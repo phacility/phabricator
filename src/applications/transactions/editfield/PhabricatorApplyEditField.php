@@ -5,6 +5,7 @@ final class PhabricatorApplyEditField
 
   private $actionDescription;
   private $actionConflictKey;
+  private $options;
 
   protected function newControl() {
     return null;
@@ -28,8 +29,21 @@ final class PhabricatorApplyEditField
     return $this->actionConflictKey;
   }
 
+  public function setOptions(array $options) {
+    $this->options = $options;
+    return $this;
+  }
+
+  public function getOptions() {
+    return $this->options;
+  }
+
   protected function newHTTPParameterType() {
-    return new AphrontBoolHTTPParameterType();
+    if ($this->getOptions()) {
+      return new AphrontPHIDListHTTPParameterType();
+    } else {
+      return new AphrontBoolHTTPParameterType();
+    }
   }
 
   protected function newConduitParameterType() {
@@ -43,9 +57,16 @@ final class PhabricatorApplyEditField
   }
 
   protected function newCommentAction() {
-    return id(new PhabricatorEditEngineStaticCommentAction())
-      ->setDescription($this->getActionDescription())
-      ->setConflictKey($this->getActionConflictKey());
+    $options = $this->getOptions();
+    if ($options) {
+      return id(new PhabricatorEditEngineCheckboxesCommentAction())
+        ->setConflictKey($this->getActionConflictKey())
+        ->setOptions($options);
+    } else {
+      return id(new PhabricatorEditEngineStaticCommentAction())
+        ->setConflictKey($this->getActionConflictKey())
+        ->setDescription($this->getActionDescription());
+    }
   }
 
 }

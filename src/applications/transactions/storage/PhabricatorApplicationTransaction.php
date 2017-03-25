@@ -932,7 +932,15 @@ abstract class PhabricatorApplicationTransaction
         $type = $this->getMetadata('edge:type');
         $type = head($type);
 
-        $type_obj = PhabricatorEdgeType::getByConstant($type);
+        try {
+          $type_obj = PhabricatorEdgeType::getByConstant($type);
+        } catch (Exception $ex) {
+          // Recover somewhat gracefully from edge transactions which
+          // we don't have the classes for.
+          return pht(
+            '%s edited an edge.',
+            $this->renderHandleLink($author_phid));
+        }
 
         if ($add && $rem) {
           return $type_obj->getTransactionEditString(

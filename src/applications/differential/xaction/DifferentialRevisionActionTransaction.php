@@ -19,6 +19,10 @@ abstract class DifferentialRevisionActionTransaction
   abstract protected function validateAction($object, PhabricatorUser $viewer);
   abstract protected function getRevisionActionLabel();
 
+  protected function validateOptionValue($object, $actor, array $value) {
+    return null;
+  }
+
   public function getCommandKeyword() {
     return null;
   }
@@ -70,6 +74,15 @@ abstract class DifferentialRevisionActionTransaction
     return ($viewer->getPHID() === $revision->getAuthorPHID());
   }
 
+  protected function getActionOptions(
+    PhabricatorUser $viewer,
+    DifferentialRevision $revision) {
+    return array(
+      array(),
+      null,
+    );
+  }
+
   public function newEditField(
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
@@ -107,6 +120,12 @@ abstract class DifferentialRevisionActionTransaction
         // It's not clear that these combinations are actually useful, so just
         // keep things simple for now.
         $field->setActionConflictKey('revision.action');
+
+        list($options, $value) = $this->getActionOptions($viewer, $revision);
+        if (count($options) > 1) {
+          $field->setOptions($options);
+          $field->setValue($value);
+        }
       }
     }
 
@@ -128,6 +147,20 @@ abstract class DifferentialRevisionActionTransaction
       if ($action_exception) {
         $errors[] = $this->newInvalidError(
           $action_exception->getMessage(),
+          $xaction);
+        continue;
+      }
+
+      $new = $xaction->getNewValue();
+      if (!is_array($new)) {
+        continue;
+      }
+
+      try {
+        $this->validateOptionValue($object, $actor, $new);
+      } catch (Exception $ex) {
+        $errors[] = $this->newInvalidError(
+          $ex->getMessage(),
           $xaction);
       }
     }

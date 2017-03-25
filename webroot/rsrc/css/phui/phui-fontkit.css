@@ -2,28 +2,8 @@
  * @provides phui-fontkit-css
  */
 
-/* - Roboto Slab ---------------------------------------------------------------
-
-  Used as Primary Headers in Object Boxes, Headers in Documents
-
-*/
-
 .diviner-document-section .phui-header-header {
-  font-family: 'Aleo', {$fontfamily};
   color: #000;
-}
-
-.phui-document-view .phui-header-tall .phui-header-header {
-  font-family: 'Aleo', {$fontfamily};
-}
-
-.phui-document-view .phabricator-remarkup h1.remarkup-header,
-.phui-document-view .phabricator-remarkup h2.remarkup-header,
-.phui-document-view .phabricator-remarkup h3.remarkup-header,
-.phui-document-view .phabricator-remarkup h4.remarkup-header,
-.phui-document-view .phabricator-remarkup h5.remarkup-header,
-.phui-document-view .phabricator-remarkup h6.remarkup-header {
-  font-family: 'Aleo', {$fontfamily};
 }
 
 .phui-document-view .phabricator-remarkup .remarkup-header {

@@ -7,8 +7,8 @@ final class DifferentialRevisionReviewersTransaction
   const EDITKEY = 'reviewers';
 
   public function generateOldValue($object) {
-    $reviewers = $object->getReviewerStatus();
-    $reviewers = mpull($reviewers, 'getStatus', 'getReviewerPHID');
+    $reviewers = $object->getReviewers();
+    $reviewers = mpull($reviewers, 'getReviewerStatus', 'getReviewerPHID');
     return $reviewers;
   }
 

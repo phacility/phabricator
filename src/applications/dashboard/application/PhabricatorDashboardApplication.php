@@ -18,6 +18,14 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     return 'fa-dashboard';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
+  }
+
+  public function getApplicationOrder() {
+    return 0.160;
+  }
+
   public function getRoutes() {
     return array(
       '/W(?P<id>\d+)' => 'PhabricatorDashboardPanelViewController',
@@ -36,6 +44,8 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
         'removepanel/(?P<id>\d+)/'
           => 'PhabricatorDashboardRemovePanelController',
         'panel/' => array(
+          'install/(?P<engineKey>[^/]+)/(?:(?P<queryKey>[^/]+)/)?' =>
+            'PhabricatorDashboardQueryPanelInstallController',
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorDashboardPanelListController',
           'create/' => 'PhabricatorDashboardPanelEditController',

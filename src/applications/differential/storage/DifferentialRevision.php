@@ -38,7 +38,6 @@ final class DifferentialRevision extends DifferentialDAO
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
   protected $properties = array();
 
-  private $relationships = self::ATTACHABLE;
   private $commits = self::ATTACHABLE;
   private $activeDiff = self::ATTACHABLE;
   private $diffIDs = self::ATTACHABLE;
@@ -69,10 +68,9 @@ final class DifferentialRevision extends DifferentialDAO
     return id(new DifferentialRevision())
       ->setViewPolicy($view_policy)
       ->setAuthorPHID($actor->getPHID())
-      ->attachRelationships(array())
       ->attachRepository(null)
       ->attachActiveDiff(null)
-      ->attachReviewerStatus(array())
+      ->attachReviewers(array())
       ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
   }
 
@@ -238,73 +236,6 @@ final class DifferentialRevision extends DifferentialDAO
     return parent::save();
   }
 
-  public function loadRelationships() {
-    if (!$this->getID()) {
-      $this->relationships = array();
-      return;
-    }
-
-    $data = array();
-
-    $subscriber_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getPHID(),
-      PhabricatorObjectHasSubscriberEdgeType::EDGECONST);
-    $subscriber_phids = array_reverse($subscriber_phids);
-    foreach ($subscriber_phids as $phid) {
-      $data[] = array(
-        'relation' => self::RELATION_SUBSCRIBED,
-        'objectPHID' => $phid,
-        'reasonPHID' => null,
-      );
-    }
-
-    $reviewer_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getPHID(),
-      DifferentialRevisionHasReviewerEdgeType::EDGECONST);
-    $reviewer_phids = array_reverse($reviewer_phids);
-    foreach ($reviewer_phids as $phid) {
-      $data[] = array(
-        'relation' => self::RELATION_REVIEWER,
-        'objectPHID' => $phid,
-        'reasonPHID' => null,
-      );
-    }
-
-    return $this->attachRelationships($data);
-  }
-
-  public function attachRelationships(array $relationships) {
-    $this->relationships = igroup($relationships, 'relation');
-    return $this;
-  }
-
-  public function getReviewers() {
-    return $this->getRelatedPHIDs(self::RELATION_REVIEWER);
-  }
-
-  public function getCCPHIDs() {
-    return $this->getRelatedPHIDs(self::RELATION_SUBSCRIBED);
-  }
-
-  private function getRelatedPHIDs($relation) {
-    $this->assertAttached($this->relationships);
-
-    return ipull($this->getRawRelations($relation), 'objectPHID');
-  }
-
-  public function getRawRelations($relation) {
-    return idx($this->relationships, $relation, array());
-  }
-
-  public function getPrimaryReviewer() {
-    $reviewers = $this->getReviewers();
-    $last = $this->lastReviewerPHID;
-    if (!$last || !in_array($last, $reviewers)) {
-      return head($this->getReviewers());
-    }
-    return $last;
-  }
-
   public function getHashes() {
     return $this->assertAttached($this->hashes);
   }
@@ -401,26 +332,31 @@ final class DifferentialRevision extends DifferentialDAO
     );
   }
 
-  public function getReviewerStatus() {
+  public function getReviewers() {
     return $this->assertAttached($this->reviewerStatus);
   }
 
-  public function attachReviewerStatus(array $reviewers) {
-    assert_instances_of($reviewers, 'DifferentialReviewerProxy');
-
+  public function attachReviewers(array $reviewers) {
+    assert_instances_of($reviewers, 'DifferentialReviewer');
+    $reviewers = mpull($reviewers, null, 'getReviewerPHID');
     $this->reviewerStatus = $reviewers;
     return $this;
   }
 
+  public function getReviewerPHIDs() {
+    $reviewers = $this->getReviewers();
+    return mpull($reviewers, 'getReviewerPHID');
+  }
+
   public function getReviewerPHIDsForEdit() {
-    $reviewers = $this->getReviewerStatus();
+    $reviewers = $this->getReviewers();
 
     $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
 
     $value = array();
     foreach ($reviewers as $reviewer) {
       $phid = $reviewer->getReviewerPHID();
-      if ($reviewer->getStatus() == $status_blocking) {
+      if ($reviewer->getReviewerStatus() == $status_blocking) {
         $value[] = 'blocking('.$phid.')';
       } else {
         $value[] = $phid;
@@ -543,11 +479,11 @@ final class DifferentialRevision extends DifferentialDAO
       $reviewers = id(new DifferentialRevisionQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withPHIDs(array($this->getPHID()))
-        ->needReviewerStatus(true)
+        ->needReviewers(true)
         ->executeOne()
-        ->getReviewerStatus();
+        ->getReviewers();
     } else {
-      $reviewers = $this->getReviewerStatus();
+      $reviewers = $this->getReviewers();
     }
 
     foreach ($reviewers as $reviewer) {

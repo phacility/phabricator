@@ -26,10 +26,6 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getRoutes() {
     return array(
       '/badges/' => array(

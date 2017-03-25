@@ -44,7 +44,9 @@ final class DifferentialRevisionResignTransaction
 
   public function generateOldValue($object) {
     $actor = $this->getActor();
-    return !$this->isViewerAnyReviewer($object, $actor);
+    $resigned = DifferentialReviewerStatus::STATUS_RESIGNED;
+
+    return ($this->getViewerReviewerStatus($object, $actor) == $resigned);
   }
 
   public function applyExternalEffects($object, $value) {
@@ -61,12 +63,19 @@ final class DifferentialRevisionResignTransaction
           'been closed. You can only resign from open revisions.'));
     }
 
-    if (!$this->isViewerAnyReviewer($object, $viewer)) {
+    $resigned = DifferentialReviewerStatus::STATUS_RESIGNED;
+    if ($this->getViewerReviewerStatus($object, $viewer) == $resigned) {
+      throw new Exception(
+        pht(
+          'You can not resign from this revision because you have already '.
+          'resigned.'));
+    }
+
+    if (!$this->isViewerAnyAuthority($object, $viewer)) {
       throw new Exception(
         pht(
           'You can not resign from this revision because you are not a '.
-          'reviewer. You can only resign from revisions where you are a '.
-          'reviewer.'));
+          'reviewer, and do not have authority over any reviewer.'));
     }
   }
 

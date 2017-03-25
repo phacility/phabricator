@@ -996,8 +996,12 @@ abstract class PhabricatorEditEngine
     $config = $this->getEditEngineConfiguration()
       ->attachEngine($this);
 
+    // NOTE: Don't prompt users to override locks when creating objects,
+    // even if the default settings would create a locked object.
+
     $can_interact = PhabricatorPolicyFilter::canInteract($viewer, $object);
     if (!$can_interact &&
+        !$this->getIsCreate() &&
         !$request->getBool('editEngine') &&
         !$request->getBool('overrideLock')) {
 

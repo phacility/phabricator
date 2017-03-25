@@ -28,7 +28,6 @@
 
 .project-card-view .phui-header-shell .phui-header-header {
   font-size: 18px;
-  font-family: 'Aleo', {$fontfamily};
   width: 290px;
   overflow: hidden;
   white-space: nowrap;
@@ -71,7 +70,6 @@
 
 .project-card-header .project-card-name {
   font-size: 20px;
-  font-family: 'Aleo', {$fontfamily};
   font-weight: bold;
   color: #000;
   margin-bottom: 2px;

@@ -1608,6 +1608,8 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s accepted this revision as %s reviewer(s): %s.' =>
+        '%s accepted this revision as: %3$s.',
     );
   }
 

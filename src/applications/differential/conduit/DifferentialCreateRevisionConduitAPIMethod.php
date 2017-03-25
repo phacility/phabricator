@@ -53,7 +53,7 @@ final class DifferentialCreateRevisionConduitAPIMethod
     }
 
     $revision = DifferentialRevision::initializeNewRevision($viewer);
-    $revision->attachReviewerStatus(array());
+    $revision->attachReviewers(array());
 
     $result = $this->applyFieldEdit(
       $request,

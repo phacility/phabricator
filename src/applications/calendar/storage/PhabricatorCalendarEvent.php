@@ -1343,7 +1343,21 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-    $this->delete();
+      $invitees = id(new PhabricatorCalendarEventInvitee())->loadAllWhere(
+        'eventPHID = %s',
+        $this->getPHID());
+      foreach ($invitees as $invitee) {
+        $invitee->delete();
+      }
+
+      $notifications = id(new PhabricatorCalendarNotification())->loadAllWhere(
+        'eventPHID = %s',
+        $this->getPHID());
+      foreach ($notifications as $notification) {
+        $notification->delete();
+      }
+
+      $this->delete();
     $this->saveTransaction();
   }
 

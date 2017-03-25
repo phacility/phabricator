@@ -43,6 +43,11 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
         $sleep = 0;
       } else {
+
+        if ($this->shouldHibernate(60)) {
+          break;
+        }
+
         // When there's no work, sleep for one second. The pool will
         // autoscale down if we're continuously idle for an extended period
         // of time.
