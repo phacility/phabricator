@@ -10,7 +10,15 @@ final class PhabricatorProjectFulltextEngine
     $project = $object;
     $project->updateDatasourceTokens();
 
-    $document->setDocumentTitle($project->getName());
+    $document->setDocumentTitle($project->getDisplayName());
+    $document->addField(PhabricatorSearchDocumentFieldType::FIELD_KEYWORDS,
+      $project->getPrimarySlug());
+    try {
+      $slugs = $project->getSlugs();
+      foreach ($slugs as $slug) {}
+    } catch (PhabricatorDataNotAttachedException $e) {
+      // ignore
+    }
 
     $document->addRelationship(
       $project->isArchived()

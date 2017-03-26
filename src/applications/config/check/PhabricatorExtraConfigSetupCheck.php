@@ -198,6 +198,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'This option has been removed, you can use Dashboards to provide '.
         'homepage customization. See T11533 for more details.');
 
+    $elastic_reason = pht(
+        'Elasticsearch is now configured with "%s".',
+        'cluster.search');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -348,6 +352,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'mysql.configuration-provider' => pht(
         'Phabricator now has application-level management of partitioning '.
         'and replicas.'),
+
+      'search.elastic.host' => $elastic_reason,
+      'search.elastic.namespace' => $elastic_reason,
+
     );
 
     return $ancient_config;

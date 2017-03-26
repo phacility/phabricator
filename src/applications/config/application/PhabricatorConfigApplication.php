@@ -69,6 +69,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
           'databases/' => 'PhabricatorConfigClusterDatabasesController',
           'notifications/' => 'PhabricatorConfigClusterNotificationsController',
           'repositories/' => 'PhabricatorConfigClusterRepositoriesController',
+          'search/' => 'PhabricatorConfigClusterSearchController',
         ),
       ),
     );

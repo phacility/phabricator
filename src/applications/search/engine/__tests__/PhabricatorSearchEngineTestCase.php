@@ -3,8 +3,8 @@
 final class PhabricatorSearchEngineTestCase extends PhabricatorTestCase {
 
   public function testLoadAllEngines() {
-    PhabricatorFulltextStorageEngine::loadAllEngines();
-    $this->assertTrue(true);
+    $services = PhabricatorSearchService::getAllServices();
+    $this->assertTrue(!empty($services));
   }
 
 }

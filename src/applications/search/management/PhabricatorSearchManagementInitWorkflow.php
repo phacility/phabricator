@@ -13,27 +13,41 @@ final class PhabricatorSearchManagementInitWorkflow
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
-    $engine = PhabricatorFulltextStorageEngine::loadEngine();
-
     $work_done = false;
-    if (!$engine->indexExists()) {
-      $console->writeOut(
-        '%s',
-        pht('Index does not exist, creating...'));
-      $engine->initIndex();
+    foreach (PhabricatorSearchService::getAllServices() as $service) {
       $console->writeOut(
         "%s\n",
-        pht('done.'));
-      $work_done = true;
-    } else if (!$engine->indexIsSane()) {
-      $console->writeOut(
-        '%s',
-        pht('Index exists but is incorrect, fixing...'));
-      $engine->initIndex();
-      $console->writeOut(
-        "%s\n",
-        pht('done.'));
-      $work_done = true;
+        pht('Initializing search service "%s"', $service->getDisplayName()));
+
+      try {
+        $host = $service->getAnyHostForRole('write');
+      } catch (PhabricatorClusterNoHostForRoleException $e) {
+        // If there are no writable hosts for a given cluster, skip it
+        $console->writeOut("%s\n", $e->getMessage());
+        continue;
+      }
+
+      $engine = $host->getEngine();
+
+      if (!$engine->indexExists()) {
+        $console->writeOut(
+          '%s',
+          pht('Index does not exist, creating...'));
+        $engine->initIndex();
+        $console->writeOut(
+          "%s\n",
+          pht('done.'));
+        $work_done = true;
+      } else if (!$engine->indexIsSane()) {
+        $console->writeOut(
+          '%s',
+          pht('Index exists but is incorrect, fixing...'));
+        $engine->initIndex();
+        $console->writeOut(
+          "%s\n",
+          pht('done.'));
+        $work_done = true;
+      }
     }
 
     if ($work_done) {

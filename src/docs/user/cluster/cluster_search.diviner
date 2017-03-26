@@ -1,0 +1,76 @@
+@title Cluster: Search
+@group cluster
+
+Overview
+========
+
+You can configure phabricator to connect to one or more fulltext search clusters
+running either Elasticsearch or MySQL. By default and without further
+configuration, Phabricator will use MySQL for fulltext search. This will be
+adequate for the vast majority of users. Installs with a very large number of
+objects or specialized search needs can consider enabling Elasticsearch for
+better scalability and potentially better search results.
+
+Configuring Search Services
+===========================
+
+To configure an Elasticsearch service, use the `cluster.search` configuration
+option. A typical Elasticsearch configuration will probably look similar to
+the following example:
+
+```lang=json
+{
+  "cluster.search": [
+    {
+      "type": "elasticsearch",
+      "hosts": [
+        {
+          "host": "127.0.0.1",
+          "roles": { "write": true, "read": true }
+        }
+      ],
+      "port": 9200,
+      "protocol": "http",
+      "path": "/phabricator",
+      "version": 5
+    },
+  ],
+}
+```
+
+Supported Options
+-----------------
+| Key       | Type   |Comments|
+|`type`     | String |Engine type. Currently, 'elasticsearch' or 'mysql'|
+|`protocol`| String |Either 'http' or 'https'|
+|`port`| Int |The TCP port that Elasticsearch is bound to|
+|`path`| String |The path portion of the url for phabricator's index.|
+|`version`| Int |The version of Elasticsearch server. Supports either 2 or 5.|
+|`hosts`| List |A list of one or more Elasticsearch host names / addresses.|
+
+Host Configuration
+------------------
+Each search service must have one or more hosts associated with it. Each host
+entry consists of a `host` key, a dictionary of roles and can optionally
+override any of the options that are valid at the service level (see above).
+
+Currently supported roles are `read` and `write`. These can be individually
+enabled or disabled on a per-host basis. A typical setup might include two
+elasticsearch clusters in two separate datacenters. You can configure one
+cluster for reads and both for writes. When one cluster is down for maintenance
+you can simply swap the read role over to the backup cluster and then proceed
+with maintenance without any service interruption.
+
+Monitoring Search Services
+==========================
+
+You can monitor fulltext search in {nav Config > Search Servers}. This interface
+shows you a quick overview of services and their health.
+
+The table on this page shows some basic stats for each configured service,
+followed by the configuration and current status of each host.
+
+NOTE: This page runs its diagnostics //from the web server that is serving the
+request//. If you are recovering from a disaster, the view this page shows
+may be partial or misleading, and two requests served by different servers may
+see different views of the cluster.
