@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => '82aca405',
     'conpherence.pkg.js' => '6249a1cf',
-    'core.pkg.css' => 'acd257dc',
+    'core.pkg.css' => '87c434ee',
     'core.pkg.js' => '021685f1',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '90b30783',
@@ -109,7 +109,7 @@ return array(
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => '9f4cb463',
     'rsrc/css/core/remarkup.css' => '17c0fb37',
-    'rsrc/css/core/syntax.css' => '769d3498',
+    'rsrc/css/core/syntax.css' => 'cae95e89',
     'rsrc/css/core/z-index.css' => '5e72c4e0',
     'rsrc/css/diviner/diviner-shared.css' => '896f1d43',
     'rsrc/css/font/font-awesome.css' => 'e838e088',
@@ -903,7 +903,7 @@ return array(
     'sprite-login-css' => '587d92d7',
     'sprite-tokens-css' => '9cdfd599',
     'syntax-default-css' => '9923583c',
-    'syntax-highlighting-css' => '769d3498',
+    'syntax-highlighting-css' => 'cae95e89',
     'tokens-css' => '3d0f239e',
     'typeahead-browse-css' => '8904346a',
     'unhandled-exception-css' => '4c96257a',
@@ -1435,9 +1435,6 @@ return array(
       'phabricator-title',
       'phabricator-shaped-request',
       'conpherence-thread-manager',
-    ),
-    '769d3498' => array(
-      'syntax-default-css',
     ),
     '76b9fc3e' => array(
       'javelin-behavior',
@@ -1999,6 +1996,9 @@ return array(
       'javelin-behavior-device',
       'phabricator-title',
       'phabricator-favicon',
+    ),
+    'cae95e89' => array(
+      'syntax-default-css',
     ),
     'ccf1cbf8' => array(
       'javelin-install',
