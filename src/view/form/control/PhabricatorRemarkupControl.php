@@ -172,11 +172,6 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'align' => 'right',
     );
 
-    $actions[] = array(
-      'spacer' => true,
-      'align' => 'right',
-    );
-
     $actions['fa-book'] = array(
       'tip' => pht('Help'),
       'align' => 'right',
@@ -200,10 +195,6 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     }
 
     if ($mode_actions) {
-      $actions[] = array(
-        'spacer' => true,
-        'align' => 'right',
-      );
       $actions += $mode_actions;
     }
 
