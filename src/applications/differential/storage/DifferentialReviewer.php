@@ -39,6 +39,11 @@ final class DifferentialReviewer
     return (phid_get_type($this->getReviewerPHID()) == $user_type);
   }
 
+  public function isPackage() {
+    $package_type = PhabricatorOwnersPackagePHIDType::TYPECONST;
+    return (phid_get_type($this->getReviewerPHID()) == $package_type);
+  }
+
   public function attachAuthority(PhabricatorUser $user, $has_authority) {
     $this->authority[$user->getCacheFragment()] = $has_authority;
     return $this;

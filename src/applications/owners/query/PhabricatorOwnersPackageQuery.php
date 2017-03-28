@@ -348,7 +348,10 @@ final class PhabricatorOwnersPackageQuery
    *
    * @return list<PhabricatorOwnersPackage> List of controlling packages.
    */
-  public function getControllingPackagesForPath($repository_phid, $path) {
+  public function getControllingPackagesForPath(
+    $repository_phid,
+    $path,
+    $ignore_dominion = false) {
     $path = (string)$path;
 
     if (!isset($this->controlMap[$repository_phid][$path])) {
@@ -382,9 +385,14 @@ final class PhabricatorOwnersPackageQuery
       }
 
       if ($best_match && $include) {
+        if ($ignore_dominion) {
+          $is_weak = false;
+        } else {
+          $is_weak = ($package->getDominion() == $weak_dominion);
+        }
         $matches[$package_id] = array(
           'strength' => $best_match,
-          'weak' => ($package->getDominion() == $weak_dominion),
+          'weak' => $is_weak,
           'package' => $package,
         );
       }

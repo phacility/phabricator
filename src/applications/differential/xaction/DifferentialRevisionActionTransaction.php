@@ -122,7 +122,12 @@ abstract class DifferentialRevisionActionTransaction
         $field->setActionConflictKey('revision.action');
 
         list($options, $value) = $this->getActionOptions($viewer, $revision);
-        if (count($options) > 1) {
+
+        // Show the options if the user can select on behalf of two or more
+        // reviewers, or can force-accept on behalf of one or more reviewers.
+        $can_multi = (count($options) > 1);
+        $can_force = (count($value) < count($options));
+        if ($can_multi || $can_force) {
           $field->setOptions($options);
           $field->setValue($value);
         }

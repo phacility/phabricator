@@ -1857,6 +1857,4 @@ final class DifferentialTransactionEditor
       $acting_phid);
   }
 
-
-
 }
