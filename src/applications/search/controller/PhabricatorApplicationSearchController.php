@@ -622,7 +622,7 @@ final class PhabricatorApplicationSearchController
       $dashboard_uri = '/dashboard/install/';
       $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-dashboard')
-        ->setName(pht('Add to Dasbhoard'))
+        ->setName(pht('Add to Dashboard'))
         ->setWorkflow(true)
         ->setHref("/dashboard/panel/install/{$engine_class}/{$query_key}/");
     }
