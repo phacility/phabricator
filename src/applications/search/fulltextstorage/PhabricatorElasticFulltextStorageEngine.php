@@ -303,7 +303,8 @@ class PhabricatorElasticFulltextStorageEngine
         $exceptions[] = $e;
       }
     }
-    throw new PhutilAggregateException('All search hosts failed:', $exceptions);
+    throw new PhutilAggregateException(pht('All Fulltext Search hosts failed:'),
+      $exceptions);
   }
 
   public function indexExists(PhabricatorElasticSearchHost $host = null) {

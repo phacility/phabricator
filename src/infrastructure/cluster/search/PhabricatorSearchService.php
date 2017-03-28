@@ -235,21 +235,20 @@ class PhabricatorSearchService
    * @throws PhutilAggregateException
    */
   public static function executeSearch(PhabricatorSavedQuery $query) {
-    $services = self::getAllServices();
     $exceptions = array();
-    foreach ($services as $service) {
-      $engine = $service->getEngine();
-      // try all hosts until one succeeds
+    // try all services until one succeeds
+    foreach (self::getAllServices() as $service) {
       try {
+        $engine = $service->getEngine();
         $res = $engine->executeSearch($query);
-        // return immediately if we get results without an exception
+        // return immediately if we get results
         return $res;
       } catch (Exception $ex) {
         $exceptions[] = $ex;
       }
     }
-    throw new PhutilAggregateException('All search engines failed:',
-      $exceptions);
+    $msg = pht('All of the configured Fulltext Search services failed.');
+    throw new PhutilAggregateException($msg, $exceptions);
   }
 
 }

@@ -47,6 +47,7 @@ will have on availability, resistance to data loss, and scalability.
 | **SSH Servers** | Minimal | Low | No Risk | Low
 | **Web Servers** | Minimal | **High** | No Risk | Moderate
 | **Notifications** | Minimal | Low | No Risk | Low
+| **Fulltext Search** | Moderate | **High** | Minimal Risk | Moderate
 
 See below for a walkthrough of these services in greater detail.
 
@@ -235,6 +236,33 @@ Notification delivery normally requires very few resources, so adding more
 hosts is unlikely to have much impact on scalability.
 
 For details, see @{article:Cluster: Notifications}.
+
+
+Cluster: Fulltext Search
+========================
+
+At a certain scale, you may begin to bump up against the limitations of MySQL's
+built-in fulltext search capabilities. We have seen this with very large
+installations with several million objects in the database and very many
+simultaneous requests. At this point you may consider adding Elasticsearch
+hosts to your cluster to reduce the load on your MySQL hosts.
+
+Elasticsearch has the ability to spread the load across multiple hosts and can
+handle very large indexes by sharding.
+
+Search does not involve any risk of data lost because it's always possible to
+rebuild the search index from the original database objects. This process can
+be very time consuming, however, especially when the database grows very large.
+
+With multiple Elasticsearch hosts, you can survive the loss of a single host
+with minimal disruption as Phabricator will detect the problem and direct
+queries to one of the remaining hosts.
+
+Phabricator supports writing to multiple indexing servers. This Simplifies
+Elasticsearch upgrades and makes it possible to recover more quickly from
+problems with the search index.
+
+For details, see @{article:Cluster: Search}.
 
 
 Overlaying Services
