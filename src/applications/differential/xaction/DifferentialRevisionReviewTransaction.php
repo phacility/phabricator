@@ -50,25 +50,19 @@ abstract class DifferentialRevisionReviewTransaction
   protected function isViewerFullyAccepted(
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
-    return $this->isViewerReviewerStatusFullyAmong(
+    return $this->isViewerReviewerStatusFully(
       $revision,
       $viewer,
-      array(
-        DifferentialReviewerStatus::STATUS_ACCEPTED,
-      ),
-      true);
+      DifferentialReviewerStatus::STATUS_ACCEPTED);
   }
 
   protected function isViewerFullyRejected(
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
-    return $this->isViewerReviewerStatusFullyAmong(
+    return $this->isViewerReviewerStatusFully(
       $revision,
       $viewer,
-      array(
-        DifferentialReviewerStatus::STATUS_REJECTED,
-      ),
-      true);
+      DifferentialReviewerStatus::STATUS_REJECTED);
   }
 
   protected function getViewerReviewerStatus(
@@ -90,11 +84,10 @@ abstract class DifferentialRevisionReviewTransaction
     return null;
   }
 
-  protected function isViewerReviewerStatusFullyAmong(
+  private function isViewerReviewerStatusFully(
     DifferentialRevision $revision,
     PhabricatorUser $viewer,
-    array $status_list,
-    $require_current) {
+    $require_status) {
 
     // If the user themselves is not a reviewer, the reviews they have
     // authority over can not all be in any set of states since their own
@@ -106,23 +99,32 @@ abstract class DifferentialRevisionReviewTransaction
 
     $active_phid = $this->getActiveDiffPHID($revision);
 
+    $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
+    $is_accepted = ($require_status == $status_accepted);
+
     // Otherwise, check that all reviews they have authority over are in
     // the desired set of states.
-    $status_map = array_fuse($status_list);
     foreach ($revision->getReviewers() as $reviewer) {
       if (!$reviewer->hasAuthority($viewer)) {
         continue;
       }
 
       $status = $reviewer->getReviewerStatus();
-      if (!isset($status_map[$status])) {
+      if ($status != $require_status) {
         return false;
       }
 
-      if ($require_current) {
-        if ($reviewer->getLastActionDiffPHID() != $active_phid) {
+      // Here, we're primarily testing if we can remove a void on the review.
+      if ($is_accepted) {
+        if (!$reviewer->isAccepted($active_phid)) {
           return false;
         }
+      }
+
+      // This is a broader check to see if we can update the diff where the
+      // last action occurred.
+      if ($reviewer->getLastActionDiffPHID() != $active_phid) {
+        return false;
       }
     }
 
@@ -222,6 +224,11 @@ abstract class DifferentialRevisionReviewTransaction
         if ($old_status !== $status) {
           $reviewer->setLastActorPHID($this->getActingAsPHID());
         }
+
+        // Clear any outstanding void on this reviewer. A void may be placed
+        // by the author using "Request Review" when a reviewer has already
+        // accepted.
+        $reviewer->setVoidedPHID(null);
 
         try {
           $reviewer->save();

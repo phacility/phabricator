@@ -357,6 +357,14 @@ final class DifferentialTransactionEditor
       }
     }
 
+    if ($downgrade_accepts) {
+      $void_type = DifferentialRevisionVoidTransaction::TRANSACTIONTYPE;
+      $results[] = id(new DifferentialTransaction())
+        ->setTransactionType($void_type)
+        ->setIgnoreOnNoEffect(true)
+        ->setNewValue(true);
+    }
+
     $is_commandeer = false;
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_UPDATE:
@@ -685,11 +693,8 @@ final class DifferentialTransactionEditor
               break;
             case DifferentialReviewerStatus::STATUS_ACCEPTED:
               if ($reviewer->isUser()) {
-                $action_phid = $reviewer->getLastActionDiffPHID();
                 $active_phid = $active_diff->getPHID();
-                $is_current = ($action_phid == $active_phid);
-
-                if ($is_sticky_accept || $is_current) {
+                if ($reviewer->isAccepted($active_phid)) {
                   $has_accepting_user = true;
                 }
               }

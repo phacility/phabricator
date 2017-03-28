@@ -9,6 +9,7 @@ final class DifferentialReviewer
   protected $lastActionDiffPHID;
   protected $lastCommentDiffPHID;
   protected $lastActorPHID;
+  protected $voidedPHID;
 
   private $authority = array();
 
@@ -19,6 +20,7 @@ final class DifferentialReviewer
         'lastActionDiffPHID' => 'phid?',
         'lastCommentDiffPHID' => 'phid?',
         'lastActorPHID' => 'phid?',
+        'voidedPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_revision' => array(
@@ -56,6 +58,13 @@ final class DifferentialReviewer
     $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
 
     if ($this->getReviewerStatus() != $status_accepted) {
+      return false;
+    }
+
+    // If this accept has been voided (for example, but a reviewer using
+    // "Request Review"), don't count it as a real "Accept" even if it is
+    // against the current diff PHID.
+    if ($this->getVoidedPHID()) {
       return false;
     }
 
