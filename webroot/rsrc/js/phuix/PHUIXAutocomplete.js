@@ -343,6 +343,10 @@ JX.install('PHUIXAutocomplete', {
       return [' ', ':', ',', '.', '!', '?'];
     },
 
+    _getIgnoreList: function() {
+      return this._map[this._active].ignore || [];
+    },
+
     _isTerminatedString: function(string) {
       var terminators = this._getTerminators();
       for (var ii = 0; ii < terminators.length; ii++) {
@@ -512,6 +516,14 @@ JX.install('PHUIXAutocomplete', {
       var cancels = this._getCancelCharacters();
       for (var ii = 0; ii < cancels.length; ii++) {
         if (trim.indexOf(cancels[ii]) !== -1) {
+          this._deactivate();
+          return;
+        }
+      }
+
+      var ignore = this._getIgnoreList();
+      for (ii = 0; ii < ignore.length; ii++) {
+        if (trim.indexOf(ignore[ii]) === 0) {
           this._deactivate();
           return;
         }

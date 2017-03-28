@@ -528,7 +528,7 @@ return array(
     'rsrc/js/phui/behavior-phui-tab-group.js' => '0a0b10e9',
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => 'b3465b9b',
-    'rsrc/js/phuix/PHUIXAutocomplete.js' => '7c492cd2',
+    'rsrc/js/phuix/PHUIXAutocomplete.js' => '7910aacb',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => '8018ee50',
     'rsrc/js/phuix/PHUIXFormControl.js' => '83e03671',
     'rsrc/js/phuix/PHUIXIconView.js' => 'bff6884b',
@@ -885,7 +885,7 @@ return array(
     'phui-workpanel-view-css' => 'a3a63478',
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => 'b3465b9b',
-    'phuix-autocomplete' => '7c492cd2',
+    'phuix-autocomplete' => '7910aacb',
     'phuix-dropdown-menu' => '8018ee50',
     'phuix-form-control-view' => '83e03671',
     'phuix-icon-view' => 'bff6884b',
@@ -1456,6 +1456,12 @@ return array(
       'multirow-row-manager',
       'javelin-json',
     ),
+    '7910aacb' => array(
+      'javelin-install',
+      'javelin-dom',
+      'phuix-icon-view',
+      'phabricator-prefab',
+    ),
     '7927a7d3' => array(
       'javelin-behavior',
       'javelin-quicksand',
@@ -1463,12 +1469,6 @@ return array(
     '7a68dda3' => array(
       'owners-path-editor',
       'javelin-behavior',
-    ),
-    '7c492cd2' => array(
-      'javelin-install',
-      'javelin-dom',
-      'phuix-icon-view',
-      'phabricator-prefab',
     ),
     '7cbe244b' => array(
       'javelin-install',

@@ -97,6 +97,15 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
             'headerIcon' => 'fa-smile-o',
             'headerText' => pht('Find Emoji:'),
             'hintText' => $emoji_datasource->getPlaceholderText(),
+
+            // Cancel on emoticons like ":3".
+            'ignore' => array(
+              '3',
+              ')',
+              '(',
+              '-',
+              '/',
+            ),
           ),
         ),
       ));
