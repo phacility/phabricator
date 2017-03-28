@@ -16,6 +16,9 @@ class PhabricatorSearchService
   const STATUS_OKAY = 'okay';
   const STATUS_FAIL = 'fail';
 
+  const ROLE_WRITE = 'write';
+  const ROLE_READ = 'read';
+
   public function __construct(PhabricatorFulltextStorageEngine $engine) {
     $this->engine = $engine;
     $this->hostType = $engine->getHostType();
@@ -84,30 +87,11 @@ class PhabricatorSearchService
   }
 
   public function isWritable() {
-    return $this->hasRole('write');
+    return (bool)$this->getAllHostsForRole(self::ROLE_WRITE);
   }
 
   public function isReadable() {
-    return $this->hasRole('read');
-  }
-
-  public function hasRole($role) {
-    return isset($this->roles[$role]) && $this->roles[$role] !== false;
-  }
-
-  public function setRoles(array $roles) {
-    foreach ($roles as $role => $val) {
-      if ($val === false && isset($this->roles[$role])) {
-        unset($this->roles[$role]);
-      } else {
-        $this->roles[$role] = $val;
-      }
-    }
-    return $this;
-  }
-
-  public function getRoles() {
-    return $this->roles;
+    return (bool)$this->getAllHostsForRole(self::ROLE_READ);
   }
 
   public function getPort() {
