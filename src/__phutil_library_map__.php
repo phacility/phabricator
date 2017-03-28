@@ -3660,6 +3660,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryDiscoveryEngine' => 'applications/repository/engine/PhabricatorRepositoryDiscoveryEngine.php',
     'PhabricatorRepositoryEditor' => 'applications/repository/editor/PhabricatorRepositoryEditor.php',
     'PhabricatorRepositoryEngine' => 'applications/repository/engine/PhabricatorRepositoryEngine.php',
+    'PhabricatorRepositoryFulltextEngine' => 'applications/repository/search/PhabricatorRepositoryFulltextEngine.php',
     'PhabricatorRepositoryGitCommitChangeParserWorker' => 'applications/repository/worker/commitchangeparser/PhabricatorRepositoryGitCommitChangeParserWorker.php',
     'PhabricatorRepositoryGitCommitMessageParserWorker' => 'applications/repository/worker/commitmessageparser/PhabricatorRepositoryGitCommitMessageParserWorker.php',
     'PhabricatorRepositoryGitLFSRef' => 'applications/repository/storage/PhabricatorRepositoryGitLFSRef.php',
@@ -8910,6 +8911,7 @@ phutil_register_library_map(array(
       'PhabricatorProjectInterface',
       'PhabricatorSpacesInterface',
       'PhabricatorConduitResultInterface',
+      'PhabricatorFulltextInterface',
     ),
     'PhabricatorRepositoryAuditRequest' => array(
       'PhabricatorRepositoryDAO',
@@ -8951,6 +8953,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryDiscoveryEngine' => 'PhabricatorRepositoryEngine',
     'PhabricatorRepositoryEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorRepositoryEngine' => 'Phobject',
+    'PhabricatorRepositoryFulltextEngine' => 'PhabricatorFulltextEngine',
     'PhabricatorRepositoryGitCommitChangeParserWorker' => 'PhabricatorRepositoryCommitChangeParserWorker',
     'PhabricatorRepositoryGitCommitMessageParserWorker' => 'PhabricatorRepositoryCommitMessageParserWorker',
     'PhabricatorRepositoryGitLFSRef' => array(

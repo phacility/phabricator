@@ -158,9 +158,15 @@ final class PhabricatorSearchManagementIndexWorkflow
       $object_class = get_class($object);
       $normalized_class = phutil_utf8_strtolower($object_class);
 
+      if ($normalized_class === $normalized_type) {
+        $matches = array($object_class => $object);
+        break;
+      }
+
       if (!strlen($type) ||
           strpos($normalized_class, $normalized_type) !== false) {
         $matches[$object_class] = $object;
+
       }
     }
 
