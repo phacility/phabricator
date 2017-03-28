@@ -49,7 +49,6 @@ class PhabricatorSearchService
 
   public function setConfig($config) {
     $this->config = $config;
-    $this->setRoles(idx($config, 'roles', array()));
 
     if (!isset($config['hosts'])) {
       $config['hosts'] = array(
