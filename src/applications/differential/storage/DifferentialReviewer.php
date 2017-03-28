@@ -54,6 +54,25 @@ final class DifferentialReviewer
     return ($this->getReviewerStatus() == $status_resigned);
   }
 
+  public function isRejected($diff_phid) {
+    $status_rejected = DifferentialReviewerStatus::STATUS_REJECTED;
+
+    if ($this->getReviewerStatus() != $status_rejected) {
+      return false;
+    }
+
+    if ($this->getVoidedPHID()) {
+      return false;
+    }
+
+    if ($this->isCurrentAction($diff_phid)) {
+      return true;
+    }
+
+    return false;
+  }
+
+
   public function isAccepted($diff_phid) {
     $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
 
@@ -68,6 +87,21 @@ final class DifferentialReviewer
       return false;
     }
 
+    if ($this->isCurrentAction($diff_phid)) {
+      return true;
+    }
+
+    $sticky_key = 'differential.sticky-accept';
+    $is_sticky = PhabricatorEnv::getEnvConfig($sticky_key);
+
+    if ($is_sticky) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private function isCurrentAction($diff_phid) {
     if (!$diff_phid) {
       return true;
     }
@@ -79,13 +113,6 @@ final class DifferentialReviewer
     }
 
     if ($action_phid == $diff_phid) {
-      return true;
-    }
-
-    $sticky_key = 'differential.sticky-accept';
-    $is_sticky = PhabricatorEnv::getEnvConfig($sticky_key);
-
-    if ($is_sticky) {
       return true;
     }
 

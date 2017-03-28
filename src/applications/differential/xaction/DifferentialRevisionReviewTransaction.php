@@ -100,7 +100,10 @@ abstract class DifferentialRevisionReviewTransaction
     $active_phid = $this->getActiveDiffPHID($revision);
 
     $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
+    $status_rejected = DifferentialReviewerStatus::STATUS_REJECTED;
+
     $is_accepted = ($require_status == $status_accepted);
+    $is_rejected = ($require_status == $status_rejected);
 
     // Otherwise, check that all reviews they have authority over are in
     // the desired set of states.
@@ -117,6 +120,12 @@ abstract class DifferentialRevisionReviewTransaction
       // Here, we're primarily testing if we can remove a void on the review.
       if ($is_accepted) {
         if (!$reviewer->isAccepted($active_phid)) {
+          return false;
+        }
+      }
+
+      if ($is_rejected) {
+        if (!$reviewer->isRejected($active_phid)) {
           return false;
         }
       }

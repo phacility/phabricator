@@ -339,7 +339,7 @@ final class DifferentialTransactionEditor
       }
     }
 
-    if ($downgrade_accepts) {
+    if ($downgrade_accepts || $downgrade_rejects) {
       $void_type = DifferentialRevisionVoidTransaction::TRANSACTIONTYPE;
       $results[] = id(new DifferentialTransaction())
         ->setTransactionType($void_type)
@@ -659,11 +659,8 @@ final class DifferentialTransactionEditor
           $reviewer_status = $reviewer->getReviewerStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:
-              $action_phid = $reviewer->getLastActionDiffPHID();
               $active_phid = $active_diff->getPHID();
-              $is_current = ($action_phid == $active_phid);
-
-              if ($is_current) {
+              if ($reviewer->isRejected($active_phid)) {
                 $has_rejecting_reviewer = true;
               }
               break;
