@@ -11,6 +11,7 @@ final class PhabricatorSearchManagementInitWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $this->validateClusterSearchConfig();
 
     $work_done = false;
     foreach (PhabricatorSearchService::getAllServices() as $service) {

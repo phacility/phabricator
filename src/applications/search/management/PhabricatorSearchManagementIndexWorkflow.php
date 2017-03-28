@@ -45,6 +45,8 @@ final class PhabricatorSearchManagementIndexWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $this->validateClusterSearchConfig();
+
     $console = PhutilConsole::getConsole();
 
     $is_all = $args->getArg('all');

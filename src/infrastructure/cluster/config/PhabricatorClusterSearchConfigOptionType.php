@@ -4,6 +4,10 @@ final class PhabricatorClusterSearchConfigOptionType
   extends PhabricatorConfigJSONOptionType {
 
   public function validateOption(PhabricatorConfigOption $option, $value) {
+    self::validateClusterSearchConfigValue($value);
+  }
+
+  public static function validateValue($value) {
     if (!is_array($value)) {
       throw new Exception(
         pht(
@@ -46,7 +50,8 @@ final class PhabricatorClusterSearchConfigOptionType
 
       if (!array_key_exists($spec['type'], $engines)) {
         throw new Exception(
-          pht('Invalid search engine type: %s. Valid types include: %s',
+          pht(
+            'Invalid search engine type: %s. Valid types are: %s.',
             $spec['type'],
             implode(', ', array_keys($engines))));
       }
