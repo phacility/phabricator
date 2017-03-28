@@ -4,7 +4,7 @@ final class PhabricatorClusterSearchConfigOptionType
   extends PhabricatorConfigJSONOptionType {
 
   public function validateOption(PhabricatorConfigOption $option, $value) {
-    self::validateClusterSearchConfigValue($value);
+    self::validateValue($value);
   }
 
   public static function validateValue($value) {

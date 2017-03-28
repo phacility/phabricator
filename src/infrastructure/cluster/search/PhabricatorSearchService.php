@@ -186,6 +186,18 @@ class PhabricatorSearchService
     $refs = array();
 
     foreach ($services as $config) {
+
+      // Normally, we've validated configuration before we get this far, but
+      // make sure we don't fatal if we end up here with a bogus configuration.
+      if (!isset($engines[$config['type']])) {
+        throw new Exception(
+          pht(
+            'Configured search engine type "%s" is unknown. Valid engines '.
+            'are: %s.',
+            $config['type'],
+            implode(', ', array_keys($engines))));
+      }
+
       $engine = $engines[$config['type']];
       $cluster = new self($engine);
       $cluster->setConfig($config);
