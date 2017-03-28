@@ -60,6 +60,8 @@ final class DifferentialCreateCommentConduitAPIMethod
       'accept' => DifferentialRevisionAcceptTransaction::TRANSACTIONTYPE,
       'reject' => DifferentialRevisionRejectTransaction::TRANSACTIONTYPE,
       'resign' => DifferentialRevisionResignTransaction::TRANSACTIONTYPE,
+      'request_review' =>
+        DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE,
     );
 
     $action = $request->getValue('action');
