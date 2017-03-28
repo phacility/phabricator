@@ -24,6 +24,15 @@ final class PhabricatorMySQLSearchHost
     return 'mysql';
   }
 
+  public function getHealthRecord() {
+    if (!$this->healthRecord) {
+      $ref = PhabricatorDatabaseRef::getMasterDatabaseRefForApplication(
+        'search');
+      $this->healthRecord = $ref->getHealthRecord();
+    }
+    return $this->healthRecord;
+  }
+
   public function getConnectionStatus() {
     PhabricatorDatabaseRef::queryAll();
     $ref = PhabricatorDatabaseRef::getMasterDatabaseRefForApplication('search');

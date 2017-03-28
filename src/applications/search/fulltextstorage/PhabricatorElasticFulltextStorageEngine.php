@@ -161,9 +161,11 @@ class PhabricatorElasticFulltextStorageEngine
         'simple_query_string' => array(
           'query'  => $query_string,
           'fields' => array(
-            '_all',
+            PhabricatorSearchDocumentFieldType::FIELD_TITLE.'.*',
+            PhabricatorSearchDocumentFieldType::FIELD_BODY.'.*',
+            PhabricatorSearchDocumentFieldType::FIELD_COMMENT.'.*',
           ),
-          'default_operator' => 'OR',
+          'default_operator' => 'AND',
         ),
       ));
 
@@ -175,6 +177,7 @@ class PhabricatorElasticFulltextStorageEngine
         'simple_query_string' => array(
           'query'  => $query_string,
           'fields' => array(
+            '*.raw',
             PhabricatorSearchDocumentFieldType::FIELD_TITLE.'^4',
             PhabricatorSearchDocumentFieldType::FIELD_BODY.'^3',
             PhabricatorSearchDocumentFieldType::FIELD_COMMENT.'^1.2',
@@ -332,10 +335,37 @@ class PhabricatorElasticFulltextStorageEngine
       'index' => array(
         'auto_expand_replicas' => '0-2',
         'analysis' => array(
+          'filter' => array(
+            'english_stop' => array(
+              'type' => 'stop',
+              'stopwords' => '_english_',
+            ),
+            'english_stemmer' => array(
+              'type' =>       'stemmer',
+              'language' =>   'english',
+            ),
+            'english_possessive_stemmer' => array(
+              'type' =>       'stemmer',
+              'language' =>   'possessive_english',
+            ),
+          ),
           'analyzer' => array(
             'english_exact' => array(
               'tokenizer' => 'standard',
               'filter'    => array('lowercase'),
+            ),
+            'letter_stop' => array(
+              'tokenizer' => 'letter',
+              'filter'    => array('lowercase', 'english_stop'),
+            ),
+            'english_stem' => array(
+              'tokenizer' => 'standard',
+              'filter'    => array(
+                'english_possessive_stemmer',
+                'lowercase',
+                'english_stop',
+                'english_stemmer',
+              ),
             ),
           ),
         ),
@@ -356,9 +386,22 @@ class PhabricatorElasticFulltextStorageEngine
         // Use the custom analyzer for the corpus of text
         $properties[$field] = array(
           'type'                  => $text_type,
-          'analyzer'              => 'english_exact',
-          'search_analyzer'       => 'english',
-          'search_quote_analyzer' => 'english_exact',
+          'fields' => array(
+            'raw' => array(
+              'type'                  => $text_type,
+              'analyzer'              => 'english_exact',
+              'search_analyzer'       => 'english',
+              'search_quote_analyzer' => 'english_exact',
+            ),
+            'keywords' => array(
+              'type'                  => $text_type,
+              'analyzer'              => 'letter_stop',
+            ),
+            'stems' => array(
+              'type'                  => $text_type,
+              'analyzer'              => 'english_stem',
+            ),
+          ),
         );
       }
 
@@ -505,7 +548,7 @@ class PhabricatorElasticFulltextStorageEngine
     array $data, $method = 'GET') {
 
     $uri = $host->getURI($path);
-    $data = json_encode($data);
+    $data = phutil_json_encode($data);
     $future = new HTTPSFuture($uri, $data);
     if ($method != 'GET') {
       $future->setMethod($method);

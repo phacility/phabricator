@@ -46,6 +46,7 @@ class PhabricatorSearchService
 
   public function setConfig($config) {
     $this->config = $config;
+    $this->setRoles(idx($config, 'roles', array()));
 
     if (!isset($config['hosts'])) {
       $config['hosts'] = array(
@@ -65,15 +66,6 @@ class PhabricatorSearchService
 
   public function getConfig() {
     return $this->config;
-  }
-
-  public function setDisabled($disabled) {
-    $this->disabled = $disabled;
-    return $this;
-  }
-
-  public function getDisabled() {
-    return $this->disabled;
   }
 
   public static function getConnectionStatusMap() {
@@ -100,7 +92,7 @@ class PhabricatorSearchService
   }
 
   public function hasRole($role) {
-    return isset($this->roles[$role]) && $this->roles[$role] === true;
+    return isset($this->roles[$role]) && $this->roles[$role] !== false;
   }
 
   public function setRoles(array $roles) {
@@ -160,6 +152,12 @@ class PhabricatorSearchService
    * @return PhabricatorSearchHost[]
    */
   public function getAllHostsForRole($role) {
+    // if the role is explicitly set to false at the top level, then all hosts
+    // have the role disabled.
+    if (idx($this->config, $role) === false) {
+      return array();
+    }
+
     $hosts = array();
     foreach ($this->hosts as $host) {
       if ($host->hasRole($role)) {
@@ -225,8 +223,11 @@ class PhabricatorSearchService
     PhabricatorSearchAbstractDocument $doc) {
     $indexed = 0;
     foreach (self::getAllServices() as $service) {
-      $service->getEngine()->reindexAbstractDocument($doc);
-      $indexed++;
+      $hosts = $service->getAllHostsForRole('write');
+      if (count($hosts)) {
+        $service->getEngine()->reindexAbstractDocument($doc);
+        $indexed++;
+      }
     }
     if ($indexed == 0) {
       throw new PhabricatorClusterNoHostForRoleException('write');

@@ -13,7 +13,6 @@ abstract class PhabricatorSearchHost
   protected $disabled;
   protected $host;
   protected $port;
-  protected $hostRefs = array();
 
   const STATUS_OKAY = 'okay';
   const STATUS_FAIL = 'fail';
@@ -120,44 +119,5 @@ abstract class PhabricatorSearchHost
   abstract public function getStatusViewColumns();
 
   abstract public function getConnectionStatus();
-
-  public static function reindexAbstractDocument(
-    PhabricatorSearchAbstractDocument $doc) {
-
-    $services = self::getAllServices();
-    $indexed = 0;
-    foreach (self::getWritableHostForEachService() as $host) {
-      $host->getEngine()->reindexAbstractDocument($doc);
-      $indexed++;
-    }
-    if ($indexed == 0) {
-      throw new PhabricatorClusterNoHostForRoleException('write');
-    }
-  }
-
-  public static function executeSearch(PhabricatorSavedQuery $query) {
-    $services = self::getAllServices();
-    foreach ($services as $service) {
-      $hosts = $service->getAllHostsForRole('read');
-      // try all hosts until one succeeds
-      foreach ($hosts as $host) {
-        $last_exception = null;
-        try {
-          $res = $host->getEngine()->executeSearch($query);
-          // return immediately if we get results without an exception
-          $host->didHealthCheck(true);
-          return $res;
-        } catch (Exception $ex) {
-          // try each server in turn, only throw if none succeed
-          $last_exception = $ex;
-          $host->didHealthCheck(false);
-        }
-      }
-    }
-    if ($last_exception) {
-      throw $last_exception;
-    }
-    return $res;
-  }
 
 }

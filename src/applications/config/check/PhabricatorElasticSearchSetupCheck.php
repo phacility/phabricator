@@ -49,26 +49,28 @@ final class PhabricatorElasticSearchSetupCheck extends PhabricatorSetupCheck {
 
           $message = pht(
             'You likely enabled cluster.search without creating the '.
-            'index. Run `./bin/search init` to correct the index.');
+            'index. Use the following command to create a new index.');
 
           $this
             ->newIssue('elastic.missing-index')
-            ->setName(pht('Elasticsearch index Not Found'))
+            ->setName(pht('Elasticsearch Index Not Found'))
+            ->addCommand('./bin/search init')
             ->setSummary($summary)
-            ->setMessage($message)
-            ->addRelatedPhabricatorConfig('cluster.search');
+            ->setMessage($message);
+
         } else if (!$index_sane) {
           $summary = pht(
             'Elasticsearch index exists but needs correction.');
 
           $message = pht(
             'Either the Phabricator schema for Elasticsearch has changed '.
-            'or Elasticsearch created the index automatically. Run '.
-            '`./bin/search init` to correct the index.');
+            'or Elasticsearch created the index automatically. '.
+            'Use the following command to rebuild the index.');
 
           $this
             ->newIssue('elastic.broken-index')
-            ->setName(pht('Elasticsearch index Incorrect'))
+            ->setName(pht('Elasticsearch Index Schema Mismatch'))
+            ->addCommand('./bin/search init')
             ->setSummary($summary)
             ->setMessage($message);
         }
