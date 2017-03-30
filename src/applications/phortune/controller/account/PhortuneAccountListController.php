@@ -18,6 +18,7 @@ final class PhortuneAccountListController extends PhortuneController {
     $merchants = id(new PhortuneMerchantQuery())
       ->setViewer($viewer)
       ->withMemberPHIDs(array($viewer->getPHID()))
+      ->needProfileImage(true)
       ->execute();
 
     $title = pht('Accounts');
@@ -39,7 +40,7 @@ final class PhortuneAccountListController extends PhortuneController {
         ->setHeader($account->getName())
         ->setHref($this->getApplicationURI($account->getID().'/'))
         ->setObject($account)
-        ->setImageIcon('fa-credit-card');
+        ->setImageIcon('fa-user-circle');
 
       $payment_list->addItem($item);
     }
@@ -71,7 +72,7 @@ final class PhortuneAccountListController extends PhortuneController {
         ->setHeader($merchant->getName())
         ->setHref($this->getApplicationURI('/merchant/'.$merchant->getID().'/'))
         ->setObject($merchant)
-        ->setImageIcon('fa-bank');
+        ->setImageURI($merchant->getProfileImageURI());
 
       $merchant_list->addItem($item);
     }
