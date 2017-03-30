@@ -15,10 +15,6 @@ final class PhabricatorOwnersPackageSearchEngine
     return new PhabricatorOwnersPackageQuery();
   }
 
-  public function canUseInPanelContext() {
-    return false;
-  }
-
   protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchDatasourceField())
