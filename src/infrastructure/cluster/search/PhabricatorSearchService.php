@@ -198,7 +198,7 @@ class PhabricatorSearchService
             implode(', ', array_keys($engines))));
       }
 
-      $engine = $engines[$config['type']];
+      $engine = clone($engines[$config['type']]);
       $cluster = new self($engine);
       $cluster->setConfig($config);
       $engine->setService($cluster);

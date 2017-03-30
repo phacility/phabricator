@@ -528,7 +528,6 @@ class PhabricatorElasticFulltextStorageEngine
       $host = $this->getHostForRead();
     }
     $uri = '/_stats/';
-    $host = $this->getHostForRead();
 
     $res = $this->executeRequest($host, $uri, array());
     $stats = $res['indices'][$this->index];
