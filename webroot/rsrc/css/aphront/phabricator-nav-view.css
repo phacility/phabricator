@@ -69,6 +69,11 @@
   margin-left: 212px;
 }
 
+.device-desktop .phabricator-standard-page-body .has-drag-nav
+  .phabricator-nav-local {
+    max-width: none;
+}
+
 .has-drag-nav ul.phui-list-view {
   height: 100%;
   overflow-y: auto;
