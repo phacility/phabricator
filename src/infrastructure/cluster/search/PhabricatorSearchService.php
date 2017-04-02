@@ -212,20 +212,30 @@ class PhabricatorSearchService
   /**
    * (re)index the document: attempt to pass the document to all writable
    * fulltext search hosts
-   * @throws PhabricatorClusterNoHostForRoleException
    */
   public static function reindexAbstractDocument(
-    PhabricatorSearchAbstractDocument $doc) {
-    $indexed = 0;
+    PhabricatorSearchAbstractDocument $document) {
+
+    $exceptions = array();
     foreach (self::getAllServices() as $service) {
-      $hosts = $service->getAllHostsForRole('write');
-      if (count($hosts)) {
-        $service->getEngine()->reindexAbstractDocument($doc);
-        $indexed++;
+      if (!$service->isWritable()) {
+        continue;
+      }
+
+      $engine = $service->getEngine();
+      try {
+        $engine->reindexAbstractDocument($document);
+      } catch (Exception $ex) {
+        $exceptions[] = $ex;
       }
     }
-    if ($indexed == 0) {
-      throw new PhabricatorClusterNoHostForRoleException('write');
+
+    if ($exceptions) {
+      throw new PhutilAggregateException(
+        pht(
+          'Writes to search services failed while reindexing document "%s".',
+          $document->getPHID()),
+        $exceptions);
     }
   }
 
