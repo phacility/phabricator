@@ -78,10 +78,8 @@ class PhabricatorElasticFulltextStorageEngine
 
     $timestamp_key = $this->getTimestampField();
 
-    // URL is not used internally but it can be useful externally.
     $spec = array(
       'title'         => $doc->getDocumentTitle(),
-      'url'           => PhabricatorEnv::getProductionURI($handle->getURI()),
       'dateCreated'   => $doc->getDocumentCreated(),
       $timestamp_key  => $doc->getDocumentModified(),
     );
