@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorElasticSearchSetupCheck extends PhabricatorSetupCheck {
+final class PhabricatorElasticsearchSetupCheck extends PhabricatorSetupCheck {
 
   public function getDefaultGroup() {
     return self::GROUP_OTHER;
@@ -16,7 +16,7 @@ final class PhabricatorElasticSearchSetupCheck extends PhabricatorSetupCheck {
         // ignore the error
         continue;
       }
-      if ($host instanceof PhabricatorElasticSearchHost) {
+      if ($host instanceof PhabricatorElasticsearchHost) {
         $index_exists = null;
         $index_sane = null;
         try {

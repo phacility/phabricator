@@ -32,19 +32,13 @@ class PhabricatorElasticFulltextStorageEngine
   }
 
   public function getHostType() {
-    return new PhabricatorElasticSearchHost($this);
+    return new PhabricatorElasticsearchHost($this);
   }
 
-  /**
-   * @return PhabricatorElasticSearchHost
-   */
   public function getHostForRead() {
     return $this->getService()->getAnyHostForRole('read');
   }
 
-  /**
-   * @return PhabricatorElasticSearchHost
-   */
   public function getHostForWrite() {
     return $this->getService()->getAnyHostForRole('write');
   }
@@ -148,7 +142,7 @@ class PhabricatorElasticFulltextStorageEngine
   }
 
   private function buildSpec(PhabricatorSavedQuery $query) {
-    $q = new PhabricatorElasticSearchQueryBuilder('bool');
+    $q = new PhabricatorElasticsearchQueryBuilder('bool');
     $query_string = $query->getParameter('query');
     if (strlen($query_string)) {
       $fields = $this->getTypeConstants('PhabricatorSearchDocumentFieldType');
@@ -305,7 +299,7 @@ class PhabricatorElasticFulltextStorageEngine
       $exceptions);
   }
 
-  public function indexExists(PhabricatorElasticSearchHost $host = null) {
+  public function indexExists(PhabricatorElasticsearchHost $host = null) {
     if (!$host) {
       $host = $this->getHostForRead();
     }
@@ -439,7 +433,7 @@ class PhabricatorElasticFulltextStorageEngine
     return $data;
   }
 
-  public function indexIsSane(PhabricatorElasticSearchHost $host = null) {
+  public function indexIsSane(PhabricatorElasticsearchHost $host = null) {
     if (!$host) {
       $host = $this->getHostForRead();
     }
@@ -518,7 +512,7 @@ class PhabricatorElasticFulltextStorageEngine
     $this->executeRequest($host, '/', $data, 'PUT');
   }
 
-  public function getIndexStats(PhabricatorElasticSearchHost $host = null) {
+  public function getIndexStats(PhabricatorElasticsearchHost $host = null) {
     if ($this->version < 2) {
       return false;
     }
@@ -542,7 +536,7 @@ class PhabricatorElasticFulltextStorageEngine
     );
   }
 
-  private function executeRequest(PhabricatorElasticSearchHost $host, $path,
+  private function executeRequest(PhabricatorElasticsearchHost $host, $path,
     array $data, $method = 'GET') {
 
     $uri = $host->getURI($path);
@@ -576,7 +570,7 @@ class PhabricatorElasticFulltextStorageEngine
     } catch (PhutilJSONParserException $ex) {
       $host->didHealthCheck(false);
       throw new PhutilProxyException(
-        pht('ElasticSearch server returned invalid JSON!'),
+        pht('Elasticsearch server returned invalid JSON!'),
         $ex);
     }
 

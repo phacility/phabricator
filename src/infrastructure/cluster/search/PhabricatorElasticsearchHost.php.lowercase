@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorElasticSearchHost
+final class PhabricatorElasticsearchHost
   extends PhabricatorSearchHost {
 
   private $version = 5;
@@ -21,7 +21,7 @@ final class PhabricatorElasticSearchHost
   }
 
   public function getDisplayName() {
-    return pht('ElasticSearch');
+    return pht('Elasticsearch');
   }
 
   public function getStatusViewColumns() {
