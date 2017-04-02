@@ -87,8 +87,9 @@ final class PhabricatorSearchManagementIndexWorkflow
     }
 
     if (!$is_background) {
-      $console->writeOut(
-        "%s\n",
+      echo tsprintf(
+        "**<bg:blue> %s </bg>** %s\n",
+        pht('NOTE'),
         pht(
           'Run this workflow with "%s" to queue tasks for the daemon workers.',
           '--background'));
@@ -109,9 +110,32 @@ final class PhabricatorSearchManagementIndexWorkflow
     );
 
     $any_success = false;
+
+    // If we aren't using "--background" or "--force", track how many objects
+    // we're skipping so we can print this information for the user and give
+    // them a hint that they might want to use "--force".
+    $track_skips = (!$is_background && !$is_force);
+
+    $count_updated = 0;
+    $count_skipped = 0;
+
     foreach ($phids as $phid) {
       try {
+        if ($track_skips) {
+          $old_versions = $this->loadIndexVersions($phid);
+        }
+
         PhabricatorSearchWorker::queueDocumentForIndexing($phid, $parameters);
+
+        if ($track_skips) {
+          $new_versions = $this->loadIndexVersions($phid);
+          if ($old_versions !== $new_versions) {
+            $count_updated++;
+          } else {
+            $count_skipped++;
+          }
+        }
+
         $any_success = true;
       } catch (Exception $ex) {
         phlog($ex);
@@ -127,6 +151,45 @@ final class PhabricatorSearchManagementIndexWorkflow
         pht('Failed to rebuild search index for any documents.'));
     }
 
+    if ($track_skips) {
+      if ($count_updated) {
+        echo tsprintf(
+          "**<bg:green> %s </bg>** %s\n",
+          pht('DONE'),
+          pht(
+            'Updated search indexes for %s document(s).',
+            new PhutilNumber($count_updated)));
+      }
+
+      if ($count_skipped) {
+        echo tsprintf(
+          "**<bg:yellow> %s </bg>** %s\n",
+          pht('SKIP'),
+          pht(
+            'Skipped %s documents(s) which have not updated since they were '.
+            'last indexed.',
+            new PhutilNumber($count_skipped)));
+        echo tsprintf(
+          "**<bg:blue> %s </bg>** %s\n",
+          pht('NOTE'),
+          pht(
+            'Use "--force" to force the index to update these documents.'));
+      }
+    } else if ($is_background) {
+      echo tsprintf(
+        "**<bg:green> %s </bg>** %s\n",
+        pht('DONE'),
+        pht(
+          'Queued %s document(s) for background indexing.',
+          new PhutilNumber(count($phids))));
+    } else {
+      echo tsprintf(
+        "**<bg:green> %s </bg>** %s\n",
+        pht('DONE'),
+        pht(
+          'Forced search index updates for %s document(s).',
+          new PhutilNumber(count($phids))));
+    }
   }
 
   private function loadPHIDsByNames(array $names) {
@@ -206,5 +269,16 @@ final class PhabricatorSearchManagementIndexWorkflow
     return $phids;
   }
 
+  private function loadIndexVersions($phid) {
+    $table = new PhabricatorSearchIndexVersion();
+    $conn = $table->establishConnection('r');
+
+    return queryfx_all(
+      $conn,
+      'SELECT extensionKey, version FROM %T WHERE objectPHID = %s
+        ORDER BY extensionKey, version',
+      $table->getTableName(),
+      $phid);
+  }
 
 }
