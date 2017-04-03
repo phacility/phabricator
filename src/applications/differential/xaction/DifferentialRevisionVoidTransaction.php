@@ -28,7 +28,7 @@ final class DifferentialRevisionVoidTransaction
           AND reviewerStatus IN (%Ls)',
       $table_name,
       $object->getPHID(),
-      $this->getVoidableStatuses());
+      $value);
 
     return ipull($rows, 'reviewerPHID');
   }
@@ -47,11 +47,11 @@ final class DifferentialRevisionVoidTransaction
       'UPDATE %T SET voidedPHID = %s
         WHERE revisionPHID = %s
           AND voidedPHID IS NULL
-          AND reviewerStatus IN (%Ls)',
+          AND reviewerPHID IN (%Ls)',
       $table_name,
       $this->getActingAsPHID(),
       $object->getPHID(),
-      $this->getVoidableStatuses());
+      $value);
   }
 
   public function shouldHide() {
