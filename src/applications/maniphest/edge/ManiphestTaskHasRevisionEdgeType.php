@@ -12,6 +12,18 @@ final class ManiphestTaskHasRevisionEdgeType extends PhabricatorEdgeType {
     return true;
   }
 
+  public function getConduitKey() {
+    return 'task.revision';
+  }
+
+  public function getConduitName() {
+    return pht('Task Has Revision');
+  }
+
+  public function getConduitDescription() {
+    return pht('The source task is associated with the destination revision.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,
