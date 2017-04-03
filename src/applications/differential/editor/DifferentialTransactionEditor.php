@@ -339,12 +339,22 @@ final class DifferentialTransactionEditor
       }
     }
 
-    if ($downgrade_accepts || $downgrade_rejects) {
+    $downgrade = array();
+    if ($downgrade_accepts) {
+      $downgrade[] = DifferentialReviewerStatus::STATUS_ACCEPTED;
+    }
+
+    if ($downgrade_accepts) {
+      $downgrade[] = DifferentialReviewerStatus::STATUS_REJECTED;
+    }
+
+    if ($downgrade) {
       $void_type = DifferentialRevisionVoidTransaction::TRANSACTIONTYPE;
+
       $results[] = id(new DifferentialTransaction())
         ->setTransactionType($void_type)
         ->setIgnoreOnNoEffect(true)
-        ->setNewValue(true);
+        ->setNewValue($downgrade);
     }
 
     $is_commandeer = false;
