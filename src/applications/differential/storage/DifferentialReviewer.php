@@ -9,6 +9,7 @@ final class DifferentialReviewer
   protected $lastActionDiffPHID;
   protected $lastCommentDiffPHID;
   protected $lastActorPHID;
+  protected $voidedPHID;
 
   private $authority = array();
 
@@ -19,6 +20,7 @@ final class DifferentialReviewer
         'lastActionDiffPHID' => 'phid?',
         'lastCommentDiffPHID' => 'phid?',
         'lastActorPHID' => 'phid?',
+        'voidedPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_revision' => array(
@@ -37,6 +39,11 @@ final class DifferentialReviewer
     return (phid_get_type($this->getReviewerPHID()) == $user_type);
   }
 
+  public function isPackage() {
+    $package_type = PhabricatorOwnersPackagePHIDType::TYPECONST;
+    return (phid_get_type($this->getReviewerPHID()) == $package_type);
+  }
+
   public function attachAuthority(PhabricatorUser $user, $has_authority) {
     $this->authority[$user->getCacheFragment()] = $has_authority;
     return $this;
@@ -52,6 +59,25 @@ final class DifferentialReviewer
     return ($this->getReviewerStatus() == $status_resigned);
   }
 
+  public function isRejected($diff_phid) {
+    $status_rejected = DifferentialReviewerStatus::STATUS_REJECTED;
+
+    if ($this->getReviewerStatus() != $status_rejected) {
+      return false;
+    }
+
+    if ($this->getVoidedPHID()) {
+      return false;
+    }
+
+    if ($this->isCurrentAction($diff_phid)) {
+      return true;
+    }
+
+    return false;
+  }
+
+
   public function isAccepted($diff_phid) {
     $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
 
@@ -59,6 +85,28 @@ final class DifferentialReviewer
       return false;
     }
 
+    // If this accept has been voided (for example, but a reviewer using
+    // "Request Review"), don't count it as a real "Accept" even if it is
+    // against the current diff PHID.
+    if ($this->getVoidedPHID()) {
+      return false;
+    }
+
+    if ($this->isCurrentAction($diff_phid)) {
+      return true;
+    }
+
+    $sticky_key = 'differential.sticky-accept';
+    $is_sticky = PhabricatorEnv::getEnvConfig($sticky_key);
+
+    if ($is_sticky) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private function isCurrentAction($diff_phid) {
     if (!$diff_phid) {
       return true;
     }
@@ -70,13 +118,6 @@ final class DifferentialReviewer
     }
 
     if ($action_phid == $diff_phid) {
-      return true;
-    }
-
-    $sticky_key = 'differential.sticky-accept';
-    $is_sticky = PhabricatorEnv::getEnvConfig($sticky_key);
-
-    if ($is_sticky) {
       return true;
     }
 

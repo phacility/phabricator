@@ -140,8 +140,6 @@ final class DifferentialTransactionEditor
             return ($object->getStatus() == $status_closed);
           case DifferentialAction::ACTION_RETHINK:
             return ($object->getStatus() != $status_plan);
-          case DifferentialAction::ACTION_REQUEST:
-            return ($object->getStatus() != $status_review);
           case DifferentialAction::ACTION_CLAIM:
             return ($actor_phid != $object->getAuthorPHID());
         }
@@ -198,9 +196,6 @@ final class DifferentialTransactionEditor
             $object->setStatus($status_review);
             return;
           case DifferentialAction::ACTION_REOPEN:
-            $object->setStatus($status_review);
-            return;
-          case DifferentialAction::ACTION_REQUEST:
             $object->setStatus($status_review);
             return;
           case DifferentialAction::ACTION_CLOSE:
@@ -294,19 +289,6 @@ final class DifferentialTransactionEditor
             $downgrade_accepts = true;
           }
           break;
-
-        // TODO: Remove this, obsoleted by ModularTransactions above.
-        case DifferentialTransaction::TYPE_ACTION:
-          switch ($xaction->getNewValue()) {
-            case DifferentialAction::ACTION_REQUEST:
-              $downgrade_rejects = true;
-              if ((!$is_sticky_accept) ||
-                  ($object->getStatus() != $status_plan)) {
-                $downgrade_accepts = true;
-              }
-              break;
-          }
-          break;
       }
     }
 
@@ -355,6 +337,14 @@ final class DifferentialTransactionEditor
           ->setIgnoreOnNoEffect(true)
           ->setNewValue(array('+' => $edits));
       }
+    }
+
+    if ($downgrade_accepts || $downgrade_rejects) {
+      $void_type = DifferentialRevisionVoidTransaction::TRANSACTIONTYPE;
+      $results[] = id(new DifferentialTransaction())
+        ->setTransactionType($void_type)
+        ->setIgnoreOnNoEffect(true)
+        ->setNewValue(true);
     }
 
     $is_commandeer = false;
@@ -669,11 +659,8 @@ final class DifferentialTransactionEditor
           $reviewer_status = $reviewer->getReviewerStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:
-              $action_phid = $reviewer->getLastActionDiffPHID();
               $active_phid = $active_diff->getPHID();
-              $is_current = ($action_phid == $active_phid);
-
-              if ($is_current) {
+              if ($reviewer->isRejected($active_phid)) {
                 $has_rejecting_reviewer = true;
               }
               break;
@@ -685,11 +672,8 @@ final class DifferentialTransactionEditor
               break;
             case DifferentialReviewerStatus::STATUS_ACCEPTED:
               if ($reviewer->isUser()) {
-                $action_phid = $reviewer->getLastActionDiffPHID();
                 $active_phid = $active_diff->getPHID();
-                $is_current = ($action_phid == $active_phid);
-
-                if ($is_sticky_accept || $is_current) {
+                if ($reviewer->isAccepted($active_phid)) {
                   $has_accepting_user = true;
                 }
               }
@@ -936,41 +920,6 @@ final class DifferentialTransactionEditor
           case ArcanistDifferentialRevisionStatus::CLOSED:
             return pht(
               'You can not plan changes to this revision because it has '.
-              'already been closed.');
-          default:
-            throw new Exception(
-              pht(
-                'Encountered unexpected revision status ("%s") when '.
-                'validating "%s" action.',
-                $revision_status,
-                $action));
-        }
-        break;
-
-      case DifferentialAction::ACTION_REQUEST:
-        if (!$actor_is_author) {
-          return pht(
-            'You can not request review of this revision because you do '.
-            'not own it. To request review of a revision, you must be its '.
-            'owner.');
-        }
-
-        switch ($revision_status) {
-          case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-          case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
-            // These are OK.
-            break;
-          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-            // This will be caught as "no effect" later on.
-            break;
-          case ArcanistDifferentialRevisionStatus::ABANDONED:
-            return pht(
-              'You can not request review of this revision because it has '.
-              'been abandoned. Instead, reclaim it.');
-          case ArcanistDifferentialRevisionStatus::CLOSED:
-            return pht(
-              'You can not request review of this revision because it has '.
               'already been closed.');
           default:
             throw new Exception(
@@ -1907,7 +1856,5 @@ final class DifferentialTransactionEditor
       $object->getPHID(),
       $acting_phid);
   }
-
-
 
 }

@@ -73,10 +73,7 @@ final class PhabricatorSearchDocumentQuery
     $query = id(clone($this->savedQuery))
       ->setParameter('offset', $this->getOffset())
       ->setParameter('limit', $this->getRawResultLimit());
-
-    $engine = PhabricatorFulltextStorageEngine::loadEngine();
-
-    return $engine->executeSearch($query);
+    return PhabricatorSearchService::executeSearch($query);
   }
 
   public function getQueryApplicationClass() {

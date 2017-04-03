@@ -1,7 +1,15 @@
 <?php
 
-$search_engine = PhabricatorFulltextStorageEngine::loadEngine();
-$use_mysql = ($search_engine instanceof PhabricatorMySQLFulltextStorageEngine);
+
+$use_mysql = false;
+
+$services = PhabricatorSearchService::getAllServices();
+foreach ($services as $service) {
+  $engine = $service->getEngine();
+  if ($engine instanceof PhabricatorMySQLFulltextStorageEngine) {
+    $use_mysql = true;
+  }
+}
 
 if ($use_mysql) {
   $field = new PhabricatorSearchDocumentField();

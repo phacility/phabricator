@@ -6,46 +6,66 @@ final class PhabricatorSearchManagementInitWorkflow
   protected function didConstruct() {
     $this
       ->setName('init')
-      ->setSynopsis(pht('Initialize or repair an index.'))
+      ->setSynopsis(pht('Initialize or repair a search service.'))
       ->setExamples('**init**');
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
-
-    $engine = PhabricatorFulltextStorageEngine::loadEngine();
+    $this->validateClusterSearchConfig();
 
     $work_done = false;
-    if (!$engine->indexExists()) {
-      $console->writeOut(
-        '%s',
-        pht('Index does not exist, creating...'));
-      $engine->initIndex();
-      $console->writeOut(
-        "%s\n",
-        pht('done.'));
-      $work_done = true;
-    } else if (!$engine->indexIsSane()) {
-      $console->writeOut(
-        '%s',
-        pht('Index exists but is incorrect, fixing...'));
-      $engine->initIndex();
-      $console->writeOut(
-        "%s\n",
-        pht('done.'));
-      $work_done = true;
-    }
-
-    if ($work_done) {
-      $console->writeOut(
+    foreach (PhabricatorSearchService::getAllServices() as $service) {
+      echo tsprintf(
         "%s\n",
         pht(
-          'Index maintenance complete. Run `%s` to reindex documents',
-          './bin/search index'));
-    } else {
-      $console->writeOut(
+          'Initializing search service "%s".',
+          $service->getDisplayName()));
+
+      if (!$service->isWritable()) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            'Skipping service "%s" because it is not writable.',
+            $service->getDisplayName()));
+        continue;
+      }
+
+      $engine = $service->getEngine();
+
+      if (!$engine->indexExists()) {
+        echo tsprintf(
+          "%s\n",
+          pht('Service index does not exist, creating...'));
+
+        $engine->initIndex();
+        $work_done = true;
+      } else if (!$engine->indexIsSane()) {
+        echo tsprintf(
+          "%s\n",
+          pht('Service index is out of date, repairing...'));
+
+        $engine->initIndex();
+        $work_done = true;
+      } else {
+        echo tsprintf(
+          "%s\n",
+          pht('Service index is already up to date.'));
+      }
+
+      echo tsprintf(
         "%s\n",
-        pht('Nothing to do.'));
+        pht('Done.'));
     }
+
+    if (!$work_done) {
+      echo tsprintf(
+        "%s\n",
+        pht('No services need initialization.'));
+      return 0;
+    }
+
+    echo tsprintf(
+      "%s\n",
+      pht('Service initialization complete.'));
   }
 }

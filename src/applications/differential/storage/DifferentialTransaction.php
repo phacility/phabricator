@@ -607,8 +607,6 @@ final class DifferentialTransaction
               'not closed.');
           case DifferentialAction::ACTION_RETHINK:
             return pht('This revision already requires changes.');
-          case DifferentialAction::ACTION_REQUEST:
-            return pht('Review is already requested for this revision.');
           case DifferentialAction::ACTION_CLAIM:
             return pht(
               'You can not commandeer this revision because you already own '.

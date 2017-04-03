@@ -8,6 +8,7 @@
  *           javelin-workflow
  *           javelin-vector
  *           phuix-autocomplete
+ *           javelin-mask
  */
 
 JX.behavior('phabricator-remarkup-assist', function(config) {
@@ -39,6 +40,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       if (edit_mode == 'fa-arrows-alt') {
         JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', false);
         JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', false);
+        JX.Mask.hide('jx-light-mask');
       }
 
       area.style.height = '';
@@ -59,6 +61,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     if (mode == 'fa-arrows-alt') {
       JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', true);
       JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', true);
+      JX.Mask.show('jx-light-mask');
 
       // If we're in preview mode, expand the preview to full-size.
       if (preview) {
@@ -275,6 +278,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
           area.parentNode.insertBefore(preview, area);
           JX.DOM.alterClass(button, 'preview-active', true);
+          JX.DOM.alterClass(root, 'remarkup-preview-active', true);
           resize_preview();
           JX.DOM.hide(area);
 
@@ -286,6 +290,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           preview = null;
 
           JX.DOM.alterClass(button, 'preview-active', false);
+          JX.DOM.alterClass(root, 'remarkup-preview-active', false);
         }
         break;
       case 'fa-thumb-tack':

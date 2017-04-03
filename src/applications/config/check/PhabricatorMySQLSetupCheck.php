@@ -145,7 +145,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           "be able to find search results for common words. You can gain ".
           "access to this option by upgrading MySQL to a more recent ".
           "version.\n\n".
-          "You can ignore this warning if you plan to configure ElasticSearch ".
+          "You can ignore this warning if you plan to configure Elasticsearch ".
           "later, or aren't concerned about searching for common words.",
           $host_name,
           phutil_tag('tt', array(), 'ft_stopword_file'));
@@ -180,7 +180,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           "To make search more useful, you can use an alternate stopword ".
           "file with fewer words. Alternatively, if you aren't concerned ".
           "about searching for common words, you can ignore this warning. ".
-          "If you later plan to configure ElasticSearch, you can also ignore ".
+          "If you later plan to configure Elasticsearch, you can also ignore ".
           "this warning: this stopword file only affects MySQL fulltext ".
           "indexes.\n\n".
           "To choose a different stopword file, add this to your %s file ".
@@ -231,7 +231,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           "You can change this setting to 3 to allow these words to be ".
           "indexed. Alternatively, you can ignore this warning if you are ".
           "not concerned about searching for 3-letter words. If you later ".
-          "plan to configure ElasticSearch, you can also ignore this warning: ".
+          "plan to configure Elasticsearch, you can also ignore this warning: ".
           "only MySQL fulltext search is affected.\n\n".
           "To reduce the minimum word length to 3, add this to your %s file ".
           "(in the %s section) and then restart %s:\n\n".
@@ -379,8 +379,13 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function shouldUseMySQLSearchEngine() {
-    $search_engine = PhabricatorFulltextStorageEngine::loadEngine();
-    return ($search_engine instanceof PhabricatorMySQLFulltextStorageEngine);
+    $services = PhabricatorSearchService::getAllServices();
+    foreach ($services as $service) {
+      if ($service instanceof PhabricatorMySQLSearchHost) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

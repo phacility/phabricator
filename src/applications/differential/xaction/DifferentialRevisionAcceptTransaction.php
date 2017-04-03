@@ -84,11 +84,18 @@ final class DifferentialRevisionAcceptTransaction
       }
     }
 
+    $default_unchecked = array();
     foreach ($reviewers as $reviewer) {
+      $reviewer_phid = $reviewer->getReviewerPHID();
+
       if (!$reviewer->hasAuthority($viewer)) {
         // If the viewer doesn't have authority to act on behalf of a reviewer,
-        // don't include that reviewer as an option.
-        continue;
+        // we check if they can accept by force.
+        if ($revision->canReviewerForceAccept($viewer, $reviewer)) {
+          $default_unchecked[$reviewer_phid] = true;
+        } else {
+          continue;
+        }
       }
 
       if ($reviewer->isAccepted($diff_phid)) {
@@ -97,19 +104,36 @@ final class DifferentialRevisionAcceptTransaction
         continue;
       }
 
-      $reviewer_phid = $reviewer->getReviewerPHID();
       $reviewer_phids[$reviewer_phid] = $reviewer_phid;
     }
 
     $handles = $viewer->loadHandles($reviewer_phids);
 
+    $head = array();
+    $tail = array();
     foreach ($reviewer_phids as $reviewer_phid) {
-      $options[$reviewer_phid] = pht(
-        'Accept as %s',
-        $viewer->renderHandle($reviewer_phid));
+      $is_force = isset($default_unchecked[$reviewer_phid]);
 
-      $value[] = $reviewer_phid;
+      if ($is_force) {
+        $tail[] = $reviewer_phid;
+
+        $options[$reviewer_phid] = pht(
+          'Force accept as %s',
+          $viewer->renderHandle($reviewer_phid));
+      } else {
+        $head[] = $reviewer_phid;
+        $value[] = $reviewer_phid;
+
+        $options[$reviewer_phid] = pht(
+          'Accept as %s',
+          $viewer->renderHandle($reviewer_phid));
+      }
     }
+
+    // Reorder reviewers so "force accept" reviewers come at the end.
+    $options =
+      array_select_keys($options, $head) +
+      array_select_keys($options, $tail);
 
     return array($options, $value);
   }

@@ -12,6 +12,19 @@ final class DifferentialRevisionHasCommitEdgeType extends PhabricatorEdgeType {
     return true;
   }
 
+  public function getConduitKey() {
+    return 'revision.commit';
+  }
+
+  public function getConduitName() {
+    return pht('Revision Has Commit');
+  }
+
+  public function getConduitDescription() {
+    return pht(
+      'The source revision is associated with the destination commit.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,

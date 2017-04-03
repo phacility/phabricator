@@ -47,6 +47,7 @@ will have on availability, resistance to data loss, and scalability.
 | **SSH Servers** | Minimal | Low | No Risk | Low
 | **Web Servers** | Minimal | **High** | No Risk | Moderate
 | **Notifications** | Minimal | Low | No Risk | Low
+| **Fulltext Search** | Minimal | Low | No Risk | Low
 
 See below for a walkthrough of these services in greater detail.
 
@@ -235,6 +236,21 @@ Notification delivery normally requires very few resources, so adding more
 hosts is unlikely to have much impact on scalability.
 
 For details, see @{article:Cluster: Notifications}.
+
+
+Cluster: Fulltext Search
+========================
+
+Configuring search services is relatively simple and has no pre-requisites.
+
+By default, Phabricator uses MySQL as a fulltext search engine, so deploying
+multiple database hosts will effectively also deploy multiple fulltext search
+hosts.
+
+Search indexes can be completely rebuilt from the database, so there is no
+risk of data loss no matter how fulltext search is configured.
+
+For details, see @{article:Cluster: Search}.
 
 
 Overlaying Services

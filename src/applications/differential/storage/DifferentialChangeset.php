@@ -75,6 +75,23 @@ final class DifferentialChangeset extends DifferentialDAO
     return $name;
   }
 
+  public function getOwnersFilename() {
+    // TODO: For Subversion, we should adjust these paths to be relative to
+    // the repository root where possible.
+
+    $path = $this->getFilename();
+
+    if (!isset($path[0])) {
+      return '/';
+    }
+
+    if ($path[0] != '/') {
+      $path = '/'.$path;
+    }
+
+    return $path;
+  }
+
   public function addUnsavedHunk(DifferentialHunk $hunk) {
     if ($this->hunks === self::ATTACHABLE) {
       $this->hunks = array();

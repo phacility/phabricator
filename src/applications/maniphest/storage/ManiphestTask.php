@@ -474,6 +474,10 @@ final class ManiphestTask extends ManiphestDAO
         ->setType('string')
         ->setDescription(pht('The title of the task.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('remarkup')
+        ->setDescription(pht('The task description.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('authorPHID')
         ->setType('phid')
         ->setDescription(pht('Original task author.')),
@@ -501,7 +505,6 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function getFieldValuesForConduit() {
-
     $status_value = $this->getStatus();
     $status_info = array(
       'value' => $status_value,
@@ -519,6 +522,9 @@ final class ManiphestTask extends ManiphestDAO
 
     return array(
       'name' => $this->getTitle(),
+      'description' => array(
+        'raw' => $this->getDescription(),
+      ),
       'authorPHID' => $this->getAuthorPHID(),
       'ownerPHID' => $this->getOwnerPHID(),
       'status' => $status_info,

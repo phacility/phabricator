@@ -1,19 +1,18 @@
 <?php
 
-final class PhabricatorDatabaseHealthRecord
+class PhabricatorClusterServiceHealthRecord
   extends Phobject {
 
-  private $ref;
+  private $cacheKey;
   private $shouldCheck;
   private $isHealthy;
   private $upEventCount;
   private $downEventCount;
 
-  public function __construct(PhabricatorDatabaseRef $ref) {
-    $this->ref = $ref;
+  public function __construct($cache_key) {
+    $this->cacheKey = $cache_key;
     $this->readState();
   }
-
 
   /**
    * Is the database currently healthy?
@@ -153,18 +152,13 @@ final class PhabricatorDatabaseHealthRecord
     }
   }
 
-  private function getHealthRecordCacheKey() {
-    $ref = $this->ref;
-
-    $host = $ref->getHost();
-    $port = $ref->getPort();
-
-    return "cluster.db.health({$host}, {$port})";
+  public function getCacheKey() {
+    return $this->cacheKey;
   }
 
   private function readHealthRecord() {
     $cache = PhabricatorCaches::getSetupCache();
-    $cache_key = $this->getHealthRecordCacheKey();
+    $cache_key = $this->getCacheKey();
     $health_record = $cache->getKey($cache_key);
 
     if (!is_array($health_record)) {
@@ -180,7 +174,7 @@ final class PhabricatorDatabaseHealthRecord
 
   private function writeHealthRecord(array $record) {
     $cache = PhabricatorCaches::getSetupCache();
-    $cache_key = $this->getHealthRecordCacheKey();
+    $cache_key = $this->getCacheKey();
     $cache->setKey($cache_key, $record);
   }
 

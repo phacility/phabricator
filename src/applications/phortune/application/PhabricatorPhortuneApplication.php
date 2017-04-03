@@ -52,7 +52,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
               => 'PhortuneCartListController',
           ),
           'charge/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneChargeListController',
+            => 'PhortuneAccountChargeListController',
         ),
         'card/(?P<id>\d+)/' => array(
           'edit/' => 'PhortunePaymentMethodEditController',

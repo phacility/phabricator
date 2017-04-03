@@ -14,6 +14,7 @@ final class PhabricatorDatabaseRef
   const REPLICATION_SLOW = 'replica-slow';
   const REPLICATION_NOT_REPLICATING = 'not-replicating';
 
+  const KEY_HEALTH = 'cluster.db.health';
   const KEY_REFS = 'cluster.db.refs';
   const KEY_INDIVIDUAL = 'cluster.db.individual';
 
@@ -489,9 +490,18 @@ final class PhabricatorDatabaseRef
     return $this;
   }
 
+  private function getHealthRecordCacheKey() {
+    $host = $this->getHost();
+    $port = $this->getPort();
+    $key = self::KEY_HEALTH;
+
+    return "{$key}({$host}, {$port})";
+  }
+
   public function getHealthRecord() {
     if (!$this->healthRecord) {
-      $this->healthRecord = new PhabricatorDatabaseHealthRecord($this);
+      $this->healthRecord = new PhabricatorClusterServiceHealthRecord(
+        $this->getHealthRecordCacheKey());
     }
     return $this->healthRecord;
   }
