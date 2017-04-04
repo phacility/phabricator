@@ -94,7 +94,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'storageHandle' => 'text255',
         'authorPHID' => 'phid?',
         'secretKey' => 'bytes20?',
-        'contentHash' => 'bytes40?',
+        'contentHash' => 'bytes64?',
         'ttl' => 'epoch?',
         'isExplicitUpload' => 'bool?',
         'mailKey' => 'bytes20',
@@ -718,7 +718,17 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public static function hashFileContent($data) {
-    return null;
+    // NOTE: Hashing can fail if the algorithm isn't available in the current
+    // build of PHP. It's fine if we're unable to generate a content hash:
+    // it just means we'll store extra data when users upload duplicate files
+    // instead of being able to deduplicate it.
+
+    $hash = hash('sha256', $data, $raw_output = false);
+    if ($hash === false) {
+      return null;
+    }
+
+    return $hash;
   }
 
   public function loadFileData() {
