@@ -104,7 +104,7 @@ final class PhragmentZIPController extends PhragmentController {
       $data,
       array(
         'name' => $zip_name,
-        'ttl' => time() + 60 * 60 * 24,
+        'ttl.relative' => phutil_units('24 hours in seconds'),
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();

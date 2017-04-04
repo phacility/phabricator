@@ -370,11 +370,11 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     $data = Filesystem::readRandomCharacters(64);
 
-    $ttl = (time() + 60 * 60 * 24);
+    $ttl = (PhabricatorTime::getNow() + phutil_units('24 hours in seconds'));
 
     $params = array(
       'name' => 'test.dat',
-      'ttl'  => ($ttl),
+      'ttl.absolute' => $ttl,
       'storageEngines' => array(
         $engine,
       ),

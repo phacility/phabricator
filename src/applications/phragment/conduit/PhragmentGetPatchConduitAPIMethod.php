@@ -178,7 +178,7 @@ final class PhragmentGetPatchConduitAPIMethod
         $data,
         array(
           'name' => 'patch.dmp',
-          'ttl' => time() + 60 * 60 * 24,
+          'ttl.relative' => phutil_units('24 hours in seconds'),
         ));
       $patches[$key]['patchURI'] = $file->getDownloadURI();
     }

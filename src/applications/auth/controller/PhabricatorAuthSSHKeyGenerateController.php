@@ -28,7 +28,7 @@ final class PhabricatorAuthSSHKeyGenerateController
         $private_key,
         array(
           'name' => $default_name.'.key',
-          'ttl' => time() + (60 * 10),
+          'ttl.relative' => phutil_units('10 minutes in seconds'),
           'viewPolicy' => $viewer->getPHID(),
         ));
 

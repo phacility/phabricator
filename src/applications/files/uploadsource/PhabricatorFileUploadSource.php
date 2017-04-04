@@ -4,7 +4,7 @@ abstract class PhabricatorFileUploadSource
   extends Phobject {
 
   private $name;
-  private $ttl;
+  private $relativeTTL;
   private $viewPolicy;
 
   private $rope;
@@ -22,13 +22,13 @@ abstract class PhabricatorFileUploadSource
     return $this->name;
   }
 
-  public function setTTL($ttl) {
-    $this->ttl = $ttl;
+  public function setRelativeTTL($relative_ttl) {
+    $this->relativeTTL = $relative_ttl;
     return $this;
   }
 
-  public function getTTL() {
-    return $this->ttl;
+  public function getRelativeTTL() {
+    return $this->relativeTTL;
   }
 
   public function setViewPolicy($view_policy) {
@@ -214,7 +214,7 @@ abstract class PhabricatorFileUploadSource
   private function getNewFileParameters() {
     return array(
       'name' => $this->getName(),
-      'ttl' => $this->getTTL(),
+      'ttl.relative' => $this->getRelativeTTL(),
       'viewPolicy' => $this->getViewPolicy(),
     );
   }

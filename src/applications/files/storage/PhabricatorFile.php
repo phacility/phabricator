@@ -9,10 +9,13 @@
  *
  *   | name | Human readable filename.
  *   | authorPHID | User PHID of uploader.
- *   | ttl | Temporary file lifetime, in seconds.
+ *   | ttl.absolute | Temporary file lifetime as an epoch timestamp.
+ *   | ttl.relative | Temporary file lifetime, relative to now, in seconds.
  *   | viewPolicy | File visibility policy.
  *   | isExplicitUpload | Used to show users files they explicitly uploaded.
  *   | canCDN | Allows the file to be cached and delivered over a CDN.
+ *   | profile | Marks the file as a profile image.
+ *   | format | Internal encoding format.
  *   | mime-type | Optional, explicit file MIME type.
  *   | builtin | Optional filename, identifies this as a builtin.
  *
@@ -1110,7 +1113,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
       $params = array(
         'name' => $builtin->getBuiltinDisplayName(),
-        'ttl'  => time() + (60 * 60 * 24 * 7),
+        'ttl.relative' => phutil_units('7 days in seconds'),
         'canCDN' => true,
         'builtin' => $key,
       );
@@ -1280,14 +1283,68 @@ final class PhabricatorFile extends PhabricatorFileDAO
    * @return this
    */
   private function readPropertiesFromParameters(array $params) {
+    PhutilTypeSpec::checkMap(
+      $params,
+      array(
+        'name' => 'optional string',
+        'authorPHID' => 'optional string',
+        'ttl.relative' => 'optional int',
+        'ttl.absolute' => 'optional int',
+        'viewPolicy' => 'optional string',
+        'isExplicitUpload' => 'optional bool',
+        'canCDN' => 'optional bool',
+        'profile' => 'optional bool',
+        'format' => 'optional string|PhabricatorFileStorageFormat',
+        'mime-type' => 'optional string',
+        'builtin' => 'optional string',
+        'storageEngines' => 'optional list<PhabricatorFileStorageEngine>',
+      ));
+
     $file_name = idx($params, 'name');
     $this->setName($file_name);
 
     $author_phid = idx($params, 'authorPHID');
     $this->setAuthorPHID($author_phid);
 
-    $file_ttl = idx($params, 'ttl');
-    $this->setTtl($file_ttl);
+    $absolute_ttl = idx($params, 'ttl.absolute');
+    $relative_ttl = idx($params, 'ttl.relative');
+    if ($absolute_ttl !== null && $relative_ttl !== null) {
+      throw new Exception(
+        pht(
+          'Specify an absolute TTL or a relative TTL, but not both.'));
+    } else if ($absolute_ttl !== null) {
+      if ($absolute_ttl < PhabricatorTime::getNow()) {
+        throw new Exception(
+          pht(
+            'Absolute TTL must be in the present or future, but TTL "%s" '.
+            'is in the past.',
+            $absolute_ttl));
+      }
+
+      $this->setTtl($absolute_ttl);
+    } else if ($relative_ttl !== null) {
+      if ($relative_ttl < 0) {
+        throw new Exception(
+          pht(
+            'Relative TTL must be zero or more seconds, but "%s" is '.
+            'negative.',
+            $relative_ttl));
+      }
+
+      $max_relative = phutil_units('365 days in seconds');
+      if ($relative_ttl > $max_relative) {
+        throw new Exception(
+          pht(
+            'Relative TTL must not be more than "%s" seconds, but TTL '.
+            '"%s" was specified.',
+            $max_relative,
+            $relative_ttl));
+      }
+
+      $absolute_ttl = PhabricatorTime::getNow() + $relative_ttl;
+
+      $this->setTtl($absolute_ttl);
+    }
 
     $view_policy = idx($params, 'viewPolicy');
     if ($view_policy) {

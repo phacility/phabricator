@@ -893,7 +893,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $raw_diff,
       array(
         'name' => $file_name,
-        'ttl' => (60 * 60 * 24),
+        'ttl.relative' => phutil_units('24 hours in seconds'),
         'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
 

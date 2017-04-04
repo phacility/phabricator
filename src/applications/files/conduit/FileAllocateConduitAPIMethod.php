@@ -42,7 +42,7 @@ final class FileAllocateConduitAPIMethod
 
     $ttl = $request->getValue('deleteAfterEpoch');
     if ($ttl) {
-      $properties['ttl'] = $ttl;
+      $properties['ttl.absolute'] = $ttl;
     }
 
     $file = null;

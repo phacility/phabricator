@@ -83,7 +83,7 @@ final class PhragmentPatchController extends PhragmentController {
       array(
         'name' => $name,
         'mime-type' => 'text/plain',
-        'ttl' => time() + 60 * 60 * 24,
+        'ttl.relative' => phutil_units('24 hours in seconds'),
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();

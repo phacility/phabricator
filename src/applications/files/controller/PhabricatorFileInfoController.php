@@ -212,6 +212,18 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       pht('Mime Type'),
       $file->getMimeType());
 
+    $ttl = $file->getTtl();
+    if ($ttl) {
+      $delta = $ttl - PhabricatorTime::getNow();
+
+      $finfo->addProperty(
+        pht('Expires'),
+        pht(
+          '%s (%s)',
+          phabricator_datetime($ttl, $viewer),
+          phutil_format_relative_time_detailed($delta)));
+    }
+
     $width = $file->getImageWidth();
     if ($width) {
       $finfo->addProperty(
