@@ -301,6 +301,11 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     $data = Filesystem::readRandomCharacters(64);
 
+    $hash = PhabricatorFile::hashFileContent($data);
+    if ($hash === null) {
+      $this->assertSkipped(pht('File content hashing is not available.'));
+    }
+
     $params = array(
       'name' => 'test.dat',
       'storageEngines' => array(

@@ -198,39 +198,42 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
 
   public static function newFileFromContentHash($hash, array $params) {
-    // Check to see if a file with same contentHash exist
+    if ($hash === null) {
+      return null;
+    }
+
+    // Check to see if a file with same hash already exists.
     $file = id(new PhabricatorFile())->loadOneWhere(
       'contentHash = %s LIMIT 1',
       $hash);
-
-    if ($file) {
-      $copy_of_storage_engine = $file->getStorageEngine();
-      $copy_of_storage_handle = $file->getStorageHandle();
-      $copy_of_storage_format = $file->getStorageFormat();
-      $copy_of_storage_properties = $file->getStorageProperties();
-      $copy_of_byte_size = $file->getByteSize();
-      $copy_of_mime_type = $file->getMimeType();
-
-      $new_file = self::initializeNewFile();
-
-      $new_file->setByteSize($copy_of_byte_size);
-
-      $new_file->setContentHash($hash);
-      $new_file->setStorageEngine($copy_of_storage_engine);
-      $new_file->setStorageHandle($copy_of_storage_handle);
-      $new_file->setStorageFormat($copy_of_storage_format);
-      $new_file->setStorageProperties($copy_of_storage_properties);
-      $new_file->setMimeType($copy_of_mime_type);
-      $new_file->copyDimensions($file);
-
-      $new_file->readPropertiesFromParameters($params);
-
-      $new_file->save();
-
-      return $new_file;
+    if (!$file) {
+      return null;
     }
 
-    return $file;
+    $copy_of_storage_engine = $file->getStorageEngine();
+    $copy_of_storage_handle = $file->getStorageHandle();
+    $copy_of_storage_format = $file->getStorageFormat();
+    $copy_of_storage_properties = $file->getStorageProperties();
+    $copy_of_byte_size = $file->getByteSize();
+    $copy_of_mime_type = $file->getMimeType();
+
+    $new_file = self::initializeNewFile();
+
+    $new_file->setByteSize($copy_of_byte_size);
+
+    $new_file->setContentHash($hash);
+    $new_file->setStorageEngine($copy_of_storage_engine);
+    $new_file->setStorageHandle($copy_of_storage_handle);
+    $new_file->setStorageFormat($copy_of_storage_format);
+    $new_file->setStorageProperties($copy_of_storage_properties);
+    $new_file->setMimeType($copy_of_mime_type);
+    $new_file->copyDimensions($file);
+
+    $new_file->readPropertiesFromParameters($params);
+
+    $new_file->save();
+
+    return $new_file;
   }
 
   public static function newChunkedFile(
@@ -353,7 +356,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
 
     $file->setByteSize(strlen($data));
-    $file->setContentHash(self::hashFileContent($data));
+
+    $hash = self::hashFileContent($data);
+    $file->setContentHash($hash);
 
     $file->setStorageEngine($engine_identifier);
     $file->setStorageHandle($data_handle);
@@ -379,10 +384,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public static function newFromFileData($data, array $params = array()) {
     $hash = self::hashFileContent($data);
-    $file = self::newFileFromContentHash($hash, $params);
 
-    if ($file) {
-      return $file;
+    if ($hash !== null) {
+      $file = self::newFileFromContentHash($hash, $params);
+      if ($file) {
+        return $file;
+      }
     }
 
     return self::buildFromFileData($data, $params);
@@ -710,9 +717,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
   }
 
-
   public static function hashFileContent($data) {
-    return sha1($data);
+    return null;
   }
 
   public function loadFileData() {

@@ -36,9 +36,12 @@ final class FileAllocateConduitAPIMethod
     $properties = array(
       'name' => $name,
       'authorPHID' => $viewer->getPHID(),
-      'viewPolicy' => $view_policy,
       'isExplicitUpload' => true,
     );
+
+    if ($view_policy !== null) {
+      $properties['viewPolicy'] = $view_policy;
+    }
 
     $ttl = $request->getValue('deleteAfterEpoch');
     if ($ttl) {
@@ -46,13 +49,13 @@ final class FileAllocateConduitAPIMethod
     }
 
     $file = null;
-    if ($hash) {
+    if ($hash !== null) {
       $file = PhabricatorFile::newFileFromContentHash(
         $hash,
         $properties);
     }
 
-    if ($hash && !$file) {
+    if ($hash !== null && !$file) {
       $chunked_hash = PhabricatorChunkedFileStorageEngine::getChunkedHash(
         $viewer,
         $hash);
@@ -103,7 +106,7 @@ final class FileAllocateConduitAPIMethod
     if ($chunk_engines) {
       $chunk_properties = $properties;
 
-      if ($hash) {
+      if ($hash !== null) {
         $chunk_properties += array(
           'chunkedHash' => $chunked_hash,
         );
