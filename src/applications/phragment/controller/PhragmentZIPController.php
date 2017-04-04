@@ -100,14 +100,15 @@ final class PhragmentZIPController extends PhragmentController {
     }
 
     $data = Filesystem::readFile((string)$temp);
-    $file = PhabricatorFile::buildFromFileDataOrHash(
-      $data,
-      array(
-        'name' => $zip_name,
-        'ttl.relative' => phutil_units('24 hours in seconds'),
-      ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file = PhabricatorFile::newFromFileData(
+        $data,
+        array(
+          'name' => $zip_name,
+          'ttl.relative' => phutil_units('24 hours in seconds'),
+        ));
+
       $file->attachToObject($fragment->getPHID());
     unset($unguarded);
 

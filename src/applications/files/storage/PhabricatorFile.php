@@ -197,44 +197,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
 
-  /**
-   * Given a block of data, try to load an existing file with the same content
-   * if one exists. If it does not, build a new file.
-   *
-   * This method is generally used when we have some piece of semi-trusted data
-   * like a diff or a file from a repository that we want to show to the user.
-   * We can't just dump it out because it may be dangerous for any number of
-   * reasons; instead, we need to serve it through the File abstraction so it
-   * ends up on the CDN domain if one is configured and so on. However, if we
-   * simply wrote a new file every time we'd potentially end up with a lot
-   * of redundant data in file storage.
-   *
-   * To solve these problems, we use file storage as a cache and reuse the
-   * same file again if we've previously written it.
-   *
-   * NOTE: This method unguards writes.
-   *
-   * @param string  Raw file data.
-   * @param dict    Dictionary of file information.
-   */
-  public static function buildFromFileDataOrHash(
-    $data,
-    array $params = array()) {
-
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'name = %s AND contentHash = %s LIMIT 1',
-      idx($params, 'name'),
-      self::hashFileContent($data));
-
-    if (!$file) {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file = self::newFromFileData($data, $params);
-      unset($unguarded);
-    }
-
-    return $file;
-  }
-
   public static function newFileFromContentHash($hash, array $params) {
     // Check to see if a file with same contentHash exist
     $file = id(new PhabricatorFile())->loadOneWhere(

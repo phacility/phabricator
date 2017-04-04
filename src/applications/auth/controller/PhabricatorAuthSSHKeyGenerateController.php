@@ -24,7 +24,7 @@ final class PhabricatorAuthSSHKeyGenerateController
       $keys = PhabricatorSSHKeyGenerator::generateKeypair();
       list($public_key, $private_key) = $keys;
 
-      $file = PhabricatorFile::buildFromFileDataOrHash(
+      $file = PhabricatorFile::newFromFileData(
         $private_key,
         array(
           'name' => $default_name.'.key',

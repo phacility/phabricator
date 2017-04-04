@@ -78,15 +78,15 @@ final class PhragmentPatchController extends PhragmentController {
       $return = $request->getStr('return');
     }
 
-    $result = PhabricatorFile::buildFromFileDataOrHash(
-      $patch,
-      array(
-        'name' => $name,
-        'mime-type' => 'text/plain',
-        'ttl.relative' => phutil_units('24 hours in seconds'),
-      ));
-
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $result = PhabricatorFile::newFromFileData(
+        $patch,
+        array(
+          'name' => $name,
+          'mime-type' => 'text/plain',
+          'ttl.relative' => phutil_units('24 hours in seconds'),
+        ));
+
       $result->attachToObject($version_b->getFragmentPHID());
     unset($unguarded);
 
