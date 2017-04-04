@@ -10,6 +10,16 @@ final class FileInfoConduitAPIMethod extends FileConduitAPIMethod {
     return pht('Get information about a file.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "file.search" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'phid' => 'optional phid',

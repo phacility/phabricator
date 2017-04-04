@@ -24,7 +24,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
@@ -1466,6 +1467,39 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $this->openTransaction();
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the file.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dataURI')
+        ->setType('string')
+        ->setDescription(pht('Download URI for the file data.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('size')
+        ->setType('int')
+        ->setDescription(pht('File size, in bytes.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'dataURI' => $this->getCDNURI(),
+      'size' => (int)$this->getByteSize(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
