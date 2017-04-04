@@ -94,25 +94,18 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $file,
       new PhabricatorFileTransactionQuery());
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    $comment_view = id(new PhabricatorFileEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($file);
 
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Question File Integrity');
+    $monogram = $file->getMonogram();
 
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $file->getPHID());
-
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($file->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($this->getApplicationURI('/comment/'.$file->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
 
     return array(
       $timeline,
-      $add_comment_form,
+      $comment_view,
     );
   }
 

@@ -774,6 +774,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $format->newReadIterator($raw_iterator);
   }
 
+  public function getURI() {
+    return $this->getInfoURI();
+  }
 
   public function getViewURI() {
     if (!$this->getPHID()) {
