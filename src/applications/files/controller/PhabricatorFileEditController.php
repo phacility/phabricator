@@ -31,7 +31,7 @@ final class PhabricatorFileEditController extends PhabricatorFileController {
       $file_name = $request->getStr('name');
       $errors = array();
 
-      $type_name = PhabricatorFileTransaction::TYPE_NAME;
+      $type_name = PhabricatorFileNameTransaction::TRANSACTIONTYPE;
 
       $xactions = array();
 
@@ -40,7 +40,7 @@ final class PhabricatorFileEditController extends PhabricatorFileController {
         ->setNewValue($can_view);
 
       $xactions[] = id(new PhabricatorFileTransaction())
-        ->setTransactionType(PhabricatorFileTransaction::TYPE_NAME)
+        ->setTransactionType($type_name)
         ->setNewValue($file_name);
 
       $editor = id(new PhabricatorFileEditor())

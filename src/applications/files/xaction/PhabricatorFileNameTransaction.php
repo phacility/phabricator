@@ -1,9 +1,9 @@
 <?php
 
-final class PhabricatorBadgesBadgeNameTransaction
-  extends PhabricatorBadgesBadgeTransactionType {
+final class PhabricatorFileNameTransaction
+  extends PhabricatorFileTransactionType {
 
-  const TRANSACTIONTYPE = 'badge.name';
+  const TRANSACTIONTYPE = 'file:name';
 
   public function generateOldValue($object) {
     return $object->getName();
@@ -15,7 +15,7 @@ final class PhabricatorBadgesBadgeNameTransaction
 
   public function getTitle() {
     return pht(
-      '%s renamed this badge from %s to %s.',
+      '%s updated the name for this file from "%s" to "%s".',
       $this->renderAuthor(),
       $this->renderOldValue(),
       $this->renderNewValue());
@@ -23,7 +23,7 @@ final class PhabricatorBadgesBadgeNameTransaction
 
   public function getTitleForFeed() {
     return pht(
-      '%s renamed %s badge %s to %s.',
+      '%s updated the name of %s from "%s" to "%s".',
       $this->renderAuthor(),
       $this->renderObject(),
       $this->renderOldValue(),
@@ -34,8 +34,7 @@ final class PhabricatorBadgesBadgeNameTransaction
     $errors = array();
 
     if ($this->isEmptyTextTransaction($object->getName(), $xactions)) {
-      $errors[] = $this->newRequiredError(
-        pht('Badges must have a name.'));
+      $errors[] = $this->newRequiredError(pht('Files must have a name.'));
     }
 
     $max_length = $object->getColumnMaximumByteLength('name');
@@ -44,8 +43,9 @@ final class PhabricatorBadgesBadgeNameTransaction
       $new_length = strlen($new_value);
       if ($new_length > $max_length) {
         $errors[] = $this->newInvalidError(
-          pht('The name can be no longer than %s characters.',
-          new PhutilNumber($max_length)));
+          pht(
+            'File names must not be longer than %s character(s).',
+            new PhutilNumber($max_length)));
       }
     }
 

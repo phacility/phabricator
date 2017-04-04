@@ -32,7 +32,7 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     // First, change the name: this should not scramble the secret.
     $xactions = array();
     $xactions[] = id(new PhabricatorFileTransaction())
-      ->setTransactionType(PhabricatorFileTransaction::TYPE_NAME)
+      ->setTransactionType(PhabricatorFileNameTransaction::TRANSACTIONTYPE)
       ->setNewValue('test.dat2');
 
     $engine = id(new PhabricatorFileEditor())
