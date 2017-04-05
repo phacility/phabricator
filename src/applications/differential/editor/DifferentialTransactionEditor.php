@@ -344,7 +344,7 @@ final class DifferentialTransactionEditor
       $downgrade[] = DifferentialReviewerStatus::STATUS_ACCEPTED;
     }
 
-    if ($downgrade_accepts) {
+    if ($downgrade_rejects) {
       $downgrade[] = DifferentialReviewerStatus::STATUS_REJECTED;
     }
 
