@@ -94,7 +94,7 @@ final class AphrontFileResponse extends AphrontResponse {
       array('Accept-Ranges', 'bytes'),
     );
 
-    if ($this->rangeMin || $this->rangeMax) {
+    if ($this->rangeMin !== null || $this->rangeMax !== null) {
       $len = $this->getContentLength();
       $min = $this->rangeMin;
 
