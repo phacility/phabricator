@@ -92,4 +92,37 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
     }
     $this->assertEqual('cow jumped', $raw_data);
   }
+
+  public function testStorageTampering() {
+    $engine = new PhabricatorTestStorageEngine();
+
+    $good = 'The cow jumped over the full moon.';
+    $evil = 'The cow slept quietly, honoring the glorious dictator.';
+
+    $params = array(
+      'name' => 'message.txt',
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    // First, write the file normally.
+    $file = PhabricatorFile::newFromFileData($good, $params);
+    $this->assertEqual($good, $file->loadFileData());
+
+    // As an adversary, tamper with the file.
+    $engine->tamperWithFile($file->getStorageHandle(), $evil);
+
+    // Attempts to read the file data should now fail the integrity check.
+    $caught = null;
+    try {
+      $file->loadFileData();
+    } catch (PhabricatorFileIntegrityException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue($caught instanceof PhabricatorFileIntegrityException);
+  }
+
+
 }

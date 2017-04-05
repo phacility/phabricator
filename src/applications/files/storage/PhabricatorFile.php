@@ -37,6 +37,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_PARTIAL = 'partial';
   const METADATA_PROFILE = 'profile';
   const METADATA_STORAGE = 'storage';
+  const METADATA_INTEGRITY = 'integrity';
 
   protected $name;
   protected $mimeType;
@@ -324,14 +325,17 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $data_handle = null;
     $engine_identifier = null;
+    $integrity_hash = null;
     $exceptions = array();
     foreach ($engines as $engine) {
       $engine_class = get_class($engine);
       try {
-        list($engine_identifier, $data_handle) = $file->writeToEngine(
+        $result = $file->writeToEngine(
           $engine,
           $data,
           $params);
+
+        list($engine_identifier, $data_handle, $integrity_hash) = $result;
 
         // We stored the file somewhere so stop trying to write it to other
         // places.
@@ -362,6 +366,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $file->setStorageEngine($engine_identifier);
     $file->setStorageHandle($data_handle);
+
+    $file->setIntegrityHash($integrity_hash);
 
     $file->readPropertiesFromParameters($params);
 
@@ -409,7 +415,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       'name' => $this->getName(),
     );
 
-    list($new_identifier, $new_handle) = $this->writeToEngine(
+    list($new_identifier, $new_handle, $integrity_hash) = $this->writeToEngine(
       $engine,
       $data,
       $params);
@@ -420,6 +426,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $this->setStorageEngine($new_identifier);
     $this->setStorageHandle($new_handle);
+    $this->setIntegrityHash($integrity_hash);
     $this->save();
 
     if (!$make_copy) {
@@ -494,6 +501,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $formatted_iterator = $format->newWriteIterator($data_iterator);
     $formatted_data = $this->loadDataFromIterator($formatted_iterator);
 
+    $integrity_hash = $engine->newIntegrityHash($formatted_data, $format);
+
     $data_handle = $engine->writeFile($formatted_data, $params);
 
     if (!$data_handle || strlen($data_handle) > 255) {
@@ -518,7 +527,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
           $engine_identifier));
     }
 
-    return array($engine_identifier, $data_handle);
+    return array($engine_identifier, $data_handle, $integrity_hash);
   }
 
 
@@ -1218,6 +1227,15 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function setIsProfileImage($value) {
     $this->metadata[self::METADATA_PROFILE] = $value;
     return $this;
+  }
+
+  public function setIntegrityHash($integrity_hash) {
+    $this->metadata[self::METADATA_INTEGRITY] = $integrity_hash;
+    return $this;
+  }
+
+  public function getIntegrityHash() {
+    return idx($this->metadata, self::METADATA_INTEGRITY);
   }
 
   /**

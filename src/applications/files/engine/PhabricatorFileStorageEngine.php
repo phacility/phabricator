@@ -332,6 +332,18 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     PhabricatorFileStorageFormat $format) {
 
     $formatted_data = $this->readFile($file->getStorageHandle());
+
+    $known_integrity = $file->getIntegrityHash();
+    if ($known_integrity !== null) {
+      $new_integrity = $this->newIntegrityHash($formatted_data, $format);
+      if ($known_integrity !== $new_integrity) {
+        throw new PhabricatorFileIntegrityException(
+          pht(
+            'File data integrity check failed. Dark forces have corrupted '.
+            'or tampered with this file. The file data can not be read.'));
+      }
+    }
+
     $formatted_data = array($formatted_data);
 
     $data = '';
@@ -349,6 +361,18 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     }
 
     return array($data);
+  }
+
+  public function newIntegrityHash(
+    $data,
+    PhabricatorFileStorageFormat $format) {
+
+    $data_hash = PhabricatorHash::digest($data);
+    $format_hash = $format->newFormatIntegrityHash();
+
+    $full_hash = "{$data_hash}/{$format_hash}";
+
+    return PhabricatorHash::digest($full_hash);
   }
 
 }
