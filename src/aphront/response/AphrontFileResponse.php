@@ -105,7 +105,7 @@ final class AphrontFileResponse extends AphrontResponse {
     }
 
     if (!$this->shouldCompressResponse()) {
-      $headers[] = array('Content-Length', $this->getContentLength());
+      $headers[] = array('Content-Length', $content_len);
     }
 
     if (strlen($this->getDownload())) {
