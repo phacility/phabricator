@@ -174,7 +174,16 @@ final class PhabricatorChunkedFileStorageEngine
     return (4 * 1024 * 1024);
   }
 
-  public function getRawFileDataIterator(PhabricatorFile $file, $begin, $end) {
+  public function getRawFileDataIterator(
+    PhabricatorFile $file,
+    $begin,
+    $end,
+    PhabricatorFileStorageFormat $format) {
+
+    // NOTE: It is currently impossible for files stored with the chunk
+    // engine to have their own formatting (instead, the individual chunks
+    // are formatted), so we ignore the format object.
+
     $chunks = id(new PhabricatorFileChunkQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withChunkHandles(array($file->getStorageHandle()))

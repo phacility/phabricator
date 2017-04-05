@@ -746,14 +746,18 @@ final class PhabricatorFile extends PhabricatorFileDAO
    */
   public function getFileDataIterator($begin = null, $end = null) {
     $engine = $this->instantiateStorageEngine();
-    $raw_iterator = $engine->getRawFileDataIterator($this, $begin, $end);
 
     $key = $this->getStorageFormat();
-
     $format = id(clone PhabricatorFileStorageFormat::requireFormat($key))
       ->setFile($this);
 
-    return $format->newReadIterator($raw_iterator);
+    $iterator = $engine->getRawFileDataIterator(
+      $this,
+      $begin,
+      $end,
+      $format);
+
+    return $iterator;
   }
 
   public function getURI() {

@@ -33,6 +33,15 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
     // The actual raw data in the storage engine should be encoded.
     $raw_data = $engine->readFile($file->getStorageHandle());
     $this->assertEqual($expect, $raw_data);
+
+    // If we generate an iterator over a slice of the file, it should return
+    // the decrypted file.
+    $iterator = $file->getFileDataIterator(4, 14);
+    $raw_data = '';
+    foreach ($iterator as $data_chunk) {
+      $raw_data .= $data_chunk;
+    }
+    $this->assertEqual('cow jumped', $raw_data);
   }
 
   public function testAES256Storage() {
@@ -73,5 +82,14 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
     // input data.
     $raw_data = $engine->readFile($file->getStorageHandle());
     $this->assertTrue($data !== $raw_data);
+
+    // If we generate an iterator over a slice of the file, it should return
+    // the decrypted file.
+    $iterator = $file->getFileDataIterator(4, 14);
+    $raw_data = '';
+    foreach ($iterator as $data_chunk) {
+      $raw_data .= $data_chunk;
+    }
+    $this->assertEqual('cow jumped', $raw_data);
   }
 }
