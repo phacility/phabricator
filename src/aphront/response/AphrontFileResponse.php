@@ -97,7 +97,12 @@ final class AphrontFileResponse extends AphrontResponse {
     if ($this->rangeMin || $this->rangeMax) {
       $len = $this->getContentLength();
       $min = $this->rangeMin;
+
       $max = $this->rangeMax;
+      if ($max === null) {
+        $max = ($len - 1);
+      }
+
       $headers[] = array('Content-Range', "bytes {$min}-{$max}/{$len}");
       $content_len = ($max - $min) + 1;
     } else {

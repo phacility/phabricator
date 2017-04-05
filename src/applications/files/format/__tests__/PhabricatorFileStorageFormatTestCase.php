@@ -91,6 +91,14 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
       $raw_data .= $data_chunk;
     }
     $this->assertEqual('cow jumped', $raw_data);
+
+    $iterator = $file->getFileDataIterator(4, null);
+    $raw_data = '';
+    foreach ($iterator as $data_chunk) {
+      $raw_data .= $data_chunk;
+    }
+    $this->assertEqual('cow jumped over the full moon.', $raw_data);
+
   }
 
   public function testStorageTampering() {
