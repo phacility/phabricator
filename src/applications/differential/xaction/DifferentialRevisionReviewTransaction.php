@@ -183,8 +183,19 @@ abstract class DifferentialRevisionReviewTransaction
     // In all cases, you affect yourself.
     $map[$viewer->getPHID()] = $status;
 
-    // If the user has submitted a specific list of reviewers to act as (by
-    // unchecking some checkboxes under "Accept"), only affect those reviewers.
+    // If we're applying an "accept the defaults" transaction, and this
+    // transaction type uses checkboxes, replace the value with the list of
+    // defaults.
+    if (!is_array($value)) {
+      list($options, $default) = $this->getActionOptions($viewer, $revision);
+      if ($options) {
+        $value = $default;
+      }
+    }
+
+    // If we have a specific list of reviewers to act on, usually because the
+    // user has submitted a specific list of reviewers to act as by
+    // unchecking some checkboxes under "Accept", only affect those reviewers.
     if (is_array($value)) {
       $map = array_select_keys($map, $value);
     }
