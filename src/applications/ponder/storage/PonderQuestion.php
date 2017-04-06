@@ -155,9 +155,8 @@ final class PonderQuestion extends PonderDAO
   // Markup interface
 
   public function getMarkupFieldKey($field) {
-    $hash = PhabricatorHash::digest($this->getMarkupText($field));
-    $id = $this->getID();
-    return "ponder:Q{$id}:{$field}:{$hash}";
+    $content = $this->getMarkupText($field);
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
   public function getMarkupText($field) {
