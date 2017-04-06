@@ -102,7 +102,7 @@ final class PhabricatorChunkedFileStorageEngine
   }
 
   public static function getChunkedHashForInput($input) {
-    $rehash = PhabricatorHash::digest($input);
+    $rehash = PhabricatorHash::weakDigest($input);
 
     // Add a suffix to identify this as a chunk hash.
     $rehash = substr($rehash, 0, -2).'-C';

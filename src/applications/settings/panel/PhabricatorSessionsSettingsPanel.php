@@ -44,7 +44,7 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
       ->withPHIDs($identity_phids)
       ->execute();
 
-    $current_key = PhabricatorHash::digest(
+    $current_key = PhabricatorHash::weakDigest(
       $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
 
     $rows = array();

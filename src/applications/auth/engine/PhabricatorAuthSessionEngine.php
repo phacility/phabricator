@@ -110,7 +110,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $session_table = new PhabricatorAuthSession();
     $user_table = new PhabricatorUser();
     $conn_r = $session_table->establishConnection('r');
-    $session_key = PhabricatorHash::digest($session_token);
+    $session_key = PhabricatorHash::weakDigest($session_token);
 
     $cache_parts = $this->getUserCacheQueryParts($conn_r);
     list($cache_selects, $cache_joins, $cache_map, $types_map) = $cache_parts;
@@ -240,7 +240,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // This has a side effect of validating the session type.
     $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
 
-    $digest_key = PhabricatorHash::digest($session_key);
+    $digest_key = PhabricatorHash::weakDigest($session_key);
 
     // Logging-in users don't have CSRF stuff yet, so we have to unguard this
     // write.
@@ -306,7 +306,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       ->execute();
 
     if ($except_session !== null) {
-      $except_session = PhabricatorHash::digest($except_session);
+      $except_session = PhabricatorHash::weakDigest($except_session);
     }
 
     foreach ($sessions as $key => $session) {
@@ -755,7 +755,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $parts[] = $email->getVerificationCode();
     }
 
-    return PhabricatorHash::digest(implode(':', $parts));
+    return PhabricatorHash::weakDigest(implode(':', $parts));
   }
 
 

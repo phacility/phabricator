@@ -48,7 +48,7 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
         ->setViewer($user)
         ->withTokenResources(array($user->getPHID()))
         ->withTokenTypes(array($password_type))
-        ->withTokenCodes(array(PhabricatorHash::digest($key)))
+        ->withTokenCodes(array(PhabricatorHash::weakDigest($key)))
         ->withExpired(false)
         ->executeOne();
     }

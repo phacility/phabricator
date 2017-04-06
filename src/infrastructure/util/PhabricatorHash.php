@@ -5,12 +5,15 @@ final class PhabricatorHash extends Phobject {
   const INDEX_DIGEST_LENGTH = 12;
 
   /**
-   * Digest a string for general use, including use which relates to security.
+   * Digest a string using HMAC+SHA1.
+   *
+   * Because a SHA1 collision is now known, this method should be considered
+   * weak. Callers should prefer @{method:digestWithNamedKey}.
    *
    * @param   string  Input string.
    * @return  string  32-byte hexidecimal SHA1+HMAC hash.
    */
-  public static function digest($string, $key = null) {
+  public static function weakDigest($string, $key = null) {
     if ($key === null) {
       $key = PhabricatorEnv::getEnvConfig('security.hmac-key');
     }
@@ -37,7 +40,7 @@ final class PhabricatorHash extends Phobject {
     }
 
     for ($ii = 0; $ii < 1000; $ii++) {
-      $result = self::digest($result, $salt);
+      $result = self::weakDigest($result, $salt);
     }
 
     return $result;
