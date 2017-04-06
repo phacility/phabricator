@@ -907,7 +907,10 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new DifferentialReviewersSearchEngineAttachment())
+        ->setAttachmentKey('reviewers'),
+    );
   }
 
 

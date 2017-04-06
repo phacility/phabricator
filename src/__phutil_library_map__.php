@@ -502,6 +502,7 @@ phutil_register_library_map(array(
     'DifferentialReviewersCommitMessageField' => 'applications/differential/field/DifferentialReviewersCommitMessageField.php',
     'DifferentialReviewersField' => 'applications/differential/customfield/DifferentialReviewersField.php',
     'DifferentialReviewersHeraldAction' => 'applications/differential/herald/DifferentialReviewersHeraldAction.php',
+    'DifferentialReviewersSearchEngineAttachment' => 'applications/differential/engineextension/DifferentialReviewersSearchEngineAttachment.php',
     'DifferentialReviewersView' => 'applications/differential/view/DifferentialReviewersView.php',
     'DifferentialRevision' => 'applications/differential/storage/DifferentialRevision.php',
     'DifferentialRevisionAbandonTransaction' => 'applications/differential/xaction/DifferentialRevisionAbandonTransaction.php',
@@ -5275,6 +5276,7 @@ phutil_register_library_map(array(
     'DifferentialReviewersCommitMessageField' => 'DifferentialCommitMessageField',
     'DifferentialReviewersField' => 'DifferentialCoreCustomField',
     'DifferentialReviewersHeraldAction' => 'HeraldAction',
+    'DifferentialReviewersSearchEngineAttachment' => 'PhabricatorSearchEngineAttachment',
     'DifferentialReviewersView' => 'AphrontView',
     'DifferentialRevision' => array(
       'DifferentialDAO',
