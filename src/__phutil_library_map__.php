@@ -1920,6 +1920,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthFactorConfig' => 'applications/auth/storage/PhabricatorAuthFactorConfig.php',
     'PhabricatorAuthFactorTestCase' => 'applications/auth/factor/__tests__/PhabricatorAuthFactorTestCase.php',
     'PhabricatorAuthFinishController' => 'applications/auth/controller/PhabricatorAuthFinishController.php',
+    'PhabricatorAuthHMACKey' => 'applications/auth/storage/PhabricatorAuthHMACKey.php',
     'PhabricatorAuthHighSecurityRequiredException' => 'applications/auth/exception/PhabricatorAuthHighSecurityRequiredException.php',
     'PhabricatorAuthHighSecurityToken' => 'applications/auth/data/PhabricatorAuthHighSecurityToken.php',
     'PhabricatorAuthInvite' => 'applications/auth/storage/PhabricatorAuthInvite.php',
@@ -2864,6 +2865,7 @@ phutil_register_library_map(array(
     'PhabricatorGuideModule' => 'applications/guides/module/PhabricatorGuideModule.php',
     'PhabricatorGuideModuleController' => 'applications/guides/controller/PhabricatorGuideModuleController.php',
     'PhabricatorGuideQuickStartModule' => 'applications/guides/module/PhabricatorGuideQuickStartModule.php',
+    'PhabricatorHMACTestCase' => 'infrastructure/util/__tests__/PhabricatorHMACTestCase.php',
     'PhabricatorHTTPParameterTypeTableView' => 'applications/config/view/PhabricatorHTTPParameterTypeTableView.php',
     'PhabricatorHandleList' => 'applications/phid/handle/pool/PhabricatorHandleList.php',
     'PhabricatorHandleObjectSelectorDataView' => 'applications/phid/handle/view/PhabricatorHandleObjectSelectorDataView.php',
@@ -6900,6 +6902,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthFactorConfig' => 'PhabricatorAuthDAO',
     'PhabricatorAuthFactorTestCase' => 'PhabricatorTestCase',
     'PhabricatorAuthFinishController' => 'PhabricatorAuthController',
+    'PhabricatorAuthHMACKey' => 'PhabricatorAuthDAO',
     'PhabricatorAuthHighSecurityRequiredException' => 'Exception',
     'PhabricatorAuthHighSecurityToken' => 'Phobject',
     'PhabricatorAuthInvite' => array(
@@ -7998,6 +8001,7 @@ phutil_register_library_map(array(
     'PhabricatorGuideModule' => 'Phobject',
     'PhabricatorGuideModuleController' => 'PhabricatorGuideController',
     'PhabricatorGuideQuickStartModule' => 'PhabricatorGuideModule',
+    'PhabricatorHMACTestCase' => 'PhabricatorTestCase',
     'PhabricatorHTTPParameterTypeTableView' => 'AphrontView',
     'PhabricatorHandleList' => array(
       'Phobject',

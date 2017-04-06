@@ -67,7 +67,9 @@ final class PhabricatorFileAES256StorageFormat
 
     $input = self::FORMATKEY.'/iv:'.$iv_envelope->openEnvelope();
 
-    return PhabricatorHash::digest($input);
+    return PhabricatorHash::digestWithNamedKey(
+      $input,
+      PhabricatorFileStorageEngine::HMAC_INTEGRITY);
   }
 
   public function newStorageProperties() {

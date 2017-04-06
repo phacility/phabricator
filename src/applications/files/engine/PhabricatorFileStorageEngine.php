@@ -16,6 +16,8 @@
  */
 abstract class PhabricatorFileStorageEngine extends Phobject {
 
+  const HMAC_INTEGRITY = 'file.integrity';
+
   /**
    * Construct a new storage engine.
    *
@@ -367,12 +369,14 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     $data,
     PhabricatorFileStorageFormat $format) {
 
-    $data_hash = PhabricatorHash::digest($data);
+    $hmac_name = self::HMAC_INTEGRITY;
+
+    $data_hash = PhabricatorHash::digestWithNamedKey($data, $hmac_name);
     $format_hash = $format->newFormatIntegrityHash();
 
     $full_hash = "{$data_hash}/{$format_hash}";
 
-    return PhabricatorHash::digest($full_hash);
+    return PhabricatorHash::digestWithNamedKey($full_hash, $hmac_name);
   }
 
 }
