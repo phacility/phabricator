@@ -336,7 +336,7 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     $known_integrity = $file->getIntegrityHash();
     if ($known_integrity !== null) {
       $new_integrity = $this->newIntegrityHash($formatted_data, $format);
-      if ($known_integrity !== $new_integrity) {
+      if (!phutil_hashes_are_identical($known_integrity, $new_integrity)) {
         throw new PhabricatorFileIntegrityException(
           pht(
             'File data integrity check failed. Dark forces have corrupted '.

@@ -493,9 +493,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $engine_class = get_class($engine);
 
-    $key = $this->getStorageFormat();
-    $format = id(clone PhabricatorFileStorageFormat::requireFormat($key))
-      ->setFile($this);
+    $format = $this->newStorageFormat();
 
     $data_iterator = array($data);
     $formatted_iterator = $format->newWriteIterator($data_iterator);
@@ -756,9 +754,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getFileDataIterator($begin = null, $end = null) {
     $engine = $this->instantiateStorageEngine();
 
-    $key = $this->getStorageFormat();
-    $format = id(clone PhabricatorFileStorageFormat::requireFormat($key))
-      ->setFile($this);
+    $format = $this->newStorageFormat();
 
     $iterator = $engine->getRawFileDataIterator(
       $this,
@@ -1238,6 +1234,21 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return idx($this->metadata, self::METADATA_INTEGRITY);
   }
 
+  public function newIntegrityHash() {
+    $engine = $this->instantiateStorageEngine();
+
+    if ($engine->isChunkEngine()) {
+      return null;
+    }
+
+    $format = $this->newStorageFormat();
+
+    $storage_handle = $this->getStorageHandle();
+    $data = $engine->readFile($storage_handle);
+
+    return $engine->newIntegrityHash($data, $format);
+  }
+
   /**
    * Write the policy edge between this file and some object.
    *
@@ -1404,6 +1415,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function getTransform($key) {
     return $this->assertAttachedKey($this->transforms, $key);
+  }
+
+  public function newStorageFormat() {
+    $key = $this->getStorageFormat();
+    $template = PhabricatorFileStorageFormat::requireFormat($key);
+
+    $format = id(clone $template)
+      ->setFile($this);
+
+    return $format;
   }
 
 
