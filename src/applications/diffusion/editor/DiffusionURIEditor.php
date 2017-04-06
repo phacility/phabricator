@@ -507,6 +507,10 @@ final class DiffusionURIEditor
         ->synchronizeWorkingCopyAfterHostingChange();
     }
 
+    $repository->writeStatusMessage(
+      PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+      null);
+
     return $xactions;
   }
 
