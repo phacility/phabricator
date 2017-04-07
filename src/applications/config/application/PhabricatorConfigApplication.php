@@ -27,7 +27,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
   }
 
   public function getName() {
-    return 'Config';
+    return pht('Config');
   }
 
   public function getShortDescription() {
