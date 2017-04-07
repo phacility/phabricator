@@ -93,7 +93,7 @@ abstract class DiffusionFileFutureQuery
     $drequest = $this->getRequest();
 
     $name = basename($drequest->getPath());
-    $ttl = PhabricatorTime::getNow() + phutil_units('48 hours in seconds');
+    $relative_ttl = phutil_units('48 hours in seconds');
 
     try {
       $threshold = PhabricatorFileStorageEngine::getChunkThreshold();
@@ -101,7 +101,7 @@ abstract class DiffusionFileFutureQuery
 
       $source = id(new PhabricatorExecFutureFileUploadSource())
         ->setName($name)
-        ->setTTL($ttl)
+        ->setRelativeTTL($relative_ttl)
         ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
         ->setExecFuture($future);
 

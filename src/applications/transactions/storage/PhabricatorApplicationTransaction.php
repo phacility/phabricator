@@ -1149,12 +1149,20 @@ abstract class PhabricatorApplicationTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
       case PhabricatorTransactions::TYPE_SPACE:
-        return pht(
-          '%s shifted %s from the %s space to the %s space.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid),
-          $this->renderHandleLink($old),
-          $this->renderHandleLink($new));
+        if ($this->getIsCreateTransaction()) {
+          return pht(
+            '%s created %s in the %s space.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleLink($new));
+        } else {
+          return pht(
+            '%s shifted %s from the %s space to the %s space.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
+        }
       case PhabricatorTransactions::TYPE_EDGE:
         $new = ipull($new, 'dst');
         $old = ipull($old, 'dst');

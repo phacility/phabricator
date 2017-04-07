@@ -78,7 +78,8 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorFileCommentController',
         'thread/(?P<phid>[^/]+)/' => 'PhabricatorFileLightboxController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
-        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorFileEditController',
+        $this->getEditRoutePattern('edit/')
+          => 'PhabricatorFileEditController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
         'imageproxy/' => 'PhabricatorFileImageProxyController',
         'transforms/(?P<id>[1-9]\d*)/' =>

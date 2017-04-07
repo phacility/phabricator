@@ -634,6 +634,10 @@ final class PhabricatorRepositoryEditor
         ->synchronizeWorkingCopyAfterCreation();
     }
 
+    $object->writeStatusMessage(
+      PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+      null);
+
     return $xactions;
   }
 

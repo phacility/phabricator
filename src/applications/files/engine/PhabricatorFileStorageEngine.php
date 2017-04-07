@@ -16,6 +16,8 @@
  */
 abstract class PhabricatorFileStorageEngine extends Phobject {
 
+  const HMAC_INTEGRITY = 'file.integrity';
+
   /**
    * Construct a new storage engine.
    *
@@ -325,10 +327,32 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     return $engine->getChunkSize();
   }
 
-  public function getRawFileDataIterator(PhabricatorFile $file, $begin, $end) {
-    // The default implementation is trivial and just loads the entire file
-    // upfront.
-    $data = $this->readFile($file->getStorageHandle());
+  public function getRawFileDataIterator(
+    PhabricatorFile $file,
+    $begin,
+    $end,
+    PhabricatorFileStorageFormat $format) {
+
+    $formatted_data = $this->readFile($file->getStorageHandle());
+
+    $known_integrity = $file->getIntegrityHash();
+    if ($known_integrity !== null) {
+      $new_integrity = $this->newIntegrityHash($formatted_data, $format);
+      if (!phutil_hashes_are_identical($known_integrity, $new_integrity)) {
+        throw new PhabricatorFileIntegrityException(
+          pht(
+            'File data integrity check failed. Dark forces have corrupted '.
+            'or tampered with this file. The file data can not be read.'));
+      }
+    }
+
+    $formatted_data = array($formatted_data);
+
+    $data = '';
+    $format_iterator = $format->newReadIterator($formatted_data);
+    foreach ($format_iterator as $raw_chunk) {
+      $data .= $raw_chunk;
+    }
 
     if ($begin !== null && $end !== null) {
       $data = substr($data, $begin, ($end - $begin));
@@ -339,6 +363,20 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     }
 
     return array($data);
+  }
+
+  public function newIntegrityHash(
+    $data,
+    PhabricatorFileStorageFormat $format) {
+
+    $hmac_name = self::HMAC_INTEGRITY;
+
+    $data_hash = PhabricatorHash::digestWithNamedKey($data, $hmac_name);
+    $format_hash = $format->newFormatIntegrityHash();
+
+    $full_hash = "{$data_hash}/{$format_hash}";
+
+    return PhabricatorHash::digestWithNamedKey($full_hash, $hmac_name);
   }
 
 }

@@ -107,7 +107,7 @@ final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
 
     if ($bad_paths) {
       foreach ($bad_paths as $path_part => $message) {
-        $digest = substr(PhabricatorHash::digest($path_part), 0, 8);
+        $digest = substr(PhabricatorHash::weakDigest($path_part), 0, 8);
 
         $this
           ->newIssue('config.PATH.'.$digest)

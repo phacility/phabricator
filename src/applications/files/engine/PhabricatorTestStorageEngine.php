@@ -47,4 +47,8 @@ final class PhabricatorTestStorageEngine
     unset(self::$storage[$handle]);
   }
 
+  public function tamperWithFile($handle, $data) {
+    self::$storage[$handle] = $data;
+  }
+
 }

@@ -109,7 +109,8 @@ EOTEXT
             'Default key for HMAC digests where the key is not important '.
             '(i.e., the hash itself is secret). You can change this if you '.
             'want (to any other string), but doing so will break existing '.
-            'sessions and CSRF tokens.')),
+            'sessions and CSRF tokens. This option is deprecated. Newer '.
+            'code automatically manages HMAC keys.')),
       $this->newOption('security.require-https', 'bool', false)
         ->setLocked(true)
         ->setSummary(

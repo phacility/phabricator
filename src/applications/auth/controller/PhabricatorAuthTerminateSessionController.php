@@ -16,7 +16,7 @@ final class PhabricatorAuthTerminateSessionController
       $query->withIDs(array($id));
     }
 
-    $current_key = PhabricatorHash::digest(
+    $current_key = PhabricatorHash::weakDigest(
       $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
 
     $sessions = $query->execute();

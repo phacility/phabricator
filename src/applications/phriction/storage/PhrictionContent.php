@@ -68,12 +68,8 @@ final class PhrictionContent extends PhrictionDAO
    * @task markup
    */
   public function getMarkupFieldKey($field) {
-    if ($this->shouldUseMarkupCache($field)) {
-      $id = $this->getID();
-    } else {
-      $id = PhabricatorHash::digest($this->getMarkupText($field));
-    }
-    return "phriction:{$field}:{$id}";
+    $content = $this->getMarkupText($field);
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
 

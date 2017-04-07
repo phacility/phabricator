@@ -14,7 +14,7 @@ foreach ($sessions as $session) {
     $conn,
     'UPDATE %T SET sessionKey = %s WHERE userPHID = %s AND type = %s',
     PhabricatorUser::SESSION_TABLE,
-    PhabricatorHash::digest($session['sessionKey']),
+    PhabricatorHash::weakDigest($session['sessionKey']),
     $session['userPHID'],
     $session['type']);
 }

@@ -94,10 +94,15 @@ final class AphrontFileResponse extends AphrontResponse {
       array('Accept-Ranges', 'bytes'),
     );
 
-    if ($this->rangeMin || $this->rangeMax) {
+    if ($this->rangeMin !== null || $this->rangeMax !== null) {
       $len = $this->getContentLength();
       $min = $this->rangeMin;
+
       $max = $this->rangeMax;
+      if ($max === null) {
+        $max = ($len - 1);
+      }
+
       $headers[] = array('Content-Range', "bytes {$min}-{$max}/{$len}");
       $content_len = ($max - $min) + 1;
     } else {
@@ -105,7 +110,7 @@ final class AphrontFileResponse extends AphrontResponse {
     }
 
     if (!$this->shouldCompressResponse()) {
-      $headers[] = array('Content-Length', $this->getContentLength());
+      $headers[] = array('Content-Length', $content_len);
     }
 
     if (strlen($this->getDownload())) {
