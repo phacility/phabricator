@@ -226,7 +226,7 @@ final class PhabricatorCalendarEventQuery
       $set = $event->newRecurrenceSet();
 
       $recurrences = $set->getEventsBetween(
-        null,
+        $start_date,
         $end_date,
         $limit + 1);
 
