@@ -251,6 +251,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file->setMimeType('application/octet-stream');
 
     $chunked_hash = idx($params, 'chunkedHash');
+
+    // Get rid of this parameter now; we aren't passing it any further down
+    // the stack.
+    unset($params['chunkedHash']);
+
     if ($chunked_hash) {
       $file->setContentHash($chunked_hash);
     } else {
