@@ -391,6 +391,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return ($epoch - $window);
   }
 
+  public function getEndDateTimeEpochForCache() {
+    return $this->getEndDateTimeEpoch();
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
