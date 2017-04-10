@@ -61,15 +61,20 @@ final class FileUploadChunkConduitAPIMethod
       $mime_type = 'application/octet-stream';
     }
 
+    $params = array(
+      'name' => $file->getMonogram().'.chunk-'.$chunk->getID(),
+      'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+    );
+
+    if ($mime_type !== null) {
+      $params['mime-type'] = 'application/octet-stream';
+    }
+
     // NOTE: These files have a view policy which prevents normal access. They
     // are only accessed through the storage engine.
     $chunk_data = PhabricatorFile::newFromFileData(
       $data,
-      array(
-        'name' => $file->getMonogram().'.chunk-'.$chunk->getID(),
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-        'mime-type' => $mime_type,
-      ));
+      $params);
 
     $chunk->setDataFilePHID($chunk_data->getPHID())->save();
 
