@@ -4692,6 +4692,7 @@ phutil_register_library_map(array(
     'javelin_tag' => 'infrastructure/javelin/markup.php',
     'phabricator_date' => 'view/viewutils.php',
     'phabricator_datetime' => 'view/viewutils.php',
+    'phabricator_datetimezone' => 'view/viewutils.php',
     'phabricator_form' => 'infrastructure/javelin/markup.php',
     'phabricator_format_local_time' => 'view/viewutils.php',
     'phabricator_relative_date' => 'view/viewutils.php',
