@@ -184,6 +184,7 @@ final class ConpherenceViewController extends
           id(new PhabricatorRemarkupControl())
           ->setUser($user)
           ->setName('text')
+          ->setSendOnEnter(true)
           ->setValue($draft->getDraft()));
 
       $status_view = phutil_tag(
