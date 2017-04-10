@@ -97,6 +97,11 @@ a.handle-status-closed:hover {
   font-size: {$smallerfontsize};
 }
 
+.phui-handle.phui-link-person {
+  /* Prevent linebreaks between user availability markers and usernames. */
+  white-space: nowrap;
+}
+
 .phui-handle .phui-icon-view {
   display: inline-block;
   margin: 2px 2px -2px 0;
