@@ -8,7 +8,8 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorSpacesInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorDestructibleInterface {
 
   protected $title;
   protected $authorPHID;
@@ -141,8 +142,19 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
 
 /* -( PhabricatorSpacesInterface )------------------------------------------- */
 
+
   public function getSpacePHID() {
     return $this->spacePHID;
   }
 
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
+  }
 }
