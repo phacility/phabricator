@@ -1,7 +1,7 @@
 <?php
 
 final class PhortuneMerchantInvoiceCreateController
-  extends PhortuneMerchantController {
+  extends PhortuneMerchantProfileController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
@@ -11,6 +11,7 @@ final class PhortuneMerchantInvoiceCreateController
       return new Aphront404Response();
     }
 
+    $this->setMerchant($merchant);
     $merchant_id = $merchant->getID();
     $cancel_uri = $this->getApplicationURI("/merchant/{$merchant_id}/");
 
@@ -88,8 +89,7 @@ final class PhortuneMerchantInvoiceCreateController
     $title = pht('New Invoice');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($merchant->getName());
-    $crumbs->setBorder(true);
+    $crumbs->addTextCrumb($title);
 
     $v_title = $request->getStr('title');
     $e_title = true;
@@ -245,9 +245,12 @@ final class PhortuneMerchantInvoiceCreateController
         $box,
       ));
 
+    $navigation = $this->buildSideNavView('orders');
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($navigation)
       ->appendChild($view);
   }
 

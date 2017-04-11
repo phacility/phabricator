@@ -88,6 +88,10 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
             => 'PhortuneMerchantEditController',
           'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
+          'manager/' => array(
+            '(?:(?P<id>\d+)/)?' => 'PhortuneMerchantManagerController',
+            'add/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantAddManagerController',
+          ),
           '(?P<merchantID>\d+)/' => array(
             'cart/(?P<id>\d+)/' => array(
               '' => 'PhortuneCartViewController',

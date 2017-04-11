@@ -1,7 +1,7 @@
 <?php
 
 final class PhortuneMerchantPictureController
-  extends PhortuneMerchantController {
+  extends PhortuneMerchantProfileController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
@@ -21,6 +21,7 @@ final class PhortuneMerchantPictureController
       return new Aphront404Response();
     }
 
+    $this->setMerchant($merchant);
     $uri = $merchant->getURI();
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
@@ -92,7 +93,7 @@ final class PhortuneMerchantPictureController
       }
     }
 
-    $title = pht('Edit Merchant Picture');
+    $title = pht('Edit Logo');
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
@@ -208,12 +209,10 @@ final class PhortuneMerchantPictureController
       ->setForm($upload_form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($merchant->getName(), $uri);
-    $crumbs->addTextCrumb(pht('Merchant Logo'));
-    $crumbs->setBorder(true);
+    $crumbs->addTextCrumb(pht('Edit Logo'));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Edit Merchant Logo'))
+      ->setHeader(pht('Edit Logo'))
       ->setHeaderIcon('fa-camera');
 
     $view = id(new PHUITwoColumnView())
@@ -223,9 +222,12 @@ final class PhortuneMerchantPictureController
         $upload_box,
       ));
 
+    $navigation = $this->buildSideNavView();
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($navigation)
       ->appendChild(
         array(
           $view,
