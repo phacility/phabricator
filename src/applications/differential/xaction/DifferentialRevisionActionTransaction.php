@@ -124,10 +124,14 @@ abstract class DifferentialRevisionActionTransaction
         list($options, $value) = $this->getActionOptions($viewer, $revision);
 
         // Show the options if the user can select on behalf of two or more
-        // reviewers, or can force-accept on behalf of one or more reviewers.
+        // reviewers, or can force-accept on behalf of one or more reviewers,
+        // or can accept on behalf of a reviewer other than themselves (see
+        // T12533).
         $can_multi = (count($options) > 1);
         $can_force = (count($value) < count($options));
-        if ($can_multi || $can_force) {
+        $not_self = (head_key($options) != $viewer->getPHID());
+
+        if ($can_multi || $can_force || $not_self) {
           $field->setOptions($options);
           $field->setValue($value);
         }
