@@ -69,6 +69,16 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '' => 'PhortuneAccountListController',
           $this->getEditRoutePattern('edit/')
             => 'PhortuneAccountEditController',
+          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneAccountEditController',
+          'add/manager/(?:(?P<id>\d+)/)?'
+            => 'PhortuneAccountAddManagerController',
+          'billing/(?:(?P<id>\d+)/)?' => 'PhortuneAccountBillingController',
+          'subscription/(?:(?P<id>\d+)/)?'
+            => 'PhortuneAccountSubscriptionController',
+          'manager/' => array(
+            '(?:(?P<id>\d+)/)?' => 'PhortuneAccountManagerController',
+            'add/(?:(?P<id>\d+)/)?' => 'PhortuneAccountAddManagerController',
+          ),
         ),
         'product/' => array(
           '' => 'PhortuneProductListController',

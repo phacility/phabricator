@@ -55,6 +55,7 @@ final class PhortuneChargeTableView extends AphrontView {
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('No charges found.'))
       ->setHeaders(
         array(
           pht('ID'),
