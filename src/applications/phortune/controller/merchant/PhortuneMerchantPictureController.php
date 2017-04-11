@@ -76,7 +76,8 @@ final class PhortuneMerchantPictureController
 
         $xactions = array();
         $xactions[] = id(new PhortuneMerchantTransaction())
-          ->setTransactionType(PhortuneMerchantTransaction::TYPE_PICTURE)
+          ->setTransactionType(
+            PhortuneMerchantPictureTransaction::TRANSACTIONTYPE)
           ->setNewValue($new_value);
 
         $editor = id(new PhortuneMerchantEditor())

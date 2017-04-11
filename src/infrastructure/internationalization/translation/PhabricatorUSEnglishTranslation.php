@@ -1610,6 +1610,20 @@ final class PhabricatorUSEnglishTranslation
 
       '%s accepted this revision as %s reviewer(s): %s.' =>
         '%s accepted this revision as: %3$s.',
+
+      '%s added %s merchant manager(s): %s.' => array(
+        array(
+          '%s added a merchant manager: %3$s.',
+          '%s added merchant managers: %3$s.',
+        ),
+      ),
+
+      '%s removed %s merchant manager(s): %s.' => array(
+        array(
+          '%s removed a merchant manager: %3$s.',
+          '%s removed merchant managers: %3$s.',
+        ),
+      ),
     );
   }
 
