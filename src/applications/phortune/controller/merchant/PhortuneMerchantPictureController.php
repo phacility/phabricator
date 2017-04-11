@@ -21,7 +21,7 @@ final class PhortuneMerchantPictureController
       return new Aphront404Response();
     }
 
-    $uri = $merchant->getViewURI();
+    $uri = $merchant->getURI();
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;

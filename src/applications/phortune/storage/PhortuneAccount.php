@@ -17,7 +17,6 @@ final class PhortuneAccount extends PhortuneDAO
 
   public static function initializeNewAccount(PhabricatorUser $actor) {
     $account = id(new PhortuneAccount());
-
     $account->memberPHIDs = array();
 
     return $account;
@@ -31,7 +30,7 @@ final class PhortuneAccount extends PhortuneDAO
 
     $xactions = array();
     $xactions[] = id(new PhortuneAccountTransaction())
-      ->setTransactionType(PhortuneAccountTransaction::TYPE_NAME)
+      ->setTransactionType(PhortuneAccountNameTransaction::TRANSACTIONTYPE)
       ->setNewValue(pht('Default Account'));
 
     $xactions[] = id(new PhortuneAccountTransaction())
@@ -94,6 +93,10 @@ final class PhortuneAccount extends PhortuneDAO
   public function attachMemberPHIDs(array $phids) {
     $this->memberPHIDs = $phids;
     return $this;
+  }
+
+  public function getURI() {
+    return '/phortune/'.$this->getID().'/';
   }
 
 

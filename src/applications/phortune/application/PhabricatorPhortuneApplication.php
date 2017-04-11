@@ -67,7 +67,8 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         ),
         'account/' => array(
           '' => 'PhortuneAccountListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneAccountEditController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhortuneAccountEditController',
         ),
         'product/' => array(
           '' => 'PhortuneProductListController',

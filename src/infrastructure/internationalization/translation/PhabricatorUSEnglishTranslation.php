@@ -1624,6 +1624,21 @@ final class PhabricatorUSEnglishTranslation
           '%s removed merchant managers: %3$s.',
         ),
       ),
+
+      '%s added %s account manager(s): %s.' => array(
+        array(
+          '%s added an account manager: %3$s.',
+          '%s added account managers: %3$s.',
+        ),
+      ),
+
+      '%s removed %s account manager(s): %s.' => array(
+        array(
+          '%s removed an account manager: %3$s.',
+          '%s removed account managers: %3$s.',
+        ),
+      ),
+
     );
   }
 

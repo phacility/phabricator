@@ -129,7 +129,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->appendChild($status_view);
 
     $curtain->newPanel()
-      ->setHeaderText(pht('Members'))
+      ->setHeaderText(pht('Managers'))
       ->appendChild($member_list);
 
     return $curtain;
