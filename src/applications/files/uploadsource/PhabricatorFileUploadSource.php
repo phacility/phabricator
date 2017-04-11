@@ -137,10 +137,6 @@ abstract class PhabricatorFileUploadSource
 
     $parameters = $this->getNewFileParameters();
 
-    $parameters = array(
-      'isPartial' => true,
-    ) + $parameters;
-
     $data_length = $this->getDataLength();
     if ($data_length !== null) {
       $length = $data_length;
