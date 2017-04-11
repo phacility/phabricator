@@ -17,7 +17,7 @@ final class PhortuneAccount extends PhortuneDAO
 
   public static function initializeNewAccount(PhabricatorUser $actor) {
     $account = id(new PhortuneAccount());
-    $account->memberPHIDs = array();
+    $account->memberPHIDs = array($actor->getPHID() => $actor->getPHID());
 
     return $account;
   }
