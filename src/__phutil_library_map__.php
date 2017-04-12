@@ -9148,7 +9148,7 @@ phutil_register_library_map(array(
     'PhabricatorSearchDocument' => 'PhabricatorSearchDAO',
     'PhabricatorSearchDocumentField' => 'PhabricatorSearchDAO',
     'PhabricatorSearchDocumentFieldType' => 'Phobject',
-    'PhabricatorSearchDocumentQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorSearchDocumentQuery' => 'PhabricatorPolicyAwareQuery',
     'PhabricatorSearchDocumentRelationship' => 'PhabricatorSearchDAO',
     'PhabricatorSearchDocumentTypeDatasource' => 'PhabricatorTypeaheadDatasource',
     'PhabricatorSearchEditController' => 'PhabricatorSearchBaseController',
