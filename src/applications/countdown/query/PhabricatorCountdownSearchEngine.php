@@ -108,7 +108,7 @@ final class PhabricatorCountdownSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($countdown)
-        ->setObjectName("C{$id}")
+        ->setObjectName($countdown->getMonogram())
         ->setHeader($countdown->getTitle())
         ->setHref($this->getApplicationURI("{$id}/"))
         ->addByline(

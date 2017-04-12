@@ -28,7 +28,7 @@ final class PhabricatorCountdownViewController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb("C{$id}")
+      ->addTextCrumb($countdown->getMonogram())
       ->setBorder(true);
 
     $epoch = $countdown->getEpoch();
