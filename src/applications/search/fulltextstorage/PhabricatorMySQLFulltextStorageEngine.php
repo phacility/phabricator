@@ -398,12 +398,13 @@ final class PhabricatorMySQLFulltextStorageEngine
     $stemmer = new PhutilSearchStemmer();
 
     $compiler = PhabricatorSearchDocument::newQueryCompiler()
-      ->setQuery($raw_query)
       ->setStemmer($stemmer);
 
+    $tokens = $compiler->newTokens($raw_query);
+
     $queries = array();
-    $queries[] = $compiler->compileLiteralQuery();
-    $queries[] = $compiler->compileStemmedQuery();
+    $queries[] = $compiler->compileLiteralQuery($tokens);
+    $queries[] = $compiler->compileStemmedQuery($tokens);
 
     return implode(' ', array_filter($queries));
   }

@@ -56,9 +56,9 @@ final class ConpherenceFulltextQuery
     }
 
     if (strlen($this->fulltext)) {
-      $compiled_query = PhabricatorSearchDocument::newQueryCompiler()
-        ->setQuery($this->fulltext)
-        ->compileQuery();
+      $compiler = PhabricatorSearchDocument::newQueryCompiler();
+      $tokens = $compiler->newTokens($this->fulltext);
+      $compiled_query = $compiler->compileQuery($tokens);
 
       $where[] = qsprintf(
         $conn_r,

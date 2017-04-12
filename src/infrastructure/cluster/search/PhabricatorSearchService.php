@@ -253,6 +253,10 @@ class PhabricatorSearchService
         $res = $engine->executeSearch($query);
         // return immediately if we get results
         return $res;
+      } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
+        // If there's a query compilation error, return it directly to the
+        // user: they issued a query with bad syntax.
+        throw $ex;
       } catch (Exception $ex) {
         $exceptions[] = $ex;
       }
