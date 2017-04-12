@@ -41,7 +41,7 @@ input[type="submit"] {
   font-weight: bold;
   font-size: {$normalfontsize};
   display: inline-block;
-  padding: 3px 12px 4px;
+  padding: 4px 16px 5px;
   text-align: center;
   white-space: nowrap;
   border-radius: 3px;
@@ -285,7 +285,7 @@ a.policy-control .phui-button-text {
 
 .dropdown .caret {
   margin-top: 7px;
-  margin-left: 6px;
+  margin-right: -4px;
 }
 
 .small.dropdown .caret {
@@ -304,8 +304,8 @@ a.policy-control .phui-button-text {
 .button .phui-icon-view {
   display: inline-block;
   position: absolute;
-  top: 6px;
-  left: 10px;
+  top: 7px;
+  left: 12px;
 }
 
 .button.icon-last .phui-icon-view {
