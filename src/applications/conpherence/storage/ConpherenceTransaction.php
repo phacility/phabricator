@@ -7,7 +7,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
   const TYPE_PARTICIPANTS    = 'participants';
   const TYPE_DATE_MARKER     = 'date-marker';
   const TYPE_PICTURE         = 'picture';
-  const TYPE_PICTURE_CROP    = 'picture-crop'; // TODO: Nuke these from DB.
 
   public function getApplicationName() {
     return 'conpherence';
@@ -43,8 +42,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_PICTURE:
       case self::TYPE_DATE_MARKER:
         return false;
-      case self::TYPE_PICTURE_CROP:
-        return true;
     }
 
     return parent::shouldHide();
