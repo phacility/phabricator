@@ -102,8 +102,13 @@ final class PhabricatorConpherenceProfileMenuItem
       return array();
     }
 
-    $data = $room->getDisplayData($viewer);
-    $unread_count = $data['unread_count'];
+    $participants = $room->getParticipants();
+    $viewer_phid = $viewer->getPHID();
+    $unread_count = null;
+    if (isset($participants[$viewer_phid])) {
+      $data = $room->getDisplayData($viewer);
+      $unread_count = $data['unread_count'];
+    }
 
     $count = null;
     if ($unread_count) {
