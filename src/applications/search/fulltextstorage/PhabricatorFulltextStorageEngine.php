@@ -101,4 +101,8 @@ abstract class PhabricatorFulltextStorageEngine extends Phobject {
   public function initIndex() {}
 
 
+  public function getFulltextTokens() {
+    return array();
+  }
+
 }

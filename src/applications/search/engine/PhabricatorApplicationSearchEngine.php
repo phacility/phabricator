@@ -978,7 +978,13 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $objects = $query->executeWithCursorPager($pager);
     }
 
+    $this->didExecuteQuery($query);
+
     return $objects;
+  }
+
+  protected function didExecuteQuery(PhabricatorPolicyAwareQuery $query) {
+    return;
   }
 
 

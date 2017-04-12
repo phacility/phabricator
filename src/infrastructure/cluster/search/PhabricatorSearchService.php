@@ -245,14 +245,25 @@ class PhabricatorSearchService
    * @throws PhutilAggregateException
    */
   public static function executeSearch(PhabricatorSavedQuery $query) {
+    $result_set = self::newResultSet($query);
+    return $result_set->getPHIDs();
+  }
+
+  public static function newResultSet(PhabricatorSavedQuery $query) {
     $exceptions = array();
     // try all services until one succeeds
     foreach (self::getAllServices() as $service) {
+      if (!$service->isReadable()) {
+        continue;
+      }
+
       try {
         $engine = $service->getEngine();
-        $res = $engine->executeSearch($query);
-        // return immediately if we get results
-        return $res;
+        $phids = $engine->executeSearch($query);
+
+        return id(new PhabricatorFulltextResultSet())
+          ->setPHIDs($phids)
+          ->setFulltextTokens($engine->getFulltextTokens());
       } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
         // If there's a query compilation error, return it directly to the
         // user: they issued a query with bad syntax.
