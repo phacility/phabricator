@@ -76,7 +76,8 @@ final class ConpherenceRoomPictureController
 
         $xactions = array();
         $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransaction::TYPE_PICTURE)
+          ->setTransactionType(
+            ConpherenceThreadPictureTransaction::TRANSACTIONTYPE)
           ->setNewValue($new_value);
 
         $editor = id(new ConpherenceEditor())

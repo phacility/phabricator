@@ -268,9 +268,9 @@ final class ConpherenceThread extends ConpherenceDAO
           case PhabricatorTransactions::TYPE_COMMENT:
             $message_transaction = $transaction;
             break;
-          case ConpherenceTransaction::TYPE_TITLE:
-          case ConpherenceTransaction::TYPE_TOPIC:
-          case ConpherenceTransaction::TYPE_PICTURE:
+          case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
+          case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:
+          case ConpherenceThreadPictureTransaction::TRANSACTIONTYPE:
           case ConpherenceTransaction::TYPE_PARTICIPANTS:
             $action_transaction = $transaction;
             break;
