@@ -13,7 +13,6 @@ final class ConpherenceThreadSearchEngine
 
   public function newQuery() {
     return id(new ConpherenceThreadQuery())
-      ->needParticipantCache(true)
       ->needProfileImage(true);
   }
 
@@ -92,14 +91,6 @@ final class ConpherenceThreadSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $conpherences,
-    PhabricatorSavedQuery $query) {
-
-    $recent = mpull($conpherences, 'getRecentParticipantPHIDs');
-    return array_unique(array_mergev($recent));
-  }
-
   protected function renderResultList(
     array $conpherences,
     PhabricatorSavedQuery $query,
@@ -153,7 +144,7 @@ final class ConpherenceThreadSearchEngine
     $list->setUser($viewer);
     foreach ($conpherences as $conpherence_phid => $conpherence) {
       $created = phabricator_date($conpherence->getDateCreated(), $viewer);
-      $title = $conpherence->getDisplayTitle($viewer);
+      $title = $conpherence->getTitle();
       $monogram = $conpherence->getMonogram();
 
       $icon_name = $conpherence->getPolicyIconName($policy_objects);

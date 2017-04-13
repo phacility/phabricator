@@ -470,7 +470,6 @@ final class ConpherenceUpdateController
     $latest_transaction_id) {
 
     $need_transactions = false;
-    $need_participant_cache = true;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
       case ConpherenceUpdateActions::LOAD:
@@ -491,7 +490,6 @@ final class ConpherenceUpdateController
       ->setViewer($user)
       ->setAfterTransactionID($latest_transaction_id)
       ->needProfileImage(true)
-      ->needParticipantCache($need_participant_cache)
       ->needParticipants(true)
       ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))

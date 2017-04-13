@@ -45,7 +45,6 @@ final class PhabricatorConpherenceProfileMenuItem
     $rooms = id(new ConpherenceThreadQuery())
       ->setViewer($viewer)
       ->withPHIDs($room_phids)
-      ->needParticipantCache(true)
       ->needProfileImage(true)
       ->execute();
 

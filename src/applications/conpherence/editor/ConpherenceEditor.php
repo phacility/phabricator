@@ -190,7 +190,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
               ->setSeenMessageCount($message_count)
               ->save();
             $object->attachParticipants($participants);
-            $object->setRecentParticipantPHIDs(array_keys($participants));
           }
           break;
       }
@@ -201,39 +200,12 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    $make_author_recent_participant = true;
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
-        if (!$this->getIsNewObject()) {
-          $old_map = array_fuse($xaction->getOldValue());
-          $new_map = array_fuse($xaction->getNewValue());
-          // if we added people, add them to the end of "recent" participants
-          $add = array_keys(array_diff_key($new_map, $old_map));
-          // if we remove people, then definintely remove them from "recent"
-          // participants
-          $del = array_keys(array_diff_key($old_map, $new_map));
-          if ($add || $del) {
-            $participants = $object->getRecentParticipantPHIDs();
-            if ($add) {
-              $participants = array_merge($participants, $add);
-            }
-            if ($del) {
-              $participants = array_diff($participants, $del);
-              $actor = $this->requireActor();
-              if (in_array($actor->getPHID(), $del)) {
-                $make_author_recent_participant = false;
-              }
-            }
-            $participants = array_slice(array_unique($participants), 0, 10);
-            $object->setRecentParticipantPHIDs($participants);
-          }
-        }
+        if (!$this->getIsNewObject()) {}
         break;
     }
 
-    if ($make_author_recent_participant) {
-      $this->makeAuthorMostRecentParticipant($object, $xaction);
-    }
   }
 
   protected function applyBuiltinInternalTransaction(
@@ -247,17 +219,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     }
 
     return parent::applyBuiltinInternalTransaction($object, $xaction);
-  }
-
-  private function makeAuthorMostRecentParticipant(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $participants = $object->getRecentParticipantPHIDs();
-    array_unshift($participants, $xaction->getAuthorPHID());
-    $participants = array_slice(array_unique($participants), 0, 10);
-
-    $object->setRecentParticipantPHIDs($participants);
   }
 
   protected function applyCustomExternalTransaction(

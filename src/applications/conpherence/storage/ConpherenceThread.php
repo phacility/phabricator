@@ -12,7 +12,6 @@ final class ConpherenceThread extends ConpherenceDAO
   protected $topic;
   protected $profileImagePHID;
   protected $messageCount;
-  protected $recentParticipantPHIDs = array();
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
@@ -39,9 +38,6 @@ final class ConpherenceThread extends ConpherenceDAO
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
-      self::CONFIG_SERIALIZATION => array(
-        'recentParticipantPHIDs' => self::SERIALIZATION_JSON,
-      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255?',
         'topic' => 'text255',
@@ -165,72 +161,6 @@ final class ConpherenceThread extends ConpherenceDAO
     return pht('Private Room');
   }
 
-  /**
-   * Get the thread's display title for a user.
-   *
-   * If a thread doesn't have a title set, this will return a string describing
-   * recent participants.
-   *
-   * @param PhabricatorUser Viewer.
-   * @return string Thread title.
-   */
-  public function getDisplayTitle(PhabricatorUser $viewer) {
-    $title = $this->getTitle();
-    if (strlen($title)) {
-      return $title;
-    }
-
-    return $this->getRecentParticipantsString($viewer);
-  }
-
-
-  /**
-   * Get recent participants (other than the viewer) as a string.
-   *
-   * For example, this method might return "alincoln, htaft, gwashington...".
-   *
-   * @param PhabricatorUser Viewer.
-   * @return string Description of other participants.
-   */
-  private function getRecentParticipantsString(PhabricatorUser $viewer) {
-    $handles = $this->getHandles();
-    $phids = $this->getOtherRecentParticipantPHIDs($viewer);
-
-    if (count($phids) == 0) {
-      $phids[] = $viewer->getPHID();
-      $more = false;
-    } else {
-      $limit = 3;
-      $more = (count($phids) > $limit);
-      $phids = array_slice($phids, 0, $limit);
-    }
-
-    $names = array_select_keys($handles, $phids);
-    $names = mpull($names, 'getName');
-    $names = implode(', ', $names);
-
-    if ($more) {
-      $names = $names.'...';
-    }
-
-    return $names;
-  }
-
-
-  /**
-   * Get PHIDs for recent participants who are not the viewer.
-   *
-   * @param PhabricatorUser Viewer.
-   * @return list<phid> Participants who are not the viewer.
-   */
-  private function getOtherRecentParticipantPHIDs(PhabricatorUser $viewer) {
-    $phids = $this->getRecentParticipantPHIDs();
-    $phids = array_fuse($phids);
-    unset($phids[$viewer->getPHID()]);
-    return array_values($phids);
-  }
-
-
   public function getDisplayData(PhabricatorUser $viewer) {
     $handles = $this->getHandles();
 
@@ -277,7 +207,7 @@ final class ConpherenceThread extends ConpherenceDAO
     }
     $unread_count = $this->getMessageCount() - $user_seen_count;
 
-    $title = $this->getDisplayTitle($viewer);
+    $title = $this->getTitle();
     $topic = $this->getTopic();
 
     return array(

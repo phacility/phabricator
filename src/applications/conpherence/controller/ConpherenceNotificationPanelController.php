@@ -21,7 +21,6 @@ final class ConpherenceNotificationPanelController
         ->needProfileImage(true)
         ->needTransactions(true)
         ->setTransactionLimit(100)
-        ->needParticipantCache(true)
         ->execute();
     }
 

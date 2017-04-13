@@ -20,7 +20,6 @@ final class ConpherenceViewController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needProfileImage(true)
-      ->needParticipantCache(true)
       ->needTransactions(true)
       ->setTransactionLimit($this->getMainQueryLimit());
 
