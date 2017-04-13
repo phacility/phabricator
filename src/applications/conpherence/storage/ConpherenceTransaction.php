@@ -4,7 +4,6 @@ final class ConpherenceTransaction
   extends PhabricatorModularTransaction {
 
   const TYPE_PARTICIPANTS    = 'participants';
-  const TYPE_DATE_MARKER     = 'date-marker';
 
   public function getApplicationName() {
     return 'conpherence';
@@ -39,8 +38,6 @@ final class ConpherenceTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_PARTICIPANTS:
         return ($old === null);
-      case self::TYPE_DATE_MARKER:
-        return false;
     }
 
     return parent::shouldHide();
@@ -93,8 +90,6 @@ final class ConpherenceTransaction
 
     $phids[] = $this->getAuthorPHID();
     switch ($this->getTransactionType()) {
-      case self::TYPE_DATE_MARKER:
-        break;
       case self::TYPE_PARTICIPANTS:
         $phids = array_merge($phids, $this->getOldValue());
         $phids = array_merge($phids, $this->getNewValue());
