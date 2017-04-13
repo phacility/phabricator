@@ -473,42 +473,55 @@ final class PhabricatorMySQLFulltextStorageEngine
   }
 
   private function newEngineLimits(AphrontDatabaseConnection $conn) {
-    $result = queryfx_one(
-      $conn,
-      'SELECT
-        @@innodb_ft_min_token_size innodb_max,
-        @@ft_min_word_len myisam_max,
-        @@ft_stopword_file myisam_stopwords');
+    // First, try InnoDB. Some database may not have both table engines, so
+    // selecting variables from missing table engines can fail and throw.
 
-    if ($result['innodb_max']) {
+    try {
+      $result = queryfx_one(
+        $conn,
+        'SELECT @@innodb_ft_min_token_size innodb_max');
+    } catch (AphrontQueryException $ex) {
+      $result = null;
+    }
+
+    if ($result) {
       $min_len = $result['innodb_max'];
       $stopwords = queryfx_all(
         $conn,
         'SELECT * FROM INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD');
       $stopwords = ipull($stopwords, 'value');
       $stopwords = array_fuse($stopwords);
-    } else {
-      $min_len = $result['myisam_max'];
 
-      $file = $result['myisam_stopwords'];
-      if (preg_match('(/resources/sql/stopwords\.txt\z)', $file)) {
-        // If this is set to something that looks like the Phabricator
-        // stopword file, read that.
-        $file = 'stopwords.txt';
-      } else {
-        // Otherwise, just use the default stopwords. This might be wrong
-        // but we can't read the actual value dynamically and reading
-        // whatever file the variable is set to could be a big headache
-        // to get right from a security perspective.
-        $file = 'stopwords_myisam.txt';
-      }
-
-      $root = dirname(phutil_get_library_root('phabricator'));
-      $data = Filesystem::readFile($root.'/resources/sql/'.$file);
-      $stopwords = explode("\n", $data);
-      $stopwords = array_filter($stopwords);
-      $stopwords = array_fuse($stopwords);
+      return array($min_len, $stopwords);
     }
+
+    // If InnoDB fails, try MyISAM.
+    $result = queryfx_one(
+      $conn,
+      'SELECT
+        @@ft_min_word_len myisam_max,
+        @@ft_stopword_file myisam_stopwords');
+
+    $min_len = $result['myisam_max'];
+
+    $file = $result['myisam_stopwords'];
+    if (preg_match('(/resources/sql/stopwords\.txt\z)', $file)) {
+      // If this is set to something that looks like the Phabricator
+      // stopword file, read that.
+      $file = 'stopwords.txt';
+    } else {
+      // Otherwise, just use the default stopwords. This might be wrong
+      // but we can't read the actual value dynamically and reading
+      // whatever file the variable is set to could be a big headache
+      // to get right from a security perspective.
+      $file = 'stopwords_myisam.txt';
+    }
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $data = Filesystem::readFile($root.'/resources/sql/'.$file);
+    $stopwords = explode("\n", $data);
+    $stopwords = array_filter($stopwords);
+    $stopwords = array_fuse($stopwords);
 
     return array($min_len, $stopwords);
   }
