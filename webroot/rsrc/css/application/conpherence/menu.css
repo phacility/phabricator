@@ -167,8 +167,7 @@
 }
 
 .conpherence-menu .conpherence-menu-item-view
-.conpherence-menu-item-unread-count,
-.conpherence-menu-item-count {
+.conpherence-menu-item-unread-count {
   position: absolute;
   right: 4px;
   top: 10px;
@@ -178,11 +177,6 @@
   font-weight: bold;
   padding: 0 5px 1px;
   font-size: {$smallestfontsize};
-}
-
-.phui-list-item-view .conpherence-menu-item-count {
-  right: 7px;
-  top: 7px;
 }
 
 .conpherence-menu .hide-unread-count .conpherence-menu-item-unread-count,
