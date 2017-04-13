@@ -122,9 +122,9 @@ final class PhabricatorSyntaxHighlightingConfigOptions
         'syntax.filemap',
         'wild',
         array(
-          '@\.arcconfig$@' => 'js',
-          '@\.arclint$@' => 'js',
-          '@\.divinerconfig$@' => 'js',
+          '@\.arcconfig$@' => 'json',
+          '@\.arclint$@' => 'json',
+          '@\.divinerconfig$@' => 'json',
         ))
         ->setSummary(
           pht('Override what language files (based on filename) highlight as.'))
