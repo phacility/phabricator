@@ -14,10 +14,6 @@ final class PhabricatorCountdownEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhabricatorCountdownTransaction::TYPE_TITLE;
-    $types[] = PhabricatorCountdownTransaction::TYPE_EPOCH;
-    $types[] = PhabricatorCountdownTransaction::TYPE_DESCRIPTION;
-
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_SPACE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -25,126 +21,6 @@ final class PhabricatorCountdownEditor
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;
-  }
-
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorCountdownTransaction::TYPE_TITLE:
-        return $object->getTitle();
-      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
-        return $object->getDescription();
-      case PhabricatorCountdownTransaction::TYPE_EPOCH:
-        return $object->getEpoch();
-    }
-
-    return parent::getCustomTransactionOldValue($object, $xaction);
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorCountdownTransaction::TYPE_TITLE:
-        return $xaction->getNewValue();
-      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
-        return $xaction->getNewValue();
-      case PhabricatorCountdownTransaction::TYPE_EPOCH:
-        return $xaction->getNewValue()->getEpoch();
-    }
-
-    return parent::getCustomTransactionNewValue($object, $xaction);
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $type = $xaction->getTransactionType();
-    switch ($type) {
-      case PhabricatorCountdownTransaction::TYPE_TITLE:
-        $object->setTitle($xaction->getNewValue());
-        return;
-      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
-        $object->setDescription($xaction->getNewValue());
-        return;
-      case PhabricatorCountdownTransaction::TYPE_EPOCH:
-        $object->setEpoch($xaction->getNewValue());
-        return;
-    }
-
-    return parent::applyCustomInternalTransaction($object, $xaction);
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $type = $xaction->getTransactionType();
-    switch ($type) {
-      case PhabricatorCountdownTransaction::TYPE_TITLE:
-        return;
-      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
-        return;
-      case PhabricatorCountdownTransaction::TYPE_EPOCH:
-        return;
-    }
-
-    return parent::applyCustomExternalTransaction($object, $xaction);
-  }
-
-  protected function validateTransaction(
-    PhabricatorLiskDAO $object,
-    $type,
-    array $xactions) {
-
-    $errors = parent::validateTransaction($object, $type, $xactions);
-
-    switch ($type) {
-      case PhabricatorCountdownTransaction::TYPE_TITLE:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getTitle(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('You must give the countdown a name.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-      break;
-      case PhabricatorCountdownTransaction::TYPE_EPOCH:
-        if (!$object->getEpoch() && !$xactions) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('You must give the countdown an end date.'),
-            null);
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-
-        foreach ($xactions as $xaction) {
-          $value = $xaction->getNewValue();
-          if (!$value->isValid()) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('You must give the countdown a valid end date.'),
-              $xaction);
-            $errors[] = $error;
-          }
-        }
-      break;
-    }
-
-    return $errors;
   }
 
   protected function shouldSendMail(
