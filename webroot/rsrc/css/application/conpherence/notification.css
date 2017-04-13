@@ -8,7 +8,7 @@
 
 .phabricator-notification .conpherence-menu-item-view {
   display: block;
-  height: 46px;
+  height: 48px;
   overflow: hidden;
   position: relative;
   text-decoration: none;
@@ -23,8 +23,8 @@
   left: 8px;
   display: block;
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background-size: 100%;
   border-radius: 3px;
 }
@@ -33,7 +33,7 @@
 .conpherence-menu-item-title {
   display: block;
   margin-top: 8px;
-  margin-left: 46px;
+  margin-left: 48px;
   text-align: left;
   font-weight: bold;
   font-size: {$normalfontsize};
@@ -49,8 +49,7 @@
   display: block;
   color: {$lightgreytext};
   font-size: {$smallestfontsize};
-  margin-top: 2px;
-  margin-left: 46px;
+  margin-left: 48px;
   width: 290px;
   text-overflow: ellipsis;
   white-space: nowrap;

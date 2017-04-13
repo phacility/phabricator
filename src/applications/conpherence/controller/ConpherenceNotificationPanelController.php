@@ -20,7 +20,7 @@ final class ConpherenceNotificationPanelController
         ->withPHIDs(array_keys($participant_data))
         ->needProfileImage(true)
         ->needTransactions(true)
-        ->setTransactionLimit(50)
+        ->setTransactionLimit(100)
         ->needParticipantCache(true)
         ->execute();
     }

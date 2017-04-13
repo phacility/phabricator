@@ -87,9 +87,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhabricatorTransactions::TYPE_COMMENT;
-
     $types[] = ConpherenceTransaction::TYPE_PARTICIPANTS;
+
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
@@ -100,25 +100,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   public function getCreateObjectTitle($author, $object) {
     return pht('%s created this room.', $author);
   }
-
-  protected function shouldPublishFeedStory(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
-        case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:
-        case ConpherenceThreadPictureTransaction::TRANSACTIONTYPE:
-          return true;
-        default:
-          return false;
-      }
-    }
-    return true;
-  }
-
-
 
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
@@ -338,39 +319,39 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_COMMENT:
           $message_count++;
+
+          // update everyone's participation status on a message -only-
+          $xaction_phid = $xaction->getPHID();
+          $behind = ConpherenceParticipationStatus::BEHIND;
+          $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
+          $participants = $object->getParticipants();
+          $user = $this->getActor();
+          $time = time();
+          foreach ($participants as $phid => $participant) {
+            if ($phid != $user->getPHID()) {
+              if ($participant->getParticipationStatus() != $behind) {
+                $participant->setBehindTransactionPHID($xaction_phid);
+                $participant->setSeenMessageCount(
+                  $object->getMessageCount() - $message_count);
+              }
+              $participant->setParticipationStatus($behind);
+              $participant->setDateTouched($time);
+            } else {
+              $participant->setSeenMessageCount($object->getMessageCount());
+              $participant->setBehindTransactionPHID($xaction_phid);
+              $participant->setParticipationStatus($up_to_date);
+              $participant->setDateTouched($time);
+            }
+            $participant->save();
+          }
+
+          PhabricatorUserCache::clearCaches(
+            PhabricatorUserMessageCountCacheType::KEY_COUNT,
+            array_keys($participants));
+
           break;
       }
     }
-
-    // update everyone's participation status on the last xaction -only-
-    $xaction = end($xactions);
-    $xaction_phid = $xaction->getPHID();
-    $behind = ConpherenceParticipationStatus::BEHIND;
-    $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
-    $participants = $object->getParticipants();
-    $user = $this->getActor();
-    $time = time();
-    foreach ($participants as $phid => $participant) {
-      if ($phid != $user->getPHID()) {
-        if ($participant->getParticipationStatus() != $behind) {
-          $participant->setBehindTransactionPHID($xaction_phid);
-          $participant->setSeenMessageCount(
-            $object->getMessageCount() - $message_count);
-        }
-        $participant->setParticipationStatus($behind);
-        $participant->setDateTouched($time);
-      } else {
-        $participant->setSeenMessageCount($object->getMessageCount());
-        $participant->setBehindTransactionPHID($xaction_phid);
-        $participant->setParticipationStatus($up_to_date);
-        $participant->setDateTouched($time);
-      }
-      $participant->save();
-    }
-
-    PhabricatorUserCache::clearCaches(
-      PhabricatorUserMessageCountCacheType::KEY_COUNT,
-      array_keys($participants));
 
     if ($xactions) {
       $data = array(

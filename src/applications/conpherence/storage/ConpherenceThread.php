@@ -240,71 +240,33 @@ final class ConpherenceThread extends ConpherenceDAO
       $transactions = array();
     }
 
-    if ($transactions) {
-      $subtitle_mode = 'message';
-    } else {
-      $subtitle_mode = 'recent';
-    }
-
-    $lucky_phid = head($this->getOtherRecentParticipantPHIDs($viewer));
-    if ($lucky_phid) {
-      $lucky_handle = $handles[$lucky_phid];
-    } else {
-      // This will be just the user talking to themselves. Weirdo.
-      $lucky_handle = reset($handles);
-    }
-
     $img_src = $this->getProfileImageURI();
 
-    $message_title = null;
-    if ($subtitle_mode == 'message') {
-      $message_transaction = null;
-      $action_transaction = null;
-      foreach ($transactions as $transaction) {
-        if ($message_transaction || $action_transaction) {
-          break;
-        }
-        switch ($transaction->getTransactionType()) {
-          case PhabricatorTransactions::TYPE_COMMENT:
-            $message_transaction = $transaction;
-            break;
-          case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
-          case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:
-          case ConpherenceThreadPictureTransaction::TRANSACTIONTYPE:
-          case ConpherenceTransaction::TYPE_PARTICIPANTS:
-            $action_transaction = $transaction;
-            break;
-          default:
-            break;
-        }
-      }
+    $message_transaction = null;
+    foreach ($transactions as $transaction) {
       if ($message_transaction) {
-        $message_handle = $handles[$message_transaction->getAuthorPHID()];
-        $message_title = sprintf(
-          '%s: %s',
-          $message_handle->getName(),
-          id(new PhutilUTF8StringTruncator())
-            ->setMaximumGlyphs(60)
-            ->truncateString(
-              $message_transaction->getComment()->getContent()));
+        break;
       }
-      if ($action_transaction) {
-        $message_title = id(clone $action_transaction)
-          ->setRenderingTarget(PhabricatorApplicationTransaction::TARGET_TEXT)
-          ->getTitle();
+      switch ($transaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_COMMENT:
+          $message_transaction = $transaction;
+          break;
+        default:
+          break;
       }
     }
-    switch ($subtitle_mode) {
-      case 'recent':
-        $subtitle = $this->getRecentParticipantsString($viewer);
-        break;
-      case 'message':
-        if ($message_title) {
-          $subtitle = $message_title;
-        } else {
-          $subtitle = $this->getRecentParticipantsString($viewer);
-        }
-        break;
+    if ($message_transaction) {
+      $message_handle = $handles[$message_transaction->getAuthorPHID()];
+      $subtitle = sprintf(
+        '%s: %s',
+        $message_handle->getName(),
+        id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(60)
+          ->truncateString(
+            $message_transaction->getComment()->getContent()));
+    } else {
+      // Kinda lame, but maybe add last message to cache?
+      $subtitle = pht('No recent messages');
     }
 
     $user_participation = $this->getParticipantIfExists($viewer->getPHID());

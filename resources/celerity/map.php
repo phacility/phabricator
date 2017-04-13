@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'conpherence.pkg.css' => 'b5ee2073',
+    'conpherence.pkg.css' => 'f8390290',
     'conpherence.pkg.js' => '281b1a73',
     'core.pkg.css' => '30a64ed6',
     'core.pkg.js' => 'fbc1c380',
@@ -49,7 +49,7 @@ return array(
     'rsrc/css/application/conpherence/header-pane.css' => '4082233d',
     'rsrc/css/application/conpherence/menu.css' => '5abfb32d',
     'rsrc/css/application/conpherence/message-pane.css' => 'd1fc13e1',
-    'rsrc/css/application/conpherence/notification.css' => '965db05b',
+    'rsrc/css/application/conpherence/notification.css' => 'cef0a3fc',
     'rsrc/css/application/conpherence/participant-pane.css' => '604a8b02',
     'rsrc/css/application/conpherence/transaction.css' => '85129c68',
     'rsrc/css/application/contentsource/content-source-view.css' => '4b8b05d4',
@@ -556,7 +556,7 @@ return array(
     'conpherence-header-pane-css' => '4082233d',
     'conpherence-menu-css' => '5abfb32d',
     'conpherence-message-pane-css' => 'd1fc13e1',
-    'conpherence-notification-css' => '965db05b',
+    'conpherence-notification-css' => 'cef0a3fc',
     'conpherence-participant-pane-css' => '604a8b02',
     'conpherence-thread-manager' => 'c8b5ee6f',
     'conpherence-transaction-css' => '85129c68',
