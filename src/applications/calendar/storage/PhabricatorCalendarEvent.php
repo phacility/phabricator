@@ -391,6 +391,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return ($epoch - $window);
   }
 
+  public function getEndDateTimeEpochForCache() {
+    return $this->getEndDateTimeEpoch();
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -1182,9 +1186,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
    * @task markup
    */
   public function getMarkupFieldKey($field) {
-    $hash = PhabricatorHash::digest($this->getMarkupText($field));
-    $id = $this->getID();
-    return "calendar:T{$id}:{$field}:{$hash}";
+    $content = $this->getMarkupText($field);
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
 

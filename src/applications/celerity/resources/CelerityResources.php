@@ -14,7 +14,7 @@ abstract class CelerityResources extends Phobject {
 
   public function getCelerityHash($data) {
     $tail = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
-    $hash = PhabricatorHash::digest($data, $tail);
+    $hash = PhabricatorHash::weakDigest($data, $tail);
     return substr($hash, 0, 8);
   }
 

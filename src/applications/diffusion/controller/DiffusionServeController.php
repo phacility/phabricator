@@ -652,7 +652,7 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     $lfs_pass = $password->openEnvelope();
-    $lfs_hash = PhabricatorHash::digest($lfs_pass);
+    $lfs_hash = PhabricatorHash::weakDigest($lfs_pass);
 
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())

@@ -357,7 +357,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
         array(
           'name' => $changeset->getFilename(),
           'mime-type' => 'text/plain',
-          'ttl' => phutil_units('24 hours in seconds'),
+          'ttl.relative' => phutil_units('24 hours in seconds'),
           'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
         ));
 

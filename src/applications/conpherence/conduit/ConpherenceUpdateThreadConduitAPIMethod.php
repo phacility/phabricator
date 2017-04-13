@@ -83,7 +83,8 @@ final class ConpherenceUpdateThreadConduitAPIMethod
     }
     if ($title) {
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
+        ->setTransactionType(
+          ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
     }
     if ($message) {

@@ -5,6 +5,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
   private $disableMacro = false;
   private $disableFullScreen = false;
   private $canPin;
+  private $sendOnEnter = false;
 
   public function setDisableMacros($disable) {
     $this->disableMacro = $disable;
@@ -23,6 +24,15 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
   public function getCanPin() {
     return $this->canPin;
+  }
+
+  public function setSendOnEnter($soe) {
+    $this->sendOnEnter = $soe;
+    return $this;
+  }
+
+  public function getSendOnEnter() {
+    return $this->sendOnEnter;
   }
 
   protected function renderInput() {
@@ -78,6 +88,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         ),
         'canPin' => $this->getCanPin(),
         'disabled' => $this->getDisabled(),
+        'sendOnEnter' => $this->getSendOnEnter(),
         'rootID' => $root_id,
         'autocompleteMap' => (object)array(
           64 => array( // "@"
@@ -97,6 +108,15 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
             'headerIcon' => 'fa-smile-o',
             'headerText' => pht('Find Emoji:'),
             'hintText' => $emoji_datasource->getPlaceholderText(),
+
+            // Cancel on emoticons like ":3".
+            'ignore' => array(
+              '3',
+              ')',
+              '(',
+              '-',
+              '/',
+            ),
           ),
         ),
       ));
@@ -172,11 +192,6 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'align' => 'right',
     );
 
-    $actions[] = array(
-      'spacer' => true,
-      'align' => 'right',
-    );
-
     $actions['fa-book'] = array(
       'tip' => pht('Help'),
       'align' => 'right',
@@ -200,10 +215,6 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     }
 
     if ($mode_actions) {
-      $actions[] = array(
-        'spacer' => true,
-        'align' => 'right',
-      );
       $actions += $mode_actions;
     }
 

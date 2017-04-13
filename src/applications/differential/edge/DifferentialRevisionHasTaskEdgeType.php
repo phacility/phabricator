@@ -12,6 +12,18 @@ final class DifferentialRevisionHasTaskEdgeType extends PhabricatorEdgeType {
     return true;
   }
 
+  public function getConduitKey() {
+    return 'revision.task';
+  }
+
+  public function getConduitName() {
+    return pht('Revision Has Task');
+  }
+
+  public function getConduitDescription() {
+    return pht('The source revision is associated with the destination task.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,

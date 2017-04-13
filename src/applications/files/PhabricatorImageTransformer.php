@@ -15,7 +15,7 @@ final class PhabricatorImageTransformer extends Phobject {
       $image,
       array(
         'name' => 'meme-'.$file->getName(),
-        'ttl' => time() + 60 * 60 * 24,
+        'ttl.relative' => phutil_units('24 hours in seconds'),
         'canCDN' => true,
       ));
   }

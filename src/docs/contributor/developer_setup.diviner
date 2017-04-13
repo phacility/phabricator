@@ -1,0 +1,112 @@
+@title Developer Setup
+@group developer
+
+How to configure a Phabricator development environment.
+
+Overview
+========
+
+There are some options and workflows that may be useful if you are developing
+or debugging Phabricator.
+
+
+Configuration
+=============
+
+To adjust Phabricator for development:
+
+  - Enable `phabricator.developer-mode` to enable some options and show
+    more debugging information.
+  - Enable `phabricator.show-prototypes` to show all the incomplete
+    applications.
+  - See @{article: Using DarkConsole} for instructions on enabling the
+    debugging console.
+
+
+Error Handling
+==============
+
+Errors normally go to DarkConsole (if enabled) and the webserver error log,
+which is often located somewhere like `/var/log/apache/error_log`. This file
+often contains relevant information after you encounter an error.
+
+When debugging, you can print information to the error log with `phlog(...)`.
+You can `phlog(new Exception(...))` to get a stack trace.
+
+You can print information to the UI with `throw new Exception(...)`,
+`print_r(...)`, or `var_dump(...)`.
+
+You can abort execution with `die(...)` if you want to make sure execution
+does not make it past some point. Normally `throw` does this too, but callers
+can `catch` exceptions; they can not catch `die(...)`.
+
+
+Utilities
+=========
+
+After adding, renaming, or moving classes, run `arc liberate` to rebuild
+the class map:
+
+```
+phabricator/ $ arc liberate
+```
+
+Until you do this, Phabricator won't recognize your new, moved, or renamed
+classes. You do not need to run this after modifying an existing class.
+
+After any modifications to static resources (CSS / JS) but before sending
+changes for review or pushing them to the remote, run `bin/celerity map`:
+
+```
+phabricator/ $ ./bin/celerity map
+```
+
+This rebuilds the static resource map.
+
+If you forget to run these commands you'll normally be warned by unit tests,
+but knowing about them may prevent confusion before you hit the warnings.
+
+
+Command Line
+============
+
+Almost every script supports a `--trace` flag, which prints out service
+calls and more detailed error information. This is often the best way to get
+started with debugging command-line scripts.
+
+
+Performance
+===========
+
+Although it is more user-focused than developer-focused, the
+@{article:Troubleshooting Performance Problems} guide has useful information
+on the tools available for diagnosing and understanding performance problems.
+
+
+Custom Domains
+==============
+
+If you're working with applications that support custom domains (like Phurl or
+Phame) you can normally test them by adding more entries to your webserver
+configuration that look exactly like the primary entry (or expanding the
+primary entry to match more domains).
+
+Phabricator routes all requests based on host headers, so alternate domains
+do not normally need any kind of special configuration.
+
+You may also need to add `/etc/hosts` entries for the domains themselves.
+
+
+Creating Test Data
+==================
+
+You can create test objects with the "Lipsum" utility:
+
+```
+phabricator/ $ ./bin/lipsum help generate
+phabricator/ $ ./bin/lipsum generate ...
+```
+
+Test data can make your local install feel a little more realistic. With
+`--quickly`, you can generate a large amount of test data to help test issues
+with performance or scale.

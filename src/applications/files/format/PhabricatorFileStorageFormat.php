@@ -22,6 +22,10 @@ abstract class PhabricatorFileStorageFormat
   abstract public function newReadIterator($raw_iterator);
   abstract public function newWriteIterator($raw_iterator);
 
+  public function newFormatIntegrityHash() {
+    return null;
+  }
+
   public function newStorageProperties() {
     return array();
   }

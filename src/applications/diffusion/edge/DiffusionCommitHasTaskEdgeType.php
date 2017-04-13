@@ -12,6 +12,18 @@ final class DiffusionCommitHasTaskEdgeType extends PhabricatorEdgeType {
     return ManiphestTaskHasCommitEdgeType::EDGECONST;
   }
 
+  public function getConduitKey() {
+    return 'commit.task';
+  }
+
+  public function getConduitName() {
+    return pht('Commit Has Task');
+  }
+
+  public function getConduitDescription() {
+    return pht('The source commit is associated with the destination task.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,

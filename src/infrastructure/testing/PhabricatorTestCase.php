@@ -128,6 +128,10 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
     $this->env->overrideEnvConfig('phabricator.silent', false);
 
     $this->env->overrideEnvConfig('cluster.read-only', false);
+
+    $this->env->overrideEnvConfig(
+      'maniphest.custom-field-definitions',
+      array());
   }
 
   protected function didRunTests() {

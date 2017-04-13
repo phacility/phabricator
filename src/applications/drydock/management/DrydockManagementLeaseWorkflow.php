@@ -22,7 +22,7 @@ final class DrydockManagementLeaseWorkflow
           array(
             'name'      => 'attributes',
             'param'     => 'name=value,...',
-            'help'      => pht('Resource specficiation.'),
+            'help'      => pht('Resource specification.'),
           ),
         ));
   }

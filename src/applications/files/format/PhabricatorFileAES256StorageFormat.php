@@ -56,6 +56,22 @@ final class PhabricatorFileAES256StorageFormat
     return array($data);
   }
 
+  public function newFormatIntegrityHash() {
+    $file = $this->getFile();
+    list($key_envelope, $iv_envelope) = $this->extractKeyAndIV($file);
+
+    // NOTE: We include the IV in the format integrity hash. If we do not,
+    // attackers can potentially forge the first block of decrypted data
+    // in CBC mode if they are able to substitute a chosen IV and predict
+    // the plaintext. (Normally, they can not tamper with the IV.)
+
+    $input = self::FORMATKEY.'/iv:'.$iv_envelope->openEnvelope();
+
+    return PhabricatorHash::digestWithNamedKey(
+      $input,
+      PhabricatorFileStorageEngine::HMAC_INTEGRITY);
+  }
+
   public function newStorageProperties() {
     // Generate a unique key and IV for this block of data.
     $key_envelope = self::newAES256Key();

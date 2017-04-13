@@ -175,15 +175,32 @@ If you're planning to use SSH, you should also edit `/etc/passwd` and
 account.
 
 The second field (which is the password field) must not be set to `!!`. This
-value will prevent login. If it is set to `!!`, edit it and set it to `NP` ("no
-password") instead.
+value will prevent login.
+
+If you have `usermod` on your system, you can adjust this value with:
+
+```
+$ sudo usermod -p NP vcs-user
+```
+
+If you do not have `usermod`, carefully edit the file and set the field value
+to `NP` ("no password") instead of `!!`.
 
 **`/etc/passwd`**: Open `/etc/passwd` and find the line for the `vcs-user`
 account.
 
 The last field (which is the login shell) must be set to a real shell. If it is
 set to something like `/bin/false`, then `sshd` will not be able to execute
-commands. Instead, you should set it to a real shell, like `/bin/sh`.
+commands.
+
+If you have `usermod` on your system, you can adjust this value with:
+
+```
+$ sudo usermod -s /bin/sh vcs-user
+```
+
+If you do not have `usermod`, carefully edit the file and change the field
+to point at a real shell, usually `/bin/sh`.
 
 
 Configuring HTTP

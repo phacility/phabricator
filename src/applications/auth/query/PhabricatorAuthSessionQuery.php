@@ -85,7 +85,7 @@ final class PhabricatorAuthSessionQuery
     if ($this->sessionKeys) {
       $hashes = array();
       foreach ($this->sessionKeys as $session_key) {
-        $hashes[] = PhabricatorHash::digest($session_key);
+        $hashes[] = PhabricatorHash::weakDigest($session_key);
       }
       $where[] = qsprintf(
         $conn_r,

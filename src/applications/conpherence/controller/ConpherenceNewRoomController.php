@@ -7,7 +7,6 @@ final class ConpherenceNewRoomController extends ConpherenceController {
 
     $title = pht('New Room');
     $e_title = true;
-    $v_message = null;
     $validation_exception = null;
 
     $conpherence = ConpherenceThread::initializeNewRoom($user);
@@ -17,7 +16,7 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       $xactions = array();
 
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
+        ->setTransactionType(ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($request->getStr('title'));
 
       $participants = $request->getArr('participants');
@@ -27,7 +26,7 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('+' => $participants));
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
+        ->setTransactionType(ConpherenceThreadTopicTransaction::TRANSACTIONTYPE)
         ->setNewValue($request->getStr('topic'));
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -38,15 +37,6 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
         ->setNewValue($request->getStr('joinPolicy'));
-
-      $v_message = $request->getStr('message');
-      if (strlen($v_message)) {
-        $message_xactions = $editor->generateTransactionsFromText(
-          $user,
-          $conpherence,
-          $v_message);
-        $xactions = array_merge($xactions, $message_xactions);
-      }
 
       try {
         $editor
@@ -60,7 +50,8 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
-        $e_title = $ex->getShortMessage(ConpherenceTransaction::TYPE_TITLE);
+        $e_title = $ex->getShortMessage(
+          ConpherenceThreadTitleTransaction::TRANSACTIONTYPE);
 
         $conpherence->setViewPolicy($request->getStr('viewPolicy'));
         $conpherence->setEditPolicy($request->getStr('editPolicy'));
@@ -125,13 +116,7 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setName('joinPolicy')
         ->setPolicyObject($conpherence)
         ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
-        ->setPolicies($policies))
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-        ->setUser($user)
-        ->setName('message')
-        ->setLabel(pht('First Message'))
-        ->setValue($v_message));
+        ->setPolicies($policies));
 
     $dialog->appendChild($form);
 

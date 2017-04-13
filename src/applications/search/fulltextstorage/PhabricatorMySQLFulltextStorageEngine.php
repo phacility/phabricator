@@ -7,12 +7,8 @@ final class PhabricatorMySQLFulltextStorageEngine
     return 'mysql';
   }
 
-  public function getEnginePriority() {
-    return 100;
-  }
-
-  public function isEnabled() {
-    return true;
+  public function getHostType() {
+    return new PhabricatorMySQLSearchHost($this);
   }
 
   public function reindexAbstractDocument(
@@ -415,4 +411,9 @@ final class PhabricatorMySQLFulltextStorageEngine
   public function indexExists() {
     return true;
   }
+
+  public function getIndexStats() {
+    return false;
+  }
+
 }

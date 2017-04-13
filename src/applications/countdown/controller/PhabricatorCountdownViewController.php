@@ -28,7 +28,7 @@ final class PhabricatorCountdownViewController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb("C{$id}")
+      ->addTextCrumb($countdown->getMonogram())
       ->setBorder(true);
 
     $epoch = $countdown->getEpoch();
@@ -101,14 +101,6 @@ final class PhabricatorCountdownViewController
         ->setHref($this->getApplicationURI("edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setName(pht('Delete Countdown'))
-        ->setHref($this->getApplicationURI("delete/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
 
     return $curtain;
   }

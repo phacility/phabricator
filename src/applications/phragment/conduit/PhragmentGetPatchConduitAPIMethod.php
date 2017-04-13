@@ -174,12 +174,15 @@ final class PhragmentGetPatchConduitAPIMethod
       unset($patches[$key]['fileOld']);
       unset($patches[$key]['fileNew']);
 
-      $file = PhabricatorFile::buildFromFileDataOrHash(
-        $data,
-        array(
-          'name' => 'patch.dmp',
-          'ttl' => time() + 60 * 60 * 24,
-        ));
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $file = PhabricatorFile::newFromFileData(
+          $data,
+          array(
+            'name' => 'patch.dmp',
+            'ttl.relative' => phutil_units('24 hours in seconds'),
+          ));
+      unset($unguarded);
+
       $patches[$key]['patchURI'] = $file->getDownloadURI();
     }
 

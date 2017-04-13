@@ -22,7 +22,7 @@ final class DiffusionGitLFSTemporaryTokenType
 
     $lfs_user = self::HTTP_USERNAME;
     $lfs_pass = Filesystem::readRandomCharacters(32);
-    $lfs_hash = PhabricatorHash::digest($lfs_pass);
+    $lfs_hash = PhabricatorHash::weakDigest($lfs_pass);
 
     $ttl = PhabricatorTime::getNow() + phutil_units('1 day in seconds');
 

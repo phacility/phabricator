@@ -32,7 +32,7 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     // First, change the name: this should not scramble the secret.
     $xactions = array();
     $xactions[] = id(new PhabricatorFileTransaction())
-      ->setTransactionType(PhabricatorFileTransaction::TYPE_NAME)
+      ->setTransactionType(PhabricatorFileNameTransaction::TRANSACTIONTYPE)
       ->setNewValue('test.dat2');
 
     $engine = id(new PhabricatorFileEditor())
@@ -301,6 +301,11 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     $data = Filesystem::readRandomCharacters(64);
 
+    $hash = PhabricatorFile::hashFileContent($data);
+    if ($hash === null) {
+      $this->assertSkipped(pht('File content hashing is not available.'));
+    }
+
     $params = array(
       'name' => 'test.dat',
       'storageEngines' => array(
@@ -370,11 +375,11 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     $data = Filesystem::readRandomCharacters(64);
 
-    $ttl = (time() + 60 * 60 * 24);
+    $ttl = (PhabricatorTime::getNow() + phutil_units('24 hours in seconds'));
 
     $params = array(
       'name' => 'test.dat',
-      'ttl'  => ($ttl),
+      'ttl.absolute' => $ttl,
       'storageEngines' => array(
         $engine,
       ),

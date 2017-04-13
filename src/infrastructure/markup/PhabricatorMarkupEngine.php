@@ -694,4 +694,19 @@ final class PhabricatorMarkupEngine extends Phobject {
       ->execute();
   }
 
+  public static function digestRemarkupContent($object, $content) {
+    $parts = array();
+    $parts[] = get_class($object);
+
+    if ($object instanceof PhabricatorLiskDAO) {
+      $parts[] = $object->getID();
+    }
+
+    $parts[] = $content;
+
+    $message = implode("\n", $parts);
+
+    return PhabricatorHash::digestWithNamedKey($message, 'remarkup');
+  }
+
 }

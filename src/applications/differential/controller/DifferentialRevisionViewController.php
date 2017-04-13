@@ -889,15 +889,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
     $file_name .= 'diff';
 
-    $file = PhabricatorFile::buildFromFileDataOrHash(
-      $raw_diff,
-      array(
-        'name' => $file_name,
-        'ttl' => (60 * 60 * 24),
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-      ));
-
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file = PhabricatorFile::newFromFileData(
+        $raw_diff,
+        array(
+          'name' => $file_name,
+          'ttl.relative' => phutil_units('24 hours in seconds'),
+          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+        ));
+
       $file->attachToObject($revision->getPHID());
     unset($unguarded);
 

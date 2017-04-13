@@ -43,7 +43,7 @@ final class PhabricatorBadgesBadgeNameTransaction
       $new_value = $xaction->getNewValue();
       $new_length = strlen($new_value);
       if ($new_length > $max_length) {
-        $errors[] = $this->newRequiredError(
+        $errors[] = $this->newInvalidError(
           pht('The name can be no longer than %s characters.',
           new PhutilNumber($max_length)));
       }

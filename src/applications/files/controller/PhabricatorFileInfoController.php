@@ -41,8 +41,8 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $ttl = $file->getTTL();
     if ($ttl !== null) {
       $ttl_tag = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_STATE)
-        ->setBackgroundColor(PHUITagView::COLOR_YELLOW)
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setShade(PHUITagView::COLOR_YELLOW)
         ->setName(pht('Temporary'));
       $header->addTag($ttl_tag);
     }
@@ -50,8 +50,8 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $partial = $file->getIsPartial();
     if ($partial) {
       $partial_tag = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_STATE)
-        ->setBackgroundColor(PHUITagView::COLOR_ORANGE)
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setShade(PHUITagView::COLOR_ORANGE)
         ->setName(pht('Partial Upload'));
       $header->addTag($partial_tag);
     }
@@ -94,25 +94,18 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $file,
       new PhabricatorFileTransactionQuery());
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    $comment_view = id(new PhabricatorFileEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($file);
 
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Question File Integrity');
+    $monogram = $file->getMonogram();
 
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $file->getPHID());
-
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($file->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($this->getApplicationURI('/comment/'.$file->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
 
     return array(
       $timeline,
-      $add_comment_form,
+      $comment_view,
     );
   }
 
@@ -218,6 +211,18 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $finfo->addProperty(
       pht('Mime Type'),
       $file->getMimeType());
+
+    $ttl = $file->getTtl();
+    if ($ttl) {
+      $delta = $ttl - PhabricatorTime::getNow();
+
+      $finfo->addProperty(
+        pht('Expires'),
+        pht(
+          '%s (%s)',
+          phabricator_datetime($ttl, $viewer),
+          phutil_format_relative_time_detailed($delta)));
+    }
 
     $width = $file->getImageWidth();
     if ($width) {

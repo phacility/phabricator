@@ -20,7 +20,7 @@ input[type="tel"],
 input[type="color"],
 div.jx-tokenizer-container {
   display: inline-block;
-  height: 28px;
+  height: 30px;
   line-height: 18px;
   color: #333;
   vertical-align: middle;
@@ -48,10 +48,6 @@ div.jx-tokenizer-container {
   background-color: #ffffff;
   border: 1px solid {$greyborder};
   border-radius: 3px;
-
-  -webkit-box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
-  -moz-box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
-  box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
 
   -webkit-transition: border linear .05s, box-shadow linear .05s;
   -moz-transition: border linear .05s, box-shadow linear .05s;
@@ -114,7 +110,7 @@ select {
   border-radius: 3px;
   color: {$darkbluetext};
   border: 1px solid {$greyborder};
-  height: 28px;
+  height: 30px;
   padding: 0 24px 0 8px;
   margin: 0;
   min-width: 180px;

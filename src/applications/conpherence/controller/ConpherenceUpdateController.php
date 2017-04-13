@@ -140,10 +140,12 @@ final class ConpherenceUpdateController
           $title = $request->getStr('title');
           $topic = $request->getStr('topic');
           $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
+            ->setTransactionType(
+              ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
             ->setNewValue($title);
           $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
+            ->setTransactionType(
+              ConpherenceThreadTopicTransaction::TRANSACTIONTYPE)
             ->setNewValue($topic);
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)

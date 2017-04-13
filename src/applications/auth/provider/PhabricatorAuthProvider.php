@@ -474,7 +474,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
         true);
     }
 
-    return PhabricatorHash::digest($phcid);
+    return PhabricatorHash::weakDigest($phcid);
   }
 
   protected function verifyAuthCSRFCode(AphrontRequest $request, $actual) {

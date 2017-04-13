@@ -24,6 +24,8 @@
 
 .phui-curtain-panel-body {
   padding: 4px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .device .phui-curtain-panel-body {

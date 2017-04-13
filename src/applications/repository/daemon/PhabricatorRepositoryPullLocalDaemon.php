@@ -68,6 +68,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $retry_after = array();
 
     $min_sleep = 15;
+    $max_sleep = phutil_units('5 minutes in seconds');
     $max_futures = 4;
     $futures = array();
     $queue = array();
@@ -228,7 +229,7 @@ final class PhabricatorRepositoryPullLocalDaemon
         continue;
       }
 
-      $should_hibernate = $this->waitForUpdates($min_sleep, $retry_after);
+      $should_hibernate = $this->waitForUpdates($max_sleep, $retry_after);
       if ($should_hibernate) {
         break;
       }

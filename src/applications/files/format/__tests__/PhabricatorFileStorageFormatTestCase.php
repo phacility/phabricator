@@ -33,6 +33,15 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
     // The actual raw data in the storage engine should be encoded.
     $raw_data = $engine->readFile($file->getStorageHandle());
     $this->assertEqual($expect, $raw_data);
+
+    // If we generate an iterator over a slice of the file, it should return
+    // the decrypted file.
+    $iterator = $file->getFileDataIterator(4, 14);
+    $raw_data = '';
+    foreach ($iterator as $data_chunk) {
+      $raw_data .= $data_chunk;
+    }
+    $this->assertEqual('cow jumped', $raw_data);
   }
 
   public function testAES256Storage() {
@@ -73,5 +82,55 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
     // input data.
     $raw_data = $engine->readFile($file->getStorageHandle());
     $this->assertTrue($data !== $raw_data);
+
+    // If we generate an iterator over a slice of the file, it should return
+    // the decrypted file.
+    $iterator = $file->getFileDataIterator(4, 14);
+    $raw_data = '';
+    foreach ($iterator as $data_chunk) {
+      $raw_data .= $data_chunk;
+    }
+    $this->assertEqual('cow jumped', $raw_data);
+
+    $iterator = $file->getFileDataIterator(4, null);
+    $raw_data = '';
+    foreach ($iterator as $data_chunk) {
+      $raw_data .= $data_chunk;
+    }
+    $this->assertEqual('cow jumped over the full moon.', $raw_data);
+
   }
+
+  public function testStorageTampering() {
+    $engine = new PhabricatorTestStorageEngine();
+
+    $good = 'The cow jumped over the full moon.';
+    $evil = 'The cow slept quietly, honoring the glorious dictator.';
+
+    $params = array(
+      'name' => 'message.txt',
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    // First, write the file normally.
+    $file = PhabricatorFile::newFromFileData($good, $params);
+    $this->assertEqual($good, $file->loadFileData());
+
+    // As an adversary, tamper with the file.
+    $engine->tamperWithFile($file->getStorageHandle(), $evil);
+
+    // Attempts to read the file data should now fail the integrity check.
+    $caught = null;
+    try {
+      $file->loadFileData();
+    } catch (PhabricatorFileIntegrityException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue($caught instanceof PhabricatorFileIntegrityException);
+  }
+
+
 }

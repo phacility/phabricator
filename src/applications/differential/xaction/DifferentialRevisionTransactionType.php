@@ -60,6 +60,9 @@ abstract class DifferentialRevisionTransactionType
   protected function getActiveDiffPHID(DifferentialRevision $revision) {
     try {
       $diff = $revision->getActiveDiff();
+      if (!$diff) {
+        return null;
+      }
       return $diff->getPHID();
     } catch (Exception $ex) {
       return null;

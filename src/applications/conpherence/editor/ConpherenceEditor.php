@@ -41,12 +41,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         ->setNewValue(array('+' => $participant_phids));
       if ($title) {
         $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
+          ->setTransactionType(
+            ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
           ->setNewValue($title);
       }
       if (strlen($topic)) {
         $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
+          ->setTransactionType(
+            ConpherenceThreadTopicTransaction::TRANSACTIONTYPE)
           ->setNewValue($topic);
       }
 
@@ -87,10 +89,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
-    $types[] = ConpherenceTransaction::TYPE_TITLE;
-    $types[] = ConpherenceTransaction::TYPE_TOPIC;
     $types[] = ConpherenceTransaction::TYPE_PARTICIPANTS;
-    $types[] = ConpherenceTransaction::TYPE_PICTURE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
@@ -98,17 +97,34 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return $types;
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this room.', $author);
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
+        case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:
+        case ConpherenceThreadPictureTransaction::TRANSACTIONTYPE:
+          return true;
+        default:
+          return false;
+      }
+    }
+    return true;
+  }
+
+
+
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        return $object->getTitle();
-      case ConpherenceTransaction::TYPE_TOPIC:
-        return $object->getTopic();
-      case ConpherenceTransaction::TYPE_PICTURE:
-        return $object->getProfileImagePHID();
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         if ($this->getIsNewObject()) {
           return array();
@@ -122,10 +138,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_TITLE:
-      case ConpherenceTransaction::TYPE_TOPIC:
-      case ConpherenceTransaction::TYPE_PICTURE:
-        return $xaction->getNewValue();
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         return $this->getPHIDTransactionNewValue($xaction);
     }
@@ -211,15 +223,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $make_author_recent_participant = true;
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        $object->setTitle($xaction->getNewValue());
-        break;
-      case ConpherenceTransaction::TYPE_TOPIC:
-        $object->setTopic($xaction->getNewValue());
-        break;
-      case ConpherenceTransaction::TYPE_PICTURE:
-        $object->setProfileImagePHID($xaction->getNewValue());
-        break;
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         if (!$this->getIsNewObject()) {
           $old_map = array_fuse($xaction->getOldValue());
@@ -418,8 +421,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             PhabricatorPolicyCapability::CAN_EDIT);
         }
         break;
-      case ConpherenceTransaction::TYPE_TITLE:
-      case ConpherenceTransaction::TYPE_TOPIC:
+      case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
+      case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
@@ -434,8 +437,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $type = $u->getTransactionType();
     switch ($type) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        return $v;
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         return $this->mergePHIDOrEdgeTransactions($u, $v);
     }
@@ -541,23 +542,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return PhabricatorEnv::getEnvConfig('metamta.conpherence.subject-prefix');
   }
 
-  protected function shouldPublishFeedStory(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case ConpherenceTransaction::TYPE_TITLE:
-        case ConpherenceTransaction::TYPE_TOPIC:
-        case ConpherenceTransaction::TYPE_PICTURE:
-          return true;
-        default:
-          return false;
-      }
-    }
-    return false;
-  }
-
   protected function supportsSearch() {
     return true;
   }
@@ -570,26 +554,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        if (empty($xactions)) {
-          break;
-        }
-        $missing = $this->validateIsEmptyTextField(
-          $object->getTitle(),
-          $xactions);
-
-        if ($missing) {
-          $detail = pht('Room title is required.');
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            $detail,
-            last($xactions));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-        break;
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         foreach ($xactions as $xaction) {
           $new_phids = $this->getPHIDTransactionNewValue($xaction, array());

@@ -14,7 +14,7 @@ final class DiffusionRepositoryListController extends DiffusionController {
       ->setName(pht('Commits'));
 
     $items[] = id(new PHUIListItemView())
-      ->setName('Browse Commits')
+      ->setName(pht('Browse Commits'))
       ->setHref($this->getApplicationURI('commit/'));
 
     return id(new PhabricatorRepositorySearchEngine())

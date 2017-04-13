@@ -6,6 +6,4 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
     return $this->newApplicationMenu()
       ->setSearchEngine(new PhabricatorCountdownSearchEngine());
   }
-
-
 }

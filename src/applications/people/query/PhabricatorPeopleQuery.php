@@ -465,7 +465,7 @@ final class PhabricatorPeopleQuery
         while (true) {
           foreach ($events as $event) {
             $from = $event->getStartDateTimeEpochForCache();
-            $to = $event->getEndDateTimeEpoch();
+            $to = $event->getEndDateTimeEpochForCache();
             if (($from <= $cursor) && ($to > $cursor)) {
               $cursor = $to;
               if (!$next_event) {
@@ -483,7 +483,7 @@ final class PhabricatorPeopleQuery
         $availability_type = $invitee->getDisplayAvailability($next_event);
         $availability = array(
           'until' => $cursor,
-          'eventPHID' => $event->getPHID(),
+          'eventPHID' => $next_event->getPHID(),
           'availability' => $availability_type,
         );
 
@@ -496,7 +496,7 @@ final class PhabricatorPeopleQuery
         // simultaneously we should accommodate that. However, it's complex
         // to compute, rare, and probably not confusing most of the time.
 
-        $availability_ttl = $next_event->getStartDateTimeEpochForCache();
+        $availability_ttl = $next_event->getEndDateTimeEpochForCache();
       } else {
         $availability = array(
           'until' => null,

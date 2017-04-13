@@ -64,14 +64,21 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $range = $request->getHTTPHeader('range');
     if ($range) {
       $matches = null;
-      if (preg_match('/^bytes=(\d+)-(\d+)$/', $range, $matches)) {
+      if (preg_match('/^bytes=(\d+)-(\d*)$/', $range, $matches)) {
         // Note that the "Range" header specifies bytes differently than
         // we do internally: the range 0-1 has 2 bytes (byte 0 and byte 1).
         $begin = (int)$matches[1];
-        $end = (int)$matches[2] + 1;
+
+        // The "Range" may be "200-299" or "200-", meaning "until end of file".
+        if (strlen($matches[2])) {
+          $range_end = (int)$matches[2];
+          $end = $range_end + 1;
+        } else {
+          $range_end = null;
+        }
 
         $response->setHTTPResponseCode(206);
-        $response->setRange($begin, ($end - 1));
+        $response->setRange($begin, $range_end);
       }
     }
 
@@ -84,18 +91,28 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     if ($is_viewable && !$force_download) {
       $response->setMimeType($file->getViewableMimeType());
     } else {
-      if (!$request->isHTTPPost() && !$is_alternate_domain && !$is_lfs) {
-        // NOTE: Require POST to download files from the primary domain. We'd
-        // rather go full-bore and do a real CSRF check, but can't currently
-        // authenticate users on the file domain. This should blunt any
-        // attacks based on iframes, script tags, applet tags, etc., at least.
-        // Send the user to the "info" page if they're using some other method.
+      $is_public = !$viewer->isLoggedIn();
+      $is_post = $request->isHTTPPost();
 
+      // NOTE: Require POST to download files from the primary domain if the
+      // request includes credentials. The "Download File" links we generate
+      // in the web UI are forms which use POST to satisfy this requirement.
+
+      // The intent is to make attacks based on tags like "<iframe />" and
+      // "<script />" (which can issue GET requests, but can not easily issue
+      // POST requests) more difficult to execute.
+
+      // The best defense against these attacks is to use an alternate file
+      // domain, which is why we strongly recommend doing so.
+
+      $is_safe = ($is_alternate_domain || $is_lfs || $is_post || $is_public);
+      if (!$is_safe) {
         // This is marked as "external" because it is fully qualified.
         return id(new AphrontRedirectResponse())
           ->setIsExternal(true)
           ->setURI(PhabricatorEnv::getProductionURI($file->getBestURI()));
       }
+
       $response->setMimeType($file->getMimeType());
       $response->setDownload($file->getName());
     }

@@ -27,21 +27,27 @@ final class FileUploadConduitAPIMethod extends FileConduitAPIMethod {
     $viewer = $request->getUser();
 
     $name = $request->getValue('name');
-    $can_cdn = $request->getValue('canCDN');
+    $can_cdn = (bool)$request->getValue('canCDN');
     $view_policy = $request->getValue('viewPolicy');
 
     $data = $request->getValue('data_base64');
     $data = $this->decodeBase64($data);
 
-    $file = PhabricatorFile::newFromFileData(
-      $data,
-      array(
-        'name' => $name,
-        'authorPHID' => $viewer->getPHID(),
-        'viewPolicy' => $view_policy,
-        'canCDN' => $can_cdn,
-        'isExplicitUpload' => true,
-      ));
+    $params = array(
+      'authorPHID' => $viewer->getPHID(),
+      'canCDN' => $can_cdn,
+      'isExplicitUpload' => true,
+    );
+
+    if ($name !== null) {
+      $params['name'] = $name;
+    }
+
+    if ($view_policy !== null) {
+      $params['viewPolicy'] = $view_policy;
+    }
+
+    $file = PhabricatorFile::newFromFileData($data, $params);
 
     return $file->getPHID();
   }
