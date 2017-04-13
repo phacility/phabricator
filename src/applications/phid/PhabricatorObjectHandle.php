@@ -6,6 +6,7 @@ final class PhabricatorObjectHandle
 
   const AVAILABILITY_FULL = 'full';
   const AVAILABILITY_NONE = 'none';
+  const AVAILABILITY_NOEMAIL = 'no-email';
   const AVAILABILITY_PARTIAL = 'partial';
   const AVAILABILITY_DISABLED = 'disabled';
 

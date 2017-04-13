@@ -151,7 +151,7 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
           }
 
           if (!$user->isResponsive()) {
-            $tag->setDotColor(PHUITagView::COLOR_GREY);
+            $tag->setDotColor(PHUITagView::COLOR_VIOLET);
           } else {
             if ($user->getAwayUntil()) {
               $away = PhabricatorCalendarEventInvitee::AVAILABILITY_AWAY;
