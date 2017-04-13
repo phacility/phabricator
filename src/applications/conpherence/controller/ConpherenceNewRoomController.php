@@ -34,9 +34,6 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
         ->setNewValue($request->getStr('editPolicy'));
-      $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-        ->setNewValue($request->getStr('joinPolicy'));
 
       try {
         $editor
@@ -55,7 +52,6 @@ final class ConpherenceNewRoomController extends ConpherenceController {
 
         $conpherence->setViewPolicy($request->getStr('viewPolicy'));
         $conpherence->setEditPolicy($request->getStr('editPolicy'));
-        $conpherence->setJoinPolicy($request->getStr('joinPolicy'));
       }
     } else {
       if ($request->getStr('participant')) {
@@ -110,12 +106,6 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setName('editPolicy')
         ->setPolicyObject($conpherence)
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-        ->setPolicies($policies))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setName('joinPolicy')
-        ->setPolicyObject($conpherence)
-        ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
         ->setPolicies($policies));
 
     $dialog->appendChild($form);

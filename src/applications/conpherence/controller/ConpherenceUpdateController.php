@@ -24,9 +24,6 @@ final class ConpherenceUpdateController
       case ConpherenceUpdateActions::METADATA:
         $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
         break;
-      case ConpherenceUpdateActions::JOIN_ROOM:
-        $needed_capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
-        break;
       case ConpherenceUpdateActions::NOTIFICATIONS:
         $need_participants = true;
         break;
@@ -153,9 +150,6 @@ final class ConpherenceUpdateController
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
             ->setNewValue($request->getStr('editPolicy'));
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-            ->setNewValue($request->getStr('joinPolicy'));
           if (!$request->getExists('force_ajax')) {
             $response_mode = 'redirect';
           }
@@ -256,16 +250,9 @@ final class ConpherenceUpdateController
 
     $participant = $conpherence->getParticipantIfExists($user->getPHID());
     if (!$participant) {
-      $can_join = PhabricatorPolicyFilter::hasCapability(
-        $user,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_JOIN);
-      if ($can_join) {
+      if ($user->isLoggedIn()) {
         $text = pht(
           'Notification settings are available after joining the room.');
-      } else if ($user->isLoggedIn()) {
-        $text = pht(
-          'Notification settings not applicable to rooms you can not join.');
       } else {
         $text = pht(
           'Notification settings are available after logging in and joining '.
@@ -459,12 +446,6 @@ final class ConpherenceUpdateController
         ->setName('editPolicy')
         ->setPolicyObject($conpherence)
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-        ->setPolicies($policies))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setName('joinPolicy')
-        ->setPolicyObject($conpherence)
-        ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
         ->setPolicies($policies));
 
     $view = id(new AphrontDialogView())

@@ -119,11 +119,6 @@ final class ConpherenceViewController extends
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 
-    $can_join = PhabricatorPolicyFilter::hasCapability(
-        $user,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_JOIN);
-
     $layout = id(new ConpherenceLayoutView())
       ->setUser($user)
       ->setBaseURI($this->getApplicationURI())
@@ -151,12 +146,9 @@ final class ConpherenceViewController extends
 
     $conpherence = $this->getConpherence();
     $user = $this->getRequest()->getUser();
-    $can_join = PhabricatorPolicyFilter::hasCapability(
-      $user,
-      $conpherence,
-      PhabricatorPolicyCapability::CAN_JOIN);
+
     $participating = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$can_join && !$participating && $user->isLoggedIn()) {
+    if (!$participating && $user->isLoggedIn()) {
       return null;
     }
     $draft = PhabricatorDraft::newFromUserAndKey(

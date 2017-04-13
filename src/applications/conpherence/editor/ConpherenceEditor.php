@@ -92,7 +92,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
-    $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
     return $types;
   }
@@ -383,24 +382,12 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
         $actor_phid = $this->requireActor()->getPHID();
 
-        $is_join = (($add === array($actor_phid)) && !$rem);
-        $is_leave = (($rem === array($actor_phid)) && !$add);
+        // You need CAN_EDIT to change participants other than yourself.
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
 
-        if ($is_join) {
-          // You need CAN_JOIN to join a room.
-          PhabricatorPolicyFilter::requireCapability(
-            $this->requireActor(),
-            $object,
-            PhabricatorPolicyCapability::CAN_JOIN);
-        } else if ($is_leave) {
-          // You don't need any capabilities to leave a conpherence thread.
-        } else {
-          // You need CAN_EDIT to change participants other than yourself.
-          PhabricatorPolicyFilter::requireCapability(
-            $this->requireActor(),
-            $object,
-            PhabricatorPolicyCapability::CAN_EDIT);
-        }
         break;
       case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
       case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:

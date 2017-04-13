@@ -53,11 +53,6 @@ final class ConpherenceTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        return $this->getRoomTitle();
-        break;
       case self::TYPE_PARTICIPANTS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
@@ -88,37 +83,6 @@ final class ConpherenceTransaction
     }
 
     return parent::getTitle();
-  }
-
-  private function getRoomTitle() {
-    $author_phid = $this->getAuthorPHID();
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        return pht(
-          '%s changed the visibility of this room from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
-        break;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return pht(
-          '%s changed the edit policy of this room from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
-        break;
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        return pht(
-          '%s changed the join policy of this room from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
-        break;
-    }
   }
 
   public function getRequiredHandlePHIDs() {

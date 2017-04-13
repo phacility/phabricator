@@ -33,7 +33,7 @@ final class ConpherenceThread extends ConpherenceDAO
       ->attachParticipants(array())
       ->setViewPolicy($default_policy)
       ->setEditPolicy($default_policy)
-      ->setJoinPolicy($default_policy);
+      ->setJoinPolicy('');
   }
 
   protected function getConfiguration() {
@@ -298,7 +298,6 @@ final class ConpherenceThread extends ConpherenceDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
-      PhabricatorPolicyCapability::CAN_JOIN,
     );
   }
 
@@ -308,8 +307,6 @@ final class ConpherenceThread extends ConpherenceDAO
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
-      case PhabricatorPolicyCapability::CAN_JOIN:
-        return $this->getJoinPolicy();
     }
     return PhabricatorPolicies::POLICY_NOONE;
   }
@@ -322,7 +319,6 @@ final class ConpherenceThread extends ConpherenceDAO
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_EDIT:
-      case PhabricatorPolicyCapability::CAN_JOIN:
         return false;
     }
 

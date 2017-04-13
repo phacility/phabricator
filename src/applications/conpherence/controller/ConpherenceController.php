@@ -78,10 +78,6 @@ abstract class ConpherenceController extends PhabricatorController {
       }
 
       $participating = $conpherence->getParticipantIfExists($viewer->getPHID());
-      $can_join = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_JOIN);
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
@@ -129,7 +125,7 @@ abstract class ConpherenceController extends PhabricatorController {
           ->setColor('green')
           ->addClass('conpherence-search-toggle'));
 
-      if ($can_join && !$participating) {
+      if (!$participating) {
         $action = ConpherenceUpdateActions::JOIN_ROOM;
         $uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
         $button = phutil_tag(
