@@ -1,18 +1,7 @@
 <?php
 
 abstract class PhortuneAccountProfileController
-  extends PhortuneController {
-
-  private $account;
-
-  public function setAccount(PhortuneAccount $account) {
-    $this->account = $account;
-    return $this;
-  }
-
-  public function getAccount() {
-    return $this->account;
-  }
+  extends PhortuneAccountController {
 
   public function buildApplicationMenu() {
     return $this->buildSideNavView()->getMenu();
@@ -34,12 +23,6 @@ abstract class PhortuneAccountProfileController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->setBorder(true);
-
-    $account = $this->getAccount();
-    if ($account) {
-      $crumbs->addTextCrumb($account->getName(), $account->getURI());
-    }
-
     return $crumbs;
   }
 
