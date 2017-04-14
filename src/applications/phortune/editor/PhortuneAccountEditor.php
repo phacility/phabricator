@@ -28,47 +28,48 @@ final class PhortuneAccountEditor
 
     $errors = parent::validateTransaction($object, $type, $xactions);
 
+    $viewer = $this->requireActor();
+
     switch ($type) {
       case PhabricatorTransactions::TYPE_EDGE:
         foreach ($xactions as $xaction) {
           switch ($xaction->getMetadataValue('edge:type')) {
             case PhortuneAccountHasMemberEdgeType::EDGECONST:
-              $actor_phid = $this->requireActor()->getPHID();
-              $new = $xaction->getNewValue();
               $old = $object->getMemberPHIDs();
+              $new = $this->getPHIDTransactionNewValue($xaction, $old);
 
-              // Check if user is trying to not set themselves on creation
-              if (!$old) {
-                $set = idx($new, '+', array());
-                $actor_set = false;
-                foreach ($set as $phid) {
-                  if ($actor_phid == $phid) {
-                    $actor_set = true;
-                  }
+              $old = array_fuse($old);
+              $new = array_fuse($new);
+
+              foreach ($new as $new_phid) {
+                if (isset($old[$new_phid])) {
+                  continue;
                 }
-                if (!$actor_set) {
+
+                $user = id(new PhabricatorPeopleQuery())
+                  ->setViewer($viewer)
+                  ->withPHIDs(array($new_phid))
+                  ->executeOne();
+                if (!$user) {
                   $error = new PhabricatorApplicationTransactionValidationError(
                     $type,
                     pht('Invalid'),
-                    pht('You can not remove yourself as an account manager.'),
-                    $xaction);
+                    pht(
+                      'Account managers must be valid users, "%s" is not.',
+                      $new_phid));
                   $errors[] = $error;
-
+                  continue;
                 }
               }
 
-              // Check if user is trying to remove themselves on edit
-              $set = idx($new, '-', array());
-              foreach ($set as $phid) {
-                if ($actor_phid == $phid) {
-                  $error = new PhabricatorApplicationTransactionValidationError(
-                    $type,
-                    pht('Invalid'),
-                    pht('You can not remove yourself as an account manager.'),
-                    $xaction);
-                  $errors[] = $error;
-
-                }
+              $actor_phid = $this->getActingAsPHID();
+              if (!isset($new[$actor_phid])) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('Invalid'),
+                  pht('You can not remove yourself as an account manager.'),
+                  $xaction);
+                $errors[] = $error;
               }
             break;
           }
