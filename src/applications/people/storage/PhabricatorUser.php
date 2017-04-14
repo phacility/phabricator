@@ -1082,7 +1082,7 @@ final class PhabricatorUser
       'UPDATE %T SET availabilityCache = %s, availabilityCacheTTL = %nd
         WHERE id = %d',
       $this->getTableName(),
-      json_encode($availability),
+      phutil_json_encode($availability),
       $ttl,
       $this->getID());
     unset($unguarded);

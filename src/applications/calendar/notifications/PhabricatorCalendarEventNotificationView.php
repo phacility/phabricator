@@ -58,4 +58,12 @@ final class PhabricatorCalendarEventNotificationView
     return phabricator_datetime($epoch, $viewer);
   }
 
+  public function getDisplayTimeWithTimezone() {
+    $viewer = $this->getViewer();
+
+    $epoch = $this->getEpoch();
+    return phabricator_datetimezone($epoch, $viewer);
+  }
+
+
 }

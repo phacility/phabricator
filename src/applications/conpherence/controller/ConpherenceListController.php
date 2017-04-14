@@ -159,7 +159,6 @@ final class ConpherenceListController extends ConpherenceController {
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
         ->needProfileImage(true)
-        ->needParticipantCache(true)
         ->execute();
 
       // this will re-sort by participation data

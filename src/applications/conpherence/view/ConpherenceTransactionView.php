@@ -67,7 +67,7 @@ final class ConpherenceTransactionView extends AphrontView {
 
     $transaction = $this->getConpherenceTransaction();
     switch ($transaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_DATE_MARKER:
+      case ConpherenceThreadDateMarkerTransaction::TRANSACTIONTYPE:
         return javelin_tag(
           'div',
           array(
@@ -216,17 +216,6 @@ final class ConpherenceTransactionView extends AphrontView {
     $content = null;
     $handles = $this->getHandles();
     switch ($transaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_TITLE:
-      case ConpherenceTransaction::TYPE_TOPIC:
-      case ConpherenceTransaction::TYPE_PICTURE:
-      case ConpherenceTransaction::TYPE_PARTICIPANTS:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
-        $content = $transaction->getTitle();
-        $this->addClass('conpherence-edited');
-        break;
       case PhabricatorTransactions::TYPE_COMMENT:
         $this->addClass('conpherence-comment');
         $author = $handles[$transaction->getAuthorPHID()];
@@ -235,6 +224,10 @@ final class ConpherenceTransactionView extends AphrontView {
           $comment,
           PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
         $content_class = 'conpherence-message';
+        break;
+      default:
+        $content = $transaction->getTitle();
+        $this->addClass('conpherence-edited');
         break;
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 final class PhortuneMerchantViewController
-  extends PhortuneMerchantController {
+  extends PhortuneMerchantProfileController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
@@ -16,20 +16,14 @@ final class PhortuneMerchantViewController
       return new Aphront404Response();
     }
 
+    $this->setMerchant($merchant);
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($merchant->getName());
-    $crumbs->setBorder(true);
+    $header = $this->buildHeaderView();
 
     $title = pht(
       'Merchant %d %s',
       $merchant->getID(),
       $merchant->getName());
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($merchant->getName())
-      ->setUser($viewer)
-      ->setPolicyObject($merchant)
-      ->setImage($merchant->getProfileImageURI());
 
     $providers = id(new PhortunePaymentProviderConfigQuery())
       ->setViewer($viewer)
@@ -48,6 +42,8 @@ final class PhortuneMerchantViewController
       new PhortuneMerchantTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $navigation = $this->buildSideNavView('overview');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
@@ -60,6 +56,7 @@ final class PhortuneMerchantViewController
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($navigation)
       ->appendChild($view);
   }
 
@@ -198,22 +195,6 @@ final class PhortuneMerchantViewController
 
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('View Orders'))
-        ->setIcon('fa-shopping-cart')
-        ->setHref($this->getApplicationURI("merchant/orders/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View Subscriptions'))
-        ->setIcon('fa-moon-o')
-        ->setHref($this->getApplicationURI("merchant/{$id}/subscription/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
         ->setName(pht('New Invoice'))
         ->setIcon('fa-fax')
         ->setHref($this->getApplicationURI("merchant/{$id}/invoice/new/"))
@@ -240,7 +221,7 @@ final class PhortuneMerchantViewController
     }
 
     $curtain->newPanel()
-      ->setHeaderText(pht('Members'))
+      ->setHeaderText(pht('Managers'))
       ->appendChild($member_list);
 
     return $curtain;

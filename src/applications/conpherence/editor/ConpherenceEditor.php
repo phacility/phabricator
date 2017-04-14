@@ -41,12 +41,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         ->setNewValue(array('+' => $participant_phids));
       if ($title) {
         $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
+          ->setTransactionType(
+            ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
           ->setNewValue($title);
       }
       if (strlen($topic)) {
         $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
+          ->setTransactionType(
+            ConpherenceThreadTopicTransaction::TRANSACTIONTYPE)
           ->setNewValue($topic);
       }
 
@@ -85,17 +87,17 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhabricatorTransactions::TYPE_COMMENT;
-
-    $types[] = ConpherenceTransaction::TYPE_TITLE;
-    $types[] = ConpherenceTransaction::TYPE_TOPIC;
     $types[] = ConpherenceTransaction::TYPE_PARTICIPANTS;
-    $types[] = ConpherenceTransaction::TYPE_PICTURE;
+
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
-    $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
     return $types;
+  }
+
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this room.', $author);
   }
 
   protected function getCustomTransactionOldValue(
@@ -103,12 +105,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        return $object->getTitle();
-      case ConpherenceTransaction::TYPE_TOPIC:
-        return $object->getTopic();
-      case ConpherenceTransaction::TYPE_PICTURE:
-        return $object->getProfileImagePHID();
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         if ($this->getIsNewObject()) {
           return array();
@@ -122,10 +118,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_TITLE:
-      case ConpherenceTransaction::TYPE_TOPIC:
-      case ConpherenceTransaction::TYPE_PICTURE:
-        return $xaction->getNewValue();
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         return $this->getPHIDTransactionNewValue($xaction);
     }
@@ -198,7 +190,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
               ->setSeenMessageCount($message_count)
               ->save();
             $object->attachParticipants($participants);
-            $object->setRecentParticipantPHIDs(array_keys($participants));
           }
           break;
       }
@@ -209,48 +200,12 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    $make_author_recent_participant = true;
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        $object->setTitle($xaction->getNewValue());
-        break;
-      case ConpherenceTransaction::TYPE_TOPIC:
-        $object->setTopic($xaction->getNewValue());
-        break;
-      case ConpherenceTransaction::TYPE_PICTURE:
-        $object->setProfileImagePHID($xaction->getNewValue());
-        break;
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
-        if (!$this->getIsNewObject()) {
-          $old_map = array_fuse($xaction->getOldValue());
-          $new_map = array_fuse($xaction->getNewValue());
-          // if we added people, add them to the end of "recent" participants
-          $add = array_keys(array_diff_key($new_map, $old_map));
-          // if we remove people, then definintely remove them from "recent"
-          // participants
-          $del = array_keys(array_diff_key($old_map, $new_map));
-          if ($add || $del) {
-            $participants = $object->getRecentParticipantPHIDs();
-            if ($add) {
-              $participants = array_merge($participants, $add);
-            }
-            if ($del) {
-              $participants = array_diff($participants, $del);
-              $actor = $this->requireActor();
-              if (in_array($actor->getPHID(), $del)) {
-                $make_author_recent_participant = false;
-              }
-            }
-            $participants = array_slice(array_unique($participants), 0, 10);
-            $object->setRecentParticipantPHIDs($participants);
-          }
-        }
+        if (!$this->getIsNewObject()) {}
         break;
     }
 
-    if ($make_author_recent_participant) {
-      $this->makeAuthorMostRecentParticipant($object, $xaction);
-    }
   }
 
   protected function applyBuiltinInternalTransaction(
@@ -264,17 +219,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     }
 
     return parent::applyBuiltinInternalTransaction($object, $xaction);
-  }
-
-  private function makeAuthorMostRecentParticipant(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $participants = $object->getRecentParticipantPHIDs();
-    array_unshift($participants, $xaction->getAuthorPHID());
-    $participants = array_slice(array_unique($participants), 0, 10);
-
-    $object->setRecentParticipantPHIDs($participants);
   }
 
   protected function applyCustomExternalTransaction(
@@ -335,39 +279,39 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_COMMENT:
           $message_count++;
+
+          // update everyone's participation status on a message -only-
+          $xaction_phid = $xaction->getPHID();
+          $behind = ConpherenceParticipationStatus::BEHIND;
+          $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
+          $participants = $object->getParticipants();
+          $user = $this->getActor();
+          $time = time();
+          foreach ($participants as $phid => $participant) {
+            if ($phid != $user->getPHID()) {
+              if ($participant->getParticipationStatus() != $behind) {
+                $participant->setBehindTransactionPHID($xaction_phid);
+                $participant->setSeenMessageCount(
+                  $object->getMessageCount() - $message_count);
+              }
+              $participant->setParticipationStatus($behind);
+              $participant->setDateTouched($time);
+            } else {
+              $participant->setSeenMessageCount($object->getMessageCount());
+              $participant->setBehindTransactionPHID($xaction_phid);
+              $participant->setParticipationStatus($up_to_date);
+              $participant->setDateTouched($time);
+            }
+            $participant->save();
+          }
+
+          PhabricatorUserCache::clearCaches(
+            PhabricatorUserMessageCountCacheType::KEY_COUNT,
+            array_keys($participants));
+
           break;
       }
     }
-
-    // update everyone's participation status on the last xaction -only-
-    $xaction = end($xactions);
-    $xaction_phid = $xaction->getPHID();
-    $behind = ConpherenceParticipationStatus::BEHIND;
-    $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
-    $participants = $object->getParticipants();
-    $user = $this->getActor();
-    $time = time();
-    foreach ($participants as $phid => $participant) {
-      if ($phid != $user->getPHID()) {
-        if ($participant->getParticipationStatus() != $behind) {
-          $participant->setBehindTransactionPHID($xaction_phid);
-          $participant->setSeenMessageCount(
-            $object->getMessageCount() - $message_count);
-        }
-        $participant->setParticipationStatus($behind);
-        $participant->setDateTouched($time);
-      } else {
-        $participant->setSeenMessageCount($object->getMessageCount());
-        $participant->setBehindTransactionPHID($xaction_phid);
-        $participant->setParticipationStatus($up_to_date);
-        $participant->setDateTouched($time);
-      }
-      $participant->save();
-    }
-
-    PhabricatorUserCache::clearCaches(
-      PhabricatorUserMessageCountCacheType::KEY_COUNT,
-      array_keys($participants));
 
     if ($xactions) {
       $data = array(
@@ -399,27 +343,15 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
         $actor_phid = $this->requireActor()->getPHID();
 
-        $is_join = (($add === array($actor_phid)) && !$rem);
-        $is_leave = (($rem === array($actor_phid)) && !$add);
+        // You need CAN_EDIT to change participants other than yourself.
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
 
-        if ($is_join) {
-          // You need CAN_JOIN to join a room.
-          PhabricatorPolicyFilter::requireCapability(
-            $this->requireActor(),
-            $object,
-            PhabricatorPolicyCapability::CAN_JOIN);
-        } else if ($is_leave) {
-          // You don't need any capabilities to leave a conpherence thread.
-        } else {
-          // You need CAN_EDIT to change participants other than yourself.
-          PhabricatorPolicyFilter::requireCapability(
-            $this->requireActor(),
-            $object,
-            PhabricatorPolicyCapability::CAN_EDIT);
-        }
         break;
-      case ConpherenceTransaction::TYPE_TITLE:
-      case ConpherenceTransaction::TYPE_TOPIC:
+      case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
+      case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
@@ -434,8 +366,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $type = $u->getTransactionType();
     switch ($type) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        return $v;
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         return $this->mergePHIDOrEdgeTransactions($u, $v);
     }
@@ -541,23 +471,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return PhabricatorEnv::getEnvConfig('metamta.conpherence.subject-prefix');
   }
 
-  protected function shouldPublishFeedStory(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case ConpherenceTransaction::TYPE_TITLE:
-        case ConpherenceTransaction::TYPE_TOPIC:
-        case ConpherenceTransaction::TYPE_PICTURE:
-          return true;
-        default:
-          return false;
-      }
-    }
-    return false;
-  }
-
   protected function supportsSearch() {
     return true;
   }
@@ -570,26 +483,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case ConpherenceTransaction::TYPE_TITLE:
-        if (empty($xactions)) {
-          break;
-        }
-        $missing = $this->validateIsEmptyTextField(
-          $object->getTitle(),
-          $xactions);
-
-        if ($missing) {
-          $detail = pht('Room title is required.');
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            $detail,
-            last($xactions));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-        break;
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
         foreach ($xactions as $xaction) {
           $new_phids = $this->getPHIDTransactionNewValue($xaction, array());

@@ -228,3 +228,17 @@
   .phui-list-item-action-icon {
     opacity: 1;
 }
+
+/* - Item Counts ----------------------------------------------------------- */
+
+.phui-list-item-count {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  background: {$blue};
+  border-radius: 2px;
+  color: #fff;
+  font-weight: bold;
+  padding: 0 5px 1px;
+  font-size: {$smallestfontsize};
+}

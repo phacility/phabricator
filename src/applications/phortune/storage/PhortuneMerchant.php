@@ -53,7 +53,7 @@ final class PhortuneMerchant extends PhortuneDAO
     return $this;
   }
 
-  public function getViewURI() {
+  public function getURI() {
     return '/phortune/merchant/'.$this->getID().'/';
   }
 
@@ -69,6 +69,7 @@ final class PhortuneMerchant extends PhortuneDAO
   public function getProfileImageFile() {
     return $this->assertAttached($this->profileImageFile);
   }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

@@ -37,7 +37,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
     // First, disable any active mode.
     if (edit_root) {
-      if (edit_mode == 'fa-arrows-alt') {
+      if (edit_mode == 'fullscreen') {
         JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', false);
         JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', false);
         JX.Mask.hide('jx-light-mask');
@@ -58,7 +58,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     edit_mode = mode;
 
     // Now, apply the new mode.
-    if (mode == 'fa-arrows-alt') {
+    if (mode == 'fullscreen') {
       JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', true);
       JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', true);
       JX.Mask.show('jx-light-mask');
@@ -118,7 +118,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     if (!edit_root) {
       return;
     }
-    if (edit_mode != 'fa-arrows-alt') {
+    if (edit_mode != 'fullscreen') {
       return;
     }
 
@@ -140,7 +140,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       return;
     }
 
-    if (edit_mode != 'fa-arrows-alt') {
+    if (edit_mode != 'fullscreen') {
       return;
     }
 
@@ -261,10 +261,10 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         break;
       case 'fa-arrows-alt':
         set_pinned_mode(root, false);
-        if (edit_mode == 'fa-arrows-alt') {
+        if (edit_mode == 'fullscreen') {
           set_edit_mode(root, 'normal');
         } else {
-          set_edit_mode(root, 'fa-arrows-alt');
+          set_edit_mode(root, 'fullscreen');
         }
         break;
       case 'fa-eye':
@@ -383,6 +383,38 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         set_pinned_mode(root, !pinned);
       })
       .register();
+  }
+
+  if (config.sendOnEnter) {
+    // Send on enter if the shift key is not held.
+    JX.DOM.listen(area, 'keydown', null,
+      function(e) {
+        if (e.getSpecialKey() != 'return') {
+          return;
+        }
+
+        var raw = e.getRawEvent();
+        if (raw.shiftKey) {
+          // If the shift key is pressed, let the browser write a newline into
+          // the textarea.
+          return;
+        }
+
+        if (edit_mode == 'fullscreen') {
+          // Don't send on enter in fullscreen
+          return;
+        }
+
+        // From here on, interpret this as a "send" action, not a literal
+        // newline.
+        e.kill();
+
+        // This allows 'workflow' and similar actions to take effect.
+        // Such as pontificate in Conpherence
+        var form = e.getNode('tag:form');
+        var r = JX.DOM.invoke(form, 'didSyntheticSubmit');
+
+      });
   }
 
 });

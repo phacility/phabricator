@@ -65,7 +65,7 @@
     font-size: 10px;
 }
 
-.conpherence-durable-column-header .phabricator-application-menu
+.device-desktop .conpherence-durable-column-header .phabricator-application-menu
   .phui-list-item-view {
     margin: 0;
     width: 28px;
@@ -73,7 +73,7 @@
     min-width: 28px;
 }
 
-.conpherence-durable-column-header .phabricator-application-menu
+.device-desktop .conpherence-durable-column-header .phabricator-application-menu
   .phui-list-item-href {
     background: transparent;
     border: none;
@@ -300,7 +300,7 @@ img {
 
 .minimize-column .conpherence-durable-column
   .conpherence-durable-column-header .phabricator-application-menu
-  .phui-list-item-icon.phui-font-fa:hover {
+  .phui-list-item-view:hover .phui-list-item-icon.phui-font-fa {
     color: {$darkbluetext};
 }
 
@@ -311,6 +311,6 @@ img {
 }
 
 .minimize-column .conpherence-durable-column .phabricator-application-menu
-  .conpherence-settings-icon {
+  .fa-gear {
     display: none;
 }

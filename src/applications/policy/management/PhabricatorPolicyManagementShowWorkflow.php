@@ -65,16 +65,20 @@ final class PhabricatorPolicyManagementShowWorkflow
       $console->writeOut("    %s\n",
         PhabricatorPolicy::getPolicyExplanation($viewer, $policy->getPHID()));
       $console->writeOut("\n");
-
-      $more = (array)$object->describeAutomaticCapability($capability);
-      if ($more) {
-        foreach ($more as $line) {
-          $console->writeOut("    %s\n", $line);
-        }
-        $console->writeOut("\n");
-      }
     }
 
+    if ($object instanceof PhabricatorPolicyCodexInterface) {
+      $codex = PhabricatorPolicyCodex::newFromObject($object, $viewer);
+
+      $rules = $codex->getPolicySpecialRuleDescriptions();
+      foreach ($rules as $rule) {
+        echo tsprintf(
+          "  - %s\n",
+          $rule->getDescription());
+      }
+
+      echo "\n";
+    }
   }
 
 }

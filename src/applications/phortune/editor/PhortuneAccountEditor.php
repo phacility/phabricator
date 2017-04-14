@@ -1,6 +1,5 @@
 <?php
 
-
 final class PhortuneAccountEditor
   extends PhabricatorApplicationTransactionEditor {
 
@@ -12,55 +11,14 @@ final class PhortuneAccountEditor
     return pht('Phortune Accounts');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this payment account.', $author);
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
-
     $types[] = PhabricatorTransactions::TYPE_EDGE;
-    $types[] = PhortuneAccountTransaction::TYPE_NAME;
-
     return $types;
-  }
-
-
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
-      case PhortuneAccountTransaction::TYPE_NAME:
-        return $object->getName();
-    }
-    return parent::getCustomTransactionOldValue($object, $xaction);
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
-      case PhortuneAccountTransaction::TYPE_NAME:
-        return $xaction->getNewValue();
-    }
-    return parent::getCustomTransactionNewValue($object, $xaction);
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
-      case PhortuneAccountTransaction::TYPE_NAME:
-        $object->setName($xaction->getNewValue());
-        return;
-    }
-    return parent::applyCustomInternalTransaction($object, $xaction);
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
-      case PhortuneAccountTransaction::TYPE_NAME:
-        return;
-    }
-    return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
   protected function validateTransaction(
@@ -70,48 +28,55 @@ final class PhortuneAccountEditor
 
     $errors = parent::validateTransaction($object, $type, $xactions);
 
+    $viewer = $this->requireActor();
+
     switch ($type) {
-      case PhortuneAccountTransaction::TYPE_NAME:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getName(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('Account name is required.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-        break;
       case PhabricatorTransactions::TYPE_EDGE:
         foreach ($xactions as $xaction) {
           switch ($xaction->getMetadataValue('edge:type')) {
             case PhortuneAccountHasMemberEdgeType::EDGECONST:
-              // TODO: This is a bit cumbersome, but validation happens before
-              // transaction normalization. Maybe provide a cleaner attack on
-              // this eventually? There's no way to generate "+" or "-"
-              // transactions right now.
-              $new = $xaction->getNewValue();
-              $set = idx($new, '=', array());
+              $old = $object->getMemberPHIDs();
+              $new = $this->getPHIDTransactionNewValue($xaction, $old);
 
-              if (empty($set[$this->requireActor()->getPHID()])) {
+              $old = array_fuse($old);
+              $new = array_fuse($new);
+
+              foreach ($new as $new_phid) {
+                if (isset($old[$new_phid])) {
+                  continue;
+                }
+
+                $user = id(new PhabricatorPeopleQuery())
+                  ->setViewer($viewer)
+                  ->withPHIDs(array($new_phid))
+                  ->executeOne();
+                if (!$user) {
+                  $error = new PhabricatorApplicationTransactionValidationError(
+                    $type,
+                    pht('Invalid'),
+                    pht(
+                      'Account managers must be valid users, "%s" is not.',
+                      $new_phid));
+                  $errors[] = $error;
+                  continue;
+                }
+              }
+
+              $actor_phid = $this->getActingAsPHID();
+              if (!isset($new[$actor_phid])) {
                 $error = new PhabricatorApplicationTransactionValidationError(
                   $type,
                   pht('Invalid'),
-                  pht('You can not remove yourself as an account member.'),
+                  pht('You can not remove yourself as an account manager.'),
                   $xaction);
                 $errors[] = $error;
               }
-              break;
+            break;
           }
         }
         break;
     }
-
     return $errors;
   }
+
 }

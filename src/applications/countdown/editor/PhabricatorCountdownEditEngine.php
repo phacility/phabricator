@@ -81,7 +81,8 @@ final class PhabricatorCountdownEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setIsRequired(true)
-        ->setTransactionType(PhabricatorCountdownTransaction::TYPE_TITLE)
+        ->setTransactionType(
+            PhabricatorCountdownTitleTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('The countdown name.'))
         ->setConduitDescription(pht('Rename the countdown.'))
         ->setConduitTypeDescription(pht('New countdown name.'))
@@ -89,7 +90,8 @@ final class PhabricatorCountdownEditEngine
       id(new PhabricatorEpochEditField())
         ->setKey('epoch')
         ->setLabel(pht('End Date'))
-        ->setTransactionType(PhabricatorCountdownTransaction::TYPE_EPOCH)
+        ->setTransactionType(
+            PhabricatorCountdownEpochTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Date when the countdown ends.'))
         ->setConduitDescription(pht('Change the end date of the countdown.'))
         ->setConduitTypeDescription(pht('New countdown end date.'))
@@ -97,7 +99,8 @@ final class PhabricatorCountdownEditEngine
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))
-        ->setTransactionType(PhabricatorCountdownTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(
+            PhabricatorCountdownDescriptionTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Description of the countdown.'))
         ->setConduitDescription(pht('Change the countdown description.'))
         ->setConduitTypeDescription(pht('New description.'))

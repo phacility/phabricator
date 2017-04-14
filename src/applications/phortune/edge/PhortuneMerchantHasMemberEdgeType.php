@@ -14,7 +14,7 @@ final class PhortuneMerchantHasMemberEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s merchant member(s): %s.',
+      '%s added %s merchant manager(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -26,7 +26,7 @@ final class PhortuneMerchantHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s merchant member(s): %s.',
+      '%s removed %s merchant manager(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -41,7 +41,7 @@ final class PhortuneMerchantHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited %s merchant member(s), added %s: %s; removed %s: %s.',
+      '%s edited %s merchant manager(s), added %s: %s; removed %s: %s.',
       $actor,
       $total_count,
       $add_count,
@@ -57,7 +57,7 @@ final class PhortuneMerchantHasMemberEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s merchant member(s) to %s: %s.',
+      '%s added %s merchant manager(s) to %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -71,7 +71,7 @@ final class PhortuneMerchantHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s merchant member(s) from %s: %s.',
+      '%s removed %s merchant manager(s) from %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -88,7 +88,7 @@ final class PhortuneMerchantHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited %s merchant member(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited %s merchant manager(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $total_count,
       $object,
