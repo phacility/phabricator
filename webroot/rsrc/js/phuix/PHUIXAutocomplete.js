@@ -153,7 +153,6 @@ JX.install('PHUIXAutocomplete', {
         datasource.setTransformer(JX.bind(this, this._transformresult));
         datasource.setSortHandler(
           JX.bind(datasource, JX.Prefab.sortHandler, {}));
-        datasource.setFilterHandler(JX.Prefab.filterClosedResults);
 
         this._datasources[code] = datasource;
       }

@@ -101,7 +101,6 @@ JX.install('Prefab', {
 
       datasource.setSortHandler(
         JX.bind(datasource, JX.Prefab.sortHandler, config));
-      datasource.setFilterHandler(JX.Prefab.filterClosedResults);
       datasource.setTransformer(JX.Prefab.transformDatasourceResults);
 
       var typeahead = new JX.Typeahead(
@@ -255,37 +254,6 @@ JX.install('Prefab', {
       });
     },
 
-
-    /**
-     * Filter callback for tokenizers and typeaheads which filters out closed
-     * or disabled objects unless they are the only options.
-     */
-    filterClosedResults: function(value, list) {
-      // Look for any open result.
-      var has_open = false;
-      var ii;
-      for (ii = 0; ii < list.length; ii++) {
-        if (!list[ii].closed) {
-          has_open = true;
-          break;
-        }
-      }
-
-      if (!has_open) {
-        // Everything is closed, so just use it as-is.
-        return list;
-      }
-
-      // Otherwise, only display the open results.
-      var results = [];
-      for (ii = 0; ii < list.length; ii++) {
-        if (!list[ii].closed) {
-          results.push(list[ii]);
-        }
-      }
-
-      return results;
-    },
 
     /**
      * Transform results from a wire format into a usable format in a standard
