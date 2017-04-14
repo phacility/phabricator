@@ -195,6 +195,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
     $user->saveTransaction();
 
+    // The SSH key cache currently includes usernames, so dirty it. See T12554
+    // for discussion.
+    PhabricatorAuthSSHKeyQuery::deleteSSHKeyCache();
+
     $user->sendUsernameChangeEmail($actor, $old_username);
   }
 
