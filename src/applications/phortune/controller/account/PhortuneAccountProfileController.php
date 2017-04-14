@@ -32,13 +32,14 @@ abstract class PhortuneAccountProfileController
   }
 
   protected function buildApplicationCrumbs() {
-    $account = $this->getAccount();
-    $id = $account->getID();
-    $account_uri = $this->getApplicationURI("/{$id}/");
-
     $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->addTextCrumb($account->getName(), $account_uri);
     $crumbs->setBorder(true);
+
+    $account = $this->getAccount();
+    if ($account) {
+      $crumbs->addTextCrumb($account->getName(), $account->getURI());
+    }
+
     return $crumbs;
   }
 
