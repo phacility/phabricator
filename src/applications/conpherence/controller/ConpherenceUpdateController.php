@@ -360,9 +360,9 @@ final class ConpherenceUpdateController
       $body[] = pht(
         'Are you sure you want to leave this room?');
     } else {
-      $title = pht('Banish User');
+      $title = pht('Remove Participant');
       $body[] = pht(
-        'Banish %s from the realm?',
+        'Remove %s from this room?',
         phutil_tag('strong', array(), $removed_user->getUsername()));
     }
 
@@ -372,7 +372,7 @@ final class ConpherenceUpdateController
           'You will be able to rejoin the room later.');
       } else {
         $body[] = pht(
-          'This user will be able to rejoin the room later.');
+          'They will be able to rejoin the room later.');
       }
     } else {
       if ($is_self) {
@@ -387,7 +387,7 @@ final class ConpherenceUpdateController
         }
       } else {
         $body[] = pht(
-          'This user will not be able to rejoin the room unless invited '.
+          'They will not be able to rejoin the room unless invited '.
           'again.');
       }
     }
