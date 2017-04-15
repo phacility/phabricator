@@ -147,9 +147,6 @@ final class ConpherenceViewController extends
     $user = $this->getRequest()->getUser();
 
     $participating = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$participating && $user->isLoggedIn()) {
-      return null;
-    }
     $draft = PhabricatorDraft::newFromUserAndKey(
       $user,
       $conpherence->getPHID());
