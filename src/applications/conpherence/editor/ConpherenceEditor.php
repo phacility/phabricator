@@ -341,13 +341,23 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         $add = array_keys(array_diff_key($new_map, $old_map));
         $rem = array_keys(array_diff_key($old_map, $new_map));
 
-        $actor_phid = $this->requireActor()->getPHID();
+        $actor_phid = $this->getActingAsPHID();
 
-        // You need CAN_EDIT to change participants other than yourself.
-        PhabricatorPolicyFilter::requireCapability(
-          $this->requireActor(),
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
+        $is_join = (($add === array($actor_phid)) && !$rem);
+        $is_leave = (($rem === array($actor_phid)) && !$add);
+
+        if ($is_join) {
+          // Anyone can join a thread they can see.
+        } else if ($is_leave) {
+          // Anyone can leave a thread.
+        } else {
+          // You need CAN_EDIT to add or remove participants. For additional
+          // discussion, see D17696 and T4411.
+          PhabricatorPolicyFilter::requireCapability(
+            $this->requireActor(),
+            $object,
+            PhabricatorPolicyCapability::CAN_EDIT);
+        }
 
         break;
       case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
