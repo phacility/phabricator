@@ -223,7 +223,7 @@
   overflow: auto;
   background: #303030;
   border: 1px solid #202020;
-  margin: 4px;
+  margin: 8px 0;
 }
 
 .dark-console-log-message {

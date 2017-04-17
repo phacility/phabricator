@@ -105,6 +105,26 @@ JX.install('WebSocket', {
 
 
     /**
+     * Disconnect abruptly, prompting a reconnect.
+     */
+    reconnect: function() {
+      if (!this._isOpen) {
+        return;
+      }
+
+      this._socket.close();
+    },
+
+
+    /**
+     * Get the current reconnect delay (in milliseconds).
+     */
+    getReconnectDelay: function() {
+      return this._delayUntilReconnect;
+    },
+
+
+    /**
      * Callback for connection open.
      */
     _onopen: function() {

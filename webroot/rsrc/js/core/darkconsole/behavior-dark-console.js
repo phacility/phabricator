@@ -353,12 +353,49 @@ JX.behavior('dark-console', function(config, statics) {
 
     JX.Leader.listen('onReceiveBroadcast', function(message, is_leader) {
       var json = JX.JSON.stringify(message.data);
+
+      if (message.type == 'aphlict.status') {
+        if (message.data == 'closed') {
+          var ws = JX.Aphlict.getInstance().getWebsocket();
+          if (ws) {
+            var delay = ws.getReconnectDelay();
+            json += ' [Reconnect: ' + delay + 'ms]';
+          }
+        }
+      }
+
       leader_log('onReceiveBroadcast', message.type, is_leader, json);
     });
 
     JX.Leader.listen('onBecomeLeader', function() {
       leader_log('onBecomeLeader');
     });
+
+    var action_log = function(action) {
+      var message = new JX.DarkMessage()
+        .setMessage('> ' + action);
+
+      realtime_log.addMessage(message);
+    };
+
+    JX.Stratcom.listen('click', 'dark-console-realtime-action', function(e) {
+      var node = e.getNode('dark-console-realtime-action');
+      var data = JX.Stratcom.getData(node);
+
+      action_log(data.label);
+
+      var action = data.action;
+      switch (action) {
+        case 'reconnect':
+          var ws = JX.Aphlict.getInstance().getWebsocket();
+          if (ws) {
+            ws.reconnect();
+          }
+          break;
+      }
+
+    });
+
   }
 
 });

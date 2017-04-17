@@ -15,11 +15,40 @@ final class DarkConsoleRealtimePlugin extends DarkConsolePlugin {
   }
 
   public function renderPanel() {
-    return phutil_tag(
+    $frame = phutil_tag(
       'div',
       array(
         'id' => 'dark-console-realtime-log',
         'class' => 'dark-console-log-frame',
+      ));
+
+    $reconnect_label = pht('Reconnect');
+
+    $buttons = phutil_tag(
+      'div',
+      array(
+        'class' => 'dark-console-realtime-actions',
+      ),
+      array(
+        id(new PHUIButtonView())
+          ->setIcon('fa-refresh')
+          ->setColor(PHUIButtonView::GREY)
+          ->setText($reconnect_label)
+          ->addSigil('dark-console-realtime-action')
+          ->setMetadata(
+            array(
+              'action' => 'reconnect',
+              'label' => $reconnect_label,
+            )),
+      ));
+
+    return phutil_tag(
+      'div',
+      array(
+      ),
+      array(
+        $buttons,
+        $frame,
       ));
   }
 

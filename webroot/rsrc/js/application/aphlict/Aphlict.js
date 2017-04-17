@@ -71,6 +71,10 @@ JX.install('Aphlict', {
       return this._status;
     },
 
+    getWebsocket: function() {
+      return this._socket;
+    },
+
     _begin: function() {
       JX.Leader.broadcast(
         null,
