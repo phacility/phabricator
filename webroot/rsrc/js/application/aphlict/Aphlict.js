@@ -130,7 +130,9 @@ JX.install('Aphlict', {
 
     _message: function(raw) {
       var message = JX.JSON.parse(raw);
-      JX.Leader.broadcast(null, {type: 'aphlict.server', data: message});
+      var id = message.uniqueID || null;
+
+      JX.Leader.broadcast(id, {type: 'aphlict.server', data: message});
     },
 
     _receive: function(message, is_leader) {
