@@ -103,10 +103,20 @@ final class PhabricatorConfigClusterNotificationsController
           new PhutilNumber(idx($details, 'messages.in')),
           new PhutilNumber(idx($details, 'messages.out')));
 
+        if (idx($details, 'history.size')) {
+          $history = pht(
+            '%s Held / %sms',
+            new PhutilNumber(idx($details, 'history.size')),
+            new PhutilNumber(idx($details, 'history.age')));
+        } else {
+          $history = pht('No Messages');
+        }
+
       } else {
         $uptime = null;
         $clients = null;
         $stats = null;
+        $history = null;
       }
 
       $status_view = array(
@@ -126,6 +136,7 @@ final class PhabricatorConfigClusterNotificationsController
         $uptime,
         $clients,
         $stats,
+        $history,
         $messages,
       );
     }
@@ -143,10 +154,12 @@ final class PhabricatorConfigClusterNotificationsController
           pht('Uptime'),
           pht('Clients'),
           pht('Messages'),
+          pht('History'),
           null,
         ))
       ->setColumnClasses(
         array(
+          null,
           null,
           null,
           null,
