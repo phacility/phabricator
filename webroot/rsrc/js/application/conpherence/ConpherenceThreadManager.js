@@ -240,6 +240,14 @@ JX.install('ConpherenceThreadManager', {
           this._updateThread();
         }));
 
+      // If we see a reconnect, always update the thread state.
+      JX.Stratcom.listen(
+        'aphlict-reconnect',
+        null,
+        JX.bind(this, function() {
+          this._updateThread();
+        }));
+
       JX.Stratcom.listen(
         'click',
         'show-older-messages',

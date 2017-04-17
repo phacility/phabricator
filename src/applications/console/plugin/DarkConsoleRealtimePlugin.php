@@ -24,6 +24,7 @@ final class DarkConsoleRealtimePlugin extends DarkConsolePlugin {
 
     $reconnect_label = pht('Reconnect');
     $replay_label = pht('Replay');
+    $repaint_label = pht('Repaint');
 
     $buttons = phutil_tag(
       'div',
@@ -50,6 +51,16 @@ final class DarkConsoleRealtimePlugin extends DarkConsolePlugin {
             array(
               'action' => 'replay',
               'label' => $replay_label,
+            )),
+        id(new PHUIButtonView())
+          ->setIcon('fa-paint-brush')
+          ->setColor(PHUIButtonView::GREY)
+          ->setText($repaint_label)
+          ->addSigil('dark-console-realtime-action')
+          ->setMetadata(
+            array(
+              'action' => 'repaint',
+              'label' => $repaint_label,
             )),
       ));
 

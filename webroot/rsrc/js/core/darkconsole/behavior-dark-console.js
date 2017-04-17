@@ -395,6 +395,9 @@ JX.behavior('dark-console', function(config, statics) {
         case 'replay':
           JX.Aphlict.getInstance().replay();
           break;
+        case 'repaint':
+          JX.Aphlict.getInstance().reconnect();
+          break;
       }
 
     });

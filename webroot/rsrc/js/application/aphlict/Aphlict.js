@@ -99,17 +99,16 @@ JX.install('Aphlict', {
       // after other tabs have had a chance to subscribe. Do this before we
       // broadcast that the connection status is now open.
       if (this._isReconnect) {
-        setTimeout(JX.bind(this, this._reconnect), 100);
+        setTimeout(JX.bind(this, this._didReconnect), 100);
       }
 
       this._broadcastStatus('open');
       JX.Leader.broadcast(null, {type: 'aphlict.getsubscribers'});
     },
 
-    _reconnect: function() {
+    _didReconnect: function() {
       this.replay();
-
-      JX.Leader.broadcast(null, {type: 'aphlict.reconnect', data: null});
+      this.reconnect();
     },
 
     replay: function() {
@@ -118,6 +117,10 @@ JX.install('Aphlict', {
       };
 
       JX.Leader.broadcast(null, {type: 'aphlict.replay', data: replay});
+    },
+
+    reconnect: function() {
+      JX.Leader.broadcast(null, {type: 'aphlict.reconnect', data: null});
     },
 
     _close: function() {

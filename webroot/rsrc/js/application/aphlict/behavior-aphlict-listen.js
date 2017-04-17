@@ -53,6 +53,10 @@ JX.behavior('aphlict-listen', function(config) {
       case 'notification.individual':
         JX.Stratcom.invoke('aphlict-notification-message', null, message.data);
         break;
+
+      case 'aphlict.reconnect':
+        JX.Stratcom.invoke('aphlict-reconnect', null, message.data);
+        break;
     }
   }
 
