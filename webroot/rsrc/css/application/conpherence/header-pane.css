@@ -24,13 +24,17 @@
 
 .conpherence-header-pane .conpherence-header-topic .phui-tag-core {
   color: {$sh-indigotext};
-  padding: 0;
+  padding: 0 4px;
   font-size: 12px;
   margin: 0 8px 0 0;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
   font-style: italic;
+}
+
+.device-phone .conpherence-header-pane .conpherence-header-topic {
+  display: none;
 }
 
 .conpherence-header-pane .phui-header-col1 {
@@ -47,8 +51,7 @@
   left: 0;
 }
 
-.conpherence-header-pane .policy-header-callout,
-.conpherence-header-pane .phui-tag-core {
+.conpherence-header-pane .policy-header-callout {
   background: transparent;
   font-size: 12px;
   margin: 0 8px 0 0;
