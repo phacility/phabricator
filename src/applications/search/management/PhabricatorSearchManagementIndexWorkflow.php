@@ -213,7 +213,7 @@ final class PhabricatorSearchManagementIndexWorkflow
 
   private function loadPHIDsByTypes($type) {
     $objects = id(new PhutilClassMapQuery())
-      ->setAncestorClass('PhabricatorFulltextInterface')
+      ->setAncestorClass('PhabricatorIndexableInterface')
       ->execute();
 
     $normalized_type = phutil_utf8_strtolower($type);
