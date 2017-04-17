@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => 'a34d59bd',
     'conpherence.pkg.js' => '5f86c17d',
     'core.pkg.css' => '959330a2',
-    'core.pkg.js' => 'd7ca5b9a',
+    'core.pkg.js' => 'cb50c410',
     'darkconsole.pkg.js' => 'a2faee86',
     'differential.pkg.css' => '90b30783',
     'differential.pkg.js' => 'ddfeb49b',
@@ -245,7 +245,7 @@ return array(
     'rsrc/externals/javelin/lib/Sound.js' => '949c0fe5',
     'rsrc/externals/javelin/lib/URI.js' => 'c989ade3',
     'rsrc/externals/javelin/lib/Vector.js' => '2caa8fb8',
-    'rsrc/externals/javelin/lib/WebSocket.js' => '0c4969d6',
+    'rsrc/externals/javelin/lib/WebSocket.js' => '3ffe32d6',
     'rsrc/externals/javelin/lib/Workflow.js' => '1e911d0f',
     'rsrc/externals/javelin/lib/__tests__/Cookie.js' => '5ed109e8',
     'rsrc/externals/javelin/lib/__tests__/DOM.js' => 'c984504b',
@@ -753,7 +753,7 @@ return array(
     'javelin-view-interpreter' => 'f829edb3',
     'javelin-view-renderer' => '6c2b09a2',
     'javelin-view-visitor' => 'efe49472',
-    'javelin-websocket' => '0c4969d6',
+    'javelin-websocket' => '3ffe32d6',
     'javelin-workboard-board' => '8935deef',
     'javelin-workboard-card' => 'c587b80f',
     'javelin-workboard-column' => '21df4ff5',
@@ -981,9 +981,6 @@ return array(
       'javelin-dom',
       'javelin-router',
     ),
-    '0c4969d6' => array(
-      'javelin-install',
-    ),
     '0ca788bd' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1147,6 +1144,9 @@ return array(
       'javelin-util',
       'javelin-workflow',
       'javelin-stratcom',
+    ),
+    '3ffe32d6' => array(
+      'javelin-install',
     ),
     '408bf173' => array(
       'javelin-behavior',
