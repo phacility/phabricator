@@ -5,7 +5,7 @@
 .conpherence-participant-pane {
   position: fixed;
   right: 0px;
-  top: 103px;
+  top: 106px;
   bottom: 0;
   width: 240px;
   border-width: 0 0 0 1px;
@@ -45,7 +45,7 @@
   position: fixed;
   overflow-y: auto;
   bottom: 0;
-  top: 102px;
+  top: 105px;
   width: 240px;
 }
 

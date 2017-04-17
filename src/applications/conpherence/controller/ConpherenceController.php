@@ -54,17 +54,23 @@ abstract class ConpherenceController extends PhabricatorController {
   }
 
   protected function buildHeaderPaneContent(
-    ConpherenceThread $conpherence,
-    array $policy_objects) {
-    assert_instances_of($policy_objects, 'PhabricatorPolicy');
+    ConpherenceThread $conpherence) {
     $viewer = $this->getViewer();
     $header = null;
 
     if ($conpherence->getID()) {
       $data = $conpherence->getDisplayData($this->getViewer());
+      $topic = id(new PHUITagView())
+        ->setName($data['topic'])
+        ->setShade(PHUITagView::COLOR_VIOLET)
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->addClass('conpherence-header-topic');
+
       $header = id(new PHUIHeaderView())
+        ->setViewer($viewer)
         ->setHeader($data['title'])
-        ->setSubheader($data['topic'])
+        ->addTag($topic)
+        ->setPolicyObject($conpherence)
         ->setImage($data['image']);
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(

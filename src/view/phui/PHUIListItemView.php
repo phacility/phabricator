@@ -33,6 +33,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $tooltip;
   private $actionIcon;
   private $actionIconHref;
+  private $count;
 
   public function setOpenInNewWindow($open_in_new_window) {
     $this->openInNewWindow = $open_in_new_window;
@@ -109,6 +110,11 @@ final class PHUIListItemView extends AphrontTagView {
 
   public function getIcon() {
     return $this->icon;
+  }
+
+  public function setCount($count) {
+    $this->count = $count;
+    return $this;
   }
 
   public function setIndented($indented) {
@@ -337,6 +343,16 @@ final class PHUIListItemView extends AphrontTagView {
         $action_icon);
     }
 
+    $count = null;
+    if ($this->count) {
+      $count = phutil_tag(
+        'span',
+        array(
+          'class' => 'phui-list-item-count',
+        ),
+        $this->count);
+    }
+
     $icons = $this->getIcons();
 
     $list_item = javelin_tag(
@@ -354,6 +370,7 @@ final class PHUIListItemView extends AphrontTagView {
         $icons,
         $this->renderChildren(),
         $name,
+        $count,
       ));
 
     return array($list_item, $action_link);

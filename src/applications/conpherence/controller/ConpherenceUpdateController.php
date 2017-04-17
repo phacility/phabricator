@@ -522,18 +522,12 @@ final class ConpherenceUpdateController
     $people_widget = null;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $policy_objects = id(new PhabricatorPolicyQuery())
-          ->setViewer($user)
-          ->setObject($conpherence)
-          ->execute();
-        $header = $this->buildHeaderPaneContent(
-          $conpherence,
-          $policy_objects);
+        $header = $this->buildHeaderPaneContent($conpherence);
         $header = hsprintf('%s', $header);
         $nav_item = id(new ConpherenceThreadListView())
           ->setUser($user)
           ->setBaseURI($this->getApplicationURI())
-          ->renderSingleThread($conpherence, $policy_objects);
+          ->renderThreadItem($conpherence);
         $nav_item = hsprintf('%s', $nav_item);
         break;
       case ConpherenceUpdateActions::ADD_PERSON:
