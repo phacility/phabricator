@@ -114,9 +114,16 @@ JX.behavior('aphlict-listen', function(config) {
     config.websocketURI,
     config.subscriptions);
 
-  client
-    .setHandler(onAphlictMessage)
-    .start();
+  var start_client = function() {
+    client
+      .setHandler(onAphlictMessage)
+      .start();
+  };
+
+  // Don't start the client until other behaviors have had a chance to
+  // initialize. In particular, we want to capture events into the log for
+  // the DarkConsole "Realtime" panel.
+  setTimeout(start_client, 0);
 
   JX.Stratcom.listen(
     'quicksand-redraw',
