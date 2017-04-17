@@ -392,6 +392,9 @@ JX.behavior('dark-console', function(config, statics) {
             ws.reconnect();
           }
           break;
+        case 'replay':
+          JX.Aphlict.getInstance().replay();
+          break;
       }
 
     });

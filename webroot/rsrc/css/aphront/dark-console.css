@@ -231,3 +231,7 @@
   padding: 8px;
   margin: 2px;
 }
+
+.dark-console-realtime .button {
+  margin-right: 8px;
+}

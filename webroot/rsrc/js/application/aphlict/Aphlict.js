@@ -40,6 +40,7 @@ JX.install('Aphlict', {
     _socket: null,
     _subscriptions: null,
     _status: null,
+    _isReconnect: false,
 
     start: function() {
       JX.Leader.listen('onBecomeLeader', JX.bind(this, this._lead));
@@ -94,8 +95,29 @@ JX.install('Aphlict', {
     },
 
     _open: function() {
+      // If this is a reconnect, ask the server to replay recent messages
+      // after other tabs have had a chance to subscribe. Do this before we
+      // broadcast that the connection status is now open.
+      if (this._isReconnect) {
+        setTimeout(JX.bind(this, this._reconnect), 100);
+      }
+
       this._broadcastStatus('open');
       JX.Leader.broadcast(null, {type: 'aphlict.getsubscribers'});
+    },
+
+    _reconnect: function() {
+      this.replay();
+
+      JX.Leader.broadcast(null, {type: 'aphlict.reconnect', data: null});
+    },
+
+    replay: function() {
+      var replay = {
+        age: 60000
+      };
+
+      JX.Leader.broadcast(null, {type: 'aphlict.replay', data: replay});
     },
 
     _close: function() {
@@ -131,10 +153,13 @@ JX.install('Aphlict', {
 
         case 'aphlict.subscribe':
           if (is_leader) {
-            this._write({
-              command: 'subscribe',
-              data: message.data
-            });
+            this._writeCommand('subscribe', message.data);
+          }
+          break;
+
+        case 'aphlict.replay':
+          if (is_leader) {
+            this._writeCommand('replay', message.data);
           }
           break;
 
@@ -147,11 +172,27 @@ JX.install('Aphlict', {
 
     _setStatus: function(status) {
       this._status = status;
+
+      // If we've ever seen an open connection, any new connection we make
+      // is a reconnect and should replay history.
+      if (status == 'open') {
+        this._isReconnect = true;
+      }
+
       this.invoke('didChangeStatus');
     },
 
     _write: function(message) {
       this._socket.send(JX.JSON.stringify(message));
+    },
+
+    _writeCommand: function(command, message) {
+      var frame = {
+        command: command,
+        data: message
+      };
+
+      return this._write(frame);
     }
 
   },
