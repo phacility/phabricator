@@ -26,14 +26,18 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
     }
 
     if ($request->isFormPost()) {
-      // Mark the file for deletion, save it, and schedule a worker to
-      // sweep by later and pick it up.
-      $file->setIsDeleted(true)->save();
+      $xactions = array();
 
-      PhabricatorWorker::scheduleTask(
-        'FileDeletionWorker',
-        array('objectPHID' => $file->getPHID()),
-        array('priority' => PhabricatorWorker::PRIORITY_BULK));
+      $xactions[] = id(new PhabricatorFileTransaction())
+        ->setTransactionType(PhabricatorFileDeleteTransaction::TRANSACTIONTYPE)
+        ->setNewValue(true);
+
+      id(new PhabricatorFileEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($file, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI('/file/');
     }

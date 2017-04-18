@@ -41,6 +41,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_STORAGE = 'storage';
   const METADATA_INTEGRITY = 'integrity';
 
+  const STATUS_ACTIVE = 'active';
+  const STATUS_DELETED = 'deleted';
+
   protected $name;
   protected $mimeType;
   protected $byteSize;
