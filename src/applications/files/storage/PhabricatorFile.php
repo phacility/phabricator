@@ -28,7 +28,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorIndexableInterface,
+    PhabricatorNgramsInterface {
 
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
@@ -87,7 +89,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'metadata' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255?',
+        'name' => 'sort255?',
         'mimeType' => 'text255?',
         'byteSize' => 'uint64',
         'storageEngine' => 'text32',
@@ -1583,6 +1585,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorFileNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

@@ -119,6 +119,12 @@ final class PhabricatorFileQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new PhabricatorFileNameNgrams()),
+      $ngrams);
+  }
+
   public function showOnlyExplicitUploads($explicit_uploads) {
     $this->explicitUploads = $explicit_uploads;
     return $this;

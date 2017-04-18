@@ -71,7 +71,7 @@ final class PhabricatorFileEditor
   }
 
   protected function supportsSearch() {
-    return false;
+    return true;
   }
 
 }

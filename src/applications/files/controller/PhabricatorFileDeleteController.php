@@ -25,7 +25,8 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
     }
 
     if ($request->isFormPost()) {
-      $file->delete();
+      $engine = new PhabricatorDestructionEngine();
+      $engine->destroyObject($file);
       return id(new AphrontRedirectResponse())->setURI('/file/');
     }
 
