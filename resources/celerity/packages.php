@@ -46,6 +46,7 @@ return array(
     'javelin-behavior-toggle-class',
     'javelin-behavior-lightbox-attachments',
     'phabricator-busy',
+    'javelin-sound',
     'javelin-aphlict',
     'phabricator-notification',
     'javelin-behavior-aphlict-listen',

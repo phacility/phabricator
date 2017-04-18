@@ -313,6 +313,14 @@ JX.install('ConpherenceThreadManager', {
 
       this._updating.knownID = r.latest_transaction_id;
       this._latestTransactionID = r.latest_transaction_id;
+
+      JX.Leader.broadcast(
+        'conpherence.message.' + r.latest_transaction_id,
+        {
+          type: 'sound',
+          data: r.sound.receive
+        });
+
       JX.Stratcom.invoke(
         'conpherence-redraw-aphlict',
         null,

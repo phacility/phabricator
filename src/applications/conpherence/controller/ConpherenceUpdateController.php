@@ -546,6 +546,9 @@ final class ConpherenceUpdateController
     $dropdown_query = id(new AphlictDropdownDataQuery())
       ->setViewer($user);
     $dropdown_query->execute();
+
+    $receive_sound = celerity_get_resource_uri('/rsrc/audio/basic/tap.mp3');
+
     $content = array(
       'non_update' => $non_update,
       'transactions' => hsprintf('%s', $rendered_transactions),
@@ -558,6 +561,9 @@ final class ConpherenceUpdateController
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),
+      ),
+      'sound' => array(
+        'receive' => $receive_sound,
       ),
     );
 
