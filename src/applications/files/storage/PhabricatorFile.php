@@ -148,6 +148,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return parent::save();
   }
 
+  public function saveAndIndex() {
+    $this->save();
+    PhabricatorSearchWorker::queueDocumentForIndexing($this->getPHID());
+    return $this;
+  }
+
   public function getMonogram() {
     return 'F'.$this->getID();
   }
@@ -234,7 +240,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $new_file->readPropertiesFromParameters($params);
 
-    $new_file->save();
+    $new_file->saveAndIndex();
 
     return $new_file;
   }
@@ -390,7 +396,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       // Do nothing
     }
 
-    $file->save();
+    $file->saveAndIndex();
 
     return $file;
   }

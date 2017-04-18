@@ -129,7 +129,7 @@ final class PhabricatorChunkedFileStorageEngine
       foreach ($chunks as $chunk) {
         $chunk->save();
       }
-      $file->save();
+      $file->saveAndIndex();
     $file->saveTransaction();
 
     return $file;
