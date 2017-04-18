@@ -139,4 +139,29 @@ final class AphrontFileResponse extends AphrontResponse {
     return $this->getCompressResponse();
   }
 
+  public function parseHTTPRange($range) {
+    $begin = null;
+    $end = null;
+
+    $matches = null;
+    if (preg_match('/^bytes=(\d+)-(\d*)$/', $range, $matches)) {
+      // Note that the "Range" header specifies bytes differently than
+      // we do internally: the range 0-1 has 2 bytes (byte 0 and byte 1).
+      $begin = (int)$matches[1];
+
+      // The "Range" may be "200-299" or "200-", meaning "until end of file".
+      if (strlen($matches[2])) {
+        $range_end = (int)$matches[2];
+        $end = $range_end + 1;
+      } else {
+        $range_end = null;
+      }
+
+      $this->setHTTPResponseCode(206);
+      $this->setRange($begin, $range_end);
+    }
+
+    return array($begin, $end);
+  }
+
 }
