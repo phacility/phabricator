@@ -153,6 +153,18 @@ JX.install('AphlictClientServer', {
               }
               break;
 
+            case 'ping':
+              var pong = {
+                type: 'pong'
+              };
+
+              try {
+                listener.writeMessage(pong);
+              } catch (error) {
+                // Ignore any issues here, we'll clean up elsewhere.
+              }
+              break;
+
             default:
               log(
                 'Unrecognized command "%s".',

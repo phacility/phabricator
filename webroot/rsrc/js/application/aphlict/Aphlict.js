@@ -41,6 +41,7 @@ JX.install('Aphlict', {
     _subscriptions: null,
     _status: null,
     _isReconnect: false,
+    _keepaliveInterval: false,
 
     start: function() {
       JX.Leader.listen('onBecomeLeader', JX.bind(this, this._lead));
@@ -104,6 +105,14 @@ JX.install('Aphlict', {
 
       this._broadcastStatus('open');
       JX.Leader.broadcast(null, {type: 'aphlict.getsubscribers'});
+
+      // By default, ELBs terminate connections after 60 seconds with no
+      // traffic. Other load balancers may have similar configuration. Send
+      // a keepalive message every 15 seconds to prevent load balancers from
+      // deciding they can reap this connection.
+
+      var keepalive = JX.bind(this, this._keepalive);
+      this._keepaliveInterval = setInterval(keepalive, 15000);
     },
 
     _didReconnect: function() {
@@ -124,6 +133,11 @@ JX.install('Aphlict', {
     },
 
     _close: function() {
+      if (this._keepaliveInterval) {
+        clearInterval(this._keepaliveInterval);
+        this._keepaliveInterval = null;
+      }
+
       this._broadcastStatus('closed');
     },
 
@@ -134,6 +148,11 @@ JX.install('Aphlict', {
     _message: function(raw) {
       var message = JX.JSON.parse(raw);
       var id = message.uniqueID || null;
+
+      // If this is just a keepalive response, don't bother broadcasting it.
+      if (message.type == 'pong') {
+        return;
+      }
 
       JX.Leader.broadcast(id, {type: 'aphlict.server', data: message});
     },
@@ -198,6 +217,10 @@ JX.install('Aphlict', {
       };
 
       return this._write(frame);
+    },
+
+    _keepalive: function() {
+      this._writeCommand('ping', null);
     }
 
   },
