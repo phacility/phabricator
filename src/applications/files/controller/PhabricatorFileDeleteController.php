@@ -9,6 +9,7 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->withIsDeleted(false)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -25,8 +26,15 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
     }
 
     if ($request->isFormPost()) {
-      $engine = new PhabricatorDestructionEngine();
-      $engine->destroyObject($file);
+      // Mark the file for deletion, save it, and schedule a worker to
+      // sweep by later and pick it up.
+      $file->setIsDeleted(true)->save();
+
+      PhabricatorWorker::scheduleTask(
+        'FileDeletionWorker',
+        array('objectPHID' => $file->getPHID()),
+        array('priority' => PhabricatorWorker::PRIORITY_BULK));
+
       return id(new AphrontRedirectResponse())->setURI('/file/');
     }
 

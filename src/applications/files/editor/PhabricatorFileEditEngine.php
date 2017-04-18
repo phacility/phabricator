@@ -36,7 +36,9 @@ final class PhabricatorFileEditEngine
   }
 
   protected function newObjectQuery() {
-    return new PhabricatorFileQuery();
+    $query = new PhabricatorFileQuery();
+    $query->withIsDeleted(false);
+    return $query;
   }
 
   protected function getObjectCreateTitleText($object) {

@@ -143,6 +143,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($this->phid))
+      ->withIsDeleted(false)
       ->executeOne();
 
     if (!$file) {

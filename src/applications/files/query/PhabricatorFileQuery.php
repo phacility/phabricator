@@ -15,6 +15,7 @@ final class PhabricatorFileQuery
   private $maxLength;
   private $names;
   private $isPartial;
+  private $isDeleted;
   private $needTransforms;
   private $builtinKeys;
 
@@ -116,6 +117,11 @@ final class PhabricatorFileQuery
 
   public function withIsPartial($partial) {
     $this->isPartial = $partial;
+    return $this;
+  }
+
+  public function withIsDeleted($deleted) {
+    $this->isDeleted = $deleted;
     return $this;
   }
 
@@ -394,6 +400,13 @@ final class PhabricatorFileQuery
         $conn,
         'isPartial = %d',
         (int)$this->isPartial);
+    }
+
+    if ($this->isDeleted !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isDeleted = %d',
+        (int)$this->isDeleted);
     }
 
     if ($this->builtinKeys !== null) {

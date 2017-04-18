@@ -16,7 +16,9 @@ final class PhabricatorFileSearchEngine
   }
 
   public function newQuery() {
-    return new PhabricatorFileQuery();
+    $query = new PhabricatorFileQuery();
+    $query->withIsDeleted(false);
+    return $query;
   }
 
   protected function buildCustomSearchFields() {

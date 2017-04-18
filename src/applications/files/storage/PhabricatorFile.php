@@ -59,6 +59,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $isExplicitUpload = 1;
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $isPartial = 0;
+  protected $isDeleted = 0;
 
   private $objects = self::ATTACHABLE;
   private $objectPHIDs = self::ATTACHABLE;
@@ -103,6 +104,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'mailKey' => 'bytes20',
         'isPartial' => 'bool',
         'builtinKey' => 'text64?',
+        'isDeleted' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
