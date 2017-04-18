@@ -245,6 +245,10 @@ JX.install('ConpherenceThreadManager', {
         'aphlict-reconnect',
         null,
         JX.bind(this, function() {
+          if (!this._loadedThreadPHID) {
+            return;
+          }
+
           this._updateThread();
         }));
 

@@ -29,6 +29,7 @@ JX.install('Aphlict', {
     this._uri = uri;
     this._subscriptions = subscriptions;
     this._setStatus('setup');
+    this._startTime = new Date().getTime();
 
     JX.Aphlict._instance = this;
   },
@@ -42,6 +43,7 @@ JX.install('Aphlict', {
     _status: null,
     _isReconnect: false,
     _keepaliveInterval: false,
+    _startTime: null,
 
     start: function() {
       JX.Leader.listen('onBecomeLeader', JX.bind(this, this._lead));
@@ -121,8 +123,22 @@ JX.install('Aphlict', {
     },
 
     replay: function() {
+      var age = 60000;
+
+      // If the page was loaded a few moments ago, only query for recent
+      // history. This keeps us from replaying events over and over again as
+      // a user browses normally.
+
+      // Allow a small margin of error for the actual page load time. It's
+      // also fine to replay a notification which the user saw for a brief
+      // moment on the previous page.
+      var extra_time = 500;
+      var now = new Date().getTime();
+
+      age = Math.min(extra_time + (now - this._startTime), age);
+
       var replay = {
-        age: 60000
+        age: age
       };
 
       JX.Leader.broadcast(null, {type: 'aphlict.replay', data: replay});

@@ -66,10 +66,12 @@ JX.behavior('aphlict-listen', function(config) {
       return;
     }
 
-    JX.Leader.broadcast(null, {
-      type: 'notification.individual',
-      data: response
-    });
+    JX.Leader.broadcast(
+      response.uniqueID,
+      {
+        type: 'notification.individual',
+        data: response
+      });
   }
 
   JX.Stratcom.listen('aphlict-notification-message', null, function(e) {
