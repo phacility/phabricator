@@ -3,7 +3,7 @@
  */
 
 .conpherence-header-pane {
-  background-color: #f9f9f9;
+  background-color: {$lightbluebackground};
 }
 
 .conpherence-header-pane .phui-header-shell {
