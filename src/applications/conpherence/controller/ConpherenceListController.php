@@ -151,6 +151,7 @@ final class ConpherenceListController extends ConpherenceController {
       ->withParticipantPHIDs(array($viewer->getPHID()))
       ->setLimit($limit)
       ->execute();
+    $all_participation = mpull($all_participation, null, 'getConpherencePHID');
 
     return array(
       'all_participation' => $all_participation,

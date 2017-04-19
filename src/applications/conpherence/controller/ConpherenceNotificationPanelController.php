@@ -12,6 +12,7 @@ final class ConpherenceNotificationPanelController
       ->withParticipantPHIDs(array($user->getPHID()))
       ->setLimit(5)
       ->execute();
+    $participant_data = mpull($participant_data, null, 'getConpherencePHID');
 
     if ($participant_data) {
       $conpherences = id(new ConpherenceThreadQuery())

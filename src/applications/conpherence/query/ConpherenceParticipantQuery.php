@@ -25,22 +25,7 @@ final class ConpherenceParticipantQuery extends PhabricatorOffsetPagedQuery {
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
 
-    $participants = $table->loadAllFromArray($data);
-
-    // TODO: Fix this, it's bogus.
-    if ('garbage') {
-      if (count($this->participantPHIDs) !== 1) {
-        throw new Exception(
-          pht(
-            'This query only works when querying for exactly one participant '.
-            'PHID!'));
-      }
-      // This will throw results away if we aren't doing a query for exactly
-      // one participant PHID.
-      $participants = mpull($participants, null, 'getConpherencePHID');
-    }
-
-    return $participants;
+    return $table->loadAllFromArray($data);
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
