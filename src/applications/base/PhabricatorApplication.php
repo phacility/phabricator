@@ -643,7 +643,7 @@ abstract class PhabricatorApplication
 
 
   public function getApplicationTransactionEditor() {
-    return new PhabricatorApplicationEditor();
+    return new PhutilMethodNotImplementedException(pht('Coming Soon!'));
   }
 
   public function getApplicationTransactionObject() {
