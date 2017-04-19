@@ -173,17 +173,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           $phids = $this->getPHIDTransactionNewValue($xaction, array());
           foreach ($phids as $phid) {
             if ($phid == $this->getActor()->getPHID()) {
-              $status = ConpherenceParticipationStatus::UP_TO_DATE;
               $message_count = 1;
             } else {
-              $status = ConpherenceParticipationStatus::BEHIND;
               $message_count = 0;
             }
             $participants[$phid] =
               id(new ConpherenceParticipant())
               ->setConpherencePHID($object->getPHID())
               ->setParticipantPHID($phid)
-              ->setParticipationStatus($status)
               ->setDateTouched(time())
               ->setSeenMessageCount($message_count)
               ->save();
@@ -243,17 +240,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         $add = array_keys(array_diff_key($new_map, $old_map));
         foreach ($add as $phid) {
           if ($phid == $this->getActor()->getPHID()) {
-            $status = ConpherenceParticipationStatus::UP_TO_DATE;
             $message_count = $object->getMessageCount();
           } else {
-            $status = ConpherenceParticipationStatus::BEHIND;
             $message_count = 0;
           }
           $participants[$phid] =
             id(new ConpherenceParticipant())
             ->setConpherencePHID($object->getPHID())
             ->setParticipantPHID($phid)
-            ->setParticipationStatus($status)
             ->setDateTouched(time())
             ->setSeenMessageCount($message_count)
             ->save();
@@ -279,22 +273,18 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
           // update everyone's participation status on a message -only-
           $xaction_phid = $xaction->getPHID();
-          $behind = ConpherenceParticipationStatus::BEHIND;
-          $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
           $participants = $object->getParticipants();
           $user = $this->getActor();
           $time = time();
           foreach ($participants as $phid => $participant) {
             if ($phid != $user->getPHID()) {
-              if ($participant->getParticipationStatus() != $behind) {
+              if ($participant->isUpToDate($object)) {
                 $participant->setSeenMessageCount(
                   $object->getMessageCount() - $message_count);
               }
-              $participant->setParticipationStatus($behind);
               $participant->setDateTouched($time);
             } else {
               $participant->setSeenMessageCount($object->getMessageCount());
-              $participant->setParticipationStatus($up_to_date);
               $participant->setDateTouched($time);
             }
             $participant->save();

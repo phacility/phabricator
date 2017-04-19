@@ -28,10 +28,9 @@ final class PhabricatorUserMessageCountCacheType
 
     $user_phids = mpull($users, 'getPHID');
 
-    $unread_status = ConpherenceParticipationStatus::BEHIND;
     $unread = id(new ConpherenceParticipantCountQuery())
       ->withParticipantPHIDs($user_phids)
-      ->withParticipationStatus($unread_status)
+      ->withUnread(true)
       ->execute();
 
     $empty = array_fill_keys($user_phids, 0);
