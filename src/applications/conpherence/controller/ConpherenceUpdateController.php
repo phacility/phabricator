@@ -115,11 +115,13 @@ final class ConpherenceUpdateController
           break;
         case ConpherenceUpdateActions::NOTIFICATIONS:
           $notifications = $request->getStr('notifications');
+          $sounds = $request->getArr('sounds');
           $participant = $conpherence->getParticipantIfExists($user->getPHID());
           if (!$participant) {
             return id(new Aphront404Response());
           }
           $participant->setSettings(array('notifications' => $notifications));
+          $participant->setSettings(array('sounds' => $sounds));
           $participant->save();
           return id(new AphrontRedirectResponse())
             ->setURI('/'.$conpherence->getMonogram());
@@ -266,29 +268,53 @@ final class ConpherenceUpdateController
     $notification_key = PhabricatorConpherenceNotificationsSetting::SETTINGKEY;
     $notification_default = $user->getUserSetting($notification_key);
 
+    $sound_key = PhabricatorConpherenceSoundSetting::SETTINGKEY;
+    $sound_default = $user->getUserSetting($sound_key);
+
     $settings = $participant->getSettings();
-    $notifications = idx(
-      $settings,
-      'notifications',
-      $notification_default);
+    $notifications = idx($settings, 'notifications', $notification_default);
+
+    $sounds = idx($settings, 'sounds', array());
+    $map = PhabricatorConpherenceSoundSetting::getDefaultSound($sound_default);
+    $receive = idx($sounds,
+      ConpherenceRoomSettings::SOUND_RECEIVE,
+      $map[ConpherenceRoomSettings::SOUND_RECEIVE]);
+    $mention = idx($sounds,
+      ConpherenceRoomSettings::SOUND_MENTION,
+      $map[ConpherenceRoomSettings::SOUND_MENTION]);
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFullWidth(true)
       ->appendControl(
-      id(new AphrontFormRadioButtonControl())
-        ->addButton(
+        id(new AphrontFormRadioButtonControl())
+          ->setLabel(pht('Notify'))
+          ->addButton(
           PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL,
           PhabricatorConpherenceNotificationsSetting::getSettingLabel(
           PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL),
-          '')
-        ->addButton(
+            '')
+          ->addButton(
           PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY,
           PhabricatorConpherenceNotificationsSetting::getSettingLabel(
           PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY),
-          '')
-        ->setName('notifications')
-        ->setValue($notifications));
+            '')
+          ->setName('notifications')
+          ->setValue($notifications))
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Message Received'))
+            ->setName('sounds['.ConpherenceRoomSettings::SOUND_RECEIVE.']')
+            ->setOptions(ConpherenceRoomSettings::getDropdownSoundMap())
+            ->setValue($receive));
+
+        // TODO: Future Adventure! Expansion Pack
+        //
+        // ->appendChild(
+        //  id(new AphrontFormSelectControl())
+        //    ->setLabel(pht('Username Mentioned'))
+        //    ->setName('sounds['.ConpherenceRoomSettings::SOUND_MENTION.']')
+        //    ->setOptions(ConpherenceRoomSettings::getDropdownSoundMap())
+        //    ->setValue($mention));
 
     return id(new AphrontDialogView())
       ->setTitle(pht('Room Preferences'))
@@ -496,6 +522,8 @@ final class ConpherenceUpdateController
       ->executeOne();
 
     $non_update = false;
+    $participant = $conpherence->getParticipant($user->getPHID());
+
     if ($need_transactions && $conpherence->getTransactions()) {
       $data = ConpherenceTransactionRenderer::renderTransactions(
         $user,
@@ -503,9 +531,7 @@ final class ConpherenceUpdateController
       $key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
       $minimized = $user->getUserSetting($key);
       if (!$minimized) {
-        $participant_obj = $conpherence->getParticipant($user->getPHID());
-        $participant_obj
-          ->markUpToDate($conpherence, $data['latest_transaction']);
+        $participant->markUpToDate($conpherence, $data['latest_transaction']);
       }
     } else if ($need_transactions) {
       $non_update = true;
@@ -547,7 +573,9 @@ final class ConpherenceUpdateController
       ->setViewer($user);
     $dropdown_query->execute();
 
-    $receive_sound = celerity_get_resource_uri('/rsrc/audio/basic/tap.mp3');
+    $sounds = $this->getSoundForParticipant($user, $participant);
+    $receive_sound = $sounds[ConpherenceRoomSettings::SOUND_RECEIVE];
+    $mention_sound = $sounds[ConpherenceRoomSettings::SOUND_MENTION];
 
     $content = array(
       'non_update' => $non_update,
@@ -564,10 +592,38 @@ final class ConpherenceUpdateController
       ),
       'sound' => array(
         'receive' => $receive_sound,
+        'mention' => $mention_sound,
       ),
     );
 
     return $content;
+  }
+
+  protected function getSoundForParticipant(
+    PhabricatorUser $user,
+    ConpherenceParticipant $participant) {
+
+    $sound_key = PhabricatorConpherenceSoundSetting::SETTINGKEY;
+    $sound_default = $user->getUserSetting($sound_key);
+
+    $settings = $participant->getSettings();
+    $sounds = idx($settings, 'sounds', array());
+    $map = PhabricatorConpherenceSoundSetting::getDefaultSound($sound_default);
+
+    $receive = idx($sounds,
+      ConpherenceRoomSettings::SOUND_RECEIVE,
+      $map[ConpherenceRoomSettings::SOUND_RECEIVE]);
+    $mention = idx($sounds,
+      ConpherenceRoomSettings::SOUND_MENTION,
+      $map[ConpherenceRoomSettings::SOUND_MENTION]);
+
+    $sound_map = ConpherenceRoomSettings::getSoundMap();
+
+    return array(
+      ConpherenceRoomSettings::SOUND_RECEIVE => $sound_map[$receive]['rsrc'],
+      ConpherenceRoomSettings::SOUND_MENTION => $sound_map[$mention]['rsrc'],
+    );
+
   }
 
 }
