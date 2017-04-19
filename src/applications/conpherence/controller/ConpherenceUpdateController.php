@@ -120,8 +120,10 @@ final class ConpherenceUpdateController
           if (!$participant) {
             return id(new Aphront404Response());
           }
-          $participant->setSettings(array('notifications' => $notifications));
-          $participant->setSettings(array('sounds' => $sounds));
+          $participant->setSettings(array(
+            'notifications' => $notifications,
+            'sounds' => $sounds,
+          ));
           $participant->save();
           return id(new AphrontRedirectResponse())
             ->setURI('/'.$conpherence->getMonogram());
