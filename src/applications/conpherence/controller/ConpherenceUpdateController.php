@@ -24,9 +24,6 @@ final class ConpherenceUpdateController
       case ConpherenceUpdateActions::METADATA:
         $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
         break;
-      case ConpherenceUpdateActions::NOTIFICATIONS:
-        $need_participants = true;
-        break;
       case ConpherenceUpdateActions::LOAD:
         break;
     }
@@ -112,22 +109,6 @@ final class ConpherenceUpdateController
               ->setNewValue(array('-' => array($person_phid)));
             $response_mode = 'go-home';
           }
-          break;
-        case ConpherenceUpdateActions::NOTIFICATIONS:
-          $notifications = $request->getStr('notifications');
-          $sounds = $request->getArr('sounds');
-          $participant = $conpherence->getParticipantIfExists($user->getPHID());
-          if (!$participant) {
-            return id(new Aphront404Response());
-          }
-          $participant->setSettings(array(
-            'notifications' => $notifications,
-            'sounds' => $sounds,
-          ));
-          $participant->save();
-          return id(new AphrontRedirectResponse())
-            ->setURI('/'.$conpherence->getMonogram());
-
           break;
         case ConpherenceUpdateActions::METADATA:
           $title = $request->getStr('title');
@@ -221,9 +202,6 @@ final class ConpherenceUpdateController
     }
 
     switch ($action) {
-      case ConpherenceUpdateActions::NOTIFICATIONS:
-        $dialog = $this->renderPreferencesDialog($conpherence);
-        break;
       case ConpherenceUpdateActions::ADD_PERSON:
         $dialog = $this->renderAddPersonDialog($conpherence);
         break;
@@ -243,88 +221,6 @@ final class ConpherenceUpdateController
         ->setSubmitURI($this->getApplicationURI('update/'.$conpherence_id.'/'))
         ->addSubmitButton()
         ->addCancelButton($this->getApplicationURI($conpherence->getID().'/'));
-
-  }
-
-  private function renderPreferencesDialog(
-    ConpherenceThread $conpherence) {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $participant = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$participant) {
-      if ($user->isLoggedIn()) {
-        $text = pht(
-          'Notification settings are available after joining the room.');
-      } else {
-        $text = pht(
-          'Notification settings are available after logging in and joining '.
-          'the room.');
-      }
-      return id(new AphrontDialogView())
-        ->setTitle(pht('Room Preferences'))
-        ->appendParagraph($text);
-    }
-
-    $notification_key = PhabricatorConpherenceNotificationsSetting::SETTINGKEY;
-    $notification_default = $user->getUserSetting($notification_key);
-
-    $sound_key = PhabricatorConpherenceSoundSetting::SETTINGKEY;
-    $sound_default = $user->getUserSetting($sound_key);
-
-    $settings = $participant->getSettings();
-    $notifications = idx($settings, 'notifications', $notification_default);
-
-    $sounds = idx($settings, 'sounds', array());
-    $map = PhabricatorConpherenceSoundSetting::getDefaultSound($sound_default);
-    $receive = idx($sounds,
-      ConpherenceRoomSettings::SOUND_RECEIVE,
-      $map[ConpherenceRoomSettings::SOUND_RECEIVE]);
-    $mention = idx($sounds,
-      ConpherenceRoomSettings::SOUND_MENTION,
-      $map[ConpherenceRoomSettings::SOUND_MENTION]);
-
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendControl(
-        id(new AphrontFormRadioButtonControl())
-          ->setLabel(pht('Notify'))
-          ->addButton(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL,
-          PhabricatorConpherenceNotificationsSetting::getSettingLabel(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL),
-            '')
-          ->addButton(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY,
-          PhabricatorConpherenceNotificationsSetting::getSettingLabel(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY),
-            '')
-          ->setName('notifications')
-          ->setValue($notifications))
-        ->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setLabel(pht('Message Received'))
-            ->setName('sounds['.ConpherenceRoomSettings::SOUND_RECEIVE.']')
-            ->setOptions(ConpherenceRoomSettings::getDropdownSoundMap())
-            ->setValue($receive));
-
-        // TODO: Future Adventure! Expansion Pack
-        //
-        // ->appendChild(
-        //  id(new AphrontFormSelectControl())
-        //    ->setLabel(pht('Username Mentioned'))
-        //    ->setName('sounds['.ConpherenceRoomSettings::SOUND_MENTION.']')
-        //    ->setOptions(ConpherenceRoomSettings::getDropdownSoundMap())
-        //    ->setValue($mention));
-
-    return id(new AphrontDialogView())
-      ->setTitle(pht('Room Preferences'))
-      ->addHiddenInput('action', 'notifications')
-      ->addHiddenInput(
-        'latest_transaction_id',
-        $request->getInt('latest_transaction_id'))
-      ->appendForm($form);
 
   }
 
@@ -508,7 +404,6 @@ final class ConpherenceUpdateController
         $need_transactions = true;
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
-      case ConpherenceUpdateActions::NOTIFICATIONS:
       default:
         break;
 
@@ -566,7 +461,6 @@ final class ConpherenceUpdateController
         $people_widget = hsprintf('%s', $people_widget->render());
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
-      case ConpherenceUpdateActions::NOTIFICATIONS:
       default:
         break;
     }

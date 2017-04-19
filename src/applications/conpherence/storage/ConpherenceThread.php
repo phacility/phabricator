@@ -72,6 +72,10 @@ final class ConpherenceThread extends ConpherenceDAO
     return 'Z'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function attachParticipants(array $participants) {
     assert_instances_of($participants, 'ConpherenceParticipant');
     $this->participants = $participants;
