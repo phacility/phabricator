@@ -168,8 +168,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           // participation data asap to pass policy checks. For existing
           // ConpherenceThreads, the existing participation is correct
           // at this stage. Note that later in applyCustomExternalTransaction
-          // this participation data will be updated, particularly the
-          // behindTransactionPHID which is just a generated dummy for now.
+          // this participation data will be updated.
           $participants = array();
           $phids = $this->getPHIDTransactionNewValue($xaction, array());
           foreach ($phids as $phid) {
@@ -186,7 +185,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
               ->setParticipantPHID($phid)
               ->setParticipationStatus($status)
               ->setDateTouched(time())
-              ->setBehindTransactionPHID($xaction->generatePHID())
               ->setSeenMessageCount($message_count)
               ->save();
             $object->attachParticipants($participants);
@@ -257,7 +255,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             ->setParticipantPHID($phid)
             ->setParticipationStatus($status)
             ->setDateTouched(time())
-            ->setBehindTransactionPHID($xaction->getPHID())
             ->setSeenMessageCount($message_count)
             ->save();
         }
@@ -290,7 +287,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           foreach ($participants as $phid => $participant) {
             if ($phid != $user->getPHID()) {
               if ($participant->getParticipationStatus() != $behind) {
-                $participant->setBehindTransactionPHID($xaction_phid);
                 $participant->setSeenMessageCount(
                   $object->getMessageCount() - $message_count);
               }
@@ -298,7 +294,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
               $participant->setDateTouched($time);
             } else {
               $participant->setSeenMessageCount($object->getMessageCount());
-              $participant->setBehindTransactionPHID($xaction_phid);
               $participant->setParticipationStatus($up_to_date);
               $participant->setDateTouched($time);
             }

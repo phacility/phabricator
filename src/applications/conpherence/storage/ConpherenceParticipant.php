@@ -5,7 +5,6 @@ final class ConpherenceParticipant extends ConpherenceDAO {
   protected $participantPHID;
   protected $conpherencePHID;
   protected $participationStatus;
-  protected $behindTransactionPHID;
   protected $seenMessageCount;
   protected $dateTouched;
   protected $settings = array();
@@ -44,7 +43,6 @@ final class ConpherenceParticipant extends ConpherenceDAO {
     ConpherenceTransaction $xaction) {
     if (!$this->isUpToDate($conpherence)) {
       $this->setParticipationStatus(ConpherenceParticipationStatus::UP_TO_DATE);
-      $this->setBehindTransactionPHID($xaction->getPHID());
       $this->setSeenMessageCount($conpherence->getMessageCount());
       $this->save();
 
