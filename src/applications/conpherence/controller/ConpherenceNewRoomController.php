@@ -23,7 +23,8 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       $participants[] = $user->getPHID();
       $participants = array_unique($participants);
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
+        ->setTransactionType(
+          ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
         ->setNewValue(array('+' => $participants));
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(ConpherenceThreadTopicTransaction::TRANSACTIONTYPE)

@@ -61,7 +61,7 @@ final class ConpherenceUpdateController
         case ConpherenceUpdateActions::JOIN_ROOM:
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(
-              ConpherenceTransaction::TYPE_PARTICIPANTS)
+              ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
             ->setNewValue(array('+' => array($user->getPHID())));
           $delete_draft = true;
           $message = $request->getStr('text');
@@ -95,7 +95,7 @@ final class ConpherenceUpdateController
           if (!empty($person_phids)) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransaction::TYPE_PARTICIPANTS)
+                ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
               ->setNewValue(array('+' => $person_phids));
           }
           break;
@@ -108,7 +108,7 @@ final class ConpherenceUpdateController
           if ($person_phid) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransaction::TYPE_PARTICIPANTS)
+                ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
               ->setNewValue(array('-' => array($person_phid)));
             $response_mode = 'go-home';
           }
