@@ -181,7 +181,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
               id(new ConpherenceParticipant())
               ->setConpherencePHID($object->getPHID())
               ->setParticipantPHID($phid)
-              ->setDateTouched(time())
               ->setSeenMessageCount($message_count)
               ->save();
             $object->attachParticipants($participants);
@@ -248,7 +247,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             id(new ConpherenceParticipant())
             ->setConpherencePHID($object->getPHID())
             ->setParticipantPHID($phid)
-            ->setDateTouched(time())
             ->setSeenMessageCount($message_count)
             ->save();
         }
@@ -282,10 +280,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
                 $participant->setSeenMessageCount(
                   $object->getMessageCount() - $message_count);
               }
-              $participant->setDateTouched($time);
             } else {
               $participant->setSeenMessageCount($object->getMessageCount());
-              $participant->setDateTouched($time);
             }
             $participant->save();
           }

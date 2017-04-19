@@ -5,7 +5,6 @@ final class ConpherenceParticipant extends ConpherenceDAO {
   protected $participantPHID;
   protected $conpherencePHID;
   protected $seenMessageCount;
-  protected $dateTouched;
   protected $settings = array();
 
   protected function getConfiguration() {
@@ -14,16 +13,12 @@ final class ConpherenceParticipant extends ConpherenceDAO {
         'settings' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'dateTouched' => 'epoch',
         'seenMessageCount' => 'uint64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'conpherencePHID' => array(
           'columns' => array('conpherencePHID', 'participantPHID'),
           'unique' => true,
-        ),
-        'participationIndex' => array(
-          'columns' => array('participantPHID', 'dateTouched', 'id'),
         ),
         'key_thread' => array(
           'columns' => array('participantPHID', 'conpherencePHID'),
