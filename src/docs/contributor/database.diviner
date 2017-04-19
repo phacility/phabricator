@@ -10,7 +10,7 @@ Database System
 Phabricator uses MySQL or another MySQL-compatible database (like MariaDB
 or Amazon RDS).
 
-Phabricator the InnoDB table engine. The only exception is the
+Phabricator uses the InnoDB table engine. The only exception is the
 `search_documentfield` table which uses MyISAM because MySQL doesn't support
 fulltext search in InnoDB (recent versions do, but we haven't added support
 yet).
@@ -102,7 +102,7 @@ An example of such usage can be found in column
 Primary Keys
 ============
 
-Most tables have auto-increment column named `id`. Adding an ID column is
+Most tables have an auto-increment column named `id`. Adding an ID column is
 appropriate for most tables (even tables that have another natural unique key),
 as it improves consistency and makes it easier to perform generic operations
 on objects.
@@ -134,12 +134,12 @@ eventually, but there isn't a strong case for them at the present time.
 PHIDs
 =====
 
-Each globally referencable object in Phabricator has its associated PHID
+Each globally referencable object in Phabricator has an associated PHID
 ("Phabricator ID") which serves as a global identifier, similar to a GUID.
 We use PHIDs for referencing data in different databases.
 
-We use both autoincrementing IDs and global PHIDs because each is useful in
-different contexts. Autoincrementing IDs are meaningfully ordered and allow
+We use both auto-incrementing IDs and global PHIDs because each is useful in
+different contexts. Auto-incrementing IDs are meaningfully ordered and allow
 us to construct short, human-readable object names (like `D2258`) and URIs.
 Global PHIDs allow us to represent relationships between different types of
 objects in a homogeneous way.
@@ -154,7 +154,7 @@ Transactions
 ============
 
 Transactional code should be written using transactions. Example of such code is
-inserting multiple records where one doesn't make sense without the other or
+inserting multiple records where one doesn't make sense without the other, or
 selecting data later used for update. See chapter in @{class:LiskDAO}.
 
 Advanced Features
@@ -195,12 +195,12 @@ set names:
 
 | Variable | Meaning | Notes |
 |---|---|---|
-| {$NAMESPACE} | Storage Namespace | Defaults to `phabricator` |
-| {$CHARSET} | Default Charset | Mostly used to specify table charset |
-| {$COLLATE_TEXT} | Text Collation | For most text (case-sensitive) |
-| {$COLLATE_SORT} | Sort Collation | For sortable text (case-insensitive) |
-| {$CHARSET_FULLTEXT} | Fulltext Charset | Specify explicitly for fulltext |
-| {$COLLATE_FULLTEXT} | Fulltext Collate | Specify explicitly for fulltext |
+| `{$NAMESPACE}` | Storage Namespace | Defaults to `phabricator` |
+| `{$CHARSET}` | Default Charset | Mostly used to specify table charset |
+| `{$COLLATE_TEXT}` | Text Collation | For most text (case-sensitive) |
+| `{$COLLATE_SORT}` | Sort Collation | For sortable text (case-insensitive) |
+| `{$CHARSET_FULLTEXT}` | Fulltext Charset | Specify explicitly for fulltext |
+| `{$COLLATE_FULLTEXT}` | Fulltext Collate | Specify explicitly for fulltext |
 
 
 **Test your patch**. Run `bin/storage upgrade` to test your patch.
