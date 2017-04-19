@@ -228,6 +228,13 @@ final class PhabricatorMySQLFulltextStorageEngine
         $fulltext_tokens[$key] = $fulltext_token;
 
         $value = $token->getValue();
+
+        // If the value is unquoted, we'll stem it in the query, so stem it
+        // here before performing filtering tests. See T12596.
+        if (!$token->isQuoted()) {
+          $value = $stemmer->stemToken($value);
+        }
+
         if (phutil_utf8_strlen($value) < $min_length) {
           $fulltext_token->setIsShort(true);
           continue;
@@ -479,16 +486,32 @@ final class PhabricatorMySQLFulltextStorageEngine
     try {
       $result = queryfx_one(
         $conn,
-        'SELECT @@innodb_ft_min_token_size innodb_max');
+        'SELECT @@innodb_ft_min_token_size innodb_max,
+          @@innodb_ft_server_stopword_table innodb_stopword_config');
     } catch (AphrontQueryException $ex) {
       $result = null;
     }
 
     if ($result) {
       $min_len = $result['innodb_max'];
+
+      $stopword_config = $result['innodb_stopword_config'];
+      if (preg_match('(/)', $stopword_config)) {
+        // If the setting is nonempty and contains a slash, query the
+        // table the user has configured.
+        $parts = explode('/', $stopword_config);
+        list($stopword_database, $stopword_table) = $parts;
+      } else {
+        // Otherwise, query the InnoDB default stopword table.
+        $stopword_database = 'INFORMATION_SCHEMA';
+        $stopword_table = 'INNODB_FT_DEFAULT_STOPWORD';
+      }
+
       $stopwords = queryfx_all(
         $conn,
-        'SELECT * FROM INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD');
+        'SELECT * FROM %T.%T',
+        $stopword_database,
+        $stopword_table);
       $stopwords = ipull($stopwords, 'value');
       $stopwords = array_fuse($stopwords);
 
