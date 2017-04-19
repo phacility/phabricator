@@ -17,7 +17,6 @@ final class ConpherenceColumnViewController extends
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
         ->needProfileImage(true)
-        ->needParticipantCache(true)
         ->execute();
       $latest_conpherences = mpull($latest_conpherences, null, 'getPHID');
       $latest_conpherences = array_select_keys(

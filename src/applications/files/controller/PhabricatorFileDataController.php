@@ -62,24 +62,8 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     // an initial request for bytes 0-1 of the audio file, and things go south
     // if we can't respond with a 206 Partial Content.
     $range = $request->getHTTPHeader('range');
-    if ($range) {
-      $matches = null;
-      if (preg_match('/^bytes=(\d+)-(\d*)$/', $range, $matches)) {
-        // Note that the "Range" header specifies bytes differently than
-        // we do internally: the range 0-1 has 2 bytes (byte 0 and byte 1).
-        $begin = (int)$matches[1];
-
-        // The "Range" may be "200-299" or "200-", meaning "until end of file".
-        if (strlen($matches[2])) {
-          $range_end = (int)$matches[2];
-          $end = $range_end + 1;
-        } else {
-          $range_end = null;
-        }
-
-        $response->setHTTPResponseCode(206);
-        $response->setRange($begin, $range_end);
-      }
+    if (strlen($range)) {
+      list($begin, $end) = $response->parseHTTPRange($range);
     }
 
     $is_viewable = $file->isViewableInBrowser();
@@ -143,6 +127,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($this->phid))
+      ->withIsDeleted(false)
       ->executeOne();
 
     if (!$file) {

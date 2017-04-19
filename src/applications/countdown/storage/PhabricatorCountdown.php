@@ -9,7 +9,8 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorSpacesInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   protected $title;
   protected $authorPHID;
@@ -151,10 +152,45 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
 
 
   public function destroyObjectPermanently(
-    PhabricatorDestructionEngine $engine) {
+      PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
     $this->delete();
     $this->saveTransaction();
   }
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The title of the countdown.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('remarkup')
+        ->setDescription(pht('The description of the countdown.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('epoch')
+        ->setType('epoch')
+        ->setDescription(pht('The end date of the countdown.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'title' => $this->getTitle(),
+      'description' => array(
+        'raw' => $this->getDescription(),
+      ),
+      'epoch' => (int)$this->getEpoch(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
 }

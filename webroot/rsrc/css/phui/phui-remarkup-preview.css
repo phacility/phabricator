@@ -27,7 +27,8 @@
   padding: 16px 0 0 16px;
 }
 
-.device-phone .phui-panel-preview {
+.device-phone .phui-panel-preview,
+.device-phone .phui-remarkup-preview {
   display: none;
 }
 

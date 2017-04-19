@@ -110,7 +110,7 @@ final class PhabricatorCountdownSearchEngine
         ->setObject($countdown)
         ->setObjectName($countdown->getMonogram())
         ->setHeader($countdown->getTitle())
-        ->setHref($this->getApplicationURI("{$id}/"))
+        ->setHref($countdown->getURI())
         ->addByline(
           pht(
             'Created by %s',

@@ -16,10 +16,8 @@ final class PhortuneAccount extends PhortuneDAO
   private $memberPHIDs = self::ATTACHABLE;
 
   public static function initializeNewAccount(PhabricatorUser $actor) {
-    $account = id(new PhortuneAccount());
-    $account->memberPHIDs = array($actor->getPHID() => $actor->getPHID());
-
-    return $account;
+    return id(new self())
+      ->attachMemberPHIDs(array());
   }
 
   public static function createNewAccount(

@@ -67,7 +67,7 @@ final class ConpherenceTransactionView extends AphrontView {
 
     $transaction = $this->getConpherenceTransaction();
     switch ($transaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_DATE_MARKER:
+      case ConpherenceThreadDateMarkerTransaction::TRANSACTIONTYPE:
         return javelin_tag(
           'div',
           array(

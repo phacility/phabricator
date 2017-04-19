@@ -120,11 +120,11 @@ final class PhabricatorSyntaxHighlightingConfigOptions
             'this is where that list is defined.')),
       $this->newOption(
         'syntax.filemap',
-        'wild',
+        'custom:PhabricatorConfigRegexOptionType',
         array(
-          '@\.arcconfig$@' => 'js',
-          '@\.arclint$@' => 'js',
-          '@\.divinerconfig$@' => 'js',
+          '@\.arcconfig$@' => 'json',
+          '@\.arclint$@' => 'json',
+          '@\.divinerconfig$@' => 'json',
         ))
         ->setSummary(
           pht('Override what language files (based on filename) highlight as.'))
@@ -138,12 +138,14 @@ final class PhabricatorSyntaxHighlightingConfigOptions
             'be tested against the filename. They should map to either an '.
             'explicit language as a string value, or a numeric index into '.
             'the captured groups as an integer.'))
-      ->addExample('{"@\\.xyz$@": "php"}', pht('Highlight %s as PHP.', '*.xyz'))
       ->addExample(
-        '{"@/httpd\\.conf@": "apacheconf"}',
+        '{"@\\\.xyz$@": "php"}',
+        pht('Highlight %s as PHP.', '*.xyz'))
+      ->addExample(
+        '{"@/httpd\\\.conf@": "apacheconf"}',
         pht('Highlight httpd.conf as "apacheconf".'))
       ->addExample(
-        '{"@\\.([^.]+)\\.bak$@": 1}',
+        '{"@\\\.([^.]+)\\\.bak$@": 1}',
         pht(
           "Treat all '*.x.bak' file as '.x'. NOTE: We map to capturing group ".
           "1 by specifying the mapping as '1'")),

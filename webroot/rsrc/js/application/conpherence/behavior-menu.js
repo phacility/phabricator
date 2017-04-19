@@ -125,10 +125,10 @@ JX.behavior('conpherence-menu', function(config) {
 
   function selectThread(node, update_page_data) {
     if (_thread.node) {
-      JX.DOM.alterClass(_thread.node, 'conpherence-selected', false);
+      JX.DOM.alterClass(_thread.node, 'phui-list-item-selected', false);
     }
 
-    JX.DOM.alterClass(node, 'conpherence-selected', true);
+    JX.DOM.alterClass(node, 'phui-list-item-selected', true);
     JX.DOM.alterClass(node, 'hide-unread-count', true);
 
     _thread.node = node;
@@ -424,20 +424,6 @@ JX.behavior('conpherence-menu', function(config) {
       }
     }
   }
-
-  JX.Stratcom.listen(
-    ['click'],
-    'conpherence-menu-see-more',
-    function (e) {
-      e.kill();
-      var sigil = e.getNodeData('conpherence-menu-see-more').moreSigil;
-      var root = JX.$('conpherence-menu-pane');
-      var more = JX.DOM.scry(root, 'li', sigil);
-      for (var i = 0; i < more.length; i++) {
-        JX.DOM.alterClass(more[i], 'hidden', false);
-      }
-      JX.DOM.hide(e.getNode('conpherence-menu-see-more'));
-    });
 
   JX.Stratcom.listen(
     ['keydown'],

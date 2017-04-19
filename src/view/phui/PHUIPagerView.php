@@ -55,7 +55,7 @@ final class PHUIPagerView extends AphrontView {
   }
 
   public function willShowPagingControls() {
-    return $this->hasMorePages;
+    return $this->hasMorePages || $this->getOffset();
   }
 
   public function getHasMorePages() {

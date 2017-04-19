@@ -71,7 +71,6 @@ final class ConpherenceQueryThreadConduitAPIMethod
         'conpherencePHID' => $conpherence->getPHID(),
         'conpherenceTitle' => $conpherence->getTitle(),
         'messageCount' => $conpherence->getMessageCount(),
-        'recentParticipantPHIDs' => $conpherence->getRecentParticipantPHIDs(),
         'conpherenceURI' => $this->getConpherenceURI($conpherence),
       );
     }

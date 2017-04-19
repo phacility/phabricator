@@ -163,6 +163,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $author_phid,
       id(new PhabricatorDiffusionApplication())->getPHID());
 
+    $acting_user = $this->loadActingUser($actor, $acting_as_phid);
+
     $conn_w = id(new DifferentialRevision())->establishConnection('w');
 
     // NOTE: The `differential_commit` table has a unique ID on `commitPHID`,
@@ -263,7 +265,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $acting_as_phid,
         $repository,
         $commit,
-        $message);
+        $message,
+        $acting_user);
     }
 
     $data->save();
@@ -287,7 +290,22 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $acting_as,
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
-    $message) {
+    $message,
+    PhabricatorUser $acting_user = null) {
+
+    // If we we were able to identify an author for the commit, we try to act
+    // as that user when loading tasks marked with "Fixes Txxx". This prevents
+    // mistakes where a user accidentally writes the wrong task IDs and affects
+    // tasks they can't see (and thus can't undo the status changes for).
+
+    // This is just a guard rail, not a security measure. An attacker can still
+    // forge another user's identity trivially by forging author or committer
+    // emails. We also let commits with unrecognized authors act on any task to
+    // make behavior less confusing for new installs.
+
+    if (!$acting_user) {
+      $acting_user = $actor;
+    }
 
     $maniphest = 'PhabricatorManiphestApplication';
     if (!PhabricatorApplication::isClassInstalled($maniphest)) {
@@ -321,9 +339,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $tasks = id(new ManiphestTaskQuery())
-      ->setViewer($actor)
+      ->setViewer($acting_user)
       ->withIDs(array_keys($task_statuses))
       ->needProjectPHIDs(true)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
 
     foreach ($tasks as $task_id => $task) {
@@ -368,5 +391,27 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $editor->applyTransactions($task, $xactions);
     }
   }
+
+  private function loadActingUser(PhabricatorUser $viewer, $user_phid) {
+    if (!$user_phid) {
+      return null;
+    }
+
+    $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
+    if (phid_get_type($user_phid) != $user_type) {
+      return null;
+    }
+
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($user_phid))
+      ->executeOne();
+    if (!$user) {
+      return null;
+    }
+
+    return $user;
+  }
+
 
 }

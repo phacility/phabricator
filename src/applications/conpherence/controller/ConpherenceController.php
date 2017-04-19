@@ -54,18 +54,27 @@ abstract class ConpherenceController extends PhabricatorController {
   }
 
   protected function buildHeaderPaneContent(
-    ConpherenceThread $conpherence,
-    array $policy_objects) {
-    assert_instances_of($policy_objects, 'PhabricatorPolicy');
+    ConpherenceThread $conpherence) {
     $viewer = $this->getViewer();
     $header = null;
 
     if ($conpherence->getID()) {
       $data = $conpherence->getDisplayData($this->getViewer());
+
       $header = id(new PHUIHeaderView())
+        ->setViewer($viewer)
         ->setHeader($data['title'])
-        ->setSubheader($data['topic'])
+        ->setPolicyObject($conpherence)
         ->setImage($data['image']);
+
+      if (strlen($data['topic'])) {
+        $topic = id(new PHUITagView())
+          ->setName($data['topic'])
+          ->setShade(PHUITagView::COLOR_VIOLET)
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->addClass('conpherence-header-topic');
+        $header->addTag($topic);
+      }
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
@@ -78,10 +87,6 @@ abstract class ConpherenceController extends PhabricatorController {
       }
 
       $participating = $conpherence->getParticipantIfExists($viewer->getPHID());
-      $can_join = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_JOIN);
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
@@ -129,7 +134,7 @@ abstract class ConpherenceController extends PhabricatorController {
           ->setColor('green')
           ->addClass('conpherence-search-toggle'));
 
-      if ($can_join && !$participating) {
+      if (!$participating) {
         $action = ConpherenceUpdateActions::JOIN_ROOM;
         $uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
         $button = phutil_tag(

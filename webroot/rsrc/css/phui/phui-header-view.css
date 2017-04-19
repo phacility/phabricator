@@ -120,7 +120,7 @@ body .phui-header-shell.phui-bleed-header
 .device-phone .phui-header-action-link .phui-button-text {
   visibility: hidden;
   width: 0;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 .device-phone .phui-header-action-link.button .phui-icon-view {

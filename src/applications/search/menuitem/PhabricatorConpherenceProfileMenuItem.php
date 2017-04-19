@@ -36,7 +36,6 @@ final class PhabricatorConpherenceProfileMenuItem
   }
 
   public function willBuildNavigationItems(array $items) {
-    require_celerity_resource('conpherence-menu-css');
     $viewer = $this->getViewer();
     $room_phids = array();
     foreach ($items as $item) {
@@ -46,7 +45,6 @@ final class PhabricatorConpherenceProfileMenuItem
     $rooms = id(new ConpherenceThreadQuery())
       ->setViewer($viewer)
       ->withPHIDs($room_phids)
-      ->needParticipantCache(true)
       ->needProfileImage(true)
       ->execute();
 
@@ -115,7 +113,7 @@ final class PhabricatorConpherenceProfileMenuItem
       $count = phutil_tag(
         'span',
         array(
-          'class' => 'conpherence-menu-item-count',
+          'class' => 'phui-list-item-count',
         ),
         $unread_count);
     }

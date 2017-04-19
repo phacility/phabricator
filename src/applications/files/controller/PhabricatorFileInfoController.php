@@ -15,6 +15,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $file = id(new PhabricatorFileQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($phid))
+        ->withIsDeleted(false)
         ->executeOne();
 
       if (!$file) {
@@ -25,6 +26,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->withIsDeleted(false)
       ->executeOne();
     if (!$file) {
       return new Aphront404Response();

@@ -24,9 +24,6 @@ final class ConpherenceUpdateController
       case ConpherenceUpdateActions::METADATA:
         $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
         break;
-      case ConpherenceUpdateActions::JOIN_ROOM:
-        $needed_capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
-        break;
       case ConpherenceUpdateActions::NOTIFICATIONS:
         $need_participants = true;
         break;
@@ -153,9 +150,6 @@ final class ConpherenceUpdateController
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
             ->setNewValue($request->getStr('editPolicy'));
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-            ->setNewValue($request->getStr('joinPolicy'));
           if (!$request->getExists('force_ajax')) {
             $response_mode = 'redirect';
           }
@@ -256,16 +250,9 @@ final class ConpherenceUpdateController
 
     $participant = $conpherence->getParticipantIfExists($user->getPHID());
     if (!$participant) {
-      $can_join = PhabricatorPolicyFilter::hasCapability(
-        $user,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_JOIN);
-      if ($can_join) {
+      if ($user->isLoggedIn()) {
         $text = pht(
           'Notification settings are available after joining the room.');
-      } else if ($user->isLoggedIn()) {
-        $text = pht(
-          'Notification settings not applicable to rooms you can not join.');
       } else {
         $text = pht(
           'Notification settings are available after logging in and joining '.
@@ -373,9 +360,9 @@ final class ConpherenceUpdateController
       $body[] = pht(
         'Are you sure you want to leave this room?');
     } else {
-      $title = pht('Banish User');
+      $title = pht('Remove Participant');
       $body[] = pht(
-        'Banish %s from the realm?',
+        'Remove %s from this room?',
         phutil_tag('strong', array(), $removed_user->getUsername()));
     }
 
@@ -385,7 +372,7 @@ final class ConpherenceUpdateController
           'You will be able to rejoin the room later.');
       } else {
         $body[] = pht(
-          'This user will be able to rejoin the room later.');
+          'They will be able to rejoin the room later.');
       }
     } else {
       if ($is_self) {
@@ -400,7 +387,7 @@ final class ConpherenceUpdateController
         }
       } else {
         $body[] = pht(
-          'This user will not be able to rejoin the room unless invited '.
+          'They will not be able to rejoin the room unless invited '.
           'again.');
       }
     }
@@ -459,12 +446,6 @@ final class ConpherenceUpdateController
         ->setName('editPolicy')
         ->setPolicyObject($conpherence)
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-        ->setPolicies($policies))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setName('joinPolicy')
-        ->setPolicyObject($conpherence)
-        ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
         ->setPolicies($policies));
 
     $view = id(new AphrontDialogView())
@@ -489,7 +470,6 @@ final class ConpherenceUpdateController
     $latest_transaction_id) {
 
     $need_transactions = false;
-    $need_participant_cache = true;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
       case ConpherenceUpdateActions::LOAD:
@@ -510,7 +490,6 @@ final class ConpherenceUpdateController
       ->setViewer($user)
       ->setAfterTransactionID($latest_transaction_id)
       ->needProfileImage(true)
-      ->needParticipantCache($need_participant_cache)
       ->needParticipants(true)
       ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))
@@ -543,18 +522,12 @@ final class ConpherenceUpdateController
     $people_widget = null;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $policy_objects = id(new PhabricatorPolicyQuery())
-          ->setViewer($user)
-          ->setObject($conpherence)
-          ->execute();
-        $header = $this->buildHeaderPaneContent(
-          $conpherence,
-          $policy_objects);
+        $header = $this->buildHeaderPaneContent($conpherence);
         $header = hsprintf('%s', $header);
         $nav_item = id(new ConpherenceThreadListView())
           ->setUser($user)
           ->setBaseURI($this->getApplicationURI())
-          ->renderSingleThread($conpherence, $policy_objects);
+          ->renderThreadItem($conpherence);
         $nav_item = hsprintf('%s', $nav_item);
         break;
       case ConpherenceUpdateActions::ADD_PERSON:
@@ -573,6 +546,9 @@ final class ConpherenceUpdateController
     $dropdown_query = id(new AphlictDropdownDataQuery())
       ->setViewer($user);
     $dropdown_query->execute();
+
+    $receive_sound = celerity_get_resource_uri('/rsrc/audio/basic/tap.mp3');
+
     $content = array(
       'non_update' => $non_update,
       'transactions' => hsprintf('%s', $rendered_transactions),
@@ -585,6 +561,9 @@ final class ConpherenceUpdateController
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),
+      ),
+      'sound' => array(
+        'receive' => $receive_sound,
       ),
     );
 

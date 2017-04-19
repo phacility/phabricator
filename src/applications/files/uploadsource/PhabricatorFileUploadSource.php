@@ -145,7 +145,7 @@ abstract class PhabricatorFileUploadSource
     }
 
     $file = PhabricatorFile::newChunkedFile($engine, $length, $parameters);
-    $file->save();
+    $file->saveAndIndex();
 
     $rope = $this->getRope();
 

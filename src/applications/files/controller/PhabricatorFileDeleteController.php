@@ -9,6 +9,7 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->withIsDeleted(false)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -25,7 +26,19 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
     }
 
     if ($request->isFormPost()) {
-      $file->delete();
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorFileTransaction())
+        ->setTransactionType(PhabricatorFileDeleteTransaction::TRANSACTIONTYPE)
+        ->setNewValue(true);
+
+      id(new PhabricatorFileEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($file, $xactions);
+
       return id(new AphrontRedirectResponse())->setURI('/file/');
     }
 

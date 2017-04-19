@@ -20,7 +20,6 @@ final class ConpherenceViewController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needProfileImage(true)
-      ->needParticipantCache(true)
       ->needTransactions(true)
       ->setTransactionLimit($this->getMainQueryLimit());
 
@@ -83,11 +82,7 @@ final class ConpherenceViewController extends
       $form = null;
       $content = array('transactions' => $messages);
     } else {
-      $policy_objects = id(new PhabricatorPolicyQuery())
-        ->setViewer($user)
-        ->setObject($conpherence)
-        ->execute();
-      $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
+      $header = $this->buildHeaderPaneContent($conpherence);
       $search = $this->buildSearchForm();
       $form = $this->renderFormContent();
       $content = array(
@@ -119,11 +114,6 @@ final class ConpherenceViewController extends
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 
-    $can_join = PhabricatorPolicyFilter::hasCapability(
-        $user,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_JOIN);
-
     $layout = id(new ConpherenceLayoutView())
       ->setUser($user)
       ->setBaseURI($this->getApplicationURI())
@@ -151,14 +141,8 @@ final class ConpherenceViewController extends
 
     $conpherence = $this->getConpherence();
     $user = $this->getRequest()->getUser();
-    $can_join = PhabricatorPolicyFilter::hasCapability(
-      $user,
-      $conpherence,
-      PhabricatorPolicyCapability::CAN_JOIN);
+
     $participating = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$can_join && !$participating && $user->isLoggedIn()) {
-      return null;
-    }
     $draft = PhabricatorDraft::newFromUserAndKey(
       $user,
       $conpherence->getPHID());

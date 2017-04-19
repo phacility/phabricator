@@ -16,3 +16,16 @@
   font-weight: normal;
   color: #000;
 }
+
+.phui-fulltext-tokens {
+  margin: 16px 8px;
+  font-weight: bold;
+}
+
+.phui-fulltext-tokens .phui-tag-view {
+  margin: 0 2px;
+}
+
+.phui-fulltext-tokens .phui-tag-view.phui-tag-shade-grey {
+  opacity: 0.5;
+}

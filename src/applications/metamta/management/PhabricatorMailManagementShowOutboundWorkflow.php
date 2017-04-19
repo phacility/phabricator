@@ -37,6 +37,15 @@ final class PhabricatorMailManagementShowOutboundWorkflow
           '--id'));
     }
 
+    foreach ($ids as $id) {
+      if (!ctype_digit($id)) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Argument "%s" is not a valid message ID.',
+            $id));
+      }
+    }
+
     $messages = id(new PhabricatorMetaMTAMail())->loadAllWhere(
       'id IN (%Ld)',
       $ids);
