@@ -67,7 +67,7 @@ final class ConpherenceColumnViewController extends
       $transactions = $conpherence->getTransactions();
       $latest_transaction = head($transactions);
       $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $participant->markUpToDate($conpherence, $latest_transaction);
+      $participant->markUpToDate($conpherence);
       unset($write_guard);
 
       $draft = PhabricatorDraft::newFromUserAndKey(

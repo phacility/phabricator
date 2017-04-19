@@ -531,7 +531,7 @@ final class ConpherenceUpdateController
       $key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
       $minimized = $user->getUserSetting($key);
       if (!$minimized) {
-        $participant->markUpToDate($conpherence, $data['latest_transaction']);
+        $participant->markUpToDate($conpherence);
       }
     } else if ($need_transactions) {
       $non_update = true;

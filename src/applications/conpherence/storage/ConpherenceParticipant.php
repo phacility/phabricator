@@ -31,9 +31,7 @@ final class ConpherenceParticipant extends ConpherenceDAO {
     return nonempty($this->settings, array());
   }
 
-  public function markUpToDate(
-    ConpherenceThread $conpherence,
-    ConpherenceTransaction $xaction) {
+  public function markUpToDate(ConpherenceThread $conpherence) {
 
     if (!$this->isUpToDate($conpherence)) {
       $this->setSeenMessageCount($conpherence->getMessageCount());
