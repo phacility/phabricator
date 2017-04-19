@@ -23,6 +23,11 @@ JX.install('DiffusionLocateFileSource', {
 
     ondata: function(results) {
       this.tree = results.tree;
+
+      if (this.lastValue !== null) {
+        this.matchResults(this.lastValue);
+      }
+
       this.setReady(true);
     },
 

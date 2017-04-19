@@ -401,7 +401,7 @@ return array(
     'rsrc/js/application/differential/behavior-populate.js' => '8694b1df',
     'rsrc/js/application/differential/behavior-toggle-files.js' => 'ca3f91eb',
     'rsrc/js/application/differential/behavior-user-select.js' => 'a8d8459d',
-    'rsrc/js/application/diffusion/DiffusionLocateFileSource.js' => 'b42eddc7',
+    'rsrc/js/application/diffusion/DiffusionLocateFileSource.js' => 'c93358e3',
     'rsrc/js/application/diffusion/behavior-audit-preview.js' => 'd835b03a',
     'rsrc/js/application/diffusion/behavior-commit-branches.js' => 'bdaf4d04',
     'rsrc/js/application/diffusion/behavior-commit-graph.js' => '49ae8328',
@@ -719,7 +719,7 @@ return array(
     'javelin-behavior-workflow' => '0a3f3021',
     'javelin-color' => '7e41274a',
     'javelin-cookie' => '62dfea03',
-    'javelin-diffusion-locate-file-source' => 'b42eddc7',
+    'javelin-diffusion-locate-file-source' => 'c93358e3',
     'javelin-dom' => '805b806a',
     'javelin-dynval' => 'f6555212',
     'javelin-event' => '2ee659ce',
@@ -1878,12 +1878,6 @@ return array(
     'b3e7d692' => array(
       'javelin-install',
     ),
-    'b42eddc7' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-typeahead-preloaded-source',
-      'javelin-util',
-    ),
     'b59e1e96' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1996,6 +1990,12 @@ return array(
       'javelin-reactor',
       'javelin-reactornode',
       'javelin-install',
+      'javelin-util',
+    ),
+    'c93358e3' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-typeahead-preloaded-source',
       'javelin-util',
     ),
     'c989ade3' => array(
