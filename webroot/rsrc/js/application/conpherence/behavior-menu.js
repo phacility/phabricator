@@ -70,7 +70,6 @@ JX.behavior('conpherence-menu', function(config) {
     var textarea = JX.DOM.find(form_root, 'textarea');
     if (!non_update) {
       _scrollMessageWindow();
-      textarea.value = '';
     }
     markThreadLoading(false);
 
