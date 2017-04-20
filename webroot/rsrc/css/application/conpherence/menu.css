@@ -21,6 +21,10 @@
   background-color: {$page.sidenav};
 }
 
+.conpherence-menu-pane .phui-basic-nav .phabricator-side-menu {
+  background-color: transparent;
+}
+
 .conpherence-menu-pane.phabricator-side-menu .room-list-href {
   padding: 10px 0 9px 8px;
   display: inline-block;

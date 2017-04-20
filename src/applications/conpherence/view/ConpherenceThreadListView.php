@@ -75,6 +75,7 @@ final class ConpherenceThreadListView extends AphrontView {
           'title' => $data['title'],
           'id' => $dom_id,
           'threadID' => $thread->getID(),
+          'theme' => $data['theme'],
           ));
   }
 

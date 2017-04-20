@@ -56,7 +56,11 @@ final class ConpherenceViewController extends
     $this->setConpherence($conpherence);
 
     $participant = $conpherence->getParticipantIfExists($user->getPHID());
+    $theme = ConpherenceRoomSettings::COLOR_LIGHT;
+
     if ($participant) {
+      $settings = $participant->getSettings();
+      $theme = idx($settings, 'theme', ConpherenceRoomSettings::COLOR_LIGHT);
       if (!$participant->isUpToDate($conpherence)) {
         $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
         $participant->markUpToDate($conpherence);
@@ -118,6 +122,7 @@ final class ConpherenceViewController extends
       ->setSearch($search)
       ->setMessages($messages)
       ->setReplyForm($form)
+      ->setTheme($theme)
       ->setLatestTransactionID($data['latest_transaction_id'])
       ->setRole('thread');
 

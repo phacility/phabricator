@@ -161,6 +161,7 @@ return array(
   'conpherence.pkg.css' => array(
     'conpherence-durable-column-view',
     'conpherence-menu-css',
+    'conpherence-color-css',
     'conpherence-message-pane-css',
     'conpherence-notification-css',
     'conpherence-transaction-css',

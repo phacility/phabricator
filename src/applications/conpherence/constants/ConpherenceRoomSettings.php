@@ -9,6 +9,13 @@ final class ConpherenceRoomSettings extends ConpherenceConstants {
   const DEFAULT_MENTION_SOUND = 'alert';
   const DEFAULT_NO_SOUND = 'none';
 
+  const COLOR_LIGHT = 'light';
+  const COLOR_BLUE = 'blue';
+  const COLOR_INDIGO = 'indigo';
+  const COLOR_PEACH = 'peach';
+  const COLOR_GREEN = 'green';
+  const COLOR_PINK = 'pink';
+
   public static function getSoundMap() {
     return array(
       'none' => array(
@@ -41,6 +48,21 @@ final class ConpherenceRoomSettings extends ConpherenceConstants {
   public static function getDropdownSoundMap() {
     $map = self::getSoundMap();
     return ipull($map, 'name');
+  }
+
+  public static function getThemeMap() {
+    return array(
+      self::COLOR_LIGHT => pht('Light'),
+      self::COLOR_BLUE => pht('Blue'),
+      self::COLOR_INDIGO => pht('Indigo'),
+      self::COLOR_PEACH => pht('Peach'),
+      self::COLOR_GREEN => pht('Green'),
+      self::COLOR_PINK => pht('Pink'),
+    );
+  }
+
+  public static function getThemeClass($theme) {
+    return 'conpherence-theme-'.$theme;
   }
 
 

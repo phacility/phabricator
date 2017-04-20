@@ -204,8 +204,13 @@ final class ConpherenceThread extends ConpherenceDAO
     }
 
     $user_participation = $this->getParticipantIfExists($viewer->getPHID());
+    $theme = ConpherenceRoomSettings::COLOR_LIGHT;
     if ($user_participation) {
       $user_seen_count = $user_participation->getSeenMessageCount();
+      $participant = $this->getParticipant($viewer->getPHID());
+      $settings = $participant->getSettings();
+      $theme = idx($settings, 'theme', $theme);
+      $theme_class = ConpherenceRoomSettings::getThemeClass($theme);
     } else {
       $user_seen_count = 0;
     }
@@ -221,6 +226,7 @@ final class ConpherenceThread extends ConpherenceDAO
       'unread_count' => $unread_count,
       'epoch' => $this->getDateModified(),
       'image' => $img_src,
+      'theme' => $theme_class,
     );
   }
 

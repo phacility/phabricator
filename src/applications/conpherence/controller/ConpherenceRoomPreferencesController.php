@@ -41,10 +41,12 @@ final class ConpherenceRoomPreferencesController
     if ($request->isFormPost()) {
       $notifications = $request->getStr('notifications');
       $sounds = $request->getArr('sounds');
+      $theme = $request->getStr('theme');
 
       $participant->setSettings(array(
         'notifications' => $notifications,
         'sounds' => $sounds,
+        'theme' => $theme,
       ));
       $participant->save();
 
@@ -60,6 +62,7 @@ final class ConpherenceRoomPreferencesController
 
     $settings = $participant->getSettings();
     $notifications = idx($settings, 'notifications', $notification_default);
+    $theme = idx($settings, 'theme', ConpherenceRoomSettings::COLOR_LIGHT);
 
     $sounds = idx($settings, 'sounds', array());
     $map = PhabricatorConpherenceSoundSetting::getDefaultSound($sound_default);
@@ -92,7 +95,13 @@ final class ConpherenceRoomPreferencesController
             ->setLabel(pht('New Message'))
             ->setName('sounds['.ConpherenceRoomSettings::SOUND_RECEIVE.']')
             ->setOptions(ConpherenceRoomSettings::getDropdownSoundMap())
-            ->setValue($receive));
+            ->setValue($receive))
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Theme'))
+            ->setName('theme')
+            ->setOptions(ConpherenceRoomSettings::getThemeMap())
+            ->setValue($theme));
 
     return $this->newDialog()
       ->setTitle(pht('Room Preferences'))
