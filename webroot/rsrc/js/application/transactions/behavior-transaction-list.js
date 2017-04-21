@@ -43,8 +43,10 @@ JX.behavior('phabricator-transaction-list', function() {
       e.prevent();
 
       var data = e.getNodeData('transaction-quote');
+      var ref = data.ref || '';
+
       new JX.Workflow(data.uri)
-        .setData({ref: data.ref})
+        .setData({ref: ref})
         .setHandler(function(r) {
           var textarea = JX.$(data.targetID);
 

@@ -11,6 +11,13 @@ final class PhabricatorConfigDatabaseSchema
   public function addTable(PhabricatorConfigTableSchema $table) {
     $key = $table->getName();
     if (isset($this->tables[$key])) {
+
+      if ($key == 'application_application') {
+        // NOTE: This is a terrible hack to allow Application subclasses to
+        // extend LiskDAO so we can apply transactions to them.
+        return $this;
+      }
+
       throw new Exception(
         pht('Trying to add duplicate table "%s"!', $key));
     }

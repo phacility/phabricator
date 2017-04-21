@@ -55,80 +55,101 @@ final class DifferentialReviewersView extends AphrontView {
 
       $item->setHighlighted($reviewer->hasAuthority($viewer));
 
+      // If someone other than the reviewer acted on the reviewer's behalf,
+      // show who is responsible for the current state. This is usually a
+      // user accepting for a package or project.
+      $authority_phid = $reviewer->getLastActorPHID();
+      if ($authority_phid && ($authority_phid !== $phid)) {
+        $authority_name = $viewer->renderHandle($authority_phid)
+          ->setAsText(true);
+      } else {
+        $authority_name = null;
+      }
+
       switch ($reviewer->getReviewerStatus()) {
         case DifferentialReviewerStatus::STATUS_ADDED:
           if ($comment_phid) {
             if ($is_current_comment) {
-              $item->setIcon(
-                'fa-comment',
-                'blue',
-                pht('Commented'));
+              $icon = 'fa-comment';
+              $color = 'blue';
+              $label = pht('Commented');
             } else {
-              $item->setIcon(
-                'fa-comment-o',
-                'bluegrey',
-                pht('Commented Previously'));
+              $icon = 'fa-comment-o';
+              $color = 'bluegrey';
+              $label = pht('Commented Previously');
             }
           } else {
-            $item->setIcon(
-              PHUIStatusItemView::ICON_OPEN,
-              'bluegrey',
-              pht('Review Requested'));
+            $icon = PHUIStatusItemView::ICON_OPEN;
+            $color = 'bluegrey';
+            $label = pht('Review Requested');
           }
           break;
 
         case DifferentialReviewerStatus::STATUS_ACCEPTED:
           if ($is_current_action) {
-            $item->setIcon(
-              PHUIStatusItemView::ICON_ACCEPT,
-              'green',
-              pht('Accepted'));
+            $icon = PHUIStatusItemView::ICON_ACCEPT;
+            $color = 'green';
+            if ($authority_name !== null) {
+              $label = pht('Accepted (by %s)', $authority_name);
+            } else {
+              $label = pht('Accepted');
+            }
           } else {
-            $item->setIcon(
-              'fa-check-circle-o',
-              'bluegrey',
-              pht('Accepted Prior Diff'));
+            $icon = 'fa-check-circle-o';
+            $color = 'bluegrey';
+            if ($authority_name !== null) {
+              $label = pht('Accepted Prior Diff (by %s)', $authority_name);
+            } else {
+              $label = pht('Accepted Prior Diff');
+            }
           }
           break;
 
         case DifferentialReviewerStatus::STATUS_REJECTED:
           if ($is_current_action) {
-            $item->setIcon(
-              PHUIStatusItemView::ICON_REJECT,
-              'red',
-              pht('Requested Changes'));
+            $icon = PHUIStatusItemView::ICON_REJECT;
+            $color = 'red';
+            if ($authority_name !== null) {
+              $label = pht('Requested Changes (by %s)', $authority_name);
+            } else {
+              $label = pht('Requested Changes');
+            }
           } else {
-            $item->setIcon(
-              'fa-times-circle-o',
-              'bluegrey',
-              pht('Requested Changes to Prior Diff'));
+            $icon = 'fa-times-circle-o';
+            $color = 'bluegrey';
+            if ($authority_name !== null) {
+              $label = pht(
+                'Requested Changes to Prior Diff (by %s)',
+                $authority_name);
+            } else {
+              $label = pht('Requested Changes to Prior Diff');
+            }
           }
           break;
 
         case DifferentialReviewerStatus::STATUS_BLOCKING:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_MINUS,
-            'red',
-            pht('Blocking Review'));
+          $icon = PHUIStatusItemView::ICON_MINUS;
+          $color = 'red';
+          $label = pht('Blocking Review');
           break;
 
         case DifferentialReviewerStatus::STATUS_RESIGNED:
-          $item->setIcon(
-            'fa-times',
-            'grey',
-            pht('Resigned'));
+          $icon = 'fa-times';
+          $color = 'grey';
+          $label = pht('Resigned');
           break;
 
         default:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_QUESTION,
-            'bluegrey',
-            pht('%s?', $reviewer->getReviewerStatus()));
+          $icon = PHUIStatusItemView::ICON_QUESTION;
+          $color = 'bluegrey';
+          $label = pht('Unknown ("%s")', $reviewer->getReviewerStatus());
           break;
 
       }
 
+      $item->setIcon($icon, $color, $label);
       $item->setTarget($handle->renderHovercardLink());
+
       $view->addItem($item);
     }
 

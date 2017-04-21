@@ -4,10 +4,7 @@ final class ConpherenceParticipant extends ConpherenceDAO {
 
   protected $participantPHID;
   protected $conpherencePHID;
-  protected $participationStatus;
-  protected $behindTransactionPHID;
   protected $seenMessageCount;
-  protected $dateTouched;
   protected $settings = array();
 
   protected function getConfiguration() {
@@ -16,8 +13,6 @@ final class ConpherenceParticipant extends ConpherenceDAO {
         'settings' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'participationStatus' => 'uint32',
-        'dateTouched' => 'epoch',
         'seenMessageCount' => 'uint64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -25,11 +20,8 @@ final class ConpherenceParticipant extends ConpherenceDAO {
           'columns' => array('conpherencePHID', 'participantPHID'),
           'unique' => true,
         ),
-        'unreadCount' => array(
-          'columns' => array('participantPHID', 'participationStatus'),
-        ),
-        'participationIndex' => array(
-          'columns' => array('participantPHID', 'dateTouched', 'id'),
+        'key_thread' => array(
+          'columns' => array('participantPHID', 'conpherencePHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -39,12 +31,9 @@ final class ConpherenceParticipant extends ConpherenceDAO {
     return nonempty($this->settings, array());
   }
 
-  public function markUpToDate(
-    ConpherenceThread $conpherence,
-    ConpherenceTransaction $xaction) {
+  public function markUpToDate(ConpherenceThread $conpherence) {
+
     if (!$this->isUpToDate($conpherence)) {
-      $this->setParticipationStatus(ConpherenceParticipationStatus::UP_TO_DATE);
-      $this->setBehindTransactionPHID($xaction->getPHID());
       $this->setSeenMessageCount($conpherence->getMessageCount());
       $this->save();
 
@@ -57,11 +46,7 @@ final class ConpherenceParticipant extends ConpherenceDAO {
   }
 
   public function isUpToDate(ConpherenceThread $conpherence) {
-    return
-      ($this->getSeenMessageCount() == $conpherence->getMessageCount())
-        &&
-      ($this->getParticipationStatus() ==
-       ConpherenceParticipationStatus::UP_TO_DATE);
+    return ($this->getSeenMessageCount() == $conpherence->getMessageCount());
   }
 
 }

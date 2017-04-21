@@ -82,7 +82,7 @@ a.grey,
 a.grey:visited {
   background-color: #F7F7F9;
   background-image: linear-gradient(to bottom, #ffffff, #f1f0f1);
-  border: 1px solid rgba({$alphablue},.2);
+  border: 1px solid rgba({$alphablue}, 0.3);
   color: {$darkgreytext};
 }
 
@@ -131,7 +131,7 @@ button:hover {
 a.button.grey:hover,
 button.grey:hover {
   background-image: linear-gradient(to bottom, #ffffff, #eeebec);
-  border-color: rgba({$alphablue}, 0.3);
+  border-color: rgba({$alphablue}, 0.4);
   transition: 0.1s;
 }
 
@@ -314,7 +314,7 @@ a.policy-control .phui-button-text {
 }
 
 .phui-button-bar .button .phui-icon-view {
-  left: 9px;
+  left: 14px;
 }
 
 .button.has-icon .phui-button-text {

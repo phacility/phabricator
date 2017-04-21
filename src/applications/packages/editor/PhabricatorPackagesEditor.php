@@ -4,7 +4,7 @@ abstract class PhabricatorPackagesEditor
   extends PhabricatorApplicationTransactionEditor {
 
   public function getEditorApplicationClass() {
-    return 'PhabricatorPasteApplication';
+    return 'PhabricatorPackagesApplication';
   }
 
   protected function supportsSearch() {

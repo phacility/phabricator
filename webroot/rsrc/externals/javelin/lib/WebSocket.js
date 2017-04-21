@@ -105,13 +105,39 @@ JX.install('WebSocket', {
 
 
     /**
+     * Disconnect abruptly, prompting a reconnect.
+     */
+    reconnect: function() {
+      if (!this._isOpen) {
+        return;
+      }
+
+      this._socket.close();
+    },
+
+
+    /**
+     * Get the current reconnect delay (in milliseconds).
+     */
+    getReconnectDelay: function() {
+      return this._delayUntilReconnect;
+    },
+
+
+    /**
      * Callback for connection open.
      */
     _onopen: function() {
       this._isOpen = true;
 
-      // Reset the reconnect delay, since we connected successfully.
-      this._resetDelay();
+      // Since we connected successfully, reset the reconnect delay to 0.
+
+      // This will make us try the first reconnect immediately after a
+      // connection failure. This limits downtime in cases like a service
+      // restart or a load balancer connection timeout.
+
+      // We only do an immediate retry after a successful connection.
+      this._delayUntilReconnect = 0;
 
       var handler = this.getOpenHandler();
       if (handler) {
@@ -170,7 +196,11 @@ JX.install('WebSocket', {
       // Increase the reconnect delay by a factor of 2. If we fail to open the
       // connection, the close handler will send us back here. We'll reconnect
       // more and more slowly until we eventually get a valid connection.
-      this._delayUntilReconnect = this._delayUntilReconnect * 2;
+      if (!this._delayUntilReconnect) {
+        this._resetDelay();
+      } else {
+        this._delayUntilReconnect = this._delayUntilReconnect * 2;
+      }
 
       // Max out at 5 minutes between attempts.
       this._delayUntilReconnect = Math.min(this._delayUntilReconnect, 300000);

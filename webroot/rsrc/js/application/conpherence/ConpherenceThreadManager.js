@@ -240,6 +240,18 @@ JX.install('ConpherenceThreadManager', {
           this._updateThread();
         }));
 
+      // If we see a reconnect, always update the thread state.
+      JX.Stratcom.listen(
+        'aphlict-reconnect',
+        null,
+        JX.bind(this, function() {
+          if (!this._loadedThreadPHID) {
+            return;
+          }
+
+          this._updateThread();
+        }));
+
       JX.Stratcom.listen(
         'click',
         'show-older-messages',
@@ -305,6 +317,14 @@ JX.install('ConpherenceThreadManager', {
 
       this._updating.knownID = r.latest_transaction_id;
       this._latestTransactionID = r.latest_transaction_id;
+
+      JX.Leader.broadcast(
+        'conpherence.message.' + r.latest_transaction_id,
+        {
+          type: 'sound',
+          data: r.sound.receive
+        });
+
       JX.Stratcom.invoke(
         'conpherence-redraw-aphlict',
         null,

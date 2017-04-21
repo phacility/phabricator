@@ -48,8 +48,6 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
         'url/' => array(
           $this->getEditRoutePattern('edit/')
             => 'PhabricatorPhurlURLEditController',
-          'comment/(?P<id>[1-9]\d*)/'
-            => 'PhabricatorPhurlURLCommentController',
         ),
       ),
     );

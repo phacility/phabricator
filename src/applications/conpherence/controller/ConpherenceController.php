@@ -54,18 +54,28 @@ abstract class ConpherenceController extends PhabricatorController {
   }
 
   protected function buildHeaderPaneContent(
-    ConpherenceThread $conpherence,
-    array $policy_objects) {
-    assert_instances_of($policy_objects, 'PhabricatorPolicy');
+    ConpherenceThread $conpherence) {
     $viewer = $this->getViewer();
     $header = null;
+    $id = $conpherence->getID();
 
-    if ($conpherence->getID()) {
+    if ($id) {
       $data = $conpherence->getDisplayData($this->getViewer());
+
       $header = id(new PHUIHeaderView())
+        ->setViewer($viewer)
         ->setHeader($data['title'])
-        ->setSubheader($data['topic'])
+        ->setPolicyObject($conpherence)
         ->setImage($data['image']);
+
+      if (strlen($data['topic'])) {
+        $topic = id(new PHUITagView())
+          ->setName($data['topic'])
+          ->setShade(PHUITagView::COLOR_VIOLET)
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->addClass('conpherence-header-topic');
+        $header->addTag($topic);
+      }
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
@@ -74,15 +84,14 @@ abstract class ConpherenceController extends PhabricatorController {
 
       if ($can_edit) {
         $header->setImageURL(
-          $this->getApplicationURI('picture/'.$conpherence->getID().'/'));
+          $this->getApplicationURI("picture/{$id}/"));
       }
 
       $participating = $conpherence->getParticipantIfExists($viewer->getPHID());
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
-          ->setHref(
-            $this->getApplicationURI('update/'.$conpherence->getID()).'/')
+          ->setHref($this->getApplicationURI("update/{$id}/"))
           ->setIcon('fa-pencil')
           ->addClass('hide-on-device')
           ->setColor('violet')
@@ -90,9 +99,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
-          ->setHref(
-            $this->getApplicationURI('update/'.$conpherence->getID()).'/'.
-            '?action='.ConpherenceUpdateActions::NOTIFICATIONS)
+          ->setHref($this->getApplicationURI("preferences/{$id}/"))
           ->setIcon('fa-gear')
           ->addClass('hide-on-device')
           ->setColor('pink')
@@ -127,7 +134,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
       if (!$participating) {
         $action = ConpherenceUpdateActions::JOIN_ROOM;
-        $uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+        $uri = $this->getApplicationURI("update/{$id}/");
         $button = phutil_tag(
           'button',
           array(

@@ -18,8 +18,10 @@ final class PhabricatorFileTemporaryGarbageCollector
       'ttl < %d LIMIT 100',
       PhabricatorTime::getNow());
 
+    $engine = new PhabricatorDestructionEngine();
+
     foreach ($files as $file) {
-      $file->delete();
+      $engine->destroyObject($file);
     }
 
     return (count($files) == 100);

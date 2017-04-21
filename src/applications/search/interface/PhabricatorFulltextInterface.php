@@ -1,6 +1,7 @@
 <?php
 
-interface PhabricatorFulltextInterface {
+interface PhabricatorFulltextInterface
+  extends PhabricatorIndexableInterface {
 
   public function newFulltextEngine();
 

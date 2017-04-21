@@ -2,7 +2,7 @@
 
 final class ConpherenceThreadListView extends AphrontView {
 
-  const SEE_MORE_LIMIT = 15;
+  const SEE_ALL_LIMIT = 16;
 
   private $baseURI;
   private $threads;
@@ -25,84 +25,11 @@ final class ConpherenceThreadListView extends AphrontView {
       ->addClass('conpherence-menu')
       ->setID('conpherence-menu');
 
-    $policy_objects = ConpherenceThread::loadViewPolicyObjects(
-      $this->getUser(),
-      $this->threads);
-
-    $this->addRoomsToMenu($menu, $this->threads, $policy_objects);
-
-    $menu = phutil_tag_div('phabricator-side-menu', $menu);
-    $menu = phutil_tag_div('phui-basic-nav', $menu);
-
-    return $menu;
-  }
-
-  public function renderSingleThread(
-    ConpherenceThread $thread,
-    array $policy_objects) {
-    assert_instances_of($policy_objects, 'PhabricatorPolicy');
-    return $this->renderThread($thread, $policy_objects);
-  }
-
-  private function renderThreadItem(
-    ConpherenceThread $thread,
-    array $policy_objects) {
-    return id(new PHUIListItemView())
-      ->setType(PHUIListItemView::TYPE_CUSTOM)
-      ->setName($this->renderThread($thread, $policy_objects));
-  }
-
-  private function renderThread(
-    ConpherenceThread $thread,
-    array $policy_objects) {
-
-    $user = $this->getUser();
-
-    $uri = '/'.$thread->getMonogram();
-    $data = $thread->getDisplayData($user);
-    $icon = id(new PHUIIconView())
-      ->addClass('msr')
-      ->setIcon($thread->getPolicyIconName($policy_objects));
-    $title = phutil_tag(
-      'span',
-      array(),
-      array(
-        $icon,
-        $data['title'],
-      ));
-    $subtitle = $data['subtitle'];
-    $unread_count = $data['unread_count'];
-    $epoch = $data['epoch'];
-    $image = $data['image'];
-    $dom_id = $thread->getPHID().'-nav-item';
-
-    return id(new ConpherenceMenuItemView())
-      ->setUser($user)
-      ->setTitle($title)
-      ->setSubtitle($subtitle)
-      ->setHref($uri)
-      ->setEpoch($epoch)
-      ->setImageURI($image)
-      ->setUnreadCount($unread_count)
-      ->setID($thread->getPHID().'-nav-item')
-      ->addSigil('conpherence-menu-click')
-      ->setMetadata(
-        array(
-          'title' => $data['title'],
-          'id' => $dom_id,
-          'threadID' => $thread->getID(),
-          ));
-  }
-
-  private function addRoomsToMenu(
-    PHUIListView $menu,
-    array $rooms,
-    array $policy_objects) {
-
-    $header = $this->renderMenuItemHeader();
+    $header = $this->buildHeaderItemView();
     $menu->addMenuItem($header);
 
-    if (empty($rooms)) {
+    // Blank State NUX
+    if (empty($this->threads)) {
       $join_item = id(new PHUIListItemView())
         ->setType(PHUIListItemView::TYPE_LINK)
         ->setHref('/conpherence/search/')
@@ -115,79 +42,70 @@ final class ConpherenceThreadListView extends AphrontView {
         ->setWorkflow(true)
         ->setName(pht('Create a Room'));
       $menu->addMenuItem($create_item);
-
-      return $menu;
     }
 
-    $this->addThreadsToMenu($menu, $rooms, $policy_objects);
+    $rooms = $this->buildRoomItems($this->threads);
+    foreach ($rooms as $room) {
+      $menu->addMenuItem($room);
+    }
+
+    $menu = phutil_tag_div('phabricator-side-menu', $menu);
+    $menu = phutil_tag_div('phui-basic-nav', $menu);
+
     return $menu;
   }
 
-  private function addThreadsToMenu(
-    PHUIListView $menu,
-    array $threads,
-    array $policy_objects) {
+  private function renderThreadItem(
+    ConpherenceThread $thread) {
 
-    // If we have self::SEE_MORE_LIMIT or less, we can just render
-    // all the threads at once. Otherwise, we render a "See more"
-    // UI element, which toggles a show / hide on the remaining rooms
+    $user = $this->getUser();
+    $data = $thread->getDisplayData($user);
+    $dom_id = $thread->getPHID().'-nav-item';
+
+    return id(new PHUIListItemView())
+      ->setName($data['title'])
+      ->setHref('/'.$thread->getMonogram())
+      ->setProfileImage($data['image'])
+      ->setCount($data['unread_count'])
+      ->setType(PHUIListItemView::TYPE_CUSTOM)
+      ->setID($thread->getPHID().'-nav-item')
+      ->addSigil('conpherence-menu-click')
+      ->setMetadata(
+        array(
+          'title' => $data['title'],
+          'id' => $dom_id,
+          'threadID' => $thread->getID(),
+          'theme' => $data['theme'],
+          ));
+  }
+
+  private function buildRoomItems(array $threads) {
+
+    $items = array();
     $show_threads = $threads;
-    $more_threads = array();
-    if (count($threads) > self::SEE_MORE_LIMIT) {
-      $show_threads = array_slice($threads, 0, self::SEE_MORE_LIMIT);
-      $more_threads = array_slice($threads, self::SEE_MORE_LIMIT);
+    $all_threads = false;
+    if (count($threads) > self::SEE_ALL_LIMIT) {
+      $show_threads = array_slice($threads, 0, self::SEE_ALL_LIMIT);
+      $all_threads = true;
     }
 
     foreach ($show_threads as $thread) {
-      $item = $this->renderThreadItem($thread, $policy_objects);
-      $menu->addMenuItem($item);
+      $items[] = $this->renderThreadItem($thread);
     }
 
-    if ($more_threads) {
-      $search_uri = '/conpherence/search/query/participant/';
-      $sigil = 'more-room';
-
-      $more_item = id(new PHUIListItemView())
+    // Send them to application search here
+    if ($all_threads) {
+      $items[] = id(new PHUIListItemView())
         ->setType(PHUIListItemView::TYPE_LINK)
-        ->setHref($search_uri)
-        ->addSigil('conpherence-menu-see-more')
-        ->setMetadata(array('moreSigil' => $sigil))
-        ->setName(pht('See More'));
-      $menu->addMenuItem($more_item);
-      $show_more_threads = $more_threads;
-      $even_more_threads = array();
-      if (count($more_threads) > self::SEE_MORE_LIMIT) {
-        $show_more_threads = array_slice(
-          $more_threads,
-          0,
-          self::SEE_MORE_LIMIT);
-        $even_more_threads = array_slice(
-          $more_threads,
-          self::SEE_MORE_LIMIT);
-      }
-      foreach ($show_more_threads as $thread) {
-        $item = $this->renderThreadItem($thread, $policy_objects)
-          ->addSigil($sigil)
-          ->addClass('hidden');
-        $menu->addMenuItem($item);
-      }
-
-      if ($even_more_threads) {
-        // kick them to application search here
-        $even_more_item = id(new PHUIListItemView())
-          ->setType(PHUIListItemView::TYPE_LINK)
-          ->setHref($search_uri)
-          ->addSigil($sigil)
-          ->addClass('hidden')
-          ->setName(pht('See More'));
-        $menu->addMenuItem($even_more_item);
-      }
+        ->setHref('/conpherence/search/query/participant/')
+        ->setIcon('fa-external-link')
+        ->setName(pht('See All Joined'));
     }
 
-    return $menu;
+    return $items;
   }
 
-  private function renderMenuItemHeader() {
+  private function buildHeaderItemView() {
     $rooms = phutil_tag(
       'a',
       array(

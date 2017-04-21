@@ -217,3 +217,21 @@
 .dark-console-panel-error-details {
   display: none;
 }
+
+.dark-console-log-frame {
+  height: 500px;
+  overflow: auto;
+  background: #303030;
+  border: 1px solid #202020;
+  margin: 8px 0;
+}
+
+.dark-console-log-message {
+  background: #404040;
+  padding: 8px;
+  margin: 2px;
+}
+
+.dark-console-realtime .button {
+  margin-right: 8px;
+}

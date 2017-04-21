@@ -8,7 +8,6 @@ final class ConpherenceUpdateActions extends ConpherenceConstants {
   const JOIN_ROOM = 'join_room';
   const ADD_PERSON = 'add_person';
   const REMOVE_PERSON = 'remove_person';
-  const NOTIFICATIONS = 'notifications';
   const ADD_STATUS = 'add_status';
   const LOAD = 'load';
 }

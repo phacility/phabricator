@@ -9,8 +9,10 @@
  * @task  meta  Application Management
  */
 abstract class PhabricatorApplication
-  extends Phobject
-  implements PhabricatorPolicyInterface {
+  extends PhabricatorLiskDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const GROUP_CORE            = 'core';
   const GROUP_UTILITIES       = 'util';
@@ -24,6 +26,30 @@ abstract class PhabricatorApplication
       self::GROUP_ADMIN         => pht('Administration'),
       self::GROUP_DEVELOPER     => pht('Developer Tools'),
     );
+  }
+
+  final public function getApplicationName() {
+    return 'application';
+  }
+
+  final public function getTableName() {
+    return 'application_application';
+  }
+
+  final protected function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
+  }
+
+  final public function generatePHID() {
+    return $this->getPHID();
+  }
+
+  final public function save() {
+    // When "save()" is called on applications, we just return without
+    // actually writing anything to the database.
+    return $this;
   }
 
 
@@ -613,4 +639,25 @@ abstract class PhabricatorApplication
     );
   }
 
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhutilMethodNotImplementedException(pht('Coming Soon!'));
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorApplicationApplicationTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
 }

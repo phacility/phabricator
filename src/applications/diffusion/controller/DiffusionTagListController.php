@@ -87,15 +87,13 @@ final class DiffusionTagListController extends DiffusionController {
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($repository->getDisplayName())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($view);
-
-    $pager_box = $this->renderTablePagerBox($pager);
+      ->setTable($view)
+      ->setPager($pager);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(array(
         $box,
-        $pager_box,
       ));
 
     return $this->newPage()

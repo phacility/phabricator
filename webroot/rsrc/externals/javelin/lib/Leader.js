@@ -33,6 +33,8 @@ JX.install('Leader', {
   events: ['onBecomeLeader', 'onReceiveBroadcast'],
 
   statics: {
+    _leaseDuration: 1500,
+
     _interval: null,
     _timeout: null,
     _broadcastKey: 'JX.Leader.broadcast',
@@ -130,8 +132,10 @@ JX.install('Leader', {
           // If we haven't installed an update timer yet, do so now. This will
           // renew our lease every 5 seconds, making sure we hold it until the
           // tab is closed.
-          if (!self._interval && lease.until > now + 10000) {
-            self._interval = window.setInterval(self._write, 5000);
+          var interval = parseInt(self._leaseDuration / 3, 10);
+
+          if (!self._interval && lease.until > now + (interval * 2)) {
+            self._interval = window.setInterval(self._write, interval);
           }
 
           self._becomeLeader();
@@ -227,7 +231,7 @@ JX.install('Leader', {
     _write: function() {
       var self = JX.Leader;
 
-      var str = [self._id, ((+new Date()) + 16000)].join(':');
+      var str = [self._id, ((+new Date()) + self._leaseDuration)].join(':');
       window.localStorage.setItem(self._leaderKey, str);
     },
 
@@ -311,8 +315,8 @@ JX.install('Leader', {
      */
     _usurp: function() {
       var self = JX.Leader;
-      self.call(JX.bag);
       self._timeout = null;
+      self.call(JX.bag);
     },
 
 

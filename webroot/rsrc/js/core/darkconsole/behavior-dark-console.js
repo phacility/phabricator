@@ -6,6 +6,8 @@
  *           javelin-dom
  *           javelin-request
  *           phabricator-keyboard-shortcut
+ *           phabricator-darklog
+ *           phabricator-darkmessage
  */
 
 JX.behavior('dark-console', function(config, statics) {
@@ -246,6 +248,12 @@ JX.behavior('dark-console', function(config, statics) {
 
     var div = JX.$N('div', {className: 'dark-console-panel-core'}, JX.$H(html));
     JX.DOM.setContent(statics.el.panel, div);
+
+    var params = {
+      panel: tclass
+    };
+
+    JX.Stratcom.invoke('darkconsole.draw', null, params);
   }
 
   function install_shortcut() {
@@ -286,5 +294,114 @@ JX.behavior('dark-console', function(config, statics) {
     config.color = statics.root.getAttribute('data-console-color');
   }
   add_request(config);
+
+
+/* -(  Realtime Panel  )----------------------------------------------------- */
+
+
+  if (!statics.realtime) {
+    statics.realtime = true;
+
+    var realtime_log = new JX.DarkLog();
+    var realtime_id = 'dark-console-realtime-log';
+
+    JX.Stratcom.listen('darkconsole.draw', null, function(e) {
+      var data = e.getData();
+      if (data.panel != 'DarkConsoleRealtimePlugin') {
+        return;
+      }
+
+      var node = JX.$(realtime_id);
+      realtime_log.setNode(node);
+    });
+
+    // If the panel is initially visible, try rendering.
+    try {
+      var node = JX.$(realtime_id);
+      realtime_log.setNode(node);
+    } catch (exception) {
+      // Ignore.
+    }
+
+    var leader_log = function(event_name, type, is_leader, details) {
+      var parts = [];
+      if (is_leader === true) {
+        parts.push('+');
+      } else if (is_leader === false) {
+        parts.push('-');
+      } else {
+        parts.push('~');
+      }
+
+      parts.push('[Leader/' + event_name + ']');
+
+      if (type) {
+        parts.push('(' + type + ')');
+      }
+
+      if (details) {
+        parts.push(details);
+      }
+
+      parts = parts.join(' ');
+
+      var message = new JX.DarkMessage()
+        .setMessage(parts);
+
+      realtime_log.addMessage(message);
+    };
+
+    JX.Leader.listen('onReceiveBroadcast', function(message, is_leader) {
+      var json = JX.JSON.stringify(message.data);
+
+      if (message.type == 'aphlict.status') {
+        if (message.data == 'closed') {
+          var ws = JX.Aphlict.getInstance().getWebsocket();
+          if (ws) {
+            var delay = ws.getReconnectDelay();
+            json += ' [Reconnect: ' + delay + 'ms]';
+          }
+        }
+      }
+
+      leader_log('onReceiveBroadcast', message.type, is_leader, json);
+    });
+
+    JX.Leader.listen('onBecomeLeader', function() {
+      leader_log('onBecomeLeader');
+    });
+
+    var action_log = function(action) {
+      var message = new JX.DarkMessage()
+        .setMessage('> ' + action);
+
+      realtime_log.addMessage(message);
+    };
+
+    JX.Stratcom.listen('click', 'dark-console-realtime-action', function(e) {
+      var node = e.getNode('dark-console-realtime-action');
+      var data = JX.Stratcom.getData(node);
+
+      action_log(data.label);
+
+      var action = data.action;
+      switch (action) {
+        case 'reconnect':
+          var ws = JX.Aphlict.getInstance().getWebsocket();
+          if (ws) {
+            ws.reconnect();
+          }
+          break;
+        case 'replay':
+          JX.Aphlict.getInstance().replay();
+          break;
+        case 'repaint':
+          JX.Aphlict.getInstance().reconnect();
+          break;
+      }
+
+    });
+
+  }
 
 });

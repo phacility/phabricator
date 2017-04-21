@@ -1801,7 +1801,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $old = array_fuse($xaction->getOldValue());
     }
 
-    $new = $xaction->getNewValue();
+    return $this->getPHIDList($old, $xaction->getNewValue());
+  }
+
+  public function getPHIDList(array $old, array $new) {
     $new_add = idx($new, '+', array());
     unset($new['+']);
     $new_rem = idx($new, '-', array());

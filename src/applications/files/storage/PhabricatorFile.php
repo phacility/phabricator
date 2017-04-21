@@ -28,7 +28,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorIndexableInterface,
+    PhabricatorNgramsInterface {
 
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
@@ -38,6 +40,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_PROFILE = 'profile';
   const METADATA_STORAGE = 'storage';
   const METADATA_INTEGRITY = 'integrity';
+
+  const STATUS_ACTIVE = 'active';
+  const STATUS_DELETED = 'deleted';
 
   protected $name;
   protected $mimeType;
@@ -57,6 +62,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $isExplicitUpload = 1;
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $isPartial = 0;
+  protected $isDeleted = 0;
 
   private $objects = self::ATTACHABLE;
   private $objectPHIDs = self::ATTACHABLE;
@@ -87,7 +93,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'metadata' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255?',
+        'name' => 'sort255?',
         'mimeType' => 'text255?',
         'byteSize' => 'uint64',
         'storageEngine' => 'text32',
@@ -101,6 +107,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'mailKey' => 'bytes20',
         'isPartial' => 'bool',
         'builtinKey' => 'text64?',
+        'isDeleted' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -144,6 +151,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $this->setMailKey(Filesystem::readRandomCharacters(20));
     }
     return parent::save();
+  }
+
+  public function saveAndIndex() {
+    $this->save();
+    PhabricatorSearchWorker::queueDocumentForIndexing($this->getPHID());
+    return $this;
   }
 
   public function getMonogram() {
@@ -232,7 +245,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $new_file->readPropertiesFromParameters($params);
 
-    $new_file->save();
+    $new_file->saveAndIndex();
 
     return $new_file;
   }
@@ -388,7 +401,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       // Do nothing
     }
 
-    $file->save();
+    $file->saveAndIndex();
 
     return $file;
   }
@@ -1583,6 +1596,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorFileNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

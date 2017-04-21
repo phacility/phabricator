@@ -30,6 +30,7 @@ final class PhabricatorPhurlURLViewController
     $timeline = $this->buildTransactionTimeline(
       $url,
       new PhabricatorPhurlURLTransactionQuery());
+    $timeline->setQuoteRef($url->getMonogram());
 
     $header = $this->buildHeaderView($url);
     $curtain = $this->buildCurtain($url);
@@ -39,20 +40,7 @@ final class PhabricatorPhurlURLViewController
       ->setErrors(array(pht('This URL is invalid due to a bad protocol.')))
       ->setIsHidden($url->isValid());
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('More Cowbell');
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $url->getPHID());
-    $comment_uri = $this->getApplicationURI(
-      '/url/comment/'.$url->getID().'/');
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($url->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($comment_uri)
-      ->setSubmitButtonName(pht('Add Comment'));
+    $add_comment_form = $this->buildCommentForm($url, $timeline);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -72,7 +60,16 @@ final class PhabricatorPhurlURLViewController
         array(
           $view,
       ));
+  }
 
+  private function buildCommentForm(PhabricatorPhurlURL $url, $timeline) {
+    $viewer = $this->getViewer();
+    $box = id(new PhabricatorPhurlURLEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($url)
+      ->setTransactionTimeline($timeline);
+
+    return $box;
   }
 
   private function buildHeaderView(PhabricatorPhurlURL $url) {

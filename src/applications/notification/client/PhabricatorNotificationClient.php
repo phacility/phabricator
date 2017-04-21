@@ -18,6 +18,11 @@ final class PhabricatorNotificationClient extends Phobject {
   }
 
   public static function tryToPostMessage(array $data) {
+    $unique_id = Filesystem::readRandomCharacters(32);
+    $data = $data + array(
+      'uniqueID' => $unique_id,
+    );
+
     $servers = PhabricatorNotificationServerRef::getEnabledAdminServers();
 
     shuffle($servers);

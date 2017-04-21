@@ -57,7 +57,8 @@ final class DiffusionBranchTableController extends DiffusionController {
       $content = id(new PHUIObjectBoxView())
         ->setHeaderText($repository->getName())
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->setTable($table);
+        ->setTable($table)
+        ->setPager($pager);
     }
 
     $crumbs = $this->buildCrumbs(
@@ -65,8 +66,6 @@ final class DiffusionBranchTableController extends DiffusionController {
         'branches' => true,
       ));
     $crumbs->setBorder(true);
-
-    $pager_box = $this->renderTablePagerBox($pager);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Branches'))
@@ -76,7 +75,6 @@ final class DiffusionBranchTableController extends DiffusionController {
       ->setHeader($header)
       ->setFooter(array(
           $content,
-          $pager_box,
       ));
 
     return $this->newPage()

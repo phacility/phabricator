@@ -25,6 +25,7 @@ JX.behavior('conpherence-menu', function(config) {
   };
 
   var scrollbar = null;
+  var cur_theme = config.theme;
 
   // TODO - move more logic into the ThreadManager
   var threadManager = new JX.ConpherenceThreadManager();
@@ -70,7 +71,6 @@ JX.behavior('conpherence-menu', function(config) {
     var textarea = JX.DOM.find(form_root, 'textarea');
     if (!non_update) {
       _scrollMessageWindow();
-      textarea.value = '';
     }
     markThreadLoading(false);
 
@@ -125,10 +125,10 @@ JX.behavior('conpherence-menu', function(config) {
 
   function selectThread(node, update_page_data) {
     if (_thread.node) {
-      JX.DOM.alterClass(_thread.node, 'conpherence-selected', false);
+      JX.DOM.alterClass(_thread.node, 'phui-list-item-selected', false);
     }
 
-    JX.DOM.alterClass(node, 'conpherence-selected', true);
+    JX.DOM.alterClass(node, 'phui-list-item-selected', true);
     JX.DOM.alterClass(node, 'hide-unread-count', true);
 
     _thread.node = node;
@@ -145,6 +145,14 @@ JX.behavior('conpherence-menu', function(config) {
 
   function updatePageData(data) {
     var uri = '/Z' + _thread.selected;
+    var new_theme = data.theme;
+
+    if (new_theme != cur_theme) {
+      var root = JX.$('conpherence-main-layout');
+      JX.DOM.alterClass(root, cur_theme, false);
+      JX.DOM.alterClass(root, new_theme, true);
+      cur_theme = new_theme;
+    }
     JX.History.replace(uri);
     if (data.title) {
       JX.Title.setTitle(data.title);
@@ -424,20 +432,6 @@ JX.behavior('conpherence-menu', function(config) {
       }
     }
   }
-
-  JX.Stratcom.listen(
-    ['click'],
-    'conpherence-menu-see-more',
-    function (e) {
-      e.kill();
-      var sigil = e.getNodeData('conpherence-menu-see-more').moreSigil;
-      var root = JX.$('conpherence-menu-pane');
-      var more = JX.DOM.scry(root, 'li', sigil);
-      for (var i = 0; i < more.length; i++) {
-        JX.DOM.alterClass(more[i], 'hidden', false);
-      }
-      JX.DOM.hide(e.getNode('conpherence-menu-see-more'));
-    });
 
   JX.Stratcom.listen(
     ['keydown'],

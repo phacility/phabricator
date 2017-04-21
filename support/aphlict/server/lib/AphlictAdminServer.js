@@ -17,6 +17,7 @@ JX.install('AphlictAdminServer', {
     server.on('request', JX.bind(this, this._onrequest));
     this._server = server;
     this._clientServers = [];
+    this._messageHistory = [];
   },
 
   properties: {
@@ -30,6 +31,7 @@ JX.install('AphlictAdminServer', {
     _messagesOut: null,
     _server: null,
     _startTime: null,
+    _messageHistory: null,
 
     getListenerLists: function(instance) {
       var clients = this.getClientServers();
@@ -121,14 +123,24 @@ JX.install('AphlictAdminServer', {
         total_count += list.getTotalListenerCount();
       }
 
+      var now = new Date().getTime();
+
+      var history_size = this._messageHistory.length;
+      var history_age = null;
+      if (history_size) {
+        history_age = (now - this._messageHistory[0].timestamp);
+      }
+
       var server_status = {
         'instance': instance,
-        'uptime': (new Date().getTime() - this._startTime),
+        'uptime': (now - this._startTime),
         'clients.active': active_count,
         'clients.total': total_count,
         'messages.in': this._messagesIn,
         'messages.out': this._messagesOut,
-        'version': 7
+        'version': 7,
+        'history.size': history_size,
+        'history.age': history_age
       };
 
       response.writeHead(200, {'Content-Type': 'application/json'});
@@ -140,6 +152,16 @@ JX.install('AphlictAdminServer', {
      * Transmits a message to all subscribed listeners.
      */
     _transmit: function(instance, message, response) {
+      var now = new Date().getTime();
+
+      this._messageHistory.push(
+        {
+          timestamp: now,
+          message: message
+        });
+
+      this._purgeHistory();
+
       var peer_list = this.getPeerList();
 
       message = peer_list.addFingerprint(message);
@@ -191,7 +213,50 @@ JX.install('AphlictAdminServer', {
             error);
         }
       }
+    },
+
+    getHistory: function(min_age) {
+      var history = this._messageHistory;
+      var results = [];
+
+      for (var ii = 0; ii < history.length; ii++) {
+        if (history[ii].timestamp >= min_age) {
+          results.push(history[ii].message);
+        }
+      }
+
+      return results;
+    },
+
+    _purgeHistory: function() {
+      var messages = this._messageHistory;
+
+      // Maximum number of messages to retain.
+      var size_limit = 4096;
+
+      // Find the index of the first item we're going to keep. If we have too
+      // many items, this will be somewhere past the beginning of the list.
+      var keep = Math.max(0, messages.length - size_limit);
+
+      // Maximum number of milliseconds of history to retain.
+      var age_limit = 60000;
+
+      // Move the index forward until we find an item that is recent enough
+      // to retain.
+      var now = new Date().getTime();
+      var min_age = (now - age_limit);
+      for (keep; keep < messages.length; keep++) {
+        if (messages[keep].timestamp >= min_age) {
+          break;
+        }
+      }
+
+      // Throw away extra messages.
+      if (keep) {
+        this._messageHistory.splice(0, keep);
+      }
     }
+
   }
 
 });
