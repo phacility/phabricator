@@ -358,7 +358,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             $object,
             PhabricatorPolicyCapability::CAN_EDIT);
         }
-
         break;
       case ConpherenceThreadTitleTransaction::TRANSACTIONTYPE:
       case ConpherenceThreadTopicTransaction::TRANSACTIONTYPE:
