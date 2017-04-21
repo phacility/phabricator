@@ -57,7 +57,8 @@ final class DiffusionHistoryController extends DiffusionController {
     $history_panel = id(new PHUIObjectBoxView())
       ->setHeader($history_header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($history_table);
+      ->setTable($history_table)
+      ->setPager($pager);
 
     $header = $this->buildHeader($drequest);
 
@@ -69,13 +70,10 @@ final class DiffusionHistoryController extends DiffusionController {
       ));
     $crumbs->setBorder(true);
 
-    $pager_box = $this->renderTablePagerBox($pager);
-
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(array(
         $history_panel,
-        $pager_box,
       ));
 
     return $this->newPage()
