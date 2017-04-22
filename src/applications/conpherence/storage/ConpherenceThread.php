@@ -204,7 +204,7 @@ final class ConpherenceThread extends ConpherenceDAO
     }
 
     $user_participation = $this->getParticipantIfExists($viewer->getPHID());
-    $theme = ConpherenceRoomSettings::COLOR_LIGHT;
+    $theme_class = ConpherenceRoomSettings::COLOR_LIGHT;
     if ($user_participation) {
       $user_seen_count = $user_participation->getSeenMessageCount();
       $participant = $this->getParticipant($viewer->getPHID());
