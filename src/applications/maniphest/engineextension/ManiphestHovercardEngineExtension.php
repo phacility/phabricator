@@ -24,24 +24,52 @@ final class ManiphestHovercardEngineExtension
     $task,
     $data) {
     $viewer = $this->getViewer();
+    require_celerity_resource('phui-workcard-view-css');
 
-    $hovercard
-      ->setTitle($task->getMonogram())
-      ->setDetail($task->getTitle());
+    $id = $task->getID();
+    $task = id(new ManiphestTaskQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->needProjectPHIDs(true)
+      ->executeOne();
+
+    $phids = array();
+    $owner_phid = $task->getOwnerPHID();
+    if ($owner_phid) {
+      $phids[$owner_phid] = $owner_phid;
+    }
+    foreach ($task->getProjectPHIDs() as $phid) {
+      $phids[$phid] = $phid;
+    }
+
+    $handles = $viewer->loadHandles($phids);
+    $handles = iterator_to_array($handles);
+
+    $card = id(new ProjectBoardTaskCard())
+      ->setViewer($viewer)
+      ->setTask($task)
+      ->setCanEdit(false);
 
     $owner_phid = $task->getOwnerPHID();
     if ($owner_phid) {
-      $owner = $viewer->renderHandle($owner_phid);
-    } else {
-      $owner = phutil_tag('em', array(), pht('None'));
+      $owner_handle = $handles[$owner_phid];
+      $card->setOwner($owner_handle);
     }
-    $hovercard->addField(pht('Assigned To'), $owner);
 
-    $hovercard->addField(
-      pht('Priority'),
-      ManiphestTaskPriority::getTaskPriorityName($task->getPriority()));
+    $project_phids = $task->getProjectPHIDs();
+    $project_handles = array_select_keys($handles, $project_phids);
+    if ($project_handles) {
+      $card->setProjectHandles($project_handles);
+    }
 
-    $hovercard->addTag(ManiphestView::renderTagForTask($task));
+    $item = $card->getItem();
+    $card = id(new PHUIObjectItemListView())
+      ->setFlush(true)
+      ->setItemClass('phui-workcard')
+      ->addClass('hovercard-task-view')
+      ->addItem($item);
+    $hovercard->appendChild($card);
+
   }
 
 }
