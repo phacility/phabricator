@@ -35,6 +35,7 @@ final class PhabricatorAccessLogConfigOptions
       'P' => pht('The logged-in user PHID, if one is logged in.'),
       'i' => pht('Request input, in bytes.'),
       'o' => pht('Request output, in bytes.'),
+      'I' => pht('Cluster instance name, if configured.'),
     );
 
     $http_map = $common_map + array(
