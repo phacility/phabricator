@@ -74,7 +74,7 @@ body.printable {
 a.button.phui-document-toc {
   display: inline-block;
   height: 16px;
-  width: 16px;
+  width: 20px;
   padding: 3px 8px 4px 8px;
 }
 
@@ -88,7 +88,7 @@ a.button.phui-document-toc {
   z-index: 30;
   background-color: #fff;
   top: 52px;
-  left: -44px;
+  left: -40px;
 }
 
 .device .phui-document-view-pro .phui-document-toc {
