@@ -29,6 +29,10 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
+.phui-two-column-view .aphront-table-notice .phui-info-view {
+  margin: 0;
+}
+
 .aphront-table-view tr.alt {
   background: {$lightgreybackground};
 }

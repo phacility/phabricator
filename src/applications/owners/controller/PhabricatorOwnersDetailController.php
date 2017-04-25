@@ -323,6 +323,10 @@ final class PhabricatorOwnersDetailController
           'wide',
         ));
 
+    if ($info) {
+      $table->setNotice($info);
+    }
+
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Paths'))
       ->setHeaderIcon('fa-folder-open');
@@ -331,10 +335,6 @@ final class PhabricatorOwnersDetailController
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
-
-    if ($info) {
-      $box->setInfoView($info);
-    }
 
     return $box;
   }
