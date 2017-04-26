@@ -45,8 +45,10 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
           => 'ConpherenceViewController',
         'columnview/'
           => 'ConpherenceColumnViewController',
-        'new/'
-          => 'ConpherenceNewRoomController',
+        $this->getEditRoutePattern('new/')
+          => 'ConpherenceRoomEditController',
+        $this->getEditRoutePattern('edit/')
+          => 'ConpherenceRoomEditController',
         'picture/(?P<id>[1-9]\d*)/'
           => 'ConpherenceRoomPictureController',
         'search/(?:query/(?P<queryKey>[^/]+)/)?'

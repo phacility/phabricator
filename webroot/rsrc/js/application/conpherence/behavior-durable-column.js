@@ -177,7 +177,7 @@ JX.behavior('durable-column', function(config, statics) {
       var params = null;
 
       switch (action) {
-        case 'metadata':
+        case 'go_edit':
           threadManager.runUpdateWorkflowFromLink(
             link,
             {

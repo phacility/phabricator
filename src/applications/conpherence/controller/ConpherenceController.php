@@ -91,7 +91,8 @@ abstract class ConpherenceController extends PhabricatorController {
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
-          ->setHref($this->getApplicationURI("update/{$id}/"))
+          ->setHref(
+            $this->getApplicationURI('edit/'.$conpherence->getID()).'/')
           ->setIcon('fa-pencil')
           ->addClass('hide-on-device')
           ->setColor('violet')

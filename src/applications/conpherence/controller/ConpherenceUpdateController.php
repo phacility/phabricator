@@ -12,7 +12,7 @@ final class ConpherenceUpdateController
 
     $need_participants = false;
     $needed_capabilities = array(PhabricatorPolicyCapability::CAN_VIEW);
-    $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
+    $action = $request->getStr('action');
     switch ($action) {
       case ConpherenceUpdateActions::REMOVE_PERSON:
         $person_phid = $request->getStr('remove_person');
@@ -21,7 +21,6 @@ final class ConpherenceUpdateController
         }
         break;
       case ConpherenceUpdateActions::ADD_PERSON:
-      case ConpherenceUpdateActions::METADATA:
         $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
         break;
       case ConpherenceUpdateActions::LOAD:
@@ -110,35 +109,6 @@ final class ConpherenceUpdateController
             $response_mode = 'go-home';
           }
           break;
-        case ConpherenceUpdateActions::METADATA:
-          $title = $request->getStr('title');
-          $topic = $request->getStr('topic');
-
-          // all other metadata updates are continue requests
-          if (!$request->isContinueRequest()) {
-            break;
-          }
-
-          $title = $request->getStr('title');
-          $topic = $request->getStr('topic');
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(
-              ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
-            ->setNewValue($title);
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(
-              ConpherenceThreadTopicTransaction::TRANSACTIONTYPE)
-            ->setNewValue($topic);
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-            ->setNewValue($request->getStr('viewPolicy'));
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-            ->setNewValue($request->getStr('editPolicy'));
-          if (!$request->getExists('force_ajax')) {
-            $response_mode = 'redirect';
-          }
-          break;
         case ConpherenceUpdateActions::LOAD:
           $updated = false;
           $response_mode = 'ajax';
@@ -207,10 +177,6 @@ final class ConpherenceUpdateController
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
         $dialog = $this->renderRemovePersonDialog($conpherence);
-        break;
-      case ConpherenceUpdateActions::METADATA:
-      default:
-        $dialog = $this->renderMetadataDialog($conpherence, $error_view);
         break;
     }
 
@@ -332,62 +298,6 @@ final class ConpherenceUpdateController
     return $dialog;
   }
 
-  private function renderMetadataDialog(
-    ConpherenceThread $conpherence,
-    $error_view) {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $title = pht('Update Room');
-    $form = id(new PHUIFormLayoutView())
-      ->appendChild($error_view)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Title'))
-        ->setName('title')
-        ->setValue($conpherence->getTitle()))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Topic'))
-        ->setName('topic')
-        ->setValue($conpherence->getTopic()));
-
-    $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
-      ->setObject($conpherence)
-      ->execute();
-
-    $form
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setName('viewPolicy')
-        ->setPolicyObject($conpherence)
-        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-        ->setPolicies($policies))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setName('editPolicy')
-        ->setPolicyObject($conpherence)
-        ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-        ->setPolicies($policies));
-
-    $view = id(new AphrontDialogView())
-      ->setTitle($title)
-      ->addHiddenInput('action', 'metadata')
-      ->addHiddenInput(
-        'latest_transaction_id',
-        $request->getInt('latest_transaction_id'))
-      ->addHiddenInput('__continue__', true)
-      ->appendChild($form);
-
-    if ($request->getExists('force_ajax')) {
-      $view->addHiddenInput('force_ajax', true);
-    }
-
-    return $view;
-  }
-
   private function loadAndRenderUpdates(
     $action,
     $conpherence_id,
@@ -395,7 +305,6 @@ final class ConpherenceUpdateController
 
     $need_transactions = false;
     switch ($action) {
-      case ConpherenceUpdateActions::METADATA:
       case ConpherenceUpdateActions::LOAD:
         $need_transactions = true;
         break;
@@ -444,15 +353,6 @@ final class ConpherenceUpdateController
     $header = null;
     $people_widget = null;
     switch ($action) {
-      case ConpherenceUpdateActions::METADATA:
-        $header = $this->buildHeaderPaneContent($conpherence);
-        $header = hsprintf('%s', $header);
-        $nav_item = id(new ConpherenceThreadListView())
-          ->setUser($user)
-          ->setBaseURI($this->getApplicationURI())
-          ->renderThreadItem($conpherence);
-        $nav_item = hsprintf('%s', $nav_item);
-        break;
       case ConpherenceUpdateActions::ADD_PERSON:
         $people_widget = id(new ConpherenceParticipantView())
           ->setUser($user)
