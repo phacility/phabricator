@@ -138,6 +138,13 @@ final class PhabricatorStorageManagementDumpWorkflow
       $command = csprintf('mysqldump %Ls', $argv);
     }
 
+    // Decrease the CPU priority of this process so it doesn't contend with
+    // other more important things.
+    if (function_exists('proc_nice')) {
+      proc_nice(19);
+    }
+
+
     // If we aren't writing to a file, just passthru the command.
     if ($output_file === null) {
       return phutil_passthru('%C', $command);
@@ -148,7 +155,7 @@ final class PhabricatorStorageManagementDumpWorkflow
     // a full disk). See T6996 for discussion.
 
     if ($is_compress) {
-      $file = gzopen($output_file, 'wb');
+      $file = gzopen($output_file, 'wb1');
     } else {
       $file = fopen($output_file, 'wb');
     }
@@ -162,23 +169,35 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     $future = new ExecFuture('%C', $command);
 
-    $lines = new LinesOfALargeExecFuture($future);
-
     try {
-      foreach ($lines as $line) {
-        $line = $line."\n";
-        if ($is_compress) {
-          $ok = gzwrite($file, $line);
-        } else {
-          $ok = fwrite($file, $line);
+      $iterator = id(new FutureIterator(array($future)))
+        ->setUpdateInterval(0.100);
+      foreach ($iterator as $ready) {
+        list($stdout, $stderr) = $future->read();
+        $future->discardBuffers();
+
+        if (strlen($stderr)) {
+          fwrite(STDERR, $stderr);
         }
 
-        if ($ok !== strlen($line)) {
-          throw new Exception(
-            pht(
-              'Failed to write %d byte(s) to file "%s".',
-              new PhutilNumber(strlen($line)),
-              $output_file));
+        if (strlen($stdout)) {
+          if ($is_compress) {
+            $ok = gzwrite($file, $stdout);
+          } else {
+            $ok = fwrite($file, $stdout);
+          }
+
+          if ($ok !== strlen($stdout)) {
+            throw new Exception(
+              pht(
+                'Failed to write %d byte(s) to file "%s".',
+                new PhutilNumber(strlen($stdout)),
+                $output_file));
+          }
+        }
+
+        if ($ready !== null) {
+          $ready->resolvex();
         }
       }
 
