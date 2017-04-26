@@ -393,6 +393,12 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           return;
         }
 
+        // Let other listeners (particularly the inline autocomplete) have a
+        // chance to handle this event.
+        if (JX.Stratcom.pass()) {
+          return;
+        }
+
         var raw = e.getRawEvent();
         if (raw.shiftKey) {
           // If the shift key is pressed, let the browser write a newline into
@@ -412,8 +418,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         // This allows 'workflow' and similar actions to take effect.
         // Such as pontificate in Conpherence
         var form = e.getNode('tag:form');
-        var r = JX.DOM.invoke(form, 'didSyntheticSubmit');
-
+        JX.DOM.invoke(form, 'didSyntheticSubmit');
       });
   }
 
