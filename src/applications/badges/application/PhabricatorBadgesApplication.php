@@ -11,7 +11,7 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Achievements and Notority');
+    return pht('Achievements and Notoriety');
   }
 
   public function getIcon() {

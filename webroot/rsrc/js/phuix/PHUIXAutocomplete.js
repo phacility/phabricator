@@ -127,7 +127,7 @@ JX.install('PHUIXAutocomplete', {
       }
 
       // Get all the text on the current line. If the line only contains
-      // whitespace, don't actiavte: the user is probably typing code or a
+      // whitespace, don't activate: the user is probably typing code or a
       // numbered list.
       var line = area.value.substring(0, head - 1);
       line = line.split('\n');
@@ -454,7 +454,7 @@ JX.install('PHUIXAutocomplete', {
 
         // If the user hasn't typed any text yet after typing the character
         // which can summon the autocomplete, deactivate and let the keystroke
-        // through. For example, We hit this when a line ends with an
+        // through. For example, we hit this when a line ends with an
         // autocomplete character and the user is trying to type a newline.
         if (range.start == this._cursorHead) {
           this._deactivate();
@@ -529,9 +529,13 @@ JX.install('PHUIXAutocomplete', {
         }
       }
 
+      // Deactivate immediately if the user types an ignored token like ":)",
+      // the smiley face emoticon. Note that we test against "text", not
+      // "trim", because the ignore list and suffix list can otherwise
+      // interact destructively.
       var ignore = this._getIgnoreList();
       for (ii = 0; ii < ignore.length; ii++) {
-        if (trim.indexOf(ignore[ii]) === 0) {
+        if (text.indexOf(ignore[ii]) === 0) {
           this._deactivate();
           return;
         }

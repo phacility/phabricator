@@ -320,13 +320,16 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $crumbs->setBorder(true);
     $crumbs->addTextCrumb($document->getMonogram());
 
+    $box = id(new PHUITwoColumnView())
+      ->setFooter($signature_box);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($document->getPHID()))
       ->appendChild(array(
         $content,
-        $signature_box,
+        $box,
       ));
   }
 

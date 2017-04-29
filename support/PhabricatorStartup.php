@@ -50,6 +50,7 @@ final class PhabricatorStartup {
   // iterate on it a bit for Conduit, some of the specific score levels, and
   // to deal with NAT'd offices.
   private static $maximumRate = 0;
+  private static $rateLimitToken;
 
 
 /* -(  Accessing Request Information  )-------------------------------------- */
@@ -137,8 +138,9 @@ final class PhabricatorStartup {
     // we can switch over to relying on our own exception recovery mechanisms.
     ini_set('display_errors', 0);
 
-    if (isset($_SERVER['REMOTE_ADDR'])) {
-      self::rateLimitRequest($_SERVER['REMOTE_ADDR']);
+    $rate_token = self::getRateLimitToken();
+    if ($rate_token !== null) {
+      self::rateLimitRequest($rate_token);
     }
 
     self::normalizeInput();
@@ -681,6 +683,36 @@ final class PhabricatorStartup {
 
 
   /**
+   * Set a token to identify the client for purposes of rate limiting.
+   *
+   * By default, the `REMOTE_ADDR` is used. If your install is behind a load
+   * balancer, you may want to parse `X-Forwarded-For` and use that address
+   * instead.
+   *
+   * @param string Client identity for rate limiting.
+   */
+  public static function setRateLimitToken($token) {
+    self::$rateLimitToken = $token;
+  }
+
+
+  /**
+   * Get the current client identity for rate limiting.
+   */
+  public static function getRateLimitToken() {
+    if (self::$rateLimitToken !== null) {
+      return self::$rateLimitToken;
+    }
+
+    if (isset($_SERVER['REMOTE_ADDR'])) {
+      return $_SERVER['REMOTE_ADDR'];
+    }
+
+    return null;
+  }
+
+
+  /**
    * Check if the user (identified by `$user_identity`) has issued too many
    * requests recently. If they have, end the request with a 429 error code.
    *
@@ -699,13 +731,18 @@ final class PhabricatorStartup {
     }
 
     $score = self::getRateLimitScore($user_identity);
-    if ($score > (self::$maximumRate * self::getRateLimitBucketCount())) {
+    $limit = self::$maximumRate * self::getRateLimitBucketCount();
+    if ($score > $limit) {
       // Give the user some bonus points for getting rate limited. This keeps
       // bad actors who keep slamming the 429 page locked out completely,
       // instead of letting them get a burst of requests through every minute
       // after a bucket expires.
-      self::addRateLimitScore($user_identity, 50);
-      self::didRateLimit($user_identity);
+      $penalty = 50;
+
+      self::addRateLimitScore($user_identity, $penalty);
+      $score += $penalty;
+
+      self::didRateLimit($user_identity, $score, $limit);
     }
   }
 
@@ -729,15 +766,21 @@ final class PhabricatorStartup {
       return;
     }
 
+    $is_apcu = (bool)function_exists('apcu_fetch');
     $current = self::getRateLimitBucket();
 
-    // There's a bit of a race here, if a second process reads the bucket before
-    // this one writes it, but it's fine if we occasionally fail to record a
-    // user's score. If they're making requests fast enough to hit rate
-    // limiting, we'll get them soon.
+    // There's a bit of a race here, if a second process reads the bucket
+    // before this one writes it, but it's fine if we occasionally fail to
+    // record a user's score. If they're making requests fast enough to hit
+    // rate limiting, we'll get them soon enough.
 
     $bucket_key = self::getRateLimitBucketKey($current);
-    $bucket = apc_fetch($bucket_key);
+    if ($is_apcu) {
+      $bucket = apcu_fetch($bucket_key);
+    } else {
+      $bucket = apc_fetch($bucket_key);
+    }
+
     if (!is_array($bucket)) {
       $bucket = array();
     }
@@ -747,7 +790,12 @@ final class PhabricatorStartup {
     }
 
     $bucket[$user_identity] += $score;
-    apc_store($bucket_key, $bucket);
+
+    if ($is_apcu) {
+      apcu_store($bucket_key, $bucket);
+    } else {
+      apc_store($bucket_key, $bucket);
+    }
   }
 
 
@@ -761,11 +809,12 @@ final class PhabricatorStartup {
    * @task ratelimit
    */
   private static function canRateLimit() {
+
     if (!self::$maximumRate) {
       return false;
     }
 
-    if (!function_exists('apc_fetch')) {
+    if (!function_exists('apc_fetch') && !function_exists('apcu_fetch')) {
       return false;
     }
 
@@ -826,16 +875,26 @@ final class PhabricatorStartup {
    * @task ratelimit
    */
   private static function getRateLimitScore($user_identity) {
+    $is_apcu = (bool)function_exists('apcu_fetch');
+
     $min_key = self::getRateLimitMinKey();
 
     // Identify the oldest bucket stored in APC.
     $cur = self::getRateLimitBucket();
-    $min = apc_fetch($min_key);
+    if ($is_apcu) {
+      $min = apcu_fetch($min_key);
+    } else {
+      $min = apc_fetch($min_key);
+    }
 
     // If we don't have any buckets stored yet, store the current bucket as
     // the oldest bucket.
     if (!$min) {
-      apc_store($min_key, $cur);
+      if ($is_apcu) {
+        apcu_store($min_key, $cur);
+      } else {
+        apc_store($min_key, $cur);
+      }
       $min = $cur;
     }
 
@@ -844,14 +903,25 @@ final class PhabricatorStartup {
     // up an old bucket once per minute.
     $count = self::getRateLimitBucketCount();
     for ($cursor = $min; $cursor < ($cur - $count); $cursor++) {
-      apc_delete(self::getRateLimitBucketKey($cursor));
-      apc_store($min_key, $cursor + 1);
+      $bucket_key = self::getRateLimitBucketKey($cursor);
+      if ($is_apcu) {
+        apcu_delete($bucket_key);
+        apcu_store($min_key, $cursor + 1);
+      } else {
+        apc_delete($bucket_key);
+        apc_store($min_key, $cursor + 1);
+      }
     }
 
     // Now, sum up the user's scores in all of the active buckets.
     $score = 0;
     for (; $cursor <= $cur; $cursor++) {
-      $bucket = apc_fetch(self::getRateLimitBucketKey($cursor));
+      $bucket_key = self::getRateLimitBucketKey($cursor);
+      if ($is_apcu) {
+        $bucket = apcu_fetch($bucket_key);
+      } else {
+        $bucket = apc_fetch($bucket_key);
+      }
       if (isset($bucket[$user_identity])) {
         $score += $bucket[$user_identity];
       }
@@ -868,12 +938,11 @@ final class PhabricatorStartup {
    * @return exit This method **does not return**.
    * @task ratelimit
    */
-  private static function didRateLimit() {
+  private static function didRateLimit($user_identity, $score, $limit) {
     $message =
       "TOO MANY REQUESTS\n".
-      "You are issuing too many requests too quickly.\n".
-      "To adjust limits, see \"Configuring a Preamble Script\" in the ".
-      "documentation.";
+      "You (\"{$user_identity}\") are issuing too many requests ".
+      "too quickly.\n";
 
     header(
       'Content-Type: text/plain; charset=utf-8',

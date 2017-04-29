@@ -3204,6 +3204,7 @@ phutil_register_library_map(array(
     'PhabricatorOwnersDefaultViewCapability' => 'applications/owners/capability/PhabricatorOwnersDefaultViewCapability.php',
     'PhabricatorOwnersDetailController' => 'applications/owners/controller/PhabricatorOwnersDetailController.php',
     'PhabricatorOwnersEditController' => 'applications/owners/controller/PhabricatorOwnersEditController.php',
+    'PhabricatorOwnersHovercardEngineExtension' => 'applications/owners/engineextension/PhabricatorOwnersHovercardEngineExtension.php',
     'PhabricatorOwnersListController' => 'applications/owners/controller/PhabricatorOwnersListController.php',
     'PhabricatorOwnersOwner' => 'applications/owners/storage/PhabricatorOwnersOwner.php',
     'PhabricatorOwnersPackage' => 'applications/owners/storage/PhabricatorOwnersPackage.php',
@@ -8406,6 +8407,7 @@ phutil_register_library_map(array(
     'PhabricatorOwnersDefaultViewCapability' => 'PhabricatorPolicyCapability',
     'PhabricatorOwnersDetailController' => 'PhabricatorOwnersController',
     'PhabricatorOwnersEditController' => 'PhabricatorOwnersController',
+    'PhabricatorOwnersHovercardEngineExtension' => 'PhabricatorHovercardEngineExtension',
     'PhabricatorOwnersListController' => 'PhabricatorOwnersController',
     'PhabricatorOwnersOwner' => 'PhabricatorOwnersDAO',
     'PhabricatorOwnersPackage' => array(

@@ -12,7 +12,6 @@ final class PhabricatorOwnersPackage
     PhabricatorNgramsInterface {
 
   protected $name;
-  protected $originalName;
   protected $auditingEnabled;
   protected $autoReview;
   protected $description;
@@ -105,8 +104,7 @@ final class PhabricatorOwnersPackage
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'sort128',
-        'originalName' => 'text255',
+        'name' => 'sort',
         'description' => 'text',
         'primaryOwnerPHID' => 'phid?',
         'auditingEnabled' => 'bool',
@@ -137,9 +135,6 @@ final class PhabricatorOwnersPackage
 
   public function setName($name) {
     $this->name = $name;
-    if (!$this->getID()) {
-      $this->originalName = $name;
-    }
     return $this;
   }
 
