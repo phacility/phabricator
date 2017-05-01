@@ -32,7 +32,7 @@ final class PonderQuestionEditor
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PonderQuestionTransaction::TYPE_ANSWERS:
+        case PonderQuestionAnswerTransaction::TRANSACTIONTYPE:
           return true;
       }
     }
@@ -46,7 +46,7 @@ final class PonderQuestionEditor
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PonderQuestionTransaction::TYPE_ANSWERS:
+        case PonderQuestionAnswerTransaction::TRANSACTIONTYPE:
           $new_value = $xaction->getNewValue();
           $new = idx($new_value, '+', array());
           foreach ($new as $new_answer) {
@@ -70,115 +70,7 @@ final class PonderQuestionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_SPACE;
 
-    $types[] = PonderQuestionTransaction::TYPE_TITLE;
-    $types[] = PonderQuestionTransaction::TYPE_CONTENT;
-    $types[] = PonderQuestionTransaction::TYPE_ANSWERS;
-    $types[] = PonderQuestionTransaction::TYPE_STATUS;
-    $types[] = PonderQuestionTransaction::TYPE_ANSWERWIKI;
-
     return $types;
-  }
-
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PonderQuestionTransaction::TYPE_TITLE:
-        return $object->getTitle();
-      case PonderQuestionTransaction::TYPE_CONTENT:
-        return $object->getContent();
-      case PonderQuestionTransaction::TYPE_ANSWERS:
-        return mpull($object->getAnswers(), 'getPHID');
-      case PonderQuestionTransaction::TYPE_STATUS:
-        return $object->getStatus();
-      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
-        return $object->getAnswerWiki();
-    }
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PonderQuestionTransaction::TYPE_TITLE:
-      case PonderQuestionTransaction::TYPE_CONTENT:
-      case PonderQuestionTransaction::TYPE_STATUS:
-      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
-        return $xaction->getNewValue();
-      case PonderQuestionTransaction::TYPE_ANSWERS:
-        $raw_new_value = $xaction->getNewValue();
-        $new_value = array();
-        foreach ($raw_new_value as $key => $answers) {
-          $phids = array();
-          foreach ($answers as $answer) {
-            $obj = idx($answer, 'answer');
-            if (!$answer) {
-              continue;
-            }
-            $phids[] = $obj->getPHID();
-          }
-          $new_value[$key] = $phids;
-        }
-        $xaction->setNewValue($new_value);
-        return $this->getPHIDTransactionNewValue($xaction);
-    }
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PonderQuestionTransaction::TYPE_TITLE:
-        $object->setTitle($xaction->getNewValue());
-        break;
-      case PonderQuestionTransaction::TYPE_CONTENT:
-        $object->setContent($xaction->getNewValue());
-        break;
-      case PonderQuestionTransaction::TYPE_STATUS:
-        $object->setStatus($xaction->getNewValue());
-        break;
-      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
-        $object->setAnswerWiki($xaction->getNewValue());
-        break;
-      case PonderQuestionTransaction::TYPE_ANSWERS:
-        $old = $xaction->getOldValue();
-        $new = $xaction->getNewValue();
-
-        $add = array_diff_key($new, $old);
-        $rem = array_diff_key($old, $new);
-
-        $count = $object->getAnswerCount();
-        $count += count($add);
-        $count -= count($rem);
-
-        $object->setAnswerCount($count);
-        break;
-    }
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    return;
-  }
-
-  protected function mergeTransactions(
-    PhabricatorApplicationTransaction $u,
-    PhabricatorApplicationTransaction $v) {
-
-    $type = $u->getTransactionType();
-    switch ($type) {
-      case PonderQuestionTransaction::TYPE_TITLE:
-      case PonderQuestionTransaction::TYPE_CONTENT:
-      case PonderQuestionTransaction::TYPE_STATUS:
-      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
-        return $v;
-    }
-
-    return parent::mergeTransactions($u, $v);
   }
 
   protected function supportsSearch() {
@@ -190,7 +82,7 @@ final class PonderQuestionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PonderQuestionTransaction::TYPE_ANSWERS:
+      case PonderQuestionAnswerTransaction::TRANSACTIONTYPE:
         return false;
     }
 
@@ -202,7 +94,7 @@ final class PonderQuestionEditor
     array $xactions) {
       foreach ($xactions as $xaction) {
         switch ($xaction->getTransactionType()) {
-          case PonderQuestionTransaction::TYPE_ANSWERS:
+          case PonderQuestionAnswerTransaction::TRANSACTIONTYPE:
             return false;
         }
       }
@@ -221,7 +113,7 @@ final class PonderQuestionEditor
     array $xactions) {
       foreach ($xactions as $xaction) {
         switch ($xaction->getTransactionType()) {
-          case PonderQuestionTransaction::TYPE_ANSWERS:
+          case PonderQuestionAnswerTransaction::TRANSACTIONTYPE:
             return false;
         }
       }
@@ -269,7 +161,7 @@ final class PonderQuestionEditor
       $old = $xaction->getOldValue();
       $new = $xaction->getNewValue();
       // If the user just asked the question, add the question text.
-      if ($type == PonderQuestionTransaction::TYPE_CONTENT) {
+      if ($type == PonderQuestionContentTransaction::TRANSACTIONTYPE) {
         if ($old === null) {
           $body->addRawSection($new);
         }

@@ -38,7 +38,7 @@ final class PonderAnswerSaveController extends PonderController {
 
     $xactions = array();
     $xactions[] = id(new PonderQuestionTransaction())
-      ->setTransactionType(PonderQuestionTransaction::TYPE_ANSWERS)
+      ->setTransactionType(PonderQuestionAnswerTransaction::TRANSACTIONTYPE)
       ->setNewValue(
         array(
           '+' => array(

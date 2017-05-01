@@ -63,20 +63,23 @@ final class PonderQuestionEditController extends PonderController {
         $xactions = array();
 
         $xactions[] = id(clone $template)
-          ->setTransactionType(PonderQuestionTransaction::TYPE_TITLE)
+          ->setTransactionType(PonderQuestionTitleTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_title);
 
         $xactions[] = id(clone $template)
-          ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
+          ->setTransactionType(
+            PonderQuestionContentTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_content);
 
         $xactions[] = id(clone $template)
-          ->setTransactionType(PonderQuestionTransaction::TYPE_ANSWERWIKI)
+          ->setTransactionType(
+            PonderQuestionAnswerWikiTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_wiki);
 
         if (!$is_new) {
           $xactions[] = id(clone $template)
-            ->setTransactionType(PonderQuestionTransaction::TYPE_STATUS)
+            ->setTransactionType(
+              PonderQuestionStatusTransaction::TRANSACTIONTYPE)
             ->setNewValue($v_status);
         }
 
