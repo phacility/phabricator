@@ -45,7 +45,7 @@ final class PhabricatorMacroViewController
     if (!$macro->getIsDisabled()) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('fa-ban', 'red', pht('Archived'));
+      $header->setStatus('fa-ban', 'indigo', pht('Archived'));
     }
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');

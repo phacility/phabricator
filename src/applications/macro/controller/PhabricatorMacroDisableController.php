@@ -22,7 +22,8 @@ final class PhabricatorMacroDisableController
 
     if ($request->isDialogFormPost() || $macro->getIsDisabled()) {
       $xaction = id(new PhabricatorMacroTransaction())
-        ->setTransactionType(PhabricatorMacroTransaction::TYPE_DISABLED)
+        ->setTransactionType(
+          PhabricatorMacroDisabledTransaction::TRANSACTIONTYPE)
         ->setNewValue($macro->getIsDisabled() ? 0 : 1);
 
       $editor = id(new PhabricatorMacroEditor())

@@ -13,70 +13,9 @@ final class PhabricatorMacroEditor
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
-
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
-    $types[] = PhabricatorMacroTransaction::TYPE_NAME;
-    $types[] = PhabricatorMacroTransaction::TYPE_DISABLED;
-    $types[] = PhabricatorMacroTransaction::TYPE_FILE;
-    $types[] = PhabricatorMacroTransaction::TYPE_AUDIO;
-    $types[] = PhabricatorMacroTransaction::TYPE_AUDIO_BEHAVIOR;
 
     return $types;
-  }
-
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorMacroTransaction::TYPE_NAME:
-        return $object->getName();
-      case PhabricatorMacroTransaction::TYPE_DISABLED:
-        return $object->getIsDisabled();
-      case PhabricatorMacroTransaction::TYPE_FILE:
-        return $object->getFilePHID();
-      case PhabricatorMacroTransaction::TYPE_AUDIO:
-        return $object->getAudioPHID();
-      case PhabricatorMacroTransaction::TYPE_AUDIO_BEHAVIOR:
-        return $object->getAudioBehavior();
-    }
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorMacroTransaction::TYPE_NAME:
-      case PhabricatorMacroTransaction::TYPE_DISABLED:
-      case PhabricatorMacroTransaction::TYPE_FILE:
-      case PhabricatorMacroTransaction::TYPE_AUDIO:
-      case PhabricatorMacroTransaction::TYPE_AUDIO_BEHAVIOR:
-        return $xaction->getNewValue();
-    }
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorMacroTransaction::TYPE_NAME:
-        $object->setName($xaction->getNewValue());
-        break;
-      case PhabricatorMacroTransaction::TYPE_DISABLED:
-        $object->setIsDisabled($xaction->getNewValue());
-        break;
-      case PhabricatorMacroTransaction::TYPE_FILE:
-        $object->setFilePHID($xaction->getNewValue());
-        break;
-      case PhabricatorMacroTransaction::TYPE_AUDIO:
-        $object->setAudioPHID($xaction->getNewValue());
-        break;
-      case PhabricatorMacroTransaction::TYPE_AUDIO_BEHAVIOR:
-        $object->setAudioBehavior($xaction->getNewValue());
-        break;
-    }
   }
 
   protected function applyCustomExternalTransaction(
@@ -84,8 +23,8 @@ final class PhabricatorMacroEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorMacroTransaction::TYPE_FILE:
-      case PhabricatorMacroTransaction::TYPE_AUDIO:
+      case PhabricatorMacroFileTransaction::TRANSACTIONTYPE:
+      case PhabricatorMacroAudioTransaction::TRANSACTIONTYPE:
         // When changing a macro's image or audio, attach the underlying files
         // to the macro (and detach the old files).
         $old = $xaction->getOldValue();
@@ -117,34 +56,9 @@ final class PhabricatorMacroEditor
     }
   }
 
-  protected function mergeTransactions(
-    PhabricatorApplicationTransaction $u,
-    PhabricatorApplicationTransaction $v) {
-
-    $type = $u->getTransactionType();
-    switch ($type) {
-      case PhabricatorMacroTransaction::TYPE_NAME:
-      case PhabricatorMacroTransaction::TYPE_DISABLED:
-      case PhabricatorMacroTransaction::TYPE_FILE:
-      case PhabricatorMacroTransaction::TYPE_AUDIO:
-      case PhabricatorMacroTransaction::TYPE_AUDIO_BEHAVIOR:
-        return $v;
-    }
-
-    return parent::mergeTransactions($u, $v);
-  }
-
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PhabricatorMacroTransaction::TYPE_NAME;
-          return ($xaction->getOldValue() !== null);
-        default:
-          break;
-      }
-    }
     return true;
   }
 

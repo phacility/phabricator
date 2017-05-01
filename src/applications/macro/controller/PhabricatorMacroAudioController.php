@@ -34,7 +34,7 @@ final class PhabricatorMacroAudioController extends PhabricatorMacroController {
       if ($request->getBool('behaviorForm')) {
         $xactions[] = id(new PhabricatorMacroTransaction())
           ->setTransactionType(
-            PhabricatorMacroTransaction::TYPE_AUDIO_BEHAVIOR)
+            PhabricatorMacroAudioBehaviorTransaction::TRANSACTIONTYPE)
           ->setNewValue($request->getStr('audioBehavior'));
       } else {
         $file = null;
@@ -54,7 +54,8 @@ final class PhabricatorMacroAudioController extends PhabricatorMacroController {
             $e_file = pht('Invalid');
           } else {
             $xactions[] = id(new PhabricatorMacroTransaction())
-              ->setTransactionType(PhabricatorMacroTransaction::TYPE_AUDIO)
+              ->setTransactionType(
+                PhabricatorMacroAudioTransaction::TRANSACTIONTYPE)
               ->setNewValue($file->getPHID());
           }
         } else {

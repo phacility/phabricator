@@ -135,13 +135,15 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
           if ($new_name !== null) {
             $xactions[] = id(new PhabricatorMacroTransaction())
-              ->setTransactionType(PhabricatorMacroTransaction::TYPE_NAME)
+              ->setTransactionType(
+                PhabricatorMacroNameTransaction::TRANSACTIONTYPE)
               ->setNewValue($new_name);
           }
 
           if ($file) {
             $xactions[] = id(new PhabricatorMacroTransaction())
-              ->setTransactionType(PhabricatorMacroTransaction::TYPE_FILE)
+              ->setTransactionType(
+                PhabricatorMacroFileTransaction::TRANSACTIONTYPE)
               ->setNewValue($file->getPHID());
           }
 
