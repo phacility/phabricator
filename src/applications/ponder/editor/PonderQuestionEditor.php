@@ -9,6 +9,14 @@ final class PonderQuestionEditor
     return pht('Ponder Questions');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this question.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   /**
    * This is used internally on @{method:applyInitialEffects} if a transaction
    * of type PonderQuestionTransaction::TYPE_ANSWERS is in the mix. The value
@@ -64,11 +72,8 @@ final class PonderQuestionEditor
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
-
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
-    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
-    $types[] = PhabricatorTransactions::TYPE_SPACE;
 
     return $types;
   }

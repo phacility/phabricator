@@ -6,6 +6,14 @@ final class PonderAnswerEditor extends PonderEditor {
     return pht('Ponder Answers');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s added this answer.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s added %s.', $author, $object);
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
     $types[] = PhabricatorTransactions::TYPE_COMMENT;

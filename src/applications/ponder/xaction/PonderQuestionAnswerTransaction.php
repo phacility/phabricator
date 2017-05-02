@@ -21,6 +21,13 @@ final class PonderQuestionAnswerTransaction
       $this->renderAuthor());
   }
 
+  public function getTitleForFeed() {
+    return pht(
+      '%s added an answer to %s.',
+      $this->renderAuthor(),
+      $this->renderObject());
+  }
+
   public function getIcon() {
     return 'fa-plus';
   }

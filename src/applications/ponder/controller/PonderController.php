@@ -27,13 +27,9 @@ abstract class PonderController extends PhabricatorController {
 
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
-    $href = $this->getApplicationURI('question/create/');
-    $crumbs
-      ->addAction(
-        id(new PHUIListItemView())
-          ->setName(pht('Ask Question'))
-          ->setHref($href)
-          ->setIcon('fa-plus-square'));
+    id(new PonderQuestionEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

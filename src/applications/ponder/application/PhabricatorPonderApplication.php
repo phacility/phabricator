@@ -60,22 +60,26 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
       '/ponder/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PonderQuestionListController',
-        'answer/add/'
-          => 'PonderAnswerSaveController',
-        'answer/edit/(?P<id>\d+)/'
-          => 'PonderAnswerEditController',
-        'answer/comment/(?P<id>\d+)/'
-          => 'PonderAnswerCommentController',
-        'answer/history/(?P<id>\d+)/'
-          => 'PonderAnswerHistoryController',
-        'question/edit/(?:(?P<id>\d+)/)?'
-          => 'PonderQuestionEditController',
-        'question/create/'
-          => 'PonderQuestionEditController',
-        'question/comment/(?P<id>\d+)/'
-          => 'PonderQuestionCommentController',
-        'question/history/(?P<id>\d+)/'
-          => 'PonderQuestionHistoryController',
+        'answer/' => array(
+          'add/'
+            => 'PonderAnswerSaveController',
+          'edit/(?P<id>\d+)/'
+            => 'PonderAnswerEditController',
+          'comment/(?P<id>\d+)/'
+            => 'PonderAnswerCommentController',
+          'history/(?P<id>\d+)/'
+            => 'PonderAnswerHistoryController',
+        ),
+        'question/' => array(
+          $this->getEditRoutePattern('edit/')
+            => 'PonderQuestionEditController',
+          'create/'
+            => 'PonderQuestionEditController',
+          'comment/(?P<id>\d+)/'
+            => 'PonderQuestionCommentController',
+          'history/(?P<id>\d+)/'
+            => 'PonderQuestionHistoryController',
+        ),
         'preview/'
           => 'PhabricatorMarkupPreviewController',
         'question/status/(?P<id>[1-9]\d*)/'
