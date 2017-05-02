@@ -75,7 +75,7 @@ final class PhameBlogEditEngine
         ->setDescription(pht('Blog name.'))
         ->setConduitDescription(pht('Retitle the blog.'))
         ->setConduitTypeDescription(pht('New blog title.'))
-        ->setTransactionType(PhameBlogTransaction::TYPE_NAME)
+        ->setTransactionType(PhameBlogNameTransaction::TRANSACTIONTYPE)
         ->setValue($object->getName()),
       id(new PhabricatorTextEditField())
         ->setKey('subtitle')
@@ -83,7 +83,7 @@ final class PhameBlogEditEngine
         ->setDescription(pht('Blog subtitle.'))
         ->setConduitDescription(pht('Change the blog subtitle.'))
         ->setConduitTypeDescription(pht('New blog subtitle.'))
-        ->setTransactionType(PhameBlogTransaction::TYPE_SUBTITLE)
+        ->setTransactionType(PhameBlogSubtitleTransaction::TRANSACTIONTYPE)
         ->setValue($object->getSubtitle()),
      id(new PhabricatorRemarkupEditField())
         ->setKey('description')
@@ -91,7 +91,7 @@ final class PhameBlogEditEngine
         ->setDescription(pht('Blog description.'))
         ->setConduitDescription(pht('Change the blog description.'))
         ->setConduitTypeDescription(pht('New blog description.'))
-        ->setTransactionType(PhameBlogTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(PhameBlogDescriptionTransaction::TRANSACTIONTYPE)
         ->setValue($object->getDescription()),
       id(new PhabricatorTextEditField())
         ->setKey('domainFullURI')
@@ -104,7 +104,7 @@ final class PhameBlogEditEngine
         ->setConduitDescription(pht('Change the blog full domain URI.'))
         ->setConduitTypeDescription(pht('New blog full domain URI.'))
         ->setValue($object->getDomainFullURI())
-        ->setTransactionType(PhameBlogTransaction::TYPE_FULLDOMAIN),
+        ->setTransactionType(PhameBlogFullDomainTransaction::TRANSACTIONTYPE),
       id(new PhabricatorTextEditField())
         ->setKey('parentSite')
         ->setLabel(pht('Parent Site Name'))
@@ -112,7 +112,7 @@ final class PhameBlogEditEngine
         ->setConduitDescription(pht('Change the blog parent site name.'))
         ->setConduitTypeDescription(pht('New blog parent site name.'))
         ->setValue($object->getParentSite())
-        ->setTransactionType(PhameBlogTransaction::TYPE_PARENTSITE),
+        ->setTransactionType(PhameBlogParentSiteTransaction::TRANSACTIONTYPE),
       id(new PhabricatorTextEditField())
         ->setKey('parentDomain')
         ->setLabel(pht('Parent Site URI'))
@@ -120,11 +120,11 @@ final class PhameBlogEditEngine
         ->setConduitDescription(pht('Change the blog parent domain.'))
         ->setConduitTypeDescription(pht('New blog parent domain.'))
         ->setValue($object->getParentDomain())
-        ->setTransactionType(PhameBlogTransaction::TYPE_PARENTDOMAIN),
+        ->setTransactionType(PhameBlogParentDomainTransaction::TRANSACTIONTYPE),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))
-        ->setTransactionType(PhameBlogTransaction::TYPE_STATUS)
+        ->setTransactionType(PhameBlogStatusTransaction::TRANSACTIONTYPE)
         ->setIsConduitOnly(true)
         ->setOptions(PhameBlog::getStatusNameMap())
         ->setDescription(pht('Active or archived status.'))

@@ -32,7 +32,7 @@ final class PhameBlogArchiveController
       $xactions = array();
 
       $xactions[] = id(new PhameBlogTransaction())
-        ->setTransactionType(PhameBlogTransaction::TYPE_STATUS)
+        ->setTransactionType(PhameBlogStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PhameBlogEditor())
