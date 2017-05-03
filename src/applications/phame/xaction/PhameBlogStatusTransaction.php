@@ -45,11 +45,11 @@ final class PhameBlogStatusTransaction
 
   public function getIcon() {
     $new = $this->getNewValue();
-      if ($new == PhameBlog::STATUS_ARCHIVED) {
-        return 'fa-ban';
-      } else {
-        return 'fa-check';
-      }
+    if ($new == PhameBlog::STATUS_ARCHIVED) {
+      return 'fa-ban';
+    } else {
+      return 'fa-check';
     }
+  }
 
 }

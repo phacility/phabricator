@@ -26,7 +26,7 @@ final class PhamePostArchiveController extends PhamePostController {
 
       $new_value = PhameConstants::VISIBILITY_ARCHIVED;
       $xactions[] = id(new PhamePostTransaction())
-        ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
+        ->setTransactionType(PhamePostVisibilityTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_value);
 
       id(new PhamePostEditor())
