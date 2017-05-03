@@ -11,11 +11,12 @@ final class PhabricatorMacroEditor
     return pht('Macros');
   }
 
-  public function getTransactionTypes() {
-    $types = parent::getTransactionTypes();
-    $types[] = PhabricatorTransactions::TYPE_COMMENT;
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this macro.', $author);
+  }
 
-    return $types;
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
   }
 
   protected function applyCustomExternalTransaction(
