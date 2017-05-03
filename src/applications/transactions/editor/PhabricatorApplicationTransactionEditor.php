@@ -298,6 +298,18 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    if ($template) {
+      try {
+        $comment = $template->getApplicationTransactionCommentObject();
+      } catch (PhutilMethodNotImplementedException $ex) {
+        $comment = null;
+      }
+
+      if ($comment) {
+        $types[] = PhabricatorTransactions::TYPE_COMMENT;
+      }
+    }
+
     return $types;
   }
 
