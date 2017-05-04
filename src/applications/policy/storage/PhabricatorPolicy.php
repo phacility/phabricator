@@ -264,9 +264,11 @@ final class PhabricatorPolicy
   public function getFullName() {
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_PROJECT:
-        return pht('Project: %s', $this->getName());
+        return pht('Members of Project: %s', $this->getName());
       case PhabricatorPolicyType::TYPE_MASKED:
         return pht('Other: %s', $this->getName());
+      case PhabricatorPolicyType::TYPE_USER:
+        return pht('Only User: %s', $this->getName());
       default:
         return $this->getName();
     }
@@ -420,6 +422,10 @@ final class PhabricatorPolicy
     $other_strength = idx($strengths, $other->getPHID(), 0);
 
     return ($this_strength > $other_strength);
+  }
+
+  public function isValidPolicyForEdit() {
+    return $this->getType() !== PhabricatorPolicyType::TYPE_MASKED;
   }
 
   public static function getSpecialRules(

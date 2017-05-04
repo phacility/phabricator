@@ -11,10 +11,6 @@ final class PhabricatorApplicationApplicationTransaction
     return PhabricatorApplicationApplicationPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-  return new PhabricatorApplicationTransactionComment();
-  }
-
   public function getBaseTransactionClass() {
     return 'PhabricatorApplicationTransactionType';
   }
