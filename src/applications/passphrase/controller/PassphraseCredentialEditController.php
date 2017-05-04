@@ -117,12 +117,19 @@ final class PassphraseCredentialEditController extends PassphraseController {
       }
 
       if (!$errors) {
-        $type_name = PassphraseCredentialTransaction::TYPE_NAME;
-        $type_desc = PassphraseCredentialTransaction::TYPE_DESCRIPTION;
-        $type_username = PassphraseCredentialTransaction::TYPE_USERNAME;
-        $type_destroy = PassphraseCredentialTransaction::TYPE_DESTROY;
-        $type_secret_id = PassphraseCredentialTransaction::TYPE_SECRET_ID;
-        $type_is_locked = PassphraseCredentialTransaction::TYPE_LOCK;
+        $type_name =
+          PassphraseCredentialNameTransaction::TRANSACTIONTYPE;
+        $type_desc =
+          PassphraseCredentialDescriptionTransaction::TRANSACTIONTYPE;
+        $type_username =
+          PassphraseCredentialUsernameTransaction::TRANSACTIONTYPE;
+        $type_destroy =
+          PassphraseCredentialDestroyTransaction::TRANSACTIONTYPE;
+        $type_secret_id =
+          PassphraseCredentialSecretIDTransaction::TRANSACTIONTYPE;
+        $type_is_locked =
+          PassphraseCredentialLockTransaction::TRANSACTIONTYPE;
+
         $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
         $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
         $type_space = PhabricatorTransactions::TYPE_SPACE;

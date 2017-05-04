@@ -50,7 +50,8 @@ final class PassphraseCredentialConduitController
       $xactions = array();
 
       $xactions[] = id(new PassphraseCredentialTransaction())
-        ->setTransactionType(PassphraseCredentialTransaction::TYPE_CONDUIT)
+        ->setTransactionType(
+          PassphraseCredentialConduitTransaction::TRANSACTIONTYPE)
         ->setNewValue(!$credential->getAllowConduit());
 
       $editor = id(new PassphraseCredentialTransactionEditor())
