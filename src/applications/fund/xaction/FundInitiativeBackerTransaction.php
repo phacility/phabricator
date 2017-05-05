@@ -57,9 +57,10 @@ final class FundInitiativeBackerTransaction
       FundInitiativeTransaction::PROPERTY_AMOUNT);
     $amount = PhortuneCurrency::newFromString($amount);
     return pht(
-      '%s backed %s.',
+      '%s backed %s with %s.',
       $this->renderAuthor(),
-      $this->renderObject());
+      $this->renderObject(),
+      $amount->formatForDisplay());
   }
 
   public function getIcon() {

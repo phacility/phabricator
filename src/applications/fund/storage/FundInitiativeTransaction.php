@@ -26,15 +26,21 @@ final class FundInitiativeTransaction
     return 'FundInitiativeTransactionType';
   }
 
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
   public function getMailTags() {
     $tags = parent::getMailTags();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_STATUS:
+      case FundInitiativeStatusTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_STATUS;
         break;
-      case self::TYPE_BACKER:
-      case self::TYPE_REFUND:
+      case FundInitiativeBackerTransaction::TRANSACTIONTYPE:
+      case FundInitiativeRefundTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_BACKER;
         break;
       default:
