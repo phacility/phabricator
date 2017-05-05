@@ -32,7 +32,8 @@ final class PhabricatorSlowvoteCloseController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorSlowvoteTransaction())
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_CLOSE)
+        ->setTransactionType(
+            PhabricatorSlowvoteCloseTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PhabricatorSlowvoteEditor())
