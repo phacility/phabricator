@@ -86,7 +86,7 @@ final class PhabricatorMailImplementationMailgunAdapter
 
     $from = idx($this->params, 'from');
     if (idx($this->params, 'from-name')) {
-      $params['from'] = "{$this->params['from-name']} <{$from}>";
+      $params['from'] = "\"{$this->params['from-name']}\" <{$from}>";
     } else {
       $params['from'] = $from;
     }
