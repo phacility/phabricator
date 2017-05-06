@@ -284,7 +284,6 @@ abstract class PhabricatorApplication
     throw new PhutilMethodNotImplementedException();
   }
 
-
 /* -(  Fact Integration  )--------------------------------------------------- */
 
 

@@ -77,23 +77,32 @@ final class PhabricatorSlowvoteEditController
         }
       }
 
-      $xactions = array();
       $template = id(new PhabricatorSlowvoteTransaction());
+      $xactions = array();
+
+      if ($is_new) {
+        $xactions[] = id(new PhabricatorSlowvoteTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+      }
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_QUESTION)
+        ->setTransactionType(
+            PhabricatorSlowvoteQuestionTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_question);
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(
+            PhabricatorSlowvoteDescriptionTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_description);
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_RESPONSES)
+        ->setTransactionType(
+            PhabricatorSlowvoteResponsesTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_responses);
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_SHUFFLE)
+        ->setTransactionType(
+            PhabricatorSlowvoteShuffleTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_shuffle);
 
       $xactions[] = id(clone $template)

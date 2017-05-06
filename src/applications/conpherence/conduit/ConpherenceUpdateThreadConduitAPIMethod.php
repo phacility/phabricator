@@ -11,6 +11,16 @@ final class ConpherenceUpdateThreadConduitAPIMethod
     return pht('Update an existing conpherence room.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "conpherence.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'id' => 'optional int',

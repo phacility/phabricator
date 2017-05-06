@@ -105,6 +105,14 @@ final class PonderQuestion extends PonderDAO
     return $this->comments;
   }
 
+  public function getMonogram() {
+    return 'Q'.$this->getID();
+  }
+
+  public function getViewURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function attachAnswers(array $answers) {
     assert_instances_of($answers, 'PonderAnswer');
     $this->answers = $answers;

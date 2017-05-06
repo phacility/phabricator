@@ -61,7 +61,7 @@ final class PhamePostHeaderPictureController
 
         $xactions = array();
         $xactions[] = id(new PhamePostTransaction())
-          ->setTransactionType(PhamePostTransaction::TYPE_HEADERIMAGE)
+          ->setTransactionType(PhamePostHeaderImageTransaction::TRANSACTIONTYPE)
           ->setNewValue($new_value);
 
         $editor = id(new PhamePostEditor())

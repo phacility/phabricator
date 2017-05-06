@@ -29,8 +29,8 @@ final class FundInitiativeViewController
       $initiative->getName());
 
     if ($initiative->isClosed()) {
-      $status_icon = 'fa-times';
-      $status_color = 'bluegrey';
+      $status_icon = 'fa-ban';
+      $status_color = 'indigo';
     } else {
       $status_icon = 'fa-check';
       $status_color = 'bluegrey';

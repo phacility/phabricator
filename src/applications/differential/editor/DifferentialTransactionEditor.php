@@ -1191,12 +1191,23 @@ final class DifferentialTransactionEditor
     array $changes,
     PhutilMarkupEngine $engine) {
 
-    $flat_blocks = mpull($changes, 'getNewValue');
-    $huge_block = implode("\n\n", $flat_blocks);
-
+    // For "Fixes ..." and "Depends on ...", we're only going to look at
+    // content blocks which are part of the revision itself (like "Summary"
+    // and  "Test Plan"), not comments.
+    $content_parts = array();
+    foreach ($changes as $change) {
+      if ($change->getTransaction()->isCommentTransaction()) {
+        continue;
+      }
+      $content_parts[] = $change->getNewValue();
+    }
+    if (!$content_parts) {
+      return array();
+    }
+    $content_block = implode("\n\n", $content_parts);
     $task_map = array();
     $task_refs = id(new ManiphestCustomFieldStatusParser())
-      ->parseCorpus($huge_block);
+      ->parseCorpus($content_block);
     foreach ($task_refs as $match) {
       foreach ($match['monograms'] as $monogram) {
         $task_id = (int)trim($monogram, 'tT');
@@ -1206,7 +1217,7 @@ final class DifferentialTransactionEditor
 
     $rev_map = array();
     $rev_refs = id(new DifferentialCustomFieldDependsOnParser())
-      ->parseCorpus($huge_block);
+      ->parseCorpus($content_block);
     foreach ($rev_refs as $match) {
       foreach ($match['monograms'] as $monogram) {
         $rev_id = (int)trim($monogram, 'dD');

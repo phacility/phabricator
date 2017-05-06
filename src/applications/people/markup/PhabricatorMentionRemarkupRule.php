@@ -150,7 +150,9 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
             $tag->addClass('phabricator-remarkup-mention-nopermission');
           }
 
-          if (!$user->isResponsive()) {
+          if ($user->getIsDisabled()) {
+            $tag->setDotColor(PHUITagView::COLOR_GREY);
+          } else if (!$user->isResponsive()) {
             $tag->setDotColor(PHUITagView::COLOR_VIOLET);
           } else {
             if ($user->getAwayUntil()) {

@@ -28,7 +28,7 @@ final class PonderQuestionStatusController
 
       $xactions = array();
       $xactions[] = id(new PonderQuestionTransaction())
-        ->setTransactionType(PonderQuestionTransaction::TYPE_STATUS)
+        ->setTransactionType(PonderQuestionStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_status);
 
       $editor = id(new PonderQuestionEditor())

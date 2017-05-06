@@ -68,10 +68,10 @@ final class FundInitiativeEditController
       $v_merchant = $request->getStr('merchantPHID');
       $v_projects = $request->getArr('projects');
 
-      $type_name = FundInitiativeTransaction::TYPE_NAME;
-      $type_desc = FundInitiativeTransaction::TYPE_DESCRIPTION;
-      $type_risk = FundInitiativeTransaction::TYPE_RISKS;
-      $type_merchant = FundInitiativeTransaction::TYPE_MERCHANT;
+      $type_name = FundInitiativeNameTransaction::TRANSACTIONTYPE;
+      $type_desc = FundInitiativeDescriptionTransaction::TRANSACTIONTYPE;
+      $type_risk = FundInitiativeRisksTransaction::TRANSACTIONTYPE;
+      $type_merchant = FundInitiativeMerchantTransaction::TRANSACTIONTYPE;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 

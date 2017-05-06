@@ -298,6 +298,18 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    if ($template) {
+      try {
+        $comment = $template->getApplicationTransactionCommentObject();
+      } catch (PhutilMethodNotImplementedException $ex) {
+        $comment = null;
+      }
+
+      if ($comment) {
+        $types[] = PhabricatorTransactions::TYPE_COMMENT;
+      }
+    }
+
     return $types;
   }
 
@@ -322,6 +334,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->generateOldValue($object);
     }
 
@@ -402,6 +416,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->generateNewValue($object, $xaction->getNewValue());
     }
 
@@ -541,6 +557,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->applyInternalEffects($object, $xaction->getNewValue());
     }
 
@@ -2151,7 +2169,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return array_mergev($errors);
   }
 
-  private function validatePolicyTransaction(
+  public function validatePolicyTransaction(
     PhabricatorLiskDAO $object,
     array $xactions,
     $transaction_type,
@@ -2760,7 +2778,11 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if (!$has_support) {
-      throw new Exception(pht('Capability not supported.'));
+      throw new Exception(
+        pht('The object being edited does not implement any standard '.
+          'interfaces (like PhabricatorSubscribableInterface) which allow '.
+          'CCs to be generated automatically. Override the "getMailCC()" '.
+          'method and generate CCs explicitly.'));
     }
 
     return array_mergev($phids);

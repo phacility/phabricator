@@ -315,4 +315,8 @@ abstract class PhabricatorModularTransactionType
     return $editor->getPHIDList($old, $new);
   }
 
+  public function getMetadataValue($key, $default = null) {
+    return $this->getStorage()->getMetadataValue($key, $default);
+  }
+
 }

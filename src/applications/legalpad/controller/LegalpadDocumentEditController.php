@@ -57,7 +57,8 @@ final class LegalpadDocumentEditController extends LegalpadController {
         $errors[] = pht('The document title may not be blank.');
       } else {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransaction::TYPE_TITLE)
+          ->setTransactionType(
+            LegalpadDocumentTitleTransaction::TRANSACTIONTYPE)
           ->setNewValue($title);
       }
 
@@ -67,7 +68,8 @@ final class LegalpadDocumentEditController extends LegalpadController {
         $errors[] = pht('The document may not be blank.');
       } else {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransaction::TYPE_TEXT)
+          ->setTransactionType(
+            LegalpadDocumentTextTransaction::TRANSACTIONTYPE)
           ->setNewValue($text);
       }
 
@@ -83,13 +85,15 @@ final class LegalpadDocumentEditController extends LegalpadController {
       if ($is_create) {
         $v_signature_type = $request->getStr('signatureType');
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransaction::TYPE_SIGNATURE_TYPE)
+          ->setTransactionType(
+            LegalpadDocumentSignatureTypeTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_signature_type);
       }
 
       $v_preamble = $request->getStr('preamble');
       $xactions[] = id(new LegalpadTransaction())
-        ->setTransactionType(LegalpadTransaction::TYPE_PREAMBLE)
+        ->setTransactionType(
+          LegalpadDocumentPreambleTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_preamble);
 
       $v_require_signature = $request->getBool('requireSignature', 0);
@@ -106,7 +110,8 @@ final class LegalpadDocumentEditController extends LegalpadController {
       }
       if ($viewer->getIsAdmin()) {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransaction::TYPE_REQUIRE_SIGNATURE)
+          ->setTransactionType(
+            LegalpadDocumentRequireSignatureTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_require_signature);
       }
 

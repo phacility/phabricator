@@ -67,9 +67,12 @@ final class PhabricatorSpacesEditController
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
 
-      $type_name = PhabricatorSpacesNamespaceTransaction::TYPE_NAME;
-      $type_desc = PhabricatorSpacesNamespaceTransaction::TYPE_DESCRIPTION;
-      $type_default = PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT;
+      $type_name =
+        PhabricatorSpacesNamespaceNameTransaction::TRANSACTIONTYPE;
+      $type_desc =
+        PhabricatorSpacesNamespaceDescriptionTransaction::TRANSACTIONTYPE;
+      $type_default =
+        PhabricatorSpacesNamespaceDefaultTransaction::TRANSACTIONTYPE;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 

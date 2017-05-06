@@ -126,12 +126,13 @@
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks input {
-  margin-right: 2px;
+  margin-right: 4px;
   opacity: 1;
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item {
   text-decoration: line-through;
+  color: {$lightgreytext};
 }
 
 .phabricator-remarkup ul.remarkup-list ol.remarkup-list,

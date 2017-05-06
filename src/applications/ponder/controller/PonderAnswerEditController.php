@@ -42,11 +42,11 @@ final class PonderAnswerEditController extends PonderController {
       if (!$errors) {
         $xactions = array();
         $xactions[] = id(new PonderAnswerTransaction())
-          ->setTransactionType(PonderAnswerTransaction::TYPE_CONTENT)
+          ->setTransactionType(PonderAnswerContentTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_content);
 
         $xactions[] = id(new PonderAnswerTransaction())
-          ->setTransactionType(PonderAnswerTransaction::TYPE_STATUS)
+          ->setTransactionType(PonderAnswerStatusTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_status);
 
         $editor = id(new PonderAnswerEditor())

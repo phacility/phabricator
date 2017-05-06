@@ -23,7 +23,8 @@ final class PhabricatorSpacesArchiveController
     $cancel_uri = '/'.$space->getMonogram();
 
     if ($request->isFormPost()) {
-      $type_archive = PhabricatorSpacesNamespaceTransaction::TYPE_ARCHIVE;
+      $type_archive =
+        PhabricatorSpacesNamespaceArchiveTransaction::TRANSACTIONTYPE;
 
       $xactions = array();
       $xactions[] = id(new PhabricatorSpacesNamespaceTransaction())

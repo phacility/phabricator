@@ -190,8 +190,10 @@ final class PhabricatorSpacesTestCase extends PhabricatorTestCase {
 
     $space = PhabricatorSpacesNamespace::initializeNewNamespace($actor);
 
-    $type_name = PhabricatorSpacesNamespaceTransaction::TYPE_NAME;
-    $type_default = PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT;
+    $type_name =
+      PhabricatorSpacesNamespaceNameTransaction::TRANSACTIONTYPE;
+    $type_default =
+      PhabricatorSpacesNamespaceDefaultTransaction::TRANSACTIONTYPE;
     $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
