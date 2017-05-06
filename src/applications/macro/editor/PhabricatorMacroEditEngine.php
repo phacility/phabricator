@@ -6,7 +6,7 @@ final class PhabricatorMacroEditEngine
   const ENGINECONST = 'macro.image';
 
   public function getEngineName() {
-    return pht('Macro Imagea');
+    return pht('Macro Image');
   }
 
   public function getSummaryHeader() {
