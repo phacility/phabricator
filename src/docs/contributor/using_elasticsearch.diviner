@@ -1,0 +1,95 @@
+@title Using elasticsearch instead of MySQL
+@group developer
+
+How to use elasticsearch for blazing fast searches instead of MySQL
+
+= Overview =
+
+Elasticsearch is a flexible and powerful open source, distributed,
+real-time search and analytics engine. More about elasticsearch here:
+
+http://www.elasticsearch.org/
+
+Phabricator has the capability to use elasticsearch instead of the
+usual MySQL. The benefit is noticeably faster search results if your
+Phabricator instance has a large amount of data.
+
+= Installation Requirements =
+
+At a **minimum**, you'll need:
+
+  - A **working** Phabricator instance.
+  - Java. Yes, you read that right.
+  - A decent amount of RAM, if you have tons of data.
+
+= Installing Java =
+
+Elasticsearch relies on Java 7 to run. You could use the OpenJDK
+libraries for trying stuff out, but it is recommended to use the libraries
+from Oracle for serious production use. If you already have Java installed,
+configured and running on your system; you can completely skip this step.
+
+On a Debian based Linux system you'd use the following commands to get
+the job done. First, we install the `python-software-properties` package
+to manage repositories external to standard distribution a bit better.
+
+  sudo apt-get install python-software-properties
+
+Then we add the repository with Java from Oracle.
+
+  sudo add-apt-repository ppa:webupd8team/java
+
+Next, update the package list on our system.
+
+  sudo apt-get update
+
+And install Java 8.
+
+  sudo apt-get install oracle-java8-installer
+
+Once that's done, we need to set the Java 8 software we just downloaded
+as the default Java on the system.
+
+  sudo apt-get install oracle-java8-set-default
+
+If everything worked out OK, Java should now work. Verify this using:
+
+  java -version
+
+= Installing Elasticsearch =
+
+You can download elasticsearch from the following URL:
+
+  http://www.elasticsearch.org/overview/elkdownloads/
+
+At the time of writing, elasticsearch was on version 1.3.2. We'll get
+Debian package using wget. If you're using some other flavour of Linux, or
+are on a different platform altogether, choose the package relevant to it.
+
+  wget -c https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.2.deb
+
+Now we'll get the downloaded package installed using `dpkg`.
+
+  sudo dpkg -i elasticsearch-1.3.2.deb
+
+Next, we'll get elasticsearch started.
+
+  sudo /etc/init.d/elasticsearch start
+
+And we're done. Next we need to configure phabrictor to use it.
+
+= Configuring Phabricator =
+
+Phabricator can't (yet) be configured to use elasticsearch from the Web UI.
+You'll have to get the settings changed from the console. To do it, run
+
+  ./bin/config set search.elastic.host 'http://localhost:9200'
+
+Next, we tell phabricator to pull stuff from the database and put in
+elasticsearch for indexing. This can be done using:
+
+  ./bin/search index --all
+
+You just have to do this once initially. The phd daemons take care of the
+rest automatically.
+
