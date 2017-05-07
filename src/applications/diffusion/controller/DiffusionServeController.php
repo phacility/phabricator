@@ -222,6 +222,11 @@ final class DiffusionServeController extends DiffusionController {
         ->needURIs(true)
         ->executeOne();
       if (!$repository) {
+         // Repository was not found with the current policy
+         if($allow_public && $allow_auth && !$viewer->isLoggedIn()) {
+            // Repo might not be pubic even though phabricator is.
+            throw new PhabricatorPolicyException();
+         }
         return new PhabricatorVCSResponse(
           404,
           pht('No such repository exists.'));
