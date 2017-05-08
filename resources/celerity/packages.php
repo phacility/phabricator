@@ -208,7 +208,8 @@ return array(
     'javelin-behavior-differential-toggle-files',
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
-    'changeset-view-manager',
+    'phabricator-diff-changeset',
+    'phabricator-diff-changeset-list',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-icons-css',

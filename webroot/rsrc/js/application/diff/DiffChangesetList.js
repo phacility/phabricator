@@ -31,7 +31,7 @@ JX.install('DiffChangesetList', {
     },
 
     getChangesetForNode: function(node) {
-      return JX.ChangesetViewManager.getForNode(node);
+      return JX.DiffChangeset.getForNode(node);
     },
 
     _ifawake: function(f) {

@@ -4,8 +4,8 @@
  *           javelin-dom
  *           javelin-stratcom
  *           phabricator-tooltip
- *           changeset-view-manager
  *           phabricator-diff-changeset-list
+ *           phabricator-diff-changeset
  * @javelin
  */
 
@@ -69,7 +69,7 @@ JX.behavior('differential-populate', function(config, statics) {
 
   for (var ii = 0; ii < config.changesetViewIDs.length; ii++) {
     var id = config.changesetViewIDs[ii];
-    var view = JX.ChangesetViewManager.getForNode(JX.$(id));
+    var view = JX.DiffChangeset.getForNode(JX.$(id));
     if (view.shouldAutoload()) {
       view.setStabilize(true).load();
     }

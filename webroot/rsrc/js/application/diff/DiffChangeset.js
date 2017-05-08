@@ -1,5 +1,5 @@
 /**
- * @provides changeset-view-manager
+ * @provides phabricator-diff-changeset
  * @requires javelin-dom
  *           javelin-util
  *           javelin-stratcom
@@ -11,7 +11,7 @@
  */
 
 
-JX.install('ChangesetViewManager', {
+JX.install('DiffChangeset', {
 
   construct : function(node) {
     this._node = node;
@@ -389,7 +389,7 @@ JX.install('ChangesetViewManager', {
     getForNode: function(node) {
       var data = JX.Stratcom.getData(node);
       if (!data.changesetViewManager) {
-        data.changesetViewManager = new JX.ChangesetViewManager(node);
+        data.changesetViewManager = new JX.DiffChangeset(node);
       }
       return data.changesetViewManager;
     }

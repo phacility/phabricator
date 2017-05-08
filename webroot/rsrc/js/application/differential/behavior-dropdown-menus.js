@@ -9,14 +9,14 @@
  *           phuix-action-list-view
  *           phuix-action-view
  *           phabricator-phtize
- *           changeset-view-manager
+ *           phabricator-diff-changeset
  */
 
 JX.behavior('differential-dropdown-menus', function(config) {
   var pht = JX.phtize(config.pht);
 
   function show_more(container) {
-    var view = JX.ChangesetViewManager.getForNode(container);
+    var view = JX.DiffChangeset.getForNode(container);
 
     var nodes = JX.DOM.scry(container, 'tr', 'context-target');
     for (var ii = 0; ii < nodes.length; ii++) {
@@ -59,7 +59,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
       'div',
       'differential-changeset');
 
-    var view = JX.ChangesetViewManager.getForNode(changeset);
+    var view = JX.DiffChangeset.getForNode(changeset);
     var menu = new JX.PHUIXDropdownMenu(button);
     var list = new JX.PHUIXActionListView();
 

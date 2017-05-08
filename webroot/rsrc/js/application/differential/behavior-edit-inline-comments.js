@@ -274,7 +274,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         insert = target.parentNode;
       }
 
-      var view = JX.ChangesetViewManager.getForNode(root);
+      var view = JX.DiffChangeset.getForNode(root);
 
       editor = new JX.DifferentialInlineCommentEditor(config.uri)
         .setTemplates(view.getUndoTemplates())
@@ -390,7 +390,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       node,
       'div',
       'differential-changeset');
-    var view = JX.ChangesetViewManager.getForNode(changeset_root);
+    var view = JX.DiffChangeset.getForNode(changeset_root);
 
     editor = new JX.DifferentialInlineCommentEditor(config.uri)
       .setTemplates(view.getUndoTemplates())
