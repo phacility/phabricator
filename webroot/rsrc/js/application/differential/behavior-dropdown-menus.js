@@ -31,20 +31,6 @@ JX.behavior('differential-dropdown-menus', function(config) {
     }
   }
 
-  JX.Stratcom.listen(
-    'click',
-    'differential-reveal-all',
-    function(e) {
-      var containers = JX.DOM.scry(
-        JX.$('differential-review-stage'),
-        'div',
-        'differential-changeset');
-      for (var i=0; i < containers.length; i++) {
-        show_more(containers[i]);
-      }
-      e.kill();
-    });
-
   var buildmenu = function(e) {
     var button = e.getNode('differential-view-options');
     var data = JX.Stratcom.getData(button);
