@@ -36,15 +36,21 @@ final class PhabricatorSlowvoteDescriptionTransaction
     }
   }
 
-  public function hasChangeDetails() {
+  public function hasChangeDetailView() {
     return true;
   }
 
+  public function getMailDiffSectionHeader() {
+    return pht('CHANGES TO POLL DESCRIPTION');
+  }
+
   public function newChangeDetailView() {
-    return $this->renderTextCorpusChangeDetails(
-      $this->getViewer(),
-      $this->getOldValue(),
-      $this->getNewValue());
+    $viewer = $this->getViewer();
+
+    return id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setViewer($viewer)
+      ->setOldText($this->getOldValue())
+      ->setNewText($this->getNewValue());
   }
 
   public function newRemarkupChanges() {
