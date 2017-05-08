@@ -50,7 +50,9 @@ final class PhabricatorMacroAudioController extends PhabricatorMacroController {
 
         if ($file) {
           if (!$file->isAudio()) {
-            $errors[] = pht('You must upload audio.');
+            $errors[] = pht(
+              'The file you uploaded is invalid: it is not recognizable as '.
+              'a valid audio file.');
             $e_file = pht('Invalid');
           } else {
             $xactions[] = id(new PhabricatorMacroTransaction())
@@ -59,7 +61,9 @@ final class PhabricatorMacroAudioController extends PhabricatorMacroController {
               ->setNewValue($file->getPHID());
           }
         } else {
-          $errors[] = pht('You must upload an audio file.');
+          $errors[] = pht(
+            'To change the audio for a macro, you must upload an audio '.
+            'file.');
           $e_file = pht('Required');
         }
       }
