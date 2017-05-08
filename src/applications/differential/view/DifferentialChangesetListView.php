@@ -138,29 +138,6 @@ final class DifferentialChangesetListView extends AphrontView {
       ),
     ));
 
-    Javelin::initBehavior(
-      'differential-dropdown-menus',
-      array(
-        'pht' => array(
-          'Open in Editor' => pht('Open in Editor'),
-          'Show All Context' => pht('Show All Context'),
-          'All Context Shown' => pht('All Context Shown'),
-          "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
-          'Expand File' => pht('Expand File'),
-          'Collapse File' => pht('Collapse File'),
-          'Browse in Diffusion' => pht('Browse in Diffusion'),
-          'View Standalone' => pht('View Standalone'),
-          'Show Raw File (Left)' => pht('Show Raw File (Left)'),
-          'Show Raw File (Right)' => pht('Show Raw File (Right)'),
-          'Configure Editor' => pht('Configure Editor'),
-          'Load Changes' => pht('Load Changes'),
-          'View Side-by-Side' => pht('View Side-by-Side'),
-          'View Unified' => pht('View Unified'),
-          'Change Text Encoding...' => pht('Change Text Encoding...'),
-          'Highlight As...' => pht('Highlight As...'),
-        ),
-      ));
-
     $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
       $viewer);
 
@@ -238,8 +215,28 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $this->requireResource('aphront-tooltip-css');
 
-    $this->initBehavior('differential-populate', array(
+    $this->initBehavior(
+      'differential-populate',
+      array(
       'changesetViewIDs' => $ids,
+      'pht' => array(
+        'Open in Editor' => pht('Open in Editor'),
+        'Show All Context' => pht('Show All Context'),
+        'All Context Shown' => pht('All Context Shown'),
+        "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
+        'Expand File' => pht('Expand File'),
+        'Collapse File' => pht('Collapse File'),
+        'Browse in Diffusion' => pht('Browse in Diffusion'),
+        'View Standalone' => pht('View Standalone'),
+        'Show Raw File (Left)' => pht('Show Raw File (Left)'),
+        'Show Raw File (Right)' => pht('Show Raw File (Right)'),
+        'Configure Editor' => pht('Configure Editor'),
+        'Load Changes' => pht('Load Changes'),
+        'View Side-by-Side' => pht('View Side-by-Side'),
+        'View Unified' => pht('View Unified'),
+        'Change Text Encoding...' => pht('Change Text Encoding...'),
+        'Highlight As...' => pht('Highlight As...'),
+      ),
     ));
 
     $this->initBehavior('differential-comment-jump', array());

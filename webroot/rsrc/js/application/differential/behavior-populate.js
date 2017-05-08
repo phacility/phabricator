@@ -58,7 +58,8 @@ JX.behavior('differential-populate', function(config, statics) {
     });
   }
 
-  var changeset_list = new JX.DiffChangesetList();
+  var changeset_list = new JX.DiffChangesetList()
+    .setTranslations(JX.phtize(config.pht));
 
   // Install and activate the current page.
   var page_id = JX.Quicksand.getCurrentPageID();

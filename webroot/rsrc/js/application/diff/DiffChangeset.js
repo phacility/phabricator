@@ -174,6 +174,20 @@ JX.install('DiffChangeset', {
       return this;
     },
 
+    loadAllContext: function() {
+      var nodes = JX.DOM.scry(this._node, 'tr', 'context-target');
+      for (var ii = 0; ii < nodes.length; ii++) {
+        var show = JX.DOM.scry(nodes[ii], 'a', 'show-more');
+        for (var jj = 0; jj < show.length; jj++) {
+          var data = JX.Stratcom.getData(show[jj]);
+          if (data.type != 'all') {
+            continue;
+          }
+          this.loadContext(data.range, nodes[ii], true);
+        }
+      }
+    },
+
     _startContentWorkflow: function(workflow) {
       var routable = workflow.getRoutable();
 

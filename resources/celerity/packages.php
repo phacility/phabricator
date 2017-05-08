@@ -204,7 +204,6 @@ return array(
     'javelin-behavior-load-blame',
 
     'differential-inline-comment-editor',
-    'javelin-behavior-differential-dropdown-menus',
     'javelin-behavior-differential-toggle-files',
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
