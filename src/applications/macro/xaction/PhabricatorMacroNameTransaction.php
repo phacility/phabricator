@@ -23,7 +23,7 @@ final class PhabricatorMacroNameTransaction
 
   public function getTitleForFeed() {
     return pht(
-      '%s renamed %s macro %s to %s.',
+      '%s renamed %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
       $this->renderOldValue(),
@@ -37,6 +37,7 @@ final class PhabricatorMacroNameTransaction
     if ($this->isEmptyTextTransaction($object->getName(), $xactions)) {
       $errors[] = $this->newRequiredError(
         pht('Macros must have a name.'));
+      return $errors;
     }
 
     $max_length = $object->getColumnMaximumByteLength('name');

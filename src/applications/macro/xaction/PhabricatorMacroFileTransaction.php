@@ -49,7 +49,7 @@ final class PhabricatorMacroFileTransaction
 
   public function getTitleForFeed() {
     return pht(
-      '%s changed the image for macro %s.',
+      '%s changed the image for %s.',
       $this->renderAuthor(),
       $this->renderObject());
   }
@@ -58,29 +58,37 @@ final class PhabricatorMacroFileTransaction
     $errors = array();
     $viewer = $this->getActor();
 
+    $old_phid = $object->getFilePHID();
+
     foreach ($xactions as $xaction) {
       $file_phid = $xaction->getNewValue();
 
-      if ($this->isEmptyTextTransaction($file_phid, $xactions)) {
-        $errors[] = $this->newRequiredError(
-          pht('Image macros must have a file.'));
+      if (!$old_phid) {
+        if ($this->isEmptyTextTransaction($file_phid, $xactions)) {
+          $errors[] = $this->newRequiredError(
+            pht('Image macros must have a file.'));
+          return $errors;
+        }
       }
 
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($file_phid))
-        ->executeOne();
+      // Only validate if file was uploaded
+      if ($file_phid) {
+        $file = id(new PhabricatorFileQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($file_phid))
+          ->executeOne();
 
-      if (!$file) {
-        $errors[] = $this->newInvalidError(
-          pht('"%s" is not a valid file PHID.',
-          $file_phid));
-      } else {
-        if (!$file->isViewableInBrowser()) {
-          $mime_type = $file->getMimeType();
+        if (!$file) {
           $errors[] = $this->newInvalidError(
-            pht('File mime type of "%s" is not a valid viewable image.',
-            $mime_type));
+            pht('"%s" is not a valid file PHID.',
+            $file_phid));
+        } else {
+          if (!$file->isViewableImage()) {
+            $mime_type = $file->getMimeType();
+            $errors[] = $this->newInvalidError(
+              pht('File mime type of "%s" is not a valid viewable image.',
+              $mime_type));
+          }
         }
       }
 
