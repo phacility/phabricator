@@ -236,6 +236,8 @@ final class DifferentialChangesetListView extends AphrontView {
         'View Unified' => pht('View Unified'),
         'Change Text Encoding...' => pht('Change Text Encoding...'),
         'Highlight As...' => pht('Highlight As...'),
+
+        'Loading...' => pht('Loading...'),
       ),
     ));
 

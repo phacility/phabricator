@@ -7,6 +7,7 @@
 JX.install('DiffChangesetList', {
 
   construct: function() {
+    this._changesets = [];
 
     var onload = JX.bind(this, this._ifawake, this._onload);
     JX.Stratcom.listen('click', 'differential-load', onload);
@@ -24,6 +25,7 @@ JX.install('DiffChangesetList', {
 
   members: {
     _asleep: true,
+    _changesets: null,
 
     sleep: function() {
       this._asleep = true;
@@ -35,6 +37,15 @@ JX.install('DiffChangesetList', {
 
     isAsleep: function() {
       return this._asleep;
+    },
+
+    newChangesetForNode: function(node) {
+      var changeset = JX.DiffChangeset.getForNode(node);
+
+      this._changesets.push(changeset);
+      changeset.setChangesetList(this);
+
+      return changeset;
     },
 
     getChangesetForNode: function(node) {

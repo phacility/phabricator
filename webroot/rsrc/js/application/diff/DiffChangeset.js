@@ -26,6 +26,10 @@ JX.install('DiffChangeset', {
     this._loaded = data.loaded;
   },
 
+  properties: {
+    changesetList: null
+  },
+
   members: {
     _node: null,
     _loaded: false,
@@ -121,6 +125,7 @@ JX.install('DiffChangeset', {
       this._sequence++;
 
       var params = this._getViewParameters();
+      var pht = this.getChangesetList().getTranslations();
 
       var workflow = new JX.Workflow(this._renderURI, params)
         .setHandler(JX.bind(this, this._onresponse, this._sequence));
@@ -132,7 +137,7 @@ JX.install('DiffChangeset', {
         JX.$N(
           'div',
           {className: 'differential-loading'},
-          'Loading...'));
+          pht('Loading...')));
 
       return this;
     },
@@ -152,9 +157,10 @@ JX.install('DiffChangeset', {
       var params = this._getViewParameters();
       params.range = range;
 
+      var pht = this.getChangesetList().getTranslations();
+
       var container = JX.DOM.scry(target, 'td')[0];
-      // TODO: pht()
-      JX.DOM.setContent(container, 'Loading...');
+      JX.DOM.setContent(container, pht('Loading...'));
       JX.DOM.alterClass(target, 'differential-show-more-loading', true);
 
       var workflow = new JX.Workflow(this._renderURI, params)

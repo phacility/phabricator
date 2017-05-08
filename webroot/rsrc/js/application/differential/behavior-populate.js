@@ -70,9 +70,11 @@ JX.behavior('differential-populate', function(config, statics) {
 
   for (var ii = 0; ii < config.changesetViewIDs.length; ii++) {
     var id = config.changesetViewIDs[ii];
-    var view = JX.DiffChangeset.getForNode(JX.$(id));
-    if (view.shouldAutoload()) {
-      view.setStabilize(true).load();
+    var node = JX.$(id);
+
+    var changeset = changeset_list.newChangesetForNode(node);
+    if (changeset.shouldAutoload()) {
+      changeset.setStabilize(true).load();
     }
   }
 
