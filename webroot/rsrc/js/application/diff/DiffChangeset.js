@@ -318,6 +318,88 @@ JX.install('DiffChangeset', {
       return this._highlight;
     },
 
+    getSelectableItems: function() {
+      var items = [];
+
+      items.push({
+        type: 'file',
+        changeset: this,
+        target: this,
+        nodes: {
+          begin: this._node,
+          end: null
+        }
+      });
+
+      var rows = JX.DOM.scry(this._node, 'tr');
+
+      var blocks = [];
+      var block;
+      var ii;
+      for (ii = 0; ii < rows.length; ii++) {
+        var type = this._getRowType(rows[ii]);
+
+        if (!block || (block.type !== type)) {
+          block = {
+            type: type,
+            items: []
+          };
+          blocks.push(block);
+        }
+
+        block.items.push(rows[ii]);
+      }
+
+      for (ii = 0; ii < blocks.length; ii++) {
+        block = blocks[ii];
+
+        if (block.type == 'change') {
+          items.push({
+            type: block.type,
+            changeset: this,
+            target: block.items[0],
+            nodes: {
+              begin: block.items[0],
+              end: block.items[block.items.length - 1]
+            }
+          });
+        }
+
+        if (block.type == 'comment') {
+          for (var jj = 0; jj < block.items.length; jj++) {
+            items.push({
+              type: block.type,
+              changeset: this,
+              target: block.items[jj],
+              nodes: {
+                begin: block.items[jj],
+                end: block.items[jj]
+              }
+            });
+          }
+        }
+      }
+
+      return items;
+    },
+
+    _getRowType: function(row) {
+      // NOTE: Don't do "className.indexOf()" elsewhere. This is evil legacy
+      // magic.
+
+      if (row.className.indexOf('inline') !== -1) {
+        return 'comment';
+      }
+
+      var cells = JX.DOM.scry(row, 'td');
+      for (var ii = 0; ii < cells.length; ii++) {
+        if (cells[ii].className.indexOf('old') !== -1 ||
+            cells[ii].className.indexOf('new') !== -1) {
+          return 'change';
+        }
+      }
+    },
+
     _getNodeData: function() {
       return JX.Stratcom.getData(this._node);
     },

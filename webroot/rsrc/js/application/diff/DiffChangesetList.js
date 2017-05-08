@@ -55,8 +55,12 @@ JX.install('DiffChangesetList', {
   },
 
   members: {
+    _initialized: false,
     _asleep: true,
     _changesets: null,
+
+    _cursorItem: null,
+    _lastKeyboardManager: null,
 
     sleep: function() {
       this._asleep = true;
@@ -64,6 +68,36 @@ JX.install('DiffChangesetList', {
 
     wake: function() {
       this._asleep = false;
+
+      if (this._initialized) {
+        return;
+      }
+
+      this._initialized = true;
+      var pht = this.getTranslations();
+
+      var label;
+
+      label = pht('Jump to next change.');
+      this._installJumpKey('j', label, 1);
+
+      label = pht('Jump to previous change.');
+      this._installJumpKey('k', label, -1);
+
+      label = pht('Jump to next file.');
+      this._installJumpKey('J', label, 1, 'file');
+
+      label = pht('Jump to previous file.');
+      this._installJumpKey('K', label, -1, 'file');
+
+      label = pht('Jump to next inline comment.');
+      this._installJumpKey('n', label, 1, 'comment');
+
+      label = pht('Jump to previous inline comment.');
+      this._installJumpKey('p', label, -1, 'comment');
+
+      label = pht('Jump to the table of contents.');
+      this._installKey('t', label, this._ontoc);
     },
 
     isAsleep: function() {
@@ -130,6 +164,134 @@ JX.install('DiffChangesetList', {
       if (routable) {
         routable.setPriority(2000);
       }
+    },
+
+    _installKey: function(key, label, handler) {
+      handler = JX.bind(this, this._ifawake, handler);
+
+      return new JX.KeyboardShortcut(key, label)
+        .setHandler(handler)
+        .register();
+    },
+
+    _installJumpKey: function(key, label, delta, filter) {
+      filter = filter || null;
+      var handler = JX.bind(this, this._onjumpkey, delta, filter);
+      return this._installKey(key, label, handler);
+    },
+
+    _ontoc: function(manager) {
+      var toc = JX.$('toc');
+      manager.scrollTo(toc);
+    },
+
+    _onjumpkey: function(delta, filter, manager) {
+      var state = this._getSelectionState();
+
+      var cursor = state.cursor;
+      var items = state.items;
+
+      // If there's currently no selection and the user tries to go back,
+      // don't do anything.
+      if ((cursor === null) && (delta < 0)) {
+        return;
+      }
+
+      while (true) {
+        if (cursor === null) {
+          cursor = 0;
+        } else {
+          cursor = cursor + delta;
+        }
+
+        // If we've gone backward past the first change, bail out.
+        if (cursor < 0) {
+          return;
+        }
+
+        // If we've gone forward off the end of the list, bail out.
+        if (cursor >= items.length) {
+          return;
+        }
+
+        // If we're selecting things of a particular type (like only files)
+        // and the next item isn't of that type, move past it.
+        if (filter !== null) {
+          if (items[cursor].type !== filter) {
+            continue;
+          }
+        }
+
+        // Otherwise, we've found a valid item to select.
+        break;
+      }
+
+      this._setSelectionState(items[cursor], manager);
+    },
+
+    _getSelectionState: function() {
+      var items = this._getSelectableItems();
+
+      var cursor = null;
+      if (this._cursorItem !== null) {
+        for (var ii = 0; ii < items.length; ii++) {
+          var item = items[ii];
+          if (this._cursorItem.target === item.target) {
+            cursor = ii;
+            break;
+          }
+        }
+      }
+
+      return {
+        cursor: cursor,
+        items: items
+      };
+    },
+
+    _setSelectionState: function(item, manager) {
+      this._cursorItem = item;
+
+      this._redrawSelection(manager, true);
+
+      return this;
+    },
+
+    _redrawSelection: function(manager, scroll) {
+      manager = manager || this._lastKeyboardManager;
+      this._lastKeyboardManager = manager;
+
+      if (this.isAsleep()) {
+        manager.focusOn(null);
+        return;
+      }
+
+      var cursor = this._cursorItem;
+      if (!cursor) {
+        manager.focusOn(null);
+        return;
+      }
+
+      manager.focusOn(cursor.nodes.begin, cursor.nodes.end);
+
+      if (scroll) {
+        manager.scrollTo(cursor.nodes.begin);
+      }
+
+      return this;
+    },
+
+    _getSelectableItems: function() {
+      var result = [];
+
+      for (var ii = 0; ii < this._changesets.length; ii++) {
+        var items = this._changesets[ii].getSelectableItems();
+        for (var jj = 0; jj < items.length; jj++) {
+          result.push(items[jj]);
+        }
+      }
+
+      return result;
     },
 
     _onmore: function(e) {
