@@ -7,10 +7,17 @@ final class AphrontFileHTTPParameterType
     return $key.'_raw';
   }
 
+  private function getDefaultKey($key) {
+    return $key.'_default';
+  }
+
   protected function getParameterExists(AphrontRequest $request, $key) {
     $file_key = $this->getFileKey($key);
+    $default_key = $this->getDefaultKey($key);
+
     return $request->getExists($key) ||
-           $request->getFileExists($file_key);
+           $request->getFileExists($file_key) ||
+           $request->getExists($default_key);
   }
 
   protected function getParameterValue(AphrontRequest $request, $key) {
@@ -27,8 +34,9 @@ final class AphrontFileHTTPParameterType
     // this code around as a fallback if the client-side JS goes awry.
 
     $file_key = $this->getFileKey($key);
+    $default_key = $this->getDefaultKey($key);
     if (!$request->getFileExists($file_key)) {
-      return null;
+      return $request->getStr($default_key);
     }
 
     $viewer = $this->getViewer();
