@@ -76,6 +76,7 @@ final class PhameBlogEditEngine
         ->setConduitDescription(pht('Retitle the blog.'))
         ->setConduitTypeDescription(pht('New blog title.'))
         ->setTransactionType(PhameBlogNameTransaction::TRANSACTIONTYPE)
+        ->setIsRequired(true)
         ->setValue($object->getName()),
       id(new PhabricatorTextEditField())
         ->setKey('subtitle')

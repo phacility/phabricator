@@ -34,9 +34,9 @@ final class PhamePostTransaction
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $tags[] = self::MAILTAG_SUBSCRIBERS;
         break;
-      case self::TYPE_TITLE:
-      case self::TYPE_SUBTITLE:
-      case self::TYPE_BODY:
+      case PhamePostTitleTransaction::TRANSACTIONTYPE:
+      case PhamePostSubtitleTransaction::TRANSACTIONTYPE:
+      case PhamePostBodyTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_CONTENT;
         break;
       default:

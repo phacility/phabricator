@@ -98,6 +98,7 @@ final class PhamePostEditEngine
         ->setConduitDescription(pht('Retitle the post.'))
         ->setConduitTypeDescription(pht('New post title.'))
         ->setTransactionType(PhamePostTitleTransaction::TRANSACTIONTYPE)
+        ->setIsRequired(true)
         ->setValue($object->getTitle()),
       id(new PhabricatorTextEditField())
         ->setKey('subtitle')
