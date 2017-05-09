@@ -6,7 +6,7 @@ final class LegalpadDocumentRequireSignatureTransaction
   const TRANSACTIONTYPE = 'legalpad:require-signature';
 
   public function generateOldValue($object) {
-    return $object->getRequireSignature();
+    return (int)$object->getRequireSignature();
   }
 
   public function applyInternalEffects($object, $value) {

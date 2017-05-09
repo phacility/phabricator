@@ -15,13 +15,13 @@ final class LegalpadDocumentSignatureTypeTransaction
 
   public function getTitle() {
     return pht(
-      '%s set the document signature type.',
+      '%s updated the document signature type.',
       $this->renderAuthor());
   }
 
   public function getTitleForFeed() {
     return pht(
-      '%s set the document signature type for %s.',
+      '%s updated the document signature type for %s.',
       $this->renderAuthor(),
       $this->renderObject());
   }
