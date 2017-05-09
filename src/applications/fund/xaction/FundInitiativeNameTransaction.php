@@ -37,7 +37,7 @@ final class FundInitiativeNameTransaction
         $this->renderObject());
     } else {
       return pht(
-        '%s renamed %s initiative from %s to %s.',
+        '%s renamed %s from %s to %s.',
         $this->renderAuthor(),
         $this->renderObject(),
         $this->renderOldValue(),

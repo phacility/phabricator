@@ -126,6 +126,7 @@ final class FundBackerSearchEngine
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('No backers found.'))
       ->setHeaders(
         array(
           pht('Initiative'),
