@@ -27,9 +27,15 @@ final class PHUIDiffTwoUpInlineCommentRowScaffold
       if ($inline->getIsOnRight()) {
         $left_side = null;
         $right_side = $inline;
+
+        $left_hidden = null;
+        $right_hidden = $inline->newHiddenIcon();
       } else {
         $left_side = $inline;
         $right_side = null;
+
+        $left_hidden = $inline->newHiddenIcon();
+        $right_hidden = null;
       }
     } else {
       list($u, $v) = $inlines;
@@ -48,6 +54,9 @@ final class PHUIDiffTwoUpInlineCommentRowScaffold
         $left_side = $v;
         $right_side = $u;
       }
+
+      $left_hidden = null;
+      $right_hidden = null;
     }
 
     $left_attrs = array(
@@ -62,9 +71,9 @@ final class PHUIDiffTwoUpInlineCommentRowScaffold
     );
 
     $cells = array(
-      phutil_tag('th', array()),
+      phutil_tag('th', array(), $left_hidden),
       phutil_tag('td', $left_attrs, $left_side),
-      phutil_tag('th', array()),
+      phutil_tag('th', array(), $right_hidden),
       phutil_tag('td', $right_attrs, $right_side),
     );
 

@@ -146,11 +146,6 @@ final class DifferentialChangesetListView extends AphrontView {
     foreach ($changesets as $key => $changeset) {
 
       $file = $changeset->getFilename();
-      $class = 'differential-changeset';
-      if (!$this->inlineURI) {
-        $class .= ' differential-changeset-noneditable';
-      }
-
       $ref = $this->references[$key];
 
       $detail = id(new DifferentialChangesetDetailView())
@@ -219,6 +214,7 @@ final class DifferentialChangesetListView extends AphrontView {
       'differential-populate',
       array(
       'changesetViewIDs' => $ids,
+      'inlineURI' => $this->inlineURI,
       'pht' => array(
         'Open in Editor' => pht('Open in Editor'),
         'Show All Context' => pht('Show All Context'),
@@ -247,7 +243,6 @@ final class DifferentialChangesetListView extends AphrontView {
       Javelin::initBehavior('differential-edit-inline-comments', array(
         'uri' => $this->inlineURI,
         'stage' => 'differential-review-stage',
-        'revealIcon' => hsprintf('%s', new PHUIDiffRevealIconView()),
       ));
     }
 

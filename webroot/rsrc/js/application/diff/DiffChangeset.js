@@ -8,6 +8,8 @@
  *           javelin-router
  *           javelin-behavior-device
  *           javelin-vector
+ *           phabricator-diff-inline
+ * @javelin
  */
 
 
@@ -24,6 +26,8 @@ JX.install('DiffChangeset', {
     this._highlight = data.highlight;
     this._encoding = data.encoding;
     this._loaded = data.loaded;
+
+    this._inlines = [];
   },
 
   properties: {
@@ -44,6 +48,7 @@ JX.install('DiffChangeset', {
     _encoding: null,
     _undoTemplates: null,
 
+    _inlines: null,
 
     /**
      * Has the content of this changeset been loaded?
@@ -401,6 +406,20 @@ JX.install('DiffChangeset', {
 
     _getRoutableKey: function() {
       return 'changeset-view.' + this._ref + '.' + this._sequence;
+    },
+
+    getInlineForRow: function(node) {
+      var data = JX.Stratcom.getData(node);
+
+      if (!data.inline) {
+        var inline = new JX.DiffInline(node)
+          .setChangeset(this);
+
+        this._inlines.push(inline);
+        data.inline = inline;
+      }
+
+      return data.inline;
     }
 
   },

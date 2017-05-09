@@ -450,7 +450,20 @@ final class PHUIDiffInlineCommentDetailView
           phutil_tag_div('phabricator-remarkup', $content)),
       ));
 
-    return $markup;
+    $summary = phutil_tag(
+      'div',
+      array(
+        'class' => 'differential-inline-summary',
+      ),
+
+      // TODO: Render something a little more useful here as a hint about the
+      // inline content, like "alincoln: first line of text...".
+      pht('...'));
+
+    return array(
+      $markup,
+      $summary,
+    );
   }
 
   private function canHide() {

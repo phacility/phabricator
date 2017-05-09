@@ -17,10 +17,17 @@ JX.install('DiffChangesetList', {
 
     var onmenu = JX.bind(this, this._ifawake, this._onmenu);
     JX.Stratcom.listen('click', 'differential-view-options', onmenu);
+
+    var onhide = JX.bind(this, this._ifawake, this._onhide);
+    JX.Stratcom.listen('click', 'hide-inline', onhide);
+
+    var onreveal = JX.bind(this, this._ifawake, this._onreveal);
+    JX.Stratcom.listen('click', 'reveal-inline', onreveal);
   },
 
   properties: {
-    translations: null
+    translations: null,
+    inlineURI: null
   },
 
   members: {
@@ -309,9 +316,27 @@ JX.install('DiffChangesetList', {
 
       data.menu = menu;
       menu.open();
+    },
+
+    _onhide: function(e) {
+      this._onhidereveal(e, true);
+    },
+
+    _onreveal: function(e) {
+      this._onhidereveal(e, false);
+    },
+
+    _onhidereveal: function(e, is_hide) {
+      e.kill();
+
+      var node = e.getNode('differential-changeset');
+      var changeset = this.getChangesetForNode(node);
+
+      var inline_node = e.getNode('inline-row');
+      var inline = changeset.getInlineForRow(inline_node);
+
+      inline.setHidden(is_hide);
     }
-
-
 
   }
 

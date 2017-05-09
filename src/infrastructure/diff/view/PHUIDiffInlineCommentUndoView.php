@@ -9,6 +9,10 @@
 final class PHUIDiffInlineCommentUndoView
   extends PHUIDiffInlineCommentView {
 
+  public function isHideable() {
+    return false;
+  }
+
   public function render() {
     $link = javelin_tag(
       'a',

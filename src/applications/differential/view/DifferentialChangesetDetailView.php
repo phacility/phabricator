@@ -166,7 +166,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'ref' => $this->getRenderingRef(),
           'autoload' => $this->getAutoload(),
           'loaded' => $this->getLoaded(),
-          'undoTemplates' => $renderer->renderUndoTemplates(),
+          'undoTemplates' => hsprintf('%s', $renderer->renderUndoTemplates()),
         ),
         'class' => $class,
         'id'    => $id,

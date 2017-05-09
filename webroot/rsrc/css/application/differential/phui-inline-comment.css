@@ -374,17 +374,36 @@
 /* - Hiding Inlines ------------------------------------------------------------
 */
 
-.reveal-inlines {
-  float: left;
-  margin-left: 4px;
+.reveal-inline {
+  color: {$lightbluetext};
+  margin: 4px 0;
+  display: none;
+}
+
+.inline-hidden .reveal-inline {
+  display: block;
+}
+
+.inline-hidden .differential-inline-comment {
+  display: none;
+}
+
+.differential-inline-summary {
+  background: {$greybackground};
+  padding: 0 4px;
+  color: {$greytext};
+  display: none;
+}
+
+.inline-hidden .differential-inline-summary {
+  display: block;
+}
+
+.reveal-inline span.phui-icon-view {
   color: {$lightbluetext};
 }
 
-.reveal-inlines span.phui-icon-view {
-  color: {$lightbluetext};
-}
-
-.reveal-inlines:hover span.phui-icon-view {
+.reveal-inline:hover span.phui-icon-view {
   color: {$darkbluetext};
 }
 

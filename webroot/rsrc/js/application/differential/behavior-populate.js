@@ -59,7 +59,8 @@ JX.behavior('differential-populate', function(config, statics) {
   }
 
   var changeset_list = new JX.DiffChangesetList()
-    .setTranslations(JX.phtize(config.pht));
+    .setTranslations(JX.phtize(config.pht))
+    .setInlineURI(config.inlineURI);
 
   // Install and activate the current page.
   var page_id = JX.Quicksand.getCurrentPageID();
@@ -71,7 +72,6 @@ JX.behavior('differential-populate', function(config, statics) {
   for (var ii = 0; ii < config.changesetViewIDs.length; ii++) {
     var id = config.changesetViewIDs[ii];
     var node = JX.$(id);
-
     var changeset = changeset_list.newChangesetForNode(node);
     if (changeset.shouldAutoload()) {
       changeset.setStabilize(true).load();
