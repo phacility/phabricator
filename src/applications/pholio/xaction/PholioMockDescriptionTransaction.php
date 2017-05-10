@@ -1,7 +1,7 @@
 <?php
 
-final class PholioDescriptionTransaction
-  extends PholioTransactionType {
+final class PholioMockDescriptionTransaction
+  extends PholioMockTransactionType {
 
   const TRANSACTIONTYPE = 'description';
 
