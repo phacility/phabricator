@@ -57,7 +57,6 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
           => 'LegalpadDocumentListController',
         $this->getEditRoutePattern('edit/')
           => 'LegalpadDocumentEditController',
-        'comment/(?P<id>\d+)/' => 'LegalpadDocumentCommentController',
         'view/(?P<id>\d+)/' => 'LegalpadDocumentManageController',
         'done/' => 'LegalpadDocumentDoneController',
         'verify/(?P<code>[^/]+)/'
