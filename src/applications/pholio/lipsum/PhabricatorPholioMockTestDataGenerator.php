@@ -24,7 +24,7 @@ final class PhabricatorPholioMockTestDataGenerator
     $changes = array();
     $changes[PholioTransaction::TYPE_NAME] =
       $this->generateTitle();
-    $changes[PholioTransaction::TYPE_DESCRIPTION] =
+    $changes[PholioDescriptionTransaction::TRANSACTIONTYPE] =
       $this->generateDescription();
     $changes[PhabricatorTransactions::TYPE_VIEW_POLICY] =
       PhabricatorPolicies::POLICY_PUBLIC;

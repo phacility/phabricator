@@ -30,7 +30,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
     $types[] = PholioTransaction::TYPE_NAME;
-    $types[] = PholioTransaction::TYPE_DESCRIPTION;
     $types[] = PholioTransaction::TYPE_STATUS;
     $types[] = PholioTransaction::TYPE_INLINE;
 
@@ -50,8 +49,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     switch ($xaction->getTransactionType()) {
       case PholioTransaction::TYPE_NAME:
         return $object->getName();
-      case PholioTransaction::TYPE_DESCRIPTION:
-        return $object->getDescription();
       case PholioTransaction::TYPE_STATUS:
         return $object->getStatus();
       case PholioTransaction::TYPE_IMAGE_FILE:
@@ -96,7 +93,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
     switch ($xaction->getTransactionType()) {
       case PholioTransaction::TYPE_NAME:
-      case PholioTransaction::TYPE_DESCRIPTION:
       case PholioTransaction::TYPE_STATUS:
       case PholioTransaction::TYPE_IMAGE_NAME:
       case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
@@ -215,9 +211,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
           $object->setOriginalName($xaction->getNewValue());
         }
         break;
-      case PholioTransaction::TYPE_DESCRIPTION:
-        $object->setDescription($xaction->getNewValue());
-        break;
       case PholioTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         break;
@@ -311,7 +304,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $type = $u->getTransactionType();
     switch ($type) {
       case PholioTransaction::TYPE_NAME:
-      case PholioTransaction::TYPE_DESCRIPTION:
       case PholioTransaction::TYPE_STATUS:
         return $v;
       case PholioTransaction::TYPE_IMAGE_REPLACE:

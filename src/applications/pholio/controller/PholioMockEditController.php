@@ -66,7 +66,7 @@ final class PholioMockEditController extends PholioController {
       $xactions = array();
 
       $type_name = PholioTransaction::TYPE_NAME;
-      $type_desc = PholioTransaction::TYPE_DESCRIPTION;
+      $type_desc = PholioDescriptionTransaction::TRANSACTIONTYPE;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
