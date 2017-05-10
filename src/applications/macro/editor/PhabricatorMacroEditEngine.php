@@ -87,7 +87,7 @@ final class PhabricatorMacroEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Macro name.'))
-        ->setConduitDescription(pht('Rename the macro.'))
+        ->setConduitDescription(pht('Name of the macro.'))
         ->setConduitTypeDescription(pht('New macro name.'))
         ->setTransactionType(PhabricatorMacroNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
