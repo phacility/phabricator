@@ -21,6 +21,14 @@ final class LegalpadDocumentEditor
     return $types;
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this document.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -62,6 +70,37 @@ final class LegalpadDocumentEditor
     }
 
     return $xactions;
+  }
+
+  protected function validateAllTransactions(PhabricatorLiskDAO $object,
+    array $xactions) {
+    $errors = array();
+
+    $is_required = (bool)$object->getRequireSignature();
+    $document_type = $object->getSignatureType();
+    $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case LegalpadDocumentRequireSignatureTransaction::TRANSACTIONTYPE:
+          $is_required = (bool)$xaction->getNewValue();
+          break;
+        case LegalpadDocumentSignatureTypeTransaction::TRANSACTIONTYPE:
+          $document_type = $xaction->getNewValue();
+          break;
+      }
+    }
+
+    if ($is_required && ($document_type != $individual)) {
+      $errors[] = new PhabricatorApplicationTransactionValidationError(
+        LegalpadDocumentRequireSignatureTransaction::TRANSACTIONTYPE,
+        pht('Invalid'),
+        pht('Only documents with signature type "individual" may '.
+            'require signing to use Phabricator.'),
+        null);
+    }
+
+    return $errors;
   }
 
 

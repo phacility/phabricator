@@ -10,11 +10,11 @@ final class LegalpadDocumentRequireSignatureTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setRequireSignature($value);
+    $object->setRequireSignature((int)$value);
   }
 
   public function applyExternalEffects($object, $value) {
-    if (strlen($value)) {
+    if ($value) {
       $session = new PhabricatorAuthSession();
       queryfx(
         $session->establishConnection('w'),
@@ -25,6 +25,7 @@ final class LegalpadDocumentRequireSignatureTransaction
 
   public function getTitle() {
     $new = $this->getNewValue();
+
     if ($new) {
       return pht(
         '%s set the document to require signatures.',
@@ -49,6 +50,19 @@ final class LegalpadDocumentRequireSignatureTransaction
         $this->renderAuthor(),
         $this->renderObject());
     }
+  }
+
+  public function validateTransactions($object, array $xactions) {
+    $errors = array();
+
+    $is_admin = $this->getActor()->getIsAdmin();
+
+    if (!$is_admin) {
+      $errors[] = $this->newInvalidError(
+        pht('Only admins may require signature.'));
+    }
+
+    return $errors;
   }
 
   public function getIcon() {
