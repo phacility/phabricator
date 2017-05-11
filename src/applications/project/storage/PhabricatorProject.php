@@ -49,6 +49,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
 
+  const ITEM_PICTURE = 'project.picture';
   const ITEM_PROFILE = 'project.profile';
   const ITEM_POINTS = 'project.points';
   const ITEM_WORKBOARD = 'project.workboard';
