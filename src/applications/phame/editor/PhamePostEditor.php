@@ -88,7 +88,7 @@ final class PhamePostEditor
     } else {
       foreach ($xactions as $xaction) {
         switch ($xaction->getTransactionType()) {
-          case PhamePostTransaction::TYPE_VISIBILITY:
+          case PhamePostVisibilityTransaction::TRANSACTIONTYPE:
             if (!$object->isDraft() && !$object->isArchived()) {
               $body->addRemarkupSection(null, $object->getBody());
             }
