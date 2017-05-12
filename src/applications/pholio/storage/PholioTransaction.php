@@ -2,12 +2,8 @@
 
 final class PholioTransaction extends PhabricatorModularTransaction {
 
-  // Edits to the high level mock
-  const TYPE_STATUS       = 'status';
-
   // Edits to images within the mock
   const TYPE_IMAGE_FILE = 'image-file';
-  const TYPE_IMAGE_DESCRIPTION = 'image-description';
   const TYPE_IMAGE_REPLACE = 'image-replace';
   const TYPE_IMAGE_SEQUENCE = 'image-sequence';
 
@@ -54,7 +50,7 @@ final class PholioTransaction extends PhabricatorModularTransaction {
         $phids[] = $new;
         $phids[] = $old;
         break;
-      case self::TYPE_IMAGE_DESCRIPTION:
+      case PholioImageDescriptionTransaction::TRANSACTIONTYPE:
       case PholioImageNameTransaction::TRANSACTIONTYPE:
       case self::TYPE_IMAGE_SEQUENCE:
         $phids[] = key($new);
@@ -68,8 +64,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
     $old = $this->getOldValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_IMAGE_DESCRIPTION:
-        return ($old === array(null => null));
       // this is boring / silly to surface; changing sequence is NBD
       case self::TYPE_IMAGE_SEQUENCE:
         return true;
@@ -86,13 +80,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
         return 'fa-comment';
-      case self::TYPE_STATUS:
-        if ($new == PholioMock::STATUS_CLOSED) {
-          return 'fa-ban';
-        } else {
-          return 'fa-check';
-        }
-      case self::TYPE_IMAGE_DESCRIPTION:
       case self::TYPE_IMAGE_SEQUENCE:
         return 'fa-pencil';
       case self::TYPE_IMAGE_FILE:
@@ -110,13 +97,13 @@ final class PholioTransaction extends PhabricatorModularTransaction {
       case PhabricatorTransactions::TYPE_COMMENT:
         $tags[] = self::MAILTAG_COMMENT;
         break;
-      case self::TYPE_STATUS:
+      case PholioMockStatusTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_STATUS;
         break;
       case PholioMockNameTransaction::TRANSACTIONTYPE:
       case PholioMockDescriptionTransaction::TRANSACTIONTYPE:
       case PholioImageNameTransaction::TRANSACTIONTYPE:
-      case self::TYPE_IMAGE_DESCRIPTION:
+      case PholioImageDescriptionTransaction::TRANSACTIONTYPE:
       case self::TYPE_IMAGE_SEQUENCE:
       case self::TYPE_IMAGE_FILE:
       case self::TYPE_IMAGE_REPLACE:
@@ -137,17 +124,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case self::TYPE_STATUS:
-        if ($new == PholioMock::STATUS_CLOSED) {
-          return pht(
-            '%s closed this mock.',
-            $this->renderHandleLink($author_phid));
-        } else {
-          return pht(
-            '%s opened this mock.',
-            $this->renderHandleLink($author_phid));
-        }
-        break;
       case self::TYPE_INLINE:
         $count = 1;
         foreach ($this->getTransactionGroup() as $xaction) {
@@ -194,12 +170,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
             $this->renderHandleList($rem));
         }
         break;
-      case self::TYPE_IMAGE_DESCRIPTION:
-        return pht(
-          '%s updated an image\'s (%s) description.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink(key($new)));
-        break;
       case self::TYPE_IMAGE_SEQUENCE:
         return pht(
           '%s updated an image\'s (%s) sequence.',
@@ -220,19 +190,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case self::TYPE_STATUS:
-        if ($new == PholioMock::STATUS_CLOSED) {
-          return pht(
-            '%s closed a mock %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-        } else {
-          return pht(
-            '%s opened a mock %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-        }
-        break;
       case self::TYPE_INLINE:
         return pht(
           '%s added an inline comment to %s.',
@@ -243,12 +200,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
       case self::TYPE_IMAGE_FILE:
         return pht(
           '%s updated images of %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-        break;
-      case self::TYPE_IMAGE_DESCRIPTION:
-        return pht(
-          '%s updated image descriptions of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
@@ -268,12 +219,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_STATUS:
-        if ($new == PholioMock::STATUS_CLOSED) {
-          return PhabricatorTransactions::COLOR_INDIGO;
-        } else {
-          return PhabricatorTransactions::COLOR_GREEN;
-        }
       case self::TYPE_IMAGE_REPLACE:
         return PhabricatorTransactions::COLOR_YELLOW;
       case self::TYPE_IMAGE_FILE:
@@ -291,16 +236,4 @@ final class PholioTransaction extends PhabricatorModularTransaction {
     return parent::getColor();
   }
 
-  public function getNoEffectDescription() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_IMAGE_NAME:
-        return pht('The image title was not updated.');
-      case self::TYPE_IMAGE_DESCRIPTION:
-        return pht('The image description was not updated.');
-      case self::TYPE_IMAGE_SEQUENCE:
-        return pht('The image sequence was not updated.');
-    }
-
-    return parent::getNoEffectDescription();
-  }
 }

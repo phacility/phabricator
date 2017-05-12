@@ -173,7 +173,7 @@ final class PholioMockEditController extends PholioController {
               array($existing_image->getPHID() => $title));
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
-              PholioTransaction::TYPE_IMAGE_DESCRIPTION)
+              PholioImageDescriptionTransaction::TRANSACTIONTYPE)
               ->setNewValue(
                 array($existing_image->getPHID() => $description));
           $xactions[] = id(new PholioTransaction())

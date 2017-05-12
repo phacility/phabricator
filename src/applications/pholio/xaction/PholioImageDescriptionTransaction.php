@@ -1,43 +1,40 @@
 <?php
 
-final class PholioImageNameTransaction
+final class PholioImageDescriptionTransaction
   extends PholioImageTransactionType {
 
-  const TRANSACTIONTYPE = 'image-name';
+  const TRANSACTIONTYPE = 'image-description';
 
   public function generateOldValue($object) {
-    $name = null;
+    $description = null;
     $phid = null;
     $image = $this->getImageForXaction($object);
     if ($image) {
-      $name = $image->getName();
+      $description = $image->getDescription();
       $phid = $image->getPHID();
     }
-    return array($phid => $name);
+    return array($phid => $description);
   }
 
   public function applyInternalEffects($object, $value) {
     $image = $this->getImageForXaction($object);
     $value = (string)head($this->getNewValue());
-    $image->setName($value);
+    $image->setDescription($value);
     $image->save();
   }
 
   public function getTitle() {
-    $old = $this->getOldValue();
     $new = $this->getNewValue();
 
     return pht(
-      '%s renamed an image (%s) from %s to %s.',
+      '%s updated an image\'s (%s) description.',
       $this->renderAuthor(),
-      $this->renderHandle(key($new)),
-      $this->renderValue($old),
-      $this->renderValue($new));
+      $this->renderHandle(head_key($new)));
   }
 
   public function getTitleForFeed() {
     return pht(
-      '%s updated the image names of %s.',
+      '%s updated image descriptions of %s.',
       $this->renderAuthor(),
       $this->renderObject());
   }
@@ -63,23 +60,17 @@ final class PholioImageNameTransaction
     return ($old === array(null => null));
   }
 
-  public function validateTransactions($object, array $xactions) {
-    $errors = array();
-
-    $max_length = $object->getColumnMaximumByteLength('name');
-    foreach ($xactions as $xaction) {
-      $new_value = head(array_values($xaction->getNewValue()));
-      $new_length = strlen($new_value);
-      if ($new_length > $max_length) {
-        $errors[] = $this->newInvalidError(
-          pht(
-            'Mock image names must not be longer than %s character(s).',
-            new PhutilNumber($max_length)));
-      }
-    }
-
-    return $errors;
+  public function hasChangeDetailView() {
+    return true;
   }
 
+  public function newChangeDetailView() {
+    $viewer = $this->getViewer();
+
+    return id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setViewer($viewer)
+      ->setOldText(head($this->getOldValue()))
+      ->setNewText(head($this->getNewValue()));
+  }
 
 }
