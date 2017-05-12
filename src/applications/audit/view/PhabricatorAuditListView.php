@@ -2,7 +2,7 @@
 
 final class PhabricatorAuditListView extends AphrontView {
 
-  private $commits;
+  private $commits = array();
   private $header;
   private $showDrafts;
   private $noDataString;
