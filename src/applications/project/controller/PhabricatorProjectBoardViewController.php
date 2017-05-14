@@ -705,10 +705,21 @@ final class PhabricatorProjectBoardViewController
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
 
+    $reorder_uri = $this->getApplicationURI("board/{$id}/reorder/");
     $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-pencil')
-      ->setName(pht('Manage Board'))
-      ->setHref($manage_uri);
+      ->setIcon('fa-exchange')
+      ->setName(pht('Reorder Columns'))
+      ->setHref($reorder_uri)
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
+
+    $background_uri = $this->getApplicationURI("board/{$id}/background/");
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-paint-brush')
+      ->setName(pht('Change Background Color'))
+      ->setHref($background_uri)
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(false);
 
     if ($show_hidden) {
       $hidden_uri = $this->getURIWithState()
@@ -727,18 +738,18 @@ final class PhabricatorProjectBoardViewController
       ->setName($hidden_text)
       ->setHref($hidden_uri);
 
+    $manage_uri = $this->getApplicationURI("board/{$id}/manage/");
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-gear')
+      ->setName(pht('Manage Workboard'))
+      ->setHref($manage_uri);
+
     $batch_edit_uri = $request->getRequestURI();
     $batch_edit_uri->setQueryParam('batch', self::BATCH_EDIT_ALL);
     $can_batch_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       PhabricatorApplication::getByClass('PhabricatorManiphestApplication'),
       ManiphestBulkEditCapability::CAPABILITY);
-
-    $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-list-ul')
-      ->setName(pht('Batch Edit Visible Tasks...'))
-      ->setHref($batch_edit_uri)
-      ->setDisabled(!$can_batch_edit);
 
     $manage_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);

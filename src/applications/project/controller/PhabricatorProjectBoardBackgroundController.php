@@ -28,6 +28,7 @@ final class PhabricatorProjectBoardBackgroundController
     $this->setProject($board);
     $id = $board->getID();
 
+    $view_uri = $this->getApplicationURI("board/{$id}/");
     $manage_uri = $this->getApplicationURI("board/{$id}/manage/");
 
     if ($request->isFormPost()) {
@@ -47,7 +48,7 @@ final class PhabricatorProjectBoardBackgroundController
         ->applyTransactions($board, $xactions);
 
       return id(new AphrontRedirectResponse())
-        ->setURI($manage_uri);
+        ->setURI($view_uri);
     }
 
     $nav = $this->getProfileMenu();
