@@ -837,6 +837,16 @@ final class PhabricatorProjectBoardViewController
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
 
+    // Column Related Actions Below
+    //
+    $edit_uri = 'board/'.$this->id.'/edit/'.$column->getID().'/';
+    $column_items[] = id(new PhabricatorActionView())
+      ->setName(pht('Edit Column'))
+      ->setIcon('fa-pencil')
+      ->setHref($this->getApplicationURI($edit_uri))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
+
     $can_hide = ($can_edit && !$column->isDefaultColumn());
     $hide_uri = 'board/'.$this->id.'/hide/'.$column->getID().'/';
     $hide_uri = $this->getApplicationURI($hide_uri);
@@ -857,6 +867,12 @@ final class PhabricatorProjectBoardViewController
         ->setDisabled(!$can_hide)
         ->setWorkflow(true);
     }
+
+    $details_uri = 'board/'.$this->id.'/column/'.$column->getID().'/';
+    $column_items[] = id(new PhabricatorActionView())
+      ->setName(pht('Column History'))
+      ->setIcon('fa-columns')
+      ->setHref($this->getApplicationURI($details_uri));
 
     $column_menu = id(new PhabricatorActionListView())
       ->setUser($viewer);
