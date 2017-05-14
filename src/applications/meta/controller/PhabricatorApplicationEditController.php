@@ -32,7 +32,6 @@ final class PhabricatorApplicationEditController
     if ($request->isFormPost()) {
       $xactions = array();
 
-      $result = array();
       $template = $application->getApplicationTransactionTemplate();
       foreach ($application->getCapabilities() as $capability) {
         if (!$application->isCapabilityEditable($capability)) {
@@ -47,8 +46,6 @@ final class PhabricatorApplicationEditController
           continue;
         }
 
-        $result[$capability] = $new;
-
         $xactions[] = id(clone $template)
           ->setTransactionType(
               PhabricatorApplicationPolicyChangeTransaction::TRANSACTIONTYPE)
@@ -58,25 +55,23 @@ final class PhabricatorApplicationEditController
           ->setNewValue($new);
       }
 
-      if ($result) {
-        $editor = id(new PhabricatorApplicationEditor())
-          ->setActor($user)
-          ->setContentSourceFromRequest($request)
-          ->setContinueOnNoEffect(true)
-          ->setContinueOnMissingFields(true);
+      $editor = id(new PhabricatorApplicationEditor())
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
 
-        try {
-          $editor->applyTransactions($application, $xactions);
-          return id(new AphrontRedirectResponse())->setURI($view_uri);
-        } catch (PhabricatorApplicationTransactionValidationException $ex) {
-          $validation_exception = $ex;
-        }
-
-        return $this->newDialog()
-          ->setTitle('Validation Failed')
-          ->setValidationException($validation_exception)
-          ->addCancelButton($view_uri);
+      try {
+        $editor->applyTransactions($application, $xactions);
+        return id(new AphrontRedirectResponse())->setURI($view_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
       }
+
+      return $this->newDialog()
+        ->setTitle(pht('Validation Failed'))
+        ->setValidationException($validation_exception)
+        ->addCancelButton($view_uri);
     }
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
