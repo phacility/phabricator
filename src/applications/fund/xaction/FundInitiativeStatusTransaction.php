@@ -28,12 +28,12 @@ final class FundInitiativeStatusTransaction
   public function getTitleForFeed() {
     if ($this->getNewValue() == FundInitiative::STATUS_CLOSED) {
       return pht(
-        '%s closed the initiative %s.',
+        '%s closed %s.',
         $this->renderAuthor(),
         $this->renderObject());
     } else {
       return pht(
-        '%s reopened the initiative %s.',
+        '%s reopened %s.',
         $this->renderAuthor(),
         $this->renderObject());
     }

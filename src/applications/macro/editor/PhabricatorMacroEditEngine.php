@@ -21,6 +21,10 @@ final class PhabricatorMacroEditEngine
     return 'PhabricatorMacroApplication';
   }
 
+  public function isEngineConfigurable() {
+    return false;
+  }
+
   protected function newEditableObject() {
     $viewer = $this->getViewer();
     return PhabricatorFileImageMacro::initializeNewFileImageMacro($viewer);
@@ -35,7 +39,7 @@ final class PhabricatorMacroEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit %s', $object->getName());
+    return pht('Edit Macro %s', $object->getName());
   }
 
   protected function getObjectEditShortText($object) {
@@ -63,6 +67,19 @@ final class PhabricatorMacroEditEngine
       PhabricatorMacroManageCapability::CAPABILITY);
   }
 
+  protected function willConfigureFields($object, array $fields) {
+    if ($this->getIsCreate()) {
+      $subscribers_field = idx($fields,
+        PhabricatorSubscriptionsEditEngineExtension::FIELDKEY);
+      if ($subscribers_field) {
+        // By default, hide the subscribers field when creating a macro
+        // because it makes the workflow SO HARD and wastes SO MUCH TIME.
+        $subscribers_field->setIsHidden(true);
+      }
+    }
+    return $fields;
+  }
+
   protected function buildCustomEditFields($object) {
 
     return array(
@@ -70,9 +87,10 @@ final class PhabricatorMacroEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Macro name.'))
-        ->setConduitDescription(pht('Rename the macro.'))
+        ->setConduitDescription(pht('Name of the macro.'))
         ->setConduitTypeDescription(pht('New macro name.'))
         ->setTransactionType(PhabricatorMacroNameTransaction::TRANSACTIONTYPE)
+        ->setIsRequired(true)
         ->setValue($object->getName()),
       id(new PhabricatorFileEditField())
         ->setKey('filePHID')
@@ -80,7 +98,8 @@ final class PhabricatorMacroEditEngine
         ->setDescription(pht('Image file to import.'))
         ->setTransactionType(PhabricatorMacroFileTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(pht('File PHID to import.'))
-        ->setConduitTypeDescription(pht('File PHID.')),
+        ->setConduitTypeDescription(pht('File PHID.'))
+        ->setValue($object->getFilePHID()),
     );
 
   }

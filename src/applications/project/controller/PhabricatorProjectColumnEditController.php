@@ -51,12 +51,7 @@ final class PhabricatorProjectColumnEditController
 
     $validation_exception = null;
     $base_uri = '/board/'.$project_id.'/';
-    if ($is_new) {
-      // we want to go back to the board
-      $view_uri = $this->getApplicationURI($base_uri);
-    } else {
-      $view_uri = $this->getApplicationURI($base_uri.'column/'.$id.'/');
-    }
+    $view_uri = $this->getApplicationURI($base_uri);
 
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');

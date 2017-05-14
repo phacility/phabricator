@@ -1,9 +1,9 @@
 <?php
 
-final class FundInitiativeNameTransaction
-  extends FundInitiativeTransactionType {
+final class PholioMockNameTransaction
+  extends PholioMockTransactionType {
 
-  const TRANSACTIONTYPE = 'fund:name';
+  const TRANSACTIONTYPE = 'name';
 
   public function generateOldValue($object) {
     return $object->getName();
@@ -11,28 +11,36 @@ final class FundInitiativeNameTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setName($value);
+    if ($object->getOriginalName() === null) {
+      $object->setOriginalName($this->getNewValue());
+    }
   }
 
   public function getTitle() {
     $old = $this->getOldValue();
-    if (!strlen($old)) {
+    $new = $this->getNewValue();
+
+    if ($old === null) {
       return pht(
-        '%s created this initiative.',
-        $this->renderAuthor());
+        '%s created %s.',
+        $this->renderAuthor(),
+        $this->renderValue($new));
     } else {
       return pht(
-        '%s renamed this initiative from %s to %s.',
+        '%s renamed this mock from %s to %s.',
         $this->renderAuthor(),
-        $this->renderOldValue(),
-        $this->renderNewValue());
+        $this->renderValue($old),
+        $this->renderValue($new));
     }
   }
 
   public function getTitleForFeed() {
     $old = $this->getOldValue();
-    if (!strlen($old)) {
+    $new = $this->getNewValue();
+
+    if ($old === null) {
       return pht(
-        '%s created initiative %s.',
+        '%s created %s.',
         $this->renderAuthor(),
         $this->renderObject());
     } else {
@@ -40,17 +48,26 @@ final class FundInitiativeNameTransaction
         '%s renamed %s from %s to %s.',
         $this->renderAuthor(),
         $this->renderObject(),
-        $this->renderOldValue(),
-        $this->renderNewValue());
+        $this->renderValue($old),
+        $this->renderValue($new));
     }
+  }
+
+  public function getColor() {
+    $old = $this->getOldValue();
+
+    if ($old === null) {
+      return PhabricatorTransactions::COLOR_GREEN;
+    }
+
+    return parent::getColor();
   }
 
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
     if ($this->isEmptyTextTransaction($object->getName(), $xactions)) {
-      $errors[] = $this->newRequiredError(
-        pht('Initiatives must have a name.'));
+      $errors[] = $this->newRequiredError(pht('Mocks must have a name.'));
     }
 
     $max_length = $object->getColumnMaximumByteLength('name');
@@ -59,13 +76,13 @@ final class FundInitiativeNameTransaction
       $new_length = strlen($new_value);
       if ($new_length > $max_length) {
         $errors[] = $this->newInvalidError(
-          pht('The name can be no longer than %s characters.',
-          new PhutilNumber($max_length)));
+          pht(
+            'Mock names must not be longer than %s character(s).',
+            new PhutilNumber($max_length)));
       }
     }
 
     return $errors;
   }
-
 
 }

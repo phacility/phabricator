@@ -71,7 +71,7 @@ final class PonderAnswerEditor extends PonderEditor {
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
       $new = $xaction->getNewValue();
-      if ($type == PonderAnswerTransaction::TYPE_CONTENT) {
+      if ($type == PonderAnswerContentTransaction::TRANSACTIONTYPE) {
         $body->addRawSection($new);
       }
     }

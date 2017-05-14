@@ -53,10 +53,10 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
       '/L(?P<id>\d+)' => 'LegalpadDocumentSignController',
       '/legalpad/' => array(
         '' => 'LegalpadDocumentListController',
-        '(?:query/(?P<queryKey>[^/]+)/)?' => 'LegalpadDocumentListController',
-        'create/' => 'LegalpadDocumentEditController',
-        'edit/(?P<id>\d+)/' => 'LegalpadDocumentEditController',
-        'comment/(?P<id>\d+)/' => 'LegalpadDocumentCommentController',
+        '(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'LegalpadDocumentListController',
+        $this->getEditRoutePattern('edit/')
+          => 'LegalpadDocumentEditController',
         'view/(?P<id>\d+)/' => 'LegalpadDocumentManageController',
         'done/' => 'LegalpadDocumentDoneController',
         'verify/(?P<code>[^/]+)/'

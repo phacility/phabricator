@@ -45,7 +45,7 @@ final class FundInitiativeMerchantTransaction
 
     return pht(
       '%s changed the merchant receiving funds from %s '.
-      'initiative from %s to %s.',
+      'from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
       $old_merchant,

@@ -65,8 +65,8 @@ final class PholioMockEditController extends PholioController {
     if ($request->isFormPost()) {
       $xactions = array();
 
-      $type_name = PholioTransaction::TYPE_NAME;
-      $type_desc = PholioTransaction::TYPE_DESCRIPTION;
+      $type_name = PholioMockNameTransaction::TRANSACTIONTYPE;
+      $type_desc = PholioMockDescriptionTransaction::TRANSACTIONTYPE;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
@@ -87,11 +87,6 @@ final class PholioMockEditController extends PholioController {
       $mock_xactions[$type_edit] = $v_edit;
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
       $mock_xactions[$type_space] = $v_space;
-
-      if (!strlen($request->getStr('name'))) {
-        $e_name = pht('Required');
-        $errors[] = pht('You must give the mock a name.');
-      }
 
       $file_phids = $request->getArr('file_phids');
       if ($file_phids) {
@@ -173,12 +168,12 @@ final class PholioMockEditController extends PholioController {
           $posted_mock_images[] = $add_image;
         } else {
           $xactions[] = id(new PholioTransaction())
-            ->setTransactionType(PholioTransaction::TYPE_IMAGE_NAME)
+            ->setTransactionType(PholioImageNameTransaction::TRANSACTIONTYPE)
             ->setNewValue(
               array($existing_image->getPHID() => $title));
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
-              PholioTransaction::TYPE_IMAGE_DESCRIPTION)
+              PholioImageDescriptionTransaction::TRANSACTIONTYPE)
               ->setNewValue(
                 array($existing_image->getPHID() => $description));
           $xactions[] = id(new PholioTransaction())

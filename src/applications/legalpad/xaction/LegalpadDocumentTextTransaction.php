@@ -17,9 +17,17 @@ final class LegalpadDocumentTextTransaction
   }
 
   public function getTitle() {
-    return pht(
-      '%s updated the document text.',
-      $this->renderAuthor());
+    $old = $this->getOldValue();
+
+    if (!strlen($old)) {
+      return pht(
+        '%s set the document text.',
+        $this->renderAuthor());
+    } else {
+      return pht(
+        '%s updated the document text.',
+        $this->renderAuthor());
+    }
   }
 
   public function getTitleForFeed() {

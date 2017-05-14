@@ -128,6 +128,10 @@ final class PhabricatorProjectSearchEngine
       $names['joined'] = pht('Joined');
     }
 
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['watching'] = pht('Watching');
+    }
+
     $names['active'] = pht('Active');
     $names['all'] = pht('All');
 
@@ -152,6 +156,10 @@ final class PhabricatorProjectSearchEngine
       case 'joined':
         return $query
           ->setParameter('memberPHIDs', array($viewer_phid))
+          ->setParameter('status', 'active');
+      case 'watching':
+        return $query
+          ->setParameter('watcherPHIDs', array($viewer_phid))
           ->setParameter('status', 'active');
     }
 

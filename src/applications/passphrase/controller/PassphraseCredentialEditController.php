@@ -244,8 +244,8 @@ final class PassphraseCredentialEditController extends PassphraseController {
           ->setValue($v_name)
           ->setError($e_name))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
+        id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))

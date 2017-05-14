@@ -29,14 +29,9 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
-    $types[] = PholioTransaction::TYPE_NAME;
-    $types[] = PholioTransaction::TYPE_DESCRIPTION;
-    $types[] = PholioTransaction::TYPE_STATUS;
     $types[] = PholioTransaction::TYPE_INLINE;
 
     $types[] = PholioTransaction::TYPE_IMAGE_FILE;
-    $types[] = PholioTransaction::TYPE_IMAGE_NAME;
-    $types[] = PholioTransaction::TYPE_IMAGE_DESCRIPTION;
     $types[] = PholioTransaction::TYPE_IMAGE_REPLACE;
     $types[] = PholioTransaction::TYPE_IMAGE_SEQUENCE;
 
@@ -48,33 +43,9 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_NAME:
-        return $object->getName();
-      case PholioTransaction::TYPE_DESCRIPTION:
-        return $object->getDescription();
-      case PholioTransaction::TYPE_STATUS:
-        return $object->getStatus();
       case PholioTransaction::TYPE_IMAGE_FILE:
         $images = $object->getImages();
         return mpull($images, 'getPHID');
-      case PholioTransaction::TYPE_IMAGE_NAME:
-        $name = null;
-        $phid = null;
-        $image = $this->getImageForXaction($object, $xaction);
-        if ($image) {
-          $name = $image->getName();
-          $phid = $image->getPHID();
-        }
-        return array($phid => $name);
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
-        $description = null;
-        $phid = null;
-        $image = $this->getImageForXaction($object, $xaction);
-        if ($image) {
-          $description = $image->getDescription();
-          $phid = $image->getPHID();
-        }
-        return array($phid => $description);
       case PholioTransaction::TYPE_IMAGE_REPLACE:
         $raw = $xaction->getNewValue();
         return $raw->getReplacesImagePHID();
@@ -95,11 +66,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_NAME:
-      case PholioTransaction::TYPE_DESCRIPTION:
-      case PholioTransaction::TYPE_STATUS:
-      case PholioTransaction::TYPE_IMAGE_NAME:
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
       case PholioTransaction::TYPE_IMAGE_SEQUENCE:
         return $xaction->getNewValue();
       case PholioTransaction::TYPE_IMAGE_REPLACE:
@@ -204,26 +170,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $this->setNewImages($new_images);
   }
 
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_NAME:
-        $object->setName($xaction->getNewValue());
-        if ($object->getOriginalName() === null) {
-          $object->setOriginalName($xaction->getNewValue());
-        }
-        break;
-      case PholioTransaction::TYPE_DESCRIPTION:
-        $object->setDescription($xaction->getNewValue());
-        break;
-      case PholioTransaction::TYPE_STATUS:
-        $object->setStatus($xaction->getNewValue());
-        break;
-    }
-  }
-
   private function getImageForXaction(
     PholioMock $mock,
     PhabricatorApplicationTransaction $xaction) {
@@ -270,18 +216,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         }
         $object->attachImages($images);
         break;
-      case PholioTransaction::TYPE_IMAGE_NAME:
-        $image = $this->getImageForXaction($object, $xaction);
-        $value = (string)head($xaction->getNewValue());
-        $image->setName($value);
-        $image->save();
-        break;
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
-        $image = $this->getImageForXaction($object, $xaction);
-        $value = (string)head($xaction->getNewValue());
-        $image->setDescription($value);
-        $image->save();
-        break;
       case PholioTransaction::TYPE_IMAGE_SEQUENCE:
         $image = $this->getImageForXaction($object, $xaction);
         $value = (int)head($xaction->getNewValue());
@@ -310,10 +244,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
     $type = $u->getTransactionType();
     switch ($type) {
-      case PholioTransaction::TYPE_NAME:
-      case PholioTransaction::TYPE_DESCRIPTION:
-      case PholioTransaction::TYPE_STATUS:
-        return $v;
       case PholioTransaction::TYPE_IMAGE_REPLACE:
         $u_img = $u->getNewValue();
         $v_img = $v->getNewValue();
@@ -323,8 +253,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         break;
       case PholioTransaction::TYPE_IMAGE_FILE:
         return $this->mergePHIDOrEdgeTransactions($u, $v);
-      case PholioTransaction::TYPE_IMAGE_NAME:
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
       case PholioTransaction::TYPE_IMAGE_SEQUENCE:
         $raw_new_value_u = $u->getNewValue();
         $raw_new_value_v = $v->getNewValue();

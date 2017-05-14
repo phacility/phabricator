@@ -68,7 +68,13 @@ final class PhabricatorSlowvoteEditController
       }
 
       if ($is_new) {
-        $responses = array_filter($responses);
+        // NOTE: Make sure common and useful response "0" is preserved.
+        foreach ($responses as $key => $response) {
+          if (!strlen($response)) {
+            unset($responses[$key]);
+          }
+        }
+
         if (empty($responses)) {
           $errors[] = pht('You must offer at least one response.');
           $e_response = pht('Required');
@@ -139,13 +145,14 @@ final class PhabricatorSlowvoteEditController
         }
 
         return id(new AphrontRedirectResponse())
-          ->setURI('/V'.$poll->getID());
+          ->setURI($poll->getURI());
       } else {
         $poll->setViewPolicy($v_view_policy);
       }
     }
 
     $form = id(new AphrontFormView())
+      ->setAction($request->getrequestURI())
       ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())

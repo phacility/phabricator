@@ -55,7 +55,7 @@ final class FundInitiativeRefundTransaction
       '%s refunded %s to %s.',
       $this->renderAuthor(),
       $amount->formatForDisplay(),
-      $this->renderHandleLink($backer_phid));
+      $this->renderHandle($backer_phid));
   }
 
   public function getTitleForFeed() {
@@ -69,7 +69,7 @@ final class FundInitiativeRefundTransaction
       '%s refunded %s to %s for %s.',
       $this->renderAuthor(),
       $amount->formatForDisplay(),
-      $this->renderHandleLink($backer_phid),
+      $this->renderHandle($backer_phid),
       $this->renderObject());
   }
 

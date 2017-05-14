@@ -17,17 +17,9 @@ final class PassphraseCredentialSecretIDTransaction
     $object->setSecretID($value);
   }
 
-  public function shouldHide() {
-    if (!$this->getOldValue()) {
-      return true;
-    }
-
-    return false;
-  }
-
   public function getTitle() {
     $old = $this->getOldValue();
-    if ($old === null) {
+    if (!$old) {
       return pht(
         '%s attached a new secret to this credential.',
         $this->renderAuthor());
@@ -51,6 +43,10 @@ final class PassphraseCredentialSecretIDTransaction
         $this->renderAuthor(),
         $this->renderObject());
     }
+  }
+
+  public function getIcon() {
+    return 'fa-key';
   }
 
 }

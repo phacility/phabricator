@@ -29,7 +29,6 @@ final class PhabricatorProjectProfileController
       ->setHeader(array($project->getDisplayName(), $tag))
       ->setUser($viewer)
       ->setPolicyObject($project)
-      ->setImage($picture)
       ->setProfileHeader(true);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
@@ -92,6 +91,7 @@ final class PhabricatorProjectProfileController
     $home = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setMainColumn(
         array(
           $properties,

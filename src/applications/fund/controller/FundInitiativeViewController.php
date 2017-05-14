@@ -52,15 +52,16 @@ final class FundInitiativeViewController
     $timeline = $this->buildTransactionTimeline(
       $initiative,
       new FundInitiativeTransactionQuery());
+    $timeline->setQuoteRef($initiative->getMonogram());
 
-    $add_comment = $this->buildCommentForm($initiative);
+    $comment_view = $this->buildCommentForm($initiative, $timeline);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
       ->setMainColumn(array(
         $timeline,
-        $add_comment,
+        $comment_view,
       ))
       ->addPropertySection(pht('Details'), $details);
 
@@ -164,26 +165,14 @@ final class FundInitiativeViewController
     return $curtain;
   }
 
-  private function buildCommentForm(FundInitiative $initiative) {
+  private function buildCommentForm(FundInitiative $initiative, $timeline) {
     $viewer = $this->getViewer();
+    $box = id(new FundInitiativeEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($initiative)
+      ->setTransactionTimeline($timeline);
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Add Liquidity');
-
-    $draft = PhabricatorDraft::newFromUserAndKey(
-      $viewer, $initiative->getPHID());
-
-    return id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($initiative->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction(
-        $this->getApplicationURI('/comment/'.$initiative->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
+    return $box;
   }
 
 

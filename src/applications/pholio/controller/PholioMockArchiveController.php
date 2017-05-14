@@ -32,7 +32,7 @@ final class PholioMockArchiveController
       $xactions = array();
 
       $xactions[] = id(new PholioTransaction())
-        ->setTransactionType(PholioTransaction::TYPE_STATUS)
+        ->setTransactionType(PholioMockStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PholioMockEditor())

@@ -17,20 +17,37 @@ final class LegalpadDocumentTitleTransaction
   }
 
   public function getTitle() {
-    return pht(
-      '%s renamed this document from %s to %s.',
-      $this->renderAuthor(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+    $old = $this->getOldValue();
+
+    if (!strlen($old)) {
+      return pht(
+        '%s created this document.',
+        $this->renderAuthor());
+    } else {
+      return pht(
+        '%s renamed this document from %s to %s.',
+        $this->renderAuthor(),
+        $this->renderOldValue(),
+        $this->renderNewValue());
+    }
   }
 
   public function getTitleForFeed() {
-    return pht(
-      '%s renamed document %s from %s to %s.',
-      $this->renderAuthor(),
-      $this->renderObject(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+    $old = $this->getOldValue();
+
+    if (!strlen($old)) {
+      return pht(
+        '%s created %s.',
+        $this->renderAuthor(),
+        $this->renderObject());
+    } else {
+      return pht(
+        '%s renamed %s from %s to %s.',
+        $this->renderAuthor(),
+        $this->renderObject(),
+        $this->renderOldValue(),
+        $this->renderNewValue());
+    }
   }
 
   public function validateTransactions($object, array $xactions) {

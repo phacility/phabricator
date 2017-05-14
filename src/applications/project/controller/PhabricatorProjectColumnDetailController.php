@@ -103,7 +103,7 @@ final class PhabricatorProjectColumnDetailController
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI($base_uri.'edit/'.$id.'/'))
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
 
     return $actions;
   }

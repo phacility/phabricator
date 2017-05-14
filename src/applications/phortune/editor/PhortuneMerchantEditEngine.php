@@ -65,6 +65,11 @@ final class PhortuneMerchantEditEngine
     return false;
   }
 
+  protected function getCreateNewObjectPolicy() {
+    return $this->getApplication()->getPolicy(
+      PhortuneMerchantCapability::CAPABILITY);
+  }
+
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 

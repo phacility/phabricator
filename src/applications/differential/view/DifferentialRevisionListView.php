@@ -5,7 +5,7 @@
  */
 final class DifferentialRevisionListView extends AphrontView {
 
-  private $revisions;
+  private $revisions = array();
   private $handles;
   private $header;
   private $noDataString;
