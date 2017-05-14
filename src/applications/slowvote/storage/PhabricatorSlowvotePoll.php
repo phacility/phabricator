@@ -112,6 +112,10 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return 'V'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));

@@ -11,6 +11,14 @@ final class PhabricatorSlowvoteEditor
     return pht('Slowvote');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this poll.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
