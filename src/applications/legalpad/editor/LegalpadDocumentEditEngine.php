@@ -114,53 +114,53 @@ final class LegalpadDocumentEditEngine
           ->setConduitTypeDescription(pht('New document signature type.'))
           ->setValue($object->getSignatureType())
           ->setOptions(LegalpadDocument::getSignatureTypeMap())
-           ->setTransactionType(
+          ->setTransactionType(
             LegalpadDocumentSignatureTypeTransaction::TRANSACTIONTYPE);
-        $show_require = true;
-      } else {
-        $fields[] = id(new PhabricatorStaticEditField())
-          ->setLabel(pht('Who Should Sign?'))
-          ->setValue($object->getSignatureTypeName());
-        $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
-        $show_require = $object->getSignatureType() == $individual;
-      }
+      $show_require = true;
+    } else {
+      $fields[] = id(new PhabricatorStaticEditField())
+        ->setLabel(pht('Who Should Sign?'))
+        ->setValue($object->getSignatureTypeName());
+      $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+      $show_require = $object->getSignatureType() == $individual;
+    }
 
-      if ($show_require && $is_admin) {
-        $fields[] =
-          id(new PhabricatorBoolEditField())
-            ->setKey('requireSignature')
-            ->setOptions(
-              pht('No Signature Required'),
-              pht('Signature Required to use Phabricator'))
-            ->setAsCheckbox(true)
-            ->setTransactionType(
-              LegalpadDocumentRequireSignatureTransaction::TRANSACTIONTYPE)
-            ->setDescription(pht('Marks this document as required signing.'))
-            ->setConduitDescription(
-              pht('Marks this document as required signing.'))
-            ->setValue($object->getRequireSignature());
-      }
-
+    if ($show_require && $is_admin) {
       $fields[] =
-        id(new PhabricatorRemarkupEditField())
-          ->setKey('preamble')
-          ->setLabel(pht('Preamble'))
-          ->setDescription(pht('The preamble of the document.'))
-          ->setConduitTypeDescription(pht('New document preamble.'))
-          ->setValue($object->getPreamble())
+        id(new PhabricatorBoolEditField())
+          ->setKey('requireSignature')
+          ->setOptions(
+            pht('No Signature Required'),
+            pht('Signature Required to use Phabricator'))
+          ->setAsCheckbox(true)
           ->setTransactionType(
-            LegalpadDocumentPreambleTransaction::TRANSACTIONTYPE);
+            LegalpadDocumentRequireSignatureTransaction::TRANSACTIONTYPE)
+          ->setDescription(pht('Marks this document as required signing.'))
+          ->setConduitDescription(
+            pht('Marks this document as required signing.'))
+          ->setValue($object->getRequireSignature());
+    }
 
-      $fields[] =
-        id(new PhabricatorRemarkupEditField())
-          ->setKey('text')
-          ->setLabel(pht('Document Body'))
-          ->setDescription(pht('The body of text of the document.'))
-          ->setConduitTypeDescription(pht('New document body.'))
-          ->setValue($document_body)
-          ->setIsRequired(true)
-          ->setTransactionType(
-            LegalpadDocumentTextTransaction::TRANSACTIONTYPE);
+    $fields[] =
+      id(new PhabricatorRemarkupEditField())
+        ->setKey('preamble')
+        ->setLabel(pht('Preamble'))
+        ->setDescription(pht('The preamble of the document.'))
+        ->setConduitTypeDescription(pht('New document preamble.'))
+        ->setValue($object->getPreamble())
+        ->setTransactionType(
+          LegalpadDocumentPreambleTransaction::TRANSACTIONTYPE);
+
+    $fields[] =
+      id(new PhabricatorRemarkupEditField())
+        ->setKey('text')
+        ->setLabel(pht('Document Body'))
+        ->setDescription(pht('The body of text of the document.'))
+        ->setConduitTypeDescription(pht('New document body.'))
+        ->setValue($document_body)
+        ->setIsRequired(true)
+        ->setTransactionType(
+          LegalpadDocumentTextTransaction::TRANSACTIONTYPE);
 
     return $fields;
 
