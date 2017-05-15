@@ -35,6 +35,12 @@ JX.install('DiffChangesetList', {
       'click',
       ['differential-inline-comment', 'differential-inline-done'],
       ondone);
+
+    var ondelete = JX.bind(this, this._ifawake, this._onaction, 'delete');
+    JX.Stratcom.listen(
+      'click',
+      ['differential-inline-comment', 'differential-inline-delete'],
+      ondelete);
   },
 
   properties: {
@@ -69,6 +75,19 @@ JX.install('DiffChangesetList', {
 
     getChangesetForNode: function(node) {
       return JX.DiffChangeset.getForNode(node);
+    },
+
+    getInlineByID: function(id) {
+      var inline = null;
+
+      for (var ii = 0; ii < this._changesets.length; ii++) {
+        inline = this._changesets[ii].getInlineByID(id);
+        if (inline) {
+          break;
+        }
+      }
+
+      return inline;
     },
 
     _ifawake: function(f) {
@@ -351,6 +370,33 @@ JX.install('DiffChangesetList', {
       e.prevent();
 
       var inline = this._getInlineForEvent(e);
+      var is_ref = false;
+
+      // If we don't have a natural inline object, the user may have clicked
+      // an action (like "Delete") inside a preview element at the bottom of
+      // the page.
+
+      // If they did, try to find an associated normal inline to act on, and
+      // pretend they clicked that instead. This makes the overall state of
+      // the page more consistent.
+
+      // However, there may be no normal inline (for example, because it is
+      // on a version of the diff which is not visible). In this case, we
+      // act by reference.
+
+      if (inline === null) {
+        var data = e.getNodeData('differential-inline-comment');
+        inline = this.getInlineByID(data.id);
+        if (inline) {
+          is_ref = true;
+        } else {
+          switch (action) {
+            case 'delete':
+              this._deleteInlineByID(data.id);
+              return;
+          }
+        }
+      }
 
       // TODO: For normal operations, highlight the inline range here.
 
@@ -361,11 +407,41 @@ JX.install('DiffChangesetList', {
         case 'done':
           inline.toggleDone();
           break;
+        case 'delete':
+          inline.delete(is_ref);
+          break;
       }
+    },
+
+    redrawPreview: function() {
+      // TODO: This isn't the cleanest way to find the preview form, but
+      // rendering no longer has direct access to it.
+      var forms = JX.DOM.scry(document.body, 'form', 'transaction-append');
+      if (forms.length) {
+        JX.DOM.invoke(forms[0], 'shouldRefresh');
+      }
+    },
+
+    _deleteInlineByID: function(id) {
+      var uri = this.getInlineURI();
+      var data = {
+        op: 'refdelete',
+        id: id
+      };
+
+      var handler = JX.bind(this, this.redrawPreview);
+
+      new JX.Workflow(uri, data)
+        .setHandler(handler)
+        .start();
     },
 
     _getInlineForEvent: function(e) {
       var node = e.getNode('differential-changeset');
+      if (!node) {
+        return null;
+      }
+
       var changeset = this.getChangesetForNode(node);
 
       var inline_row = e.getNode('inline-row');

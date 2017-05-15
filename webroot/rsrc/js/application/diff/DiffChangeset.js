@@ -322,7 +322,6 @@ JX.install('DiffChangeset', {
       return JX.Stratcom.getData(this._node);
     },
 
-
     _onresponse: function(sequence, response) {
       if (sequence != this._sequence) {
         // If this isn't the most recent request, ignore it. This normally
@@ -420,7 +419,24 @@ JX.install('DiffChangeset', {
       }
 
       return data.inline;
+    },
+
+    getInlineByID: function(id) {
+      // TODO: Currently, this will only find inlines which the user has
+      // already interacted with! Inlines are built lazily as events arrive.
+      // This can not yet find inlines which are passively present in the
+      // document.
+
+      for (var ii = 0; ii < this._inlines.length; ii++) {
+        var inline = this._inlines[ii];
+        if (inline.getID() == id) {
+          return inline;
+        }
+      }
+
+      return null;
     }
+
 
   },
 

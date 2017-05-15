@@ -47,6 +47,11 @@ JX.install('DiffInline', {
     _length: null,
     _displaySide: null,
     _isNewFile: null,
+    _undoRow: null,
+
+    _isDeleted: false,
+    _isInvisible: false,
+    _isLoading: false,
 
     setHidden: function(hidden) {
       this._hidden = hidden;
@@ -106,15 +111,45 @@ JX.install('DiffInline', {
     },
 
     edit: function() {
-      var handler = JX.bind(this, this._oneditresponse);
       var uri = this._getInlineURI();
-      var data = this._newRequestData();
+      var handler = JX.bind(this, this._oneditresponse);
+      var data = this._newRequestData('edit');
 
-      // TODO: Set state to "loading".
+      this.setLoading(true);
 
       new JX.Request(uri, handler)
         .setData(data)
         .send();
+    },
+
+    delete: function(is_ref) {
+      var uri = this._getInlineURI();
+      var handler = JX.bind(this, this._ondeleteresponse);
+
+      // NOTE: This may be a direct delete (the user clicked on the inline
+      // itself) or a "refdelete" (the user clicked somewhere else, like the
+      // preview, but the inline is present on the page).
+
+      // For a "refdelete", we prompt the user to confirm that they want to
+      // delete the comment, because they can not undo deletions from the
+      // preview. We could jump the user to the inline instead, but this would
+      // be somewhat disruptive and make deleting several comments more
+      // difficult.
+
+      var op;
+      if (is_ref) {
+        op = 'refdelete';
+      } else {
+        op = 'delete';
+      }
+
+      var data = this._newRequestData(op);
+
+      this.setLoading(true);
+
+      new JX.Workflow(uri, data)
+        .setHandler(handler)
+        .start();
     },
 
     getDisplaySide: function() {
@@ -133,9 +168,31 @@ JX.install('DiffInline', {
       return this._isNewFile;
     },
 
-    _newRequestData: function() {
+    getID: function() {
+      return this._id;
+    },
+
+    setDeleted: function(deleted) {
+      this._isDeleted = deleted;
+      this._redraw();
+      return this;
+    },
+
+    setInvisible: function(invisible) {
+      this._isInvisible = invisible;
+      this._redraw();
+      return this;
+    },
+
+    setLoading: function(loading) {
+      this._isLoading = loading;
+      this._redraw();
+      return this;
+    },
+
+    _newRequestData: function(operation) {
       return {
-        op: 'edit',
+        op: operation,
         id: this._id,
         on_right: ((this.getDisplaySide() == 'right') ? 1 : 0),
         renderer: this.getChangeset().getRenderer(),
@@ -151,42 +208,89 @@ JX.install('DiffInline', {
 
       this._drawEditRows(rows);
 
-      // TODO: Set the row state to "hidden".
+      this.setLoading(false);
+      this.setInvisible(true);
+    },
+
+    _ondeleteresponse: function() {
+      this._drawUndoRows();
+
+      this.setLoading(false);
+      this.setDeleted(true);
+
+      this._didUpdate();
+    },
+
+    _drawUndoRows: function() {
+      var templates = this.getChangeset().getUndoTemplates();
+
+      var template;
+      if (this.getDisplaySide() == 'right') {
+        template = templates.r;
+      } else {
+        template = templates.l;
+      }
+      template = JX.$H(template).getNode();
+
+      this._undoRow = this._drawRows(template, this._row, 'undo');
     },
 
     _drawEditRows: function(rows) {
-      var first_row = JX.DOM.scry(rows, 'tr')[0];
-      var row = first_row;
-      var cursor = this._row;
+      return this._drawRows(rows, null, 'edit');
+    },
 
+    _drawRows: function(rows, cursor, type) {
+      var first_row = JX.DOM.scry(rows, 'tr')[0];
+      var first_meta;
+      var row = first_row;
+      cursor = cursor || this._row.nextSibling;
+
+      var next_row;
       while (row) {
+        // Grab this first, since it's going to change once we insert the row
+        // into the document.
+        next_row = row.nextSibling;
+
         cursor.parentNode.insertBefore(row, cursor.nextSibling);
         cursor = row;
 
         var row_meta = {
           node: row,
-          type: 'edit',
+          type: type,
           listeners: []
         };
 
-        row_meta.listeners.push(
-          JX.DOM.listen(
-            row,
-            ['submit', 'didSyntheticSubmit'],
-            'inline-edit-form',
-            JX.bind(this, this._onsubmit, row_meta)));
+        if (!first_meta) {
+          first_meta = row_meta;
+        }
 
-        row_meta.listeners.push(
-          JX.DOM.listen(
-            row,
-            'click',
-            'inline-edit-cancel',
-            JX.bind(this, this._oncancel, row_meta)));
+        if (type == 'edit') {
+          row_meta.listeners.push(
+            JX.DOM.listen(
+              row,
+              ['submit', 'didSyntheticSubmit'],
+              'inline-edit-form',
+              JX.bind(this, this._onsubmit, row_meta)));
 
-        row = row.nextSibling;
+          row_meta.listeners.push(
+            JX.DOM.listen(
+              row,
+              'click',
+              'inline-edit-cancel',
+              JX.bind(this, this._oncancel, row_meta)));
+        } else {
+          row_meta.listeners.push(
+            JX.DOM.listen(
+              row,
+              'click',
+              'differential-inline-comment-undo',
+              JX.bind(this, this._onundo, row_meta)));
+        }
+
+        row = next_row;
       }
 
-      return first_row;
+      return first_meta;
     },
 
     _onsubmit: function(row, e) {
@@ -194,11 +298,33 @@ JX.install('DiffInline', {
 
       var handler = JX.bind(this, this._onsubmitresponse, row);
 
+      this.setLoading(true);
+
       JX.Workflow.newFromForm(e.getTarget())
         .setHandler(handler)
         .start();
+    },
 
-      // TODO: Set state to "loading".
+    _onundo: function(row, e) {
+      e.kill();
+
+      this._removeRow(row);
+
+      var uri = this._getInlineURI();
+      var data = this._newRequestData('undelete');
+      var handler = JX.bind(this, this._onundelete);
+
+      this.setDeleted(false);
+      this.setLoading(true);
+
+      new JX.Request(uri, handler)
+        .setData(data)
+        .send();
+    },
+
+    _onundelete: function() {
+      this.setLoading(false);
+      this._didUpdate();
     },
 
     _oncancel: function(row, e) {
@@ -206,18 +332,15 @@ JX.install('DiffInline', {
 
       // TODO: Capture edited text and offer "undo".
 
-      JX.DOM.remove(row.node);
-      this._removeListeners(row.listeners);
+      this._removeRow(row);
 
-      // TODO: Restore state to "normal".
+      this.setInvisible(false);
     },
 
     _onsubmitresponse: function(row, response) {
+      this._removeRow(row);
 
-     JX.DOM.remove(row.node);
-     this._removeListeners(row.listeners);
-
-     // TODO: Restore state to "normal".
+      this.setInvisible(false);
 
       this._onupdate(response);
     },
@@ -225,7 +348,7 @@ JX.install('DiffInline', {
     _onupdate: function(response) {
       var new_row;
       if (response.markup) {
-        new_row = this._drawEditRows(JX.$H(response.markup).getNode());
+        new_row = this._drawEditRows(JX.$H(response.markup).getNode()).node;
       }
 
       // TODO: Save the old row so the action it's undo-able if it was a
@@ -243,18 +366,22 @@ JX.install('DiffInline', {
     _didUpdate: function() {
       // After making changes to inline comments, refresh the transaction
       // preview at the bottom of the page.
-
-      // TODO: This isn't the cleanest way to find the preview form, but
-      // rendering no longer has direct access to it.
-      var forms = JX.DOM.scry(document.body, 'form', 'transaction-append');
-      if (forms.length) {
-        JX.DOM.invoke(forms[0], 'shouldRefresh');
-      }
+      this.getChangeset().getChangesetList().redrawPreview();
     },
 
-    _removeListeners: function(listeners) {
-      for (var ii = 0; ii < listeners.length; ii++) {
-        listeners[ii].remove();
+    _redraw: function() {
+      var is_invisible = (this._isInvisible || this._isDeleted);
+      var is_loading = (this._isLoading);
+
+      var row = this._row;
+      JX.DOM.alterClass(row, 'differential-inline-hidden', is_invisible);
+      JX.DOM.alterClass(row, 'differential-inline-loading', is_loading);
+    },
+
+    _removeRow: function(row) {
+      JX.DOM.remove(row.node);
+      for (var ii = 0; ii < row.listeners.length; ii++) {
+        row.listeners[ii].remove();
       }
     },
 

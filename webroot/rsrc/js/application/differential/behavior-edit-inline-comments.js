@@ -331,46 +331,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
   var handle_inline_action = function(node, op) {
     var data = JX.Stratcom.getData(node);
 
-    // If you click an action in the preview at the bottom of the page, we
-    // find the corresponding node and simulate clicking that, if it's
-    // present on the page. This gives the editor a more consistent view
-    // of the document.
-    if (JX.Stratcom.hasSigil(node, 'differential-inline-comment-preview')) {
-      var nodes = JX.DOM.scry(
-        JX.DOM.getContentFrame(),
-        'div',
-        'differential-inline-comment');
-
-      var found = false;
-      var node_data;
-      for (var ii = 0; ii < nodes.length; ++ii) {
-        if (nodes[ii] == node) {
-          // Don't match the preview itself.
-          continue;
-        }
-        node_data = JX.Stratcom.getData(nodes[ii]);
-        if (node_data.id == data.id) {
-          node = nodes[ii];
-          data = node_data;
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        switch (op) {
-          case 'delete':
-            new JX.DifferentialInlineCommentEditor(config.uri)
-              .deleteByID(data.id);
-            return;
-        }
-      }
-
-      if (op == 'delete') {
-        op = 'refdelete';
-      }
-    }
-
     var original = data.original;
     var reply_phid = null;
     if (op == 'reply') {
@@ -387,30 +347,25 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       'differential-changeset');
     var view = JX.DiffChangeset.getForNode(changeset_root);
 
-    if (op == 'edit') {
-      // This is now handled by DiffChangesetList.
-      editor = true;
-    } else {
-      editor = new JX.DifferentialInlineCommentEditor(config.uri)
-        .setTemplates(view.getUndoTemplates())
-        .setOperation(op)
-        .setID(data.id)
-        .setChangesetID(data.changesetID)
-        .setLineNumber(data.number)
-        .setLength(data.length)
-        .setOnRight(data.on_right)
-        .setOriginalText(original)
-        .setRow(row)
-        .setTable(row.parentNode)
-        .setReplyToCommentPHID(reply_phid)
-        .setRenderer(view.getRenderer())
-        .start();
-    }
+    editor = new JX.DifferentialInlineCommentEditor(config.uri)
+      .setTemplates(view.getUndoTemplates())
+      .setOperation(op)
+      .setID(data.id)
+      .setChangesetID(data.changesetID)
+      .setLineNumber(data.number)
+      .setLength(data.length)
+      .setOnRight(data.on_right)
+      .setOriginalText(original)
+      .setRow(row)
+      .setTable(row.parentNode)
+      .setReplyToCommentPHID(reply_phid)
+      .setRenderer(view.getRenderer())
+      .start();
 
     set_link_state(true);
   };
 
-  for (var op in {'edit': 1, 'delete': 1, 'reply': 1}) {
+  for (var op in {'reply': 1}) {
     JX.Stratcom.listen(
       'click',
       ['differential-inline-comment', 'differential-inline-' + op],
