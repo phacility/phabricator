@@ -184,6 +184,12 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     return null;
   }
 
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return;
+  }
+
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
