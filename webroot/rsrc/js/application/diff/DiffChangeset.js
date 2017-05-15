@@ -433,6 +433,18 @@ JX.install('DiffChangeset', {
       return inline;
     },
 
+    newInlineReply: function(original) {
+      var inline = new JX.DiffInline()
+        .setChangeset(this)
+        .bindToReply(original);
+
+      this._inlines.push(inline);
+
+      inline.create();
+
+      return inline;
+    },
+
     getInlineByID: function(id) {
       // TODO: Currently, this will only find inlines which the user has
       // already interacted with! Inlines are built lazily as events arrive.

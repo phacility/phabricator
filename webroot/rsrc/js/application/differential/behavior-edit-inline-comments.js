@@ -5,7 +5,6 @@
  *           javelin-dom
  *           javelin-util
  *           javelin-vector
- *           differential-inline-comment-editor
  */
 
 JX.behavior('differential-edit-inline-comments', function(config) {
@@ -126,13 +125,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     setSelectedCells([]);
   }
 
-  JX.DifferentialInlineCommentEditor.listen('done', function() {
-    selecting = false;
-    editor = false;
-    hideReticle();
-    set_link_state(false);
-  });
-
   function isOnRight(node) {
     return node.parentNode.firstChild != node;
   }
@@ -150,24 +142,12 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     }
   }
 
-  var set_link_state = function(active) {
-    JX.DOM.alterClass(JX.$(config.stage), 'inline-editor-active', active);
-  };
-
   JX.Stratcom.listen(
     'mousedown',
     ['differential-changeset', 'tag:th'],
     function(e) {
       if (e.isRightButton() ||
           getRowNumber(e.getTarget()) === undefined) {
-        return;
-      }
-
-      if (editor) {
-        new JX.DifferentialInlineCommentEditor(config.uri)
-          .setOperation('busy')
-          .setRow(editor.getRow().previousSibling)
-          .start();
         return;
       }
 
@@ -290,8 +270,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       origin = null;
       target = null;
 
-      set_link_state(true);
-
       e.kill();
     });
 
@@ -308,77 +286,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       } else {
         updateReticleForComment(e);
       }
-    });
-
-  var action_handler = function(op, e) {
-    // NOTE: We prevent this event, rather than killing it, because some
-    // actions are now handled by DiffChangesetList.
-    e.prevent();
-
-    if (editor) {
-      return;
-    }
-
-    var node = e.getNode('differential-inline-comment');
-
-    // If we're on a touch device, we didn't highlight the affected lines
-    // earlier because we can't use hover events to mutate the document.
-    // Highlight them now.
-    updateReticleForComment(e);
-
-    handle_inline_action(node, op);
-  };
-
-  var handle_inline_action = function(node, op) {
-    var data = JX.Stratcom.getData(node);
-
-    var original = data.original;
-    var reply_phid = null;
-    if (op == 'reply') {
-      // If the user hit "reply", the original text is empty (a new reply), not
-      // the text of the comment they're replying to.
-      original = '';
-      reply_phid = data.phid;
-    }
-
-    var row = JX.DOM.findAbove(node, 'tr');
-    var changeset_root = JX.DOM.findAbove(
-      node,
-      'div',
-      'differential-changeset');
-    var view = JX.DiffChangeset.getForNode(changeset_root);
-
-    editor = new JX.DifferentialInlineCommentEditor(config.uri)
-      .setTemplates(view.getUndoTemplates())
-      .setOperation(op)
-      .setID(data.id)
-      .setChangesetID(data.changesetID)
-      .setLineNumber(data.number)
-      .setLength(data.length)
-      .setOnRight(data.on_right)
-      .setOriginalText(original)
-      .setRow(row)
-      .setTable(row.parentNode)
-      .setReplyToCommentPHID(reply_phid)
-      .setRenderer(view.getRenderer())
-      .start();
-
-    set_link_state(true);
-  };
-
-  for (var op in {'reply': 1}) {
-    JX.Stratcom.listen(
-      'click',
-      ['differential-inline-comment', 'differential-inline-' + op],
-      JX.bind(null, action_handler, op));
-  }
-
-  JX.Stratcom.listen(
-    'differential-inline-action',
-    null,
-    function(e) {
-      var data = e.getData();
-      handle_inline_action(data.node, data.op);
     });
 
 });

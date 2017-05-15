@@ -41,6 +41,12 @@ JX.install('DiffChangesetList', {
       'click',
       ['differential-inline-comment', 'differential-inline-delete'],
       ondelete);
+
+    var onreply = JX.bind(this, this._ifawake, this._onaction, 'reply');
+    JX.Stratcom.listen(
+      'click',
+      ['differential-inline-comment', 'differential-inline-reply'],
+      onreply);
   },
 
   properties: {
@@ -409,6 +415,9 @@ JX.install('DiffChangesetList', {
           break;
         case 'delete':
           inline.delete(is_ref);
+          break;
+        case 'reply':
+          inline.reply();
           break;
       }
     },

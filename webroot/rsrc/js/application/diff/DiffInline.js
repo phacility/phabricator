@@ -24,6 +24,7 @@ JX.install('DiffInline', {
     _displaySide: null,
     _isNewFile: null,
     _undoRow: null,
+    _replyToCommentPHID: null,
 
     _isDeleted: false,
     _isInvisible: false,
@@ -66,22 +67,11 @@ JX.install('DiffInline', {
     },
 
     bindToRange: function(data) {
-      this._id = null;
-      this._phid = null;
-
-      this._hidden = false;
-
       this._displaySide = data.displaySide;
       this._number = data.number;
       this._length = data.length;
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
-
-      var row = this._newRow();
-      JX.Stratcom.getData(row).inline = this;
-      this._row = row;
-
-      this.setInvisible(true);
 
       // Insert the comment after any other comments which already appear on
       // the same row.
@@ -90,7 +80,36 @@ JX.install('DiffInline', {
       while (target_row && JX.Stratcom.hasSigil(target_row, 'inline-row')) {
         target_row = target_row.nextSibling;
       }
+
+      var row = this._newRow();
       parent_row.parentNode.insertBefore(row, target_row);
+
+      this.setInvisible(true);
+
+      return this;
+    },
+
+    bindToReply: function(inline) {
+      this._displaySide = inline._displaySide;
+      this._number = inline._number;
+      this._length = inline._length;
+      this._isNewFile = inline._isNewFile;
+      this._changesetID = inline._changesetID;
+
+      this._replyToCommentPHID = inline._phid;
+
+      // TODO: This should insert correctly into the thread, not just at the
+      // bottom.
+      var parent_row = inline._row;
+      var target_row = parent_row.nextSibling;
+      while (target_row && JX.Stratcom.hasSigil(target_row, 'inline-row')) {
+        target_row = target_row.nextSibling;
+      }
+
+      var row = this._newRow();
+      parent_row.parentNode.insertBefore(row, target_row);
+
+      this.setInvisible(true);
 
       return this;
     },
@@ -100,7 +119,16 @@ JX.install('DiffInline', {
         sigil: 'inline-row'
       };
 
-      return JX.$N('tr', attributes);
+      var row = JX.$N('tr', attributes);
+
+      JX.Stratcom.getData(row).inline = this;
+      this._row = row;
+
+      this._id = null;
+      this._phid = null;
+      this._hidden = false;
+
+      return row;
     },
 
     setHidden: function(hidden) {
@@ -172,6 +200,11 @@ JX.install('DiffInline', {
         .send();
     },
 
+    reply: function() {
+      var changeset = this.getChangeset();
+      return changeset.newInlineReply(this);
+    },
+
     edit: function() {
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oneditresponse);
@@ -238,6 +271,10 @@ JX.install('DiffInline', {
       return this._changesetID;
     },
 
+    getReplyToCommentPHID: function() {
+      return this._replyToCommentPHID;
+    },
+
     setDeleted: function(deleted) {
       this._isDeleted = deleted;
       this._redraw();
@@ -266,7 +303,7 @@ JX.install('DiffInline', {
         length: this.getLineLength(),
         is_new: this.isNewFile(),
         changesetID: this.getChangesetID(),
-        replyToCommentPHID: ''
+        replyToCommentPHID: this.getReplyToCommentPHID() || '',
       };
     },
 
