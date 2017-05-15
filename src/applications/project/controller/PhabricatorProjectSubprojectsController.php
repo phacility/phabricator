@@ -31,8 +31,6 @@ final class PhabricatorProjectSubprojectsController
         ->setViewer($viewer)
         ->withParentProjectPHIDs(array($project->getPHID()))
         ->needImages(true)
-        ->needMembers(true)
-        ->needWatchers(true)
         ->withIsMilestone(false)
         ->execute();
     } else {
@@ -44,8 +42,6 @@ final class PhabricatorProjectSubprojectsController
         ->setViewer($viewer)
         ->withParentProjectPHIDs(array($project->getPHID()))
         ->needImages(true)
-        ->needMembers(true)
-        ->needWatchers(true)
         ->withIsMilestone(true)
         ->setOrderVector(array('milestoneNumber', 'id'))
         ->execute();
