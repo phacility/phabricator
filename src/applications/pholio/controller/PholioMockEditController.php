@@ -151,7 +151,7 @@ final class PholioMockEditController extends PholioController {
             ->setSequence($sequence);
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
-              PholioTransaction::TYPE_IMAGE_REPLACE)
+              PholioImageReplaceTransaction::TRANSACTIONTYPE)
             ->setNewValue($replace_image);
           $posted_mock_images[] = $replace_image;
         } else if (!$existing_image) { // this is an add
@@ -162,7 +162,7 @@ final class PholioMockEditController extends PholioController {
             ->setDescription($description)
             ->setSequence($sequence);
           $xactions[] = id(new PholioTransaction())
-            ->setTransactionType(PholioTransaction::TYPE_IMAGE_FILE)
+            ->setTransactionType(PholioImageFileTransaction::TRANSACTIONTYPE)
             ->setNewValue(
               array('+' => array($add_image)));
           $posted_mock_images[] = $add_image;
@@ -178,7 +178,7 @@ final class PholioMockEditController extends PholioController {
                 array($existing_image->getPHID() => $description));
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
-              PholioTransaction::TYPE_IMAGE_SEQUENCE)
+              PholioImageSequenceTransaction::TRANSACTIONTYPE)
               ->setNewValue(
                 array($existing_image->getPHID() => $sequence));
 
@@ -189,7 +189,7 @@ final class PholioMockEditController extends PholioController {
         if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {
           // this is an outright delete
           $xactions[] = id(new PholioTransaction())
-            ->setTransactionType(PholioTransaction::TYPE_IMAGE_FILE)
+            ->setTransactionType(PholioImageFileTransaction::TRANSACTIONTYPE)
             ->setNewValue(
               array('-' => array($mock_image)));
         }
