@@ -310,7 +310,9 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     });
 
   var action_handler = function(op, e) {
-    e.kill();
+    // NOTE: We prevent this event, rather than killing it, because some
+    // actions are now handled by DiffChangesetList.
+    e.prevent();
 
     if (editor) {
       return;
@@ -392,20 +394,25 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       'differential-changeset');
     var view = JX.DiffChangeset.getForNode(changeset_root);
 
-    editor = new JX.DifferentialInlineCommentEditor(config.uri)
-      .setTemplates(view.getUndoTemplates())
-      .setOperation(op)
-      .setID(data.id)
-      .setChangesetID(data.changesetID)
-      .setLineNumber(data.number)
-      .setLength(data.length)
-      .setOnRight(data.on_right)
-      .setOriginalText(original)
-      .setRow(row)
-      .setTable(row.parentNode)
-      .setReplyToCommentPHID(reply_phid)
-      .setRenderer(view.getRenderer())
-      .start();
+    if (op == 'edit') {
+      // This is now handled by DiffChangesetList.
+      editor = true;
+    } else {
+      editor = new JX.DifferentialInlineCommentEditor(config.uri)
+        .setTemplates(view.getUndoTemplates())
+        .setOperation(op)
+        .setID(data.id)
+        .setChangesetID(data.changesetID)
+        .setLineNumber(data.number)
+        .setLength(data.length)
+        .setOnRight(data.on_right)
+        .setOriginalText(original)
+        .setRow(row)
+        .setTable(row.parentNode)
+        .setReplyToCommentPHID(reply_phid)
+        .setRenderer(view.getRenderer())
+        .start();
+    }
 
     set_link_state(true);
   };

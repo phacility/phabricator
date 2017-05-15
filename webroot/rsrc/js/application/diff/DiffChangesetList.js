@@ -23,6 +23,12 @@ JX.install('DiffChangesetList', {
 
     var onreveal = JX.bind(this, this._ifawake, this._onreveal);
     JX.Stratcom.listen('click', 'reveal-inline', onreveal);
+
+    var onedit = JX.bind(this, this._ifawake, this._onaction, 'edit');
+    JX.Stratcom.listen(
+      'click',
+      ['differential-inline-comment', 'differential-inline-edit'],
+      onedit);
   },
 
   properties: {
@@ -329,13 +335,32 @@ JX.install('DiffChangesetList', {
     _onhidereveal: function(e, is_hide) {
       e.kill();
 
+      var inline = this._getInlineForEvent(e);
+
+      inline.setHidden(is_hide);
+    },
+
+    _onaction: function(action, e) {
+      // TODO: This can become a kill once things fully switch over..
+      e.prevent();
+
+      var inline = this._getInlineForEvent(e);
+
+      // TODO: For normal operations, highlight the inline range here.
+
+      switch (action) {
+        case 'edit':
+          inline.edit();
+          break;
+      }
+    },
+
+    _getInlineForEvent: function(e) {
       var node = e.getNode('differential-changeset');
       var changeset = this.getChangesetForNode(node);
 
-      var inline_node = e.getNode('inline-row');
-      var inline = changeset.getInlineForRow(inline_node);
-
-      inline.setHidden(is_hide);
+      var inline_row = e.getNode('inline-row');
+      return changeset.getInlineForRow(inline_row);
     }
 
   }
