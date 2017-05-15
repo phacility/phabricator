@@ -15,6 +15,7 @@ final class PhabricatorProjectListView extends AphrontView {
 
   public function renderList() {
     $viewer = $this->getUser();
+    $viewer_phid = $viewer->getPHID();
     $projects = $this->getProjects();
 
     $handles = $viewer->loadHandles(mpull($projects, 'getPHID'));
@@ -26,10 +27,8 @@ final class PhabricatorProjectListView extends AphrontView {
       $id = $project->getID();
 
       $icon = $project->getDisplayIconIcon();
-      $color = $project->getColor();
-
       $icon_icon = id(new PHUIIconView())
-        ->setIcon("{$icon} {$color}");
+        ->setIcon($icon);
 
       $icon_name = $project->getDisplayIconName();
 
@@ -47,6 +46,17 @@ final class PhabricatorProjectListView extends AphrontView {
       if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
         $item->addIcon('delete-grey', pht('Archived'));
         $item->setDisabled(true);
+      }
+
+      $is_member = $project->isUserMember($viewer_phid);
+      $is_watcher = $project->isUserWatcher($viewer_phid);
+
+      if ($is_member) {
+        $item->addIcon('fa-user', pht('Member'));
+      }
+
+      if ($is_watcher) {
+        $item->addIcon('fa-eye', pht('Watching'));
       }
 
       $list->addItem($item);
