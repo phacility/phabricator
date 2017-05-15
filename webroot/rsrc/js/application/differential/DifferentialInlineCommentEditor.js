@@ -312,28 +312,6 @@ JX.install('DifferentialInlineCommentEditor', {
         .start();
     },
 
-    toggleCheckbox: function(id, checkbox) {
-      var data = {
-        op: 'done',
-        id: id
-      };
-
-      new JX.Workflow(this._uri, data)
-        .setHandler(JX.bind(this, function(r) {
-          checkbox.checked = !checkbox.checked;
-
-          var comment = JX.DOM.findAbove(
-            checkbox,
-            'div',
-            'differential-inline-comment');
-          JX.DOM.alterClass(comment, 'inline-is-done', !!checkbox.checked);
-          JX.DOM.alterClass(comment, 'inline-state-is-draft', r.draftState);
-
-          this._didUpdate();
-        }))
-        .start();
-    },
-
     _didUpdate: function() {
       // After making changes to inline comments, refresh the transaction
       // preview at the bottom of the page.

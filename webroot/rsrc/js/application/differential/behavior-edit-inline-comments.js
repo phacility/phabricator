@@ -371,13 +371,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       }
     }
 
-    if (op == 'done') {
-      var checkbox = JX.DOM.find(node, 'input', 'differential-inline-done');
-      new JX.DifferentialInlineCommentEditor(config.uri)
-        .toggleCheckbox(data.id, checkbox);
-      return;
-    }
-
     var original = data.original;
     var reply_phid = null;
     if (op == 'reply') {
@@ -417,7 +410,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     set_link_state(true);
   };
 
-  for (var op in {'edit': 1, 'delete': 1, 'reply': 1, 'done': 1}) {
+  for (var op in {'edit': 1, 'delete': 1, 'reply': 1}) {
     JX.Stratcom.listen(
       'click',
       ['differential-inline-comment', 'differential-inline-' + op],

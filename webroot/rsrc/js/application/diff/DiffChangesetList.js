@@ -29,6 +29,12 @@ JX.install('DiffChangesetList', {
       'click',
       ['differential-inline-comment', 'differential-inline-edit'],
       onedit);
+
+    var ondone = JX.bind(this, this._ifawake, this._onaction, 'done');
+    JX.Stratcom.listen(
+      'click',
+      ['differential-inline-comment', 'differential-inline-done'],
+      ondone);
   },
 
   properties: {
@@ -351,6 +357,9 @@ JX.install('DiffChangesetList', {
       switch (action) {
         case 'edit':
           inline.edit();
+          break;
+        case 'done':
+          inline.toggleDone();
           break;
       }
     },

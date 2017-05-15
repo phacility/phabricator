@@ -60,7 +60,7 @@ JX.install('DiffInline', {
         op = 'show';
       }
 
-      var inline_uri = this._getChangesetList().getInlineURI();
+      var inline_uri = this._getInlineURI();
       var comment_id = this._id;
 
       new JX.Workflow(inline_uri, {op: op, ids: comment_id})
@@ -68,9 +68,46 @@ JX.install('DiffInline', {
         .start();
     },
 
+    toggleDone: function() {
+      var uri = this._getInlineURI();
+      var data = {
+        op: 'done',
+        id: this._id
+      };
+
+      var ondone = JX.bind(this, this._ondone);
+
+      new JX.Workflow(uri, data)
+        .setHandler(ondone)
+        .start();
+    },
+
+    _ondone: function(response) {
+      var checkbox = JX.DOM.find(
+        this._row,
+        'input',
+        'differential-inline-done');
+
+      checkbox.checked = (response.isChecked ? 'checked' : null);
+
+      var comment = JX.DOM.findAbove(
+        checkbox,
+        'div',
+        'differential-inline-comment');
+
+      JX.DOM.alterClass(comment, 'inline-is-done', response.isChecked);
+
+      // NOTE: This is marking the inline as having an unsubmitted checkmark,
+      // as opposed to a submitted checkmark. This is different from the
+      // top-level "draft" state of unsubmitted comments.
+      JX.DOM.alterClass(comment, 'inline-state-is-draft', response.draftState);
+
+      this._didUpdate();
+    },
+
     edit: function() {
       var handler = JX.bind(this, this._oneditresponse);
-      var uri = this.getChangeset().getChangesetList().getInlineURI();
+      var uri = this._getInlineURI();
       var data = this._newRequestData();
 
       // TODO: Set state to "loading".
@@ -221,9 +258,10 @@ JX.install('DiffInline', {
       }
     },
 
-    _getChangesetList: function() {
+    _getInlineURI: function() {
       var changeset = this.getChangeset();
-      return changeset.getChangesetList();
+      var list = changeset.getChangesetList();
+      return list.getInlineURI();
     }
   }
 
