@@ -229,6 +229,8 @@ final class PhabricatorProjectSearchEngine
     $list = id(new PhabricatorProjectListView())
       ->setUser($viewer)
       ->setProjects($projects)
+      ->setShowWatching(true)
+      ->setShowMember(true)
       ->renderList();
 
     return id(new PhabricatorApplicationSearchResultView())

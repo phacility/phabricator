@@ -3,6 +3,8 @@
 final class PhabricatorProjectListView extends AphrontView {
 
   private $projects;
+  private $showMember;
+  private $showWatching;
 
   public function setProjects(array $projects) {
     $this->projects = $projects;
@@ -11,6 +13,16 @@ final class PhabricatorProjectListView extends AphrontView {
 
   public function getProjects() {
     return $this->projects;
+  }
+
+  public function setShowWatching($watching) {
+    $this->showWatching = $watching;
+    return $this;
+  }
+
+  public function setShowMember($member) {
+    $this->showMember = $member;
+    return $this;
   }
 
   public function renderList() {
@@ -48,15 +60,18 @@ final class PhabricatorProjectListView extends AphrontView {
         $item->setDisabled(true);
       }
 
-      $is_member = $project->isUserMember($viewer_phid);
-      $is_watcher = $project->isUserWatcher($viewer_phid);
-
-      if ($is_member) {
-        $item->addIcon('fa-user', pht('Member'));
+      if ($this->showMember) {
+        $is_member = $project->isUserMember($viewer_phid);
+        if ($is_member) {
+          $item->addIcon('fa-user', pht('Member'));
+        }
       }
 
-      if ($is_watcher) {
-        $item->addIcon('fa-eye', pht('Watching'));
+      if ($this->showWatching) {
+        $is_watcher = $project->isUserWatcher($viewer_phid);
+        if ($is_watcher) {
+          $item->addIcon('fa-eye', pht('Watching'));
+        }
       }
 
       $list->addItem($item);
