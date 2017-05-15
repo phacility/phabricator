@@ -1337,7 +1337,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+      ->setTransactionType(ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue($name);
 
     if ($projects) {

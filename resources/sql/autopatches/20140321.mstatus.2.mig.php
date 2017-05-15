@@ -35,7 +35,8 @@ foreach (new LiskMigrationIterator(new ManiphestTransaction()) as $xaction) {
   $id = $xaction->getID();
   echo pht('Migrating %d...', $id)."\n";
 
-  if ($xaction->getTransactionType() == ManiphestTransaction::TYPE_STATUS) {
+  $xn_type = ManiphestTaskStatusTransaction::TRANSACTIONTYPE;
+  if ($xaction->getTransactionType() == $xn_type) {
     $old = $xaction->getOldValue();
     if ($old !== null && isset($status_map[$old])) {
       $old = $status_map[$old];

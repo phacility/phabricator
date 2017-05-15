@@ -40,7 +40,7 @@ final class ManiphestTaskStatusHeraldAction
     }
 
     $xaction = $adapter->newTransaction()
-      ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+      ->setTransactionType(ManiphestTaskStatusTransaction::TRANSACTIONTYPE)
       ->setNewValue($status);
 
     $adapter->queueTransaction($xaction);
