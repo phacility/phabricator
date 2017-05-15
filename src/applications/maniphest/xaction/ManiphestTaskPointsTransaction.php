@@ -6,16 +6,14 @@ final class ManiphestTaskPointsTransaction
   const TRANSACTIONTYPE = 'points';
 
   public function generateOldValue($object) {
-    return $object->getPoints();
+    return $this->getValueForPoints($object->getPoints());
+  }
+
+  public function generateNewValue($object, $value) {
+    return $this->getValueForPoints($value);
   }
 
   public function applyInternalEffects($object, $value) {
-    if (!strlen($value)) {
-      $value = null;
-    }
-    if ($value !== null) {
-      $value = (double)$value;
-    }
     $object->setPoints($value);
   }
 
@@ -71,6 +69,16 @@ final class ManiphestTaskPointsTransaction
     }
 
     return $errors;
+  }
+
+  private function getValueForPoints($value) {
+    if (!strlen($value)) {
+      $value = null;
+    }
+    if ($value !== null) {
+      $value = (double)$value;
+    }
+    return $value;
   }
 
 }
