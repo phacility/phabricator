@@ -13,7 +13,9 @@ final class PhabricatorProjectSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorProjectQuery())
-      ->needImages(true);
+      ->needImages(true)
+      ->needMembers(true)
+      ->needWatchers(true);
   }
 
   protected function buildCustomSearchFields() {
