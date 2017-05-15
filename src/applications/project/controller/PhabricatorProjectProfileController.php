@@ -113,10 +113,7 @@ final class PhabricatorProjectProfileController
       ->setCrumbs($crumbs)
       ->setTitle($project->getDisplayName())
       ->setPageObjectPHIDs(array($project->getPHID()))
-      ->appendChild(
-        array(
-          $home,
-        ));
+      ->appendChild($home);
   }
 
   private function buildPropertyListView(

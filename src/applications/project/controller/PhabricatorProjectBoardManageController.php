@@ -40,8 +40,12 @@ final class PhabricatorProjectBoardManageController
     $nav = $this->getProfileMenu();
     $columns_list = $this->buildColumnsList($board, $columns);
 
+    require_celerity_resource('project-view-css');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setFooter($columns_list);
 
     $title = array(
@@ -78,7 +82,6 @@ final class PhabricatorProjectBoardManageController
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Workboard: %s', $board->getDisplayName()))
       ->setUser($viewer)
-      ->setPolicyObject($board)
       ->setProfileHeader(true)
       ->addActionLink($button);
 
