@@ -411,14 +411,26 @@ JX.install('DiffChangeset', {
       var data = JX.Stratcom.getData(node);
 
       if (!data.inline) {
-        var inline = new JX.DiffInline(node)
-          .setChangeset(this);
+        var inline = new JX.DiffInline()
+          .setChangeset(this)
+          .bindToRow(node);
 
         this._inlines.push(inline);
-        data.inline = inline;
       }
 
       return data.inline;
+    },
+
+    newInlineForRange: function(data) {
+      var inline = new JX.DiffInline()
+        .setChangeset(this)
+        .bindToRange(data);
+
+      this._inlines.push(inline);
+
+      inline.create();
+
+      return inline;
     },
 
     getInlineByID: function(id) {

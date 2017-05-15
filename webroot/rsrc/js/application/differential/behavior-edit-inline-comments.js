@@ -276,18 +276,19 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
       var view = JX.DiffChangeset.getForNode(root);
 
-      editor = new JX.DifferentialInlineCommentEditor(config.uri)
-        .setTemplates(view.getUndoTemplates())
-        .setOperation('new')
-        .setChangesetID(changeset)
-        .setLineNumber(o)
-        .setLength(len)
-        .setIsNew(isNewFile(target) ? 1 : 0)
-        .setOnRight(isOnRight(target) ? 1 : 0)
-        .setRow(insert.nextSibling)
-        .setTable(insert.parentNode)
-        .setRenderer(view.getRenderer())
-        .start();
+      view.newInlineForRange({
+        origin: origin,
+        target: target,
+        number: o,
+        length: len,
+        changesetID: changeset,
+        isNewFile: isNewFile(target),
+        displaySide: isOnRight(target) ? 'right' : 'left'
+      });
+
+      selecting = false;
+      origin = null;
+      target = null;
 
       set_link_state(true);
 

@@ -6,33 +6,7 @@
 
 JX.install('DiffInline', {
 
-  construct : function(row) {
-    this._row = row;
-
-    var row_data = JX.Stratcom.getData(row);
-    this._hidden = row_data.hidden || false;
-
-    // TODO: Get smarter about this once we do more editing, this is pretty
-    // hacky.
-    var comment = JX.DOM.find(row, 'div', 'differential-inline-comment');
-    var data = JX.Stratcom.getData(comment);
-
-    this._id = data.id;
-
-    // TODO: This is very, very, very, very, very, very, very hacky.
-    var td = comment.parentNode;
-    var th = td.previousSibling;
-    if (th.parentNode.firstChild != th) {
-      this._displaySide = 'right';
-    } else {
-      this._displaySide = 'left';
-    }
-
-    this._number = data.number;
-    this._length = data.length;
-    this._isNewFile =
-      (this.getDisplaySide() == 'right') ||
-      (data.left != data.right);
+  construct : function() {
   },
 
   properties: {
@@ -41,6 +15,8 @@ JX.install('DiffInline', {
 
   members: {
     _id: null,
+    _phid: null,
+    _changesetID: null,
     _row: null,
     _hidden: false,
     _number: null,
@@ -52,6 +28,80 @@ JX.install('DiffInline', {
     _isDeleted: false,
     _isInvisible: false,
     _isLoading: false,
+
+    bindToRow: function(row) {
+      this._row = row;
+
+      var row_data = JX.Stratcom.getData(row);
+      row_data.inline = this;
+
+      this._hidden = row_data.hidden || false;
+
+      // TODO: Get smarter about this once we do more editing, this is pretty
+      // hacky.
+      var comment = JX.DOM.find(row, 'div', 'differential-inline-comment');
+      var data = JX.Stratcom.getData(comment);
+
+      this._id = data.id;
+      this._phid = data.phid;
+
+      // TODO: This is very, very, very, very, very, very, very hacky.
+      var td = comment.parentNode;
+      var th = td.previousSibling;
+      if (th.parentNode.firstChild != th) {
+        this._displaySide = 'right';
+      } else {
+        this._displaySide = 'left';
+      }
+
+      this._number = data.number;
+      this._length = data.length;
+      this._isNewFile =
+        (this.getDisplaySide() == 'right') ||
+        (data.left != data.right);
+
+      this.setInvisible(false);
+
+      return this;
+    },
+
+    bindToRange: function(data) {
+      this._id = null;
+      this._phid = null;
+
+      this._hidden = false;
+
+      this._displaySide = data.displaySide;
+      this._number = data.number;
+      this._length = data.length;
+      this._isNewFile = data.isNewFile;
+      this._changesetID = data.changesetID;
+
+      var row = this._newRow();
+      JX.Stratcom.getData(row).inline = this;
+      this._row = row;
+
+      this.setInvisible(true);
+
+      // Insert the comment after any other comments which already appear on
+      // the same row.
+      var parent_row = JX.DOM.findAbove(data.target, 'tr');
+      var target_row = parent_row.nextSibling;
+      while (target_row && JX.Stratcom.hasSigil(target_row, 'inline-row')) {
+        target_row = target_row.nextSibling;
+      }
+      parent_row.parentNode.insertBefore(row, target_row);
+
+      return this;
+    },
+
+    _newRow: function() {
+      var attributes = {
+        sigil: 'inline-row'
+      };
+
+      return JX.$N('tr', attributes);
+    },
 
     setHidden: function(hidden) {
       this._hidden = hidden;
@@ -108,6 +158,18 @@ JX.install('DiffInline', {
       JX.DOM.alterClass(comment, 'inline-state-is-draft', response.draftState);
 
       this._didUpdate();
+    },
+
+    create: function() {
+      var uri = this._getInlineURI();
+      var handler = JX.bind(this, this._oncreateresponse);
+      var data = this._newRequestData('new');
+
+      this.setLoading(true);
+
+      new JX.Request(uri, handler)
+        .setData(data)
+        .send();
     },
 
     edit: function() {
@@ -172,6 +234,10 @@ JX.install('DiffInline', {
       return this._id;
     },
 
+    getChangesetID: function() {
+      return this._changesetID;
+    },
+
     setDeleted: function(deleted) {
       this._isDeleted = deleted;
       this._redraw();
@@ -199,6 +265,7 @@ JX.install('DiffInline', {
         number: this.getLineNumber(),
         length: this.getLineLength(),
         is_new: this.isNewFile(),
+        changesetID: this.getChangesetID(),
         replyToCommentPHID: ''
       };
     },
@@ -210,6 +277,12 @@ JX.install('DiffInline', {
 
       this.setLoading(false);
       this.setInvisible(true);
+    },
+
+    _oncreateresponse: function(response) {
+      var rows = JX.$H(response).getNode();
+
+      this._drawEditRows(rows);
     },
 
     _ondeleteresponse: function() {
@@ -251,7 +324,7 @@ JX.install('DiffInline', {
         // into the document.
         next_row = row.nextSibling;
 
-        cursor.parentNode.insertBefore(row, cursor.nextSibling);
+        cursor.parentNode.insertBefore(row, cursor);
         cursor = row;
 
         var row_meta = {
@@ -285,6 +358,17 @@ JX.install('DiffInline', {
               'click',
               'differential-inline-comment-undo',
               JX.bind(this, this._onundo, row_meta)));
+        }
+
+        // If the row has a textarea, focus it. This allows the user to start
+        // typing a comment immediately after a "new", "edit", or "reply"
+        // action.
+        var textareas = JX.DOM.scry(
+          row,
+          'textarea',
+          'differential-inline-comment-edit-textarea');
+        if (textareas.length) {
+          textareas[0].focus();
         }
 
         row = next_row;
@@ -340,6 +424,7 @@ JX.install('DiffInline', {
     _onsubmitresponse: function(row, response) {
       this._removeRow(row);
 
+      this.setLoading(false);
       this.setInvisible(false);
 
       this._onupdate(response);
@@ -358,7 +443,7 @@ JX.install('DiffInline', {
         JX.DOM.remove(this._row);
       }
 
-      this._row = new_row;
+      this.bindToRow(new_row);
 
       this._didUpdate();
     },
