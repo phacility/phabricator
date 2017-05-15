@@ -262,6 +262,8 @@ final class PhabricatorProjectProfileController
       ->setViewer($viewer)
       ->withParentProjectPHIDs(array($project->getPHID()))
       ->needImages(true)
+      ->needMembers(true)
+      ->needWatchers(true)
       ->withStatuses(
         array(
           PhabricatorProjectStatus::STATUS_ACTIVE,
