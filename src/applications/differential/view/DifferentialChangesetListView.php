@@ -252,6 +252,21 @@ final class DifferentialChangesetListView extends AphrontView {
           pht('You must select a comment to reply to.'),
         'You must select a comment to edit.' =>
           pht('You must select a comment to edit.'),
+
+        'Mark or unmark selected inline comment as done.' =>
+          pht('Mark or unmark selected inline comment as done.'),
+        'You must select a comment to mark done.' =>
+          pht('You must select a comment to mark done.'),
+
+        'Hide or show inline comment.' =>
+          pht('Hide or show inline comment.'),
+        'You must select a comment to hide.' =>
+          pht('You must select a comment to hide.'),
+
+        'Jump to next inline comment, including hidden comments.' =>
+          pht('Jump to next inline comment, including hidden comments.'),
+        'Jump to previous inline comment, including hidden comments.' =>
+          pht('Jump to previous inline comment, including hidden comments.'),
       ),
     ));
 

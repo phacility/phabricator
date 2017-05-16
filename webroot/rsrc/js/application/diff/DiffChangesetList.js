@@ -106,14 +106,27 @@ JX.install('DiffChangesetList', {
       label = pht('Jump to previous inline comment.');
       this._installJumpKey('p', label, -1, 'comment');
 
+      label = pht('Jump to next inline comment, including hidden comments.');
+      this._installJumpKey('N', label, 1, 'comment', true);
+
+      label = pht(
+        'Jump to previous inline comment, including hidden comments.');
+      this._installJumpKey('P', label, -1, 'comment', true);
+
       label = pht('Jump to the table of contents.');
       this._installKey('t', label, this._ontoc);
 
       label = pht('Reply to selected inline comment.');
-      this._installKey('r', label, this._onreply);
+      this._installKey('r', label, this._onkeyreply);
 
       label = pht('Edit selected inline comment.');
-      this._installKey('e', label, this._onedit);
+      this._installKey('e', label, this._onkeyedit);
+
+      label = pht('Mark or unmark selected inline comment as done.');
+      this._installKey('w', label, this._onkeydone);
+
+      label = pht('Hide or show inline comment.');
+      this._installKey('q', label, this._onkeyhide);
     },
 
     isAsleep: function() {
@@ -190,9 +203,9 @@ JX.install('DiffChangesetList', {
         .register();
     },
 
-    _installJumpKey: function(key, label, delta, filter) {
+    _installJumpKey: function(key, label, delta, filter, show_hidden) {
       filter = filter || null;
-      var handler = JX.bind(this, this._onjumpkey, delta, filter);
+      var handler = JX.bind(this, this._onjumpkey, delta, filter, show_hidden);
       return this._installKey(key, label, handler);
     },
 
@@ -201,7 +214,7 @@ JX.install('DiffChangesetList', {
       manager.scrollTo(toc);
     },
 
-    _onreply: function(manager) {
+    _onkeyreply: function() {
       var cursor = this._cursorItem;
 
       if (cursor) {
@@ -220,7 +233,7 @@ JX.install('DiffChangesetList', {
       this._warnUser(pht('You must select a comment to reply to.'));
     },
 
-    _onedit: function(manager) {
+    _onkeyedit: function() {
       var cursor = this._cursorItem;
 
       if (cursor) {
@@ -239,6 +252,44 @@ JX.install('DiffChangesetList', {
       this._warnUser(pht('You must select a comment to edit.'));
     },
 
+    _onkeydone: function() {
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'comment') {
+          var inline = cursor.target;
+          if (inline.canDone()) {
+            this.setFocus(null);
+
+            inline.toggleDone();
+            return;
+          }
+        }
+      }
+
+      var pht = this.getTranslations();
+      this._warnUser(pht('You must select a comment to mark done.'));
+    },
+
+    _onkeyhide: function() {
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'comment') {
+          var inline = cursor.target;
+          if (inline.canHide()) {
+            this.setFocus(null);
+
+            inline.setHidden(!inline.isHidden());
+            return;
+          }
+        }
+      }
+
+      var pht = this.getTranslations();
+      this._warnUser(pht('You must select a comment to hide.'));
+    },
+
     _warnUser: function(message) {
       new JX.Notification()
         .setContent(message)
@@ -247,7 +298,7 @@ JX.install('DiffChangesetList', {
         .show();
     },
 
-    _onjumpkey: function(delta, filter, manager) {
+    _onjumpkey: function(delta, filter, show_hidden, manager) {
       var state = this._getSelectionState();
 
       var cursor = state.cursor;
@@ -286,8 +337,10 @@ JX.install('DiffChangesetList', {
 
         // If the item is hidden, don't select it when iterating with jump
         // keys. It can still potentially be selected in other ways.
-        if (items[cursor].hidden) {
-          continue;
+        if (!show_hidden) {
+          if (items[cursor].hidden) {
+            continue;
+          }
         }
 
         // Otherwise, we've found a valid item to select.

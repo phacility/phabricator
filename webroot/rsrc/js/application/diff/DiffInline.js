@@ -130,6 +130,22 @@ JX.install('DiffInline', {
       return true;
     },
 
+    canDone: function() {
+      if (!JX.DOM.scry(this._row, 'input', 'differential-inline-done').length) {
+        return false;
+      }
+
+      return true;
+    },
+
+    canHide: function() {
+      if (!JX.DOM.scry(this._row, 'a', 'hide-inline').length) {
+        return false;
+      }
+
+      return true;
+    },
+
     _hasAction: function(action) {
       var nodes = JX.DOM.scry(this._row, 'a', 'differential-inline-' + action);
       return (nodes.length > 0);
@@ -171,7 +187,7 @@ JX.install('DiffInline', {
         .setHandler(JX.bag)
         .start();
 
-      JX.Stratcom.invoke('resize');
+      this._didUpdate(true);
     },
 
     isHidden: function() {
@@ -514,10 +530,12 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _didUpdate: function() {
+    _didUpdate: function(local_only) {
       // After making changes to inline comments, refresh the transaction
       // preview at the bottom of the page.
-      this.getChangeset().getChangesetList().redrawPreview();
+      if (!local_only) {
+        this.getChangeset().getChangesetList().redrawPreview();
+      }
 
       this.getChangeset().getChangesetList().redrawCursor();
 

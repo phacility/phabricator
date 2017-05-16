@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => '8c5f913d',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => '58712637',
-    'differential.pkg.js' => '0bfd141c',
+    'differential.pkg.js' => 'e486afd0',
     'diffusion.pkg.css' => 'b93d9b8c',
     'diffusion.pkg.js' => '84c8f8fd',
     'favicon.ico' => '30672e08',
@@ -391,8 +391,8 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '453c5375',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => 'd4eecc63',
     'rsrc/js/application/diff/DiffChangeset.js' => '145c34e2',
-    'rsrc/js/application/diff/DiffChangesetList.js' => 'ca3b6387',
-    'rsrc/js/application/diff/DiffInline.js' => 'b5b1f167',
+    'rsrc/js/application/diff/DiffChangesetList.js' => 'd93e34c2',
+    'rsrc/js/application/diff/DiffInline.js' => 'bdf6b568',
     'rsrc/js/application/diff/behavior-preview-link.js' => '051c7832',
     'rsrc/js/application/differential/behavior-comment-jump.js' => '4fdb476d',
     'rsrc/js/application/differential/behavior-comment-preview.js' => 'b064af76',
@@ -782,8 +782,8 @@ return array(
     'phabricator-darkmessage' => 'c48cccdd',
     'phabricator-dashboard-css' => 'fe5b1869',
     'phabricator-diff-changeset' => '145c34e2',
-    'phabricator-diff-changeset-list' => 'ca3b6387',
-    'phabricator-diff-inline' => 'b5b1f167',
+    'phabricator-diff-changeset-list' => 'd93e34c2',
+    'phabricator-diff-inline' => 'bdf6b568',
     'phabricator-drag-and-drop-file-upload' => '58dea2fa',
     'phabricator-draggable-list' => 'bea6e7f4',
     'phabricator-fatal-config-template-css' => '8f18fa41',
@@ -1842,9 +1842,6 @@ return array(
       'javelin-dom',
       'phabricator-draggable-list',
     ),
-    'b5b1f167' => array(
-      'javelin-dom',
-    ),
     'b5c256b8' => array(
       'javelin-install',
       'javelin-dom',
@@ -1892,6 +1889,9 @@ return array(
       'javelin-dom',
       'javelin-util',
       'javelin-request',
+    ),
+    'bdf6b568' => array(
+      'javelin-dom',
     ),
     'bea6e7f4' => array(
       'javelin-install',
@@ -1983,9 +1983,6 @@ return array(
       'phabricator-title',
       'phabricator-shaped-request',
       'conpherence-thread-manager',
-    ),
-    'ca3b6387' => array(
-      'javelin-install',
     ),
     'ca3f91eb' => array(
       'javelin-behavior',
@@ -2081,6 +2078,9 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-shaped-request',
+    ),
+    'd93e34c2' => array(
+      'javelin-install',
     ),
     'de2e896f' => array(
       'javelin-behavior',
