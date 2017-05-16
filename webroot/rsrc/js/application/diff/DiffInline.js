@@ -148,6 +148,10 @@ JX.install('DiffInline', {
       return true;
     },
 
+    getRawText: function() {
+      return this._originalText;
+    },
+
     _hasAction: function(action) {
       var nodes = JX.DOM.scry(this._row, 'a', 'differential-inline-' + action);
       return (nodes.length > 0);
@@ -247,9 +251,9 @@ JX.install('DiffInline', {
         .send();
     },
 
-    reply: function() {
+    reply: function(text) {
       var changeset = this.getChangeset();
-      return changeset.newInlineReply(this);
+      return changeset.newInlineReply(this, text);
     },
 
     edit: function(text) {
@@ -365,13 +369,9 @@ JX.install('DiffInline', {
     },
 
     _oncreateresponse: function(response) {
-      try {
       var rows = JX.$H(response).getNode();
 
       this._drawEditRows(rows);
-      } catch (e) {
-        JX.log(e);
-      }
     },
 
     _ondeleteresponse: function() {
@@ -471,7 +471,11 @@ JX.install('DiffInline', {
           'textarea',
           'differential-inline-comment-edit-textarea');
         if (textareas.length) {
-          textareas[0].focus();
+          var area = textareas[0];
+          area.focus();
+
+          var length = area.value.length;
+          JX.TextAreaUtils.setSelectionRange(area, length, length);
         }
 
         row = next_row;

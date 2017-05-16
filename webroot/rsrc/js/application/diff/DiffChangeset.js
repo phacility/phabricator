@@ -526,7 +526,37 @@ JX.install('DiffChangeset', {
       return data.inline;
     },
 
-    newInlineForRange: function(data) {
+    newInlineForRange: function(origin, target) {
+      var list = this.getChangesetList();
+
+      var src = list.getLineNumberFromHeader(origin);
+      var dst = list.getLineNumberFromHeader(target);
+
+      var changeset_id = null;
+      var side = list.getDisplaySideFromHeader(origin);
+      if (side == 'right') {
+        changeset_id = this.getRightChangesetID();
+      } else {
+        changeset_id = this.getLeftChangesetID();
+      }
+
+      var is_new = false;
+      if (side == 'right') {
+        is_new = true;
+      } else if (this.getRightChangesetID() != this.getLeftChangesetID()) {
+        is_new = true;
+      }
+
+      var data = {
+        origin: origin,
+        target: target,
+        number: src,
+        length: dst - src,
+        changesetID: changeset_id,
+        displaySide: side,
+        isNewFile: is_new
+      };
+
       var inline = new JX.DiffInline()
         .setChangeset(this)
         .bindToRange(data);
@@ -538,14 +568,14 @@ JX.install('DiffChangeset', {
       return inline;
     },
 
-    newInlineReply: function(original) {
+    newInlineReply: function(original, text) {
       var inline = new JX.DiffInline()
         .setChangeset(this)
         .bindToReply(original);
 
       this._inlines.push(inline);
 
-      inline.create();
+      inline.create(text);
 
       return inline;
     },

@@ -136,8 +136,11 @@ JX.install('DiffChangesetList', {
       label = pht('Jump to the table of contents.');
       this._installKey('t', label, this._ontoc);
 
-      label = pht('Reply to selected inline comment.');
-      this._installKey('r', label, this._onkeyreply);
+      label = pht('Reply to selected inline comment or change.');
+      this._installKey('r', label, JX.bind(this, this._onkeyreply, false));
+
+      label = pht('Reply and quote selected inline comment.');
+      this._installKey('R', label, JX.bind(this, this._onkeyreply, true));
 
       label = pht('Edit selected inline comment.');
       this._installKey('e', label, this._onkeyedit);
@@ -234,7 +237,7 @@ JX.install('DiffChangesetList', {
       manager.scrollTo(toc);
     },
 
-    _onkeyreply: function() {
+    _onkeyreply: function(is_quote) {
       var cursor = this._cursorItem;
 
       if (cursor) {
@@ -243,14 +246,77 @@ JX.install('DiffChangesetList', {
           if (inline.canReply()) {
             this.setFocus(null);
 
-            inline.reply();
+            var text;
+            if (is_quote) {
+              text = inline.getRawText();
+              text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
+            } else {
+              text = '';
+            }
+
+            inline.reply(text);
             return;
           }
+        }
+
+        // If the keyboard cursor is selecting a range of lines, we may have
+        // a mixture of old and new changes on the selected rows. It is not
+        // entirely unambiguous what the user means when they say they want
+        // to reply to this, but we use this logic: reply on the new file if
+        // there are any new lines. Otherwise (if there are only removed
+        // lines) reply on the old file.
+
+        if (cursor.type == 'change') {
+          var origin = cursor.nodes.begin;
+          var target = cursor.nodes.end;
+
+          // The "origin" and "target" are entire rows, but we need to find
+          // a range of "<th />" nodes to actually create an inline, so go
+          // fishing.
+
+          var old_list = [];
+          var new_list = [];
+
+          var row = origin;
+          while (row) {
+            var header = row.firstChild;
+            while (header) {
+              if (JX.DOM.isType(header, 'th')) {
+                if (header.className.indexOf('old') !== -1) {
+                  old_list.push(header);
+                } else if (header.className.indexOf('new') !== -1) {
+                  new_list.push(header);
+                }
+              }
+              header = header.nextSibling;
+            }
+
+            if (row == target) {
+              break;
+            }
+
+            row = row.nextSibling;
+          }
+
+          var use_list;
+          if (new_list.length) {
+            use_list = new_list;
+          } else {
+            use_list = old_list;
+          }
+
+          var src = use_list[0];
+          var dst = use_list[use_list.length - 1];
+
+          cursor.changeset.newInlineForRange(src, dst);
+
+          this.setFocus(null);
+          return;
         }
       }
 
       var pht = this.getTranslations();
-      this._warnUser(pht('You must select a comment to reply to.'));
+      this._warnUser(pht('You must select a comment or change to reply to.'));
     },
 
     _onkeyedit: function() {
@@ -804,7 +870,7 @@ JX.install('DiffChangesetList', {
       // Clear the mouse hover reticle after a substantive edit: we don't get
       // a "mouseout" event if the row vanished because of row being removed
       // after an edit.
-      this.reseHover();
+      this.resetHover();
     },
 
     setFocus: function(node, extended_node) {
@@ -978,8 +1044,19 @@ JX.install('DiffChangesetList', {
 
       var inline_row = e.getNode('inline-row');
       return changeset.getInlineForRow(inline_row);
-    }
+    },
 
+    getLineNumberFromHeader: function(th) {
+      try {
+        return parseInt(th.id.match(/^C\d+[ON]L(\d+)$/)[1], 10);
+      } catch (x) {
+        return null;
+      }
+    },
+
+    getDisplaySideFromHeader: function(th) {
+      return (th.parentNode.firstChild != th) ? 'right' : 'left';
+    }
   }
 
 });

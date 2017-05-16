@@ -244,14 +244,18 @@ final class DifferentialChangesetListView extends AphrontView {
           pht('Jump to previous inline comment.'),
         'Jump to the table of contents.' =>
           pht('Jump to the table of contents.'),
-        'Reply to selected inline comment.' =>
-          pht('Reply to selected inline comment.'),
+
         'Edit selected inline comment.' =>
           pht('Edit selected inline comment.'),
-        'You must select a comment to reply to.' =>
-          pht('You must select a comment to reply to.'),
         'You must select a comment to edit.' =>
           pht('You must select a comment to edit.'),
+
+        'Reply to selected inline comment or change.' =>
+          pht('Reply to selected inline comment or change.'),
+        'You must select a comment or change to reply to.' =>
+          pht('You must select a comment or change to reply to.'),
+        'Reply and quote selected inline comment.' =>
+          pht('Reply and quote selected inline comment.'),
 
         'Mark or unmark selected inline comment as done.' =>
           pht('Mark or unmark selected inline comment as done.'),

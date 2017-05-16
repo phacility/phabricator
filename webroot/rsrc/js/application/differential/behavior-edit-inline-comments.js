@@ -72,11 +72,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     return node.parentNode.firstChild != node;
   }
 
-  function isNewFile(node) {
-    var data = JX.Stratcom.getData(root);
-    return isOnRight(node) || (data.left != data.right);
-  }
-
   function getRowNumber(th_node) {
     try {
       return parseInt(th_node.id.match(/^C\d+[ON]L(\d+)$/)[1], 10);
@@ -192,15 +187,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
       var view = JX.DiffChangeset.getForNode(root);
 
-      view.newInlineForRange({
-        origin: origin,
-        target: target,
-        number: o,
-        length: len,
-        changesetID: changeset,
-        isNewFile: isNewFile(target),
-        displaySide: isOnRight(target) ? 'right' : 'left'
-      });
+      view.newInlineForRange(origin, target);
 
       selecting = false;
       origin = null;
