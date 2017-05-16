@@ -206,7 +206,7 @@ JX.install('DiffChangesetList', {
 
       if (cursor) {
         if (cursor.type == 'comment') {
-          var inline = cursor.inline;
+          var inline = cursor.target;
           if (inline.canReply()) {
             this.setFocus(null);
 
@@ -225,7 +225,7 @@ JX.install('DiffChangesetList', {
 
       if (cursor) {
         if (cursor.type == 'comment') {
-          var inline = cursor.inline;
+          var inline = cursor.target;
           if (inline.canEdit()) {
             this.setFocus(null);
 
@@ -284,6 +284,12 @@ JX.install('DiffChangesetList', {
           }
         }
 
+        // If the item is hidden, don't select it when iterating with jump
+        // keys. It can still potentially be selected in other ways.
+        if (items[cursor].hidden) {
+          continue;
+        }
+
         // Otherwise, we've found a valid item to select.
         break;
       }
@@ -328,11 +334,26 @@ JX.install('DiffChangesetList', {
 
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
-      if (scroll) {
+      if (manager && scroll) {
         manager.scrollTo(cursor.nodes.begin);
       }
 
       return this;
+    },
+
+    redrawCursor: function() {
+      // NOTE: This is setting the cursor to the current cursor. Usually, this
+      // would have no effect.
+
+      // However, if the old cursor pointed at an inline and the inline has
+      // been edited so the rows have changed, this updates the cursor to point
+      // at the new inline with the proper rows for the current state, and
+      // redraws the reticle correctly.
+
+      var state = this._getSelectionState();
+      if (state.cursor !== null) {
+        this._setSelectionState(state.items[state.cursor]);
+      }
     },
 
     _getSelectableItems: function() {

@@ -519,6 +519,8 @@ JX.install('DiffInline', {
       // preview at the bottom of the page.
       this.getChangeset().getChangesetList().redrawPreview();
 
+      this.getChangeset().getChangesetList().redrawCursor();
+
       // Emit a resize event so that UI elements like the keyboad focus
       // reticle can redraw properly.
       JX.Stratcom.invoke('resize');
