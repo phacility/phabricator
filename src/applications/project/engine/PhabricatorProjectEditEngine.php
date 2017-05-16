@@ -235,7 +235,7 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+        ->setTransactionType(PhabricatorProjectNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setDescription(pht('Project name.'))
         ->setConduitDescription(pht('Rename the project'))

@@ -10,7 +10,7 @@ final class PhabricatorProjectTransactionEditor
     return $this;
   }
 
-  private function getIsMilestone() {
+  public function getIsMilestone() {
     return $this->isMilestone;
   }
 
@@ -30,7 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_NAME;
     $types[] = PhabricatorProjectTransaction::TYPE_SLUGS;
     $types[] = PhabricatorProjectTransaction::TYPE_STATUS;
     $types[] = PhabricatorProjectTransaction::TYPE_IMAGE;
@@ -52,8 +51,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_NAME:
-        return $object->getName();
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         $slugs = $object->getSlugs();
         $slugs = mpull($slugs, 'getSlug', 'getSlug');
@@ -90,7 +87,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_NAME:
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
@@ -121,13 +117,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_NAME:
-        $name = $xaction->getNewValue();
-        $object->setName($name);
-        if (!$this->getIsMilestone()) {
-          $object->setPrimarySlug(PhabricatorSlug::normalizeProjectSlug($name));
-        }
-        return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         return;
       case PhabricatorProjectTransaction::TYPE_STATUS:
@@ -178,16 +167,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_NAME:
-        // First, add the old name as a secondary slug; this is helpful
-        // for renames and generally a good thing to do.
-        if (!$this->getIsMilestone()) {
-          if ($old !== null) {
-            $this->addSlug($object, $old, false);
-          }
-          $this->addSlug($object, $new, false);
-        }
-        return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         $old = $xaction->getOldValue();
         $new = $xaction->getNewValue();
@@ -299,59 +278,6 @@ final class PhabricatorProjectTransactionEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case PhabricatorProjectTransaction::TYPE_NAME:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getName(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('Project name is required.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-
-        if (!$xactions) {
-          break;
-        }
-
-        if ($this->getIsMilestone()) {
-          break;
-        }
-
-        $name = last($xactions)->getNewValue();
-
-        if (!PhabricatorSlug::isValidProjectSlug($name)) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'Project names must contain at least one letter or number.'),
-            last($xactions));
-          break;
-        }
-
-        $slug = PhabricatorSlug::normalizeProjectSlug($name);
-
-        $slug_used_already = id(new PhabricatorProjectSlug())
-          ->loadOneWhere('slug = %s', $slug);
-        if ($slug_used_already &&
-            $slug_used_already->getProjectPHID() != $object->getPHID()) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Duplicate'),
-            pht(
-              'Project name generates the same hashtag ("%s") as another '.
-              'existing project. Choose a unique name.',
-              '#'.$slug),
-            nonempty(last($xactions), null));
-          $errors[] = $error;
-        }
-        break;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         if (!$xactions) {
           break;
@@ -497,7 +423,7 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_NAME:
+      case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
@@ -717,7 +643,7 @@ final class PhabricatorProjectTransactionEditor
     return parent::applyFinalEffects($object, $xactions);
   }
 
-  private function addSlug(PhabricatorProject $project, $slug, $force) {
+  public function addSlug(PhabricatorProject $project, $slug, $force) {
     $slug = PhabricatorSlug::normalizeProjectSlug($slug);
     $table = new PhabricatorProjectSlug();
     $project_phid = $project->getPHID();

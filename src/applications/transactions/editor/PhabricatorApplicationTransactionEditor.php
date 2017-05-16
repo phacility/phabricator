@@ -592,6 +592,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->applyExternalEffects($object, $xaction->getNewValue());
     }
 

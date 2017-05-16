@@ -16,7 +16,7 @@ final class PhabricatorProjectTestDataGenerator
     $xactions = array();
 
     $xactions[] = $this->newTransaction(
-      PhabricatorProjectTransaction::TYPE_NAME,
+      PhabricatorProjectNameTransaction::TRANSACTIONTYPE,
       $this->newProjectTitle());
 
     $xactions[] = $this->newTransaction(

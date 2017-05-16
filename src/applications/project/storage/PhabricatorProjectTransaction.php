@@ -1,9 +1,8 @@
 <?php
 
 final class PhabricatorProjectTransaction
-  extends PhabricatorApplicationTransaction {
+  extends PhabricatorModularTransaction {
 
-  const TYPE_NAME       = 'project:name';
   const TYPE_SLUGS      = 'project:slugs';
   const TYPE_STATUS     = 'project:status';
   const TYPE_IMAGE      = 'project:image';
@@ -31,6 +30,10 @@ final class PhabricatorProjectTransaction
 
   public function getApplicationTransactionType() {
     return PhabricatorProjectProjectPHIDType::TYPECONST;
+  }
+
+  public function getBaseTransactionClass() {
+    return 'PhabricatorProjectTransactionType';
   }
 
   public function getRequiredHandlePHIDs() {
@@ -148,20 +151,6 @@ final class PhabricatorProjectTransaction
         return pht(
           '%s created this project.',
           $this->renderHandleLink($author_phid));
-
-      case self::TYPE_NAME:
-        if ($old === null) {
-          return pht(
-            '%s created this project.',
-            $author_handle);
-        } else {
-          return pht(
-            '%s renamed this project from "%s" to "%s".',
-            $author_handle,
-            $old,
-            $new);
-        }
-        break;
 
       case self::TYPE_STATUS:
         if ($old == 0) {
@@ -329,20 +318,6 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_NAME:
-        if ($old === null) {
-          return pht(
-            '%s created %s.',
-            $author_handle,
-            $object_handle);
-        } else {
-          return pht(
-            '%s renamed %s from "%s" to "%s".',
-            $author_handle,
-            $object_handle,
-            $old,
-            $new);
-        }
       case self::TYPE_STATUS:
         if ($old == 0) {
           return pht(
