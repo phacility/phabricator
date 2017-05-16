@@ -60,7 +60,10 @@ JX.install('DiffChangesetList', {
     _changesets: null,
 
     _cursorItem: null,
-    _lastKeyboardManager: null,
+
+    _focusNode: null,
+    _focusStart: null,
+    _focusEnd: null,
 
     sleep: function() {
       this._asleep = true;
@@ -198,7 +201,7 @@ JX.install('DiffChangesetList', {
         if (cursor.type == 'comment') {
           var inline = cursor.inline;
           if (inline.canReply()) {
-            manager.focusOn(null);
+            this.setFocus(null);
 
             inline.reply();
             return;
@@ -217,7 +220,7 @@ JX.install('DiffChangesetList', {
         if (cursor.type == 'comment') {
           var inline = cursor.inline;
           if (inline.canEdit()) {
-            manager.focusOn(null);
+            this.setFocus(null);
 
             inline.edit();
             return;
@@ -310,21 +313,13 @@ JX.install('DiffChangesetList', {
     },
 
     _redrawSelection: function(manager, scroll) {
-      manager = manager || this._lastKeyboardManager;
-      this._lastKeyboardManager = manager;
-
-      if (this.isAsleep()) {
-        manager.focusOn(null);
-        return;
-      }
-
       var cursor = this._cursorItem;
       if (!cursor) {
-        manager.focusOn(null);
+        this.setFocus(null);
         return;
       }
 
-      manager.focusOn(cursor.nodes.begin, cursor.nodes.end);
+      this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
       if (scroll) {
         manager.scrollTo(cursor.nodes.begin);
@@ -642,6 +637,47 @@ JX.install('DiffChangesetList', {
       if (forms.length) {
         JX.DOM.invoke(forms[0], 'shouldRefresh');
       }
+    },
+
+    setFocus: function(node, extended_node) {
+      this._focusStart = node;
+      this._focusEnd = extended_node;
+      this._redrawFocus();
+    },
+
+    _redrawFocus: function() {
+      var node = this._focusStart;
+      var extended_node = this._focusEnd || node;
+
+      var reticle = this._getFocusNode();
+      if (!node) {
+        JX.DOM.remove(reticle);
+        return;
+      }
+
+      // Outset the reticle some pixels away from the element, so there's some
+      // space between the focused element and the outline.
+      var p = JX.Vector.getPos(node);
+      var s = JX.Vector.getAggregateScrollForNode(node);
+
+      p.add(s).add(-4, -4).setPos(reticle);
+      // Compute the size we need to extend to the full extent of the focused
+      // nodes.
+      JX.Vector.getPos(extended_node)
+        .add(-p.x, -p.y)
+        .add(JX.Vector.getDim(extended_node))
+        .add(8, 8)
+        .setDim(reticle);
+
+      JX.DOM.getContentFrame().appendChild(reticle);
+    },
+
+    _getFocusNode: function() {
+      if (!this._focusNode) {
+        var node = JX.$N('div', {className : 'keyboard-focus-focus-reticle'});
+        this._focusNode = node;
+      }
+      return this._focusNode;
     },
 
     _deleteInlineByID: function(id) {
