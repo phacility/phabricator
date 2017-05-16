@@ -47,6 +47,9 @@ JX.install('DiffChangesetList', {
       'click',
       ['differential-inline-comment', 'differential-inline-reply'],
       onreply);
+
+    var onresize = JX.bind(this, this._ifawake, this._onresize);
+    JX.Stratcom.listen('resize', null, onresize);
   },
 
   properties: {
@@ -582,6 +585,10 @@ JX.install('DiffChangesetList', {
       var inline = this._getInlineForEvent(e);
 
       inline.setHidden(is_hide);
+    },
+
+    _onresize: function() {
+      this._redrawFocus();
     },
 
     _onaction: function(action, e) {
