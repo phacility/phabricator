@@ -440,6 +440,12 @@ JX.install('DiffChangeset', {
       var near_top = (old_pos.y <= sticky);
       var near_bot = ((old_pos.y + old_view.y) >= (old_dim.y - sticky));
 
+      // If we have an anchor in the URL, never stick to the bottom of the
+      // page. See T11784 for discussion.
+      if (window.location.hash) {
+        near_bot = false;
+      }
+
       var target_pos = JX.Vector.getPos(target);
       var target_dim = JX.Vector.getDim(target);
       var target_mid = (target_pos.y + (target_dim.y / 2));
