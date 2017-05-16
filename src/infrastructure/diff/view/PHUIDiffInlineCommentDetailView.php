@@ -405,7 +405,6 @@ final class PHUIDiffInlineCommentDetailView
         'class' => 'inline-head-right',
       ),
       array(
-        $anchor,
         $done_button,
         $links,
         $actions,
@@ -445,6 +444,7 @@ final class PHUIDiffInlineCommentDetailView
       pht('...'));
 
     return array(
+      $anchor,
       $markup,
       $summary,
     );
