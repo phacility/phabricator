@@ -11,35 +11,12 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
   var selecting = false;
   var reticle = JX.$N('div', {className: 'differential-reticle'});
-  var old_cells = [];
   JX.DOM.hide(reticle);
 
   var origin = null;
   var target = null;
   var root   = null;
   var changeset = null;
-
-  var editor = null;
-
-  function updateReticleForComment(e) {
-    root = e.getNode('differential-changeset');
-    if (!root) {
-      return;
-    }
-
-    var data = e.getNodeData('differential-inline-comment');
-    var change = e.getNodeData('differential-changeset');
-
-    var id_part = data.on_right ? change.right : change.left;
-    var new_part = data.isNewFile ? 'N' : 'O';
-    var prefix = 'C' + id_part + new_part + 'L';
-
-    origin = JX.$(prefix + data.number);
-    target = JX.$(prefix + (parseInt(data.number, 10) +
-                            parseInt(data.length, 10)));
-
-    updateReticle();
-  }
 
   function updateReticle() {
     JX.DOM.getContentFrame().appendChild(reticle);
@@ -85,44 +62,10 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     dim.setDim(reticle);
 
     JX.DOM.show(reticle);
-
-    // Find all the cells in the same row position between the top and bottom
-    // cell, so we can highlight them.
-    var seq = 0;
-    var row = top.parentNode;
-    for (seq = 0; seq < row.childNodes.length; seq++) {
-      if (row.childNodes[seq] == top) {
-        break;
-      }
-    }
-
-    var cells = [];
-    while (true) {
-      cells.push(row.childNodes[seq]);
-      if (row.childNodes[seq] == bot) {
-        break;
-      }
-      row = row.nextSibling;
-    }
-
-    setSelectedCells(cells);
-  }
-
-  function setSelectedCells(new_cells) {
-    updateSelectedCellsClass(old_cells, false);
-    updateSelectedCellsClass(new_cells, true);
-    old_cells = new_cells;
-  }
-
-  function updateSelectedCellsClass(cells, selected) {
-    for (var ii = 0; ii < cells.length; ii++) {
-      JX.DOM.alterClass(cells[ii], 'selected', selected);
-    }
   }
 
   function hideReticle() {
     JX.DOM.hide(reticle);
-    setSelectedCells([]);
   }
 
   function isOnRight(node) {
@@ -180,13 +123,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         return;
       }
 
-      if (editor) {
-        // Don't update the reticle if we're editing a comment, since this
-        // would be distracting and we want to keep the lines corresponding
-        // to the comment highlighted during the edit.
-        return;
-      }
-
       if (getRowNumber(e.getTarget()) === undefined) {
         // Don't update the reticle if this "<th />" doesn't correspond to a
         // line number. For instance, this may be a dead line number, like the
@@ -236,7 +172,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     'mouseup',
     null,
     function(e) {
-      if (editor || !selecting) {
+      if (!selecting) {
         return;
       }
 
@@ -280,12 +216,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       if (e.getIsTouchEvent()) {
         return;
       }
-
-      if (e.getType() == 'mouseout') {
-        hideReticle();
-      } else {
-        updateReticleForComment(e);
-      }
+      hideReticle();
     });
 
 });

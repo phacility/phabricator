@@ -27,6 +27,9 @@ JX.install('DiffChangeset', {
     this._encoding = data.encoding;
     this._loaded = data.loaded;
 
+    this._leftID = data.left;
+    this._rightID = data.right;
+
     this._inlines = [];
   },
 
@@ -48,7 +51,18 @@ JX.install('DiffChangeset', {
     _encoding: null,
     _undoTemplates: null,
 
+    _leftID: null,
+    _rightID: null,
+
     _inlines: null,
+
+    getLeftChangesetID: function() {
+      return this._leftID;
+    },
+
+    getRightChangesetID: function() {
+      return this._rightID;
+    },
 
     /**
      * Has the content of this changeset been loaded?

@@ -56,6 +56,12 @@ JX.install('DiffChangesetList', {
       'mousedown',
       ['differential-inline-comment', 'differential-inline-header'],
       onselect);
+
+    var onhover = JX.bind(this, this._ifawake, this._onhover);
+    JX.Stratcom.listen(
+      ['mouseover', 'mouseout'],
+      'differential-inline-comment',
+      onhover);
   },
 
   properties: {
@@ -74,16 +80,24 @@ JX.install('DiffChangesetList', {
     _focusStart: null,
     _focusEnd: null,
 
+    _hoverNode: null,
+    _hoverInline: null,
+    _hoverOrigin: null,
+    _hoverTarget: null,
+
     sleep: function() {
       this._asleep = true;
 
       this._redrawFocus();
+      this._redrawSelection();
+      this.resetHover();
     },
 
     wake: function() {
       this._asleep = false;
 
       this._redrawFocus();
+      this._redrawSelection();
 
       if (this._initialized) {
         return;
@@ -428,6 +442,21 @@ JX.install('DiffChangesetList', {
       return result;
     },
 
+    _onhover: function(e) {
+      if (e.getIsTouchEvent()) {
+        return;
+      }
+
+      var inline;
+      if (e.getType() == 'mouseout') {
+        inline = null;
+      } else {
+        inline = this._getInlineForEvent(e);
+      }
+
+      this._setHoverInline(inline);
+    },
+
     _onmore: function(e) {
       e.kill();
 
@@ -669,6 +698,8 @@ JX.install('DiffChangesetList', {
 
     _onresize: function() {
       this._redrawFocus();
+      this._redrawSelection();
+      this._redrawHover();
     },
 
     _onselect: function(e) {
@@ -769,6 +800,11 @@ JX.install('DiffChangesetList', {
       if (forms.length) {
         JX.DOM.invoke(forms[0], 'shouldRefresh');
       }
+
+      // Clear the mouse hover reticle after a substantive edit: we don't get
+      // a "mouseout" event if the row vanished because of row being removed
+      // after an edit.
+      this.reseHover();
     },
 
     setFocus: function(node, extended_node) {
@@ -810,6 +846,112 @@ JX.install('DiffChangesetList', {
         this._focusNode = node;
       }
       return this._focusNode;
+    },
+
+    _setHoverInline: function(inline) {
+      this._hoverInline = inline;
+
+      if (inline) {
+        var changeset = inline.getChangeset();
+
+        var changeset_id;
+        var side = inline.getDisplaySide();
+        if (side == 'right') {
+          changeset_id = changeset.getRightChangesetID();
+        } else {
+          changeset_id = changeset.getLeftChangesetID();
+        }
+
+        var new_part;
+        if (inline.isNewFile()) {
+          new_part = 'N';
+        } else {
+          new_part = 'O';
+        }
+
+        var prefix = 'C' + changeset_id + new_part + 'L';
+
+        var number = inline.getLineNumber();
+        var length = inline.getLineLength();
+
+        var origin = JX.$(prefix + number);
+        var target = JX.$(prefix + (number + length));
+
+        this._hoverOrigin = origin;
+        this._hoverTarget = target;
+      } else {
+        this._hoverOrigin = null;
+        this._hoverTarget = null;
+      }
+
+      this._redrawHover();
+    },
+
+    resetHover: function() {
+      this._setHoverInline(null);
+    },
+
+    _redrawHover: function() {
+      var reticle = this._getHoverNode();
+      if (!this._hoverOrigin || this.isAsleep()) {
+        JX.DOM.remove(reticle);
+        return;
+      }
+
+      JX.DOM.getContentFrame().appendChild(reticle);
+
+      var top = this._hoverOrigin;
+      var bot = this._hoverTarget;
+      if (JX.$V(top).y > JX.$V(bot).y) {
+        var tmp = top;
+        top = bot;
+        bot = tmp;
+      }
+
+      // Find the leftmost cell that we're going to highlight: this is the next
+      // <td /> in the row. In 2up views, it should be directly adjacent. In
+      // 1up views, we may have to skip over the other line number column.
+      var l = top;
+      while (JX.DOM.isType(l, 'th')) {
+        l = l.nextSibling;
+      }
+
+      // Find the rightmost cell that we're going to highlight: this is the
+      // farthest consecutive, adjacent <td /> in the row. Sometimes the left
+      // and right nodes are the same (left side of 2up view); sometimes we're
+      // going to highlight several nodes (copy + code + coverage).
+      var r = l;
+      while (r.nextSibling && JX.DOM.isType(r.nextSibling, 'td')) {
+        r = r.nextSibling;
+      }
+
+      var pos = JX.$V(l)
+        .add(JX.Vector.getAggregateScrollForNode(l));
+
+      var dim = JX.$V(r)
+        .add(JX.Vector.getAggregateScrollForNode(r))
+        .add(-pos.x, -pos.y)
+        .add(JX.Vector.getDim(r));
+
+      var bpos = JX.$V(bot)
+        .add(JX.Vector.getAggregateScrollForNode(bot));
+      dim.y = (bpos.y - pos.y) + JX.Vector.getDim(bot).y;
+
+      pos.setPos(reticle);
+      dim.setDim(reticle);
+
+      JX.DOM.show(reticle);
+    },
+
+    _getHoverNode: function() {
+      if (!this._hoverNode) {
+        var attributes = {
+          className: 'differential-reticle'
+        };
+        this._hoverNode = JX.$N('div', attributes);
+      }
+
+      return this._hoverNode;
     },
 
     _deleteInlineByID: function(id) {

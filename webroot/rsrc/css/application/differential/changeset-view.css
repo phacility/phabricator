@@ -109,10 +109,6 @@
   color: {$darkgreytext};
 }
 
-.differential-diff th.selected {
-  background-color: {$sh-yellowbackground};
-}
-
 .differential-changeset-immutable .differential-diff th {
   cursor: auto;
 }
@@ -308,6 +304,7 @@ td.cov-I {
   top: 0;
   left: 0;
   box-sizing: border-box;
+  pointer-events: none;
 }
 
 .differential-diff .inline > td {

@@ -56,8 +56,8 @@ JX.install('DiffInline', {
         this._displaySide = 'left';
       }
 
-      this._number = data.number;
-      this._length = data.length;
+      this._number = parseInt(data.number, 10);
+      this._length = parseInt(data.length, 10);
       this._originalText = data.original;
       this._isNewFile =
         (this.getDisplaySide() == 'right') ||
@@ -70,8 +70,8 @@ JX.install('DiffInline', {
 
     bindToRange: function(data) {
       this._displaySide = data.displaySide;
-      this._number = data.number;
-      this._length = data.length;
+      this._number = parseInt(data.number, 10);
+      this._length = parseInt(data.length, 10);
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
 
@@ -365,9 +365,13 @@ JX.install('DiffInline', {
     },
 
     _oncreateresponse: function(response) {
+      try {
       var rows = JX.$H(response).getNode();
 
       this._drawEditRows(rows);
+      } catch (e) {
+        JX.log(e);
+      }
     },
 
     _ondeleteresponse: function() {
@@ -409,6 +413,7 @@ JX.install('DiffInline', {
       var first_row = JX.DOM.scry(rows, 'tr')[0];
       var first_meta;
       var row = first_row;
+      var anchor = cursor || this._row;
       cursor = cursor || this._row.nextSibling;
 
       var next_row;
@@ -417,7 +422,11 @@ JX.install('DiffInline', {
         // into the document.
         next_row = row.nextSibling;
 
-        cursor.parentNode.insertBefore(row, cursor);
+        // Bind edit and undo rows to this DiffInline object so that
+        // interactions like hovering work properly.
+        JX.Stratcom.getData(row).inline = this;
+
+        anchor.parentNode.insertBefore(row, cursor);
         cursor = row;
 
         var row_meta = {
@@ -528,6 +537,8 @@ JX.install('DiffInline', {
       this._removeRow(row);
 
       this.setInvisible(false);
+
+      this._didUpdate(true);
     },
 
     _readText: function(row) {
@@ -579,8 +590,9 @@ JX.install('DiffInline', {
       }
 
       this.getChangeset().getChangesetList().redrawCursor();
+      this.getChangeset().getChangesetList().resetHover();
 
-      // Emit a resize event so that UI elements like the keyboad focus
+      // Emit a resize event so that UI elements like the keyboard focus
       // reticle can redraw properly.
       JX.Stratcom.invoke('resize');
     },
