@@ -438,6 +438,8 @@ JX.install('DiffInline', {
         row = next_row;
       }
 
+      JX.Stratcom.invoke('resize');
+
       return first_meta;
     },
 
@@ -516,6 +518,10 @@ JX.install('DiffInline', {
       // After making changes to inline comments, refresh the transaction
       // preview at the bottom of the page.
       this.getChangeset().getChangesetList().redrawPreview();
+
+      // Emit a resize event so that UI elements like the keyboad focus
+      // reticle can redraw properly.
+      JX.Stratcom.invoke('resize');
     },
 
     _redraw: function() {
