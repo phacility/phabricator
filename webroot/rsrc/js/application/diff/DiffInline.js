@@ -25,6 +25,7 @@ JX.install('DiffInline', {
     _isNewFile: null,
     _undoRow: null,
     _replyToCommentPHID: null,
+    _originalText: null,
 
     _isDeleted: false,
     _isInvisible: false,
@@ -57,6 +58,7 @@ JX.install('DiffInline', {
 
       this._number = data.number;
       this._length = data.length;
+      this._originalText = data.original;
       this._isNewFile =
         (this.getDisplaySide() == 'right') ||
         (data.left != data.right);
@@ -165,6 +167,8 @@ JX.install('DiffInline', {
       this._phid = null;
       this._hidden = false;
 
+      this._originalText = null;
+
       return row;
     },
 
@@ -231,10 +235,10 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    create: function() {
+    create: function(text) {
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oncreateresponse);
-      var data = this._newRequestData('new');
+      var data = this._newRequestData('new', text);
 
       this.setLoading(true);
 
@@ -248,10 +252,10 @@ JX.install('DiffInline', {
       return changeset.newInlineReply(this);
     },
 
-    edit: function() {
+    edit: function(text) {
       var uri = this._getInlineURI();
       var handler = JX.bind(this, this._oneditresponse);
-      var data = this._newRequestData('edit');
+      var data = this._newRequestData('edit', text || null);
 
       this.setLoading(true);
 
@@ -336,7 +340,7 @@ JX.install('DiffInline', {
       return this;
     },
 
-    _newRequestData: function(operation) {
+    _newRequestData: function(operation, text) {
       return {
         op: operation,
         id: this._id,
@@ -347,6 +351,7 @@ JX.install('DiffInline', {
         is_new: this.isNewFile(),
         changesetID: this.getChangesetID(),
         replyToCommentPHID: this.getReplyToCommentPHID() || '',
+        text: text || ''
       };
     },
 
@@ -366,7 +371,7 @@ JX.install('DiffInline', {
     },
 
     _ondeleteresponse: function() {
-      this._drawUndoRows();
+      this._drawUndeleteRows();
 
       this.setLoading(false);
       this.setDeleted(true);
@@ -374,7 +379,15 @@ JX.install('DiffInline', {
       this._didUpdate();
     },
 
-    _drawUndoRows: function() {
+    _drawUndeleteRows: function() {
+      return this._drawUndoRows('undelete', this._row);
+    },
+
+    _drawUneditRows: function(text) {
+      return this._drawUndoRows('unedit', null, text);
+    },
+
+    _drawUndoRows: function(mode, cursor, text) {
       var templates = this.getChangeset().getUndoTemplates();
 
       var template;
@@ -385,14 +398,14 @@ JX.install('DiffInline', {
       }
       template = JX.$H(template).getNode();
 
-      this._undoRow = this._drawRows(template, this._row, 'undo');
+      this._undoRow = this._drawRows(template, cursor, mode, text);
     },
 
     _drawEditRows: function(rows) {
       return this._drawRows(rows, null, 'edit');
     },
 
-    _drawRows: function(rows, cursor, type) {
+    _drawRows: function(rows, cursor, type, text) {
       var first_row = JX.DOM.scry(rows, 'tr')[0];
       var first_meta;
       var row = first_row;
@@ -410,6 +423,7 @@ JX.install('DiffInline', {
         var row_meta = {
           node: row,
           type: type,
+          text: text || null,
           listeners: []
         };
 
@@ -476,16 +490,26 @@ JX.install('DiffInline', {
 
       this._removeRow(row);
 
-      var uri = this._getInlineURI();
-      var data = this._newRequestData('undelete');
-      var handler = JX.bind(this, this._onundelete);
+      if (row.type == 'undelete') {
+        var uri = this._getInlineURI();
+        var data = this._newRequestData('undelete');
+        var handler = JX.bind(this, this._onundelete);
 
-      this.setDeleted(false);
-      this.setLoading(true);
+        this.setDeleted(false);
+        this.setLoading(true);
 
-      new JX.Request(uri, handler)
-        .setData(data)
-        .send();
+        new JX.Request(uri, handler)
+          .setData(data)
+          .send();
+      }
+
+      if (row.type == 'unedit') {
+        if (this.getID()) {
+          this.edit(row.text);
+        } else {
+          this.create(row.text);
+        }
+      }
     },
 
     _onundelete: function() {
@@ -496,11 +520,28 @@ JX.install('DiffInline', {
     _oncancel: function(row, e) {
       e.kill();
 
-      // TODO: Capture edited text and offer "undo".
+      var text = this._readText(row.node);
+      if (text && text.length && (text != this._originalText)) {
+        this._drawUneditRows(text);
+      }
 
       this._removeRow(row);
 
       this.setInvisible(false);
+    },
+
+    _readText: function(row) {
+      var textarea;
+      try {
+        textarea = JX.DOM.find(
+          row,
+          'textarea',
+          'differential-inline-comment-edit-textarea');
+      } catch (ex) {
+        return null;
+      }
+
+      return textarea.value;
     },
 
     _onsubmitresponse: function(row, response) {

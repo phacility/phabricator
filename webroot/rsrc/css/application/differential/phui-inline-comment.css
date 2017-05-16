@@ -318,11 +318,10 @@
 
 .differential-inline-undo {
   padding: 8px;
-  margin: 8px 12px;
+  margin: 4px 12px;
   text-align: center;
   background: {$sh-yellowbackground};
   border: 1px solid {$sh-yellowborder};
-  margin: 4px 0;
   color: {$darkgreytext};
   font: {$basefont};
   font-size: {$normalfontsize};
@@ -396,7 +395,6 @@
   background: {$lightgreybackground};
   padding: 2px 16px;
   color: {$lightgreytext};
-  font-size: {$smallerfontsize};
   display: none;
   font: {$basefont};
   white-space: nowrap;
