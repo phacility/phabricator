@@ -71,6 +71,10 @@ final class ManiphestTaskPointsTransaction
     return $errors;
   }
 
+  public function getIcon() {
+    return 'fa-calculator';
+  }
+
   private function getValueForPoints($value) {
     if (!strlen($value)) {
       $value = null;
