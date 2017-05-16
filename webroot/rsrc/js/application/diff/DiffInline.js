@@ -114,6 +114,27 @@ JX.install('DiffInline', {
       return this;
     },
 
+    canReply: function() {
+      if (!this._hasAction('reply')) {
+        return false;
+      }
+
+      return true;
+    },
+
+    canEdit: function() {
+      if (!this._hasAction('edit')) {
+        return false;
+      }
+
+      return true;
+    },
+
+    _hasAction: function(action) {
+      var nodes = JX.DOM.scry(this._row, 'a', 'differential-inline-' + action);
+      return (nodes.length > 0);
+    },
+
     _newRow: function() {
       var attributes = {
         sigil: 'inline-row'
@@ -149,6 +170,10 @@ JX.install('DiffInline', {
       new JX.Workflow(inline_uri, {op: op, ids: comment_id})
         .setHandler(JX.bag)
         .start();
+    },
+
+    isHidden: function() {
+      return this._hidden;
     },
 
     toggleDone: function() {

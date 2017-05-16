@@ -98,6 +98,12 @@ JX.install('DiffChangesetList', {
 
       label = pht('Jump to the table of contents.');
       this._installKey('t', label, this._ontoc);
+
+      label = pht('Reply to selected inline comment.');
+      this._installKey('r', label, this._onreply);
+
+      label = pht('Edit selected inline comment.');
+      this._installKey('e', label, this._onedit);
     },
 
     isAsleep: function() {
@@ -183,6 +189,52 @@ JX.install('DiffChangesetList', {
     _ontoc: function(manager) {
       var toc = JX.$('toc');
       manager.scrollTo(toc);
+    },
+
+    _onreply: function(manager) {
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'comment') {
+          var inline = cursor.inline;
+          if (inline.canReply()) {
+            manager.focusOn(null);
+
+            inline.reply();
+            return;
+          }
+        }
+      }
+
+      var pht = this.getTranslations();
+      this._warnUser(pht('You must select a comment to reply to.'));
+    },
+
+    _onedit: function(manager) {
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'comment') {
+          var inline = cursor.inline;
+          if (inline.canEdit()) {
+            manager.focusOn(null);
+
+            inline.edit();
+            return;
+          }
+        }
+      }
+
+      var pht = this.getTranslations();
+      this._warnUser(pht('You must select a comment to edit.'));
+    },
+
+    _warnUser: function(message) {
+      new JX.Notification()
+        .setContent(message)
+        .alterClassName('jx-notification-alert', true)
+        .setDuration(1000)
+        .show();
     },
 
     _onjumpkey: function(delta, filter, manager) {
@@ -534,8 +586,7 @@ JX.install('DiffChangesetList', {
     },
 
     _onaction: function(action, e) {
-      // TODO: This can become a kill once things fully switch over..
-      e.prevent();
+      e.kill();
 
       var inline = this._getInlineForEvent(e);
       var is_ref = false;

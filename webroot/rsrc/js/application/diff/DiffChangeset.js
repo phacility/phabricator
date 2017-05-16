@@ -367,10 +367,19 @@ JX.install('DiffChangeset', {
 
         if (block.type == 'comment') {
           for (var jj = 0; jj < block.items.length; jj++) {
+            var inline = this.getInlineForRow(block.items[jj]);
+
+            // If this inline has been collapsed, don't select it with the
+            // keyboard cursor.
+            if (inline.isHidden()) {
+              continue;
+            }
+
             items.push({
               type: block.type,
               changeset: this,
               target: block.items[jj],
+              inline: inline,
               nodes: {
                 begin: block.items[jj],
                 end: block.items[jj]
