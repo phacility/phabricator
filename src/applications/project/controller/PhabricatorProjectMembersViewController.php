@@ -70,7 +70,7 @@ final class PhabricatorProjectMembersViewController
     $viewer = $this->getViewer();
     $id = $project->getID();
 
-    $curtain = $this->newCurtainView($project);
+    $curtain = $this->newCurtainView();
 
     $is_locked = $project->getIsMembershipLocked();
 

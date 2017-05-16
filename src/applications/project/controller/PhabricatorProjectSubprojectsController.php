@@ -203,7 +203,7 @@ final class PhabricatorProjectSubprojectsController
     $allows_milestones = $project->supportsMilestones();
     $allows_subprojects = $project->supportsSubprojects();
 
-    $curtain = $this->newCurtainView($project);
+    $curtain = $this->newCurtainView();
 
     if ($allows_milestones && $milestones) {
       $milestone_text = pht('Create Next Milestone');
