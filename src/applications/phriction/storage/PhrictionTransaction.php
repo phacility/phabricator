@@ -5,7 +5,6 @@ final class PhrictionTransaction
 
   const TYPE_CONTENT = 'content';
   const TYPE_DELETE  = 'delete';
-  const TYPE_MOVE_TO = 'move-to';
   const TYPE_MOVE_AWAY = 'move-away';
 
   const MAILTAG_TITLE       = 'phriction-title';
@@ -34,7 +33,7 @@ final class PhrictionTransaction
     $phids = parent::getRequiredHandlePHIDs();
     $new = $this->getNewValue();
     switch ($this->getTransactionType()) {
-      case self::TYPE_MOVE_TO:
+      case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
       case self::TYPE_MOVE_AWAY:
         $phids[] = $new['phid'];
         break;
@@ -76,7 +75,7 @@ final class PhrictionTransaction
 
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
-      case self::TYPE_MOVE_TO:
+      case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
       case self::TYPE_MOVE_AWAY:
         return true;
       case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
@@ -87,7 +86,7 @@ final class PhrictionTransaction
 
   public function shouldHideForFeed() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_MOVE_TO:
+      case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
       case self::TYPE_MOVE_AWAY:
         return true;
       case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
@@ -102,7 +101,6 @@ final class PhrictionTransaction
         return 1.3;
       case self::TYPE_DELETE:
         return 1.5;
-      case self::TYPE_MOVE_TO:
       case self::TYPE_MOVE_AWAY:
         return 1.0;
     }
@@ -119,8 +117,6 @@ final class PhrictionTransaction
         return pht('Edited');
       case self::TYPE_DELETE:
         return pht('Deleted');
-      case self::TYPE_MOVE_TO:
-        return pht('Moved');
       case self::TYPE_MOVE_AWAY:
         return pht('Moved Away');
     }
@@ -137,7 +133,6 @@ final class PhrictionTransaction
         return 'fa-pencil';
       case self::TYPE_DELETE:
         return 'fa-times';
-      case self::TYPE_MOVE_TO:
       case self::TYPE_MOVE_AWAY:
         return 'fa-arrows';
     }
@@ -162,12 +157,6 @@ final class PhrictionTransaction
         return pht(
           '%s deleted this document.',
           $this->renderHandleLink($author_phid));
-
-      case self::TYPE_MOVE_TO:
-        return pht(
-          '%s moved this document from %s',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($new['phid']));
 
       case self::TYPE_MOVE_AWAY:
         return pht(
