@@ -30,21 +30,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
-    $types[] = PholioTransaction::TYPE_INLINE;
-
     return $types;
-  }
-
-  protected function transactionHasEffect(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_INLINE:
-        return true;
-    }
-
-    return parent::transactionHasEffect($object, $xaction);
   }
 
   protected function shouldApplyInitialEffects(
@@ -147,7 +133,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       }
       $comment = $xaction->getComment();
       switch ($xaction->getTransactionType()) {
-        case PholioTransaction::TYPE_INLINE:
+        case PholioMockInlineTransaction::TRANSACTIONTYPE:
           if ($comment && strlen($comment->getContent())) {
             $inline_comments[] = $comment;
           }
@@ -237,7 +223,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     // Move inline comments to the end, so the comments precede them.
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
-      if ($type == PholioTransaction::TYPE_INLINE) {
+      if ($type == PholioMockInlineTransaction::TRANSACTIONTYPE) {
         $tail[] = $xaction;
       } else {
         $head[] = $xaction;
@@ -252,7 +238,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_INLINE:
+      case PholioMockInlineTransaction::TRANSACTIONTYPE:
         return true;
     }
 

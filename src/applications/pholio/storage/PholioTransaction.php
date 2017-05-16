@@ -2,9 +2,6 @@
 
 final class PholioTransaction extends PhabricatorModularTransaction {
 
-  // Your witty commentary at the mock : image : x,y level
-  const TYPE_INLINE  = 'inline';
-
   const MAILTAG_STATUS            = 'pholio-status';
   const MAILTAG_COMMENT           = 'pholio-comment';
   const MAILTAG_UPDATED           = 'pholio-updated';
@@ -30,19 +27,10 @@ final class PholioTransaction extends PhabricatorModularTransaction {
     return new PholioTransactionView();
   }
 
-  public function getIcon() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_INLINE:
-        return 'fa-comment';
-    }
-
-    return parent::getIcon();
-  }
-
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
-      case self::TYPE_INLINE:
+      case PholioMockInlineTransaction::TRANSACTIONTYPE:
       case PhabricatorTransactions::TYPE_COMMENT:
         $tags[] = self::MAILTAG_COMMENT;
         break;
@@ -63,52 +51,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
         break;
     }
     return $tags;
-  }
-
-  public function getTitle() {
-    $author_phid = $this->getAuthorPHID();
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    $type = $this->getTransactionType();
-    switch ($type) {
-      case self::TYPE_INLINE:
-        $count = 1;
-        foreach ($this->getTransactionGroup() as $xaction) {
-          if ($xaction->getTransactionType() == $type) {
-            $count++;
-          }
-        }
-
-        return pht(
-          '%s added %d inline comment(s).',
-          $this->renderHandleLink($author_phid),
-          $count);
-        break;
-    }
-
-    return parent::getTitle();
-  }
-
-  public function getTitleForFeed() {
-    $author_phid = $this->getAuthorPHID();
-    $object_phid = $this->getObjectPHID();
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    $type = $this->getTransactionType();
-    switch ($type) {
-      case self::TYPE_INLINE:
-        return pht(
-          '%s added an inline comment to %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-        break;
-    }
-
-    return parent::getTitleForFeed();
   }
 
 }
