@@ -28,14 +28,17 @@
   background: #fff;
   border: 1px solid {$sh-yellowborder};
   font: {$basefont};
-  margin: 0;
-  width: 100%;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   overflow: hidden;
   white-space: normal;
   border-radius: 3px;
+  margin: 8px 12px;
+}
+
+.device .differential-inline-comment {
+  margin: 4px;
 }
 
 .inline-state-is-draft {
@@ -61,7 +64,7 @@
 
 /* Tighten up spacing on replies */
 .differential-inline-comment.inline-comment-is-reply {
-  margin-top: -12px;
+  margin-top: 0;
 }
 
 .differential-inline-comment .inline-head-right {
@@ -315,6 +318,7 @@
 
 .differential-inline-undo {
   padding: 8px;
+  margin: 8px 12px;
   text-align: center;
   background: {$sh-yellowbackground};
   border: 1px solid {$sh-yellowborder};
@@ -389,10 +393,20 @@
 }
 
 .differential-inline-summary {
-  background: {$greybackground};
-  padding: 0 4px;
-  color: {$greytext};
+  background: {$lightgreybackground};
+  padding: 2px 16px;
+  color: {$lightgreytext};
+  font-size: {$smallerfontsize};
   display: none;
+  font: {$basefont};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.device .differential-inline-summary {
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .inline-hidden .differential-inline-summary {

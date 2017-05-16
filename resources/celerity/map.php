@@ -12,7 +12,7 @@ return array(
     'core.pkg.css' => 'ee5f28cd',
     'core.pkg.js' => '8c5f913d',
     'darkconsole.pkg.js' => '1f9a31bc',
-    'differential.pkg.css' => '58712637',
+    'differential.pkg.css' => '7b1c772c',
     'differential.pkg.js' => 'f1b636fb',
     'diffusion.pkg.css' => 'b93d9b8c',
     'diffusion.pkg.js' => '84c8f8fd',
@@ -64,9 +64,9 @@ return array(
     'rsrc/css/application/dashboard/dashboard.css' => 'fe5b1869',
     'rsrc/css/application/diff/inline-comment-summary.css' => '51efda3a',
     'rsrc/css/application/differential/add-comment.css' => 'c47f8c40',
-    'rsrc/css/application/differential/changeset-view.css' => '41af6d25',
+    'rsrc/css/application/differential/changeset-view.css' => '69a3c268',
     'rsrc/css/application/differential/core.css' => '5b7b8ff4',
-    'rsrc/css/application/differential/phui-inline-comment.css' => '3fd8ca64',
+    'rsrc/css/application/differential/phui-inline-comment.css' => 'e0a2b52e',
     'rsrc/css/application/differential/revision-comment.css' => '14b8565a',
     'rsrc/css/application/differential/revision-history.css' => '0e8eb855',
     'rsrc/css/application/differential/revision-list.css' => 'f3c47d33',
@@ -567,7 +567,7 @@ return array(
     'conpherence-thread-manager' => '4d863052',
     'conpherence-transaction-css' => '85129c68',
     'd3' => 'a11a5ff2',
-    'differential-changeset-view-css' => '41af6d25',
+    'differential-changeset-view-css' => '69a3c268',
     'differential-core-view-css' => '5b7b8ff4',
     'differential-revision-add-comment-css' => 'c47f8c40',
     'differential-revision-comment-css' => '14b8565a',
@@ -864,7 +864,7 @@ return array(
     'phui-image-mask-css' => 'a8498f9c',
     'phui-info-panel-css' => '27ea50a1',
     'phui-info-view-css' => '6e217679',
-    'phui-inline-comment-view-css' => '3fd8ca64',
+    'phui-inline-comment-view-css' => 'e0a2b52e',
     'phui-invisible-character-view-css' => '6993d9f0',
     'phui-lightbox-css' => '0a035e40',
     'phui-list-view-css' => '12eb8ce6',
@@ -1182,9 +1182,6 @@ return array(
       'javelin-dom',
       'javelin-reactor-dom',
     ),
-    '41af6d25' => array(
-      'phui-inline-comment-view-css',
-    ),
     42126667 => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1400,6 +1397,9 @@ return array(
     ),
     '6882e80a' => array(
       'javelin-dom',
+    ),
+    '69a3c268' => array(
+      'phui-inline-comment-view-css',
     ),
     '69adf288' => array(
       'javelin-install',

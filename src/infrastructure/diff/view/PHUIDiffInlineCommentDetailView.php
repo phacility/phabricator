@@ -433,15 +433,20 @@ final class PHUIDiffInlineCommentDetailView
           phutil_tag_div('phabricator-remarkup', $content)),
       ));
 
+    $snippet = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(96)
+      ->truncateString($inline->getContent());
+
     $summary = phutil_tag(
       'div',
       array(
         'class' => 'differential-inline-summary',
       ),
-
-      // TODO: Render something a little more useful here as a hint about the
-      // inline content, like "alincoln: first line of text...".
-      pht('...'));
+      array(
+        phutil_tag('strong', array(), pht('%s:', $author)),
+        ' ',
+        $snippet,
+      ));
 
     return array(
       $anchor,
