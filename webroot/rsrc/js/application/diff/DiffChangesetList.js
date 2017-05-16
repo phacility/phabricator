@@ -67,10 +67,14 @@ JX.install('DiffChangesetList', {
 
     sleep: function() {
       this._asleep = true;
+
+      this._redrawFocus();
     },
 
     wake: function() {
       this._asleep = false;
+
+      this._redrawFocus();
 
       if (this._initialized) {
         return;
@@ -650,7 +654,7 @@ JX.install('DiffChangesetList', {
       var extended_node = this._focusEnd || node;
 
       var reticle = this._getFocusNode();
-      if (!node) {
+      if (!node || this.isAsleep()) {
         JX.DOM.remove(reticle);
         return;
       }
