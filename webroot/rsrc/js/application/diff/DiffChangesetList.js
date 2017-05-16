@@ -50,6 +50,12 @@ JX.install('DiffChangesetList', {
 
     var onresize = JX.bind(this, this._ifawake, this._onresize);
     JX.Stratcom.listen('resize', null, onresize);
+
+    var onselect = JX.bind(this, this._ifawake, this._onselect);
+    JX.Stratcom.listen(
+      'mousedown',
+      ['differential-inline-comment', 'differential-inline-header'],
+      onselect);
   },
 
   properties: {
@@ -663,6 +669,47 @@ JX.install('DiffChangesetList', {
 
     _onresize: function() {
       this._redrawFocus();
+    },
+
+    _onselect: function(e) {
+      // If the user clicked some element inside the header, like an action
+      // icon, ignore the event. They have to click the header element itself.
+      if (e.getTarget() !== e.getNode('differential-inline-header')) {
+        return;
+      }
+
+      var inline = this._getInlineForEvent(e);
+      if (!inline) {
+        return;
+      }
+
+      // The user definitely clicked an inline, so we're going to handle the
+      // event.
+      e.kill();
+
+      var selection = this._getSelectionState();
+      var item;
+
+      // If the comment the user clicked is currently selected, deselect it.
+      // This makes it easy to undo things if you clicked by mistake.
+      if (selection.cursor !== null) {
+        item = selection.items[selection.cursor];
+        if (item.target === inline) {
+          this._setSelectionState(null);
+          return;
+        }
+      }
+
+      // Otherwise, select the item that the user clicked. This makes it
+      // easier to resume keyboard operations after using the mouse to do
+      // something else.
+      var items = selection.items;
+      for (var ii = 0; ii < items.length; ii++) {
+        item = items[ii];
+        if (item.target === inline) {
+          this._setSelectionState(item);
+        }
+      }
     },
 
     _onaction: function(action, e) {

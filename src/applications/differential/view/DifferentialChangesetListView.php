@@ -270,8 +270,6 @@ final class DifferentialChangesetListView extends AphrontView {
       ),
     ));
 
-    $this->initBehavior('differential-comment-jump', array());
-
     if ($this->inlineURI) {
       Javelin::initBehavior('differential-edit-inline-comments', array(
         'uri' => $this->inlineURI,
