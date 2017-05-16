@@ -170,6 +170,8 @@ JX.install('DiffInline', {
       new JX.Workflow(inline_uri, {op: op, ids: comment_id})
         .setHandler(JX.bag)
         .start();
+
+      JX.Stratcom.invoke('resize');
     },
 
     isHidden: function() {
