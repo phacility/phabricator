@@ -94,7 +94,8 @@ final class PhabricatorProjectBoardReorderController
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
       ->setID($list_id)
-      ->setFlush(true);
+      ->setFlush(true)
+      ->setDrag(true);
 
     foreach ($columns as $column) {
       // Don't allow milestone columns to be reordered.
@@ -134,14 +135,9 @@ final class PhabricatorProjectBoardReorderController
         'reorderURI' => $reorder_uri,
       ));
 
-    $note = id(new PHUIInfoView())
-      ->appendChild(pht('Drag and drop columns to reorder them.'))
-      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-
     return $this->newDialog()
       ->setTitle(pht('Reorder Columns'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendChild($note)
       ->appendChild($list)
       ->addSubmitButton(pht('Done'));
   }
