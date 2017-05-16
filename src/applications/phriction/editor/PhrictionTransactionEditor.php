@@ -29,7 +29,7 @@ final class PhrictionTransactionEditor
     return $this;
   }
 
-  private function getOldContent() {
+  public function getOldContent() {
     return $this->oldContent;
   }
 
@@ -38,7 +38,7 @@ final class PhrictionTransactionEditor
     return $this;
   }
 
-  private function getNewContent() {
+  public function getNewContent() {
     return $this->newContent;
   }
 
@@ -80,7 +80,6 @@ final class PhrictionTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhrictionTransaction::TYPE_TITLE;
     $types[] = PhrictionTransaction::TYPE_CONTENT;
     $types[] = PhrictionTransaction::TYPE_DELETE;
     $types[] = PhrictionTransaction::TYPE_MOVE_TO;
@@ -99,11 +98,6 @@ final class PhrictionTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $this->getOldContent()->getTitle();
       case PhrictionTransaction::TYPE_CONTENT:
         if ($this->getIsNewObject()) {
           return null;
@@ -121,7 +115,6 @@ final class PhrictionTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
       case PhrictionTransaction::TYPE_DELETE:
         return $xaction->getNewValue();
@@ -154,7 +147,7 @@ final class PhrictionTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
+      case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
       case PhrictionTransaction::TYPE_CONTENT:
       case PhrictionTransaction::TYPE_DELETE:
       case PhrictionTransaction::TYPE_MOVE_TO:
@@ -178,7 +171,6 @@ final class PhrictionTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
       case PhrictionTransaction::TYPE_MOVE_TO:
         $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
@@ -232,9 +224,6 @@ final class PhrictionTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
-        $this->getNewContent()->setTitle($xaction->getNewValue());
-        break;
       case PhrictionTransaction::TYPE_CONTENT:
         $this->getNewContent()->setContent($xaction->getNewValue());
         break;
@@ -270,7 +259,7 @@ final class PhrictionTransactionEditor
     $save_content = false;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhrictionTransaction::TYPE_TITLE:
+        case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         case PhrictionTransaction::TYPE_CONTENT:
         case PhrictionTransaction::TYPE_DELETE:
         case PhrictionTransaction::TYPE_MOVE_AWAY:
@@ -312,7 +301,8 @@ final class PhrictionTransactionEditor
               $slug);
             $stub_xactions = array();
             $stub_xactions[] = id(new PhrictionTransaction())
-              ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+              ->setTransactionType(
+                PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
               ->setNewValue(PhabricatorSlug::getDefaultTitle($slug))
               ->setMetadataValue('stub:create:phid', $object->getPHID());
             $stub_xactions[] = id(new PhrictionTransaction())
@@ -477,30 +467,6 @@ final class PhrictionTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($type) {
-        case PhrictionTransaction::TYPE_TITLE:
-          $title = $object->getContent()->getTitle();
-          $missing = $this->validateIsEmptyTextField(
-            $title,
-            $xactions);
-
-          if ($missing) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Required'),
-              pht('Document title is required.'),
-              nonempty(last($xactions), null));
-
-            $error->setIsMissingFieldError(true);
-            $errors[] = $error;
-          } else if ($this->getProcessContentVersionError()) {
-            $error = $this->validateContentVersion($object, $type, $xaction);
-            if ($error) {
-              $this->setProcessContentVersionError(false);
-              $errors[] = $error;
-            }
-          }
-          break;
-
         case PhrictionTransaction::TYPE_CONTENT:
           if ($xaction->getMetadataValue('stub:create:phid')) {
             continue;

@@ -133,7 +133,7 @@ final class PhrictionEditController
 
       $xactions = array();
       $xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+        ->setTransactionType(PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
@@ -174,7 +174,8 @@ final class PhrictionEditController
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
         $e_title = nonempty(
-          $ex->getShortMessage(PhrictionTransaction::TYPE_TITLE),
+          $ex->getShortMessage(
+            PhrictionDocumentTitleTransaction::TRANSACTIONTYPE),
           true);
         $e_content = nonempty(
           $ex->getShortMessage(PhrictionTransaction::TYPE_CONTENT),

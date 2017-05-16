@@ -1,9 +1,8 @@
 <?php
 
 final class PhrictionTransaction
-  extends PhabricatorApplicationTransaction {
+  extends PhabricatorModularTransaction {
 
-  const TYPE_TITLE = 'title';
   const TYPE_CONTENT = 'content';
   const TYPE_DELETE  = 'delete';
   const TYPE_MOVE_TO = 'move-to';
@@ -27,6 +26,10 @@ final class PhrictionTransaction
     return new PhrictionTransactionComment();
   }
 
+  public function getBaseTransactionClass() {
+    return 'PhrictionDocumentTransactionType';
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
     $new = $this->getNewValue();
@@ -35,13 +38,12 @@ final class PhrictionTransaction
       case self::TYPE_MOVE_AWAY:
         $phids[] = $new['phid'];
         break;
-      case self::TYPE_TITLE:
+      case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         if ($this->getMetadataValue('stub:create:phid')) {
           $phids[] = $this->getMetadataValue('stub:create:phid');
         }
         break;
     }
-
 
     return $phids;
   }
@@ -77,7 +79,7 @@ final class PhrictionTransaction
       case self::TYPE_MOVE_TO:
       case self::TYPE_MOVE_AWAY:
         return true;
-      case self::TYPE_TITLE:
+      case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         return $this->getMetadataValue('stub:create:phid', false);
     }
     return parent::shouldHideForMail($xactions);
@@ -88,7 +90,7 @@ final class PhrictionTransaction
       case self::TYPE_MOVE_TO:
       case self::TYPE_MOVE_AWAY:
         return true;
-      case self::TYPE_TITLE:
+      case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         return $this->getMetadataValue('stub:create:phid', false);
     }
     return parent::shouldHideForFeed();
@@ -96,8 +98,6 @@ final class PhrictionTransaction
 
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
-        return 1.4;
       case self::TYPE_CONTENT:
         return 1.3;
       case self::TYPE_DELETE:
@@ -115,29 +115,14 @@ final class PhrictionTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
-        if ($old === null) {
-          if ($this->getMetadataValue('stub:create:phid')) {
-            return pht('Stubbed');
-          } else {
-            return pht('Created');
-          }
-        }
-
-        return pht('Retitled');
-
       case self::TYPE_CONTENT:
         return pht('Edited');
-
       case self::TYPE_DELETE:
         return pht('Deleted');
-
       case self::TYPE_MOVE_TO:
         return pht('Moved');
-
       case self::TYPE_MOVE_AWAY:
         return pht('Moved Away');
-
     }
 
     return parent::getActionName();
@@ -148,7 +133,6 @@ final class PhrictionTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
       case self::TYPE_CONTENT:
         return 'fa-pencil';
       case self::TYPE_DELETE:
@@ -169,26 +153,6 @@ final class PhrictionTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
-        if ($old === null) {
-          if ($this->getMetadataValue('stub:create:phid')) {
-            return pht(
-              '%s stubbed out this document when creating %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink(
-                $this->getMetadataValue('stub:create:phid')));
-          } else {
-            return pht(
-              '%s created this document.',
-              $this->renderHandleLink($author_phid));
-          }
-        }
-        return pht(
-          '%s changed the title from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $old,
-          $new);
-
       case self::TYPE_CONTENT:
         return pht(
           '%s edited the document content.',
@@ -224,20 +188,6 @@ final class PhrictionTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
-        if ($old === null) {
-          return pht(
-            '%s created %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-        }
-
-        return pht(
-          '%s renamed %s from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid),
-          $old,
-          $new);
 
       case self::TYPE_CONTENT:
         return pht(
@@ -273,7 +223,7 @@ final class PhrictionTransaction
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
+      case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_TITLE;
         break;
       case self::TYPE_CONTENT:
