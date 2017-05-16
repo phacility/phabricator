@@ -26,13 +26,15 @@ final class PhabricatorProjectMembersViewController
       ->setUser($viewer)
       ->setProject($project)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setUserPHIDs($project->getMemberPHIDs());
+      ->setUserPHIDs($project->getMemberPHIDs())
+      ->setShowNote(true);
 
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setUserPHIDs($project->getWatcherPHIDs());
+      ->setUserPHIDs($project->getWatcherPHIDs())
+      ->setShowNote(true);
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::ITEM_MEMBERS);
