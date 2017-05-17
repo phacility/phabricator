@@ -1743,7 +1743,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return array_values($result);
   }
 
-  protected function mergePHIDOrEdgeTransactions(
+  public function mergePHIDOrEdgeTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
 
