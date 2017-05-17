@@ -65,7 +65,7 @@ JX.install('DiffChangesetList', {
 
     var onrangedown = JX.bind(this, this._ifawake, this._onrangedown);
     JX.Stratcom.listen(
-      'mousedown',
+      ['touchstart', 'mousedown'],
       ['differential-changeset', 'tag:th'],
       onrangedown);
 
@@ -75,8 +75,17 @@ JX.install('DiffChangesetList', {
       ['differential-changeset', 'tag:th'],
       onrangemove);
 
+    var onrangetouchmove = JX.bind(this, this._ifawake, this._onrangetouchmove);
+    JX.Stratcom.listen(
+      'touchmove',
+      null,
+      onrangetouchmove);
+
     var onrangeup = JX.bind(this, this._ifawake, this._onrangeup);
-    JX.Stratcom.listen('mouseup', null, onrangeup);
+    JX.Stratcom.listen(
+      ['touchend', 'mouseup'],
+      null,
+      onrangeup);
   },
 
   properties: {
@@ -1088,11 +1097,9 @@ JX.install('DiffChangesetList', {
     },
 
     _onrangedown: function(e) {
-      if (!e.isNormalMouseEvent()) {
-        return;
-      }
-
-      if (e.getIsTouchEvent()) {
+      // NOTE: We're allowing touch events through, including "touchstart". We
+      // need to kill the "touchstart" event so the page doesn't scroll.
+      if (e.isRightButton()) {
         return;
       }
 
@@ -1120,8 +1127,13 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      var is_out = (e.getType() == 'mouseout');
       var target = e.getTarget();
 
+      this._updateRange(target, is_out);
+    },
+
+    _updateRange: function(target, is_out) {
       // Don't update the range if this "<th />" doesn't correspond to a line
       // number. For instance, this may be a dead line number, like the empty
       // line numbers on the left hand side of a newly added file.
@@ -1154,7 +1166,6 @@ JX.install('DiffChangesetList', {
         }
       }
 
-      var is_out = (e.getType() == 'mouseout');
       if (is_out) {
         if (this._rangeActive) {
           // If we're dragging a range, just leave the state as it is. This
@@ -1175,6 +1186,31 @@ JX.install('DiffChangesetList', {
       }
 
       this._setHoverRange(this._rangeOrigin, this._rangeTarget);
+    },
+
+    _onrangetouchmove: function(e) {
+      if (!this._rangeActive) {
+        return;
+      }
+
+      // NOTE: The target of a "touchmove" event is bogus. Use dark magic to
+      // identify the actual target. Some day, this might move into the core
+      // libraries. If this doesn't work, just bail.
+
+      var target;
+      try {
+        var raw_event = e.getRawEvent();
+        var touch = raw_event.touches[0];
+        target = document.elementFromPoint(touch.clientX, touch.clientY);
+      } catch (ex) {
+        return;
+      }
+
+      if (!JX.DOM.isType(target, 'th')) {
+        return;
+      }
+
+      this._updateRange(target, false);
     },
 
     _onrangeup: function(e) {
