@@ -323,6 +323,12 @@ final class DifferentialChangesetTwoUpRenderer
       $new = $this->renderImageStage($new_file);
     }
 
+    // If we don't have an explicit "vs" changeset, it's the left side of the
+    // "id" changeset.
+    if (!$vs) {
+      $vs = $id;
+    }
+
     $html_old = array();
     $html_new = array();
     foreach ($this->getOldComments() as $on_line => $comment_group) {
