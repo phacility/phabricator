@@ -968,11 +968,22 @@ JX.install('DiffChangesetList', {
         var number = inline.getLineNumber();
         var length = inline.getLineLength();
 
-        var origin = JX.$(prefix + number);
-        var target = JX.$(prefix + (number + length));
+        try {
+          var origin = JX.$(prefix + number);
+          var target = JX.$(prefix + (number + length));
 
-        this._hoverOrigin = origin;
-        this._hoverTarget = target;
+          this._hoverOrigin = origin;
+          this._hoverTarget = target;
+        } catch (error) {
+          // There may not be any nodes present in the document. A case where
+          // this occurs is when you reply to a ghost inline which was made
+          // on lines near the bottom of "long.txt" in an earlier diff, and
+          // the file was later shortened so those lines no longer exist. For
+          // more details, see T11662.
+
+          this._hoverOrigin = null;
+          this._hoverTarget = null;
+        }
       } else {
         this._hoverOrigin = null;
         this._hoverTarget = null;
