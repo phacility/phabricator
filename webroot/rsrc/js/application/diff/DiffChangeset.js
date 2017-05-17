@@ -581,8 +581,16 @@ JX.install('DiffChangeset', {
     },
 
     getInlineByID: function(id) {
+      return this._queryInline('id', id);
+    },
+
+    getInlineByPHID: function(phid) {
+      return this._queryInline('phid', phid);
+    },
+
+    _queryInline: function(field, value) {
       // First, look for the inline in the objects we've already built.
-      var inline = this._findInlineByID(id);
+      var inline = this._findInline(field, value);
       if (inline) {
         return inline;
       }
@@ -590,13 +598,24 @@ JX.install('DiffChangeset', {
       // If we haven't found a matching inline yet, rebuild all the inlines
       // present in the document, then look again.
       this._rebuildAllInlines();
-      return this._findInlineByID(id);
+      return this._findInline(field, value);
     },
 
-    _findInlineByID: function(id) {
+    _findInline: function(field, value) {
       for (var ii = 0; ii < this._inlines.length; ii++) {
         var inline = this._inlines[ii];
-        if (inline.getID() == id) {
+
+        var target;
+        switch (field) {
+          case 'id':
+            target = inline.getID();
+            break;
+          case 'phid':
+            target = inline.getPHID();
+            break;
+        }
+
+        if (target == value) {
           return inline;
         }
       }

@@ -63,6 +63,8 @@ JX.install('DiffInline', {
         (this.getDisplaySide() == 'right') ||
         (data.left != data.right);
 
+      this._replyToCommentPHID = data.replyToCommentPHID;
+
       this.setInvisible(false);
 
       return this;
@@ -100,11 +102,45 @@ JX.install('DiffInline', {
 
       this._replyToCommentPHID = inline._phid;
 
-      // TODO: This should insert correctly into the thread, not just at the
-      // bottom.
+      var changeset = this.getChangeset();
+
+      // We're going to figure out where in the document to position the new
+      // inline. Normally, it goes after any existing inline rows (so if
+      // several inlines reply to the same line, they appear in chronological
+      // order).
+
+      // However: if inlines are threaded, we want to put the new inline in
+      // the right place in the thread. This might be somewhere in the middle,
+      // so we need to do a bit more work to figure it out.
+
+      // To find the right place in the thread, we're going to look for any
+      // inline which is at or above the level of the comment we're replying
+      // to. This means we've reached a new fork of the thread, and should
+      // put our new inline before the comment we found.
+      var ancestor_map = {};
+      var ancestor = inline;
+      var reply_phid;
+      while (ancestor) {
+        reply_phid = ancestor.getReplyToCommentPHID();
+        if (!reply_phid) {
+          break;
+        }
+        ancestor_map[reply_phid] = true;
+        ancestor = changeset.getInlineByPHID(reply_phid);
+      }
+
       var parent_row = inline._row;
       var target_row = parent_row.nextSibling;
       while (target_row && JX.Stratcom.hasSigil(target_row, 'inline-row')) {
+        var target = changeset.getInlineForRow(target_row);
+        reply_phid = target.getReplyToCommentPHID();
+
+        // If we found an inline which is replying directly to some ancestor
+        // of this new comment, this is where the new rows go.
+        if (ancestor_map.hasOwnProperty(reply_phid)) {
+          break;
+        }
+
         target_row = target_row.nextSibling;
       }
 
@@ -316,6 +352,10 @@ JX.install('DiffInline', {
 
     getID: function() {
       return this._id;
+    },
+
+    getPHID: function() {
+      return this._phid;
     },
 
     getChangesetID: function() {
