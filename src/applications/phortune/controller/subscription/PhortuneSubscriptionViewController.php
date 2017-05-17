@@ -43,8 +43,8 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
 
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('fa-pencil')
-        ->setName(pht('Edit Subscription'))
+        ->setIcon('fa-credit-card')
+        ->setName(pht('Manage Autopay'))
         ->setHref($edit_uri)
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
