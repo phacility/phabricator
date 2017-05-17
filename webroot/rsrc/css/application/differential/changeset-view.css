@@ -325,6 +325,7 @@ td.cov-I {
   border: 1px solid {$blue};
   text-align: center;
   background-color: {$lightblue};
+  margin: 8px;
 }
 
 .differential-collapse-undo a {

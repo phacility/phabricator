@@ -55,6 +55,9 @@ JX.install('DiffChangeset', {
     _rightID: null,
 
     _inlines: null,
+    _visible: true,
+
+    _undoNode: null,
 
     getLeftChangesetID: function() {
       return this._leftID;
@@ -344,6 +347,10 @@ JX.install('DiffChangeset', {
           end: null
         }
       });
+
+      if (!this._visible) {
+        return items;
+      }
 
       var rows = JX.DOM.scry(this._node, 'tr');
 
@@ -635,8 +642,60 @@ JX.install('DiffChangeset', {
         // them to this Changeset's list of inlines.
         this.getInlineForRow(row);
       }
-    }
+    },
 
+    toggleVisibility: function() {
+      this._visible = !this._visible;
+
+      var diff = JX.DOM.find(this._node, 'table', 'differential-diff');
+      var undo = this._getUndoNode();
+
+      if (this._visible) {
+        JX.DOM.show(diff);
+        JX.DOM.remove(undo);
+      } else {
+        JX.DOM.hide(diff);
+        JX.DOM.appendContent(diff.parentNode, undo);
+      }
+
+      JX.Stratcom.invoke('resize');
+    },
+
+    _getUndoNode: function() {
+      if (!this._undoNode) {
+        var pht = this.getChangesetList().getTranslations();
+
+        var link_attributes = {
+          href: '#'
+        };
+
+        var undo_link = JX.$N('a', link_attributes, pht('Show Content'));
+
+        var onundo = JX.bind(this, this._onundo);
+        JX.DOM.listen(undo_link, 'click', null, onundo);
+
+        var node_attributes = {
+          className: 'differential-collapse-undo'
+        };
+
+        var node_content = [
+          pht('This file content has been collapsed.'),
+          ' ',
+          undo_link
+        ];
+
+        var undo_node = JX.$N('div', node_attributes, node_content);
+
+        this._undoNode = undo_node;
+      }
+
+      return this._undoNode;
+    },
+
+    _onundo: function(e) {
+      e.kill();
+      this.toggleVisibility();
+    }
   },
 
   statics: {

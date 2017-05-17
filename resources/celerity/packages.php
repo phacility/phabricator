@@ -200,7 +200,6 @@ return array(
     'javelin-behavior-repository-crossreference',
     'javelin-behavior-load-blame',
 
-    'javelin-behavior-differential-toggle-files',
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
 

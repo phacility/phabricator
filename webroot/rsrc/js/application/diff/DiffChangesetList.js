@@ -161,6 +161,9 @@ JX.install('DiffChangesetList', {
         'Jump to previous inline comment, including hidden comments.');
       this._installJumpKey('P', label, -1, 'comment', true);
 
+      label = pht('Hide or show the current file.');
+      this._installKey('h', label, this._onkeytogglefile);
+
       label = pht('Jump to the table of contents.');
       this._installKey('t', label, this._ontoc);
 
@@ -383,6 +386,20 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a comment to mark done.'));
+    },
+
+    _onkeytogglefile: function() {
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'file') {
+          cursor.changeset.toggleVisibility();
+          return;
+        }
+      }
+
+      var pht = this.getTranslations();
+      this._warnUser(pht('You must select a file to hide or show.'));
     },
 
     _onkeyhide: function() {
@@ -616,14 +633,10 @@ JX.install('DiffChangesetList', {
 
       var visible_item = new JX.PHUIXActionView()
         .setHandler(function(e) {
-          var diff = JX.DOM.scry(
-            JX.$(data.containerID),
-            'table',
-            'differential-diff');
-
-          JX.Stratcom.invoke('differential-toggle-file', null, {diff: diff});
           e.prevent();
           menu.close();
+
+          changeset.toggleVisibility();
         });
       list.addItem(visible_item);
 
