@@ -150,15 +150,31 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
       $this->getRenderer());
 
+    $changeset_id = $this->changeset->getID();
+
+    $vs_id = $this->getVsChangesetID();
+    if (!$vs_id) {
+      // Showing a changeset normally.
+      $left_id = $changeset_id;
+      $right_id = $changeset_id;
+    } else if ($vs_id == -1) {
+      // Showing a synthetic "deleted" changeset for a file which was
+      // removed between changes.
+      $left_id = $changeset_id;
+      $right_id = null;
+    } else {
+      // Showing a diff-of-diffs.
+      $left_id = $vs_id;
+      $right_id = $changeset_id;
+    }
+
     return javelin_tag(
       'div',
       array(
         'sigil' => 'differential-changeset',
         'meta'  => array(
-          'left'  => nonempty(
-            $this->getVsChangesetID(),
-            $this->changeset->getID()),
-          'right' => $this->changeset->getID(),
+          'left'  => $left_id,
+          'right' => $right_id,
           'renderURI' => $this->getRenderURI(),
           'whitespace' => $this->getWhitespace(),
           'highlight' => null,
