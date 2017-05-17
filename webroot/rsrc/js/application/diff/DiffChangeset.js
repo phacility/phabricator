@@ -19,6 +19,7 @@ JX.install('DiffChangeset', {
     this._node = node;
 
     var data = this._getNodeData();
+
     this._renderURI = data.renderURI;
     this._ref = data.ref;
     this._whitespace = data.whitespace;
@@ -29,6 +30,8 @@ JX.install('DiffChangeset', {
 
     this._leftID = data.left;
     this._rightID = data.right;
+
+    this._path = data.path;
 
     this._inlines = [];
   },
@@ -58,6 +61,7 @@ JX.install('DiffChangeset', {
     _visible: true,
 
     _undoNode: null,
+    _path: null,
 
     getLeftChangesetID: function() {
       return this._leftID;
@@ -227,6 +231,9 @@ JX.install('DiffChangeset', {
       JX.Router.getInstance().queue(routable);
     },
 
+    getPath: function() {
+      return this._path;
+    },
 
     /**
      * Receive a response to a context request.
@@ -426,6 +433,13 @@ JX.install('DiffChangeset', {
 
     _getNodeData: function() {
       return JX.Stratcom.getData(this._node);
+    },
+
+    getVectors: function() {
+      return {
+        pos: JX.$V(this._node),
+        dim: JX.Vector.getDim(this._node)
+      };
     },
 
     _onresponse: function(sequence, response) {

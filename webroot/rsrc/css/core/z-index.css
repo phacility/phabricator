@@ -93,6 +93,10 @@ div.phui-calendar-day-event {
   z-index: 6;
 }
 
+.diff-banner {
+  z-index: 6;
+}
+
 .conpherence-durable-column {
   z-index: 7;
 }

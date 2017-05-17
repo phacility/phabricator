@@ -51,6 +51,9 @@ JX.install('DiffChangesetList', {
     var onresize = JX.bind(this, this._ifawake, this._onresize);
     JX.Stratcom.listen('resize', null, onresize);
 
+    var onscroll = JX.bind(this, this._ifawake, this._onscroll);
+    JX.Stratcom.listen('scroll', null, onscroll);
+
     var onselect = JX.bind(this, this._ifawake, this._onselect);
     JX.Stratcom.listen(
       'mousedown',
@@ -112,6 +115,8 @@ JX.install('DiffChangesetList', {
     _rangeActive: false,
     _rangeOrigin: null,
     _rangeTarget: null,
+
+    _bannerNode: null,
 
     sleep: function() {
       this._asleep = true;
@@ -807,6 +812,12 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
       this._redrawHover();
+
+      this._redrawBanner();
+    },
+
+    _onscroll: function() {
+      this._redrawBanner();
     },
 
     _onselect: function(e) {
@@ -1265,6 +1276,77 @@ JX.install('DiffChangesetList', {
       this._rangeTarget = null;
 
       this.resetHover();
+    },
+
+    _redrawBanner: function() {
+      var node = this._getBannerNode();
+      var changeset = this._getVisibleChangeset();
+
+      // Don't do anything if nothing has changed. This seems to avoid some
+      // flickering issues in Safari, at least.
+      if (this._bannerChangeset === changeset) {
+        return;
+      }
+      this._bannerChangeset = changeset;
+
+      if (!changeset) {
+        JX.DOM.remove(node);
+        return;
+      }
+
+      var icon = new JX.PHUIXIconView()
+        .setIcon('fa-file')
+        .getNode();
+      JX.DOM.setContent(node, [icon, ' ', changeset.getPath()]);
+
+      document.body.appendChild(node);
+    },
+
+    _getBannerNode: function() {
+      if (!this._bannerNode) {
+        var attributes = {
+          className: 'diff-banner',
+          id: 'diff-banner'
+        };
+
+        this._bannerNode = JX.$N('div', attributes);
+      }
+
+      return this._bannerNode;
+    },
+
+    _getVisibleChangeset: function() {
+      if (this.isAsleep()) {
+        return null;
+      }
+
+      if (JX.Device.getDevice() != 'desktop') {
+        return null;
+      }
+
+      // Never show the banner if we're very near the top of the page.
+      var margin = 480;
+      var s = JX.Vector.getScroll();
+      if (s.y < margin) {
+        return null;
+      }
+
+      var v = JX.Vector.getViewport();
+      for (var ii = 0; ii < this._changesets.length; ii++) {
+        var changeset = this._changesets[ii];
+        var c = changeset.getVectors();
+
+        // If the changeset starts above the upper half of the screen...
+        if (c.pos.y < (s.y + (v.y / 2))) {
+          // ...and ends below the lower half of the screen, this is the
+          // current visible changeset.
+          if ((c.pos.y + c.dim.y) > (s.y + (v.y / 2))) {
+            return changeset;
+          }
+        }
+      }
+
+      return null;
     }
   }
 

@@ -130,8 +130,19 @@ JX.behavior('phabricator-nav', function(config) {
       return;
     }
 
+    // When the buoyant header is visible, move the menu down below it. This
+    // is a bit of a hack.
+    var banner_height = 0;
+    try {
+      var banner = JX.$('diff-banner');
+      banner_height = JX.Vector.getDim(banner).y;
+    } catch (error) {
+      // Ignore if there's no banner on the page.
+    }
+
     local.style.top = Math.max(
       0,
+      banner_height,
       JX.$V(content).y - Math.max(0, JX.Vector.getScroll().y)) + 'px';
   }
 
