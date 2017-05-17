@@ -62,6 +62,21 @@ JX.install('DiffChangesetList', {
       ['mouseover', 'mouseout'],
       'differential-inline-comment',
       onhover);
+
+    var onrangedown = JX.bind(this, this._ifawake, this._onrangedown);
+    JX.Stratcom.listen(
+      'mousedown',
+      ['differential-changeset', 'tag:th'],
+      onrangedown);
+
+    var onrangemove = JX.bind(this, this._ifawake, this._onrangemove);
+    JX.Stratcom.listen(
+      ['mouseover', 'mouseout'],
+      ['differential-changeset', 'tag:th'],
+      onrangemove);
+
+    var onrangeup = JX.bind(this, this._ifawake, this._onrangeup);
+    JX.Stratcom.listen('mouseup', null, onrangeup);
   },
 
   properties: {
@@ -84,6 +99,10 @@ JX.install('DiffChangesetList', {
     _hoverInline: null,
     _hoverOrigin: null,
     _hoverTarget: null,
+
+    _rangeActive: false,
+    _rangeOrigin: null,
+    _rangeTarget: null,
 
     sleep: function() {
       this._asleep = true;
@@ -953,8 +972,18 @@ JX.install('DiffChangesetList', {
       this._redrawHover();
     },
 
+    _setHoverRange: function(origin, target) {
+      this._hoverOrigin = origin;
+      this._hoverTarget = target;
+
+      this._redrawHover();
+    },
+
     resetHover: function() {
       this._setHoverInline(null);
+
+      this._hoverOrigin = null;
+      this._hoverTarget = null;
     },
 
     _redrawHover: function() {
@@ -1056,6 +1085,126 @@ JX.install('DiffChangesetList', {
 
     getDisplaySideFromHeader: function(th) {
       return (th.parentNode.firstChild != th) ? 'right' : 'left';
+    },
+
+    _onrangedown: function(e) {
+      if (!e.isNormalMouseEvent()) {
+        return;
+      }
+
+      if (e.getIsTouchEvent()) {
+        return;
+      }
+
+      if (this._rangeActive) {
+        return;
+      }
+
+      var target = e.getTarget();
+      var number = this.getLineNumberFromHeader(target);
+      if (!number) {
+        return;
+      }
+
+      e.kill();
+      this._rangeActive = true;
+
+      this._rangeOrigin = target;
+      this._rangeTarget = target;
+
+      this._setHoverRange(this._rangeOrigin, this._rangeTarget);
+    },
+
+    _onrangemove: function(e) {
+      if (e.getIsTouchEvent()) {
+        return;
+      }
+
+      var target = e.getTarget();
+
+      // Don't update the range if this "<th />" doesn't correspond to a line
+      // number. For instance, this may be a dead line number, like the empty
+      // line numbers on the left hand side of a newly added file.
+      var number = this.getLineNumberFromHeader(target);
+      if (!number) {
+        return;
+      }
+
+      if (this._rangeActive) {
+        var origin = this._hoverOrigin;
+
+        // Don't update the reticle if we're selecting a line range and the
+        // "<th />" under the cursor is on the wrong side of the file. You can
+        // only leave inline comments on the left or right side of a file, not
+        // across lines on both sides.
+        var origin_side = this.getDisplaySideFromHeader(origin);
+        var target_side = this.getDisplaySideFromHeader(target);
+        if (origin_side != target_side) {
+          return;
+        }
+
+        // Don't update the reticle if we're selecting a line range and the
+        // "<th />" under the cursor corresponds to a different file. You can
+        // only leave inline comments on lines in a single file, not across
+        // multiple files.
+        var origin_table = JX.DOM.findAbove(origin, 'table');
+        var target_table = JX.DOM.findAbove(target, 'table');
+        if (origin_table != target_table) {
+          return;
+        }
+      }
+
+      var is_out = (e.getType() == 'mouseout');
+      if (is_out) {
+        if (this._rangeActive) {
+          // If we're dragging a range, just leave the state as it is. This
+          // allows you to drag over something invalid while selecting a
+          // range without the range flickering or getting lost.
+        } else {
+          // Otherwise, clear the current range.
+          this.resetHover();
+        }
+        return;
+      }
+
+      if (this._rangeActive) {
+        this._rangeTarget = target;
+      } else {
+        this._rangeOrigin = target;
+        this._rangeTarget = target;
+      }
+
+      this._setHoverRange(this._rangeOrigin, this._rangeTarget);
+    },
+
+    _onrangeup: function(e) {
+      if (!this._rangeActive) {
+        return;
+      }
+
+      e.kill();
+
+      var origin = this._rangeOrigin;
+      var target = this._rangeTarget;
+
+      // If the user dragged a range from the bottom to the top, swap the node
+      // order around.
+      if (JX.$V(origin).y > JX.$V(target).y) {
+        var tmp = target;
+        target = origin;
+        origin = tmp;
+      }
+
+      var node = JX.DOM.findAbove(origin, null, 'differential-changeset');
+      var changeset = this.getChangesetForNode(node);
+
+      changeset.newInlineForRange(origin, target);
+
+      this._rangeActive = false;
+      this._rangeOrigin = null;
+      this._rangeTarget = null;
+
+      this.resetHover();
     }
   }
 

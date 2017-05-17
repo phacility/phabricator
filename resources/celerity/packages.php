@@ -193,7 +193,6 @@ return array(
     'phabricator-shaped-request',
 
     'javelin-behavior-differential-feedback-preview',
-    'javelin-behavior-differential-edit-inline-comments',
     'javelin-behavior-differential-populate',
     'javelin-behavior-differential-diff-radios',
     'javelin-behavior-aphront-drag-and-drop-textarea',

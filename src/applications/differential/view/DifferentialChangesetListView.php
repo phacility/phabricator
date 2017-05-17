@@ -274,13 +274,6 @@ final class DifferentialChangesetListView extends AphrontView {
       ),
     ));
 
-    if ($this->inlineURI) {
-      Javelin::initBehavior('differential-edit-inline-comments', array(
-        'uri' => $this->inlineURI,
-        'stage' => 'differential-review-stage',
-      ));
-    }
-
     if ($this->header) {
       $header = $this->header;
     } else {
