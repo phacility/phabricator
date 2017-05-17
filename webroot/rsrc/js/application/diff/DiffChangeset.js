@@ -581,11 +581,19 @@ JX.install('DiffChangeset', {
     },
 
     getInlineByID: function(id) {
-      // TODO: Currently, this will only find inlines which the user has
-      // already interacted with! Inlines are built lazily as events arrive.
-      // This can not yet find inlines which are passively present in the
-      // document.
+      // First, look for the inline in the objects we've already built.
+      var inline = this._findInlineByID(id);
+      if (inline) {
+        return inline;
+      }
 
+      // If we haven't found a matching inline yet, rebuild all the inlines
+      // present in the document, then look again.
+      this._rebuildAllInlines();
+      return this._findInlineByID(id);
+    },
+
+    _findInlineByID: function(id) {
       for (var ii = 0; ii < this._inlines.length; ii++) {
         var inline = this._inlines[ii];
         if (inline.getID() == id) {
@@ -594,8 +602,21 @@ JX.install('DiffChangeset', {
       }
 
       return null;
-    }
+    },
 
+    _rebuildAllInlines: function() {
+      var rows = JX.DOM.scry(this._node, 'tr');
+      for (var ii = 0; ii < rows.length; ii++) {
+        var row = rows[ii];
+        if (this._getRowType(row) != 'comment') {
+          continue;
+        }
+
+        // As a side effect, this builds any missing inline objects and adds
+        // them to this Changeset's list of inlines.
+        this.getInlineForRow(row);
+      }
+    }
 
   },
 
