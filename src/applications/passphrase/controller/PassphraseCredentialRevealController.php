@@ -67,7 +67,7 @@ final class PassphraseCredentialRevealController
         ->setDisableWorkflowOnCancel(true)
         ->addCancelButton($view_uri, pht('Done'));
 
-      $type_secret = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
+      $type_secret = PassphraseCredentialLookedAtTransaction::TRANSACTIONTYPE;
       $xactions = array(
         id(new PassphraseCredentialTransaction())
           ->setTransactionType($type_secret)

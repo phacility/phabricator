@@ -138,29 +138,6 @@ final class DifferentialChangesetListView extends AphrontView {
       ),
     ));
 
-    Javelin::initBehavior(
-      'differential-dropdown-menus',
-      array(
-        'pht' => array(
-          'Open in Editor' => pht('Open in Editor'),
-          'Show All Context' => pht('Show All Context'),
-          'All Context Shown' => pht('All Context Shown'),
-          "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
-          'Expand File' => pht('Expand File'),
-          'Collapse File' => pht('Collapse File'),
-          'Browse in Diffusion' => pht('Browse in Diffusion'),
-          'View Standalone' => pht('View Standalone'),
-          'Show Raw File (Left)' => pht('Show Raw File (Left)'),
-          'Show Raw File (Right)' => pht('Show Raw File (Right)'),
-          'Configure Editor' => pht('Configure Editor'),
-          'Load Changes' => pht('Load Changes'),
-          'View Side-by-Side' => pht('View Side-by-Side'),
-          'View Unified' => pht('View Unified'),
-          'Change Text Encoding...' => pht('Change Text Encoding...'),
-          'Highlight As...' => pht('Highlight As...'),
-        ),
-      ));
-
     $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
       $viewer);
 
@@ -169,11 +146,6 @@ final class DifferentialChangesetListView extends AphrontView {
     foreach ($changesets as $key => $changeset) {
 
       $file = $changeset->getFilename();
-      $class = 'differential-changeset';
-      if (!$this->inlineURI) {
-        $class .= ' differential-changeset-noneditable';
-      }
-
       $ref = $this->references[$key];
 
       $detail = id(new DifferentialChangesetDetailView())
@@ -238,19 +210,69 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $this->requireResource('aphront-tooltip-css');
 
-    $this->initBehavior('differential-populate', array(
+    $this->initBehavior(
+      'differential-populate',
+      array(
       'changesetViewIDs' => $ids,
+      'inlineURI' => $this->inlineURI,
+      'pht' => array(
+        'Open in Editor' => pht('Open in Editor'),
+        'Show All Context' => pht('Show All Context'),
+        'All Context Shown' => pht('All Context Shown'),
+        "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
+        'Expand File' => pht('Expand File'),
+        'Collapse File' => pht('Collapse File'),
+        'Browse in Diffusion' => pht('Browse in Diffusion'),
+        'View Standalone' => pht('View Standalone'),
+        'Show Raw File (Left)' => pht('Show Raw File (Left)'),
+        'Show Raw File (Right)' => pht('Show Raw File (Right)'),
+        'Configure Editor' => pht('Configure Editor'),
+        'Load Changes' => pht('Load Changes'),
+        'View Side-by-Side' => pht('View Side-by-Side'),
+        'View Unified' => pht('View Unified'),
+        'Change Text Encoding...' => pht('Change Text Encoding...'),
+        'Highlight As...' => pht('Highlight As...'),
+
+        'Loading...' => pht('Loading...'),
+
+        'Jump to next change.' => pht('Jump to next change.'),
+        'Jump to previous change.' => pht('Jump to previous change.'),
+        'Jump to next file.' => pht('Jump to next file.'),
+        'Jump to previous file.' => pht('Jump to previous file.'),
+        'Jump to next inline comment.' => pht('Jump to next inline comment.'),
+        'Jump to previous inline comment.' =>
+          pht('Jump to previous inline comment.'),
+        'Jump to the table of contents.' =>
+          pht('Jump to the table of contents.'),
+
+        'Edit selected inline comment.' =>
+          pht('Edit selected inline comment.'),
+        'You must select a comment to edit.' =>
+          pht('You must select a comment to edit.'),
+
+        'Reply to selected inline comment or change.' =>
+          pht('Reply to selected inline comment or change.'),
+        'You must select a comment or change to reply to.' =>
+          pht('You must select a comment or change to reply to.'),
+        'Reply and quote selected inline comment.' =>
+          pht('Reply and quote selected inline comment.'),
+
+        'Mark or unmark selected inline comment as done.' =>
+          pht('Mark or unmark selected inline comment as done.'),
+        'You must select a comment to mark done.' =>
+          pht('You must select a comment to mark done.'),
+
+        'Hide or show inline comment.' =>
+          pht('Hide or show inline comment.'),
+        'You must select a comment to hide.' =>
+          pht('You must select a comment to hide.'),
+
+        'Jump to next inline comment, including hidden comments.' =>
+          pht('Jump to next inline comment, including hidden comments.'),
+        'Jump to previous inline comment, including hidden comments.' =>
+          pht('Jump to previous inline comment, including hidden comments.'),
+      ),
     ));
-
-    $this->initBehavior('differential-comment-jump', array());
-
-    if ($this->inlineURI) {
-      Javelin::initBehavior('differential-edit-inline-comments', array(
-        'uri' => $this->inlineURI,
-        'stage' => 'differential-review-stage',
-        'revealIcon' => hsprintf('%s', new PHUIDiffRevealIconView()),
-      ));
-    }
 
     if ($this->header) {
       $header = $this->header;

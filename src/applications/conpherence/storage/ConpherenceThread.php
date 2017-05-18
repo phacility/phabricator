@@ -72,6 +72,10 @@ final class ConpherenceThread extends ConpherenceDAO
     return 'Z'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function attachParticipants(array $participants) {
     assert_instances_of($participants, 'ConpherenceParticipant');
     $this->participants = $participants;
@@ -200,12 +204,18 @@ final class ConpherenceThread extends ConpherenceDAO
     }
 
     $user_participation = $this->getParticipantIfExists($viewer->getPHID());
+    $theme = ConpherenceRoomSettings::COLOR_LIGHT;
     if ($user_participation) {
       $user_seen_count = $user_participation->getSeenMessageCount();
+      $participant = $this->getParticipant($viewer->getPHID());
+      $settings = $participant->getSettings();
+      $theme = idx($settings, 'theme', $theme);
     } else {
       $user_seen_count = 0;
     }
+
     $unread_count = $this->getMessageCount() - $user_seen_count;
+    $theme_class = ConpherenceRoomSettings::getThemeClass($theme);
 
     $title = $this->getTitle();
     $topic = $this->getTopic();
@@ -217,6 +227,7 @@ final class ConpherenceThread extends ConpherenceDAO
       'unread_count' => $unread_count,
       'epoch' => $this->getDateModified(),
       'image' => $img_src,
+      'theme' => $theme_class,
     );
   }
 

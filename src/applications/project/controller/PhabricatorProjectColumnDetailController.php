@@ -44,36 +44,38 @@ final class PhabricatorProjectColumnDetailController
     $title = $column->getDisplayName();
 
     $header = $this->buildHeaderView($column);
-    $actions = $this->buildActionView($column);
-    $properties = $this->buildPropertyView($column, $actions);
+    $properties = $this->buildPropertyView($column);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Workboard'), "/project/board/{$project_id}/");
     $crumbs->addTextCrumb(pht('Column: %s', $title));
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $crumbs->setBorder(true);
 
     $nav = $this->getProfileMenu();
+    require_celerity_resource('project-view-css');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
+      ->setMainColumn(array(
+        $properties,
+        $timeline,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $box,
-          $timeline,
-        ));
+      ->appendChild($view);
   }
 
   private function buildHeaderView(PhabricatorProjectColumn $column) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $header = id(new PHUIHeaderView())
-      ->setUser($viewer)
-      ->setHeader($column->getDisplayName());
+      ->setHeader(pht('Column: %s', $column->getDisplayName()))
+      ->setUser($viewer);
 
     if ($column->isHidden()) {
       $header->setStatus('fa-ban', 'dark', pht('Hidden'));
@@ -82,41 +84,13 @@ final class PhabricatorProjectColumnDetailController
     return $header;
   }
 
-  private function buildActionView(PhabricatorProjectColumn $column) {
-    $viewer = $this->getRequest()->getUser();
-
-    $id = $column->getID();
-    $project_id = $this->getProject()->getID();
-    $base_uri = '/board/'.$project_id.'/';
-
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $column,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Column'))
-        ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI($base_uri.'edit/'.$id.'/'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    return $actions;
-  }
-
   private function buildPropertyView(
-    PhabricatorProjectColumn $column,
-    PhabricatorActionListView $actions) {
-    $viewer = $this->getRequest()->getUser();
+    PhabricatorProjectColumn $column) {
+    $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($column)
-      ->setActionList($actions);
+      ->setObject($column);
 
     $limit = $column->getPointLimit();
     if ($limit === null) {
@@ -126,7 +100,12 @@ final class PhabricatorProjectColumnDetailController
     }
     $properties->addProperty(pht('Point Limit'), $limit_text);
 
-    return $properties;
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($properties);
+
+    return $box;
   }
 
 }

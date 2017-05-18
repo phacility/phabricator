@@ -2,14 +2,14 @@
  * @provides phabricator-zindex-css
  */
 
-.keyboard-focus-focus-reticle {
-  z-index: 1;
-}
-
 .device .phabricator-action-list-view.phabricator-action-list-toggle,
 .device-desktop .phui-document-content
   .phabricator-action-list-view.phabricator-action-list-toggle {
   z-index: 1;
+}
+
+.keyboard-focus-focus-reticle {
+  z-index: 2;
 }
 
 .device-desktop .phui-timeline-minor-event .phui-timeline-image {

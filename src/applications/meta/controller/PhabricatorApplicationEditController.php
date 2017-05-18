@@ -30,8 +30,14 @@ final class PhabricatorApplicationEditController
       ->execute();
 
     if ($request->isFormPost()) {
-      $result = array();
+      $xactions = array();
+
+      $template = $application->getApplicationTransactionTemplate();
       foreach ($application->getCapabilities() as $capability) {
+        if (!$application->isCapabilityEditable($capability)) {
+          continue;
+        }
+
         $old = $application->getPolicy($capability);
         $new = $request->getStr('policy:'.$capability);
 
@@ -40,67 +46,32 @@ final class PhabricatorApplicationEditController
           continue;
         }
 
-        if (empty($policies[$new])) {
-          // Not a standard policy, check for a custom policy.
-          $policy = id(new PhabricatorPolicyQuery())
-            ->setViewer($user)
-            ->withPHIDs(array($new))
-            ->executeOne();
-          if (!$policy) {
-            // Not a custom policy either. Can't set the policy to something
-            // invalid, so skip this.
-            continue;
-          }
-        }
-
-        if ($new == PhabricatorPolicies::POLICY_PUBLIC) {
-          $capobj = PhabricatorPolicyCapability::getCapabilityByKey(
-            $capability);
-          if (!$capobj || !$capobj->shouldAllowPublicPolicySetting()) {
-            // Can't set non-public policies to public.
-            continue;
-          }
-        }
-
-        $result[$capability] = $new;
+        $xactions[] = id(clone $template)
+          ->setTransactionType(
+              PhabricatorApplicationPolicyChangeTransaction::TRANSACTIONTYPE)
+          ->setMetadataValue(
+            PhabricatorApplicationPolicyChangeTransaction::METADATA_ATTRIBUTE,
+            $capability)
+          ->setNewValue($new);
       }
 
-      if ($result) {
-        $key = 'phabricator.application-settings';
-        $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
-        $value = $config_entry->getValue();
+      $editor = id(new PhabricatorApplicationEditor())
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
 
-        $phid = $application->getPHID();
-        if (empty($value[$phid])) {
-          $value[$application->getPHID()] = array();
-        }
-        if (empty($value[$phid]['policy'])) {
-          $value[$phid]['policy'] = array();
-        }
-
-        $value[$phid]['policy'] = $result + $value[$phid]['policy'];
-
-        // Don't allow users to make policy edits which would lock them out of
-        // applications, since they would be unable to undo those actions.
-        PhabricatorEnv::overrideConfig($key, $value);
-        PhabricatorPolicyFilter::mustRetainCapability(
-          $user,
-          $application,
-          PhabricatorPolicyCapability::CAN_VIEW);
-
-        PhabricatorPolicyFilter::mustRetainCapability(
-          $user,
-          $application,
-          PhabricatorPolicyCapability::CAN_EDIT);
-
-        PhabricatorConfigEditor::storeNewValue(
-          $user,
-          $config_entry,
-          $value,
-          PhabricatorContentSource::newFromRequest($request));
+      try {
+        $editor->applyTransactions($application, $xactions);
+        return id(new AphrontRedirectResponse())->setURI($view_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
       }
 
-      return id(new AphrontRedirectResponse())->setURI($view_uri);
+      return $this->newDialog()
+        ->setTitle(pht('Validation Failed'))
+        ->setValidationException($validation_exception)
+        ->addCancelButton($view_uri);
     }
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(

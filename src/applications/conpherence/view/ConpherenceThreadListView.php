@@ -75,6 +75,7 @@ final class ConpherenceThreadListView extends AphrontView {
           'title' => $data['title'],
           'id' => $dom_id,
           'threadID' => $thread->getID(),
+          'theme' => $data['theme'],
           ));
   }
 
@@ -116,7 +117,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $new_icon = id(new PHUIIconView())
       ->setIcon('fa-plus-square')
       ->addSigil('has-tooltip')
-      ->setHref('/conpherence/new/')
+      ->setHref('/conpherence/edit/')
       ->setWorkflow(true)
       ->setMetaData(array(
         'tip' => pht('New Room'),

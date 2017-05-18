@@ -113,6 +113,10 @@ JX.behavior('phabricator-nav', function(config) {
     new JX.Request('/settings/adjust/', JX.bag)
       .setData({ key : 'nav-collapsed', value : (collapsed ? 1 : 0) })
       .send();
+
+    // Invoke a resize event so page elements can redraw if they need to. One
+    // example is the selection reticles in Differential.
+    JX.Stratcom.invoke('resize');
   });
 
 

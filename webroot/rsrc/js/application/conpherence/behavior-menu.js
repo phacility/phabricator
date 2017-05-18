@@ -25,6 +25,7 @@ JX.behavior('conpherence-menu', function(config) {
   };
 
   var scrollbar = null;
+  var cur_theme = config.theme;
 
   // TODO - move more logic into the ThreadManager
   var threadManager = new JX.ConpherenceThreadManager();
@@ -70,7 +71,6 @@ JX.behavior('conpherence-menu', function(config) {
     var textarea = JX.DOM.find(form_root, 'textarea');
     if (!non_update) {
       _scrollMessageWindow();
-      textarea.value = '';
     }
     markThreadLoading(false);
 
@@ -145,6 +145,14 @@ JX.behavior('conpherence-menu', function(config) {
 
   function updatePageData(data) {
     var uri = '/Z' + _thread.selected;
+    var new_theme = data.theme;
+
+    if (new_theme != cur_theme) {
+      var root = JX.$('conpherence-main-layout');
+      JX.DOM.alterClass(root, cur_theme, false);
+      JX.DOM.alterClass(root, new_theme, true);
+      cur_theme = new_theme;
+    }
     JX.History.replace(uri);
     if (data.title) {
       JX.Title.setTitle(data.title);

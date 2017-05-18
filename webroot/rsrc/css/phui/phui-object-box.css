@@ -146,3 +146,15 @@ div.phui-object-box.phui-object-box-flush {
   padding: 4px 8px;
   background-color: {$lightgreybackground};
 }
+
+/* - Pager at the bottom ---------------------------------------------------- */
+
+.phui-object-box-pager {
+  background-color: {$bluebackground};
+  border-top: 1px solid {$lightblueborder};
+}
+
+.phui-object-box-pager a.button {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}

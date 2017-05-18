@@ -120,6 +120,10 @@ final class LegalpadDocument extends LegalpadDAO
     return 'L'.$this->getID();
   }
 
+  public function getViewURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function getUserSignature($phid) {
     return $this->assertAttachedKey($this->userSignatures, $phid);
   }

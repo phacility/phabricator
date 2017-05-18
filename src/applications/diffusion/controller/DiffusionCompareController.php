@@ -92,6 +92,7 @@ final class DiffusionCompareController extends DiffusionController {
       array(
         'view' => 'compare',
       ));
+    $crumbs->setBorder(true);
 
     $pager = id(new PHUIPagerView())
       ->readFromRequest($request);
@@ -310,16 +311,11 @@ final class DiffusionCompareController extends DiffusionController {
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Commits'));
 
-    $object_box = id(new PHUIObjectBoxView())
+    return id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($history_table);
+      ->setTable($history_table)
+      ->setPager($pager);
 
-    $pager_box = $this->renderTablePagerBox($pager);
-
-    return array(
-      $object_box,
-      $pager_box,
-    );
   }
 }

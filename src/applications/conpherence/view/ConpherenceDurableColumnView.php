@@ -363,9 +363,9 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       $actions[] = array(
         'name' => pht('Edit Room'),
         'disabled' => !$can_edit,
-        'href' => '/conpherence/update/'.$conpherence->getID().'/?nopic',
+        'href' => '/conpherence/edit/'.$conpherence->getID().'/',
         'icon' => 'fa-pencil',
-        'key' => ConpherenceUpdateActions::METADATA,
+        'key' => 'go_edit',
       );
       $actions[] = array(
         'name' => pht('View in Conpherence'),

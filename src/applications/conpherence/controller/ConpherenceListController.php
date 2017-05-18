@@ -89,13 +89,14 @@ final class ConpherenceListController extends ConpherenceController {
       default:
         $data = $this->loadDefaultParticipation($limit);
         $all_participation = $data['all_participation'];
-
-        $conpherence_id = head($all_participation)->getConpherencePHID();
-        $conpherence = id(new ConpherenceThreadQuery())
-          ->setViewer($user)
-          ->withPHIDs(array($conpherence_id))
-          ->needProfileImage(true)
-          ->executeOne();
+        if ($all_participation) {
+          $conpherence_id = head($all_participation)->getConpherencePHID();
+          $conpherence = id(new ConpherenceThreadQuery())
+            ->setViewer($user)
+            ->withPHIDs(array($conpherence_id))
+            ->needProfileImage(true)
+            ->executeOne();
+        }
         // If $conpherence is null, NUX state will render
         break;
     }
@@ -151,6 +152,7 @@ final class ConpherenceListController extends ConpherenceController {
       ->withParticipantPHIDs(array($viewer->getPHID()))
       ->setLimit($limit)
       ->execute();
+    $all_participation = mpull($all_participation, null, 'getConpherencePHID');
 
     return array(
       'all_participation' => $all_participation,

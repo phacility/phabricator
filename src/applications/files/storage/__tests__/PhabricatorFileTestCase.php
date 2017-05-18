@@ -94,11 +94,12 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     $xactions = array();
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+      ->setTransactionType(ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue(pht('File Scramble Test Task'));
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+      ->setTransactionType(
+        ManiphestTaskDescriptionTransaction::TRANSACTIONTYPE)
       ->setNewValue('{'.$file->getMonogram().'}');
 
     id(new ManiphestTransactionEditor())

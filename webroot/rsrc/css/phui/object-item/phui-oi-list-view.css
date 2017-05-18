@@ -302,6 +302,7 @@ ul.phui-oi-list-view {
   display: inline-block;
   color: {$greytext};
   vertical-align: top;
+  margin-right: 4px;
 }
 
 .phui-oi-attribute-spacer {

@@ -42,8 +42,8 @@ final class PhabricatorFundApplication extends PhabricatorApplication {
       '/fund/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'FundInitiativeListController',
         'create/' => 'FundInitiativeEditController',
-        'comment/(?P<id>[1-9]\d*)/' => 'FundInitiativeCommentController',
-        'edit/(?:(?P<id>\d+)/)?' => 'FundInitiativeEditController',
+        $this->getEditRoutePattern('edit/')
+          => 'FundInitiativeEditController',
         'close/(?P<id>\d+)/' => 'FundInitiativeCloseController',
         'back/(?P<id>\d+)/' => 'FundInitiativeBackController',
         'backers/(?:(?P<id>\d+)/)?(?:query/(?P<queryKey>[^/]+)/)?'

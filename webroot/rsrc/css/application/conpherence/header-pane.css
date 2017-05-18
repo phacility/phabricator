@@ -2,10 +2,6 @@
  * @provides conpherence-header-pane-css
  */
 
-.conpherence-header-pane {
-  background-color: {$lightbluebackground};
-}
-
 .conpherence-header-pane .phui-header-shell {
   padding: 8px 16px 10px;
   min-height: 38px;

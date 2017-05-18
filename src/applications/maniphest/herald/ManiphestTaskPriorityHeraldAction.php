@@ -40,7 +40,7 @@ final class ManiphestTaskPriorityHeraldAction
     }
 
     $xaction = $adapter->newTransaction()
-      ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+      ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($priority);
 
     $adapter->queueTransaction($xaction);

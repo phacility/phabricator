@@ -32,7 +32,8 @@ final class PassphraseCredentialDestroyController
 
       $xactions = array();
       $xactions[] = id(new PassphraseCredentialTransaction())
-        ->setTransactionType(PassphraseCredentialTransaction::TYPE_DESTROY)
+        ->setTransactionType(
+          PassphraseCredentialDestroyTransaction::TRANSACTIONTYPE)
         ->setNewValue(1);
 
       $editor = id(new PassphraseCredentialTransactionEditor())

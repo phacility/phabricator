@@ -22,15 +22,15 @@ final class PhabricatorManiphestTaskTestDataGenerator
     $template = new ManiphestTransaction();
     // Accumulate Transactions
     $changes = array();
-    $changes[ManiphestTransaction::TYPE_TITLE] =
+    $changes[ManiphestTaskTitleTransaction::TRANSACTIONTYPE] =
       $this->generateTitle();
-    $changes[ManiphestTransaction::TYPE_DESCRIPTION] =
+    $changes[ManiphestTaskDescriptionTransaction::TRANSACTIONTYPE] =
       $this->generateDescription();
-    $changes[ManiphestTransaction::TYPE_OWNER] =
+    $changes[ManiphestTaskOwnerTransaction::TRANSACTIONTYPE] =
       $this->loadOwnerPHID();
-    $changes[ManiphestTransaction::TYPE_STATUS] =
+    $changes[ManiphestTaskStatusTransaction::TRANSACTIONTYPE] =
       $this->generateTaskStatus();
-    $changes[ManiphestTransaction::TYPE_PRIORITY] =
+    $changes[ManiphestTaskPriorityTransaction::TRANSACTIONTYPE] =
       $this->generateTaskPriority();
     $changes[PhabricatorTransactions::TYPE_SUBSCRIBERS] =
       array('=' => $this->getCCPHIDs());

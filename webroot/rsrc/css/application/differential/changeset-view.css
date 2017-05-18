@@ -67,10 +67,6 @@
   padding: 1px 4px;
 }
 
-.device .differential-diff .inline > td {
-  padding: 4px;
-}
-
 .differential-diff td .zwsp {
   position: absolute;
   width: 0;
@@ -111,10 +107,6 @@
 .prose-diff span.old,
 .prose-diff span.new {
   color: {$darkgreytext};
-}
-
-.differential-diff th.selected {
-  background-color: {$sh-yellowbackground};
 }
 
 .differential-changeset-immutable .differential-diff th {
@@ -312,10 +304,11 @@ td.cov-I {
   top: 0;
   left: 0;
   box-sizing: border-box;
+  pointer-events: none;
 }
 
 .differential-diff .inline > td {
-  padding: 8px 12px;
+  padding: 0;
 }
 
 .differential-loading {

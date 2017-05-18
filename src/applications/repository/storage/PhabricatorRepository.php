@@ -1929,8 +1929,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'Cluster hosts must correctly route their intracluster requests.'));
     }
 
+    if (count($results) > 1) {
+      if (!$this->supportsSynchronization()) {
+        throw new Exception(
+          pht(
+            'Repository "%s" is bound to multiple active repository hosts, '.
+            'but this repository does not support cluster synchronization. '.
+            'Declusterize this repository or move it to a service with only '.
+            'one host.',
+            $this->getDisplayName()));
+      }
+    }
+
     shuffle($results);
     return head($results);
+  }
+
+  public function supportsSynchronization() {
+    // TODO: For now, this is only supported for Git.
+    if (!$this->isGit()) {
+      return false;
+    }
+
+    return true;
   }
 
   public function getAlmanacServiceCacheKey() {

@@ -456,7 +456,8 @@ final class DiffusionLintController extends DiffusionController {
     $content[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Lint Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+      ->setTable($table)
+      ->setPager($pager);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -465,7 +466,6 @@ final class DiffusionLintController extends DiffusionController {
         'view'   => 'lint',
       ));
 
-    $pager_box = $this->renderTablePagerBox($pager);
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Lint: %s', $drequest->getRepository()->getDisplayName()))
       ->setHeaderIcon('fa-code');
@@ -474,7 +474,6 @@ final class DiffusionLintController extends DiffusionController {
       ->setHeader($header)
       ->setFooter(array(
         $content,
-        $pager_box,
       ));
 
     return $this->newPage()

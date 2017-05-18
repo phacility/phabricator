@@ -20,6 +20,7 @@ final class PhabricatorSSHLog extends Phobject {
         'h' => php_uname('n'),
         'p' => getmypid(),
         'e' => time(),
+        'I' => PhabricatorEnv::getEnvConfig('cluster.instance'),
       );
 
       $sudo_user = PhabricatorEnv::getEnvConfig('phd.user');

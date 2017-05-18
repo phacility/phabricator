@@ -1090,7 +1090,9 @@ abstract class PhabricatorStorageManagementWorkflow
             }
 
             $t_begin = microtime(true);
-            $api->applyPatch($patch);
+            if (!$is_dryrun) {
+              $api->applyPatch($patch);
+            }
             $t_end = microtime(true);
 
             $duration = ($t_end - $t_begin);
@@ -1100,7 +1102,9 @@ abstract class PhabricatorStorageManagementWorkflow
           // If we're explicitly reapplying this patch, we don't need to
           // mark it as applied.
           if (!isset($state_map[$ref_key][$key])) {
-            $api->markPatchApplied($key, ($t_end - $t_begin));
+            if (!$is_dryrun) {
+              $api->markPatchApplied($key, ($t_end - $t_begin));
+            }
             $applied_map[$ref_key][$key] = true;
           }
         }

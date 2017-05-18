@@ -25,7 +25,7 @@ final class FundInitiativeCloseController
     $is_close = !$initiative->isClosed();
 
     if ($request->isFormPost()) {
-      $type_status = FundInitiativeTransaction::TYPE_STATUS;
+      $type_status = FundInitiativeStatusTransaction::TRANSACTIONTYPE;
 
       if ($is_close) {
         $new_status = FundInitiative::STATUS_CLOSED;

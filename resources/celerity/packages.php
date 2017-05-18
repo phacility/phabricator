@@ -161,6 +161,7 @@ return array(
   'conpherence.pkg.css' => array(
     'conpherence-durable-column-view',
     'conpherence-menu-css',
+    'conpherence-color-css',
     'conpherence-message-pane-css',
     'conpherence-notification-css',
     'conpherence-transaction-css',
@@ -192,22 +193,20 @@ return array(
     'phabricator-shaped-request',
 
     'javelin-behavior-differential-feedback-preview',
-    'javelin-behavior-differential-edit-inline-comments',
     'javelin-behavior-differential-populate',
     'javelin-behavior-differential-diff-radios',
-    'javelin-behavior-differential-comment-jump',
-    'javelin-behavior-differential-keyboard-navigation',
     'javelin-behavior-aphront-drag-and-drop-textarea',
     'javelin-behavior-phabricator-object-selector',
     'javelin-behavior-repository-crossreference',
     'javelin-behavior-load-blame',
 
-    'differential-inline-comment-editor',
-    'javelin-behavior-differential-dropdown-menus',
     'javelin-behavior-differential-toggle-files',
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
-    'changeset-view-manager',
+
+    'phabricator-diff-inline',
+    'phabricator-diff-changeset',
+    'phabricator-diff-changeset-list',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-icons-css',

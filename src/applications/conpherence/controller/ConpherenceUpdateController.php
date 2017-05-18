@@ -12,7 +12,7 @@ final class ConpherenceUpdateController
 
     $need_participants = false;
     $needed_capabilities = array(PhabricatorPolicyCapability::CAN_VIEW);
-    $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
+    $action = $request->getStr('action');
     switch ($action) {
       case ConpherenceUpdateActions::REMOVE_PERSON:
         $person_phid = $request->getStr('remove_person');
@@ -21,11 +21,7 @@ final class ConpherenceUpdateController
         }
         break;
       case ConpherenceUpdateActions::ADD_PERSON:
-      case ConpherenceUpdateActions::METADATA:
         $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
-        break;
-      case ConpherenceUpdateActions::NOTIFICATIONS:
-        $need_participants = true;
         break;
       case ConpherenceUpdateActions::LOAD:
         break;
@@ -61,7 +57,7 @@ final class ConpherenceUpdateController
         case ConpherenceUpdateActions::JOIN_ROOM:
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(
-              ConpherenceTransaction::TYPE_PARTICIPANTS)
+              ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
             ->setNewValue(array('+' => array($user->getPHID())));
           $delete_draft = true;
           $message = $request->getStr('text');
@@ -95,7 +91,7 @@ final class ConpherenceUpdateController
           if (!empty($person_phids)) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransaction::TYPE_PARTICIPANTS)
+                ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
               ->setNewValue(array('+' => $person_phids));
           }
           break;
@@ -108,50 +104,9 @@ final class ConpherenceUpdateController
           if ($person_phid) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransaction::TYPE_PARTICIPANTS)
+                ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
               ->setNewValue(array('-' => array($person_phid)));
             $response_mode = 'go-home';
-          }
-          break;
-        case ConpherenceUpdateActions::NOTIFICATIONS:
-          $notifications = $request->getStr('notifications');
-          $participant = $conpherence->getParticipantIfExists($user->getPHID());
-          if (!$participant) {
-            return id(new Aphront404Response());
-          }
-          $participant->setSettings(array('notifications' => $notifications));
-          $participant->save();
-          return id(new AphrontRedirectResponse())
-            ->setURI('/'.$conpherence->getMonogram());
-
-          break;
-        case ConpherenceUpdateActions::METADATA:
-          $title = $request->getStr('title');
-          $topic = $request->getStr('topic');
-
-          // all other metadata updates are continue requests
-          if (!$request->isContinueRequest()) {
-            break;
-          }
-
-          $title = $request->getStr('title');
-          $topic = $request->getStr('topic');
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(
-              ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
-            ->setNewValue($title);
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(
-              ConpherenceThreadTopicTransaction::TRANSACTIONTYPE)
-            ->setNewValue($topic);
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-            ->setNewValue($request->getStr('viewPolicy'));
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-            ->setNewValue($request->getStr('editPolicy'));
-          if (!$request->getExists('force_ajax')) {
-            $response_mode = 'redirect';
           }
           break;
         case ConpherenceUpdateActions::LOAD:
@@ -217,18 +172,11 @@ final class ConpherenceUpdateController
     }
 
     switch ($action) {
-      case ConpherenceUpdateActions::NOTIFICATIONS:
-        $dialog = $this->renderPreferencesDialog($conpherence);
-        break;
       case ConpherenceUpdateActions::ADD_PERSON:
         $dialog = $this->renderAddPersonDialog($conpherence);
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
         $dialog = $this->renderRemovePersonDialog($conpherence);
-        break;
-      case ConpherenceUpdateActions::METADATA:
-      default:
-        $dialog = $this->renderMetadataDialog($conpherence, $error_view);
         break;
     }
 
@@ -239,64 +187,6 @@ final class ConpherenceUpdateController
         ->setSubmitURI($this->getApplicationURI('update/'.$conpherence_id.'/'))
         ->addSubmitButton()
         ->addCancelButton($this->getApplicationURI($conpherence->getID().'/'));
-
-  }
-
-  private function renderPreferencesDialog(
-    ConpherenceThread $conpherence) {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $participant = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$participant) {
-      if ($user->isLoggedIn()) {
-        $text = pht(
-          'Notification settings are available after joining the room.');
-      } else {
-        $text = pht(
-          'Notification settings are available after logging in and joining '.
-          'the room.');
-      }
-      return id(new AphrontDialogView())
-        ->setTitle(pht('Room Preferences'))
-        ->appendParagraph($text);
-    }
-
-    $notification_key = PhabricatorConpherenceNotificationsSetting::SETTINGKEY;
-    $notification_default = $user->getUserSetting($notification_key);
-
-    $settings = $participant->getSettings();
-    $notifications = idx(
-      $settings,
-      'notifications',
-      $notification_default);
-
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->setFullWidth(true)
-      ->appendControl(
-      id(new AphrontFormRadioButtonControl())
-        ->addButton(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL,
-          PhabricatorConpherenceNotificationsSetting::getSettingLabel(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL),
-          '')
-        ->addButton(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY,
-          PhabricatorConpherenceNotificationsSetting::getSettingLabel(
-          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY),
-          '')
-        ->setName('notifications')
-        ->setValue($notifications));
-
-    return id(new AphrontDialogView())
-      ->setTitle(pht('Room Preferences'))
-      ->addHiddenInput('action', 'notifications')
-      ->addHiddenInput(
-        'latest_transaction_id',
-        $request->getInt('latest_transaction_id'))
-      ->appendForm($form);
 
   }
 
@@ -408,62 +298,6 @@ final class ConpherenceUpdateController
     return $dialog;
   }
 
-  private function renderMetadataDialog(
-    ConpherenceThread $conpherence,
-    $error_view) {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $title = pht('Update Room');
-    $form = id(new PHUIFormLayoutView())
-      ->appendChild($error_view)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Title'))
-        ->setName('title')
-        ->setValue($conpherence->getTitle()))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Topic'))
-        ->setName('topic')
-        ->setValue($conpherence->getTopic()));
-
-    $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
-      ->setObject($conpherence)
-      ->execute();
-
-    $form
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setName('viewPolicy')
-        ->setPolicyObject($conpherence)
-        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-        ->setPolicies($policies))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-        ->setName('editPolicy')
-        ->setPolicyObject($conpherence)
-        ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-        ->setPolicies($policies));
-
-    $view = id(new AphrontDialogView())
-      ->setTitle($title)
-      ->addHiddenInput('action', 'metadata')
-      ->addHiddenInput(
-        'latest_transaction_id',
-        $request->getInt('latest_transaction_id'))
-      ->addHiddenInput('__continue__', true)
-      ->appendChild($form);
-
-    if ($request->getExists('force_ajax')) {
-      $view->addHiddenInput('force_ajax', true);
-    }
-
-    return $view;
-  }
-
   private function loadAndRenderUpdates(
     $action,
     $conpherence_id,
@@ -471,7 +305,6 @@ final class ConpherenceUpdateController
 
     $need_transactions = false;
     switch ($action) {
-      case ConpherenceUpdateActions::METADATA:
       case ConpherenceUpdateActions::LOAD:
         $need_transactions = true;
         break;
@@ -480,7 +313,6 @@ final class ConpherenceUpdateController
         $need_transactions = true;
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
-      case ConpherenceUpdateActions::NOTIFICATIONS:
       default:
         break;
 
@@ -496,6 +328,8 @@ final class ConpherenceUpdateController
       ->executeOne();
 
     $non_update = false;
+    $participant = $conpherence->getParticipant($user->getPHID());
+
     if ($need_transactions && $conpherence->getTransactions()) {
       $data = ConpherenceTransactionRenderer::renderTransactions(
         $user,
@@ -503,9 +337,7 @@ final class ConpherenceUpdateController
       $key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
       $minimized = $user->getUserSetting($key);
       if (!$minimized) {
-        $participant_obj = $conpherence->getParticipant($user->getPHID());
-        $participant_obj
-          ->markUpToDate($conpherence, $data['latest_transaction']);
+        $participant->markUpToDate($conpherence);
       }
     } else if ($need_transactions) {
       $non_update = true;
@@ -521,15 +353,6 @@ final class ConpherenceUpdateController
     $header = null;
     $people_widget = null;
     switch ($action) {
-      case ConpherenceUpdateActions::METADATA:
-        $header = $this->buildHeaderPaneContent($conpherence);
-        $header = hsprintf('%s', $header);
-        $nav_item = id(new ConpherenceThreadListView())
-          ->setUser($user)
-          ->setBaseURI($this->getApplicationURI())
-          ->renderThreadItem($conpherence);
-        $nav_item = hsprintf('%s', $nav_item);
-        break;
       case ConpherenceUpdateActions::ADD_PERSON:
         $people_widget = id(new ConpherenceParticipantView())
           ->setUser($user)
@@ -538,7 +361,6 @@ final class ConpherenceUpdateController
         $people_widget = hsprintf('%s', $people_widget->render());
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
-      case ConpherenceUpdateActions::NOTIFICATIONS:
       default:
         break;
     }
@@ -547,7 +369,9 @@ final class ConpherenceUpdateController
       ->setViewer($user);
     $dropdown_query->execute();
 
-    $receive_sound = celerity_get_resource_uri('/rsrc/audio/basic/tap.mp3');
+    $sounds = $this->getSoundForParticipant($user, $participant);
+    $receive_sound = $sounds[ConpherenceRoomSettings::SOUND_RECEIVE];
+    $mention_sound = $sounds[ConpherenceRoomSettings::SOUND_MENTION];
 
     $content = array(
       'non_update' => $non_update,
@@ -564,10 +388,38 @@ final class ConpherenceUpdateController
       ),
       'sound' => array(
         'receive' => $receive_sound,
+        'mention' => $mention_sound,
       ),
     );
 
     return $content;
+  }
+
+  protected function getSoundForParticipant(
+    PhabricatorUser $user,
+    ConpherenceParticipant $participant) {
+
+    $sound_key = PhabricatorConpherenceSoundSetting::SETTINGKEY;
+    $sound_default = $user->getUserSetting($sound_key);
+
+    $settings = $participant->getSettings();
+    $sounds = idx($settings, 'sounds', array());
+    $map = PhabricatorConpherenceSoundSetting::getDefaultSound($sound_default);
+
+    $receive = idx($sounds,
+      ConpherenceRoomSettings::SOUND_RECEIVE,
+      $map[ConpherenceRoomSettings::SOUND_RECEIVE]);
+    $mention = idx($sounds,
+      ConpherenceRoomSettings::SOUND_MENTION,
+      $map[ConpherenceRoomSettings::SOUND_MENTION]);
+
+    $sound_map = ConpherenceRoomSettings::getSoundMap();
+
+    return array(
+      ConpherenceRoomSettings::SOUND_RECEIVE => $sound_map[$receive]['rsrc'],
+      ConpherenceRoomSettings::SOUND_MENTION => $sound_map[$mention]['rsrc'],
+    );
+
   }
 
 }

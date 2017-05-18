@@ -10,6 +10,7 @@ final class ConpherenceLayoutView extends AphrontTagView {
   private $search;
   private $messages;
   private $replyForm;
+  private $theme = ConpherenceRoomSettings::COLOR_LIGHT;
   private $latestTransactionID;
 
   public function setMessages($messages) {
@@ -56,6 +57,11 @@ final class ConpherenceLayoutView extends AphrontTagView {
     return $this;
   }
 
+  public function setTheme($theme) {
+    $this->theme = $theme;
+    return $this;
+  }
+
   public function setLatestTransactionID($id) {
     $this->latestTransactionID = $id;
     return $this;
@@ -66,6 +72,7 @@ final class ConpherenceLayoutView extends AphrontTagView {
     $classes[] = 'conpherence-layout';
     $classes[] = 'hide-widgets';
     $classes[] = 'conpherence-role-'.$this->role;
+    $classes[] = ConpherenceRoomSettings::getThemeClass($this->theme);
 
     return array(
       'id'    => 'conpherence-main-layout',
@@ -105,6 +112,7 @@ final class ConpherenceLayoutView extends AphrontTagView {
         'canEditSelectedThread' => $can_edit_selected,
         'latestTransactionID' => $this->latestTransactionID,
         'role' => $this->role,
+        'theme' => ConpherenceRoomSettings::getThemeClass($this->theme),
         'hasThreadList' => (bool)$this->threadView,
         'hasThread' => (bool)$this->messages,
         'hasWidgets' => false,

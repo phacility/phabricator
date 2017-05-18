@@ -61,9 +61,10 @@ body.white-background {
 }
 
 .keyboard-focus-focus-reticle {
-  background: #ffffd3;
+  background: rgba(255, 255, 211, 0.15);
   position: absolute;
-  border: 1px solid #999900;
+  border: 1px solid {$yellow};
+  pointer-events: none;
 }
 
 a.handle-status-closed {

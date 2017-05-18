@@ -17,7 +17,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $this->newImages = $new_images;
     return $this;
   }
-  private function getNewImages() {
+
+  public function getNewImages() {
     return $this->newImages;
   }
 
@@ -29,135 +30,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
-    $types[] = PholioTransaction::TYPE_NAME;
-    $types[] = PholioTransaction::TYPE_DESCRIPTION;
-    $types[] = PholioTransaction::TYPE_STATUS;
-    $types[] = PholioTransaction::TYPE_INLINE;
-
-    $types[] = PholioTransaction::TYPE_IMAGE_FILE;
-    $types[] = PholioTransaction::TYPE_IMAGE_NAME;
-    $types[] = PholioTransaction::TYPE_IMAGE_DESCRIPTION;
-    $types[] = PholioTransaction::TYPE_IMAGE_REPLACE;
-    $types[] = PholioTransaction::TYPE_IMAGE_SEQUENCE;
-
     return $types;
-  }
-
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_NAME:
-        return $object->getName();
-      case PholioTransaction::TYPE_DESCRIPTION:
-        return $object->getDescription();
-      case PholioTransaction::TYPE_STATUS:
-        return $object->getStatus();
-      case PholioTransaction::TYPE_IMAGE_FILE:
-        $images = $object->getImages();
-        return mpull($images, 'getPHID');
-      case PholioTransaction::TYPE_IMAGE_NAME:
-        $name = null;
-        $phid = null;
-        $image = $this->getImageForXaction($object, $xaction);
-        if ($image) {
-          $name = $image->getName();
-          $phid = $image->getPHID();
-        }
-        return array($phid => $name);
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
-        $description = null;
-        $phid = null;
-        $image = $this->getImageForXaction($object, $xaction);
-        if ($image) {
-          $description = $image->getDescription();
-          $phid = $image->getPHID();
-        }
-        return array($phid => $description);
-      case PholioTransaction::TYPE_IMAGE_REPLACE:
-        $raw = $xaction->getNewValue();
-        return $raw->getReplacesImagePHID();
-      case PholioTransaction::TYPE_IMAGE_SEQUENCE:
-        $sequence = null;
-        $phid = null;
-        $image = $this->getImageForXaction($object, $xaction);
-        if ($image) {
-          $sequence = $image->getSequence();
-          $phid = $image->getPHID();
-        }
-        return array($phid => $sequence);
-    }
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_NAME:
-      case PholioTransaction::TYPE_DESCRIPTION:
-      case PholioTransaction::TYPE_STATUS:
-      case PholioTransaction::TYPE_IMAGE_NAME:
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
-      case PholioTransaction::TYPE_IMAGE_SEQUENCE:
-        return $xaction->getNewValue();
-      case PholioTransaction::TYPE_IMAGE_REPLACE:
-        $raw = $xaction->getNewValue();
-        return $raw->getPHID();
-      case PholioTransaction::TYPE_IMAGE_FILE:
-        $raw_new_value = $xaction->getNewValue();
-        $new_value = array();
-        foreach ($raw_new_value as $key => $images) {
-          $new_value[$key] = mpull($images, 'getPHID');
-        }
-        $xaction->setNewValue($new_value);
-        return $this->getPHIDTransactionNewValue($xaction);
-    }
-  }
-
-  protected function extractFilePHIDsFromCustomTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $images = $this->getNewImages();
-    $images = mpull($images, null, 'getPHID');
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_IMAGE_FILE:
-        $file_phids = array();
-        foreach ($xaction->getNewValue() as $image_phid) {
-          $image = idx($images, $image_phid);
-          if (!$image) {
-            continue;
-          }
-          $file_phids[] = $image->getFilePHID();
-        }
-        return $file_phids;
-      case PholioTransaction::TYPE_IMAGE_REPLACE:
-        $image_phid = $xaction->getNewValue();
-        $image = idx($images, $image_phid);
-
-        if ($image) {
-          return array($image->getFilePHID());
-        }
-        break;
-    }
-
-    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
-  }
-
-
-  protected function transactionHasEffect(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_INLINE:
-        return true;
-    }
-
-    return parent::transactionHasEffect($object, $xaction);
   }
 
   protected function shouldApplyInitialEffects(
@@ -166,8 +39,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PholioTransaction::TYPE_IMAGE_FILE:
-        case PholioTransaction::TYPE_IMAGE_REPLACE:
+        case PholioImageFileTransaction::TRANSACTIONTYPE:
+        case PholioImageReplaceTransaction::TRANSACTIONTYPE:
           return true;
           break;
       }
@@ -182,7 +55,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $new_images = array();
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PholioTransaction::TYPE_IMAGE_FILE:
+        case PholioImageFileTransaction::TRANSACTIONTYPE:
           $new_value = $xaction->getNewValue();
           foreach ($new_value as $key => $txn_images) {
             if ($key != '+') {
@@ -194,7 +67,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
             }
           }
           break;
-        case PholioTransaction::TYPE_IMAGE_REPLACE:
+        case PholioImageReplaceTransaction::TRANSACTIONTYPE:
           $image = $xaction->getNewValue();
           $image->save();
           $new_images[] = $image;
@@ -202,93 +75,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       }
     }
     $this->setNewImages($new_images);
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_NAME:
-        $object->setName($xaction->getNewValue());
-        if ($object->getOriginalName() === null) {
-          $object->setOriginalName($xaction->getNewValue());
-        }
-        break;
-      case PholioTransaction::TYPE_DESCRIPTION:
-        $object->setDescription($xaction->getNewValue());
-        break;
-      case PholioTransaction::TYPE_STATUS:
-        $object->setStatus($xaction->getNewValue());
-        break;
-    }
-  }
-
-  private function getImageForXaction(
-    PholioMock $mock,
-    PhabricatorApplicationTransaction $xaction) {
-    $raw_new_value = $xaction->getNewValue();
-    $image_phid = key($raw_new_value);
-    $images = $mock->getImages();
-    foreach ($images as $image) {
-      if ($image->getPHID() == $image_phid) {
-        return $image;
-      }
-    }
-    return null;
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_IMAGE_FILE:
-        $old_map = array_fuse($xaction->getOldValue());
-        $new_map = array_fuse($xaction->getNewValue());
-
-        $obsolete_map = array_diff_key($old_map, $new_map);
-        $images = $object->getImages();
-        foreach ($images as $seq => $image) {
-          if (isset($obsolete_map[$image->getPHID()])) {
-            $image->setIsObsolete(1);
-            $image->save();
-            unset($images[$seq]);
-          }
-        }
-        $object->attachImages($images);
-        break;
-      case PholioTransaction::TYPE_IMAGE_REPLACE:
-        $old = $xaction->getOldValue();
-        $images = $object->getImages();
-        foreach ($images as $seq => $image) {
-          if ($image->getPHID() == $old) {
-            $image->setIsObsolete(1);
-            $image->save();
-            unset($images[$seq]);
-          }
-        }
-        $object->attachImages($images);
-        break;
-      case PholioTransaction::TYPE_IMAGE_NAME:
-        $image = $this->getImageForXaction($object, $xaction);
-        $value = (string)head($xaction->getNewValue());
-        $image->setName($value);
-        $image->save();
-        break;
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
-        $image = $this->getImageForXaction($object, $xaction);
-        $value = (string)head($xaction->getNewValue());
-        $image->setDescription($value);
-        $image->save();
-        break;
-      case PholioTransaction::TYPE_IMAGE_SEQUENCE:
-        $image = $this->getImageForXaction($object, $xaction);
-        $value = (int)head($xaction->getNewValue());
-        $image->setSequence($value);
-        $image->save();
-        break;
-    }
   }
 
   protected function applyFinalEffects(
@@ -302,41 +88,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     }
 
     return $xactions;
-  }
-
-  protected function mergeTransactions(
-    PhabricatorApplicationTransaction $u,
-    PhabricatorApplicationTransaction $v) {
-
-    $type = $u->getTransactionType();
-    switch ($type) {
-      case PholioTransaction::TYPE_NAME:
-      case PholioTransaction::TYPE_DESCRIPTION:
-      case PholioTransaction::TYPE_STATUS:
-        return $v;
-      case PholioTransaction::TYPE_IMAGE_REPLACE:
-        $u_img = $u->getNewValue();
-        $v_img = $v->getNewValue();
-        if ($u_img->getReplacesImagePHID() == $v_img->getReplacesImagePHID()) {
-          return $v;
-        }
-        break;
-      case PholioTransaction::TYPE_IMAGE_FILE:
-        return $this->mergePHIDOrEdgeTransactions($u, $v);
-      case PholioTransaction::TYPE_IMAGE_NAME:
-      case PholioTransaction::TYPE_IMAGE_DESCRIPTION:
-      case PholioTransaction::TYPE_IMAGE_SEQUENCE:
-        $raw_new_value_u = $u->getNewValue();
-        $raw_new_value_v = $v->getNewValue();
-        $phid_u = key($raw_new_value_u);
-        $phid_v = key($raw_new_value_v);
-        if ($phid_u == $phid_v) {
-          return $v;
-        }
-        break;
-    }
-
-    return parent::mergeTransactions($u, $v);
   }
 
   protected function shouldSendMail(
@@ -382,7 +133,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       }
       $comment = $xaction->getComment();
       switch ($xaction->getTransactionType()) {
-        case PholioTransaction::TYPE_INLINE:
+        case PholioMockInlineTransaction::TRANSACTIONTYPE:
           if ($comment && strlen($comment->getContent())) {
             $inline_comments[] = $comment;
           }
@@ -472,7 +223,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     // Move inline comments to the end, so the comments precede them.
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
-      if ($type == PholioTransaction::TYPE_INLINE) {
+      if ($type == PholioMockInlineTransaction::TRANSACTIONTYPE) {
         $tail[] = $xaction;
       } else {
         $head[] = $xaction;
@@ -487,7 +238,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PholioTransaction::TYPE_INLINE:
+      case PholioMockInlineTransaction::TRANSACTIONTYPE:
         return true;
     }
 

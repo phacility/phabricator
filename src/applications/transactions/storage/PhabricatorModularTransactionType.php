@@ -309,4 +309,14 @@ abstract class PhabricatorModularTransactionType
     return $this->getStorage()->getIsCreateTransaction();
   }
 
+  final protected function getPHIDList(array $old, array $new) {
+    $editor = $this->getEditor();
+
+    return $editor->getPHIDList($old, $new);
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return $this->getStorage()->getMetadataValue($key, $default);
+  }
+
 }

@@ -57,8 +57,9 @@ abstract class ConpherenceController extends PhabricatorController {
     ConpherenceThread $conpherence) {
     $viewer = $this->getViewer();
     $header = null;
+    $id = $conpherence->getID();
 
-    if ($conpherence->getID()) {
+    if ($id) {
       $data = $conpherence->getDisplayData($this->getViewer());
 
       $header = id(new PHUIHeaderView())
@@ -83,7 +84,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
       if ($can_edit) {
         $header->setImageURL(
-          $this->getApplicationURI('picture/'.$conpherence->getID().'/'));
+          $this->getApplicationURI("picture/{$id}/"));
       }
 
       $participating = $conpherence->getParticipantIfExists($viewer->getPHID());
@@ -91,7 +92,7 @@ abstract class ConpherenceController extends PhabricatorController {
       $header->addActionItem(
         id(new PHUIIconCircleView())
           ->setHref(
-            $this->getApplicationURI('update/'.$conpherence->getID()).'/')
+            $this->getApplicationURI('edit/'.$conpherence->getID()).'/')
           ->setIcon('fa-pencil')
           ->addClass('hide-on-device')
           ->setColor('violet')
@@ -99,9 +100,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
-          ->setHref(
-            $this->getApplicationURI('update/'.$conpherence->getID()).'/'.
-            '?action='.ConpherenceUpdateActions::NOTIFICATIONS)
+          ->setHref($this->getApplicationURI("preferences/{$id}/"))
           ->setIcon('fa-gear')
           ->addClass('hide-on-device')
           ->setColor('pink')
@@ -136,7 +135,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
       if (!$participating) {
         $action = ConpherenceUpdateActions::JOIN_ROOM;
-        $uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+        $uri = $this->getApplicationURI("update/{$id}/");
         $button = phutil_tag(
           'button',
           array(

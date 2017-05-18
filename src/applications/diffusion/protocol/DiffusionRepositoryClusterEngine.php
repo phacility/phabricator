@@ -559,8 +559,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       return false;
     }
 
-    // TODO: For now, this is only supported for Git.
-    if (!$repository->isGit()) {
+    if (!$repository->supportsSynchronization()) {
       return false;
     }
 

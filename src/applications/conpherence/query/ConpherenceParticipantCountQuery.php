@@ -1,73 +1,69 @@
 <?php
 
-/**
- * Query class that answers the question:
- *
- * - Q: How many unread conpherences am I participating in?
- * - A:
- *     id(new ConpherenceParticipantCountQuery())
- *     ->withParticipantPHIDs(array($my_phid))
- *     ->withParticipationStatus(ConpherenceParticipationStatus::BEHIND)
- *     ->execute();
- */
 final class ConpherenceParticipantCountQuery
   extends PhabricatorOffsetPagedQuery {
 
   private $participantPHIDs;
-  private $participationStatus;
+  private $unread;
 
   public function withParticipantPHIDs(array $phids) {
     $this->participantPHIDs = $phids;
     return $this;
   }
 
-  public function withParticipationStatus($participation_status) {
-    $this->participationStatus = $participation_status;
+  public function withUnread($unread) {
+    $this->unread = $unread;
     return $this;
   }
 
   public function execute() {
+    $thread = new ConpherenceThread();
     $table = new ConpherenceParticipant();
-    $conn_r = $table->establishConnection('r');
+    $conn = $table->establishConnection('r');
 
     $rows = queryfx_all(
-      $conn_r,
-      'SELECT COUNT(*) as count, participantPHID '.
-      'FROM %T participant %Q %Q %Q',
+      $conn,
+      'SELECT COUNT(*) as count, participantPHID
+        FROM %T participant JOIN %T thread
+        ON participant.conpherencePHID = thread.phid %Q %Q %Q',
       $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupByClause($conn_r),
-      $this->buildLimitClause($conn_r));
+      $thread->getTableName(),
+      $this->buildWhereClause($conn),
+      $this->buildGroupByClause($conn),
+      $this->buildLimitClause($conn));
 
     return ipull($rows, 'count', 'participantPHID');
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    if ($this->participantPHIDs) {
+    if ($this->participantPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'participantPHID IN (%Ls)',
+        $conn,
+        'participant.participantPHID IN (%Ls)',
         $this->participantPHIDs);
     }
 
-    if ($this->participationStatus !== null) {
-      $where[] = qsprintf(
-        $conn_r,
-        'participationStatus = %d',
-        $this->participationStatus);
+    if ($this->unread !== null) {
+      if ($this->unread) {
+        $where[] = qsprintf(
+          $conn,
+          'participant.seenMessageCount < thread.messageCount');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'participant.seenMessageCount >= thread.messageCount');
+      }
     }
 
     return $this->formatWhereClause($where);
   }
 
-  private function buildGroupByClause(AphrontDatabaseConnection $conn_r) {
-    $group_by = qsprintf(
-      $conn_r,
+  private function buildGroupByClause(AphrontDatabaseConnection $conn) {
+    return qsprintf(
+      $conn,
       'GROUP BY participantPHID');
-
-    return $group_by;
   }
 
 }

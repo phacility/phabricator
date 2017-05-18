@@ -1,8 +1,7 @@
 @title Configuring a Preamble Script
 @group config
 
-Adjust environmental settings (SSL, remote IP, rate limiting) using a preamble
-script.
+Adjust environmental settings (SSL, remote IPs) using a preamble script.
 
 Overview
 ========

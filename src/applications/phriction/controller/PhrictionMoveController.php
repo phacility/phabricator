@@ -64,7 +64,8 @@ final class PhrictionMoveController extends PhrictionController {
 
       $xactions = array();
       $xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(PhrictionTransaction::TYPE_MOVE_TO)
+        ->setTransactionType(
+          PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE)
         ->setNewValue($document);
       $target_document = id(new PhrictionDocumentQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -88,7 +89,8 @@ final class PhrictionMoveController extends PhrictionController {
         return id(new AphrontRedirectResponse())->setURI($redir_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
-        $e_slug = $ex->getShortMessage(PhrictionTransaction::TYPE_MOVE_TO);
+        $e_slug = $ex->getShortMessage(
+          PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE);
       }
     }
 

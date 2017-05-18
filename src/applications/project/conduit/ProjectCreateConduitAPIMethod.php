@@ -42,7 +42,7 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
       $user);
 
     $project = PhabricatorProject::initializeNewProject($user);
-    $type_name = PhabricatorProjectTransaction::TYPE_NAME;
+    $type_name = PhabricatorProjectNameTransaction::TRANSACTIONTYPE;
     $members = $request->getValue('members');
     $xactions = array();
 

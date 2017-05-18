@@ -105,7 +105,7 @@ final class FundBackerProduct extends PhortuneProductImplementation {
 
     $xactions = array();
     $xactions[] = id(new FundInitiativeTransaction())
-      ->setTransactionType(FundInitiativeTransaction::TYPE_BACKER)
+      ->setTransactionType(FundInitiativeBackerTransaction::TRANSACTIONTYPE)
       ->setMetadataValue(
         FundInitiativeTransaction::PROPERTY_AMOUNT,
         $backer->getAmountAsCurrency()->serializeForStorage())
@@ -134,7 +134,7 @@ final class FundBackerProduct extends PhortuneProductImplementation {
 
     $xactions = array();
     $xactions[] = id(new FundInitiativeTransaction())
-      ->setTransactionType(FundInitiativeTransaction::TYPE_REFUND)
+      ->setTransactionType(FundInitiativeRefundTransaction::TRANSACTIONTYPE)
       ->setMetadataValue(
         FundInitiativeTransaction::PROPERTY_AMOUNT,
         $amount->serializeForStorage())

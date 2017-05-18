@@ -317,12 +317,6 @@ abstract class DiffusionController extends PhabricatorController {
       ->appendChild($body);
   }
 
-  protected function renderTablePagerBox(PHUIPagerView $pager) {
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($pager);
-  }
-
   protected function renderCommitHashTag(DiffusionRequest $drequest) {
     $stable_commit = $drequest->getStableCommit();
     $commit = phutil_tag(

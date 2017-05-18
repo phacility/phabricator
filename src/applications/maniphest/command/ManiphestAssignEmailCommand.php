@@ -53,7 +53,7 @@ final class ManiphestAssignEmailCommand
     }
 
     $xactions[] = $object->getApplicationTransactionTemplate()
-      ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+      ->setTransactionType(ManiphestTaskOwnerTransaction::TRANSACTIONTYPE)
       ->setNewValue($assign_phid);
 
     return $xactions;

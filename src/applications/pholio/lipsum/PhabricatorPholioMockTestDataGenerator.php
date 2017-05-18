@@ -22,9 +22,9 @@ final class PhabricatorPholioMockTestDataGenerator
 
     // Accumulate Transactions
     $changes = array();
-    $changes[PholioTransaction::TYPE_NAME] =
+    $changes[PholioMockNameTransaction::TRANSACTIONTYPE] =
       $this->generateTitle();
-    $changes[PholioTransaction::TYPE_DESCRIPTION] =
+    $changes[PholioMockDescriptionTransaction::TRANSACTIONTYPE] =
       $this->generateDescription();
     $changes[PhabricatorTransactions::TYPE_VIEW_POLICY] =
       PhabricatorPolicies::POLICY_PUBLIC;

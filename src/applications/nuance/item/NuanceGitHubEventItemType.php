@@ -390,12 +390,14 @@ final class NuanceGitHubEventItemType
       $state = $xobj->getProperty('task.state');
 
       $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+        ->setTransactionType(
+          ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title)
         ->setDateCreated($created);
 
       $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(
+          ManiphestTaskDescriptionTransaction::TRANSACTIONTYPE)
         ->setNewValue($description)
         ->setDateCreated($created);
 

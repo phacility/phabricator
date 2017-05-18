@@ -32,7 +32,7 @@ foreach ($rows as $row) {
   $project_phid = $project_row['phid'];
 
   $type_map = array(
-    'name' => PhabricatorProjectTransaction::TYPE_NAME,
+    'name' => PhabricatorProjectNameTransaction::TRANSACTIONTYPE,
     'members' => PhabricatorProjectTransaction::TYPE_MEMBERS,
     'status' => PhabricatorProjectTransaction::TYPE_STATUS,
     'canview' => PhabricatorTransactions::TYPE_VIEW_POLICY,

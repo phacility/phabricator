@@ -21,6 +21,10 @@ final class PhabricatorProjectProfileMenuEngine
     $items = array();
 
     $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_PICTURE)
+      ->setMenuItemKey(PhabricatorProjectPictureProfileMenuItem::MENUITEMKEY);
+
+    $items[] = $this->newItem()
       ->setBuiltinKey(PhabricatorProject::ITEM_PROFILE)
       ->setMenuItemKey(PhabricatorProjectDetailsProfileMenuItem::MENUITEMKEY);
 

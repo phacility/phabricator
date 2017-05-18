@@ -43,11 +43,11 @@ final class ManiphestSubpriorityController extends ManiphestController {
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+      ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($pri);
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+      ->setTransactionType(ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($sub);
 
     $editor = id(new ManiphestTransactionEditor())

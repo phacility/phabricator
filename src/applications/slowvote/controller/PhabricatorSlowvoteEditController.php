@@ -68,7 +68,13 @@ final class PhabricatorSlowvoteEditController
       }
 
       if ($is_new) {
-        $responses = array_filter($responses);
+        // NOTE: Make sure common and useful response "0" is preserved.
+        foreach ($responses as $key => $response) {
+          if (!strlen($response)) {
+            unset($responses[$key]);
+          }
+        }
+
         if (empty($responses)) {
           $errors[] = pht('You must offer at least one response.');
           $e_response = pht('Required');
@@ -77,23 +83,32 @@ final class PhabricatorSlowvoteEditController
         }
       }
 
-      $xactions = array();
       $template = id(new PhabricatorSlowvoteTransaction());
+      $xactions = array();
+
+      if ($is_new) {
+        $xactions[] = id(new PhabricatorSlowvoteTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+      }
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_QUESTION)
+        ->setTransactionType(
+            PhabricatorSlowvoteQuestionTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_question);
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(
+            PhabricatorSlowvoteDescriptionTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_description);
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_RESPONSES)
+        ->setTransactionType(
+            PhabricatorSlowvoteResponsesTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_responses);
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_SHUFFLE)
+        ->setTransactionType(
+            PhabricatorSlowvoteShuffleTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_shuffle);
 
       $xactions[] = id(clone $template)
@@ -130,13 +145,14 @@ final class PhabricatorSlowvoteEditController
         }
 
         return id(new AphrontRedirectResponse())
-          ->setURI('/V'.$poll->getID());
+          ->setURI($poll->getURI());
       } else {
         $poll->setViewPolicy($v_view_policy);
       }
     }
 
     $form = id(new AphrontFormView())
+      ->setAction($request->getrequestURI())
       ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())

@@ -4,6 +4,7 @@ final class PhabricatorSubscriptionsEditEngineExtension
   extends PhabricatorEditEngineExtension {
 
   const EXTENSIONKEY = 'subscriptions.subscribers';
+  const FIELDKEY = 'subscriberPHIDs';
 
   const EDITKEY_ADD = 'subscribers.add';
   const EDITKEY_SET = 'subscribers.set';
@@ -42,7 +43,7 @@ final class PhabricatorSubscriptionsEditEngineExtension
     }
 
     $subscribers_field = id(new PhabricatorSubscribersEditField())
-      ->setKey('subscriberPHIDs')
+      ->setKey(self::FIELDKEY)
       ->setLabel(pht('Subscribers'))
       ->setEditTypeKey('subscribers')
       ->setAliases(array('subscriber', 'subscribers'))
