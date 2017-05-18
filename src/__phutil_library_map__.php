@@ -3584,6 +3584,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectBoardReorderController' => 'applications/project/controller/PhabricatorProjectBoardReorderController.php',
     'PhabricatorProjectBoardViewController' => 'applications/project/controller/PhabricatorProjectBoardViewController.php',
     'PhabricatorProjectCardView' => 'applications/project/view/PhabricatorProjectCardView.php',
+    'PhabricatorProjectColorTransaction' => 'applications/project/xaction/PhabricatorProjectColorTransaction.php',
     'PhabricatorProjectColorsConfigOptionType' => 'applications/project/config/PhabricatorProjectColorsConfigOptionType.php',
     'PhabricatorProjectColumn' => 'applications/project/storage/PhabricatorProjectColumn.php',
     'PhabricatorProjectColumnDetailController' => 'applications/project/controller/PhabricatorProjectColumnDetailController.php',
@@ -8987,6 +8988,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectBoardReorderController' => 'PhabricatorProjectBoardController',
     'PhabricatorProjectBoardViewController' => 'PhabricatorProjectBoardController',
     'PhabricatorProjectCardView' => 'AphrontTagView',
+    'PhabricatorProjectColorTransaction' => 'PhabricatorProjectTransactionType',
     'PhabricatorProjectColorsConfigOptionType' => 'PhabricatorConfigJSONOptionType',
     'PhabricatorProjectColumn' => array(
       'PhabricatorProjectDAO',

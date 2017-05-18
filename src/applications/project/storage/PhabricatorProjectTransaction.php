@@ -3,7 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_COLOR      = 'project:color';
   const TYPE_LOCKED     = 'project:locked';
   const TYPE_PARENT = 'project:parent';
   const TYPE_MILESTONE = 'project:milestone';
@@ -116,13 +115,6 @@ final class PhabricatorProjectTransaction
           '%s created this project.',
           $this->renderHandleLink($author_phid));
 
-      case self::TYPE_COLOR:
-        return pht(
-          "%s set this project's color to %s.",
-          $author_handle,
-          PHUITagView::getShadeName($new));
-        break;
-
       case self::TYPE_LOCKED:
         if ($new) {
           return pht(
@@ -214,13 +206,6 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_COLOR:
-        return pht(
-          '%s set the color for %s to %s.',
-          $author_handle,
-          $object_handle,
-          PHUITagView::getShadeName($new));
-
       case self::TYPE_LOCKED:
         if ($new) {
           return pht(
@@ -245,7 +230,7 @@ final class PhabricatorProjectTransaction
       case PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectImageTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectIconTransaction::TRANSACTIONTYPE:
-      case self::TYPE_COLOR:
+      case PhabricatorProjectColorTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_METADATA;
         break;
       case PhabricatorTransactions::TYPE_EDGE:

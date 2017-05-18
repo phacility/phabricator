@@ -30,7 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
     $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
     $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
     $types[] = PhabricatorProjectTransaction::TYPE_MILESTONE;
@@ -47,8 +46,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_COLOR:
-        return $object->getColor();
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         return (int)$object->getIsMembershipLocked();
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
@@ -72,7 +69,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
@@ -97,9 +93,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_COLOR:
-        $object->setColor($xaction->getNewValue());
-        return;
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         $object->setIsMembershipLocked($xaction->getNewValue());
         return;
@@ -136,7 +129,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
@@ -322,7 +314,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectStatusTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectImageTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectIconTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectTransaction::TYPE_COLOR:
+      case PhabricatorProjectColorTransaction::TRANSACTIONTYPE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,

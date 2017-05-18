@@ -113,7 +113,7 @@ final class PhabricatorProjectEditEngine
       PhabricatorTransactions::TYPE_EDIT_POLICY,
       PhabricatorTransactions::TYPE_JOIN_POLICY,
       PhabricatorProjectIconTransaction::TRANSACTIONTYPE,
-      PhabricatorProjectTransaction::TYPE_COLOR,
+      PhabricatorProjectColorTransaction::TRANSACTIONTYPE,
     );
     $unavailable = array_fuse($unavailable);
 
@@ -253,7 +253,8 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorSelectEditField())
         ->setKey('color')
         ->setLabel(pht('Color'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_COLOR)
+        ->setTransactionType(
+            PhabricatorProjectColorTransaction::TRANSACTIONTYPE)
         ->setOptions(PhabricatorProjectIconSet::getColorMap())
         ->setDescription(pht('Project tag color.'))
         ->setConduitDescription(pht('Change the project tag color.'))
