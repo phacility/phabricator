@@ -28,6 +28,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $hideCommentOptions = false;
   private $authorPHID;
   private $badges = array();
+  private $pinboardItems = array();
 
   public function setAuthorPHID($author_phid) {
     $this->authorPHID = $author_phid;
@@ -188,6 +189,11 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function getHideCommentOptions() {
     return $this->hideCommentOptions;
+  }
+
+  public function addPinboardItem(PHUIPinboardItemView $item) {
+    $this->pinboardItems[] = $item;
+    return $this;
   }
 
   public function setToken($token, $removed = false) {
@@ -441,12 +447,21 @@ final class PHUITimelineEventView extends AphrontView {
       ),
       $content);
 
+    // Image Events
+    $pinboard = null;
+    if ($this->pinboardItems) {
+      $pinboard = new PHUIPinboardView();
+      foreach ($this->pinboardItems as $item) {
+        $pinboard->addItem($item);
+      }
+    }
+
     $content = phutil_tag(
       'div',
       array(
         'class' => implode(' ', $content_classes),
       ),
-      array($image, $badges, $wedge, $content));
+      array($image, $badges, $wedge, $content, $pinboard));
 
     $outer_classes = $this->classes;
     $outer_classes[] = 'phui-timeline-shell';
