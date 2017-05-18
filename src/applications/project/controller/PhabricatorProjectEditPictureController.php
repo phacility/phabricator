@@ -78,7 +78,8 @@ final class PhabricatorProjectEditPictureController
 
         $xactions = array();
         $xactions[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorProjectTransaction::TYPE_IMAGE)
+          ->setTransactionType(
+              PhabricatorProjectImageTransaction::TRANSACTIONTYPE)
           ->setNewValue($new_value);
 
         $editor = id(new PhabricatorProjectTransactionEditor())

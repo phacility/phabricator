@@ -30,7 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_IMAGE;
     $types[] = PhabricatorProjectTransaction::TYPE_ICON;
     $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
     $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
@@ -49,8 +48,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
-        return $object->getProfileImagePHID();
       case PhabricatorProjectTransaction::TYPE_ICON:
         return $object->getIcon();
       case PhabricatorProjectTransaction::TYPE_COLOR:
@@ -78,7 +75,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
@@ -105,9 +101,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
-        $object->setProfileImagePHID($xaction->getNewValue());
-        return;
       case PhabricatorProjectTransaction::TYPE_ICON:
         $object->setIcon($xaction->getNewValue());
         return;
@@ -150,7 +143,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
@@ -336,7 +328,7 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectStatusTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
+      case PhabricatorProjectImageTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
         PhabricatorPolicyFilter::requireCapability(
@@ -473,22 +465,6 @@ final class PhabricatorProjectTransactionEditor
 
   protected function supportsSearch() {
     return true;
-  }
-
-  protected function extractFilePHIDsFromCustomTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
-        $new = $xaction->getNewValue();
-        if ($new) {
-          return array($new);
-        }
-        break;
-    }
-
-    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
   protected function applyFinalEffects(

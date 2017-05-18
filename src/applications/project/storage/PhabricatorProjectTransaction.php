@@ -3,7 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_IMAGE      = 'project:image';
   const TYPE_ICON       = 'project:icon';
   const TYPE_COLOR      = 'project:color';
   const TYPE_LOCKED     = 'project:locked';
@@ -44,10 +43,6 @@ final class PhabricatorProjectTransaction
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
         $req_phids = array_merge($add, $rem);
-        break;
-      case self::TYPE_IMAGE:
-        $req_phids[] = $old;
-        $req_phids[] = $new;
         break;
     }
 
@@ -106,8 +101,6 @@ final class PhabricatorProjectTransaction
         }
       case self::TYPE_ICON:
         return PhabricatorProjectIconSet::getIconIcon($new);
-      case self::TYPE_IMAGE:
-        return 'fa-photo';
       case self::TYPE_MEMBERS:
         return 'fa-user';
     }
@@ -125,26 +118,6 @@ final class PhabricatorProjectTransaction
         return pht(
           '%s created this project.',
           $this->renderHandleLink($author_phid));
-
-      case self::TYPE_IMAGE:
-        // TODO: Some day, it would be nice to show the images.
-        if (!$old) {
-          return pht(
-            "%s set this project's image to %s.",
-            $author_handle,
-            $this->renderHandleLink($new));
-        } else if (!$new) {
-          return pht(
-            "%s removed this project's image.",
-            $author_handle);
-        } else {
-          return pht(
-            "%s updated this project's image from %s to %s.",
-            $author_handle,
-            $this->renderHandleLink($old),
-            $this->renderHandleLink($new));
-        }
-        break;
 
       case self::TYPE_ICON:
         $set = new PhabricatorProjectIconSet();
@@ -253,27 +226,6 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_IMAGE:
-        // TODO: Some day, it would be nice to show the images.
-        if (!$old) {
-          return pht(
-            '%s set the image for %s to %s.',
-            $author_handle,
-            $object_handle,
-            $this->renderHandleLink($new));
-        } else if (!$new) {
-          return pht(
-            '%s removed the image for %s.',
-            $author_handle,
-            $object_handle);
-        } else {
-          return pht(
-            '%s updated the image for %s from %s to %s.',
-            $author_handle,
-            $object_handle,
-            $this->renderHandleLink($old),
-            $this->renderHandleLink($new));
-        }
 
       case self::TYPE_ICON:
         $set = new PhabricatorProjectIconSet();
@@ -313,7 +265,7 @@ final class PhabricatorProjectTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE:
-      case self::TYPE_IMAGE:
+      case PhabricatorProjectImageTransaction::TRANSACTIONTYPE:
       case self::TYPE_ICON:
       case self::TYPE_COLOR:
         $tags[] = self::MAILTAG_METADATA;

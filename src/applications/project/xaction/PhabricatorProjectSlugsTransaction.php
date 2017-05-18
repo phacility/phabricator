@@ -61,7 +61,6 @@ final class PhabricatorProjectSlugsTransaction
           count($rem),
           $this->renderSlugList($rem));
     }
-    break;
   }
 
   public function getTitleForFeed() {
