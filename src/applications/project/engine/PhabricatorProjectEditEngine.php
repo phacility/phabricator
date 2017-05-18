@@ -112,7 +112,7 @@ final class PhabricatorProjectEditEngine
       PhabricatorTransactions::TYPE_VIEW_POLICY,
       PhabricatorTransactions::TYPE_EDIT_POLICY,
       PhabricatorTransactions::TYPE_JOIN_POLICY,
-      PhabricatorProjectTransaction::TYPE_ICON,
+      PhabricatorProjectIconTransaction::TRANSACTIONTYPE,
       PhabricatorProjectTransaction::TYPE_COLOR,
     );
     $unavailable = array_fuse($unavailable);
@@ -244,7 +244,7 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_ICON)
+        ->setTransactionType(PhabricatorProjectIconTransaction::TRANSACTIONTYPE)
         ->setIconSet(new PhabricatorProjectIconSet())
         ->setDescription(pht('Project icon.'))
         ->setConduitDescription(pht('Change the project icon.'))

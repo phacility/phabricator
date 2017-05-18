@@ -52,7 +52,7 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
 
     if ($request->getValue('icon')) {
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_ICON)
+        ->setTransactionType(PhabricatorProjectIconTransaction::TRANSACTIONTYPE)
         ->setNewValue($request->getValue('icon'));
     }
 

@@ -3,7 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_ICON       = 'project:icon';
   const TYPE_COLOR      = 'project:color';
   const TYPE_LOCKED     = 'project:locked';
   const TYPE_PARENT = 'project:parent';
@@ -99,8 +98,6 @@ final class PhabricatorProjectTransaction
         } else {
           return 'fa-unlock';
         }
-      case self::TYPE_ICON:
-        return PhabricatorProjectIconSet::getIconIcon($new);
       case self::TYPE_MEMBERS:
         return 'fa-user';
     }
@@ -118,15 +115,6 @@ final class PhabricatorProjectTransaction
         return pht(
           '%s created this project.',
           $this->renderHandleLink($author_phid));
-
-      case self::TYPE_ICON:
-        $set = new PhabricatorProjectIconSet();
-
-        return pht(
-          "%s set this project's icon to %s.",
-          $author_handle,
-          $set->getIconLabel($new));
-        break;
 
       case self::TYPE_COLOR:
         return pht(
@@ -226,16 +214,6 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-
-      case self::TYPE_ICON:
-        $set = new PhabricatorProjectIconSet();
-
-        return pht(
-          '%s set the icon for %s to %s.',
-          $author_handle,
-          $object_handle,
-          $set->getIconLabel($new));
-
       case self::TYPE_COLOR:
         return pht(
           '%s set the color for %s to %s.',
@@ -266,7 +244,7 @@ final class PhabricatorProjectTransaction
       case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectImageTransaction::TRANSACTIONTYPE:
-      case self::TYPE_ICON:
+      case PhabricatorProjectIconTransaction::TRANSACTIONTYPE:
       case self::TYPE_COLOR:
         $tags[] = self::MAILTAG_METADATA;
         break;
