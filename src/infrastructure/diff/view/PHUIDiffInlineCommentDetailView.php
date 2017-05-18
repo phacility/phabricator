@@ -99,6 +99,14 @@ final class PHUIDiffInlineCommentDetailView
       'differential-inline-comment',
     );
 
+    $is_fixed = false;
+    switch ($inline->getFixedState()) {
+      case PhabricatorInlineCommentInterface::STATE_DONE:
+      case PhabricatorInlineCommentInterface::STATE_DRAFT:
+        $is_fixed = true;
+        break;
+    }
+
     $metadata = array(
       'id' => $inline->getID(),
       'phid' => $inline->getPHID(),
@@ -109,6 +117,9 @@ final class PHUIDiffInlineCommentDetailView
       'on_right' => $this->getIsOnRight(),
       'original' => $inline->getContent(),
       'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
+      'isDraft' => $inline->isDraft(),
+      'isFixed' => $is_fixed,
+      'isGhost' => $inline->getIsGhost(),
     );
 
     $sigil = 'differential-inline-comment';

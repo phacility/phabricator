@@ -9,10 +9,6 @@ JX.install('DiffInline', {
   construct : function() {
   },
 
-  properties: {
-    changeset: null
-  },
-
   members: {
     _id: null,
     _phid: null,
@@ -31,12 +27,18 @@ JX.install('DiffInline', {
     _isInvisible: false,
     _isLoading: false,
 
+    _changeset: null,
+    _objective: null,
+
+    _isDraft: null,
+    _isFixed: null,
+
     bindToRow: function(row) {
       this._row = row;
+      this._objective.setAnchor(this._row);
 
       var row_data = JX.Stratcom.getData(row);
       row_data.inline = this;
-
       this._hidden = row_data.hidden || false;
 
       // TODO: Get smarter about this once we do more editing, this is pretty
@@ -65,6 +67,13 @@ JX.install('DiffInline', {
 
       this._replyToCommentPHID = data.replyToCommentPHID;
 
+      this._isDraft = data.isDraft;
+      this._isFixed = data.isFixed;
+      this._isGhost = data.isGhost;
+
+      this._changesetID = data.changesetID;
+
+      this.updateObjective();
       this.setInvisible(false);
 
       return this;
@@ -152,6 +161,60 @@ JX.install('DiffInline', {
       return this;
     },
 
+    setChangeset: function(changeset) {
+      this._changeset = changeset;
+
+      var objectives = changeset.getChangesetList().getObjectives();
+      this._objective = objectives.newObjective()
+        .setCallback(JX.bind(this, this._onobjective));
+      this.updateObjective();
+
+      return this;
+    },
+
+    getChangeset: function() {
+      return this._changeset;
+    },
+
+    _onobjective: function() {
+      this.getChangeset().getChangesetList().selectInline(this);
+    },
+
+    updateObjective: function() {
+      var objective = this._objective;
+
+      if (this.isHidden() || this._isDeleted) {
+        objective.hide();
+        return;
+      }
+
+      var changeset = this.getChangeset();
+      if (!changeset.isVisible()) {
+        objective.hide();
+        return;
+      }
+
+      var icon = 'fa-comment';
+      var color = 'bluegrey';
+
+      if (this._isDraft) {
+        // This inline is an unsubmitted draft.
+        icon = 'fa-pencil';
+      } else if (this._isFixed) {
+        // This inline has been marked done.
+        icon = 'fa-check';
+        color = 'grey';
+      } else if (this._isGhost) {
+        icon = 'fa-comment-o';
+        color = 'grey';
+      }
+
+      objective
+        .setIcon(icon)
+        .setColor(color)
+        .show();
+    },
+
     canReply: function() {
       if (!this._hasAction('reply')) {
         return false;
@@ -202,6 +265,7 @@ JX.install('DiffInline', {
 
       JX.Stratcom.getData(row).inline = this;
       this._row = row;
+      this._objective.setAnchor(this._row);
 
       this._id = null;
       this._phid = null;
@@ -271,6 +335,8 @@ JX.install('DiffInline', {
       // as opposed to a submitted checkmark. This is different from the
       // top-level "draft" state of unsubmitted comments.
       JX.DOM.alterClass(comment, 'inline-state-is-draft', response.draftState);
+
+      this._isFixed = response.isChecked;
 
       this._didUpdate();
     },
@@ -632,6 +698,8 @@ JX.install('DiffInline', {
       if (!local_only) {
         this.getChangeset().getChangesetList().redrawPreview();
       }
+
+      this.updateObjective();
 
       this.getChangeset().getChangesetList().redrawCursor();
       this.getChangeset().getChangesetList().resetHover();

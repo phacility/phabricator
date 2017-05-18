@@ -203,6 +203,9 @@ return array(
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
 
+    'phabricator-scroll-objective',
+    'phabricator-scroll-objective-list',
+
     'phabricator-diff-inline',
     'phabricator-diff-changeset',
     'phabricator-diff-changeset-list',

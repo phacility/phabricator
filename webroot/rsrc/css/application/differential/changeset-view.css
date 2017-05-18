@@ -404,3 +404,32 @@ tr.differential-inline-loading {
 .diff-banner .phui-icon-view {
   margin-right: 4px;
 }
+
+.scroll-objective-list {
+  position: fixed;
+  right: 0;
+  width: 24px;
+  top: 48px;
+  bottom: 48px;
+  z-index: 6;
+  background: rgba(255, 255, 255, 0.50);
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.95);
+  border-width: 1px 0 1px 1px;
+  box-shadow: -1px 0 2px rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.scroll-objective {
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  cursor: pointer;
+  left: 8px;
+}
+
+.scroll-objective .phui-icon-view {
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.25);
+  display: block;
+  height: 14px;
+}

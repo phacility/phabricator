@@ -1,6 +1,7 @@
 /**
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
+ *           phabricator-scroll-objective-list
  * @javelin
  */
 
@@ -8,6 +9,7 @@ JX.install('DiffChangesetList', {
 
   construct: function() {
     this._changesets = [];
+    this._objectives = new JX.ScrollObjectiveList();
 
     var onload = JX.bind(this, this._ifawake, this._onload);
     JX.Stratcom.listen('click', 'differential-load', onload);
@@ -100,6 +102,7 @@ JX.install('DiffChangesetList', {
     _initialized: false,
     _asleep: true,
     _changesets: null,
+    _objectives: null,
 
     _cursorItem: null,
 
@@ -124,6 +127,8 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
       this.resetHover();
+
+      this._objectives.hide();
     },
 
     wake: function() {
@@ -131,6 +136,8 @@ JX.install('DiffChangesetList', {
 
       this._redrawFocus();
       this._redrawSelection();
+
+      this._objectives.show();
 
       if (this._initialized) {
         return;
@@ -190,6 +197,10 @@ JX.install('DiffChangesetList', {
 
     isAsleep: function() {
       return this._asleep;
+    },
+
+    getObjectives: function() {
+      return this._objectives;
     },
 
     newChangesetForNode: function(node) {
@@ -271,6 +282,18 @@ JX.install('DiffChangesetList', {
     _ontoc: function(manager) {
       var toc = JX.$('toc');
       manager.scrollTo(toc);
+    },
+
+    getSelectedInline: function() {
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'comment') {
+          return cursor.target;
+        }
+      }
+
+      return null;
     },
 
     _onkeyreply: function(is_quote) {
@@ -772,7 +795,7 @@ JX.install('DiffChangesetList', {
         } else if (diffs.length == 1) {
           var diff = diffs[0];
           visible_item.setDisabled(false);
-          if (JX.Stratcom.getData(diff).hidden) {
+          if (!changeset.isVisible()) {
             visible_item
               .setName(pht('Expand File'))
               .setIcon('fa-expand');
@@ -836,6 +859,10 @@ JX.install('DiffChangesetList', {
       // event.
       e.kill();
 
+      this.selectInline(inline);
+    },
+
+    selectInline: function(inline) {
       var selection = this._getSelectionState();
       var item;
 
