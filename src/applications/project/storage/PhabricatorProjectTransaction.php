@@ -3,7 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_STATUS     = 'project:status';
   const TYPE_IMAGE      = 'project:image';
   const TYPE_ICON       = 'project:icon';
   const TYPE_COLOR      = 'project:color';
@@ -55,22 +54,6 @@ final class PhabricatorProjectTransaction
     return array_merge($req_phids, parent::getRequiredHandlePHIDs());
   }
 
-  public function getColor() {
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-      case self::TYPE_STATUS:
-        if ($old == 0) {
-          return 'red';
-        } else {
-          return 'green';
-        }
-      }
-    return parent::getColor();
-  }
-
   public function shouldHide() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_EDGE:
@@ -115,12 +98,6 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_STATUS:
-        if ($old == 0) {
-          return 'fa-ban';
-        } else {
-          return 'fa-check';
-        }
       case self::TYPE_LOCKED:
         if ($new) {
           return 'fa-lock';
@@ -148,18 +125,6 @@ final class PhabricatorProjectTransaction
         return pht(
           '%s created this project.',
           $this->renderHandleLink($author_phid));
-
-      case self::TYPE_STATUS:
-        if ($old == 0) {
-          return pht(
-            '%s archived this project.',
-            $author_handle);
-        } else {
-          return pht(
-            '%s activated this project.',
-            $author_handle);
-        }
-        break;
 
       case self::TYPE_IMAGE:
         // TODO: Some day, it would be nice to show the images.
@@ -288,18 +253,6 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_STATUS:
-        if ($old == 0) {
-          return pht(
-            '%s archived %s.',
-            $author_handle,
-            $object_handle);
-        } else {
-          return pht(
-            '%s activated %s.',
-            $author_handle,
-            $object_handle);
-        }
       case self::TYPE_IMAGE:
         // TODO: Some day, it would be nice to show the images.
         if (!$old) {
@@ -378,7 +331,7 @@ final class PhabricatorProjectTransaction
           $tags[] = self::MAILTAG_OTHER;
         }
         break;
-      case self::TYPE_STATUS:
+      case PhabricatorProjectStatusTransaction::TRANSACTIONTYPE:
       case self::TYPE_LOCKED:
       default:
         $tags[] = self::MAILTAG_OTHER;
