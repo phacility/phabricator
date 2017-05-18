@@ -3666,6 +3666,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectSilenceController' => 'applications/project/controller/PhabricatorProjectSilenceController.php',
     'PhabricatorProjectSilencedEdgeType' => 'applications/project/edge/PhabricatorProjectSilencedEdgeType.php',
     'PhabricatorProjectSlug' => 'applications/project/storage/PhabricatorProjectSlug.php',
+    'PhabricatorProjectSlugsTransaction' => 'applications/project/xaction/PhabricatorProjectSlugsTransaction.php',
     'PhabricatorProjectStandardCustomField' => 'applications/project/customfield/PhabricatorProjectStandardCustomField.php',
     'PhabricatorProjectStatus' => 'applications/project/constants/PhabricatorProjectStatus.php',
     'PhabricatorProjectSubprojectWarningController' => 'applications/project/controller/PhabricatorProjectSubprojectWarningController.php',
@@ -9077,6 +9078,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectSilenceController' => 'PhabricatorProjectController',
     'PhabricatorProjectSilencedEdgeType' => 'PhabricatorEdgeType',
     'PhabricatorProjectSlug' => 'PhabricatorProjectDAO',
+    'PhabricatorProjectSlugsTransaction' => 'PhabricatorProjectTransactionType',
     'PhabricatorProjectStandardCustomField' => array(
       'PhabricatorProjectCustomField',
       'PhabricatorStandardCustomFieldInterface',

@@ -3,7 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_SLUGS      = 'project:slugs';
   const TYPE_STATUS     = 'project:status';
   const TYPE_IMAGE      = 'project:image';
   const TYPE_ICON       = 'project:icon';
@@ -134,8 +133,6 @@ final class PhabricatorProjectTransaction
         return 'fa-photo';
       case self::TYPE_MEMBERS:
         return 'fa-user';
-      case self::TYPE_SLUGS:
-        return 'fa-tag';
     }
     return parent::getIcon();
   }
@@ -209,33 +206,6 @@ final class PhabricatorProjectTransaction
           return pht(
             "%s unlocked this project's membership.",
             $author_handle);
-        }
-        break;
-
-      case self::TYPE_SLUGS:
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        if ($add && $rem) {
-          return pht(
-            '%s changed project hashtag(s), added %d: %s; removed %d: %s.',
-            $author_handle,
-            count($add),
-            $this->renderSlugList($add),
-            count($rem),
-            $this->renderSlugList($rem));
-        } else if ($add) {
-          return pht(
-            '%s added %d project hashtag(s): %s.',
-            $author_handle,
-            count($add),
-            $this->renderSlugList($add));
-        } else if ($rem) {
-            return pht(
-              '%s removed %d project hashtag(s): %s.',
-              $author_handle,
-              count($rem),
-              $this->renderSlugList($rem));
         }
         break;
 
@@ -380,36 +350,6 @@ final class PhabricatorProjectTransaction
             $author_handle,
             $object_handle);
         }
-
-      case self::TYPE_SLUGS:
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        if ($add && $rem) {
-          return pht(
-            '%s changed %s hashtag(s), added %d: %s; removed %d: %s.',
-            $author_handle,
-            $object_handle,
-            count($add),
-            $this->renderSlugList($add),
-            count($rem),
-            $this->renderSlugList($rem));
-        } else if ($add) {
-          return pht(
-            '%s added %d %s hashtag(s): %s.',
-            $author_handle,
-            count($add),
-            $object_handle,
-            $this->renderSlugList($add));
-        } else if ($rem) {
-          return pht(
-            '%s removed %d %s hashtag(s): %s.',
-            $author_handle,
-            count($rem),
-            $object_handle,
-            $this->renderSlugList($rem));
-        }
-
     }
 
     return parent::getTitleForFeed();
@@ -418,8 +358,8 @@ final class PhabricatorProjectTransaction
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
-      case self::TYPE_NAME:
-      case self::TYPE_SLUGS:
+      case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
+      case PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE:
       case self::TYPE_IMAGE:
       case self::TYPE_ICON:
       case self::TYPE_COLOR:
@@ -445,10 +385,6 @@ final class PhabricatorProjectTransaction
         break;
     }
     return $tags;
-  }
-
-  private function renderSlugList($slugs) {
-    return implode(', ', $slugs);
   }
 
 }
