@@ -80,13 +80,35 @@ final class PHUITimelineExample extends PhabricatorUIExample {
       ->setTitle(pht('Minor Red Event'))
       ->setColor(PhabricatorTransactions::COLOR_RED);
 
+    // Pinboard!!
+    $pin1 = id(new PHUIPinboardItemView())
+      ->setUser($user)
+      ->setHeader('user0.png')
+      ->setImageURI(celerity_get_resource_uri('/rsrc/image/people/user0.png'))
+      ->setURI(celerity_get_resource_uri('/rsrc/image/people/user0.png'))
+      ->setImageSize(280, 210);
+
+    $pin2 = id(new PHUIPinboardItemView())
+      ->setUser($user)
+      ->setHeader('user1.png')
+      ->setImageURI(celerity_get_resource_uri('/rsrc/image/people/user1.png'))
+      ->setURI(celerity_get_resource_uri('/rsrc/image/people/user1.png'))
+      ->setImageSize(280, 210);
+
+    $pin3 = id(new PHUIPinboardItemView())
+      ->setUser($user)
+      ->setHeader('user2.png')
+      ->setImageURI(celerity_get_resource_uri('/rsrc/image/people/user2.png'))
+      ->setURI(celerity_get_resource_uri('/rsrc/image/people/user1.png'))
+      ->setImageSize(280, 210);
+
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('fa-check')
-      ->setTitle(pht('Historically Important Action'))
-      ->setColor(PhabricatorTransactions::COLOR_BLACK)
-      ->setReallyMajorEvent(true);
-
+      ->setIcon('fa-camera-retro')
+      ->setTitle(pht('Pinboard Image Event'))
+      ->addPinboardItem($pin1)
+      ->addPinboardItem($pin2)
+      ->addPinboardItem($pin3);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
@@ -101,12 +123,6 @@ final class PHUITimelineExample extends PhabricatorUIExample {
       ->setTitle(str_repeat(pht('Long Text Title').' ', 64))
       ->appendChild(str_repeat(pht('Long Text Body').' ', 64))
       ->setColor(PhabricatorTransactions::COLOR_ORANGE);
-
-    $events[] = id(new PHUITimelineEventView())
-      ->setUserHandle($handle)
-      ->setTitle(str_repeat('LongTextEventNoSpaces', 1024))
-      ->appendChild(str_repeat('LongTextNoSpaces', 1024))
-      ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $colors = array(
       PhabricatorTransactions::COLOR_RED,

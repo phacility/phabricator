@@ -64,7 +64,8 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
 
     if ($request->getValue('tags')) {
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+        ->setTransactionType(
+            PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
         ->setNewValue($request->getValue('tags'));
     }
 

@@ -262,7 +262,8 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorStringListEditField())
         ->setKey('slugs')
         ->setLabel(pht('Additional Hashtags'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+        ->setTransactionType(
+            PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Additional project slugs.'))
         ->setConduitDescription(pht('Change project slugs.'))
         ->setConduitTypeDescription(pht('New list of slugs.'))

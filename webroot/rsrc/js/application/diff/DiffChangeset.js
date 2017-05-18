@@ -19,6 +19,7 @@ JX.install('DiffChangeset', {
     this._node = node;
 
     var data = this._getNodeData();
+
     this._renderURI = data.renderURI;
     this._ref = data.ref;
     this._whitespace = data.whitespace;
@@ -29,6 +30,8 @@ JX.install('DiffChangeset', {
 
     this._leftID = data.left;
     this._rightID = data.right;
+
+    this._path = data.path;
 
     this._inlines = [];
   },
@@ -55,6 +58,10 @@ JX.install('DiffChangeset', {
     _rightID: null,
 
     _inlines: null,
+    _visible: true,
+
+    _undoNode: null,
+    _path: null,
 
     getLeftChangesetID: function() {
       return this._leftID;
@@ -224,6 +231,9 @@ JX.install('DiffChangeset', {
       JX.Router.getInstance().queue(routable);
     },
 
+    getPath: function() {
+      return this._path;
+    },
 
     /**
      * Receive a response to a context request.
@@ -345,6 +355,10 @@ JX.install('DiffChangeset', {
         }
       });
 
+      if (!this._visible) {
+        return items;
+      }
+
       var rows = JX.DOM.scry(this._node, 'tr');
 
       var blocks = [];
@@ -419,6 +433,13 @@ JX.install('DiffChangeset', {
 
     _getNodeData: function() {
       return JX.Stratcom.getData(this._node);
+    },
+
+    getVectors: function() {
+      return {
+        pos: JX.$V(this._node),
+        dim: JX.Vector.getDim(this._node)
+      };
     },
 
     _onresponse: function(sequence, response) {
@@ -635,8 +656,60 @@ JX.install('DiffChangeset', {
         // them to this Changeset's list of inlines.
         this.getInlineForRow(row);
       }
-    }
+    },
 
+    toggleVisibility: function() {
+      this._visible = !this._visible;
+
+      var diff = JX.DOM.find(this._node, 'table', 'differential-diff');
+      var undo = this._getUndoNode();
+
+      if (this._visible) {
+        JX.DOM.show(diff);
+        JX.DOM.remove(undo);
+      } else {
+        JX.DOM.hide(diff);
+        JX.DOM.appendContent(diff.parentNode, undo);
+      }
+
+      JX.Stratcom.invoke('resize');
+    },
+
+    _getUndoNode: function() {
+      if (!this._undoNode) {
+        var pht = this.getChangesetList().getTranslations();
+
+        var link_attributes = {
+          href: '#'
+        };
+
+        var undo_link = JX.$N('a', link_attributes, pht('Show Content'));
+
+        var onundo = JX.bind(this, this._onundo);
+        JX.DOM.listen(undo_link, 'click', null, onundo);
+
+        var node_attributes = {
+          className: 'differential-collapse-undo'
+        };
+
+        var node_content = [
+          pht('This file content has been collapsed.'),
+          ' ',
+          undo_link
+        ];
+
+        var undo_node = JX.$N('div', node_attributes, node_content);
+
+        this._undoNode = undo_node;
+      }
+
+      return this._undoNode;
+    },
+
+    _onundo: function(e) {
+      e.kill();
+      this.toggleVisibility();
+    }
   },
 
   statics: {

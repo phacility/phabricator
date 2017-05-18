@@ -30,8 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_SLUGS;
-    $types[] = PhabricatorProjectTransaction::TYPE_STATUS;
     $types[] = PhabricatorProjectTransaction::TYPE_IMAGE;
     $types[] = PhabricatorProjectTransaction::TYPE_ICON;
     $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
@@ -51,13 +49,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
-        $slugs = $object->getSlugs();
-        $slugs = mpull($slugs, 'getSlug', 'getSlug');
-        unset($slugs[$object->getPrimarySlug()]);
-        return array_keys($slugs);
-      case PhabricatorProjectTransaction::TYPE_STATUS:
-        return $object->getStatus();
       case PhabricatorProjectTransaction::TYPE_IMAGE:
         return $object->getProfileImagePHID();
       case PhabricatorProjectTransaction::TYPE_ICON:
@@ -87,7 +78,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
@@ -105,8 +95,6 @@ final class PhabricatorProjectTransactionEditor
           return null;
         }
         return $value;
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
-        return $this->normalizeSlugs($xaction->getNewValue());
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -117,11 +105,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
-        return;
-      case PhabricatorProjectTransaction::TYPE_STATUS:
-        $object->setStatus($xaction->getNewValue());
-        return;
       case PhabricatorProjectTransaction::TYPE_IMAGE:
         $object->setProfileImagePHID($xaction->getNewValue());
         return;
@@ -167,19 +150,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
-        $old = $xaction->getOldValue();
-        $new = $xaction->getNewValue();
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        foreach ($add as $slug) {
-          $this->addSlug($object, $slug, true);
-        }
-
-        $this->removeSlugs($object, $rem);
-        return;
-      case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
@@ -278,65 +248,6 @@ final class PhabricatorProjectTransactionEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
-        if (!$xactions) {
-          break;
-        }
-
-        $slug_xaction = last($xactions);
-
-        $new = $slug_xaction->getNewValue();
-
-        $invalid = array();
-        foreach ($new as $slug) {
-          if (!PhabricatorSlug::isValidProjectSlug($slug)) {
-            $invalid[] = $slug;
-          }
-        }
-
-        if ($invalid) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'Hashtags must contain at least one letter or number. %s '.
-              'project hashtag(s) are invalid: %s.',
-              phutil_count($invalid),
-              implode(', ', $invalid)),
-            $slug_xaction);
-          break;
-        }
-
-        $new = $this->normalizeSlugs($new);
-
-        if ($new) {
-          $slugs_used_already = id(new PhabricatorProjectSlug())
-            ->loadAllWhere('slug IN (%Ls)', $new);
-        } else {
-          // The project doesn't have any extra slugs.
-          $slugs_used_already = array();
-        }
-
-        $slugs_used_already = mgroup($slugs_used_already, 'getProjectPHID');
-        foreach ($slugs_used_already as $project_phid => $used_slugs) {
-          if ($project_phid == $object->getPHID()) {
-            continue;
-          }
-
-          $used_slug_strs = mpull($used_slugs, 'getSlug');
-
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              '%s project hashtag(s) are already used by other projects: %s.',
-              phutil_count($used_slug_strs),
-              implode(', ', $used_slug_strs)),
-            $slug_xaction);
-          $errors[] = $error;
-        }
-
-        break;
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
         if (!$xactions) {
@@ -424,7 +335,7 @@ final class PhabricatorProjectTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectTransaction::TYPE_STATUS:
+      case PhabricatorProjectStatusTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
@@ -674,7 +585,7 @@ final class PhabricatorProjectTransactionEditor
       ->save();
   }
 
-  private function removeSlugs(PhabricatorProject $project, array $slugs) {
+  public function removeSlugs(PhabricatorProject $project, array $slugs) {
     if (!$slugs) {
       return;
     }
@@ -696,7 +607,7 @@ final class PhabricatorProjectTransactionEditor
     }
   }
 
-  private function normalizeSlugs(array $slugs) {
+  public function normalizeSlugs(array $slugs) {
     foreach ($slugs as $key => $slug) {
       $slugs[$key] = PhabricatorSlug::normalizeProjectSlug($slug);
     }

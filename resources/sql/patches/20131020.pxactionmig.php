@@ -34,7 +34,7 @@ foreach ($rows as $row) {
   $type_map = array(
     'name' => PhabricatorProjectNameTransaction::TRANSACTIONTYPE,
     'members' => PhabricatorProjectTransaction::TYPE_MEMBERS,
-    'status' => PhabricatorProjectTransaction::TYPE_STATUS,
+    'status' => PhabricatorProjectStatusTransaction::TRANSACTIONTYPE,
     'canview' => PhabricatorTransactions::TYPE_VIEW_POLICY,
     'canedit' => PhabricatorTransactions::TYPE_EDIT_POLICY,
     'canjoin' => PhabricatorTransactions::TYPE_JOIN_POLICY,

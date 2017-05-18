@@ -131,13 +131,6 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $changesets = $this->changesets;
 
-    Javelin::initBehavior('differential-toggle-files', array(
-      'pht' => array(
-        'undo' => pht('Undo'),
-        'collapsed' => pht('This file content has been collapsed.'),
-      ),
-    ));
-
     $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
       $viewer);
 
@@ -271,6 +264,15 @@ final class DifferentialChangesetListView extends AphrontView {
           pht('Jump to next inline comment, including hidden comments.'),
         'Jump to previous inline comment, including hidden comments.' =>
           pht('Jump to previous inline comment, including hidden comments.'),
+
+        'This file content has been collapsed.' =>
+          pht('This file content has been collapsed.'),
+        'Show Content' => pht('Show Content'),
+
+        'Hide or show the current file.' =>
+          pht('Hide or show the current file.'),
+        'You must select a file to hide or show.' =>
+          pht('You must select a file to hide or show.'),
       ),
     ));
 

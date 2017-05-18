@@ -65,7 +65,8 @@ final class PhabricatorProjectColumnHideController
         $xactions = array();
 
         $xactions[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorProjectTransaction::TYPE_STATUS)
+          ->setTransactionType(
+              PhabricatorProjectStatusTransaction::TRANSACTIONTYPE)
           ->setNewValue($new_status);
 
         id(new PhabricatorProjectTransactionEditor())

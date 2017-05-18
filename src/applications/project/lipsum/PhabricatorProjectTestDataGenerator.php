@@ -20,7 +20,7 @@ final class PhabricatorProjectTestDataGenerator
       $this->newProjectTitle());
 
     $xactions[] = $this->newTransaction(
-      PhabricatorProjectTransaction::TYPE_STATUS,
+      PhabricatorProjectStatusTransaction::TRANSACTIONTYPE,
       $this->newProjectStatus());
 
     // Almost always make the author a member.
