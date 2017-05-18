@@ -405,13 +405,16 @@ tr.differential-inline-loading {
   margin-right: 4px;
 }
 
+.diff-banner-path {
+  color: {$greytext};
+}
+
 .scroll-objective-list {
   position: fixed;
   right: 0;
   width: 24px;
   top: 48px;
   bottom: 48px;
-  z-index: 6;
   background: rgba(255, 255, 255, 0.50);
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.95);

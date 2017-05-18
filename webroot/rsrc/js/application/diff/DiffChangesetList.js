@@ -1322,9 +1322,9 @@ JX.install('DiffChangesetList', {
       }
 
       var icon = new JX.PHUIXIconView()
-        .setIcon('fa-file')
+        .setIcon(changeset.getIcon())
         .getNode();
-      JX.DOM.setContent(node, [icon, ' ', changeset.getPath()]);
+      JX.DOM.setContent(node, [icon, ' ', changeset.getDisplayPath()]);
 
       document.body.appendChild(node);
     },

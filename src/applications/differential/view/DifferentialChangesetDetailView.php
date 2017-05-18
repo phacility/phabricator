@@ -168,6 +168,26 @@ final class DifferentialChangesetDetailView extends AphrontView {
       $right_id = $changeset_id;
     }
 
+    // In the persistent banner, emphasize the current filename.
+    $path_part = dirname($display_filename);
+    $file_part = basename($display_filename);
+    $display_parts = array();
+    if (strlen($path_part)) {
+      $path_part = $path_part.'/';
+      $display_parts[] = phutil_tag(
+        'span',
+        array(
+          'class' => 'diff-banner-path',
+        ),
+        $path_part);
+    }
+    $display_parts[] = phutil_tag(
+      'span',
+      array(
+        'class' => 'diff-banner-file',
+      ),
+      $file_part);
+
     return javelin_tag(
       'div',
       array(
@@ -183,9 +203,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'autoload' => $this->getAutoload(),
           'loaded' => $this->getLoaded(),
           'undoTemplates' => hsprintf('%s', $renderer->renderUndoTemplates()),
-          'path' => $display_filename,
+          'displayPath' => hsprintf('%s', $display_parts),
           'objectiveName' => basename($display_filename),
-          'icon' => 'fa-file-text-o',
+          'icon' => $display_icon,
         ),
         'class' => $class,
         'id'    => $id,

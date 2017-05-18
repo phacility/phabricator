@@ -31,7 +31,7 @@ JX.install('DiffChangeset', {
     this._leftID = data.left;
     this._rightID = data.right;
 
-    this._path = data.path;
+    this._displayPath = JX.$H(data.displayPath);
     this._objectiveName = data.objectiveName;
     this._icon = data.icon;
 
@@ -59,7 +59,7 @@ JX.install('DiffChangeset', {
     _visible: true,
 
     _undoNode: null,
-    _path: null,
+    _displayPath: null,
 
     _changesetList: null,
     _objective: null,
@@ -277,8 +277,8 @@ JX.install('DiffChangeset', {
       JX.Router.getInstance().queue(routable);
     },
 
-    getPath: function() {
-      return this._path;
+    getDisplayPath: function() {
+      return this._displayPath;
     },
 
     /**
