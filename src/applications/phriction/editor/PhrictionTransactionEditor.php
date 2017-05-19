@@ -164,6 +164,8 @@ final class PhrictionTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_CONTENT:
+        $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
+        return;
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
         return;
@@ -241,10 +243,10 @@ final class PhrictionTransactionEditor
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
         case PhrictionTransaction::TYPE_CONTENT:
         case PhrictionTransaction::TYPE_DELETE:
         case PhrictionTransaction::TYPE_MOVE_AWAY:
-        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
           $save_content = true;
           break;
         default:
