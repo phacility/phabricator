@@ -209,12 +209,12 @@ final class PhabricatorProjectTransaction
       case self::TYPE_LOCKED:
         if ($new) {
           return pht(
-            '%s locked %s membership.',
+            '%s locked membership for %s.',
             $author_handle,
             $object_handle);
         } else {
           return pht(
-            '%s unlocked %s membership.',
+            '%s unlocked membership for %s.',
             $author_handle,
             $object_handle);
         }
