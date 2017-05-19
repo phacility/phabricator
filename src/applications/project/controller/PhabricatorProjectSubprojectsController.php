@@ -183,7 +183,7 @@ final class PhabricatorProjectSubprojectsController
         'have their own milestones.');
     } else {
       if (!$milestones) {
-        $note = pht('You can create milestones for this project.');
+        $note = pht('Milestones can be created for this project.');
       } else {
         $note = pht('This project has milestones.');
       }
@@ -199,7 +199,7 @@ final class PhabricatorProjectSubprojectsController
         'subprojects.');
     } else {
       if (!$subprojects) {
-        $note = pht('You can create subprojects for this project.');
+        $note = pht('Subprojects can be created for this project.');
       } else {
         $note = pht('This project has subprojects.');
       }
