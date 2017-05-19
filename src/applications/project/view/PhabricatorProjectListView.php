@@ -68,7 +68,7 @@ final class PhabricatorProjectListView extends AphrontView {
           ));
 
       if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
-        $item->addIcon('delete-grey', pht('Archived'));
+        $item->addIcon('fa-ban', pht('Archived'));
         $item->setDisabled(true);
       }
 

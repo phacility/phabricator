@@ -390,6 +390,17 @@ ul.phui-oi-icons {
   text-decoration: line-through;
 }
 
+.phui-oi.phui-oi-disabled .phui-oi-image {
+  opacity: .8;
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
+
+.phui-oi.phui-oi-disabled .phui-oi-attribute,
+.phui-oi.phui-oi-disabled .phui-oi-attribute .phui-icon-view {
+  color: {$lightgreytext};
+}
+
 
 /* - Effects -------------------------------------------------------------------
 
