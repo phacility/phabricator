@@ -148,6 +148,9 @@ final class PhabricatorProjectMoveController
       list($pri, $sub) = ManiphestTransactionEditor::getAdjacentSubpriority(
         $task,
         $is_after);
+
+      // If we find a priority on the first try, don't keep going.
+      break;
     }
 
     $xactions = array();
