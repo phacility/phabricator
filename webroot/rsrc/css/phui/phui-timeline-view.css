@@ -429,3 +429,9 @@ a.phui-timeline-menu .phui-icon-view {
 .phui-comment-preview-view {
   margin-bottom: 20px;
 }
+
+.phui-timeline-view .phui-pinboard-view {
+  margin: 8px 0 0 0;
+  padding: 0;
+  text-align: left;
+}

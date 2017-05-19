@@ -277,7 +277,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $can_create = (bool)$edit_config;
 
     $can_reassign = $edit_engine->hasEditAccessToTransaction(
-      ManiphestTransaction::TYPE_OWNER);
+      ManiphestTaskOwnerTransaction::TRANSACTIONTYPE);
 
     if ($can_create) {
       $form_key = $edit_config->getIdentifier();

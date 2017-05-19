@@ -26,6 +26,9 @@ final class PhabricatorProjectSubprojectsController
     $allows_subprojects = $project->supportsSubprojects();
     $allows_milestones = $project->supportsMilestones();
 
+    $subproject_list = null;
+    $milestone_list = null;
+
     if ($allows_subprojects) {
       $subprojects = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
@@ -33,6 +36,16 @@ final class PhabricatorProjectSubprojectsController
         ->needImages(true)
         ->withIsMilestone(false)
         ->execute();
+
+      $subproject_list = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('%s Subprojects', $project->getName()))
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->setObjectList(
+          id(new PhabricatorProjectListView())
+            ->setUser($viewer)
+            ->setProjects($subprojects)
+            ->setNoDataString(pht('This project has no subprojects.'))
+            ->renderList());
     } else {
       $subprojects = array();
     }
@@ -45,51 +58,24 @@ final class PhabricatorProjectSubprojectsController
         ->withIsMilestone(true)
         ->setOrderVector(array('milestoneNumber', 'id'))
         ->execute();
-    } else {
-      $milestones = array();
-    }
 
-    if ($milestones) {
       $milestone_list = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Milestones'))
+        ->setHeaderText(pht('%s Milestones', $project->getName()))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setObjectList(
           id(new PhabricatorProjectListView())
             ->setUser($viewer)
             ->setProjects($milestones)
+            ->setNoDataString(pht('This project has no milestones.'))
             ->renderList());
     } else {
-      $milestone_list = null;
+      $milestones = array();
     }
-
-    if ($subprojects) {
-      $subproject_list = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Subprojects'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->setObjectList(
-          id(new PhabricatorProjectListView())
-            ->setUser($viewer)
-            ->setProjects($subprojects)
-            ->renderList());
-    } else {
-      $subproject_list = null;
-    }
-
-    $property_list = $this->buildPropertyList(
-      $project,
-      $milestones,
-      $subprojects);
 
     $curtain = $this->buildCurtainView(
       $project,
       $milestones,
       $subprojects);
-
-
-    $details = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Details'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($property_list);
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::ITEM_SUBPROJECTS);
@@ -102,11 +88,24 @@ final class PhabricatorProjectSubprojectsController
       ->setHeader(pht('Subprojects and Milestones'))
       ->setHeaderIcon('fa-sitemap');
 
+    require_celerity_resource('project-view-css');
+
+    // This page isn't reachable via UI, but make it pretty anyways.
+    $info_view = null;
+    if (!$milestone_list && !$subproject_list) {
+      $info_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(pht('Milestone projects do not support subprojects '.
+          'or milestones.'));
+    }
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setMainColumn(array(
-          $details,
+          $info_view,
           $milestone_list,
           $subproject_list,
       ));
@@ -116,73 +115,6 @@ final class PhabricatorProjectSubprojectsController
       ->setCrumbs($crumbs)
       ->setTitle(array($project->getName(), pht('Subprojects')))
       ->appendChild($view);
-  }
-
-  private function buildPropertyList(
-    PhabricatorProject $project,
-    array $milestones,
-    array $subprojects) {
-    $viewer = $this->getViewer();
-
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer);
-
-    $view->addProperty(
-      pht('Prototype'),
-      $this->renderStatus(
-        'fa-exclamation-triangle red',
-        pht('Warning'),
-        pht('Subprojects and milestones are only partially implemented.')));
-
-    if (!$project->supportsMilestones()) {
-      $milestone_status = $this->renderStatus(
-        'fa-times grey',
-        pht('Already Milestone'),
-        pht(
-          'This project is already a milestone, and milestones may not '.
-          'have their own milestones.'));
-    } else {
-      if (!$milestones) {
-        $milestone_status = $this->renderStatus(
-          'fa-check grey',
-          pht('None Created'),
-          pht(
-            'You can create milestones for this project.'));
-      } else {
-        $milestone_status = $this->renderStatus(
-          'fa-check green',
-          pht('Has Milestones'),
-          pht('This project has milestones.'));
-      }
-    }
-
-    $view->addProperty(pht('Milestones'), $milestone_status);
-
-    if (!$project->supportsSubprojects()) {
-      $subproject_status = $this->renderStatus(
-        'fa-times grey',
-        pht('Milestone'),
-        pht(
-          'This project is a milestone, and milestones may not have '.
-          'subprojects.'));
-    } else {
-      if (!$subprojects) {
-        $subproject_status = $this->renderStatus(
-          'fa-check grey',
-          pht('None Created'),
-          pht('You can create subprojects for this project.'));
-      } else {
-        $subproject_status = $this->renderStatus(
-          'fa-check green',
-          pht('Has Subprojects'),
-          pht(
-            'This project has subprojects.'));
-      }
-    }
-
-    $view->addProperty(pht('Subprojects'), $subproject_status);
-
-    return $view;
   }
 
   private function buildCurtainView(
@@ -203,7 +135,7 @@ final class PhabricatorProjectSubprojectsController
     $allows_milestones = $project->supportsMilestones();
     $allows_subprojects = $project->supportsSubprojects();
 
-    $curtain = $this->newCurtainView($project);
+    $curtain = $this->newCurtainView();
 
     if ($allows_milestones && $milestones) {
       $milestone_text = pht('Create Next Milestone');
@@ -243,6 +175,39 @@ final class PhabricatorProjectSubprojectsController
         ->setHref($subproject_href)
         ->setDisabled($subproject_disabled)
         ->setWorkflow($subproject_workflow));
+
+
+    if (!$project->supportsMilestones()) {
+      $note = pht(
+        'This project is already a milestone, and milestones may not '.
+        'have their own milestones.');
+    } else {
+      if (!$milestones) {
+        $note = pht('Milestones can be created for this project.');
+      } else {
+        $note = pht('This project has milestones.');
+      }
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Milestones'))
+      ->appendChild($note);
+
+    if (!$project->supportsSubprojects()) {
+      $note = pht(
+        'This project is a milestone, and milestones may not have '.
+        'subprojects.');
+    } else {
+      if (!$subprojects) {
+        $note = pht('Subprojects can be created for this project.');
+      } else {
+        $note = pht('This project has subprojects.');
+      }
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Subprojects'))
+      ->appendChild($note);
 
     return $curtain;
   }

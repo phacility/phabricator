@@ -720,8 +720,6 @@ final class DiffusionCommitController extends DiffusionController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    Javelin::initBehavior('differential-keyboard-navigation');
-
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');

@@ -64,6 +64,10 @@ final class PHUIButtonView extends AphrontTagView {
     return $this;
   }
 
+  public function getColor() {
+    return $this->color;
+  }
+
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
     return $this;

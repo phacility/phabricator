@@ -265,6 +265,7 @@ final class PhabricatorPeopleSearchEngine
 
       if ($user->getIsDisabled()) {
         $item->addIcon('fa-ban', pht('Disabled'));
+        $item->setDisabled(true);
       }
 
       if (!$is_approval) {

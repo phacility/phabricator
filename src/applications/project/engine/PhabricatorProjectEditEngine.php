@@ -112,8 +112,8 @@ final class PhabricatorProjectEditEngine
       PhabricatorTransactions::TYPE_VIEW_POLICY,
       PhabricatorTransactions::TYPE_EDIT_POLICY,
       PhabricatorTransactions::TYPE_JOIN_POLICY,
-      PhabricatorProjectTransaction::TYPE_ICON,
-      PhabricatorProjectTransaction::TYPE_COLOR,
+      PhabricatorProjectIconTransaction::TRANSACTIONTYPE,
+      PhabricatorProjectColorTransaction::TRANSACTIONTYPE,
     );
     $unavailable = array_fuse($unavailable);
 
@@ -235,7 +235,7 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+        ->setTransactionType(PhabricatorProjectNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setDescription(pht('Project name.'))
         ->setConduitDescription(pht('Rename the project'))
@@ -244,7 +244,7 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_ICON)
+        ->setTransactionType(PhabricatorProjectIconTransaction::TRANSACTIONTYPE)
         ->setIconSet(new PhabricatorProjectIconSet())
         ->setDescription(pht('Project icon.'))
         ->setConduitDescription(pht('Change the project icon.'))
@@ -253,7 +253,8 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorSelectEditField())
         ->setKey('color')
         ->setLabel(pht('Color'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_COLOR)
+        ->setTransactionType(
+            PhabricatorProjectColorTransaction::TRANSACTIONTYPE)
         ->setOptions(PhabricatorProjectIconSet::getColorMap())
         ->setDescription(pht('Project tag color.'))
         ->setConduitDescription(pht('Change the project tag color.'))
@@ -262,7 +263,8 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorStringListEditField())
         ->setKey('slugs')
         ->setLabel(pht('Additional Hashtags'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+        ->setTransactionType(
+            PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Additional project slugs.'))
         ->setConduitDescription(pht('Change project slugs.'))
         ->setConduitTypeDescription(pht('New list of slugs.'))

@@ -21,4 +21,16 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
     return false;
   }
 
+  public function isHideable() {
+    return true;
+  }
+
+  public function newHiddenIcon() {
+    if ($this->isHideable()) {
+      return new PHUIDiffRevealIconView();
+    } else {
+      return null;
+    }
+  }
+
 }

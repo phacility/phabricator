@@ -74,6 +74,8 @@ JX.behavior('differential-feedback-preview', function(config) {
       });
 
       updateLinks();
+
+      JX.Stratcom.invoke('resize');
     })
     .setTimeout(5000)
     .send();

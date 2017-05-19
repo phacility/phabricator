@@ -24,7 +24,7 @@ final class ManiphestCloseEmailCommand
     $xactions = array();
 
     $xactions[] = $object->getApplicationTransactionTemplate()
-      ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+      ->setTransactionType(ManiphestTaskStatusTransaction::TRANSACTIONTYPE)
       ->setNewValue(ManiphestTaskStatus::getDefaultClosedStatus());
 
     return $xactions;

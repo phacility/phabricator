@@ -71,7 +71,7 @@ final class ManiphestPriorityEmailCommand
     }
 
     $xactions[] = $object->getApplicationTransactionTemplate()
-      ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+      ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($priority);
 
     return $xactions;

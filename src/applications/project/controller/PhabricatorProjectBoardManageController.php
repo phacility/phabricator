@@ -31,6 +31,7 @@ final class PhabricatorProjectBoardManageController
     $board_id = $board->getID();
 
     $header = $this->buildHeaderView($board);
+    $curtain = $this->buildCurtainView($board);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Workboard'), "/project/board/{$board_id}/");
@@ -40,9 +41,14 @@ final class PhabricatorProjectBoardManageController
     $nav = $this->getProfileMenu();
     $columns_list = $this->buildColumnsList($board, $columns);
 
+    require_celerity_resource('project-view-css');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter($columns_list);
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
+      ->setCurtain($curtain)
+      ->setMainColumn($columns_list);
 
     $title = array(
       pht('Manage Workboard'),
@@ -59,30 +65,35 @@ final class PhabricatorProjectBoardManageController
   private function buildHeaderView(PhabricatorProject $board) {
     $viewer = $this->getViewer();
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Workboard: %s', $board->getDisplayName()))
+      ->setUser($viewer);
+
+    return $header;
+  }
+
+  private function buildCurtainView(PhabricatorProject $board) {
+    $viewer = $this->getViewer();
+    $id = $board->getID();
+
+    $curtain = $this->newCurtainView();
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $board,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $id = $board->getID();
     $disable_uri = $this->getApplicationURI("board/{$id}/disable/");
 
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-ban')
-      ->setText(pht('Disable Board'))
-      ->setHref($disable_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(true);
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-ban')
+        ->setName(pht('Disable Workboard'))
+        ->setHref($disable_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Workboard: %s', $board->getDisplayName()))
-      ->setUser($viewer)
-      ->setPolicyObject($board)
-      ->setProfileHeader(true)
-      ->addActionLink($button);
-
-    return $header;
+    return $curtain;
   }
 
   private function buildColumnsList(
@@ -123,6 +134,7 @@ final class PhabricatorProjectBoardManageController
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Columns'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($view);
   }
 

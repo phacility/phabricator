@@ -6,6 +6,7 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
   private $userPHIDs;
   private $limit;
   private $background;
+  private $showNote;
 
   public function setProject(PhabricatorProject $project) {
     $this->project = $project;
@@ -39,10 +40,16 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
     return $this;
   }
 
+  public function setShowNote($show) {
+    $this->showNote = $show;
+    return $this;
+  }
+
   abstract protected function canEditList();
   abstract protected function getNoDataString();
   abstract protected function getRemoveURI($phid);
   abstract protected function getHeaderText();
+  abstract protected function getMembershipNote();
 
   public function render() {
     $viewer = $this->getViewer();
@@ -134,6 +141,15 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setObjectList($list);
+
+    if ($this->showNote) {
+      if ($this->getMembershipNote()) {
+        $info = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_PLAIN)
+        ->appendChild($this->getMembershipNote());
+        $box->setInfoView($info);
+      }
+    }
 
     if ($this->background) {
       $box->setBackground($this->background);

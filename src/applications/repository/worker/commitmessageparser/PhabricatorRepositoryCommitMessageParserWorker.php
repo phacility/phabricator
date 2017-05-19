@@ -367,7 +367,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       if ($status) {
         if ($task->getStatus() != $status) {
           $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+            ->setTransactionType(
+              ManiphestTaskStatusTransaction::TRANSACTIONTYPE)
             ->setMetadataValue('commitPHID', $commit->getPHID())
             ->setNewValue($status);
 

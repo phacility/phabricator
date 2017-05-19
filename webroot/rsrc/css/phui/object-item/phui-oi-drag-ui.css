@@ -23,6 +23,10 @@
   margin-top: 4px;
 }
 
+.phui-oi-drag .phui-oi-name {
+  padding-left: 0;
+}
+
 .phui-oi-drag.phui-oi-with-image-icon .phui-oi-frame,
 .phui-oi-drag.phui-oi-with-image .phui-oi-frame,
 .phui-oi-drag .phui-oi-frame {
@@ -56,4 +60,8 @@
 
 .phui-oi-list-drag .drag-ghost {
   margin-top: 4px;
+}
+
+.phui-oi-list-drag .phui-object-icon-pane {
+  padding-right: 8px;
 }

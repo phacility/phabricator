@@ -16,6 +16,10 @@ final class PhabricatorActionListView extends AphrontTagView {
   }
 
   protected function getTagName() {
+    if (!$this->actions) {
+      return null;
+    }
+
     return 'ul';
   }
 

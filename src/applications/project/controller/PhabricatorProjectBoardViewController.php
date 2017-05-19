@@ -879,12 +879,6 @@ final class PhabricatorProjectBoardViewController
         ->setWorkflow(true);
     }
 
-    $details_uri = 'board/'.$this->id.'/column/'.$column->getID().'/';
-    $column_items[] = id(new PhabricatorActionView())
-      ->setName(pht('Column History'))
-      ->setIcon('fa-columns')
-      ->setHref($this->getApplicationURI($details_uri));
-
     $column_menu = id(new PhabricatorActionListView())
       ->setUser($viewer);
     foreach ($column_items as $item) {

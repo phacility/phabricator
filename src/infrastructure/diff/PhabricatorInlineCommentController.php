@@ -94,19 +94,6 @@ abstract class PhabricatorInlineCommentController
 
     $op = $this->getOperation();
     switch ($op) {
-      case 'busy':
-        if ($request->isFormPost()) {
-          return new AphrontAjaxResponse();
-        }
-
-        return $this->newDialog()
-          ->setTitle(pht('Already Editing'))
-          ->appendParagraph(
-            pht(
-              'You are already editing an inline comment. Finish editing '.
-              'your current comment before adding new comments.'))
-          ->addCancelButton('/')
-          ->addSubmitButton(pht('Jump to Inline'));
       case 'hide':
       case 'show':
         if (!$request->validateCSRF()) {
@@ -130,12 +117,14 @@ abstract class PhabricatorInlineCommentController
         $inline = $this->loadCommentForDone($this->getCommentID());
 
         $is_draft_state = false;
+        $is_checked = false;
         switch ($inline->getFixedState()) {
           case PhabricatorInlineCommentInterface::STATE_DRAFT:
             $next_state = PhabricatorInlineCommentInterface::STATE_UNDONE;
             break;
           case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
             $next_state = PhabricatorInlineCommentInterface::STATE_DONE;
+            $is_checked = true;
             break;
           case PhabricatorInlineCommentInterface::STATE_DONE:
             $next_state = PhabricatorInlineCommentInterface::STATE_UNDRAFT;
@@ -145,6 +134,7 @@ abstract class PhabricatorInlineCommentController
           case PhabricatorInlineCommentInterface::STATE_UNDONE:
             $next_state = PhabricatorInlineCommentInterface::STATE_DRAFT;
             $is_draft_state = true;
+            $is_checked = true;
             break;
         }
 
@@ -153,6 +143,7 @@ abstract class PhabricatorInlineCommentController
         return id(new AphrontAjaxResponse())
           ->setContent(
             array(
+              'isChecked' => $is_checked,
               'draftState' => $is_draft_state,
             ));
       case 'delete':

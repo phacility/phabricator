@@ -18,18 +18,6 @@ final class ManiphestTransactionEditor
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
-    $types[] = ManiphestTransaction::TYPE_PRIORITY;
-    $types[] = ManiphestTransaction::TYPE_STATUS;
-    $types[] = ManiphestTransaction::TYPE_TITLE;
-    $types[] = ManiphestTransaction::TYPE_DESCRIPTION;
-    $types[] = ManiphestTransaction::TYPE_OWNER;
-    $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
-    $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
-    $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
-    $types[] = ManiphestTransaction::TYPE_UNBLOCK;
-    $types[] = ManiphestTransaction::TYPE_PARENT;
-    $types[] = ManiphestTransaction::TYPE_COVER_IMAGE;
-    $types[] = ManiphestTransaction::TYPE_POINTS;
     $types[] = PhabricatorTransactions::TYPE_COLUMNS;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -37,47 +25,19 @@ final class ManiphestTransactionEditor
     return $types;
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this task.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PRIORITY:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return (int)$object->getPriority();
-      case ManiphestTransaction::TYPE_STATUS:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $object->getStatus();
-      case ManiphestTransaction::TYPE_TITLE:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $object->getTitle();
-      case ManiphestTransaction::TYPE_DESCRIPTION:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $object->getDescription();
-      case ManiphestTransaction::TYPE_OWNER:
-        return nonempty($object->getOwnerPHID(), null);
-      case ManiphestTransaction::TYPE_SUBPRIORITY:
-        return $object->getSubpriority();
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        return $object->getCoverImageFilePHID();
-      case ManiphestTransaction::TYPE_POINTS:
-        $points = $object->getPoints();
-        if ($points !== null) {
-          $points = (double)$points;
-        }
-        return $points;
-      case ManiphestTransaction::TYPE_MERGED_INTO:
-      case ManiphestTransaction::TYPE_MERGED_FROM:
-        return null;
-      case ManiphestTransaction::TYPE_PARENT:
       case PhabricatorTransactions::TYPE_COLUMNS:
         return null;
     }
@@ -88,31 +48,8 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PRIORITY:
-        return (int)$xaction->getNewValue();
-      case ManiphestTransaction::TYPE_OWNER:
-        return nonempty($xaction->getNewValue(), null);
-      case ManiphestTransaction::TYPE_STATUS:
-      case ManiphestTransaction::TYPE_TITLE:
-      case ManiphestTransaction::TYPE_DESCRIPTION:
-      case ManiphestTransaction::TYPE_SUBPRIORITY:
-      case ManiphestTransaction::TYPE_MERGED_INTO:
-      case ManiphestTransaction::TYPE_MERGED_FROM:
-      case ManiphestTransaction::TYPE_UNBLOCK:
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        return $xaction->getNewValue();
-      case ManiphestTransaction::TYPE_PARENT:
       case PhabricatorTransactions::TYPE_COLUMNS:
         return $xaction->getNewValue();
-      case ManiphestTransaction::TYPE_POINTS:
-        $value = $xaction->getNewValue();
-        if (!strlen($value)) {
-          $value = null;
-        }
-        if ($value !== null) {
-          $value = (double)$value;
-        }
-        return $value;
     }
   }
 
@@ -136,72 +73,6 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PRIORITY:
-        return $object->setPriority($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_STATUS:
-        return $object->setStatus($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_TITLE:
-        return $object->setTitle($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_DESCRIPTION:
-        return $object->setDescription($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_OWNER:
-        $phid = $xaction->getNewValue();
-
-        // Update the "ownerOrdering" column to contain the full name of the
-        // owner, if the task is assigned.
-
-        $handle = null;
-        if ($phid) {
-          $handle = id(new PhabricatorHandleQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($phid))
-            ->executeOne();
-        }
-
-        if ($handle) {
-          $object->setOwnerOrdering($handle->getName());
-        } else {
-          $object->setOwnerOrdering(null);
-        }
-
-        return $object->setOwnerPHID($phid);
-      case ManiphestTransaction::TYPE_SUBPRIORITY:
-        $object->setSubpriority($xaction->getNewValue());
-        return;
-      case ManiphestTransaction::TYPE_MERGED_INTO:
-        $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
-        return;
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        $file_phid = $xaction->getNewValue();
-
-        if ($file_phid) {
-          $file = id(new PhabricatorFileQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($file_phid))
-            ->executeOne();
-        } else {
-          $file = null;
-        }
-
-        if (!$file || !$file->isTransformableImage()) {
-          $object->setProperty('cover.filePHID', null);
-          $object->setProperty('cover.thumbnailPHID', null);
-          return;
-        }
-
-        $xform_key = PhabricatorFileThumbnailTransform::TRANSFORM_WORKCARD;
-
-        $xform = PhabricatorFileTransform::getTransformByKey($xform_key)
-          ->executeTransform($file);
-
-        $object->setProperty('cover.filePHID', $file->getPHID());
-        $object->setProperty('cover.thumbnailPHID', $xform->getPHID());
-        return;
-      case ManiphestTransaction::TYPE_POINTS:
-        $object->setPoints($xaction->getNewValue());
-        return;
-      case ManiphestTransaction::TYPE_MERGED_FROM:
-      case ManiphestTransaction::TYPE_PARENT:
       case PhabricatorTransactions::TYPE_COLUMNS:
         return;
     }
@@ -212,21 +83,10 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PARENT:
-        $parent_phid = $xaction->getNewValue();
-        $parent_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-        $task_phid = $object->getPHID();
-
-        id(new PhabricatorEdgeEditor())
-          ->addEdge($parent_phid, $parent_type, $task_phid)
-          ->save();
-        break;
       case PhabricatorTransactions::TYPE_COLUMNS:
         foreach ($xaction->getNewValue() as $move) {
           $this->applyBoardMove($object, $move);
         }
-        break;
-      default:
         break;
     }
   }
@@ -240,7 +100,7 @@ final class ManiphestTransactionEditor
     $unblock_xaction = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ManiphestTransaction::TYPE_STATUS:
+        case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
           $unblock_xaction = $xaction;
           break;
       }
@@ -265,7 +125,8 @@ final class ManiphestTransactionEditor
 
         foreach ($blocked_tasks as $blocked_task) {
           $parent_xaction = id(new ManiphestTransaction())
-            ->setTransactionType(ManiphestTransaction::TYPE_UNBLOCK)
+            ->setTransactionType(
+              ManiphestTaskUnblockTransaction::TRANSACTIONTYPE)
             ->setOldValue(array($object->getPHID() => $old))
             ->setNewValue(array($object->getPHID() => $new));
 
@@ -398,7 +259,7 @@ final class ManiphestTransactionEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return $this->shouldSendMail($object, $xactions);
+    return true;
   }
 
   protected function supportsSearch() {
@@ -426,11 +287,11 @@ final class ManiphestTransactionEditor
     parent::requireCapabilities($object, $xaction);
 
     $app_capability_map = array(
-      ManiphestTransaction::TYPE_PRIORITY =>
+      ManiphestTaskPriorityTransaction::TRANSACTIONTYPE =>
         ManiphestEditPriorityCapability::CAPABILITY,
-      ManiphestTransaction::TYPE_STATUS =>
+      ManiphestTaskStatusTransaction::TRANSACTIONTYPE =>
         ManiphestEditStatusCapability::CAPABILITY,
-      ManiphestTransaction::TYPE_OWNER =>
+      ManiphestTaskOwnerTransaction::TRANSACTIONTYPE =>
         ManiphestEditAssignCapability::CAPABILITY,
       PhabricatorTransactions::TYPE_EDIT_POLICY =>
         ManiphestEditPoliciesCapability::CAPABILITY,
@@ -471,7 +332,7 @@ final class ManiphestTransactionEditor
     $copy = parent::adjustObjectForPolicyChecks($object, $xactions);
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ManiphestTransaction::TYPE_OWNER:
+        case ManiphestTaskOwnerTransaction::TRANSACTIONTYPE:
           $copy->setOwnerPHID($xaction->getNewValue());
           break;
         default:
@@ -629,157 +490,6 @@ final class ManiphestTransactionEditor
     return array($dst->getPriority(), $sub);
   }
 
-  protected function validateTransaction(
-    PhabricatorLiskDAO $object,
-    $type,
-    array $xactions) {
-
-    $errors = parent::validateTransaction($object, $type, $xactions);
-
-    switch ($type) {
-      case ManiphestTransaction::TYPE_TITLE:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getTitle(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('Task title is required.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-        break;
-      case ManiphestTransaction::TYPE_PARENT:
-        $with_effect = array();
-        foreach ($xactions as $xaction) {
-          $task_phid = $xaction->getNewValue();
-          if (!$task_phid) {
-            continue;
-          }
-
-          $with_effect[] = $xaction;
-
-          $task = id(new ManiphestTaskQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($task_phid))
-            ->executeOne();
-          if (!$task) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht(
-                'Parent task identifier "%s" does not identify a visible '.
-                'task.',
-                $task_phid),
-              $xaction);
-          }
-        }
-
-        if ($with_effect && !$this->getIsNewObject()) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'You can only select a parent task when creating a '.
-              'transaction for the first time.'),
-            last($with_effect));
-        }
-        break;
-      case ManiphestTransaction::TYPE_OWNER:
-        foreach ($xactions as $xaction) {
-          $old = $xaction->getOldValue();
-          $new = $xaction->getNewValue();
-          if (!strlen($new)) {
-            continue;
-          }
-
-          if ($new === $old) {
-            continue;
-          }
-
-          $assignee_list = id(new PhabricatorPeopleQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($new))
-            ->execute();
-          if (!$assignee_list) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht(
-                'User "%s" is not a valid user.',
-                $new),
-              $xaction);
-          }
-        }
-        break;
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        foreach ($xactions as $xaction) {
-          $old = $xaction->getOldValue();
-          $new = $xaction->getNewValue();
-          if (!$new) {
-            continue;
-          }
-
-          if ($new === $old) {
-            continue;
-          }
-
-          $file = id(new PhabricatorFileQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($new))
-            ->executeOne();
-          if (!$file) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('File "%s" is not valid.', $new),
-              $xaction);
-            continue;
-          }
-
-          if (!$file->isTransformableImage()) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('File "%s" is not a valid image file.', $new),
-              $xaction);
-            continue;
-          }
-        }
-        break;
-
-      case ManiphestTransaction::TYPE_POINTS:
-        foreach ($xactions as $xaction) {
-          $new = $xaction->getNewValue();
-          if (strlen($new) && !is_numeric($new)) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('Points value must be numeric or empty.'),
-              $xaction);
-            continue;
-          }
-
-          if ((double)$new < 0) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('Points value must be nonnegative.'),
-              $xaction);
-            continue;
-          }
-        }
-        break;
-
-    }
-
-    return $errors;
-  }
-
   protected function validateAllTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -806,7 +516,8 @@ final class ManiphestTransactionEditor
 
     $any_assign = false;
     foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() == ManiphestTransaction::TYPE_OWNER) {
+      if ($xaction->getTransactionType() ==
+        ManiphestTaskOwnerTransaction::TRANSACTIONTYPE) {
         $any_assign = true;
         break;
       }
@@ -817,7 +528,7 @@ final class ManiphestTransactionEditor
     $new_status = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ManiphestTransaction::TYPE_STATUS:
+        case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
           $new_status = $xaction->getNewValue();
           break;
       }
@@ -838,7 +549,7 @@ final class ManiphestTransactionEditor
       // Don't claim the task if the status is configured to not claim.
       if ($actor_phid && $is_claim) {
         $results[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+          ->setTransactionType(ManiphestTaskOwnerTransaction::TRANSACTIONTYPE)
           ->setNewValue($actor_phid);
       }
     }
@@ -881,7 +592,7 @@ final class ManiphestTransactionEditor
           $this->moreValidationErrors[] = $error;
         }
         break;
-      case ManiphestTransaction::TYPE_OWNER:
+      case ManiphestTaskOwnerTransaction::TRANSACTIONTYPE:
         // If this is a no-op update, don't expand it.
         $old_value = $object->getOwnerPHID();
         $new_value = $xaction->getNewValue();
@@ -904,20 +615,6 @@ final class ManiphestTransactionEditor
     }
 
     return $results;
-  }
-
-  protected function extractFilePHIDsFromCustomTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    $phids = parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
-
-    switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        $phids[] = $xaction->getNewValue();
-        break;
-    }
-
-    return $phids;
   }
 
   private function buildMoveTransaction(

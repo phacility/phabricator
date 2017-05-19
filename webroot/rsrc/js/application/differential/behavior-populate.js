@@ -4,51 +4,79 @@
  *           javelin-dom
  *           javelin-stratcom
  *           phabricator-tooltip
- *           changeset-view-manager
+ *           phabricator-diff-changeset-list
+ *           phabricator-diff-changeset
+ * @javelin
  */
 
-JX.behavior('differential-populate', function(config) {
+JX.behavior('differential-populate', function(config, statics) {
+
+  // When we perform a Quicksand navigation, deactivate the changeset lists on
+  // the current page and activate the changeset lists on the new page.
+  var onredraw = function(page_id) {
+    // If the current page is already active, we don't need to do anything.
+    if (statics.pageID === page_id) {
+      return;
+    }
+
+    var ii;
+
+    // Put the old lists to sleep.
+    var old_lists = get_lists(statics.pageID);
+    for (ii = 0; ii < old_lists.length; ii++) {
+      old_lists[ii].sleep();
+    }
+    statics.pageID = null;
+
+    // Awaken the new lists, if they exist.
+    if (statics.pages.hasOwnProperty(page_id)) {
+      var new_lists = get_lists(page_id);
+      for (ii = 0; ii < new_lists.length; ii++) {
+        new_lists[ii].wake();
+      }
+
+      statics.pageID = page_id;
+    }
+  };
+
+  // Get changeset lists on the current page.
+  var get_lists = function(page_id) {
+    if (page_id === null) {
+      return [];
+    }
+
+    return statics.pages[page_id] || [];
+  };
+
+  if (!statics.installed) {
+    statics.installed = true;
+    statics.pages = {};
+    statics.pageID = null;
+
+    JX.Stratcom.listen('quicksand-redraw', null, function(e) {
+      onredraw(e.getData().newResponseID);
+    });
+  }
+
+  var changeset_list = new JX.DiffChangesetList()
+    .setTranslations(JX.phtize(config.pht))
+    .setInlineURI(config.inlineURI);
+
+  // Install and activate the current page.
+  var page_id = JX.Quicksand.getCurrentPageID();
+  statics.pages[page_id] = [changeset_list];
+  onredraw(page_id);
+
+
 
   for (var ii = 0; ii < config.changesetViewIDs.length; ii++) {
     var id = config.changesetViewIDs[ii];
-    var view = JX.ChangesetViewManager.getForNode(JX.$(id));
-    if (view.shouldAutoload()) {
-      view.setStabilize(true).load();
+    var node = JX.$(id);
+    var changeset = changeset_list.newChangesetForNode(node);
+    if (changeset.shouldAutoload()) {
+      changeset.setStabilize(true).load();
     }
   }
-
-  JX.Stratcom.listen(
-    'click',
-    'differential-load',
-    function(e) {
-      var meta = e.getNodeData('differential-load');
-      var changeset = JX.$(meta.id);
-      var view = JX.ChangesetViewManager.getForNode(changeset);
-
-      view.load();
-      var routable = view.getRoutable();
-      if (routable) {
-        routable.setPriority(2000);
-      }
-
-      if (meta.kill) {
-        e.kill();
-      }
-    });
-
-  JX.Stratcom.listen(
-    'click',
-    'show-more',
-    function(e) {
-      e.kill();
-
-      var changeset = e.getNode('differential-changeset');
-      var view = JX.ChangesetViewManager.getForNode(changeset);
-      var data = e.getNodeData('show-more');
-      var target = e.getNode('context-target');
-
-      view.loadContext(data.range, target);
-    });
 
   var highlighted = null;
   var highlight_class = null;

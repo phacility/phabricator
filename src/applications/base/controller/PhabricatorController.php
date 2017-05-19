@@ -471,7 +471,7 @@ abstract class PhabricatorController extends AphrontController {
       ->setViewer($this->getViewer());
   }
 
-  public function newCurtainView($object) {
+  public function newCurtainView($object = null) {
     $viewer = $this->getViewer();
 
     $action_id = celerity_generate_unique_node_id();
@@ -491,9 +491,11 @@ abstract class PhabricatorController extends AphrontController {
       ->setViewer($viewer)
       ->setActionList($action_list);
 
-    $panels = PHUICurtainExtension::buildExtensionPanels($viewer, $object);
-    foreach ($panels as $panel) {
-      $curtain->addPanel($panel);
+    if ($object) {
+      $panels = PHUICurtainExtension::buildExtensionPanels($viewer, $object);
+      foreach ($panels as $panel) {
+        $curtain->addPanel($panel);
+      }
     }
 
     return $curtain;

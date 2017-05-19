@@ -7,6 +7,7 @@ final class PHUIInfoView extends AphrontTagView {
   const SEVERITY_NOTICE = 'notice';
   const SEVERITY_NODATA = 'nodata';
   const SEVERITY_SUCCESS = 'success';
+  const SEVERITY_PLAIN = 'plain';
 
   private $title;
   private $errors;
@@ -52,8 +53,14 @@ final class PHUIInfoView extends AphrontTagView {
     return $this;
   }
 
-  public function setIcon(PHUIIconView $icon) {
-    $this->icon = $icon;
+  public function setIcon($icon) {
+    if ($icon instanceof PHUIIconView) {
+      $this->icon = $icon;
+    } else {
+      $icon = id(new PHUIIconView())
+        ->setIcon($icon);
+    }
+
     return $this;
   }
 
@@ -72,6 +79,7 @@ final class PHUIInfoView extends AphrontTagView {
       case self::SEVERITY_NOTICE:
         $icon = 'fa-info-circle';
       break;
+      case self::SEVERITY_PLAIN:
       case self::SEVERITY_NODATA:
         return null;
       break;

@@ -891,7 +891,7 @@ JX.install('DOM', {
      * it.
      *
      * @param   Node    Node to look above.
-     * @param   string  Tag name, like 'a' or 'textarea'.
+     * @param   string  Optional tag name, like 'a' or 'textarea'.
      * @param   string  Optionally, sigil which selected node must have.
      * @return  Node    Matching node.
      *
@@ -911,7 +911,7 @@ JX.install('DOM', {
         if (!result) {
           break;
         }
-        if (JX.DOM.isType(result, tagname)) {
+        if (!tagname || JX.DOM.isType(result, tagname)) {
           if (!sigil || JX.Stratcom.hasSigil(result, sigil)) {
             break;
           }

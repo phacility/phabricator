@@ -36,7 +36,7 @@ final class PhabricatorProjectCoverController
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_COVER_IMAGE)
+      ->setTransactionType(ManiphestTaskCoverImageTransaction::TRANSACTIONTYPE)
       ->setNewValue($file->getPHID());
 
     $editor = id(new ManiphestTransactionEditor())
