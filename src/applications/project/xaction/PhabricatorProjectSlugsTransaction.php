@@ -40,26 +40,29 @@ final class PhabricatorProjectSlugsTransaction
     $add = array_diff($new, $old);
     $rem = array_diff($old, $new);
 
+    $add = $this->renderHashtags($add);
+    $rem = $this->renderHashtags($rem);
+
     if ($add && $rem) {
       return pht(
         '%s changed project hashtag(s), added %d: %s; removed %d: %s.',
         $this->renderAuthor(),
         count($add),
-        $this->renderSlugList($add),
+        $this->renderValueList($add),
         count($rem),
-        $this->renderSlugList($rem));
+        $this->renderValueList($rem));
     } else if ($add) {
       return pht(
         '%s added %d project hashtag(s): %s.',
         $this->renderAuthor(),
         count($add),
-        $this->renderSlugList($add));
+        $this->renderValueList($add));
     } else if ($rem) {
         return pht(
           '%s removed %d project hashtag(s): %s.',
           $this->renderAuthor(),
           count($rem),
-          $this->renderSlugList($rem));
+          $this->renderValueList($rem));
     }
   }
 
@@ -70,29 +73,32 @@ final class PhabricatorProjectSlugsTransaction
     $add = array_diff($new, $old);
     $rem = array_diff($old, $new);
 
+    $add = $this->renderHashtags($add);
+    $rem = $this->renderHashtags($rem);
+
     if ($add && $rem) {
       return pht(
         '%s changed %s hashtag(s), added %d: %s; removed %d: %s.',
         $this->renderAuthor(),
         $this->renderObject(),
         count($add),
-        $this->renderSlugList($add),
+        $this->renderValueList($add),
         count($rem),
-        $this->renderSlugList($rem));
+        $this->renderValueList($rem));
     } else if ($add) {
       return pht(
         '%s added %d %s hashtag(s): %s.',
         $this->renderAuthor(),
         count($add),
         $this->renderObject(),
-        $this->renderSlugList($add));
+        $this->renderValueList($add));
     } else if ($rem) {
       return pht(
         '%s removed %d %s hashtag(s): %s.',
         $this->renderAuthor(),
         count($rem),
         $this->renderObject(),
-        $this->renderSlugList($rem));
+        $this->renderValueList($rem));
     }
   }
 
@@ -157,8 +163,12 @@ final class PhabricatorProjectSlugsTransaction
     return $errors;
   }
 
-  private function renderSlugList($slugs) {
-    return implode(', ', $slugs);
+  private function renderHashtags(array $tags) {
+    $result = array();
+    foreach ($tags as $tag) {
+      $result[] = '#'.$tag;
+    }
+    return $result;
   }
 
 }
