@@ -36,7 +36,7 @@ final class ManiphestTaskTitleTransaction
     }
 
     return pht(
-      '%s renamed the title from %s to %s.',
+      '%s renamed this task from %s to %s.',
       $this->renderAuthor(),
       $this->renderOldValue(),
       $this->renderNewValue());
