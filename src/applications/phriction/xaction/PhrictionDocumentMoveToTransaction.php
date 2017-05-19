@@ -17,12 +17,15 @@ final class PhrictionDocumentMoveToTransaction
       'content' => $document->getContent()->getContent(),
       'title' => $document->getContent()->getTitle(),
     );
+
+    $editor = $this->getEditor();
+    $editor->setMoveAwayDocument($document);
+
     return $dict;
   }
 
   public function applyInternalEffects($object, $value) {
     $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
-    $this->getEditor()->getNewContent()->setTitle($value);
   }
 
   public function applyExternalEffects($object, $value) {

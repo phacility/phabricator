@@ -69,6 +69,11 @@ final class PhrictionTransactionEditor
     return $this->processContentVersionError;
   }
 
+  public function setMoveAwayDocument(PhrictionDocument $document) {
+    $this->moveAwayDocument = $document;
+    return $this;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorPhrictionApplication';
   }
@@ -116,11 +121,6 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_CONTENT:
       case PhrictionTransaction::TYPE_DELETE:
         return $xaction->getNewValue();
-      case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-        $document = $xaction->getNewValue();
-        // grab the real object now for the sub-editor to come
-        $this->moveAwayDocument = $document;
-        return;
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $document = $xaction->getNewValue();
         $dict = array(
