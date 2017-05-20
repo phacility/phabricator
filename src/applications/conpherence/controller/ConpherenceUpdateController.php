@@ -369,9 +369,17 @@ final class ConpherenceUpdateController
       ->setViewer($user);
     $dropdown_query->execute();
 
-    $sounds = $this->getSoundForParticipant($user, $participant);
-    $receive_sound = $sounds[ConpherenceRoomSettings::SOUND_RECEIVE];
-    $mention_sound = $sounds[ConpherenceRoomSettings::SOUND_MENTION];
+    $map = ConpherenceRoomSettings::getSoundMap();
+    $default_receive = ConpherenceRoomSettings::DEFAULT_RECEIVE_SOUND;
+    $receive_sound = $map[$default_receive]['rsrc'];
+    $mention_sound = null;
+
+    // Get the user's defaults if logged in
+    if ($participant) {
+      $sounds = $this->getSoundForParticipant($user, $participant);
+      $receive_sound = $sounds[ConpherenceRoomSettings::SOUND_RECEIVE];
+      $mention_sound = $sounds[ConpherenceRoomSettings::SOUND_MENTION];
+    }
 
     $content = array(
       'non_update' => $non_update,
