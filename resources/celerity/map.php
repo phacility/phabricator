@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => '599698a7',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => '7d4cfa59',
-    'differential.pkg.js' => 'f94e941c',
+    'differential.pkg.js' => 'fc6a23eb',
     'diffusion.pkg.css' => 'b93d9b8c',
     'diffusion.pkg.js' => '84c8f8fd',
     'favicon.ico' => '30672e08',
@@ -392,8 +392,8 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => 'd4eecc63',
     'rsrc/js/application/diff/DiffChangeset.js' => 'cf4e2140',
     'rsrc/js/application/diff/DiffChangesetList.js' => 'a716ca27',
-    'rsrc/js/application/diff/DiffInline.js' => 'fa07d36e',
-    'rsrc/js/application/diff/ScrollObjective.js' => '2e069f79',
+    'rsrc/js/application/diff/DiffInline.js' => '93cbb03f',
+    'rsrc/js/application/diff/ScrollObjective.js' => '9df4e4e2',
     'rsrc/js/application/diff/ScrollObjectiveList.js' => '085dd101',
     'rsrc/js/application/diff/behavior-preview-link.js' => '051c7832',
     'rsrc/js/application/differential/behavior-comment-preview.js' => '51c5ad07',
@@ -779,7 +779,7 @@ return array(
     'phabricator-dashboard-css' => 'fe5b1869',
     'phabricator-diff-changeset' => 'cf4e2140',
     'phabricator-diff-changeset-list' => 'a716ca27',
-    'phabricator-diff-inline' => 'fa07d36e',
+    'phabricator-diff-inline' => '93cbb03f',
     'phabricator-drag-and-drop-file-upload' => '58dea2fa',
     'phabricator-draggable-list' => 'bea6e7f4',
     'phabricator-fatal-config-template-css' => '8f18fa41',
@@ -799,7 +799,7 @@ return array(
     'phabricator-phtize' => 'd254d646',
     'phabricator-prefab' => 'c5af80a2',
     'phabricator-remarkup-css' => 'd1a5e11e',
-    'phabricator-scroll-objective' => '2e069f79',
+    'phabricator-scroll-objective' => '9df4e4e2',
     'phabricator-scroll-objective-list' => '085dd101',
     'phabricator-search-results-css' => 'f87d23ad',
     'phabricator-shaped-request' => '7cbe244b',
@@ -1112,13 +1112,6 @@ return array(
     '2caa8fb8' => array(
       'javelin-install',
       'javelin-event',
-    ),
-    '2e069f79' => array(
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-install',
-      'javelin-workflow',
     ),
     '2ee659ce' => array(
       'javelin-install',
@@ -1611,6 +1604,9 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
     ),
+    '93cbb03f' => array(
+      'javelin-dom',
+    ),
     '93d0c9e3' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1674,6 +1670,13 @@ return array(
     ),
     '9d9685d6' => array(
       'phui-oi-list-view-css',
+    ),
+    '9df4e4e2' => array(
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-install',
+      'javelin-workflow',
     ),
     '9f36c42d' => array(
       'javelin-behavior',
@@ -2204,9 +2207,6 @@ return array(
     'f829edb3' => array(
       'javelin-view',
       'javelin-install',
-      'javelin-dom',
-    ),
-    'fa07d36e' => array(
       'javelin-dom',
     ),
     'fbe497e7' => array(

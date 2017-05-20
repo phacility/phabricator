@@ -74,8 +74,9 @@ JX.install('DiffInline', {
 
       this._changesetID = data.changesetID;
 
-      this.updateObjective();
       this.setInvisible(false);
+
+      this.updateObjective();
 
       return this;
     },
@@ -166,9 +167,11 @@ JX.install('DiffInline', {
       this._changeset = changeset;
 
       var objectives = changeset.getChangesetList().getObjectives();
+
+      // Create this inline's objective, but don't show it yet.
       this._objective = objectives.newObjective()
-        .setCallback(JX.bind(this, this._onobjective));
-      this.updateObjective();
+        .setCallback(JX.bind(this, this._onobjective))
+        .hide();
 
       return this;
     },
@@ -206,11 +209,17 @@ JX.install('DiffInline', {
       var icon = 'fa-comment';
       var color = 'bluegrey';
       var tooltip = null;
+      var anchor = this._row;
 
       if (this._isEditing) {
         icon = 'fa-star';
         color = 'pink';
         tooltip = pht('Editing Comment');
+
+        // If we're editing, anchor to the row with the editor instead of the
+        // actual comment row (which is invisible and can have a misleading
+        // position).
+        anchor = this._row.nextSibling;
       } else if (this._isDraft) {
         // This inline is an unsubmitted draft.
         icon = 'fa-pencil';
@@ -225,6 +234,7 @@ JX.install('DiffInline', {
       }
 
       objective
+        .setAnchor(anchor)
         .setIcon(icon)
         .setColor(color)
         .setTooltip(tooltip)
