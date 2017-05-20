@@ -419,7 +419,7 @@ tr.differential-inline-loading {
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.95);
   border-width: 1px 0 1px 1px;
-  box-shadow: -1px 0 2px rgba(255, 255, 255, 0.25);
+  box-shadow: -1px 0 2px rgba(255, 255, 255, 0.10);
   overflow: hidden;
 }
 
@@ -433,7 +433,8 @@ tr.differential-inline-loading {
   position: absolute;
   box-sizing: border-box;
   cursor: pointer;
-  left: 8px;
+  text-align: middle;
+  left: 7px;
 }
 
 .scroll-objective .phui-icon-view {

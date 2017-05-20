@@ -32,6 +32,7 @@ JX.install('DiffInline', {
 
     _isDraft: null,
     _isFixed: null,
+    _isEditing: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -176,6 +177,12 @@ JX.install('DiffInline', {
       return this._changeset;
     },
 
+    setEditing: function(editing) {
+      this._isEditing = editing;
+      this.updateObjective();
+      return this;
+    },
+
     _onobjective: function() {
       this.getChangeset().getChangesetList().selectInline(this);
     },
@@ -194,12 +201,20 @@ JX.install('DiffInline', {
         return;
       }
 
+      var pht = changeset.getChangesetList().getTranslations();
+
       var icon = 'fa-comment';
       var color = 'bluegrey';
+      var tooltip = null;
 
-      if (this._isDraft) {
+      if (this._isEditing) {
+        icon = 'fa-star';
+        color = 'pink';
+        tooltip = pht('Editing Comment');
+      } else if (this._isDraft) {
         // This inline is an unsubmitted draft.
         icon = 'fa-pencil';
+        color = 'indigo';
       } else if (this._isFixed) {
         // This inline has been marked done.
         icon = 'fa-check';
@@ -212,6 +227,7 @@ JX.install('DiffInline', {
       objective
         .setIcon(icon)
         .setColor(color)
+        .setTooltip(tooltip)
         .show();
     },
 
@@ -511,7 +527,12 @@ JX.install('DiffInline', {
       this._undoRow = this._drawRows(template, cursor, mode, text);
     },
 
+    _drawContentRows: function(rows) {
+      return this._drawRows(rows, null, 'content');
+    },
+
     _drawEditRows: function(rows) {
+      this.setEditing(true);
       return this._drawRows(rows, null, 'edit');
     },
 
@@ -560,6 +581,8 @@ JX.install('DiffInline', {
               'click',
               'inline-edit-cancel',
               JX.bind(this, this._oncancel, row_meta)));
+        } else if (type == 'content') {
+          // No special listeners for these rows.
         } else {
           row_meta.listeners.push(
             JX.DOM.listen(
@@ -645,6 +668,7 @@ JX.install('DiffInline', {
       }
 
       this._removeRow(row);
+      this.setEditing(false);
 
       this.setInvisible(false);
 
@@ -670,6 +694,7 @@ JX.install('DiffInline', {
 
       this.setLoading(false);
       this.setInvisible(false);
+      this.setEditing(false);
 
       this._onupdate(response);
     },
@@ -677,7 +702,7 @@ JX.install('DiffInline', {
     _onupdate: function(response) {
       var new_row;
       if (response.markup) {
-        new_row = this._drawEditRows(JX.$H(response.markup).getNode()).node;
+        new_row = this._drawContentRows(JX.$H(response.markup).getNode()).node;
       }
 
       // TODO: Save the old row so the action it's undo-able if it was a

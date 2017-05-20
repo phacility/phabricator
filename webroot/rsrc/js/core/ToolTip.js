@@ -21,6 +21,10 @@ JX.install('Tooltip', {
         return;
       }
 
+      if (content === null) {
+        return;
+      }
+
       if (__DEV__) {
         switch (align) {
           case 'N':

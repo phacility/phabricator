@@ -232,6 +232,8 @@ final class DifferentialChangesetListView extends AphrontView {
 
         'Loading...' => pht('Loading...'),
 
+        'Editing Comment' => pht('Editing Comment'),
+
         'Jump to next change.' => pht('Jump to next change.'),
         'Jump to previous change.' => pht('Jump to previous change.'),
         'Jump to next file.' => pht('Jump to next file.'),
