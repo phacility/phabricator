@@ -1358,16 +1358,20 @@ JX.install('DiffChangesetList', {
         return null;
       }
 
-      var v = JX.Vector.getViewport();
+      // We're going to find the changeset which spans an invisible line a
+      // little underneath the bottom of the banner. This makes the header
+      // tick over from "A.txt" to "B.txt" just as "A.txt" scrolls completely
+      // offscreen.
+      var detect_height = 64;
+
       for (var ii = 0; ii < this._changesets.length; ii++) {
         var changeset = this._changesets[ii];
         var c = changeset.getVectors();
 
-        // If the changeset starts above the upper half of the screen...
-        if (c.pos.y < (s.y + (v.y / 2))) {
-          // ...and ends below the lower half of the screen, this is the
-          // current visible changeset.
-          if ((c.pos.y + c.dim.y) > (s.y + (v.y / 2))) {
+        // If the changeset starts above the line...
+        if (c.pos.y <= (s.y + detect_height)) {
+          // ...and ends below the line, this is the current visible changeset.
+          if ((c.pos.y + c.dim.y) >= (s.y + detect_height)) {
             return changeset;
           }
         }

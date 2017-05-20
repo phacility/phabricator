@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => 'e822b496',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => '4d7dd14e',
-    'differential.pkg.js' => '68a4fa60',
+    'differential.pkg.js' => '6d05ad4c',
     'diffusion.pkg.css' => 'b93d9b8c',
     'diffusion.pkg.js' => '84c8f8fd',
     'favicon.ico' => '30672e08',
@@ -391,7 +391,7 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '453c5375',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => 'd4eecc63',
     'rsrc/js/application/diff/DiffChangeset.js' => 'cf4e2140',
-    'rsrc/js/application/diff/DiffChangesetList.js' => '5c68c40c',
+    'rsrc/js/application/diff/DiffChangesetList.js' => '541206ba',
     'rsrc/js/application/diff/DiffInline.js' => '77e14b60',
     'rsrc/js/application/diff/ScrollObjective.js' => '0eee7a00',
     'rsrc/js/application/diff/ScrollObjectiveList.js' => '1ca4d9db',
@@ -778,7 +778,7 @@ return array(
     'phabricator-darkmessage' => 'c48cccdd',
     'phabricator-dashboard-css' => 'fe5b1869',
     'phabricator-diff-changeset' => 'cf4e2140',
-    'phabricator-diff-changeset-list' => '5c68c40c',
+    'phabricator-diff-changeset-list' => '541206ba',
     'phabricator-diff-inline' => '77e14b60',
     'phabricator-drag-and-drop-file-upload' => '58dea2fa',
     'phabricator-draggable-list' => 'bea6e7f4',
@@ -1316,6 +1316,10 @@ return array(
     '5294060f' => array(
       'phui-theme-css',
     ),
+    '541206ba' => array(
+      'javelin-install',
+      'phabricator-scroll-objective-list',
+    ),
     '54774a28' => array(
       'phui-inline-comment-view-css',
     ),
@@ -1367,10 +1371,6 @@ return array(
       'javelin-behavior',
       'javelin-stratcom',
       'javelin-dom',
-    ),
-    '5c68c40c' => array(
-      'javelin-install',
-      'phabricator-scroll-objective-list',
     ),
     '5e2634b9' => array(
       'javelin-behavior',
