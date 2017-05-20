@@ -538,9 +538,23 @@ JX.install('DiffChangesetList', {
     },
 
     _setSelectionState: function(item, manager) {
-      this._cursorItem = item;
+      // If we had an inline selected before, we need to update it after
+      // changing our selection to clear the selected state. Then, update the
+      // new one to add the selected state.
+      var old_inline = this.getSelectedInline();
 
+      this._cursorItem = item;
       this._redrawSelection(manager, true);
+
+      var new_inline = this.getSelectedInline();
+
+      if (old_inline) {
+        old_inline.updateObjective();
+      }
+
+      if (new_inline) {
+        new_inline.updateObjective();
+      }
 
       return this;
     },

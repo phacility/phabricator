@@ -250,6 +250,13 @@ JX.install('DiffInline', {
         should_stack = true;
       }
 
+      if (changeset.getChangesetList().getSelectedInline() === this) {
+        // TODO: Maybe add some other kind of effect here, since we're only
+        // using color to show this?
+        color = 'yellow';
+      }
+
+
       objective
         .setAnchor(anchor)
         .setIcon(icon)

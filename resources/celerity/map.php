@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => '599698a7',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => '7d4cfa59',
-    'differential.pkg.js' => '886eadff',
+    'differential.pkg.js' => '1d120743',
     'diffusion.pkg.css' => 'b93d9b8c',
     'diffusion.pkg.js' => '84c8f8fd',
     'favicon.ico' => '30672e08',
@@ -391,8 +391,8 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '453c5375',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => 'd4eecc63',
     'rsrc/js/application/diff/DiffChangeset.js' => 'cf4e2140',
-    'rsrc/js/application/diff/DiffChangesetList.js' => 'a716ca27',
-    'rsrc/js/application/diff/DiffInline.js' => '1478c3b2',
+    'rsrc/js/application/diff/DiffChangesetList.js' => '7a184082',
+    'rsrc/js/application/diff/DiffInline.js' => '19582231',
     'rsrc/js/application/diff/ScrollObjective.js' => '7e8877e7',
     'rsrc/js/application/diff/ScrollObjectiveList.js' => '6120e99a',
     'rsrc/js/application/diff/behavior-preview-link.js' => '051c7832',
@@ -778,8 +778,8 @@ return array(
     'phabricator-darkmessage' => 'c48cccdd',
     'phabricator-dashboard-css' => 'fe5b1869',
     'phabricator-diff-changeset' => 'cf4e2140',
-    'phabricator-diff-changeset-list' => 'a716ca27',
-    'phabricator-diff-inline' => '1478c3b2',
+    'phabricator-diff-changeset-list' => '7a184082',
+    'phabricator-diff-inline' => '19582231',
     'phabricator-drag-and-drop-file-upload' => '58dea2fa',
     'phabricator-draggable-list' => 'bea6e7f4',
     'phabricator-fatal-config-template-css' => '8f18fa41',
@@ -981,9 +981,6 @@ return array(
       'javelin-dom',
       'javelin-typeahead-normalizer',
     ),
-    '1478c3b2' => array(
-      'javelin-dom',
-    ),
     '1499a8cb' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1002,6 +999,9 @@ return array(
     ),
     '185bbd53' => array(
       'javelin-install',
+    ),
+    19582231 => array(
+      'javelin-dom',
     ),
     '19f9369b' => array(
       'phui-oi-list-view-css',
@@ -1488,6 +1488,10 @@ return array(
       'javelin-behavior',
       'javelin-quicksand',
     ),
+    '7a184082' => array(
+      'javelin-install',
+      'phabricator-scroll-objective-list',
+    ),
     '7a68dda3' => array(
       'owners-path-editor',
       'javelin-behavior',
@@ -1723,10 +1727,6 @@ return array(
       'javelin-behavior',
       'javelin-stratcom',
       'javelin-dom',
-    ),
-    'a716ca27' => array(
-      'javelin-install',
-      'phabricator-scroll-objective-list',
     ),
     'a80d0378' => array(
       'javelin-behavior',
