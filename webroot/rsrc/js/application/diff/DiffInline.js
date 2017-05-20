@@ -223,6 +223,7 @@ JX.install('DiffInline', {
       var color = 'bluegrey';
       var tooltip = this._snippet;
       var anchor = this._row;
+      var should_stack = false;
 
       if (this._isEditing) {
         icon = 'fa-star';
@@ -244,6 +245,9 @@ JX.install('DiffInline', {
       } else if (this._isGhost) {
         icon = 'fa-comment-o';
         color = 'grey';
+      } else if (this._replyToCommentPHID) {
+        icon = 'fa-reply';
+        should_stack = true;
       }
 
       objective
@@ -251,6 +255,7 @@ JX.install('DiffInline', {
         .setIcon(icon)
         .setColor(color)
         .setTooltip(tooltip)
+        .setShouldStack(should_stack)
         .show();
     },
 

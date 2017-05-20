@@ -112,7 +112,8 @@ JX.install('ScrollObjectiveList', {
 
         items.push({
           offset: offset,
-          node: objective_node
+          node: objective_node,
+          objective: objective
         });
       }
 
@@ -130,7 +131,11 @@ JX.install('ScrollObjectiveList', {
         offset = item.offset;
 
         if (min !== null) {
-          offset = Math.max(offset, min);
+          if (item.objective.shouldStack()) {
+            offset = min;
+          } else {
+            offset = Math.max(offset, min);
+          }
         }
         min = offset + 15;
 
