@@ -423,6 +423,11 @@ tr.differential-inline-loading {
   overflow: hidden;
 }
 
+.scroll-objective-list.has-aesthetic-scrollbar {
+  /* For now, hide this element on systems with aesthetic scrollbars. */
+  display: none;
+}
+
 .scroll-objective {
   display: block;
   position: absolute;

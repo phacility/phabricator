@@ -5,6 +5,7 @@
  *           javelin-stratcom
  *           javelin-install
  *           javelin-workflow
+ *           javelin-scrollbar
  *           phabricator-scroll-objective
  * @javelin
  */
@@ -80,6 +81,11 @@ JX.install('ScrollObjectiveList', {
       }
 
       document.body.appendChild(node);
+
+      // If we're on OSX without a mouse or some other system with zero-width
+      // trackpad-style scrollbars, adjust the display appropriately.
+      var aesthetic = (JX.Scrollbar.getScrollbarControlWidth() === 0);
+      JX.DOM.alterClass(node, 'has-aesthetic-scrollbar', aesthetic);
 
       var d = JX.Vector.getDocument();
 
