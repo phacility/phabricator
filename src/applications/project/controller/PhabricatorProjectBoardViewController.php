@@ -713,14 +713,6 @@ final class PhabricatorProjectBoardViewController
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
 
-    $background_uri = $this->getApplicationURI("board/{$id}/background/");
-    $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-paint-brush')
-      ->setName(pht('Change Background Color'))
-      ->setHref($background_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(false);
-
     if ($show_hidden) {
       $hidden_uri = $this->getURIWithState()
         ->setQueryParam('hidden', null);
@@ -737,6 +729,17 @@ final class PhabricatorProjectBoardViewController
       ->setIcon($hidden_icon)
       ->setName($hidden_text)
       ->setHref($hidden_uri);
+
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
+
+    $background_uri = $this->getApplicationURI("board/{$id}/background/");
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-paint-brush')
+      ->setName(pht('Change Background Color'))
+      ->setHref($background_uri)
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(false);
 
     $manage_uri = $this->getApplicationURI("board/{$id}/manage/");
     $manage_items[] = id(new PhabricatorActionView())
