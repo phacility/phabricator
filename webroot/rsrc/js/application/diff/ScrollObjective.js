@@ -111,6 +111,7 @@ JX.install('ScrollObjective', {
 
     hide: function() {
       this._visible = false;
+      return this;
     },
 
     isVisible: function() {
