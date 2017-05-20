@@ -26,6 +26,7 @@ JX.install('ScrollObjective', {
 
     _visible: false,
     _callback: false,
+    _stack: false,
 
     getNode: function() {
       if (!this._node) {
@@ -102,6 +103,23 @@ JX.install('ScrollObjective', {
       JX.Stratcom.getData(node).align = 'W';
       JX.Stratcom.getData(node).size = 'auto';
       return this;
+    },
+
+
+    /**
+     * Should this objective always stack immediately under the previous
+     * objective?
+     *
+     * This allows related objectives (like "comment, reply, reply") to be
+     * rendered in a tight sequence.
+     */
+    setShouldStack: function(stack) {
+      this._stack = stack;
+      return this;
+    },
+
+    shouldStack: function() {
+      return this._stack;
     },
 
     show: function() {
