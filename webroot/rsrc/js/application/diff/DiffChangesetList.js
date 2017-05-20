@@ -120,6 +120,7 @@ JX.install('DiffChangesetList', {
     _rangeTarget: null,
 
     _bannerNode: null,
+    _showObjectives: false,
 
     sleep: function() {
       this._asleep = true;
@@ -137,7 +138,9 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
 
-      this._objectives.show();
+      if (this._showObjectives) {
+        this._objectives.show();
+      }
 
       if (this._initialized) {
         return;
@@ -193,6 +196,11 @@ JX.install('DiffChangesetList', {
 
       label = pht('Hide or show inline comment.');
       this._installKey('q', label, this._onkeyhide);
+    },
+
+    setShowObjectives: function(show) {
+      this._showObjectives = show;
+      return this;
     },
 
     isAsleep: function() {
