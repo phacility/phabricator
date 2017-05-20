@@ -30,7 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
     $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
     $types[] = PhabricatorProjectTransaction::TYPE_MILESTONE;
     $types[] = PhabricatorProjectTransaction::TYPE_HASWORKBOARD;
@@ -46,8 +45,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_LOCKED:
-        return (int)$object->getIsMembershipLocked();
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
         return (int)$object->getHasWorkboard();
       case PhabricatorProjectTransaction::TYPE_PARENT:
@@ -69,7 +66,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
@@ -93,9 +89,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_LOCKED:
-        $object->setIsMembershipLocked($xaction->getNewValue());
-        return;
       case PhabricatorProjectTransaction::TYPE_PARENT:
         $object->setParentProjectPHID($xaction->getNewValue());
         return;
@@ -129,7 +122,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
@@ -320,7 +312,7 @@ final class PhabricatorProjectTransactionEditor
           $object,
           PhabricatorPolicyCapability::CAN_EDIT);
         return;
-      case PhabricatorProjectTransaction::TYPE_LOCKED:
+      case PhabricatorProjectLockTransaction::TRANSACTIONTYPE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           newv($this->getEditorApplicationClass(), array()),
