@@ -33,6 +33,7 @@ JX.install('DiffInline', {
     _isDraft: null,
     _isFixed: null,
     _isEditing: false,
+    _isNew: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -73,6 +74,7 @@ JX.install('DiffInline', {
       this._isGhost = data.isGhost;
 
       this._changesetID = data.changesetID;
+      this._isNew = false;
 
       this.setInvisible(false);
 
@@ -87,6 +89,7 @@ JX.install('DiffInline', {
       this._length = parseInt(data.length, 10);
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
+      this._isNew = true;
 
       // Insert the comment after any other comments which already appear on
       // the same row.
@@ -110,6 +113,7 @@ JX.install('DiffInline', {
       this._length = inline._length;
       this._isNewFile = inline._isNewFile;
       this._changesetID = inline._changesetID;
+      this._isNew = true;
 
       this._replyToCommentPHID = inline._phid;
 
@@ -194,6 +198,13 @@ JX.install('DiffInline', {
       var objective = this._objective;
 
       if (this.isHidden() || this._isDeleted) {
+        objective.hide();
+        return;
+      }
+
+      // If this is a new comment which we aren't editing, don't show anything:
+      // the use started a comment or reply, then cancelled it.
+      if (this._isNew && !this._isEditing) {
         objective.hide();
         return;
       }
