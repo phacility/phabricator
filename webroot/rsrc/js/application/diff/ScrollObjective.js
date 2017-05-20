@@ -100,6 +100,7 @@ JX.install('ScrollObjective', {
       JX.Stratcom.addSigil(node, 'has-tooltip');
       JX.Stratcom.getData(node).tip = tip;
       JX.Stratcom.getData(node).align = 'W';
+      JX.Stratcom.getData(node).size = 'auto';
       return this;
     },
 
