@@ -421,6 +421,11 @@ final class PHUIDiffInlineCommentDetailView
         $actions,
       ));
 
+    $snippet = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(96)
+      ->truncateString($inline->getContent());
+    $metadata['snippet'] = pht('%s: %s', $author, $snippet);
+
     $markup = javelin_tag(
       'div',
       array(
@@ -443,10 +448,6 @@ final class PHUIDiffInlineCommentDetailView
           'differential-inline-comment-content',
           phutil_tag_div('phabricator-remarkup', $content)),
       ));
-
-    $snippet = id(new PhutilUTF8StringTruncator())
-      ->setMaximumGlyphs(96)
-      ->truncateString($inline->getContent());
 
     $summary = phutil_tag(
       'div',

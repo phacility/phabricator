@@ -22,6 +22,7 @@ JX.install('DiffInline', {
     _undoRow: null,
     _replyToCommentPHID: null,
     _originalText: null,
+    _snippet: null,
 
     _isDeleted: false,
     _isInvisible: false,
@@ -75,6 +76,7 @@ JX.install('DiffInline', {
 
       this._changesetID = data.changesetID;
       this._isNew = false;
+      this._snippet = data.snippet;
 
       this.setInvisible(false);
 
@@ -219,7 +221,7 @@ JX.install('DiffInline', {
 
       var icon = 'fa-comment';
       var color = 'bluegrey';
-      var tooltip = null;
+      var tooltip = this._snippet;
       var anchor = this._row;
 
       if (this._isEditing) {
