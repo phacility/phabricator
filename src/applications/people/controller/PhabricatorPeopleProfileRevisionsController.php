@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPeopleProfileCommitsController
+final class PhabricatorPeopleProfileRevisionsController
   extends PhabricatorPeopleProfileController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -18,22 +18,22 @@ final class PhabricatorPeopleProfileCommitsController
       return new Aphront404Response();
     }
 
-    $class = 'PhabricatorDiffusionApplication';
+    $class = 'PhabricatorDifferentialApplication';
     if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
       return new Aphront404Response();
     }
 
     $this->setUser($user);
-    $title = array(pht('Recent Commits'), $user->getUsername());
+    $title = array(pht('Recent Revisions'), $user->getUsername());
     $header = $this->buildProfileHeader();
-    $commits = $this->buildCommitsView($user);
+    $commits = $this->buildRevisionsView($user);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Recent Commits'));
+    $crumbs->addTextCrumb(pht('Recent Revisions'));
     $crumbs->setBorder(true);
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_COMMITS);
+    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_REVISIONS);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -50,25 +50,30 @@ final class PhabricatorPeopleProfileCommitsController
       ->appendChild($view);
   }
 
-  private function buildCommitsView(PhabricatorUser $user) {
+  private function buildRevisionsView(PhabricatorUser $user) {
     $viewer = $this->getViewer();
 
-    $commits = id(new DiffusionCommitQuery())
+    $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
-      ->withAuthorPHIDs(array($user->getPHID()))
-      ->needAuditRequests(true)
-      ->needCommitData(true)
+      ->withAuthors(array($user->getPHID()))
+      ->needFlags(true)
       ->needDrafts(true)
+      ->needReviewers(true)
       ->setLimit(100)
       ->execute();
 
-    $list = id(new PhabricatorAuditListView())
-      ->setViewer($viewer)
-      ->setCommits($commits)
-      ->setNoDataString(pht('No recent commits.'));
+    $list = id(new DifferentialRevisionListView())
+      ->setUser($viewer)
+      ->setNoBox(true)
+      ->setRevisions($revisions)
+      ->setNoDataString(pht('No recent revisions.'));
+
+    $object_phids = $list->getRequiredHandlePHIDs();
+    $handles = $this->loadViewerHandles($object_phids);
+    $list->setHandles($handles);
 
     $view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Commits'))
+      ->setHeaderText(pht('Recent Revisions'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($list);
 
