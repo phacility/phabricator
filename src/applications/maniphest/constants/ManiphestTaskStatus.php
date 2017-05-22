@@ -97,7 +97,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
       ->setName($name)
       ->setIcon($icon)
       ->setType(PHUITagView::TYPE_SHADE)
-      ->setShade($color);
+      ->setColor($color);
 
     return $tag;
   }

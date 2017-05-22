@@ -148,7 +148,7 @@ final class PHUIDiffInlineCommentDetailView
         ->setType(PHUITagView::TYPE_SHADE)
         ->setName(pht('Unsubmitted'))
         ->setSlimShady(true)
-        ->setShade(PHUITagView::COLOR_RED)
+        ->setColor(PHUITagView::COLOR_RED)
         ->addClass('mml inline-draft-text');
     }
 
@@ -383,7 +383,7 @@ final class PHUIDiffInlineCommentDetailView
           ->setType(PHUITagView::TYPE_SHADE)
           ->setName(pht('Author'))
           ->setSlimShady(true)
-          ->setShade(PHUITagView::COLOR_YELLOW)
+          ->setColor(PHUITagView::COLOR_YELLOW)
           ->addClass('mml');
       }
     }

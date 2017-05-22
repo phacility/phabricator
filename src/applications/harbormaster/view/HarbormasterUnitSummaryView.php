@@ -56,7 +56,7 @@ final class HarbormasterUnitSummaryView extends AphrontView {
 
     $tag = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_SHADE)
-      ->setShade($tag_color)
+      ->setColor($tag_color)
       ->setIcon($tag_icon)
       ->setName($tag_text);
 

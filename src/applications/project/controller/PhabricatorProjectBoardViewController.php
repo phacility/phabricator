@@ -331,7 +331,7 @@ final class PhabricatorProjectBoardViewController
 
       $count_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
-        ->setShade(PHUITagView::COLOR_BLUE)
+        ->setColor(PHUITagView::COLOR_BLUE)
         ->addSigil('column-points')
         ->setName(
           javelin_tag(

@@ -187,12 +187,12 @@ final class PHUITagExample extends PhabricatorUIExample {
     foreach ($outlines as $outline) {
       $tags[] = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_OUTLINE)
-        ->setShade($outline)
+        ->setColor($outline)
         ->setName($outline);
       $tags[] = hsprintf('&nbsp;');
       $tags[] = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_OUTLINE)
-        ->setShade($outline)
+        ->setColor($outline)
         ->setSlimShady(true)
         ->setName($outline);
       $tags[] = hsprintf('<br /><br />');
