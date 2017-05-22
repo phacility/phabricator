@@ -26,8 +26,12 @@ final class NuanceItem
   private $source = self::ATTACHABLE;
   private $implementation = self::ATTACHABLE;
 
-  public static function initializeNewItem() {
+  public static function initializeNewItem($item_type) {
+
+    // TODO: Validate that the type is valid, and construct and attach it.
+
     return id(new NuanceItem())
+      ->setItemType($item_type)
       ->setStatus(self::STATUS_OPEN);
   }
 
@@ -42,7 +46,7 @@ final class NuanceItem
         'requestorPHID' => 'phid?',
         'queuePHID' => 'phid?',
         'itemType' => 'text64',
-        'itemKey' => 'text64',
+        'itemKey' => 'text64?',
         'itemContainerKey' => 'text64?',
         'status' => 'text32',
         'mailKey' => 'bytes20',

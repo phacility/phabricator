@@ -149,6 +149,8 @@ abstract class NuanceSourceDefinition extends Phobject {
   }
 
   protected function newItemFromProperties(
+    $item_type,
+    $author_phid,
     array $properties,
     PhabricatorContentSource $content_source) {
 
@@ -157,7 +159,7 @@ abstract class NuanceSourceDefinition extends Phobject {
     $actor = PhabricatorUser::getOmnipotentUser();
     $source = $this->getSource();
 
-    $item = NuanceItem::initializeNewItem();
+    $item = NuanceItem::initializeNewItem($item_type);
 
     $xactions = array();
 
@@ -181,6 +183,7 @@ abstract class NuanceSourceDefinition extends Phobject {
 
     $editor = id(new NuanceItemEditor())
       ->setActor($actor)
+      ->setActingAsPHID($author_phid)
       ->setContentSource($content_source);
 
     $editor->applyTransactions($item, $xactions);
