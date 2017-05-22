@@ -86,7 +86,6 @@ final class PhrictionTransactionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhrictionTransaction::TYPE_CONTENT;
-    $types[] = PhrictionTransaction::TYPE_MOVE_AWAY;
 
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -106,8 +105,6 @@ final class PhrictionTransactionEditor
           return null;
         }
         return $this->getOldContent()->getContent();
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        return null;
     }
   }
 
@@ -118,15 +115,6 @@ final class PhrictionTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_CONTENT:
         return $xaction->getNewValue();
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        $document = $xaction->getNewValue();
-        $dict = array(
-          'id' => $document->getID(),
-          'phid' => $document->getPHID(),
-          'content' => $document->getContent()->getContent(),
-          'title' => $document->getContent()->getTitle(),
-        );
-        return $dict;
     }
   }
 
@@ -140,7 +128,7 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_CONTENT:
       case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
       case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
+      case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
         return true;
       }
     }
@@ -162,9 +150,6 @@ final class PhrictionTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_CONTENT:
         $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
-        return;
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
         return;
     }
   }
@@ -213,13 +198,6 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_CONTENT:
         $this->getNewContent()->setContent($xaction->getNewValue());
         break;
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        $dict = $xaction->getNewValue();
-        $this->getNewContent()->setContent('');
-        $this->getNewContent()->setChangeType(
-          PhrictionChangeType::CHANGE_MOVE_AWAY);
-        $this->getNewContent()->setChangeRef($dict['id']);
-        break;
       default:
         break;
     }
@@ -234,9 +212,9 @@ final class PhrictionTransactionEditor
       switch ($xaction->getTransactionType()) {
         case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-        case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
         case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
-        case PhrictionTransaction::TYPE_MOVE_AWAY:
+        case PhrictionTransaction::TYPE_CONTENT:
           $save_content = true;
           break;
         default:
@@ -303,7 +281,8 @@ final class PhrictionTransactionEditor
     if ($this->moveAwayDocument !== null) {
       $move_away_xactions = array();
       $move_away_xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(PhrictionTransaction::TYPE_MOVE_AWAY)
+        ->setTransactionType(
+          PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE)
         ->setNewValue($object);
       $sub_editor = id(new PhrictionTransactionEditor())
         ->setActor($this->getActor())

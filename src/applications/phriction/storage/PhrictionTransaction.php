@@ -4,7 +4,6 @@ final class PhrictionTransaction
   extends PhabricatorModularTransaction {
 
   const TYPE_CONTENT = 'content';
-  const TYPE_MOVE_AWAY = 'move-away';
 
   const MAILTAG_TITLE       = 'phriction-title';
   const MAILTAG_CONTENT     = 'phriction-content';
@@ -33,7 +32,7 @@ final class PhrictionTransaction
     $new = $this->getNewValue();
     switch ($this->getTransactionType()) {
       case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-      case self::TYPE_MOVE_AWAY:
+      case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
         $phids[] = $new['phid'];
         break;
       case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
@@ -75,7 +74,7 @@ final class PhrictionTransaction
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
       case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-      case self::TYPE_MOVE_AWAY:
+      case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
         return true;
       case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         return $this->getMetadataValue('stub:create:phid', false);
@@ -86,7 +85,7 @@ final class PhrictionTransaction
   public function shouldHideForFeed() {
     switch ($this->getTransactionType()) {
       case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-      case self::TYPE_MOVE_AWAY:
+      case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
         return true;
       case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         return $this->getMetadataValue('stub:create:phid', false);
@@ -98,8 +97,6 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return 1.3;
-      case self::TYPE_MOVE_AWAY:
-        return 1.0;
     }
 
     return parent::getActionStrength();
@@ -112,8 +109,6 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return pht('Edited');
-      case self::TYPE_MOVE_AWAY:
-        return pht('Moved Away');
     }
 
     return parent::getActionName();
@@ -126,8 +121,6 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return 'fa-pencil';
-      case self::TYPE_MOVE_AWAY:
-        return 'fa-arrows';
     }
 
     return parent::getIcon();
@@ -145,13 +138,6 @@ final class PhrictionTransaction
         return pht(
           '%s edited the document content.',
           $this->renderHandleLink($author_phid));
-
-      case self::TYPE_MOVE_AWAY:
-        return pht(
-          '%s moved this document to %s',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($new['phid']));
-
     }
 
     return parent::getTitle();
