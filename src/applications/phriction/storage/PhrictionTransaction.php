@@ -4,7 +4,6 @@ final class PhrictionTransaction
   extends PhabricatorModularTransaction {
 
   const TYPE_CONTENT = 'content';
-  const TYPE_DELETE  = 'delete';
   const TYPE_MOVE_AWAY = 'move-away';
 
   const MAILTAG_TITLE       = 'phriction-title';
@@ -99,8 +98,6 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return 1.3;
-      case self::TYPE_DELETE:
-        return 1.5;
       case self::TYPE_MOVE_AWAY:
         return 1.0;
     }
@@ -115,8 +112,6 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return pht('Edited');
-      case self::TYPE_DELETE:
-        return pht('Deleted');
       case self::TYPE_MOVE_AWAY:
         return pht('Moved Away');
     }
@@ -131,8 +126,6 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return 'fa-pencil';
-      case self::TYPE_DELETE:
-        return 'fa-times';
       case self::TYPE_MOVE_AWAY:
         return 'fa-arrows';
     }
@@ -151,11 +144,6 @@ final class PhrictionTransaction
       case self::TYPE_CONTENT:
         return pht(
           '%s edited the document content.',
-          $this->renderHandleLink($author_phid));
-
-      case self::TYPE_DELETE:
-        return pht(
-          '%s deleted this document.',
           $this->renderHandleLink($author_phid));
 
       case self::TYPE_MOVE_AWAY:
@@ -181,12 +169,6 @@ final class PhrictionTransaction
       case self::TYPE_CONTENT:
         return pht(
           '%s edited the content of %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-
-      case self::TYPE_DELETE:
-        return pht(
-          '%s deleted %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
 
@@ -218,7 +200,7 @@ final class PhrictionTransaction
       case self::TYPE_CONTENT:
         $tags[] = self::MAILTAG_CONTENT;
         break;
-      case self::TYPE_DELETE:
+      case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_DELETE;
         break;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:

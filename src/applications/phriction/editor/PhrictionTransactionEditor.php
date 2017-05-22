@@ -86,7 +86,6 @@ final class PhrictionTransactionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhrictionTransaction::TYPE_CONTENT;
-    $types[] = PhrictionTransaction::TYPE_DELETE;
     $types[] = PhrictionTransaction::TYPE_MOVE_AWAY;
 
     $types[] = PhabricatorTransactions::TYPE_EDGE;
@@ -107,7 +106,6 @@ final class PhrictionTransactionEditor
           return null;
         }
         return $this->getOldContent()->getContent();
-      case PhrictionTransaction::TYPE_DELETE:
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         return null;
     }
@@ -119,7 +117,6 @@ final class PhrictionTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_CONTENT:
-      case PhrictionTransaction::TYPE_DELETE:
         return $xaction->getNewValue();
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $document = $xaction->getNewValue();
@@ -141,7 +138,7 @@ final class PhrictionTransactionEditor
       switch ($xaction->getTransactionType()) {
       case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
       case PhrictionTransaction::TYPE_CONTENT:
-      case PhrictionTransaction::TYPE_DELETE:
+      case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
       case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         return true;
@@ -169,9 +166,6 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
         return;
-      case PhrictionTransaction::TYPE_DELETE:
-        $object->setStatus(PhrictionDocumentStatus::STATUS_DELETED);
-        return;
     }
   }
 
@@ -188,7 +182,8 @@ final class PhrictionTransactionEditor
         $content = $xaction->getNewValue();
         if ($content === '') {
           $xactions[] = id(new PhrictionTransaction())
-            ->setTransactionType(PhrictionTransaction::TYPE_DELETE)
+            ->setTransactionType(
+              PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE)
             ->setNewValue(true)
             ->setMetadataValue('contentDelete', true);
         }
@@ -218,11 +213,6 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_CONTENT:
         $this->getNewContent()->setContent($xaction->getNewValue());
         break;
-      case PhrictionTransaction::TYPE_DELETE:
-        $this->getNewContent()->setContent('');
-        $this->getNewContent()->setChangeType(
-          PhrictionChangeType::CHANGE_DELETE);
-        break;
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $dict = $xaction->getNewValue();
         $this->getNewContent()->setContent('');
@@ -245,7 +235,7 @@ final class PhrictionTransactionEditor
         case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
         case PhrictionTransaction::TYPE_CONTENT:
-        case PhrictionTransaction::TYPE_DELETE:
+        case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
         case PhrictionTransaction::TYPE_MOVE_AWAY:
           $save_content = true;
           break;
@@ -536,35 +526,6 @@ final class PhrictionTransactionEditor
           }
           break;
 
-        case PhrictionTransaction::TYPE_DELETE:
-          switch ($object->getStatus()) {
-            case PhrictionDocumentStatus::STATUS_DELETED:
-              if ($xaction->getMetadataValue('contentDelete')) {
-                $e_text = pht(
-                  'This document is already deleted. You must specify '.
-                  'content to re-create the document and make further edits.');
-              } else {
-                $e_text = pht(
-                  'An already deleted document can not be deleted.');
-              }
-              break;
-            case PhrictionDocumentStatus::STATUS_MOVED:
-              $e_text = pht('A moved document can not be deleted.');
-              break;
-            case PhrictionDocumentStatus::STATUS_STUB:
-              $e_text = pht('A stub document can not be deleted.');
-              break;
-            default:
-              break 2;
-          }
-
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Can not delete document.'),
-            $e_text,
-            $xaction);
-          $errors[] = $error;
-          break;
       }
     }
 
