@@ -285,9 +285,9 @@ JX.install('WorkboardColumn', {
       JX.DOM.alterClass(panel, 'project-panel-over-limit', over_limit);
 
       var color_map = {
-        'phui-tag-shade-disabled': (total_points === 0),
-        'phui-tag-shade-blue': (total_points > 0 && !over_limit),
-        'phui-tag-shade-red': (over_limit)
+        'phui-tag-disabled': (total_points === 0),
+        'phui-tag-blue': (total_points > 0 && !over_limit),
+        'phui-tag-red': (over_limit)
       };
 
       for (var c in color_map) {
