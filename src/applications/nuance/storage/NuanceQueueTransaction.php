@@ -12,6 +12,10 @@ final class NuanceQueueTransaction extends NuanceTransaction {
     return new NuanceQueueTransactionComment();
   }
 
+  public function getBaseTransactionClass() {
+    return 'NuanceSourceTransactionType';
+  }
+
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

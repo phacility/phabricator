@@ -162,18 +162,19 @@ abstract class NuanceSourceDefinition extends Phobject {
     $xactions = array();
 
     $xactions[] = id(new NuanceItemTransaction())
-      ->setTransactionType(NuanceItemTransaction::TYPE_SOURCE)
+      ->setTransactionType(NuanceItemSourceTransaction::TRANSACTIONTYPE)
       ->setNewValue($source->getPHID());
 
     // TODO: Eventually, apply real routing rules. For now, just put everything
     // in the default queue for the source.
     $xactions[] = id(new NuanceItemTransaction())
-      ->setTransactionType(NuanceItemTransaction::TYPE_QUEUE)
+      ->setTransactionType(NuanceItemQueueTransaction::TRANSACTIONTYPE)
       ->setNewValue($source->getDefaultQueuePHID());
 
+    // TODO: Maybe this should all be modular transactions now?
     foreach ($properties as $key => $property) {
       $xactions[] = id(new NuanceItemTransaction())
-        ->setTransactionType(NuanceItemTransaction::TYPE_PROPERTY)
+        ->setTransactionType(NuanceItemPropertyTransaction::TRANSACTIONTYPE)
         ->setMetadataValue(NuanceItemTransaction::PROPERTY_KEY, $key)
         ->setNewValue($property);
     }

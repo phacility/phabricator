@@ -14,6 +14,10 @@ final class NuanceSourceTransaction
     return new NuanceSourceTransactionComment();
   }
 
+  public function getBaseTransactionClass() {
+    return 'NuanceSourceTransactionType';
+  }
+
   public function shouldHide() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

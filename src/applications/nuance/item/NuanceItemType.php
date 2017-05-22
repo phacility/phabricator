@@ -115,7 +115,7 @@ abstract class NuanceItemType
     }
 
     $xaction = id(new NuanceItemTransaction())
-      ->setTransactionType(NuanceItemTransaction::TYPE_COMMAND)
+      ->setTransactionType(NuanceItemCommandTransaction::TRANSACTIONTYPE)
       ->setNewValue(
         array(
           'command' => $command->getCommand(),
