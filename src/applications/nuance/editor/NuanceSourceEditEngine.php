@@ -96,14 +96,15 @@ final class NuanceSourceEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the source.'))
-        ->setTransactionType(NuanceSourceTransaction::TYPE_NAME)
+        ->setTransactionType(NuanceSourceNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
       id(new PhabricatorDatasourceEditField())
         ->setKey('defaultQueue')
         ->setLabel(pht('Default Queue'))
         ->setDescription(pht('Default queue.'))
-        ->setTransactionType(NuanceSourceTransaction::TYPE_DEFAULT_QUEUE)
+        ->setTransactionType(
+          NuanceSourceDefaultQueueTransaction::TRANSACTIONTYPE)
         ->setDatasource(new NuanceQueueDatasource())
         ->setSingleValue($object->getDefaultQueuePHID()),
     );
