@@ -136,7 +136,8 @@ final class PhrictionEditController
         ->setTransactionType(PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
       $xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+        ->setTransactionType(
+          PhrictionDocumentContentTransaction::TRANSACTIONTYPE)
         ->setNewValue($content_text);
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -178,7 +179,8 @@ final class PhrictionEditController
             PhrictionDocumentTitleTransaction::TRANSACTIONTYPE),
           true);
         $e_content = nonempty(
-          $ex->getShortMessage(PhrictionTransaction::TYPE_CONTENT),
+          $ex->getShortMessage(
+            PhrictionDocumentContentTransaction::TRANSACTIONTYPE),
           true);
 
         // if we're not supposed to process the content version error, then

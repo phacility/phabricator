@@ -85,8 +85,6 @@ final class PhrictionTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhrictionTransaction::TYPE_CONTENT;
-
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -95,41 +93,18 @@ final class PhrictionTransactionEditor
     return $types;
   }
 
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_CONTENT:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $this->getOldContent()->getContent();
-    }
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_CONTENT:
-        return $xaction->getNewValue();
-    }
-  }
-
   protected function shouldApplyInitialEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-      case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
-      case PhrictionTransaction::TYPE_CONTENT:
-      case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
-      case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-      case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
-        return true;
+        case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
+          return true;
       }
     }
     return parent::shouldApplyInitialEffects($object, $xactions);
@@ -143,24 +118,13 @@ final class PhrictionTransactionEditor
     $this->setNewContent($this->buildNewContentTemplate($object));
   }
 
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_CONTENT:
-        $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
-        return;
-    }
-  }
-
   protected function expandTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
     $xactions = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
         if ($this->getIsNewObject()) {
           break;
         }
@@ -190,19 +154,6 @@ final class PhrictionTransactionEditor
     return $xactions;
   }
 
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_CONTENT:
-        $this->getNewContent()->setContent($xaction->getNewValue());
-        break;
-      default:
-        break;
-    }
-  }
-
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -214,7 +165,7 @@ final class PhrictionTransactionEditor
         case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
         case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
         case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
-        case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
           $save_content = true;
           break;
         default:
@@ -257,7 +208,8 @@ final class PhrictionTransactionEditor
               ->setNewValue(PhabricatorSlug::getDefaultTitle($slug))
               ->setMetadataValue('stub:create:phid', $object->getPHID());
             $stub_xactions[] = id(new PhrictionTransaction())
-              ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+              ->setTransactionType(
+                PhrictionDocumentContentTransaction::TRANSACTIONTYPE)
               ->setNewValue('')
               ->setMetadataValue('stub:create:phid', $object->getPHID());
             $stub_xactions[] = id(new PhrictionTransaction())
@@ -295,7 +247,7 @@ final class PhrictionTransactionEditor
     // Compute the content diff URI for the publishing phase.
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
           $uri = id(new PhutilURI('/phriction/diff/'.$object->getID().'/'))
             ->alter('l', $this->getOldContent()->getVersion())
             ->alter('r', $this->getNewContent()->getVersion());
@@ -419,29 +371,12 @@ final class PhrictionTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($type) {
-        case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
           if ($xaction->getMetadataValue('stub:create:phid')) {
             continue;
           }
 
-          $missing = false;
-          if ($this->getIsNewObject()) {
-            $content = $object->getContent()->getContent();
-            $missing = $this->validateIsEmptyTextField(
-              $content,
-              $xactions);
-          }
-
-          if ($missing) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Required'),
-              pht('Document content is required.'),
-              nonempty(last($xactions), null));
-
-            $error->setIsMissingFieldError(true);
-            $errors[] = $error;
-          } else if ($this->getProcessContentVersionError()) {
+          if ($this->getProcessContentVersionError()) {
             $error = $this->validateContentVersion($object, $type, $xaction);
             if ($error) {
               $this->setProcessContentVersionError(false);
@@ -459,7 +394,6 @@ final class PhrictionTransactionEditor
               $errors = array_merge($errors, $ancestry_errors);
             }
           }
-
           break;
 
         case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:

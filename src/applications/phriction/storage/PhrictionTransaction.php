@@ -3,8 +3,6 @@
 final class PhrictionTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_CONTENT = 'content';
-
   const MAILTAG_TITLE       = 'phriction-title';
   const MAILTAG_CONTENT     = 'phriction-content';
   const MAILTAG_DELETE      = 'phriction-delete';
@@ -45,32 +43,6 @@ final class PhrictionTransaction
     return $phids;
   }
 
-  public function getRemarkupBlocks() {
-    $blocks = parent::getRemarkupBlocks();
-
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        $blocks[] = $this->getNewValue();
-        break;
-    }
-
-    return $blocks;
-  }
-
-  public function shouldHide() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        if ($this->getOldValue() === null) {
-          return true;
-        } else {
-          return false;
-        }
-        break;
-    }
-
-    return parent::shouldHide();
-  }
-
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
       case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
@@ -93,89 +65,6 @@ final class PhrictionTransaction
     return parent::shouldHideForFeed();
   }
 
-  public function getActionStrength() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        return 1.3;
-    }
-
-    return parent::getActionStrength();
-  }
-
-  public function getActionName() {
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        return pht('Edited');
-    }
-
-    return parent::getActionName();
-  }
-
-  public function getIcon() {
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        return 'fa-pencil';
-    }
-
-    return parent::getIcon();
-  }
-
-
-  public function getTitle() {
-    $author_phid = $this->getAuthorPHID();
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        return pht(
-          '%s edited the document content.',
-          $this->renderHandleLink($author_phid));
-    }
-
-    return parent::getTitle();
-  }
-
-  public function getTitleForFeed() {
-    $author_phid = $this->getAuthorPHID();
-    $object_phid = $this->getObjectPHID();
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-
-      case self::TYPE_CONTENT:
-        return pht(
-          '%s edited the content of %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-
-    }
-    return parent::getTitleForFeed();
-  }
-
-  public function hasChangeDetails() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        return true;
-    }
-    return parent::hasChangeDetails();
-  }
-
-  public function renderChangeDetails(PhabricatorUser $viewer) {
-    return $this->renderTextCorpusChangeDetails(
-      $viewer,
-      $this->getOldValue(),
-      $this->getNewValue());
-  }
 
   public function getMailTags() {
     $tags = array();
@@ -183,7 +72,7 @@ final class PhrictionTransaction
       case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_TITLE;
         break;
-      case self::TYPE_CONTENT:
+      case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
         $tags[] = self::MAILTAG_CONTENT;
         break;
       case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
