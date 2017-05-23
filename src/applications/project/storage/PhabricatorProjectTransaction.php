@@ -3,7 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_HASWORKBOARD = 'project:hasworkboard';
   const TYPE_DEFAULT_SORT = 'project:sort';
   const TYPE_DEFAULT_FILTER = 'project:filter';
   const TYPE_BACKGROUND = 'project:background';
@@ -61,7 +60,6 @@ final class PhabricatorProjectTransaction
 
   public function shouldHideForFeed() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_HASWORKBOARD:
       case self::TYPE_DEFAULT_SORT:
       case self::TYPE_DEFAULT_FILTER:
       case self::TYPE_BACKGROUND:
@@ -73,7 +71,7 @@ final class PhabricatorProjectTransaction
 
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
-      case self::TYPE_HASWORKBOARD:
+      case PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE:
       case self::TYPE_DEFAULT_SORT:
       case self::TYPE_DEFAULT_FILTER:
       case self::TYPE_BACKGROUND:
@@ -141,17 +139,6 @@ final class PhabricatorProjectTransaction
           }
         }
         break;
-
-      case self::TYPE_HASWORKBOARD:
-        if ($new) {
-          return pht(
-            '%s enabled the workboard for this project.',
-            $author_handle);
-        } else {
-          return pht(
-            '%s disabled the workboard for this project.',
-            $author_handle);
-        }
 
       case self::TYPE_DEFAULT_SORT:
         return pht(

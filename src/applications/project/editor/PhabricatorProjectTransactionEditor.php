@@ -30,7 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_HASWORKBOARD;
     $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_SORT;
     $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER;
     $types[] = PhabricatorProjectTransaction::TYPE_BACKGROUND;
@@ -43,8 +42,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
-        return (int)$object->getHasWorkboard();
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
         return $object->getDefaultWorkboardSort();
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
@@ -64,8 +61,6 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
         return $xaction->getNewValue();
-      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
-        return (int)$xaction->getNewValue();
       case PhabricatorProjectTransaction::TYPE_BACKGROUND:
         $value = $xaction->getNewValue();
         if (!strlen($value)) {
@@ -82,9 +77,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
-        $object->setHasWorkboard($xaction->getNewValue());
-        return;
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
         $object->setDefaultWorkboardSort($xaction->getNewValue());
         return;
@@ -107,7 +99,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
       case PhabricatorProjectTransaction::TYPE_BACKGROUND:

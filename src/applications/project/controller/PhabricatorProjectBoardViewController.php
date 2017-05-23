@@ -966,7 +966,18 @@ final class PhabricatorProjectBoardViewController
           ->setProjectPHID($project->getPHID())
           ->save();
 
-        $project->setHasWorkboard(1)->save();
+          $xactions = array();
+          $xactions[] = id(new PhabricatorProjectTransaction())
+            ->setTransactionType(
+                PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE)
+            ->setNewValue(1);
+
+          id(new PhabricatorProjectTransactionEditor())
+            ->setActor($viewer)
+            ->setContentSourceFromRequest($request)
+            ->setContinueOnNoEffect(true)
+            ->setContinueOnMissingFields(true)
+            ->applyTransactions($project, $xactions);
 
         return id(new AphrontRedirectResponse())
           ->setURI($board_uri);
@@ -1050,7 +1061,8 @@ final class PhabricatorProjectBoardViewController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_HASWORKBOARD)
+        ->setTransactionType(
+            PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE)
         ->setNewValue(1);
 
       id(new PhabricatorProjectTransactionEditor())
