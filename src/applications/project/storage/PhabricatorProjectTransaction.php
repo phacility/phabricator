@@ -3,8 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_PARENT = 'project:parent';
-  const TYPE_MILESTONE = 'project:milestone';
   const TYPE_HASWORKBOARD = 'project:hasworkboard';
   const TYPE_DEFAULT_SORT = 'project:sort';
   const TYPE_DEFAULT_FILTER = 'project:filter';

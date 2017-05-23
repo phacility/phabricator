@@ -1447,11 +1447,13 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     if ($parent) {
       if ($is_milestone) {
         $xactions[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
+          ->setTransactionType(
+              PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE)
           ->setNewValue($parent->getPHID());
       } else {
         $xactions[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
+          ->setTransactionType(
+              PhabricatorProjectParentTransaction::TRANSACTIONTYPE)
           ->setNewValue($parent->getPHID());
       }
     }

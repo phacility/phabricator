@@ -30,8 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
-    $types[] = PhabricatorProjectTransaction::TYPE_MILESTONE;
     $types[] = PhabricatorProjectTransaction::TYPE_HASWORKBOARD;
     $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_SORT;
     $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER;
@@ -47,9 +45,6 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
         return (int)$object->getHasWorkboard();
-      case PhabricatorProjectTransaction::TYPE_PARENT:
-      case PhabricatorProjectTransaction::TYPE_MILESTONE:
-        return null;
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
         return $object->getDefaultWorkboardSort();
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
@@ -66,8 +61,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_PARENT:
-      case PhabricatorProjectTransaction::TYPE_MILESTONE:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
         return $xaction->getNewValue();
@@ -89,14 +82,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_PARENT:
-        $object->setParentProjectPHID($xaction->getNewValue());
-        return;
-      case PhabricatorProjectTransaction::TYPE_MILESTONE:
-        $number = $object->getParentProject()->loadNextMilestoneNumber();
-        $object->setMilestoneNumber($number);
-        $object->setParentProjectPHID($xaction->getNewValue());
-        return;
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
         $object->setHasWorkboard($xaction->getNewValue());
         return;
@@ -122,8 +107,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_PARENT:
-      case PhabricatorProjectTransaction::TYPE_MILESTONE:
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
@@ -145,8 +128,8 @@ final class PhabricatorProjectTransactionEditor
     $parent_xaction = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhabricatorProjectTransaction::TYPE_PARENT:
-        case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        case PhabricatorProjectParentTransaction::TRANSACTIONTYPE:
+        case PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE:
           if ($xaction->getNewValue() === null) {
             continue;
           }
@@ -207,95 +190,6 @@ final class PhabricatorProjectTransactionEditor
 
     return $errors;
   }
-
-  protected function validateTransaction(
-    PhabricatorLiskDAO $object,
-    $type,
-    array $xactions) {
-
-    $errors = parent::validateTransaction($object, $type, $xactions);
-
-    switch ($type) {
-      case PhabricatorProjectTransaction::TYPE_PARENT:
-      case PhabricatorProjectTransaction::TYPE_MILESTONE:
-        if (!$xactions) {
-          break;
-        }
-
-        $xaction = last($xactions);
-
-        $parent_phid = $xaction->getNewValue();
-        if (!$parent_phid) {
-          continue;
-        }
-
-        if (!$this->getIsNewObject()) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'You can only set a parent or milestone project when creating a '.
-              'project for the first time.'),
-            $xaction);
-          break;
-        }
-
-        $projects = id(new PhabricatorProjectQuery())
-          ->setViewer($this->requireActor())
-          ->withPHIDs(array($parent_phid))
-          ->requireCapabilities(
-            array(
-              PhabricatorPolicyCapability::CAN_VIEW,
-              PhabricatorPolicyCapability::CAN_EDIT,
-            ))
-          ->execute();
-        if (!$projects) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'Parent or milestone project PHID ("%s") must be the PHID of a '.
-              'valid, visible project which you have permission to edit.',
-              $parent_phid),
-            $xaction);
-          break;
-        }
-
-        $project = head($projects);
-
-        if ($project->isMilestone()) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'Parent or milestone project PHID ("%s") must not be a '.
-              'milestone. Milestones may not have subprojects or milestones.',
-              $parent_phid),
-            $xaction);
-          break;
-        }
-
-        $limit = PhabricatorProject::getProjectDepthLimit();
-        if ($project->getProjectDepth() >= ($limit - 1)) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'You can not create a subproject or mielstone under this parent '.
-              'because it would nest projects too deeply. The maximum '.
-              'nesting depth of projects is %s.',
-              new PhutilNumber($limit)),
-            $xaction);
-          break;
-        }
-
-        $object->attachParentProject($project);
-        break;
-    }
-
-    return $errors;
-  }
-
 
   protected function requireCapabilities(
     PhabricatorLiskDAO $object,
@@ -458,8 +352,8 @@ final class PhabricatorProjectTransactionEditor
               break;
           }
           break;
-        case PhabricatorProjectTransaction::TYPE_PARENT:
-        case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        case PhabricatorProjectParentTransaction::TRANSACTIONTYPE:
+        case PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE:
           $materialize = true;
           $new_parent = $object->getParentProject();
           break;
@@ -634,7 +528,7 @@ final class PhabricatorProjectTransactionEditor
     $is_milestone = $object->isMilestone();
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        case PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE:
           if ($xaction->getNewValue() !== null) {
             $is_milestone = true;
           }

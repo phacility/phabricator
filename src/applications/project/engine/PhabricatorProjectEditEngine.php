@@ -202,7 +202,8 @@ final class PhabricatorProjectEditEngine
           pht('Choose a parent project to create a subproject beneath.'))
         ->setConduitTypeDescription(pht('PHID of the parent project.'))
         ->setAliases(array('parentPHID'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
+        ->setTransactionType(
+            PhabricatorProjectParentTransaction::TRANSACTIONTYPE)
         ->setHandleParameterType(new AphrontPHIDHTTPParameterType())
         ->setSingleValue($parent_phid)
         ->setIsReorderable(false)
@@ -217,7 +218,8 @@ final class PhabricatorProjectEditEngine
           pht('Choose a parent project to create a new milestone for.'))
         ->setConduitTypeDescription(pht('PHID of the parent project.'))
         ->setAliases(array('milestonePHID'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
+        ->setTransactionType(
+            PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE)
         ->setHandleParameterType(new AphrontPHIDHTTPParameterType())
         ->setSingleValue($milestone_phid)
         ->setIsReorderable(false)
@@ -244,7 +246,8 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
-        ->setTransactionType(PhabricatorProjectIconTransaction::TRANSACTIONTYPE)
+        ->setTransactionType(
+            PhabricatorProjectIconTransaction::TRANSACTIONTYPE)
         ->setIconSet(new PhabricatorProjectIconSet())
         ->setDescription(pht('Project icon.'))
         ->setConduitDescription(pht('Change the project icon.'))
