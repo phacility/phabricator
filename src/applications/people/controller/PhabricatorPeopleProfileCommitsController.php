@@ -56,22 +56,15 @@ final class PhabricatorPeopleProfileCommitsController
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withAuthorPHIDs(array($user->getPHID()))
-      ->needAuditRequests(true)
       ->needCommitData(true)
-      ->needDrafts(true)
       ->setLimit(100)
       ->execute();
 
-    $list = id(new PhabricatorAuditListView())
+    $list = id(new DiffusionHistoryListView())
       ->setViewer($viewer)
       ->setCommits($commits)
       ->setNoDataString(pht('No recent commits.'));
 
-    $view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Commits'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($list);
-
-    return $view;
+    return $list;
   }
 }
