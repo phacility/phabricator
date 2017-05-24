@@ -54,16 +54,25 @@ final class NuanceQueueWorkController
 
     $item = head($items);
 
-    $curtain = $this->buildCurtain($queue);
+    $curtain = $this->buildCurtain($queue, $item);
 
     $timeline = $this->buildTransactionTimeline(
       $item,
       new NuanceItemTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $impl = $item->getImplementation()
+      ->setViewer($viewer);
+
+    $work_content = $impl->buildItemWorkView($item);
+
     $view = id(new PHUITwoColumnView())
       ->setCurtain($curtain)
-      ->setMainColumn($timeline);
+      ->setMainColumn(
+        array(
+          $work_content,
+          $timeline,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -71,11 +80,27 @@ final class NuanceQueueWorkController
       ->appendChild($view);
   }
 
-  private function buildCurtain(NuanceQueue $queue) {
+  private function buildCurtain(NuanceQueue $queue, NuanceItem $item) {
     $viewer = $this->getViewer();
     $id = $queue->getID();
 
     $curtain = $this->newCurtainView();
+
+    $impl = $item->getImplementation();
+    $commands = $impl->buildWorkCommands($item);
+
+    foreach ($commands as $command) {
+      $command_key = $command->getCommandKey();
+
+      $item_id = $item->getID();
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName($command->getName())
+          ->setIcon($command->getIcon())
+          ->setHref("queue/command/{$id}/{$command_key}/{$item_id}/"))
+          ->setWorkflow(true);
+    }
 
     $curtain->addAction(
       id(new PhabricatorActionView())

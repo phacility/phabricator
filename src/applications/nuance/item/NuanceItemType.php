@@ -32,6 +32,10 @@ abstract class NuanceItemType
     return $this->newItemView($item);
   }
 
+  final public function buildItemWorkView(NuanceItem $item) {
+    return $this->newItemView($item);
+  }
+
   protected function newItemView(NuanceItem $item) {
     return null;
   }
@@ -104,6 +108,10 @@ abstract class NuanceItemType
     return null;
   }
 
+  final public function buildWorkCommands(NuanceItem $item) {
+    return $this->newWorkCommands($item);
+  }
+
   final public function applyCommand(
     NuanceItem $item,
     NuanceItemCommand $command) {
@@ -159,4 +167,8 @@ abstract class NuanceItemType
     return id(new PhabricatorNuanceApplication())->getPHID();
   }
 
+  protected function newCommand($command_key) {
+    return id(new NuanceItemCommandSpec())
+      ->setCommandKey($command_key);
+  }
 }
