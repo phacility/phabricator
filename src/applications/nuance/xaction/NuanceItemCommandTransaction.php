@@ -9,14 +9,14 @@ final class NuanceItemCommandTransaction
     return null;
   }
 
-  public function applyInternalEffects($object, $value) {
-    // TODO: Probably implement this.
-  }
-
   public function getTitle() {
+    $spec = $this->getNewValue();
+    $command_key = idx($spec, 'command', '???');
+
     return pht(
-      '%s applied a command to this item.',
-      $this->renderAuthor());
+      '%s applied a "%s" command to this item.',
+      $this->renderAuthor(),
+      $command_key);
   }
 
 }

@@ -9,7 +9,6 @@ final class NuanceItem
   const STATUS_IMPORTING = 'importing';
   const STATUS_ROUTING = 'routing';
   const STATUS_OPEN = 'open';
-  const STATUS_ASSIGNED = 'assigned';
   const STATUS_CLOSED = 'closed';
 
   protected $status;

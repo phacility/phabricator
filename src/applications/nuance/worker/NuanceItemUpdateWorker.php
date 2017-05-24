@@ -68,13 +68,29 @@ final class NuanceItemUpdateWorker
       ->execute();
     $commands = msort($commands, 'getID');
 
+    $executors = NuanceCommandImplementation::getAllCommands();
     foreach ($commands as $command) {
       $command
         ->setStatus(NuanceItemCommand::STATUS_EXECUTING)
         ->save();
 
       try {
-        $impl->applyCommand($item, $command);
+        $command_key = $command->getCommand();
+
+        $executor = idx($executors, $command_key);
+        if (!$executor) {
+          throw new Exception(
+            pht(
+              'Unable to execute command "%s": this command does not have '.
+              'a recognized command implementation.',
+              $command_key));
+        }
+
+        $executor = clone $executor;
+
+        $executor
+          ->setActor($viewer)
+          ->applyCommand($item, $command);
 
         $command
           ->setStatus(NuanceItemCommand::STATUS_DONE)

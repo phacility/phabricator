@@ -329,6 +329,9 @@ final class NuanceGitHubEventItemType
     NuanceItem $item,
     NuanceItemCommand $command) {
 
+    // TODO: This code is no longer reachable, and has moved to
+    // CommandImplementation subclasses.
+
     $action = $command->getCommand();
     switch ($action) {
       case 'sync':
