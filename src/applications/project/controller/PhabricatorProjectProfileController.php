@@ -135,7 +135,7 @@ final class PhabricatorProjectProfileController
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Properties'));
+      ->setHeader(pht('Details'));
 
     $view = id(new PHUIObjectBoxView())
       ->setHeader($header)
