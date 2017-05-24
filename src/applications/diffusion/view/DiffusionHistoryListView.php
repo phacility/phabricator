@@ -102,6 +102,14 @@ final class DiffusionHistoryListView extends AphrontView {
       $commit_desc = $this->getCommitDescription($commit_phid);
       $committed = phabricator_datetime($commit->getEpoch(), $viewer);
 
+      $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+      $engine->setConfig('viewer', $viewer);
+      $commit_data = $commit->getCommitData();
+      $message = $commit_data->getCommitMessage();
+      $message = $engine->markupText($message);
+      $message = phutil_tag_div(
+        'diffusion-history-message phabricator-remarkup', $message);
+
       $author_phid = $commit->getAuthorPHID();
       if ($author_phid) {
         $author_name = $handles[$author_phid]->renderLink();
@@ -122,6 +130,7 @@ final class DiffusionHistoryListView extends AphrontView {
         ->setHeader($commit_desc)
         ->setHref($commit_link)
         ->setDisabled($commit->isUnreachable())
+        ->setDescription($message)
         ->setImageURI($author_image_uri)
         ->addByline(pht('Author: %s', $author_name))
         ->addIcon('none', $committed)

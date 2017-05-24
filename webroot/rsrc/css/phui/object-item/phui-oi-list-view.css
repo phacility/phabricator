@@ -285,6 +285,31 @@ ul.phui-oi-list-view {
   padding: 0 8px 6px;
 }
 
+.phui-oi-description {
+  display: none;
+}
+
+.phui-oi-description.phui-oi-description-reveal {
+  display: block;
+}
+
+.phui-oi-description-tag {
+  margin-left: 4px;
+}
+
+.phui-oi-description-tag:hover .phui-tag-core {
+  cursor: pointer;
+  background: {$darkgreybackground};
+}
+
+.phui-oi-description-tag .phui-tag-core {
+  border: none;
+}
+
+.phui-oi-description-tag.phui-tag-view .phui-icon-view {
+  margin: 2px;
+}
+
 
 /* - Attribute List ------------------------------------------------------------
 
