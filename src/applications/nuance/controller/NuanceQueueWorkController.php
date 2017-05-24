@@ -64,12 +64,14 @@ final class NuanceQueueWorkController
     $impl = $item->getImplementation()
       ->setViewer($viewer);
 
+    $commands = $this->buildCommands($item);
     $work_content = $impl->buildItemWorkView($item);
 
     $view = id(new PHUITwoColumnView())
       ->setCurtain($curtain)
       ->setMainColumn(
         array(
+          $commands,
           $work_content,
           $timeline,
         ));
@@ -94,12 +96,15 @@ final class NuanceQueueWorkController
 
       $item_id = $item->getID();
 
+      $action_uri = "queue/action/{$id}/{$command_key}/{$item_id}/";
+      $action_uri = $this->getApplicationURI($action_uri);
+
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($command->getName())
           ->setIcon($command->getIcon())
-          ->setHref("queue/command/{$id}/{$command_key}/{$item_id}/"))
-          ->setWorkflow(true);
+          ->setHref($action_uri)
+          ->setWorkflow(true));
     }
 
     $curtain->addAction(
@@ -118,6 +123,64 @@ final class NuanceQueueWorkController
         ->setHref($this->getApplicationURI("queue/view/{$id}/")));
 
     return $curtain;
+  }
+
+  private function buildCommands(NuanceItem $item) {
+    $viewer = $this->getViewer();
+
+    $commands = id(new NuanceItemCommandQuery())
+      ->setViewer($viewer)
+      ->withItemPHIDs(array($item->getPHID()))
+      ->withStatuses(
+        array(
+          NuanceItemCommand::STATUS_ISSUED,
+          NuanceItemCommand::STATUS_EXECUTING,
+          NuanceItemCommand::STATUS_FAILED,
+        ))
+      ->execute();
+    $commands = msort($commands, 'getID');
+
+    if (!$commands) {
+      return null;
+    }
+
+    $rows = array();
+    foreach ($commands as $command) {
+      $icon = $command->getStatusIcon();
+      $color = $command->getStatusColor();
+
+      $rows[] = array(
+        $command->getID(),
+        id(new PHUIIconView())
+          ->setIcon($icon, $color),
+        $viewer->renderHandle($command->getAuthorPHID()),
+        $command->getCommand(),
+        phabricator_datetime($command->getDateCreated(), $viewer),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('ID'),
+          null,
+          pht('Actor'),
+          pht('Command'),
+          pht('Date'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'icon',
+          null,
+          'pri',
+          'wide right',
+        ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Pending Commands'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($table);
   }
 
 }

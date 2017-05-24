@@ -95,13 +95,7 @@ abstract class NuanceItemType
   }
 
   final public function buildActionResponse(NuanceItem $item, $action) {
-    $response = $this->handleAction($item, $action);
-
-    if ($response === null) {
-      return new Aphront404Response();
-    }
-
-    return $response;
+    return $this->handleAction($item, $action);
   }
 
   protected function handleAction(NuanceItem $item, $action) {

@@ -61,12 +61,31 @@ final class NuanceItemUpdateWorker
     $commands = id(new NuanceItemCommandQuery())
       ->setViewer($viewer)
       ->withItemPHIDs(array($item->getPHID()))
+      ->withStatuses(
+        array(
+          NuanceItemCommand::STATUS_ISSUED,
+        ))
       ->execute();
     $commands = msort($commands, 'getID');
 
     foreach ($commands as $command) {
-      $impl->applyCommand($item, $command);
-      $command->delete();
+      $command
+        ->setStatus(NuanceItemCommand::STATUS_EXECUTING)
+        ->save();
+
+      try {
+        $impl->applyCommand($item, $command);
+
+        $command
+          ->setStatus(NuanceItemCommand::STATUS_DONE)
+          ->save();
+      } catch (Exception $ex) {
+        $command
+          ->setStatus(NuanceItemCommand::STATUS_FAILED)
+          ->save();
+
+        throw $ex;
+      }
     }
   }
 

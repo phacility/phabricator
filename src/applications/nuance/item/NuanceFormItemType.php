@@ -47,4 +47,8 @@ final class NuanceFormItemType
     );
   }
 
+  protected function handleAction(NuanceItem $item, $action) {
+    return null;
+  }
+
 }
