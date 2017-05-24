@@ -1663,6 +1663,7 @@ phutil_register_library_map(array(
     'NuanceQueueTransactionQuery' => 'applications/nuance/query/NuanceQueueTransactionQuery.php',
     'NuanceQueueTransactionType' => 'applications/nuance/xaction/NuanceQueueTransactionType.php',
     'NuanceQueueViewController' => 'applications/nuance/controller/NuanceQueueViewController.php',
+    'NuanceQueueWorkController' => 'applications/nuance/controller/NuanceQueueWorkController.php',
     'NuanceSchemaSpec' => 'applications/nuance/storage/NuanceSchemaSpec.php',
     'NuanceSource' => 'applications/nuance/storage/NuanceSource.php',
     'NuanceSourceActionController' => 'applications/nuance/controller/NuanceSourceActionController.php',
@@ -6788,6 +6789,7 @@ phutil_register_library_map(array(
     'NuanceQueueTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'NuanceQueueTransactionType' => 'PhabricatorModularTransactionType',
     'NuanceQueueViewController' => 'NuanceQueueController',
+    'NuanceQueueWorkController' => 'NuanceQueueController',
     'NuanceSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'NuanceSource' => array(
       'NuanceDAO',

@@ -23,6 +23,7 @@ final class NuanceItem
   protected $data = array();
   protected $mailKey;
 
+  private $queue = self::ATTACHABLE;
   private $source = self::ATTACHABLE;
   private $implementation = self::ATTACHABLE;
 
@@ -173,6 +174,15 @@ final class NuanceItem
 
   public function attachImplementation(NuanceItemType $type) {
     $this->implementation = $type;
+    return $this;
+  }
+
+  public function getQueue() {
+    return $this->assertAttached($this->queue);
+  }
+
+  public function attachQueue(NuanceQueue $queue = null) {
+    $this->queue = $queue;
     return $this;
   }
 
