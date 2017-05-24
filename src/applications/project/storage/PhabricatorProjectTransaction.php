@@ -3,8 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_BACKGROUND = 'project:background';
-
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
 
@@ -56,22 +54,12 @@ final class PhabricatorProjectTransaction
     return parent::shouldHide();
   }
 
-  public function shouldHideForFeed() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_BACKGROUND:
-        return true;
-    }
-
-    return parent::shouldHideForFeed();
-  }
-
-
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
       case PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectSortTransaction::TRANSACTIONTYPE:
       case PhabricatorProjectFilterTransaction::TRANSACTIONTYPE:
-      case self::TYPE_BACKGROUND:
+      case PhabricatorProjectWorkboardBackgroundTransaction::TRANSACTIONTYPE:
         return true;
     }
 
@@ -136,11 +124,6 @@ final class PhabricatorProjectTransaction
           }
         }
         break;
-
-      case self::TYPE_BACKGROUND:
-        return pht(
-          '%s changed the background color of the project workboard.',
-          $author_handle);
     }
 
     return parent::getTitle();

@@ -30,65 +30,7 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_BACKGROUND;
-
     return $types;
-  }
-
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
-        return $object->getWorkboardBackgroundColor();
-    }
-
-    return parent::getCustomTransactionOldValue($object, $xaction);
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
-        $value = $xaction->getNewValue();
-        if (!strlen($value)) {
-          return null;
-        }
-        return $value;
-    }
-
-    return parent::getCustomTransactionNewValue($object, $xaction);
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
-        $object->setWorkboardBackgroundColor($xaction->getNewValue());
-        return;
-    }
-
-    return parent::applyCustomInternalTransaction($object, $xaction);
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $old = $xaction->getOldValue();
-    $new = $xaction->getNewValue();
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
-        return;
-     }
-
-    return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
   protected function validateAllTransactions(
