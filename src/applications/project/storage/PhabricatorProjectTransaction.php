@@ -3,8 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_DEFAULT_SORT = 'project:sort';
-  const TYPE_DEFAULT_FILTER = 'project:filter';
   const TYPE_BACKGROUND = 'project:background';
 
   // NOTE: This is deprecated, members are just a normal edge now.
@@ -60,8 +58,6 @@ final class PhabricatorProjectTransaction
 
   public function shouldHideForFeed() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_DEFAULT_SORT:
-      case self::TYPE_DEFAULT_FILTER:
       case self::TYPE_BACKGROUND:
         return true;
     }
@@ -69,11 +65,12 @@ final class PhabricatorProjectTransaction
     return parent::shouldHideForFeed();
   }
 
+
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
       case PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE:
-      case self::TYPE_DEFAULT_SORT:
-      case self::TYPE_DEFAULT_FILTER:
+      case PhabricatorProjectSortTransaction::TRANSACTIONTYPE:
+      case PhabricatorProjectFilterTransaction::TRANSACTIONTYPE:
       case self::TYPE_BACKGROUND:
         return true;
     }
@@ -139,16 +136,6 @@ final class PhabricatorProjectTransaction
           }
         }
         break;
-
-      case self::TYPE_DEFAULT_SORT:
-        return pht(
-          '%s changed the default sort order for the project workboard.',
-          $author_handle);
-
-      case self::TYPE_DEFAULT_FILTER:
-        return pht(
-          '%s changed the default filter for the project workboard.',
-          $author_handle);
 
       case self::TYPE_BACKGROUND:
         return pht(

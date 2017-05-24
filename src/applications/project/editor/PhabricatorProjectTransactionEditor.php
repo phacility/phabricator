@@ -30,8 +30,6 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
-    $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_SORT;
-    $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER;
     $types[] = PhabricatorProjectTransaction::TYPE_BACKGROUND;
 
     return $types;
@@ -42,10 +40,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
-        return $object->getDefaultWorkboardSort();
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
-        return $object->getDefaultWorkboardFilter();
       case PhabricatorProjectTransaction::TYPE_BACKGROUND:
         return $object->getWorkboardBackgroundColor();
     }
@@ -58,9 +52,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
-        return $xaction->getNewValue();
       case PhabricatorProjectTransaction::TYPE_BACKGROUND:
         $value = $xaction->getNewValue();
         if (!strlen($value)) {
@@ -77,12 +68,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
-        $object->setDefaultWorkboardSort($xaction->getNewValue());
-        return;
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
-        $object->setDefaultWorkboardFilter($xaction->getNewValue());
-        return;
       case PhabricatorProjectTransaction::TYPE_BACKGROUND:
         $object->setWorkboardBackgroundColor($xaction->getNewValue());
         return;
@@ -99,8 +84,6 @@ final class PhabricatorProjectTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
-      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
       case PhabricatorProjectTransaction::TYPE_BACKGROUND:
         return;
      }
