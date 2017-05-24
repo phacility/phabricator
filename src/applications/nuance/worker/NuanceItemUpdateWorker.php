@@ -6,9 +6,7 @@ final class NuanceItemUpdateWorker
   protected function doWork() {
     $item_phid = $this->getTaskDataValue('itemPHID');
 
-    $hash = PhabricatorHash::digestForIndex($item_phid);
-    $lock_key = "nuance.item.{$hash}";
-    $lock = PhabricatorGlobalLock::newLock($lock_key);
+    $lock = $this->newLock($item_phid);
 
     $lock->lock(1);
     try {
@@ -55,9 +53,6 @@ final class NuanceItemUpdateWorker
   private function applyCommands(NuanceItem $item) {
     $viewer = $this->getViewer();
 
-    $impl = $item->getImplementation();
-    $impl->setViewer($viewer);
-
     $commands = id(new NuanceItemCommandQuery())
       ->setViewer($viewer)
       ->withItemPHIDs(array($item->getPHID()))
@@ -68,8 +63,60 @@ final class NuanceItemUpdateWorker
       ->execute();
     $commands = msort($commands, 'getID');
 
+    $this->executeCommandList($item, $commands);
+  }
+
+  public function executeCommands(NuanceItem $item, array $commands) {
+    if (!$commands) {
+      return true;
+    }
+
+    $item_phid = $item->getPHID();
+    $viewer = $this->getViewer();
+
+    $lock = $this->newLock($item_phid);
+    try {
+      $lock->lock(1);
+    } catch (PhutilLockException $ex) {
+      return false;
+    }
+
+    try {
+      $item = $this->loadItem($item_phid);
+
+      // Reload commands now that we have a lock, to make sure we don't
+      // execute any commands twice by mistake.
+      $commands = id(new NuanceItemCommandQuery())
+        ->setViewer($viewer)
+        ->withIDs(mpull($commands, 'getID'))
+        ->execute();
+
+      $this->executeCommandList($item, $commands);
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
+
+    $lock->unlock();
+
+    return true;
+  }
+
+  private function executeCommandList(NuanceItem $item, array $commands) {
+    $viewer = $this->getViewer();
+
     $executors = NuanceCommandImplementation::getAllCommands();
     foreach ($commands as $command) {
+      if ($command->getItemPHID() !== $item->getPHID()) {
+        throw new Exception(
+          pht('Trying to apply a command to the wrong item!'));
+      }
+
+      if ($command->getStatus() !== NuanceItemCommand::STATUS_ISSUED) {
+        // Never execute commands which have already been issued.
+        continue;
+      }
+
       $command
         ->setStatus(NuanceItemCommand::STATUS_EXECUTING)
         ->save();
@@ -103,6 +150,12 @@ final class NuanceItemUpdateWorker
         throw $ex;
       }
     }
+  }
+
+  private function newLock($item_phid) {
+    $hash = PhabricatorHash::digestForIndex($item_phid);
+    $lock_key = "nuance.item.{$hash}";
+    return PhabricatorGlobalLock::newLock($lock_key);
   }
 
 }

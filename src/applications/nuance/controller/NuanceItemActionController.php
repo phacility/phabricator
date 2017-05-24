@@ -53,6 +53,25 @@ final class NuanceItemActionController extends NuanceController {
     $impl->setViewer($viewer);
     $impl->setController($this);
 
+    $executors = NuanceCommandImplementation::getAllCommands();
+    $executor = idx($executors, $action);
+    if (!$executor) {
+      return new Aphront404Response();
+    }
+
+    $executor = id(clone $executor)
+      ->setActor($viewer);
+
+    if (!$executor->canApplyToItem($item)) {
+      return $this->newDialog()
+        ->setTitle(pht('Command Not Supported'))
+        ->appendParagraph(
+          pht(
+            'This item does not support the specified command ("%s").',
+            $action))
+        ->addCancelButton($cancel_uri);
+    }
+
     $command = NuanceItemCommand::initializeNewCommand()
       ->setItemPHID($item->getPHID())
       ->setAuthorPHID($viewer->getPHID())
@@ -64,17 +83,29 @@ final class NuanceItemActionController extends NuanceController {
 
     $command->save();
 
-    // TODO: Here, we should check if the command should be tried immediately,
-    // and just defer it to the daemons if not. If we're going to try to apply
-    // the command directly, we should first acquire the worker lock. If we
-    // can not, we should defer the command even if it's an immediate command.
-    // For the moment, skip all this stuff by deferring unconditionally.
+    // If this command can be applied immediately, try to apply it now.
 
-    $should_defer = true;
-    if ($should_defer) {
+    // In most cases, local commands (like closing an item) can be applied
+    // immediately.
+
+    // Commands that require making a call to a remote system (for example,
+    // to reply to a tweet or close a remote object) are usually done in the
+    // background so the user doesn't have to wait for the operation to
+    // complete before they can continue work.
+
+    $did_apply = false;
+    $immediate = $executor->canApplyImmediately($item, $command);
+    if ($immediate) {
+      // TODO: Move this stuff to a new Engine, and have the controller and
+      // worker both call into the Engine.
+      $worker = new NuanceItemUpdateWorker(array());
+      $did_apply = $worker->executeCommands($item, array($command));
+    }
+
+    // If this can't be applied immediately or we were unable to get a lock
+    // fast enough, do the update in the background instead.
+    if (!$did_apply) {
       $item->scheduleUpdate();
-    } else {
-      // ...
     }
 
     if ($queue) {

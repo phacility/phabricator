@@ -19,6 +19,12 @@ abstract class NuanceCommandImplementation
   abstract public function getCommandName();
   abstract public function canApplyToItem(NuanceItem $item);
 
+  public function canApplyImmediately(
+    NuanceItem $item,
+    NuanceItemCommand $command) {
+    return false;
+  }
+
   abstract protected function executeCommand(
     NuanceItem $item,
     NuanceItemCommand $command);

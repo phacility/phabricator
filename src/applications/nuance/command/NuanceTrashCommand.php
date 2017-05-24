@@ -14,6 +14,12 @@ final class NuanceTrashCommand
     return ($type instanceof NuanceFormItemType);
   }
 
+  public function canApplyImmediately(
+    NuanceItem $item,
+    NuanceItemCommand $command) {
+    return true;
+  }
+
   protected function executeCommand(
     NuanceItem $item,
     NuanceItemCommand $command) {
