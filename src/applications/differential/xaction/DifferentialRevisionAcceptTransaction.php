@@ -50,7 +50,8 @@ final class DifferentialRevisionAcceptTransaction
 
   protected function getActionOptions(
     PhabricatorUser $viewer,
-    DifferentialRevision $revision) {
+    DifferentialRevision $revision,
+    $include_accepted = false) {
 
     $reviewers = $revision->getReviewers();
 
@@ -98,10 +99,13 @@ final class DifferentialRevisionAcceptTransaction
         }
       }
 
-      if ($reviewer->isAccepted($diff_phid)) {
-        // If a reviewer is already in a full "accepted" state, don't
-        // include that reviewer as an option.
-        continue;
+      if (!$include_accepted) {
+        if ($reviewer->isAccepted($diff_phid)) {
+          // If a reviewer is already in a full "accepted" state, don't
+          // include that reviewer as an option unless we're listing all
+          // reviwers, including reviewers who have already accepted.
+          continue;
+        }
       }
 
       $reviewer_phids[$reviewer_phid] = $reviewer_phid;
@@ -185,7 +189,12 @@ final class DifferentialRevisionAcceptTransaction
           'least one reviewer.'));
     }
 
-    list($options) = $this->getActionOptions($actor, $object);
+    // NOTE: We're including reviewers who have already been accepted in this
+    // check. Legitimate users may race one another to accept on behalf of
+    // packages. If we get a form submission which includes a reviewer which
+    // someone has already accepted, that's fine. See T12757.
+
+    list($options) = $this->getActionOptions($actor, $object, true);
     foreach ($value as $phid) {
       if (!isset($options[$phid])) {
         throw new Exception(
