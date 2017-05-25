@@ -330,6 +330,8 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
     $list->addItem(
       id(new PHUIObjectItemView())
         ->setImageURI($default_project->getViewURI())
+        ->setImageHref('#')
+        ->setHref('$$$')
         ->setHeader(pht('Default Project Profile Image'))
         ->setGrippable(true)
         ->addAttribute(pht('This is the default project profile image.')));

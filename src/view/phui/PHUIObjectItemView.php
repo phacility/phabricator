@@ -19,6 +19,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $headIcons = array();
   private $disabled;
   private $imageURI;
+  private $imageHref;
   private $imageIcon;
   private $titleText;
   private $badge;
@@ -124,6 +125,11 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function setImageURI($image_uri) {
     $this->imageURI = $image_uri;
+    return $this;
+  }
+
+  public function setImageHref($image_href) {
+    $this->imageHref = $image_href;
     return $this;
   }
 
@@ -575,11 +581,12 @@ final class PHUIObjectItemView extends AphrontTagView {
         $this->getImageIcon());
     }
 
-    if ($image && $this->href) {
+    if ($image && (strlen($this->href) || strlen($this->imageHref))) {
+      $image_href = ($this->imageHref) ? $this->imageHref : $this->href;
       $image = phutil_tag(
         'a',
         array(
-          'href' => $this->href,
+          'href' => $image_href,
         ),
         $image);
     }
