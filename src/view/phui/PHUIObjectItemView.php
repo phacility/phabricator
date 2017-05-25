@@ -25,7 +25,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $badge;
   private $countdownNum;
   private $countdownNoun;
-  private $launchButton;
+  private $sideColumn;
   private $coverImage;
   private $description;
 
@@ -229,9 +229,8 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
-  public function setLaunchButton(PHUIButtonView $button) {
-    $button->setSize(PHUIButtonView::SMALL);
-    $this->launchButton = $button;
+  public function setSideColumn($column) {
+    $this->sideColumn = $column;
     return $this;
   }
 
@@ -652,14 +651,15 @@ final class PHUIObjectItemView extends AphrontTagView {
         ));
     }
 
-    if ($this->launchButton) {
+    /* Fixed width, right column container. */
+    if ($this->sideColumn) {
       $column2 = phutil_tag(
         'div',
         array(
-          'class' => 'phui-oi-col2 phui-oi-launch-button',
+          'class' => 'phui-oi-col2 phui-oi-side-column',
         ),
         array(
-          $this->launchButton,
+          $this->sideColumn,
         ));
     }
 

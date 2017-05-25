@@ -650,13 +650,13 @@ ul.phui-oi-list-view .phui-oi-selected
 
 /* - Launcher Button -------------------------------------------------------- */
 
-.phui-oi-col2.phui-oi-launch-button {
+.phui-oi-col2.phui-oi-side-column {
   text-align: right;
   vertical-align: middle;
   padding-right: 4px;
 }
 
-.device-phone .phui-oi-col2.phui-oi-launch-button {
+.device-phone .phui-oi-col2.phui-oi-side-column {
   padding: 0 8px 8px;
   text-align: left;
 }
