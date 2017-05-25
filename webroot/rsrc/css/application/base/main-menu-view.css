@@ -309,6 +309,22 @@ a.phabricator-core-user-menu .caret:before {
   color: {$darkgreytext};
 }
 
+.phabricator-main-search-typeahead-result.result-closed {
+  opacity: .8;
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
+
+.phabricator-main-search-typeahead-result.result-closed
+  .result-name {
+  text-decoration: line-through;
+  color: {$lightgreytext};
+}
+
+.phabricator-main-search-typeahead-result.has-image {
+  padding-left: 48px;
+}
+
 .phabricator-main-search-typeahead-result .result-type {
   color: {$lightgreytext};
   font-size: {$smallestfontsize};
