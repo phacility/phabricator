@@ -91,8 +91,8 @@ input[type="submit"].simple,
 a.simple,
 a.simple:visited {
   background: #fff;
-  color: {$blue};
-  border: 1px solid {$blue};
+  color: {$bluetext};
+  border: 1px solid {$lightblueborder};
 }
 
 a.simple.current {
@@ -103,7 +103,7 @@ button.simple .phui-icon-view,
 input[type="submit"].simple .phui-icon-view,
 a.simple .phui-icon-view,
 a.simple:visited .phui-icon-view {
-  color: {$blue};
+  color: {$lightbluetext};
 }
 
 a.disabled,
@@ -145,10 +145,10 @@ button.green:hover {
 
 a.button.simple:hover,
 button.simple:hover {
-  background-color: {$blue};
+  background-color: {$lightblue};
   background-image: linear-gradient(to bottom, {$blue}, {$blue});
   color: #fff;
-  transition: 0.1s;
+  transition: 0s;
 }
 
 a.button.simple:hover .phui-icon-view,
