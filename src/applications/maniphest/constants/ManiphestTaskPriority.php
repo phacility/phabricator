@@ -110,7 +110,7 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return idx($config, 'disabled', false);
   }
 
-  private static function getConfig() {
+  public static function getConfig() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.priorities');
     krsort($config);
     return $config;
