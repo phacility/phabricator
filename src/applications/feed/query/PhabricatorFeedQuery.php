@@ -89,6 +89,20 @@ final class PhabricatorFeedQuery
     return array('key');
   }
 
+  public function getBuiltinOrders() {
+    return array(
+      'newest' => array(
+        'vector' => array('key'),
+        'name' => pht('Creation (Newest First)'),
+        'aliases' => array('created'),
+      ),
+      'oldest' => array(
+        'vector' => array('-key'),
+        'name' => pht('Creation (Oldest First)'),
+      ),
+    );
+  }
+
   public function getOrderableColumns() {
     $table = ($this->filterPHIDs ? 'ref' : 'story');
     return array(
