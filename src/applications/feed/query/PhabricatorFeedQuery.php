@@ -5,6 +5,8 @@ final class PhabricatorFeedQuery
 
   private $filterPHIDs;
   private $chronologicalKeys;
+  private $rangeMin;
+  private $rangeMax;
 
   public function withFilterPHIDs(array $phids) {
     $this->filterPHIDs = $phids;
@@ -13,6 +15,12 @@ final class PhabricatorFeedQuery
 
   public function withChronologicalKeys(array $keys) {
     $this->chronologicalKeys = $keys;
+    return $this;
+  }
+
+  public function withEpochInRange($range_min, $range_max) {
+    $this->rangeMin = $range_min;
+    $this->rangeMax = $range_max;
     return $this;
   }
 
@@ -72,6 +80,24 @@ final class PhabricatorFeedQuery
         $conn,
         'ref.chronologicalKey IN (%Q)',
         implode(', ', $keys));
+    }
+
+    // NOTE: We may not have 64-bit PHP, so do the shifts in MySQL instead.
+    // From EXPLAIN, it appears like MySQL is smart enough to compute the
+    // result and make use of keys to execute the query.
+
+    if ($this->rangeMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'ref.chronologicalKey >= (%d << 32)',
+        $this->rangeMin);
+    }
+
+    if ($this->rangeMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'ref.chronologicalKey < (%d << 32)',
+        $this->rangeMax);
     }
 
     return $where;

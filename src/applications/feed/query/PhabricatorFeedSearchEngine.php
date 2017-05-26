@@ -30,6 +30,12 @@ final class PhabricatorFeedSearchEngine
         ->setDatasource(new PhabricatorProjectDatasource())
         ->setLabel(pht('Include Projects'))
         ->setKey('projectPHIDs'),
+      id(new PhabricatorSearchDateControlField())
+        ->setLabel(pht('Occurs After'))
+        ->setKey('rangeStart'),
+      id(new PhabricatorSearchDateControlField())
+        ->setLabel(pht('Occurs Before'))
+        ->setKey('rangeEnd'),
 
       // NOTE: This is a legacy field retained only for backward
       // compatibility. If the projects field used EdgeLogic, we could use
@@ -69,6 +75,30 @@ final class PhabricatorFeedSearchEngine
 
     if ($phids) {
       $query->withFilterPHIDs($phids);
+    }
+
+    $range_min = $map['rangeStart'];
+    if ($range_min) {
+      $range_min = $range_min->getEpoch();
+    }
+
+    $range_max = $map['rangeEnd'];
+    if ($range_max) {
+      $range_max = $range_max->getEpoch();
+    }
+
+    if ($range_min && $range_max) {
+      if ($range_min > $range_max) {
+        throw new PhabricatorSearchConstraintException(
+          pht(
+            'The specified "Occurs Before" date is earlier in time than the '.
+            'specified "Occurs After" date, so this query can never match '.
+            'any results.'));
+      }
+    }
+
+    if ($range_min || $range_max) {
+      $query->withEpochInRange($range_min, $range_max);
     }
 
     return $query;
