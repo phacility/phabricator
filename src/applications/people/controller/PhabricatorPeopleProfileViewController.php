@@ -28,8 +28,21 @@ final class PhabricatorPeopleProfileViewController
     $name = $user->getUsername();
 
     $feed = $this->buildPeopleFeed($user, $viewer);
+
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon(
+        id(new PHUIIconView())
+          ->setIcon('fa-list-ul'))
+      ->setText(pht('View All'))
+      ->setHref('/feed/?userPHIDs='.$user->getPHID());
+
+    $feed_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Activity'))
+      ->addActionLink($view_all);
+
     $feed = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Activity'))
+      ->setHeader($feed_header)
       ->addClass('project-view-feed')
       ->appendChild($feed);
 
