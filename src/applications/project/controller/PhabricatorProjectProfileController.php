@@ -73,7 +73,7 @@ final class PhabricatorProjectProfileController
 
     $stories = id(new PhabricatorFeedQuery())
       ->setViewer($viewer)
-      ->setFilterPHIDs(
+      ->withFilterPHIDs(
         array(
           $project->getPHID(),
         ))

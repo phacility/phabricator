@@ -56,7 +56,7 @@ final class PhabricatorFeedSearchEngine
 
     $phids = array_mergev($phids);
     if ($phids) {
-      $query->setFilterPHIDs($phids);
+      $query->withFilterPHIDs($phids);
     }
 
     return $query;

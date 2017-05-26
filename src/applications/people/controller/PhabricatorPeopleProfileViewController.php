@@ -229,7 +229,7 @@ final class PhabricatorPeopleProfileViewController
     $viewer) {
 
     $query = new PhabricatorFeedQuery();
-    $query->setFilterPHIDs(
+    $query->withFilterPHIDs(
       array(
         $user->getPHID(),
       ));
