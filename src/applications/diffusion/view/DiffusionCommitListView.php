@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionHistoryListView extends AphrontView {
+final class DiffusionCommitListView extends AphrontView {
 
   private $commits = array();
   private $noDataString;
@@ -114,10 +114,12 @@ final class DiffusionHistoryListView extends AphrontView {
       if ($author_phid) {
         $author_name = $handles[$author_phid]->renderLink();
         $author_image_uri = $handles[$author_phid]->getImageURI();
+        $author_image_href = $handles[$author_phid]->getURI();
       } else {
         $author_name = $commit->getCommitData()->getAuthorName();
         $author_image_uri =
           celerity_get_resource_uri('/rsrc/image/people/user0.png');
+        $author_image_href = null;
       }
 
       $commit_tag = id(new PHUITagView())
@@ -132,6 +134,7 @@ final class DiffusionHistoryListView extends AphrontView {
         ->setDisabled($commit->isUnreachable())
         ->setDescription($message)
         ->setImageURI($author_image_uri)
+        ->setImageHref($author_image_href)
         ->addByline(pht('Author: %s', $author_name))
         ->addIcon('none', $committed)
         ->addAttribute($commit_tag);

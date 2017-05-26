@@ -60,7 +60,7 @@ final class PhabricatorPeopleProfileCommitsController
       ->setLimit(100)
       ->execute();
 
-    $list = id(new DiffusionHistoryListView())
+    $list = id(new DiffusionCommitListView())
       ->setViewer($viewer)
       ->setCommits($commits)
       ->setNoDataString(pht('No recent commits.'));
