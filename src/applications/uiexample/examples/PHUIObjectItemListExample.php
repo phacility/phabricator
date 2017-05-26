@@ -202,7 +202,7 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
     $list->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Ace of Hearts'))
-        ->setSubHead(
+        ->setDescription(
           pht('This is a powerful card in the game "Hearts".'))
         ->setHref('#')
         ->addAttribute(pht('Suit: Hearts'))
@@ -330,6 +330,8 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
     $list->addItem(
       id(new PHUIObjectItemView())
         ->setImageURI($default_project->getViewURI())
+        ->setImageHref('#')
+        ->setHref('$$$')
         ->setHeader(pht('Default Project Profile Image'))
         ->setGrippable(true)
         ->addAttribute(pht('This is the default project profile image.')));

@@ -131,9 +131,6 @@ final class PHUIButtonExample extends PhabricatorUIExample {
     );
     $colors = array(
       PHUIButtonView::SIMPLE,
-      PHUIButtonView::SIMPLE_YELLOW,
-      PHUIButtonView::SIMPLE_GREY,
-      PHUIButtonView::SIMPLE_BLUE,
     );
     $column = array();
     foreach ($colors as $color) {

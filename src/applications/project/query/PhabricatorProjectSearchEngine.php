@@ -211,7 +211,7 @@ final class PhabricatorProjectSearchEngine
       $options[$color] = array(
         id(new PHUITagView())
           ->setType(PHUITagView::TYPE_SHADE)
-          ->setShade($color)
+          ->setColor($color)
           ->setName($name),
       );
     }

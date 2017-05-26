@@ -331,7 +331,7 @@ final class PhabricatorProjectBoardViewController
 
       $count_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
-        ->setShade(PHUITagView::COLOR_BLUE)
+        ->setColor(PHUITagView::COLOR_BLUE)
         ->addSigil('column-points')
         ->setName(
           javelin_tag(
@@ -713,14 +713,6 @@ final class PhabricatorProjectBoardViewController
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
 
-    $background_uri = $this->getApplicationURI("board/{$id}/background/");
-    $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-paint-brush')
-      ->setName(pht('Change Background Color'))
-      ->setHref($background_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(false);
-
     if ($show_hidden) {
       $hidden_uri = $this->getURIWithState()
         ->setQueryParam('hidden', null);
@@ -737,6 +729,17 @@ final class PhabricatorProjectBoardViewController
       ->setIcon($hidden_icon)
       ->setName($hidden_text)
       ->setHref($hidden_uri);
+
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
+
+    $background_uri = $this->getApplicationURI("board/{$id}/background/");
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-paint-brush')
+      ->setName(pht('Change Background Color'))
+      ->setHref($background_uri)
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(false);
 
     $manage_uri = $this->getApplicationURI("board/{$id}/manage/");
     $manage_items[] = id(new PhabricatorActionView())
@@ -963,7 +966,18 @@ final class PhabricatorProjectBoardViewController
           ->setProjectPHID($project->getPHID())
           ->save();
 
-        $project->setHasWorkboard(1)->save();
+          $xactions = array();
+          $xactions[] = id(new PhabricatorProjectTransaction())
+            ->setTransactionType(
+                PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE)
+            ->setNewValue(1);
+
+          id(new PhabricatorProjectTransactionEditor())
+            ->setActor($viewer)
+            ->setContentSourceFromRequest($request)
+            ->setContinueOnNoEffect(true)
+            ->setContinueOnMissingFields(true)
+            ->applyTransactions($project, $xactions);
 
         return id(new AphrontRedirectResponse())
           ->setURI($board_uri);
@@ -1047,7 +1061,8 @@ final class PhabricatorProjectBoardViewController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_HASWORKBOARD)
+        ->setTransactionType(
+            PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE)
         ->setNewValue(1);
 
       id(new PhabricatorProjectTransactionEditor())

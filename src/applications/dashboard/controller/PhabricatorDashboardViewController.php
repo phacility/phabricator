@@ -47,6 +47,7 @@ final class PhabricatorDashboardViewController
       ->setTag('a')
       ->setText('Install Dashboard')
       ->setIcon('fa-plus')
+      ->setColor(PHUIButtonView::GREEN)
       ->setWorkflow(true)
       ->setHref($this->getApplicationURI("/install/{$id}/"));
     $header->addActionLink($install_button);

@@ -285,6 +285,31 @@ ul.phui-oi-list-view {
   padding: 0 8px 6px;
 }
 
+.phui-oi-description {
+  display: none;
+}
+
+.phui-oi-description.phui-oi-description-reveal {
+  display: block;
+}
+
+.phui-oi-description-tag {
+  margin-left: 4px;
+}
+
+.phui-oi-description-tag:hover .phui-tag-core {
+  cursor: pointer;
+  background: {$darkgreybackground};
+}
+
+.phui-oi-description-tag .phui-tag-core {
+  border: none;
+}
+
+.phui-oi-description-tag.phui-tag-view .phui-icon-view {
+  margin: 2px;
+}
+
 
 /* - Attribute List ------------------------------------------------------------
 
@@ -625,13 +650,13 @@ ul.phui-oi-list-view .phui-oi-selected
 
 /* - Launcher Button -------------------------------------------------------- */
 
-.phui-oi-col2.phui-oi-launch-button {
+.phui-oi-col2.phui-oi-side-column {
   text-align: right;
   vertical-align: middle;
   padding-right: 4px;
 }
 
-.device-phone .phui-oi-col2.phui-oi-launch-button {
+.device-phone .phui-oi-col2.phui-oi-side-column {
   padding: 0 8px 8px;
   text-align: left;
 }

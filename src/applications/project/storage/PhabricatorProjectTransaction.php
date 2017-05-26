@@ -3,14 +3,6 @@
 final class PhabricatorProjectTransaction
   extends PhabricatorModularTransaction {
 
-  const TYPE_LOCKED     = 'project:locked';
-  const TYPE_PARENT = 'project:parent';
-  const TYPE_MILESTONE = 'project:milestone';
-  const TYPE_HASWORKBOARD = 'project:hasworkboard';
-  const TYPE_DEFAULT_SORT = 'project:sort';
-  const TYPE_DEFAULT_FILTER = 'project:filter';
-  const TYPE_BACKGROUND = 'project:background';
-
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
 
@@ -62,24 +54,12 @@ final class PhabricatorProjectTransaction
     return parent::shouldHide();
   }
 
-  public function shouldHideForFeed() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_HASWORKBOARD:
-      case self::TYPE_DEFAULT_SORT:
-      case self::TYPE_DEFAULT_FILTER:
-      case self::TYPE_BACKGROUND:
-        return true;
-    }
-
-    return parent::shouldHideForFeed();
-  }
-
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
-      case self::TYPE_HASWORKBOARD:
-      case self::TYPE_DEFAULT_SORT:
-      case self::TYPE_DEFAULT_FILTER:
-      case self::TYPE_BACKGROUND:
+      case PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE:
+      case PhabricatorProjectSortTransaction::TRANSACTIONTYPE:
+      case PhabricatorProjectFilterTransaction::TRANSACTIONTYPE:
+      case PhabricatorProjectWorkboardBackgroundTransaction::TRANSACTIONTYPE:
         return true;
     }
 
@@ -87,16 +67,7 @@ final class PhabricatorProjectTransaction
   }
 
   public function getIcon() {
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
     switch ($this->getTransactionType()) {
-      case self::TYPE_LOCKED:
-        if ($new) {
-          return 'fa-lock';
-        } else {
-          return 'fa-unlock';
-        }
       case self::TYPE_MEMBERS:
         return 'fa-user';
     }
@@ -114,18 +85,6 @@ final class PhabricatorProjectTransaction
         return pht(
           '%s created this project.',
           $this->renderHandleLink($author_phid));
-
-      case self::TYPE_LOCKED:
-        if ($new) {
-          return pht(
-            "%s locked this project's membership.",
-            $author_handle);
-        } else {
-          return pht(
-            "%s unlocked this project's membership.",
-            $author_handle);
-        }
-        break;
 
       case self::TYPE_MEMBERS:
         $add = array_diff($new, $old);
@@ -165,62 +124,9 @@ final class PhabricatorProjectTransaction
           }
         }
         break;
-
-      case self::TYPE_HASWORKBOARD:
-        if ($new) {
-          return pht(
-            '%s enabled the workboard for this project.',
-            $author_handle);
-        } else {
-          return pht(
-            '%s disabled the workboard for this project.',
-            $author_handle);
-        }
-
-      case self::TYPE_DEFAULT_SORT:
-        return pht(
-          '%s changed the default sort order for the project workboard.',
-          $author_handle);
-
-      case self::TYPE_DEFAULT_FILTER:
-        return pht(
-          '%s changed the default filter for the project workboard.',
-          $author_handle);
-
-      case self::TYPE_BACKGROUND:
-        return pht(
-          '%s changed the background color of the project workboard.',
-          $author_handle);
     }
 
     return parent::getTitle();
-  }
-
-  public function getTitleForFeed() {
-    $author_phid = $this->getAuthorPHID();
-    $object_phid = $this->getObjectPHID();
-    $author_handle = $this->renderHandleLink($author_phid);
-    $object_handle = $this->renderHandleLink($object_phid);
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-      case self::TYPE_LOCKED:
-        if ($new) {
-          return pht(
-            '%s locked membership for %s.',
-            $author_handle,
-            $object_handle);
-        } else {
-          return pht(
-            '%s unlocked membership for %s.',
-            $author_handle,
-            $object_handle);
-        }
-    }
-
-    return parent::getTitleForFeed();
   }
 
   public function getMailTags() {
@@ -247,7 +153,7 @@ final class PhabricatorProjectTransaction
         }
         break;
       case PhabricatorProjectStatusTransaction::TRANSACTIONTYPE:
-      case self::TYPE_LOCKED:
+      case PhabricatorProjectLockTransaction::TRANSACTIONTYPE:
       default:
         $tags[] = self::MAILTAG_OTHER;
         break;

@@ -73,16 +73,28 @@ final class PhabricatorProjectProfileController
 
     $stories = id(new PhabricatorFeedQuery())
       ->setViewer($viewer)
-      ->setFilterPHIDs(
+      ->withFilterPHIDs(
         array(
           $project->getPHID(),
         ))
       ->setLimit(50)
       ->execute();
 
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon(
+        id(new PHUIIconView())
+          ->setIcon('fa-list-ul'))
+      ->setText(pht('View All'))
+      ->setHref('/feed/?projectPHIDs='.$project->getPHID());
+
+    $feed_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Activity'))
+      ->addActionLink($view_all);
+
     $feed = $this->renderStories($stories);
     $feed = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Activity'))
+      ->setHeader($feed_header)
       ->addClass('project-view-feed')
       ->appendChild($feed);
 
@@ -135,7 +147,7 @@ final class PhabricatorProjectProfileController
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Properties'));
+      ->setHeader(pht('Details'));
 
     $view = id(new PHUIObjectBoxView())
       ->setHeader($header)

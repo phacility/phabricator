@@ -71,7 +71,7 @@ abstract class ConpherenceController extends PhabricatorController {
       if (strlen($data['topic'])) {
         $topic = id(new PHUITagView())
           ->setName($data['topic'])
-          ->setShade(PHUITagView::COLOR_VIOLET)
+          ->setColor(PHUITagView::COLOR_VIOLET)
           ->setType(PHUITagView::TYPE_SHADE)
           ->addClass('conpherence-header-topic');
         $header->addTag($topic);

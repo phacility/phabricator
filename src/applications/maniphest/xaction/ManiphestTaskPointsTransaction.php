@@ -50,6 +50,32 @@ final class ManiphestTaskPointsTransaction
     }
   }
 
+  public function getTitleForFeed() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    if ($old === null) {
+      return pht(
+        '%s set the point value for %s to %s.',
+        $this->renderAuthor(),
+        $this->renderObject(),
+        $this->renderNewValue());
+    } else if ($new === null) {
+      return pht(
+        '%s removed the point value for %s.',
+        $this->renderAuthor(),
+        $this->renderObject());
+    } else {
+      return pht(
+        '%s changed the point value for %s from %s to %s.',
+        $this->renderAuthor(),
+        $this->renderObject(),
+        $this->renderOldValue(),
+        $this->renderNewValue());
+    }
+  }
+
+
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 

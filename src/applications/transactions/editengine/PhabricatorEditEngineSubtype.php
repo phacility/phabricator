@@ -8,6 +8,9 @@ final class PhabricatorEditEngineSubtype
 
   private $key;
   private $name;
+  private $icon;
+  private $tagText;
+  private $color;
 
   public function setKey($key) {
     $this->key = $key;
@@ -27,8 +30,48 @@ final class PhabricatorEditEngineSubtype
     return $this->name;
   }
 
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
   public function getIcon() {
-    return 'fa-drivers-license-o';
+    return $this->icon;
+  }
+
+  public function setTagText($text) {
+    $this->tagText = $text;
+    return $this;
+  }
+
+  public function getTagText() {
+    return $this->tagText;
+  }
+
+  public function setColor($color) {
+    $this->color = $color;
+    return $this;
+  }
+
+  public function getColor() {
+    return $this->color;
+  }
+
+  public function hasTagView() {
+    return (bool)strlen($this->getTagText());
+  }
+
+  public function newTagView() {
+    $view = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_OUTLINE)
+      ->setName($this->getTagText());
+
+    $color = $this->getColor();
+    if ($color) {
+      $view->setColor($color);
+    }
+
+    return $view;
   }
 
   public static function validateSubtypeKey($subtype) {
@@ -72,6 +115,9 @@ final class PhabricatorEditEngineSubtype
         array(
           'key' => 'string',
           'name' => 'string',
+          'tag' => 'optional string',
+          'color' => 'optional string',
+          'icon' => 'optional string',
         ));
 
       $key = $value['key'];
@@ -113,9 +159,27 @@ final class PhabricatorEditEngineSubtype
       $key = $entry['key'];
       $name = $entry['name'];
 
-      $map[$key] = id(new self())
+      $tag_text = idx($entry, 'tag');
+      if ($tag_text === null) {
+        if ($key != self::SUBTYPE_DEFAULT) {
+          $tag_text = phutil_utf8_strtoupper($name);
+        }
+      }
+
+      $color = idx($entry, 'color', 'blue');
+      $icon = idx($entry, 'icon', 'fa-drivers-license-o');
+
+      $subtype = id(new self())
         ->setKey($key)
-        ->setName($name);
+        ->setName($name)
+        ->setTagText($tag_text)
+        ->setIcon($icon);
+
+      if ($color) {
+        $subtype->setColor($color);
+      }
+
+      $map[$key] = $subtype;
     }
 
     return $map;

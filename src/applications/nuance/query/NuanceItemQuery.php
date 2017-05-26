@@ -6,9 +6,11 @@ final class NuanceItemQuery
   private $ids;
   private $phids;
   private $sourcePHIDs;
+  private $queuePHIDs;
   private $itemTypes;
   private $itemKeys;
   private $containerKeys;
+  private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -25,6 +27,11 @@ final class NuanceItemQuery
     return $this;
   }
 
+  public function withQueuePHIDs(array $queue_phids) {
+    $this->queuePHIDs = $queue_phids;
+    return $this;
+  }
+
   public function withItemTypes(array $item_types) {
     $this->itemTypes = $item_types;
     return $this;
@@ -32,6 +39,11 @@ final class NuanceItemQuery
 
   public function withItemKeys(array $item_keys) {
     $this->itemKeys = $item_keys;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -49,13 +61,11 @@ final class NuanceItemQuery
   }
 
   protected function willFilterPage(array $items) {
+    $viewer = $this->getViewer();
     $source_phids = mpull($items, 'getSourcePHID');
 
-    // NOTE: We always load sources, even if the viewer can't formally see
-    // them. If they can see the item, they're allowed to be aware of the
-    // source in some sense.
     $sources = id(new NuanceSourceQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($viewer)
       ->withPHIDs($source_phids)
       ->execute();
     $sources = mpull($sources, null, 'getPHID');
@@ -81,6 +91,43 @@ final class NuanceItemQuery
       $item->attachImplementation($type);
     }
 
+    $queue_phids = array();
+    foreach ($items as $item) {
+      $queue_phid = $item->getQueuePHID();
+      if ($queue_phid) {
+        $queue_phids[$queue_phid] = $queue_phid;
+      }
+    }
+
+    if ($queue_phids) {
+      $queues = id(new NuanceQueueQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($queue_phids)
+        ->execute();
+      $queues = mpull($queues, null, 'getPHID');
+    } else {
+      $queues = array();
+    }
+
+    foreach ($items as $key => $item) {
+      $queue_phid = $item->getQueuePHID();
+
+      if (!$queue_phid) {
+        $item->attachQueue(null);
+        continue;
+      }
+
+      $queue = idx($queues, $queue_phid);
+
+      if (!$queue) {
+        unset($items[$key]);
+        $this->didRejectResult($item);
+        continue;
+      }
+
+      $item->attachQueue($queue);
+    }
+
     return $items;
   }
 
@@ -92,6 +139,13 @@ final class NuanceItemQuery
         $conn,
         'sourcePHID IN (%Ls)',
         $this->sourcePHIDs);
+    }
+
+    if ($this->queuePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'queuePHID IN (%Ls)',
+        $this->queuePHIDs);
     }
 
     if ($this->ids !== null) {
@@ -106,6 +160,13 @@ final class NuanceItemQuery
         $conn,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
     }
 
     if ($this->itemTypes !== null) {

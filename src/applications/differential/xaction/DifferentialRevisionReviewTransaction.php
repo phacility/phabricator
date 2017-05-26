@@ -17,6 +17,16 @@ abstract class DifferentialRevisionReviewTransaction
     $viewer = $this->getActor();
     list($options, $default) = $this->getActionOptions($viewer, $object);
 
+    // Remove reviewers which aren't actionable. In the case of "Accept", we
+    // may allow the transaction to proceed with some reviewers who have
+    // already accepted, to avoid race conditions where two reviewers fill
+    // out the form at the same time and accept on behalf of the same package.
+    // It's okay for these reviewers to survive validation, but they should
+    // not survive beyond this point.
+    $value = array_fuse($value);
+    $value = array_intersect($value, array_keys($options));
+    $value = array_values($value);
+
     sort($default);
     sort($value);
 

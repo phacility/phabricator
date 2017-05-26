@@ -233,11 +233,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ManiphestTaskPoints::getPointsLabel());
         $tag = id(new PHUITagView())
           ->setName($points_name)
-          ->setShade('blue')
+          ->setColor(PHUITagView::COLOR_BLUE)
           ->setType(PHUITagView::TYPE_SHADE);
 
         $view->addTag($tag);
       }
+    }
+
+    $subtype = $task->newSubtypeObject();
+    if ($subtype && $subtype->hasTagView()) {
+      $subtype_tag = $subtype->newTagView();
+      $view->addTag($subtype_tag);
     }
 
     return $view;

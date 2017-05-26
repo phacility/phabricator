@@ -29,7 +29,7 @@ final class PHUIUserAvailabilityView
 
     $away_tag = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_SHADE)
-      ->setShade($color)
+      ->setColor($color)
       ->setName($name)
       ->setDotColor($color);
 

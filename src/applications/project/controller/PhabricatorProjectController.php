@@ -166,4 +166,12 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       ->buildResponse();
   }
 
+  public function renderHashtags(array $tags) {
+    $result = array();
+    foreach ($tags as $key => $tag) {
+      $result[] = '#'.$tag;
+    }
+    return implode(', ', $result);
+  }
+
 }

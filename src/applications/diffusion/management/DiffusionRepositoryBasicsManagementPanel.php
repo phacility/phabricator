@@ -33,9 +33,10 @@ final class DiffusionRepositoryBasicsManagementPanel
     );
   }
 
-  protected function buildManagementPanelActions() {
+  public function buildManagementPanelCurtain() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
+    $action_list = $this->getNewActionList();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -67,38 +68,47 @@ final class DiffusionRepositoryBasicsManagementPanel
       $can_dangerous = ($can_edit && $repository->canAllowDangerousChanges());
     }
 
-    return array(
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Basic Information'))
         ->setHref($edit_uri)
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit),
+        ->setWorkflow(!$can_edit));
+
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-text-width')
         ->setName(pht('Edit Text Encoding'))
         ->setHref($encoding_uri)
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit),
+        ->setWorkflow(!$can_edit));
+
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon($dangerous_icon)
         ->setName($dangerous_name)
         ->setHref($dangerous_uri)
         ->setDisabled(!$can_dangerous)
-        ->setWorkflow(true),
+        ->setWorkflow(true));
+
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setHref($activate_uri)
         ->setIcon($activate_icon)
         ->setName($activate_label)
         ->setDisabled(!$can_edit)
-        ->setWorkflow(true),
+        ->setWorkflow(true));
+
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Delete Repository'))
         ->setIcon('fa-times')
         ->setHref($delete_uri)
         ->setDisabled(true)
-        ->setWorkflow(true),
-    );
+        ->setWorkflow(true));
+
+    return $this->getNewCurtainView($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -108,6 +118,7 @@ final class DiffusionRepositoryBasicsManagementPanel
 
     $repository = $this->getRepository();
     $is_new = $repository->isNewlyInitialized();
+    $info_view = null;
     if ($is_new) {
       $messages = array();
 
@@ -131,8 +142,6 @@ final class DiffusionRepositoryBasicsManagementPanel
       $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors($messages);
-
-      $basics->setInfoView($info_view);
     }
 
     $result[] = $basics;
@@ -142,7 +151,7 @@ final class DiffusionRepositoryBasicsManagementPanel
       $result[] = $this->newBox(pht('Description'), $description);
     }
 
-    return $result;
+    return array($info_view, $result);
   }
 
   private function buildBasics() {
@@ -150,8 +159,7 @@ final class DiffusionRepositoryBasicsManagementPanel
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setViewer($viewer)
-      ->setActionList($this->newActions());
+      ->setViewer($viewer);
 
     $name = $repository->getName();
     $view->addProperty(pht('Name'), $name);

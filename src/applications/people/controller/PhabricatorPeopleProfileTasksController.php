@@ -13,10 +13,6 @@ final class PhabricatorPeopleProfileTasksController
       ->needProfile(true)
       ->needProfileImage(true)
       ->needAvailability(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-        ))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();

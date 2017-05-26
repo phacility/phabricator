@@ -540,6 +540,11 @@ final class ManiphestTask extends ManiphestDAO
     );
   }
 
+  public function newSubtypeObject() {
+    $subtype_key = $this->getEditEngineSubtype();
+    $subtype_map = $this->newEditEngineSubtypeMap();
+    return idx($subtype_map, $subtype_key);
+  }
 
 /* -(  PhabricatorFulltextInterface  )--------------------------------------- */
 

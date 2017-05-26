@@ -384,8 +384,7 @@ final class ManiphestTransactionEditor
    */
   public static function getAdjacentSubpriority(
     ManiphestTask $dst,
-    $is_after,
-    $allow_recursion = true) {
+    $is_after) {
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -407,76 +406,25 @@ final class ManiphestTransactionEditor
     // If we find an adjacent task, we average the two subpriorities and
     // return the result.
     if ($adjacent) {
-      $epsilon = 0.01;
+      $epsilon = 1.0;
 
       // If the adjacent task has a subpriority that is identical or very
-      // close to the task we're looking at, we're going to move it and all
-      // tasks with the same subpriority a little farther down the subpriority
-      // scale.
-      if ($allow_recursion &&
-          (abs($adjacent->getSubpriority() - $base) < $epsilon)) {
-        $conn_w = $adjacent->establishConnection('w');
+      // close to the task we're looking at, we're going to spread out all
+      // the nearby tasks.
 
-        $min = ($adjacent->getSubpriority() - ($epsilon));
-        $max = ($adjacent->getSubpriority() + ($epsilon));
-
-        // Get all of the tasks with the similar subpriorities to the adjacent
-        // task, including the adjacent task itself.
-        $query = id(new ManiphestTaskQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPriorities(array($adjacent->getPriority()))
-          ->withSubpriorityBetween($min, $max);
-
-        if (!$is_after) {
-          $query->setOrderVector(array('-priority', '-subpriority', '-id'));
+      $adjacent_sub = $adjacent->getSubpriority();
+      if ((abs($adjacent_sub - $base) < $epsilon)) {
+        $base = self::disperseBlock(
+          $dst,
+          $epsilon * 2);
+        if ($is_after) {
+          $sub = $base - $epsilon;
         } else {
-          $query->setOrderVector(array('priority', 'subpriority', 'id'));
+          $sub = $base + $epsilon;
         }
-
-        $shift_all = $query->execute();
-        $shift_last = last($shift_all);
-
-        // Select the most extreme subpriority in the result set as the
-        // base value.
-        $shift_base = head($shift_all)->getSubpriority();
-
-        // Find the subpriority before or after the task at the end of the
-        // block.
-        list($shift_pri, $shift_sub) = self::getAdjacentSubpriority(
-          $shift_last,
-          $is_after,
-          $allow_recursion = false);
-
-        $delta = ($shift_sub - $shift_base);
-        $count = count($shift_all);
-
-        $shift = array();
-        $cursor = 1;
-        foreach ($shift_all as $shift_task) {
-          $shift_target = $shift_base + (($cursor / $count) * $delta);
-          $cursor++;
-
-          queryfx(
-            $conn_w,
-            'UPDATE %T SET subpriority = %f WHERE id = %d',
-            $adjacent->getTableName(),
-            $shift_target,
-            $shift_task->getID());
-
-          // If we're shifting the adjacent task, update it.
-          if ($shift_task->getID() == $adjacent->getID()) {
-            $adjacent->setSubpriority($shift_target);
-          }
-
-          // If we're shifting the original target task, update the base
-          // subpriority.
-          if ($shift_task->getID() == $dst->getID()) {
-            $base = $shift_target;
-          }
-        }
+      } else {
+        $sub = ($adjacent_sub + $base) / 2;
       }
-
-      $sub = ($adjacent->getSubpriority() + $base) / 2;
     } else {
       // Otherwise, we take a step away from the target's subpriority and
       // use that.
@@ -488,6 +436,156 @@ final class ManiphestTransactionEditor
     }
 
     return array($dst->getPriority(), $sub);
+  }
+
+  /**
+   * Distribute a cluster of tasks with similar subpriorities.
+   */
+  private static function disperseBlock(
+    ManiphestTask $task,
+    $spacing) {
+
+    $conn = $task->establishConnection('w');
+
+    // Find a block of subpriority space which is, on average, sparse enough
+    // to hold all the tasks that are inside it with a reasonable level of
+    // separation between them.
+
+    // We'll start by looking near the target task for a range of numbers
+    // which has more space available than tasks. For example, if the target
+    // task has subpriority 33 and we want to separate each task by at least 1,
+    // we might start by looking in the range [23, 43].
+
+    // If we find fewer than 20 tasks there, we have room to reassign them
+    // with the desired level of separation. We space them out, then we're
+    // done.
+
+    // However: if we find more than 20 tasks, we don't have enough room to
+    // distribute them. We'll widen our search and look in a bigger range,
+    // maybe [13, 53]. This range has more space, so if we find fewer than
+    // 40 tasks in this range we can spread them out. If we still find too
+    // many tasks, we keep widening the search.
+
+    $base = $task->getSubpriority();
+
+    $scale = 4.0;
+    while (true) {
+      $range = ($spacing * $scale) / 2.0;
+      $min = ($base - $range);
+      $max = ($base + $range);
+
+      $result = queryfx_one(
+        $conn,
+        'SELECT COUNT(*) N FROM %T WHERE priority = %d AND
+          subpriority BETWEEN %f AND %f',
+        $task->getTableName(),
+        $task->getPriority(),
+        $min,
+        $max);
+
+      $count = $result['N'];
+      if ($count < $scale) {
+        // We have found a block which we can make sparse enough, so bail and
+        // continue below with our selection.
+        break;
+      }
+
+      // This block had too many tasks for its size, so try again with a
+      // bigger block.
+      $scale *= 2.0;
+    }
+
+    $rows = queryfx_all(
+      $conn,
+      'SELECT id FROM %T WHERE priority = %d AND
+        subpriority BETWEEN %f AND %f
+        ORDER BY priority, subpriority, id',
+      $task->getTableName(),
+      $task->getPriority(),
+      $min,
+      $max);
+
+    $task_id = $task->getID();
+    $result = null;
+
+    // NOTE: In strict mode (which we encourage enabling) we can't structure
+    // this bulk update as an "INSERT ... ON DUPLICATE KEY UPDATE" unless we
+    // provide default values for ALL of the columns that don't have defaults.
+
+    // This is gross, but we may be moving enough rows that individual
+    // queries are unreasonably slow. An alternate construction which might
+    // be worth evaluating is to use "CASE". Another approach is to disable
+    // strict mode for this query.
+
+    $extra_columns = array(
+      'phid' => '""',
+      'authorPHID' => '""',
+      'status' => '""',
+      'priority' => 0,
+      'title' => '""',
+      'originalTitle' => '""',
+      'description' => '""',
+      'dateCreated' => 0,
+      'dateModified' => 0,
+      'mailKey' => '""',
+      'viewPolicy' => '""',
+      'editPolicy' => '""',
+      'ownerOrdering' => '""',
+      'spacePHID' => '""',
+      'bridgedObjectPHID' => '""',
+      'properties' => '""',
+      'points' => 0,
+      'subtype' => '""',
+    );
+
+    $defaults = implode(', ', $extra_columns);
+
+    $sql = array();
+    $offset = 0;
+
+    // Often, we'll have more room than we need in the range. Distribute the
+    // tasks evenly over the whole range so that we're less likely to end up
+    // with tasks spaced exactly the minimum distance apart, which may
+    // get shifted again later. We have one fewer space to distribute than we
+    // have tasks.
+    $divisor = (double)(count($rows) - 1.0);
+    if ($divisor > 0) {
+      $available_distance = (($max - $min) / $divisor);
+    } else {
+      $available_distance = 0.0;
+    }
+
+    foreach ($rows as $row) {
+      $subpriority = $min + ($offset * $available_distance);
+
+      // If this is the task that we're spreading out relative to, keep track
+      // of where it is ending up so we can return the new subpriority.
+      $id = $row['id'];
+      if ($id == $task_id) {
+        $result = $subpriority;
+      }
+
+      $sql[] = qsprintf(
+        $conn,
+        '(%d, %Q, %f)',
+        $id,
+        $defaults,
+        $subpriority);
+
+      $offset++;
+    }
+
+    foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
+      queryfx(
+        $conn,
+        'INSERT INTO %T (id, %Q, subpriority) VALUES %Q
+          ON DUPLICATE KEY UPDATE subpriority = VALUES(subpriority)',
+        $task->getTableName(),
+        implode(', ', array_keys($extra_columns)),
+        $chunk);
+    }
+
+    return $result;
   }
 
   protected function validateAllTransactions(

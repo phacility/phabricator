@@ -64,7 +64,7 @@ final class PhabricatorFulltextToken extends Phobject {
 
     $tag = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_SHADE)
-      ->setShade($shade)
+      ->setColor($shade)
       ->setName($token->getValue());
 
     if ($tip !== null) {

@@ -149,6 +149,8 @@ abstract class NuanceSourceDefinition extends Phobject {
   }
 
   protected function newItemFromProperties(
+    $item_type,
+    $author_phid,
     array $properties,
     PhabricatorContentSource $content_source) {
 
@@ -157,29 +159,31 @@ abstract class NuanceSourceDefinition extends Phobject {
     $actor = PhabricatorUser::getOmnipotentUser();
     $source = $this->getSource();
 
-    $item = NuanceItem::initializeNewItem();
+    $item = NuanceItem::initializeNewItem($item_type);
 
     $xactions = array();
 
     $xactions[] = id(new NuanceItemTransaction())
-      ->setTransactionType(NuanceItemTransaction::TYPE_SOURCE)
+      ->setTransactionType(NuanceItemSourceTransaction::TRANSACTIONTYPE)
       ->setNewValue($source->getPHID());
 
     // TODO: Eventually, apply real routing rules. For now, just put everything
     // in the default queue for the source.
     $xactions[] = id(new NuanceItemTransaction())
-      ->setTransactionType(NuanceItemTransaction::TYPE_QUEUE)
+      ->setTransactionType(NuanceItemQueueTransaction::TRANSACTIONTYPE)
       ->setNewValue($source->getDefaultQueuePHID());
 
+    // TODO: Maybe this should all be modular transactions now?
     foreach ($properties as $key => $property) {
       $xactions[] = id(new NuanceItemTransaction())
-        ->setTransactionType(NuanceItemTransaction::TYPE_PROPERTY)
+        ->setTransactionType(NuanceItemPropertyTransaction::TRANSACTIONTYPE)
         ->setMetadataValue(NuanceItemTransaction::PROPERTY_KEY, $key)
         ->setNewValue($property);
     }
 
     $editor = id(new NuanceItemEditor())
       ->setActor($actor)
+      ->setActingAsPHID($author_phid)
       ->setContentSource($content_source);
 
     $editor->applyTransactions($item, $xactions);

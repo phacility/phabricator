@@ -130,6 +130,23 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->addClass('mmr');
     }
 
+    $circles = array('fa-gear', 'fa-recycle');
+    $colors = array('green', 'pink', 'red', 'sky', 'violet');
+    foreach ($circles as $circle) {
+      $states = PHUIIconCircleView::getStateMap();
+      foreach ($states as $state => $name) {
+        $i = array_rand($colors);
+        $circleview[] =
+          id(new PHUIIconCircleView())
+            ->setIcon($circle)
+            ->setSize(PHUIIconCircleView::SMALL)
+            ->setState($state)
+            ->setColor($colors[$i])
+            ->setHref('#')
+            ->addClass('mmr');
+      }
+    }
+
     $squares = array('fa-briefcase', 'fa-code', 'fa-globe', 'fa-home');
     $squareview = array();
     foreach ($squares as $icon) {

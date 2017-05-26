@@ -36,10 +36,9 @@ final class NuanceGitHubRepositoryImportCursor
       $container_key = "github.issue.{$issue_id}";
     }
 
-    return NuanceItem::initializeNewItem()
+    return NuanceItem::initializeNewItem(NuanceGitHubEventItemType::ITEMTYPE)
       ->setStatus(NuanceItem::STATUS_IMPORTING)
       ->setSourcePHID($source->getPHID())
-      ->setItemType(NuanceGitHubEventItemType::ITEMTYPE)
       ->setItemKey($item_key)
       ->setItemContainerKey($container_key)
       ->setItemProperty('api.type', 'repository')

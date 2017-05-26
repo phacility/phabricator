@@ -335,9 +335,16 @@ dictionary with these keys:
     "task", "feature", or "bug".
   - `name` //Required string.// Human-readable name for this subtype, like
     "Task", "Feature Request" or "Bug Report".
+  - `tag` //Optional string.// Tag text for this subtype.
+  - `color` //Optional string.// Display color for this subtype.
+  - `icon` //Optional string.// Icon for the subtype.
 
 Each subtype must have a unique key, and you must define a subtype with
 the key "%s", which is used as a default subtype.
+
+The tag text (`tag`) is used to set the text shown in the subtype tag on list
+views and workboards. If you do not configure it, the default subtype will have
+no subtype tag and other subtypes will use their name as tag text.
 EOTEXT
       ,
       $subtype_default_key));

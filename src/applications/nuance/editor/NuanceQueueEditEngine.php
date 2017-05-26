@@ -75,7 +75,7 @@ final class NuanceQueueEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the queue.'))
-        ->setTransactionType(NuanceQueueTransaction::TYPE_NAME)
+        ->setTransactionType(NuanceQueueNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );

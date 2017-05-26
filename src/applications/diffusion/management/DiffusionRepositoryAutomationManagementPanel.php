@@ -46,9 +46,10 @@ final class DiffusionRepositoryAutomationManagementPanel
     return 'fa-truck';
   }
 
-  protected function buildManagementPanelActions() {
+  public function buildManagementPanelCurtain() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
+    $action_list = $this->getNewActionList();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -60,20 +61,23 @@ final class DiffusionRepositoryAutomationManagementPanel
     $automation_uri = $this->getEditPageURI();
     $test_uri = $repository->getPathURI('edit/testautomation/');
 
-    return array(
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Automation'))
         ->setHref($automation_uri)
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit),
+        ->setWorkflow(!$can_edit));
+
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-gamepad')
         ->setName(pht('Test Configuration'))
         ->setWorkflow(true)
         ->setDisabled(!$can_test)
-        ->setHref($test_uri),
-    );
+        ->setHref($test_uri));
+
+    return $this->getNewCurtainView($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -81,8 +85,7 @@ final class DiffusionRepositoryAutomationManagementPanel
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setViewer($viewer)
-      ->setActionList($this->newActions());
+      ->setViewer($viewer);
 
     $blueprint_phids = $repository->getAutomationBlueprintPHIDs();
     if (!$blueprint_phids) {

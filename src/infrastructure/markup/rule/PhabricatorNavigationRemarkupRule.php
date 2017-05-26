@@ -60,7 +60,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
 
       $tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
-        ->setShade($item_color)
+        ->setColor($item_color)
         ->setName($item_name);
 
       if ($item['icon']) {
