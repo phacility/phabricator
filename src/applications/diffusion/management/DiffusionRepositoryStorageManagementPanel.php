@@ -25,6 +25,22 @@ final class DiffusionRepositoryStorageManagementPanel
     }
   }
 
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->getNewActionList();
+
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-book')
+        ->setHref($doc_href)
+        ->setName(pht('Cluster Documentation')));
+
+    return $this->getNewCurtainView($action_list);
+  }
+
   public function buildManagementPanelContent() {
     return array(
       $this->buildStorageStatusPanel(),
@@ -55,13 +71,9 @@ final class DiffusionRepositoryStorageManagementPanel
     $view->addProperty(pht('Storage Path'), $storage_path);
     $view->addProperty(pht('Storage Cluster'), $storage_service);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Storage'));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($view);
+    $box = $this->newBox(pht('Storage'), null);
+    $box->addPropertyList($view);
+    return $box;
   }
 
   private function buildClusterStatusPanel() {
@@ -231,21 +243,9 @@ final class DiffusionRepositoryStorageManagementPanel
           'date',
         ));
 
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Cluster Status'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+    $box = $this->newBox(pht('Cluster Status'), null);
+    $box->setTable($table);
+    return $box;
   }
 
 }

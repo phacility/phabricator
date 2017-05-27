@@ -49,7 +49,8 @@ final class PhabricatorProjectLockController
       }
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_LOCKED)
+        ->setTransactionType(
+            PhabricatorProjectLockTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_value);
 
       $editor = id(new PhabricatorProjectTransactionEditor())

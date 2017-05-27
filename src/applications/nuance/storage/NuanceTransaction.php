@@ -1,7 +1,7 @@
 <?php
 
 abstract class NuanceTransaction
-  extends PhabricatorApplicationTransaction {
+  extends PhabricatorModularTransaction {
 
   public function getApplicationName() {
     return 'nuance';

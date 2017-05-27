@@ -17,6 +17,35 @@ final class DiffusionRepositoryURIsManagementPanel
     return 400;
   }
 
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->getNewActionList();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: URIs');
+    $add_href = $repository->getPathURI('uri/edit/');
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-plus')
+        ->setHref($add_href)
+        ->setDisabled(!$can_edit)
+        ->setName(pht('Add New URI')));
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-book')
+        ->setHref($doc_href)
+        ->setName(pht('URI Documentation')));
+
+    return $this->getNewCurtainView($action_list);
+  }
+
   public function buildManagementPanelContent() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -95,24 +124,6 @@ final class DiffusionRepositoryURIsManagementPanel
           null,
         ));
 
-    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: URIs');
-    $add_href = $repository->getPathURI('uri/edit/');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Repository URIs'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-plus')
-          ->setHref($add_href)
-          ->setTag('a')
-          ->setText(pht('Add New URI')))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
     $is_new = $repository->isNewlyInitialized();
 
     $messages = array();
@@ -123,11 +134,7 @@ final class DiffusionRepositoryURIsManagementPanel
         $host_message = pht('Phabricator is hosting this repository.');
       }
 
-      $messages[] = array(
-        id(new PHUIIconView())->setIcon('fa-folder'),
-        ' ',
-        $host_message,
-      );
+      $messages[] = $host_message;
     } else {
       if ($is_new) {
         $observe_message = pht(
@@ -137,22 +144,17 @@ final class DiffusionRepositoryURIsManagementPanel
           'This repository is hosted remotely. Phabricator is observing it.');
       }
 
-      $messages[] = array(
-        id(new PHUIIconView())->setIcon('fa-download'),
-        ' ',
-        $observe_message,
-      );
+      $messages[] = $observe_message;
     }
 
     $info_view = id(new PHUIInfoView())
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
       ->setErrors($messages);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setInfoView($info_view)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+    $box = $this->newBox(pht('Repository URIs'), null);
+    $box->setTable($table);
+
+    return array($info_view, $box);
   }
 
 }

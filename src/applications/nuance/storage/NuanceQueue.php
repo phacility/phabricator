@@ -43,6 +43,10 @@ final class NuanceQueue
     return '/nuance/queue/view/'.$this->getID().'/';
   }
 
+  public function getWorkURI() {
+    return '/nuance/queue/work/'.$this->getID().'/';
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

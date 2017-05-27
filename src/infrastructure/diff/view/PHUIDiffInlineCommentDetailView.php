@@ -99,6 +99,14 @@ final class PHUIDiffInlineCommentDetailView
       'differential-inline-comment',
     );
 
+    $is_fixed = false;
+    switch ($inline->getFixedState()) {
+      case PhabricatorInlineCommentInterface::STATE_DONE:
+      case PhabricatorInlineCommentInterface::STATE_DRAFT:
+        $is_fixed = true;
+        break;
+    }
+
     $metadata = array(
       'id' => $inline->getID(),
       'phid' => $inline->getPHID(),
@@ -109,6 +117,9 @@ final class PHUIDiffInlineCommentDetailView
       'on_right' => $this->getIsOnRight(),
       'original' => $inline->getContent(),
       'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
+      'isDraft' => $inline->isDraft(),
+      'isFixed' => $is_fixed,
+      'isGhost' => $inline->getIsGhost(),
     );
 
     $sigil = 'differential-inline-comment';
@@ -137,7 +148,7 @@ final class PHUIDiffInlineCommentDetailView
         ->setType(PHUITagView::TYPE_SHADE)
         ->setName(pht('Unsubmitted'))
         ->setSlimShady(true)
-        ->setShade(PHUITagView::COLOR_RED)
+        ->setColor(PHUITagView::COLOR_RED)
         ->addClass('mml inline-draft-text');
     }
 
@@ -372,7 +383,7 @@ final class PHUIDiffInlineCommentDetailView
           ->setType(PHUITagView::TYPE_SHADE)
           ->setName(pht('Author'))
           ->setSlimShady(true)
-          ->setShade(PHUITagView::COLOR_YELLOW)
+          ->setColor(PHUITagView::COLOR_YELLOW)
           ->addClass('mml');
       }
     }
@@ -410,6 +421,11 @@ final class PHUIDiffInlineCommentDetailView
         $actions,
       ));
 
+    $snippet = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(96)
+      ->truncateString($inline->getContent());
+    $metadata['snippet'] = pht('%s: %s', $author, $snippet);
+
     $markup = javelin_tag(
       'div',
       array(
@@ -432,10 +448,6 @@ final class PHUIDiffInlineCommentDetailView
           'differential-inline-comment-content',
           phutil_tag_div('phabricator-remarkup', $content)),
       ));
-
-    $snippet = id(new PhutilUTF8StringTruncator())
-      ->setMaximumGlyphs(96)
-      ->truncateString($inline->getContent());
 
     $summary = phutil_tag(
       'div',

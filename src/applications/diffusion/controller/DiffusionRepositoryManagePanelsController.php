@@ -83,11 +83,11 @@ final class DiffusionRepositoryManagePanelsController
         ->setTag('a')
         ->setText(pht('View Repository'))
         ->setHref($repository->getURI())
-        ->setIcon('fa-code'));
+        ->setIcon('fa-code')
+        ->setColor(PHUIButtonView::GREEN));
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
       ->setMainColumn($content);
 
     $curtain = $panel->buildManagementPanelCurtain();
@@ -98,6 +98,7 @@ final class DiffusionRepositoryManagePanelsController
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($view);
   }
 
@@ -111,6 +112,12 @@ final class DiffusionRepositoryManagePanelsController
 
     $nav = id(new AphrontSideNavFilterView())
       ->setBaseURI($base_uri);
+
+    $item = id(new PHUIListItemView())
+      ->setName(pht('manage'))
+      ->setType(PHUIListItemView::TYPE_LABEL);
+
+    $nav->addMenuItem($item);
 
     foreach ($panels as $panel) {
       $key = $panel->getManagementPanelKey();

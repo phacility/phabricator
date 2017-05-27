@@ -1,0 +1,20 @@
+/**
+ * @provides diffusion-history-css
+ */
+
+.diffusion-history-list .phui-oi-link {
+  color: {$darkbluetext};
+  font-size: {$biggerfontsize};
+}
+
+.diffusion-history-list .phui-oi-attribute .phui-tag-core {
+  border-color: transparent;
+}
+
+.diffusion-history-message {
+  background-color: {$bluebackground};
+  padding: 16px;
+  margin: 4px 0;
+  border-radius: 5px;
+  color: {$darkbluetext};
+}

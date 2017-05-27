@@ -138,6 +138,12 @@ final class PhabricatorProjectManageController
       pht('Looks Like'),
       $viewer->renderHandle($project->getPHID())->setAsTag(true));
 
+    $slugs = $project->getSlugs();
+    $tags = mpull($slugs, 'getSlug');
+
+    $view->addProperty(
+      pht('Hashtags'),
+      $this->renderHashtags($tags));
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,
@@ -146,6 +152,5 @@ final class PhabricatorProjectManageController
 
     return $view;
   }
-
 
 }

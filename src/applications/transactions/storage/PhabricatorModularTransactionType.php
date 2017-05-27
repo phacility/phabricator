@@ -208,6 +208,19 @@ abstract class PhabricatorModularTransactionType
       $value);
   }
 
+  final protected function renderValueList(array $values) {
+    $result = array();
+    foreach ($values as $value) {
+      $result[] = $this->renderValue($value);
+    }
+
+    if ($this->isTextMode()) {
+      return implode(', ', $result);
+    }
+
+    return phutil_implode_html(', ', $result);
+  }
+
   final protected function renderOldValue() {
     return $this->renderValue($this->getOldValue());
   }

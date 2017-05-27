@@ -19,8 +19,8 @@ final class ManiphestTaskTitleTransaction
 
   public function getActionName() {
     $old = $this->getOldValue();
-    $new = $this->getNewValue();
-    if ($old === null) {
+
+    if (!strlen($old)) {
       return pht('Created');
     }
 
@@ -29,14 +29,15 @@ final class ManiphestTaskTitleTransaction
 
   public function getTitle() {
     $old = $this->getOldValue();
-    if ($old === null) {
+
+    if (!strlen($old)) {
       return pht(
         '%s created this task.',
         $this->renderAuthor());
     }
 
     return pht(
-      '%s changed the title from %s to %s.',
+      '%s renamed this task from %s to %s.',
       $this->renderAuthor(),
       $this->renderOldValue(),
       $this->renderNewValue());
@@ -53,7 +54,7 @@ final class ManiphestTaskTitleTransaction
     }
 
     return pht(
-      '%s changed %s title from %s to %s.',
+      '%s renamed %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
       $this->renderOldValue(),

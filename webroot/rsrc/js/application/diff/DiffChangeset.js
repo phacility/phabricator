@@ -31,13 +31,11 @@ JX.install('DiffChangeset', {
     this._leftID = data.left;
     this._rightID = data.right;
 
-    this._path = data.path;
+    this._displayPath = JX.$H(data.displayPath);
+    this._objectiveName = data.objectiveName;
+    this._icon = data.icon;
 
     this._inlines = [];
-  },
-
-  properties: {
-    changesetList: null
   },
 
   members: {
@@ -61,7 +59,12 @@ JX.install('DiffChangeset', {
     _visible: true,
 
     _undoNode: null,
-    _path: null,
+    _displayPath: null,
+
+    _changesetList: null,
+    _objective: null,
+    _objectiveName: null,
+    _icon: null,
 
     getLeftChangesetID: function() {
       return this._leftID;
@@ -69,6 +72,49 @@ JX.install('DiffChangeset', {
 
     getRightChangesetID: function() {
       return this._rightID;
+    },
+
+    setChangesetList: function(list) {
+      this._changesetList = list;
+
+      var objectives = list.getObjectives();
+      this._objective = objectives.newObjective()
+        .setAnchor(this._node);
+
+      this._updateObjective();
+
+      return this;
+    },
+
+    _updateObjective: function() {
+      this._objective
+        .setIcon(this.getIcon())
+        .setColor(this.getColor())
+        .setTooltip(this.getObjectiveName());
+    },
+
+    getIcon: function() {
+      if (!this._visible) {
+        return 'fa-file-o';
+      }
+
+      return this._icon;
+    },
+
+    getColor: function() {
+      if (!this._visible) {
+        return 'grey';
+      }
+
+      return 'blue';
+    },
+
+    getObjectiveName: function() {
+      return this._objectiveName;
+    },
+
+    getChangesetList: function() {
+      return this._changesetList;
     },
 
     /**
@@ -231,8 +277,8 @@ JX.install('DiffChangeset', {
       JX.Router.getInstance().queue(routable);
     },
 
-    getPath: function() {
-      return this._path;
+    getDisplayPath: function() {
+      return this._displayPath;
     },
 
     /**
@@ -523,6 +569,11 @@ JX.install('DiffChangeset', {
       }
 
       JX.Stratcom.invoke('differential-inline-comment-refresh');
+
+      this._objective.show();
+      this._rebuildAllInlines();
+
+      JX.Stratcom.invoke('resize');
     },
 
     _getContentFrame: function() {
@@ -672,7 +723,16 @@ JX.install('DiffChangeset', {
         JX.DOM.appendContent(diff.parentNode, undo);
       }
 
+      this._updateObjective();
+      for (var ii = 0; ii < this._inlines.length; ii++) {
+        this._inlines[ii].updateObjective();
+      }
+
       JX.Stratcom.invoke('resize');
+    },
+
+    isVisible: function() {
+      return this._visible;
     },
 
     _getUndoNode: function() {

@@ -13,10 +13,6 @@ final class PhabricatorPeopleProfileCommitsController
       ->needProfile(true)
       ->needProfileImage(true)
       ->needAvailability(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-        ))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
@@ -60,26 +56,15 @@ final class PhabricatorPeopleProfileCommitsController
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withAuthorPHIDs(array($user->getPHID()))
-      ->needAuditRequests(true)
       ->needCommitData(true)
-      ->needDrafts(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-        ))
       ->setLimit(100)
       ->execute();
 
-    $list = id(new PhabricatorAuditListView())
+    $list = id(new DiffusionCommitListView())
       ->setViewer($viewer)
       ->setCommits($commits)
       ->setNoDataString(pht('No recent commits.'));
 
-    $view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Commits'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($list);
-
-    return $view;
+    return $list;
   }
 }

@@ -44,7 +44,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     if ($ttl !== null) {
       $ttl_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
-        ->setShade(PHUITagView::COLOR_YELLOW)
+        ->setColor(PHUITagView::COLOR_YELLOW)
         ->setName(pht('Temporary'));
       $header->addTag($ttl_tag);
     }
@@ -53,7 +53,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     if ($partial) {
       $partial_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
-        ->setShade(PHUITagView::COLOR_ORANGE)
+        ->setColor(PHUITagView::COLOR_ORANGE)
         ->setName(pht('Partial Upload'));
       $header->addTag($partial_tag);
     }

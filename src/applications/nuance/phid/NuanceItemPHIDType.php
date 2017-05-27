@@ -33,7 +33,7 @@ final class NuanceItemPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $item = $objects[$phid];
 
-      $handle->setName($item->getItemDisplayName());
+      $handle->setName($item->getDisplayName());
       $handle->setURI($item->getURI());
     }
   }

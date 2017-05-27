@@ -26,7 +26,8 @@ final class PhrictionDeleteController extends PhrictionController {
     if ($request->isFormPost()) {
         $xactions = array();
         $xactions[] = id(new PhrictionTransaction())
-          ->setTransactionType(PhrictionTransaction::TYPE_DELETE)
+          ->setTransactionType(
+            PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE)
           ->setNewValue(true);
 
         $editor = id(new PhrictionTransactionEditor())

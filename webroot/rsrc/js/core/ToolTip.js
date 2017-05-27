@@ -21,6 +21,10 @@ JX.install('Tooltip', {
         return;
       }
 
+      if (content === null) {
+        return;
+      }
+
       if (__DEV__) {
         switch (align) {
           case 'N':
@@ -50,7 +54,11 @@ JX.install('Tooltip', {
         { className: 'jx-tooltip-container' },
         node_inner);
 
-      node.style.maxWidth  = scale + 'px';
+      if (scale == 'auto') {
+        node.style.maxWidth = '';
+      } else {
+        node.style.maxWidth = scale + 'px';
+      }
 
       JX.Tooltip.hide();
       self._node = node;

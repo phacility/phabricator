@@ -353,7 +353,7 @@ body .phui-header-shell.phui-bleed-header
   vertical-align: top;
 }
 
-.phui-header-view .phui-tag-shade-indigo a {
+.phui-header-view .phui-tag-indigo a {
   color: {$sh-indigotext};
 }
 

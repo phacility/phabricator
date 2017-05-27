@@ -1,6 +1,7 @@
 /**
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
+ *           phabricator-scroll-objective-list
  * @javelin
  */
 
@@ -8,6 +9,7 @@ JX.install('DiffChangesetList', {
 
   construct: function() {
     this._changesets = [];
+    this._objectives = new JX.ScrollObjectiveList();
 
     var onload = JX.bind(this, this._ifawake, this._onload);
     JX.Stratcom.listen('click', 'differential-load', onload);
@@ -100,6 +102,7 @@ JX.install('DiffChangesetList', {
     _initialized: false,
     _asleep: true,
     _changesets: null,
+    _objectives: null,
 
     _cursorItem: null,
 
@@ -117,6 +120,7 @@ JX.install('DiffChangesetList', {
     _rangeTarget: null,
 
     _bannerNode: null,
+    _showObjectives: false,
 
     sleep: function() {
       this._asleep = true;
@@ -124,6 +128,8 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
       this.resetHover();
+
+      this._objectives.hide();
     },
 
     wake: function() {
@@ -131,6 +137,10 @@ JX.install('DiffChangesetList', {
 
       this._redrawFocus();
       this._redrawSelection();
+
+      if (this._showObjectives) {
+        this._objectives.show();
+      }
 
       if (this._initialized) {
         return;
@@ -188,8 +198,17 @@ JX.install('DiffChangesetList', {
       this._installKey('q', label, this._onkeyhide);
     },
 
+    setShowObjectives: function(show) {
+      this._showObjectives = show;
+      return this;
+    },
+
     isAsleep: function() {
       return this._asleep;
+    },
+
+    getObjectives: function() {
+      return this._objectives;
     },
 
     newChangesetForNode: function(node) {
@@ -271,6 +290,18 @@ JX.install('DiffChangesetList', {
     _ontoc: function(manager) {
       var toc = JX.$('toc');
       manager.scrollTo(toc);
+    },
+
+    getSelectedInline: function() {
+      var cursor = this._cursorItem;
+
+      if (cursor) {
+        if (cursor.type == 'comment') {
+          return cursor.target;
+        }
+      }
+
+      return null;
     },
 
     _onkeyreply: function(is_quote) {
@@ -507,9 +538,23 @@ JX.install('DiffChangesetList', {
     },
 
     _setSelectionState: function(item, manager) {
-      this._cursorItem = item;
+      // If we had an inline selected before, we need to update it after
+      // changing our selection to clear the selected state. Then, update the
+      // new one to add the selected state.
+      var old_inline = this.getSelectedInline();
 
+      this._cursorItem = item;
       this._redrawSelection(manager, true);
+
+      var new_inline = this.getSelectedInline();
+
+      if (old_inline) {
+        old_inline.updateObjective();
+      }
+
+      if (new_inline) {
+        new_inline.updateObjective();
+      }
 
       return this;
     },
@@ -772,7 +817,7 @@ JX.install('DiffChangesetList', {
         } else if (diffs.length == 1) {
           var diff = diffs[0];
           visible_item.setDisabled(false);
-          if (JX.Stratcom.getData(diff).hidden) {
+          if (!changeset.isVisible()) {
             visible_item
               .setName(pht('Expand File'))
               .setIcon('fa-expand');
@@ -836,6 +881,10 @@ JX.install('DiffChangesetList', {
       // event.
       e.kill();
 
+      this.selectInline(inline);
+    },
+
+    selectInline: function(inline) {
       var selection = this._getSelectionState();
       var item;
 
@@ -1295,9 +1344,9 @@ JX.install('DiffChangesetList', {
       }
 
       var icon = new JX.PHUIXIconView()
-        .setIcon('fa-file')
+        .setIcon(changeset.getIcon())
         .getNode();
-      JX.DOM.setContent(node, [icon, ' ', changeset.getPath()]);
+      JX.DOM.setContent(node, [icon, ' ', changeset.getDisplayPath()]);
 
       document.body.appendChild(node);
     },
@@ -1331,16 +1380,20 @@ JX.install('DiffChangesetList', {
         return null;
       }
 
-      var v = JX.Vector.getViewport();
+      // We're going to find the changeset which spans an invisible line a
+      // little underneath the bottom of the banner. This makes the header
+      // tick over from "A.txt" to "B.txt" just as "A.txt" scrolls completely
+      // offscreen.
+      var detect_height = 64;
+
       for (var ii = 0; ii < this._changesets.length; ii++) {
         var changeset = this._changesets[ii];
         var c = changeset.getVectors();
 
-        // If the changeset starts above the upper half of the screen...
-        if (c.pos.y < (s.y + (v.y / 2))) {
-          // ...and ends below the lower half of the screen, this is the
-          // current visible changeset.
-          if ((c.pos.y + c.dim.y) > (s.y + (v.y / 2))) {
+        // If the changeset starts above the line...
+        if (c.pos.y <= (s.y + detect_height)) {
+          // ...and ends below the line, this is the current visible changeset.
+          if ((c.pos.y + c.dim.y) >= (s.y + detect_height)) {
             return changeset;
           }
         }

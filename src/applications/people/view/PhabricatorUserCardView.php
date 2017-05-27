@@ -85,7 +85,7 @@ final class PhabricatorUserCardView extends AphrontTagView {
       ->setType(PHUITagView::TYPE_SHADE);
 
     if ($tag_shade !== null) {
-      $tag->setShade($tag_shade);
+      $tag->setColor($tag_shade);
     }
 
     $body = array();

@@ -32,6 +32,10 @@ abstract class NuanceItemType
     return $this->newItemView($item);
   }
 
+  final public function buildItemWorkView(NuanceItem $item) {
+    return $this->newItemView($item);
+  }
+
   protected function newItemView(NuanceItem $item) {
     return null;
   }
@@ -91,57 +95,15 @@ abstract class NuanceItemType
   }
 
   final public function buildActionResponse(NuanceItem $item, $action) {
-    $response = $this->handleAction($item, $action);
-
-    if ($response === null) {
-      return new Aphront404Response();
-    }
-
-    return $response;
+    return $this->handleAction($item, $action);
   }
 
   protected function handleAction(NuanceItem $item, $action) {
     return null;
   }
 
-  final public function applyCommand(
-    NuanceItem $item,
-    NuanceItemCommand $command) {
-
-    $result = $this->handleCommand($item, $command);
-
-    if ($result === null) {
-      return;
-    }
-
-    $xaction = id(new NuanceItemTransaction())
-      ->setTransactionType(NuanceItemTransaction::TYPE_COMMAND)
-      ->setNewValue(
-        array(
-          'command' => $command->getCommand(),
-          'parameters' => $command->getParameters(),
-          'result' => $result,
-        ));
-
-    $viewer = $this->getViewer();
-
-    // TODO: Maybe preserve the actor's original content source?
-    $source = PhabricatorContentSource::newForSource(
-      PhabricatorDaemonContentSource::SOURCECONST);
-
-    $editor = id(new NuanceItemEditor())
-      ->setActor($viewer)
-      ->setActingAsPHID($command->getAuthorPHID())
-      ->setContentSource($source)
-      ->setContinueOnMissingFields(true)
-      ->setContinueOnNoEffect(true)
-      ->applyTransactions($item, array($xaction));
-  }
-
-  protected function handleCommand(
-    NuanceItem $item,
-    NuanceItemCommand $command) {
-    return null;
+  final public function buildWorkCommands(NuanceItem $item) {
+    return $this->newWorkCommands($item);
   }
 
   final protected function newContentSource(
@@ -159,4 +121,8 @@ abstract class NuanceItemType
     return id(new PhabricatorNuanceApplication())->getPHID();
   }
 
+  protected function newCommand($command_key) {
+    return id(new NuanceItemCommandSpec())
+      ->setCommandKey($command_key);
+  }
 }

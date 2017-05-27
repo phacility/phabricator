@@ -169,7 +169,7 @@ JX.behavior('lightbox-attachments', function (config) {
       );
 
     var commentIcon = new JX.PHUIXIconView()
-      .setIcon('fa-comments')
+      .setIcon('fa-comments phui-icon-circle-icon')
       .getNode();
     var commentButton =
       JX.$N('a',
@@ -181,7 +181,7 @@ JX.behavior('lightbox-attachments', function (config) {
         commentIcon
       );
     var closeIcon = new JX.PHUIXIconView()
-      .setIcon('fa-times')
+      .setIcon('fa-times phui-icon-circle-icon')
       .getNode();
     var closeButton =
       JX.$N('a',

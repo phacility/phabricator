@@ -9,10 +9,6 @@ JX.install('DiffInline', {
   construct : function() {
   },
 
-  properties: {
-    changeset: null
-  },
-
   members: {
     _id: null,
     _phid: null,
@@ -26,17 +22,26 @@ JX.install('DiffInline', {
     _undoRow: null,
     _replyToCommentPHID: null,
     _originalText: null,
+    _snippet: null,
 
     _isDeleted: false,
     _isInvisible: false,
     _isLoading: false,
 
+    _changeset: null,
+    _objective: null,
+
+    _isDraft: null,
+    _isFixed: null,
+    _isEditing: false,
+    _isNew: false,
+
     bindToRow: function(row) {
       this._row = row;
+      this._objective.setAnchor(this._row);
 
       var row_data = JX.Stratcom.getData(row);
       row_data.inline = this;
-
       this._hidden = row_data.hidden || false;
 
       // TODO: Get smarter about this once we do more editing, this is pretty
@@ -65,7 +70,17 @@ JX.install('DiffInline', {
 
       this._replyToCommentPHID = data.replyToCommentPHID;
 
+      this._isDraft = data.isDraft;
+      this._isFixed = data.isFixed;
+      this._isGhost = data.isGhost;
+
+      this._changesetID = data.changesetID;
+      this._isNew = false;
+      this._snippet = data.snippet;
+
       this.setInvisible(false);
+
+      this.updateObjective();
 
       return this;
     },
@@ -76,6 +91,7 @@ JX.install('DiffInline', {
       this._length = parseInt(data.length, 10);
       this._isNewFile = data.isNewFile;
       this._changesetID = data.changesetID;
+      this._isNew = true;
 
       // Insert the comment after any other comments which already appear on
       // the same row.
@@ -99,6 +115,7 @@ JX.install('DiffInline', {
       this._length = inline._length;
       this._isNewFile = inline._isNewFile;
       this._changesetID = inline._changesetID;
+      this._isNew = true;
 
       this._replyToCommentPHID = inline._phid;
 
@@ -152,6 +169,103 @@ JX.install('DiffInline', {
       return this;
     },
 
+    setChangeset: function(changeset) {
+      this._changeset = changeset;
+
+      var objectives = changeset.getChangesetList().getObjectives();
+
+      // Create this inline's objective, but don't show it yet.
+      this._objective = objectives.newObjective()
+        .setCallback(JX.bind(this, this._onobjective))
+        .hide();
+
+      return this;
+    },
+
+    getChangeset: function() {
+      return this._changeset;
+    },
+
+    setEditing: function(editing) {
+      this._isEditing = editing;
+      this.updateObjective();
+      return this;
+    },
+
+    _onobjective: function() {
+      this.getChangeset().getChangesetList().selectInline(this);
+    },
+
+    updateObjective: function() {
+      var objective = this._objective;
+
+      if (this.isHidden() || this._isDeleted) {
+        objective.hide();
+        return;
+      }
+
+      // If this is a new comment which we aren't editing, don't show anything:
+      // the use started a comment or reply, then cancelled it.
+      if (this._isNew && !this._isEditing) {
+        objective.hide();
+        return;
+      }
+
+      var changeset = this.getChangeset();
+      if (!changeset.isVisible()) {
+        objective.hide();
+        return;
+      }
+
+      var pht = changeset.getChangesetList().getTranslations();
+
+      var icon = 'fa-comment';
+      var color = 'bluegrey';
+      var tooltip = this._snippet;
+      var anchor = this._row;
+      var should_stack = false;
+
+      if (this._isEditing) {
+        icon = 'fa-star';
+        color = 'pink';
+        tooltip = pht('Editing Comment');
+
+        // If we're editing, anchor to the row with the editor instead of the
+        // actual comment row (which is invisible and can have a misleading
+        // position).
+        anchor = this._row.nextSibling;
+      } else if (this._isDraft) {
+        // This inline is an unsubmitted draft.
+        icon = 'fa-pencil';
+        color = 'indigo';
+      } else if (this._isFixed) {
+        // This inline has been marked done.
+        icon = 'fa-check';
+        color = 'grey';
+      } else if (this._isGhost) {
+        icon = 'fa-comment-o';
+        color = 'grey';
+      } else if (this._replyToCommentPHID) {
+        icon = 'fa-reply';
+        should_stack = true;
+      }
+
+      if (changeset.getChangesetList().getSelectedInline() === this) {
+        // TODO: Maybe add some other kind of effect here, since we're only
+        // using color to show this?
+        color = 'yellow';
+      }
+
+
+      objective
+        .setAnchor(anchor)
+        .setIcon(icon)
+        .setColor(color)
+        .setTooltip(tooltip)
+        .setShouldStack(should_stack)
+        .show();
+    },
+
     canReply: function() {
       if (!this._hasAction('reply')) {
         return false;
@@ -202,6 +316,7 @@ JX.install('DiffInline', {
 
       JX.Stratcom.getData(row).inline = this;
       this._row = row;
+      this._objective.setAnchor(this._row);
 
       this._id = null;
       this._phid = null;
@@ -271,6 +386,8 @@ JX.install('DiffInline', {
       // as opposed to a submitted checkmark. This is different from the
       // top-level "draft" state of unsubmitted comments.
       JX.DOM.alterClass(comment, 'inline-state-is-draft', response.draftState);
+
+      this._isFixed = response.isChecked;
 
       this._didUpdate();
     },
@@ -445,7 +562,12 @@ JX.install('DiffInline', {
       this._undoRow = this._drawRows(template, cursor, mode, text);
     },
 
+    _drawContentRows: function(rows) {
+      return this._drawRows(rows, null, 'content');
+    },
+
     _drawEditRows: function(rows) {
+      this.setEditing(true);
       return this._drawRows(rows, null, 'edit');
     },
 
@@ -494,6 +616,8 @@ JX.install('DiffInline', {
               'click',
               'inline-edit-cancel',
               JX.bind(this, this._oncancel, row_meta)));
+        } else if (type == 'content') {
+          // No special listeners for these rows.
         } else {
           row_meta.listeners.push(
             JX.DOM.listen(
@@ -579,6 +703,7 @@ JX.install('DiffInline', {
       }
 
       this._removeRow(row);
+      this.setEditing(false);
 
       this.setInvisible(false);
 
@@ -604,6 +729,7 @@ JX.install('DiffInline', {
 
       this.setLoading(false);
       this.setInvisible(false);
+      this.setEditing(false);
 
       this._onupdate(response);
     },
@@ -611,7 +737,7 @@ JX.install('DiffInline', {
     _onupdate: function(response) {
       var new_row;
       if (response.markup) {
-        new_row = this._drawEditRows(JX.$H(response.markup).getNode()).node;
+        new_row = this._drawContentRows(JX.$H(response.markup).getNode()).node;
       }
 
       // TODO: Save the old row so the action it's undo-able if it was a
@@ -632,6 +758,8 @@ JX.install('DiffInline', {
       if (!local_only) {
         this.getChangeset().getChangesetList().redrawPreview();
       }
+
+      this.updateObjective();
 
       this.getChangeset().getChangesetList().redrawCursor();
       this.getChangeset().getChangesetList().resetHover();

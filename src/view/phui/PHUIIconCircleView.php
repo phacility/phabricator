@@ -6,9 +6,21 @@ final class PHUIIconCircleView extends AphrontTagView {
   private $icon;
   private $color;
   private $size;
+  private $state;
 
   const SMALL = 'circle-small';
   const MEDIUM = 'circle-medium';
+
+  const STATE_FAIL = 'fa-times-circle';
+  const STATE_INFO = 'fa-info-circle';
+  const STATE_STOP = 'fa-stop-circle';
+  const STATE_START = 'fa-play-circle';
+  const STATE_PAUSE = 'fa-pause-circle';
+  const STATE_SUCCESS = 'fa-check-circle';
+  const STATE_WARNING = 'fa-exclamation-circle';
+  const STATE_PLUS = 'fa-plus-circle';
+  const STATE_MINUS = 'fa-minus-circle';
+  const STATE_UNKNOWN = 'fa-question-circle';
 
   public function setHref($href) {
     $this->href = $href;
@@ -27,6 +39,11 @@ final class PHUIIconCircleView extends AphrontTagView {
 
   public function setSize($size) {
     $this->size = $size;
+    return $this;
+  }
+
+  public function setState($state) {
+    $this->state = $state;
     return $this;
   }
 
@@ -54,6 +71,10 @@ final class PHUIIconCircleView extends AphrontTagView {
       $classes[] = $this->size;
     }
 
+    if ($this->state) {
+      $classes[] = 'phui-icon-circle-state';
+    }
+
     return array(
       'href' => $this->href,
       'class' => $classes,
@@ -61,8 +82,32 @@ final class PHUIIconCircleView extends AphrontTagView {
   }
 
   protected function getTagContent() {
+    $state = null;
+    if ($this->state) {
+      $state = id(new PHUIIconView())
+        ->setIcon($this->state.' '.$this->color)
+        ->addClass('phui-icon-circle-state-icon');
+    }
+
     return id(new PHUIIconView())
-      ->setIcon($this->icon);
+      ->setIcon($this->icon)
+      ->addClass('phui-icon-circle-icon')
+      ->appendChild($state);
+  }
+
+  public static function getStateMap() {
+    return array(
+      self::STATE_FAIL => pht('Failure'),
+      self::STATE_INFO => pht('Information'),
+      self::STATE_STOP => pht('Stop'),
+      self::STATE_START => pht('Start'),
+      self::STATE_PAUSE => pht('Pause'),
+      self::STATE_SUCCESS => pht('Success'),
+      self::STATE_WARNING => pht('Warning'),
+      self::STATE_PLUS => pht('Plus'),
+      self::STATE_MINUS => pht('Minus'),
+      self::STATE_UNKNOWN => pht('Unknown'),
+    );
   }
 
 }

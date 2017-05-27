@@ -72,6 +72,19 @@ final class NuanceItemSearchEngine
         $impl->getItemTypeDisplayIcon(),
         $impl->getItemTypeDisplayName());
 
+      $queue = $item->getQueue();
+      if ($queue) {
+        $view->addAttribute(
+          phutil_tag(
+            'a',
+            array(
+              'href' => $queue->getURI(),
+            ),
+            $queue->getName()));
+      } else {
+        $view->addAttribute(phutil_tag('em', array(), pht('Not in Queue')));
+      }
+
       $list->addItem($view);
     }
 

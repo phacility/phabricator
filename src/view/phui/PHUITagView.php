@@ -6,6 +6,7 @@ final class PHUITagView extends AphrontTagView {
   const TYPE_OBJECT         = 'object';
   const TYPE_STATE          = 'state';
   const TYPE_SHADE          = 'shade';
+  const TYPE_OUTLINE        = 'outline';
 
   const COLOR_RED           = 'red';
   const COLOR_ORANGE        = 'orange';
@@ -15,6 +16,8 @@ final class PHUITagView extends AphrontTagView {
   const COLOR_VIOLET        = 'violet';
   const COLOR_GREEN         = 'green';
   const COLOR_BLACK         = 'black';
+  const COLOR_SKY           = 'sky';
+  const COLOR_FIRE          = 'fire';
   const COLOR_GREY          = 'grey';
   const COLOR_WHITE         = 'white';
   const COLOR_PINK          = 'pink';
@@ -29,6 +32,7 @@ final class PHUITagView extends AphrontTagView {
   private $href;
   private $name;
   private $phid;
+  private $color;
   private $backgroundColor;
   private $dotColor;
   private $closed;
@@ -41,6 +45,7 @@ final class PHUITagView extends AphrontTagView {
     $this->type = $type;
     switch ($type) {
       case self::TYPE_SHADE:
+      case self::TYPE_OUTLINE:
         break;
       case self::TYPE_OBJECT:
         $this->setBackgroundColor(self::COLOR_OBJECT);
@@ -52,8 +57,20 @@ final class PHUITagView extends AphrontTagView {
     return $this;
   }
 
+  /**
+   * This method has been deprecated, use @{method:setColor} instead.
+   *
+   * @deprecated
+   */
   public function setShade($shade) {
-    $this->shade = $shade;
+    phlog(
+      pht('Deprecated call to setShade(), use setColor() instead.'));
+    $this->color = $shade;
+    return $this;
+  }
+
+  public function setColor($color) {
+    $this->color = $color;
     return $this;
   }
 
@@ -109,12 +126,16 @@ final class PHUITagView extends AphrontTagView {
       'phui-tag-type-'.$this->type,
     );
 
-    if ($this->shade) {
+    if ($this->color) {
+      $classes[] = 'phui-tag-'.$this->color;
+    }
+
+    if ($this->slimShady) {
+      $classes[] = 'phui-tag-slim';
+    }
+
+    if ($this->type == self::TYPE_SHADE) {
       $classes[] = 'phui-tag-shade';
-      $classes[] = 'phui-tag-shade-'.$this->shade;
-      if ($this->slimShady) {
-        $classes[] = 'phui-tag-shade-slim';
-      }
     }
 
     if ($this->icon) {
@@ -238,6 +259,32 @@ final class PHUITagView extends AphrontTagView {
 
   public static function getShadeName($shade) {
     return idx(self::getShadeMap(), $shade, $shade);
+  }
+
+  public static function getOutlines() {
+    return array_keys(self::getOutlineMap());
+  }
+
+  public static function getOutlineMap() {
+    return array(
+      self::COLOR_RED => pht('Red'),
+      self::COLOR_ORANGE => pht('Orange'),
+      self::COLOR_YELLOW => pht('Yellow'),
+      self::COLOR_BLUE => pht('Blue'),
+      self::COLOR_INDIGO => pht('Indigo'),
+      self::COLOR_VIOLET => pht('Violet'),
+      self::COLOR_GREEN => pht('Green'),
+      self::COLOR_GREY => pht('Grey'),
+      self::COLOR_PINK => pht('Pink'),
+      self::COLOR_SKY => pht('Sky'),
+      self::COLOR_FIRE => pht('Fire'),
+      self::COLOR_BLACK => pht('Black'),
+      self::COLOR_DISABLED => pht('Disabled'),
+    );
+  }
+
+  public static function getOutlineName($outline) {
+    return idx(self::getOutlineMap(), $outline, $outline);
   }
 
 

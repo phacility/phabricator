@@ -70,6 +70,8 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
           'PhabricatorPeopleProfileTasksController',
         'commits/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileCommitsController',
+        'revisions/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfileRevisionsController',
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfilePictureController',
         'manage/(?P<id>[1-9]\d*)/' =>

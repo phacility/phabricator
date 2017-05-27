@@ -33,7 +33,8 @@ final class PhabricatorProjectBoardDisableController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_HASWORKBOARD)
+        ->setTransactionType(
+            PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE)
         ->setNewValue(0);
 
       id(new PhabricatorProjectTransactionEditor())

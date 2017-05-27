@@ -32,7 +32,7 @@ final class PhabricatorProjectDefaultController
         $button = pht('Save Default Filter');
 
         $xaction_value = $request->getStr('filter');
-        $xaction_type = PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER;
+        $xaction_type = PhabricatorProjectFilterTransaction::TRANSACTIONTYPE;
         break;
       case 'sort':
         $title = pht('Set Board Default Order');
@@ -43,7 +43,7 @@ final class PhabricatorProjectDefaultController
         $button = pht('Save Default Order');
 
         $xaction_value = $request->getStr('order');
-        $xaction_type = PhabricatorProjectTransaction::TYPE_DEFAULT_SORT;
+        $xaction_type = PhabricatorProjectSortTransaction::TRANSACTIONTYPE;
         break;
       default:
         return new Aphront404Response();

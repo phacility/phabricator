@@ -131,7 +131,7 @@ final class PHUIHeaderView extends AphrontTagView {
     $tag = id(new PHUITagView())
       ->setName($name)
       ->setIcon($icon)
-      ->setShade($color)
+      ->setColor($color)
       ->setType(PHUITagView::TYPE_SHADE);
 
     return $this->addProperty(self::PROPERTY_STATUS, $tag);

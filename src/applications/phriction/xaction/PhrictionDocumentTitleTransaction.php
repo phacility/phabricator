@@ -14,6 +14,9 @@ final class PhrictionDocumentTitleTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
+  }
+
+  public function applyExternalEffects($object, $value) {
     $this->getEditor()->getNewContent()->setTitle($value);
   }
 

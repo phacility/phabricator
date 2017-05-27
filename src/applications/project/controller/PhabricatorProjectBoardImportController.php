@@ -61,8 +61,18 @@ final class PhabricatorProjectBoardImportController
           ->setProperties($import_column->getProperties())
           ->save();
       }
+      $xactions = array();
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(
+            PhabricatorProjectWorkboardTransaction::TRANSACTIONTYPE)
+        ->setNewValue(1);
 
-      $project->setHasWorkboard(1)->save();
+      id(new PhabricatorProjectTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($project, $xactions);
 
       $table->saveTransaction();
 

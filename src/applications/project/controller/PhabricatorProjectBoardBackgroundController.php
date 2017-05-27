@@ -37,7 +37,8 @@ final class PhabricatorProjectBoardBackgroundController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_BACKGROUND)
+        ->setTransactionType(
+            PhabricatorProjectWorkboardBackgroundTransaction::TRANSACTIONTYPE)
         ->setNewValue($background_key);
 
       id(new PhabricatorProjectTransactionEditor())

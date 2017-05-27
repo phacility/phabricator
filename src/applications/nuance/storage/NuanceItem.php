@@ -9,7 +9,6 @@ final class NuanceItem
   const STATUS_IMPORTING = 'importing';
   const STATUS_ROUTING = 'routing';
   const STATUS_OPEN = 'open';
-  const STATUS_ASSIGNED = 'assigned';
   const STATUS_CLOSED = 'closed';
 
   protected $status;
@@ -23,11 +22,16 @@ final class NuanceItem
   protected $data = array();
   protected $mailKey;
 
+  private $queue = self::ATTACHABLE;
   private $source = self::ATTACHABLE;
   private $implementation = self::ATTACHABLE;
 
-  public static function initializeNewItem() {
+  public static function initializeNewItem($item_type) {
+
+    // TODO: Validate that the type is valid, and construct and attach it.
+
     return id(new NuanceItem())
+      ->setItemType($item_type)
       ->setStatus(self::STATUS_OPEN);
   }
 
@@ -42,7 +46,7 @@ final class NuanceItem
         'requestorPHID' => 'phid?',
         'queuePHID' => 'phid?',
         'itemType' => 'text64',
-        'itemKey' => 'text64',
+        'itemKey' => 'text64?',
         'itemContainerKey' => 'text64?',
         'status' => 'text32',
         'mailKey' => 'bytes20',
@@ -169,6 +173,15 @@ final class NuanceItem
 
   public function attachImplementation(NuanceItemType $type) {
     $this->implementation = $type;
+    return $this;
+  }
+
+  public function getQueue() {
+    return $this->assertAttached($this->queue);
+  }
+
+  public function attachQueue(NuanceQueue $queue = null) {
+    $this->queue = $queue;
     return $this;
   }
 

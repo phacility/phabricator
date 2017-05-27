@@ -112,8 +112,8 @@ final class PhabricatorProjectEditEngine
       PhabricatorTransactions::TYPE_VIEW_POLICY,
       PhabricatorTransactions::TYPE_EDIT_POLICY,
       PhabricatorTransactions::TYPE_JOIN_POLICY,
-      PhabricatorProjectTransaction::TYPE_ICON,
-      PhabricatorProjectTransaction::TYPE_COLOR,
+      PhabricatorProjectIconTransaction::TRANSACTIONTYPE,
+      PhabricatorProjectColorTransaction::TRANSACTIONTYPE,
     );
     $unavailable = array_fuse($unavailable);
 
@@ -202,7 +202,8 @@ final class PhabricatorProjectEditEngine
           pht('Choose a parent project to create a subproject beneath.'))
         ->setConduitTypeDescription(pht('PHID of the parent project.'))
         ->setAliases(array('parentPHID'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
+        ->setTransactionType(
+            PhabricatorProjectParentTransaction::TRANSACTIONTYPE)
         ->setHandleParameterType(new AphrontPHIDHTTPParameterType())
         ->setSingleValue($parent_phid)
         ->setIsReorderable(false)
@@ -217,7 +218,8 @@ final class PhabricatorProjectEditEngine
           pht('Choose a parent project to create a new milestone for.'))
         ->setConduitTypeDescription(pht('PHID of the parent project.'))
         ->setAliases(array('milestonePHID'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
+        ->setTransactionType(
+            PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE)
         ->setHandleParameterType(new AphrontPHIDHTTPParameterType())
         ->setSingleValue($milestone_phid)
         ->setIsReorderable(false)
@@ -244,7 +246,8 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_ICON)
+        ->setTransactionType(
+            PhabricatorProjectIconTransaction::TRANSACTIONTYPE)
         ->setIconSet(new PhabricatorProjectIconSet())
         ->setDescription(pht('Project icon.'))
         ->setConduitDescription(pht('Change the project icon.'))
@@ -253,7 +256,8 @@ final class PhabricatorProjectEditEngine
       id(new PhabricatorSelectEditField())
         ->setKey('color')
         ->setLabel(pht('Color'))
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_COLOR)
+        ->setTransactionType(
+            PhabricatorProjectColorTransaction::TRANSACTIONTYPE)
         ->setOptions(PhabricatorProjectIconSet::getColorMap())
         ->setDescription(pht('Project tag color.'))
         ->setConduitDescription(pht('Change the project tag color.'))

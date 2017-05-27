@@ -121,8 +121,8 @@ final class PHUIHandleTagListView extends AphrontTagView {
 
   private function newPlaceholderTag() {
     return id(new PHUITagView())
-      ->setType(PHUITagView::TYPE_OBJECT)
-      ->setShade(PHUITagView::COLOR_DISABLED)
+      ->setType(PHUITagView::TYPE_SHADE)
+      ->setColor(PHUITagView::COLOR_DISABLED)
       ->setSlimShady($this->slim);
   }
 

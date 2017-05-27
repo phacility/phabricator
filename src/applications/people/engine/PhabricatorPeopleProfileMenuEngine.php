@@ -9,6 +9,7 @@ final class PhabricatorPeopleProfileMenuEngine
   const ITEM_BADGES = 'people.badges';
   const ITEM_TASKS = 'people.tasks';
   const ITEM_COMMITS = 'people.commits';
+  const ITEM_REVISIONS = 'people.revisions';
 
   protected function isMenuEngineConfigurable() {
     return false;
@@ -50,6 +51,16 @@ final class PhabricatorPeopleProfileMenuEngine
       $items[] = $this->newItem()
         ->setBuiltinKey(self::ITEM_TASKS)
         ->setMenuItemKey(PhabricatorPeopleTasksProfileMenuItem::MENUITEMKEY);
+    }
+
+    $have_differential = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorDifferentialApplication',
+      $viewer);
+    if ($have_differential) {
+      $items[] = $this->newItem()
+        ->setBuiltinKey(self::ITEM_REVISIONS)
+        ->setMenuItemKey(
+          PhabricatorPeopleRevisionsProfileMenuItem::MENUITEMKEY);
     }
 
     $have_diffusion = PhabricatorApplication::isClassInstalledForViewer(

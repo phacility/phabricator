@@ -45,6 +45,10 @@ JX.behavior('phabricator-search-typeahead', function(config) {
         JX.$N('span', {className: 'result-type'}, object.type)
       ]);
 
+    if (object.closed) {
+      JX.DOM.alterClass(render, 'result-closed', true);
+    }
+
     object.display = render;
 
     return object;

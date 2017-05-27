@@ -1811,11 +1811,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           case PhabricatorQueryConstraint::OPERATOR_NOT:
           case PhabricatorQueryConstraint::OPERATOR_AND:
           case PhabricatorQueryConstraint::OPERATOR_OR:
-          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
             if (count($list) > 1) {
               return true;
             }
             break;
+          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
+            // NOTE: We must always group query results rows when using an
+            // "ANCESTOR" operator because a single task may be related to
+            // two different descendants of a particular ancestor. For
+            // discussion, see T12753.
+            return true;
           case PhabricatorQueryConstraint::OPERATOR_NULL:
             return true;
         }

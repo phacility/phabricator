@@ -162,15 +162,15 @@ final class PHUITagExample extends PhabricatorUIExample {
     $tags = array();
     foreach ($shades as $shade) {
       $tags[] = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_OBJECT)
-        ->setShade($shade)
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setColor($shade)
         ->setIcon('fa-tags')
         ->setName(ucwords($shade))
         ->setHref('#');
       $tags[] = hsprintf('&nbsp;');
       $tags[] = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_OBJECT)
-        ->setShade($shade)
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setColor($shade)
         ->setSlimShady(true)
         ->setIcon('fa-tags')
         ->setName(ucwords($shade))
@@ -179,6 +179,26 @@ final class PHUITagExample extends PhabricatorUIExample {
     }
 
     $content4 = id(new PHUIBoxView())
+      ->appendChild($tags)
+      ->addPadding(PHUI::PADDING_LARGE);
+
+    $outlines = PHUITagView::getOutlines();
+    $tags = array();
+    foreach ($outlines as $outline) {
+      $tags[] = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OUTLINE)
+        ->setColor($outline)
+        ->setName($outline);
+      $tags[] = hsprintf('&nbsp;');
+      $tags[] = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OUTLINE)
+        ->setColor($outline)
+        ->setSlimShady(true)
+        ->setName($outline);
+      $tags[] = hsprintf('<br /><br />');
+    }
+
+    $content5 = id(new PHUIBoxView())
       ->appendChild($tags)
       ->addPadding(PHUI::PADDING_LARGE);
 
@@ -202,6 +222,10 @@ final class PHUITagExample extends PhabricatorUIExample {
       ->setHeaderText(pht('Shades'))
       ->appendChild($content4);
 
-    return array($box, $box1, $box2, $box3, $box4);
+    $box5 = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Outlines'))
+      ->appendChild($content5);
+
+    return array($box, $box1, $box2, $box3, $box4, $box5);
   }
 }

@@ -64,7 +64,7 @@ final class PhabricatorOwnersHovercardEngineExtension
     if ($package->isArchived()) {
       $tag = id(new PHUITagView())
         ->setName(pht('Archived'))
-        ->setShade(PHUITagView::COLOR_INDIGO)
+        ->setColor(PHUITagView::COLOR_INDIGO)
         ->setType(PHUITagView::TYPE_OBJECT);
       $hovercard->addTag($tag);
     }
