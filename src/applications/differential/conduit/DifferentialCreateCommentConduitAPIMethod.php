@@ -49,6 +49,7 @@ final class DifferentialCreateCommentConduitAPIMethod
       ->withIDs(array($request->getValue('revision_id')))
       ->needReviewers(true)
       ->needReviewerAuthority(true)
+      ->needActiveDiffs(true)
       ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_BAD_REVISION');
