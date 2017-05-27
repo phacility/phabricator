@@ -268,7 +268,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       }
 
       $icon = id(new PHUIIconView())
-        ->setIcon('fa-download');
+        ->setIcon('fa-download')
+        ->addClass('phui-icon-circle-icon');
       $lightbox_id = celerity_generate_unique_node_id();
       $download_form = phabricator_form(
         $user,
