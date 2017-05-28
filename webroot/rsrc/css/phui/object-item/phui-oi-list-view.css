@@ -182,6 +182,10 @@ ul.phui-oi-list-view {
   vertical-align: top;
 }
 
+.phui-oi-col2.phui-oi-side-column {
+  width: 200px;
+}
+
 .device-phone .phui-oi-col1,
 .device-phone .phui-oi-col2 {
   display: block;

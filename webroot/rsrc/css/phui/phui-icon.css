@@ -144,7 +144,7 @@ a.phui-icon-circle.hover-red:hover .phui-icon-view {
   color: {$red};
 }
 
-a.phui-icon-circle .phui-icon-view.phui-icon-circle-state-icon {
+.phui-icon-circle .phui-icon-view.phui-icon-circle-state-icon {
   position: absolute;
   width: 14px;
   height: 14px;

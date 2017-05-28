@@ -3,7 +3,7 @@
  */
 
 .diffusion-history-list .phui-oi-link {
-  color: {$darkbluetext};
+  color: #000;
   font-size: {$biggerfontsize};
 }
 
@@ -11,10 +11,23 @@
   border-color: transparent;
 }
 
+.diffusion-history-list .phui-oi-attribute .phui-tag-indigo a {
+  color: {$indigo};
+}
+
 .diffusion-history-message {
   background-color: {$bluebackground};
   padding: 16px;
   margin: 4px 0;
   border-radius: 5px;
+  color: {$darkbluetext};
+}
+
+.diffusion-history-list .phui-oi-attribute {
+  font-size: {$smallerfontsize};
+  letter-spacing: 0.01em;
+}
+
+.diffusion-history-author-name a {
   color: {$darkbluetext};
 }
