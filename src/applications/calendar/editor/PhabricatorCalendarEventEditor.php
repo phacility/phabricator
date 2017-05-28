@@ -127,6 +127,9 @@ final class PhabricatorCalendarEventEditor
     // Clear the availability caches for users whose availability is affected
     // by this edit.
 
+    $phids = mpull($object->getInvitees(), 'getInviteePHID');
+    $phids = array_fuse($phids);
+
     $invalidate_all = false;
     $invalidate_phids = array();
     foreach ($xactions as $xaction) {
@@ -146,15 +149,20 @@ final class PhabricatorCalendarEventEditor
           $invalidate_phids[$acting_phid] = $acting_phid;
           break;
         case PhabricatorCalendarEventInviteTransaction::TRANSACTIONTYPE:
-          foreach ($xaction->getNewValue() as $phid => $ignored) {
+          foreach ($xaction->getOldValue() as $phid) {
+            // Add the possibly un-invited user to the list of potentially
+            // affected users if they are't already present.
+            $phids[$phid] = $phid;
+
+            $invalidate_phids[$phid] = $phid;
+          }
+
+          foreach ($xaction->getNewValue() as $phid) {
             $invalidate_phids[$phid] = $phid;
           }
           break;
       }
     }
-
-    $phids = mpull($object->getInvitees(), 'getInviteePHID');
-    $phids = array_fuse($phids);
 
     if (!$invalidate_all) {
       $phids = array_select_keys($phids, $invalidate_phids);
@@ -168,10 +176,9 @@ final class PhabricatorCalendarEventEditor
       queryfx(
         $conn_w,
         'UPDATE %T SET availabilityCacheTTL = NULL
-          WHERE phid IN (%Ls) AND availabilityCacheTTL >= %d',
+          WHERE phid IN (%Ls)',
         $user->getTableName(),
-        $phids,
-        $object->getStartDateTimeEpochForCache());
+        $phids);
     }
 
     return $xactions;

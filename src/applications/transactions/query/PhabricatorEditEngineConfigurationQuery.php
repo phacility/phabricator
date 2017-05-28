@@ -12,6 +12,7 @@ final class PhabricatorEditEngineConfigurationQuery
   private $isEdit;
   private $disabled;
   private $ignoreDatabaseConfigurations;
+  private $subtypes;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -55,6 +56,11 @@ final class PhabricatorEditEngineConfigurationQuery
 
   public function withIgnoreDatabaseConfigurations($ignore) {
     $this->ignoreDatabaseConfigurations = $ignore;
+    return $this;
+  }
+
+  public function withSubtypes(array $subtypes) {
+    $this->subtypes = $subtypes;
     return $this;
   }
 
@@ -183,6 +189,17 @@ final class PhabricatorEditEngineConfigurationQuery
       }
     }
 
+    if ($this->subtypes !== null) {
+      $subtypes = array_fuse($this->subtypes);
+      foreach ($page as $key => $config) {
+        if (isset($subtypes[$config->getSubtype()])) {
+          continue;
+        }
+
+        unset($page[$key]);
+      }
+    }
+
     return $page;
   }
 
@@ -248,6 +265,13 @@ final class PhabricatorEditEngineConfigurationQuery
         '(id IN (%Ls) OR builtinKey IN (%Ls))',
         $this->identifiers,
         $this->identifiers);
+    }
+
+    if ($this->subtypes !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'subtype IN (%Ls)',
+        $this->subtypes);
     }
 
     return $where;

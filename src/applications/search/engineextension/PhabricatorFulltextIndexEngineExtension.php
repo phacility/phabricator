@@ -5,12 +5,19 @@ final class PhabricatorFulltextIndexEngineExtension
 
   const EXTENSIONKEY = 'fulltext';
 
+  private $configurationVersion;
+
   public function getExtensionName() {
     return pht('Fulltext Engine');
   }
 
   public function getIndexVersion($object) {
     $version = array();
+
+    // When "cluster.search" is reconfigured, new indexes which don't have any
+    // data yet may have been added. We err on the side of caution and assume
+    // that every document may need to be reindexed.
+    $version[] = $this->getConfigurationVersion();
 
     if ($object instanceof PhabricatorApplicationTransactionInterface) {
       // If this is a normal object with transactions, we only need to
@@ -86,6 +93,23 @@ final class PhabricatorFulltextIndexEngineExtension
     }
 
     return $comment_row['id'];
+  }
+
+  private function getConfigurationVersion() {
+    if ($this->configurationVersion === null) {
+      $this->configurationVersion = $this->newConfigurationVersion();
+    }
+    return $this->configurationVersion;
+  }
+
+  private function newConfigurationVersion() {
+    $raw = array(
+      'services' => PhabricatorEnv::getEnvConfig('cluster.search'),
+    );
+
+    $json = phutil_json_encode($raw);
+
+    return PhabricatorHash::digestForIndex($json);
   }
 
 

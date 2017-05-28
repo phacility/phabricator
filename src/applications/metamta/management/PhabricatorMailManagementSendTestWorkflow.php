@@ -93,7 +93,16 @@ final class PhabricatorMailManagementSendTestWorkflow
       ->execute();
     $users = mpull($users, null, 'getUsername');
 
+    $raw_tos = array();
     foreach ($tos as $key => $username) {
+      // If the recipient has an "@" in any noninitial position, treat this as
+      // a raw email address.
+      if (preg_match('/.@/', $username)) {
+        $raw_tos[] = $username;
+        unset($tos[$key]);
+        continue;
+      }
+
       if (empty($users[$username])) {
         throw new PhutilArgumentUsageException(
           pht("No such user '%s' exists.", $username));
@@ -122,12 +131,19 @@ final class PhabricatorMailManagementSendTestWorkflow
     $body = file_get_contents('php://stdin');
 
     $mail = id(new PhabricatorMetaMTAMail())
-      ->addTos($tos)
       ->addCCs($ccs)
       ->setSubject($subject)
       ->setBody($body)
       ->setIsBulk($is_bulk)
       ->setMailTags($tags);
+
+    if ($tos) {
+      $mail->addTos($tos);
+    }
+
+    if ($raw_tos) {
+      $mail->addRawTos($raw_tos);
+    }
 
     if ($args->getArg('html')) {
       $mail->setBody(

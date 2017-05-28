@@ -185,7 +185,7 @@ final class PhabricatorPasteQuery
         $paste->getFilePHID(),
         $paste->getLanguage(),
         'snippet',
-        'v2',
+        'v2.1',
         PhabricatorHash::digestForIndex($paste->getTitle()),
       ));
   }
@@ -292,7 +292,7 @@ final class PhabricatorPasteQuery
     foreach ($pastes as $paste) {
       $key = $this->getSnippetCacheKey($paste);
       if (isset($caches[$key])) {
-        $snippet_data = phutil_json_decode($caches[$key], true);
+        $snippet_data = phutil_json_decode($caches[$key]);
         $snippet = new PhabricatorPasteSnippet(
           phutil_safe_html($snippet_data['content']),
           $snippet_data['type'],
@@ -352,6 +352,9 @@ final class PhabricatorPasteQuery
     $snippet_type = PhabricatorPasteSnippet::FULL;
     $snippet = $paste->getRawContent();
 
+    $lines = phutil_split_lines($snippet);
+    $line_count = count($lines);
+
     if (strlen($snippet) > 1024) {
       $snippet_type = PhabricatorPasteSnippet::FIRST_BYTES;
       $snippet = id(new PhutilUTF8StringTruncator())
@@ -360,8 +363,6 @@ final class PhabricatorPasteQuery
         ->truncateString($snippet);
     }
 
-    $lines = phutil_split_lines($snippet);
-    $line_count = count($lines);
     if ($line_count > 5) {
       $snippet_type = PhabricatorPasteSnippet::FIRST_LINES;
       $snippet = implode('', array_slice($lines, 0, 5));

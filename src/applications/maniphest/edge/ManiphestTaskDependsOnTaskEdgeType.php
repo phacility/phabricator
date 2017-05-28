@@ -16,6 +16,18 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     return true;
   }
 
+  public function getConduitKey() {
+    return 'task.subtask';
+  }
+
+  public function getConduitName() {
+    return pht('Subtask');
+  }
+
+  public function getConduitDescription() {
+    return pht('The source object has the destination object as a subtask.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,

@@ -41,7 +41,7 @@ input[type="submit"] {
   font-weight: bold;
   font-size: {$normalfontsize};
   display: inline-block;
-  padding: 3px 12px 4px;
+  padding: 4px 16px 5px;
   text-align: center;
   white-space: nowrap;
   border-radius: 3px;
@@ -82,7 +82,7 @@ a.grey,
 a.grey:visited {
   background-color: #F7F7F9;
   background-image: linear-gradient(to bottom, #ffffff, #f1f0f1);
-  border: 1px solid rgba({$alphablue},.2);
+  border: 1px solid rgba({$alphablue}, 0.3);
   color: {$darkgreytext};
 }
 
@@ -91,8 +91,8 @@ input[type="submit"].simple,
 a.simple,
 a.simple:visited {
   background: #fff;
-  color: {$blue};
-  border: 1px solid {$blue};
+  color: {$bluetext};
+  border: 1px solid {$lightblueborder};
 }
 
 a.simple.current {
@@ -103,7 +103,7 @@ button.simple .phui-icon-view,
 input[type="submit"].simple .phui-icon-view,
 a.simple .phui-icon-view,
 a.simple:visited .phui-icon-view {
-  color: {$blue};
+  color: {$lightbluetext};
 }
 
 a.disabled,
@@ -131,7 +131,7 @@ button:hover {
 a.button.grey:hover,
 button.grey:hover {
   background-image: linear-gradient(to bottom, #ffffff, #eeebec);
-  border-color: rgba({$alphablue}, 0.3);
+  border-color: rgba({$alphablue}, 0.4);
   transition: 0.1s;
 }
 
@@ -145,10 +145,10 @@ button.green:hover {
 
 a.button.simple:hover,
 button.simple:hover {
-  background-color: {$blue};
+  background-color: {$lightblue};
   background-image: linear-gradient(to bottom, {$blue}, {$blue});
   color: #fff;
-  transition: 0.1s;
+  transition: 0s;
 }
 
 a.button.simple:hover .phui-icon-view,
@@ -235,6 +235,19 @@ a.policy-control .caret {
   float: right;
 }
 
+a.policy-control .phui-button-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.device-phone a.button.policy-control {
+  display: block;
+  float: none;
+  width: auto;
+}
+
 .caret {
   display: inline-block;
   width: 0;
@@ -272,7 +285,7 @@ a.policy-control .caret {
 
 .dropdown .caret {
   margin-top: 7px;
-  margin-left: 6px;
+  margin-right: -4px;
 }
 
 .small.dropdown .caret {
@@ -283,32 +296,6 @@ a.policy-control .caret {
   border-top-color: #000;
 }
 
-.phabricator-action-view-submenu .caret-right {
-  float: right;
-  margin-top: 4px;
-  margin-right: 6px;
-  border-left-color: {$alphablue};
-}
-
-.phabricator-action-view-submenu .caret {
-  float: right;
-  margin-top: 5px;
-  margin-right: 4px;
-  border-top: 7px solid {$lightgreytext};
-}
-
-.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
-  .phabricator-action-view-item {
-  background-color: rgba({$alphablue}, 0.07);
-  color: {$sky};
-  border-radius: 3px;
-}
-
-.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
-  .phabricator-action-view-item .phui-icon-view {
-    color: {$sky};
-}
-
 /* Icons */
 .button.has-icon {
   position: relative;
@@ -317,8 +304,8 @@ a.policy-control .caret {
 .button .phui-icon-view {
   display: inline-block;
   position: absolute;
-  top: 6px;
-  left: 10px;
+  top: 7px;
+  left: 12px;
 }
 
 .button.icon-last .phui-icon-view {
@@ -327,7 +314,7 @@ a.policy-control .caret {
 }
 
 .phui-button-bar .button .phui-icon-view {
-  left: 9px;
+  left: 14px;
 }
 
 .button.has-icon .phui-button-text {

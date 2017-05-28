@@ -40,7 +40,7 @@ abstract class ManiphestTaskAssignHeraldAction
     }
 
     $xaction = $adapter->newTransaction()
-      ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+      ->setTransactionType(ManiphestTaskOwnerTransaction::TRANSACTIONTYPE)
       ->setNewValue($phid);
 
     $adapter->queueTransaction($xaction);

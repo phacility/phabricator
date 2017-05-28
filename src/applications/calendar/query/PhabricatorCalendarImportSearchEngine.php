@@ -11,6 +11,10 @@ final class PhabricatorCalendarImportSearchEngine
     return 'PhabricatorCalendarApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     return new PhabricatorCalendarImportQuery();
   }

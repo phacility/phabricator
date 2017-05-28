@@ -34,8 +34,7 @@ final class PhabricatorDashboardArrangeController
     $info_view = null;
     if (!$can_edit) {
       $no_edit = pht(
-        'You do not have permission to edit this dashboard. If you want to '.
-        'make changes, make a copy first.');
+        'You do not have permission to edit this dashboard.');
 
       $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
@@ -51,6 +50,14 @@ final class PhabricatorDashboardArrangeController
     $dashboard_box = id(new PHUIBoxView())
       ->addClass('dashboard-preview-box')
       ->appendChild($rendered_dashboard);
+
+    $install_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText('Install Dashboard')
+      ->setIcon('fa-plus')
+      ->setWorkflow(true)
+      ->setHref($this->getApplicationURI("/install/{$id}/"));
+    $header->addActionLink($install_button);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

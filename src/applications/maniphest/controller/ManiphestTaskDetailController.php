@@ -219,7 +219,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $status = $task->getStatus();
     $status_name = ManiphestTaskStatus::renderFullDescription(
-      $status, $priority_name, $priority_color);
+      $status, $priority_name);
     $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
 
     $view->setHeaderIcon(ManiphestTaskStatus::getStatusIcon(
@@ -233,11 +233,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ManiphestTaskPoints::getPointsLabel());
         $tag = id(new PHUITagView())
           ->setName($points_name)
-          ->setShade('blue')
+          ->setColor(PHUITagView::COLOR_BLUE)
           ->setType(PHUITagView::TYPE_SHADE);
 
         $view->addTag($tag);
       }
+    }
+
+    $subtype = $task->newSubtypeObject();
+    if ($subtype && $subtype->hasTagView()) {
+      $subtype_tag = $subtype->newTagView();
+      $view->addTag($subtype_tag);
     }
 
     return $view;
@@ -257,6 +263,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $task,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $can_interact = PhabricatorPolicyFilter::canInteract($viewer, $task);
+
+    // We expect a policy dialog if you can't edit the task, and expect a
+    // lock override dialog if you can't interact with it.
+    $workflow_edit = (!$can_edit || !$can_interact);
+
     $curtain = $this->newCurtainView($task);
 
     $curtain->addAction(
@@ -265,13 +277,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("/task/edit/{$id}/"))
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow($workflow_edit));
 
-    $edit_config = $edit_engine->loadDefaultEditConfiguration();
+    $edit_config = $edit_engine->loadDefaultEditConfiguration($task);
     $can_create = (bool)$edit_config;
 
     $can_reassign = $edit_engine->hasEditAccessToTransaction(
-      ManiphestTransaction::TYPE_OWNER);
+      ManiphestTaskOwnerTransaction::TRANSACTIONTYPE);
 
     if ($can_create) {
       $form_key = $edit_config->getIdentifier();

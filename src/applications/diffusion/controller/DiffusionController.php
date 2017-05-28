@@ -317,12 +317,6 @@ abstract class DiffusionController extends PhabricatorController {
       ->appendChild($body);
   }
 
-  protected function renderTablePagerBox(PHUIPagerView $pager) {
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($pager);
-  }
-
   protected function renderCommitHashTag(DiffusionRequest $drequest) {
     $stable_commit = $drequest->getStableCommit();
     $commit = phutil_tag(
@@ -338,7 +332,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     $tag = id(new PHUITagView())
       ->setName($commit)
-      ->setShade('indigo')
+      ->setColor(PHUITagView::COLOR_INDIGO)
       ->setType(PHUITagView::TYPE_SHADE);
 
     return $tag;
@@ -357,7 +351,7 @@ abstract class DiffusionController extends PhabricatorController {
     $stable_commit = $drequest->getStableCommit();
 
     $stable_commit_hash = PhabricatorHash::digestForIndex($stable_commit);
-    $readme_path_hash = PhabricatorHash::digestForindex($readme_path);
+    $readme_path_hash = PhabricatorHash::digestForIndex($readme_path);
 
     $cache = PhabricatorCaches::getMutableStructureCache();
     $cache_key = "diffusion".

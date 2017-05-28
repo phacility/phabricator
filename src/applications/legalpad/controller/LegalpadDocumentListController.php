@@ -26,7 +26,7 @@ final class LegalpadDocumentListController extends LegalpadController {
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Create Document'))
-        ->setHref($this->getApplicationURI('create/'))
+        ->setHref($this->getApplicationURI('edit/'))
         ->setIcon('fa-plus-square')
         ->setDisabled(!$can_create)
         ->setWorkflow(!$can_create));

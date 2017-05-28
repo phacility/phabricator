@@ -97,7 +97,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
       ->setName($name)
       ->setIcon($icon)
       ->setType(PHUITagView::TYPE_SHADE)
-      ->setShade($color);
+      ->setColor($color);
 
     return $tag;
   }
@@ -154,6 +154,10 @@ final class ManiphestTaskStatus extends ManiphestConstants {
 
   public static function isClosedStatus($status) {
     return !self::isOpenStatus($status);
+  }
+
+  public static function isLockedStatus($status) {
+    return self::getStatusAttribute($status, 'locked', false);
   }
 
   public static function getStatusActionName($status) {
@@ -277,6 +281,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'keywords' => 'optional list<string>',
           'disabled' => 'optional bool',
           'claim' => 'optional bool',
+          'locked' => 'optional bool',
         ));
     }
 

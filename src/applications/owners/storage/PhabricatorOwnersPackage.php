@@ -12,7 +12,6 @@ final class PhabricatorOwnersPackage
     PhabricatorNgramsInterface {
 
   protected $name;
-  protected $originalName;
   protected $auditingEnabled;
   protected $autoReview;
   protected $description;
@@ -26,6 +25,7 @@ final class PhabricatorOwnersPackage
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $pathRepositoryMap = array();
 
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';
@@ -104,8 +104,7 @@ final class PhabricatorOwnersPackage
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'sort128',
-        'originalName' => 'text255',
+        'name' => 'sort',
         'description' => 'text',
         'primaryOwnerPHID' => 'phid?',
         'auditingEnabled' => 'bool',
@@ -136,9 +135,6 @@ final class PhabricatorOwnersPackage
 
   public function setName($name) {
     $this->name = $name;
-    if (!$this->getID()) {
-      $this->originalName = $name;
-    }
     return $this;
   }
 
@@ -369,11 +365,32 @@ final class PhabricatorOwnersPackage
   public function attachPaths(array $paths) {
     assert_instances_of($paths, 'PhabricatorOwnersPath');
     $this->paths = $paths;
+
+    // Drop this cache if we're attaching new paths.
+    $this->pathRepositoryMap = array();
+
     return $this;
   }
 
   public function getPaths() {
     return $this->assertAttached($this->paths);
+  }
+
+  public function getPathsForRepository($repository_phid) {
+    if (isset($this->pathRepositoryMap[$repository_phid])) {
+      return $this->pathRepositoryMap[$repository_phid];
+    }
+
+    $map = array();
+    foreach ($this->getPaths() as $path) {
+      if ($path->getRepositoryPHID() == $repository_phid) {
+        $map[] = $path;
+      }
+    }
+
+    $this->pathRepositoryMap[$repository_phid] = $map;
+
+    return $this->pathRepositoryMap[$repository_phid];
   }
 
   public function attachOwners(array $owners) {

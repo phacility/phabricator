@@ -7,6 +7,10 @@ abstract class PhabricatorDaemonController
     return true;
   }
 
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView(true)->getMenu();
+  }
+
   protected function buildSideNavView() {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));

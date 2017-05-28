@@ -67,7 +67,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $revision = id(new DifferentialRevisionQuery())
         ->setViewer($viewer)
         ->withIDs(array($revision_id))
-        ->needReviewerStatus(true)
+        ->needReviewers(true)
         ->executeOne();
     } else {
       $revision = null;
@@ -165,7 +165,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $accepted_statuses = array_fuse($accepted_statuses);
 
     $found_accept = false;
-    foreach ($revision->getReviewerStatus() as $reviewer) {
+    foreach ($revision->getReviewers() as $reviewer) {
       $reviewer_phid = $reviewer->getReviewerPHID();
 
       // If this reviewer isn't a package owner, just ignore them.
@@ -175,7 +175,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
 
       // If this reviewer accepted the revision and owns the package, we're
       // all clear and do not need to trigger an audit.
-      if (isset($accepted_statuses[$reviewer->getStatus()])) {
+      if (isset($accepted_statuses[$reviewer->getReviewerStatus()])) {
         $found_accept = true;
         break;
       }

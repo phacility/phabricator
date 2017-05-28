@@ -11,6 +11,10 @@ final class PhabricatorDashboardQueryPanelType
     return pht('Query Panel');
   }
 
+  public function getIcon() {
+    return 'fa-search';
+  }
+
   public function getPanelTypeDescription() {
     return pht(
       'Show results of a search query, like the most recently filed tasks or '.

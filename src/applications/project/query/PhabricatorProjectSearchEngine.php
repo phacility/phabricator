@@ -13,7 +13,9 @@ final class PhabricatorProjectSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorProjectQuery())
-      ->needImages(true);
+      ->needImages(true)
+      ->needMembers(true)
+      ->needWatchers(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -128,6 +130,10 @@ final class PhabricatorProjectSearchEngine
       $names['joined'] = pht('Joined');
     }
 
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['watching'] = pht('Watching');
+    }
+
     $names['active'] = pht('Active');
     $names['all'] = pht('All');
 
@@ -152,6 +158,10 @@ final class PhabricatorProjectSearchEngine
       case 'joined':
         return $query
           ->setParameter('memberPHIDs', array($viewer_phid))
+          ->setParameter('status', 'active');
+      case 'watching':
+        return $query
+          ->setParameter('watcherPHIDs', array($viewer_phid))
           ->setParameter('status', 'active');
     }
 
@@ -201,7 +211,7 @@ final class PhabricatorProjectSearchEngine
       $options[$color] = array(
         id(new PHUITagView())
           ->setType(PHUITagView::TYPE_SHADE)
-          ->setShade($color)
+          ->setColor($color)
           ->setName($name),
       );
     }
@@ -219,6 +229,8 @@ final class PhabricatorProjectSearchEngine
     $list = id(new PhabricatorProjectListView())
       ->setUser($viewer)
       ->setProjects($projects)
+      ->setShowWatching(true)
+      ->setShowMember(true)
       ->renderList();
 
     return id(new PhabricatorApplicationSearchResultView())

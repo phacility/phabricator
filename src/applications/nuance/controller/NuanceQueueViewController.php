@@ -70,6 +70,14 @@ final class NuanceQueueViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Begin Work'))
+        ->setIcon('fa-play-circle-o')
+        ->setHref($this->getApplicationURI("queue/work/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     return $curtain;
   }
 

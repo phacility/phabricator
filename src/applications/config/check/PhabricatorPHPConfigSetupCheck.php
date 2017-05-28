@@ -14,7 +14,7 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
   protected function executeChecks() {
 
     if (empty($_SERVER['REMOTE_ADDR'])) {
-      $doc_href = PhabricatorEnv::getDocLink('Configuring a Preamble Script');
+      $doc_href = PhabricatorEnv::getDoclink('Configuring a Preamble Script');
 
       $summary = pht(
         'You likely need to fix your preamble script so '.

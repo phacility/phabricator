@@ -37,12 +37,12 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
         'status' => array(
           'columns' => array('status'),
         ),
-        'dateCreated' => array(
-          'columns' => array('dateCreated'),
-        ),
         'key_daemonID' => array(
           'columns' => array('daemonID'),
           'unique' => true,
+        ),
+        'key_modified' => array(
+          'columns' => array('dateModified'),
         ),
       ),
     ) + parent::getConfiguration();

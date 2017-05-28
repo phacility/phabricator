@@ -7,6 +7,9 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
   protected $path;
   protected $excluded;
 
+  private $fragments;
+  private $fragmentCount;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
@@ -74,19 +77,21 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
    * Get the number of directory matches between this path specification and
    * some real path.
    */
-  public function getPathMatchStrength($path) {
-    $this_path = $this->getPath();
+  public function getPathMatchStrength($path_fragments, $path_count) {
+    $this_path = $this->path;
 
     if ($this_path === '/') {
       // The root path "/" just matches everything with strength 1.
       return 1;
     }
 
-    $self_fragments = PhabricatorOwnersPackage::splitPath($this_path);
-    $path_fragments = PhabricatorOwnersPackage::splitPath($path);
+    if ($this->fragments === null) {
+      $this->fragments = PhabricatorOwnersPackage::splitPath($this_path);
+      $this->fragmentCount = count($this->fragments);
+    }
 
-    $self_count = count($self_fragments);
-    $path_count = count($path_fragments);
+    $self_fragments = $this->fragments;
+    $self_count = $this->fragmentCount;
     if ($self_count > $path_count) {
       // If this path is longer (and therefore more specific) than the target
       // path, we don't match it at all.

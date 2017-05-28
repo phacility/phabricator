@@ -47,10 +47,10 @@ final class PhrictionCreateConduitAPIMethod extends PhrictionConduitAPIMethod {
 
     $xactions = array();
     $xactions[] = id(new PhrictionTransaction())
-      ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+      ->setTransactionType(PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue($request->getValue('title'));
     $xactions[] = id(new PhrictionTransaction())
-      ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+      ->setTransactionType(PhrictionDocumentContentTransaction::TRANSACTIONTYPE)
       ->setNewValue($request->getValue('content'));
 
     $editor = id(new PhrictionTransactionEditor())

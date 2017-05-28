@@ -11,6 +11,10 @@ final class PhabricatorOAuthServerClientSearchEngine
     return 'PhabricatorOAuthServerApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     return id(new PhabricatorOAuthServerClientQuery());
   }

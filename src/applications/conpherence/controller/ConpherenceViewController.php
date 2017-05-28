@@ -20,7 +20,6 @@ final class ConpherenceViewController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needProfileImage(true)
-      ->needParticipantCache(true)
       ->needTransactions(true)
       ->setTransactionLimit($this->getMainQueryLimit());
 
@@ -56,15 +55,15 @@ final class ConpherenceViewController extends
     }
     $this->setConpherence($conpherence);
 
-    $transactions = $this->getNeededTransactions(
-      $conpherence,
-      $old_message_id);
-    $latest_transaction = head($transactions);
     $participant = $conpherence->getParticipantIfExists($user->getPHID());
+    $theme = ConpherenceRoomSettings::COLOR_LIGHT;
+
     if ($participant) {
+      $settings = $participant->getSettings();
+      $theme = idx($settings, 'theme', ConpherenceRoomSettings::COLOR_LIGHT);
       if (!$participant->isUpToDate($conpherence)) {
         $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $participant->markUpToDate($conpherence, $latest_transaction);
+        $participant->markUpToDate($conpherence);
         $user->clearCacheData(PhabricatorUserMessageCountCacheType::KEY_COUNT);
         unset($write_guard);
       }
@@ -83,11 +82,7 @@ final class ConpherenceViewController extends
       $form = null;
       $content = array('transactions' => $messages);
     } else {
-      $policy_objects = id(new PhabricatorPolicyQuery())
-        ->setViewer($user)
-        ->setObject($conpherence)
-        ->execute();
-      $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
+      $header = $this->buildHeaderPaneContent($conpherence);
       $search = $this->buildSearchForm();
       $form = $this->renderFormContent();
       $content = array(
@@ -119,11 +114,6 @@ final class ConpherenceViewController extends
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 
-    $can_join = PhabricatorPolicyFilter::hasCapability(
-        $user,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_JOIN);
-
     $layout = id(new ConpherenceLayoutView())
       ->setUser($user)
       ->setBaseURI($this->getApplicationURI())
@@ -132,6 +122,7 @@ final class ConpherenceViewController extends
       ->setSearch($search)
       ->setMessages($messages)
       ->setReplyForm($form)
+      ->setTheme($theme)
       ->setLatestTransactionID($data['latest_transaction_id'])
       ->setRole('thread');
 
@@ -151,14 +142,8 @@ final class ConpherenceViewController extends
 
     $conpherence = $this->getConpherence();
     $user = $this->getRequest()->getUser();
-    $can_join = PhabricatorPolicyFilter::hasCapability(
-      $user,
-      $conpherence,
-      PhabricatorPolicyCapability::CAN_JOIN);
+
     $participating = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$can_join && !$participating && $user->isLoggedIn()) {
-      return null;
-    }
     $draft = PhabricatorDraft::newFromUserAndKey(
       $user,
       $conpherence->getPHID());
@@ -184,6 +169,7 @@ final class ConpherenceViewController extends
           id(new PhabricatorRemarkupControl())
           ->setUser($user)
           ->setName('text')
+          ->setSendOnEnter(true)
           ->setValue($draft->getDraft()));
 
       $status_view = phutil_tag(
@@ -212,33 +198,6 @@ final class ConpherenceViewController extends
           ->setText(pht('Login to Participate'))
           ->setHref((string)$login_href));
     }
-  }
-
-  private function getNeededTransactions(
-    ConpherenceThread $conpherence,
-    $message_id) {
-
-    if ($message_id) {
-      $newer_transactions = $conpherence->getTransactions();
-      $query = id(new ConpherenceTransactionQuery())
-        ->setViewer($this->getRequest()->getUser())
-        ->withObjectPHIDs(array($conpherence->getPHID()))
-        ->setAfterID($message_id)
-        ->needHandles(true)
-        ->setLimit(self::OLDER_FETCH_LIMIT);
-      $older_transactions = $query->execute();
-      $handles = array();
-      foreach ($older_transactions as $transaction) {
-        $handles += $transaction->getHandles();
-      }
-      $conpherence->attachHandles($conpherence->getHandles() + $handles);
-      $transactions = array_merge($newer_transactions, $older_transactions);
-      $conpherence->attachTransactions($transactions);
-    } else {
-      $transactions = $conpherence->getTransactions();
-    }
-
-    return $transactions;
   }
 
   private function getMainQueryLimit() {

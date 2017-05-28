@@ -67,15 +67,15 @@ final class FeedQueryConduitAPIMethod extends FeedConduitAPIMethod {
     if (!$limit) {
       $limit = $this->getDefaultLimit();
     }
-    $filter_phids = $request->getValue('filterPHIDs');
-    if (!$filter_phids) {
-      $filter_phids = array();
-    }
 
     $query = id(new PhabricatorFeedQuery())
       ->setLimit($limit)
-      ->setFilterPHIDs($filter_phids)
       ->setViewer($user);
+
+    $filter_phids = $request->getValue('filterPHIDs');
+    if ($filter_phids) {
+      $query->withFilterPHIDs($filter_phids);
+    }
 
     $after = $request->getValue('after');
     if (strlen($after)) {

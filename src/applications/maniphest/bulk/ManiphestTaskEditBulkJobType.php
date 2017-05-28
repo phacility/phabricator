@@ -76,9 +76,9 @@ final class ManiphestTaskEditBulkJobType
     $value_map = array();
     $type_map = array(
       'add_comment' => PhabricatorTransactions::TYPE_COMMENT,
-      'assign' => ManiphestTransaction::TYPE_OWNER,
-      'status' => ManiphestTransaction::TYPE_STATUS,
-      'priority' => ManiphestTransaction::TYPE_PRIORITY,
+      'assign' => ManiphestTaskOwnerTransaction::TRANSACTIONTYPE,
+      'status' => ManiphestTaskStatusTransaction::TRANSACTIONTYPE,
+      'priority' => ManiphestTaskPriorityTransaction::TRANSACTIONTYPE,
       'add_project' => PhabricatorTransactions::TYPE_EDGE,
       'remove_project' => PhabricatorTransactions::TYPE_EDGE,
       'add_ccs' => PhabricatorTransactions::TYPE_SUBSCRIBERS,
@@ -114,13 +114,13 @@ final class ManiphestTaskEditBulkJobType
           case PhabricatorTransactions::TYPE_COMMENT:
             $current = null;
             break;
-          case ManiphestTransaction::TYPE_OWNER:
+          case ManiphestTaskOwnerTransaction::TRANSACTIONTYPE:
             $current = $task->getOwnerPHID();
             break;
-          case ManiphestTransaction::TYPE_STATUS:
+          case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
             $current = $task->getStatus();
             break;
-          case ManiphestTransaction::TYPE_PRIORITY:
+          case ManiphestTaskPriorityTransaction::TRANSACTIONTYPE:
             $current = $task->getPriority();
             break;
           case PhabricatorTransactions::TYPE_EDGE:
@@ -153,7 +153,7 @@ final class ManiphestTaskEditBulkJobType
           }
           $value = head($value);
           break;
-        case ManiphestTransaction::TYPE_OWNER:
+        case ManiphestTaskOwnerTransaction::TRANSACTIONTYPE:
           if (empty($value)) {
             continue 2;
           }

@@ -1,0 +1,210 @@
+@title Cluster: Search
+@group cluster
+
+Overview
+========
+
+You can configure Phabricator to connect to one or more fulltext search
+services.
+
+By default, Phabricator will use MySQL for fulltext search. This is suitable
+for most installs. However, alternate engines are supported.
+
+
+Configuring Search Services
+===========================
+
+To configure search services, adjust the `cluster.search` configuration
+option. This option contains a list of one or more fulltext search services,
+like this:
+
+```lang=json
+[
+  {
+    "type": "...",
+    "hosts": [
+      ...
+    ],
+    "roles": {
+      "read": true,
+      "write": true
+    }
+  }
+]
+```
+
+When a user makes a change to a document, Phabricator writes the updated
+document into every configured, writable fulltext service.
+
+When a user issues a query, Phabricator tries configured, readable services
+in order until it is able to execute the query successfully.
+
+These options are supported by all service types:
+
+| Key | Description |
+|---|---|
+| `type` | Constant identifying the service type, like `mysql`.
+| `roles` | Dictionary of role settings, for enabling reads and writes.
+| `hosts` | List of hosts for this service.
+
+Some service types support additional options.
+
+Available Service Types
+=======================
+
+These service types are supported:
+
+| Service | Key | Description |
+|---|---|---|
+| MySQL | `mysql` | Default MySQL fulltext index.
+| Elasticsearch | `elasticsearch` | Use an external Elasticsearch service
+
+
+Fulltext Service Roles
+======================
+
+These roles are supported:
+
+| Role | Key | Description
+|---|---|---|
+| Read | `read` | Allows the service to be queried when users search.
+| Write | `write` | Allows documents to be published to the service.
+
+
+Specifying Hosts
+================
+
+The `hosts` key should contain a list of dictionaries, each specifying the
+details of a host. A service should normally have one or more hosts.
+
+When an option is set at the service level, it serves as a default for all
+hosts. It may be overridden by changing the value for a particular host.
+
+
+Service Type: MySQL
+==============
+
+The `mysql` service type does not require any configuration, and does not
+need to have hosts specified. This service uses the builtin database to
+index and search documents.
+
+A typical `mysql` service configuration looks like this:
+
+```lang=json
+{
+  "type": "mysql"
+}
+```
+
+
+Service Type: Elasticsearch
+======================
+
+The `elasticsearch` sevice type supports these options:
+
+| Key | Description |
+|---|---|
+| `protocol` | Either `"http"` (default) or `"https"`.
+| `port` | Elasticsearch TCP port.
+| `version` | Elasticsearch version, either `2` or `5` (default).
+| `path` | Path for the index. Defaults to `/phabriator`. Advanced.
+
+A typical `elasticsearch` service configuration looks like this:
+
+```lang=json
+{
+  "type": "elasticsearch",
+  "hosts": [
+    {
+      "protocol": "http",
+      "host": "127.0.0.1",
+      "port": 9200
+    }
+  ]
+}
+```
+
+Monitoring Search Services
+==========================
+
+You can monitor fulltext search in {nav Config > Search Servers}. This
+interface shows you a quick overview of services and their health.
+
+The table on this page shows some basic stats for each configured service,
+followed by the configuration and current status of each host.
+
+
+Rebuilding Indexes
+==================
+
+After adding new search services, you will need to rebuild document indexes
+on them. To do this, first initialize the services:
+
+```
+phabricator/ $ ./bin/search init
+```
+
+This will perform index setup steps and other one-time configuration.
+
+To populate documents in all indexes, run this command:
+
+```
+phabricator/ $ ./bin/search index --force --background --type all
+```
+
+This initiates an exhaustive rebuild of the document indexes. To get a more
+detailed list of indexing options available, run:
+
+```
+phabricator/ $ ./bin/search help index
+```
+
+
+Advanced Example
+================
+
+This is a more advanced example which shows a configuration with multiple
+different services in different roles. In this example:
+
+  - Phabricator is using an Elasticsearch 2 service as its primary fulltext
+    service.
+  - An Elasticsearch 5 service is online, but only receiving writes.
+  - The MySQL service is serving as a backup if Elasticsearch fails.
+
+This particular configuration may not be very useful. It is primarily
+intended to show how to configure many different options.
+
+
+```lang=json
+[
+  {
+    "type": "elasticsearch",
+    "version": 2,
+    "hosts": [
+      {
+        "host": "elastic2.mycompany.com",
+        "port": 9200,
+        "protocol": "http"
+      }
+    ]
+  },
+  {
+    "type": "elasticsearch",
+    "version": 5,
+    "hosts": [
+      {
+        "host": "elastic5.mycompany.com",
+        "port": 9789,
+        "protocol": "https"
+        "roles": {
+          "read": false,
+          "write": true
+        }
+      }
+    ]
+  },
+  {
+    "type": "mysql"
+  }
+]
+```

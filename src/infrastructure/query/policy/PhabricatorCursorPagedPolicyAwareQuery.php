@@ -85,12 +85,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   protected function loadStandardPageRows(PhabricatorLiskDAO $table) {
     $conn = $table->establishConnection('r');
+    return $this->loadStandardPageRowsWithConnection(
+      $conn,
+      $table->getTableName());
+  }
+
+  protected function loadStandardPageRowsWithConnection(
+    AphrontDatabaseConnection $conn,
+    $table_name) {
 
     $rows = queryfx_all(
       $conn,
       '%Q FROM %T %Q %Q %Q %Q %Q %Q %Q',
       $this->buildSelectClause($conn),
-      $table->getTableName(),
+      $table_name,
       (string)$this->getPrimaryTableAlias(),
       $this->buildJoinClause($conn),
       $this->buildWhereClause($conn),
@@ -1521,6 +1529,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
+   * @return this
    * @task edgelogic
    */
   public function withEdgeLogicConstraints($edge_type, array $constraints) {
@@ -1802,11 +1811,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           case PhabricatorQueryConstraint::OPERATOR_NOT:
           case PhabricatorQueryConstraint::OPERATOR_AND:
           case PhabricatorQueryConstraint::OPERATOR_OR:
-          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
             if (count($list) > 1) {
               return true;
             }
             break;
+          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
+            // NOTE: We must always group query results rows when using an
+            // "ANCESTOR" operator because a single task may be related to
+            // two different descendants of a particular ancestor. For
+            // discussion, see T12753.
+            return true;
           case PhabricatorQueryConstraint::OPERATOR_NULL:
             return true;
         }

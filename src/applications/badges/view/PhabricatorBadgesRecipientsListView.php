@@ -3,10 +3,16 @@
 final class PhabricatorBadgesRecipientsListView extends AphrontView {
 
   private $badge;
+  private $awards;
   private $handles;
 
   public function setBadge(PhabricatorBadgesBadge $badge) {
     $this->badge = $badge;
+    return $this;
+  }
+
+  public function setAwards(array $awards) {
+    $this->awards = $awards;
     return $this;
   }
 
@@ -20,12 +26,24 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
 
     $badge = $this->badge;
     $handles = $this->handles;
-    $awards = mpull($badge->getAwards(), null, 'getRecipientPHID');
+    $awards = mpull($this->awards, null, 'getRecipientPHID');
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $badge,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $award_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-plus')
+      ->setText(pht('Add Recipients'))
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit)
+      ->setHref('/badges/recipients/'.$badge->getID().'/add/');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recipients'))
+      ->addActionLink($award_button);
 
     $list = id(new PHUIObjectItemListView())
       ->setNoDataString(pht('This badge does not have any recipients.'))
@@ -62,7 +80,7 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recipients'))
+      ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 

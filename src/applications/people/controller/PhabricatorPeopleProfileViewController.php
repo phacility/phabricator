@@ -14,7 +14,6 @@ final class PhabricatorPeopleProfileViewController
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
       ->withUsernames(array($username))
-      ->needBadges(true)
       ->needProfileImage(true)
       ->needAvailability(true)
       ->executeOne();
@@ -29,15 +28,26 @@ final class PhabricatorPeopleProfileViewController
     $name = $user->getUsername();
 
     $feed = $this->buildPeopleFeed($user, $viewer);
+
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon(
+        id(new PHUIIconView())
+          ->setIcon('fa-list-ul'))
+      ->setText(pht('View All'))
+      ->setHref('/feed/?userPHIDs='.$user->getPHID());
+
+    $feed_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Activity'))
+      ->addActionLink($view_all);
+
     $feed = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Activity'))
+      ->setHeader($feed_header)
       ->addClass('project-view-feed')
       ->appendChild($feed);
 
     $projects = $this->buildProjectsView($user);
     $calendar = $this->buildCalendarDayView($user);
-    $badges = $this->buildBadgesView($user);
-    require_celerity_resource('project-view-css');
 
     $home = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -52,7 +62,6 @@ final class PhabricatorPeopleProfileViewController
         array(
           $projects,
           $calendar,
-          $badges,
         ));
 
     $nav = $this->getProfileMenu();
@@ -228,112 +237,12 @@ final class PhabricatorPeopleProfileViewController
     return $box;
   }
 
-  private function buildBadgesView(PhabricatorUser $user) {
-
-    $viewer = $this->getViewer();
-    $class = 'PhabricatorBadgesApplication';
-
-    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      return null;
-    }
-
-    $awards = array();
-    $badges = array();
-    if ($user->getBadgePHIDs()) {
-      $awards = id(new PhabricatorBadgesAwardQuery())
-        ->setViewer($viewer)
-        ->withRecipientPHIDs(array($user->getPHID()))
-        ->execute();
-      $awards = mpull($awards, null, 'getBadgePHID');
-
-      $badges = array();
-      foreach ($awards as $award) {
-        $badge = $award->getBadge();
-        if ($badge->getStatus() == PhabricatorBadgesBadge::STATUS_ACTIVE) {
-          $badges[$award->getBadgePHID()] = $badge;
-        }
-      }
-    }
-
-    if (count($badges)) {
-      $flex = new PHUIBadgeBoxView();
-
-      foreach ($badges as $badge) {
-        if ($badge) {
-          $awarder_info = array();
-
-          $award = idx($awards, $badge->getPHID(), null);
-          $awarder_phid = $award->getAwarderPHID();
-          $awarder_handle = $viewer->renderHandle($awarder_phid);
-
-          $awarder_info = pht(
-            'Awarded by %s',
-            $awarder_handle->render());
-
-          $item = id(new PHUIBadgeView())
-            ->setIcon($badge->getIcon())
-            ->setHeader($badge->getName())
-            ->setSubhead($badge->getFlavor())
-            ->setQuality($badge->getQuality())
-            ->setHref($badge->getViewURI())
-            ->addByLine($awarder_info);
-
-          $flex->addItem($item);
-        }
-      }
-    } else {
-      $flex = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
-        ->appendChild(pht('User does not have any badges.'));
-    }
-
-    // Best option?
-    $badges = id(new PhabricatorBadgesQuery())
-      ->setViewer($viewer)
-      ->withStatuses(array(
-        PhabricatorBadgesBadge::STATUS_ACTIVE,
-      ))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->execute();
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-plus')
-      ->setText(pht('Award'))
-      ->setWorkflow(true)
-      ->setHref('/badges/award/'.$user->getID().'/');
-
-    $can_award = false;
-    if (count($badges)) {
-      $can_award = true;
-    }
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Badges'));
-
-    if (count($badges)) {
-      $header->addActionLink($button);
-    }
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addClass('project-view-badges')
-      ->appendChild($flex)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-
-    return $box;
-  }
-
   private function buildPeopleFeed(
     PhabricatorUser $user,
     $viewer) {
 
     $query = new PhabricatorFeedQuery();
-    $query->setFilterPHIDs(
+    $query->withFilterPHIDs(
       array(
         $user->getPHID(),
       ));

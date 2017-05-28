@@ -128,7 +128,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
 
   private function parseParams(DivinerAtom $atom, AASTNode $func) {
     $params = $func
-      ->getChildByIndex(3, 'n_DECLARATAION_PARAMETER_LIST')
+      ->getChildOfType(3, 'n_DECLARATION_PARAMETER_LIST')
       ->selectDescendantsOfType('n_DECLARATION_PARAMETER');
 
     $param_spec = array();

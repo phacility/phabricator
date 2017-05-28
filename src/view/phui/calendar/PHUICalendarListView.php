@@ -57,7 +57,6 @@ final class PHUICalendarListView extends AphrontTagView {
     Javelin::initBehavior('phabricator-tooltips');
 
     $singletons = array();
-    $allday = false;
     foreach ($this->events as $event) {
       $start_epoch = $event->getEpochStart();
 
@@ -81,7 +80,7 @@ final class PHUICalendarListView extends AphrontTagView {
         array(
           'class' => 'phui-calendar-list-title',
         ),
-        $this->getEventTitle($event, $allday));
+        $this->getEventTitle($event));
       $time = phutil_tag(
         'span',
         array(

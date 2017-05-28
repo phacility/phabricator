@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_nuance.nuance_item
+  MODIFY itemKey VARCHAR(64) COLLATE {$COLLATE_TEXT};

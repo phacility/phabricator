@@ -14,12 +14,12 @@ final class PhabricatorCountdownView extends AphrontView {
     require_celerity_resource('phabricator-countdown-css');
 
     $header_text = array(
-      'C'.$countdown->getID(),
+      $countdown->getMonogram(),
       ' ',
       phutil_tag(
         'a',
         array(
-          'href' => '/countdown/'.$countdown->getID(),
+          'href' => $countdown->getURI(),
         ),
         $countdown->getTitle()),
     );

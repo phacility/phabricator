@@ -11,6 +11,10 @@ final class PhabricatorMetaMTAMailSearchEngine
     return 'PhabricatorMetaMTAApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     return new PhabricatorMetaMTAMailQuery();
   }

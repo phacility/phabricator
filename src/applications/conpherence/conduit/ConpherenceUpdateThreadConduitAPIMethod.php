@@ -11,6 +11,16 @@ final class ConpherenceUpdateThreadConduitAPIMethod
     return pht('Update an existing conpherence room.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "conpherence.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'id' => 'optional int',
@@ -69,7 +79,7 @@ final class ConpherenceUpdateThreadConduitAPIMethod
     if ($add_participant_phids) {
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(
-          ConpherenceTransaction::TYPE_PARTICIPANTS)
+          ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
         ->setNewValue(array('+' => $add_participant_phids));
     }
     if ($remove_participant_phid) {
@@ -78,12 +88,13 @@ final class ConpherenceUpdateThreadConduitAPIMethod
       }
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(
-          ConpherenceTransaction::TYPE_PARTICIPANTS)
+          ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
         ->setNewValue(array('-' => array($remove_participant_phid)));
     }
     if ($title) {
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
+        ->setTransactionType(
+          ConpherenceThreadTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
     }
     if ($message) {

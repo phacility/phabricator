@@ -29,7 +29,6 @@ final class PhabricatorProjectProfileController
       ->setHeader(array($project->getDisplayName(), $tag))
       ->setUser($viewer)
       ->setPolicyObject($project)
-      ->setImage($picture)
       ->setProfileHeader(true);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
@@ -74,16 +73,28 @@ final class PhabricatorProjectProfileController
 
     $stories = id(new PhabricatorFeedQuery())
       ->setViewer($viewer)
-      ->setFilterPHIDs(
+      ->withFilterPHIDs(
         array(
           $project->getPHID(),
         ))
       ->setLimit(50)
       ->execute();
 
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon(
+        id(new PHUIIconView())
+          ->setIcon('fa-list-ul'))
+      ->setText(pht('View All'))
+      ->setHref('/feed/?projectPHIDs='.$project->getPHID());
+
+    $feed_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Activity'))
+      ->addActionLink($view_all);
+
     $feed = $this->renderStories($stories);
     $feed = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Activity'))
+      ->setHeader($feed_header)
       ->addClass('project-view-feed')
       ->appendChild($feed);
 
@@ -92,6 +103,7 @@ final class PhabricatorProjectProfileController
     $home = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setMainColumn(
         array(
           $properties,
@@ -113,10 +125,7 @@ final class PhabricatorProjectProfileController
       ->setCrumbs($crumbs)
       ->setTitle($project->getDisplayName())
       ->setPageObjectPHIDs(array($project->getPHID()))
-      ->appendChild(
-        array(
-          $home,
-        ));
+      ->appendChild($home);
   }
 
   private function buildPropertyListView(
@@ -138,7 +147,7 @@ final class PhabricatorProjectProfileController
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Properties'));
+      ->setHeader(pht('Details'));
 
     $view = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -244,7 +253,7 @@ final class PhabricatorProjectProfileController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($milestone_list);
   }
 

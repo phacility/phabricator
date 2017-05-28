@@ -125,6 +125,34 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
       9,
       count($subpri),
       pht('Expected subpriorities to be distributed.'));
+
+    // Move task 9 to the end.
+    $this->moveTask($viewer, $t[9], $t[1], true);
+    $tasks = $this->loadTasks($viewer, $auto_base);
+    $this->assertEqual(
+      array(8, 7, 6, 5, 4, 3, 2, 1, 9),
+      array_keys($tasks));
+
+    // Move task 3 to the beginning.
+    $this->moveTask($viewer, $t[3], $t[8], false);
+    $tasks = $this->loadTasks($viewer, $auto_base);
+    $this->assertEqual(
+      array(3, 8, 7, 6, 5, 4, 2, 1, 9),
+      array_keys($tasks));
+
+    // Move task 3 to the end.
+    $this->moveTask($viewer, $t[3], $t[9], true);
+    $tasks = $this->loadTasks($viewer, $auto_base);
+    $this->assertEqual(
+      array(8, 7, 6, 5, 4, 2, 1, 9, 3),
+      array_keys($tasks));
+
+    // Move task 5 to before task 4 (this is its current position).
+    $this->moveTask($viewer, $t[5], $t[4], false);
+    $tasks = $this->loadTasks($viewer, $auto_base);
+    $this->assertEqual(
+      array(8, 7, 6, 5, 4, 2, 1, 9, 3),
+      array_keys($tasks));
   }
 
   private function newTask(PhabricatorUser $viewer, $title) {
@@ -133,7 +161,7 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+      ->setTransactionType(ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue($title);
 
 
@@ -169,11 +197,11 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+      ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($pri);
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+      ->setTransactionType(ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($sub);
 
     return $this->applyTaskTransactions($viewer, $src, $xactions);
@@ -192,11 +220,11 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+      ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($pri);
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+      ->setTransactionType(ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)
       ->setNewValue($sub);
 
     return $this->applyTaskTransactions($viewer, $src, $xactions);

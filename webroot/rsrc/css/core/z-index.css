@@ -2,14 +2,14 @@
  * @provides phabricator-zindex-css
  */
 
-.keyboard-focus-focus-reticle {
-  z-index: 1;
-}
-
 .device .phabricator-action-list-view.phabricator-action-list-toggle,
 .device-desktop .phui-document-content
   .phabricator-action-list-view.phabricator-action-list-toggle {
   z-index: 1;
+}
+
+.keyboard-focus-focus-reticle {
+  z-index: 2;
 }
 
 .device-desktop .phui-timeline-minor-event .phui-timeline-image {
@@ -90,6 +90,14 @@ div.phui-calendar-day-event {
 
 .loading .messages-loading-mask,
 .loading .widgets-loading-mask {
+  z-index: 6;
+}
+
+.diff-banner {
+  z-index: 6;
+}
+
+.scroll-objective-list {
   z-index: 6;
 }
 

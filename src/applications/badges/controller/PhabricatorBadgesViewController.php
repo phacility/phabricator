@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorBadgesViewController
-  extends PhabricatorBadgesController {
+  extends PhabricatorBadgesProfileController {
 
   public function shouldAllowPublic() {
     return true;
@@ -14,51 +14,23 @@ final class PhabricatorBadgesViewController
     $badge = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needRecipients(true)
       ->executeOne();
     if (!$badge) {
       return new Aphront404Response();
     }
 
+    $this->setBadge($badge);
+
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($badge->getName());
-    $crumbs->setBorder(true);
     $title = $badge->getName();
 
-    if ($badge->isArchived()) {
-      $status_icon = 'fa-ban';
-      $status_color = 'dark';
-    } else {
-      $status_icon = 'fa-check';
-      $status_color = 'bluegrey';
-    }
-    $status_name = idx(
-      PhabricatorBadgesBadge::getStatusNameMap(),
-      $badge->getStatus());
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($badge->getName())
-      ->setUser($viewer)
-      ->setPolicyObject($badge)
-      ->setStatus($status_icon, $status_color, $status_name)
-      ->setHeaderIcon('fa-trophy');
-
+    $header = $this->buildHeaderView();
     $curtain = $this->buildCurtain($badge);
     $details = $this->buildDetailsView($badge);
 
     $timeline = $this->buildTransactionTimeline(
       $badge,
       new PhabricatorBadgesTransactionQuery());
-
-    $awards = $badge->getAwards();
-    $recipient_phids = mpull($awards, 'getRecipientPHID');
-    $recipient_phids = array_reverse($recipient_phids);
-    $handles = $this->loadViewerHandles($recipient_phids);
-
-    $recipient_list = id(new PhabricatorBadgesRecipientsListView())
-      ->setBadge($badge)
-      ->setHandles($handles)
-      ->setUser($viewer);
 
     $comment_view = id(new PhabricatorBadgesEditEngine())
       ->setViewer($viewer)
@@ -68,16 +40,18 @@ final class PhabricatorBadgesViewController
       ->setHeader($header)
       ->setCurtain($curtain)
       ->setMainColumn(array(
-          $recipient_list,
           $timeline,
           $comment_view,
         ))
       ->addPropertySection(pht('Description'), $details);
 
+    $navigation = $this->buildSideNavView('view');
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($badge->getPHID()))
+      ->setNavigation($navigation)
       ->appendChild($view);
   }
 
@@ -116,7 +90,6 @@ final class PhabricatorBadgesViewController
     $id = $badge->getID();
     $edit_uri = $this->getApplicationURI("/edit/{$id}/");
     $archive_uri = $this->getApplicationURI("/archive/{$id}/");
-    $award_uri = $this->getApplicationURI("/recipients/{$id}/");
 
     $curtain = $this->newCurtainView($badge);
 
@@ -144,14 +117,6 @@ final class PhabricatorBadgesViewController
           ->setWorkflow($can_edit)
           ->setHref($archive_uri));
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName('Add Recipients')
-        ->setIcon('fa-users')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true)
-        ->setHref($award_uri));
 
     return $curtain;
   }

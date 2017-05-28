@@ -25,6 +25,10 @@ final class ManiphestEditEngine
     return true;
   }
 
+  public function getQuickCreateOrderVector() {
+    return id(new PhutilSortVector())->addInt(100);
+  }
+
   protected function newEditableObject() {
     return ManiphestTask::initializeNewTask($this->getViewer());
   }
@@ -146,7 +150,7 @@ EODOCS
         ->setConduitDescription(pht('Create as a subtask of another task.'))
         ->setConduitTypeDescription(pht('PHID of the parent task.'))
         ->setAliases(array('parentPHID'))
-        ->setTransactionType(ManiphestTransaction::TYPE_PARENT)
+        ->setTransactionType(ManiphestTaskParentTransaction::TRANSACTIONTYPE)
         ->setHandleParameterType(new ManiphestTaskListHTTPParameterType())
         ->setSingleValue(null)
         ->setIsReorderable(false)
@@ -175,7 +179,7 @@ EODOCS
         ->setDescription(pht('Name of the task.'))
         ->setConduitDescription(pht('Rename the task.'))
         ->setConduitTypeDescription(pht('New task name.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+        ->setTransactionType(ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getTitle()),
       id(new PhabricatorUsersEditField())
@@ -186,7 +190,7 @@ EODOCS
         ->setConduitDescription(pht('Reassign the task.'))
         ->setConduitTypeDescription(
           pht('New task owner, or `null` to unassign.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+        ->setTransactionType(ManiphestTaskOwnerTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setSingleValue($object->getOwnerPHID())
         ->setCommentActionLabel(pht('Assign / Claim'))
@@ -197,7 +201,7 @@ EODOCS
         ->setDescription(pht('Status of the task.'))
         ->setConduitDescription(pht('Change the task status.'))
         ->setConduitTypeDescription(pht('New task status constant.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+        ->setTransactionType(ManiphestTaskStatusTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setValue($object->getStatus())
         ->setOptions($status_map)
@@ -209,7 +213,7 @@ EODOCS
         ->setDescription(pht('Priority of the task.'))
         ->setConduitDescription(pht('Change the priority of the task.'))
         ->setConduitTypeDescription(pht('New task priority constant.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+        ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setValue($object->getPriority())
         ->setOptions($priority_map)
@@ -226,7 +230,7 @@ EODOCS
         ->setDescription(pht('Point value of the task.'))
         ->setConduitDescription(pht('Change the task point value.'))
         ->setConduitTypeDescription(pht('New task point value.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_POINTS)
+        ->setTransactionType(ManiphestTaskPointsTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setValue($object->getPoints())
         ->setCommentActionLabel($action_label);
@@ -238,7 +242,7 @@ EODOCS
       ->setDescription(pht('Task description.'))
       ->setConduitDescription(pht('Update the task description.'))
       ->setConduitTypeDescription(pht('New task description.'))
-      ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+      ->setTransactionType(ManiphestTaskDescriptionTransaction::TRANSACTIONTYPE)
       ->setValue($object->getDescription())
       ->setPreviewPanel(
         id(new PHUIRemarkupPreviewPanel())

@@ -66,6 +66,21 @@ EOTEXT
       ,
       PhabricatorEnv::getDoclink('Configuring Encryption')));
 
+    $require_mfa_description = $this->deformat(pht(<<<EOTEXT
+By default, Phabricator allows users to add multi-factor authentication to
+their accounts, but does not require it. By enabling this option, you can
+force all users to add at least one authentication factor before they can use
+their accounts.
+
+Administrators can query a list of users who do not have MFA configured in
+{nav People}:
+
+  - **[[ %s | %s ]]**
+EOTEXT
+      ,
+      '/people/?mfa=false',
+      pht('List of Users Without MFA')));
+
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
         ->setLocked(true)
@@ -94,7 +109,8 @@ EOTEXT
             'Default key for HMAC digests where the key is not important '.
             '(i.e., the hash itself is secret). You can change this if you '.
             'want (to any other string), but doing so will break existing '.
-            'sessions and CSRF tokens.')),
+            'sessions and CSRF tokens. This option is deprecated. Newer '.
+            'code automatically manages HMAC keys.')),
       $this->newOption('security.require-https', 'bool', false)
         ->setLocked(true)
         ->setSummary(
@@ -132,13 +148,7 @@ EOTEXT
         ->setLocked(true)
         ->setSummary(
           pht('Require all users to configure multi-factor authentication.'))
-        ->setDescription(
-          pht(
-            'By default, Phabricator allows users to add multi-factor '.
-            'authentication to their accounts, but does not require it. '.
-            'By enabling this option, you can force all users to add '.
-            'at least one authentication factor before they can use their '.
-            'accounts.'))
+        ->setDescription($require_mfa_description)
         ->setBoolOptions(
           array(
             pht('Multi-Factor Required'),

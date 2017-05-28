@@ -79,7 +79,7 @@ a config like this:
 To select a configuration file, write the name of the file (relative to
 `phabricator/conf/`) to `phabricator/conf/local/ENVIRONMENT`. For example, to
 select `phabricator/conf/custom/exampleconfig.conf.php`, you would write
-"custom/exampleconfig" to `phabrictor/conf/local/ENVIRONMENT`:
+"custom/exampleconfig" to `phabricator/conf/local/ENVIRONMENT`:
 
   phabricator/ $ echo custom/exampleconfig > conf/local/ENVIRONMENT
   phabricator/ $ cat conf/local/ENVIRONMENT

@@ -41,7 +41,7 @@ final class PhabricatorMetaMTAAttachment extends Phobject {
   public function toDictionary() {
     return array(
       'filename' => $this->getFilename(),
-      'mimetype' => $this->getMimetype(),
+      'mimetype' => $this->getMimeType(),
       'data' => $this->getData(),
     );
   }

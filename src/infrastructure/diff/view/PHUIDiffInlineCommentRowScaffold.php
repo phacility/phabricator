@@ -21,21 +21,28 @@ abstract class PHUIDiffInlineCommentRowScaffold extends AphrontView {
   }
 
   protected function getRowAttributes() {
-    // TODO: This is semantic information used by the JS when placing comments
-    // and using keyboard navigation; we should move it out of class names.
-
-    $style = null;
+    $is_hidden = false;
     foreach ($this->getInlineViews() as $view) {
       if ($view->isHidden()) {
-        $style = 'display: none';
+        $is_hidden = true;
       }
     }
 
-    return array(
-      'class' => 'inline',
+    $classes = array();
+    $classes[] = 'inline';
+    if ($is_hidden) {
+      $classes[] = 'inline-hidden';
+    }
+
+    $result = array(
+      'class' => implode(' ', $classes),
       'sigil' => 'inline-row',
-      'style' => $style,
+      'meta' => array(
+        'hidden' => $is_hidden,
+      ),
     );
+
+    return $result;
   }
 
 }

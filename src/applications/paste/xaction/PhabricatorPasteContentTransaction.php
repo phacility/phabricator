@@ -79,7 +79,6 @@ final class PhabricatorPasteContentTransaction
         'mime-type' => 'text/plain; charset=utf-8',
         'authorPHID' => $actor->getPHID(),
         'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-        'editPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
   }
 

@@ -69,8 +69,6 @@ final class DifferentialChangesetTwoUpRenderer
     $depths = $this->getDepths();
     $mask = $this->getMask();
 
-    $hidden = new PHUIDiffRevealIconView();
-
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
         // If we aren't going to show this line, we've just entered a gap.
@@ -241,9 +239,6 @@ final class DifferentialChangesetTwoUpRenderer
       $new_comments = $this->getNewComments();
       $scaffolds = array();
 
-      $o_hidden = array();
-      $n_hidden = array();
-
       if ($o_num && isset($old_comments[$o_num])) {
         foreach ($old_comments[$o_num] as $comment) {
           $inline = $this->buildInlineComment(
@@ -251,20 +246,12 @@ final class DifferentialChangesetTwoUpRenderer
             $on_right = false);
           $scaffold = $this->getRowScaffoldForInline($inline);
 
-          if ($comment->isHidden()) {
-            $o_hidden[] = $comment;
-          }
-
           if ($n_num && isset($new_comments[$n_num])) {
             foreach ($new_comments[$n_num] as $key => $new_comment) {
               if ($comment->isCompatible($new_comment)) {
                 $companion = $this->buildInlineComment(
                   $new_comment,
                   $on_right = true);
-
-                if ($new_comment->isHidden()) {
-                  $n_hidden = $new_comment;
-                }
 
                 $scaffold->addInlineView($companion);
                 unset($new_comments[$n_num][$key]);
@@ -284,20 +271,8 @@ final class DifferentialChangesetTwoUpRenderer
             $comment,
             $on_right = true);
 
-          if ($comment->isHidden()) {
-            $n_hidden[] = $comment;
-          }
-
           $scaffolds[] = $this->getRowScaffoldForInline($inline);
         }
-      }
-
-      if ($o_hidden) {
-        $o_num = array($hidden, $o_num);
-      }
-
-      if ($n_hidden) {
-        $n_num = array($hidden, $n_num);
       }
 
       // NOTE: This is a unicode zero-width space, which we use as a hint when
@@ -346,6 +321,12 @@ final class DifferentialChangesetTwoUpRenderer
     $new = null;
     if ($new_file) {
       $new = $this->renderImageStage($new_file);
+    }
+
+    // If we don't have an explicit "vs" changeset, it's the left side of the
+    // "id" changeset.
+    if (!$vs) {
+      $vs = $id;
     }
 
     $html_old = array();

@@ -31,112 +31,69 @@ final class PhabricatorProjectBoardManageController
     $board_id = $board->getID();
 
     $header = $this->buildHeaderView($board);
-    $actions = $this->buildActionView($board);
-    $properties = $this->buildPropertyView($board);
-
-    $properties->setActionList($actions);
+    $curtain = $this->buildCurtainView($board);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Workboard'), "/project/board/{$board_id}/");
     $crumbs->addTextCrumb(pht('Manage'));
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $crumbs->setBorder(true);
 
     $nav = $this->getProfileMenu();
+    $columns_list = $this->buildColumnsList($board, $columns);
+
+    require_celerity_resource('project-view-css');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
+      ->setCurtain($curtain)
+      ->setMainColumn($columns_list);
 
     $title = array(
       pht('Manage Workboard'),
       $board->getDisplayName(),
     );
 
-    $columns_list = $this->buildColumnsList($board, $columns);
-
     return $this->newPage()
       ->setTitle($title)
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $box,
-          $columns_list,
-        ));
+      ->appendChild($view);
   }
 
   private function buildHeaderView(PhabricatorProject $board) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $header = id(new PHUIHeaderView())
-      ->setUser($viewer)
-      ->setHeader(pht('Workboard: %s', $board->getDisplayName()));
+      ->setHeader(pht('Workboard: %s', $board->getDisplayName()))
+      ->setUser($viewer);
 
     return $header;
   }
 
-  private function buildActionView(PhabricatorProject $board) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildCurtainView(PhabricatorProject $board) {
+    $viewer = $this->getViewer();
     $id = $board->getID();
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $curtain = $this->newCurtainView();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $board,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $reorder_uri = $this->getApplicationURI("board/{$id}/reorder/");
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-exchange')
-        ->setName(pht('Reorder Columns'))
-        ->setHref($reorder_uri)
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
-    $background_uri = $this->getApplicationURI("board/{$id}/background/");
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-paint-brush')
-        ->setName(pht('Change Background Color'))
-        ->setHref($background_uri)
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
     $disable_uri = $this->getApplicationURI("board/{$id}/disable/");
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-ban')
-        ->setName(pht('Disable Board'))
+        ->setName(pht('Disable Workboard'))
         ->setHref($disable_uri)
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    return $actions;
-  }
-
-  private function buildPropertyView(
-    PhabricatorProject $board) {
-    $viewer = $this->getRequest()->getUser();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($board);
-
-    $background = $board->getDisplayWorkboardBackgroundColor();
-    if ($background !== null) {
-      $map = PhabricatorProjectWorkboardBackgroundColor::getOptions();
-      $map = ipull($map, 'name');
-
-      $name = idx($map, $background, $background);
-      $properties->addProperty(pht('Background Color'), $name);
-    }
-
-    return $properties;
+    return $curtain;
   }
 
   private function buildColumnsList(
@@ -165,6 +122,11 @@ final class PhabricatorProjectBoardManageController
 
       if ($column->isHidden()) {
         $item->setDisabled(true);
+        $item->addAttribute(pht('Hidden'));
+        $item->setImageIcon('fa-columns grey');
+      } else {
+        $item->addAttribute(pht('Visible'));
+        $item->setImageIcon('fa-columns');
       }
 
       $view->addItem($item);
@@ -172,6 +134,7 @@ final class PhabricatorProjectBoardManageController
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Columns'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($view);
   }
 

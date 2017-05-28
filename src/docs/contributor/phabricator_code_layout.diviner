@@ -55,7 +55,7 @@ this document. See @{article:Adding New CSS and JS}.)
   phabricator/webroot/rsrc/css/application/derp/
 
 These directories under `phabricator/src/applications/derp/` represent
-the basic set of class types from which most Phabrictor applications are
+the basic set of class types from which most Phabricator applications are
 assembled. Each would contain a class file. For `Derp`, these classes could be
 something like:
 

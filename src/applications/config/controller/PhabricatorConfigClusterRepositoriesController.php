@@ -22,7 +22,7 @@ final class PhabricatorConfigClusterRepositoriesController
           ->setText(pht('Documentation')));
 
     $crumbs = $this
-      ->buildApplicationCrumbs($nav)
+      ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Repository Servers'))
       ->setBorder(true);
 

@@ -11,6 +11,16 @@ final class ConpherenceCreateThreadConduitAPIMethod
     return pht('Create a new conpherence thread.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "conpherence.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'title' => 'required string',
@@ -50,9 +60,6 @@ final class ConpherenceCreateThreadConduitAPIMethod
     if ($errors) {
       foreach ($errors as $error_code) {
         switch ($error_code) {
-          case ConpherenceEditor::ERROR_EMPTY_TITLE:
-            throw new ConduitException('ERR_EMPTY_TITLE');
-            break;
           case ConpherenceEditor::ERROR_EMPTY_PARTICIPANTS:
             throw new ConduitException('ERR_EMPTY_PARTICIPANT_PHIDS');
             break;

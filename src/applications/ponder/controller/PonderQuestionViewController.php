@@ -83,7 +83,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setContentID($content_id)
       ->setCount(count($xactions));
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb('Q'.$id, '/Q'.$id);
     $crumbs->setBorder(true);
 

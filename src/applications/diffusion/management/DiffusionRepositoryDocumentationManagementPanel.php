@@ -21,6 +21,10 @@ final class DiffusionRepositoryDocumentationManagementPanel
     return null;
   }
 
+  public function buildManagementPanelCurtain() {
+    return null;
+  }
+
   public function getPanelNavigationURI() {
     return PhabricatorEnv::getDoclink(
       'Diffusion User Guide: Managing Repositories');

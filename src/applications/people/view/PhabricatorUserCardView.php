@@ -31,11 +31,10 @@ final class PhabricatorUserCardView extends AphrontTagView {
   protected function getTagAttributes() {
     $classes = array();
     $classes[] = 'project-card-view';
+    $classes[] = 'people-card-view';
 
     if ($this->profile->getIsDisabled()) {
-      $classes[] = 'project-card-grey';
-    } else {
-      $classes[] = 'project-card-blue';
+      $classes[] = 'project-card-disabled';
     }
 
     return array(
@@ -52,55 +51,98 @@ final class PhabricatorUserCardView extends AphrontTagView {
 
     require_celerity_resource('project-card-view-css');
 
-    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
-    $profile_title = $profile->getDisplayTitle();
+    // We don't have a ton of room on the hovercard, so we're trying to show
+    // the most important tag. Users can click through to the profile to get
+    // more details.
+
+    $classes = array();
+    if ($user->getIsDisabled()) {
+      $tag_icon = 'fa-ban';
+      $tag_title = pht('Disabled');
+      $tag_shade = PHUITagView::COLOR_RED;
+      $classes[] = 'phui-image-disabled';
+    } else if (!$user->getIsApproved()) {
+      $tag_icon = 'fa-ban';
+      $tag_title = pht('Unapproved Account');
+      $tag_shade = PHUITagView::COLOR_RED;
+    } else if (!$user->getIsEmailVerified()) {
+      $tag_icon = 'fa-envelope';
+      $tag_title = pht('Email Not Verified');
+      $tag_shade = PHUITagView::COLOR_VIOLET;
+    } else if ($user->getIsAdmin()) {
+      $tag_icon = 'fa-star';
+      $tag_title = pht('Administrator');
+      $tag_shade = PHUITagView::COLOR_INDIGO;
+    } else {
+      $tag_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
+      $tag_title = $profile->getDisplayTitle();
+      $tag_shade = null;
+    }
 
     $tag = id(new PHUITagView())
-      ->setIcon($profile_icon)
-      ->setName($profile_title)
-      ->addClass('project-view-header-tag')
+      ->setIcon($tag_icon)
+      ->setName($tag_title)
       ->setType(PHUITagView::TYPE_SHADE);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(array($user->getFullName(), $tag))
-      ->setUser($viewer)
-      ->setImage($picture);
+    if ($tag_shade !== null) {
+      $tag->setColor($tag_shade);
+    }
 
     $body = array();
 
+    /* TODO: Replace with Conpherence Availability if we ship it */
     $body[] = $this->addItem(
-      pht('User Since'),
-      phabricator_date($profile->getDateCreated(), $viewer));
+      'fa-user-plus',
+      phabricator_date($user->getDateCreated(), $viewer));
 
     if (PhabricatorApplication::isClassInstalledForViewer(
         'PhabricatorCalendarApplication',
         $viewer)) {
       $body[] = $this->addItem(
-        pht('Availability'),
+        'fa-calendar-o',
         id(new PHUIUserAvailabilityView())
           ->setViewer($viewer)
           ->setAvailableUser($user));
     }
 
-    $badges = $this->buildBadges($user, $viewer);
-    if ($badges) {
-      $badges = id(new PHUIBadgeBoxView())
-        ->addItems($badges)
-        ->setCollapsed(true);
-      $body[] = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-hovercard-body-item hovercard-badges',
-        ),
-        $badges);
-    }
+    $classes[] = 'project-card-image';
+    $image = phutil_tag(
+      'img',
+      array(
+        'src' => $picture,
+        'class' => implode(' ', $classes),
+      ));
 
-    $body = phutil_tag(
+    $href = urisprintf(
+      '/p/%s/',
+      $user->getUsername());
+
+    $image = phutil_tag(
+      'a',
+      array(
+        'href' => $href,
+        'class' => 'project-card-image-href',
+      ),
+      $image);
+
+    $name = phutil_tag_div('project-card-name',
+      $user->getRealname());
+    $username = phutil_tag_div('project-card-username',
+      '@'.$user->getUsername());
+    $tag = phutil_tag_div('phui-header-subheader',
+      $tag);
+
+    $header = phutil_tag(
       'div',
       array(
-        'class' => 'project-card-body',
+        'class' => 'project-card-header',
       ),
-      $body);
+      array(
+        $name,
+        $username,
+        $tag,
+        $body,
+      ));
 
     $card = phutil_tag(
       'div',
@@ -108,47 +150,24 @@ final class PhabricatorUserCardView extends AphrontTagView {
         'class' => 'project-card-inner',
       ),
       array(
+        $image,
         $header,
-        $body,
       ));
 
     return $card;
   }
 
-  private function addItem($label, $value) {
-    $item = array(
-      phutil_tag('strong', array(), $label),
-      ': ',
-      phutil_tag('span', array(), $value),
-    );
-    return phutil_tag_div('project-card-item', $item);
-  }
-
-  private function buildBadges(
-    PhabricatorUser $user,
-    $viewer) {
-
-    $class = 'PhabricatorBadgesApplication';
-    $items = array();
-
-    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      $badge_phids = $user->getBadgePHIDs();
-      if ($badge_phids) {
-        $badges = id(new PhabricatorBadgesQuery())
-          ->setViewer($viewer)
-          ->withPHIDs($badge_phids)
-          ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
-          ->execute();
-
-        foreach ($badges as $badge) {
-          $items[] = id(new PHUIBadgeMiniView())
-            ->setIcon($badge->getIcon())
-            ->setHeader($badge->getName())
-            ->setQuality($badge->getQuality());
-        }
-      }
-    }
-    return $items;
+  private function addItem($icon, $value) {
+    $icon = id(new PHUIIconView())
+      ->addClass('project-card-item-icon')
+      ->setIcon($icon);
+    $text = phutil_tag(
+      'span',
+      array(
+        'class' => 'project-card-item-text',
+      ),
+      $value);
+    return phutil_tag_div('project-card-item', array($icon, $text));
   }
 
 }

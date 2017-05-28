@@ -15,6 +15,10 @@ final class PhabricatorDashboardPanelSearchEngine
     return new PhabricatorDashboardPanelQuery();
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
     if ($map['status']) {

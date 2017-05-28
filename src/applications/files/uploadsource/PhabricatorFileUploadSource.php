@@ -4,7 +4,7 @@ abstract class PhabricatorFileUploadSource
   extends Phobject {
 
   private $name;
-  private $ttl;
+  private $relativeTTL;
   private $viewPolicy;
 
   private $rope;
@@ -22,13 +22,13 @@ abstract class PhabricatorFileUploadSource
     return $this->name;
   }
 
-  public function setTTL($ttl) {
-    $this->ttl = $ttl;
+  public function setRelativeTTL($relative_ttl) {
+    $this->relativeTTL = $relative_ttl;
     return $this;
   }
 
-  public function getTTL() {
-    return $this->ttl;
+  public function getRelativeTTL() {
+    return $this->relativeTTL;
   }
 
   public function setViewPolicy($view_policy) {
@@ -137,10 +137,6 @@ abstract class PhabricatorFileUploadSource
 
     $parameters = $this->getNewFileParameters();
 
-    $parameters = array(
-      'isPartial' => true,
-    ) + $parameters;
-
     $data_length = $this->getDataLength();
     if ($data_length !== null) {
       $length = $data_length;
@@ -149,7 +145,7 @@ abstract class PhabricatorFileUploadSource
     }
 
     $file = PhabricatorFile::newChunkedFile($engine, $length, $parameters);
-    $file->save();
+    $file->saveAndIndex();
 
     $rope = $this->getRope();
 
@@ -214,7 +210,7 @@ abstract class PhabricatorFileUploadSource
   private function getNewFileParameters() {
     return array(
       'name' => $this->getName(),
-      'ttl' => $this->getTTL(),
+      'ttl.relative' => $this->getRelativeTTL(),
       'viewPolicy' => $this->getViewPolicy(),
     );
   }

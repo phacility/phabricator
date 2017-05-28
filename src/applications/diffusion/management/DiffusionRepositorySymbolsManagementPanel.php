@@ -34,9 +34,10 @@ final class DiffusionRepositorySymbolsManagementPanel
     );
   }
 
-  protected function buildManagementPanelActions() {
+  public function buildManagementPanelCurtain() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
+    $action_list = $this->getNewActionList();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -45,14 +46,15 @@ final class DiffusionRepositorySymbolsManagementPanel
 
     $symbols_uri = $this->getEditPageURI();
 
-    return array(
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Symbols'))
         ->setHref($symbols_uri)
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit),
-    );
+        ->setWorkflow(!$can_edit));
+
+    return $this->getNewCurtainView($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -60,8 +62,7 @@ final class DiffusionRepositorySymbolsManagementPanel
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setViewer($viewer)
-      ->setActionList($this->newActions());
+      ->setViewer($viewer);
 
     $languages = $repository->getSymbolLanguages();
     if ($languages) {

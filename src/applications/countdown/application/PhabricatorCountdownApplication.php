@@ -42,14 +42,10 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
       '/countdown/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorCountdownListController',
-        '(?P<id>[1-9]\d*)/'
-          => 'PhabricatorCountdownViewController',
         'comment/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownCommentController',
         $this->getEditRoutePattern('edit/')
           => 'PhabricatorCountdownEditController',
-        'delete/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorCountdownDeleteController',
       ),
     );
   }

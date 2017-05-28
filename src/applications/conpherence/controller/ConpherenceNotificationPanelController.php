@@ -7,12 +7,12 @@ final class ConpherenceNotificationPanelController
     $user = $request->getUser();
     $conpherences = array();
     require_celerity_resource('conpherence-notification-css');
-    $unread_status = ConpherenceParticipationStatus::BEHIND;
 
     $participant_data = id(new ConpherenceParticipantQuery())
       ->withParticipantPHIDs(array($user->getPHID()))
       ->setLimit(5)
       ->execute();
+    $participant_data = mpull($participant_data, null, 'getConpherencePHID');
 
     if ($participant_data) {
       $conpherences = id(new ConpherenceThreadQuery())
@@ -20,8 +20,7 @@ final class ConpherenceNotificationPanelController
         ->withPHIDs(array_keys($participant_data))
         ->needProfileImage(true)
         ->needTransactions(true)
-        ->setTransactionLimit(50)
-        ->needParticipantCache(true)
+        ->setTransactionLimit(100)
         ->execute();
     }
 
@@ -38,7 +37,7 @@ final class ConpherenceNotificationPanelController
           'conpherence-notification',
         );
 
-        if ($p_data->getParticipationStatus() == $unread_status) {
+        if (!$p_data->isUpToDate($conpherence)) {
           $classes[] = 'phabricator-notification-unread';
         }
         $uri = $this->getApplicationURI($conpherence->getID().'/');
@@ -96,7 +95,7 @@ final class ConpherenceNotificationPanelController
 
     $unread = id(new ConpherenceParticipantCountQuery())
       ->withParticipantPHIDs(array($user->getPHID()))
-      ->withParticipationStatus($unread_status)
+      ->withUnread(true)
       ->execute();
     $unread_count = idx($unread, $user->getPHID(), 0);
 

@@ -47,6 +47,7 @@ final class PhabricatorNotificationIndividualController
       'title'             => $data['title'],
       'body'              => $data['body'],
       'content'           => hsprintf('%s', $content),
+      'uniqueID' => 'story/'.$story->getChronologicalKey(),
     );
 
     return id(new AphrontAjaxResponse())->setContent($response);

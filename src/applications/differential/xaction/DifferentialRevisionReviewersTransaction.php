@@ -7,8 +7,8 @@ final class DifferentialRevisionReviewersTransaction
   const EDITKEY = 'reviewers';
 
   public function generateOldValue($object) {
-    $reviewers = $object->getReviewerStatus();
-    $reviewers = mpull($reviewers, 'getStatus', 'getReviewerPHID');
+    $reviewers = $object->getReviewers();
+    $reviewers = mpull($reviewers, 'getReviewerStatus', 'getReviewerPHID');
     return $reviewers;
   }
 
@@ -106,6 +106,9 @@ final class DifferentialRevisionReviewersTransaction
   public function applyExternalEffects($object, $value) {
     $src_phid = $object->getPHID();
 
+    // This is currently double-writing: to the old (edge) store and the new
+    // (reviewer) store. Do the old edge write first.
+
     $old = $this->generateOldValue($object);
     $new = $value;
     $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
@@ -138,6 +141,51 @@ final class DifferentialRevisionReviewersTransaction
     }
 
     $editor->save();
+
+    // Now, do the new write.
+
+    $table = new DifferentialReviewer();
+    $table_name = $table->getTableName();
+    $conn = $table->establishConnection('w');
+
+    if ($rem) {
+      queryfx(
+        $conn,
+        'DELETE FROM %T WHERE revisionPHID = %s AND reviewerPHID IN (%Ls)',
+        $table_name,
+        $src_phid,
+        array_keys($rem));
+    }
+
+    if ($new) {
+      $reviewers = $table->loadAllWhere(
+        'revisionPHID = %s AND reviewerPHID IN (%Ls)',
+        $src_phid,
+        array_keys($new));
+      $reviewers = mpull($reviewers, null, 'getReviewerPHID');
+
+      foreach ($new as $dst_phid => $status) {
+        $old_status = idx($old, $dst_phid);
+        if ($old_status === $status) {
+          continue;
+        }
+
+        $reviewer = idx($reviewers, $dst_phid);
+        if (!$reviewer) {
+          $reviewer = id(new DifferentialReviewer())
+            ->setRevisionPHID($src_phid)
+            ->setReviewerPHID($dst_phid);
+        }
+
+        $reviewer->setReviewerStatus($status);
+
+        try {
+          $reviewer->save();
+        } catch (AphrontDuplicateKeyQueryException $ex) {
+          // At least for now, just ignore it if we lost a race.
+        }
+      }
+    }
   }
 
   public function getTitle() {

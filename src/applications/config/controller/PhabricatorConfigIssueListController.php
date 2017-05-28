@@ -49,7 +49,7 @@ final class PhabricatorConfigIssueListController
       ->setProfileHeader(true);
 
     $crumbs = $this
-      ->buildApplicationCrumbs($nav)
+      ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Setup Issues'))
       ->setBorder(true);
 

@@ -11,7 +11,7 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Achievements and Notority');
+    return pht('Achievements and Notoriety');
   }
 
   public function getIcon() {
@@ -24,10 +24,6 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
 
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
-  }
-
-  public function isPrototype() {
-    return true;
   }
 
   public function getRoutes() {
@@ -47,11 +43,14 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
           => 'PhabricatorBadgesArchiveController',
         'view/(?:(?P<id>\d+)/)?'
           => 'PhabricatorBadgesViewController',
-        'recipients/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorBadgesEditRecipientsController',
-        'recipients/(?P<id>[1-9]\d*)/remove/'
-          => 'PhabricatorBadgesRemoveRecipientsController',
-
+        'recipients/' => array(
+          '(?P<id>[1-9]\d*)/'
+            => 'PhabricatorBadgesRecipientsController',
+          '(?P<id>[1-9]\d*)/add/'
+            => 'PhabricatorBadgesEditRecipientsController',
+          '(?P<id>[1-9]\d*)/remove/'
+            => 'PhabricatorBadgesRemoveRecipientsController',
+        ),
       ),
     );
   }

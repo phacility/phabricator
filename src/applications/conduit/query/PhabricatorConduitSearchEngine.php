@@ -11,6 +11,10 @@ final class PhabricatorConduitSearchEngine
     return 'PhabricatorConduitApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function getPageSize(PhabricatorSavedQuery $saved) {
     return PHP_INT_MAX - 1;
   }

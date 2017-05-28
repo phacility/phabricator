@@ -6,6 +6,10 @@ final class PhabricatorPeopleProfileMenuEngine
   const ITEM_PROFILE = 'people.profile';
   const ITEM_MANAGE = 'people.manage';
   const ITEM_PICTURE = 'people.picture';
+  const ITEM_BADGES = 'people.badges';
+  const ITEM_TASKS = 'people.tasks';
+  const ITEM_COMMITS = 'people.commits';
+  const ITEM_REVISIONS = 'people.revisions';
 
   protected function isMenuEngineConfigurable() {
     return false;
@@ -31,52 +35,41 @@ final class PhabricatorPeopleProfileMenuEngine
       ->setBuiltinKey(self::ITEM_PROFILE)
       ->setMenuItemKey(PhabricatorPeopleDetailsProfileMenuItem::MENUITEMKEY);
 
+    $have_badges = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorBadgesApplication',
+      $viewer);
+    if ($have_badges) {
+      $items[] = $this->newItem()
+        ->setBuiltinKey(self::ITEM_BADGES)
+        ->setMenuItemKey(PhabricatorPeopleBadgesProfileMenuItem::MENUITEMKEY);
+    }
+
     $have_maniphest = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorManiphestApplication',
       $viewer);
     if ($have_maniphest) {
-      $uri = urisprintf(
-        '/maniphest/?statuses=open()&assigned=%s#R',
-        $object->getPHID());
-
       $items[] = $this->newItem()
-        ->setBuiltinKey('tasks')
-        ->setMenuItemKey(PhabricatorLinkProfileMenuItem::MENUITEMKEY)
-        ->setMenuItemProperty('icon', 'maniphest')
-        ->setMenuItemProperty('name', pht('Open Tasks'))
-        ->setMenuItemProperty('uri', $uri);
+        ->setBuiltinKey(self::ITEM_TASKS)
+        ->setMenuItemKey(PhabricatorPeopleTasksProfileMenuItem::MENUITEMKEY);
     }
 
     $have_differential = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorDifferentialApplication',
       $viewer);
     if ($have_differential) {
-      $uri = urisprintf(
-        '/differential/?authors=%s#R',
-        $object->getPHID());
-
       $items[] = $this->newItem()
-        ->setBuiltinKey('revisions')
-        ->setMenuItemKey(PhabricatorLinkProfileMenuItem::MENUITEMKEY)
-        ->setMenuItemProperty('icon', 'differential')
-        ->setMenuItemProperty('name', pht('Revisions'))
-        ->setMenuItemProperty('uri', $uri);
+        ->setBuiltinKey(self::ITEM_REVISIONS)
+        ->setMenuItemKey(
+          PhabricatorPeopleRevisionsProfileMenuItem::MENUITEMKEY);
     }
 
     $have_diffusion = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorDiffusionApplication',
       $viewer);
     if ($have_diffusion) {
-      $uri = urisprintf(
-        '/diffusion/commit/?authors=%s#R',
-        $object->getPHID());
-
       $items[] = $this->newItem()
-        ->setBuiltinKey('commits')
-        ->setMenuItemKey(PhabricatorLinkProfileMenuItem::MENUITEMKEY)
-        ->setMenuItemProperty('icon', 'diffusion')
-        ->setMenuItemProperty('name', pht('Commits'))
-        ->setMenuItemProperty('uri', $uri);
+        ->setBuiltinKey(self::ITEM_COMMITS)
+        ->setMenuItemKey(PhabricatorPeopleCommitsProfileMenuItem::MENUITEMKEY);
     }
 
     $items[] = $this->newItem()

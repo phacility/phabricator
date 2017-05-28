@@ -42,7 +42,7 @@ final class PhabricatorMarkupEngine extends Phobject {
   private $objects = array();
   private $viewer;
   private $contextObject;
-  private $version = 16;
+  private $version = 17;
   private $engineCaches = array();
   private $auxiliaryConfig = array();
 
@@ -111,7 +111,7 @@ final class PhabricatorMarkupEngine extends Phobject {
     }
 
     if (!$keys) {
-      return;
+      return $this;
     }
 
     $objects = array_select_keys($this->objects, $keys);
@@ -692,6 +692,21 @@ final class PhabricatorMarkupEngine extends Phobject {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorRemarkupCustomBlockRule')
       ->execute();
+  }
+
+  public static function digestRemarkupContent($object, $content) {
+    $parts = array();
+    $parts[] = get_class($object);
+
+    if ($object instanceof PhabricatorLiskDAO) {
+      $parts[] = $object->getID();
+    }
+
+    $parts[] = $content;
+
+    $message = implode("\n", $parts);
+
+    return PhabricatorHash::digestWithNamedKey($message, 'remarkup');
   }
 
 }

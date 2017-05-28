@@ -60,7 +60,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
     if ($is_new) {
       $task->setTitle((string)$request->getValue('title'));
       $task->setDescription((string)$request->getValue('description'));
-      $changes[ManiphestTransaction::TYPE_STATUS] =
+      $changes[ManiphestTaskStatusTransaction::TRANSACTIONTYPE] =
         ManiphestTaskStatus::getDefaultStatus();
       $changes[PhabricatorTransactions::TYPE_SUBSCRIBERS] =
         array('+' => array($request->getUser()->getPHID()));
@@ -73,12 +73,12 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
 
       $title = $request->getValue('title');
       if ($title !== null) {
-        $changes[ManiphestTransaction::TYPE_TITLE] = $title;
+        $changes[ManiphestTaskTitleTransaction::TRANSACTIONTYPE] = $title;
       }
 
       $desc = $request->getValue('description');
       if ($desc !== null) {
-        $changes[ManiphestTransaction::TYPE_DESCRIPTION] = $desc;
+        $changes[ManiphestTaskDescriptionTransaction::TRANSACTIONTYPE] = $desc;
       }
 
       $status = $request->getValue('status');
@@ -88,7 +88,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
           throw id(new ConduitException('ERR-INVALID-PARAMETER'))
             ->setErrorDescription(pht('Status set to invalid value.'));
         }
-        $changes[ManiphestTransaction::TYPE_STATUS] = $status;
+        $changes[ManiphestTaskStatusTransaction::TRANSACTIONTYPE] = $status;
       }
     }
 
@@ -99,7 +99,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
         throw id(new ConduitException('ERR-INVALID-PARAMETER'))
           ->setErrorDescription(pht('Priority set to invalid value.'));
       }
-      $changes[ManiphestTransaction::TYPE_PRIORITY] = $priority;
+      $changes[ManiphestTaskPriorityTransaction::TRANSACTIONTYPE] = $priority;
     }
 
     $owner_phid = $request->getValue('ownerPHID');
@@ -108,7 +108,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
         array($owner_phid),
         PhabricatorPeopleUserPHIDType::TYPECONST,
         'ownerPHID');
-      $changes[ManiphestTransaction::TYPE_OWNER] = $owner_phid;
+      $changes[ManiphestTaskOwnerTransaction::TRANSACTIONTYPE] = $owner_phid;
     }
 
     $ccs = $request->getValue('ccPHIDs');

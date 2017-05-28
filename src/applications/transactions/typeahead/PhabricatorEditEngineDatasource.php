@@ -30,11 +30,17 @@ final class PhabricatorEditEngineDatasource
     $forms = $this->executeQuery($query);
     $results = array();
     foreach ($forms as $form) {
+      $create_uri = $form->getCreateURI();
+      if (!$create_uri) {
+        continue;
+      }
+
       if ($form->getID()) {
         $key = $form->getEngineKey().'/'.$form->getID();
       } else {
         $key = $form->getEngineKey().'/'.$form->getBuiltinKey();
       }
+
       $result = id(new PhabricatorTypeaheadResult())
         ->setName($form->getName())
         ->setPHID($key)

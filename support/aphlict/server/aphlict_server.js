@@ -197,3 +197,8 @@ for (ii = 0; ii < aphlict_admins.length; ii++) {
   admin_server.setClientServers(aphlict_clients);
   admin_server.setPeerList(peer_list);
 }
+
+for (ii = 0; ii < aphlict_clients.length; ii++) {
+  var client_server = aphlict_clients[ii];
+  client_server.setAdminServers(aphlict_admins);
+}

@@ -43,6 +43,15 @@ final class PhabricatorDashboardViewController
     $navigation = $this->buildSideNavView('view');
     $header = $this->buildHeaderView();
 
+    $install_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText('Install Dashboard')
+      ->setIcon('fa-plus')
+      ->setColor(PHUIButtonView::GREEN)
+      ->setWorkflow(true)
+      ->setHref($this->getApplicationURI("/install/{$id}/"));
+    $header->addActionLink($install_button);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(array(

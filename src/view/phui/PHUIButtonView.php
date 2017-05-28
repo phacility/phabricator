@@ -5,11 +5,7 @@ final class PHUIButtonView extends AphrontTagView {
   const GREEN = 'green';
   const GREY = 'grey';
   const DISABLED = 'disabled';
-
   const SIMPLE = 'simple';
-  const SIMPLE_YELLOW = 'simple simple-yellow';
-  const SIMPLE_GREY = 'simple simple-grey';
-  const SIMPLE_BLUE = 'simple simple-blue';
 
   const SMALL = 'small';
   const BIG = 'big';
@@ -62,6 +58,10 @@ final class PHUIButtonView extends AphrontTagView {
   public function setColor($color) {
     $this->color = $color;
     return $this;
+  }
+
+  public function getColor() {
+    return $this->color;
   }
 
   public function setDisabled($disabled) {

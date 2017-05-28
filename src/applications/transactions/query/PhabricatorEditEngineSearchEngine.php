@@ -15,6 +15,10 @@ final class PhabricatorEditEngineSearchEngine
     return id(new PhabricatorEditEngineQuery());
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
     return $query;

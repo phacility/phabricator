@@ -30,11 +30,6 @@ final class PhabricatorRepositoryURIQuery
     return $this;
   }
 
-  public function withObjectHashes(array $hashes) {
-    $this->objectHashes = $hashes;
-    return $this;
-  }
-
   public function newResultObject() {
     return new PhabricatorRepositoryURI();
   }

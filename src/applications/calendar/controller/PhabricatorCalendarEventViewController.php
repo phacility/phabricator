@@ -125,7 +125,7 @@ final class PhabricatorCalendarEventViewController
           ->setName(pht('Imported'))
           ->setIcon('fa-download')
           ->setHref($event->getImportSource()->getURI())
-          ->setShade('orange'));
+          ->setColor(PHUITagView::COLOR_ORANGE));
     }
 
     foreach ($this->buildRSVPActions($event) as $action) {

@@ -23,7 +23,7 @@ final class ManiphestClaimEmailCommand
     $xactions = array();
 
     $xactions[] = $object->getApplicationTransactionTemplate()
-      ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+      ->setTransactionType(ManiphestTaskOwnerTransaction::TRANSACTIONTYPE)
       ->setNewValue($viewer->getPHID());
 
     return $xactions;

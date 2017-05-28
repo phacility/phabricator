@@ -11,6 +11,10 @@ final class PhabricatorDashboardTabsPanelType
     return pht('Tab Panel');
   }
 
+  public function getIcon() {
+    return 'fa-window-maximize';
+  }
+
   public function getPanelTypeDescription() {
     return pht('Use tabs to switch between several other panels.');
   }
@@ -93,6 +97,7 @@ final class PhabricatorDashboardTabsPanelType
           ->setPanel($panel)
           ->setPanelPHID($panel->getPHID())
           ->setHeaderMode($no_headers)
+          ->setMovable(false)
           ->renderPanel();
       } else {
         $panel_content = pht('(Invalid Panel)');

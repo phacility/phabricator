@@ -36,6 +36,8 @@ final class PhabricatorMacroViewController
       $macro,
       new PhabricatorMacroTransactionQuery());
 
+    $comment_form = $this->buildCommentForm($macro, $timeline);
+
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($macro)
@@ -45,24 +47,8 @@ final class PhabricatorMacroViewController
     if (!$macro->getIsDisabled()) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('fa-ban', 'red', pht('Archived'));
+      $header->setStatus('fa-ban', 'indigo', pht('Archived'));
     }
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Grovel in Awe');
-
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $macro->getPHID());
-
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($macro->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($comment_header)
-      ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -70,7 +56,7 @@ final class PhabricatorMacroViewController
       ->setCurtain($curtain)
       ->setMainColumn(array(
         $timeline,
-        $add_comment_form,
+        $comment_form,
       ))
       ->addPropertySection(pht('Macro'), $file)
       ->addPropertySection(pht('Details'), $details);
@@ -80,6 +66,16 @@ final class PhabricatorMacroViewController
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($macro->getPHID()))
       ->appendChild($view);
+  }
+
+  private function buildCommentForm(
+    PhabricatorFileImageMacro $macro, $timeline) {
+    $viewer = $this->getViewer();
+
+    return id(new PhabricatorMacroEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($macro)
+      ->setTransactionTimeline($timeline);
   }
 
   private function buildCurtain(

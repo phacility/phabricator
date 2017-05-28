@@ -3,6 +3,8 @@
 final class PhabricatorPeopleTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'users';
+
   public function getGeneratorName() {
     return pht('User Accounts');
   }

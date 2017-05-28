@@ -6,6 +6,7 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
   abstract public function getPanelTypeName();
   abstract public function getPanelTypeDescription();
   abstract public function getFieldSpecifications();
+  abstract public function getIcon();
 
   abstract public function renderPanelContent(
     PhabricatorUser $viewer,

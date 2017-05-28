@@ -15,14 +15,13 @@ final class PhabricatorBadgesAwardController
       return new Aphront404Response();
     }
 
-    $view_uri = '/p/'.$user->getUsername();
+    $view_uri = '/people/badges/'.$user->getID().'/';
 
     if ($request->isFormPost()) {
       $badge_phids = $request->getArr('badgePHIDs');
       $badges = id(new PhabricatorBadgesQuery())
         ->setViewer($viewer)
         ->withPHIDs($badge_phids)
-        ->needRecipients(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_EDIT,
@@ -37,10 +36,11 @@ final class PhabricatorBadgesAwardController
       foreach ($badges as $badge) {
         $xactions = array();
         $xactions[] = id(new PhabricatorBadgesTransaction())
-          ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
+          ->setTransactionType(
+            PhabricatorBadgesBadgeAwardTransaction::TRANSACTIONTYPE)
           ->setNewValue($award_phids);
 
-        $editor = id(new PhabricatorBadgesEditor($badge))
+        $editor = id(new PhabricatorBadgesEditor())
           ->setActor($viewer)
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)
@@ -66,7 +66,7 @@ final class PhabricatorBadgesAwardController
                   ))));
 
     $dialog = $this->newDialog()
-      ->setTitle(pht('Grant Badge'))
+      ->setTitle(pht('Award Badge'))
       ->appendForm($form)
       ->addCancelButton($view_uri)
       ->addSubmitButton(pht('Award'));

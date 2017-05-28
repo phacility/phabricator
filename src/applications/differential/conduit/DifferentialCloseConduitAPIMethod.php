@@ -44,7 +44,7 @@ final class DifferentialCloseConduitAPIMethod
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($id))
       ->setViewer($viewer)
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_NOT_FOUND');

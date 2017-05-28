@@ -46,7 +46,7 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
 
     if ($this->changesets instanceof Exception) {
       $ex_class = get_class($this->changesets);
-      $ex_message = $this->changesets->getmessage();
+      $ex_message = $this->changesets->getMessage();
       if ($type === 'name') {
         return array("<{$ex_class}: {$ex_message}>");
       } else {
@@ -190,7 +190,7 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
         $this->revision = id(new DifferentialRevisionQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
           ->withIDs(array($revision_id))
-          ->needRelationships(true)
+          ->needReviewers(true)
           ->executeOne();
       }
     }

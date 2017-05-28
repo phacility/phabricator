@@ -20,7 +20,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $this->objects = $objects;
 
-    $phids = $query->getEvaluatedParameter('responsiblePHIDs', array());
+    $phids = $query->getEvaluatedParameter('responsiblePHIDs');
     if (!$phids) {
       throw new Exception(
         pht(
@@ -28,6 +28,14 @@ final class DifferentialRevisionRequiredActionResultBucket
           'specifying "Responsible Users".'));
     }
     $phids = array_fuse($phids);
+
+    // Before continuing, throw away any revisions which responsible users
+    // have explicitly resigned from.
+
+    // The goal is to allow users to resign from revisions they don't want to
+    // review to get these revisions off their dashboard, even if there are
+    // other project or package reviewers which they have authority over.
+    $this->filterResigned($phids);
 
     $groups = array();
 
@@ -62,6 +70,11 @@ final class DifferentialRevisionRequiredActionResultBucket
       ->setName(pht('Waiting on Authors'))
       ->setNoDataString(pht('No revisions are waiting on author action.'))
       ->setObjects($this->filterWaitingOnAuthors($phids));
+
+    $groups[] = $this->newGroup()
+      ->setName(pht('Waiting on Other Reviewers'))
+      ->setNoDataString(pht('No revisions are waiting for other reviewers.'))
+      ->setObjects($this->filterWaitingOnOtherReviewers($phids));
 
     // Because you can apply these buckets to queries which include revisions
     // that have been closed, add an "Other" bucket if we still have stuff
@@ -193,6 +206,48 @@ final class DifferentialRevisionRequiredActionResultBucket
     $results = array();
     foreach ($objects as $key => $object) {
       if (empty($statuses[$object->getStatus()])) {
+        continue;
+      }
+
+      $results[$key] = $object;
+      unset($this->objects[$key]);
+    }
+
+    return $results;
+  }
+
+  private function filterWaitingOnOtherReviewers(array $phids) {
+    $statuses = array(
+      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
+    );
+    $statuses = array_fuse($statuses);
+
+    $objects = $this->getRevisionsNotAuthored($this->objects, $phids);
+
+    $results = array();
+    foreach ($objects as $key => $object) {
+      if (!isset($statuses[$object->getStatus()])) {
+        continue;
+      }
+
+      $results[$key] = $object;
+      unset($this->objects[$key]);
+    }
+
+    return $results;
+  }
+
+  private function filterResigned(array $phids) {
+    $resigned = array(
+      DifferentialReviewerStatus::STATUS_RESIGNED,
+    );
+    $resigned = array_fuse($resigned);
+
+    $objects = $this->getRevisionsNotAuthored($this->objects, $phids);
+
+    $results = array();
+    foreach ($objects as $key => $object) {
+      if (!$this->hasReviewersWithStatus($object, $phids, $resigned)) {
         continue;
       }
 

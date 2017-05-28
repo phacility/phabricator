@@ -134,5 +134,5 @@ query escaping system the rest of the application does.
 
 Hopefully, whatever language you're writing in has good query libraries that
 can handle escaping for you. If so, use them. If you're using PHP and don't have
-a solution in place yet, the Phabricator implementation of qsprintf() is similar
-to Facebook's system and was successful there.
+a solution in place yet, the Phabricator implementation of `qsprintf()` is
+similar to Facebook's system and was successful there.

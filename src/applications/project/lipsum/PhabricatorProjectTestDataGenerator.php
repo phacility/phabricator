@@ -3,6 +3,8 @@
 final class PhabricatorProjectTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'projects';
+
   public function getGeneratorName() {
     return pht('Projects');
   }
@@ -14,11 +16,11 @@ final class PhabricatorProjectTestDataGenerator
     $xactions = array();
 
     $xactions[] = $this->newTransaction(
-      PhabricatorProjectTransaction::TYPE_NAME,
+      PhabricatorProjectNameTransaction::TRANSACTIONTYPE,
       $this->newProjectTitle());
 
     $xactions[] = $this->newTransaction(
-      PhabricatorProjectTransaction::TYPE_STATUS,
+      PhabricatorProjectStatusTransaction::TRANSACTIONTYPE,
       $this->newProjectStatus());
 
     // Almost always make the author a member.

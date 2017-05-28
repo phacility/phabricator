@@ -86,6 +86,9 @@ abstract class PhabricatorPeopleProfileController
     if ($user->getIsMailingList()) {
       $roles[] = pht('Mailing List');
     }
+    if (!$user->getIsEmailVerified()) {
+      $roles[] = pht('Email Not Verified');
+    }
 
     $tag = null;
     if ($roles) {
@@ -100,6 +103,8 @@ abstract class PhabricatorPeopleProfileController
       ->setImage($picture)
       ->setProfileHeader(true)
       ->addClass('people-profile-header');
+
+    require_celerity_resource('project-view-css');
 
     if ($user->getIsDisabled()) {
       $header->setStatus('fa-ban', 'red', pht('Disabled'));

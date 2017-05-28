@@ -56,6 +56,12 @@ abstract class PhabricatorConduitController extends PhabricatorController {
         $panel_link),
     );
 
+    if ($params === null) {
+      $messages[] = pht(
+        'If you submit parameters, these examples will update to show '.
+        'exactly how to encode the parameters you submit.');
+    }
+
     $info_view = id(new PHUIInfoView())
       ->setErrors($messages)
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
@@ -154,7 +160,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     $parts[] = "\n\n";
 
     $parts[] = 'require_once ';
-    $parts[] = phutil_var_export($libphutil_path, true);
+    $parts[] = phutil_var_export($libphutil_path);
     $parts[] = ";\n\n";
 
     $parts[] = '$api_token = "';
@@ -168,7 +174,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
       $parts[] = ');';
     } else {
       $params = $this->simplifyParams($params);
-      $params = phutil_var_export($params, true);
+      $params = phutil_var_export($params);
       $parts[] = phutil_tag('strong', array('class' => 'real'), $params);
       $parts[] = ';';
     }
@@ -178,7 +184,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     $parts[] = phutil_tag(
       'strong',
       array('class' => 'real'),
-      phutil_var_export(PhabricatorEnv::getURI('/'), true));
+      phutil_var_export(PhabricatorEnv::getURI('/')));
     $parts[] = ");\n";
 
     $parts[] = '$client->setConduitToken($api_token);';
@@ -188,7 +194,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     $parts[] = phutil_tag(
       'strong',
       array('class' => 'real'),
-      phutil_var_export($method->getAPIMethodName(), true));
+      phutil_var_export($method->getAPIMethodName()));
     $parts[] = ', ';
     $parts[] = '$api_parameters';
     $parts[] = ");\n";

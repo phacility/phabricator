@@ -51,6 +51,10 @@ final class DifferentialChangesetOneUpMailRenderer
   protected function renderPrimitives(array $primitives, $rows) {
     $out = array();
 
+    $viewer = $this->getUser();
+    $old_bright = $viewer->getCSSValue('old-bright');
+    $new_bright = $viewer->getCSSValue('new-bright');
+
     $context_style = array(
       'background: #F7F7F7;',
       'color: #74777D;',
@@ -72,13 +76,13 @@ final class DifferentialChangesetOneUpMailRenderer
 
           if ($is_old) {
             if ($p['htype']) {
-              $style = 'background: #ffd0d0;';
+              $style = "background: {$old_bright};";
             } else {
               $style = null;
             }
           } else {
             if ($p['htype']) {
-              $style = 'background: #d0ffd0;';
+              $style = "background: {$new_bright};";
             } else {
               $style =  null;
             }

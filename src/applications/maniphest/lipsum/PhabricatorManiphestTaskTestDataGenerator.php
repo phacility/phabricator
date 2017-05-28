@@ -3,12 +3,14 @@
 final class PhabricatorManiphestTaskTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'tasks';
+
   public function getGeneratorName() {
     return pht('Maniphest Tasks');
   }
 
   public function generateObject() {
-    $author_phid = $this->loadPhabrictorUserPHID();
+    $author_phid = $this->loadPhabricatorUserPHID();
     $author = id(new PhabricatorUser())
       ->loadOneWhere('phid = %s', $author_phid);
     $task = ManiphestTask::initializeNewTask($author)
@@ -20,15 +22,15 @@ final class PhabricatorManiphestTaskTestDataGenerator
     $template = new ManiphestTransaction();
     // Accumulate Transactions
     $changes = array();
-    $changes[ManiphestTransaction::TYPE_TITLE] =
+    $changes[ManiphestTaskTitleTransaction::TRANSACTIONTYPE] =
       $this->generateTitle();
-    $changes[ManiphestTransaction::TYPE_DESCRIPTION] =
+    $changes[ManiphestTaskDescriptionTransaction::TRANSACTIONTYPE] =
       $this->generateDescription();
-    $changes[ManiphestTransaction::TYPE_OWNER] =
+    $changes[ManiphestTaskOwnerTransaction::TRANSACTIONTYPE] =
       $this->loadOwnerPHID();
-    $changes[ManiphestTransaction::TYPE_STATUS] =
+    $changes[ManiphestTaskStatusTransaction::TRANSACTIONTYPE] =
       $this->generateTaskStatus();
-    $changes[ManiphestTransaction::TYPE_PRIORITY] =
+    $changes[ManiphestTaskPriorityTransaction::TRANSACTIONTYPE] =
       $this->generateTaskPriority();
     $changes[PhabricatorTransactions::TYPE_SUBSCRIBERS] =
       array('=' => $this->getCCPHIDs());
@@ -63,7 +65,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
   public function getCCPHIDs() {
     $ccs = array();
     for ($i = 0; $i < rand(1, 4);$i++) {
-      $ccs[] = $this->loadPhabrictorUserPHID();
+      $ccs[] = $this->loadPhabricatorUserPHID();
     }
     return $ccs;
   }
@@ -83,7 +85,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
     if (rand(0, 3) == 0) {
       return null;
     } else {
-      return $this->loadPhabrictorUserPHID();
+      return $this->loadPhabricatorUserPHID();
     }
   }
 

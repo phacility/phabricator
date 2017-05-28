@@ -61,7 +61,7 @@ abstract class DivinerWorkflow extends PhabricatorManagementWorkflow {
     }
 
     foreach (idx($book, 'groups', array()) as $group) {
-      PhutilTypeSpec::checkmap(
+      PhutilTypeSpec::checkMap(
         $group,
         array(
           'name' => 'string',

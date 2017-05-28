@@ -3,6 +3,9 @@
 final class PhabricatorProjectListView extends AphrontView {
 
   private $projects;
+  private $showMember;
+  private $showWatching;
+  private $noDataString;
 
   public function setProjects(array $projects) {
     $this->projects = $projects;
@@ -13,23 +16,43 @@ final class PhabricatorProjectListView extends AphrontView {
     return $this->projects;
   }
 
+  public function setShowWatching($watching) {
+    $this->showWatching = $watching;
+    return $this;
+  }
+
+  public function setShowMember($member) {
+    $this->showMember = $member;
+    return $this;
+  }
+
+  public function setNoDataString($text) {
+    $this->noDataString = $text;
+    return $this;
+  }
+
   public function renderList() {
     $viewer = $this->getUser();
+    $viewer_phid = $viewer->getPHID();
     $projects = $this->getProjects();
 
     $handles = $viewer->loadHandles(mpull($projects, 'getPHID'));
 
+    $no_data = pht('No projects found.');
+    if ($this->noDataString) {
+      $no_data = $this->noDataString;
+    }
+
     $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setNoDataString($no_data);
 
     foreach ($projects as $key => $project) {
       $id = $project->getID();
 
       $icon = $project->getDisplayIconIcon();
-      $color = $project->getColor();
-
       $icon_icon = id(new PHUIIconView())
-        ->setIcon("{$icon} {$color}");
+        ->setIcon($icon);
 
       $icon_name = $project->getDisplayIconName();
 
@@ -45,8 +68,22 @@ final class PhabricatorProjectListView extends AphrontView {
           ));
 
       if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
-        $item->addIcon('delete-grey', pht('Archived'));
+        $item->addIcon('fa-ban', pht('Archived'));
         $item->setDisabled(true);
+      }
+
+      if ($this->showMember) {
+        $is_member = $project->isUserMember($viewer_phid);
+        if ($is_member) {
+          $item->addIcon('fa-user', pht('Member'));
+        }
+      }
+
+      if ($this->showWatching) {
+        $is_watcher = $project->isUserWatcher($viewer_phid);
+        if ($is_watcher) {
+          $item->addIcon('fa-eye', pht('Watching'));
+        }
       }
 
       $list->addItem($item);

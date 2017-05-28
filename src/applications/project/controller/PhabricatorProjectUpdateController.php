@@ -67,7 +67,7 @@ final class PhabricatorProjectUpdateController
         ->setMetadataValue('edge:type', $type_member)
         ->setNewValue($member_spec);
 
-      $editor = id(new PhabricatorProjectTransactionEditor($project))
+      $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)

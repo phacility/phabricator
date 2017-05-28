@@ -11,6 +11,14 @@
   border-radius: 3px;
 }
 
+div.phui-info-view.phui-info-severity-plain {
+  background: {$lightgreybackground};
+  color: {$bluetext};
+  border: none;
+  padding: 8px 12px;
+  margin-bottom: 4px !important;
+}
+
 .phui-info-view.phui-info-view-flush {
   margin: 0 0 20px 0;
 }

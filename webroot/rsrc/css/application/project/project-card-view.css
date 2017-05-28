@@ -9,7 +9,8 @@
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
   box-shadow: {$dropshadow};
-  width: 380px;
+  width: 420px;
+  position: relative;
 }
 
 .project-card-view .phui-header-shell {
@@ -27,12 +28,61 @@
 
 .project-card-view .phui-header-shell .phui-header-header {
   font-size: 18px;
-  font-family: 'Aleo', {$fontfamily};
   width: 290px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   display: block;
+}
+
+.project-card-view .project-card-image {
+  height: 140px;
+  width: 140px;
+  margin: 6px;
+  border-radius: 3px;
+}
+
+.project-card-view .project-card-image-href {
+  display: inline-block;
+}
+
+.project-card-view .project-card-item div {
+  display: inline;
+}
+
+.project-card-view .project-card-item {
+  margin-bottom: 2px;
+}
+
+.project-card-view .project-card-item-text {
+  color: {$greytext};
+}
+
+.project-card-view .project-card-item-icon {
+  width: 20px;
+}
+
+.project-card-view .project-card-header {
+  position: absolute;
+  top: 12px;
+  left: 158px;
+}
+
+.project-card-header .project-card-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 250px;
+  overflow: hidden;
+}
+
+.project-card-header .project-card-username {
+  font-size: 14px;
+  color: {$bluetext};
+  margin-bottom: 12px;
 }
 
 .project-card-view .phui-header-shell .phui-header-col1 {
@@ -55,6 +105,14 @@
   margin-top: 8px;
 }
 
+.people-card-view .phui-header-subheader .phui-tag-core {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 232px;
+  overflow: hidden;
+  display: inline-block;
+}
+
 .project-card-view .phui-header-header .phui-tag-view .phui-tag-core {
   padding: 0;
 }
@@ -65,7 +123,7 @@
 }
 
 .project-card-view .project-card-body {
-  padding: 0 12px 12px 76px;
+  padding: 0 12px 12px 12px;
   color: {$darkbluetext};
 }
 

@@ -201,7 +201,7 @@ final class DiffusionDiffQueryConduitAPIMethod
 
     $effective_commit = $this->getEffectiveCommit($request);
     if (!$effective_commit) {
-      return $this->getEmptyResult(1);
+      return $this->getEmptyResult();
     }
 
     $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
@@ -209,7 +209,7 @@ final class DiffusionDiffQueryConduitAPIMethod
 
     $raw_diff = $raw_query->executeInline();
     if (!$raw_diff) {
-      return $this->getEmptyResult(2);
+      return $this->getEmptyResult();
     }
 
     $parser = $this->getDefaultParser();

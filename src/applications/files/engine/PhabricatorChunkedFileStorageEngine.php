@@ -102,7 +102,7 @@ final class PhabricatorChunkedFileStorageEngine
   }
 
   public static function getChunkedHashForInput($input) {
-    $rehash = PhabricatorHash::digest($input);
+    $rehash = PhabricatorHash::weakDigest($input);
 
     // Add a suffix to identify this as a chunk hash.
     $rehash = substr($rehash, 0, -2).'-C';
@@ -129,7 +129,7 @@ final class PhabricatorChunkedFileStorageEngine
       foreach ($chunks as $chunk) {
         $chunk->save();
       }
-      $file->save();
+      $file->saveAndIndex();
     $file->saveTransaction();
 
     return $file;
@@ -174,7 +174,16 @@ final class PhabricatorChunkedFileStorageEngine
     return (4 * 1024 * 1024);
   }
 
-  public function getRawFileDataIterator(PhabricatorFile $file, $begin, $end) {
+  public function getRawFileDataIterator(
+    PhabricatorFile $file,
+    $begin,
+    $end,
+    PhabricatorFileStorageFormat $format) {
+
+    // NOTE: It is currently impossible for files stored with the chunk
+    // engine to have their own formatting (instead, the individual chunks
+    // are formatted), so we ignore the format object.
+
     $chunks = id(new PhabricatorFileChunkQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withChunkHandles(array($file->getStorageHandle()))

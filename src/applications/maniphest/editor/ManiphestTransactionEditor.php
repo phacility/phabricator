@@ -18,18 +18,6 @@ final class ManiphestTransactionEditor
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
-    $types[] = ManiphestTransaction::TYPE_PRIORITY;
-    $types[] = ManiphestTransaction::TYPE_STATUS;
-    $types[] = ManiphestTransaction::TYPE_TITLE;
-    $types[] = ManiphestTransaction::TYPE_DESCRIPTION;
-    $types[] = ManiphestTransaction::TYPE_OWNER;
-    $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
-    $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
-    $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
-    $types[] = ManiphestTransaction::TYPE_UNBLOCK;
-    $types[] = ManiphestTransaction::TYPE_PARENT;
-    $types[] = ManiphestTransaction::TYPE_COVER_IMAGE;
-    $types[] = ManiphestTransaction::TYPE_POINTS;
     $types[] = PhabricatorTransactions::TYPE_COLUMNS;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -37,47 +25,19 @@ final class ManiphestTransactionEditor
     return $types;
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this task.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PRIORITY:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return (int)$object->getPriority();
-      case ManiphestTransaction::TYPE_STATUS:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $object->getStatus();
-      case ManiphestTransaction::TYPE_TITLE:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $object->getTitle();
-      case ManiphestTransaction::TYPE_DESCRIPTION:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $object->getDescription();
-      case ManiphestTransaction::TYPE_OWNER:
-        return nonempty($object->getOwnerPHID(), null);
-      case ManiphestTransaction::TYPE_SUBPRIORITY:
-        return $object->getSubpriority();
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        return $object->getCoverImageFilePHID();
-      case ManiphestTransaction::TYPE_POINTS:
-        $points = $object->getPoints();
-        if ($points !== null) {
-          $points = (double)$points;
-        }
-        return $points;
-      case ManiphestTransaction::TYPE_MERGED_INTO:
-      case ManiphestTransaction::TYPE_MERGED_FROM:
-        return null;
-      case ManiphestTransaction::TYPE_PARENT:
       case PhabricatorTransactions::TYPE_COLUMNS:
         return null;
     }
@@ -88,31 +48,8 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PRIORITY:
-        return (int)$xaction->getNewValue();
-      case ManiphestTransaction::TYPE_OWNER:
-        return nonempty($xaction->getNewValue(), null);
-      case ManiphestTransaction::TYPE_STATUS:
-      case ManiphestTransaction::TYPE_TITLE:
-      case ManiphestTransaction::TYPE_DESCRIPTION:
-      case ManiphestTransaction::TYPE_SUBPRIORITY:
-      case ManiphestTransaction::TYPE_MERGED_INTO:
-      case ManiphestTransaction::TYPE_MERGED_FROM:
-      case ManiphestTransaction::TYPE_UNBLOCK:
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        return $xaction->getNewValue();
-      case ManiphestTransaction::TYPE_PARENT:
       case PhabricatorTransactions::TYPE_COLUMNS:
         return $xaction->getNewValue();
-      case ManiphestTransaction::TYPE_POINTS:
-        $value = $xaction->getNewValue();
-        if (!strlen($value)) {
-          $value = null;
-        }
-        if ($value !== null) {
-          $value = (double)$value;
-        }
-        return $value;
     }
   }
 
@@ -136,72 +73,6 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PRIORITY:
-        return $object->setPriority($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_STATUS:
-        return $object->setStatus($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_TITLE:
-        return $object->setTitle($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_DESCRIPTION:
-        return $object->setDescription($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_OWNER:
-        $phid = $xaction->getNewValue();
-
-        // Update the "ownerOrdering" column to contain the full name of the
-        // owner, if the task is assigned.
-
-        $handle = null;
-        if ($phid) {
-          $handle = id(new PhabricatorHandleQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($phid))
-            ->executeOne();
-        }
-
-        if ($handle) {
-          $object->setOwnerOrdering($handle->getName());
-        } else {
-          $object->setOwnerOrdering(null);
-        }
-
-        return $object->setOwnerPHID($phid);
-      case ManiphestTransaction::TYPE_SUBPRIORITY:
-        $object->setSubpriority($xaction->getNewValue());
-        return;
-      case ManiphestTransaction::TYPE_MERGED_INTO:
-        $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
-        return;
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        $file_phid = $xaction->getNewValue();
-
-        if ($file_phid) {
-          $file = id(new PhabricatorFileQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($file_phid))
-            ->executeOne();
-        } else {
-          $file = null;
-        }
-
-        if (!$file || !$file->isTransformableImage()) {
-          $object->setProperty('cover.filePHID', null);
-          $object->setProperty('cover.thumbnailPHID', null);
-          return;
-        }
-
-        $xform_key = PhabricatorFileThumbnailTransform::TRANSFORM_WORKCARD;
-
-        $xform = PhabricatorFileTransform::getTransformByKey($xform_key)
-          ->executeTransform($file);
-
-        $object->setProperty('cover.filePHID', $file->getPHID());
-        $object->setProperty('cover.thumbnailPHID', $xform->getPHID());
-        return;
-      case ManiphestTransaction::TYPE_POINTS:
-        $object->setPoints($xaction->getNewValue());
-        return;
-      case ManiphestTransaction::TYPE_MERGED_FROM:
-      case ManiphestTransaction::TYPE_PARENT:
       case PhabricatorTransactions::TYPE_COLUMNS:
         return;
     }
@@ -212,21 +83,10 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PARENT:
-        $parent_phid = $xaction->getNewValue();
-        $parent_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-        $task_phid = $object->getPHID();
-
-        id(new PhabricatorEdgeEditor())
-          ->addEdge($parent_phid, $parent_type, $task_phid)
-          ->save();
-        break;
       case PhabricatorTransactions::TYPE_COLUMNS:
         foreach ($xaction->getNewValue() as $move) {
           $this->applyBoardMove($object, $move);
         }
-        break;
-      default:
         break;
     }
   }
@@ -240,7 +100,7 @@ final class ManiphestTransactionEditor
     $unblock_xaction = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ManiphestTransaction::TYPE_STATUS:
+        case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
           $unblock_xaction = $xaction;
           break;
       }
@@ -265,7 +125,8 @@ final class ManiphestTransactionEditor
 
         foreach ($blocked_tasks as $blocked_task) {
           $parent_xaction = id(new ManiphestTransaction())
-            ->setTransactionType(ManiphestTransaction::TYPE_UNBLOCK)
+            ->setTransactionType(
+              ManiphestTaskUnblockTransaction::TRANSACTIONTYPE)
             ->setOldValue(array($object->getPHID() => $old))
             ->setNewValue(array($object->getPHID() => $new));
 
@@ -398,7 +259,7 @@ final class ManiphestTransactionEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return $this->shouldSendMail($object, $xactions);
+    return true;
   }
 
   protected function supportsSearch() {
@@ -426,11 +287,11 @@ final class ManiphestTransactionEditor
     parent::requireCapabilities($object, $xaction);
 
     $app_capability_map = array(
-      ManiphestTransaction::TYPE_PRIORITY =>
+      ManiphestTaskPriorityTransaction::TRANSACTIONTYPE =>
         ManiphestEditPriorityCapability::CAPABILITY,
-      ManiphestTransaction::TYPE_STATUS =>
+      ManiphestTaskStatusTransaction::TRANSACTIONTYPE =>
         ManiphestEditStatusCapability::CAPABILITY,
-      ManiphestTransaction::TYPE_OWNER =>
+      ManiphestTaskOwnerTransaction::TRANSACTIONTYPE =>
         ManiphestEditAssignCapability::CAPABILITY,
       PhabricatorTransactions::TYPE_EDIT_POLICY =>
         ManiphestEditPoliciesCapability::CAPABILITY,
@@ -471,7 +332,7 @@ final class ManiphestTransactionEditor
     $copy = parent::adjustObjectForPolicyChecks($object, $xactions);
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ManiphestTransaction::TYPE_OWNER:
+        case ManiphestTaskOwnerTransaction::TRANSACTIONTYPE:
           $copy->setOwnerPHID($xaction->getNewValue());
           break;
         default:
@@ -523,8 +384,7 @@ final class ManiphestTransactionEditor
    */
   public static function getAdjacentSubpriority(
     ManiphestTask $dst,
-    $is_after,
-    $allow_recursion = true) {
+    $is_after) {
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -546,76 +406,25 @@ final class ManiphestTransactionEditor
     // If we find an adjacent task, we average the two subpriorities and
     // return the result.
     if ($adjacent) {
-      $epsilon = 0.01;
+      $epsilon = 1.0;
 
       // If the adjacent task has a subpriority that is identical or very
-      // close to the task we're looking at, we're going to move it and all
-      // tasks with the same subpriority a little farther down the subpriority
-      // scale.
-      if ($allow_recursion &&
-          (abs($adjacent->getSubpriority() - $base) < $epsilon)) {
-        $conn_w = $adjacent->establishConnection('w');
+      // close to the task we're looking at, we're going to spread out all
+      // the nearby tasks.
 
-        $min = ($adjacent->getSubpriority() - ($epsilon));
-        $max = ($adjacent->getSubpriority() + ($epsilon));
-
-        // Get all of the tasks with the similar subpriorities to the adjacent
-        // task, including the adjacent task itself.
-        $query = id(new ManiphestTaskQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPriorities(array($adjacent->getPriority()))
-          ->withSubpriorityBetween($min, $max);
-
-        if (!$is_after) {
-          $query->setOrderVector(array('-priority', '-subpriority', '-id'));
+      $adjacent_sub = $adjacent->getSubpriority();
+      if ((abs($adjacent_sub - $base) < $epsilon)) {
+        $base = self::disperseBlock(
+          $dst,
+          $epsilon * 2);
+        if ($is_after) {
+          $sub = $base - $epsilon;
         } else {
-          $query->setOrderVector(array('priority', 'subpriority', 'id'));
+          $sub = $base + $epsilon;
         }
-
-        $shift_all = $query->execute();
-        $shift_last = last($shift_all);
-
-        // Select the most extreme subpriority in the result set as the
-        // base value.
-        $shift_base = head($shift_all)->getSubpriority();
-
-        // Find the subpriority before or after the task at the end of the
-        // block.
-        list($shift_pri, $shift_sub) = self::getAdjacentSubpriority(
-          $shift_last,
-          $is_after,
-          $allow_recursion = false);
-
-        $delta = ($shift_sub - $shift_base);
-        $count = count($shift_all);
-
-        $shift = array();
-        $cursor = 1;
-        foreach ($shift_all as $shift_task) {
-          $shift_target = $shift_base + (($cursor / $count) * $delta);
-          $cursor++;
-
-          queryfx(
-            $conn_w,
-            'UPDATE %T SET subpriority = %f WHERE id = %d',
-            $adjacent->getTableName(),
-            $shift_target,
-            $shift_task->getID());
-
-          // If we're shifting the adjacent task, update it.
-          if ($shift_task->getID() == $adjacent->getID()) {
-            $adjacent->setSubpriority($shift_target);
-          }
-
-          // If we're shifting the original target task, update the base
-          // subpriority.
-          if ($shift_task->getID() == $dst->getID()) {
-            $base = $shift_target;
-          }
-        }
+      } else {
+        $sub = ($adjacent_sub + $base) / 2;
       }
-
-      $sub = ($adjacent->getSubpriority() + $base) / 2;
     } else {
       // Otherwise, we take a step away from the target's subpriority and
       // use that.
@@ -629,155 +438,154 @@ final class ManiphestTransactionEditor
     return array($dst->getPriority(), $sub);
   }
 
-  protected function validateTransaction(
-    PhabricatorLiskDAO $object,
-    $type,
-    array $xactions) {
+  /**
+   * Distribute a cluster of tasks with similar subpriorities.
+   */
+  private static function disperseBlock(
+    ManiphestTask $task,
+    $spacing) {
 
-    $errors = parent::validateTransaction($object, $type, $xactions);
+    $conn = $task->establishConnection('w');
 
-    switch ($type) {
-      case ManiphestTransaction::TYPE_TITLE:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getTitle(),
-          $xactions);
+    // Find a block of subpriority space which is, on average, sparse enough
+    // to hold all the tasks that are inside it with a reasonable level of
+    // separation between them.
 
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('Task title is required.'),
-            nonempty(last($xactions), null));
+    // We'll start by looking near the target task for a range of numbers
+    // which has more space available than tasks. For example, if the target
+    // task has subpriority 33 and we want to separate each task by at least 1,
+    // we might start by looking in the range [23, 43].
 
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
+    // If we find fewer than 20 tasks there, we have room to reassign them
+    // with the desired level of separation. We space them out, then we're
+    // done.
+
+    // However: if we find more than 20 tasks, we don't have enough room to
+    // distribute them. We'll widen our search and look in a bigger range,
+    // maybe [13, 53]. This range has more space, so if we find fewer than
+    // 40 tasks in this range we can spread them out. If we still find too
+    // many tasks, we keep widening the search.
+
+    $base = $task->getSubpriority();
+
+    $scale = 4.0;
+    while (true) {
+      $range = ($spacing * $scale) / 2.0;
+      $min = ($base - $range);
+      $max = ($base + $range);
+
+      $result = queryfx_one(
+        $conn,
+        'SELECT COUNT(*) N FROM %T WHERE priority = %d AND
+          subpriority BETWEEN %f AND %f',
+        $task->getTableName(),
+        $task->getPriority(),
+        $min,
+        $max);
+
+      $count = $result['N'];
+      if ($count < $scale) {
+        // We have found a block which we can make sparse enough, so bail and
+        // continue below with our selection.
         break;
-      case ManiphestTransaction::TYPE_PARENT:
-        $with_effect = array();
-        foreach ($xactions as $xaction) {
-          $task_phid = $xaction->getNewValue();
-          if (!$task_phid) {
-            continue;
-          }
+      }
 
-          $with_effect[] = $xaction;
-
-          $task = id(new ManiphestTaskQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($task_phid))
-            ->executeOne();
-          if (!$task) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht(
-                'Parent task identifier "%s" does not identify a visible '.
-                'task.',
-                $task_phid),
-              $xaction);
-          }
-        }
-
-        if ($with_effect && !$this->getIsNewObject()) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'You can only select a parent task when creating a '.
-              'transaction for the first time.'),
-            last($with_effect));
-        }
-        break;
-      case ManiphestTransaction::TYPE_OWNER:
-        foreach ($xactions as $xaction) {
-          $old = $xaction->getOldValue();
-          $new = $xaction->getNewValue();
-          if (!strlen($new)) {
-            continue;
-          }
-
-          if ($new === $old) {
-            continue;
-          }
-
-          $assignee_list = id(new PhabricatorPeopleQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($new))
-            ->execute();
-          if (!$assignee_list) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht(
-                'User "%s" is not a valid user.',
-                $new),
-              $xaction);
-          }
-        }
-        break;
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        foreach ($xactions as $xaction) {
-          $old = $xaction->getOldValue();
-          $new = $xaction->getNewValue();
-          if (!$new) {
-            continue;
-          }
-
-          if ($new === $old) {
-            continue;
-          }
-
-          $file = id(new PhabricatorFileQuery())
-            ->setViewer($this->getActor())
-            ->withPHIDs(array($new))
-            ->executeOne();
-          if (!$file) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('File "%s" is not valid.', $new),
-              $xaction);
-            continue;
-          }
-
-          if (!$file->isTransformableImage()) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('File "%s" is not a valid image file.', $new),
-              $xaction);
-            continue;
-          }
-        }
-        break;
-
-      case ManiphestTransaction::TYPE_POINTS:
-        foreach ($xactions as $xaction) {
-          $new = $xaction->getNewValue();
-          if (strlen($new) && !is_numeric($new)) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('Points value must be numeric or empty.'),
-              $xaction);
-            continue;
-          }
-
-          if ((double)$new < 0) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('Points value must be nonnegative.'),
-              $xaction);
-            continue;
-          }
-        }
-        break;
-
+      // This block had too many tasks for its size, so try again with a
+      // bigger block.
+      $scale *= 2.0;
     }
 
-    return $errors;
+    $rows = queryfx_all(
+      $conn,
+      'SELECT id FROM %T WHERE priority = %d AND
+        subpriority BETWEEN %f AND %f
+        ORDER BY priority, subpriority, id',
+      $task->getTableName(),
+      $task->getPriority(),
+      $min,
+      $max);
+
+    $task_id = $task->getID();
+    $result = null;
+
+    // NOTE: In strict mode (which we encourage enabling) we can't structure
+    // this bulk update as an "INSERT ... ON DUPLICATE KEY UPDATE" unless we
+    // provide default values for ALL of the columns that don't have defaults.
+
+    // This is gross, but we may be moving enough rows that individual
+    // queries are unreasonably slow. An alternate construction which might
+    // be worth evaluating is to use "CASE". Another approach is to disable
+    // strict mode for this query.
+
+    $extra_columns = array(
+      'phid' => '""',
+      'authorPHID' => '""',
+      'status' => '""',
+      'priority' => 0,
+      'title' => '""',
+      'originalTitle' => '""',
+      'description' => '""',
+      'dateCreated' => 0,
+      'dateModified' => 0,
+      'mailKey' => '""',
+      'viewPolicy' => '""',
+      'editPolicy' => '""',
+      'ownerOrdering' => '""',
+      'spacePHID' => '""',
+      'bridgedObjectPHID' => '""',
+      'properties' => '""',
+      'points' => 0,
+      'subtype' => '""',
+    );
+
+    $defaults = implode(', ', $extra_columns);
+
+    $sql = array();
+    $offset = 0;
+
+    // Often, we'll have more room than we need in the range. Distribute the
+    // tasks evenly over the whole range so that we're less likely to end up
+    // with tasks spaced exactly the minimum distance apart, which may
+    // get shifted again later. We have one fewer space to distribute than we
+    // have tasks.
+    $divisor = (double)(count($rows) - 1.0);
+    if ($divisor > 0) {
+      $available_distance = (($max - $min) / $divisor);
+    } else {
+      $available_distance = 0.0;
+    }
+
+    foreach ($rows as $row) {
+      $subpriority = $min + ($offset * $available_distance);
+
+      // If this is the task that we're spreading out relative to, keep track
+      // of where it is ending up so we can return the new subpriority.
+      $id = $row['id'];
+      if ($id == $task_id) {
+        $result = $subpriority;
+      }
+
+      $sql[] = qsprintf(
+        $conn,
+        '(%d, %Q, %f)',
+        $id,
+        $defaults,
+        $subpriority);
+
+      $offset++;
+    }
+
+    foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
+      queryfx(
+        $conn,
+        'INSERT INTO %T (id, %Q, subpriority) VALUES %Q
+          ON DUPLICATE KEY UPDATE subpriority = VALUES(subpriority)',
+        $task->getTableName(),
+        implode(', ', array_keys($extra_columns)),
+        $chunk);
+    }
+
+    return $result;
   }
 
   protected function validateAllTransactions(
@@ -806,7 +614,8 @@ final class ManiphestTransactionEditor
 
     $any_assign = false;
     foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() == ManiphestTransaction::TYPE_OWNER) {
+      if ($xaction->getTransactionType() ==
+        ManiphestTaskOwnerTransaction::TRANSACTIONTYPE) {
         $any_assign = true;
         break;
       }
@@ -817,7 +626,7 @@ final class ManiphestTransactionEditor
     $new_status = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ManiphestTransaction::TYPE_STATUS:
+        case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
           $new_status = $xaction->getNewValue();
           break;
       }
@@ -838,7 +647,7 @@ final class ManiphestTransactionEditor
       // Don't claim the task if the status is configured to not claim.
       if ($actor_phid && $is_claim) {
         $results[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+          ->setTransactionType(ManiphestTaskOwnerTransaction::TRANSACTIONTYPE)
           ->setNewValue($actor_phid);
       }
     }
@@ -881,7 +690,7 @@ final class ManiphestTransactionEditor
           $this->moreValidationErrors[] = $error;
         }
         break;
-      case ManiphestTransaction::TYPE_OWNER:
+      case ManiphestTaskOwnerTransaction::TRANSACTIONTYPE:
         // If this is a no-op update, don't expand it.
         $old_value = $object->getOwnerPHID();
         $new_value = $xaction->getNewValue();
@@ -904,20 +713,6 @@ final class ManiphestTransactionEditor
     }
 
     return $results;
-  }
-
-  protected function extractFilePHIDsFromCustomTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    $phids = parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
-
-    switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_COVER_IMAGE:
-        $phids[] = $xaction->getNewValue();
-        break;
-    }
-
-    return $phids;
   }
 
   private function buildMoveTransaction(

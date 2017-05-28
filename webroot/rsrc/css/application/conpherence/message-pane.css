@@ -9,7 +9,7 @@
   position: fixed;
   left: 240px;
   right: 240px;
-  top: 102px;
+  top: 106px;
   bottom: 0px;
   min-width: 300px;
   width: auto;
@@ -20,8 +20,6 @@
 .device .loading .messages-loading-icon,
 .device .conpherence-layout .conpherence-no-threads {
   left: 0;
-  right: 0;
-  width: 100%;
 }
 
 .conpherence-layout .conpherence-content-pane .conpherence-no-threads {
@@ -57,7 +55,7 @@
   position: fixed;
   left: 240px;
   right: 240px;
-  top: 103px;
+  top: 106px;
   bottom: 142px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -181,13 +179,14 @@
   border: none;
 }
 
-.device .remarkup-assist-button,
-.device .remarkup-assist-separator {
+.device .conpherence-message-pane .remarkup-assist-button,
+.device .conpherence-message-pane .remarkup-assist-separator {
   display: none;
 }
 
-.device .remarkup-assist-button.remarkup-assist-upload {
-  display: block;
+.device .conpherence-message-pane
+  .remarkup-assist-button.remarkup-assist-upload {
+    display: block;
 }
 
 .device .conpherence-message-pane .phui-form-view {
@@ -343,7 +342,7 @@
   padding: 2px 0 8px 0;
 }
 
-.conpherence-message-pane .aphront-form-control {
+body .conpherence-message-pane .aphront-form-control {
   padding: 0;
 }
 
@@ -359,7 +358,7 @@
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
   margin: 0;
-  padding: 7px 8px 6px 30px;
+  padding: 7px 8px 6px 38px;
   width: 100%;
   height: 34px;
   resize: none;
@@ -446,9 +445,9 @@
 .show-searchbar .conpherence-search-form-view {
   display: block;
   height: 54px;
-  background: {$lightbluebackground};
+  background: #fff;
   position: absolute;
-  top: 1px;
+  top: 0;
   left: 0;
   right: 0;
 }

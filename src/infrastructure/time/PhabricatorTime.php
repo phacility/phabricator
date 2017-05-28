@@ -64,7 +64,7 @@ final class PhabricatorTime extends Phobject {
   public static function getTodayMidnightDateTime($viewer) {
     $timezone = new DateTimeZone($viewer->getTimezoneIdentifier());
     $today = new DateTime('@'.time());
-    $today->setTimeZone($timezone);
+    $today->setTimezone($timezone);
     $year = $today->format('Y');
     $month = $today->format('m');
     $day = $today->format('d');
@@ -74,7 +74,7 @@ final class PhabricatorTime extends Phobject {
 
   public static function getDateTimeFromEpoch($epoch, PhabricatorUser $viewer) {
     $datetime = new DateTime('@'.$epoch);
-    $datetime->setTimeZone($viewer->getTimeZone());
+    $datetime->setTimezone($viewer->getTimeZone());
     return $datetime;
   }
 

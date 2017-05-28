@@ -42,7 +42,10 @@ abstract class PhabricatorConfigController extends PhabricatorController {
       pht('Notification Servers'), null, 'fa-bell-o');
     $nav->addFilter('cluster/repositories/',
       pht('Repository Servers'), null, 'fa-code');
+    $nav->addFilter('cluster/search/',
+      pht('Search Servers'), null, 'fa-search');
     $nav->addLabel(pht('Modules'));
+
 
     $modules = PhabricatorConfigModule::getAllModules();
     foreach ($modules as $key => $module) {

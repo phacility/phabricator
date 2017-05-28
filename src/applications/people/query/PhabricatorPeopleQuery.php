@@ -18,12 +18,13 @@ final class PhabricatorPeopleQuery
   private $nameLike;
   private $nameTokens;
   private $namePrefixes;
+  private $isEnrolledInMultiFactor;
 
   private $needPrimaryEmail;
   private $needProfile;
   private $needProfileImage;
   private $needAvailability;
-  private $needBadges;
+  private $needBadgeAwards;
   private $cacheKeys = array();
 
   public function withIDs(array $ids) {
@@ -101,6 +102,11 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
+  public function withIsEnrolledInMultiFactor($enrolled) {
+    $this->isEnrolledInMultiFactor = $enrolled;
+    return $this;
+  }
+
   public function needPrimaryEmail($need) {
     $this->needPrimaryEmail = $need;
     return $this;
@@ -128,13 +134,20 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
-  public function needBadges($need) {
-    $this->needBadges = $need;
+  public function needUserSettings($need) {
+    $cache_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
+
+    if ($need) {
+      $this->cacheKeys[$cache_key] = true;
+    } else {
+      unset($this->cacheKeys[$cache_key]);
+    }
+
     return $this;
   }
 
-  public function needUserSettings($need) {
-    $cache_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
+  public function needBadgeAwards($need) {
+    $cache_key = PhabricatorUserBadgesCacheType::KEY_BADGES;
 
     if ($need) {
       $this->cacheKeys[$cache_key] = true;
@@ -177,21 +190,6 @@ final class PhabricatorPeopleQuery
         }
 
         $user->attachUserProfile($profile);
-      }
-    }
-
-    if ($this->needBadges) {
-      $awards = id(new PhabricatorBadgesAwardQuery())
-        ->setViewer($this->getViewer())
-        ->withRecipientPHIDs(mpull($users, 'getPHID'))
-        ->execute();
-
-      $awards = mgroup($awards, 'getRecipientPHID');
-
-      foreach ($users as $user) {
-        $user_awards = idx($awards, $user->getPHID(), array());
-        $badge_phids = mpull($user_awards, 'getBadgePHID');
-        $user->attachBadgePHIDs($badge_phids);
       }
     }
 
@@ -358,6 +356,13 @@ final class PhabricatorPeopleQuery
         $this->nameLike);
     }
 
+    if ($this->isEnrolledInMultiFactor !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'user.isEnrolledInMultiFactor = %d',
+        (int)$this->isEnrolledInMultiFactor);
+    }
+
     return $where;
   }
 
@@ -460,7 +465,7 @@ final class PhabricatorPeopleQuery
         while (true) {
           foreach ($events as $event) {
             $from = $event->getStartDateTimeEpochForCache();
-            $to = $event->getEndDateTimeEpoch();
+            $to = $event->getEndDateTimeEpochForCache();
             if (($from <= $cursor) && ($to > $cursor)) {
               $cursor = $to;
               if (!$next_event) {
@@ -478,7 +483,7 @@ final class PhabricatorPeopleQuery
         $availability_type = $invitee->getDisplayAvailability($next_event);
         $availability = array(
           'until' => $cursor,
-          'eventPHID' => $event->getPHID(),
+          'eventPHID' => $next_event->getPHID(),
           'availability' => $availability_type,
         );
 
@@ -491,7 +496,7 @@ final class PhabricatorPeopleQuery
         // simultaneously we should accommodate that. However, it's complex
         // to compute, rare, and probably not confusing most of the time.
 
-        $availability_ttl = $next_event->getStartDateTimeEpochForCache();
+        $availability_ttl = $next_event->getEndDateTimeEpochForCache();
       } else {
         $availability = array(
           'until' => null,

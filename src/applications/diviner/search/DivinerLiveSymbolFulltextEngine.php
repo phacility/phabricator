@@ -33,8 +33,8 @@ final class DivinerLiveSymbolFulltextEngine
 
     $document->addRelationship(
       $atom->getGraphHash()
-        ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
-        : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+        ? PhabricatorSearchRelationship::RELATIONSHIP_OPEN
+        : PhabricatorSearchRelationship::RELATIONSHIP_CLOSED,
       $atom->getBookPHID(),
       DivinerBookPHIDType::TYPECONST,
       PhabricatorTime::getNow());

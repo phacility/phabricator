@@ -14,7 +14,7 @@ final class PhabricatorCalendarExternalInvitee
     PhabricatorUser $actor, $event) {
     return id(new PhabricatorCalendarEventInvitee())
       ->setInviterPHID($actor->getPHID())
-      ->setStatus(self::STATUS_INVITED)
+      ->setStatus(PhabricatorCalendarEventInvitee::STATUS_INVITED)
       ->setEventPHID($event->getPHID());
   }
 

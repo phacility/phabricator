@@ -31,6 +31,7 @@ final class PhabricatorFileIconSetSelectController
 
     $ii = 0;
     $buttons = array();
+    $breakpoint = ceil(sqrt(count($set->getIcons())));
     foreach ($set->getIcons() as $icon) {
       $label = $icon->getLabel();
 
@@ -75,7 +76,7 @@ final class PhabricatorFileIconSetSelectController
           $view,
         ));
 
-      if ((++$ii % 4) == 0) {
+      if ((++$ii % $breakpoint) == 0) {
         $buttons[] = phutil_tag('br');
       }
     }

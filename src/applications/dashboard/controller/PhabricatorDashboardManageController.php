@@ -36,7 +36,7 @@ final class PhabricatorDashboardManageController
     $crumbs->addTextCrumb(pht('Manage'));
 
     $header = $this->buildHeaderView();
-    $curtain = $this->buildCurtainview($dashboard);
+    $curtain = $this->buildCurtainView($dashboard);
     $properties = $this->buildPropertyView($dashboard);
 
     $timeline = $this->buildTransactionTimeline(
@@ -47,8 +47,7 @@ final class PhabricatorDashboardManageController
     $info_view = null;
     if (!$can_edit) {
       $no_edit = pht(
-        'You do not have permission to edit this dashboard. If you want to '.
-        'make changes, make a copy first.');
+        'You do not have permission to edit this dashboard.');
 
       $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
@@ -109,13 +108,6 @@ final class PhabricatorDashboardManageController
           ->setDisabled(!$can_edit)
           ->setWorkflow($can_edit));
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Copy Dashboard'))
-        ->setIcon('fa-files-o')
-        ->setHref($this->getApplicationURI("copy/{$id}/"))
-        ->setWorkflow(true));
 
     return $curtain;
   }

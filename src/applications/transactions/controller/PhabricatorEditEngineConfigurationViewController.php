@@ -151,6 +151,18 @@ final class PhabricatorEditEngineConfigurationViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
+    if ($engine->supportsSubtypes()) {
+      $subtype_uri = "{$base_uri}/subtype/{$form_key}/";
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Change Form Subtype'))
+          ->setIcon('fa-drivers-license-o')
+          ->setHref($subtype_uri)
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit));
+    }
+
     $disable_uri = "{$base_uri}/disable/{$form_key}/";
 
     if ($config->getIsDisabled()) {

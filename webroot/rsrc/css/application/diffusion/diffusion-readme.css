@@ -11,4 +11,9 @@
 
 .diffusion-readme-view .phui-document-container {
   border: none;
+  padding: 24px 32px;
+}
+
+.diffusion-readme-view .phabricator-remarkup-toc {
+  display: none;
 }

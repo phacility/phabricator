@@ -54,9 +54,7 @@ abstract class DifferentialController extends PhabricatorController {
           $toc_view->setAuthorityPackages($packages);
         }
 
-        // TODO: For Subversion, we should adjust these paths to be relative to
-        // the repository root where possible.
-        $paths = mpull($changesets, 'getFilename');
+        $paths = mpull($changesets, 'getOwnersFilename');
 
         $control_query = id(new PhabricatorOwnersPackageQuery())
           ->setViewer($viewer)
@@ -83,7 +81,7 @@ abstract class DifferentialController extends PhabricatorController {
       if ($have_owners) {
         $packages = $control_query->getControllingPackagesForPath(
           $repository_phid,
-          $changeset->getFilename());
+          $changeset->getOwnersFilename());
         $item->setPackages($packages);
       }
 

@@ -44,7 +44,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $is_file = ($reason == DiffusionBrowseResultSet::REASON_IS_FILE);
 
     if ($is_file) {
-      return $this->browseFile($results);
+      return $this->browseFile();
     } else {
       $paths = $results->getPaths();
       $paths = $pager->sliceResults($paths);
@@ -370,7 +370,8 @@ final class DiffusionBrowseController extends DiffusionController {
       $browse_panel = id(new PHUIObjectBoxView())
         ->setHeader($browse_header)
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->setTable($browse_table);
+        ->setTable($browse_table)
+        ->setPager($pager);
 
       $browse_panel->setShowHide(
         array(pht('Show Search')),
@@ -395,7 +396,6 @@ final class DiffusionBrowseController extends DiffusionController {
         'view'   => 'browse',
       ));
 
-    $pager_box = $this->renderTablePagerBox($pager);
     $crumbs->setBorder(true);
 
     $view = id(new PHUITwoColumnView())
@@ -411,7 +411,6 @@ final class DiffusionBrowseController extends DiffusionController {
         array(
           $open_revisions,
           $readme,
-          $pager_box,
         ));
 
     if ($details) {
@@ -489,14 +488,12 @@ final class DiffusionBrowseController extends DiffusionController {
         nonempty($drequest->getPath(), '/'));
     }
 
-    $box = id(new PHUIObjectBoxView())
+    return id(new PHUIObjectBoxView())
       ->setHeaderText($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+      ->setTable($table)
+      ->setPager($pager);
 
-    $pager_box = $this->renderTablePagerBox($pager);
-
-    return array($box, $pager_box);
   }
 
   private function renderGrepResults(array $results, $pattern) {
@@ -1765,7 +1762,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)
-      ->needRelationships(true)
+      ->needReviewers(true)
       ->needFlags(true)
       ->needDrafts(true)
       ->execute();
@@ -1775,9 +1772,8 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Open Revisions'))
-      ->setSubheader(
-        pht('Recently updated open revisions affecting this file.'));
+      ->setHeader(pht('Recently Open Revisions'))
+      ->setHeaderIcon('fa-gear');
 
     $view = id(new DifferentialRevisionListView())
       ->setHeader($header)

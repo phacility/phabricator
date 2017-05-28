@@ -705,7 +705,11 @@ final class DiffusionCommitController extends DiffusionController {
     $timeline = $this->buildTransactionTimeline(
       $commit,
       new PhabricatorAuditTransactionQuery());
+
     $commit->willRenderTimeline($timeline, $this->getRequest());
+
+    $timeline->setQuoteRef($commit->getMonogram());
+
     return $timeline;
   }
 
@@ -715,8 +719,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
-
-    Javelin::initBehavior('differential-keyboard-navigation');
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.

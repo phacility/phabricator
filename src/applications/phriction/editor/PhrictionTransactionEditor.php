@@ -29,7 +29,7 @@ final class PhrictionTransactionEditor
     return $this;
   }
 
-  private function getOldContent() {
+  public function getOldContent() {
     return $this->oldContent;
   }
 
@@ -38,7 +38,7 @@ final class PhrictionTransactionEditor
     return $this;
   }
 
-  private function getNewContent() {
+  public function getNewContent() {
     return $this->newContent;
   }
 
@@ -69,6 +69,11 @@ final class PhrictionTransactionEditor
     return $this->processContentVersionError;
   }
 
+  public function setMoveAwayDocument(PhrictionDocument $document) {
+    $this->moveAwayDocument = $document;
+    return $this;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorPhrictionApplication';
   }
@@ -80,12 +85,6 @@ final class PhrictionTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhrictionTransaction::TYPE_TITLE;
-    $types[] = PhrictionTransaction::TYPE_CONTENT;
-    $types[] = PhrictionTransaction::TYPE_DELETE;
-    $types[] = PhrictionTransaction::TYPE_MOVE_TO;
-    $types[] = PhrictionTransaction::TYPE_MOVE_AWAY;
-
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -94,72 +93,18 @@ final class PhrictionTransactionEditor
     return $types;
   }
 
-  protected function getCustomTransactionOldValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $this->getOldContent()->getTitle();
-      case PhrictionTransaction::TYPE_CONTENT:
-        if ($this->getIsNewObject()) {
-          return null;
-        }
-        return $this->getOldContent()->getContent();
-      case PhrictionTransaction::TYPE_DELETE:
-      case PhrictionTransaction::TYPE_MOVE_TO:
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        return null;
-    }
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
-      case PhrictionTransaction::TYPE_CONTENT:
-      case PhrictionTransaction::TYPE_DELETE:
-        return $xaction->getNewValue();
-      case PhrictionTransaction::TYPE_MOVE_TO:
-        $document = $xaction->getNewValue();
-        // grab the real object now for the sub-editor to come
-        $this->moveAwayDocument = $document;
-        $dict = array(
-          'id' => $document->getID(),
-          'phid' => $document->getPHID(),
-          'content' => $document->getContent()->getContent(),
-          'title' => $document->getContent()->getTitle(),
-        );
-        return $dict;
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        $document = $xaction->getNewValue();
-        $dict = array(
-          'id' => $document->getID(),
-          'phid' => $document->getPHID(),
-          'content' => $document->getContent()->getContent(),
-          'title' => $document->getContent()->getTitle(),
-        );
-        return $dict;
-    }
-  }
-
   protected function shouldApplyInitialEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
-      case PhrictionTransaction::TYPE_CONTENT:
-      case PhrictionTransaction::TYPE_DELETE:
-      case PhrictionTransaction::TYPE_MOVE_TO:
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        return true;
+        case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
+          return true;
       }
     }
     return parent::shouldApplyInitialEffects($object, $xactions);
@@ -173,44 +118,26 @@ final class PhrictionTransactionEditor
     $this->setNewContent($this->buildNewContentTemplate($object));
   }
 
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
-      case PhrictionTransaction::TYPE_CONTENT:
-      case PhrictionTransaction::TYPE_MOVE_TO:
-        $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
-        return;
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
-        return;
-      case PhrictionTransaction::TYPE_DELETE:
-        $object->setStatus(PhrictionDocumentStatus::STATUS_DELETED);
-        return;
-    }
-  }
-
   protected function expandTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
     $xactions = parent::expandTransaction($object, $xaction);
     switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
         if ($this->getIsNewObject()) {
           break;
         }
         $content = $xaction->getNewValue();
         if ($content === '') {
           $xactions[] = id(new PhrictionTransaction())
-            ->setTransactionType(PhrictionTransaction::TYPE_DELETE)
+            ->setTransactionType(
+              PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE)
             ->setNewValue(true)
             ->setMetadataValue('contentDelete', true);
         }
         break;
-      case PhrictionTransaction::TYPE_MOVE_TO:
+      case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
         $document = $xaction->getNewValue();
         $xactions[] = id(new PhrictionTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -227,42 +154,6 @@ final class PhrictionTransactionEditor
     return $xactions;
   }
 
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhrictionTransaction::TYPE_TITLE:
-        $this->getNewContent()->setTitle($xaction->getNewValue());
-        break;
-      case PhrictionTransaction::TYPE_CONTENT:
-        $this->getNewContent()->setContent($xaction->getNewValue());
-        break;
-      case PhrictionTransaction::TYPE_DELETE:
-        $this->getNewContent()->setContent('');
-        $this->getNewContent()->setChangeType(
-          PhrictionChangeType::CHANGE_DELETE);
-        break;
-      case PhrictionTransaction::TYPE_MOVE_TO:
-        $dict = $xaction->getNewValue();
-        $this->getNewContent()->setContent($dict['content']);
-        $this->getNewContent()->setTitle($dict['title']);
-        $this->getNewContent()->setChangeType(
-          PhrictionChangeType::CHANGE_MOVE_HERE);
-        $this->getNewContent()->setChangeRef($dict['id']);
-        break;
-      case PhrictionTransaction::TYPE_MOVE_AWAY:
-        $dict = $xaction->getNewValue();
-        $this->getNewContent()->setContent('');
-        $this->getNewContent()->setChangeType(
-          PhrictionChangeType::CHANGE_MOVE_AWAY);
-        $this->getNewContent()->setChangeRef($dict['id']);
-        break;
-      default:
-        break;
-    }
-  }
-
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -270,11 +161,11 @@ final class PhrictionTransactionEditor
     $save_content = false;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhrictionTransaction::TYPE_TITLE:
-        case PhrictionTransaction::TYPE_CONTENT:
-        case PhrictionTransaction::TYPE_DELETE:
-        case PhrictionTransaction::TYPE_MOVE_AWAY:
-        case PhrictionTransaction::TYPE_MOVE_TO:
+        case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
           $save_content = true;
           break;
         default:
@@ -312,11 +203,13 @@ final class PhrictionTransactionEditor
               $slug);
             $stub_xactions = array();
             $stub_xactions[] = id(new PhrictionTransaction())
-              ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+              ->setTransactionType(
+                PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
               ->setNewValue(PhabricatorSlug::getDefaultTitle($slug))
               ->setMetadataValue('stub:create:phid', $object->getPHID());
             $stub_xactions[] = id(new PhrictionTransaction())
-              ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+              ->setTransactionType(
+                PhrictionDocumentContentTransaction::TRANSACTIONTYPE)
               ->setNewValue('')
               ->setMetadataValue('stub:create:phid', $object->getPHID());
             $stub_xactions[] = id(new PhrictionTransaction())
@@ -340,7 +233,8 @@ final class PhrictionTransactionEditor
     if ($this->moveAwayDocument !== null) {
       $move_away_xactions = array();
       $move_away_xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(PhrictionTransaction::TYPE_MOVE_AWAY)
+        ->setTransactionType(
+          PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE)
         ->setNewValue($object);
       $sub_editor = id(new PhrictionTransactionEditor())
         ->setActor($this->getActor())
@@ -353,7 +247,7 @@ final class PhrictionTransactionEditor
     // Compute the content diff URI for the publishing phase.
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
           $uri = id(new PhutilURI('/phriction/diff/'.$object->getID().'/'))
             ->alter('l', $this->getOldContent()->getVersion())
             ->alter('r', $this->getNewContent()->getVersion());
@@ -458,7 +352,7 @@ final class PhrictionTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhrictionTransaction::TYPE_MOVE_TO:
+        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
           $dict = $xaction->getNewValue();
           $phids[] = $dict['phid'];
           break;
@@ -477,53 +371,12 @@ final class PhrictionTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($type) {
-        case PhrictionTransaction::TYPE_TITLE:
-          $title = $object->getContent()->getTitle();
-          $missing = $this->validateIsEmptyTextField(
-            $title,
-            $xactions);
-
-          if ($missing) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Required'),
-              pht('Document title is required.'),
-              nonempty(last($xactions), null));
-
-            $error->setIsMissingFieldError(true);
-            $errors[] = $error;
-          } else if ($this->getProcessContentVersionError()) {
-            $error = $this->validateContentVersion($object, $type, $xaction);
-            if ($error) {
-              $this->setProcessContentVersionError(false);
-              $errors[] = $error;
-            }
-          }
-          break;
-
-        case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
           if ($xaction->getMetadataValue('stub:create:phid')) {
             continue;
           }
 
-          $missing = false;
-          if ($this->getIsNewObject()) {
-            $content = $object->getContent()->getContent();
-            $missing = $this->validateIsEmptyTextField(
-              $content,
-              $xactions);
-          }
-
-          if ($missing) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Required'),
-              pht('Document content is required.'),
-              nonempty(last($xactions), null));
-
-            $error->setIsMissingFieldError(true);
-            $errors[] = $error;
-          } else if ($this->getProcessContentVersionError()) {
+          if ($this->getProcessContentVersionError()) {
             $error = $this->validateContentVersion($object, $type, $xaction);
             if ($error) {
               $this->setProcessContentVersionError(false);
@@ -541,34 +394,10 @@ final class PhrictionTransactionEditor
               $errors = array_merge($errors, $ancestry_errors);
             }
           }
-
           break;
 
-        case PhrictionTransaction::TYPE_MOVE_TO:
+        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
           $source_document = $xaction->getNewValue();
-          switch ($source_document->getStatus()) {
-            case PhrictionDocumentStatus::STATUS_DELETED:
-              $e_text = pht('A deleted document can not be moved.');
-              break;
-            case PhrictionDocumentStatus::STATUS_MOVED:
-              $e_text = pht('A moved document can not be moved again.');
-              break;
-            case PhrictionDocumentStatus::STATUS_STUB:
-              $e_text = pht('A stub document can not be moved.');
-              break;
-            default:
-              $e_text = null;
-              break;
-          }
-
-          if ($e_text) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Can not move document.'),
-              $e_text,
-              $xaction);
-            $errors[] = $error;
-          }
 
           $ancestry_errors = $this->validateAncestry(
             $object,
@@ -610,42 +439,13 @@ final class PhrictionTransactionEditor
           }
           break;
 
-        case PhrictionTransaction::TYPE_DELETE:
-          switch ($object->getStatus()) {
-            case PhrictionDocumentStatus::STATUS_DELETED:
-              if ($xaction->getMetadataValue('contentDelete')) {
-                $e_text = pht(
-                  'This document is already deleted. You must specify '.
-                  'content to re-create the document and make further edits.');
-              } else {
-                $e_text = pht(
-                  'An already deleted document can not be deleted.');
-              }
-              break;
-            case PhrictionDocumentStatus::STATUS_MOVED:
-              $e_text = pht('A moved document can not be deleted.');
-              break;
-            case PhrictionDocumentStatus::STATUS_STUB:
-              $e_text = pht('A stub document can not be deleted.');
-              break;
-            default:
-              break 2;
-          }
-
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Can not delete document.'),
-            $e_text,
-            $xaction);
-          $errors[] = $error;
-          break;
       }
     }
 
     return $errors;
   }
 
-  private function validateAncestry(
+  public function validateAncestry(
     PhabricatorLiskDAO $object,
     $type,
     PhabricatorApplicationTransaction $xaction,

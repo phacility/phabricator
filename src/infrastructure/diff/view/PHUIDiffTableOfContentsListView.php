@@ -103,22 +103,6 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
       }
     }
 
-    $reveal_link = javelin_tag(
-      'a',
-      array(
-        'sigil' => 'differential-reveal-all',
-        'mustcapture' => true,
-        'class' => 'button differential-toc-reveal-all',
-      ),
-      pht('Show All Context'));
-
-    $buttons = phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-toc-buttons grouped',
-      ),
-      $reveal_link);
-
     $table = id(new AphrontTableView($rows))
       ->setRowClasses($rowc)
       ->setHeaders(
@@ -185,8 +169,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
       ->setHeader($header)
       ->setBackground($this->background)
       ->setTable($table)
-      ->appendChild($anchor)
-      ->appendChild($buttons);
+      ->appendChild($anchor);
 
     if ($this->infoView) {
       $box->setInfoView($this->infoView);

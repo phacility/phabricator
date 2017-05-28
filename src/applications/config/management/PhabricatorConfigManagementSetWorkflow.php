@@ -158,6 +158,10 @@ final class PhabricatorConfigManagementSetWorkflow
       $config_type = 'database';
       $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
       $config_entry->setValue($value);
+
+      // If the entry has been deleted, resurrect it.
+      $config_entry->setIsDeleted(0);
+
       $config_entry->save();
     } else {
       $config_type = 'local';

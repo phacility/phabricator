@@ -17,7 +17,6 @@ final class ConpherenceColumnViewController extends
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
         ->needProfileImage(true)
-        ->needParticipantCache(true)
         ->execute();
       $latest_conpherences = mpull($latest_conpherences, null, 'getPHID');
       $latest_conpherences = array_select_keys(
@@ -68,7 +67,7 @@ final class ConpherenceColumnViewController extends
       $transactions = $conpherence->getTransactions();
       $latest_transaction = head($transactions);
       $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $participant->markUpToDate($conpherence, $latest_transaction);
+      $participant->markUpToDate($conpherence);
       unset($write_guard);
 
       $draft = PhabricatorDraft::newFromUserAndKey(

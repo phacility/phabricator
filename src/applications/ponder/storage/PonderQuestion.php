@@ -105,6 +105,14 @@ final class PonderQuestion extends PonderDAO
     return $this->comments;
   }
 
+  public function getMonogram() {
+    return 'Q'.$this->getID();
+  }
+
+  public function getViewURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function attachAnswers(array $answers) {
     assert_instances_of($answers, 'PonderAnswer');
     $this->answers = $answers;
@@ -155,9 +163,8 @@ final class PonderQuestion extends PonderDAO
   // Markup interface
 
   public function getMarkupFieldKey($field) {
-    $hash = PhabricatorHash::digest($this->getMarkupText($field));
-    $id = $this->getID();
-    return "ponder:Q{$id}:{$field}:{$hash}";
+    $content = $this->getMarkupText($field);
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
   public function getMarkupText($field) {

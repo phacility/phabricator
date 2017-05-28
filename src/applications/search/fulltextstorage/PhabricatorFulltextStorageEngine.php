@@ -7,6 +7,31 @@
  */
 abstract class PhabricatorFulltextStorageEngine extends Phobject {
 
+  protected $service;
+
+  public function getHosts() {
+    return $this->service->getHosts();
+  }
+
+  public function setService(PhabricatorSearchService $service) {
+    $this->service = $service;
+    return $this;
+  }
+
+  /**
+   * @return PhabricatorSearchService
+   */
+  public function getService() {
+    return $this->service;
+  }
+
+  /**
+   * Implementations must return a prototype host instance which is cloned
+   * by the PhabricatorSearchService infrastructure to configure each engine.
+   * @return PhabricatorSearchHost
+   */
+  abstract public function getHostType();
+
 /* -(  Engine Metadata  )---------------------------------------------------- */
 
   /**
@@ -16,37 +41,6 @@ abstract class PhabricatorFulltextStorageEngine extends Phobject {
    * @task meta
    */
   abstract public function getEngineIdentifier();
-
-  /**
-   * Prioritize this engine relative to other engines.
-   *
-   * Engines with a smaller priority number get an opportunity to write files
-   * first. Generally, lower-latency filestores should have lower priority
-   * numbers, and higher-latency filestores should have higher priority
-   * numbers. Setting priority to approximately the number of milliseconds of
-   * read latency will generally produce reasonable results.
-   *
-   * In conjunction with filesize limits, the goal is to store small files like
-   * profile images, thumbnails, and text snippets in lower-latency engines,
-   * and store large files in higher-capacity engines.
-   *
-   * @return float Engine priority.
-   * @task meta
-   */
-  abstract public function getEnginePriority();
-
-  /**
-   * Return `true` if the engine is currently writable.
-   *
-   * Engines that are disabled or missing configuration should return `false`
-   * to prevent new writes. If writes were made with this engine in the past,
-   * the application may still try to perform reads.
-   *
-   * @return bool True if this engine can support new writes.
-   * @task meta
-   */
-  abstract public function isEnabled();
-
 
 /* -(  Managing Documents  )------------------------------------------------- */
 
@@ -84,6 +78,13 @@ abstract class PhabricatorFulltextStorageEngine extends Phobject {
   abstract public function indexExists();
 
   /**
+    * Implementations should override this method to return a dictionary of
+    * stats which are suitable for display in the admin UI.
+    */
+  abstract public function getIndexStats();
+
+
+  /**
    * Is the index in a usable state?
    *
    * @return bool
@@ -100,39 +101,8 @@ abstract class PhabricatorFulltextStorageEngine extends Phobject {
   public function initIndex() {}
 
 
-/* -(  Loading Storage Engines  )-------------------------------------------- */
-
-  /**
-   * @task load
-   */
-  public static function loadAllEngines() {
-    return id(new PhutilClassMapQuery())
-      ->setAncestorClass(__CLASS__)
-      ->setUniqueMethod('getEngineIdentifier')
-      ->setSortMethod('getEnginePriority')
-      ->execute();
-  }
-
-  /**
-   * @task load
-   */
-  public static function loadActiveEngines() {
-    $engines = self::loadAllEngines();
-
-    $active = array();
-    foreach ($engines as $key => $engine) {
-      if (!$engine->isEnabled()) {
-        continue;
-      }
-
-      $active[$key] = $engine;
-    }
-
-    return $active;
-  }
-
-  public static function loadEngine() {
-    return head(self::loadActiveEngines());
+  public function getFulltextTokens() {
+    return array();
   }
 
 }

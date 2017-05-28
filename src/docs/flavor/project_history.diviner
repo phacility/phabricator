@@ -52,9 +52,9 @@ problems.
 I joined the new Dev Tools team around February 2010 and took over Diffcamp. I
 renamed it to Differential, moved it to a new Alite-based infrastructure with
 Javelin, and started making it somewhat less terrible. I eventually wrote
-Diffusion and build Herald to replace a very difficult-to-use predecessor. These
+Diffusion and built Herald to replace a very difficult-to-use predecessor. These
 tools were less negatively received than the older versions. By December 2010 I
 started open sourcing them; Haste became //Celerity// and Alite became
 //Aphront//. I wrote Maniphest to track open issues with the project in January
-or February and we open sourced Phabricator in late April, shortly after I left
-Facebook.
+or February, left Facebook in April, and shortly after, we open sourced
+Phabricator.

@@ -65,7 +65,7 @@ final class DifferentialRevisionStatus extends Phobject {
     $tag = id(new PHUITagView())
       ->setName($status_name)
       ->setIcon(self::getRevisionStatusIcon($status))
-      ->setShade(self::getRevisionStatusColor($status))
+      ->setColor(self::getRevisionStatusColor($status))
       ->setType(PHUITagView::TYPE_SHADE);
 
     return $tag;

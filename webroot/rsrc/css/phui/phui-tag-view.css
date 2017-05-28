@@ -46,11 +46,11 @@ a.phui-tag-view:hover {
 .phui-tag-dot {
   position: relative;
   display: inline-block;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   margin-right: 4px;
   top: -1px;
-  border-radius: 6px;
+  border-radius: 5px;
   border: 1px solid transparent;
 }
 
@@ -161,225 +161,233 @@ a.phui-tag-view:hover
 
 */
 
-.phui-tag-shade {
+.phui-tag-view.phui-tag-type-shade {
   font-weight: normal;
 }
 
-.phui-tag-shade .phui-icon-view {
+.phui-tag-view.phui-tag-type-shade .phui-icon-view {
   font-size: 12px;
 }
 
-.phui-tag-shade-slim .phui-icon-view {
+
+/* - Slim Tags -----------------------------------------------------------------
+
+  A thinner tag for object list, workboards.
+
+*/
+
+.phui-tag-slim .phui-icon-view {
   font-size: 11px;
 }
 
-.phui-tag-shade-slim .phui-tag-core {
+.phui-tag-slim .phui-tag-core {
   font-size: {$smallerfontsize};
 }
 
+
 /* - Red -------------------------------------------------------------------- */
 
-.phui-tag-shade-red .phui-tag-core,
+.phui-tag-red .phui-tag-core,
 .jx-tokenizer-token.red {
   background: {$sh-redbackground};
   border-color: {$sh-lightredborder};
   color: {$sh-redtext};
 }
 
-.phui-tag-shade-red .phui-icon-view,
+.phui-tag-red .phui-icon-view,
 .jx-tokenizer-token.red .phui-icon-view,
 .jx-tokenizer-token.red .jx-tokenizer-x {
   color: {$sh-redicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-red .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-red .phui-tag-core,
 .jx-tokenizer-token.red:hover {
   border-color: {$sh-redborder};
 }
 
 /* - Orange ----------------------------------------------------------------- */
 
-.phui-tag-shade-orange .phui-tag-core,
+.phui-tag-orange .phui-tag-core,
 .jx-tokenizer-token.orange {
   background: {$sh-orangebackground};
   border-color: {$sh-lightorangeborder};
   color: {$sh-orangetext};
 }
 
-.phui-tag-shade-orange .phui-icon-view,
+.phui-tag-orange .phui-icon-view,
 .jx-tokenizer-token.orange .phui-icon-view,
 .jx-tokenizer-token.orange .jx-tokenizer-x {
   color: {$sh-orangeicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-orange .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-orange .phui-tag-core,
 .jx-tokenizer-token.orange:hover {
   border-color: {$sh-orangeborder};
 }
 
 /* - Yellow ----------------------------------------------------------------- */
 
-.phui-tag-shade-yellow .phui-tag-core,
+.phui-tag-yellow .phui-tag-core,
 .jx-tokenizer-token.yellow {
   background: {$sh-yellowbackground};
   border-color: {$sh-lightyellowborder};
   color: {$sh-yellowtext};
 }
 
-.phui-tag-shade-yellow .phui-icon-view,
+.phui-tag-yellow .phui-icon-view,
 .jx-tokenizer-token.yellow .phui-icon-view,
 .jx-tokenizer-token.yellow .jx-tokenizer-x {
   color: {$sh-yellowicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-yellow .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-yellow .phui-tag-core,
 .jx-tokenizer-token.yellow:hover {
   border-color: {$sh-yellowborder};
 }
 
 /* - Blue ------------------------------------------------------------------- */
 
-.phui-tag-shade-blue .phui-tag-core,
+.phui-tag-blue .phui-tag-core,
 .jx-tokenizer-token.blue {
   background: {$sh-bluebackground};
   border-color: {$sh-lightblueborder};
   color: {$sh-bluetext};
 }
 
-.phui-tag-shade-blue .phui-icon-view,
+.phui-tag-blue .phui-icon-view,
 .jx-tokenizer-token.blue .phui-icon-view,
 .jx-tokenizer-token.blue .jx-tokenizer-x {
   color: {$sh-blueicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-blue .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-blue .phui-tag-core,
 .jx-tokenizer-token.blue:hover {
   border-color: {$sh-blueborder};
 }
 
 /* - Sky ------------------------------------------------------------------- */
 
-.phui-tag-shade-sky .phui-tag-core,
+.phui-tag-sky .phui-tag-core,
 .jx-tokenizer-token.sky {
   background: #E0F0FA;
   border-color: {$sh-lightblueborder};
   color: {$sh-bluetext};
 }
 
-.phui-tag-shade-sky .phui-icon-view,
+.phui-tag-sky .phui-icon-view,
 .jx-tokenizer-token.sky .phui-icon-view,
 .jx-tokenizer-token.sky .jx-tokenizer-x {
   color: {$sh-blueicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-sky .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-sky .phui-tag-core,
 .jx-tokenizer-token.sky:hover {
   border-color: {$sh-blueborder};
 }
 
 /* - Indigo ----------------------------------------------------------------- */
 
-.phui-tag-shade-indigo .phui-tag-core,
+.phui-tag-indigo .phui-tag-core,
 .jx-tokenizer-token.indigo {
   background: {$sh-indigobackground};
   border-color: {$sh-lightindigoborder};
   color: {$sh-indigotext};
 }
 
-.phui-tag-shade-indigo .phui-icon-view,
+.phui-tag-indigo .phui-icon-view,
 .jx-tokenizer-token.indigo .phui-icon-view,
 .jx-tokenizer-token.indigo .jx-tokenizer-x {
   color: {$sh-indigoicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-indigo .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-indigo .phui-tag-core,
 .jx-tokenizer-token.indigo:hover {
   border-color: {$sh-indigoborder};
 }
 
 /* - Green ------------------------------------------------------------------ */
 
-.phui-tag-shade-green .phui-tag-core,
+.phui-tag-green .phui-tag-core,
 .jx-tokenizer-token.green {
   background: {$sh-greenbackground};
   border-color: {$sh-lightgreenborder};
   color: {$sh-greentext};
 }
 
-.phui-tag-shade-green .phui-icon-view,
+.phui-tag-green .phui-icon-view,
 .jx-tokenizer-token.green .phui-icon-view,
 .jx-tokenizer-token.green .jx-tokenizer-x {
   color: {$sh-greenicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-green .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-green .phui-tag-core,
 .jx-tokenizer-token.green:hover {
   border-color: {$sh-greenborder};
 }
 
 /* - Violet ----------------------------------------------------------------- */
 
-.phui-tag-shade-violet .phui-tag-core,
+.phui-tag-violet .phui-tag-core,
 .jx-tokenizer-token.violet {
   background: {$sh-violetbackground};
   border-color: {$sh-lightvioletborder};
   color: {$sh-violettext};
 }
 
-.phui-tag-shade-violet .phui-icon-view,
+.phui-tag-violet .phui-icon-view,
 .jx-tokenizer-token.violet .phui-icon-view,
 .jx-tokenizer-token.violet .jx-tokenizer-x {
   color: {$sh-violeticon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-violet .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-violet .phui-tag-core,
 .jx-tokenizer-token.violet:hover {
   border-color: {$sh-violetborder};
 }
 
 /* - Pink ------------------------------------------------------------------- */
 
-.phui-tag-shade-pink .phui-tag-core,
+.phui-tag-pink .phui-tag-core,
 .jx-tokenizer-token.pink {
   background: {$sh-pinkbackground};
   border-color: {$sh-lightpinkborder};
   color: {$sh-pinktext};
 }
 
-.phui-tag-shade-pink .phui-icon-view,
+.phui-tag-pink .phui-icon-view,
 .jx-tokenizer-token.pink .phui-icon-view,
 .jx-tokenizer-token.pink .jx-tokenizer-x {
   color: {$sh-pinkicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-pink .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-pink .phui-tag-core,
 .jx-tokenizer-token.pink:hover {
   border-color: {$sh-pinkborder};
 }
 
 /* - Grey ------------------------------------------------------------------- */
 
-.phui-tag-shade-grey .phui-tag-core,
+.phui-tag-grey .phui-tag-core,
 .jx-tokenizer-token.grey {
   background: {$sh-greybackground};
   border-color: {$sh-lightgreyborder};
   color: {$sh-greytext};
 }
 
-.phui-tag-shade-grey .phui-icon-view,
+.phui-tag-grey .phui-icon-view,
 .jx-tokenizer-token.grey .phui-icon-view,
 .jx-tokenizer-token.grey .jx-tokenizer-x {
   color: {$sh-greyicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-grey .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-grey .phui-tag-core,
 .jx-tokenizer-token.grey:hover {
   border-color: {$sh-greyborder};
 }
 
 /* - Checkered -------------------------------------------------------------- */
 
-.phui-tag-shade-checkered .phui-tag-core,
+.phui-tag-checkered .phui-tag-core,
 .jx-tokenizer-token.checkered {
   background: url(/rsrc/image/checker_lighter.png);
   border-style: dashed;
@@ -388,13 +396,13 @@ a.phui-tag-view:hover.phui-tag-shade-grey .phui-tag-core,
   text-shadow: 1px 1px #fff;
 }
 
-.phui-tag-shade-checkered .phui-icon-view,
+.phui-tag-checkered .phui-icon-view,
 .jx-tokenizer-token.checkered .phui-icon-view,
 .jx-tokenizer-token.checkered .jx-tokenizer-x {
   color: {$sh-greyicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-checkered .phui-tag-core,
+a.phui-tag-view:hover.phui-tag-checkered .phui-tag-core,
 .jx-tokenizer-token.checkered:hover {
   border-style: solid;
   border-color: {$sh-greyborder};
@@ -402,16 +410,101 @@ a.phui-tag-view:hover.phui-tag-shade-checkered .phui-tag-core,
 
 /* - Disabled --------------------------------------------------------------- */
 
-.phui-tag-shade-disabled .phui-tag-core {
+.phui-tag-disabled .phui-tag-core {
   background-color: {$sh-disabledbackground};
   border-color: {$sh-lightdisabledborder};
   color: {$sh-disabledtext};
 }
 
-.phui-tag-shade-disabled .phui-icon-view {
+.phui-tag-disabled .phui-icon-view {
   color: {$sh-disabledicon};
 }
 
-a.phui-tag-view:hover.phui-tag-shade-disabled .phui-tag-core {
+a.phui-tag-view:hover.phui-tag-disabled .phui-tag-core {
   border-color: {$sh-disabledborder};
+}
+
+/* - Outline Tags --------------------------------------------------------------
+
+  Basic Tag with a bold border and white background
+
+*/
+
+.phui-tag-type-outline {
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+.phui-tag-view.phui-tag-type-outline .phui-tag-core {
+  background: #fff;
+  padding: 0 6px 1px 6px;
+}
+
+.phui-tag-slim.phui-tag-type-outline .phui-tag-core {
+  font-size: {$smallestfontsize};
+}
+
+.phui-tag-type-outline.phui-tag-red .phui-tag-core {
+  color: {$red};
+  border-color: {$red};
+}
+
+.phui-tag-type-outline.phui-tag-orange .phui-tag-core {
+  color: {$orange};
+  border-color: {$orange};
+}
+
+.phui-tag-type-outline.phui-tag-yellow .phui-tag-core {
+  color: {$yellow};
+  border-color: {$yellow};
+}
+
+.phui-tag-type-outline.phui-tag-green .phui-tag-core {
+  color: {$green};
+  border-color: {$green};
+}
+
+.phui-tag-type-outline.phui-tag-blue .phui-tag-core {
+  color: {$blue};
+  border-color: {$blue};
+}
+
+.phui-tag-type-outline.phui-tag-indigo .phui-tag-core {
+  color: {$indigo};
+  border-color: {$indigo};
+}
+
+.phui-tag-type-outline.phui-tag-violet .phui-tag-core {
+  color: {$violet};
+  border-color: {$violet};
+}
+
+.phui-tag-type-outline.phui-tag-grey .phui-tag-core {
+  color: {$bluetext};
+  border-color: {$bluetext};
+}
+
+.phui-tag-type-outline.phui-tag-disabled .phui-tag-core {
+  color: {$lightgreytext};
+  border-color: {$lightgreytext};
+}
+
+.phui-tag-type-outline.phui-tag-pink .phui-tag-core {
+  color: {$pink};
+  border-color: {$pink};
+}
+
+.phui-tag-type-outline.phui-tag-sky .phui-tag-core {
+  color: {$sky};
+  border-color: {$sky};
+}
+
+.phui-tag-type-outline.phui-tag-fire .phui-tag-core {
+  color: {$fire};
+  border-color: {$fire};
+}
+
+.phui-tag-type-outline.phui-tag-black .phui-tag-core {
+  color: #000;
+  border-color: #000;
 }

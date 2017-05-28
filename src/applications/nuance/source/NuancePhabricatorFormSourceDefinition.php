@@ -39,6 +39,8 @@ final class NuancePhabricatorFormSourceDefinition
       $content_source = PhabricatorContentSource::newFromRequest($request);
 
       $item = $this->newItemFromProperties(
+        NuanceFormItemType::ITEMTYPE,
+        $viewer->getPHID(),
         $properties,
         $content_source);
 
@@ -79,7 +81,7 @@ final class NuancePhabricatorFormSourceDefinition
     NuanceItem $item,
     PHUIPropertyListView $view) {
 
-    $complaint = $item->getNuanceProperty('complaint');
+    $complaint = $item->getItemProperty('complaint');
     $complaint = new PHUIRemarkupView($viewer, $complaint);
     $view->addSectionHeader(
       pht('Complaint'), 'fa-exclamation-circle');

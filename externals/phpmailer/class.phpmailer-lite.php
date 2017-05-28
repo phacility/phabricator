@@ -656,6 +656,10 @@ class PHPMailerLite {
     $addr_str .= implode(', ', $addresses);
     $addr_str .= $this->LE;
 
+    // NOTE: This is a narrow hack to fix an issue with 1000+ characters of
+    // recipients, described in T12372.
+    $addr_str = wordwrap($addr_str, 75, "\n ");
+
     return $addr_str;
   }
 

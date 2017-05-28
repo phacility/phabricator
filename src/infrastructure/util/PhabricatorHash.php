@@ -5,12 +5,15 @@ final class PhabricatorHash extends Phobject {
   const INDEX_DIGEST_LENGTH = 12;
 
   /**
-   * Digest a string for general use, including use which relates to security.
+   * Digest a string using HMAC+SHA1.
+   *
+   * Because a SHA1 collision is now known, this method should be considered
+   * weak. Callers should prefer @{method:digestWithNamedKey}.
    *
    * @param   string  Input string.
    * @return  string  32-byte hexidecimal SHA1+HMAC hash.
    */
-  public static function digest($string, $key = null) {
+  public static function weakDigest($string, $key = null) {
     if ($key === null) {
       $key = PhabricatorEnv::getEnvConfig('security.hmac-key');
     }
@@ -37,7 +40,7 @@ final class PhabricatorHash extends Phobject {
     }
 
     for ($ii = 0; $ii < 1000; $ii++) {
-      $result = self::digest($result, $salt);
+      $result = self::weakDigest($result, $salt);
     }
 
     return $result;
@@ -76,6 +79,22 @@ final class PhabricatorHash extends Phobject {
     }
 
     return $result;
+  }
+
+  public static function digestToRange($string, $min, $max) {
+    if ($min > $max) {
+      throw new Exception(pht('Maximum must be larger than minimum.'));
+    }
+
+    if ($min == $max) {
+      return $min;
+    }
+
+    $hash = sha1($string, $raw_output = true);
+    // Make sure this ends up positive, even on 32-bit machines.
+    $value = head(unpack('L', $hash)) & 0x7FFFFFFF;
+
+    return $min + ($value % (1 + $max - $min));
   }
 
 
@@ -121,6 +140,90 @@ final class PhabricatorHash extends Phobject {
     $prefix = substr($string, 0, ($length - ($min_length - 1)));
 
     return $prefix.'-'.$hash;
+  }
+
+  public static function digestWithNamedKey($message, $key_name) {
+    $key_bytes = self::getNamedHMACKey($key_name);
+    return self::digestHMACSHA256($message, $key_bytes);
+  }
+
+  public static function digestHMACSHA256($message, $key) {
+    if (!strlen($key)) {
+      throw new Exception(
+        pht('HMAC-SHA256 requires a nonempty key.'));
+    }
+
+    $result = hash_hmac('sha256', $message, $key, $raw_output = false);
+
+    if ($result === false) {
+      throw new Exception(
+        pht('Unable to compute HMAC-SHA256 digest of message.'));
+    }
+
+    return $result;
+  }
+
+
+/* -(  HMAC Key Management  )------------------------------------------------ */
+
+
+  private static function getNamedHMACKey($hmac_name) {
+    $cache = PhabricatorCaches::getImmutableCache();
+
+    $cache_key = "hmac.key({$hmac_name})";
+
+    $hmac_key = $cache->getKey($cache_key);
+    if (!strlen($hmac_key)) {
+      $hmac_key = self::readHMACKey($hmac_name);
+
+      if ($hmac_key === null) {
+        $hmac_key = self::newHMACKey($hmac_name);
+        self::writeHMACKey($hmac_name, $hmac_key);
+      }
+
+      $cache->setKey($cache_key, $hmac_key);
+    }
+
+    // The "hex2bin()" function doesn't exist until PHP 5.4.0 so just
+    // implement it inline.
+    $result = '';
+    for ($ii = 0; $ii < strlen($hmac_key); $ii += 2) {
+      $result .= pack('H*', substr($hmac_key, $ii, 2));
+    }
+
+    return $result;
+  }
+
+  private static function newHMACKey($hmac_name) {
+    $hmac_key = Filesystem::readRandomBytes(64);
+    return bin2hex($hmac_key);
+  }
+
+  private static function writeHMACKey($hmac_name, $hmac_key) {
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+      id(new PhabricatorAuthHMACKey())
+        ->setKeyName($hmac_name)
+        ->setKeyValue($hmac_key)
+        ->save();
+
+    unset($unguarded);
+  }
+
+  private static function readHMACKey($hmac_name) {
+    $table = new PhabricatorAuthHMACKey();
+    $conn = $table->establishConnection('r');
+
+    $row = queryfx_one(
+      $conn,
+      'SELECT keyValue FROM %T WHERE keyName = %s',
+      $table->getTableName(),
+      $hmac_name);
+    if (!$row) {
+      return null;
+    }
+
+    return $row['keyValue'];
   }
 
 

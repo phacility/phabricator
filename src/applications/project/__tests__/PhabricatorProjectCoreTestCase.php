@@ -356,13 +356,13 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $xactions = array();
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setTransactionType(PhabricatorProjectNameTransaction::TRANSACTIONTYPE)
       ->setNewValue($name);
     $this->applyTransactions($project, $user, $xactions);
 
     $xactions = array();
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setTransactionType(PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
       ->setNewValue(array($name));
     $this->applyTransactions($project, $user, $xactions);
 
@@ -382,11 +382,11 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setTransactionType(PhabricatorProjectNameTransaction::TRANSACTIONTYPE)
       ->setNewValue($name2);
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setTransactionType(PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
       ->setNewValue(array($name2));
 
     $this->applyTransactions($project, $user, $xactions);
@@ -416,7 +416,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setTransactionType(PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
       ->setNewValue(array($input, $input));
 
     $this->applyTransactions($project, $user, $xactions);
@@ -448,7 +448,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setTransactionType(PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
       ->setNewValue(array($input));
 
     $this->applyTransactions($project, $user, $xactions);
@@ -474,7 +474,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setTransactionType(PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
       ->setNewValue(array($input));
 
     $caught = null;
@@ -503,7 +503,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setTransactionType(PhabricatorProjectNameTransaction::TRANSACTIONTYPE)
       ->setNewValue($name);
 
     $xactions[] = id(new PhabricatorProjectTransaction())
@@ -601,11 +601,11 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setTransactionType(PhabricatorProjectNameTransaction::TRANSACTIONTYPE)
       ->setNewValue($name);
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setTransactionType(PhabricatorProjectSlugsTransaction::TRANSACTIONTYPE)
       ->setNewValue(array($slug));
 
     $this->applyTransactions($project, $user, $xactions);
@@ -1290,7 +1290,8 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $new_name = $proj->getName().' '.mt_rand();
 
     $xaction = new PhabricatorProjectTransaction();
-    $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
+    $xaction->setTransactionType(
+      PhabricatorProjectNameTransaction::TRANSACTIONTYPE);
     $xaction->setNewValue($new_name);
 
     $this->applyTransactions($proj, $user, array($xaction));
@@ -1337,7 +1338,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+      ->setTransactionType(ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue($name);
 
     if ($projects) {
@@ -1440,17 +1441,19 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setTransactionType(PhabricatorProjectNameTransaction::TRANSACTIONTYPE)
       ->setNewValue($name);
 
     if ($parent) {
       if ($is_milestone) {
         $xactions[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
+          ->setTransactionType(
+              PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE)
           ->setNewValue($parent->getPHID());
       } else {
         $xactions[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
+          ->setTransactionType(
+              PhabricatorProjectParentTransaction::TRANSACTIONTYPE)
           ->setNewValue($parent->getPHID());
       }
     }

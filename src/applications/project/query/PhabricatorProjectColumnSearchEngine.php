@@ -11,6 +11,10 @@ final class PhabricatorProjectColumnSearchEngine
     return 'PhabricatorProjectApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     return new PhabricatorProjectColumnQuery();
   }
@@ -24,7 +28,6 @@ final class PhabricatorProjectColumnSearchEngine
         ->setAliases(array('project', 'projects', 'projectPHID')),
     );
   }
-
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();

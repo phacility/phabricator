@@ -37,6 +37,7 @@ final class LegalpadDocumentManageController extends LegalpadController {
       $document,
       new LegalpadTransactionQuery(),
       $engine);
+    $timeline->setQuoteRef($document->getMonogram());
 
     $title = $document_body->getTitle();
 
@@ -50,11 +51,9 @@ final class LegalpadDocumentManageController extends LegalpadController {
     $properties = $this->buildPropertyView($document, $engine);
     $document_view = $this->buildDocumentView($document, $engine);
 
-    $comment_form_id = celerity_generate_unique_node_id();
+    $comment_form = $this->buildCommentView($document, $timeline);
 
-    $add_comment = $this->buildAddCommentView($document, $comment_form_id);
-
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       $document->getMonogram(),
       '/'.$document->getMonogram());
@@ -69,7 +68,7 @@ final class LegalpadDocumentManageController extends LegalpadController {
         $properties,
         $document_view,
         $timeline,
-        $add_comment,
+        $comment_form,
       ));
 
     return $this->newPage()
@@ -181,31 +180,14 @@ final class LegalpadDocumentManageController extends LegalpadController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
   }
 
-  private function buildAddCommentView(
-    LegalpadDocument $document,
-    $comment_form_id) {
+  private function buildCommentView(LegalpadDocument $document, $timeline) {
     $viewer = $this->getViewer();
+    $box = id(new LegalpadDocumentEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($document)
+      ->setTransactionTimeline($timeline);
 
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $document->getPHID());
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $title = $is_serious
-      ? pht('Add Comment')
-      : pht('Debate Legislation');
-
-    $form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($document->getPHID())
-      ->setFormID($comment_form_id)
-      ->setHeaderText($title)
-      ->setDraft($draft)
-      ->setSubmitButtonName(pht('Add Comment'))
-      ->setAction($this->getApplicationURI('/comment/'.$document->getID().'/'))
-      ->setRequestURI($this->getRequest()->getRequestURI());
-
-    return $form;
-
+    return $box;
   }
 
 }

@@ -41,8 +41,6 @@ final class DifferentialChangesetOneUpRenderer
 
     $column_width = 4;
 
-    $hidden = new PHUIDiffRevealIconView();
-
     $out = array();
     foreach ($primitives as $k => $p) {
       $type = $p['type'];
@@ -52,27 +50,6 @@ final class DifferentialChangesetOneUpRenderer
         case 'old-file':
         case 'new-file':
           $is_old = ($type == 'old' || $type == 'old-file');
-
-          $o_hidden = array();
-          $n_hidden = array();
-
-          for ($look = $k + 1; isset($primitives[$look]); $look++) {
-            $next = $primitives[$look];
-            switch ($next['type']) {
-              case 'inline':
-                $comment = $next['comment'];
-                if ($comment->isHidden()) {
-                  if ($next['right']) {
-                    $n_hidden[] = $comment;
-                  } else {
-                    $o_hidden[] = $comment;
-                  }
-                }
-                break;
-              default:
-                break 2;
-            }
-          }
 
           $cells = array();
           if ($is_old) {
@@ -93,9 +70,6 @@ final class DifferentialChangesetOneUpRenderer
             }
 
             $line = $p['line'];
-            if ($o_hidden) {
-              $line = array($hidden, $line);
-            }
 
             $cells[] = phutil_tag(
               'th',
@@ -122,9 +96,6 @@ final class DifferentialChangesetOneUpRenderer
               }
 
               $oline = $p['oline'];
-              if ($o_hidden) {
-                $oline = array($hidden, $oline);
-              }
 
               $cells[] = phutil_tag('th', array('id' => $left_id), $oline);
             }
@@ -140,9 +111,6 @@ final class DifferentialChangesetOneUpRenderer
             }
 
             $line = $p['line'];
-            if ($n_hidden) {
-              $line = array($hidden, $line);
-            }
 
             $cells[] = phutil_tag(
               'th',

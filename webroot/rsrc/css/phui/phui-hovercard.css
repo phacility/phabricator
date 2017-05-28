@@ -81,7 +81,11 @@
 }
 
 .hovercard-badges {
-  margin: 8px 0 0 0;
+  margin: 6px 0 0 0;
+  padding: 4px;
+  background: {$page.background};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .hovercard-badges .phui-badge-flex-item {
@@ -100,4 +104,12 @@
 .phui-hovercard-tail button,
 .phui-hovercard-tail a.button {
   margin: 3px;
+}
+
+.phui-hovercard-wrapper .hovercard-task-view {
+  box-shadow: 0px 4px 16px rgba(0,0,0,.2);
+}
+
+.hovercard-task-view .phui-oi-disabled.phui-workcard {
+  background-color: #fff;
 }

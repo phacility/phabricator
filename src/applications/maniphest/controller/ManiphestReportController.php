@@ -93,7 +93,7 @@ final class ManiphestReportController extends ManiphestController {
         ORDER BY x.dateCreated ASC',
       $table->getTableName(),
       $joins,
-      ManiphestTransaction::TYPE_STATUS);
+      ManiphestTaskStatusTransaction::TRANSACTIONTYPE);
 
     $stats = array();
     $day_buckets = array();

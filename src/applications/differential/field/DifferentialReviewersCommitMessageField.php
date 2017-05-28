@@ -45,8 +45,8 @@ final class DifferentialReviewersCommitMessageField
     $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
 
     $results = array();
-    foreach ($revision->getReviewerStatus() as $reviewer) {
-      if ($reviewer->getStatus() == $status_blocking) {
+    foreach ($revision->getReviewers() as $reviewer) {
+      if ($reviewer->getReviewerStatus() == $status_blocking) {
         $suffixes = array('!' => '!');
       } else {
         $suffixes = array();

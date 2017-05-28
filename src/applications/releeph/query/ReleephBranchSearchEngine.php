@@ -9,6 +9,10 @@ final class ReleephBranchSearchEngine
     return pht('Releeph Branches');
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function getApplicationClassName() {
     return 'PhabricatorReleephApplication';
   }

@@ -34,29 +34,30 @@ final class PhabricatorProjectsMembershipIndexEngineExtension
   }
 
   private function materializeProject(PhabricatorProject $project) {
-    if ($project->isMilestone()) {
-      return;
-    }
-
     $material_type = PhabricatorProjectMaterializedMemberEdgeType::EDGECONST;
     $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
 
     $project_phid = $project->getPHID();
 
-    $descendants = id(new PhabricatorProjectQuery())
-      ->setViewer($this->getViewer())
-      ->withAncestorProjectPHIDs(array($project->getPHID()))
-      ->withIsMilestone(false)
-      ->withHasSubprojects(false)
-      ->execute();
-    $descendant_phids = mpull($descendants, 'getPHID');
-
-    if ($descendant_phids) {
-      $source_phids = $descendant_phids;
-      $has_subprojects = true;
-    } else {
-      $source_phids = array($project->getPHID());
+    if ($project->isMilestone()) {
+      $source_phids = array($project->getParentProjectPHID());
       $has_subprojects = false;
+    } else {
+      $descendants = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withAncestorProjectPHIDs(array($project->getPHID()))
+        ->withIsMilestone(false)
+        ->withHasSubprojects(false)
+        ->execute();
+      $descendant_phids = mpull($descendants, 'getPHID');
+
+      if ($descendant_phids) {
+        $source_phids = $descendant_phids;
+        $has_subprojects = true;
+      } else {
+        $source_phids = array($project->getPHID());
+        $has_subprojects = false;
+      }
     }
 
     $conn_w = $project->establishConnection('w');

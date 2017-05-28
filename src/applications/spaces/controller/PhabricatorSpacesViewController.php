@@ -39,7 +39,7 @@ final class PhabricatorSpacesViewController
       ->setHeaderIcon('fa-th-large');
 
     if ($space->getIsArchived()) {
-      $header->setStatus('fa-ban', 'red', pht('Archived'));
+      $header->setStatus('fa-ban', 'indigo', pht('Archived'));
     } else {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     }

@@ -5,6 +5,7 @@ final class NuanceItemCommandQuery
 
   private $ids;
   private $itemPHIDs;
+  private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +14,11 @@ final class NuanceItemCommandQuery
 
   public function withItemPHIDs(array $item_phids) {
     $this->itemPHIDs = $item_phids;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -39,6 +45,13 @@ final class NuanceItemCommandQuery
         $conn,
         'itemPHID IN (%Ls)',
         $this->itemPHIDs);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
     }
 
     return $where;

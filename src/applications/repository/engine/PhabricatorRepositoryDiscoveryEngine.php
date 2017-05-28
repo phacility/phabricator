@@ -14,7 +14,7 @@ final class PhabricatorRepositoryDiscoveryEngine
   private $commitCache = array();
   private $workingSet = array();
 
-  const MAX_COMMIT_CACHE_SIZE = 2048;
+  const MAX_COMMIT_CACHE_SIZE = 65535;
 
 
 /* -(  Discovering Repositories  )------------------------------------------- */
@@ -233,7 +233,7 @@ final class PhabricatorRepositoryDiscoveryEngine
           $limit,
           $repository->getSubversionBaseURI($at_rev));
       } catch (CommandException $ex) {
-        $stderr = $ex->getStdErr();
+        $stderr = $ex->getStderr();
         if (preg_match('/(path|File) not found/', $stderr)) {
           // We've gone all the way back through history and this path was not
           // affected by earlier commits.
@@ -476,6 +476,15 @@ final class PhabricatorRepositoryDiscoveryEngine
       return;
     }
 
+    $max_size = self::MAX_COMMIT_CACHE_SIZE;
+
+    // If we're filling more identifiers than would fit in the cache, ignore
+    // the ones that don't fit. Because the cache is FIFO, overfilling it can
+    // cause the entire cache to miss. See T12296.
+    if (count($identifiers) > $max_size) {
+      $identifiers = array_slice($identifiers, 0, $max_size);
+    }
+
     // When filling the cache we ignore commits which have been marked as
     // unreachable, treating them as though they do not exist. When recording
     // commits later we'll revive commits that exist but are unreachable.
@@ -492,7 +501,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->commitCache[$commit->getCommitIdentifier()] = true;
     }
 
-    while (count($this->commitCache) > self::MAX_COMMIT_CACHE_SIZE) {
+    while (count($this->commitCache) > $max_size) {
       array_shift($this->commitCache);
     }
   }

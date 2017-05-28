@@ -74,8 +74,9 @@ body.printable {
 a.button.phui-document-toc {
   display: inline-block;
   height: 16px;
-  width: 16px;
-  padding: 3px 8px 4px 8px;
+  width: 20px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .phui-document-view-pro .phui-document-toc-list {
@@ -83,12 +84,12 @@ a.button.phui-document-toc {
   border: 1px solid {$lightgreyborder};
   border-radius: 3px;
   box-shadow: {$dropshadow};
-  width: 200px;
+  width: 260px;
   position: absolute;
   z-index: 30;
   background-color: #fff;
   top: 52px;
-  left: -44px;
+  left: -40px;
 }
 
 .device .phui-document-view-pro .phui-document-toc {
@@ -105,6 +106,7 @@ a.button.phui-document-toc {
 
 .phui-document-toc-open .phui-document-toc {
   background-color: {$blue};
+  border-color: {$blue};
 }
 
 .phui-document-toc-open .phui-document-toc .phui-icon-view {
@@ -112,17 +114,38 @@ a.button.phui-document-toc {
 }
 
 .phui-document-view-pro .phui-document-toc-content {
-  margin: 4px 12px;
+  margin: 8px 16px;
 }
 
 .phui-document-view-pro .phui-document-toc-header {
   font-weight: bold;
   color: {$bluetext};
   margin-bottom: 8px;
+  text-transform: uppercase;
+  font-size: {$smallerfontsize};
 }
 
 .phui-document-view-pro .phui-document-toc-content li {
-  margin: 4px 8px;
+  margin: 4px 8px 4px 0;
+}
+
+.phui-document-view-pro .phui-document-toc-content a {
+  padding: 2px 0;
+  display: block;
+  text-decoration: none;
+  color: {$darkbluetext};
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.phui-document-view-pro .phui-document-toc-content a:hover {
+  color: {$anchor};
+  text-decoration: underline;
+}
+
+.phui-document-view-pro .phui-document-toc-content li + ul {
+  margin: 4px 0 4px 8px;
 }
 
 .phui-document-view-pro .phui-document-content .phabricator-remarkup {

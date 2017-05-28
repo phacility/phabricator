@@ -34,7 +34,7 @@ final class ConpherenceListController extends ConpherenceController {
     $title = pht('Conpherence');
     $conpherence = null;
 
-    $limit = (ConpherenceThreadListView::SEE_MORE_LIMIT * 2) + 1;
+    $limit = ConpherenceThreadListView::SEE_ALL_LIMIT + 1;
     $all_participation = array();
 
     $mode = $this->determineMode();
@@ -64,7 +64,7 @@ final class ConpherenceListController extends ConpherenceController {
         }
 
         // check to see if the loaded conpherence is going to show up
-        // within the SEE_MORE_LIMIT amount of conpherences.
+        // within the SEE_ALL_LIMIT amount of conpherences.
         // If its not there, then we just pre-pend it as the "first"
         // conpherence so folks have a navigation item in the menu.
         $count = 0;
@@ -75,7 +75,7 @@ final class ConpherenceListController extends ConpherenceController {
             break;
           }
           $count++;
-          if ($count > ConpherenceThreadListView::SEE_MORE_LIMIT) {
+          if ($count > ConpherenceThreadListView::SEE_ALL_LIMIT) {
             break;
           }
         }
@@ -89,11 +89,19 @@ final class ConpherenceListController extends ConpherenceController {
       default:
         $data = $this->loadDefaultParticipation($limit);
         $all_participation = $data['all_participation'];
+        if ($all_participation) {
+          $conpherence_id = head($all_participation)->getConpherencePHID();
+          $conpherence = id(new ConpherenceThreadQuery())
+            ->setViewer($user)
+            ->withPHIDs(array($conpherence_id))
+            ->needProfileImage(true)
+            ->executeOne();
+        }
+        // If $conpherence is null, NUX state will render
         break;
     }
 
-    $threads = $this->loadConpherenceThreadData(
-      $all_participation);
+    $threads = $this->loadConpherenceThreadData($all_participation);
 
     $thread_view = id(new ConpherenceThreadListView())
       ->setUser($user)
@@ -144,6 +152,7 @@ final class ConpherenceListController extends ConpherenceController {
       ->withParticipantPHIDs(array($viewer->getPHID()))
       ->setLimit($limit)
       ->execute();
+    $all_participation = mpull($all_participation, null, 'getConpherencePHID');
 
     return array(
       'all_participation' => $all_participation,
@@ -159,7 +168,6 @@ final class ConpherenceListController extends ConpherenceController {
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
         ->needProfileImage(true)
-        ->needParticipantCache(true)
         ->execute();
 
       // this will re-sort by participation data

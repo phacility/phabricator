@@ -212,13 +212,6 @@ final class DifferentialTransaction
           $tags[] = self::MAILTAG_UPDATED;
         }
         break;
-      case PhabricatorTransactions::TYPE_EDGE:
-        switch ($this->getMetadataValue('edge:type')) {
-          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
-            $tags[] = self::MAILTAG_REVIEWERS;
-            break;
-        }
-        break;
       case PhabricatorTransactions::TYPE_COMMENT:
       case self::TYPE_INLINE:
         $tags[] = self::MAILTAG_COMMENT;
@@ -598,14 +591,6 @@ final class DifferentialTransaction
 
   public function getNoEffectDescription() {
     switch ($this->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_EDGE:
-        switch ($this->getMetadataValue('edge:type')) {
-          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
-            return pht(
-              'The reviewers you are trying to add are already reviewing '.
-              'this revision.');
-        }
-        break;
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
@@ -622,20 +607,10 @@ final class DifferentialTransaction
               'not closed.');
           case DifferentialAction::ACTION_RETHINK:
             return pht('This revision already requires changes.');
-          case DifferentialAction::ACTION_REQUEST:
-            return pht('Review is already requested for this revision.');
-          case DifferentialAction::ACTION_RESIGN:
-            return pht(
-              'You can not resign from this revision because you are not '.
-              'a reviewer.');
           case DifferentialAction::ACTION_CLAIM:
             return pht(
               'You can not commandeer this revision because you already own '.
               'it.');
-          case DifferentialAction::ACTION_ACCEPT:
-            return pht('You have already accepted this revision.');
-          case DifferentialAction::ACTION_REJECT:
-            return pht('You have already requested changes to this revision.');
         }
         break;
     }

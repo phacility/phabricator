@@ -28,7 +28,7 @@ final class PhamePostMoveController extends PhamePostController {
 
       $xactions = array();
       $xactions[] = id(new PhamePostTransaction())
-        ->setTransactionType(PhamePostTransaction::TYPE_BLOG)
+        ->setTransactionType(PhamePostBlogTransaction::TRANSACTIONTYPE)
         ->setNewValue($v_blog);
 
       $editor = id(new PhamePostEditor())

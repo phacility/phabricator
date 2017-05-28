@@ -37,8 +37,7 @@ abstract class DifferentialReviewersHeraldAction
       }
     }
 
-    $reviewers = $object->getReviewerStatus();
-    $reviewers = mpull($reviewers, null, 'getReviewerPHID');
+    $reviewers = $object->getReviewers();
 
     if ($is_blocking) {
       $new_status = DifferentialReviewerStatus::STATUS_BLOCKING;
@@ -58,7 +57,7 @@ abstract class DifferentialReviewersHeraldAction
       // If we're applying a stronger status (usually, upgrading a reviewer
       // into a blocking reviewer), skip this check so we apply the change.
       $old_strength = DifferentialReviewerStatus::getStatusStrength(
-        $reviewers[$phid]->getStatus());
+        $reviewers[$phid]->getReviewerStatus());
       if ($old_strength <= $new_strength) {
         continue;
       }
@@ -81,18 +80,17 @@ abstract class DifferentialReviewersHeraldAction
 
     $value = array();
     foreach ($phids as $phid) {
-      $value[$phid] = array(
-        'data' => array(
-          'status' => $new_status,
-        ),
-      );
+      if ($is_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
     }
 
-    $edgetype_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
+    $reviewers_type = DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE;
 
     $xaction = $adapter->newTransaction()
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', $edgetype_reviewer)
+      ->setTransactionType($reviewers_type)
       ->setNewValue(
         array(
           '+' => $value,

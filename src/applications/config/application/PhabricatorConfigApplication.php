@@ -27,7 +27,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
   }
 
   public function getName() {
-    return 'Config';
+    return pht('Config');
   }
 
   public function getShortDescription() {
@@ -69,6 +69,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
           'databases/' => 'PhabricatorConfigClusterDatabasesController',
           'notifications/' => 'PhabricatorConfigClusterNotificationsController',
           'repositories/' => 'PhabricatorConfigClusterRepositoriesController',
+          'search/' => 'PhabricatorConfigClusterSearchController',
         ),
       ),
     );

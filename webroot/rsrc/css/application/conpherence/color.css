@@ -1,0 +1,48 @@
+/**
+ * @provides conpherence-color-css
+ */
+
+.conpherence-theme-blue .conpherence-menu-pane {
+  background-color: {$lightblue};
+}
+
+.conpherence-theme-blue .phui-basic-nav .phabricator-side-menu
+  .phui-list-item-selected {
+    border-left-color: {$blue};
+}
+
+.conpherence-theme-indigo .conpherence-menu-pane {
+  background-color: {$lightindigo};
+}
+
+.conpherence-theme-indigo .phui-basic-nav .phabricator-side-menu
+  .phui-list-item-selected {
+    border-left-color: {$indigo};
+}
+
+.conpherence-theme-peach .conpherence-menu-pane {
+  background-color: {$lightred};
+}
+
+.conpherence-theme-peach .phui-basic-nav .phabricator-side-menu
+  .phui-list-item-selected {
+    border-left-color: rgba(0,0,0,.25);
+}
+
+.conpherence-theme-green .conpherence-menu-pane {
+  background-color: {$lightgreen};
+}
+
+.conpherence-theme-green .phui-basic-nav .phabricator-side-menu
+  .phui-list-item-selected {
+    border-left-color: {$green};
+}
+
+.conpherence-theme-pink .conpherence-menu-pane {
+  background-color: {$lightpink};
+}
+
+.conpherence-theme-pink .phui-basic-nav .phabricator-side-menu
+  .phui-list-item-selected {
+    border-left-color: {$pink};
+}

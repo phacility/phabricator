@@ -67,9 +67,17 @@ final class DiffusionTaggedRepositoriesFunctionDatasource
       ->execute();
 
     $results = array();
-
     foreach ($repositories as $repository) {
       $results[] = $repository->getPHID();
+    }
+
+    if (!$results) {
+      // TODO: This is a little hacky, but if you query for "tagged(x)" and
+      // there are no such repositories, we want to match nothing. If we
+      // just return `array()`, that gets evaluated as "no constraint" and
+      // we match everything. This works correctly for now, but should be
+      // replaced with some more elegant/general approach eventually.
+      $results[] = PhabricatorPHIDConstants::PHID_VOID;
     }
 
     return $results;

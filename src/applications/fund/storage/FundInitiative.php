@@ -85,6 +85,10 @@ final class FundInitiative extends FundDAO
     return 'I'.$this->getID();
   }
 
+  public function getViewURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function getProjectPHIDs() {
     return $this->assertAttached($this->projectPHIDs);
   }

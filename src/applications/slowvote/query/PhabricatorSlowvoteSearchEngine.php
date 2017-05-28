@@ -55,6 +55,7 @@ final class PhabricatorSlowvoteSearchEngine
 
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
+        ->setLabel(pht('Statuses'))
         ->setOptions(array(
           'open' => pht('Open'),
           'closed' => pht('Closed'),

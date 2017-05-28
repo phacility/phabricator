@@ -11,8 +11,14 @@ final class PhabricatorFileSearchEngine
     return 'PhabricatorFilesApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
-    return new PhabricatorFileQuery();
+    $query = new PhabricatorFileQuery();
+    $query->withIsDeleted(false);
+    return $query;
   }
 
   protected function buildCustomSearchFields() {
@@ -34,6 +40,10 @@ final class PhabricatorFileSearchEngine
       id(new PhabricatorSearchDateField())
         ->setKey('createdEnd')
         ->setLabel(pht('Created Before')),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name')
+        ->setDescription(pht('Search for files by name substring.')),
     );
   }
 
@@ -62,6 +72,10 @@ final class PhabricatorFileSearchEngine
 
     if ($map['createdEnd']) {
       $query->withDateCreatedBefore($map['createdEnd']);
+    }
+
+    if ($map['name'] !== null) {
+      $query->withNameNgrams($map['name']);
     }
 
     return $query;

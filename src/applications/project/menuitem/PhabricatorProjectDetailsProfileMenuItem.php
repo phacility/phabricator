@@ -46,15 +46,15 @@ final class PhabricatorProjectDetailsProfileMenuItem
     $project = $config->getProfileObject();
 
     $id = $project->getID();
-    $picture = $project->getProfileImageURI();
     $name = $project->getName();
+    $icon = $project->getDisplayIconIcon();
 
     $href = "/project/profile/{$id}/";
 
     $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setProfileImage($picture);
+      ->setIcon($icon);
 
     return array(
       $item,

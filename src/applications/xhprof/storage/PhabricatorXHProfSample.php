@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorXHProfSample extends PhabricatorXHProfDAO {
+final class PhabricatorXHProfSample
+  extends PhabricatorXHProfDAO
+  implements PhabricatorPolicyInterface {
 
   protected $filePHID;
   protected $usTotal;
@@ -9,6 +11,12 @@ final class PhabricatorXHProfSample extends PhabricatorXHProfDAO {
   protected $requestPath;
   protected $controller;
   protected $userPHID;
+
+  public static function initializeNewSample() {
+    return id(new self())
+      ->setUsTotal(0)
+      ->setSampleRate(0);
+  }
 
   protected function getConfiguration() {
     return array(
@@ -27,6 +35,40 @@ final class PhabricatorXHProfSample extends PhabricatorXHProfDAO {
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getURI() {
+    return '/xhprof/profile/'.$this->getFilePHID().'/';
+  }
+
+  public function getDisplayName() {
+    $request_path = $this->getRequestPath();
+    if (strlen($request_path)) {
+      return $request_path;
+    }
+
+    return pht('Unnamed Sample');
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

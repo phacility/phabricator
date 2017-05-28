@@ -32,6 +32,7 @@ final class PhabricatorXHProfApplication extends PhabricatorApplication {
         '' => 'PhabricatorXHProfSampleListController',
         'list/(?P<view>[^/]+)/' => 'PhabricatorXHProfSampleListController',
         'profile/(?P<phid>[^/]+)/' => 'PhabricatorXHProfProfileController',
+        'import/drop/' => 'PhabricatorXHProfDropController',
       ),
     );
   }

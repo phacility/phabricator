@@ -127,53 +127,41 @@ final class PhameBlog extends PhameDAO
     $supported_protocols = array('http', 'https');
 
     if (!in_array($protocol, $supported_protocols)) {
-      return array(
-        $label,
-        pht(
+      return pht(
           'The custom domain should include a valid protocol in the URI '.
           '(for example, "%s"). Valid protocols are "http" or "https".',
-          $example_domain),
-        );
+          $example_domain);
     }
 
     if (strlen($path) && $path != '/') {
-      return array(
-        $label,
-        pht(
+      return pht(
           'The custom domain should not specify a path (hosting a Phame '.
           'blog at a path is currently not supported). Instead, just provide '.
           'the bare domain name (for example, "%s").',
-          $example_domain),
-        );
+          $example_domain);
     }
 
     if (strpos($domain, '.') === false) {
-      return array(
-        $label,
-        pht(
+      return pht(
           'The custom domain should contain at least one dot (.) because '.
           'some browsers fail to set cookies on domains without a dot. '.
           'Instead, use a normal looking domain name like "%s".',
-          $example_domain),
-        );
+          $example_domain);
     }
 
     if (!PhabricatorEnv::getEnvConfig('policy.allow-public')) {
       $href = PhabricatorEnv::getProductionURI(
         '/config/edit/policy.allow-public/');
-      return array(
-        pht('Fix Configuration'),
-        pht(
-          'For custom domains to work, this Phabricator instance must be '.
-          'configured to allow the public access policy. Configure this '.
-          'setting %s, or ask an administrator to configure this setting. '.
-          'The domain can be specified later once this setting has been '.
-          'changed.',
-          phutil_tag(
-            'a',
-            array('href' => $href),
-            pht('here'))),
-      );
+      return pht(
+        'For custom domains to work, this Phabricator instance must be '.
+        'configured to allow the public access policy. Configure this '.
+        'setting %s, or ask an administrator to configure this setting. '.
+        'The domain can be specified later once this setting has been '.
+        'changed.',
+        phutil_tag(
+          'a',
+          array('href' => $href),
+          pht('here')));
     }
 
     return null;
@@ -289,8 +277,8 @@ final class PhameBlog extends PhameDAO
 
 
   public function getMarkupFieldKey($field) {
-    $hash = PhabricatorHash::digest($this->getMarkupText($field));
-    return $this->getPHID().':'.$field.':'.$hash;
+    $content = $this->getMarkupText($field);
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
 

@@ -120,6 +120,7 @@ final class PhabricatorRepositoryPullEngine
           pht(
             'Updating the working copy for repository "%s".',
             $repository->getDisplayName()));
+
         if ($is_git) {
           $this->verifyGitOrigin($repository);
           $this->executeGitUpdate();
@@ -157,7 +158,7 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function skipPull($message) {
-    $this->log('%s', $message);
+    $this->log($message);
     $this->donePull();
   }
 
@@ -172,7 +173,7 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function logPull($message) {
-    $this->log('%s', $message);
+    $this->log($message);
   }
 
   private function donePull() {
@@ -190,7 +191,7 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function installHook($path, array $hook_argv = array()) {
-    $this->log('%s', pht('Installing commit hook to "%s"...', $path));
+    $this->log(pht('Installing commit hook to "%s"...', $path));
 
     $repository = $this->getRepository();
     $identifier = $this->getHookContextIdentifier($repository);
@@ -339,44 +340,36 @@ final class PhabricatorRepositoryPullEngine
       throw new Exception($message);
     }
 
-    $retry = false;
-    do {
-      // This is a local command, but needs credentials.
-      if ($repository->isWorkingCopyBare()) {
-        // For bare working copies, we need this magic incantation.
-        $future = $repository->getRemoteCommandFuture(
-          'fetch origin %s --prune',
-          '+refs/*:refs/*');
-      } else {
-        $future = $repository->getRemoteCommandFuture(
-          'fetch --all --prune');
-      }
+    $remote_refs = $this->loadGitRemoteRefs($repository);
+    $local_refs = $this->loadGitLocalRefs($repository);
+    if ($remote_refs === $local_refs) {
+      $this->log(
+        pht(
+          'Skipping fetch because local and remote refs are already '.
+          'identical.'));
+      return false;
+    }
 
-      $future->setCWD($path);
-      list($err, $stdout, $stderr) = $future->resolve();
+    $this->logRefDifferences($remote_refs, $local_refs);
 
-      if ($err && !$retry && $repository->canDestroyWorkingCopy()) {
-        $retry = true;
-        // Fix remote origin url if it doesn't match our configuration
-        $origin_url = $repository->execLocalCommand(
-          'config --get remote.origin.url');
-        $remote_uri = $repository->getRemoteURIEnvelope();
-        if ($origin_url != $remote_uri->openEnvelope()) {
-          $repository->execLocalCommand(
-            'remote set-url origin %P',
-            $remote_uri);
-        }
-      } else if ($err) {
-        throw new CommandException(
-          pht('Failed to fetch changes!'),
-          $future->getCommand(),
-          $err,
-          $stdout,
-          $stderr);
-      } else {
-        $retry = false;
-      }
-    } while ($retry);
+    // Force the "origin" URI to the configured value.
+    $repository->execxLocalCommand(
+      'remote set-url origin -- %P',
+      $repository->getRemoteURIEnvelope());
+
+    if ($repository->isWorkingCopyBare()) {
+      // For bare working copies, we need this magic incantation.
+      $future = $repository->getRemoteCommandFuture(
+        'fetch origin %s --prune',
+        '+refs/*:refs/*');
+    } else {
+      $future = $repository->getRemoteCommandFuture(
+        'fetch --all --prune');
+    }
+
+    $future
+      ->setCWD($path)
+      ->resolvex();
   }
 
 
@@ -395,6 +388,78 @@ final class PhabricatorRepositoryPullEngine
 
     $this->installHook($root.$path);
   }
+
+  private function loadGitRemoteRefs(PhabricatorRepository $repository) {
+    $remote_envelope = $repository->getRemoteURIEnvelope();
+
+    // NOTE: "git ls-remote" does not support "--" until circa January 2016.
+    // See T12416. None of the flags to "ls-remote" appear dangerous, and
+    // other checks make it difficult to configure a suspicious remote URI.
+    list($stdout) = $repository->execxRemoteCommand(
+      'ls-remote %P',
+      $remote_envelope);
+
+    $map = array();
+    $lines = phutil_split_lines($stdout, false);
+    foreach ($lines as $line) {
+      list($hash, $name) = preg_split('/\s+/', $line, 2);
+
+      // If the remote has a HEAD, just ignore it.
+      if ($name == 'HEAD') {
+        continue;
+      }
+
+      // If the remote ref is itself a remote ref, ignore it.
+      if (preg_match('(^refs/remotes/)', $name)) {
+        continue;
+      }
+
+      $map[$name] = $hash;
+    }
+
+    ksort($map);
+
+    return $map;
+  }
+
+  private function loadGitLocalRefs(PhabricatorRepository $repository) {
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->execute();
+
+    $map = array();
+    foreach ($refs as $ref) {
+      $fields = $ref->getRawFields();
+      $map[idx($fields, 'refname')] = $ref->getCommitIdentifier();
+    }
+
+    ksort($map);
+
+    return $map;
+  }
+
+  private function logRefDifferences(array $remote, array $local) {
+    $all = $local + $remote;
+
+    $differences = array();
+    foreach ($all as $key => $ignored) {
+      $remote_ref = idx($remote, $key, pht('<null>'));
+      $local_ref = idx($local, $key, pht('<null>'));
+      if ($remote_ref !== $local_ref) {
+        $differences[] = pht(
+          '%s (remote: "%s", local: "%s")',
+          $key,
+          $remote_ref,
+          $local_ref);
+      }
+    }
+
+    $this->log(
+      pht(
+        "Updating repository after detecting ref differences:\n%s",
+        implode("\n", $differences)));
+  }
+
 
 
 /* -(  Pulling Mercurial Working Copies  )----------------------------------- */
@@ -471,7 +536,7 @@ final class PhabricatorRepositoryPullEngine
       $future->resolvex();
     } catch (CommandException $ex) {
       $err = $ex->getError();
-      $stdout = $ex->getStdOut();
+      $stdout = $ex->getStdout();
 
       // NOTE: Between versions 2.1 and 2.1.1, Mercurial changed the behavior
       // of "hg pull" to return 1 in case of a successful pull with no changes.

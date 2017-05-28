@@ -9,7 +9,7 @@ abstract class LegalpadController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('create/', pht('Create Document'));
+      $nav->addFilter('edit/', pht('Create Document'));
     }
 
     id(new LegalpadDocumentSearchEngine())

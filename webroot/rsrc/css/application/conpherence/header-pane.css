@@ -9,18 +9,28 @@
 
 .conpherence-header-pane .phui-header-header {
   font-size: 16px;
-  font-family: 'Aleo', {$fontfamily};
   color: #000;
+  display: block;
 }
 
 .conpherence-header-pane .phui-header-subheader {
-  color: {$lightgreytext};
   padding: 0;
-  font-size: 12px;
   margin: 0;
+}
+
+.conpherence-header-pane .conpherence-header-topic .phui-tag-core {
+  color: {$sh-indigotext};
+  padding: 0 4px;
+  font-size: 12px;
+  margin: 0 8px 0 0;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  font-style: italic;
+}
+
+.device-phone .conpherence-header-pane .conpherence-header-topic {
+  display: none;
 }
 
 .conpherence-header-pane .phui-header-col1 {
@@ -35,6 +45,28 @@
   position: absolute;
   top: 4px;
   left: 0;
+}
+
+.conpherence-header-pane .policy-header-callout {
+  background: transparent;
+  font-size: 12px;
+  margin: 0 8px 0 0;
+  padding: 3px 0;
+  font-style: normal;
+}
+
+.conpherence-header-pane .phui-header-subheader .policy-link {
+  color: {$lightbluetext};
+}
+
+.conpherence-header-pane  .phui-header-subheader .policy-header-callout
+  .phui-icon-view {
+    font-size: 12px;
+    color: {$lightbluetext};
+}
+
+.conpherence-header-pane .phui-header-subheader .policy-link:hover {
+  color: {$darkbluetext};
 }
 
 .conpherence-header-pane .phui-header-image-href {

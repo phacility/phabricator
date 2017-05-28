@@ -13,6 +13,7 @@ final class PhabricatorEditEngineConfigurationTransaction
   const TYPE_DISABLE = 'editengine.config.disable';
   const TYPE_CREATEORDER = 'editengine.order.create';
   const TYPE_EDITORDER = 'editengine.order.edit';
+  const TYPE_SUBTYPE = 'editengine.config.subtype';
 
   public function getApplicationName() {
     return 'search';
@@ -99,6 +100,12 @@ final class PhabricatorEditEngineConfigurationTransaction
             '%s enabled this form.',
             $this->renderHandleLink($author_phid));
         }
+      case self::TYPE_SUBTYPE:
+        return pht(
+          '%s changed the subtype of this form from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $old,
+          $new);
     }
 
     return parent::getTitle();

@@ -16,7 +16,9 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorSpacesInterface,
     PhabricatorConduitResultInterface,
     PhabricatorFulltextInterface,
-    DoorkeeperBridgedObjectInterface {
+    DoorkeeperBridgedObjectInterface,
+    PhabricatorEditEngineSubtypeInterface,
+    PhabricatorEditEngineLockableInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -40,6 +42,7 @@ final class ManiphestTask extends ManiphestDAO
   protected $bridgedObjectPHID;
   protected $properties = array();
   protected $points;
+  protected $subtype;
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
@@ -63,6 +66,7 @@ final class ManiphestTask extends ManiphestDAO
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
+      ->setSubtype(PhabricatorEditEngineSubtype::SUBTYPE_DEFAULT)
       ->attachProjectPHIDs(array())
       ->attachSubscriberPHIDs(array());
   }
@@ -86,6 +90,7 @@ final class ManiphestTask extends ManiphestDAO
         'subpriority' => 'double',
         'points' => 'double?',
         'bridgedObjectPHID' => 'phid?',
+        'subtype' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -123,6 +128,9 @@ final class ManiphestTask extends ManiphestDAO
         'key_bridgedobject' => array(
           'columns' => array('bridgedObjectPHID'),
           'unique' => true,
+        ),
+        'key_subtype' => array(
+          'columns' => array('subtype'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -204,6 +212,10 @@ final class ManiphestTask extends ManiphestDAO
 
   public function isClosed() {
     return ManiphestTaskStatus::isClosedStatus($this->getStatus());
+  }
+
+  public function isLocked() {
+    return ManiphestTaskStatus::isLockedStatus($this->getStatus());
   }
 
   public function setProperty($key, $value) {
@@ -289,9 +301,8 @@ final class ManiphestTask extends ManiphestDAO
    * @task markup
    */
   public function getMarkupFieldKey($field) {
-    $hash = PhabricatorHash::digest($this->getMarkupText($field));
-    $id = $this->getID();
-    return "maniphest:T{$id}:{$field}:{$hash}";
+    $content = $this->getMarkupText($field);
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
 
@@ -336,6 +347,7 @@ final class ManiphestTask extends ManiphestDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_INTERACT,
       PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
@@ -344,6 +356,12 @@ final class ManiphestTask extends ManiphestDAO
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_INTERACT:
+        if ($this->isLocked()) {
+          return PhabricatorPolicies::POLICY_NOONE;
+        } else {
+          return $this->getViewPolicy();
+        }
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
     }
@@ -455,6 +473,10 @@ final class ManiphestTask extends ManiphestDAO
         ->setType('string')
         ->setDescription(pht('The title of the task.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('remarkup')
+        ->setDescription(pht('The task description.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('authorPHID')
         ->setType('phid')
         ->setDescription(pht('Original task author.')),
@@ -474,11 +496,14 @@ final class ManiphestTask extends ManiphestDAO
         ->setKey('points')
         ->setType('points')
         ->setDescription(pht('Point value of the task.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('subtype')
+        ->setType('string')
+        ->setDescription(pht('Subtype of the task.')),
     );
   }
 
   public function getFieldValuesForConduit() {
-
     $status_value = $this->getStatus();
     $status_info = array(
       'value' => $status_value,
@@ -496,11 +521,15 @@ final class ManiphestTask extends ManiphestDAO
 
     return array(
       'name' => $this->getTitle(),
+      'description' => array(
+        'raw' => $this->getDescription(),
+      ),
       'authorPHID' => $this->getAuthorPHID(),
       'ownerPHID' => $this->getOwnerPHID(),
       'status' => $status_info,
       'priority' => $priority_info,
       'points' => $this->getPoints(),
+      'subtype' => $this->getSubtype(),
     );
   }
 
@@ -511,6 +540,11 @@ final class ManiphestTask extends ManiphestDAO
     );
   }
 
+  public function newSubtypeObject() {
+    $subtype_key = $this->getEditEngineSubtype();
+    $subtype_map = $this->newEditEngineSubtypeMap();
+    return idx($subtype_map, $subtype_key);
+  }
 
 /* -(  PhabricatorFulltextInterface  )--------------------------------------- */
 
@@ -531,6 +565,31 @@ final class ManiphestTask extends ManiphestDAO
     DoorkeeperExternalObject $object = null) {
     $this->bridgedObject = $object;
     return $this;
+  }
+
+
+/* -(  PhabricatorEditEngineSubtypeInterface  )------------------------------ */
+
+
+  public function getEditEngineSubtype() {
+    return $this->getSubtype();
+  }
+
+  public function setEditEngineSubtype($value) {
+    return $this->setSubtype($value);
+  }
+
+  public function newEditEngineSubtypeMap() {
+    $config = PhabricatorEnv::getEnvConfig('maniphest.subtypes');
+    return PhabricatorEditEngineSubtype::newSubtypeMap($config);
+  }
+
+
+/* -(  PhabricatorEditEngineLockableInterface  )----------------------------- */
+
+
+  public function newEditEngineLock() {
+    return new ManiphestTaskEditEngineLock();
   }
 
 }

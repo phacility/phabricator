@@ -60,7 +60,8 @@ final class ConpherenceTransactionRenderer extends Phobject {
     // between days. some setup required!
     $previous_transaction = null;
     $date_marker_transaction = id(new ConpherenceTransaction())
-      ->setTransactionType(ConpherenceTransaction::TYPE_DATE_MARKER)
+      ->setTransactionType(
+        ConpherenceThreadDateMarkerTransaction::TRANSACTIONTYPE)
       ->makeEphemeral();
     $date_marker_transaction_view = id(new ConpherenceTransactionView())
       ->setUser($user)

@@ -11,6 +11,10 @@ final class HeraldTranscriptSearchEngine
     return 'PhabricatorHeraldApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

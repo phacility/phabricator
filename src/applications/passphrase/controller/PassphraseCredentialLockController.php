@@ -40,11 +40,13 @@ final class PassphraseCredentialLockController
       $xactions = array();
 
       $xactions[] = id(new PassphraseCredentialTransaction())
-        ->setTransactionType(PassphraseCredentialTransaction::TYPE_CONDUIT)
+        ->setTransactionType(
+          PassphraseCredentialConduitTransaction::TRANSACTIONTYPE)
         ->setNewValue(0);
 
       $xactions[] = id(new PassphraseCredentialTransaction())
-        ->setTransactionType(PassphraseCredentialTransaction::TYPE_LOCK)
+        ->setTransactionType(
+          PassphraseCredentialLockTransaction::TRANSACTIONTYPE)
         ->setNewValue(1);
 
       $editor = id(new PassphraseCredentialTransactionEditor())

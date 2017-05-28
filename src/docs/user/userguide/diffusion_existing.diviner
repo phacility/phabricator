@@ -44,11 +44,11 @@ Importing Repositories
 There are two primary ways to import an existing repository:
 
 **Observe First**: In Git or Mercurial, you can observe the repository first.
-Once the import completes, disable the **Observe** URI to automatically convert
-it into a hosted repository.
+Once the import completes, change the "I/O Type" on the **Observe** URI to
+"No I/O" mode to automatically convert it into a hosted repository.
 
 **Push to Empty Repository**: Create an activate an empty repository, then push
-all of your changes to empty the repository.
+all of your changes to the empty repository.
 
 In Git and Mercurial, you can do this with `git push` or `hg push`.
 

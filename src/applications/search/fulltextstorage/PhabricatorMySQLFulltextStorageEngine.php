@@ -3,16 +3,15 @@
 final class PhabricatorMySQLFulltextStorageEngine
   extends PhabricatorFulltextStorageEngine {
 
+  private $fulltextTokens = array();
+  private $engineLimits;
+
   public function getEngineIdentifier() {
     return 'mysql';
   }
 
-  public function getEnginePriority() {
-    return 100;
-  }
-
-  public function isEnabled() {
-    return true;
+  public function getHostType() {
+    return new PhabricatorMySQLSearchHost($this);
   }
 
   public function reindexAbstractDocument(
@@ -207,8 +206,71 @@ final class PhabricatorMySQLFulltextStorageEngine
     $title_field = PhabricatorSearchDocumentFieldType::FIELD_TITLE;
     $title_boost = 1024;
 
+    $stemmer = new PhutilSearchStemmer();
+
     $raw_query = $query->getParameter('query');
-    $compiled_query = $this->compileQuery($raw_query);
+    $raw_query = trim($raw_query);
+    if (strlen($raw_query)) {
+      $compiler = PhabricatorSearchDocument::newQueryCompiler()
+        ->setStemmer($stemmer);
+
+      $tokens = $compiler->newTokens($raw_query);
+
+      list($min_length, $stopword_list) = $this->getEngineLimits($conn);
+
+      // Process all the parts of the user's query so we can show them which
+      // parts we searched for and which ones we ignored.
+      $fulltext_tokens = array();
+      foreach ($tokens as $key => $token) {
+        $fulltext_token = id(new PhabricatorFulltextToken())
+          ->setToken($token);
+
+        $fulltext_tokens[$key] = $fulltext_token;
+
+        $value = $token->getValue();
+
+        // If the value is unquoted, we'll stem it in the query, so stem it
+        // here before performing filtering tests. See T12596.
+        if (!$token->isQuoted()) {
+          $value = $stemmer->stemToken($value);
+        }
+
+        if (phutil_utf8_strlen($value) < $min_length) {
+          $fulltext_token->setIsShort(true);
+          continue;
+        }
+
+        if (isset($stopword_list[phutil_utf8_strtolower($value)])) {
+          $fulltext_token->setIsStopword(true);
+          continue;
+        }
+      }
+      $this->fulltextTokens = $fulltext_tokens;
+
+      // Remove tokens which aren't queryable from the query. This is mostly
+      // a workaround for the peculiar behaviors described in T12137.
+      foreach ($this->fulltextTokens as $key => $fulltext_token) {
+        if (!$fulltext_token->isQueryable()) {
+          unset($tokens[$key]);
+        }
+      }
+
+      if (!$tokens) {
+        throw new PhutilSearchQueryCompilerSyntaxException(
+          pht(
+            'All of your search terms are too short or too common to '.
+            'appear in the search index. Search for longer or more '.
+            'distinctive terms.'));
+      }
+
+      $queries = array();
+      $queries[] = $compiler->compileLiteralQuery($tokens);
+      $queries[] = $compiler->compileStemmedQuery($tokens);
+      $compiled_query = implode(' ', array_filter($queries));
+    } else {
+      $compiled_query = null;
+    }
+
     if (strlen($compiled_query)) {
       $select[] = qsprintf(
         $conn,
@@ -398,21 +460,93 @@ final class PhabricatorMySQLFulltextStorageEngine
     return $sql;
   }
 
-  private function compileQuery($raw_query) {
-    $stemmer = new PhutilSearchStemmer();
-
-    $compiler = PhabricatorSearchDocument::newQueryCompiler()
-      ->setQuery($raw_query)
-      ->setStemmer($stemmer);
-
-    $queries = array();
-    $queries[] = $compiler->compileLiteralQuery();
-    $queries[] = $compiler->compileStemmedQuery();
-
-    return implode(' ', array_filter($queries));
-  }
-
   public function indexExists() {
     return true;
   }
+
+  public function getIndexStats() {
+    return false;
+  }
+
+  public function getFulltextTokens() {
+    return $this->fulltextTokens;
+  }
+
+  private function getEngineLimits(AphrontDatabaseConnection $conn) {
+    if ($this->engineLimits === null) {
+      $this->engineLimits = $this->newEngineLimits($conn);
+    }
+    return $this->engineLimits;
+  }
+
+  private function newEngineLimits(AphrontDatabaseConnection $conn) {
+    // First, try InnoDB. Some database may not have both table engines, so
+    // selecting variables from missing table engines can fail and throw.
+
+    try {
+      $result = queryfx_one(
+        $conn,
+        'SELECT @@innodb_ft_min_token_size innodb_max,
+          @@innodb_ft_server_stopword_table innodb_stopword_config');
+    } catch (AphrontQueryException $ex) {
+      $result = null;
+    }
+
+    if ($result) {
+      $min_len = $result['innodb_max'];
+
+      $stopword_config = $result['innodb_stopword_config'];
+      if (preg_match('(/)', $stopword_config)) {
+        // If the setting is nonempty and contains a slash, query the
+        // table the user has configured.
+        $parts = explode('/', $stopword_config);
+        list($stopword_database, $stopword_table) = $parts;
+      } else {
+        // Otherwise, query the InnoDB default stopword table.
+        $stopword_database = 'INFORMATION_SCHEMA';
+        $stopword_table = 'INNODB_FT_DEFAULT_STOPWORD';
+      }
+
+      $stopwords = queryfx_all(
+        $conn,
+        'SELECT * FROM %T.%T',
+        $stopword_database,
+        $stopword_table);
+      $stopwords = ipull($stopwords, 'value');
+      $stopwords = array_fuse($stopwords);
+
+      return array($min_len, $stopwords);
+    }
+
+    // If InnoDB fails, try MyISAM.
+    $result = queryfx_one(
+      $conn,
+      'SELECT
+        @@ft_min_word_len myisam_max,
+        @@ft_stopword_file myisam_stopwords');
+
+    $min_len = $result['myisam_max'];
+
+    $file = $result['myisam_stopwords'];
+    if (preg_match('(/resources/sql/stopwords\.txt\z)', $file)) {
+      // If this is set to something that looks like the Phabricator
+      // stopword file, read that.
+      $file = 'stopwords.txt';
+    } else {
+      // Otherwise, just use the default stopwords. This might be wrong
+      // but we can't read the actual value dynamically and reading
+      // whatever file the variable is set to could be a big headache
+      // to get right from a security perspective.
+      $file = 'stopwords_myisam.txt';
+    }
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $data = Filesystem::readFile($root.'/resources/sql/'.$file);
+    $stopwords = explode("\n", $data);
+    $stopwords = array_filter($stopwords);
+    $stopwords = array_fuse($stopwords);
+
+    return array($min_len, $stopwords);
+  }
+
 }

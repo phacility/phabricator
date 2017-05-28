@@ -1,10 +1,7 @@
 <?php
 
 final class FundBackerTransaction
-  extends PhabricatorApplicationTransaction {
-
-  const TYPE_STATUS = 'fund:backer:status';
-  const TYPE_REFUND = 'fund:backer:refund';
+  extends PhabricatorModularTransaction {
 
   public function getApplicationName() {
     return 'fund';
@@ -16,6 +13,10 @@ final class FundBackerTransaction
 
   public function getApplicationTransactionCommentObject() {
     return null;
+  }
+
+  public function getBaseTransactionClass() {
+    return 'FundBackerTransactionType';
   }
 
 }

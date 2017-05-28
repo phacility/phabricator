@@ -12,6 +12,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $previewTimelineID;
   private $previewToggleID;
   private $formID;
+  private $statusID;
   private $commentID;
   private $draft;
   private $requestURI;
@@ -21,6 +22,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $noPermission;
   private $fullWidth;
   private $infoView;
+  private $editEngineLock;
 
   private $currentVersion;
   private $versionedDraft;
@@ -148,11 +150,20 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this->noPermission;
   }
 
+  public function setEditEngineLock(PhabricatorEditEngineLock $lock) {
+    $this->editEngineLock = $lock;
+    return $this;
+  }
+
+  public function getEditEngineLock() {
+    return $this->editEngineLock;
+  }
+
   public function setTransactionTimeline(
     PhabricatorApplicationTransactionView $timeline) {
 
     $timeline->setQuoteTargetID($this->getCommentID());
-    if ($this->getNoPermission()) {
+    if ($this->getNoPermission() || $this->getEditEngineLock()) {
       $timeline->setShouldTerminate(true);
     }
 
@@ -163,6 +174,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   public function render() {
     if ($this->getNoPermission()) {
       return null;
+    }
+
+    $lock = $this->getEditEngineLock();
+    if ($lock) {
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(
+          array(
+            $lock->getLockedObjectDisplayText(),
+          ));
     }
 
     $user = $this->getUser();
@@ -217,11 +238,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'class' => 'phui-timeline-wedge',
       ),
       '');
+
+    $badge_view = $this->renderBadgeView();
+
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->addClass('phui-comment-form-view')
       ->addSigil('phui-comment-form')
       ->appendChild($image)
+      ->appendChild($badge_view)
       ->appendChild($wedge)
       ->appendChild($comment);
 
@@ -489,6 +514,44 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     }
 
     return $options;
+  }
+
+  private function renderBadgeView() {
+    $user = $this->getUser();
+    $can_use_badges = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorBadgesApplication',
+      $user);
+    if (!$can_use_badges) {
+      return null;
+    }
+
+    // Pull Badges from UserCache
+    $badges = $user->getRecentBadgeAwards();
+    $badge_view = null;
+    if ($badges) {
+      $badge_list = array();
+      foreach ($badges as $badge) {
+        $badge_view = id(new PHUIBadgeMiniView())
+          ->setIcon($badge['icon'])
+          ->setQuality($badge['quality'])
+          ->setHeader($badge['name'])
+          ->setTipDirection('E')
+          ->setHref('/badges/view/'.$badge['id'].'/');
+
+        $badge_list[] = $badge_view;
+      }
+      $flex = new PHUIBadgeBoxView();
+      $flex->addItems($badge_list);
+      $flex->setCollapsed(true);
+      $badge_view = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-timeline-badges',
+        ),
+        $flex);
+    }
+
+    return $badge_view;
   }
 
 }

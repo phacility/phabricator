@@ -216,7 +216,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     require_celerity_resource('phabricator-standard-page-view');
     require_celerity_resource('conpherence-durable-column-view');
     require_celerity_resource('font-lato');
-    require_celerity_resource('font-aleo');
 
     Javelin::initBehavior('workflow', array());
 
@@ -269,7 +268,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       }
 
       $icon = id(new PHUIIconView())
-        ->setIcon('fa-download');
+        ->setIcon('fa-download')
+        ->addClass('phui-icon-circle-icon');
       $lightbox_id = celerity_generate_unique_node_id();
       $download_form = phabricator_form(
         $user,

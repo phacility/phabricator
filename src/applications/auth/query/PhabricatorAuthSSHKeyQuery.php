@@ -11,6 +11,12 @@ final class PhabricatorAuthSSHKeyQuery
   private $keys;
   private $isActive;
 
+  public static function deleteSSHKeyCache() {
+    $cache = PhabricatorCaches::getMutableCache();
+    $authfile_key = self::AUTHFILE_CACHEKEY;
+    $cache->deleteKey($authfile_key);
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;

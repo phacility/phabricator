@@ -62,7 +62,7 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
   border-color: {$lightblueborder};
   border-top: 1px solid {$thinblueborder};
   padding: 8px;
-  height: 10em;
+  height: 12em;
   background-color: rgba({$alphablue},.02);
 }
 
@@ -155,8 +155,8 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 
 .phui-comment-form-view .phui-form-view label.aphront-form-label,
 .phui-comment-form-view .phui-form-view .aphront-form-error {
-  height: 26px;
-  line-height: 26px;
+  height: 28x;
+  line-height: 28px;
   padding: 0;
 }
 

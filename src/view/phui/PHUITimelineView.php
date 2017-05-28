@@ -182,7 +182,7 @@ final class PHUITimelineView extends AphrontView {
     }
 
     if ($this->shouldTerminate) {
-      $events[] = self::renderEnder(true);
+      $events[] = self::renderEnder();
     }
 
     return $events;
@@ -220,7 +220,6 @@ final class PHUITimelineView extends AphrontView {
     }
 
     $user_phid_type = PhabricatorPeopleUserPHIDType::TYPECONST;
-    $badge_edge_type = PhabricatorRecipientHasBadgeEdgeType::EDGECONST;
 
     $user_phids = array();
     foreach ($events as $key => $event) {
@@ -244,38 +243,26 @@ final class PHUITimelineView extends AphrontView {
       return;
     }
 
-
-    $awards = id(new PhabricatorBadgesAwardQuery())
-      ->setViewer($this->getViewer())
-      ->withRecipientPHIDs($user_phids)
+    $users = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($user_phids)
+      ->needBadgeAwards(true)
       ->execute();
-
-    $awards = mgroup($awards, 'getRecipientPHID');
+    $users = mpull($users, null, 'getPHID');
 
     foreach ($events as $event) {
-
-      $author_awards = idx($awards, $event->getAuthorPHID(), array());
-
-      $badges = array();
-      foreach ($author_awards as $award) {
-        $badge = $award->getBadge();
-        if ($badge->getStatus() == PhabricatorBadgesBadge::STATUS_ACTIVE) {
-          $badges[$award->getBadgePHID()] = $badge;
-        }
+      $user_phid = $event->getAuthorPHID();
+      if (!array_key_exists($user_phid, $users)) {
+        continue;
       }
-
-      // TODO: Pick the "best" badges in some smart way. For now, just pick
-      // the first two.
-      $badges = array_slice($badges, 0, 2);
-
+      $badges = $users[$user_phid]->getRecentBadgeAwards();
       foreach ($badges as $badge) {
         $badge_view = id(new PHUIBadgeMiniView())
-          ->setIcon($badge->getIcon())
-          ->setQuality($badge->getQuality())
-          ->setHeader($badge->getName())
+          ->setIcon($badge['icon'])
+          ->setQuality($badge['quality'])
+          ->setHeader($badge['name'])
           ->setTipDirection('E')
-          ->setHref('/badges/view/'.$badge->getID());
-
+          ->setHref('/badges/view/'.$badge['id'].'/');
         $event->addBadge($badge_view);
       }
     }

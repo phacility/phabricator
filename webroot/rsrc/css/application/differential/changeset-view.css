@@ -67,10 +67,6 @@
   padding: 1px 4px;
 }
 
-.device .differential-diff .inline > td {
-  padding: 4px;
-}
-
 .differential-diff td .zwsp {
   position: absolute;
   width: 0;
@@ -111,10 +107,6 @@
 .prose-diff span.old,
 .prose-diff span.new {
   color: {$darkgreytext};
-}
-
-.differential-diff th.selected {
-  background-color: {$sh-yellowbackground};
 }
 
 .differential-changeset-immutable .differential-diff th {
@@ -312,10 +304,11 @@ td.cov-I {
   top: 0;
   left: 0;
   box-sizing: border-box;
+  pointer-events: none;
 }
 
 .differential-diff .inline > td {
-  padding: 8px 12px;
+  padding: 0;
 }
 
 .differential-loading {
@@ -332,6 +325,7 @@ td.cov-I {
   border: 1px solid {$blue};
   text-align: center;
   background-color: {$lightblue};
+  margin: 8px;
 }
 
 .differential-collapse-undo a {
@@ -391,4 +385,60 @@ tr.differential-inline-loading {
 
 .differential-review-stage {
   position: relative;
+}
+
+.diff-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid {$lightgreyborder};
+  padding: 12px 18px;
+  vertical-align: middle;
+  font-weight: bold;
+  font-size: {$biggerfontsize};
+}
+
+.diff-banner .phui-icon-view {
+  margin-right: 4px;
+}
+
+.diff-banner-path {
+  color: {$greytext};
+}
+
+.scroll-objective-list {
+  position: fixed;
+  right: 0;
+  width: 24px;
+  top: 48px;
+  bottom: 48px;
+  background: rgba(255, 255, 255, 0.50);
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.95);
+  border-width: 1px 0 1px 1px;
+  box-shadow: -1px 0 2px rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+
+.scroll-objective-list.has-aesthetic-scrollbar {
+  /* For now, hide this element on systems with aesthetic scrollbars. */
+  display: none;
+}
+
+.scroll-objective {
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-align: middle;
+  left: 7px;
+}
+
+.scroll-objective .phui-icon-view {
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.25);
+  display: block;
+  height: 14px;
 }

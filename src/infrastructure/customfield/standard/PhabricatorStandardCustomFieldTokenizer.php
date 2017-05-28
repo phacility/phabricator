@@ -14,6 +14,7 @@ abstract class PhabricatorStandardCustomFieldTokenizer
       ->setName($this->getFieldKey())
       ->setDatasource($this->getDatasource())
       ->setCaption($this->getCaption())
+      ->setError($this->getFieldError())
       ->setValue(nonempty($value, array()));
 
     $limit = $this->getFieldConfigValue('limit');

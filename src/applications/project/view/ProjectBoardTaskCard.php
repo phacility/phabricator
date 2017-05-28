@@ -100,12 +100,19 @@ final class ProjectBoardTaskCard extends Phobject {
       if ($points !== null) {
         $points_tag = id(new PHUITagView())
           ->setType(PHUITagView::TYPE_SHADE)
-          ->setShade(PHUITagView::COLOR_GREY)
+          ->setColor(PHUITagView::COLOR_GREY)
           ->setSlimShady(true)
           ->setName($points)
           ->addClass('phui-workcard-points');
         $card->addAttribute($points_tag);
       }
+    }
+
+    $subtype = $task->newSubtypeObject();
+    if ($subtype && $subtype->hasTagView()) {
+      $subtype_tag = $subtype->newTagView()
+        ->setSlimShady(true);
+      $card->addAttribute($subtype_tag);
     }
 
     if ($task->isClosed()) {

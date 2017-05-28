@@ -67,7 +67,7 @@ final class PholioMockViewController extends PholioController {
     $timeline->setMock($mock);
 
     $curtain = $this->buildCurtainView($mock);
-    $details = $this->buildDescriptionView($mock, $engine);
+    $details = $this->buildDescriptionView($mock);
 
     require_celerity_resource('pholio-css');
     require_celerity_resource('pholio-inline-comments-css');

@@ -68,6 +68,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $retry_after = array();
 
     $min_sleep = 15;
+    $max_sleep = phutil_units('5 minutes in seconds');
     $max_futures = 4;
     $futures = array();
     $queue = array();
@@ -228,7 +229,10 @@ final class PhabricatorRepositoryPullLocalDaemon
         continue;
       }
 
-      $this->waitForUpdates($min_sleep, $retry_after);
+      $should_hibernate = $this->waitForUpdates($max_sleep, $retry_after);
+      if ($should_hibernate) {
+        break;
+      }
     }
 
   }
@@ -492,6 +496,10 @@ final class PhabricatorRepositoryPullLocalDaemon
     while (($sleep_until - time()) > 0) {
       $sleep_duration = ($sleep_until - time());
 
+      if ($this->shouldHibernate($sleep_duration)) {
+        return true;
+      }
+
       $this->log(
         pht(
           'Sleeping for %s more second(s)...',
@@ -501,7 +509,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
       if ($this->shouldExit()) {
         $this->log(pht('Awakened from sleep by graceful shutdown!'));
-        return;
+        return false;
       }
 
       if ($this->loadRepositoryUpdateMessages()) {
@@ -509,6 +517,8 @@ final class PhabricatorRepositoryPullLocalDaemon
         break;
       }
     }
+
+    return false;
   }
 
 }

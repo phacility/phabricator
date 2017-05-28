@@ -61,7 +61,7 @@ final class PhameBlogHeaderPictureController
 
         $xactions = array();
         $xactions[] = id(new PhameBlogTransaction())
-          ->setTransactionType(PhameBlogTransaction::TYPE_HEADERIMAGE)
+          ->setTransactionType(PhameBlogHeaderImageTransaction::TRANSACTIONTYPE)
           ->setNewValue($new_value);
 
         $editor = id(new PhameBlogEditor())

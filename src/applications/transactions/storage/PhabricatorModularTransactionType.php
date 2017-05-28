@@ -87,6 +87,13 @@ abstract class PhabricatorModularTransactionType
     return array();
   }
 
+  public function mergeTransactions(
+    $object,
+    PhabricatorApplicationTransaction $u,
+    PhabricatorApplicationTransaction $v) {
+    return null;
+  }
+
   final public function setStorage(
     PhabricatorApplicationTransaction $xaction) {
     $this->storage = $xaction;
@@ -201,6 +208,19 @@ abstract class PhabricatorModularTransactionType
       $value);
   }
 
+  final protected function renderValueList(array $values) {
+    $result = array();
+    foreach ($values as $value) {
+      $result[] = $this->renderValue($value);
+    }
+
+    if ($this->isTextMode()) {
+      return implode(', ', $result);
+    }
+
+    return phutil_implode_html(', ', $result);
+  }
+
   final protected function renderOldValue() {
     return $this->renderValue($this->getOldValue());
   }
@@ -227,22 +247,15 @@ abstract class PhabricatorModularTransactionType
 
     if ($all_day) {
       $display = phabricator_date($epoch, $viewer);
-    } else {
-      $display = phabricator_datetime($epoch, $viewer);
-
+    } else if ($this->isRenderingTargetExternal()) {
       // When rendering to text, we explicitly render the offset from UTC to
       // provide context to the date: the mail may be generating with the
       // server's settings, or the user may later refer back to it after
       // changing timezones.
 
-      if ($this->isRenderingTargetExternal()) {
-        $offset = $viewer->getTimeZoneOffsetInHours();
-        if ($offset >= 0) {
-          $display = pht('%s (UTC+%d)', $display, $offset);
-        } else {
-          $display = pht('%s (UTC-%d)', $display, abs($offset));
-        }
-      }
+      $display = phabricator_datetimezone($epoch, $viewer);
+    } else {
+      $display = phabricator_datetime($epoch, $viewer);
     }
 
     return $this->renderValue($display);
@@ -307,6 +320,16 @@ abstract class PhabricatorModularTransactionType
 
   final protected function isCreateTransaction() {
     return $this->getStorage()->getIsCreateTransaction();
+  }
+
+  final protected function getPHIDList(array $old, array $new) {
+    $editor = $this->getEditor();
+
+    return $editor->getPHIDList($old, $new);
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return $this->getStorage()->getMetadataValue($key, $default);
   }
 
 }

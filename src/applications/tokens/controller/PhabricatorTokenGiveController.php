@@ -14,6 +14,24 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
       return new Aphront404Response();
     }
 
+    $object = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($phid))
+      ->executeOne();
+
+    if (!($object instanceof PhabricatorTokenReceiverInterface)) {
+      return new Aphront400Response();
+    }
+
+    if (!PhabricatorPolicyFilter::canInteract($viewer, $object)) {
+      $lock = PhabricatorEditEngineLock::newForObject($viewer, $object);
+
+      $dialog = $this->newDialog()
+        ->addCancelButton($handle->getURI());
+
+      return $lock->willBlockUserInteractionWithDialog($dialog);
+    }
+
     $current = id(new PhabricatorTokenGivenQuery())
       ->setViewer($viewer)
       ->withAuthorPHIDs(array($viewer->getPHID()))

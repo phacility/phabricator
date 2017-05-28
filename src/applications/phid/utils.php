@@ -5,7 +5,7 @@
  * PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN if it fails to look up the type
  *
  * @param   phid Anything.
- * @return  A value from PhabricatorPHIDConstants (ideally)
+ * @return  string A value from PhabricatorPHIDConstants (ideally)
  */
 function phid_get_type($phid) {
   $matches = null;

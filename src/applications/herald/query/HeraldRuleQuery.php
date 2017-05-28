@@ -40,11 +40,6 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function withExecutableRules($executable) {
-    $this->executable = $executable;
-    return $this;
-  }
-
   public function withDisabled($disabled) {
     $this->disabled = $disabled;
     return $this;

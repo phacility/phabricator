@@ -98,6 +98,19 @@ function phabricator_form(PhabricatorUser $user, $attributes, $content) {
           'name' => '__form__',
           'value' => true,
         ));
+
+      // If the profiler was active for this request, keep it active for any
+      // forms submitted from this page.
+      if (DarkConsoleXHProfPluginAPI::isProfilerRequested()) {
+        $body[] = phutil_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => '__profile__',
+            'value' => true,
+          ));
+      }
+
     }
   }
 

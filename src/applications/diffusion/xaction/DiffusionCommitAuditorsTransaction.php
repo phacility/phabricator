@@ -58,6 +58,31 @@ final class DiffusionCommitAuditorsTransaction
     return ($old !== $new);
   }
 
+  public function mergeTransactions(
+    $object,
+    PhabricatorApplicationTransaction $u,
+    PhabricatorApplicationTransaction $v) {
+
+    $u_new = $u->getNewValue();
+    $v_new = $v->getNewValue();
+
+    $result = $v_new;
+    foreach (array('-', '+') as $key) {
+      $u_value = idx($u_new, $key, array());
+      $v_value = idx($v_new, $key, array());
+
+      $merged = $u_value + $v_value;
+
+      if ($merged) {
+        $result[$key] = $merged;
+      }
+    }
+
+    $u->setNewValue($result);
+
+    return $u;
+  }
+
   public function applyExternalEffects($object, $value) {
     $src_phid = $object->getPHID();
 

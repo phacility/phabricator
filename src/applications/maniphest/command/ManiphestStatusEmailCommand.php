@@ -73,7 +73,7 @@ final class ManiphestStatusEmailCommand
     }
 
     $xactions[] = $object->getApplicationTransactionTemplate()
-      ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+      ->setTransactionType(ManiphestTaskStatusTransaction::TRANSACTIONTYPE)
       ->setNewValue($status);
 
     return $xactions;

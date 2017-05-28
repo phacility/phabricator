@@ -4,7 +4,7 @@ final class PhabricatorProjectWatcherListView
   extends PhabricatorProjectUserListView {
 
   protected function canEditList() {
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
     $project = $this->getProject();
 
     return PhabricatorPolicyFilter::hasCapability(
@@ -25,6 +25,19 @@ final class PhabricatorProjectWatcherListView
 
   protected function getHeaderText() {
     return pht('Watchers');
+  }
+
+  protected function getMembershipNote() {
+    $viewer = $this->getViewer();
+    $viewer_phid = $viewer->getPHID();
+    $project = $this->getProject();
+
+    $note = null;
+    if ($project->isUserWatcher($viewer_phid)) {
+      $note = pht('You are watching this project and will receive mail about '.
+                  'changes made to any related object.');
+    }
+    return $note;
   }
 
 }

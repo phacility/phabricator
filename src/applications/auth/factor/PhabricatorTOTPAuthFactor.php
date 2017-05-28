@@ -39,7 +39,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
         ->withTokenResources(array($user->getPHID()))
         ->withTokenTypes(array($totp_token_type))
         ->withExpired(false)
-        ->withTokenCodes(array(PhabricatorHash::digest($key)))
+        ->withTokenCodes(array(PhabricatorHash::weakDigest($key)))
         ->executeOne();
       if (!$temporary_token) {
         // If we don't have a matching token, regenerate the key below.
@@ -58,7 +58,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
           ->setTokenResource($user->getPHID())
           ->setTokenType($totp_token_type)
           ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
-          ->setTokenCode(PhabricatorHash::digest($key))
+          ->setTokenCode(PhabricatorHash::weakDigest($key))
           ->save();
       unset($unguarded);
     }

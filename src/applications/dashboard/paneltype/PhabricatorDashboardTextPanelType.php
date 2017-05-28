@@ -11,6 +11,10 @@ final class PhabricatorDashboardTextPanelType
     return pht('Text Panel');
   }
 
+  public function getIcon() {
+    return 'fa-paragraph';
+  }
+
   public function getPanelTypeDescription() {
     return pht(
       'Add some static text to the dashboard. This can be used to '.

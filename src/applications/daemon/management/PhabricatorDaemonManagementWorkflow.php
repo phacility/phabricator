@@ -362,17 +362,17 @@ abstract class PhabricatorDaemonManagementWorkflow
     $daemons = array(
       array(
         'class' => 'PhabricatorRepositoryPullLocalDaemon',
+        'label' => 'pull',
       ),
       array(
         'class' => 'PhabricatorTriggerDaemon',
+        'label' => 'trigger',
       ),
       array(
         'class' => 'PhabricatorTaskmasterDaemon',
-        'autoscale' => array(
-          'group' => 'task',
-          'pool' => PhabricatorEnv::getEnvConfig('phd.taskmasters'),
-          'reserve' => idx($options, 'reserve', 0),
-        ),
+        'label' => 'task',
+        'pool' => PhabricatorEnv::getEnvConfig('phd.taskmasters'),
+        'reserve' => idx($options, 'reserve', 0),
       ),
     );
 
@@ -618,23 +618,12 @@ abstract class PhabricatorDaemonManagementWorkflow
       pht('(Logs will appear in "%s".)', $log_dir));
 
     foreach ($daemons as $daemon) {
-      $is_autoscale = isset($daemon['autoscale']['group']);
-      if ($is_autoscale) {
-        $autoscale = $daemon['autoscale'];
-        foreach ($autoscale as $key => $value) {
-          $autoscale[$key] = $key.'='.$value;
-        }
-        $autoscale = implode(', ', $autoscale);
-
-        $autoscale = pht('(Autoscaling: %s)', $autoscale);
-      } else {
-        $autoscale = pht('(Static)');
-      }
+      $pool_size = pht('(Pool: %s)', idx($daemon, 'pool', 1));
 
       $console->writeOut(
         "    %s %s\n",
+        $pool_size,
         $daemon['class'],
-        $autoscale,
         implode(' ', idx($daemon, 'argv', array())));
     }
     $console->writeOut("\n");

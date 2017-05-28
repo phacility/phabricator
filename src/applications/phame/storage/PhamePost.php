@@ -172,7 +172,7 @@ final class PhamePost extends PhameDAO
   }
 
   public function getSlug() {
-    return PhabricatorSlug::normalizeProjectSlug($this->getTitle(), true);
+    return PhabricatorSlug::normalizeProjectSlug($this->getTitle());
   }
 
   public function getHeaderImageURI() {
@@ -241,8 +241,8 @@ final class PhamePost extends PhameDAO
 
 
   public function getMarkupFieldKey($field) {
-    $hash = PhabricatorHash::digest($this->getMarkupText($field));
-    return $this->getPHID().':'.$field.':'.$hash;
+    $content = $this->getMarkupText($field);
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
   public function newMarkupEngine($field) {

@@ -94,7 +94,7 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
 
     $this->pushAtomStack($atom);
       $description = $engine->markupText($text);
-    $this->popAtomStack($atom);
+    $this->popAtomStack();
 
     return phutil_tag(
       'div',

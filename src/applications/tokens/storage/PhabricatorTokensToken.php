@@ -14,6 +14,7 @@ final class PhabricatorTokensToken extends PhabricatorTokenDAO
   protected $tokenImagePHID;
   protected $builtinKey;
 
+  private $tokenImageFile = self::ATTACHABLE;
 
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';

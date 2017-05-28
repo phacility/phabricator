@@ -111,7 +111,6 @@ final class DiffusionCommitEditEngine
       ->setValue($object->getAuditorPHIDsForEdit());
 
     $reason = $data->getCommitDetail('autocloseReason', false);
-    $reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
     if ($reason !== false) {
       switch ($reason) {
         case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:

@@ -58,11 +58,16 @@ final class PhortuneMerchantEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    return $object->getViewURI();
+    return $object->getURI();
   }
 
   public function isEngineConfigurable() {
     return false;
+  }
+
+  protected function getCreateNewObjectPolicy() {
+    return $this->getApplication()->getPolicy(
+      PhortuneMerchantCapability::CAPABILITY);
   }
 
   protected function buildCustomEditFields($object) {
@@ -81,21 +86,22 @@ final class PhortuneMerchantEditEngine
         ->setDescription(pht('Merchant name.'))
         ->setConduitTypeDescription(pht('New Merchant name.'))
         ->setIsRequired(true)
-        ->setTransactionType(PhortuneMerchantTransaction::TYPE_NAME)
+        ->setTransactionType(
+          PhortuneMerchantNameTransaction::TRANSACTIONTYPE)
         ->setValue($object->getName()),
 
       id(new PhabricatorUsersEditField())
         ->setKey('members')
-        ->setAliases(array('memberPHIDs'))
-        ->setLabel(pht('Members'))
+        ->setAliases(array('memberPHIDs', 'managerPHIDs'))
+        ->setLabel(pht('Managers'))
         ->setUseEdgeTransactions(true)
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue(
           'edge:type',
           PhortuneMerchantHasMemberEdgeType::EDGECONST)
-        ->setDescription(pht('Initial merchant members.'))
-        ->setConduitDescription(pht('Set merchant members.'))
-        ->setConduitTypeDescription(pht('New list of members.'))
+        ->setDescription(pht('Initial merchant managers.'))
+        ->setConduitDescription(pht('Set merchant managers.'))
+        ->setConduitTypeDescription(pht('New list of managers.'))
         ->setInitialValue($object->getMemberPHIDs())
         ->setValue($member_phids),
 
@@ -104,7 +110,8 @@ final class PhortuneMerchantEditEngine
         ->setLabel(pht('Description'))
         ->setDescription(pht('Merchant description.'))
         ->setConduitTypeDescription(pht('New merchant description.'))
-        ->setTransactionType(PhortuneMerchantTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(
+          PhortuneMerchantDescriptionTransaction::TRANSACTIONTYPE)
         ->setValue($object->getDescription()),
 
       id(new PhabricatorRemarkupEditField())
@@ -112,7 +119,8 @@ final class PhortuneMerchantEditEngine
         ->setLabel(pht('Contact Info'))
         ->setDescription(pht('Merchant contact information.'))
         ->setConduitTypeDescription(pht('Merchant contact information.'))
-        ->setTransactionType(PhortuneMerchantTransaction::TYPE_CONTACTINFO)
+        ->setTransactionType(
+          PhortuneMerchantContactInfoTransaction::TRANSACTIONTYPE)
         ->setValue($object->getContactInfo()),
 
       id(new PhabricatorTextEditField())
@@ -121,7 +129,8 @@ final class PhortuneMerchantEditEngine
         ->setDescription(pht('Email address invoices are sent from.'))
         ->setConduitTypeDescription(
           pht('Email address invoices are sent from.'))
-        ->setTransactionType(PhortuneMerchantTransaction::TYPE_INVOICEEMAIL)
+        ->setTransactionType(
+          PhortuneMerchantInvoiceEmailTransaction::TRANSACTIONTYPE)
         ->setValue($object->getInvoiceEmail()),
 
       id(new PhabricatorRemarkupEditField())
@@ -129,7 +138,8 @@ final class PhortuneMerchantEditEngine
         ->setLabel(pht('Invoice Footer'))
         ->setDescription(pht('Footer on invoice forms.'))
         ->setConduitTypeDescription(pht('Footer on invoice forms.'))
-        ->setTransactionType(PhortuneMerchantTransaction::TYPE_INVOICEFOOTER)
+        ->setTransactionType(
+          PhortuneMerchantInvoiceFooterTransaction::TRANSACTIONTYPE)
         ->setValue($object->getInvoiceFooter()),
 
     );

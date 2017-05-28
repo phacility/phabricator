@@ -160,7 +160,7 @@ abstract class PhabricatorModularTransaction
     return parent::attachViewer($viewer);
   }
 
-  final public function hasChangeDetails() {
+  /* final */ public function hasChangeDetails() {
     if ($this->getTransactionImplementation()->hasChangeDetailView()) {
       return true;
     }
@@ -168,7 +168,7 @@ abstract class PhabricatorModularTransaction
     return parent::hasChangeDetails();
   }
 
-  final public function renderChangeDetails(PhabricatorUser $viewer) {
+  /* final */ public function renderChangeDetails(PhabricatorUser $viewer) {
     $impl = $this->getTransactionImplementation();
     $impl->setViewer($viewer);
     $view = $impl->newChangeDetailView();

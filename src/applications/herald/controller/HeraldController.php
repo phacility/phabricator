@@ -3,7 +3,7 @@
 abstract class HeraldController extends PhabricatorController {
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(true)->getMenu();
+    return $this->buildSideNavView()->getMenu();
   }
 
   protected function buildApplicationCrumbs() {

@@ -88,15 +88,25 @@ final class PhabricatorDesktopNotificationsSettingsPanel
           'for this Phabricator instance. Consult your browser settings / '.
           'documentation to figure out how to clear this setting, do so, '.
           'and then re-visit this page to grant permission.'));
+
+    $message_id = celerity_generate_unique_node_id();
+
+    $message_container = phutil_tag(
+      'span',
+      array(
+        'id' => $message_id,
+      ));
+
     $status_box = id(new PHUIInfoView())
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
       ->setID($status_id)
       ->setIsHidden(true)
-      ->appendChild($accept_ask);
+      ->appendChild($message_container);
 
     $control_config = array(
        'controlID' => $control_id,
        'statusID' => $status_id,
+       'messageID' => $message_id,
        'browserStatusID' => $browser_status_id,
        'defaultMode' => 0,
        'desktopMode' => 1,

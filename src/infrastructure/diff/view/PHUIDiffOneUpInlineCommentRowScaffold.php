@@ -22,9 +22,17 @@ final class PHUIDiffOneUpInlineCommentRowScaffold
       'id' => $inline->getScaffoldCellID(),
     );
 
+    if ($inline->getIsOnRight()) {
+      $left_hidden = null;
+      $right_hidden = $inline->newHiddenIcon();
+    } else {
+      $left_hidden = $inline->newHiddenIcon();
+      $right_hidden = null;
+    }
+
     $cells = array(
-      phutil_tag('th', array()),
-      phutil_tag('th', array()),
+      phutil_tag('th', array(), $left_hidden),
+      phutil_tag('th', array(), $right_hidden),
       phutil_tag('td', $attrs, $inline),
     );
 

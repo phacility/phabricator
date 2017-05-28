@@ -4,7 +4,7 @@ final class PhabricatorPhurlURLSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Shortened URLs');
+    return pht('Phurl URLs');
   }
 
   public function getApplicationClassName() {

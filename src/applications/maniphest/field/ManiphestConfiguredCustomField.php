@@ -10,8 +10,7 @@ final class ManiphestConfiguredCustomField
 
   public function createFields($object) {
     $config = PhabricatorEnv::getEnvConfig(
-      'maniphest.custom-field-definitions',
-      array());
+      'maniphest.custom-field-definitions');
     $fields = PhabricatorStandardCustomField::buildStandardFields(
       $this,
       $config);

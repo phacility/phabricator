@@ -23,8 +23,7 @@ final class PhabricatorProjectEditPictureController
 
     $this->setProject($project);
 
-    $edit_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
-    $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
+    $manage_uri = $this->getApplicationURI('manage/'.$project->getID().'/');
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;
@@ -78,7 +77,8 @@ final class PhabricatorProjectEditPictureController
 
         $xactions = array();
         $xactions[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorProjectTransaction::TYPE_IMAGE)
+          ->setTransactionType(
+              PhabricatorProjectImageTransaction::TRANSACTIONTYPE)
           ->setNewValue($new_value);
 
         $editor = id(new PhabricatorProjectTransactionEditor())
@@ -89,7 +89,7 @@ final class PhabricatorProjectEditPictureController
 
         $editor->applyTransactions($project, $xactions);
 
-        return id(new AphrontRedirectResponse())->setURI($edit_uri);
+        return id(new AphrontRedirectResponse())->setURI($manage_uri);
       }
     }
 
@@ -242,7 +242,7 @@ final class PhabricatorProjectEditPictureController
             pht('Supported formats: %s', implode(', ', $supported_formats))))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($edit_uri)
+          ->addCancelButton($manage_uri)
           ->setValue(pht('Upload Picture')));
 
     $form_box = id(new PHUIObjectBoxView())

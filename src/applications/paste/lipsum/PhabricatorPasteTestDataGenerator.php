@@ -3,6 +3,8 @@
 final class PhabricatorPasteTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'pastes';
+
   public function getGeneratorName() {
     return pht('Pastes');
   }

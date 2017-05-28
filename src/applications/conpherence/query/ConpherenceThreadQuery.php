@@ -10,17 +10,11 @@ final class ConpherenceThreadQuery
   private $participantPHIDs;
   private $needParticipants;
   private $needTransactions;
-  private $needParticipantCache;
   private $afterTransactionID;
   private $beforeTransactionID;
   private $transactionLimit;
   private $fulltext;
   private $needProfileImage;
-
-  public function needParticipantCache($participant_cache) {
-    $this->needParticipantCache = $participant_cache;
-    return $this;
-  }
 
   public function needParticipants($need) {
     $this->needParticipants = $need;
@@ -101,9 +95,6 @@ final class ConpherenceThreadQuery
     if ($conpherences) {
       $conpherences = mpull($conpherences, null, 'getPHID');
       $this->loadParticipantsAndInitHandles($conpherences);
-      if ($this->needParticipantCache) {
-        $this->loadCoreHandles($conpherences, 'getRecentParticipantPHIDs');
-      }
       if ($this->needParticipants) {
         $this->loadCoreHandles($conpherences, 'getParticipantPHIDs');
       }

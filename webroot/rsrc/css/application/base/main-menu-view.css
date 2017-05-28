@@ -139,8 +139,7 @@
 }
 
 .device-desktop .phabricator-main-menu-search-target {
-  width: 320px;
-  margin-left: -150px;
+  width: 360px;
 }
 
 .device .phabricator-main-menu-search-target {
@@ -276,11 +275,11 @@ a.phabricator-core-user-menu .caret:before {
   box-shadow: {$dropshadow};
   border: 1px solid {$lightgreyborder};
   border-radius: 3px;
-  margin-left: 40px;
+  margin-left: -64px;
 }
 
 .device .phabricator-main-menu-search-target div.jx-typeahead-results {
-  margin-left: 30px;
+  margin-left: 28px;
 }
 
 .phabricator-main-search-typeahead-result .phabricator-search-icon {
@@ -308,6 +307,22 @@ a.phabricator-core-user-menu .caret:before {
   font-size: {$normalfontsize};
   font-weight: bold;
   color: {$darkgreytext};
+}
+
+.phabricator-main-search-typeahead-result.result-closed {
+  opacity: .8;
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
+
+.phabricator-main-search-typeahead-result.result-closed
+  .result-name {
+  text-decoration: line-through;
+  color: {$lightgreytext};
+}
+
+.phabricator-main-search-typeahead-result.has-image {
+  padding-left: 48px;
 }
 
 .phabricator-main-search-typeahead-result .result-type {

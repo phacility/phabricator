@@ -4,7 +4,7 @@ final class PhabricatorBadgesSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Badge');
+    return pht('Badges');
   }
 
   public function getApplicationClassName() {
@@ -24,6 +24,7 @@ final class PhabricatorBadgesSearchEngine
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('qualities')
         ->setLabel(pht('Quality'))
+        ->setEnableForConduit(false)
         ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
@@ -147,7 +148,7 @@ final class PhabricatorBadgesSearchEngine
       ->setTitle(pht('Welcome to %s', $app_name))
       ->setDescription(
         pht('Badges let you award and distinguish special users '.
-          'throughout your instance.'))
+          'throughout your install.'))
       ->addAction($create_button);
 
       return $view;

@@ -28,14 +28,17 @@
   background: #fff;
   border: 1px solid {$sh-yellowborder};
   font: {$basefont};
-  margin: 0;
-  width: 100%;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   overflow: hidden;
   white-space: normal;
   border-radius: 3px;
+  margin: 8px 12px;
+}
+
+.device .differential-inline-comment {
+  margin: 4px;
 }
 
 .inline-state-is-draft {
@@ -61,7 +64,7 @@
 
 /* Tighten up spacing on replies */
 .differential-inline-comment.inline-comment-is-reply {
-  margin-top: -12px;
+  margin-top: 0;
 }
 
 .differential-inline-comment .inline-head-right {
@@ -315,10 +318,10 @@
 
 .differential-inline-undo {
   padding: 8px;
+  margin: 4px 12px;
   text-align: center;
   background: {$sh-yellowbackground};
   border: 1px solid {$sh-yellowborder};
-  margin: 4px 0;
   color: {$darkgreytext};
   font: {$basefont};
   font-size: {$normalfontsize};
@@ -374,17 +377,45 @@
 /* - Hiding Inlines ------------------------------------------------------------
 */
 
-.reveal-inlines {
-  float: left;
-  margin-left: 4px;
+.reveal-inline {
+  color: {$lightbluetext};
+  margin: 4px 0;
+  display: none;
+}
+
+.inline-hidden .reveal-inline {
+  display: block;
+}
+
+.inline-hidden .differential-inline-comment {
+  display: none;
+}
+
+.differential-inline-summary {
+  background: {$lightgreybackground};
+  padding: 2px 16px;
+  color: {$lightgreytext};
+  display: none;
+  font: {$basefont};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.device .differential-inline-summary {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.inline-hidden .differential-inline-summary {
+  display: block;
+}
+
+.reveal-inline span.phui-icon-view {
   color: {$lightbluetext};
 }
 
-.reveal-inlines span.phui-icon-view {
-  color: {$lightbluetext};
-}
-
-.reveal-inlines:hover span.phui-icon-view {
+.reveal-inline:hover span.phui-icon-view {
   color: {$darkbluetext};
 }
 

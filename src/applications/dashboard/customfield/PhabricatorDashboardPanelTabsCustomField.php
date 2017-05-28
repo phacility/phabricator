@@ -15,7 +15,11 @@ final class PhabricatorDashboardPanelTabsCustomField
     $value = array();
 
     $names = $request->getArr($this->getFieldKey().'_name');
-    $panels = $request->getArr($this->getFieldKey().'_panelID');
+    $panel_ids = $request->getArr($this->getFieldKey().'_panelID');
+    $panels = array();
+    foreach ($panel_ids as $panel_id) {
+      $panels[] = $panel_id[0];
+    }
     foreach ($names as $idx => $name) {
       $panel_id = idx($panels, $idx);
       if (strlen($name) && $panel_id) {
@@ -29,25 +33,53 @@ final class PhabricatorDashboardPanelTabsCustomField
     $this->setFieldValue($value);
   }
 
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    $new_tabs = array();
+    if ($new) {
+      foreach ($new as $new_tab) {
+        $new_tabs[] = $new_tab['name'];
+      }
+      $new_tabs = implode(' | ', $new_tabs);
+    }
+
+    $old_tabs = array();
+    if ($old) {
+      foreach ($old as $old_tab) {
+        $old_tabs[] = $old_tab['name'];
+      }
+      $old_tabs = implode(' | ', $old_tabs);
+    }
+
+    if (!$old) {
+      // In case someone makes a tab panel with no tabs.
+      if ($new) {
+        return pht(
+          '%s set the tabs to "%s".',
+          $xaction->renderHandleLink($author_phid),
+          $new_tabs);
+      }
+    } else if (!$new) {
+      return pht(
+        '%s removed tabs.',
+        $xaction->renderHandleLink($author_phid));
+    } else {
+      return pht(
+        '%s changed the tabs from "%s" to "%s".',
+        $xaction->renderHandleLink($author_phid),
+        $old_tabs,
+        $new_tabs);
+    }
+  }
+
   public function renderEditControl(array $handles) {
     // NOTE: This includes archived panels so we don't mutate the tabs
     // when saving a tab panel that includes archied panels. This whole UI is
     // hopefully temporary anyway.
-
-    $panels = id(new PhabricatorDashboardPanelQuery())
-      ->setViewer($this->getViewer())
-      ->execute();
-
-    $panel_map = array();
-    foreach ($panels as $panel) {
-      $panel_map[$panel->getID()] = pht(
-        '%s %s',
-        $panel->getMonogram(),
-        $panel->getName());
-    }
-    $panel_map = array(
-      '' => pht('(None)'),
-    ) + $panel_map;
 
     $value = $this->getFieldValue();
     if (!is_array($value)) {
@@ -57,15 +89,22 @@ final class PhabricatorDashboardPanelTabsCustomField
     $out = array();
     for ($ii = 1; $ii <= 6; $ii++) {
       $tab = idx($value, ($ii - 1), array());
+      $panel = idx($tab, 'panelID', null);
+      $panel_id = array();
+      if ($panel) {
+        $panel_id[] = $panel;
+      }
       $out[] = id(new AphrontFormTextControl())
         ->setName($this->getFieldKey().'_name[]')
         ->setValue(idx($tab, 'name'))
         ->setLabel(pht('Tab %d Name', $ii));
 
-      $out[] = id(new AphrontFormSelectControl())
+      $out[] = id(new AphrontFormTokenizerControl())
+        ->setUser($this->getViewer())
+        ->setDatasource(new PhabricatorDashboardPanelDatasource())
         ->setName($this->getFieldKey().'_panelID[]')
-        ->setValue(idx($tab, 'panelID'))
-        ->setOptions($panel_map)
+        ->setValue($panel_id)
+        ->setLimit(1)
         ->setLabel(pht('Tab %d Panel', $ii));
     }
 

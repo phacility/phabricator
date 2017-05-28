@@ -236,12 +236,14 @@ abstract class ReleephFieldSpecification
   }
 
   final public function getMarkupFieldKey($field) {
-    return sprintf(
+    $content = sprintf(
       '%s:%s:%s:%s',
       $this->getReleephRequest()->getPHID(),
       $this->getStorageKey(),
       $field,
-      PhabricatorHash::digest($this->getMarkupText($field)));
+      $this->getMarkupText($field));
+
+    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
   }
 
   final public function newMarkupEngine($field) {

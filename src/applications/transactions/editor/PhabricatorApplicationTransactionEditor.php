@@ -261,6 +261,10 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $types[] = PhabricatorTransactions::TYPE_CREATE;
 
+    if ($this->object instanceof PhabricatorEditEngineSubtypeInterface) {
+      $types[] = PhabricatorTransactions::TYPE_SUBTYPE;
+    }
+
     if ($this->object instanceof PhabricatorSubscribableInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;
     }
@@ -294,6 +298,18 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    if ($template) {
+      try {
+        $comment = $template->getApplicationTransactionCommentObject();
+      } catch (PhutilMethodNotImplementedException $ex) {
+        $comment = null;
+      }
+
+      if ($comment) {
+        $types[] = PhabricatorTransactions::TYPE_COMMENT;
+      }
+    }
+
     return $types;
   }
 
@@ -318,12 +334,16 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->generateOldValue($object);
     }
 
     switch ($type) {
       case PhabricatorTransactions::TYPE_CREATE:
         return null;
+      case PhabricatorTransactions::TYPE_SUBTYPE:
+        return $object->getEditEngineSubtype();
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return array_values($this->subscribers);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -396,6 +416,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->generateNewValue($object, $xaction->getNewValue());
     }
 
@@ -410,6 +432,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_SUBTYPE:
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_SPACE:
         $space_phid = $xaction->getNewValue();
@@ -534,6 +557,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->applyInternalEffects($object, $xaction->getNewValue());
     }
 
@@ -542,6 +567,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
       case PhabricatorTransactions::TYPE_CREATE:
+      case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -566,6 +592,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xtype = $this->getModularTransactionType($type);
     if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
       return $xtype->applyExternalEffects($object, $xaction->getNewValue());
     }
 
@@ -601,6 +629,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
       case PhabricatorTransactions::TYPE_CREATE:
+      case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
@@ -663,6 +692,9 @@ abstract class PhabricatorApplicationTransactionEditor
         break;
       case PhabricatorTransactions::TYPE_SPACE:
         $object->setSpacePHID($xaction->getNewValue());
+        break;
+      case PhabricatorTransactions::TYPE_SUBTYPE:
+        $object->setEditEngineSubtype($xaction->getNewValue());
         break;
     }
   }
@@ -1462,6 +1494,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $type = $u->getTransactionType();
 
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $object = $this->object;
+      return $xtype->mergeTransactions($object, $u, $v);
+    }
+
     switch ($type) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return $this->mergePHIDOrEdgeTransactions($u, $v);
@@ -1707,7 +1745,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return array_values($result);
   }
 
-  protected function mergePHIDOrEdgeTransactions(
+  public function mergePHIDOrEdgeTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
 
@@ -1783,7 +1821,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $old = array_fuse($xaction->getOldValue());
     }
 
-    $new = $xaction->getNewValue();
+    return $this->getPHIDList($old, $xaction->getNewValue());
+  }
+
+  public function getPHIDList(array $old, array $new) {
     $new_add = idx($new, '+', array());
     unset($new['+']);
     $new_rem = idx($new, '-', array());
@@ -2097,6 +2138,12 @@ abstract class PhabricatorApplicationTransactionEditor
           $xactions,
           $type);
         break;
+      case PhabricatorTransactions::TYPE_SUBTYPE:
+        $errors[] = $this->validateSubtypeTransactions(
+          $object,
+          $xactions,
+          $type);
+        break;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $groups = array();
         foreach ($xactions as $xaction) {
@@ -2124,7 +2171,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return array_mergev($errors);
   }
 
-  private function validatePolicyTransaction(
+  public function validatePolicyTransaction(
     PhabricatorLiskDAO $object,
     array $xactions,
     $transaction_type,
@@ -2248,6 +2295,35 @@ abstract class PhabricatorApplicationTransactionEditor
     return $errors;
   }
 
+  private function validateSubtypeTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $transaction_type) {
+    $errors = array();
+
+    $map = $object->newEditEngineSubtypeMap();
+    $old = $object->getEditEngineSubtype();
+    foreach ($xactions as $xaction) {
+      $new = $xaction->getNewValue();
+
+      if ($old == $new) {
+        continue;
+      }
+
+      if (!isset($map[$new])) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht(
+            'The subtype "%s" is not a valid subtype.',
+            $new),
+          $xaction);
+        continue;
+      }
+    }
+
+    return $errors;
+  }
 
   protected function adjustObjectForPolicyChecks(
     PhabricatorLiskDAO $object,
@@ -2312,51 +2388,6 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($xactions && strlen(last($xactions)->getNewValue())) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Check that text field input isn't longer than a specified length.
-   *
-   * A text field input is invalid if the length of the input is longer than a
-   * specified length. This length can be determined by the space allotted in
-   * the database, or given arbitrarily.
-   * This method is intended to make implementing @{method:validateTransaction}
-   * more convenient:
-   *
-   *   $overdrawn = $this->validateIsTextFieldTooLong(
-   *     $object->getName(),
-   *     $xactions,
-   *     $field_length);
-   *
-   * This will return `true` if the net effect of the object and transactions
-   * is a field that is too long.
-   *
-   * @param wild Current field value.
-   * @param list<PhabricatorApplicationTransaction> Transactions editing the
-   *          field.
-   * @param integer for maximum field length.
-   * @return bool True if the field will be too long after edits.
-   */
-  protected function validateIsTextFieldTooLong(
-    $field_value,
-    array $xactions,
-    $length) {
-
-    if ($xactions) {
-      $new_value_length = phutil_utf8_strlen(last($xactions)->getNewValue());
-      if ($new_value_length <= $length) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-
-    $old_value_length = phutil_utf8_strlen($field_value);
-    if ($old_value_length <= $length) {
       return false;
     }
 
@@ -2749,7 +2780,11 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if (!$has_support) {
-      throw new Exception(pht('Capability not supported.'));
+      throw new Exception(
+        pht('The object being edited does not implement any standard '.
+          'interfaces (like PhabricatorSubscribableInterface) which allow '.
+          'CCs to be generated automatically. Override the "getMailCC()" '.
+          'method and generate CCs explicitly.'));
     }
 
     return array_mergev($phids);

@@ -21,8 +21,7 @@ final class PhabricatorProjectManageController
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Project History'))
       ->setUser($viewer)
-      ->setPolicyObject($project)
-      ->setImage($picture);
+      ->setPolicyObject($project);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
@@ -45,10 +44,14 @@ final class PhabricatorProjectManageController
     $crumbs->addTextCrumb(pht('Manage'));
     $crumbs->setBorder(true);
 
+    require_celerity_resource('project-view-css');
+
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
       ->addPropertySection(pht('Details'), $properties)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setMainColumn(
         array(
           $timeline,
@@ -135,6 +138,12 @@ final class PhabricatorProjectManageController
       pht('Looks Like'),
       $viewer->renderHandle($project->getPHID())->setAsTag(true));
 
+    $slugs = $project->getSlugs();
+    $tags = mpull($slugs, 'getSlug');
+
+    $view->addProperty(
+      pht('Hashtags'),
+      $this->renderHashtags($tags));
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,
@@ -143,6 +152,5 @@ final class PhabricatorProjectManageController
 
     return $view;
   }
-
 
 }

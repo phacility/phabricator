@@ -43,7 +43,7 @@ final class DivinerAtom extends Phobject {
         $this->getContext(),
         $this->getName(),
         $this->getFile(),
-        sprintf('%08', $this->getLine()),
+        sprintf('%08d', $this->getLine()),
       ));
   }
 

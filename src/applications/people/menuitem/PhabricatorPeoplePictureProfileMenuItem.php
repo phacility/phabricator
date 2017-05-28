@@ -36,6 +36,13 @@ final class PhabricatorPeoplePictureProfileMenuItem
 
     $picture = $user->getProfileImageURI();
     $name = $user->getUsername();
+
+    $classes = array();
+    $classes[] = 'people-menu-image';
+    if ($user->getIsDisabled()) {
+      $classes[] = 'phui-image-disabled';
+    }
+
     $href = urisprintf(
       '/p/%s/',
       $user->getUsername());
@@ -44,7 +51,7 @@ final class PhabricatorPeoplePictureProfileMenuItem
       'img',
       array(
         'src' => $picture,
-        'class' => 'people-menu-image',
+        'class' => implode(' ', $classes),
       ));
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

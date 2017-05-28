@@ -55,7 +55,8 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     $xactions = array();
     if ($this->getMailAddedParticipantPHIDs()) {
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
+        ->setTransactionType(
+          ConpherenceThreadParticipantsTransaction::TRANSACTIONTYPE)
         ->setNewValue(array('+' => $this->getMailAddedParticipantPHIDs()));
     }
 

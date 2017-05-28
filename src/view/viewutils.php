@@ -48,6 +48,24 @@ function phabricator_datetime($epoch, $user) {
       $user->getUserSetting($time_key)));
 }
 
+function phabricator_datetimezone($epoch, $user) {
+  $datetime = phabricator_datetime($epoch, $user);
+  $timezone = phabricator_format_local_time($epoch, $user, 'T');
+
+  // Some obscure timezones just render as "+03" or "-09". Make these render
+  // as "UTC+3" instead.
+  if (preg_match('/^[+-]/', $timezone)) {
+    $timezone = (int)trim($timezone, '+');
+    if ($timezone < 0) {
+      $timezone = pht('UTC-%s', $timezone);
+    } else {
+      $timezone = pht('UTC+%s', $timezone);
+    }
+  }
+
+  return pht('%s (%s)', $datetime, $timezone);
+}
+
 /**
  * This function does not usually need to be called directly. Instead, call
  * @{function:phabricator_date}, @{function:phabricator_time}, or
@@ -88,7 +106,7 @@ function phabricator_format_local_time($epoch, $user, $format) {
       "raised an exception.", $epoch));
   }
 
-  $date->setTimeZone($zone);
+  $date->setTimezone($zone);
 
   return PhutilTranslator::getInstance()->translateDate($format, $date);
 }

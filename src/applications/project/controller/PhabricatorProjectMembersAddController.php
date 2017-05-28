@@ -48,7 +48,7 @@ final class PhabricatorProjectMembersAddController
             '+' => array_fuse($member_phids),
           ));
 
-      $editor = id(new PhabricatorProjectTransactionEditor($project))
+      $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)

@@ -96,7 +96,7 @@ final class FundInitiativeBackController
         $xactions = array();
 
         $xactions[] = id(new FundBackerTransaction())
-          ->setTransactionType(FundBackerTransaction::TYPE_STATUS)
+          ->setTransactionType(FundBackerStatusTransaction::TRANSACTIONTYPE)
           ->setNewValue(FundBacker::STATUS_IN_CART);
 
         $editor = id(new FundBackerEditor())

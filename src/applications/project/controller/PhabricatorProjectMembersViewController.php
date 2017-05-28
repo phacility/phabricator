@@ -20,26 +20,21 @@ final class PhabricatorProjectMembersViewController
 
     $this->setProject($project);
     $title = pht('Members and Watchers');
-
-    $properties = $this->buildProperties($project);
     $curtain = $this->buildCurtainView($project);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Details'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($properties);
 
     $member_list = id(new PhabricatorProjectMemberListView())
       ->setUser($viewer)
       ->setProject($project)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setUserPHIDs($project->getMemberPHIDs());
+      ->setUserPHIDs($project->getMemberPHIDs())
+      ->setShowNote(true);
 
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setUserPHIDs($project->getWatcherPHIDs());
+      ->setUserPHIDs($project->getWatcherPHIDs())
+      ->setShowNote(true);
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::ITEM_MEMBERS);
@@ -52,15 +47,17 @@ final class PhabricatorProjectMembersViewController
       ->setHeader($title)
       ->setHeaderIcon('fa-group');
 
+    require_celerity_resource('project-view-css');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setMainColumn(array(
-        $object_box,
         $member_list,
         $watcher_list,
       ));
-
 
     return $this->newPage()
       ->setNavigation($nav)
@@ -69,110 +66,11 @@ final class PhabricatorProjectMembersViewController
       ->appendChild($view);
   }
 
-  private function buildProperties(PhabricatorProject $project) {
-    $viewer = $this->getViewer();
-
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($project);
-
-    if ($project->isMilestone()) {
-      $icon_key = PhabricatorProjectIconSet::getMilestoneIconKey();
-      $icon = PhabricatorProjectIconSet::getIconIcon($icon_key);
-      $target = PhabricatorProjectIconSet::getIconName($icon_key);
-      $note = pht(
-        'Members of the parent project are members of this project.');
-      $show_join = false;
-    } else if ($project->getHasSubprojects()) {
-      $icon = 'fa-sitemap';
-      $target = pht('Parent Project');
-      $note = pht(
-        'Members of all subprojects are members of this project.');
-      $show_join = false;
-    } else if ($project->getIsMembershipLocked()) {
-      $icon = 'fa-lock';
-      $target = pht('Locked Project');
-      $note = pht(
-        'Users with access may join this project, but may not leave.');
-      $show_join = true;
-    } else {
-      $icon = 'fa-briefcase';
-      $target = pht('Normal Project');
-      $note = pht('Users with access may join and leave this project.');
-      $show_join = true;
-    }
-
-    $item = id(new PHUIStatusItemView())
-      ->setIcon($icon)
-      ->setTarget(phutil_tag('strong', array(), $target))
-      ->setNote($note);
-
-    $status = id(new PHUIStatusListView())
-      ->addItem($item);
-
-    $view->addProperty(pht('Membership'), $status);
-
-    if ($show_join) {
-      $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-        $viewer,
-        $project);
-
-      $view->addProperty(
-        pht('Joinable By'),
-        $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
-    }
-
-    $viewer_phid = $viewer->getPHID();
-
-    if ($project->isUserWatcher($viewer_phid)) {
-      $watch_item = id(new PHUIStatusItemView())
-        ->setIcon('fa-eye green')
-        ->setTarget(phutil_tag('strong', array(), pht('Watching')))
-        ->setNote(
-          pht(
-            'You will receive mail about changes made to any related '.
-            'object.'));
-
-      $watch_status = id(new PHUIStatusListView())
-        ->addItem($watch_item);
-
-      $view->addProperty(pht('Watching'), $watch_status);
-    }
-
-    if ($project->isUserMember($viewer_phid)) {
-      $is_silenced = $this->isProjectSilenced($project);
-      if ($is_silenced) {
-        $mail_icon = 'fa-envelope-o grey';
-        $mail_target = pht('Disabled');
-        $mail_note = pht(
-          'When mail is sent to project members, you will not receive '.
-          'a copy.');
-      } else {
-        $mail_icon = 'fa-envelope-o green';
-        $mail_target = pht('Enabled');
-        $mail_note = pht(
-          'You will receive mail that is sent to project members.');
-      }
-
-      $mail_item = id(new PHUIStatusItemView())
-        ->setIcon($mail_icon)
-        ->setTarget(phutil_tag('strong', array(), $mail_target))
-        ->setNote($mail_note);
-
-      $mail_status = id(new PHUIStatusListView())
-        ->addItem($mail_item);
-
-      $view->addProperty(pht('Mail to Members'), $mail_status);
-    }
-
-    return $view;
-  }
-
   private function buildCurtainView(PhabricatorProject $project) {
     $viewer = $this->getViewer();
     $id = $project->getID();
 
-    $curtain = $this->newCurtainView($project);
+    $curtain = $this->newCurtainView();
 
     $is_locked = $project->getIsMembershipLocked();
 
@@ -271,6 +169,42 @@ final class PhabricatorProjectMembersViewController
         ->setHref($this->getApplicationURI("lock/{$id}/"))
         ->setDisabled(!$can_lock)
         ->setWorkflow(true));
+
+    if ($project->isMilestone()) {
+      $icon_key = PhabricatorProjectIconSet::getMilestoneIconKey();
+      $header = PhabricatorProjectIconSet::getIconName($icon_key);
+      $note = pht(
+        'Members of the parent project are members of this project.');
+      $show_join = false;
+    } else if ($project->getHasSubprojects()) {
+      $header = pht('Parent Project');
+      $note = pht(
+        'Members of all subprojects are members of this project.');
+      $show_join = false;
+    } else if ($project->getIsMembershipLocked()) {
+      $header = pht('Locked Project');
+      $note = pht(
+        'Users with access may join this project, but may not leave.');
+      $show_join = true;
+    } else {
+      $header = pht('Normal Project');
+      $note = pht('Users with access may join and leave this project.');
+      $show_join = true;
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText($header)
+      ->appendChild($note);
+
+    if ($show_join) {
+      $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+        $viewer,
+        $project);
+
+      $curtain->newPanel()
+        ->setHeaderText(pht('Joinable By'))
+        ->appendChild($descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
+    }
 
     return $curtain;
   }

@@ -19,7 +19,8 @@ abstract class ManiphestTaskRelationship
   protected function newMergeIntoTransactions(ManiphestTask $task) {
     return array(
       id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_MERGED_INTO)
+        ->setTransactionType(
+          ManiphestTaskMergedIntoTransaction::TRANSACTIONTYPE)
         ->setNewValue($task->getPHID()),
     );
   }
@@ -34,7 +35,8 @@ abstract class ManiphestTaskRelationship
       ->setNewValue(array('+' => $subscriber_phids));
 
     $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_MERGED_FROM)
+        ->setTransactionType(
+          ManiphestTaskMergedFromTransaction::TRANSACTIONTYPE)
         ->setNewValue(mpull($tasks, 'getPHID'));
 
     return $xactions;

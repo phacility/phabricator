@@ -16,6 +16,7 @@ final class PhabricatorEditEngineConfiguration
   protected $isEdit = 0;
   protected $createOrder = 0;
   protected $editOrder = 0;
+  protected $subtype;
 
   private $engine = self::ATTACHABLE;
 
@@ -32,6 +33,7 @@ final class PhabricatorEditEngineConfiguration
     PhabricatorEditEngine $engine) {
 
     return id(new PhabricatorEditEngineConfiguration())
+      ->setSubtype(PhabricatorEditEngine::SUBTYPE_DEFAULT)
       ->setEngineKey($engine->getEngineKey())
       ->attachEngine($engine)
       ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy());
@@ -84,6 +86,7 @@ final class PhabricatorEditEngineConfiguration
         'isEdit' => 'bool',
         'createOrder' => 'uint32',
         'editOrder' => 'uint32',
+        'subtype' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_engine' => array(
@@ -214,6 +217,19 @@ final class PhabricatorEditEngineConfiguration
     $key = $this->getIdentifier();
 
     return "/transactions/editengine/{$engine_key}/view/{$key}/";
+  }
+
+  public function getCreateURI() {
+    $form_key = $this->getIdentifier();
+    $engine = $this->getEngine();
+
+    try {
+      $create_uri = $engine->getEditURI(null, "form/{$form_key}/");
+    } catch (Exception $ex) {
+      $create_uri = null;
+    }
+
+    return $create_uri;
   }
 
   public function getIdentifier() {

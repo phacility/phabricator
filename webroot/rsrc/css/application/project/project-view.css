@@ -67,10 +67,6 @@
     text-align: center;
 }
 
-.project-view-badges .phui-badge-flex-view {
-  background-color: #fff;
-}
-
 .project-view-home .phui-box-grey .phui-oi-attribute .phui-icon-view {
   color: {$lightgreytext};
 }

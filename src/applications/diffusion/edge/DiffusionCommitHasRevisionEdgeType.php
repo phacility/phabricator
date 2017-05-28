@@ -12,4 +12,17 @@ final class DiffusionCommitHasRevisionEdgeType extends PhabricatorEdgeType {
     return true;
   }
 
+  public function getConduitKey() {
+    return 'commit.revision';
+  }
+
+  public function getConduitName() {
+    return pht('Commit Has Revision');
+  }
+
+  public function getConduitDescription() {
+    return pht(
+      'The source commit is associated with the destination revision.');
+  }
+
 }

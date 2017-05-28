@@ -3,12 +3,14 @@
 final class PhabricatorPholioMockTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'mocks';
+
   public function getGeneratorName() {
     return pht('Pholio Mocks');
   }
 
   public function generateObject() {
-    $author_phid = $this->loadPhabrictorUserPHID();
+    $author_phid = $this->loadPhabricatorUserPHID();
     $author = id(new PhabricatorUser())
           ->loadOneWhere('phid = %s', $author_phid);
     $mock = PholioMock::initializeNewMock($author);
@@ -20,9 +22,9 @@ final class PhabricatorPholioMockTestDataGenerator
 
     // Accumulate Transactions
     $changes = array();
-    $changes[PholioTransaction::TYPE_NAME] =
+    $changes[PholioMockNameTransaction::TRANSACTIONTYPE] =
       $this->generateTitle();
-    $changes[PholioTransaction::TYPE_DESCRIPTION] =
+    $changes[PholioMockDescriptionTransaction::TRANSACTIONTYPE] =
       $this->generateDescription();
     $changes[PhabricatorTransactions::TYPE_VIEW_POLICY] =
       PhabricatorPolicies::POLICY_PUBLIC;
@@ -82,7 +84,7 @@ final class PhabricatorPholioMockTestDataGenerator
   public function getCCPHIDs() {
     $ccs = array();
     for ($i = 0; $i < rand(1, 4);$i++) {
-      $ccs[] = $this->loadPhabrictorUserPHID();
+      $ccs[] = $this->loadPhabricatorUserPHID();
     }
     return $ccs;
   }

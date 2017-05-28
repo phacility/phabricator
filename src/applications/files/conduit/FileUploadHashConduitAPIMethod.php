@@ -3,12 +3,21 @@
 final class FileUploadHashConduitAPIMethod extends FileConduitAPIMethod {
 
   public function getAPIMethodName() {
-    // TODO: Deprecate this in favor of `file.allocate`.
     return 'file.uploadhash';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is deprecated. Callers should use "file.allocate" '.
+      'instead.');
+  }
+
   public function getMethodDescription() {
-    return pht('Upload a file to the server using content hash.');
+    return pht('Obsolete. Has no effect.');
   }
 
   protected function defineParamTypes() {
@@ -19,25 +28,11 @@ final class FileUploadHashConduitAPIMethod extends FileConduitAPIMethod {
   }
 
   protected function defineReturnType() {
-    return 'phid or null';
+    return 'null';
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $hash = $request->getValue('hash');
-    $name = $request->getValue('name');
-    $user = $request->getUser();
-
-    $file = PhabricatorFile::newFileFromContentHash(
-      $hash,
-      array(
-        'name' => $name,
-        'authorPHID' => $user->getPHID(),
-      ));
-
-    if ($file) {
-      return $file->getPHID();
-    }
-    return $file;
+    return null;
   }
 
 }

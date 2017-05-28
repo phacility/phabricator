@@ -38,7 +38,7 @@ final class PhabricatorPeopleLdapController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
-      pht('Import Ldap Users'),
+      pht('Import LDAP Users'),
       $this->getApplicationURI('/ldap/'));
 
     $nav = $this->buildSideNavView();
@@ -56,7 +56,7 @@ final class PhabricatorPeopleLdapController
     }
 
     return $this->newPage()
-      ->setTitle(pht('Import Ldap Users'))
+      ->setTitle(pht('Import LDAP Users'))
       ->setCrumbs($crumbs)
       ->setNavigation($nav);
   }

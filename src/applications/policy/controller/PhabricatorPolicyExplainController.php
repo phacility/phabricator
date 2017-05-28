@@ -85,7 +85,7 @@ final class PhabricatorPolicyExplainController
       return null;
     }
 
-    if (!PhabricatorSpacesNamespaceQuery::getSpacesExist($viewer)) {
+    if (!PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
       return null;
     }
 

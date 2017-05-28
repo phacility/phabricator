@@ -4,7 +4,7 @@ final class PhabricatorProjectMemberListView
   extends PhabricatorProjectUserListView {
 
   protected function canEditList() {
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
     $project = $this->getProject();
 
     if (!$project->supportsEditMembers()) {
@@ -29,6 +29,37 @@ final class PhabricatorProjectMemberListView
 
   protected function getHeaderText() {
     return pht('Members');
+  }
+
+  protected function getMembershipNote() {
+    $viewer = $this->getViewer();
+    $viewer_phid = $viewer->getPHID();
+    $project = $this->getProject();
+
+    if (!$viewer_phid) {
+      return null;
+    }
+
+    $note = null;
+    if ($project->isUserMember($viewer_phid)) {
+      $edge_type = PhabricatorProjectSilencedEdgeType::EDGECONST;
+      $silenced = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $project->getPHID(),
+        $edge_type);
+      $silenced = array_fuse($silenced);
+      $is_silenced = isset($silenced[$viewer_phid]);
+      if ($is_silenced) {
+        $note = pht(
+          'You have disabled mail. When mail is sent to project members, '.
+          'you will not receive a copy.');
+      } else {
+        $note = pht(
+          'You are a member and you will receive mail that is sent to all '.
+          'project members.');
+      }
+    }
+
+    return $note;
   }
 
 }

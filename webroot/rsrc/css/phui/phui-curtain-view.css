@@ -7,12 +7,17 @@
   margin: 0 4px;
 }
 
+.phui-two-column-properties > .phui-curtain-panel:first-child {
+  padding-top: 6px;
+}
+
 .device .phui-curtain-panel {
   padding: 8px 0;
   margin: 0;
 }
 
-.device-desktop .phui-curtain-panel {
+.device-desktop .phui-curtain-panel + .phui-curtain-panel,
+.device-desktop .phabricator-action-list-view + .phui-curtain-panel {
   border-top: 1px solid {$greybackground};
 }
 
@@ -24,6 +29,8 @@
 
 .phui-curtain-panel-body {
   padding: 4px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .device .phui-curtain-panel-body {

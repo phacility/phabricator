@@ -9,6 +9,7 @@ final class PhabricatorConfigKeySchema
   private $unique;
   private $table;
   private $indexType;
+  private $property;
 
   public function setIndexType($index_type) {
     $this->indexType = $index_type;

@@ -14,7 +14,7 @@ final class PhortuneAccountHasMemberEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s account member(s): %s.',
+      '%s added %s account manager(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -26,7 +26,7 @@ final class PhortuneAccountHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s account member(s): %s.',
+      '%s removed %s account manager(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -41,7 +41,7 @@ final class PhortuneAccountHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited %s account member(s), added %s: %s; removed %s: %s.',
+      '%s edited %s account manager(s), added %s: %s; removed %s: %s.',
       $actor,
       $total_count,
       $add_count,
@@ -57,7 +57,7 @@ final class PhortuneAccountHasMemberEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s account member(s) to %s: %s.',
+      '%s added %s account manager(s) to %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -71,7 +71,7 @@ final class PhortuneAccountHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s account member(s) from %s: %s.',
+      '%s removed %s account manager(s) from %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -88,7 +88,7 @@ final class PhortuneAccountHasMemberEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited %s account member(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited %s account manager(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $total_count,
       $object,

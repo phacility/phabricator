@@ -3,8 +3,10 @@
 final class PhabricatorSearchApplicationSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $resultSet;
+
   public function getResultTypeDescription() {
-    return pht('Fulltext Results');
+    return pht('Fulltext Search Results');
   }
 
   public function getApplicationClassName() {
@@ -243,6 +245,9 @@ final class PhabricatorSearchApplicationSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
 
+    $result_set = $this->resultSet;
+    $fulltext_tokens = $result_set->getFulltextTokens();
+
     $viewer = $this->requireViewer();
     $list = new PHUIObjectItemListView();
     $list->setNoDataString(pht('No results found.'));
@@ -263,7 +268,28 @@ final class PhabricatorSearchApplicationSearchEngine
       }
     }
 
+    $fulltext_view = null;
+    if ($fulltext_tokens) {
+      require_celerity_resource('phabricator-search-results-css');
+
+      $fulltext_view = array();
+      foreach ($fulltext_tokens as $token) {
+        $fulltext_view[] = $token->newTag();
+      }
+      $fulltext_view = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-fulltext-tokens',
+        ),
+        array(
+          pht('Searched For:'),
+          ' ',
+          $fulltext_view,
+        ));
+    }
+
     $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($fulltext_view);
     $result->setObjectList($list);
 
     return $result;
@@ -278,6 +304,10 @@ final class PhabricatorSearchApplicationSearchEngine
     }
 
     return $owner_phids;
+  }
+
+  protected function didExecuteQuery(PhabricatorPolicyAwareQuery $query) {
+    $this->resultSet = $query->getFulltextResultSet();
   }
 
 }

@@ -24,7 +24,14 @@ final class PhabricatorTestWorker extends PhabricatorWorker {
   }
 
   protected function doWork() {
-    switch (idx($this->getTaskData(), 'doWork')) {
+    $data = $this->getTaskData();
+
+    $duration = idx($data, 'duration');
+    if ($duration) {
+      usleep($duration * 1000000);
+    }
+
+    switch (idx($data, 'doWork')) {
       case 'fail-temporary':
         throw new Exception(pht('Temporary failure!'));
       case 'fail-permanent':

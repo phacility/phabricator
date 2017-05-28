@@ -69,7 +69,7 @@ final class CalendarTimeUtil extends Phobject {
 
     $today_epoch = PhabricatorTime::parseLocalTime('today', $user);
     $today = new DateTime('@'.$today_epoch);
-    $today->setTimeZone($timezone);
+    $today->setTimezone($timezone);
 
     if (strtolower($start_day_str) == 'today' ||
         $today->format('l') == $start_day_str) {
@@ -79,7 +79,7 @@ final class CalendarTimeUtil extends Phobject {
         'last '.$start_day_str,
         $user);
       $start_day = new DateTime('@'.$start_epoch);
-      $start_day->setTimeZone($timezone);
+      $start_day->setTimezone($timezone);
     }
     return array(
       'today' => $today,

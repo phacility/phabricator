@@ -28,7 +28,7 @@ final class PhabricatorSlowvoteVoteController
     if ($request->isAjax()) {
       $vote = $request->getInt('vote');
       $votes = array_keys($old_votes);
-      $votes = array_fuse($votes, $votes);
+      $votes = array_fuse($votes);
 
       if ($poll->getMethod() == PhabricatorSlowvotePoll::METHOD_PLURALITY) {
         if (idx($votes, $vote, false)) {
@@ -68,7 +68,7 @@ final class PhabricatorSlowvoteVoteController
     }
 
     $votes = $request->getArr('vote');
-    $votes = array_fuse($votes, $votes);
+    $votes = array_fuse($votes);
 
     $this->updateVotes($viewer, $poll, $old_votes, $votes);
 

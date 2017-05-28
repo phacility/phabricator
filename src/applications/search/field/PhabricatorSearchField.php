@@ -17,6 +17,9 @@ abstract class PhabricatorSearchField extends Phobject {
   private $aliases = array();
   private $errors = array();
   private $description;
+  private $isHidden;
+
+  private $enableForConduit = true;
 
 
 /* -(  Configuring Fields  )------------------------------------------------- */
@@ -188,6 +191,30 @@ abstract class PhabricatorSearchField extends Phobject {
   }
 
 
+  /**
+   * Hide this field from the web UI.
+   *
+   * @param bool True to hide the field from the web UI.
+   * @return this
+   * @task config
+   */
+  public function setIsHidden($is_hidden) {
+    $this->isHidden = $is_hidden;
+    return $this;
+  }
+
+
+  /**
+   * Should this field be hidden from the web UI?
+   *
+   * @return bool True to hide the field in the web UI.
+   * @task config
+   */
+  public function getIsHidden() {
+    return $this->isHidden;
+  }
+
+
 /* -(  Handling Errors  )---------------------------------------------------- */
 
 
@@ -273,6 +300,10 @@ abstract class PhabricatorSearchField extends Phobject {
 
 
   protected function renderControl() {
+    if ($this->getIsHidden()) {
+      return null;
+    }
+
     $control = $this->newControl();
 
     if (!$control) {
@@ -304,6 +335,10 @@ abstract class PhabricatorSearchField extends Phobject {
    * @task conduit
    */
   final public function getConduitParameterType() {
+    if (!$this->getEnableForConduit()) {
+      return false;
+    }
+
     $type = $this->newConduitParameterType();
 
     if ($type) {
@@ -336,6 +371,15 @@ abstract class PhabricatorSearchField extends Phobject {
   public function getValidConstraintKeys() {
     return $this->getConduitParameterType()->getKeys(
       $this->getConduitKey());
+  }
+
+  final public function setEnableForConduit($enable) {
+    $this->enableForConduit = $enable;
+    return $this;
+  }
+
+  final public function getEnableForConduit() {
+    return $this->enableForConduit;
   }
 
 

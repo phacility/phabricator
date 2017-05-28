@@ -52,7 +52,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
           $commit,
           $path);
       } catch (CommandException $e) {
-        $stderr = $e->getStdErr();
+        $stderr = $e->getStderr();
         if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
           // Grab two logs, since the first one is when the object was deleted.
           list($stdout) = $repository->execxLocalCommand(

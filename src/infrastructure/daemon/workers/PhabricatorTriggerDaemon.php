@@ -108,6 +108,11 @@ final class PhabricatorTriggerDaemon
       $sleep_duration = $this->runNuanceImportCursors($sleep_duration);
       $sleep_duration = $this->runGarbageCollection($sleep_duration);
       $sleep_duration = $this->runCalendarNotifier($sleep_duration);
+
+      if ($this->shouldHibernate($sleep_duration)) {
+        break;
+      }
+
       $this->sleep($sleep_duration);
     } while (!$this->shouldExit());
   }
@@ -270,7 +275,7 @@ final class PhabricatorTriggerDaemon
    * @return int Number of seconds to sleep for.
    */
   private function getSleepDuration() {
-    $sleep = 5;
+    $sleep = phutil_units('3 minutes in seconds');
 
     $next_triggers = id(new PhabricatorWorkerTriggerQuery())
       ->setViewer($this->getViewer())

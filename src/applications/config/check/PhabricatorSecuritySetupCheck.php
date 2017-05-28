@@ -52,7 +52,7 @@ final class PhabricatorSecuritySetupCheck extends PhabricatorSetupCheck {
     $file_key = 'security.alternate-file-domain';
     $file_domain = PhabricatorEnv::getEnvConfig($file_key);
     if (!$file_domain) {
-      $doc_href = PhabricatorEnv::getDocLink('Configuring a File Domain');
+      $doc_href = PhabricatorEnv::getDoclink('Configuring a File Domain');
 
       $this->newIssue('security.'.$file_key)
         ->setName(pht('Alternate File Domain Not Configured'))

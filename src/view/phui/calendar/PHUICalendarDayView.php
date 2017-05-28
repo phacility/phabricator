@@ -369,38 +369,4 @@ final class PHUICalendarDayView extends AphrontView {
 
     return $date;
   }
-
-  private function findTodayClusters() {
-    $events = msort($this->todayEvents, 'getEpochStart');
-    $clusters = array();
-
-    foreach ($events as $event) {
-      $destination_cluster_key = null;
-      $event_start = $event->getEpochStart() - (30 * 60);
-      $event_end = $event->getEpochEnd() + (30 * 60);
-
-      foreach ($clusters as $key => $cluster) {
-        foreach ($cluster as $clustered_event) {
-          $compare_event_start = $clustered_event->getEpochStart();
-          $compare_event_end = $clustered_event->getEpochEnd();
-
-          if ($event_start < $compare_event_end
-            && $event_end > $compare_event_start) {
-            $destination_cluster_key = $key;
-            break;
-          }
-        }
-      }
-
-      if ($destination_cluster_key !== null) {
-        $clusters[$destination_cluster_key][] = $event;
-      } else {
-        $next_cluster = array();
-        $next_cluster[] = $event;
-        $clusters[] = $next_cluster;
-      }
-    }
-
-    return $clusters;
-  }
 }

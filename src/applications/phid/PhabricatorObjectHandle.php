@@ -6,6 +6,7 @@ final class PhabricatorObjectHandle
 
   const AVAILABILITY_FULL = 'full';
   const AVAILABILITY_NONE = 'none';
+  const AVAILABILITY_NOEMAIL = 'no-email';
   const AVAILABILITY_PARTIAL = 'partial';
   const AVAILABILITY_DISABLED = 'disabled';
 
@@ -406,8 +407,8 @@ final class PhabricatorObjectHandle
 
   public function renderTag() {
     return id(new PHUITagView())
-      ->setType(PHUITagView::TYPE_OBJECT)
-      ->setShade($this->getTagColor())
+      ->setType(PHUITagView::TYPE_SHADE)
+      ->setColor($this->getTagColor())
       ->setIcon($this->getIcon())
       ->setHref($this->getURI())
       ->setName($this->getLinkName());

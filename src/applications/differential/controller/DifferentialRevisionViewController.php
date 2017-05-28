@@ -17,8 +17,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($this->revisionID))
       ->setViewer($viewer)
-      ->needRelationships(true)
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needReviewerAuthority(true)
       ->executeOne();
     if (!$revision) {
@@ -103,9 +102,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $this->loadDiffProperties($diffs);
     $props = $target_manual->getDiffProperties();
 
+    $subscriber_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $revision->getPHID());
+
     $object_phids = array_merge(
-      $revision->getReviewers(),
-      $revision->getCCPHIDs(),
+      $revision->getReviewerPHIDs(),
+      $subscriber_phids,
       $revision->loadCommitPHIDs(),
       array(
         $revision->getAuthorPHID(),
@@ -463,7 +465,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     Javelin::initBehavior('differential-user-select');
-    Javelin::initBehavior('differential-keyboard-navigation');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -782,7 +783,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setLimit(10)
       ->needFlags(true)
       ->needDrafts(true)
-      ->needRelationships(true);
+      ->needReviewers(true);
 
     foreach ($path_map as $path => $path_id) {
       $query->withPath($repository->getID(), $path_id);
@@ -887,15 +888,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
     $file_name .= 'diff';
 
-    $file = PhabricatorFile::buildFromFileDataOrHash(
-      $raw_diff,
-      array(
-        'name' => $file_name,
-        'ttl' => (60 * 60 * 24),
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-      ));
-
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file = PhabricatorFile::newFromFileData(
+        $raw_diff,
+        array(
+          'name' => $file_name,
+          'ttl.relative' => phutil_units('24 hours in seconds'),
+          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+        ));
+
       $file->attachToObject($revision->getPHID());
     unset($unguarded);
 

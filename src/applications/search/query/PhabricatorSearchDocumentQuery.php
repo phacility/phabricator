@@ -1,10 +1,12 @@
 <?php
 
 final class PhabricatorSearchDocumentQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+  extends PhabricatorPolicyAwareQuery {
 
   private $savedQuery;
   private $objectCapabilities;
+  private $unfilteredOffset;
+  private $fulltextResultSet;
 
   public function withSavedQuery(PhabricatorSavedQuery $query) {
     $this->savedQuery = $query;
@@ -20,11 +22,38 @@ final class PhabricatorSearchDocumentQuery
     if ($this->objectCapabilities) {
       return $this->objectCapabilities;
     }
+
     return $this->getRequiredCapabilities();
   }
 
+  public function getFulltextResultSet() {
+    if (!$this->fulltextResultSet) {
+      throw new PhutilInvalidStateException('execute');
+    }
+
+    return $this->fulltextResultSet;
+  }
+
+  protected function willExecute() {
+    $this->unfilteredOffset = 0;
+    $this->fulltextResultSet = null;
+  }
+
   protected function loadPage() {
-    $phids = $this->loadDocumentPHIDsWithoutPolicyChecks();
+    // NOTE: The offset and limit information in the inherited properties of
+    // this object represent a policy-filtered offset and limit, but the
+    // underlying query engine needs an unfiltered offset and limit. We keep
+    // track of an unfiltered result offset internally.
+
+    $query = id(clone($this->savedQuery))
+      ->setParameter('offset', $this->unfilteredOffset)
+      ->setParameter('limit', $this->getRawResultLimit());
+
+    $result_set = PhabricatorSearchService::newResultSet($query, $this);
+    $phids = $result_set->getPHIDs();
+
+    $this->fulltextResultSet = $result_set;
+    $this->unfilteredOffset += count($phids);
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getViewer())
@@ -69,28 +98,13 @@ final class PhabricatorSearchDocumentQuery
     return $handles;
   }
 
-  public function loadDocumentPHIDsWithoutPolicyChecks() {
-    $query = id(clone($this->savedQuery))
-      ->setParameter('offset', $this->getOffset())
-      ->setParameter('limit', $this->getRawResultLimit());
-
-    $engine = PhabricatorFulltextStorageEngine::loadEngine();
-
-    return $engine->executeSearch($query);
-  }
-
   public function getQueryApplicationClass() {
     return 'PhabricatorSearchApplication';
   }
 
-  protected function getResultCursor($result) {
-    throw new Exception(
-      pht(
-        'This query does not support cursor paging; it must be offset paged.'));
-  }
-
   protected function nextPage(array $page) {
-    $this->setOffset($this->getOffset() + count($page));
+    // We already updated the internal offset in `loadPage()` after loading
+    // results, so we do not need to make any additional state updates here.
     return $this;
   }
 

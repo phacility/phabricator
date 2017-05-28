@@ -184,12 +184,18 @@ Welcome to Phabricator, here are some links to get you started:
 EOT
 );
       }
-      $welcome = new PHUIRemarkupView($viewer, $content);
 
-      $list = new PHUIObjectItemListView();
-      $view = new PhabricatorApplicationSearchResultView();
-      $view->setObjectList($list);
-      $view->setNoDataString($welcome);
+      if ($results) {
+        $list = new PHUIObjectItemListView();
+        $view = new PhabricatorApplicationSearchResultView();
+        $view->setObjectList($list);
+      } else {
+        $content = id(new PHUIBoxView())
+          ->appendChild(new PHUIRemarkupView($viewer, $content))
+          ->addClass('mlt mlb msr msl');
+        $view = new PhabricatorApplicationSearchResultView();
+        $view->setContent($content);
+      }
     }
 
     $title = pht('Recent Activity');

@@ -108,7 +108,7 @@ final class PhabricatorRepositoryMirrorEngine
         ->setCWD($repository->getLocalPath())
         ->resolvex();
     } catch (CommandException $ex) {
-      if (preg_match('/no changes found/', $ex->getStdOut())) {
+      if (preg_match('/no changes found/', $ex->getStdout())) {
         // mercurial says nothing changed, but that's good
       } else {
         throw $ex;

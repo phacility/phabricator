@@ -30,6 +30,7 @@ final class PhabricatorAccessLog extends Phobject {
             'h' => php_uname('n'),
             'p' => getmypid(),
             'e' => time(),
+            'I' => PhabricatorEnv::getEnvConfig('cluster.instance'),
           ));
 
       self::$log = $log;

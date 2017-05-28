@@ -11,7 +11,6 @@ final class PhabricatorBadgesEditRecipientsController
     $badge = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needRecipients(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_EDIT,
@@ -22,9 +21,7 @@ final class PhabricatorBadgesEditRecipientsController
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('view/'.$badge->getID().'/');
-    $awards = $badge->getAwards();
-    $recipient_phids = mpull($awards, 'getRecipientPHID');
+    $view_uri = $this->getApplicationURI('recipients/'.$badge->getID().'/');
 
     if ($request->isFormPost()) {
       $award_phids = array();
@@ -37,10 +34,11 @@ final class PhabricatorBadgesEditRecipientsController
       }
 
       $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeAwardTransaction::TRANSACTIONTYPE)
         ->setNewValue($award_phids);
 
-      $editor = id(new PhabricatorBadgesEditor($badge))
+      $editor = id(new PhabricatorBadgesEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
@@ -49,17 +47,6 @@ final class PhabricatorBadgesEditRecipientsController
 
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
-    }
-
-    $recipient_phids = array_reverse($recipient_phids);
-    $handles = $this->loadViewerHandles($recipient_phids);
-
-    $state = array();
-    foreach ($handles as $handle) {
-      $state[] = array(
-        'phid' => $handle->getPHID(),
-        'name' => $handle->getFullName(),
-      );
     }
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -79,13 +66,13 @@ final class PhabricatorBadgesEditRecipientsController
         ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setName('phids')
-            ->setLabel(pht('Add Recipients'))
+            ->setLabel(pht('Recipients'))
             ->setDatasource(new PhabricatorPeopleDatasource()));
     }
 
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
-      ->setTitle(pht('Award Badges'))
+      ->setTitle(pht('Add Recipients'))
       ->appendForm($form)
       ->addCancelButton($view_uri)
       ->addSubmitButton(pht('Add Recipients'));

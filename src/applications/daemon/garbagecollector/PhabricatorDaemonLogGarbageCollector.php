@@ -19,10 +19,9 @@ final class PhabricatorDaemonLogGarbageCollector
 
     queryfx(
       $conn_w,
-      'DELETE FROM %T WHERE dateCreated < %d AND status != %s LIMIT 100',
+      'DELETE FROM %T WHERE dateModified < %d LIMIT 100',
       $table->getTableName(),
-      $this->getGarbageEpoch(),
-      PhabricatorDaemonLog::STATUS_RUNNING);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

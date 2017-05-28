@@ -131,7 +131,7 @@ final class PHUIHeaderView extends AphrontTagView {
     $tag = id(new PHUITagView())
       ->setName($name)
       ->setIcon($icon)
-      ->setShade($color)
+      ->setColor($color)
       ->setType(PHUITagView::TYPE_SHADE);
 
     return $this->addProperty(self::PROPERTY_STATUS, $tag);
@@ -267,7 +267,9 @@ final class PHUIHeaderView extends AphrontTagView {
     if ($this->actionLinks) {
       $actions = array();
       foreach ($this->actionLinks as $button) {
-        $button->setColor(PHUIButtonView::GREY);
+        if (!$button->getColor()) {
+          $button->setColor(PHUIButtonView::GREY);
+        }
         $button->addClass(PHUI::MARGIN_SMALL_LEFT);
         $button->addClass('phui-header-action-link');
         $actions[] = $button;

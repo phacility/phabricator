@@ -19,17 +19,21 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
   public function renderForMail() {
     $diff = $this->buildDiff();
 
+    $viewer = $this->getViewer();
+    $old_bright = $viewer->getCSSValue('old-bright');
+    $new_bright = $viewer->getCSSValue('new-bright');
+
     $old_styles = array(
       'padding: 0 2px;',
       'color: #333333;',
-      'background: #f8cbcb;',
+      "background: {$old_bright};",
     );
     $old_styles = implode(' ', $old_styles);
 
     $new_styles = array(
       'padding: 0 2px;',
       'color: #333333;',
-      'background: #a6f3a6;',
+      "background: {$new_bright};",
     );
     $new_styles = implode(' ', $new_styles);
 

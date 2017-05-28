@@ -271,13 +271,13 @@ final class DiffusionLowLevelResolveRefsQuery
       try {
         list($stdout) = $future->resolvex();
       } catch (CommandException $ex) {
-        if (preg_match('/ambiguous identifier/', $ex->getStdErr())) {
+        if (preg_match('/ambiguous identifier/', $ex->getStderr())) {
           // This indicates that the ref ambiguously matched several things.
           // Eventually, it would be nice to return all of them, but it is
           // unclear how to best do that. For now, treat it as a miss instead.
           continue;
         }
-        if (preg_match('/unknown revision/', $ex->getStdErr())) {
+        if (preg_match('/unknown revision/', $ex->getStderr())) {
           // No matches for this ref.
           continue;
         }

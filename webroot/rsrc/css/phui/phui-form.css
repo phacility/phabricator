@@ -20,7 +20,7 @@ input[type="tel"],
 input[type="color"],
 div.jx-tokenizer-container {
   display: inline-block;
-  height: 28px;
+  height: 30px;
   line-height: 18px;
   color: #333;
   vertical-align: middle;
@@ -48,10 +48,6 @@ div.jx-tokenizer-container {
   background-color: #ffffff;
   border: 1px solid {$greyborder};
   border-radius: 3px;
-
-  -webkit-box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
-  -moz-box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
-  box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
 
   -webkit-transition: border linear .05s, box-shadow linear .05s;
   -moz-transition: border linear .05s, box-shadow linear .05s;
@@ -114,7 +110,7 @@ select {
   border-radius: 3px;
   color: {$darkbluetext};
   border: 1px solid {$greyborder};
-  height: 28px;
+  height: 30px;
   padding: 0 24px 0 8px;
   margin: 0;
   min-width: 180px;
@@ -157,9 +153,20 @@ textarea[disabled],
 }
 
 .aphront-space-select-control-knob {
-  margin: 2px 8px 2px 0;
+  margin: 0 8px 0 0;
+  float: left;
+}
+
+.aphront-form-control-policy .policy-control {
+  float: left;
+  margin-right: 8px;
 }
 
 .device .aphront-space-select-control-knob {
   margin-bottom: 8px;
+  float: none;
+}
+
+.device .aphront-form-control-policy .policy-control {
+  margin: 0;
 }

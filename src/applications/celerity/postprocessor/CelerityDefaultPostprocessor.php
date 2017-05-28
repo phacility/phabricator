@@ -193,10 +193,10 @@ final class CelerityDefaultPostprocessor
       'sh-disabledbackground'   => '#f3f3f3',
 
       // Diffs
-      'new-background' => '#eaffea',
-      'new-bright' => '#a6f3a6',
-      'old-background' => '#ffecec',
-      'old-bright' => '#f8cbcb',
+      'new-background' => 'rgba(151, 234, 151, .3)',
+      'new-bright' => 'rgba(151, 234, 151, .6)',
+      'old-background' => 'rgba(251, 175, 175, .3)',
+      'old-bright' => 'rgba(251, 175, 175, .7)',
       'move-background' => '#fdf5d4',
       'copy-background' => '#f1c40f',
 

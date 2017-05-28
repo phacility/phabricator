@@ -4,11 +4,15 @@ final class PhabricatorAuthInviteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Email Invites');
+    return pht('Auth Email Invites');
   }
 
   public function getApplicationClassName() {
     return 'PhabricatorAuthApplication';
+  }
+
+  public function canUseInPanelContext() {
+    return false;
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {

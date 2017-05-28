@@ -34,7 +34,7 @@ final class PhamePostPublishController extends PhamePostController {
       }
 
       $xactions[] = id(new PhamePostTransaction())
-        ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
+        ->setTransactionType(PhamePostVisibilityTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_value);
 
       id(new PhamePostEditor())
