@@ -10,6 +10,10 @@ final class PHUIIconExample extends PhabricatorUIExample {
     return pht('Easily render icons or images with links and sprites.');
   }
 
+  public function getCategory() {
+    return pht('Catalogs');
+  }
+
   private function listTransforms() {
     return array(
       'ph-rotate-90',

@@ -11,6 +11,10 @@ final class PhabricatorRemarkupUIExample extends PhabricatorUIExample {
       'Demonstrates the visual appearance of various Remarkup elements.');
   }
 
+  public function getCategory() {
+    return pht('Technical');
+  }
+
   public function renderExample() {
     $viewer = $this->getRequest()->getUser();
 
