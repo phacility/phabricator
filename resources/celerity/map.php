@@ -13,7 +13,7 @@ return array(
     'core.pkg.js' => '1475bd91',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => '9ebe4f44',
-    'differential.pkg.js' => '78b8497f',
+    'differential.pkg.js' => '40f4acb3',
     'diffusion.pkg.css' => 'b93d9b8c',
     'diffusion.pkg.js' => '84c8f8fd',
     'favicon.ico' => '30672e08',
@@ -392,7 +392,7 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '453c5375',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => 'd4eecc63',
     'rsrc/js/application/diff/DiffChangeset.js' => '3359ad02',
-    'rsrc/js/application/diff/DiffChangesetList.js' => '675f1ca3',
+    'rsrc/js/application/diff/DiffChangesetList.js' => 'b42eb5ff',
     'rsrc/js/application/diff/DiffInline.js' => '45d37835',
     'rsrc/js/application/diff/behavior-preview-link.js' => '051c7832',
     'rsrc/js/application/differential/behavior-comment-preview.js' => '51c5ad07',
@@ -778,7 +778,7 @@ return array(
     'phabricator-darkmessage' => 'c48cccdd',
     'phabricator-dashboard-css' => 'fe5b1869',
     'phabricator-diff-changeset' => '3359ad02',
-    'phabricator-diff-changeset-list' => '675f1ca3',
+    'phabricator-diff-changeset-list' => 'b42eb5ff',
     'phabricator-diff-inline' => '45d37835',
     'phabricator-drag-and-drop-file-upload' => '58dea2fa',
     'phabricator-draggable-list' => 'bea6e7f4',
@@ -1412,9 +1412,6 @@ return array(
       'javelin-workflow',
       'javelin-dom',
     ),
-    '675f1ca3' => array(
-      'javelin-install',
-    ),
     '680ea2c8' => array(
       'javelin-install',
       'javelin-dom',
@@ -1820,6 +1817,9 @@ return array(
       'phabricator-prefab',
     ),
     'b3e7d692' => array(
+      'javelin-install',
+    ),
+    'b42eb5ff' => array(
       'javelin-install',
     ),
     'b59e1e96' => array(

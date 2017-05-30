@@ -68,7 +68,7 @@ JX.install('DiffChangesetList', {
 
     var onrangedown = JX.bind(this, this._ifawake, this._onrangedown);
     JX.Stratcom.listen(
-      ['touchstart', 'mousedown'],
+      'mousedown',
       ['differential-changeset', 'tag:th'],
       onrangedown);
 
@@ -78,15 +78,9 @@ JX.install('DiffChangesetList', {
       ['differential-changeset', 'tag:th'],
       onrangemove);
 
-    var onrangetouchmove = JX.bind(this, this._ifawake, this._onrangetouchmove);
-    JX.Stratcom.listen(
-      'touchmove',
-      null,
-      onrangetouchmove);
-
     var onrangeup = JX.bind(this, this._ifawake, this._onrangeup);
     JX.Stratcom.listen(
-      ['touchend', 'mouseup'],
+      'mouseup',
       null,
       onrangeup);
   },
@@ -1147,8 +1141,8 @@ JX.install('DiffChangesetList', {
     },
 
     _onrangedown: function(e) {
-      // NOTE: We're allowing touch events through, including "touchstart". We
-      // need to kill the "touchstart" event so the page doesn't scroll.
+      // NOTE: We're allowing "mousedown" from a touch event through so users
+      // can leave inlines on a single line.
       if (e.isRightButton()) {
         return;
       }
@@ -1236,31 +1230,6 @@ JX.install('DiffChangesetList', {
       }
 
       this._setHoverRange(this._rangeOrigin, this._rangeTarget);
-    },
-
-    _onrangetouchmove: function(e) {
-      if (!this._rangeActive) {
-        return;
-      }
-
-      // NOTE: The target of a "touchmove" event is bogus. Use dark magic to
-      // identify the actual target. Some day, this might move into the core
-      // libraries. If this doesn't work, just bail.
-
-      var target;
-      try {
-        var raw_event = e.getRawEvent();
-        var touch = raw_event.touches[0];
-        target = document.elementFromPoint(touch.clientX, touch.clientY);
-      } catch (ex) {
-        return;
-      }
-
-      if (!JX.DOM.isType(target, 'th')) {
-        return;
-      }
-
-      this._updateRange(target, false);
     },
 
     _onrangeup: function(e) {
