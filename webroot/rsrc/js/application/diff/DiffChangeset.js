@@ -679,6 +679,11 @@ JX.install('DiffChangeset', {
       return null;
     },
 
+    getInlines: function() {
+      this._rebuildAllInlines();
+      return this._inlines;
+    },
+
     _rebuildAllInlines: function() {
       var rows = JX.DOM.scry(this._node, 'tr');
       for (var ii = 0; ii < rows.length; ii++) {

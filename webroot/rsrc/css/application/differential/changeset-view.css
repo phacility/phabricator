@@ -408,3 +408,8 @@ tr.differential-inline-loading {
 .diff-banner-path {
   color: {$greytext};
 }
+
+.diff-banner-has-unsaved,
+.diff-banner-has-unsubmitted {
+  background: {$sh-yellowbackground};
+}

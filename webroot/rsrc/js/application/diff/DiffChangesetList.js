@@ -818,6 +818,11 @@ JX.install('DiffChangesetList', {
       this._redrawSelection();
       this._redrawHover();
 
+      // Force a banner redraw after a resize event. Particularly, this makes
+      // sure the inline state updates immediately after an inline edit
+      // operation, even if the changeset itself has not changed.
+      this._bannerChangeset = null;
+
       this._redrawBanner();
     },
 
@@ -1277,6 +1282,43 @@ JX.install('DiffChangesetList', {
         JX.DOM.remove(node);
         return;
       }
+
+      var changesets = this._changesets;
+      var unsaved = [];
+      var unsubmitted = [];
+      var undone = [];
+      var all = [];
+
+      for (var ii = 0; ii < changesets.length; ii++) {
+        var inlines = changesets[ii].getInlines();
+        for (var jj = 0; jj < inlines.length; jj++) {
+          var inline = inlines[jj];
+
+          if (inline.isDeleted()) {
+            continue;
+          }
+
+          all.push(inline);
+
+          if (inline.isEditing()) {
+            unsaved.push(inline);
+          } else if (inline.isDraft()) {
+            unsubmitted.push(inline);
+          } else if (!inline.isDone()) {
+            undone.push(inline);
+          }
+        }
+      }
+
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-unsaved',
+        !!unsaved.length);
+
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-unsubmitted',
+        !!unsubmitted.length);
 
       var icon = new JX.PHUIXIconView()
         .setIcon(changeset.getIcon())

@@ -81,6 +81,22 @@ JX.install('DiffInline', {
       return this;
     },
 
+    isDraft: function() {
+      return this._isDraft;
+    },
+
+    isDone: function() {
+      return this._isFixed;
+    },
+
+    isEditing: function() {
+      return this._isEditing;
+    },
+
+    isDeleted: function() {
+      return this._isDeleted;
+    },
+
     bindToRange: function(data) {
       this._displaySide = data.displaySide;
       this._number = parseInt(data.number, 10);
