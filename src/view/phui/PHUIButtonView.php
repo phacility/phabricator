@@ -10,6 +10,9 @@ final class PHUIButtonView extends AphrontTagView {
   const SMALL = 'small';
   const BIG = 'big';
 
+  const BUTTONTYPE_DEFAULT = 'buttontype.default';
+  const BUTTONTYPE_SIMPLE = 'buttontype.simple';
+
   private $size;
   private $text;
   private $subtext;
@@ -25,6 +28,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $tooltip;
   private $noCSS;
   private $hasCaret;
+  private $buttonType = self::BUTTONTYPE_DEFAULT;
 
   public function setName($name) {
     $this->name = $name;
@@ -103,6 +107,15 @@ final class PHUIButtonView extends AphrontTagView {
     return $this->hasCaret;
   }
 
+  public function setButtonType($button_type) {
+    $this->buttonType = $button_type;
+    return $this;
+  }
+
+  public function getButtonType() {
+    return $this->buttonType;
+  }
+
   public function setIcon($icon, $first = true) {
     if (!($icon instanceof PHUIIconView)) {
       $icon = id(new PHUIIconView())
@@ -167,6 +180,15 @@ final class PHUIButtonView extends AphrontTagView {
 
     if ($this->disabled) {
       $classes[] = 'disabled';
+    }
+
+    switch ($this->getButtonType()) {
+      case self::BUTTONTYPE_DEFAULT:
+        // Nothing special for default buttons.
+        break;
+      case self::BUTTONTYPE_SIMPLE:
+        $classes[] = 'simple';
+        break;
     }
 
     $sigil = null;

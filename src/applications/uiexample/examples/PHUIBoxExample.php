@@ -62,11 +62,11 @@ final class PHUIBoxExample extends PhabricatorUIExample {
       );
 
     $button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
-        ->setIcon('fa-heart')
-        ->setText(pht('Such Wow'))
-        ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+      ->setTag('a')
+      ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
+      ->setIcon('fa-heart')
+      ->setText(pht('Such Wow'))
+      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
 
     $badge1 = id(new PHUIBadgeMiniView())
       ->setIcon('fa-bug')

@@ -129,15 +129,15 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       'Subscribe' => 'fa-check-circle bluegrey',
       'Edit' => 'fa-pencil bluegrey',
     );
-    $colors = array(
-      PHUIButtonView::SIMPLE,
+    $designs = array(
+      PHUIButtonView::BUTTONTYPE_SIMPLE,
     );
     $column = array();
-    foreach ($colors as $color) {
+    foreach ($designs as $design) {
       foreach ($icons as $text => $icon) {
         $column[] = id(new PHUIButtonView())
           ->setTag('a')
-          ->setColor($color)
+          ->setButtonType($design)
           ->setIcon($icon)
           ->setText($text)
           ->addClass(PHUI::MARGIN_SMALL_RIGHT);
