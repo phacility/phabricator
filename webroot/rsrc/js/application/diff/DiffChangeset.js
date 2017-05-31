@@ -501,12 +501,17 @@ JX.install('DiffChangeset', {
       // diff with a large number of changes don't constantly have the text
       // area scrolled off the bottom of the screen until the entire diff loads.
       //
-      // There are two three major cases here:
+      // There are several major cases here:
       //
       //  - If we're near the top of the document, never scroll.
-      //  - If we're near the bottom of the document, always scroll.
-      //  - Otherwise, scroll if the changes were above the midline of the
-      //    viewport.
+      //  - If we're near the bottom of the document, always scroll, unless
+      //    we have an anchor.
+      //  - Otherwise, scroll if the changes were above (or, at least,
+      //    almost entirely above) the viewport.
+      //
+      // We don't scroll if the changes were just near the top of the viewport
+      // because this makes us scroll incorrectly when an anchored change is
+      // visible. See T12779.
 
       var target = this._node;
 
@@ -529,17 +534,18 @@ JX.install('DiffChangeset', {
 
       var target_pos = JX.Vector.getPos(target);
       var target_dim = JX.Vector.getDim(target);
-      var target_mid = (target_pos.y + (target_dim.y / 2));
+      var target_bot = (target_pos.y + target_dim.y);
 
-      var view_mid = (old_pos.y + (old_view.y / 2));
-      var above_mid = (target_mid < view_mid);
+      // Detect if the changeset is entirely (or, at least, almost entirely)
+      // above us.
+      var above_screen = (target_bot < old_pos.y + 128);
 
       var frame = this._getContentFrame();
       JX.DOM.setContent(frame, JX.$H(response.changeset));
 
       if (this._stabilize) {
         if (!near_top) {
-          if (near_bot || above_mid) {
+          if (near_bot || above_screen) {
             // Figure out how much taller the document got.
             var delta = (JX.Vector.getDocument().y - old_dim.y);
             JX.DOM.scrollToPosition(old_pos.x, old_pos.y + delta);
