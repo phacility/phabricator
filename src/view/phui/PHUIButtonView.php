@@ -174,6 +174,10 @@ final class PHUIButtonView extends AphrontTagView {
       $classes[] = 'has-icon';
     }
 
+    if (strlen($this->text)) {
+      $classes[] = 'has-text';
+    }
+
     if ($this->iconFirst == false) {
       $classes[] = 'icon-last';
     }
@@ -226,10 +230,24 @@ final class PHUIButtonView extends AphrontTagView {
       $subtext = null;
       if ($this->subtext) {
         $subtext = phutil_tag(
-          'div', array('class' => 'phui-button-subtext'), $this->subtext);
+          'div',
+          array(
+            'class' => 'phui-button-subtext',
+          ),
+        $this->subtext);
       }
-      $text = phutil_tag(
-        'div', array('class' => 'phui-button-text'), array($text, $subtext));
+
+      if (strlen($this->text)) {
+        $text = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-button-text',
+          ),
+          array(
+            $text,
+            $subtext,
+          ));
+      }
     }
 
     $caret = null;

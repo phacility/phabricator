@@ -123,6 +123,18 @@ final class PHUIButtonExample extends PhabricatorUIExample {
         'icon' => 'fa-exclamation-triangle',
       ),
       array(
+        'icon' => 'fa-rocket',
+      ),
+      array(
+        'icon' => 'fa-clipboard',
+      ),
+      array(
+        'icon' => 'fa-upload',
+      ),
+      array(
+        'icon' => 'fa-street-view',
+      ),
+      array(
         'text' => pht('Copy "Quack" to Clipboard'),
         'icon' => 'fa-clipboard',
         'copy' => pht('Quack'),

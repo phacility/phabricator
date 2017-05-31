@@ -324,7 +324,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         javelin_tag(
           'a',
           array(
-            'class' => 'grey button dropdown has-icon policy-control',
+            'class' => 'grey button dropdown has-icon has-text policy-control',
             'href' => '#',
             'mustcapture' => true,
             'sigil' => 'policy-control',

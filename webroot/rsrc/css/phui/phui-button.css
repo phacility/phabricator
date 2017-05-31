@@ -41,7 +41,7 @@ input[type="submit"] {
   font-weight: bold;
   font-size: {$normalfontsize};
   display: inline-block;
-  padding: 4px 16px 5px;
+  padding: 4px 14px 5px;
   text-align: center;
   white-space: nowrap;
   border-radius: 3px;
@@ -301,7 +301,7 @@ a.policy-control .phui-button-text {
   position: relative;
 }
 
-.button .phui-icon-view {
+.button.has-text .phui-icon-view {
   display: inline-block;
   position: absolute;
   top: 7px;
@@ -311,10 +311,6 @@ a.policy-control .phui-button-text {
 .button.icon-last .phui-icon-view {
   left: auto;
   right: 10px;
-}
-
-.phui-button-bar .button .phui-icon-view {
-  left: 14px;
 }
 
 .button.has-icon .phui-button-text {
@@ -372,12 +368,6 @@ a.policy-control .phui-button-text {
 
 .phui-button-bar-borderless .button {
   border: 0;
-}
-
-.phui-button-bar a.button.has-icon {
-  display: inline-block;
-  height: 18px;
-  width: 6px;
 }
 
 .phui-button-bar .phui-button-bar-first {

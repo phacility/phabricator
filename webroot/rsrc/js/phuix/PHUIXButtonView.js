@@ -102,6 +102,7 @@ JX.install('PHUIXButtonView', {
       }
 
       JX.DOM.alterClass(node, 'has-icon', !!icon);
+      JX.DOM.alterClass(node, 'has-text', !!text);
       JX.DOM.setContent(node, content);
     }
   }
