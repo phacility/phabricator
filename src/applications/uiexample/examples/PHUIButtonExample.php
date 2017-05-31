@@ -106,18 +106,49 @@ final class PHUIButtonExample extends PhabricatorUIExample {
 
     $column = array();
     $icons = array(
-      'Comment' => 'fa-comment',
-      'Give Token' => 'fa-trophy',
-      'Reverse Time' => 'fa-clock-o',
-      'Implode Earth' => 'fa-exclamation-triangle red',
+      array(
+        'text' => pht('Comment'),
+        'icon' => 'fa-comment',
+      ),
+      array(
+        'text' => pht('Give Token'),
+        'icon' => 'fa-trophy',
+      ),
+      array(
+        'text' => pht('Reverse Time'),
+        'icon' => 'fa-clock-o',
+      ),
+      array(
+        'text' => pht('Implode Earth'),
+        'icon' => 'fa-exclamation-triangle',
+      ),
+      array(
+        'text' => pht('Copy "Quack" to Clipboard'),
+        'icon' => 'fa-clipboard',
+        'copy' => pht('Quack'),
+      ),
     );
-    foreach ($icons as $text => $icon) {
-      $column[] = id(new PHUIButtonView())
+    foreach ($icons as $text => $spec) {
+      $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)
-        ->setIcon($icon)
-        ->setText($text)
+        ->setIcon(idx($spec, 'icon'))
+        ->setText(idx($spec, 'text'))
         ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+
+      $copy = idx($spec, 'copy');
+      if ($copy !== null) {
+        Javelin::initBehavior('phabricator-clipboard-copy');
+
+        $button->addClass('clipboard-copy');
+        $button->addSigil('clipboard-copy');
+        $button->setMetadata(
+          array(
+            'text' => $copy,
+          ));
+      }
+
+      $column[] = $button;
     }
 
     $layout3 = id(new AphrontMultiColumnView())
