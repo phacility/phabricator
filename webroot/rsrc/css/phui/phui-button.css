@@ -69,8 +69,8 @@ a.icon:visited {
 }
 
 button.green,
-a.green,
-a.green:visited {
+a.green.button,
+a.green.button:visited {
   background-color: {$green};
   border-color: {$green};
   background-image: linear-gradient(to bottom, #23BB5B, #139543);
