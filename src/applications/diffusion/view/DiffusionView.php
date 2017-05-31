@@ -58,7 +58,10 @@ abstract class DiffusionView extends AphrontView {
       id(new PHUIIconView())->setIcon('fa-history bluegrey'));
   }
 
-  final public function linkBrowse($path, array $details = array()) {
+  final public function linkBrowse(
+    $path,
+    array $details = array(),
+    $button = false) {
     require_celerity_resource('diffusion-icons-css');
     Javelin::initBehavior('phabricator-tooltips');
 
@@ -109,6 +112,15 @@ abstract class DiffusionView extends AphrontView {
         'tip' => $tip,
         'align' => 'E',
       );
+    }
+
+    if ($button) {
+      return id(new PHUIButtonView())
+        ->setText(pht('Browse'))
+        ->setIcon('fa-code')
+        ->setHref($href)
+        ->setTag('a')
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE);
     }
 
     return javelin_tag(

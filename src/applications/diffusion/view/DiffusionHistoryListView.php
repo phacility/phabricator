@@ -105,13 +105,14 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         }
       }
 
-      $browse = $this->linkBrowse(
+      $browse_button = $this->linkBrowse(
         $history->getPath(),
         array(
           'commit' => $history->getCommitIdentifier(),
           'branch' => $drequest->getBranch(),
           'type' => $history->getFileType(),
-        ));
+        ),
+        true);
 
       $differential_view = null;
       if ($show_revisions && $commit) {
@@ -191,13 +192,6 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         ->setType(PHUITagView::TYPE_SHADE)
         ->setColor(PHUITagView::COLOR_INDIGO)
         ->setSlimShady(true);
-
-      $browse_button = id(new PHUIButtonView())
-        ->setText(pht('Browse'))
-        ->setIcon('fa-code')
-        ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
-        ->appendChild($audit_view);
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($commit_desc)
