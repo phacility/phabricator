@@ -22,10 +22,6 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
     return false;
   }
 
-  public function isLaunchable() {
-    return false;
-  }
-
   public function getRoutes() {
     $panel_pattern = '(?:page/(?P<pageKey>[^/]+)/(?:(?P<formSaved>saved)/)?)?';
 
