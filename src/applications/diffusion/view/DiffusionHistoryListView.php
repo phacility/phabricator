@@ -10,18 +10,7 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
     require_celerity_resource('diffusion-history-css');
     Javelin::initBehavior('phabricator-tooltips');
 
-    $buildables = $this->loadBuildables(
-      mpull($this->getHistory(), 'getCommit'));
-
-    $show_revisions = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorDifferentialApplication',
-      $viewer);
-
     $handles = $viewer->loadHandles($this->getRequiredHandlePHIDs());
-
-    $show_builds = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorHarbormasterApplication',
-      $this->getUser());
 
     $rows = array();
     $ii = 0;
@@ -97,14 +86,6 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         $commit_desc = phutil_tag('em', array(), pht("Importing\xE2\x80\xA6"));
       }
 
-      $build_view = null;
-      if ($show_builds) {
-        $buildable = idx($buildables, $commit->getPHID());
-        if ($buildable !== null) {
-          $build_view = $this->renderBuildable($buildable);
-        }
-      }
-
       $browse_button = $this->linkBrowse(
         $history->getPath(),
         array(
@@ -113,63 +94,6 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
           'type' => $history->getFileType(),
         ),
         true);
-
-      $differential_view = null;
-      if ($show_revisions && $commit) {
-        $d_id = idx($this->getRevisions(), $commit->getPHID());
-        if ($d_id) {
-          $differential_view = id(new PHUIIconCircleView())
-            ->setIcon('fa-gear')
-            ->setColor('green')
-            ->setState(PHUIIconCircleView::STATE_SUCCESS)
-            ->addSigil('has-tooltip')
-            ->setSize(PHUIIconCircleView::SMALL)
-            ->setHref('/D'.$d_id)
-            ->addClass('mmr')
-            ->setMetadata(
-              array(
-                'tip' => 'Revision D'.$d_id,
-              ));
-          }
-      }
-
-      $status = $commit->getAuditStatus();
-      $icon = PhabricatorAuditCommitStatusConstants::getStatusIcon($status);
-      $color = PhabricatorAuditCommitStatusConstants::getStatusColor($status);
-      $name = PhabricatorAuditCommitStatusConstants::getStatusName($status);
-      $audit_view = id(new PHUIIconCircleView())
-        ->setIcon('fa-code')
-        ->setColor($color)
-        ->setState($icon)
-        ->addSigil('has-tooltip')
-        ->setSize(PHUIIconCircleView::SMALL)
-        ->addClass('mmr')
-        ->setMetadata(
-          array(
-            'tip' => $name,
-          ));
-
-      if ($show_builds) {
-        $buildable = idx($buildables, $commit->getPHID());
-        if ($buildable !== null) {
-          $status = $buildable->getBuildableStatus();
-          $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
-          $color = HarbormasterBuildable::getBuildableStatusColor($status);
-          $name = HarbormasterBuildable::getBuildableStatusName($status);
-          $build_view = id(new PHUIIconCircleView())
-            ->setIcon('fa-recycle')
-            ->setColor($color)
-            ->setState($icon)
-            ->addSigil('has-tooltip')
-            ->setSize(PHUIIconCircleView::SMALL)
-            ->setHref('/'.$buildable->getMonogram())
-            ->addClass('mmr')
-            ->setMetadata(
-              array(
-                'tip' => $name,
-              ));
-        }
-      }
 
       $message = null;
       $commit_link = $repository->getCommitURI(
@@ -193,6 +117,27 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         ->setColor(PHUITagView::COLOR_INDIGO)
         ->setSlimShady(true);
 
+      $clippy = null;
+      if ($commit) {
+        Javelin::initBehavior('phabricator-clipboard-copy');
+        $clippy = id(new PHUIButtonView())
+          ->setIcon('fa-clipboard')
+          ->setHref('#')
+          ->setTag('a')
+          ->addSigil('has-tooltip')
+          ->addSigil('clipboard-copy')
+          ->addClass('clipboard-copy')
+          ->addClass('mmr')
+          ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
+          ->setMetadata(
+            array(
+              'text' => $history->getCommitIdentifier(),
+              'tip'   => pht('Copy'),
+              'align' => 'N',
+              'size'  => 'auto',
+            ));
+      }
+
       $item = id(new PHUIObjectItemView())
         ->setHeader($commit_desc)
         ->setHref($commit_link)
@@ -202,9 +147,7 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         ->addAttribute($commit_tag)
         ->addAttribute($authored)
         ->setSideColumn(array(
-          $differential_view,
-          $audit_view,
-          $build_view,
+          $clippy,
           $browse_button,
         ));
 
