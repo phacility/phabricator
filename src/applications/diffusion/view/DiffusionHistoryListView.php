@@ -10,7 +10,18 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
     require_celerity_resource('diffusion-history-css');
     Javelin::initBehavior('phabricator-tooltips');
 
+    $buildables = $this->loadBuildables(
+      mpull($this->getHistory(), 'getCommit'));
+
+    $show_revisions = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorDifferentialApplication',
+      $viewer);
+
     $handles = $viewer->loadHandles($this->getRequiredHandlePHIDs());
+
+    $show_builds = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorHarbormasterApplication',
+      $this->getUser());
 
     $rows = array();
     $ii = 0;
@@ -95,6 +106,40 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         ),
         true);
 
+      $diff_tag = null;
+      if ($show_revisions && $commit) {
+        $d_id = idx($this->getRevisions(), $commit->getPHID());
+        if ($d_id) {
+          $diff_tag = id(new PHUITagView())
+            ->setName('D'.$d_id)
+            ->setType(PHUITagView::TYPE_SHADE)
+            ->setColor(PHUITagView::COLOR_BLUE)
+            ->setHref('/D'.$d_id)
+            ->addClass('diffusion-differential-tag')
+            ->setSlimShady(true);
+          }
+      }
+
+      $build_view = null;
+      if ($show_builds) {
+        $buildable = idx($buildables, $commit->getPHID());
+        if ($buildable !== null) {
+          $status = $buildable->getBuildableStatus();
+          $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
+          $color = HarbormasterBuildable::getBuildableStatusColor($status);
+          $name = HarbormasterBuildable::getBuildableStatusName($status);
+          $build_view = id(new PHUIButtonView())
+            ->setTag('a')
+            ->setText($name)
+            ->setIcon($icon)
+            ->setColor($color)
+            ->setHref('/'.$buildable->getMonogram())
+            ->addClass('mmr')
+            ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
+            ->addClass('diffusion-list-build-status');
+        }
+      }
+
       $message = null;
       $commit_link = $repository->getCommitURI(
         $history->getCommitIdentifier());
@@ -117,37 +162,16 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         ->setColor(PHUITagView::COLOR_INDIGO)
         ->setSlimShady(true);
 
-      $clippy = null;
-      if ($commit) {
-        Javelin::initBehavior('phabricator-clipboard-copy');
-        $clippy = id(new PHUIButtonView())
-          ->setIcon('fa-clipboard')
-          ->setHref('#')
-          ->setTag('a')
-          ->addSigil('has-tooltip')
-          ->addSigil('clipboard-copy')
-          ->addClass('clipboard-copy')
-          ->addClass('mmr')
-          ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
-          ->setMetadata(
-            array(
-              'text' => $history->getCommitIdentifier(),
-              'tip'   => pht('Copy'),
-              'align' => 'N',
-              'size'  => 'auto',
-            ));
-      }
-
       $item = id(new PHUIObjectItemView())
         ->setHeader($commit_desc)
         ->setHref($commit_link)
         ->setDisabled($commit->isUnreachable())
         ->setDescription($message)
         ->setImageURI($author_image)
-        ->addAttribute($commit_tag)
+        ->addAttribute(array($commit_tag, ' ', $diff_tag)) // For Copy Pasta
         ->addAttribute($authored)
         ->setSideColumn(array(
-          $clippy,
+          $build_view,
           $browse_button,
         ));
 

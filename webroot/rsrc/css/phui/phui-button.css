@@ -106,6 +106,22 @@ a.simple:visited .phui-icon-view {
   color: {$lightbluetext};
 }
 
+button.simple.red,
+input[type="submit"].simple.red,
+a.simple.red,
+a.simple.red:visited {
+  background: #fff;
+  color: {$redtext};
+  border: 1px solid {$sh-redborder};
+}
+
+button.simple.red .phui-icon-view,
+input[type="submit"].simple.red .phui-icon-view,
+a.simple.red .phui-icon-view,
+a.simple.red:visited .phui-icon-view {
+  color: {$redtext};
+}
+
 a.disabled,
 button.disabled,
 button[disabled] {
@@ -145,16 +161,18 @@ button.green:hover {
 
 a.button.simple:hover,
 button.simple:hover {
-  background-color: {$lightblue};
-  background-image: linear-gradient(to bottom, {$blue}, {$blue});
-  color: #fff;
+  border-color: {$blueborder};
+  background-image: none;
+  background-color: #fff;
   transition: 0s;
 }
 
-a.button.simple:hover .phui-icon-view,
-button.simple:hover .phui-icon-view {
-  color: #fff;
-  transition: 0.1s;
+a.button.simple.red:hover,
+button.simple.red:hover {
+  border-color: {$red};
+  background-image: none;
+  background-color: #fff;
+  transition: 0s;
 }
 
 a.button.simple .phui-icon-view {

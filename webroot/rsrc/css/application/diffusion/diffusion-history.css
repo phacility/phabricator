@@ -31,3 +31,12 @@
 .diffusion-history-author-name a {
   color: {$darkbluetext};
 }
+
+.diffusion-history-list .diffusion-differential-tag {
+  margin-left: 4px;
+}
+
+a.phui-tag-view:hover.diffusion-differential-tag .phui-tag-core {
+  border-color: transparent;
+  text-decoration: underline;
+}
