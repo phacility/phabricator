@@ -516,14 +516,35 @@ JX.install('DiffChangeset', {
       var target_bot = (target_pos.y + target_dim.y);
 
       // Detect if the changeset is entirely (or, at least, almost entirely)
-      // above us.
-      var above_screen = (target_bot < old_pos.y + 128);
+      // above us. The height here is roughly the height of the persistent
+      // banner.
+      var above_screen = (target_bot < old_pos.y + 64);
+
+      // If we have a URL anchor and are currently nearby, stick to it
+      // no matter what.
+      var on_target = null;
+      if (window.location.hash) {
+        try {
+          var anchor = JX.$(window.location.hash.replace('#', ''));
+          if (anchor) {
+            var anchor_pos = JX.$V(anchor);
+            if ((anchor_pos.y > old_pos.y) &&
+                (anchor_pos.y < old_pos.y + 96)) {
+              on_target = anchor;
+            }
+          }
+        } catch (ignored) {
+          // If we have a bogus anchor, just ignore it.
+        }
+      }
 
       var frame = this._getContentFrame();
       JX.DOM.setContent(frame, JX.$H(response.changeset));
 
       if (this._stabilize) {
-        if (!near_top) {
+        if (on_target) {
+          JX.DOM.scrollToPosition(old_pos.x, JX.$V(on_target).y - 60);
+        } else if (!near_top) {
           if (near_bot || above_screen) {
             // Figure out how much taller the document got.
             var delta = (JX.Vector.getDocument().y - old_dim.y);
