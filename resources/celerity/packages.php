@@ -93,6 +93,7 @@ return array(
     'phabricator-core-css',
     'phabricator-zindex-css',
     'phui-button-css',
+    'phui-button-simple-css',
     'phui-theme-css',
     'phabricator-standard-page-view',
     'aphront-dialog-view-css',

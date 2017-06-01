@@ -181,4 +181,5 @@ a.jx-tokenizer-token-invalid:hover {
 .button.tokenizer-browse-button .phui-icon-view {
   top: 7px;
   left: 9px;
+  position: absolute;
 }

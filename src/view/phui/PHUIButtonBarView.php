@@ -29,7 +29,7 @@ final class PHUIButtonBarView extends AphrontTagView {
   }
 
   protected function getTagContent() {
-    require_celerity_resource('phui-button-css');
+    require_celerity_resource('phui-button-bar-css');
 
     $i = 1;
     $j = count($this->buttons);

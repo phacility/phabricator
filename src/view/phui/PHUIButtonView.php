@@ -154,6 +154,7 @@ final class PHUIButtonView extends AphrontTagView {
   protected function getTagAttributes() {
 
     require_celerity_resource('phui-button-css');
+    require_celerity_resource('phui-button-simple-css');
 
     $classes = array();
     $classes[] = 'button';

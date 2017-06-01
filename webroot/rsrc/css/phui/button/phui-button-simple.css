@@ -1,0 +1,105 @@
+/**
+ * @provides phui-button-simple-css
+ * @requires phui-button-css
+ */
+
+
+/* - Basic -------------------------------------------------------------------*/
+
+button.simple,
+input[type="submit"].simple,
+a.simple,
+a.simple:visited {
+  background: #fff;
+  color: {$bluetext};
+  border: 1px solid {$lightblueborder};
+}
+
+button.simple .phui-icon-view,
+input[type="submit"].simple .phui-icon-view,
+a.simple .phui-icon-view,
+a.simple:visited .phui-icon-view {
+  color: {$lightbluetext};
+}
+
+a.button.simple:hover,
+button.simple:hover {
+  border-color: {$blueborder};
+  background-image: none;
+  background-color: #fff;
+  transition: 0s;
+}
+
+a.simple.current {
+  background: {$lightblue};
+}
+
+
+/* - Red  --------------------------------------------------------------------*/
+
+button.simple.red,
+input[type="submit"].simple.red,
+a.simple.red,
+a.simple.red:visited {
+  background: #fff;
+  color: {$redtext};
+  border: 1px solid {$sh-redborder};
+}
+
+button.simple.red .phui-icon-view,
+input[type="submit"].simple.red .phui-icon-view,
+a.simple.red .phui-icon-view,
+a.simple.red:visited .phui-icon-view {
+  color: {$redtext};
+}
+
+a.button.simple.red:hover,
+button.simple.red:hover {
+  border-color: {$red};
+  background-image: none;
+  background-color: #fff;
+  transition: 0s;
+}
+
+/* - Green  ------------------------------------------------------------------*/
+
+button.simple.green,
+input[type="submit"].simple.green,
+a.simple.green,
+a.simple.green:visited {
+  background: #fff;
+  color: {$greentext};
+  border: 1px solid {$sh-greenborder};
+}
+
+button.simple.green .phui-icon-view,
+input[type="submit"].simple.green .phui-icon-view,
+a.simple.green .phui-icon-view,
+a.simple.green:visited .phui-icon-view {
+  color: {$greentext};
+}
+
+a.button.simple.green:hover,
+button.simple.green:hover {
+  border-color: {$green};
+  background-image: none;
+  background-color: #fff;
+  transition: 0s;
+}
+
+
+/* - Misc  -------------------------------------------------------------------*/
+
+a.button.simple .phui-icon-view {
+  border: none;
+}
+
+a.button.simple.phuix-dropdown-open {
+  background-color: #fff;
+  color: {$blue};
+  box-shadow: none;
+}
+
+a.button.simple.phuix-dropdown-open:hover .phui-icon-view {
+  color: {$blue};
+}

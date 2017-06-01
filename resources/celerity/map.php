@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => 'ff161f2d',
     'conpherence.pkg.js' => 'b5b51108',
-    'core.pkg.css' => '38689e09',
+    'core.pkg.css' => 'e8d63571',
     'core.pkg.js' => '1475bd91',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => 'a2755617',
@@ -33,7 +33,7 @@ return array(
     'rsrc/css/aphront/panel-view.css' => '8427b78d',
     'rsrc/css/aphront/phabricator-nav-view.css' => 'faf6a6fc',
     'rsrc/css/aphront/table-view.css' => '34cf86b4',
-    'rsrc/css/aphront/tokenizer.css' => '9a8cb501',
+    'rsrc/css/aphront/tokenizer.css' => '15d5ff71',
     'rsrc/css/aphront/tooltip.css' => '173b9431',
     'rsrc/css/aphront/typeahead-browse.css' => '4f82e510',
     'rsrc/css/aphront/typeahead.css' => '8a84cc7d',
@@ -124,6 +124,9 @@ return array(
     'rsrc/css/font/phui-font-icon-base.css' => '870a7360',
     'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-source-code-view.css' => '4383192f',
+    'rsrc/css/phui/button/phui-button-bar.css' => '39fe680c',
+    'rsrc/css/phui/button/phui-button-simple.css' => 'd410596b',
+    'rsrc/css/phui/button/phui-button.css' => '9f13ddcc',
     'rsrc/css/phui/calendar/phui-calendar-day.css' => '572b1893',
     'rsrc/css/phui/calendar/phui-calendar-list.css' => '576be600',
     'rsrc/css/phui/calendar/phui-calendar-month.css' => '8e10e92c',
@@ -140,7 +143,6 @@ return array(
     'rsrc/css/phui/phui-basic-nav-view.css' => 'a0705f53',
     'rsrc/css/phui/phui-big-info-view.css' => 'bd903741',
     'rsrc/css/phui/phui-box.css' => '269cbc99',
-    'rsrc/css/phui/phui-button.css' => '836844c9',
     'rsrc/css/phui/phui-chart.css' => '6bf6f78e',
     'rsrc/css/phui/phui-cms.css' => '504b4b23',
     'rsrc/css/phui/phui-comment-form.css' => '57af2e14',
@@ -539,7 +541,7 @@ return array(
     'aphront-multi-column-view-css' => '84cc6640',
     'aphront-panel-view-css' => '8427b78d',
     'aphront-table-view-css' => '34cf86b4',
-    'aphront-tokenizer-control-css' => '9a8cb501',
+    'aphront-tokenizer-control-css' => '15d5ff71',
     'aphront-tooltip-css' => '173b9431',
     'aphront-typeahead-control-css' => '8a84cc7d',
     'application-search-view-css' => '66ee5d46',
@@ -817,7 +819,9 @@ return array(
     'phui-basic-nav-view-css' => 'a0705f53',
     'phui-big-info-view-css' => 'bd903741',
     'phui-box-css' => '269cbc99',
-    'phui-button-css' => '836844c9',
+    'phui-button-bar-css' => '39fe680c',
+    'phui-button-css' => '9f13ddcc',
+    'phui-button-simple-css' => 'd410596b',
     'phui-calendar-css' => '477acfaa',
     'phui-calendar-day-css' => '572b1893',
     'phui-calendar-list-css' => '576be600',
@@ -973,6 +977,10 @@ return array(
       'javelin-dom',
       'javelin-history',
     ),
+    '15d5ff71' => array(
+      'aphront-typeahead-control-css',
+      'phui-tag-view-css',
+    ),
     16053029 => array(
       'phui-theme-css',
     ),
@@ -1101,6 +1109,10 @@ return array(
       'javelin-util',
       'javelin-dom',
       'javelin-vector',
+    ),
+    '39fe680c' => array(
+      'phui-button-css',
+      'phui-button-simple-css',
     ),
     '3ab51e2c' => array(
       'javelin-behavior',
@@ -1618,10 +1630,6 @@ return array(
       'phuix-icon-view',
       'javelin-behavior-phabricator-gesture',
     ),
-    '9a8cb501' => array(
-      'aphront-typeahead-control-css',
-      'phui-tag-view-css',
-    ),
     '9bbf3762' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1971,6 +1979,9 @@ return array(
     'd254d646' => array(
       'javelin-util',
     ),
+    'd410596b' => array(
+      'phui-button-css',
+    ),
     'd4505101' => array(
       'javelin-stratcom',
       'javelin-install',
@@ -2177,6 +2188,7 @@ return array(
       'phabricator-core-css',
       'phabricator-zindex-css',
       'phui-button-css',
+      'phui-button-simple-css',
       'phui-theme-css',
       'phabricator-standard-page-view',
       'aphront-dialog-view-css',
