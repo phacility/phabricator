@@ -9,15 +9,6 @@ final class ManiphestTaskUnblockTransaction
     return null;
   }
 
-  public function shouldHideForFeed() {
-    // Hide "alice created X, a task blocking Y." from feed because it
-    // will almost always appear adjacent to "alice created Y".
-    $is_new = $this->getMetadataValue('blocker.new');
-    if ($is_new) {
-      return true;
-    }
-  }
-
   public function getActionName() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
