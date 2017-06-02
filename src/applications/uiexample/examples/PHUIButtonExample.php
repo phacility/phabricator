@@ -175,15 +175,19 @@ final class PHUIButtonExample extends PhabricatorUIExample {
     $designs = array(
       PHUIButtonView::BUTTONTYPE_SIMPLE,
     );
+    $colors = array('', 'red', 'green', 'yellow');
     $column = array();
     foreach ($designs as $design) {
-      foreach ($icons as $text => $icon) {
-        $column[] = id(new PHUIButtonView())
-          ->setTag('a')
-          ->setButtonType($design)
-          ->setIcon($icon)
-          ->setText($text)
-          ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+      foreach ($colors as $color) {
+        foreach ($icons as $text => $icon) {
+          $column[] = id(new PHUIButtonView())
+            ->setTag('a')
+            ->setButtonType($design)
+            ->setColor($color)
+            ->setIcon($icon)
+            ->setText($text)
+            ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+        }
       }
     }
 

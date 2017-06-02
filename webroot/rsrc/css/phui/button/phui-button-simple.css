@@ -41,7 +41,7 @@ button.simple.red,
 input[type="submit"].simple.red,
 a.simple.red,
 a.simple.red:visited {
-  background: #fff;
+  background: {$sh-redbackground};
   color: {$redtext};
   border: 1px solid {$sh-redborder};
 }
@@ -55,9 +55,9 @@ a.simple.red:visited .phui-icon-view {
 
 a.button.simple.red:hover,
 button.simple.red:hover {
-  border-color: {$red};
+  border-color: {$sh-redtext};
   background-image: none;
-  background-color: #fff;
+  background-color: {$sh-redbackground};
   transition: 0s;
 }
 
@@ -67,7 +67,7 @@ button.simple.green,
 input[type="submit"].simple.green,
 a.simple.green,
 a.simple.green:visited {
-  background: #fff;
+  background: {$sh-greenbackground};
   color: {$greentext};
   border: 1px solid {$sh-greenborder};
 }
@@ -81,9 +81,35 @@ a.simple.green:visited .phui-icon-view {
 
 a.button.simple.green:hover,
 button.simple.green:hover {
-  border-color: {$green};
+  border-color: {$sh-greentext};
   background-image: none;
-  background-color: #fff;
+  background-color: {$sh-greenbackground};
+  transition: 0s;
+}
+
+/* - Yellow  -----------------------------------------------------------------*/
+
+button.simple.yellow,
+input[type="submit"].simple.yellow,
+a.simple.yellow,
+a.simple.yellow:visited {
+  background-color: {$sh-yellowbackground};
+  color: {$sh-yellowtext};
+  border: 1px solid {$sh-yellowborder};
+}
+
+button.simple.yellow .phui-icon-view,
+input[type="submit"].simple.yellow .phui-icon-view,
+a.simple.yellow .phui-icon-view,
+a.simple.yellow:visited .phui-icon-view {
+  color: {$sh-yellowicon};
+}
+
+a.button.simple.yellow:hover,
+button.simple.yellow:hover {
+  border-color: {$sh-yellowtext};
+  background-image: none;
+  background-color: {$sh-yellowbackground};
   transition: 0s;
 }
 
