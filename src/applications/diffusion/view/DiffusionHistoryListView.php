@@ -26,19 +26,12 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
     $rows = array();
     $ii = 0;
     $cur_date = 0;
-    $list = null;
     $header = null;
     $view = array();
     foreach ($this->getHistory() as $history) {
       $epoch = $history->getEpoch();
       $new_date = date('Ymd', $history->getEpoch());
       if ($cur_date != $new_date) {
-        if ($list) {
-          $view[] = id(new PHUIObjectBoxView())
-            ->setHeader($header)
-            ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-            ->setObjectList($list);
-        }
         $date = ucfirst(
           phabricator_relative_date($history->getEpoch(), $viewer));
         $header = id(new PHUIHeaderView())
@@ -46,6 +39,11 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         $list = id(new PHUIObjectItemListView())
           ->setFlush(true)
           ->addClass('diffusion-history-list');
+
+        $view[] = id(new PHUIObjectBoxView())
+          ->setHeader($header)
+          ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+          ->setObjectList($list);
       }
 
       if ($epoch) {
