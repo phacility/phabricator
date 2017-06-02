@@ -23,15 +23,12 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
       'PhabricatorHarbormasterApplication',
       $this->getUser());
 
-    $rows = array();
-    $ii = 0;
-    $cur_date = 0;
-    $header = null;
+    $cur_date = null;
     $view = array();
     foreach ($this->getHistory() as $history) {
       $epoch = $history->getEpoch();
-      $new_date = date('Ymd', $history->getEpoch());
-      if ($cur_date != $new_date) {
+      $new_date = phabricator_date($history->getEpoch(), $viewer);
+      if ($cur_date !== $new_date) {
         $date = ucfirst(
           phabricator_relative_date($history->getEpoch(), $viewer));
         $header = id(new PHUIHeaderView())
