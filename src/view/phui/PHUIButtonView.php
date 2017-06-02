@@ -5,7 +5,6 @@ final class PHUIButtonView extends AphrontTagView {
   const GREEN = 'green';
   const GREY = 'grey';
   const DISABLED = 'disabled';
-  const SIMPLE = 'simple';
 
   const SMALL = 'small';
   const BIG = 'big';
@@ -175,7 +174,7 @@ final class PHUIButtonView extends AphrontTagView {
       $classes[] = 'has-icon';
     }
 
-    if (strlen($this->text)) {
+    if ($this->text !== null) {
       $classes[] = 'has-text';
     }
 
@@ -238,7 +237,7 @@ final class PHUIButtonView extends AphrontTagView {
         $this->subtext);
       }
 
-      if (strlen($this->text)) {
+      if ($this->text !== null) {
         $text = phutil_tag(
           'div',
           array(

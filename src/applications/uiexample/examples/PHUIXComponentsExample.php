@@ -72,6 +72,23 @@ final class PHUIXComponentsExample extends PhabricatorUIExample {
         'color' => PHUIButtonView::GREEN,
         'text' => pht('Environmental!'),
       ),
+      array(
+        'icon' => 'fa-cog',
+      ),
+      array(
+        'icon' => 'fa-cog',
+        'type' => PHUIButtonView::BUTTONTYPE_SIMPLE,
+      ),
+      array(
+        'text' => array('2 + 2', ' ', '=', ' ', '4'),
+      ),
+      array(
+        'color' => PHUIButtonView::GREY,
+        'text' => pht('Cancel'),
+      ),
+      array(
+        'text' => array('<strong />'),
+      ),
     );
 
     foreach ($buttons as $spec) {
