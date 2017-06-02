@@ -29,7 +29,6 @@ JX.install('DiffInline', {
     _isLoading: false,
 
     _changeset: null,
-    _objective: null,
 
     _isDraft: null,
     _isFixed: null,
@@ -38,7 +37,6 @@ JX.install('DiffInline', {
 
     bindToRow: function(row) {
       this._row = row;
-      this._objective.setAnchor(this._row);
 
       var row_data = JX.Stratcom.getData(row);
       row_data.inline = this;
@@ -80,9 +78,23 @@ JX.install('DiffInline', {
 
       this.setInvisible(false);
 
-      this.updateObjective();
-
       return this;
+    },
+
+    isDraft: function() {
+      return this._isDraft;
+    },
+
+    isDone: function() {
+      return this._isFixed;
+    },
+
+    isEditing: function() {
+      return this._isEditing;
+    },
+
+    isDeleted: function() {
+      return this._isDeleted;
     },
 
     bindToRange: function(data) {
@@ -171,14 +183,6 @@ JX.install('DiffInline', {
 
     setChangeset: function(changeset) {
       this._changeset = changeset;
-
-      var objectives = changeset.getChangesetList().getObjectives();
-
-      // Create this inline's objective, but don't show it yet.
-      this._objective = objectives.newObjective()
-        .setCallback(JX.bind(this, this._onobjective))
-        .hide();
-
       return this;
     },
 
@@ -188,82 +192,7 @@ JX.install('DiffInline', {
 
     setEditing: function(editing) {
       this._isEditing = editing;
-      this.updateObjective();
       return this;
-    },
-
-    _onobjective: function() {
-      this.getChangeset().getChangesetList().selectInline(this);
-    },
-
-    updateObjective: function() {
-      var objective = this._objective;
-
-      if (this.isHidden() || this._isDeleted) {
-        objective.hide();
-        return;
-      }
-
-      // If this is a new comment which we aren't editing, don't show anything:
-      // the use started a comment or reply, then cancelled it.
-      if (this._isNew && !this._isEditing) {
-        objective.hide();
-        return;
-      }
-
-      var changeset = this.getChangeset();
-      if (!changeset.isVisible()) {
-        objective.hide();
-        return;
-      }
-
-      var pht = changeset.getChangesetList().getTranslations();
-
-      var icon = 'fa-comment';
-      var color = 'bluegrey';
-      var tooltip = this._snippet;
-      var anchor = this._row;
-      var should_stack = false;
-
-      if (this._isEditing) {
-        icon = 'fa-star';
-        color = 'pink';
-        tooltip = pht('Editing Comment');
-
-        // If we're editing, anchor to the row with the editor instead of the
-        // actual comment row (which is invisible and can have a misleading
-        // position).
-        anchor = this._row.nextSibling;
-      } else if (this._isDraft) {
-        // This inline is an unsubmitted draft.
-        icon = 'fa-pencil';
-        color = 'indigo';
-      } else if (this._isFixed) {
-        // This inline has been marked done.
-        icon = 'fa-check';
-        color = 'grey';
-      } else if (this._isGhost) {
-        icon = 'fa-comment-o';
-        color = 'grey';
-      } else if (this._replyToCommentPHID) {
-        icon = 'fa-reply';
-        should_stack = true;
-      }
-
-      if (changeset.getChangesetList().getSelectedInline() === this) {
-        // TODO: Maybe add some other kind of effect here, since we're only
-        // using color to show this?
-        color = 'yellow';
-      }
-
-
-      objective
-        .setAnchor(anchor)
-        .setIcon(icon)
-        .setColor(color)
-        .setTooltip(tooltip)
-        .setShouldStack(should_stack)
-        .show();
     },
 
     canReply: function() {
@@ -316,7 +245,6 @@ JX.install('DiffInline', {
 
       JX.Stratcom.getData(row).inline = this;
       this._row = row;
-      this._objective.setAnchor(this._row);
 
       this._id = null;
       this._phid = null;
@@ -758,8 +686,6 @@ JX.install('DiffInline', {
       if (!local_only) {
         this.getChangeset().getChangesetList().redrawPreview();
       }
-
-      this.updateObjective();
 
       this.getChangeset().getChangesetList().redrawCursor();
       this.getChangeset().getChangesetList().resetHover();

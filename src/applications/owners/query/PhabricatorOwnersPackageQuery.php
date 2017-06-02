@@ -398,13 +398,36 @@ final class PhabricatorOwnersPackageQuery
       }
     }
 
+    // At each strength level, drop weak packages if there are also strong
+    // packages of the same strength.
+    $strength_map = igroup($matches, 'strength');
+    foreach ($strength_map as $strength => $package_list) {
+      $any_strong = false;
+      foreach ($package_list as $package_id => $package) {
+        if (!$package['weak']) {
+          $any_strong = true;
+          break;
+        }
+      }
+      if ($any_strong) {
+        foreach ($package_list as $package_id => $package) {
+          if ($package['weak']) {
+            unset($matches[$package_id]);
+          }
+        }
+      }
+    }
+
     $matches = isort($matches, 'strength');
     $matches = array_reverse($matches);
 
-    $first_id = null;
+    $strongest = null;
     foreach ($matches as $package_id => $match) {
-      if ($first_id === null) {
-        $first_id = $package_id;
+      if ($strongest === null) {
+        $strongest = $match['strength'];
+      }
+
+      if ($match['strength'] === $strongest) {
         continue;
       }
 

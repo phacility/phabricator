@@ -58,7 +58,10 @@ abstract class DiffusionView extends AphrontView {
       id(new PHUIIconView())->setIcon('fa-history bluegrey'));
   }
 
-  final public function linkBrowse($path, array $details = array()) {
+  final public function linkBrowse(
+    $path,
+    array $details = array(),
+    $button = false) {
     require_celerity_resource('diffusion-icons-css');
     Javelin::initBehavior('phabricator-tooltips');
 
@@ -109,6 +112,15 @@ abstract class DiffusionView extends AphrontView {
         'tip' => $tip,
         'align' => 'E',
       );
+    }
+
+    if ($button) {
+      return id(new PHUIButtonView())
+        ->setText(pht('Browse'))
+        ->setIcon('fa-code')
+        ->setHref($href)
+        ->setTag('a')
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE);
     }
 
     return javelin_tag(
@@ -168,7 +180,7 @@ abstract class DiffusionView extends AphrontView {
           'sigil' => 'has-tooltip',
           'meta'  => array(
             'tip'   => $email->getAddress(),
-            'align' => 'E',
+            'align' => 'S',
             'size'  => 'auto',
           ),
         ),
@@ -177,30 +189,24 @@ abstract class DiffusionView extends AphrontView {
     return hsprintf('%s', $name);
   }
 
-  final protected function renderBuildable(HarbormasterBuildable $buildable) {
+  final protected function renderBuildable(
+    HarbormasterBuildable $buildable) {
     $status = $buildable->getBuildableStatus();
+    Javelin::initBehavior('phabricator-tooltips');
 
     $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
     $color = HarbormasterBuildable::getBuildableStatusColor($status);
     $name = HarbormasterBuildable::getBuildableStatusName($status);
 
-    $icon_view = id(new PHUIIconView())
-      ->setIcon($icon.' '.$color);
+    return id(new PHUIIconView())
+      ->setIcon($icon.' '.$color)
+      ->addSigil('has-tooltip')
+      ->setHref('/'.$buildable->getMonogram())
+      ->setMetadata(
+        array(
+          'tip' => $name,
+        ));
 
-    $tooltip_view = javelin_tag(
-      'span',
-      array(
-        'sigil' => 'has-tooltip',
-        'meta' => array('tip' => $name),
-      ),
-      $icon_view);
-
-    Javelin::initBehavior('phabricator-tooltips');
-
-    return phutil_tag(
-      'a',
-      array('href' => '/'.$buildable->getMonogram()),
-      $tooltip_view);
   }
 
   final protected function loadBuildables(array $commits) {

@@ -14,6 +14,10 @@ final class PhabricatorGestureUIExample extends PhabricatorUIExample {
       phutil_tag('tt', array(), 'touchable'));
   }
 
+  public function getCategory() {
+    return pht('Technical');
+  }
+
   public function renderExample() {
     $id = celerity_generate_unique_node_id();
 

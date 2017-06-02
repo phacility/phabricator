@@ -8,7 +8,11 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
 
   public function getDescription() {
     return pht(
-      'An outlandish exaggeration of intricate tales from around the realm');
+      'An outlandish exaggeration of intricate tales from around the realm.');
+  }
+
+  public function getCategory() {
+    return pht('Single Use');
   }
 
   public function renderExample() {

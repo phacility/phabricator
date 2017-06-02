@@ -25,6 +25,28 @@ final class DiffusionCommitListView extends AphrontView {
     return $this->commits;
   }
 
+  public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
+    $this->handles = $handles;
+    return $this;
+  }
+
+  private function getRequiredHandlePHIDs() {
+    $phids = array();
+    foreach ($this->history as $item) {
+      $data = $item->getCommitData();
+      if ($data) {
+        if ($data->getCommitDetail('authorPHID')) {
+          $phids[$data->getCommitDetail('authorPHID')] = true;
+        }
+        if ($data->getCommitDetail('committerPHID')) {
+          $phids[$data->getCommitDetail('committerPHID')] = true;
+        }
+      }
+    }
+    return array_keys($phids);
+  }
+
   private function getCommitDescription($phid) {
     if ($this->commits === null) {
       return pht('(Unknown Commit)');
@@ -114,12 +136,10 @@ final class DiffusionCommitListView extends AphrontView {
       if ($author_phid) {
         $author_name = $handles[$author_phid]->renderLink();
         $author_image_uri = $handles[$author_phid]->getImageURI();
-        $author_image_href = $handles[$author_phid]->getURI();
       } else {
         $author_name = $commit->getCommitData()->getAuthorName();
         $author_image_uri =
           celerity_get_resource_uri('/rsrc/image/people/user0.png');
-        $author_image_href = null;
       }
 
       $commit_tag = id(new PHUITagView())
@@ -134,7 +154,6 @@ final class DiffusionCommitListView extends AphrontView {
         ->setDisabled($commit->isUnreachable())
         ->setDescription($message)
         ->setImageURI($author_image_uri)
-        ->setImageHref($author_image_href)
         ->addByline(pht('Author: %s', $author_name))
         ->addIcon('none', $committed)
         ->addAttribute($commit_tag);

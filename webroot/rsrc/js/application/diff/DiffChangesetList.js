@@ -1,7 +1,6 @@
 /**
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
- *           phabricator-scroll-objective-list
  * @javelin
  */
 
@@ -9,7 +8,6 @@ JX.install('DiffChangesetList', {
 
   construct: function() {
     this._changesets = [];
-    this._objectives = new JX.ScrollObjectiveList();
 
     var onload = JX.bind(this, this._ifawake, this._onload);
     JX.Stratcom.listen('click', 'differential-load', onload);
@@ -70,7 +68,7 @@ JX.install('DiffChangesetList', {
 
     var onrangedown = JX.bind(this, this._ifawake, this._onrangedown);
     JX.Stratcom.listen(
-      ['touchstart', 'mousedown'],
+      'mousedown',
       ['differential-changeset', 'tag:th'],
       onrangedown);
 
@@ -80,15 +78,9 @@ JX.install('DiffChangesetList', {
       ['differential-changeset', 'tag:th'],
       onrangemove);
 
-    var onrangetouchmove = JX.bind(this, this._ifawake, this._onrangetouchmove);
-    JX.Stratcom.listen(
-      'touchmove',
-      null,
-      onrangetouchmove);
-
     var onrangeup = JX.bind(this, this._ifawake, this._onrangeup);
     JX.Stratcom.listen(
-      ['touchend', 'mouseup'],
+      'mouseup',
       null,
       onrangeup);
   },
@@ -102,7 +94,6 @@ JX.install('DiffChangesetList', {
     _initialized: false,
     _asleep: true,
     _changesets: null,
-    _objectives: null,
 
     _cursorItem: null,
 
@@ -120,7 +111,6 @@ JX.install('DiffChangesetList', {
     _rangeTarget: null,
 
     _bannerNode: null,
-    _showObjectives: false,
 
     sleep: function() {
       this._asleep = true;
@@ -128,8 +118,6 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
       this.resetHover();
-
-      this._objectives.hide();
     },
 
     wake: function() {
@@ -137,10 +125,6 @@ JX.install('DiffChangesetList', {
 
       this._redrawFocus();
       this._redrawSelection();
-
-      if (this._showObjectives) {
-        this._objectives.show();
-      }
 
       if (this._initialized) {
         return;
@@ -198,17 +182,8 @@ JX.install('DiffChangesetList', {
       this._installKey('q', label, this._onkeyhide);
     },
 
-    setShowObjectives: function(show) {
-      this._showObjectives = show;
-      return this;
-    },
-
     isAsleep: function() {
       return this._asleep;
-    },
-
-    getObjectives: function() {
-      return this._objectives;
     },
 
     newChangesetForNode: function(node) {
@@ -538,23 +513,8 @@ JX.install('DiffChangesetList', {
     },
 
     _setSelectionState: function(item, manager) {
-      // If we had an inline selected before, we need to update it after
-      // changing our selection to clear the selected state. Then, update the
-      // new one to add the selected state.
-      var old_inline = this.getSelectedInline();
-
       this._cursorItem = item;
       this._redrawSelection(manager, true);
-
-      var new_inline = this.getSelectedInline();
-
-      if (old_inline) {
-        old_inline.updateObjective();
-      }
-
-      if (new_inline) {
-        new_inline.updateObjective();
-      }
 
       return this;
     },
@@ -857,6 +817,11 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
       this._redrawHover();
+
+      // Force a banner redraw after a resize event. Particularly, this makes
+      // sure the inline state updates immediately after an inline edit
+      // operation, even if the changeset itself has not changed.
+      this._bannerChangeset = null;
 
       this._redrawBanner();
     },
@@ -1181,8 +1146,8 @@ JX.install('DiffChangesetList', {
     },
 
     _onrangedown: function(e) {
-      // NOTE: We're allowing touch events through, including "touchstart". We
-      // need to kill the "touchstart" event so the page doesn't scroll.
+      // NOTE: We're allowing "mousedown" from a touch event through so users
+      // can leave inlines on a single line.
       if (e.isRightButton()) {
         return;
       }
@@ -1272,31 +1237,6 @@ JX.install('DiffChangesetList', {
       this._setHoverRange(this._rangeOrigin, this._rangeTarget);
     },
 
-    _onrangetouchmove: function(e) {
-      if (!this._rangeActive) {
-        return;
-      }
-
-      // NOTE: The target of a "touchmove" event is bogus. Use dark magic to
-      // identify the actual target. Some day, this might move into the core
-      // libraries. If this doesn't work, just bail.
-
-      var target;
-      try {
-        var raw_event = e.getRawEvent();
-        var touch = raw_event.touches[0];
-        target = document.elementFromPoint(touch.clientX, touch.clientY);
-      } catch (ex) {
-        return;
-      }
-
-      if (!JX.DOM.isType(target, 'th')) {
-        return;
-      }
-
-      this._updateRange(target, false);
-    },
-
     _onrangeup: function(e) {
       if (!this._rangeActive) {
         return;
@@ -1342,6 +1282,43 @@ JX.install('DiffChangesetList', {
         JX.DOM.remove(node);
         return;
       }
+
+      var changesets = this._changesets;
+      var unsaved = [];
+      var unsubmitted = [];
+      var undone = [];
+      var all = [];
+
+      for (var ii = 0; ii < changesets.length; ii++) {
+        var inlines = changesets[ii].getInlines();
+        for (var jj = 0; jj < inlines.length; jj++) {
+          var inline = inlines[jj];
+
+          if (inline.isDeleted()) {
+            continue;
+          }
+
+          all.push(inline);
+
+          if (inline.isEditing()) {
+            unsaved.push(inline);
+          } else if (inline.isDraft()) {
+            unsubmitted.push(inline);
+          } else if (!inline.isDone()) {
+            undone.push(inline);
+          }
+        }
+      }
+
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-unsaved',
+        !!unsaved.length);
+
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-unsubmitted',
+        !!unsubmitted.length);
 
       var icon = new JX.PHUIXIconView()
         .setIcon(changeset.getIcon())

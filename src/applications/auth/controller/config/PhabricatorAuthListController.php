@@ -103,7 +103,7 @@ final class PhabricatorAuthListController
 
     $button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
         ->setHref($this->getApplicationURI('config/new/'))
         ->setIcon('fa-plus')
         ->setDisabled(!$can_manage)

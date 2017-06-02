@@ -10,6 +10,10 @@ final class PhabricatorSetupIssueUIExample extends PhabricatorUIExample {
     return pht('Setup errors and warnings.');
   }
 
+  public function getCategory() {
+    return pht('Single Use');
+  }
+
   public function renderExample() {
     $request = $this->getRequest();
     $user = $request->getUser();

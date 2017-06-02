@@ -98,7 +98,7 @@ final class PhameBlogSearchEngine
           ->setTag('a')
           ->setText('New Post')
           ->setHref($this->getApplicationURI('/post/edit/?blog='.$id))
-          ->setColor(PHUIButtonView::SIMPLE);
+          ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE);
         $item->setSideColumn($button);
       }
 

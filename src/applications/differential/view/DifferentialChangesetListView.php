@@ -203,15 +203,11 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $this->requireResource('aphront-tooltip-css');
 
-    $show_objectives =
-      PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
-
     $this->initBehavior(
       'differential-populate',
       array(
       'changesetViewIDs' => $ids,
       'inlineURI' => $this->inlineURI,
-      'showObjectives' => $show_objectives,
       'pht' => array(
         'Open in Editor' => pht('Open in Editor'),
         'Show All Context' => pht('Show All Context'),

@@ -10,6 +10,10 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
     return pht('A Standard Palette of Colors for use.');
   }
 
+  public function getCategory() {
+    return pht('Catalogs');
+  }
+
   public function renderExample() {
 
     $colors = array(

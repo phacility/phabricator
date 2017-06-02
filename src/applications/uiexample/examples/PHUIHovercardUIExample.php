@@ -12,6 +12,10 @@ final class PHUIHovercardUIExample extends PhabricatorUIExample {
       phutil_tag('tt', array(), 'PHUIHovercardView'));
   }
 
+  public function getCategory() {
+    return pht('Single Use');
+  }
+
   public function renderExample() {
     $request = $this->getRequest();
     $user = $request->getUser();

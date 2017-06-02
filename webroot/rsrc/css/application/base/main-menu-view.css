@@ -247,6 +247,7 @@ a.phabricator-core-user-menu .caret:before {
   font-size: 15px;
   top: 4px;
   left: 8px;
+  position: absolute;
 }
 
 .phabricator-main-menu-search-dropdown .caret {

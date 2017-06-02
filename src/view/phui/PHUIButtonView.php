@@ -5,10 +5,12 @@ final class PHUIButtonView extends AphrontTagView {
   const GREEN = 'green';
   const GREY = 'grey';
   const DISABLED = 'disabled';
-  const SIMPLE = 'simple';
 
   const SMALL = 'small';
   const BIG = 'big';
+
+  const BUTTONTYPE_DEFAULT = 'buttontype.default';
+  const BUTTONTYPE_SIMPLE = 'buttontype.simple';
 
   private $size;
   private $text;
@@ -25,6 +27,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $tooltip;
   private $noCSS;
   private $hasCaret;
+  private $buttonType = self::BUTTONTYPE_DEFAULT;
 
   public function setName($name) {
     $this->name = $name;
@@ -103,6 +106,15 @@ final class PHUIButtonView extends AphrontTagView {
     return $this->hasCaret;
   }
 
+  public function setButtonType($button_type) {
+    $this->buttonType = $button_type;
+    return $this;
+  }
+
+  public function getButtonType() {
+    return $this->buttonType;
+  }
+
   public function setIcon($icon, $first = true) {
     if (!($icon instanceof PHUIIconView)) {
       $icon = id(new PHUIIconView())
@@ -141,6 +153,7 @@ final class PHUIButtonView extends AphrontTagView {
   protected function getTagAttributes() {
 
     require_celerity_resource('phui-button-css');
+    require_celerity_resource('phui-button-simple-css');
 
     $classes = array();
     $classes[] = 'button';
@@ -161,12 +174,25 @@ final class PHUIButtonView extends AphrontTagView {
       $classes[] = 'has-icon';
     }
 
+    if ($this->text !== null) {
+      $classes[] = 'has-text';
+    }
+
     if ($this->iconFirst == false) {
       $classes[] = 'icon-last';
     }
 
     if ($this->disabled) {
       $classes[] = 'disabled';
+    }
+
+    switch ($this->getButtonType()) {
+      case self::BUTTONTYPE_DEFAULT:
+        // Nothing special for default buttons.
+        break;
+      case self::BUTTONTYPE_SIMPLE:
+        $classes[] = 'simple';
+        break;
     }
 
     $sigil = null;
@@ -204,10 +230,24 @@ final class PHUIButtonView extends AphrontTagView {
       $subtext = null;
       if ($this->subtext) {
         $subtext = phutil_tag(
-          'div', array('class' => 'phui-button-subtext'), $this->subtext);
+          'div',
+          array(
+            'class' => 'phui-button-subtext',
+          ),
+        $this->subtext);
       }
-      $text = phutil_tag(
-        'div', array('class' => 'phui-button-text'), array($text, $subtext));
+
+      if ($this->text !== null) {
+        $text = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-button-text',
+          ),
+          array(
+            $text,
+            $subtext,
+          ));
+      }
     }
 
     $caret = null;

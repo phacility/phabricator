@@ -79,7 +79,7 @@ final class PHUIDocumentViewPro extends AphrontTagView {
       $toc[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setIcon('fa-align-left')
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
         ->addClass('phui-document-toc')
         ->addSigil('jx-toggle-class')
         ->setMetaData(array(
