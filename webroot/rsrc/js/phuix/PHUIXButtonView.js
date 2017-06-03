@@ -57,6 +57,7 @@ JX.install('PHUIXButtonView', {
 
     setText: function(text) {
       JX.DOM.setContent(this._getTextNode(), text);
+      this._redraw();
       return this;
     },
 

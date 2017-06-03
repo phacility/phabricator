@@ -403,6 +403,8 @@ JX.install('DiffChangeset', {
         block.items.push(rows[ii]);
       }
 
+      var last_inline = null;
+      var last_inline_item = null;
       for (ii = 0; ii < blocks.length; ii++) {
         block = blocks[ii];
 
@@ -422,16 +424,38 @@ JX.install('DiffChangeset', {
           for (var jj = 0; jj < block.items.length; jj++) {
             var inline = this.getInlineForRow(block.items[jj]);
 
-            items.push({
+            // When comments are being edited, they have a hidden row with
+            // the actual comment and then a visible row with the editor.
+
+            // In this case, we only want to generate one item, but it should
+            // use the editor as a scroll target. To accomplish this, check if
+            // this row has the same inline as the previous row. If so, update
+            // the last item to use this row's nodes.
+
+            if (inline === last_inline) {
+              last_inline_item.nodes.begin = block.items[jj];
+              last_inline_item.nodes.end = block.items[jj];
+              continue;
+            } else {
+              last_inline = inline;
+            }
+
+            last_inline_item = {
               type: block.type,
               changeset: this,
               target: inline,
               hidden: inline.isHidden(),
+              deleted: !inline.getID() && !inline.isEditing(),
               nodes: {
                 begin: block.items[jj],
                 end: block.items[jj]
+              },
+              attributes: {
+                unsaved: inline.isEditing()
               }
-            });
+            };
+
+            items.push(last_inline_item);
           }
         }
       }

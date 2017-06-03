@@ -1,6 +1,7 @@
 /**
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
+ *           phuix-button-view
  * @javelin
  */
 
@@ -111,6 +112,7 @@ JX.install('DiffChangesetList', {
     _rangeTarget: null,
 
     _bannerNode: null,
+    _unsavedButton: null,
 
     sleep: function() {
       this._asleep = true;
@@ -258,7 +260,13 @@ JX.install('DiffChangesetList', {
 
     _installJumpKey: function(key, label, delta, filter, show_hidden) {
       filter = filter || null;
-      var handler = JX.bind(this, this._onjumpkey, delta, filter, show_hidden);
+
+      var options = {
+        filter: filter,
+        hidden: show_hidden
+      };
+
+      var handler = JX.bind(this, this._onjumpkey, delta, options);
       return this._installKey(key, label, handler);
     },
 
@@ -440,8 +448,13 @@ JX.install('DiffChangesetList', {
         .show();
     },
 
-    _onjumpkey: function(delta, filter, show_hidden, manager) {
+    _onjumpkey: function(delta, options) {
       var state = this._getSelectionState();
+
+      var filter = options.filter || null;
+      var hidden = options.hidden || false;
+      var wrap = options.wrap || false;
+      var attribute = options.attribute || null;
 
       var cursor = state.cursor;
       var items = state.items;
@@ -452,6 +465,7 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      var did_wrap = false;
       while (true) {
         if (cursor === null) {
           cursor = 0;
@@ -464,9 +478,22 @@ JX.install('DiffChangesetList', {
           return;
         }
 
-        // If we've gone forward off the end of the list, bail out.
+        // If we've gone forward off the end of the list, figure out where we
+        // should end up.
         if (cursor >= items.length) {
-          return;
+          if (!wrap) {
+            // If we aren't wrapping around, we're done.
+            return;
+          }
+
+          if (did_wrap) {
+            // If we're already wrapped around, we're done.
+            return;
+          }
+
+          // Otherwise, wrap the cursor back to the top.
+          cursor = 0;
+          did_wrap = true;
         }
 
         // If we're selecting things of a particular type (like only files)
@@ -479,8 +506,22 @@ JX.install('DiffChangesetList', {
 
         // If the item is hidden, don't select it when iterating with jump
         // keys. It can still potentially be selected in other ways.
-        if (!show_hidden) {
+        if (!hidden) {
           if (items[cursor].hidden) {
+            continue;
+          }
+        }
+
+        // If the item has been deleted, don't select it when iterating. The
+        // cursor may remain on it until it is removed.
+        if (items[cursor].deleted) {
+          continue;
+        }
+
+        // If we're selecting things with a particular attribute, like
+        // "unsaved", skip items without the attribute.
+        if (attribute !== null) {
+          if (!(items[cursor].attributes || {})[attribute]) {
             continue;
           }
         }
@@ -489,7 +530,7 @@ JX.install('DiffChangesetList', {
         break;
       }
 
-      this._setSelectionState(items[cursor], manager);
+      this._setSelectionState(items[cursor]);
     },
 
     _getSelectionState: function() {
@@ -512,24 +553,34 @@ JX.install('DiffChangesetList', {
       };
     },
 
-    _setSelectionState: function(item, manager) {
+    _setSelectionState: function(item) {
       this._cursorItem = item;
-      this._redrawSelection(manager, true);
+      this._redrawSelection(true);
 
       return this;
     },
 
-    _redrawSelection: function(manager, scroll) {
+    _redrawSelection: function(scroll) {
       var cursor = this._cursorItem;
       if (!cursor) {
         this.setFocus(null);
         return;
       }
 
+      // If this item has been removed from the document (for example: create
+      // a new empty comment, then use the "Unsaved" button to select it, then
+      // cancel it), we can still keep the cursor here but do not want to show
+      // a selection reticle over an invisible node.
+      if (cursor.deleted) {
+        this.setFocus(null);
+        return;
+      }
+
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
-      if (manager && scroll) {
-        manager.scrollTo(cursor.nodes.begin);
+      if (scroll) {
+        var pos = JX.$V(cursor.nodes.begin);
+        JX.DOM.scrollToPosition(0, pos.y - 60);
       }
 
       return this;
@@ -1320,12 +1371,63 @@ JX.install('DiffChangesetList', {
         'diff-banner-has-unsubmitted',
         !!unsubmitted.length);
 
+      var unsaved_button = this._getUnsavedButton();
+      var pht = this.getTranslations();
+
+      if (unsaved.length) {
+        unsaved_button.setText(unsaved.length + ' ' + pht('Unsaved'));
+        JX.DOM.show(unsaved_button.getNode());
+      } else {
+        JX.DOM.hide(unsaved_button.getNode());
+      }
+
+      var path_view = [icon, ' ', changeset.getDisplayPath()];
+
+      var buttons_attrs = {
+        className: 'diff-banner-buttons'
+      };
+
+      var buttons_list = [
+        unsaved_button.getNode()
+      ];
+
+      var buttons_view = JX.$N('div', buttons_attrs, buttons_list);
+
       var icon = new JX.PHUIXIconView()
         .setIcon(changeset.getIcon())
         .getNode();
-      JX.DOM.setContent(node, [icon, ' ', changeset.getDisplayPath()]);
+      JX.DOM.setContent(node, [buttons_view, path_view]);
 
       document.body.appendChild(node);
+    },
+
+    _getUnsavedButton: function() {
+      if (!this._unsavedButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-commenting-o')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var onunsaved = JX.bind(this, this._onunsavedclick);
+        JX.DOM.listen(node, 'click', null, onunsaved);
+
+        this._unsavedButton = button;
+      }
+
+      return this._unsavedButton;
+    },
+
+    _onunsavedclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        attribute: 'unsaved'
+      };
+
+      this._onjumpkey(1, options);
     },
 
     _getBannerNode: function() {

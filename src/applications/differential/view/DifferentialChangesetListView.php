@@ -275,6 +275,10 @@ final class DifferentialChangesetListView extends AphrontView {
           pht('Hide or show the current file.'),
         'You must select a file to hide or show.' =>
           pht('You must select a file to hide or show.'),
+
+        'Unsaved' => pht('Unsaved'),
+        'Unsubmitted' => pht('Unsubmitted'),
+        'Comments' => pht('Comments'),
       ),
     ));
 
