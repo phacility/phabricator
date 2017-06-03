@@ -114,6 +114,8 @@ JX.install('DiffChangesetList', {
     _bannerNode: null,
     _unsavedButton: null,
     _unsubmittedButton: null,
+    _doneButton: null,
+    _doneMode: null,
 
     sleep: function() {
       this._asleep = true;
@@ -531,7 +533,7 @@ JX.install('DiffChangesetList', {
         break;
       }
 
-      this._setSelectionState(items[cursor]);
+      this._setSelectionState(items[cursor], true);
     },
 
     _getSelectionState: function() {
@@ -554,9 +556,9 @@ JX.install('DiffChangesetList', {
       };
     },
 
-    _setSelectionState: function(item) {
+    _setSelectionState: function(item, scroll) {
       this._cursorItem = item;
-      this._redrawSelection(true);
+      this._redrawSelection(scroll);
 
       return this;
     },
@@ -598,7 +600,7 @@ JX.install('DiffChangesetList', {
 
       var state = this._getSelectionState();
       if (state.cursor !== null) {
-        this._setSelectionState(state.items[state.cursor]);
+        this._setSelectionState(state.items[state.cursor], false);
       }
     },
 
@@ -910,7 +912,7 @@ JX.install('DiffChangesetList', {
       if (selection.cursor !== null) {
         item = selection.items[selection.cursor];
         if (item.target === inline) {
-          this._setSelectionState(null);
+          this._setSelectionState(null, false);
           return;
         }
       }
@@ -922,7 +924,7 @@ JX.install('DiffChangesetList', {
       for (var ii = 0; ii < items.length; ii++) {
         item = items[ii];
         if (item.target === inline) {
-          this._setSelectionState(item);
+          this._setSelectionState(item, false);
         }
       }
     },
@@ -1339,7 +1341,7 @@ JX.install('DiffChangesetList', {
       var unsaved = [];
       var unsubmitted = [];
       var undone = [];
-      var all = [];
+      var done = [];
 
       for (var ii = 0; ii < changesets.length; ii++) {
         var inlines = changesets[ii].getInlines();
@@ -1350,14 +1352,14 @@ JX.install('DiffChangesetList', {
             continue;
           }
 
-          all.push(inline);
-
           if (inline.isEditing()) {
             unsaved.push(inline);
           } else if (inline.isDraft()) {
             unsubmitted.push(inline);
           } else if (!inline.isDone()) {
             undone.push(inline);
+          } else {
+            done.push(inline);
           }
         }
       }
@@ -1375,6 +1377,7 @@ JX.install('DiffChangesetList', {
       var pht = this.getTranslations();
       var unsaved_button = this._getUnsavedButton();
       var unsubmitted_button = this._getUnsubmittedButton();
+      var done_button = this._getDoneButton();
 
       if (unsaved.length) {
         unsaved_button.setText(unsaved.length + ' ' + pht('Unsaved'));
@@ -1391,6 +1394,30 @@ JX.install('DiffChangesetList', {
         JX.DOM.hide(unsubmitted_button.getNode());
       }
 
+      if (done.length || undone.length) {
+        done_button.setText([
+          done.length,
+          ' / ',
+          (done.length + undone.length),
+          ' ',
+          pht('Comments')
+        ]);
+
+        JX.DOM.show(done_button.getNode());
+
+        // If any comments are not marked "Done", this cycles through the
+        // missing comments. Otherwise, it cycles through all the saved
+        // comments.
+        if (undone.length) {
+          this._doneMode = 'undone';
+        } else {
+          this._doneMode = 'done';
+        }
+
+      } else {
+        JX.DOM.hide(done_button.getNode());
+      }
+
       var path_view = [icon, ' ', changeset.getDisplayPath()];
 
       var buttons_attrs = {
@@ -1399,7 +1426,8 @@ JX.install('DiffChangesetList', {
 
       var buttons_list = [
         unsaved_button.getNode(),
-        unsubmitted_button.getNode()
+        unsubmitted_button.getNode(),
+        done_button.getNode()
       ];
 
       var buttons_view = JX.$N('div', buttons_attrs, buttons_list);
@@ -1446,6 +1474,22 @@ JX.install('DiffChangesetList', {
       return this._unsubmittedButton;
     },
 
+    _getDoneButton: function() {
+      if (!this._doneButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-comment')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var ondone = JX.bind(this, this._ondoneclick);
+        JX.DOM.listen(node, 'click', null, ondone);
+
+        this._doneButton = button;
+      }
+
+      return this._doneButton;
+    },
     _onunsavedclick: function(e) {
       e.kill();
 
@@ -1465,6 +1509,18 @@ JX.install('DiffChangesetList', {
         filter: 'comment',
         wrap: true,
         attribute: 'unsubmitted'
+      };
+
+      this._onjumpkey(1, options);
+    },
+
+    _ondoneclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        attribute: this._doneMode
       };
 
       this._onjumpkey(1, options);

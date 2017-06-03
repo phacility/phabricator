@@ -440,6 +440,8 @@ JX.install('DiffChangeset', {
               last_inline = inline;
             }
 
+            var is_saved = (!inline.isDraft() && !inline.isEditing());
+
             last_inline_item = {
               type: block.type,
               changeset: this,
@@ -452,7 +454,9 @@ JX.install('DiffChangeset', {
               },
               attributes: {
                 unsaved: inline.isEditing(),
-                unsubmitted: inline.isDraft()
+                unsubmitted: inline.isDraft(),
+                undone: (is_saved && !inline.isDone()),
+                done: (is_saved && inline.isDone())
               }
             };
 
