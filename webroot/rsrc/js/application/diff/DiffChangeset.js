@@ -451,7 +451,8 @@ JX.install('DiffChangeset', {
                 end: block.items[jj]
               },
               attributes: {
-                unsaved: inline.isEditing()
+                unsaved: inline.isEditing(),
+                unsubmitted: inline.isDraft()
               }
             };
 

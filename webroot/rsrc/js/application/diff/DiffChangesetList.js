@@ -113,6 +113,7 @@ JX.install('DiffChangesetList', {
 
     _bannerNode: null,
     _unsavedButton: null,
+    _unsubmittedButton: null,
 
     sleep: function() {
       this._asleep = true;
@@ -1371,14 +1372,23 @@ JX.install('DiffChangesetList', {
         'diff-banner-has-unsubmitted',
         !!unsubmitted.length);
 
-      var unsaved_button = this._getUnsavedButton();
       var pht = this.getTranslations();
+      var unsaved_button = this._getUnsavedButton();
+      var unsubmitted_button = this._getUnsubmittedButton();
 
       if (unsaved.length) {
         unsaved_button.setText(unsaved.length + ' ' + pht('Unsaved'));
         JX.DOM.show(unsaved_button.getNode());
       } else {
         JX.DOM.hide(unsaved_button.getNode());
+      }
+
+      if (unsubmitted.length) {
+        unsubmitted_button.setText(
+          unsubmitted.length + ' ' + pht('Unsubmitted'));
+        JX.DOM.show(unsubmitted_button.getNode());
+      } else {
+        JX.DOM.hide(unsubmitted_button.getNode());
       }
 
       var path_view = [icon, ' ', changeset.getDisplayPath()];
@@ -1388,7 +1398,8 @@ JX.install('DiffChangesetList', {
       };
 
       var buttons_list = [
-        unsaved_button.getNode()
+        unsaved_button.getNode(),
+        unsubmitted_button.getNode()
       ];
 
       var buttons_view = JX.$N('div', buttons_attrs, buttons_list);
@@ -1418,6 +1429,23 @@ JX.install('DiffChangesetList', {
       return this._unsavedButton;
     },
 
+    _getUnsubmittedButton: function() {
+      if (!this._unsubmittedButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-comment-o')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var onunsubmitted = JX.bind(this, this._onunsubmittedclick);
+        JX.DOM.listen(node, 'click', null, onunsubmitted);
+
+        this._unsubmittedButton = button;
+      }
+
+      return this._unsubmittedButton;
+    },
+
     _onunsavedclick: function(e) {
       e.kill();
 
@@ -1425,6 +1453,18 @@ JX.install('DiffChangesetList', {
         filter: 'comment',
         wrap: true,
         attribute: 'unsaved'
+      };
+
+      this._onjumpkey(1, options);
+    },
+
+    _onunsubmittedclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        attribute: 'unsubmitted'
       };
 
       this._onjumpkey(1, options);
