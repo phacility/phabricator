@@ -333,6 +333,7 @@ abstract class DiffusionController extends PhabricatorController {
     $tag = id(new PHUITagView())
       ->setName($commit)
       ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
       ->setType(PHUITagView::TYPE_SHADE);
 
     return $tag;

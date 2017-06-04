@@ -110,7 +110,7 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
             ->setType(PHUITagView::TYPE_SHADE)
             ->setColor(PHUITagView::COLOR_BLUE)
             ->setHref('/D'.$d_id)
-            ->addClass('diffusion-differential-tag')
+            ->setBorder(PHUITagView::BORDER_NONE)
             ->setSlimShady(true);
           }
       }
@@ -155,6 +155,7 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         ->setName($commit_name)
         ->setType(PHUITagView::TYPE_SHADE)
         ->setColor(PHUITagView::COLOR_INDIGO)
+        ->setBorder(PHUITagView::BORDER_NONE)
         ->setSlimShady(true);
 
       $item = id(new PHUIObjectItemView())

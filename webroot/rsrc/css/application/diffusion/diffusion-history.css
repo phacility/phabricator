@@ -7,14 +7,6 @@
   font-size: {$biggerfontsize};
 }
 
-.diffusion-history-list .phui-oi-attribute .phui-tag-core {
-  border-color: transparent;
-}
-
-.diffusion-history-list .phui-oi-attribute .phui-tag-indigo a {
-  color: {$indigo};
-}
-
 .diffusion-history-message {
   background-color: {$bluebackground};
   padding: 16px;
@@ -34,9 +26,4 @@
 
 .diffusion-history-list .diffusion-differential-tag {
   margin-left: 4px;
-}
-
-a.phui-tag-view:hover.diffusion-differential-tag .phui-tag-core {
-  border-color: transparent;
-  text-decoration: underline;
 }
