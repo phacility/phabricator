@@ -191,7 +191,7 @@ final class HeraldRuleController extends HeraldController {
             'a',
             array(
               'href' => '#',
-              'class' => 'button green',
+              'class' => 'button button-green',
               'sigil' => 'create-condition',
               'mustcapture' => true,
             ),
@@ -212,7 +212,7 @@ final class HeraldRuleController extends HeraldController {
             'a',
             array(
               'href' => '#',
-              'class' => 'button green',
+              'class' => 'button button-green',
               'sigil' => 'create-action',
               'mustcapture' => true,
             ),

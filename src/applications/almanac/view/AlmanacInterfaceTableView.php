@@ -30,9 +30,9 @@ final class AlmanacInterfaceTableView extends AphrontView {
     $can_edit = $this->getCanEdit();
 
     if ($can_edit) {
-      $button_class = 'small grey button';
+      $button_class = 'small button button-grey';
     } else {
-      $button_class = 'small grey button disabled';
+      $button_class = 'small button button-grey disabled';
     }
 
     $handles = $viewer->loadHandles(mpull($interfaces, 'getNetworkPHID'));

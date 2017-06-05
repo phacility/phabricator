@@ -69,7 +69,7 @@ final class PhabricatorMultiFactorSettingsPanel
           array(
             'href' => $this->getPanelURI('?delete='.$factor->getID()),
             'sigil' => 'workflow',
-            'class' => 'small grey button',
+            'class' => 'small button button-grey',
           ),
           pht('Remove')),
       );

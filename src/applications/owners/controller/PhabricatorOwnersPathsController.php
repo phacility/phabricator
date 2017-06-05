@@ -124,7 +124,7 @@ final class PhabricatorOwnersPathsController
               'a',
               array(
                 'href' => '#',
-                'class' => 'button green',
+                'class' => 'button button-green',
                 'sigil' => 'addpath',
                 'mustcapture' => true,
               ),

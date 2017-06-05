@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => 'ff161f2d',
     'conpherence.pkg.js' => 'b5b51108',
-    'core.pkg.css' => '5284a0e0',
+    'core.pkg.css' => '1a935531',
     'core.pkg.js' => '1475bd91',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => '1ccbf3a9',
@@ -125,8 +125,8 @@ return array(
     'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-source-code-view.css' => '4383192f',
     'rsrc/css/phui/button/phui-button-bar.css' => '39fe680c',
-    'rsrc/css/phui/button/phui-button-simple.css' => '081cfeea',
-    'rsrc/css/phui/button/phui-button.css' => '9f13ddcc',
+    'rsrc/css/phui/button/phui-button-simple.css' => '8e1baf68',
+    'rsrc/css/phui/button/phui-button.css' => '022581b4',
     'rsrc/css/phui/calendar/phui-calendar-day.css' => '572b1893',
     'rsrc/css/phui/calendar/phui-calendar-list.css' => '576be600',
     'rsrc/css/phui/calendar/phui-calendar-month.css' => '8e10e92c',
@@ -526,7 +526,7 @@ return array(
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => 'b3465b9b',
     'rsrc/js/phuix/PHUIXAutocomplete.js' => 'f6699267',
-    'rsrc/js/phuix/PHUIXButtonView.js' => 'b3c515be',
+    'rsrc/js/phuix/PHUIXButtonView.js' => 'a37126bd',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => '8018ee50',
     'rsrc/js/phuix/PHUIXExample.js' => '68af71ca',
     'rsrc/js/phuix/PHUIXFormControl.js' => '83e03671',
@@ -820,8 +820,8 @@ return array(
     'phui-big-info-view-css' => 'bd903741',
     'phui-box-css' => '269cbc99',
     'phui-button-bar-css' => '39fe680c',
-    'phui-button-css' => '9f13ddcc',
-    'phui-button-simple-css' => '081cfeea',
+    'phui-button-css' => '022581b4',
+    'phui-button-simple-css' => '8e1baf68',
     'phui-calendar-css' => '477acfaa',
     'phui-calendar-day-css' => '572b1893',
     'phui-calendar-list-css' => '576be600',
@@ -878,7 +878,7 @@ return array(
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => 'b3465b9b',
     'phuix-autocomplete' => 'f6699267',
-    'phuix-button-view' => 'b3c515be',
+    'phuix-button-view' => 'a37126bd',
     'phuix-dropdown-menu' => '8018ee50',
     'phuix-form-control-view' => '83e03671',
     'phuix-icon-view' => 'bff6884b',
@@ -935,9 +935,6 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-workflow',
-    ),
-    '081cfeea' => array(
-      'phui-button-css',
     ),
     '0825c27a' => array(
       'javelin-behavior',
@@ -1561,6 +1558,9 @@ return array(
       'javelin-stratcom',
       'javelin-install',
     ),
+    '8e1baf68' => array(
+      'phui-button-css',
+    ),
     '8ff5e24c' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1650,6 +1650,10 @@ return array(
       'javelin-workflow',
       'javelin-util',
       'phabricator-keyboard-shortcut',
+    ),
+    'a37126bd' => array(
+      'javelin-install',
+      'javelin-dom',
     ),
     'a3a63478' => array(
       'phui-workcard-view-css',
@@ -1767,10 +1771,6 @@ return array(
     'b3a4b884' => array(
       'javelin-behavior',
       'phabricator-prefab',
-    ),
-    'b3c515be' => array(
-      'javelin-install',
-      'javelin-dom',
     ),
     'b3e7d692' => array(
       'javelin-install',

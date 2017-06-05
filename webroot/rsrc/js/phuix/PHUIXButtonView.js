@@ -35,10 +35,10 @@ JX.install('PHUIXButtonView', {
       var node = this.getNode();
 
       if (this._color) {
-        JX.DOM.alterClass(node, this._color, false);
+        JX.DOM.alterClass(node, 'button-' + this._color, false);
       }
       this._color = color;
-      JX.DOM.alterClass(node, this._color, true);
+      JX.DOM.alterClass(node, 'button-' + this._color, true);
 
       return this;
     },
@@ -50,7 +50,7 @@ JX.install('PHUIXButtonView', {
       var node = this.getNode();
 
       var is_simple = (this._buttonType == self.BUTTONTYPE_SIMPLE);
-      JX.DOM.alterClass(node, 'simple', is_simple);
+      JX.DOM.alterClass(node, 'phui-button-simple', is_simple);
 
       return this;
     },

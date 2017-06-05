@@ -120,7 +120,7 @@ final class PholioUploadedImageView extends AphrontView {
     return javelin_tag(
       'a',
       array(
-        'class' => 'button grey',
+        'class' => 'button button-grey',
         'sigil' => 'pholio-drop-remove',
       ),
       'X');

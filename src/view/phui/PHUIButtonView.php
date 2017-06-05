@@ -4,6 +4,7 @@ final class PHUIButtonView extends AphrontTagView {
 
   const GREEN = 'green';
   const GREY = 'grey';
+  const BLUE = 'blue';
   const DISABLED = 'disabled';
 
   const SMALL = 'small';
@@ -159,7 +160,7 @@ final class PHUIButtonView extends AphrontTagView {
     $classes[] = 'button';
 
     if ($this->color) {
-      $classes[] = $this->color;
+      $classes[] = 'button-'.$this->color;
     }
 
     if ($this->size) {
@@ -188,10 +189,10 @@ final class PHUIButtonView extends AphrontTagView {
 
     switch ($this->getButtonType()) {
       case self::BUTTONTYPE_DEFAULT:
-        // Nothing special for default buttons.
+        $classes[] = 'phui-button-default';
         break;
       case self::BUTTONTYPE_SIMPLE:
-        $classes[] = 'simple';
+        $classes[] = 'phui-button-simple';
         break;
     }
 

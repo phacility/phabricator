@@ -174,7 +174,7 @@ final class DifferentialChangesetListView extends AphrontView {
           $load = javelin_tag(
             'a',
             array(
-              'class' => 'button grey',
+              'class' => 'button button-grey',
               'href' => '#'.$uniq_id,
               'sigil' => 'differential-load',
               'meta' => array(

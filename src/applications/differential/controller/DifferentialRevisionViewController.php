@@ -156,7 +156,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         phutil_tag(
           'a',
           array(
-            'class' => 'button grey',
+            'class' => 'button button-grey',
             'href' => $request_uri
               ->alter('large', 'true')
               ->setFragment('toc'),

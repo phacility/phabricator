@@ -341,7 +341,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       $button_edit = javelin_tag(
         'a',
         array(
-          'class' => 'button small grey',
+          'class' => 'button small button-grey',
           'href'  => $uri->alter('edit', $email->getID()),
           'sigil' => 'workflow',
         ),
@@ -350,7 +350,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       $button_remove = javelin_tag(
         'a',
         array(
-          'class'   => 'button small grey',
+          'class'   => 'button small button-grey',
           'href'    => $uri->alter('delete', $email->getID()),
           'sigil'   => 'workflow',
         ),

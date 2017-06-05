@@ -123,7 +123,7 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
       'a',
       array(
         'href' => $uri,
-        'class' => 'button grey',
+        'class' => 'button button-grey',
       ),
       pht('Add Payment Method...'));
 

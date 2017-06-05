@@ -63,7 +63,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       $button_verify = javelin_tag(
         'a',
         array(
-          'class' => 'button small grey',
+          'class' => 'button small button-grey',
           'href'  => $uri->alter('verify', $email->getID()),
           'sigil' => 'workflow',
         ),
@@ -72,7 +72,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       $button_make_primary = javelin_tag(
         'a',
         array(
-          'class' => 'button small grey',
+          'class' => 'button small button-grey',
           'href'  => $uri->alter('primary', $email->getID()),
           'sigil' => 'workflow',
         ),
@@ -81,7 +81,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       $button_remove = javelin_tag(
         'a',
         array(
-          'class'   => 'button small grey',
+          'class'   => 'button small button-grey',
           'href'    => $uri->alter('delete', $email->getID()),
           'sigil'   => 'workflow',
         ),

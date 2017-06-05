@@ -101,7 +101,7 @@ final class PhortuneOrderTableView extends AphrontView {
           'a',
           array(
             'href' => $cart->getCheckoutURI(),
-            'class' => 'small green button',
+            'class' => 'small button button-green',
           ),
           pht('Pay Now')),
       );

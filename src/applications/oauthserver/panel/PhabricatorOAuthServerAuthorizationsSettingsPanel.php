@@ -87,7 +87,7 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
         'a',
         array(
           'href' => $this->getPanelURI('?revoke='.$authorization->getID()),
-          'class' => 'small grey button',
+          'class' => 'small button button-grey',
           'sigil' => 'workflow',
         ),
         pht('Revoke'));
