@@ -69,7 +69,8 @@ final class DiffusionHistoryController extends DiffusionController {
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->appendChild($view)
+      ->addClass('diffusion-history-view');
   }
 
   private function buildHeader(DiffusionRequest $drequest) {
