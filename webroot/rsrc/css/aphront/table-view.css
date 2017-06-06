@@ -24,7 +24,6 @@
 
 .aphront-table-notice {
   padding: 12px 16px;
-  font-size: {$normalfontsize};
   color: {$darkbluetext};
   border-bottom: 1px solid {$thinblueborder};
 }
@@ -37,9 +36,16 @@
   background: {$lightgreybackground};
 }
 
+.device-desktop .aphront-table-view tr:hover {
+  background: {$bluebackground};
+}
+
+.device-desktop .aphront-table-view tr.no-data:hover {
+  background: inherit;
+}
+
 .aphront-table-view th {
   font-weight: bold;
-  font-size: {$normalfontsize};
   white-space: nowrap;
   color: {$bluetext};
   text-shadow: 0 1px 0 white;
@@ -78,6 +84,7 @@ th.aphront-table-view-sortable-selected {
 .aphront-table-view td {
   white-space: nowrap;
   vertical-align: middle;
+  color: {$darkbluetext};
 }
 
 .aphront-table-down-sort {
@@ -115,12 +122,10 @@ th.aphront-table-view-sortable-selected {
 
 .aphront-table-view th {
   padding: 8px 10px;
-  font-size: {$normalfontsize};
 }
 
 .aphront-table-view td {
   padding: 8px 10px;
-  font-size: {$smallerfontsize};
 }
 
 .device-tablet .aphront-table-view td,
@@ -128,20 +133,10 @@ th.aphront-table-view-sortable-selected {
   padding: 6px;
 }
 
-.device-tablet .aphront-table-view td + td,
-.device-phone .aphront-table-view td + td {
-  padding-left: 0px;
-}
-
 .device-tablet .aphront-table-view th,
 .device-phone .aphront-table-view th {
   padding: 6px;
   overflow: hidden;
-}
-
-.device-tablet .aphront-table-view th + th,
-.device-phone .aphront-table-view th + th {
-  padding-left: 0px;
 }
 
 .aphront-table-view td.sorted-column {
@@ -196,7 +191,7 @@ th.aphront-table-view-sortable-selected {
 }
 
 .aphront-table-view td.wrap {
-  white-space:      normal;
+  white-space: normal;
 }
 
 .aphront-table-view td.prewrap {
@@ -282,7 +277,6 @@ span.single-display-line-content {
   text-align: center;
   color: {$lightgreytext};
   font-style: italic;
-  font-size: {$normalfontsize};
 }
 
 .aphront-table-view td.thumb img {
