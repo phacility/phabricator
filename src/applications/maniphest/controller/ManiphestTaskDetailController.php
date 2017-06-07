@@ -36,6 +36,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ManiphestTaskHasMockEdgeType::EDGECONST,
       PhabricatorObjectMentionedByObjectEdgeType::EDGECONST,
       PhabricatorObjectMentionsObjectEdgeType::EDGECONST,
+      ManiphestTaskHasDuplicateTaskEdgeType::EDGECONST,
     );
 
     $phid = $task->getPHID();
@@ -159,6 +160,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $related_tabs[] = $this->newMocksTab($task, $query);
     $related_tabs[] = $this->newMentionsTab($task, $query);
+    $related_tabs[] = $this->newDuplicatesTab($task, $query);
 
     $tab_view = null;
 
@@ -550,6 +552,32 @@ final class ManiphestTaskDetailController extends ManiphestController {
     return id(new PHUITabView())
       ->setName(pht('Mentions'))
       ->setKey('mentions')
+      ->appendChild($view);
+  }
+
+  private function newDuplicatesTab(
+    ManiphestTask $task,
+    PhabricatorEdgeQuery $edge_query) {
+
+    $in_type = ManiphestTaskHasDuplicateTaskEdgeType::EDGECONST;
+    $in_phids = $edge_query->getDestinationPHIDs(array(), array($in_type));
+
+    $viewer = $this->getViewer();
+    $in_handles = $viewer->loadHandles($in_phids);
+    $in_handles = $this->getCompleteHandles($in_handles);
+
+    $view = new PHUIPropertyListView();
+
+    if (!count($in_handles)) {
+      return null;
+    }
+
+    $view->addProperty(
+      pht('Duplicates Merged Here'), $in_handles->renderList());
+
+    return id(new PHUITabView())
+      ->setName(pht('Duplicates'))
+      ->setKey('duplicates')
       ->appendChild($view);
   }
 
