@@ -134,7 +134,7 @@ final class PhabricatorProjectEditPictureController
       $button = javelin_tag(
         'button',
         array(
-          'class' => 'grey profile-image-button',
+          'class' => 'button-grey profile-image-button',
           'sigil' => 'has-tooltip',
           'meta' => array(
             'tip' => $spec['tip'],
@@ -285,7 +285,7 @@ final class PhabricatorProjectEditPictureController
     $default_button = javelin_tag(
       'button',
       array(
-        'class' => 'grey profile-image-button',
+        'class' => 'button-grey profile-image-button',
         'sigil' => 'has-tooltip',
         'meta' => array(
           'tip' => pht('Use Icon and Color'),
