@@ -307,14 +307,6 @@ body .phui-header-shell.phui-bleed-header
   text-decoration: underline;
 }
 
-.phui-header-subheader .phui-badge-flex-view {
-  display: inline;
-  margin-right: 4px;
-}
-
-.phui-header-subheader .phui-badge-flex-view:after {
-  display: inline;
-}
 
 /*** Profile Header ***********************************************************/
 

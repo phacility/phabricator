@@ -68,21 +68,10 @@ final class PHUIBoxExample extends PhabricatorUIExample {
       ->setText(pht('Such Wow'))
       ->addClass(PHUI::MARGIN_SMALL_RIGHT);
 
-    $badge1 = id(new PHUIBadgeMiniView())
-      ->setIcon('fa-bug')
-      ->setHeader(pht('Bugmeister'));
-
-    $badge2 = id(new PHUIBadgeMiniView())
-      ->setIcon('fa-heart')
-      ->setHeader(pht('Funder'))
-      ->setQuality(PhabricatorBadgesQuality::UNCOMMON);
-
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Fancy Box'))
       ->addActionLink($button)
-      ->setSubheader(pht('Much Features'))
-      ->addBadge($badge1)
-      ->addBadge($badge2);
+      ->setSubheader(pht('Much Features'));
 
     $obj4 = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -116,7 +105,9 @@ final class PHUIBoxExample extends PhabricatorUIExample {
 
     return phutil_tag(
       'div',
-        array(),
+        array(
+          'class' => 'ml',
+        ),
         array(
           $head1,
           $wrap1,
