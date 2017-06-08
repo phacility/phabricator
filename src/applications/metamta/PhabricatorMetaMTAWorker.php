@@ -13,10 +13,6 @@ final class PhabricatorMetaMTAWorker
 
   protected function doWork() {
     $message = $this->loadMessage();
-    if (!$message) {
-      throw new PhabricatorWorkerPermanentFailureException(
-        pht('Unable to load message!'));
-    }
 
     if ($message->getStatus() != PhabricatorMailOutboundStatus::STATUS_QUEUE) {
       return;
@@ -32,7 +28,18 @@ final class PhabricatorMetaMTAWorker
 
   private function loadMessage() {
     $message_id = $this->getTaskData();
-    return id(new PhabricatorMetaMTAMail())->load($message_id);
+    $message = id(new PhabricatorMetaMTAMail())
+      ->load($message_id);
+
+    if (!$message) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht(
+          'Unable to load mail message (with ID "%s") while preparing to '.
+          'deliver it.',
+          $message_id));
+    }
+
+    return $message;
   }
 
   public function renderForDisplay(PhabricatorUser $viewer) {
