@@ -20,11 +20,11 @@ function phabricator_relative_date($epoch, $user, $on = false) {
   $date = phabricator_date($epoch, $user);
 
   if ($date === $today) {
-    return 'today';
+    return pht('Today');
   }
 
   if ($date === $yesterday) {
-    return 'yesterday';
+    return pht('Yesterday');
   }
 
   return (($on ? 'on ' : '').$date);
