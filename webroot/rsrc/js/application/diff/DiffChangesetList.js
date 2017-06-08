@@ -1352,8 +1352,16 @@ JX.install('DiffChangesetList', {
             continue;
           }
 
+          if (inline.isSynthetic()) {
+            continue;
+          }
+
           if (inline.isEditing()) {
             unsaved.push(inline);
+          } else if (!inline.getID()) {
+            // These are new comments which have been cancelled, and do not
+            // count as anything.
+            continue;
           } else if (inline.isDraft()) {
             unsubmitted.push(inline);
           } else if (!inline.isDone()) {
@@ -1395,13 +1403,28 @@ JX.install('DiffChangesetList', {
       }
 
       if (done.length || undone.length) {
-        done_button.setText([
-          done.length,
-          ' / ',
-          (done.length + undone.length),
-          ' ',
-          pht('Comments')
-        ]);
+        // If you haven't marked any comments as "Done", we just show text
+        // like "3 Comments". If you've marked at least one done, we show
+        // "1 / 3 Comments".
+
+        var done_text;
+        if (done.length) {
+          done_text = [
+            done.length,
+            ' / ',
+            (done.length + undone.length),
+            ' ',
+            pht('Comments')
+          ];
+        } else {
+          done_text = [
+            undone.length,
+            ' ',
+            pht('Comments')
+          ];
+        }
+
+        done_button.setText(done_text);
 
         JX.DOM.show(done_button.getNode());
 

@@ -34,6 +34,7 @@ JX.install('DiffInline', {
     _isFixed: null,
     _isEditing: false,
     _isNew: false,
+    _isSynthetic: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -71,6 +72,7 @@ JX.install('DiffInline', {
       this._isDraft = data.isDraft;
       this._isFixed = data.isFixed;
       this._isGhost = data.isGhost;
+      this._isSynthetic = data.isSynthetic;
 
       this._changesetID = data.changesetID;
       this._isNew = false;
@@ -95,6 +97,10 @@ JX.install('DiffInline', {
 
     isDeleted: function() {
       return this._isDeleted;
+    },
+
+    isSynthetic: function() {
+      return this._isSynthetic;
     },
 
     bindToRange: function(data) {
