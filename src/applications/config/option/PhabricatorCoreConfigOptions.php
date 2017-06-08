@@ -265,10 +265,10 @@ final class PhabricatorCoreConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must start with ".
-            "%s' or '%s'.",
+            "'%s' or '%s'.",
+            $key,
             'http://',
-            'https://',
-            $key));
+            'https://'));
       }
 
       $domain = $uri->getDomain();
@@ -278,10 +278,9 @@ final class PhabricatorCoreConfigOptions
             "Config option '%s' is invalid. The URI must contain a dot ".
             "('%s'), like '%s', not just a bare name like '%s'. Some web ".
             "browsers will not set cookies on domains with no TLD.",
-            '.',
+            $key,
             'http://example.com/',
-            'http://example/',
-            $key));
+            'http://example/'));
       }
 
       $path = $uri->getPath();
