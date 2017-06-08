@@ -1,8 +1,10 @@
 #!/bin/bash
 
+set -e
+
 confirm() {
   echo "Press RETURN to continue, or ^C to cancel.";
-  read -e ignored
+  read ignored
 }
 
 GIT='git'
