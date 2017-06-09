@@ -24,7 +24,7 @@ final class PhabricatorNotificationUIExample extends PhabricatorUIExample {
       'a',
       array(
         'sigil' => 'notification-example',
-        'class' => 'button green',
+        'class' => 'button button-green',
       ),
       pht('Show Notification'));
 

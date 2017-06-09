@@ -248,7 +248,7 @@ final class AphrontDialogView
         'a',
         array(
           'href'  => $this->cancelURI,
-          'class' => 'button grey',
+          'class' => 'button button-grey',
           'name'  => '__cancel__',
           'sigil' => 'jx-workflow-button',
           'meta' => $meta,

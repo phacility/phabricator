@@ -196,7 +196,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
       array(
         'href'        => '#',
         'mustcapture' => true,
-        'class'       => 'grey button',
+        'class'       => 'button button-grey',
         'id'          => 'batch-select-all',
       ),
       pht('Select All'));
@@ -206,7 +206,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
       array(
         'href'        => '#',
         'mustcapture' => true,
-        'class'       => 'grey button',
+        'class'       => 'button button-grey',
         'id'          => 'batch-select-none',
       ),
       pht('Clear Selection'));
@@ -224,7 +224,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
       'a',
       array(
         'href' => '/maniphest/export/'.$saved_query->getQueryKey().'/',
-        'class' => 'grey button',
+        'class' => 'button button-grey',
       ),
       pht('Export to Excel'));
 

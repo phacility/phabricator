@@ -413,3 +413,7 @@ tr.differential-inline-loading {
 .diff-banner-has-unsubmitted {
   background: {$sh-yellowbackground};
 }
+
+.diff-banner-buttons {
+  float: right;
+}

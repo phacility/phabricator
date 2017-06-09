@@ -107,6 +107,11 @@ final class PHUIDiffInlineCommentDetailView
         break;
     }
 
+    $is_synthetic = false;
+    if ($inline->getSyntheticAuthor()) {
+      $is_synthetic = true;
+    }
+
     $metadata = array(
       'id' => $inline->getID(),
       'phid' => $inline->getPHID(),
@@ -120,6 +125,7 @@ final class PHUIDiffInlineCommentDetailView
       'isDraft' => $inline->isDraft(),
       'isFixed' => $is_fixed,
       'isGhost' => $inline->getIsGhost(),
+      'isSynthetic' => $is_synthetic,
     );
 
     $sigil = 'differential-inline-comment';
@@ -135,11 +141,6 @@ final class PHUIDiffInlineCommentDetailView
     $handles = $this->handles;
 
     $links = array();
-
-    $is_synthetic = false;
-    if ($inline->getSyntheticAuthor()) {
-      $is_synthetic = true;
-    }
 
     $draft_text = null;
     if (!$is_synthetic) {

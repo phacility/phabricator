@@ -173,7 +173,7 @@ final class ManiphestBatchEditController extends ManiphestController {
             'a',
             array(
               'href' => '#',
-              'class' => 'button green',
+              'class' => 'button button-green',
               'sigil' => 'add-action',
               'mustcapture' => true,
             ),

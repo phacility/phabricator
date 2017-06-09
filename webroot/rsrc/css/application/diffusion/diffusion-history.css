@@ -2,17 +2,11 @@
  * @provides diffusion-history-css
  */
 
+/* - List Styles  ------------------------------------------------------------*/
+
 .diffusion-history-list .phui-oi-link {
   color: #000;
   font-size: {$biggerfontsize};
-}
-
-.diffusion-history-list .phui-oi-attribute .phui-tag-core {
-  border-color: transparent;
-}
-
-.diffusion-history-list .phui-oi-attribute .phui-tag-indigo a {
-  color: {$indigo};
 }
 
 .diffusion-history-message {
@@ -36,7 +30,53 @@
   margin-left: 4px;
 }
 
-a.phui-tag-view:hover.diffusion-differential-tag .phui-tag-core {
-  border-color: transparent;
-  text-decoration: underline;
+
+/* - Phone Style  ------------------------------------------------------------*/
+
+.device-phone.diffusion-history-view  .phui-two-column-view
+  .phui-two-column-footer .phui-object-box {
+    border-color: {$thinblueborder};
+}
+
+.device-phone.diffusion-history-view .phui-two-column-view
+  .phui-two-column-footer .phui-header-view {
+    text-align: center;
+}
+
+.device-phone.diffusion-history-view .phui-two-column-content {
+  padding: 0;
+  margin: 0 -4px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-attribute-spacer {
+  display: none;
+}
+
+.device-phone.diffusion-history-view .phui-oi-attribute {
+  display: block;
+  margin: 0 0 4px 0;
+}
+
+.device-phone.diffusion-history-view .phui-oi-image {
+  height: 36px;
+  width: 36px;
+  margin-top: 10px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-with-image .phui-oi-content-box {
+  margin-left: 44px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-col2.phui-oi-side-column {
+  padding-bottom: 10px;
+}
+
+.device-phone.diffusion-history-view .diffusion-history-list .button.has-icon
+  .phui-button-text {
+    margin: 0;
+}
+
+.device-phone.diffusion-history-view .diffusion-history-list .button.has-icon
+  .phui-icon-view {
+    display: none;
 }

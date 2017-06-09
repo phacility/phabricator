@@ -122,17 +122,38 @@
 .phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item,
 .phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-unchecked-item {
   list-style: none;
-  margin-left: -18px;
+  margin-left: -20px;
+  position: relative;
+  padding-left: 22px;
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks input {
-  margin-right: 4px;
-  opacity: 1;
+  display: none;
+}
+
+.phabricator-remarkup .remarkup-list-with-checkmarks
+  .remarkup-list-item::before {
+    height: 16px;
+    width: 16px;
+    background-size: 16px;
+    display: inline-block;
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 0;
+}
+
+.remarkup-list-with-checkmarks .remarkup-checked-item::before {
+  background-image: url(rsrc/image/controls/checkbox-checked.png);
+}
+
+.remarkup-list-with-checkmarks .remarkup-unchecked-item::before {
+  background-image: url(rsrc/image/controls/checkbox-unchecked.png);
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item {
-  text-decoration: line-through;
   color: {$lightgreytext};
+  text-decoration: line-through;
 }
 
 .phabricator-remarkup ul.remarkup-list ol.remarkup-list,

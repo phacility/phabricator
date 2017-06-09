@@ -140,7 +140,7 @@ abstract class ConpherenceController extends PhabricatorController {
           'button',
           array(
             'type' => 'SUBMIT',
-            'class' => 'button green mlr',
+            'class' => 'button button-green mlr',
           ),
           pht('Join Room'));
 

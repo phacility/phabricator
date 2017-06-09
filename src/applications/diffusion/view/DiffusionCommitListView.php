@@ -94,18 +94,10 @@ final class DiffusionCommitListView extends AphrontView {
     $handles = $viewer->loadHandles($phids);
 
     $cur_date = 0;
-    $list = null;
-    $header = null;
     $view = array();
     foreach ($this->commits as $commit) {
-      $new_date = date('Ymd', $commit->getEpoch());
-      if ($cur_date != $new_date) {
-        if ($list) {
-          $view[] = id(new PHUIObjectBoxView())
-            ->setHeader($header)
-            ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-            ->setObjectList($list);
-        }
+      $new_date = phabricator_date($commit->getEpoch(), $viewer);
+      if ($cur_date !== $new_date) {
         $date = ucfirst(
           phabricator_relative_date($commit->getEpoch(), $viewer));
         $header = id(new PHUIHeaderView())
@@ -113,6 +105,11 @@ final class DiffusionCommitListView extends AphrontView {
         $list = id(new PHUIObjectItemListView())
           ->setFlush(true)
           ->addClass('diffusion-history-list');
+
+        $view[] = id(new PHUIObjectBoxView())
+          ->setHeader($header)
+          ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+          ->setObjectList($list);
       }
 
       $commit_phid = $commit->getPHID();
@@ -146,6 +143,7 @@ final class DiffusionCommitListView extends AphrontView {
         ->setName($commit_name)
         ->setType(PHUITagView::TYPE_SHADE)
         ->setColor(PHUITagView::COLOR_INDIGO)
+        ->setBorder(PHUITagView::BORDER_NONE)
         ->setSlimShady(true);
 
       $item = id(new PHUIObjectItemView())

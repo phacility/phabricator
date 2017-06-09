@@ -30,7 +30,7 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
           'a',
           array(
             'href' => '/auth/token/revoke/'.$token->getID().'/',
-            'class' => 'small grey button',
+            'class' => 'small button button-grey',
             'sigil' => 'workflow',
           ),
           pht('Revoke'));
@@ -38,7 +38,7 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
         $button = javelin_tag(
           'a',
           array(
-            'class' => 'small grey button disabled',
+            'class' => 'small button button-grey disabled',
           ),
           pht('Revoke'));
       }

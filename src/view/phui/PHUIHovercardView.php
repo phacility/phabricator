@@ -173,7 +173,7 @@ final class PHUIHovercardView extends AphrontTagView {
 
     foreach ($this->actions as $action) {
       $options = array(
-        'class' => 'button grey',
+        'class' => 'button button-grey',
         'href'  => $action['uri'],
       );
 

@@ -426,7 +426,7 @@ ul.phui-oi-icons {
 }
 
 .phui-oi.phui-oi-disabled .phui-oi-attribute,
-.phui-oi.phui-oi-disabled .phui-oi-attribute .phui-icon-view {
+.phui-oi.phui-oi-disabled .phui-oi-attribute > .phui-icon-view {
   color: {$lightgreytext};
 }
 

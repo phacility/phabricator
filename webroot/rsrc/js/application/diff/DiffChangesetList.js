@@ -1,6 +1,7 @@
 /**
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
+ *           phuix-button-view
  * @javelin
  */
 
@@ -111,6 +112,10 @@ JX.install('DiffChangesetList', {
     _rangeTarget: null,
 
     _bannerNode: null,
+    _unsavedButton: null,
+    _unsubmittedButton: null,
+    _doneButton: null,
+    _doneMode: null,
 
     sleep: function() {
       this._asleep = true;
@@ -258,7 +263,13 @@ JX.install('DiffChangesetList', {
 
     _installJumpKey: function(key, label, delta, filter, show_hidden) {
       filter = filter || null;
-      var handler = JX.bind(this, this._onjumpkey, delta, filter, show_hidden);
+
+      var options = {
+        filter: filter,
+        hidden: show_hidden
+      };
+
+      var handler = JX.bind(this, this._onjumpkey, delta, options);
       return this._installKey(key, label, handler);
     },
 
@@ -440,8 +451,13 @@ JX.install('DiffChangesetList', {
         .show();
     },
 
-    _onjumpkey: function(delta, filter, show_hidden, manager) {
+    _onjumpkey: function(delta, options) {
       var state = this._getSelectionState();
+
+      var filter = options.filter || null;
+      var hidden = options.hidden || false;
+      var wrap = options.wrap || false;
+      var attribute = options.attribute || null;
 
       var cursor = state.cursor;
       var items = state.items;
@@ -452,6 +468,7 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      var did_wrap = false;
       while (true) {
         if (cursor === null) {
           cursor = 0;
@@ -464,9 +481,22 @@ JX.install('DiffChangesetList', {
           return;
         }
 
-        // If we've gone forward off the end of the list, bail out.
+        // If we've gone forward off the end of the list, figure out where we
+        // should end up.
         if (cursor >= items.length) {
-          return;
+          if (!wrap) {
+            // If we aren't wrapping around, we're done.
+            return;
+          }
+
+          if (did_wrap) {
+            // If we're already wrapped around, we're done.
+            return;
+          }
+
+          // Otherwise, wrap the cursor back to the top.
+          cursor = 0;
+          did_wrap = true;
         }
 
         // If we're selecting things of a particular type (like only files)
@@ -479,8 +509,22 @@ JX.install('DiffChangesetList', {
 
         // If the item is hidden, don't select it when iterating with jump
         // keys. It can still potentially be selected in other ways.
-        if (!show_hidden) {
+        if (!hidden) {
           if (items[cursor].hidden) {
+            continue;
+          }
+        }
+
+        // If the item has been deleted, don't select it when iterating. The
+        // cursor may remain on it until it is removed.
+        if (items[cursor].deleted) {
+          continue;
+        }
+
+        // If we're selecting things with a particular attribute, like
+        // "unsaved", skip items without the attribute.
+        if (attribute !== null) {
+          if (!(items[cursor].attributes || {})[attribute]) {
             continue;
           }
         }
@@ -489,7 +533,7 @@ JX.install('DiffChangesetList', {
         break;
       }
 
-      this._setSelectionState(items[cursor], manager);
+      this._setSelectionState(items[cursor], true);
     },
 
     _getSelectionState: function() {
@@ -512,24 +556,34 @@ JX.install('DiffChangesetList', {
       };
     },
 
-    _setSelectionState: function(item, manager) {
+    _setSelectionState: function(item, scroll) {
       this._cursorItem = item;
-      this._redrawSelection(manager, true);
+      this._redrawSelection(scroll);
 
       return this;
     },
 
-    _redrawSelection: function(manager, scroll) {
+    _redrawSelection: function(scroll) {
       var cursor = this._cursorItem;
       if (!cursor) {
         this.setFocus(null);
         return;
       }
 
+      // If this item has been removed from the document (for example: create
+      // a new empty comment, then use the "Unsaved" button to select it, then
+      // cancel it), we can still keep the cursor here but do not want to show
+      // a selection reticle over an invisible node.
+      if (cursor.deleted) {
+        this.setFocus(null);
+        return;
+      }
+
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
-      if (manager && scroll) {
-        manager.scrollTo(cursor.nodes.begin);
+      if (scroll) {
+        var pos = JX.$V(cursor.nodes.begin);
+        JX.DOM.scrollToPosition(0, pos.y - 60);
       }
 
       return this;
@@ -546,7 +600,7 @@ JX.install('DiffChangesetList', {
 
       var state = this._getSelectionState();
       if (state.cursor !== null) {
-        this._setSelectionState(state.items[state.cursor]);
+        this._setSelectionState(state.items[state.cursor], false);
       }
     },
 
@@ -858,7 +912,7 @@ JX.install('DiffChangesetList', {
       if (selection.cursor !== null) {
         item = selection.items[selection.cursor];
         if (item.target === inline) {
-          this._setSelectionState(null);
+          this._setSelectionState(null, false);
           return;
         }
       }
@@ -870,7 +924,7 @@ JX.install('DiffChangesetList', {
       for (var ii = 0; ii < items.length; ii++) {
         item = items[ii];
         if (item.target === inline) {
-          this._setSelectionState(item);
+          this._setSelectionState(item, false);
         }
       }
     },
@@ -1287,7 +1341,7 @@ JX.install('DiffChangesetList', {
       var unsaved = [];
       var unsubmitted = [];
       var undone = [];
-      var all = [];
+      var done = [];
 
       for (var ii = 0; ii < changesets.length; ii++) {
         var inlines = changesets[ii].getInlines();
@@ -1298,14 +1352,22 @@ JX.install('DiffChangesetList', {
             continue;
           }
 
-          all.push(inline);
+          if (inline.isSynthetic()) {
+            continue;
+          }
 
           if (inline.isEditing()) {
             unsaved.push(inline);
+          } else if (!inline.getID()) {
+            // These are new comments which have been cancelled, and do not
+            // count as anything.
+            continue;
           } else if (inline.isDraft()) {
             unsubmitted.push(inline);
           } else if (!inline.isDone()) {
             undone.push(inline);
+          } else {
+            done.push(inline);
           }
         }
       }
@@ -1320,12 +1382,171 @@ JX.install('DiffChangesetList', {
         'diff-banner-has-unsubmitted',
         !!unsubmitted.length);
 
+      var pht = this.getTranslations();
+      var unsaved_button = this._getUnsavedButton();
+      var unsubmitted_button = this._getUnsubmittedButton();
+      var done_button = this._getDoneButton();
+
+      if (unsaved.length) {
+        unsaved_button.setText(unsaved.length + ' ' + pht('Unsaved'));
+        JX.DOM.show(unsaved_button.getNode());
+      } else {
+        JX.DOM.hide(unsaved_button.getNode());
+      }
+
+      if (unsubmitted.length) {
+        unsubmitted_button.setText(
+          unsubmitted.length + ' ' + pht('Unsubmitted'));
+        JX.DOM.show(unsubmitted_button.getNode());
+      } else {
+        JX.DOM.hide(unsubmitted_button.getNode());
+      }
+
+      if (done.length || undone.length) {
+        // If you haven't marked any comments as "Done", we just show text
+        // like "3 Comments". If you've marked at least one done, we show
+        // "1 / 3 Comments".
+
+        var done_text;
+        if (done.length) {
+          done_text = [
+            done.length,
+            ' / ',
+            (done.length + undone.length),
+            ' ',
+            pht('Comments')
+          ];
+        } else {
+          done_text = [
+            undone.length,
+            ' ',
+            pht('Comments')
+          ];
+        }
+
+        done_button.setText(done_text);
+
+        JX.DOM.show(done_button.getNode());
+
+        // If any comments are not marked "Done", this cycles through the
+        // missing comments. Otherwise, it cycles through all the saved
+        // comments.
+        if (undone.length) {
+          this._doneMode = 'undone';
+        } else {
+          this._doneMode = 'done';
+        }
+
+      } else {
+        JX.DOM.hide(done_button.getNode());
+      }
+
+      var path_view = [icon, ' ', changeset.getDisplayPath()];
+
+      var buttons_attrs = {
+        className: 'diff-banner-buttons'
+      };
+
+      var buttons_list = [
+        unsaved_button.getNode(),
+        unsubmitted_button.getNode(),
+        done_button.getNode()
+      ];
+
+      var buttons_view = JX.$N('div', buttons_attrs, buttons_list);
+
       var icon = new JX.PHUIXIconView()
         .setIcon(changeset.getIcon())
         .getNode();
-      JX.DOM.setContent(node, [icon, ' ', changeset.getDisplayPath()]);
+      JX.DOM.setContent(node, [buttons_view, path_view]);
 
       document.body.appendChild(node);
+    },
+
+    _getUnsavedButton: function() {
+      if (!this._unsavedButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-commenting-o')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var onunsaved = JX.bind(this, this._onunsavedclick);
+        JX.DOM.listen(node, 'click', null, onunsaved);
+
+        this._unsavedButton = button;
+      }
+
+      return this._unsavedButton;
+    },
+
+    _getUnsubmittedButton: function() {
+      if (!this._unsubmittedButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-comment-o')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var onunsubmitted = JX.bind(this, this._onunsubmittedclick);
+        JX.DOM.listen(node, 'click', null, onunsubmitted);
+
+        this._unsubmittedButton = button;
+      }
+
+      return this._unsubmittedButton;
+    },
+
+    _getDoneButton: function() {
+      if (!this._doneButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-comment')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var ondone = JX.bind(this, this._ondoneclick);
+        JX.DOM.listen(node, 'click', null, ondone);
+
+        this._doneButton = button;
+      }
+
+      return this._doneButton;
+    },
+    _onunsavedclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        attribute: 'unsaved'
+      };
+
+      this._onjumpkey(1, options);
+    },
+
+    _onunsubmittedclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        attribute: 'unsubmitted'
+      };
+
+      this._onjumpkey(1, options);
+    },
+
+    _ondoneclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        attribute: this._doneMode
+      };
+
+      this._onjumpkey(1, options);
     },
 
     _getBannerNode: function() {

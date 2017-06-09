@@ -49,6 +49,17 @@ final class PhabricatorAuditTransaction
     return $blocks;
   }
 
+  public function getActionStrength() {
+    $type = $this->getTransactionType();
+
+    switch ($type) {
+      case self::TYPE_COMMIT:
+        return 3.0;
+    }
+
+    return parent::getActionStrength();
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 

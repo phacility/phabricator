@@ -199,7 +199,7 @@ final class PhabricatorPolicyEditController
               'a',
               array(
                 'href' => '#',
-                'class' => 'button green',
+                'class' => 'button button-green',
                 'sigil' => 'create-rule',
                 'mustcapture' => true,
               ),
