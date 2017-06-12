@@ -576,6 +576,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $curtain->addAction(
       id(new PhabricatorActionView())
+        ->setIcon('fa-indent')
+        ->setHref("/differential/revision/inlines/{$revision_id}/")
+        ->setName(pht('List Inline Comments')));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
         ->setIcon('fa-upload')
         ->setHref("/differential/revision/update/{$revision_id}/")
         ->setName(pht('Update Diff'))

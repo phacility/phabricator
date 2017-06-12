@@ -483,8 +483,10 @@ abstract class PhabricatorController extends AphrontController {
     // NOTE: Applications (objects of class PhabricatorApplication) can't
     // currently be set here, although they don't need any of the extensions
     // anyway. This should probably work differently than it does, though.
-    if ($object instanceof PhabricatorLiskDAO) {
-      $action_list->setObject($object);
+    if ($object) {
+      if ($object instanceof PhabricatorLiskDAO) {
+        $action_list->setObject($object);
+      }
     }
 
     $curtain = id(new PHUICurtainView())
