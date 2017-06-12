@@ -143,6 +143,7 @@ abstract class DiffusionRequest extends Phobject {
     $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
       ->withIdentifiers(array($identifier))
+      ->needProfileImage(true)
       ->needURIs(true);
 
     if ($need_edit) {

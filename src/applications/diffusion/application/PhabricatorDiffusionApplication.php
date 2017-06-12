@@ -140,6 +140,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           $this->getEditRoutePattern('edit/') =>
             'DiffusionCommitEditController',
         ),
+        'picture/(?P<id>[0-9]\d*)/'
+          => 'DiffusionRepositoryProfilePictureController',
       ),
     );
   }
