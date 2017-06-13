@@ -121,14 +121,13 @@ final class PHUIDiffInlineCommentEditView
   private function renderBody() {
     $buttons = array();
 
-    $buttons[] = phutil_tag('button', array(), pht('Save Draft'));
-    $buttons[] = javelin_tag(
-      'button',
-      array(
-        'sigil' => 'inline-edit-cancel',
-        'class' => 'grey',
-      ),
-      pht('Cancel'));
+    $buttons[] = id(new PHUIButtonView())
+      ->setText(pht('Save Draft'));
+
+    $buttons[] = id(new PHUIButtonView())
+      ->setText(pht('Cancel'))
+      ->setColor(PHUIButtonView::GREY)
+      ->addSigil('inline-edit-cancel');
 
     $title = phutil_tag(
       'div',
