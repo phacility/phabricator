@@ -116,10 +116,10 @@ abstract class DiffusionView extends AphrontView {
 
     if ($button) {
       return id(new PHUIButtonView())
-        ->setText(pht('Browse'))
+        ->setTag('a')
         ->setIcon('fa-code')
         ->setHref($href)
-        ->setTag('a')
+        ->setToolTip(pht('Browse'))
         ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE);
     }
 
