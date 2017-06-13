@@ -48,18 +48,7 @@ final class DiffusionBranchListView extends DiffusionView {
 
         $buildable = idx($buildables, $commit->getPHID());
         if ($buildable) {
-          $status = $buildable->getBuildableStatus();
-          $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
-          $color = HarbormasterBuildable::getBuildableStatusColor($status);
-          $name = HarbormasterBuildable::getBuildableStatusName($status);
-          $build_view = id(new PHUIButtonView())
-            ->setTag('a')
-            ->setText($name)
-            ->setIcon($icon)
-            ->setColor($color)
-            ->setHref('/'.$buildable->getMonogram())
-            ->addClass('mmr')
-            ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE);
+          $build_view = $this->renderBuildable($buildable, 'button');
         }
       } else {
         $datetime = null;

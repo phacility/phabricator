@@ -190,13 +190,26 @@ abstract class DiffusionView extends AphrontView {
   }
 
   final protected function renderBuildable(
-    HarbormasterBuildable $buildable) {
+    HarbormasterBuildable $buildable,
+    $type = null) {
     $status = $buildable->getBuildableStatus();
     Javelin::initBehavior('phabricator-tooltips');
 
     $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
     $color = HarbormasterBuildable::getBuildableStatusColor($status);
     $name = HarbormasterBuildable::getBuildableStatusName($status);
+
+    if ($type == 'button') {
+      return id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText($name)
+        ->setIcon($icon)
+        ->setColor($color)
+        ->setHref('/'.$buildable->getMonogram())
+        ->addClass('mmr')
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
+        ->addClass('diffusion-list-build-status');
+    }
 
     return id(new PHUIIconView())
       ->setIcon($icon.' '.$color)

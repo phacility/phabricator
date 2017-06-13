@@ -492,7 +492,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->needCommitData(true)
       ->execute();
 
-    $view = id(new DiffusionTagListView())
+    $view = id(new DiffusionTagTableView())
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
       ->setTags($tags)
