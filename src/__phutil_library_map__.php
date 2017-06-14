@@ -1507,6 +1507,7 @@ phutil_register_library_map(array(
     'ManiphestSearchConduitAPIMethod' => 'applications/maniphest/conduit/ManiphestSearchConduitAPIMethod.php',
     'ManiphestStatusConfigOptionType' => 'applications/maniphest/config/ManiphestStatusConfigOptionType.php',
     'ManiphestStatusEmailCommand' => 'applications/maniphest/command/ManiphestStatusEmailCommand.php',
+    'ManiphestStatusSearchConduitAPIMethod' => 'applications/maniphest/conduit/ManiphestStatusSearchConduitAPIMethod.php',
     'ManiphestSubpriorityController' => 'applications/maniphest/controller/ManiphestSubpriorityController.php',
     'ManiphestSubtypesConfigOptionsType' => 'applications/maniphest/config/ManiphestSubtypesConfigOptionsType.php',
     'ManiphestTask' => 'applications/maniphest/storage/ManiphestTask.php',
@@ -6607,6 +6608,7 @@ phutil_register_library_map(array(
     'ManiphestSearchConduitAPIMethod' => 'PhabricatorSearchEngineAPIMethod',
     'ManiphestStatusConfigOptionType' => 'PhabricatorConfigJSONOptionType',
     'ManiphestStatusEmailCommand' => 'ManiphestEmailCommand',
+    'ManiphestStatusSearchConduitAPIMethod' => 'ManiphestConduitAPIMethod',
     'ManiphestSubpriorityController' => 'ManiphestController',
     'ManiphestSubtypesConfigOptionsType' => 'PhabricatorConfigJSONOptionType',
     'ManiphestTask' => array(

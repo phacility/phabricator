@@ -285,6 +285,11 @@ final class ManiphestTaskEditBulkJobType
                 '=' => array_fuse($value),
               ));
           break;
+        case ManiphestTaskPriorityTransaction::TRANSACTIONTYPE:
+          $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+          $keyword = head(idx($keyword_map, $value));
+          $xaction->setNewValue($keyword);
+          break;
         default:
           $xaction->setNewValue($value);
           break;

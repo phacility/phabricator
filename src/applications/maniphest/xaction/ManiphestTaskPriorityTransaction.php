@@ -12,6 +12,19 @@ final class ManiphestTaskPriorityTransaction
     return $object->getPriority();
   }
 
+  public function generateNewValue($object, $value) {
+    // `$value` is supposed to be a keyword, but if the priority
+    // assigned to a task has been removed from the config,
+    // no such keyword will be available. Other edits to the task
+    // should still be allowed, even if the priority is  no longer
+    // valid, so treat this as a no-op.
+    if ($value === ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD) {
+      return $object->getPriority();
+    }
+
+    return (string)ManiphestTaskPriority::getTaskPriorityFromKeyword($value);
+  }
+
   public function applyInternalEffects($object, $value) {
     $object->setPriority($value);
   }

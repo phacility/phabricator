@@ -79,7 +79,7 @@ final class ManiphestTask extends ManiphestDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'ownerPHID' => 'phid?',
-        'status' => 'text12',
+        'status' => 'text64',
         'priority' => 'uint32',
         'title' => 'sort',
         'originalTitle' => 'text',
@@ -243,6 +243,14 @@ final class ManiphestTask extends ManiphestDAO
         (int)-$this->getID(),
       ),
     );
+  }
+
+  public function getPriorityKeyword() {
+    $priority = $this->getPriority();
+    $map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+    $default = array(ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD);
+    $keywords = idx($map, $priority, $default);
+    return head($keywords);
   }
 
   private function comparePriorityTo(ManiphestTask $other) {

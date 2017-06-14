@@ -194,11 +194,14 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
       $dst,
       $is_after);
 
+    $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+    $keyword = head($keyword_map[$pri]);
+
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
-      ->setNewValue($pri);
+      ->setNewValue($keyword);
 
     $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)
@@ -217,11 +220,14 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
       $target_priority,
       $is_end);
 
+    $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+    $keyword = head($keyword_map[$pri]);
+
     $xactions = array();
 
     $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
-      ->setNewValue($pri);
+      ->setNewValue($keyword);
 
     $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)
