@@ -279,6 +279,12 @@ final class DifferentialChangesetListView extends AphrontView {
         'Unsaved' => pht('Unsaved'),
         'Unsubmitted' => pht('Unsubmitted'),
         'Comments' => pht('Comments'),
+
+        'Hide "Done" Inlines' => pht('Hide "Done" Inlines'),
+        'Hide Collapsed Inlines' => pht('Hide Collapsed Inlines'),
+        'Hide Older Inlines' => pht('Hide Older Inlines'),
+        'Hide All Inlines' => pht('Hide All Inlines'),
+        'Show All Inlines' => pht('Show All Inlines'),
       ),
     ));
 

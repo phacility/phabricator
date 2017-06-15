@@ -117,6 +117,10 @@ JX.install('DiffChangesetList', {
     _doneButton: null,
     _doneMode: null,
 
+    _dropdownMenu: null,
+    _menuButton: null,
+    _menuItems: null,
+
     sleep: function() {
       this._asleep = true;
 
@@ -458,6 +462,7 @@ JX.install('DiffChangesetList', {
       var collapsed = options.collapsed || false;
       var wrap = options.wrap || false;
       var attribute = options.attribute || null;
+      var show = options.show || false;
 
       var cursor = state.cursor;
       var items = state.items;
@@ -527,6 +532,15 @@ JX.install('DiffChangesetList', {
           if (!(items[cursor].attributes || {})[attribute]) {
             continue;
           }
+        }
+
+        // If this item is a hidden inline but we're clicking a button which
+        // selects inlines of a particular type, make it visible again.
+        if (items[cursor].hidden) {
+          if (!show) {
+            continue;
+          }
+          items[cursor].target.setHidden(false);
         }
 
         // Otherwise, we've found a valid item to select.
@@ -1314,6 +1328,13 @@ JX.install('DiffChangesetList', {
     },
 
     _redrawBanner: function() {
+      // If the inline comment menu is open and we've done a redraw, close it.
+      // In particular, this makes it close when you scroll the document:
+      // otherwise, it stays open but the banner moves underneath it.
+      if (this._dropdownMenu) {
+        this._dropdownMenu.close();
+      }
+
       var node = this._getBannerNode();
       var changeset = this._getVisibleChangeset();
 
@@ -1329,49 +1350,13 @@ JX.install('DiffChangesetList', {
         return;
       }
 
-      var changesets = this._changesets;
-      var unsaved = [];
-      var unsubmitted = [];
-      var draft_done = [];
-      var undone = [];
-      var done = [];
+      var inlines = this._getInlinesByType();
 
-      for (var ii = 0; ii < changesets.length; ii++) {
-        var inlines = changesets[ii].getInlines();
-        for (var jj = 0; jj < inlines.length; jj++) {
-          var inline = inlines[jj];
-
-          if (inline.isDeleted()) {
-            continue;
-          }
-
-          if (inline.isSynthetic()) {
-            continue;
-          }
-
-          if (inline.isEditing()) {
-            unsaved.push(inline);
-          } else if (!inline.getID()) {
-            // These are new comments which have been cancelled, and do not
-            // count as anything.
-            continue;
-          } else if (inline.isDraft()) {
-            unsubmitted.push(inline);
-          } else {
-            // NOTE: Unlike other states, an inline may be marked with a
-            // draft checkmark and still be a "done" or "undone" comment.
-            if (inline.isDraftDone()) {
-              draft_done.push(inline);
-            }
-
-            if (!inline.isDone()) {
-              undone.push(inline);
-            } else {
-              done.push(inline);
-            }
-          }
-        }
-      }
+      var unsaved = inlines.unsaved;
+      var unsubmitted = inlines.unsubmitted;
+      var undone = inlines.undone;
+      var done = inlines.done;
+      var draft_done = inlines.draftDone;
 
       JX.DOM.alterClass(
         node,
@@ -1392,6 +1377,7 @@ JX.install('DiffChangesetList', {
       var unsaved_button = this._getUnsavedButton();
       var unsubmitted_button = this._getUnsubmittedButton();
       var done_button = this._getDoneButton();
+      var menu_button = this._getMenuButton();
 
       if (unsaved.length) {
         unsaved_button.setText(unsaved.length + ' ' + pht('Unsaved'));
@@ -1457,7 +1443,8 @@ JX.install('DiffChangesetList', {
       var buttons_list = [
         unsaved_button.getNode(),
         unsubmitted_button.getNode(),
-        done_button.getNode()
+        done_button.getNode(),
+        menu_button.getNode()
       ];
 
       var buttons_view = JX.$N('div', buttons_attrs, buttons_list);
@@ -1468,6 +1455,104 @@ JX.install('DiffChangesetList', {
       JX.DOM.setContent(node, [buttons_view, path_view]);
 
       document.body.appendChild(node);
+    },
+
+    _getInlinesByType: function() {
+      var changesets = this._changesets;
+      var unsaved = [];
+      var unsubmitted = [];
+      var undone = [];
+      var done = [];
+      var draft_done = [];
+
+      var visible_done = [];
+      var visible_collapsed = [];
+      var visible_ghosts = [];
+      var visible = [];
+      var hidden = [];
+
+      for (var ii = 0; ii < changesets.length; ii++) {
+        var inlines = changesets[ii].getInlines();
+        var inline;
+        var jj;
+        for (jj = 0; jj < inlines.length; jj++) {
+          inline = inlines[jj];
+
+          if (inline.isDeleted()) {
+            continue;
+          }
+
+          if (inline.isSynthetic()) {
+            continue;
+          }
+
+          if (inline.isEditing()) {
+            unsaved.push(inline);
+          } else if (!inline.getID()) {
+            // These are new comments which have been cancelled, and do not
+            // count as anything.
+            continue;
+          } else if (inline.isDraft()) {
+            unsubmitted.push(inline);
+          } else {
+            // NOTE: Unlike other states, an inline may be marked with a
+            // draft checkmark and still be a "done" or "undone" comment.
+            if (inline.isDraftDone()) {
+              draft_done.push(inline);
+            }
+
+            if (!inline.isDone()) {
+              undone.push(inline);
+            } else {
+              done.push(inline);
+            }
+          }
+        }
+
+        for (jj = 0; jj < inlines.length; jj++) {
+          inline = inlines[jj];
+          if (inline.isDeleted()) {
+            continue;
+          }
+
+          if (inline.isEditing()) {
+            continue;
+          }
+
+          if (inline.isHidden()) {
+            hidden.push(inline);
+            continue;
+          }
+
+          visible.push(inline);
+
+          if (inline.isDone()) {
+            visible_done.push(inline);
+          }
+
+          if (inline.isCollapsed()) {
+            visible_collapsed.push(inline);
+          }
+
+          if (inline.isGhost()) {
+            visible_ghosts.push(inline);
+          }
+        }
+      }
+
+      return {
+        unsaved: unsaved,
+        unsubmitted: unsubmitted,
+        undone: undone,
+        done: done,
+        draftDone: draft_done,
+        visibleDone: visible_done,
+        visibleGhosts: visible_ghosts,
+        visibleCollapsed: visible_collapsed,
+        visible: visible,
+        hidden: hidden
+      };
+
     },
 
     _getUnsavedButton: function() {
@@ -1520,12 +1605,126 @@ JX.install('DiffChangesetList', {
 
       return this._doneButton;
     },
+
+    _getMenuButton: function() {
+      if (!this._menuButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-gear')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var dropdown = new JX.PHUIXDropdownMenu(button.getNode());
+        this._menuItems = {};
+
+        var list = new JX.PHUIXActionListView();
+        dropdown.setContent(list.getNode());
+
+        var map = {
+          hideDone: {
+            type: 'done'
+          },
+          hideCollapsed: {
+            type: 'collapsed'
+          },
+          hideGhosts: {
+            type: 'ghosts'
+          },
+          hideAll: {
+            type: 'all'
+          },
+          showAll: {
+            type: 'show'
+          }
+        };
+
+        for (var k in map) {
+          var spec = map[k];
+
+          var handler = JX.bind(this, this._onhideinlines, spec.type);
+          var item = new JX.PHUIXActionView()
+            .setHandler(handler);
+
+          list.addItem(item);
+          this._menuItems[k] = item;
+        }
+
+        dropdown.listen('open', JX.bind(this, this._ondropdown));
+
+        this._menuButton = button;
+        this._dropdownMenu = dropdown;
+      }
+
+      return this._menuButton;
+    },
+
+    _ondropdown: function() {
+      var inlines = this._getInlinesByType();
+      var items = this._menuItems;
+      var pht = this.getTranslations();
+
+      items.hideDone
+        .setName(pht('Hide "Done" Inlines'))
+        .setDisabled(!inlines.visibleDone.length);
+
+      items.hideCollapsed
+        .setName(pht('Hide Collapsed Inlines'))
+        .setDisabled(!inlines.visibleCollapsed.length);
+
+      items.hideGhosts
+        .setName(pht('Hide Older Inlines'))
+        .setDisabled(!inlines.visibleGhosts.length);
+
+      items.hideAll
+        .setName(pht('Hide All Inlines'))
+        .setDisabled(!inlines.visible.length);
+
+      items.showAll
+        .setName(pht('Show All Inlines'))
+        .setDisabled(!inlines.hidden.length);
+    },
+
+    _onhideinlines: function(type, e) {
+      this._dropdownMenu.close();
+      e.prevent();
+
+      var inlines = this._getInlinesByType();
+
+      // Clear the selection state since we end up in a weird place if the
+      // user hides the selected inline.
+      this._setSelectionState(null);
+
+      var targets;
+      var mode = true;
+      switch (type) {
+        case 'done':
+          targets = inlines.visibleDone;
+          break;
+        case 'collapsed':
+          targets = inlines.visibleCollapsed;
+          break;
+        case 'ghosts':
+          targets = inlines.visibleGhosts;
+          break;
+        case 'all':
+          targets = inlines.visible;
+          break;
+        case 'show':
+          targets = inlines.hidden;
+          mode = false;
+          break;
+      }
+
+      for (var ii = 0; ii < targets.length; ii++) {
+        targets[ii].setHidden(mode);
+      }
+    },
+
     _onunsavedclick: function(e) {
       e.kill();
 
       var options = {
         filter: 'comment',
         wrap: true,
+        show: true,
         attribute: 'unsaved'
       };
 
@@ -1538,6 +1737,7 @@ JX.install('DiffChangesetList', {
       var options = {
         filter: 'comment',
         wrap: true,
+        show: true,
         attribute: 'anyDraft'
       };
 
@@ -1550,6 +1750,7 @@ JX.install('DiffChangesetList', {
       var options = {
         filter: 'comment',
         wrap: true,
+        show: true,
         attribute: this._doneMode
       };
 

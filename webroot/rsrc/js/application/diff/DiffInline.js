@@ -36,6 +36,7 @@ JX.install('DiffInline', {
     _isEditing: false,
     _isNew: false,
     _isSynthetic: false,
+    _isHidden: false,
 
     bindToRow: function(row) {
       this._row = row;
@@ -107,6 +108,14 @@ JX.install('DiffInline', {
 
     isDraftDone: function() {
       return this._isDraftDone;
+    },
+
+    isHidden: function() {
+      return this._isHidden;
+    },
+
+    isGhost: function() {
+      return this._isGhost;
     },
 
     bindToRange: function(data) {
@@ -204,6 +213,12 @@ JX.install('DiffInline', {
 
     setEditing: function(editing) {
       this._isEditing = editing;
+      return this;
+    },
+
+    setHidden: function(hidden) {
+      this._isHidden = hidden;
+      this._redraw();
       return this;
     },
 
@@ -708,9 +723,10 @@ JX.install('DiffInline', {
     },
 
     _redraw: function() {
-      var is_invisible = (this._isInvisible || this._isDeleted);
+      var is_invisible =
+        (this._isInvisible || this._isDeleted || this._isHidden);
       var is_loading = this._isLoading;
-      var is_collapsed = this._isCollapsed;
+      var is_collapsed = (this._isCollapsed && !this._isHidden);
 
       var row = this._row;
       JX.DOM.alterClass(row, 'differential-inline-hidden', is_invisible);
