@@ -8,7 +8,7 @@ final class PHUIDiffRevealIconView extends AphrontView {
       ->addSigil('has-tooltip')
       ->setMetadata(
         array(
-          'tip' => pht('Show Hidden Comment'),
+          'tip' => pht('Expand'),
           'align' => 'E',
           'size' => 275,
         ));

@@ -14,7 +14,6 @@ JX.install('DiffInline', {
     _phid: null,
     _changesetID: null,
     _row: null,
-    _hidden: false,
     _number: null,
     _length: null,
     _displaySide: null,
@@ -30,6 +29,7 @@ JX.install('DiffInline', {
 
     _changeset: null,
 
+    _isCollapsed: false,
     _isDraft: null,
     _isFixed: null,
     _isEditing: false,
@@ -41,7 +41,7 @@ JX.install('DiffInline', {
 
       var row_data = JX.Stratcom.getData(row);
       row_data.inline = this;
-      this._hidden = row_data.hidden || false;
+      this._isCollapsed = row_data.hidden || false;
 
       // TODO: Get smarter about this once we do more editing, this is pretty
       // hacky.
@@ -225,7 +225,7 @@ JX.install('DiffInline', {
       return true;
     },
 
-    canHide: function() {
+    canCollapse: function() {
       if (!JX.DOM.scry(this._row, 'a', 'hide-inline').length) {
         return false;
       }
@@ -254,20 +254,18 @@ JX.install('DiffInline', {
 
       this._id = null;
       this._phid = null;
-      this._hidden = false;
+      this._isCollapsed = false;
 
       this._originalText = null;
 
       return row;
     },
 
-    setHidden: function(hidden) {
-      this._hidden = hidden;
-
-      JX.DOM.alterClass(this._row, 'inline-hidden', this._hidden);
+    setCollapsed: function(collapsed) {
+      this._isCollapsed = collapsed;
 
       var op;
-      if (hidden) {
+      if (collapsed) {
         op = 'hide';
       } else {
         op = 'show';
@@ -280,11 +278,12 @@ JX.install('DiffInline', {
         .setHandler(JX.bag)
         .start();
 
+      this._redraw();
       this._didUpdate(true);
     },
 
-    isHidden: function() {
-      return this._hidden;
+    isCollapsed: function() {
+      return this._isCollapsed;
     },
 
     toggleDone: function() {
@@ -703,11 +702,13 @@ JX.install('DiffInline', {
 
     _redraw: function() {
       var is_invisible = (this._isInvisible || this._isDeleted);
-      var is_loading = (this._isLoading);
+      var is_loading = this._isLoading;
+      var is_collapsed = this._isCollapsed;
 
       var row = this._row;
       JX.DOM.alterClass(row, 'differential-inline-hidden', is_invisible);
       JX.DOM.alterClass(row, 'differential-inline-loading', is_loading);
+      JX.DOM.alterClass(row, 'inline-hidden', is_collapsed);
     },
 
     _removeRow: function(row) {

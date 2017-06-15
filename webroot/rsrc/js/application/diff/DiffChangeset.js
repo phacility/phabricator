@@ -446,7 +446,7 @@ JX.install('DiffChangeset', {
               type: block.type,
               changeset: this,
               target: inline,
-              hidden: inline.isHidden(),
+              collapsed: inline.isCollapsed(),
               deleted: !inline.getID() && !inline.isEditing(),
               nodes: {
                 begin: block.items[jj],

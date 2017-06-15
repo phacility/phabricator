@@ -265,7 +265,7 @@ final class PHUIDiffInlineCommentDetailView
     if (!$this->preview && $this->canHide()) {
       $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
-        ->setTooltip(pht('Hide Comment'))
+        ->setTooltip(pht('Collapse'))
         ->setIcon('fa-times')
         ->addSigil('hide-inline')
         ->setMustCapture(true);

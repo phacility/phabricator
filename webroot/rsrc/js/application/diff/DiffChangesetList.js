@@ -19,11 +19,11 @@ JX.install('DiffChangesetList', {
     var onmenu = JX.bind(this, this._ifawake, this._onmenu);
     JX.Stratcom.listen('click', 'differential-view-options', onmenu);
 
-    var onhide = JX.bind(this, this._ifawake, this._onhide);
-    JX.Stratcom.listen('click', 'hide-inline', onhide);
+    var oncollapse = JX.bind(this, this._ifawake, this._oncollapse, true);
+    JX.Stratcom.listen('click', 'hide-inline', oncollapse);
 
-    var onreveal = JX.bind(this, this._ifawake, this._onreveal);
-    JX.Stratcom.listen('click', 'reveal-inline', onreveal);
+    var onexpand = JX.bind(this, this._ifawake, this._oncollapse, false);
+    JX.Stratcom.listen('click', 'reveal-inline', onexpand);
 
     var onedit = JX.bind(this, this._ifawake, this._onaction, 'edit');
     JX.Stratcom.listen(
@@ -158,11 +158,11 @@ JX.install('DiffChangesetList', {
       label = pht('Jump to previous inline comment.');
       this._installJumpKey('p', label, -1, 'comment');
 
-      label = pht('Jump to next inline comment, including hidden comments.');
+      label = pht('Jump to next inline comment, including collapsed comments.');
       this._installJumpKey('N', label, 1, 'comment', true);
 
       label = pht(
-        'Jump to previous inline comment, including hidden comments.');
+        'Jump to previous inline comment, including collapsed comments.');
       this._installJumpKey('P', label, -1, 'comment', true);
 
       label = pht('Hide or show the current file.');
@@ -183,8 +183,8 @@ JX.install('DiffChangesetList', {
       label = pht('Mark or unmark selected inline comment as done.');
       this._installKey('w', label, this._onkeydone);
 
-      label = pht('Hide or show inline comment.');
-      this._installKey('q', label, this._onkeyhide);
+      label = pht('Collapse or expand inline comment.');
+      this._installKey('q', label, this._onkeycollapse);
     },
 
     isAsleep: function() {
@@ -261,12 +261,12 @@ JX.install('DiffChangesetList', {
         .register();
     },
 
-    _installJumpKey: function(key, label, delta, filter, show_hidden) {
+    _installJumpKey: function(key, label, delta, filter, show_collapsed) {
       filter = filter || null;
 
       var options = {
         filter: filter,
-        hidden: show_hidden
+        collapsed: show_collapsed
       };
 
       var handler = JX.bind(this, this._onjumpkey, delta, options);
@@ -424,16 +424,16 @@ JX.install('DiffChangesetList', {
       this._warnUser(pht('You must select a file to hide or show.'));
     },
 
-    _onkeyhide: function() {
+    _onkeycollapse: function() {
       var cursor = this._cursorItem;
 
       if (cursor) {
         if (cursor.type == 'comment') {
           var inline = cursor.target;
-          if (inline.canHide()) {
+          if (inline.canCollapse()) {
             this.setFocus(null);
 
-            inline.setHidden(!inline.isHidden());
+            inline.setCollapsed(!inline.isCollapsed());
             return;
           }
         }
@@ -455,7 +455,7 @@ JX.install('DiffChangesetList', {
       var state = this._getSelectionState();
 
       var filter = options.filter || null;
-      var hidden = options.hidden || false;
+      var collapsed = options.collapsed || false;
       var wrap = options.wrap || false;
       var attribute = options.attribute || null;
 
@@ -507,10 +507,10 @@ JX.install('DiffChangesetList', {
           }
         }
 
-        // If the item is hidden, don't select it when iterating with jump
+        // If the item is collapsed, don't select it when iterating with jump
         // keys. It can still potentially be selected in other ways.
-        if (!hidden) {
-          if (items[cursor].hidden) {
+        if (!collapsed) {
+          if (items[cursor].collapsed) {
             continue;
           }
         }
@@ -851,20 +851,12 @@ JX.install('DiffChangesetList', {
       menu.open();
     },
 
-    _onhide: function(e) {
-      this._onhidereveal(e, true);
-    },
-
-    _onreveal: function(e) {
-      this._onhidereveal(e, false);
-    },
-
-    _onhidereveal: function(e, is_hide) {
+    _oncollapse: function(is_collapse, e) {
       e.kill();
 
       var inline = this._getInlineForEvent(e);
 
-      inline.setHidden(is_hide);
+      inline.setCollapsed(is_collapse);
     },
 
     _onresize: function() {
