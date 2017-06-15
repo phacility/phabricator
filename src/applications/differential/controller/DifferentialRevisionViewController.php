@@ -281,6 +281,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setTitle(pht('Diff %s', $target->getID()))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
+
+    $revision_id = $revision->getID();
+    $inline_list_uri = "/revision/inlines/{$revision_id}/";
+    $inline_list_uri = $this->getApplicationURI($inline_list_uri);
+    $changeset_view->setInlineListURI($inline_list_uri);
+
     if ($repository) {
       $changeset_view->setRepository($repository);
     }
@@ -573,12 +579,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setName(pht('Edit Revision'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-indent')
-        ->setHref("/differential/revision/inlines/{$revision_id}/")
-        ->setName(pht('List Inline Comments')));
 
     $curtain->addAction(
       id(new PhabricatorActionView())

@@ -88,7 +88,8 @@ JX.install('DiffChangesetList', {
 
   properties: {
     translations: null,
-    inlineURI: null
+    inlineURI: null,
+    inlineListURI: null
   },
 
   members: {
@@ -1648,6 +1649,20 @@ JX.install('DiffChangesetList', {
         }
 
         dropdown.listen('open', JX.bind(this, this._ondropdown));
+
+        var pht = this.getTranslations();
+
+        if (this.getInlineListURI()) {
+          list.addItem(
+            new JX.PHUIXActionView()
+              .setDivider(true));
+
+          list.addItem(
+            new JX.PHUIXActionView()
+              .setIcon('fa-link')
+              .setName(pht('List Inline Comments'))
+              .setHref(this.getInlineListURI()));
+        }
 
         this._menuButton = button;
         this._dropdownMenu = dropdown;

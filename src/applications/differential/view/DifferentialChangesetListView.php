@@ -14,6 +14,7 @@ final class DifferentialChangesetListView extends AphrontView {
   private $standaloneURI;
   private $leftRawFileURI;
   private $rightRawFileURI;
+  private $inlineListURI;
 
   private $symbolIndexes = array();
   private $repository;
@@ -62,6 +63,15 @@ final class DifferentialChangesetListView extends AphrontView {
   public function setInlineCommentControllerURI($uri) {
     $this->inlineURI = $uri;
     return $this;
+  }
+
+  public function setInlineListURI($uri) {
+    $this->inlineListURI = $uri;
+    return $this;
+  }
+
+  public function getInlineListURI() {
+    return $this->inlineListURI;
   }
 
   public function setRepository(PhabricatorRepository $repository) {
@@ -208,6 +218,7 @@ final class DifferentialChangesetListView extends AphrontView {
       array(
       'changesetViewIDs' => $ids,
       'inlineURI' => $this->inlineURI,
+      'inlineListURI' => $this->inlineListURI,
       'pht' => array(
         'Open in Editor' => pht('Open in Editor'),
         'Show All Context' => pht('Show All Context'),
@@ -285,6 +296,8 @@ final class DifferentialChangesetListView extends AphrontView {
         'Hide Older Inlines' => pht('Hide Older Inlines'),
         'Hide All Inlines' => pht('Hide All Inlines'),
         'Show All Inlines' => pht('Show All Inlines'),
+
+        'List Inline Comments' => pht('List Inline Comments'),
       ),
     ));
 
