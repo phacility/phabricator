@@ -415,7 +415,8 @@ tr.differential-inline-loading {
 }
 
 .diff-banner-has-unsaved,
-.diff-banner-has-unsubmitted {
+.diff-banner-has-unsubmitted,
+.diff-banner-has-draft-done {
   background: {$sh-yellowbackground};
 }
 

@@ -31,6 +31,7 @@ JX.install('DiffInline', {
 
     _isCollapsed: false,
     _isDraft: null,
+    _isDraftDone: null,
     _isFixed: null,
     _isEditing: false,
     _isNew: false,
@@ -73,6 +74,7 @@ JX.install('DiffInline', {
       this._isFixed = data.isFixed;
       this._isGhost = data.isGhost;
       this._isSynthetic = data.isSynthetic;
+      this._isDraftDone = data.isDraftDone;
 
       this._changesetID = data.changesetID;
       this._isNew = false;
@@ -101,6 +103,10 @@ JX.install('DiffInline', {
 
     isSynthetic: function() {
       return this._isSynthetic;
+    },
+
+    isDraftDone: function() {
+      return this._isDraftDone;
     },
 
     bindToRange: function(data) {
@@ -321,6 +327,7 @@ JX.install('DiffInline', {
       JX.DOM.alterClass(comment, 'inline-state-is-draft', response.draftState);
 
       this._isFixed = response.isChecked;
+      this._isDraftDone = !!response.draftState;
 
       this._didUpdate();
     },

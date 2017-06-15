@@ -454,7 +454,7 @@ JX.install('DiffChangeset', {
               },
               attributes: {
                 unsaved: inline.isEditing(),
-                unsubmitted: inline.isDraft(),
+                anyDraft: inline.isDraft() || inline.isDraftDone(),
                 undone: (is_saved && !inline.isDone()),
                 done: (is_saved && inline.isDone())
               }

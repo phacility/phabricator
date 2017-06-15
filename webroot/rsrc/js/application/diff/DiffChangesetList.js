@@ -1332,6 +1332,7 @@ JX.install('DiffChangesetList', {
       var changesets = this._changesets;
       var unsaved = [];
       var unsubmitted = [];
+      var draft_done = [];
       var undone = [];
       var done = [];
 
@@ -1356,10 +1357,18 @@ JX.install('DiffChangesetList', {
             continue;
           } else if (inline.isDraft()) {
             unsubmitted.push(inline);
-          } else if (!inline.isDone()) {
-            undone.push(inline);
           } else {
-            done.push(inline);
+            // NOTE: Unlike other states, an inline may be marked with a
+            // draft checkmark and still be a "done" or "undone" comment.
+            if (inline.isDraftDone()) {
+              draft_done.push(inline);
+            }
+
+            if (!inline.isDone()) {
+              undone.push(inline);
+            } else {
+              done.push(inline);
+            }
           }
         }
       }
@@ -1374,6 +1383,11 @@ JX.install('DiffChangesetList', {
         'diff-banner-has-unsubmitted',
         !!unsubmitted.length);
 
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-draft-done',
+        !!draft_done.length);
+
       var pht = this.getTranslations();
       var unsaved_button = this._getUnsavedButton();
       var unsubmitted_button = this._getUnsubmittedButton();
@@ -1386,9 +1400,10 @@ JX.install('DiffChangesetList', {
         JX.DOM.hide(unsaved_button.getNode());
       }
 
-      if (unsubmitted.length) {
-        unsubmitted_button.setText(
-          unsubmitted.length + ' ' + pht('Unsubmitted'));
+      if (unsubmitted.length || draft_done.length) {
+        var any_draft_count = unsubmitted.length + draft_done.length;
+
+        unsubmitted_button.setText(any_draft_count + ' ' + pht('Unsubmitted'));
         JX.DOM.show(unsubmitted_button.getNode());
       } else {
         JX.DOM.hide(unsubmitted_button.getNode());
@@ -1523,7 +1538,7 @@ JX.install('DiffChangesetList', {
       var options = {
         filter: 'comment',
         wrap: true,
-        attribute: 'unsubmitted'
+        attribute: 'anyDraft'
       };
 
       this._onjumpkey(1, options);
