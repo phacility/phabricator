@@ -10,10 +10,15 @@ final class ManiphestTaskStatusTestCase extends PhabricatorTestCase {
       'duplicate2' => true,
 
       '' => false,
-      'longlonglonglong' => false,
+      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' =>
+         false,
       '.' => false,
-      'ABCD' => false,
+      ' ' => false,
+      'ABCD' => true,
       'a b c ' => false,
+      '1' => false,
+      '111' => false,
+      '11a' => true,
     );
 
     foreach ($map as $input => $expect) {

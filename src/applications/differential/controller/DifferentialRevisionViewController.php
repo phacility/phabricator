@@ -156,7 +156,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         phutil_tag(
           'a',
           array(
-            'class' => 'button grey',
+            'class' => 'button button-grey',
             'href' => $request_uri
               ->alter('large', 'true')
               ->setFragment('toc'),
@@ -280,6 +280,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setSymbolIndexes($symbol_indexes)
       ->setTitle(pht('Diff %s', $target->getID()))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
+
+
+    $revision_id = $revision->getID();
+    $inline_list_uri = "/revision/inlines/{$revision_id}/";
+    $inline_list_uri = $this->getApplicationURI($inline_list_uri);
+    $changeset_view->setInlineListURI($inline_list_uri);
 
     if ($repository) {
       $changeset_view->setRepository($repository);

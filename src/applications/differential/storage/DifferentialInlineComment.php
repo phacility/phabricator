@@ -255,6 +255,13 @@ final class DifferentialInlineComment
     return $this;
   }
 
+  public function getDateModified() {
+    return $this->proxy->getDateModified();
+  }
+
+  public function getDateCreated() {
+    return $this->proxy->getDateCreated();
+  }
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

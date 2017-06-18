@@ -3,12 +3,12 @@
  */
 
 .dark-console {
-  background:     #444444;
-  color:          #eeeeee;
-  width:          100%;
-  font-family:    "Verdana";
-  font-size:      11px;
-  position:       relative;
+  background: #444444;
+  color: #eeeeee;
+  width: 100%;
+  font-family: "Verdana";
+  font-size: 11px;
+  position: relative;
 }
 
 .dark-console a {
@@ -74,6 +74,7 @@
 .dark-console-requests a.dark-console-request:hover,
 .dark-console-tabs a.dark-console-tab:hover {
   background: #1188cc;
+  text-decoration: none;
 }
 
 .dark-console-tabs a.dark-console-tab {
@@ -107,6 +108,12 @@
 
 .dark-console .aphront-table-view td {
   font-size: 11px;
+  color: #eee;
+}
+
+.dark-console .aphront-table-view tr:hover,
+.dark-console .aphront-table-view tr.alt:hover {
+  background: #333;
 }
 
 .dark-console .aphront-table-view td.header {

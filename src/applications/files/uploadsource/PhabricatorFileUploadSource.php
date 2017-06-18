@@ -208,11 +208,17 @@ abstract class PhabricatorFileUploadSource
   }
 
   private function getNewFileParameters() {
-    return array(
+    $parameters = array(
       'name' => $this->getName(),
-      'ttl.relative' => $this->getRelativeTTL(),
       'viewPolicy' => $this->getViewPolicy(),
     );
+
+    $ttl = $this->getRelativeTTL();
+    if ($ttl !== null) {
+      $parameters['ttl.relative'] = $ttl;
+    }
+
+    return $parameters;
   }
 
   private function getChunkEngine() {

@@ -170,7 +170,8 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
           'a',
           array(
             'href'  => $data['analyzeURI'],
-            'class' => $data['didAnalyze'] ? 'disabled button' : 'green button',
+            'class' => $data['didAnalyze'] ?
+              'disabled button' : 'button button-green',
           ),
           pht('Analyze Query Plans')),
         phutil_tag('h1', array(), pht('Calls to External Services')),

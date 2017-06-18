@@ -21,7 +21,6 @@ final class PHUIHeaderView extends AphrontTagView {
   private $policyObject;
   private $epoch;
   private $actionItems = array();
-  private $badges = array();
   private $href;
   private $actionList;
   private $actionListID;
@@ -43,11 +42,6 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function addTag(PHUITagView $tag) {
     $this->tags[] = $tag;
-    return $this;
-  }
-
-  public function addBadge(PHUIBadgeMiniView $badge) {
-    $this->badges[] = $badge;
     return $this;
   }
 
@@ -341,21 +335,13 @@ final class PHUIHeaderView extends AphrontTagView {
         $header_content,
       ));
 
-    if ($this->subheader || $this->badges) {
-      $badges = null;
-      if ($this->badges) {
-        $badges = new PHUIBadgeBoxView();
-        $badges->addItems($this->badges);
-        $badges->setCollapsed(true);
-      }
-
+    if ($this->subheader) {
       $left[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-subheader',
         ),
         array(
-          $badges,
           $this->subheader,
         ));
     }

@@ -61,7 +61,7 @@ JX.behavior('differential-populate', function(config, statics) {
   var changeset_list = new JX.DiffChangesetList()
     .setTranslations(JX.phtize(config.pht))
     .setInlineURI(config.inlineURI)
-    .setShowObjectives(config.showObjectives);
+    .setInlineListURI(config.inlineListURI);
 
   // Install and activate the current page.
   var page_id = JX.Quicksand.getCurrentPageID();

@@ -53,7 +53,7 @@ JX.behavior('diffusion-commit-graph', function(config) {
       return (col * cell) + (cell / 2);
     };
 
-    var h = 32;
+    var h = 34;
     var w = cell * config.count;
 
     var canvas = JX.$N('canvas', {width: w, height: h});

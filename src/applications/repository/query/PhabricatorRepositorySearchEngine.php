@@ -15,7 +15,8 @@ final class PhabricatorRepositorySearchEngine
     return id(new PhabricatorRepositoryQuery())
       ->needProjectPHIDs(true)
       ->needCommitCounts(true)
-      ->needMostRecentCommits(true);
+      ->needMostRecentCommits(true)
+      ->needProfileImage(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -165,7 +166,8 @@ final class PhabricatorRepositorySearchEngine
         ->setObject($repository)
         ->setHeader($repository->getName())
         ->setObjectName($repository->getMonogram())
-        ->setHref($repository->getURI());
+        ->setHref($repository->getURI())
+        ->setImageURI($repository->getProfileImageURI());
 
       $commit = $repository->getMostRecentCommit();
       if ($commit) {

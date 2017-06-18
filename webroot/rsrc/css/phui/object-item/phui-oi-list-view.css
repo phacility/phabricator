@@ -182,6 +182,10 @@ ul.phui-oi-list-view {
   vertical-align: top;
 }
 
+.phui-oi-col2.phui-oi-side-column {
+  width: 200px;
+}
+
 .device-phone .phui-oi-col1,
 .device-phone .phui-oi-col2 {
   display: block;
@@ -422,7 +426,7 @@ ul.phui-oi-icons {
 }
 
 .phui-oi.phui-oi-disabled .phui-oi-attribute,
-.phui-oi.phui-oi-disabled .phui-oi-attribute .phui-icon-view {
+.phui-oi.phui-oi-disabled .phui-oi-attribute > .phui-icon-view {
   color: {$lightgreytext};
 }
 

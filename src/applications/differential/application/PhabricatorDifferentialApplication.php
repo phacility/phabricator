@@ -77,6 +77,8 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
             => 'DifferentialDiffCreateController',
           'operation/(?P<id>[1-9]\d*)/'
             => 'DifferentialRevisionOperationController',
+          'inlines/(?P<id>[1-9]\d*)/'
+            => 'DifferentialRevisionInlinesController',
         ),
         'comment/' => array(
           'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',

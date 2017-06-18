@@ -154,6 +154,15 @@ a.phui-tag-view:hover
   margin: 0 4px 2px 0;
 }
 
+.phui-tag-view.phui-tag-border-none .phui-tag-core {
+  border-color: transparent;
+}
+
+a.phui-tag-view:hover.phui-tag-border-none .phui-tag-core {
+  border-color: transparent !important;
+  text-decoration: underline;
+}
+
 
 /* - Shaded Tags ---------------------------------------------------------------
 

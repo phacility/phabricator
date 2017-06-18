@@ -10,6 +10,10 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
     return pht('Celebrate the moments of your life.');
   }
 
+  public function getCategory() {
+    return pht('Single Use');
+  }
+
   public function renderExample() {
 
     $badges1 = array();

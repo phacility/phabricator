@@ -30,7 +30,7 @@ final class PhabricatorGuideListView extends AphrontView {
           ->setText(pht('Skip'))
           ->setTag('a')
           ->setHref($skip_href)
-          ->setColor(PHUIButtonView::SIMPLE);
+          ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE);
         $list_item->setSideColumn($skip);
       }
       $list->addItem($list_item);

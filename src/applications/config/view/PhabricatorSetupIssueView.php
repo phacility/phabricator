@@ -129,7 +129,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
           array(
             'href' => '/config/unignore/'.$issue->getIssueKey().'/',
             'sigil' => 'workflow',
-            'class' => 'button grey',
+            'class' => 'button button-grey',
           ),
           pht('Unignore Setup Issue'));
       } else {
@@ -138,7 +138,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
           array(
             'href' => '/config/ignore/'.$issue->getIssueKey().'/',
             'sigil' => 'workflow',
-            'class' => 'button grey',
+            'class' => 'button button-grey',
           ),
           pht('Ignore Setup Issue'));
       }
@@ -147,7 +147,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
         'a',
         array(
           'href' => '/config/issue/'.$issue->getIssueKey().'/',
-          'class' => 'button grey',
+          'class' => 'button button-grey',
           'style' => 'float: right',
         ),
         pht('Reload Page'));

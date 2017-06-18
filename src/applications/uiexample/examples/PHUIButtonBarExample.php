@@ -36,7 +36,7 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
     foreach ($icons as $text => $icon) {
       $button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
         ->setTitle($text)
         ->setText($text);
 
@@ -47,7 +47,7 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
     foreach ($icons as $text => $icon) {
       $button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
         ->setTitle($text)
         ->setTooltip($text)
         ->setIcon($icon);

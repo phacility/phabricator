@@ -77,7 +77,7 @@ final class AlmanacBindingTableView extends AphrontView {
         phutil_tag(
           'a',
           array(
-            'class' => 'small grey button',
+            'class' => 'small button button-grey',
             'href' => '/almanac/binding/'.$binding->getID().'/',
           ),
           pht('Details')),

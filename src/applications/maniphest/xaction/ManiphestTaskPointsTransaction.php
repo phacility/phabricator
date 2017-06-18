@@ -17,10 +17,6 @@ final class ManiphestTaskPointsTransaction
     $object->setPoints($value);
   }
 
-  public function shouldHideForFeed() {
-    return true;
-  }
-
   public function shouldHide() {
     if (!ManiphestTaskPoints::getIsEnabled()) {
       return true;

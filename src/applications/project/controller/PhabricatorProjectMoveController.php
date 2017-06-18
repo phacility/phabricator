@@ -153,11 +153,14 @@ final class PhabricatorProjectMoveController
       break;
     }
 
+    $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+    $keyword = head(idx($keyword_map, $pri));
+
     $xactions = array();
     if ($pri !== null) {
       $xactions[] = id(new ManiphestTransaction())
         ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
-        ->setNewValue($pri);
+        ->setNewValue($keyword);
       $xactions[] = id(new ManiphestTransaction())
         ->setTransactionType(
           ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)

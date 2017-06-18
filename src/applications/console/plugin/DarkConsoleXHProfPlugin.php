@@ -67,7 +67,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
           'a',
           array(
             'href'  => $profile_uri,
-            'class' => $run ? 'disabled button' : 'green button',
+            'class' => $run ? 'disabled button' : 'button button-green',
           ),
           pht('Profile Page')),
         phutil_tag('h1', array(), pht('XHProf Profiler')),

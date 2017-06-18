@@ -392,13 +392,14 @@ tr.differential-inline-loading {
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: #fff;
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid {$lightgreyborder};
-  padding: 12px 18px;
+  padding: 8px 18px;
   vertical-align: middle;
   font-weight: bold;
   font-size: {$biggerfontsize};
+  line-height: 28px;
 }
 
 .diff-banner .phui-icon-view {
@@ -409,36 +410,16 @@ tr.differential-inline-loading {
   color: {$greytext};
 }
 
-.scroll-objective-list {
-  position: fixed;
-  right: 0;
-  width: 24px;
-  top: 48px;
-  bottom: 48px;
-  background: rgba(255, 255, 255, 0.50);
-  border-style: solid;
-  border-color: rgba(255, 255, 255, 0.95);
-  border-width: 1px 0 1px 1px;
-  box-shadow: -1px 0 2px rgba(255, 255, 255, 0.10);
-  overflow: hidden;
+.diff-banner-buttons .button {
+  margin-left: 8px;
 }
 
-.scroll-objective-list.has-aesthetic-scrollbar {
-  /* For now, hide this element on systems with aesthetic scrollbars. */
-  display: none;
+.diff-banner-has-unsaved,
+.diff-banner-has-unsubmitted,
+.diff-banner-has-draft-done {
+  background: {$sh-yellowbackground};
 }
 
-.scroll-objective {
-  display: block;
-  position: absolute;
-  box-sizing: border-box;
-  cursor: pointer;
-  text-align: middle;
-  left: 7px;
-}
-
-.scroll-objective .phui-icon-view {
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.25);
-  display: block;
-  height: 14px;
+.diff-banner-buttons {
+  float: right;
 }

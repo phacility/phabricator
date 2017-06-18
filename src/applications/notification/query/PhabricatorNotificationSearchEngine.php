@@ -85,12 +85,12 @@ final class PhabricatorNotificationSearchEngine
     $viewer = $this->requireViewer();
 
     $image = id(new PHUIIconView())
-      ->setIcon('fa-eye-slash');
+      ->setIcon('fa-bell-o');
 
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->addSigil('workflow')
-      ->setColor(PHUIButtonView::SIMPLE)
+      ->setColor(PHUIButtonView::GREY)
       ->setIcon($image)
       ->setText(pht('Mark All Read'));
 

@@ -18,11 +18,6 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function isLaunchable() {
-    // Try to hide this even more for now.
-    return false;
-  }
-
   public function getBaseURI() {
     return '/nuance/';
   }

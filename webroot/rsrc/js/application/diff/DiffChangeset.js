@@ -32,7 +32,6 @@ JX.install('DiffChangeset', {
     this._rightID = data.right;
 
     this._displayPath = JX.$H(data.displayPath);
-    this._objectiveName = data.objectiveName;
     this._icon = data.icon;
 
     this._inlines = [];
@@ -62,8 +61,6 @@ JX.install('DiffChangeset', {
     _displayPath: null,
 
     _changesetList: null,
-    _objective: null,
-    _objectiveName: null,
     _icon: null,
 
     getLeftChangesetID: function() {
@@ -76,21 +73,7 @@ JX.install('DiffChangeset', {
 
     setChangesetList: function(list) {
       this._changesetList = list;
-
-      var objectives = list.getObjectives();
-      this._objective = objectives.newObjective()
-        .setAnchor(this._node);
-
-      this._updateObjective();
-
       return this;
-    },
-
-    _updateObjective: function() {
-      this._objective
-        .setIcon(this.getIcon())
-        .setColor(this.getColor())
-        .setTooltip(this.getObjectiveName());
     },
 
     getIcon: function() {
@@ -107,10 +90,6 @@ JX.install('DiffChangeset', {
       }
 
       return 'blue';
-    },
-
-    getObjectiveName: function() {
-      return this._objectiveName;
     },
 
     getChangesetList: function() {
@@ -424,6 +403,8 @@ JX.install('DiffChangeset', {
         block.items.push(rows[ii]);
       }
 
+      var last_inline = null;
+      var last_inline_item = null;
       for (ii = 0; ii < blocks.length; ii++) {
         block = blocks[ii];
 
@@ -443,16 +424,44 @@ JX.install('DiffChangeset', {
           for (var jj = 0; jj < block.items.length; jj++) {
             var inline = this.getInlineForRow(block.items[jj]);
 
-            items.push({
+            // When comments are being edited, they have a hidden row with
+            // the actual comment and then a visible row with the editor.
+
+            // In this case, we only want to generate one item, but it should
+            // use the editor as a scroll target. To accomplish this, check if
+            // this row has the same inline as the previous row. If so, update
+            // the last item to use this row's nodes.
+
+            if (inline === last_inline) {
+              last_inline_item.nodes.begin = block.items[jj];
+              last_inline_item.nodes.end = block.items[jj];
+              continue;
+            } else {
+              last_inline = inline;
+            }
+
+            var is_saved = (!inline.isDraft() && !inline.isEditing());
+
+            last_inline_item = {
               type: block.type,
               changeset: this,
               target: inline,
               hidden: inline.isHidden(),
+              collapsed: inline.isCollapsed(),
+              deleted: !inline.getID() && !inline.isEditing(),
               nodes: {
                 begin: block.items[jj],
                 end: block.items[jj]
+              },
+              attributes: {
+                unsaved: inline.isEditing(),
+                anyDraft: inline.isDraft() || inline.isDraftDone(),
+                undone: (is_saved && !inline.isDone()),
+                done: (is_saved && inline.isDone())
               }
-            });
+            };
+
+            items.push(last_inline_item);
           }
         }
       }
@@ -501,12 +510,17 @@ JX.install('DiffChangeset', {
       // diff with a large number of changes don't constantly have the text
       // area scrolled off the bottom of the screen until the entire diff loads.
       //
-      // There are two three major cases here:
+      // There are several major cases here:
       //
       //  - If we're near the top of the document, never scroll.
-      //  - If we're near the bottom of the document, always scroll.
-      //  - Otherwise, scroll if the changes were above the midline of the
-      //    viewport.
+      //  - If we're near the bottom of the document, always scroll, unless
+      //    we have an anchor.
+      //  - Otherwise, scroll if the changes were above (or, at least,
+      //    almost entirely above) the viewport.
+      //
+      // We don't scroll if the changes were just near the top of the viewport
+      // because this makes us scroll incorrectly when an anchored change is
+      // visible. See T12779.
 
       var target = this._node;
 
@@ -529,17 +543,39 @@ JX.install('DiffChangeset', {
 
       var target_pos = JX.Vector.getPos(target);
       var target_dim = JX.Vector.getDim(target);
-      var target_mid = (target_pos.y + (target_dim.y / 2));
+      var target_bot = (target_pos.y + target_dim.y);
 
-      var view_mid = (old_pos.y + (old_view.y / 2));
-      var above_mid = (target_mid < view_mid);
+      // Detect if the changeset is entirely (or, at least, almost entirely)
+      // above us. The height here is roughly the height of the persistent
+      // banner.
+      var above_screen = (target_bot < old_pos.y + 64);
+
+      // If we have a URL anchor and are currently nearby, stick to it
+      // no matter what.
+      var on_target = null;
+      if (window.location.hash) {
+        try {
+          var anchor = JX.$(window.location.hash.replace('#', ''));
+          if (anchor) {
+            var anchor_pos = JX.$V(anchor);
+            if ((anchor_pos.y > old_pos.y) &&
+                (anchor_pos.y < old_pos.y + 96)) {
+              on_target = anchor;
+            }
+          }
+        } catch (ignored) {
+          // If we have a bogus anchor, just ignore it.
+        }
+      }
 
       var frame = this._getContentFrame();
       JX.DOM.setContent(frame, JX.$H(response.changeset));
 
       if (this._stabilize) {
-        if (!near_top) {
-          if (near_bot || above_mid) {
+        if (on_target) {
+          JX.DOM.scrollToPosition(old_pos.x, JX.$V(on_target).y - 60);
+        } else if (!near_top) {
+          if (near_bot || above_screen) {
             // Figure out how much taller the document got.
             var delta = (JX.Vector.getDocument().y - old_dim.y);
             JX.DOM.scrollToPosition(old_pos.x, old_pos.y + delta);
@@ -570,7 +606,6 @@ JX.install('DiffChangeset', {
 
       JX.Stratcom.invoke('differential-inline-comment-refresh');
 
-      this._objective.show();
       this._rebuildAllInlines();
 
       JX.Stratcom.invoke('resize');
@@ -695,6 +730,11 @@ JX.install('DiffChangeset', {
       return null;
     },
 
+    getInlines: function() {
+      this._rebuildAllInlines();
+      return this._inlines;
+    },
+
     _rebuildAllInlines: function() {
       var rows = JX.DOM.scry(this._node, 'tr');
       for (var ii = 0; ii < rows.length; ii++) {
@@ -721,11 +761,6 @@ JX.install('DiffChangeset', {
       } else {
         JX.DOM.hide(diff);
         JX.DOM.appendContent(diff.parentNode, undo);
-      }
-
-      this._updateObjective();
-      for (var ii = 0; ii < this._inlines.length; ii++) {
-        this._inlines[ii].updateObjective();
       }
 
       JX.Stratcom.invoke('resize');

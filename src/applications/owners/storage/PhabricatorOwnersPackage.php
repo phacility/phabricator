@@ -297,27 +297,54 @@ final class PhabricatorOwnersPackage
     // a more specific package.
     if ($weak) {
       foreach ($path_packages as $match => $packages) {
+
+        // Group packages by length.
+        $length_map = array();
+        foreach ($packages as $package_id => $package) {
+          $length_map[$package['length']][$package_id] = $package;
+        }
+
+        // For each path length, remove all weak packages if there are any
+        // strong packages of the same length. This makes sure that if there
+        // are one or more strong claims on a particular path, only those
+        // claims stand.
+        foreach ($length_map as $package_list) {
+          $any_strong = false;
+          foreach ($package_list as $package_id => $package) {
+            if (!isset($weak[$package_id])) {
+              $any_strong = true;
+              break;
+            }
+          }
+
+          if ($any_strong) {
+            foreach ($package_list as $package_id => $package) {
+              if (isset($weak[$package_id])) {
+                unset($packages[$package_id]);
+              }
+            }
+          }
+        }
+
         $packages = isort($packages, 'length');
         $packages = array_reverse($packages, true);
 
-        $first = null;
+        $best_length = null;
         foreach ($packages as $package_id => $package) {
-          // If this is the first package we've encountered, note it and
-          // continue. We're iterating over the packages from longest to
-          // shortest match, so this package always has the strongest claim
-          // on the path.
-          if ($first === null) {
-            $first = $package_id;
+          // If this is the first package we've encountered, note its length.
+          // We're iterating over the packages from longest to shortest match,
+          // so packages of this length always have the best claim on the path.
+          if ($best_length === null) {
+            $best_length = $package['length'];
+          }
+
+          // If this package has the same length as the best length, its claim
+          // stands.
+          if ($package['length'] === $best_length) {
             continue;
           }
 
-          // If this is the first package we saw, its claim stands even if it
-          // is a weak package.
-          if ($first === $package_id) {
-            continue;
-          }
-
-          // If this is a weak package and not the first package we saw,
+          // If this is a weak package and does not have the best length,
           // cede its claim to the stronger package.
           if (isset($weak[$package_id])) {
             unset($packages[$package_id]);

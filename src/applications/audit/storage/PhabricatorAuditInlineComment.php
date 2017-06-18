@@ -331,6 +331,14 @@ final class PhabricatorAuditInlineComment
     return $this->isGhost;
   }
 
+  public function getDateModified() {
+    return $this->proxy->getDateModified();
+  }
+
+  public function getDateCreated() {
+    return $this->proxy->getDateCreated();
+  }
+
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

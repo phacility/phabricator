@@ -274,7 +274,9 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setHeader($repository->getName())
       ->setUser($viewer)
       ->setPolicyObject($repository)
-      ->setHeaderIcon('fa-code');
+      ->setProfileHeader(true)
+      ->setImage($repository->getProfileImageURI())
+      ->setImageEditURL('/diffusion/picture/'.$repository->getID().'/');
 
     if (!$repository->isTracked()) {
       $header->setStatus('fa-ban', 'dark', pht('Inactive'));
@@ -490,7 +492,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->needCommitData(true)
       ->execute();
 
-    $view = id(new DiffusionTagListView())
+    $view = id(new DiffusionTagTableView())
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
       ->setTags($tags)

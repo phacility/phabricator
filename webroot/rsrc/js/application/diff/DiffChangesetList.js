@@ -1,7 +1,7 @@
 /**
  * @provides phabricator-diff-changeset-list
  * @requires javelin-install
- *           phabricator-scroll-objective-list
+ *           phuix-button-view
  * @javelin
  */
 
@@ -9,7 +9,6 @@ JX.install('DiffChangesetList', {
 
   construct: function() {
     this._changesets = [];
-    this._objectives = new JX.ScrollObjectiveList();
 
     var onload = JX.bind(this, this._ifawake, this._onload);
     JX.Stratcom.listen('click', 'differential-load', onload);
@@ -20,11 +19,11 @@ JX.install('DiffChangesetList', {
     var onmenu = JX.bind(this, this._ifawake, this._onmenu);
     JX.Stratcom.listen('click', 'differential-view-options', onmenu);
 
-    var onhide = JX.bind(this, this._ifawake, this._onhide);
-    JX.Stratcom.listen('click', 'hide-inline', onhide);
+    var oncollapse = JX.bind(this, this._ifawake, this._oncollapse, true);
+    JX.Stratcom.listen('click', 'hide-inline', oncollapse);
 
-    var onreveal = JX.bind(this, this._ifawake, this._onreveal);
-    JX.Stratcom.listen('click', 'reveal-inline', onreveal);
+    var onexpand = JX.bind(this, this._ifawake, this._oncollapse, false);
+    JX.Stratcom.listen('click', 'reveal-inline', onexpand);
 
     var onedit = JX.bind(this, this._ifawake, this._onaction, 'edit');
     JX.Stratcom.listen(
@@ -70,7 +69,7 @@ JX.install('DiffChangesetList', {
 
     var onrangedown = JX.bind(this, this._ifawake, this._onrangedown);
     JX.Stratcom.listen(
-      ['touchstart', 'mousedown'],
+      'mousedown',
       ['differential-changeset', 'tag:th'],
       onrangedown);
 
@@ -80,29 +79,23 @@ JX.install('DiffChangesetList', {
       ['differential-changeset', 'tag:th'],
       onrangemove);
 
-    var onrangetouchmove = JX.bind(this, this._ifawake, this._onrangetouchmove);
-    JX.Stratcom.listen(
-      'touchmove',
-      null,
-      onrangetouchmove);
-
     var onrangeup = JX.bind(this, this._ifawake, this._onrangeup);
     JX.Stratcom.listen(
-      ['touchend', 'mouseup'],
+      'mouseup',
       null,
       onrangeup);
   },
 
   properties: {
     translations: null,
-    inlineURI: null
+    inlineURI: null,
+    inlineListURI: null
   },
 
   members: {
     _initialized: false,
     _asleep: true,
     _changesets: null,
-    _objectives: null,
 
     _cursorItem: null,
 
@@ -120,7 +113,14 @@ JX.install('DiffChangesetList', {
     _rangeTarget: null,
 
     _bannerNode: null,
-    _showObjectives: false,
+    _unsavedButton: null,
+    _unsubmittedButton: null,
+    _doneButton: null,
+    _doneMode: null,
+
+    _dropdownMenu: null,
+    _menuButton: null,
+    _menuItems: null,
 
     sleep: function() {
       this._asleep = true;
@@ -128,8 +128,6 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
       this.resetHover();
-
-      this._objectives.hide();
     },
 
     wake: function() {
@@ -137,10 +135,6 @@ JX.install('DiffChangesetList', {
 
       this._redrawFocus();
       this._redrawSelection();
-
-      if (this._showObjectives) {
-        this._objectives.show();
-      }
 
       if (this._initialized) {
         return;
@@ -169,11 +163,11 @@ JX.install('DiffChangesetList', {
       label = pht('Jump to previous inline comment.');
       this._installJumpKey('p', label, -1, 'comment');
 
-      label = pht('Jump to next inline comment, including hidden comments.');
+      label = pht('Jump to next inline comment, including collapsed comments.');
       this._installJumpKey('N', label, 1, 'comment', true);
 
       label = pht(
-        'Jump to previous inline comment, including hidden comments.');
+        'Jump to previous inline comment, including collapsed comments.');
       this._installJumpKey('P', label, -1, 'comment', true);
 
       label = pht('Hide or show the current file.');
@@ -194,21 +188,12 @@ JX.install('DiffChangesetList', {
       label = pht('Mark or unmark selected inline comment as done.');
       this._installKey('w', label, this._onkeydone);
 
-      label = pht('Hide or show inline comment.');
-      this._installKey('q', label, this._onkeyhide);
-    },
-
-    setShowObjectives: function(show) {
-      this._showObjectives = show;
-      return this;
+      label = pht('Collapse or expand inline comment.');
+      this._installKey('q', label, this._onkeycollapse);
     },
 
     isAsleep: function() {
       return this._asleep;
-    },
-
-    getObjectives: function() {
-      return this._objectives;
     },
 
     newChangesetForNode: function(node) {
@@ -281,9 +266,15 @@ JX.install('DiffChangesetList', {
         .register();
     },
 
-    _installJumpKey: function(key, label, delta, filter, show_hidden) {
+    _installJumpKey: function(key, label, delta, filter, show_collapsed) {
       filter = filter || null;
-      var handler = JX.bind(this, this._onjumpkey, delta, filter, show_hidden);
+
+      var options = {
+        filter: filter,
+        collapsed: show_collapsed
+      };
+
+      var handler = JX.bind(this, this._onjumpkey, delta, options);
       return this._installKey(key, label, handler);
     },
 
@@ -438,16 +429,16 @@ JX.install('DiffChangesetList', {
       this._warnUser(pht('You must select a file to hide or show.'));
     },
 
-    _onkeyhide: function() {
+    _onkeycollapse: function() {
       var cursor = this._cursorItem;
 
       if (cursor) {
         if (cursor.type == 'comment') {
           var inline = cursor.target;
-          if (inline.canHide()) {
+          if (inline.canCollapse()) {
             this.setFocus(null);
 
-            inline.setHidden(!inline.isHidden());
+            inline.setCollapsed(!inline.isCollapsed());
             return;
           }
         }
@@ -465,8 +456,14 @@ JX.install('DiffChangesetList', {
         .show();
     },
 
-    _onjumpkey: function(delta, filter, show_hidden, manager) {
+    _onjumpkey: function(delta, options) {
       var state = this._getSelectionState();
+
+      var filter = options.filter || null;
+      var collapsed = options.collapsed || false;
+      var wrap = options.wrap || false;
+      var attribute = options.attribute || null;
+      var show = options.show || false;
 
       var cursor = state.cursor;
       var items = state.items;
@@ -477,6 +474,7 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      var did_wrap = false;
       while (true) {
         if (cursor === null) {
           cursor = 0;
@@ -489,9 +487,22 @@ JX.install('DiffChangesetList', {
           return;
         }
 
-        // If we've gone forward off the end of the list, bail out.
+        // If we've gone forward off the end of the list, figure out where we
+        // should end up.
         if (cursor >= items.length) {
-          return;
+          if (!wrap) {
+            // If we aren't wrapping around, we're done.
+            return;
+          }
+
+          if (did_wrap) {
+            // If we're already wrapped around, we're done.
+            return;
+          }
+
+          // Otherwise, wrap the cursor back to the top.
+          cursor = 0;
+          did_wrap = true;
         }
 
         // If we're selecting things of a particular type (like only files)
@@ -502,19 +513,42 @@ JX.install('DiffChangesetList', {
           }
         }
 
-        // If the item is hidden, don't select it when iterating with jump
+        // If the item is collapsed, don't select it when iterating with jump
         // keys. It can still potentially be selected in other ways.
-        if (!show_hidden) {
-          if (items[cursor].hidden) {
+        if (!collapsed) {
+          if (items[cursor].collapsed) {
             continue;
           }
+        }
+
+        // If the item has been deleted, don't select it when iterating. The
+        // cursor may remain on it until it is removed.
+        if (items[cursor].deleted) {
+          continue;
+        }
+
+        // If we're selecting things with a particular attribute, like
+        // "unsaved", skip items without the attribute.
+        if (attribute !== null) {
+          if (!(items[cursor].attributes || {})[attribute]) {
+            continue;
+          }
+        }
+
+        // If this item is a hidden inline but we're clicking a button which
+        // selects inlines of a particular type, make it visible again.
+        if (items[cursor].hidden) {
+          if (!show) {
+            continue;
+          }
+          items[cursor].target.setHidden(false);
         }
 
         // Otherwise, we've found a valid item to select.
         break;
       }
 
-      this._setSelectionState(items[cursor], manager);
+      this._setSelectionState(items[cursor], true);
     },
 
     _getSelectionState: function() {
@@ -537,39 +571,34 @@ JX.install('DiffChangesetList', {
       };
     },
 
-    _setSelectionState: function(item, manager) {
-      // If we had an inline selected before, we need to update it after
-      // changing our selection to clear the selected state. Then, update the
-      // new one to add the selected state.
-      var old_inline = this.getSelectedInline();
-
+    _setSelectionState: function(item, scroll) {
       this._cursorItem = item;
-      this._redrawSelection(manager, true);
-
-      var new_inline = this.getSelectedInline();
-
-      if (old_inline) {
-        old_inline.updateObjective();
-      }
-
-      if (new_inline) {
-        new_inline.updateObjective();
-      }
+      this._redrawSelection(scroll);
 
       return this;
     },
 
-    _redrawSelection: function(manager, scroll) {
+    _redrawSelection: function(scroll) {
       var cursor = this._cursorItem;
       if (!cursor) {
         this.setFocus(null);
         return;
       }
 
+      // If this item has been removed from the document (for example: create
+      // a new empty comment, then use the "Unsaved" button to select it, then
+      // cancel it), we can still keep the cursor here but do not want to show
+      // a selection reticle over an invisible node.
+      if (cursor.deleted) {
+        this.setFocus(null);
+        return;
+      }
+
       this.setFocus(cursor.nodes.begin, cursor.nodes.end);
 
-      if (manager && scroll) {
-        manager.scrollTo(cursor.nodes.begin);
+      if (scroll) {
+        var pos = JX.$V(cursor.nodes.begin);
+        JX.DOM.scrollToPosition(0, pos.y - 60);
       }
 
       return this;
@@ -586,7 +615,7 @@ JX.install('DiffChangesetList', {
 
       var state = this._getSelectionState();
       if (state.cursor !== null) {
-        this._setSelectionState(state.items[state.cursor]);
+        this._setSelectionState(state.items[state.cursor], false);
       }
     },
 
@@ -837,26 +866,23 @@ JX.install('DiffChangesetList', {
       menu.open();
     },
 
-    _onhide: function(e) {
-      this._onhidereveal(e, true);
-    },
-
-    _onreveal: function(e) {
-      this._onhidereveal(e, false);
-    },
-
-    _onhidereveal: function(e, is_hide) {
+    _oncollapse: function(is_collapse, e) {
       e.kill();
 
       var inline = this._getInlineForEvent(e);
 
-      inline.setHidden(is_hide);
+      inline.setCollapsed(is_collapse);
     },
 
     _onresize: function() {
       this._redrawFocus();
       this._redrawSelection();
       this._redrawHover();
+
+      // Force a banner redraw after a resize event. Particularly, this makes
+      // sure the inline state updates immediately after an inline edit
+      // operation, even if the changeset itself has not changed.
+      this._bannerChangeset = null;
 
       this._redrawBanner();
     },
@@ -893,7 +919,7 @@ JX.install('DiffChangesetList', {
       if (selection.cursor !== null) {
         item = selection.items[selection.cursor];
         if (item.target === inline) {
-          this._setSelectionState(null);
+          this._setSelectionState(null, false);
           return;
         }
       }
@@ -905,7 +931,7 @@ JX.install('DiffChangesetList', {
       for (var ii = 0; ii < items.length; ii++) {
         item = items[ii];
         if (item.target === inline) {
-          this._setSelectionState(item);
+          this._setSelectionState(item, false);
         }
       }
     },
@@ -1181,8 +1207,8 @@ JX.install('DiffChangesetList', {
     },
 
     _onrangedown: function(e) {
-      // NOTE: We're allowing touch events through, including "touchstart". We
-      // need to kill the "touchstart" event so the page doesn't scroll.
+      // NOTE: We're allowing "mousedown" from a touch event through so users
+      // can leave inlines on a single line.
       if (e.isRightButton()) {
         return;
       }
@@ -1272,31 +1298,6 @@ JX.install('DiffChangesetList', {
       this._setHoverRange(this._rangeOrigin, this._rangeTarget);
     },
 
-    _onrangetouchmove: function(e) {
-      if (!this._rangeActive) {
-        return;
-      }
-
-      // NOTE: The target of a "touchmove" event is bogus. Use dark magic to
-      // identify the actual target. Some day, this might move into the core
-      // libraries. If this doesn't work, just bail.
-
-      var target;
-      try {
-        var raw_event = e.getRawEvent();
-        var touch = raw_event.touches[0];
-        target = document.elementFromPoint(touch.clientX, touch.clientY);
-      } catch (ex) {
-        return;
-      }
-
-      if (!JX.DOM.isType(target, 'th')) {
-        return;
-      }
-
-      this._updateRange(target, false);
-    },
-
     _onrangeup: function(e) {
       if (!this._rangeActive) {
         return;
@@ -1328,6 +1329,13 @@ JX.install('DiffChangesetList', {
     },
 
     _redrawBanner: function() {
+      // If the inline comment menu is open and we've done a redraw, close it.
+      // In particular, this makes it close when you scroll the document:
+      // otherwise, it stays open but the banner moves underneath it.
+      if (this._dropdownMenu) {
+        this._dropdownMenu.close();
+      }
+
       var node = this._getBannerNode();
       var changeset = this._getVisibleChangeset();
 
@@ -1343,12 +1351,425 @@ JX.install('DiffChangesetList', {
         return;
       }
 
+      var inlines = this._getInlinesByType();
+
+      var unsaved = inlines.unsaved;
+      var unsubmitted = inlines.unsubmitted;
+      var undone = inlines.undone;
+      var done = inlines.done;
+      var draft_done = inlines.draftDone;
+
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-unsaved',
+        !!unsaved.length);
+
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-unsubmitted',
+        !!unsubmitted.length);
+
+      JX.DOM.alterClass(
+        node,
+        'diff-banner-has-draft-done',
+        !!draft_done.length);
+
+      var pht = this.getTranslations();
+      var unsaved_button = this._getUnsavedButton();
+      var unsubmitted_button = this._getUnsubmittedButton();
+      var done_button = this._getDoneButton();
+      var menu_button = this._getMenuButton();
+
+      if (unsaved.length) {
+        unsaved_button.setText(unsaved.length + ' ' + pht('Unsaved'));
+        JX.DOM.show(unsaved_button.getNode());
+      } else {
+        JX.DOM.hide(unsaved_button.getNode());
+      }
+
+      if (unsubmitted.length || draft_done.length) {
+        var any_draft_count = unsubmitted.length + draft_done.length;
+
+        unsubmitted_button.setText(any_draft_count + ' ' + pht('Unsubmitted'));
+        JX.DOM.show(unsubmitted_button.getNode());
+      } else {
+        JX.DOM.hide(unsubmitted_button.getNode());
+      }
+
+      if (done.length || undone.length) {
+        // If you haven't marked any comments as "Done", we just show text
+        // like "3 Comments". If you've marked at least one done, we show
+        // "1 / 3 Comments".
+
+        var done_text;
+        if (done.length) {
+          done_text = [
+            done.length,
+            ' / ',
+            (done.length + undone.length),
+            ' ',
+            pht('Comments')
+          ];
+        } else {
+          done_text = [
+            undone.length,
+            ' ',
+            pht('Comments')
+          ];
+        }
+
+        done_button.setText(done_text);
+
+        JX.DOM.show(done_button.getNode());
+
+        // If any comments are not marked "Done", this cycles through the
+        // missing comments. Otherwise, it cycles through all the saved
+        // comments.
+        if (undone.length) {
+          this._doneMode = 'undone';
+        } else {
+          this._doneMode = 'done';
+        }
+
+      } else {
+        JX.DOM.hide(done_button.getNode());
+      }
+
+      var path_view = [icon, ' ', changeset.getDisplayPath()];
+
+      var buttons_attrs = {
+        className: 'diff-banner-buttons'
+      };
+
+      var buttons_list = [
+        unsaved_button.getNode(),
+        unsubmitted_button.getNode(),
+        done_button.getNode(),
+        menu_button.getNode()
+      ];
+
+      var buttons_view = JX.$N('div', buttons_attrs, buttons_list);
+
       var icon = new JX.PHUIXIconView()
         .setIcon(changeset.getIcon())
         .getNode();
-      JX.DOM.setContent(node, [icon, ' ', changeset.getDisplayPath()]);
+      JX.DOM.setContent(node, [buttons_view, path_view]);
 
       document.body.appendChild(node);
+    },
+
+    _getInlinesByType: function() {
+      var changesets = this._changesets;
+      var unsaved = [];
+      var unsubmitted = [];
+      var undone = [];
+      var done = [];
+      var draft_done = [];
+
+      var visible_done = [];
+      var visible_collapsed = [];
+      var visible_ghosts = [];
+      var visible = [];
+      var hidden = [];
+
+      for (var ii = 0; ii < changesets.length; ii++) {
+        var inlines = changesets[ii].getInlines();
+        var inline;
+        var jj;
+        for (jj = 0; jj < inlines.length; jj++) {
+          inline = inlines[jj];
+
+          if (inline.isDeleted()) {
+            continue;
+          }
+
+          if (inline.isSynthetic()) {
+            continue;
+          }
+
+          if (inline.isEditing()) {
+            unsaved.push(inline);
+          } else if (!inline.getID()) {
+            // These are new comments which have been cancelled, and do not
+            // count as anything.
+            continue;
+          } else if (inline.isDraft()) {
+            unsubmitted.push(inline);
+          } else {
+            // NOTE: Unlike other states, an inline may be marked with a
+            // draft checkmark and still be a "done" or "undone" comment.
+            if (inline.isDraftDone()) {
+              draft_done.push(inline);
+            }
+
+            if (!inline.isDone()) {
+              undone.push(inline);
+            } else {
+              done.push(inline);
+            }
+          }
+        }
+
+        for (jj = 0; jj < inlines.length; jj++) {
+          inline = inlines[jj];
+          if (inline.isDeleted()) {
+            continue;
+          }
+
+          if (inline.isEditing()) {
+            continue;
+          }
+
+          if (inline.isHidden()) {
+            hidden.push(inline);
+            continue;
+          }
+
+          visible.push(inline);
+
+          if (inline.isDone()) {
+            visible_done.push(inline);
+          }
+
+          if (inline.isCollapsed()) {
+            visible_collapsed.push(inline);
+          }
+
+          if (inline.isGhost()) {
+            visible_ghosts.push(inline);
+          }
+        }
+      }
+
+      return {
+        unsaved: unsaved,
+        unsubmitted: unsubmitted,
+        undone: undone,
+        done: done,
+        draftDone: draft_done,
+        visibleDone: visible_done,
+        visibleGhosts: visible_ghosts,
+        visibleCollapsed: visible_collapsed,
+        visible: visible,
+        hidden: hidden
+      };
+
+    },
+
+    _getUnsavedButton: function() {
+      if (!this._unsavedButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-commenting-o')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var onunsaved = JX.bind(this, this._onunsavedclick);
+        JX.DOM.listen(node, 'click', null, onunsaved);
+
+        this._unsavedButton = button;
+      }
+
+      return this._unsavedButton;
+    },
+
+    _getUnsubmittedButton: function() {
+      if (!this._unsubmittedButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-comment-o')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var onunsubmitted = JX.bind(this, this._onunsubmittedclick);
+        JX.DOM.listen(node, 'click', null, onunsubmitted);
+
+        this._unsubmittedButton = button;
+      }
+
+      return this._unsubmittedButton;
+    },
+
+    _getDoneButton: function() {
+      if (!this._doneButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-comment')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var node = button.getNode();
+
+        var ondone = JX.bind(this, this._ondoneclick);
+        JX.DOM.listen(node, 'click', null, ondone);
+
+        this._doneButton = button;
+      }
+
+      return this._doneButton;
+    },
+
+    _getMenuButton: function() {
+      if (!this._menuButton) {
+        var button = new JX.PHUIXButtonView()
+          .setIcon('fa-gear')
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+
+        var dropdown = new JX.PHUIXDropdownMenu(button.getNode());
+        this._menuItems = {};
+
+        var list = new JX.PHUIXActionListView();
+        dropdown.setContent(list.getNode());
+
+        var map = {
+          hideDone: {
+            type: 'done'
+          },
+          hideCollapsed: {
+            type: 'collapsed'
+          },
+          hideGhosts: {
+            type: 'ghosts'
+          },
+          hideAll: {
+            type: 'all'
+          },
+          showAll: {
+            type: 'show'
+          }
+        };
+
+        for (var k in map) {
+          var spec = map[k];
+
+          var handler = JX.bind(this, this._onhideinlines, spec.type);
+          var item = new JX.PHUIXActionView()
+            .setHandler(handler);
+
+          list.addItem(item);
+          this._menuItems[k] = item;
+        }
+
+        dropdown.listen('open', JX.bind(this, this._ondropdown));
+
+        var pht = this.getTranslations();
+
+        if (this.getInlineListURI()) {
+          list.addItem(
+            new JX.PHUIXActionView()
+              .setDivider(true));
+
+          list.addItem(
+            new JX.PHUIXActionView()
+              .setIcon('fa-link')
+              .setName(pht('List Inline Comments'))
+              .setHref(this.getInlineListURI()));
+        }
+
+        this._menuButton = button;
+        this._dropdownMenu = dropdown;
+      }
+
+      return this._menuButton;
+    },
+
+    _ondropdown: function() {
+      var inlines = this._getInlinesByType();
+      var items = this._menuItems;
+      var pht = this.getTranslations();
+
+      items.hideDone
+        .setName(pht('Hide "Done" Inlines'))
+        .setDisabled(!inlines.visibleDone.length);
+
+      items.hideCollapsed
+        .setName(pht('Hide Collapsed Inlines'))
+        .setDisabled(!inlines.visibleCollapsed.length);
+
+      items.hideGhosts
+        .setName(pht('Hide Older Inlines'))
+        .setDisabled(!inlines.visibleGhosts.length);
+
+      items.hideAll
+        .setName(pht('Hide All Inlines'))
+        .setDisabled(!inlines.visible.length);
+
+      items.showAll
+        .setName(pht('Show All Inlines'))
+        .setDisabled(!inlines.hidden.length);
+    },
+
+    _onhideinlines: function(type, e) {
+      this._dropdownMenu.close();
+      e.prevent();
+
+      var inlines = this._getInlinesByType();
+
+      // Clear the selection state since we end up in a weird place if the
+      // user hides the selected inline.
+      this._setSelectionState(null);
+
+      var targets;
+      var mode = true;
+      switch (type) {
+        case 'done':
+          targets = inlines.visibleDone;
+          break;
+        case 'collapsed':
+          targets = inlines.visibleCollapsed;
+          break;
+        case 'ghosts':
+          targets = inlines.visibleGhosts;
+          break;
+        case 'all':
+          targets = inlines.visible;
+          break;
+        case 'show':
+          targets = inlines.hidden;
+          mode = false;
+          break;
+      }
+
+      for (var ii = 0; ii < targets.length; ii++) {
+        targets[ii].setHidden(mode);
+      }
+    },
+
+    _onunsavedclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        show: true,
+        attribute: 'unsaved'
+      };
+
+      this._onjumpkey(1, options);
+    },
+
+    _onunsubmittedclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        show: true,
+        attribute: 'anyDraft'
+      };
+
+      this._onjumpkey(1, options);
+    },
+
+    _ondoneclick: function(e) {
+      e.kill();
+
+      var options = {
+        filter: 'comment',
+        wrap: true,
+        show: true,
+        attribute: this._doneMode
+      };
+
+      this._onjumpkey(1, options);
     },
 
     _getBannerNode: function() {

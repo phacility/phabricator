@@ -2,13 +2,11 @@
  * @provides diffusion-history-css
  */
 
-.diffusion-history-list .phui-oi-link {
-  color: {$darkbluetext};
-  font-size: {$biggerfontsize};
-}
+/* - List Styles  ------------------------------------------------------------*/
 
-.diffusion-history-list .phui-oi-attribute .phui-tag-core {
-  border-color: transparent;
+.diffusion-history-list .phui-oi-link {
+  color: #000;
+  font-size: {$biggerfontsize};
 }
 
 .diffusion-history-message {
@@ -17,4 +15,85 @@
   margin: 4px 0;
   border-radius: 5px;
   color: {$darkbluetext};
+}
+
+.diffusion-history-list .phui-oi-attribute {
+  font-size: {$smallerfontsize};
+  letter-spacing: 0.01em;
+}
+
+.diffusion-history-author-name a {
+  color: {$darkbluetext};
+}
+
+.diffusion-history-list .diffusion-differential-tag {
+  margin-left: 4px;
+}
+
+/* - Branch Styles  ----------------------------------------------------------*/
+
+.diffusion-branch-list .phui-oi-attribute a {
+  color: {$darkbluetext};
+}
+
+.diffusion-branch-list .phui-oi-attribute-spacer {
+  visibility: hidden;
+}
+
+.diffusion-branch-list .phui-oi-subhead {
+  color: {$bluetext};
+}
+
+.diffusion-branch-list .phui-oi-subhead .phui-tag-view {
+  margin-right: 4px;
+}
+
+/* - Phone Style  ------------------------------------------------------------*/
+
+.device-phone.diffusion-history-view  .phui-two-column-view
+  .phui-two-column-footer .phui-object-box {
+    border-color: {$thinblueborder};
+}
+
+.device-phone.diffusion-history-view .phui-two-column-view
+  .phui-two-column-footer .phui-header-view {
+    text-align: center;
+}
+
+.device-phone.diffusion-history-view .phui-two-column-content {
+  padding: 0;
+  margin: 0 -4px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-attribute-spacer {
+  display: none;
+}
+
+.device-phone.diffusion-history-view .phui-oi-attribute {
+  display: block;
+  margin: 0 0 4px 0;
+}
+
+.device-phone.diffusion-history-view .phui-oi-image {
+  height: 36px;
+  width: 36px;
+  margin-top: 10px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-with-image .phui-oi-content-box {
+  margin-left: 44px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-col2.phui-oi-side-column {
+  padding-bottom: 10px;
+}
+
+.device-phone.diffusion-history-view .diffusion-history-list .button.has-icon
+  .phui-button-text {
+    margin: 0;
+}
+
+.device-phone.diffusion-history-view .diffusion-history-list .button.has-icon
+  .phui-icon-view {
+    display: none;
 }

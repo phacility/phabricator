@@ -103,7 +103,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l - 1)->alter('r', $r - 1),
-            'class' => 'button grey',
+            'class' => 'button button-grey',
           ),
           pht("\xC2\xAB Previous Change"));
       } else {
@@ -111,7 +111,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => '#',
-            'class' => 'button grey disabled',
+            'class' => 'button button-grey disabled',
           ),
           pht('Original Change'));
       }
@@ -122,7 +122,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l + 1)->alter('r', $r + 1),
-            'class' => 'button grey',
+            'class' => 'button button-grey',
           ),
           pht("Next Change \xC2\xBB"));
       } else {
@@ -130,7 +130,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => '#',
-            'class' => 'button grey disabled',
+            'class' => 'button button-grey disabled',
           ),
           pht('Most Recent Change'));
       }
@@ -200,7 +200,7 @@ final class PhrictionDiffController extends PhrictionController {
         'a',
         array(
           'href'  => '/phriction/edit/'.$document_id.'/',
-          'class' => 'button grey',
+          'class' => 'button button-grey',
         ),
         pht('Edit Current Version'));
     }
@@ -210,7 +210,7 @@ final class PhrictionDiffController extends PhrictionController {
       'a',
       array(
         'href'  => '/phriction/edit/'.$document_id.'/?revert='.$version,
-        'class' => 'button grey',
+        'class' => 'button button-grey',
       ),
       pht('Revert to Version %s...', $version));
   }

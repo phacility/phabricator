@@ -84,8 +84,8 @@ abstract class AlmanacController
         'a',
         array(
           'class' => ($can_edit
-            ? 'button grey small'
-            : 'button grey small disabled'),
+            ? 'button button-grey small'
+            : 'button button-grey small disabled'),
           'sigil' => 'workflow',
           'href' => $delete_uri,
         ),

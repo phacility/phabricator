@@ -12,6 +12,10 @@ final class PHUIHovercardUIExample extends PhabricatorUIExample {
       phutil_tag('tt', array(), 'PHUIHovercardView'));
   }
 
+  public function getCategory() {
+    return pht('Single Use');
+  }
+
   public function renderExample() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -51,14 +55,6 @@ final class PHUIHovercardUIExample extends PhabricatorUIExample {
       ->addTag($tag));
     $elements[] = $panel;
 
-    $badge1 = id(new PHUIBadgeMiniView())
-      ->setIcon('fa-book')
-      ->setHeader(pht('Documenter'));
-
-    $badge2 = id(new PHUIBadgeMiniView())
-      ->setIcon('fa-star')
-      ->setHeader(pht('Contributor'));
-
     $user_handle = $this->createBasicDummyHandle(
       'gwashington',
       PhabricatorPeopleUserPHIDType::TYPECONST,
@@ -71,8 +67,6 @@ final class PHUIHovercardUIExample extends PhabricatorUIExample {
       ->addField(pht('Status'), pht('Available'))
       ->addField(pht('Member since'), '30. February 1750')
       ->addAction(pht('Send a Message'), '/dev/null')
-      ->addBadge($badge1)
-      ->addBadge($badge2)
       ->setUser($user));
     $elements[] = $panel;
 
