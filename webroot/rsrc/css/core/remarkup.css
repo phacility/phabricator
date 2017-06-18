@@ -128,7 +128,8 @@
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks input {
-  display: none;
+  visibility: hidden;
+  width: 0;
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks
