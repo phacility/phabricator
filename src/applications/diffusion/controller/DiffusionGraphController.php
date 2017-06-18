@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionHistoryController extends DiffusionController {
+final class DiffusionGraphController extends DiffusionController {
 
   public function shouldAllowPublic() {
     return true;
@@ -34,71 +34,72 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history = $pager->sliceResults($history);
 
-    $history_list = id(new DiffusionHistoryListView())
+    $graph = id(new DiffusionHistoryTableView())
       ->setViewer($viewer)
       ->setDiffusionRequest($drequest)
       ->setHistory($history);
 
-    $history_list->loadRevisions();
+    $graph->loadRevisions();
+    $show_graph = !strlen($drequest->getPath());
+    if ($show_graph) {
+      $graph->setParents($history_results['parents']);
+      $graph->setIsHead(!$pager->getOffset());
+      $graph->setIsTail(!$pager->getHasMorePages());
+    }
+
     $header = $this->buildHeader($drequest);
 
     $crumbs = $this->buildCrumbs(
       array(
         'branch' => true,
         'path'   => true,
-        'view'   => 'history',
+        'view'   => 'graph',
       ));
     $crumbs->setBorder(true);
 
     $title = array(
-      pht('History'),
+      pht('Graph'),
       $repository->getDisplayName(),
     );
 
-    $pager = id(new PHUIBoxView())
-      ->addClass('mlb')
-      ->appendChild($pager);
+    $graph_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('History Graph'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($graph)
+      ->setPager($pager);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $history_list,
-        $pager,
-      ));
+      ->setFooter($graph_view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view)
-      ->addClass('diffusion-history-view');
+      ->appendChild($view);
   }
 
   private function buildHeader(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
 
     $tag = $this->renderCommitHashTag($drequest);
-    $show_graph = !strlen($drequest->getPath());
+    $history_uri = $drequest->generateURI(
+      array(
+        'action' => 'history',
+      ));
+
+    $history_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('History'))
+      ->setHref($history_uri)
+      ->setIcon('fa-history');
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($drequest->getRepository())
       ->addTag($tag)
       ->setHeader($this->renderPathLinks($drequest, $mode = 'history'))
-      ->setHeaderIcon('fa-clock-o');
-
-    if ($show_graph) {
-      $graph_uri = $drequest->generateURI(
-        array(
-          'action' => 'graph',
-        ));
-
-      $graph_button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setText(pht('Graph'))
-        ->setHref($graph_uri)
-        ->setIcon('fa-code-fork');
-      $header->addActionLink($graph_button);
-    }
+      ->setHeaderIcon('fa-code-fork')
+      ->addActionLink($history_button);
 
     return $header;
 
