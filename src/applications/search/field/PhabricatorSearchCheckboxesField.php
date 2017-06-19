@@ -18,6 +18,14 @@ final class PhabricatorSearchCheckboxesField
     return array();
   }
 
+  protected function didReadValueFromSavedQuery($value) {
+    if (!is_array($value)) {
+      return array();
+    }
+
+    return $value;
+  }
+
   protected function getValueFromRequest(AphrontRequest $request, $key) {
     return $this->getListFromRequest($request, $key);
   }
