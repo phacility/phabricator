@@ -12,19 +12,13 @@ abstract class AphrontRequestExceptionHandler extends Phobject {
 
   abstract public function getRequestExceptionHandlerPriority();
 
-  public function shouldLogException(
+  abstract public function canHandleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
-    return null;
-  }
+    $throwable);
 
-  abstract public function canHandleRequestException(
+  abstract public function handleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex);
-
-  abstract public function handleRequestException(
-    AphrontRequest $request,
-    Exception $ex);
+    $throwable);
 
   final public static function getAllHandlers() {
     return id(new PhutilClassMapQuery())

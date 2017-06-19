@@ -11,19 +11,19 @@ final class PhabricatorConduitRequestExceptionHandler
     return pht('Responds to requests made by Conduit clients.');
   }
 
-  public function canHandleRequestException(
+  public function canHandleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
     return $request->isConduit();
   }
 
-  public function handleRequestException(
+  public function handleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     $response = id(new ConduitAPIResponse())
-      ->setErrorCode(get_class($ex))
-      ->setErrorInfo($ex->getMessage());
+      ->setErrorCode(get_class($throwable))
+      ->setErrorInfo($throwable->getMessage());
 
     return id(new AphrontJSONResponse())
       ->setAddJSONShield(false)
