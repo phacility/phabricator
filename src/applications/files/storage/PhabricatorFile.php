@@ -393,6 +393,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $tmp = new TempFile();
       Filesystem::writeFile($tmp, $data);
       $file->setMimeType(Filesystem::getMimeType($tmp));
+      unset($tmp);
     }
 
     try {
