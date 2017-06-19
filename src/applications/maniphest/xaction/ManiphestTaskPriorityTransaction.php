@@ -129,4 +129,50 @@ final class ManiphestTaskPriorityTransaction
     }
   }
 
+  public function validateTransactions($object, array $xactions) {
+    $errors = array();
+
+    $content_source = $this->getEditor()->getContentSource();
+    $is_web = ($content_source instanceof PhabricatorWebContentSource);
+
+    foreach ($xactions as $xaction) {
+      $value = $xaction->getNewValue();
+
+      // If this is a legitimate keyword like "low" or "high", this transaction
+      // is fine and apply normally.
+      $keyword = ManiphestTaskPriority::getTaskPriorityFromKeyword($value);
+      if ($keyword !== null) {
+        continue;
+      }
+
+      // If this is the magic "don't change things" value for editing tasks
+      // with an obsolete priority constant in the database, let it through if
+      // this is a web edit.
+      if ($value === ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD) {
+        if ($is_web) {
+          continue;
+        }
+      }
+
+      $keyword_list = array();
+      foreach (ManiphestTaskPriority::getTaskPriorityMap() as $pri => $name) {
+        $keyword = ManiphestTaskPriority::getKeywordForTaskPriority($pri);
+        if ($keyword === null) {
+          continue;
+        }
+        $keyword_list[] = $keyword;
+      }
+
+      $errors[] = $this->newInvalidError(
+        pht(
+          'Task priority "%s" is not a valid task priority. Use a priority '.
+          'keyword to choose a task priority: %s.',
+          $value,
+          implode(', ', $keyword_list)),
+        $xaction);
+    }
+
+    return $errors;
+  }
+
 }
