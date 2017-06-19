@@ -77,6 +77,8 @@ final class ManiphestEditEngine
     $status_map = $this->getTaskStatusMap($object);
     $priority_map = $this->getTaskPriorityMap($object);
 
+    $alias_map = ManiphestTaskPriority::getTaskPriorityAliasMap();
+
     if ($object->isClosed()) {
       $default_status = ManiphestTaskStatus::getDefaultStatus();
     } else {
@@ -217,6 +219,7 @@ EODOCS
         ->setIsCopyable(true)
         ->setValue($object->getPriorityKeyword())
         ->setOptions($priority_map)
+        ->setOptionAliases($alias_map)
         ->setCommentActionLabel(pht('Change Priority')),
     );
 
