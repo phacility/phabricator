@@ -27,18 +27,13 @@ final class PhabricatorSelectEditField
     return $this->optionAliases;
   }
 
+  protected function getDefaultValueFromConfiguration($value) {
+    return $this->getCanonicalValue($value);
+  }
+
   protected function getValueForControl() {
     $value = parent::getValueForControl();
-
-    $options = $this->getOptions();
-    if (!isset($options[$value])) {
-      $aliases = $this->getOptionAliases();
-      if (isset($aliases[$value])) {
-        $value = $aliases[$value];
-      }
-    }
-
-    return $value;
+    return $this->getCanonicalValue($value);
   }
 
   protected function newControl() {
@@ -57,6 +52,18 @@ final class PhabricatorSelectEditField
 
   protected function newConduitParameterType() {
     return new ConduitStringParameterType();
+  }
+
+  private function getCanonicalValue($value) {
+    $options = $this->getOptions();
+    if (!isset($options[$value])) {
+      $aliases = $this->getOptionAliases();
+      if (isset($aliases[$value])) {
+        $value = $aliases[$value];
+      }
+    }
+
+    return $value;
   }
 
 }
