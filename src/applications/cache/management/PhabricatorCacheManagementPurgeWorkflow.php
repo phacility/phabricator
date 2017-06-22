@@ -64,7 +64,11 @@ final class PhabricatorCacheManagementPurgeWorkflow
       }
     }
 
+    $viewer = $this->getViewer();
+
     foreach ($purgers as $key => $purger) {
+      $purger->setViewer($viewer);
+
       echo tsprintf(
         "%s\n",
         pht(
