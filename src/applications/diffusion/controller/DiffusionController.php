@@ -204,6 +204,9 @@ abstract class DiffusionController extends PhabricatorController {
       case 'history':
         $view_name = pht('History');
         break;
+      case 'graph':
+        $view_name = pht('Graph');
+        break;
       case 'browse':
         $view_name = pht('Browse');
         break;

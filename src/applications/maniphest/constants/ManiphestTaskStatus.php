@@ -232,15 +232,16 @@ final class ManiphestTaskStatus extends ManiphestConstants {
    * @task validate
    */
   public static function isValidStatusConstant($constant) {
-    if (strlen($constant) > 12) {
+    if (!strlen($constant) || strlen($constant) > 64) {
       return false;
     }
-    if (!preg_match('/^[a-z0-9]+\z/', $constant)) {
+
+    // Alphanumeric, but not exclusively numeric
+    if (!preg_match('/^(?![0-9]*$)[a-zA-Z0-9]+$/', $constant)) {
       return false;
     }
     return true;
   }
-
 
   /**
    * @task validate
@@ -250,10 +251,9 @@ final class ManiphestTaskStatus extends ManiphestConstants {
       if (!self::isValidStatusConstant($key)) {
         throw new Exception(
           pht(
-            'Key "%s" is not a valid status constant. Status constants must '.
-            'be 1-12 characters long and contain only lowercase letters (a-z) '.
-            'and digits (0-9). For example, "%s" or "%s" are reasonable '.
-            'choices.',
+            'Key "%s" is not a valid status constant. Status constants '.
+            'must be 1-64 alphanumeric characters and cannot be exclusively '.
+            'digits. For example, "%s" or "%s" are reasonable choices.',
             $key,
             'open',
             'closed'));

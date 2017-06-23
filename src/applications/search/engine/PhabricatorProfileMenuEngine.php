@@ -238,7 +238,14 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       case 'view':
         $navigation->selectFilter($selected_item->getDefaultMenuItemKey());
 
-        $content = $this->buildItemViewContent($selected_item);
+        try {
+          $content = $this->buildItemViewContent($selected_item);
+        } catch (Exception $ex) {
+          $content = id(new PHUIInfoView())
+            ->setTitle(pht('Unable to Render Dashboard'))
+            ->setErrors(array($ex->getMessage()));
+        }
+
         $crumbs->addTextCrumb($selected_item->getDisplayName());
         if (!$content) {
           return new Aphront404Response();

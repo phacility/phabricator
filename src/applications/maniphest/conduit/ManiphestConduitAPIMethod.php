@@ -99,7 +99,9 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
         throw id(new ConduitException('ERR-INVALID-PARAMETER'))
           ->setErrorDescription(pht('Priority set to invalid value.'));
       }
-      $changes[ManiphestTaskPriorityTransaction::TRANSACTIONTYPE] = $priority;
+      $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+      $keyword = head(idx($keyword_map, $priority));
+      $changes[ManiphestTaskPriorityTransaction::TRANSACTIONTYPE] = $keyword;
     }
 
     $owner_phid = $request->getValue('ownerPHID');

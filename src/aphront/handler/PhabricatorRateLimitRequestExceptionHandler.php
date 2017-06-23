@@ -13,20 +13,20 @@ final class PhabricatorRateLimitRequestExceptionHandler
       'does something too frequently.');
   }
 
-  public function canHandleRequestException(
+  public function canHandleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     if (!$this->isPhabricatorSite($request)) {
       return false;
     }
 
-    return ($ex instanceof PhabricatorSystemActionRateLimitException);
+    return ($throwable instanceof PhabricatorSystemActionRateLimitException);
   }
 
-  public function handleRequestException(
+  public function handleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     $viewer = $this->getViewer($request);
 
@@ -34,8 +34,8 @@ final class PhabricatorRateLimitRequestExceptionHandler
       ->setTitle(pht('Slow Down!'))
       ->setUser($viewer)
       ->setErrors(array(pht('You are being rate limited.')))
-      ->appendParagraph($ex->getMessage())
-      ->appendParagraph($ex->getRateExplanation())
+      ->appendParagraph($throwable->getMessage())
+      ->appendParagraph($throwable->getRateExplanation())
       ->addCancelButton('/', pht('Okaaaaaaaaaaaaaay...'));
   }
 

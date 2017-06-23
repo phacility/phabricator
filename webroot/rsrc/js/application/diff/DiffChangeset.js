@@ -447,6 +447,7 @@ JX.install('DiffChangeset', {
               changeset: this,
               target: inline,
               hidden: inline.isHidden(),
+              collapsed: inline.isCollapsed(),
               deleted: !inline.getID() && !inline.isEditing(),
               nodes: {
                 begin: block.items[jj],
@@ -454,7 +455,7 @@ JX.install('DiffChangeset', {
               },
               attributes: {
                 unsaved: inline.isEditing(),
-                unsubmitted: inline.isDraft(),
+                anyDraft: inline.isDraft() || inline.isDraftDone(),
                 undone: (is_saved && !inline.isDone()),
                 done: (is_saved && inline.isDone())
               }

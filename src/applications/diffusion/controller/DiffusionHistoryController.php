@@ -77,24 +77,28 @@ final class DiffusionHistoryController extends DiffusionController {
     $viewer = $this->getViewer();
 
     $tag = $this->renderCommitHashTag($drequest);
-    $browse_uri = $drequest->generateURI(
-      array(
-        'action' => 'browse',
-      ));
-
-    $browse_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Browse'))
-      ->setHref($browse_uri)
-      ->setIcon('fa-code');
+    $show_graph = !strlen($drequest->getPath());
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($drequest->getRepository())
       ->addTag($tag)
       ->setHeader($this->renderPathLinks($drequest, $mode = 'history'))
-      ->setHeaderIcon('fa-clock-o')
-      ->addActionLink($browse_button);
+      ->setHeaderIcon('fa-clock-o');
+
+    if ($show_graph) {
+      $graph_uri = $drequest->generateURI(
+        array(
+          'action' => 'graph',
+        ));
+
+      $graph_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Graph'))
+        ->setHref($graph_uri)
+        ->setIcon('fa-code-fork');
+      $header->addActionLink($graph_button);
+    }
 
     return $header;
 

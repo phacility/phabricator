@@ -14,6 +14,7 @@ final class DifferentialChangesetListView extends AphrontView {
   private $standaloneURI;
   private $leftRawFileURI;
   private $rightRawFileURI;
+  private $inlineListURI;
 
   private $symbolIndexes = array();
   private $repository;
@@ -62,6 +63,15 @@ final class DifferentialChangesetListView extends AphrontView {
   public function setInlineCommentControllerURI($uri) {
     $this->inlineURI = $uri;
     return $this;
+  }
+
+  public function setInlineListURI($uri) {
+    $this->inlineListURI = $uri;
+    return $this;
+  }
+
+  public function getInlineListURI() {
+    return $this->inlineListURI;
   }
 
   public function setRepository(PhabricatorRepository $repository) {
@@ -208,6 +218,7 @@ final class DifferentialChangesetListView extends AphrontView {
       array(
       'changesetViewIDs' => $ids,
       'inlineURI' => $this->inlineURI,
+      'inlineListURI' => $this->inlineListURI,
       'pht' => array(
         'Open in Editor' => pht('Open in Editor'),
         'Show All Context' => pht('Show All Context'),
@@ -257,15 +268,15 @@ final class DifferentialChangesetListView extends AphrontView {
         'You must select a comment to mark done.' =>
           pht('You must select a comment to mark done.'),
 
-        'Hide or show inline comment.' =>
-          pht('Hide or show inline comment.'),
+        'Collapse or expand inline comment.' =>
+          pht('Collapse or expand inline comment.'),
         'You must select a comment to hide.' =>
           pht('You must select a comment to hide.'),
 
-        'Jump to next inline comment, including hidden comments.' =>
-          pht('Jump to next inline comment, including hidden comments.'),
-        'Jump to previous inline comment, including hidden comments.' =>
-          pht('Jump to previous inline comment, including hidden comments.'),
+        'Jump to next inline comment, including collapsed comments.' =>
+          pht('Jump to next inline comment, including collapsed comments.'),
+        'Jump to previous inline comment, including collapsed comments.' =>
+          pht('Jump to previous inline comment, including collapsed comments.'),
 
         'This file content has been collapsed.' =>
           pht('This file content has been collapsed.'),
@@ -279,6 +290,14 @@ final class DifferentialChangesetListView extends AphrontView {
         'Unsaved' => pht('Unsaved'),
         'Unsubmitted' => pht('Unsubmitted'),
         'Comments' => pht('Comments'),
+
+        'Hide "Done" Inlines' => pht('Hide "Done" Inlines'),
+        'Hide Collapsed Inlines' => pht('Hide Collapsed Inlines'),
+        'Hide Older Inlines' => pht('Hide Older Inlines'),
+        'Hide All Inlines' => pht('Hide All Inlines'),
+        'Show All Inlines' => pht('Show All Inlines'),
+
+        'List Inline Comments' => pht('List Inline Comments'),
       ),
     ));
 

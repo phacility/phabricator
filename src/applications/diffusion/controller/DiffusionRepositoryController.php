@@ -274,7 +274,9 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setHeader($repository->getName())
       ->setUser($viewer)
       ->setPolicyObject($repository)
-      ->setHeaderIcon('fa-code');
+      ->setProfileHeader(true)
+      ->setImage($repository->getProfileImageURI())
+      ->setImageEditURL('/diffusion/picture/'.$repository->getID().'/');
 
     if (!$repository->isTracked()) {
       $header->setStatus('fa-ban', 'dark', pht('Inactive'));
@@ -449,11 +451,11 @@ final class DiffusionRepositoryController extends DiffusionController {
       $header->setSubheader(pht('Showing %d branches.', $limit));
     }
 
-    $button = new PHUIButtonView();
-    $button->setText(pht('Show All'));
-    $button->setTag('a');
-    $button->setIcon('fa-code-fork');
-    $button->setHref($drequest->generateURI(
+    $button = id(new PHUIButtonView())
+      ->setText(pht('Show All'))
+      ->setTag('a')
+      ->setIcon('fa-code-fork')
+      ->setHref($drequest->generateURI(
       array(
         'action' => 'branches',
       )));
@@ -490,7 +492,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->needCommitData(true)
       ->execute();
 
-    $view = id(new DiffusionTagListView())
+    $view = id(new DiffusionTagTableView())
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
       ->setTags($tags)
@@ -509,11 +511,11 @@ final class DiffusionRepositoryController extends DiffusionController {
         pht('Showing the %d most recent tags.', $tag_limit));
     }
 
-    $button = new PHUIButtonView();
-    $button->setText(pht('Show All Tags'));
-    $button->setTag('a');
-    $button->setIcon('fa-tag');
-    $button->setHref($drequest->generateURI(
+    $button = id(new PHUIButtonView())
+      ->setText(pht('Show All Tags'))
+      ->setTag('a')
+      ->setIcon('fa-tag')
+      ->setHref($drequest->generateURI(
       array(
         'action' => 'tags',
       )));
@@ -565,23 +567,30 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $history_table->setIsHead(true);
 
-    $icon = id(new PHUIIconView())
-      ->setIcon('fa-list-alt');
-
-    $button = id(new PHUIButtonView())
-      ->setText(pht('View History'))
+    $history = id(new PHUIButtonView())
+      ->setText(pht('History'))
       ->setHref($drequest->generateURI(
         array(
           'action' => 'history',
         )))
       ->setTag('a')
-      ->setIcon($icon);
+      ->setIcon('fa-history');
+
+    $graph = id(new PHUIButtonView())
+      ->setText(pht('Graph'))
+      ->setHref($drequest->generateURI(
+        array(
+          'action' => 'graph',
+        )))
+      ->setTag('a')
+      ->setIcon('fa-code-fork');
 
     $panel = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Recent Commits'))
-      ->addActionLink($button);
+      ->addActionLink($graph)
+      ->addActionLink($history);
     $panel->setHeader($header);
     $panel->setTable($history_table);
 
@@ -670,14 +679,11 @@ final class DiffusionRepositoryController extends DiffusionController {
     $header = id(new PHUIHeaderView())
       ->setHeader($repository->getName());
 
-    $icon = id(new PHUIIconView())
-      ->setIcon('fa-folder-open');
-
-    $button = new PHUIButtonView();
-    $button->setText(pht('Browse Repository'));
-    $button->setTag('a');
-    $button->setIcon($icon);
-    $button->setHref($browse_uri);
+    $button = id(new PHUIButtonView())
+      ->setText(pht('Browse'))
+      ->setTag('a')
+      ->setIcon('fa-code')
+      ->setHref($browse_uri);
 
     $header->addActionLink($button);
     $browse_panel->setHeader($header);

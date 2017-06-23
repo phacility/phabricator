@@ -2,6 +2,8 @@
 
 final class ManiphestTaskPriority extends ManiphestConstants {
 
+  const UNKNOWN_PRIORITY_KEYWORD = '!!unknown!!';
+
   /**
    * Get the priorities and their full descriptions.
    *
@@ -39,6 +41,58 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     }
 
     return $map;
+  }
+
+  /**
+   * Get the canonical keyword for a given priority constant.
+   *
+   * @return string|null Keyword, or `null` if no keyword is configured.
+   */
+  public static function getKeywordForTaskPriority($priority) {
+    $map = self::getConfig();
+
+    $spec = idx($map, $priority);
+    if (!$spec) {
+      return null;
+    }
+
+    $keywords = idx($spec, 'keywords');
+    if (!$keywords) {
+      return null;
+    }
+
+    return head($keywords);
+  }
+
+
+  /**
+   * Get a map of supported alternate names for each priority.
+   *
+   * Keys are aliases, like "wish" and "wishlist". Values are canonical
+   * priority keywords, like "wishlist".
+   *
+   * @return map<string, string> Map of aliases to canonical priority keywords.
+   */
+  public static function getTaskPriorityAliasMap() {
+    $keyword_map = self::getTaskPriorityKeywordsMap();
+
+    $result = array();
+    foreach ($keyword_map as $key => $keywords) {
+      $target = self::getKeywordForTaskPriority($key);
+      if ($target === null) {
+        continue;
+      }
+
+      // NOTE: Include the raw priority value, like "25", in the list of
+      // aliases. This supports legacy sources like saved EditEngine forms.
+      $result[$key] = $target;
+
+      foreach ($keywords as $keyword) {
+        $result[$keyword] = $target;
+      }
+    }
+
+    return $result;
   }
 
 
@@ -105,6 +159,18 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return 'fa-arrow-right';
   }
 
+  public static function getTaskPriorityFromKeyword($keyword) {
+    $map = self::getTaskPriorityKeywordsMap();
+
+    foreach ($map as $priority => $keywords) {
+      if (in_array($keyword, $keywords)) {
+        return $priority;
+      }
+    }
+
+    return null;
+  }
+
   public static function isDisabledPriority($priority) {
     $config = idx(self::getConfig(), $priority, array());
     return idx($config, 'disabled', false);
@@ -114,6 +180,18 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     $config = PhabricatorEnv::getEnvConfig('maniphest.priorities');
     krsort($config);
     return $config;
+  }
+
+  private static function isValidPriorityKeyword($keyword) {
+    if (!strlen($keyword) || strlen($keyword) > 64) {
+      return false;
+    }
+
+    // Alphanumeric, but not exclusively numeric
+    if (!preg_match('/^(?![0-9]*$)[a-zA-Z0-9]+$/', $keyword)) {
+      return false;
+    }
+    return true;
   }
 
   public static function validateConfiguration($config) {
@@ -147,9 +225,24 @@ final class ManiphestTaskPriority extends ManiphestConstants {
           'name' => 'string',
           'short' => 'optional string',
           'color' => 'optional string',
-          'keywords' => 'optional list<string>',
+          'keywords' => 'list<string>',
           'disabled' => 'optional bool',
         ));
+
+      $keywords = $value['keywords'];
+      foreach ($keywords as $keyword) {
+        if (!self::isValidPriorityKeyword($keyword)) {
+          throw new Exception(
+            pht(
+              'Key "%s" is not a valid priority keyword. Priority keywords '.
+              'must be 1-64 alphanumeric characters and cannot be '.
+              'exclusively digits. For example, "%s" or "%s" are '.
+              'reasonable choices.',
+              $keyword,
+              'low',
+              'critical'));
+        }
+      }
     }
   }
 

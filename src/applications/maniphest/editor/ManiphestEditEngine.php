@@ -77,6 +77,8 @@ final class ManiphestEditEngine
     $status_map = $this->getTaskStatusMap($object);
     $priority_map = $this->getTaskPriorityMap($object);
 
+    $alias_map = ManiphestTaskPriority::getTaskPriorityAliasMap();
+
     if ($object->isClosed()) {
       $default_status = ManiphestTaskStatus::getDefaultStatus();
     } else {
@@ -215,8 +217,9 @@ EODOCS
         ->setConduitTypeDescription(pht('New task priority constant.'))
         ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
-        ->setValue($object->getPriority())
+        ->setValue($object->getPriorityKeyword())
         ->setOptions($priority_map)
+        ->setOptionAliases($alias_map)
         ->setCommentActionLabel(pht('Change Priority')),
     );
 
@@ -289,29 +292,29 @@ EODOCS
 
   private function getTaskPriorityMap(ManiphestTask $task) {
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+    $priority_keywords = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
     $current_priority = $task->getPriority();
+    $results = array();
+
+    foreach ($priority_map as $priority => $priority_name) {
+      $disabled = ManiphestTaskPriority::isDisabledPriority($priority);
+      if ($disabled && !($priority == $current_priority)) {
+        continue;
+      }
+
+      $keyword = head(idx($priority_keywords, $priority));
+      $results[$keyword] = $priority_name;
+    }
 
     // If the current value isn't a legitimate one, put it in the dropdown
-    // anyway so saving the form doesn't cause a side effects.
+    // anyway so saving the form doesn't cause any side effects.
     if (idx($priority_map, $current_priority) === null) {
-      $priority_map[$current_priority] = pht(
+      $results[ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD] = pht(
         '<Unknown: %s>',
         $current_priority);
     }
 
-    foreach ($priority_map as $priority => $priority_name) {
-      // Always keep the current priority.
-      if ($priority == $current_priority) {
-        continue;
-      }
-
-      if (ManiphestTaskPriority::isDisabledPriority($priority)) {
-        unset($priority_map[$priority]);
-        continue;
-      }
-    }
-
-    return $priority_map;
+    return $results;
   }
 
   protected function newEditResponse(

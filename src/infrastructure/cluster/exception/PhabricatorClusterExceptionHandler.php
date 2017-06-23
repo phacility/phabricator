@@ -11,24 +11,24 @@ final class PhabricatorClusterExceptionHandler
     return pht('Handles runtime problems with cluster configuration.');
   }
 
-  public function canHandleRequestException(
+  public function canHandleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
-    return ($ex instanceof PhabricatorClusterException);
+    $throwable) {
+    return ($throwable instanceof PhabricatorClusterException);
   }
 
-  public function handleRequestException(
+  public function handleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     $viewer = $this->getViewer($request);
 
-    $title = $ex->getExceptionTitle();
+    $title = $throwable->getExceptionTitle();
 
     $dialog =  id(new AphrontDialogView())
       ->setTitle($title)
       ->setUser($viewer)
-      ->appendParagraph($ex->getMessage())
+      ->appendParagraph($throwable->getMessage())
       ->addCancelButton('/', pht('Proceed With Caution'));
 
     return id(new AphrontDialogResponse())

@@ -16,6 +16,7 @@ JX.install('PHUIXActionView', {
     _label: false,
     _handler: null,
     _selected: false,
+    _divider: false,
 
     _iconNode: null,
     _nameNode: null,
@@ -38,6 +39,15 @@ JX.install('PHUIXActionView', {
         this.getNode(),
         'phabricator-action-view-label',
         label);
+      return this;
+    },
+
+    setDivider: function(divider) {
+      this._divider = divider;
+      JX.DOM.alterClass(
+        this.getNode(),
+        'phabricator-action-view-type-divider',
+        divider);
       return this;
     },
 

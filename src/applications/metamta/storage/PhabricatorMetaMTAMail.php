@@ -372,15 +372,15 @@ final class PhabricatorMetaMTAMail
       }
       $editor->save();
 
-      // Queue a task to send this mail.
-      $mailer_task = PhabricatorWorker::scheduleTask(
-        'PhabricatorMetaMTAWorker',
-        $this->getID(),
-        array(
-          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
-        ));
-
     $this->saveTransaction();
+
+    // Queue a task to send this mail.
+    $mailer_task = PhabricatorWorker::scheduleTask(
+      'PhabricatorMetaMTAWorker',
+      $this->getID(),
+      array(
+        'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+      ));
 
     return $result;
   }

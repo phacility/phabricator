@@ -159,7 +159,8 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->setIcon($icon)
           ->setBackground('bg-blue')
           ->setHref('#')
-          ->addClass('mmr');
+          ->addClass('mmr')
+          ->setTooltip($icon);
     }
 
     $layout_cicons = id(new PHUIBoxView())

@@ -14,7 +14,6 @@ JX.install('DiffInline', {
     _phid: null,
     _changesetID: null,
     _row: null,
-    _hidden: false,
     _number: null,
     _length: null,
     _displaySide: null,
@@ -30,18 +29,21 @@ JX.install('DiffInline', {
 
     _changeset: null,
 
+    _isCollapsed: false,
     _isDraft: null,
+    _isDraftDone: null,
     _isFixed: null,
     _isEditing: false,
     _isNew: false,
     _isSynthetic: false,
+    _isHidden: false,
 
     bindToRow: function(row) {
       this._row = row;
 
       var row_data = JX.Stratcom.getData(row);
       row_data.inline = this;
-      this._hidden = row_data.hidden || false;
+      this._isCollapsed = row_data.hidden || false;
 
       // TODO: Get smarter about this once we do more editing, this is pretty
       // hacky.
@@ -73,6 +75,7 @@ JX.install('DiffInline', {
       this._isFixed = data.isFixed;
       this._isGhost = data.isGhost;
       this._isSynthetic = data.isSynthetic;
+      this._isDraftDone = data.isDraftDone;
 
       this._changesetID = data.changesetID;
       this._isNew = false;
@@ -101,6 +104,18 @@ JX.install('DiffInline', {
 
     isSynthetic: function() {
       return this._isSynthetic;
+    },
+
+    isDraftDone: function() {
+      return this._isDraftDone;
+    },
+
+    isHidden: function() {
+      return this._isHidden;
+    },
+
+    isGhost: function() {
+      return this._isGhost;
     },
 
     bindToRange: function(data) {
@@ -201,6 +216,12 @@ JX.install('DiffInline', {
       return this;
     },
 
+    setHidden: function(hidden) {
+      this._isHidden = hidden;
+      this._redraw();
+      return this;
+    },
+
     canReply: function() {
       if (!this._hasAction('reply')) {
         return false;
@@ -225,7 +246,7 @@ JX.install('DiffInline', {
       return true;
     },
 
-    canHide: function() {
+    canCollapse: function() {
       if (!JX.DOM.scry(this._row, 'a', 'hide-inline').length) {
         return false;
       }
@@ -254,20 +275,18 @@ JX.install('DiffInline', {
 
       this._id = null;
       this._phid = null;
-      this._hidden = false;
+      this._isCollapsed = false;
 
       this._originalText = null;
 
       return row;
     },
 
-    setHidden: function(hidden) {
-      this._hidden = hidden;
-
-      JX.DOM.alterClass(this._row, 'inline-hidden', this._hidden);
+    setCollapsed: function(collapsed) {
+      this._isCollapsed = collapsed;
 
       var op;
-      if (hidden) {
+      if (collapsed) {
         op = 'hide';
       } else {
         op = 'show';
@@ -280,11 +299,12 @@ JX.install('DiffInline', {
         .setHandler(JX.bag)
         .start();
 
+      this._redraw();
       this._didUpdate(true);
     },
 
-    isHidden: function() {
-      return this._hidden;
+    isCollapsed: function() {
+      return this._isCollapsed;
     },
 
     toggleDone: function() {
@@ -322,6 +342,7 @@ JX.install('DiffInline', {
       JX.DOM.alterClass(comment, 'inline-state-is-draft', response.draftState);
 
       this._isFixed = response.isChecked;
+      this._isDraftDone = !!response.draftState;
 
       this._didUpdate();
     },
@@ -702,12 +723,15 @@ JX.install('DiffInline', {
     },
 
     _redraw: function() {
-      var is_invisible = (this._isInvisible || this._isDeleted);
-      var is_loading = (this._isLoading);
+      var is_invisible =
+        (this._isInvisible || this._isDeleted || this._isHidden);
+      var is_loading = this._isLoading;
+      var is_collapsed = (this._isCollapsed && !this._isHidden);
 
       var row = this._row;
       JX.DOM.alterClass(row, 'differential-inline-hidden', is_invisible);
       JX.DOM.alterClass(row, 'differential-inline-loading', is_loading);
+      JX.DOM.alterClass(row, 'inline-hidden', is_collapsed);
     },
 
     _removeRow: function(row) {

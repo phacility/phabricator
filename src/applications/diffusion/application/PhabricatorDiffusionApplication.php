@@ -56,6 +56,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         'repository/(?P<dblob>.*)' => 'DiffusionRepositoryController',
         'change/(?P<dblob>.*)' => 'DiffusionChangeController',
         'history/(?P<dblob>.*)' => 'DiffusionHistoryController',
+        'graph/(?P<dblob>.*)' => 'DiffusionGraphController',
         'browse/(?P<dblob>.*)' => 'DiffusionBrowseController',
         'lastmodified/(?P<dblob>.*)' => 'DiffusionLastModifiedController',
         'diff/' => 'DiffusionDiffController',
@@ -140,6 +141,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           $this->getEditRoutePattern('edit/') =>
             'DiffusionCommitEditController',
         ),
+        'picture/(?P<id>[0-9]\d*)/'
+          => 'DiffusionRepositoryProfilePictureController',
       ),
     );
   }

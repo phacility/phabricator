@@ -30,6 +30,23 @@
   margin-left: 4px;
 }
 
+/* - Branch Styles  ----------------------------------------------------------*/
+
+.diffusion-branch-list .phui-oi-attribute a {
+  color: {$darkbluetext};
+}
+
+.diffusion-branch-list .phui-oi-attribute-spacer {
+  visibility: hidden;
+}
+
+.diffusion-branch-list .phui-oi-subhead {
+  color: {$bluetext};
+}
+
+.diffusion-branch-list .phui-oi-subhead .phui-tag-view {
+  margin-right: 4px;
+}
 
 /* - Phone Style  ------------------------------------------------------------*/
 

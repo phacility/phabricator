@@ -186,12 +186,18 @@ abstract class PhabricatorFileUploadSource
     $actual_length = strlen($data);
     $rope->removeBytesFromHead($actual_length);
 
-    $chunk_data = PhabricatorFile::newFromFileData(
-      $data,
-      array(
-        'name' => $file->getMonogram().'.chunk-'.$offset,
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-      ));
+    $params = array(
+      'name' => $file->getMonogram().'.chunk-'.$offset,
+      'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+    );
+
+    // If this isn't the initial chunk, provide a dummy MIME type so we do not
+    // try to detect it. See T12857.
+    if ($offset > 0) {
+      $params['mime-type'] = 'application/octet-stream';
+    }
+
+    $chunk_data = PhabricatorFile::newFromFileData($data, $params);
 
     $chunk = PhabricatorFileChunk::initializeNewChunk(
       $file->getStorageHandle(),
@@ -208,11 +214,17 @@ abstract class PhabricatorFileUploadSource
   }
 
   private function getNewFileParameters() {
-    return array(
+    $parameters = array(
       'name' => $this->getName(),
-      'ttl.relative' => $this->getRelativeTTL(),
       'viewPolicy' => $this->getViewPolicy(),
     );
+
+    $ttl = $this->getRelativeTTL();
+    if ($ttl !== null) {
+      $parameters['ttl.relative'] = $ttl;
+    }
+
+    return $parameters;
   }
 
   private function getChunkEngine() {

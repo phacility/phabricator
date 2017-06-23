@@ -57,6 +57,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $pushPolicy;
+  protected $profileImagePHID;
 
   protected $versionControlSystem;
   protected $details = array();
@@ -69,6 +70,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   private $mostRecentCommit = self::ATTACHABLE;
   private $projectPHIDs = self::ATTACHABLE;
   private $uris = self::ATTACHABLE;
+  private $profileImageFile = self::ATTACHABLE;
 
 
   public static function initializeNewRepository(PhabricatorUser $actor) {
@@ -110,6 +112,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'credentialPHID' => 'phid?',
         'almanacServicePHID' => 'phid?',
         'localPath' => 'text128?',
+        'profileImagePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'callsign' => array(
@@ -478,6 +481,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
   }
 
+  public function getProfileImageURI() {
+    return $this->getProfileImageFile()->getBestURI();
+  }
+
+  public function attachProfileImageFile(PhabricatorFile $file) {
+    $this->profileImageFile = $file;
+    return $this;
+  }
+
+  public function getProfileImageFile() {
+    return $this->assertAttached($this->profileImageFile);
+  }
+
+
 
 /* -(  Remote Command Execution  )------------------------------------------- */
 
@@ -682,6 +699,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $action = idx($params, 'action');
     switch ($action) {
       case 'history':
+      case 'graph':
       case 'browse':
       case 'change':
       case 'lastmodified':
@@ -759,6 +777,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     switch ($action) {
       case 'change':
       case 'history':
+      case 'graph':
       case 'browse':
       case 'lastmodified':
       case 'tags':
