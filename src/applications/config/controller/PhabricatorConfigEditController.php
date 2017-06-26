@@ -347,20 +347,6 @@ final class PhabricatorConfigEditController
       $set_value = null;
 
       switch ($type) {
-        case 'list<string>':
-        case 'list<regex>':
-          $set_value = phutil_split_lines(
-            $request->getStr('value'),
-            $retain_endings = false);
-
-          foreach ($set_value as $key => $v) {
-            if (!strlen($v)) {
-              unset($set_value[$key]);
-            }
-          }
-          $set_value = array_values($set_value);
-
-          break;
         case 'set':
           $set_value = array_fill_keys($request->getStrList('value'), true);
           break;
@@ -441,9 +427,6 @@ final class PhabricatorConfigEditController
           return $value;
         case 'bool':
           return $value ? 'true' : 'false';
-        case 'list<string>':
-        case 'list<regex>':
-          return implode("\n", nonempty($value, array()));
         case 'set':
           return implode("\n", nonempty(array_keys($value), array()));
         default:
@@ -496,11 +479,6 @@ final class PhabricatorConfigEditController
 
           $control = id(new AphrontFormSelectControl())
             ->setOptions($names);
-          break;
-        case 'list<string>':
-        case 'list<regex>':
-          $control = id(new AphrontFormTextAreaControl())
-            ->setCaption(pht('Separate values with newlines.'));
           break;
         case 'set':
           $control = id(new AphrontFormTextAreaControl())

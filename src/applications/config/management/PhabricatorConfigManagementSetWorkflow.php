@@ -65,6 +65,7 @@ final class PhabricatorConfigManagementSetWorkflow
         $value = $type->newValueFromCommandLineValue(
           $option,
           $value);
+        $type->validateStoredValue($option, $value);
       } catch (PhabricatorConfigValidationException $ex) {
         throw new PhutilArgumentUsageException($ex->getMessage());
       }
@@ -109,26 +110,10 @@ final class PhabricatorConfigManagementSetWorkflow
                   $command);
                 break;
               default:
-                if (preg_match('/^list</', $type)) {
-                  $command = csprintf(
-                    './bin/config set %R %s',
-                    $key,
-                    '["a", "b", "c"]');
-
-                  $message = sprintf(
-                    "%s\n\n    %s\n",
-                    pht(
-                      'Config key "%s" is of type "%s". Specify it in JSON. '.
-                      'For example:',
-                      $key,
-                      $type),
-                    $command);
-                } else {
-                  $message = pht(
-                    'Config key "%s" is of type "%s". Specify it in JSON.',
-                    $key,
-                    $type);
-                }
+                $message = pht(
+                  'Config key "%s" is of type "%s". Specify it in JSON.',
+                  $key,
+                  $type);
                 break;
             }
             throw new PhutilArgumentUsageException($message);
