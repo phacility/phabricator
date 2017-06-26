@@ -350,20 +350,6 @@ final class PhabricatorConfigEditController
         case 'set':
           $set_value = array_fill_keys($request->getStrList('value'), true);
           break;
-        case 'bool':
-          switch ($value) {
-            case 'true':
-              $set_value = true;
-              break;
-            case 'false':
-              $set_value = false;
-              break;
-            default:
-              $e_value = pht('Invalid');
-              $errors[] = pht('Value must be boolean, "true" or "false".');
-              break;
-          }
-          break;
         case 'class':
           if (!class_exists($value)) {
             $e_value = pht('Invalid');
@@ -425,8 +411,6 @@ final class PhabricatorConfigEditController
       switch ($type) {
         case 'class':
           return $value;
-        case 'bool':
-          return $value ? 'true' : 'false';
         case 'set':
           return implode("\n", nonempty(array_keys($value), array()));
         default:
@@ -456,15 +440,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'bool':
-          $control = id(new AphrontFormSelectControl())
-            ->setOptions(
-              array(
-                ''      => pht('(Use Default)'),
-                'true'  => idx($option->getBoolOptions(), 0),
-                'false' => idx($option->getBoolOptions(), 1),
-              ));
-          break;
         case 'class':
           $symbols = id(new PhutilSymbolLoader())
             ->setType('class')

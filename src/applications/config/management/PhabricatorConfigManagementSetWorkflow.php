@@ -75,21 +75,6 @@ final class PhabricatorConfigManagementSetWorkflow
         case 'class':
           $value = (string)$value;
           break;
-        case 'bool':
-          if ($value == 'true') {
-            $value = true;
-          } else if ($value == 'false') {
-            $value = false;
-          } else {
-            throw new PhutilArgumentUsageException(
-              pht(
-                "Config key '%s' is of type '%s'. Specify '%s' or '%s'.",
-                $key,
-                $type,
-                'true',
-                'false'));
-          }
-          break;
         default:
           $value = json_decode($value, true);
           if (!is_array($value)) {

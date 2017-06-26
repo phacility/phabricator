@@ -43,15 +43,6 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     }
 
     switch ($option->getType()) {
-      case 'bool':
-        if ($value !== true &&
-            $value !== false) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' is of type bool, but value is not true or false.",
-              $option->getKey()));
-        }
-        break;
       case 'class':
         $symbols = id(new PhutilSymbolLoader())
           ->setType('class')
