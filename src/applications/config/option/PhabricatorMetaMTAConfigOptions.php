@@ -297,9 +297,9 @@ EODOC
       $this->newOption('metamta.user-address-format', 'enum', 'full')
         ->setEnumOptions(
           array(
-            'short' => 'short',
-            'real' => 'real',
-            'full' => 'full',
+            'short' => pht('Short'),
+            'real' => pht('Real'),
+            'full' => pht('Full'),
           ))
         ->setSummary(pht('Control how Phabricator renders user names in mail.'))
         ->setDescription($address_description)

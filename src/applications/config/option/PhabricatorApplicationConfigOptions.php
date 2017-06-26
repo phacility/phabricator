@@ -52,14 +52,6 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
               $option->getKey()));
         }
         break;
-      case 'string':
-        if (!is_string($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' is of type string, but value is not a string.",
-              $option->getKey()));
-        }
-        break;
       case 'class':
         $symbols = id(new PhutilSymbolLoader())
           ->setType('class')

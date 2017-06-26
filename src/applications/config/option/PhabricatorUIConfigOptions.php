@@ -21,12 +21,12 @@ final class PhabricatorUIConfigOptions
 
   public function getOptions() {
     $options = array(
-      'blindigo' => 'blindigo',
-      'red' => 'red',
-      'blue' => 'blue',
-      'green' => 'green',
-      'indigo' => 'indigo',
-      'dark' => 'dark',
+      'blindigo' => pht('Blindigo'),
+      'red' => pht('Red'),
+      'blue' => pht('Blue'),
+      'green' => pht('Green'),
+      'indigo' => pht('Indigo'),
+      'dark' => pht('Dark'),
     );
 
     $example = <<<EOJSON

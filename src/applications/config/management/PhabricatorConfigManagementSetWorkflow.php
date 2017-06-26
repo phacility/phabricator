@@ -71,9 +71,7 @@ final class PhabricatorConfigManagementSetWorkflow
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'string':
         case 'class':
-        case 'enum':
           $value = (string)$value;
           break;
         case 'bool':

@@ -10,6 +10,12 @@ abstract class PhabricatorTextConfigType
     return (bool)strlen($value);
   }
 
+  protected function newCanonicalValue(
+    PhabricatorConfigOption $option,
+    $value) {
+    return (string)$value;
+  }
+
   protected function newHTTPParameterType() {
     return new AphrontStringHTTPParameterType();
   }

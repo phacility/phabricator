@@ -285,7 +285,7 @@ final class PhabricatorConfigEditController
           $canonical_value = $type->newValueFromRequestValue(
             $option,
             $value);
-          $type->validateStoredValue($canonical_value);
+          $type->validateStoredValue($option, $canonical_value);
           $xaction = $type->newTransaction($option, $canonical_value);
         } catch (PhabricatorConfigValidationException $ex) {
           $errors[] = $ex->getMessage();
@@ -347,10 +347,6 @@ final class PhabricatorConfigEditController
       $set_value = null;
 
       switch ($type) {
-        case 'string':
-        case 'enum':
-          $set_value = (string)$value;
-          break;
         case 'list<string>':
         case 'list<regex>':
           $set_value = phutil_split_lines(
@@ -441,8 +437,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'string':
-        case 'enum':
         case 'class':
           return $value;
         case 'bool':
@@ -479,9 +473,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'string':
-          $control = id(new AphrontFormTextControl());
-          break;
         case 'bool':
           $control = id(new AphrontFormSelectControl())
             ->setOptions(
@@ -490,15 +481,6 @@ final class PhabricatorConfigEditController
                 'true'  => idx($option->getBoolOptions(), 0),
                 'false' => idx($option->getBoolOptions(), 1),
               ));
-          break;
-        case 'enum':
-          $options = array_mergev(
-            array(
-              array('' => pht('(Use Default)')),
-              $option->getEnumOptions(),
-            ));
-          $control = id(new AphrontFormSelectControl())
-            ->setOptions($options);
           break;
         case 'class':
           $symbols = id(new PhutilSymbolLoader())
