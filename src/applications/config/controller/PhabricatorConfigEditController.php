@@ -350,20 +350,6 @@ final class PhabricatorConfigEditController
         case 'set':
           $set_value = array_fill_keys($request->getStrList('value'), true);
           break;
-        case 'class':
-          if (!class_exists($value)) {
-            $e_value = pht('Invalid');
-            $errors[] = pht('Class does not exist.');
-          } else {
-            $base = $option->getBaseClass();
-            if (!is_subclass_of($value, $base)) {
-              $e_value = pht('Invalid');
-              $errors[] = pht('Class is not of valid type.');
-            } else {
-              $set_value = $value;
-            }
-          }
-          break;
         default:
           $json = json_decode($value, true);
           if ($json === null && strtolower($value) != 'null') {
@@ -409,8 +395,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'class':
-          return $value;
         case 'set':
           return implode("\n", nonempty(array_keys($value), array()));
         default:
@@ -440,21 +424,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'class':
-          $symbols = id(new PhutilSymbolLoader())
-            ->setType('class')
-            ->setAncestorClass($option->getBaseClass())
-            ->setConcreteOnly(true)
-            ->selectSymbolsWithoutLoading();
-          $names = ipull($symbols, 'name', 'name');
-          asort($names);
-          $names = array(
-            '' => pht('(Use Default)'),
-          ) + $names;
-
-          $control = id(new AphrontFormSelectControl())
-            ->setOptions($names);
-          break;
         case 'set':
           $control = id(new AphrontFormTextAreaControl())
             ->setCaption(pht('Separate values with newlines or commas.'));

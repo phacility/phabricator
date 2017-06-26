@@ -72,9 +72,6 @@ final class PhabricatorConfigManagementSetWorkflow
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'class':
-          $value = (string)$value;
-          break;
         default:
           $value = json_decode($value, true);
           if (!is_array($value)) {

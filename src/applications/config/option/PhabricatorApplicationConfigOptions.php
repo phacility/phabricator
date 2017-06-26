@@ -43,21 +43,6 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     }
 
     switch ($option->getType()) {
-      case 'class':
-        $symbols = id(new PhutilSymbolLoader())
-          ->setType('class')
-          ->setAncestorClass($option->getBaseClass())
-          ->setConcreteOnly(true)
-          ->selectSymbolsWithoutLoading();
-        $names = ipull($symbols, 'name', 'name');
-        if (empty($names[$value])) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' value must name a class extending '%s'.",
-              $option->getKey(),
-              $option->getBaseClass()));
-        }
-        break;
       case 'set':
         $valid = true;
         if (!is_array($value)) {
