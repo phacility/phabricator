@@ -43,24 +43,6 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     }
 
     switch ($option->getType()) {
-      case 'set':
-        $valid = true;
-        if (!is_array($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' must be a set, but value is not an array.",
-              $option->getKey()));
-        }
-        foreach ($value as $v) {
-          if ($v !== true) {
-            throw new PhabricatorConfigValidationException(
-              pht(
-                "Option '%s' must be a set, but array contains values other ".
-                "than 'true'.",
-                $option->getKey()));
-          }
-        }
-        break;
       case 'wild':
       default:
         break;

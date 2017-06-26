@@ -76,21 +76,6 @@ final class PhabricatorConfigManagementSetWorkflow
           $value = json_decode($value, true);
           if (!is_array($value)) {
             switch ($type) {
-              case 'set':
-                $command = csprintf(
-                  './bin/config set %R %s',
-                  $key,
-                  '{"value1": true, "value2": true}');
-
-                $message = sprintf(
-                  "%s\n\n    %s\n",
-                  pht(
-                    'Config key "%s" is of type "%s". Specify it in JSON. '.
-                    'For example:',
-                    $key,
-                    $type),
-                  $command);
-                break;
               default:
                 $message = pht(
                   'Config key "%s" is of type "%s". Specify it in JSON.',

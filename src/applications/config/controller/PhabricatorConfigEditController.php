@@ -347,9 +347,6 @@ final class PhabricatorConfigEditController
       $set_value = null;
 
       switch ($type) {
-        case 'set':
-          $set_value = array_fill_keys($request->getStrList('value'), true);
-          break;
         default:
           $json = json_decode($value, true);
           if ($json === null && strtolower($value) != 'null') {
@@ -395,8 +392,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'set':
-          return implode("\n", nonempty(array_keys($value), array()));
         default:
           return PhabricatorConfigJSON::prettyPrintJSON($value);
       }
@@ -424,10 +419,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'set':
-          $control = id(new AphrontFormTextAreaControl())
-            ->setCaption(pht('Separate values with newlines or commas.'));
-          break;
         default:
           $control = id(new AphrontFormTextAreaControl())
             ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
