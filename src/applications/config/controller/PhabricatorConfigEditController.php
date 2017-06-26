@@ -274,11 +274,57 @@ final class PhabricatorConfigEditController
     PhabricatorConfigOption $option,
     AphrontRequest $request) {
 
+    $type = $option->newOptionType();
+    if ($type) {
+      $is_set = $type->isValuePresentInRequest($option, $request);
+      if ($is_set) {
+        $value = $type->readValueFromRequest($option, $request);
+
+        $errors = array();
+        try {
+          $canonical_value = $type->newValueFromRequestValue(
+            $option,
+            $value);
+          $type->validateStoredValue($canonical_value);
+          $xaction = $type->newTransaction($option, $canonical_value);
+        } catch (PhabricatorConfigValidationException $ex) {
+          $errors[] = $ex->getMessage();
+          $xaction = null;
+        }
+
+        return array(
+          $errors ? pht('Invalid') : null,
+          $errors,
+          $value,
+          $xaction,
+        );
+      } else {
+        $delete_xaction = id(new PhabricatorConfigTransaction())
+          ->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT)
+          ->setNewValue(
+            array(
+              'deleted' => true,
+              'value' => null,
+            ));
+
+        return array(
+          null,
+          array(),
+          null,
+          $delete_xaction,
+        );
+      }
+    }
+
+    // TODO: If we missed on the new `PhabricatorConfigType` map, fall back
+    // to the old semi-modular, semi-hacky way of doing things.
+
     $xaction = new PhabricatorConfigTransaction();
     $xaction->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT);
 
     $e_value = null;
     $errors = array();
+
 
     if ($option->isCustomType()) {
       $info = $option->getCustomObject()->readRequest($option, $request);
@@ -301,14 +347,6 @@ final class PhabricatorConfigEditController
       $set_value = null;
 
       switch ($type) {
-        case 'int':
-          if (preg_match('/^-?[0-9]+$/', trim($value))) {
-            $set_value = (int)$value;
-          } else {
-            $e_value = pht('Invalid');
-            $errors[] = pht('Value must be an integer.');
-          }
-          break;
         case 'string':
         case 'enum':
           $set_value = (string)$value;
@@ -390,6 +428,11 @@ final class PhabricatorConfigEditController
     PhabricatorConfigEntry $entry,
     $value) {
 
+    $type = $option->newOptionType();
+    if ($type) {
+      return $type->newDisplayValue($option, $value);
+    }
+
     if ($option->isCustomType()) {
       return $option->getCustomObject()->getDisplayValue(
         $option,
@@ -398,7 +441,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'int':
         case 'string':
         case 'enum':
         case 'class':
@@ -421,6 +463,14 @@ final class PhabricatorConfigEditController
     $display_value,
     $e_value) {
 
+    $type = $option->newOptionType();
+    if ($type) {
+      return $type->newControls(
+        $option,
+        $display_value,
+        $e_value);
+    }
+
     if ($option->isCustomType()) {
       $controls = $option->getCustomObject()->renderControls(
         $option,
@@ -429,7 +479,6 @@ final class PhabricatorConfigEditController
     } else {
       $type = $option->getType();
       switch ($type) {
-        case 'int':
         case 'string':
           $control = id(new AphrontFormTextControl());
           break;

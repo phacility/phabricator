@@ -20,13 +20,24 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
       return;
     }
 
+    $type = $option->newOptionType();
+    if ($type) {
+      try {
+        $type->validateStoredValue($option, $value);
+      } catch (PhabricatorConfigValidationException $ex) {
+        throw $ex;
+      } catch (Exception $ex) {
+        // If custom validators threw exceptions other than validation
+        // exceptions, convert them to validation exceptions so we repair the
+        // configuration and raise an error.
+        throw new PhabricatorConfigValidationException($ex->getMessage());
+      }
+    }
+
     if ($option->isCustomType()) {
       try {
         return $option->getCustomObject()->validateOption($option, $value);
       } catch (Exception $ex) {
-        // If custom validators threw exceptions, convert them to configuation
-        // validation exceptions so we repair the configuration and raise
-        // an error.
         throw new PhabricatorConfigValidationException($ex->getMessage());
       }
     }
@@ -38,14 +49,6 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
           throw new PhabricatorConfigValidationException(
             pht(
               "Option '%s' is of type bool, but value is not true or false.",
-              $option->getKey()));
-        }
-        break;
-      case 'int':
-        if (!is_int($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' is of type int, but value is not an integer.",
               $option->getKey()));
         }
         break;
