@@ -615,6 +615,29 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $curtain->addAction($relationship_submenu);
     }
 
+    $repository = $revision->getRepository();
+    if ($repository && $repository->canPerformAutomation()) {
+      $revision_id = $revision->getID();
+
+      $op = new DrydockLandRepositoryOperation();
+      $barrier = $op->getBarrierToLanding($viewer, $revision);
+
+      if ($barrier) {
+        $can_land = false;
+      } else {
+        $can_land = true;
+      }
+
+      $action = id(new PhabricatorActionView())
+        ->setName(pht('Land Revision'))
+        ->setIcon('fa-fighter-jet')
+        ->setHref("/differential/revision/operation/{$revision_id}/")
+        ->setWorkflow(true)
+        ->setDisabled(!$can_land);
+
+      $curtain->addAction($action);
+    }
+
     return $curtain;
   }
 
