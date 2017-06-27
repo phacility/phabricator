@@ -290,6 +290,11 @@ final class PhabricatorConfigEditController
         } catch (PhabricatorConfigValidationException $ex) {
           $errors[] = $ex->getMessage();
           $xaction = null;
+        } catch (Exception $ex) {
+          // NOTE: Some older validators throw bare exceptions. Purely in good
+          // taste, it would be nice to convert these at some point.
+          $errors[] = $ex->getMessage();
+          $xaction = null;
         }
 
         return array(

@@ -203,6 +203,7 @@ final class ManiphestTaskPriority extends ManiphestConstants {
           $config));
     }
 
+    $all_keywords = array();
     foreach ($config as $key => $value) {
       if (!ctype_digit((string)$key)) {
         throw new Exception(
@@ -223,9 +224,9 @@ final class ManiphestTaskPriority extends ManiphestConstants {
         $value,
         array(
           'name' => 'string',
+          'keywords' => 'list<string>',
           'short' => 'optional string',
           'color' => 'optional string',
-          'keywords' => 'list<string>',
           'disabled' => 'optional bool',
         ));
 
@@ -242,6 +243,18 @@ final class ManiphestTaskPriority extends ManiphestConstants {
               'low',
               'critical'));
         }
+
+        if (isset($all_keywords[$keyword])) {
+          throw new Exception(
+            pht(
+              'Two different task priorities ("%s" and "%s") have the same '.
+              'keyword ("%s"). Keywords must uniquely identify priorities.',
+              $value['name'],
+              $all_keywords[$keyword],
+              $keyword));
+        }
+
+        $all_keywords[$keyword] = $value['name'];
       }
     }
   }
