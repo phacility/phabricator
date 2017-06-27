@@ -325,40 +325,14 @@ final class PhabricatorConfigEditController
     $e_value = null;
     $errors = array();
 
-
     if ($option->isCustomType()) {
       $info = $option->getCustomObject()->readRequest($option, $request);
       list($e_value, $errors, $set_value, $value) = $info;
     } else {
-      $value = $request->getStr('value');
-      if (!strlen($value)) {
-        $value = null;
-
-        $xaction->setNewValue(
-          array(
-            'deleted' => true,
-            'value'   => null,
-          ));
-
-        return array($e_value, $errors, $value, $xaction);
-      }
-
-      $type = $option->getType();
-      $set_value = null;
-
-      switch ($type) {
-        default:
-          $json = json_decode($value, true);
-          if ($json === null && strtolower($value) != 'null') {
-            $e_value = pht('Invalid');
-            $errors[] = pht(
-              'The given value must be valid JSON. This means, among '.
-              'other things, that you must wrap strings in double-quotes.');
-          } else {
-            $set_value = $json;
-          }
-          break;
-      }
+      throw new Exception(
+        pht(
+          'Unknown configuration option type "%s".',
+          $option->getType()));
     }
 
     if (!$errors) {
@@ -389,13 +363,12 @@ final class PhabricatorConfigEditController
         $option,
         $entry,
         $value);
-    } else {
-      $type = $option->getType();
-      switch ($type) {
-        default:
-          return PhabricatorConfigJSON::prettyPrintJSON($value);
-      }
     }
+
+    throw new Exception(
+      pht(
+        'Unknown configuration option type "%s".',
+        $option->getType()));
   }
 
   private function renderControls(
@@ -417,23 +390,10 @@ final class PhabricatorConfigEditController
         $display_value,
         $e_value);
     } else {
-      $type = $option->getType();
-      switch ($type) {
-        default:
-          $control = id(new AphrontFormTextAreaControl())
-            ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-            ->setCustomClass('PhabricatorMonospaced')
-            ->setCaption(pht('Enter value in JSON.'));
-          break;
-      }
-
-      $control
-        ->setLabel(pht('Database Value'))
-        ->setError($e_value)
-        ->setValue($display_value)
-        ->setName('value');
-
-      $controls = array($control);
+      throw new Exception(
+        pht(
+          'Unknown configuration option type "%s".',
+          $option->getType()));
     }
 
     return $controls;

@@ -43,7 +43,7 @@ final class PhabricatorUserConfigOptions
       $this->newOption('user.fields', $custom_field_type, $default)
         ->setCustomData(id(new PhabricatorUser())->getCustomFieldBaseClass())
         ->setDescription(pht('Select and reorder user profile fields.')),
-      $this->newOption('user.custom-field-definitions', 'map', array())
+      $this->newOption('user.custom-field-definitions', 'wild', array())
         ->setDescription(pht('Add new simple fields to user profiles.')),
       $this->newOption('user.require-real-name', 'bool', true)
         ->setDescription(pht('Always require real name for user profiles.'))

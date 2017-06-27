@@ -70,6 +70,7 @@ final class PhabricatorConfigManagementSetWorkflow
         throw new PhutilArgumentUsageException($ex->getMessage());
       }
     } else {
+      // NOTE: For now, this handles both "wild" values and custom types.
       $type = $option->getType();
       switch ($type) {
         default:

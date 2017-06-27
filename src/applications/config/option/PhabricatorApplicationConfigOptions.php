@@ -24,6 +24,7 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     if ($type) {
       try {
         $type->validateStoredValue($option, $value);
+        $this->didValidateOption($option, $value);
       } catch (PhabricatorConfigValidationException $ex) {
         throw $ex;
       } catch (Exception $ex) {
@@ -32,6 +33,8 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
         // configuration and raise an error.
         throw new PhabricatorConfigValidationException($ex->getMessage());
       }
+
+      return;
     }
 
     if ($option->isCustomType()) {
@@ -40,12 +43,11 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
       } catch (Exception $ex) {
         throw new PhabricatorConfigValidationException($ex->getMessage());
       }
-    }
-
-    switch ($option->getType()) {
-      case 'wild':
-      default:
-        break;
+    } else {
+      throw new Exception(
+        pht(
+          'Unknown configuration option type "%s".',
+          $option->getType()));
     }
 
     $this->didValidateOption($option, $value);
