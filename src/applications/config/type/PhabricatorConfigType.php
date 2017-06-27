@@ -29,10 +29,6 @@ abstract class PhabricatorConfigType extends Phobject {
 
   abstract protected function newHTTPParameterType();
 
-  public function validateValue(PhabricatorConfigOption $option, $value) {
-    return array();
-  }
-
   public function newTransaction(
     PhabricatorConfigOption $option,
     $value) {

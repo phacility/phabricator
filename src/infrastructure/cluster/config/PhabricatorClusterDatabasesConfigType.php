@@ -1,19 +1,17 @@
 <?php
 
-final class PhabricatorClusterDatabasesConfigOptionType
-  extends PhabricatorConfigJSONOptionType {
+final class PhabricatorClusterDatabasesConfigType
+  extends PhabricatorJSONConfigType {
 
-  public function validateOption(PhabricatorConfigOption $option, $value) {
-    if (!is_array($value)) {
-      throw new Exception(
-        pht(
-          'Database cluster configuration is not valid: value must be a '.
-          'list of database hosts.'));
-    }
+  const TYPEKEY = 'cluster.databases';
+
+  public function validateStoredValue(
+    PhabricatorConfigOption $option,
+    $value) {
 
     foreach ($value as $index => $spec) {
       if (!is_array($spec)) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Database cluster configuration is not valid: each entry in the '.
             'list must be a dictionary describing a database host, but '.
@@ -40,7 +38,7 @@ final class PhabricatorClusterDatabasesConfigOptionType
             'persistent' => 'optional bool',
           ));
       } catch (Exception $ex) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Database cluster configuration has an invalid host '.
             'specification (at index "%s"): %s.',
@@ -57,7 +55,7 @@ final class PhabricatorClusterDatabasesConfigOptionType
         case 'replica':
           break;
         default:
-          throw new Exception(
+          throw $this->newException(
             pht(
               'Database cluster configuration describes an invalid '.
               'host ("%s", at index "%s") with an unrecognized role ("%s"). '.
@@ -78,7 +76,7 @@ final class PhabricatorClusterDatabasesConfigOptionType
       // mistakes.
       $key = "{$host}:{$port}";
       if (isset($map[$key])) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Database cluster configuration is invalid: it describes the '.
             'same host ("%s") multiple times. Each host should appear only '.
