@@ -121,9 +121,39 @@ final class PhabricatorProjectEditPictureController
       }
     }
 
+    $builtins = array(
+      'projects/v3/bug.png',
+      'projects/v3/calendar.png',
+      'projects/v3/cloud.png',
+      'projects/v3/creditcard.png',
+      'projects/v3/database.png',
+      'projects/v3/desktop.png',
+      'projects/v3/experimental.png',
+      'projects/v3/flag.png',
+      'projects/v3/folder.png',
+      'projects/v3/lock.png',
+      'projects/v3/mail.png',
+      'projects/v3/mobile.png',
+      'projects/v3/organization.png',
+      'projects/v3/people.png',
+      'projects/v3/servers.png',
+      'projects/v3/tag.png',
+      'projects/v3/trash.png',
+      'projects/v3/truck.png',
+      'projects/v3/umbrella.png',
+    );
+
+    foreach ($builtins as $builtin) {
+      $file = PhabricatorFile::loadBuiltin($viewer, $builtin);
+      $images[$file->getPHID()] = array(
+        'uri' => $file->getBestURI(),
+        'tip' => pht('Builtin Image'),
+      );
+    }
+
     $images[PhabricatorPHIDConstants::PHID_VOID] = array(
       'uri' => $default_image->getBestURI(),
-      'tip' => pht('No Picture'),
+      'tip' => pht('Default Picture'),
     );
 
     require_celerity_resource('people-profile-css');
@@ -200,7 +230,7 @@ final class PhabricatorProjectEditPictureController
     $compose_button = javelin_tag(
       'button',
       array(
-        'class' => 'grey',
+        'class' => 'button-grey',
         'id' => $launch_id,
         'sigil' => 'icon-composer',
       ),
@@ -227,7 +257,7 @@ final class PhabricatorProjectEditPictureController
 
     $form->appendChild(
       id(new AphrontFormMarkupControl())
-        ->setLabel(pht('Quick Create'))
+        ->setLabel(pht('Custom'))
         ->setValue($compose_form));
 
     $upload_form = id(new AphrontFormView())
