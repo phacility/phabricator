@@ -106,7 +106,6 @@ final class DiffusionBrowseController extends DiffusionController {
     $path = $drequest->getPath();
 
     $blame_key = PhabricatorDiffusionBlameSetting::SETTINGKEY;
-
     $show_blame = $request->getBool(
       'blame',
       $viewer->getUserSetting($blame_key));
@@ -160,6 +159,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $hit_time_limit = $response['tooSlow'];
 
     $file_phid = $response['filePHID'];
+    $show_editor = false;
     if ($hit_byte_limit) {
       $corpus = $this->buildErrorCorpus(
         pht(
@@ -215,6 +215,7 @@ final class DiffusionBrowseController extends DiffusionController {
       } else {
         $this->loadLintMessages();
         $this->coverage = $drequest->loadCoverage();
+        $show_editor = true;
 
         // Build the content of the file.
         $corpus = $this->buildCorpus(
@@ -234,12 +235,7 @@ final class DiffusionBrowseController extends DiffusionController {
     require_celerity_resource('diffusion-source-css');
 
     // Render the page.
-    $view = $this->buildCurtain($drequest);
-    $curtain = $this->enrichCurtain(
-      $view,
-      $drequest,
-      $show_blame);
-
+    $curtain = $this->buildCurtain($drequest, $show_blame, $show_editor);
     $properties = $this->buildPropertyView($drequest);
     $header = $this->buildHeaderView($drequest);
     $header->setHeaderIcon('fa-file-code-o');
@@ -327,7 +323,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $reason = $results->getReasonForEmptyResultSet();
 
-    $curtain = $this->buildCurtain($drequest);
+    $actions = $this->getActions($drequest);
     $details = $this->buildPropertyView($drequest);
 
     $header = $this->buildHeaderView($drequest);
@@ -363,9 +359,9 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setPaths($results->getPaths())
         ->setUser($request->getUser());
 
-      $browse_header = id(new PHUIHeaderView())
-        ->setHeader(nonempty(basename($drequest->getPath()), '/'))
-        ->setHeaderIcon('fa-folder-open');
+      $title = nonempty(basename($drequest->getPath()), '/');
+      $icon = 'fa-folder-open';
+      $browse_header = $this->buildPanelHeaderView($title, $icon, $actions);
 
       $browse_panel = id(new PHUIObjectBoxView())
         ->setHeader($browse_header)
@@ -400,15 +396,11 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setCurtain($curtain)
-      ->setMainColumn(
+      ->setFooter(
         array(
           $branch_panel,
           $empty_result,
           $browse_panel,
-        ))
-      ->setFooter(
-        array(
           $open_revisions,
           $readme,
         ));
@@ -745,14 +737,14 @@ final class DiffusionBrowseController extends DiffusionController {
 
     Javelin::initBehavior('load-blame', array('id' => $id));
 
-
-    $edit = $this->renderEditButton();
     $file = $this->renderFileButton();
-    $header = id(new PHUIHeaderView())
-      ->setHeader(basename($this->getDiffusionRequest()->getPath()))
-      ->setHeaderIcon('fa-file-code-o')
-      ->addActionLink($edit)
-      ->addActionLink($file);
+    $title = basename($this->getDiffusionRequest()->getPath());
+    $icon = 'fa-file-code-o';
+    $drequest = $this->getDiffusionRequest();
+    $actions = $this->getActions($drequest);
+
+    $header = $this->buildPanelHeaderView($title, $icon, $actions);
+    $header->addActionLink($file);
 
     $corpus = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -791,13 +783,22 @@ final class DiffusionBrowseController extends DiffusionController {
     return $corpus;
   }
 
-  private function enrichCurtain(
-    PHUICurtainView $curtain,
+  private function buildCurtain(
     DiffusionRequest $drequest,
-    $show_blame) {
+    $show_blame,
+    $show_editor) {
 
+    $curtain = $this->newCurtainView($drequest);
     $viewer = $this->getViewer();
     $base_uri = $this->getRequest()->getRequestURI();
+
+    $user = $this->getRequest()->getUser();
+    $repository = $drequest->getRepository();
+    $path = $drequest->getPath();
+    $line = nonempty((int)$drequest->getLine(), 1);
+
+    $editor_link = $user->loadEditorLink($path, $line, $repository);
+    $template = $user->loadEditorLink($path, '%l', $repository);
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -826,6 +827,15 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setIcon($blame_icon)
         ->setUser($viewer)
         ->setRenderAsForm($viewer->isLoggedIn()));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Open in Editor'))
+        ->setHref($editor_link)
+        ->setIcon('fa-pencil')
+        ->setID('editor_link')
+        ->setMetadata(array('link_template' => $template))
+        ->setDisabled(!$editor_link));
 
     $href = null;
     if ($this->getRequest()->getStr('lint') !== null) {
@@ -897,41 +907,16 @@ final class DiffusionBrowseController extends DiffusionController {
     return $curtain;
   }
 
-  private function renderEditButton() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $drequest = $this->getDiffusionRequest();
-
-    $repository = $drequest->getRepository();
-    $path = $drequest->getPath();
-    $line = nonempty((int)$drequest->getLine(), 1);
-
-    $editor_link = $user->loadEditorLink($path, $line, $repository);
-    $template = $user->loadEditorLink($path, '%l', $repository);
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Open in Editor'))
-      ->setHref($editor_link)
-      ->setIcon('fa-pencil')
-      ->setID('editor_link')
-      ->setMetadata(array('link_template' => $template))
-      ->setDisabled(!$editor_link);
-
-    return $button;
-  }
-
   private function renderFileButton($file_uri = null, $label = null) {
 
     $base_uri = $this->getRequest()->getRequestURI();
 
     if ($file_uri) {
-      $text = pht('Download Raw File');
+      $text = pht('Download Raw');
       $href = $file_uri;
       $icon = 'fa-download';
     } else {
-      $text = pht('View Raw File');
+      $text = pht('View Raw');
       $href = $base_uri->alter('view', 'raw');
       $icon = 'fa-file-text';
     }
@@ -1374,10 +1359,12 @@ final class DiffusionBrowseController extends DiffusionController {
         )));
 
     $file = $this->renderFileButton($file_uri);
-    $header = id(new PHUIHeaderView())
-      ->setHeader(basename($this->getDiffusionRequest()->getPath()))
-      ->addActionLink($file)
-      ->setHeaderIcon('fa-file-image-o');
+    $title = basename($this->getDiffusionRequest()->getPath());
+    $icon = 'fa-file-image-o';
+    $drequest = $this->getDiffusionRequest();
+    $actions = $this->getActions($drequest);
+    $header = $this->buildPanelHeaderView($title, $icon, $actions);
+    $header->addActionLink($file);
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -1393,9 +1380,12 @@ final class DiffusionBrowseController extends DiffusionController {
       ->appendChild($text);
 
     $file = $this->renderFileButton($file_uri);
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Details'))
-      ->addActionLink($file);
+    $title = basename($this->getDiffusionRequest()->getPath());
+    $icon = 'fa-file';
+    $drequest = $this->getDiffusionRequest();
+    $actions = $this->getActions($drequest);
+    $header = $this->buildPanelHeaderView($title, $icon, $actions);
+    $header->addActionLink($file);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -1656,52 +1646,61 @@ final class DiffusionBrowseController extends DiffusionController {
     return $header;
   }
 
-  protected function buildCurtain(DiffusionRequest $drequest) {
+  protected function buildPanelHeaderView($title, $icon, array $actions) {
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($icon)
+      ->addClass('diffusion-panel-header-view');
+
+    foreach ($actions as $action_link) {
+      if ($action_link) {
+        $header->addActionLink($action_link);
+      }
+    }
+    return $header;
+
+  }
+
+  protected function getActions(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
     $repository = $drequest->getRepository();
-
-    $curtain = $this->newCurtainView($drequest);
-
-    $history_uri = $drequest->generateURI(
-      array(
-        'action' => 'history',
-      ));
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View History'))
-        ->setHref($history_uri)
-        ->setIcon('fa-list'));
-
+    $history_uri = $drequest->generateURI(array('action' => 'history'));
     $behind_head = $drequest->getSymbolicCommit();
-
-    if ($repository->supportsBranchComparison()) {
-      $compare_uri = $drequest->generateURI(
-        array(
-          'action' => 'compare',
-        ));
-
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Compare Against...'))
-          ->setIcon('fa-code-fork')
-          ->setWorkflow(true)
-          ->setHref($compare_uri));
-    }
-
     $head_uri = $drequest->generateURI(
       array(
         'commit' => '',
         'action' => 'browse',
       ));
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Jump to HEAD'))
+
+    if ($repository->supportsBranchComparison()) {
+      $compare_uri = $drequest->generateURI(array('action' => 'compare'));
+      $compare = id(new PHUIButtonView())
+        ->setText(pht('Compare'))
+        ->setIcon('fa-code-fork')
+        ->setWorkflow(true)
+        ->setTag('a')
+        ->setHref($compare_uri)
+        ->setColor(PHUIButtonView::GREY);
+    }
+
+    $head = null;
+    if ($behind_head) {
+      $head = id(new PHUIButtonView())
+        ->setText(pht('Back to HEAD'))
         ->setHref($head_uri)
         ->setIcon('fa-home')
-        ->setDisabled(!$behind_head));
+        ->setColor(PHUIButtonView::GREY);
+    }
 
-    return $curtain;
+    $history = id(new PHUIButtonView())
+      ->setText(pht('History'))
+      ->setHref($history_uri)
+      ->setTag('a')
+      ->setIcon('fa-history')
+      ->setColor(PHUIButtonView::GREY);
+
+    return array($history, $compare, $head);
   }
 
   protected function buildPropertyView(
@@ -1902,9 +1901,11 @@ final class DiffusionBrowseController extends DiffusionController {
     // show the user an error if we can't, rather than making them click
     // through to hit an error.
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(basename($this->getDiffusionRequest()->getPath()))
-      ->setHeaderIcon('fa-archive');
+    $title = basename($this->getDiffusionRequest()->getPath());
+    $icon = 'fa-archive';
+    $drequest = $this->getDiffusionRequest();
+    $actions = $this->getActions($drequest);
+    $header = $this->buildPanelHeaderView($title, $icon, $actions);
 
     $severity = PHUIInfoView::SEVERITY_NOTICE;
 

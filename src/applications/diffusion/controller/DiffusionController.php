@@ -44,6 +44,7 @@ abstract class DiffusionController extends PhabricatorController {
   private function loadContext(array $options) {
     $request = $this->getRequest();
     $viewer = $this->getViewer();
+    require_celerity_resource('diffusion-repository-css');
 
     $identifier = $this->getRepositoryIdentifierFromRequest($request);
 
