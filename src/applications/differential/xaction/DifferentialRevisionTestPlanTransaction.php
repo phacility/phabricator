@@ -55,7 +55,10 @@ final class DifferentialRevisionTestPlanTransaction
   }
 
   public function validateTransactions($object, array $xactions) {
-    $errors = array();
+    $errors = $this->validateCommitMessageCorpusTransactions(
+      $object,
+      $xactions,
+      pht('Test Plan'));
 
     $is_required = PhabricatorEnv::getEnvConfig(
       'differential.require-test-plan-field');

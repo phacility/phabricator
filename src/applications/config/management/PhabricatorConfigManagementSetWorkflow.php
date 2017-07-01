@@ -59,84 +59,37 @@ final class PhabricatorConfigManagementSetWorkflow
 
     $option = $options[$key];
 
-    $type = $option->getType();
-    switch ($type) {
-      case 'string':
-      case 'class':
-      case 'enum':
-        $value = (string)$value;
-        break;
-      case 'int':
-        if (!ctype_digit($value)) {
-          throw new PhutilArgumentUsageException(
-            pht(
-              "Config key '%s' is of type '%s'. Specify an integer.",
-              $key,
-              $type));
-        }
-        $value = (int)$value;
-        break;
-      case 'bool':
-        if ($value == 'true') {
-          $value = true;
-        } else if ($value == 'false') {
-          $value = false;
-        } else {
-          throw new PhutilArgumentUsageException(
-            pht(
-              "Config key '%s' is of type '%s'. Specify '%s' or '%s'.",
-              $key,
-              $type,
-              'true',
-              'false'));
-        }
-        break;
-      default:
-        $value = json_decode($value, true);
-        if (!is_array($value)) {
-          switch ($type) {
-            case 'set':
-              $command = csprintf(
-                './bin/config set %R %s',
-                $key,
-                '{"value1": true, "value2": true}');
-
-              $message = sprintf(
-                "%s\n\n    %s\n",
-                pht(
-                  'Config key "%s" is of type "%s". Specify it in JSON. '.
-                  'For example:',
-                  $key,
-                  $type),
-                $command);
-              break;
-            default:
-              if (preg_match('/^list</', $type)) {
-                $command = csprintf(
-                  './bin/config set %R %s',
-                  $key,
-                  '["a", "b", "c"]');
-
-                $message = sprintf(
-                  "%s\n\n    %s\n",
-                  pht(
-                    'Config key "%s" is of type "%s". Specify it in JSON. '.
-                    'For example:',
-                    $key,
-                    $type),
-                  $command);
-              } else {
+    $type = $option->newOptionType();
+    if ($type) {
+      try {
+        $value = $type->newValueFromCommandLineValue(
+          $option,
+          $value);
+        $type->validateStoredValue($option, $value);
+      } catch (PhabricatorConfigValidationException $ex) {
+        throw new PhutilArgumentUsageException($ex->getMessage());
+      }
+    } else {
+      // NOTE: For now, this handles both "wild" values and custom types.
+      $type = $option->getType();
+      switch ($type) {
+        default:
+          $value = json_decode($value, true);
+          if (!is_array($value)) {
+            switch ($type) {
+              default:
                 $message = pht(
                   'Config key "%s" is of type "%s". Specify it in JSON.',
                   $key,
                   $type);
-              }
-              break;
+                break;
+            }
+            throw new PhutilArgumentUsageException($message);
           }
-          throw new PhutilArgumentUsageException($message);
-        }
-        break;
+          break;
+      }
     }
+
     $use_database = $args->getArg('database');
     if ($option->getLocked() && $use_database) {
       throw new PhutilArgumentUsageException(

@@ -1,19 +1,17 @@
 <?php
 
-final class PhabricatorNotificationServersConfigOptionType
-  extends PhabricatorConfigJSONOptionType {
+final class PhabricatorNotificationServersConfigType
+  extends PhabricatorJSONConfigType {
 
-  public function validateOption(PhabricatorConfigOption $option, $value) {
-    if (!is_array($value)) {
-      throw new Exception(
-        pht(
-          'Notification server configuration is not valid: value must be a '.
-          'list of servers'));
-    }
+  const TYPEKEY = 'cluster.notifications';
+
+  public function validateStoredValue(
+    PhabricatorConfigOption $option,
+    $value) {
 
     foreach ($value as $index => $spec) {
       if (!is_array($spec)) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Notification server configuration is not valid: each entry in '.
             'the list must be a dictionary describing a service, but '.
@@ -38,7 +36,7 @@ final class PhabricatorNotificationServersConfigOptionType
             'disabled' => 'optional bool',
           ));
       } catch (Exception $ex) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Notification server configuration has an invalid service '.
             'specification (at index "%s"): %s.',
@@ -64,7 +62,7 @@ final class PhabricatorNotificationServersConfigOptionType
           }
           break;
         default:
-          throw new Exception(
+          throw $this->newException(
             pht(
               'Notification server configuration describes an invalid '.
               'host ("%s", at index "%s") with an unrecognized type ("%s"). '.
@@ -81,7 +79,7 @@ final class PhabricatorNotificationServersConfigOptionType
         case 'https':
           break;
         default:
-          throw new Exception(
+          throw $this->newException(
             pht(
               'Notification server configuration describes an invalid '.
               'host ("%s", at index "%s") with an invalid protocol ("%s"). '.
@@ -95,7 +93,7 @@ final class PhabricatorNotificationServersConfigOptionType
 
       $path = idx($spec, 'path');
       if ($type == 'admin' && strlen($path)) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Notification server configuration describes an invalid host '.
             '("%s", at index "%s"). This is an "admin" service but it has a '.
@@ -108,7 +106,7 @@ final class PhabricatorNotificationServersConfigOptionType
       // mistakes.
       $key = "{$host}:{$port}";
       if (isset($map[$key])) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Notification server configuration is invalid: it describes the '.
             'same host and port ("%s") multiple times. Each host and port '.
@@ -120,7 +118,7 @@ final class PhabricatorNotificationServersConfigOptionType
 
     if ($value) {
       if (!$has_admin) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Notification server configuration is invalid: it does not '.
             'specify any enabled servers with type "admin". Notifications '.
@@ -128,7 +126,7 @@ final class PhabricatorNotificationServersConfigOptionType
       }
 
       if (!$has_client) {
-        throw new Exception(
+        throw $this->newException(
           pht(
             'Notification server configuration is invalid: it does not '.
             'specify any enabled servers with type "client". Notifications '.

@@ -20,47 +20,47 @@ final class PhabricatorManiphestConfigOptions
   }
 
   public function getOptions() {
-    $priority_type = 'custom:ManiphestPriorityConfigOptionType';
+    $priority_type = 'maniphest.priorities';
     $priority_defaults = array(
       100 => array(
         'name'  => pht('Unbreak Now!'),
+        'keywords' => array('unbreak'),
         'short' => pht('Unbreak!'),
         'color' => 'pink',
-        'keywords' => array('unbreak'),
       ),
       90 => array(
         'name' => pht('Needs Triage'),
+        'keywords' => array('triage'),
         'short' => pht('Triage'),
         'color' => 'violet',
-        'keywords' => array('triage'),
       ),
       80 => array(
         'name' => pht('High'),
+        'keywords' => array('high'),
         'short' => pht('High'),
         'color' => 'red',
-        'keywords' => array('high'),
       ),
       50 => array(
         'name' => pht('Normal'),
+        'keywords' => array('normal'),
         'short' => pht('Normal'),
         'color' => 'orange',
-        'keywords' => array('normal'),
       ),
       25 => array(
         'name' => pht('Low'),
+        'keywords' => array('low'),
         'short' => pht('Low'),
         'color' => 'yellow',
-        'keywords' => array('low'),
       ),
       0 => array(
         'name' => pht('Wishlist'),
+        'keywords' => array('wish', 'wishlist'),
         'short' => pht('Wish'),
         'color' => 'sky',
-        'keywords' => array('wish', 'wishlist'),
       ),
     );
 
-    $status_type = 'custom:ManiphestStatusConfigOptionType';
+    $status_type = 'maniphest.statuses';
     $status_defaults = array(
       'open' => array(
         'name' => pht('Open'),
@@ -265,7 +265,7 @@ EOTEXT
     );
     $fields_json = id(new PhutilJSON())->encodeFormatted($fields_example);
 
-    $points_type = 'custom:ManiphestPointsConfigOptionType';
+    $points_type = 'maniphest.points';
 
     $points_example_1 = array(
       'enabled' => true,
@@ -299,7 +299,7 @@ See the example below for a starting point.
 EOTEXT
 ));
 
-    $subtype_type = 'custom:ManiphestSubtypesConfigOptionsType';
+    $subtype_type = 'maniphest.subtypes';
     $subtype_default_key = PhabricatorEditEngineSubtype::SUBTYPE_DEFAULT;
     $subtype_example = array(
       array(
@@ -349,6 +349,32 @@ EOTEXT
       ,
       $subtype_default_key));
 
+    $priorities_description = $this->deformat(pht(<<<EOTEXT
+Allows you to edit or override the default priorities available in Maniphest,
+like "High", "Normal" and "Low". The configuration should contain a map of
+numeric priority values (where larger numbers correspond to higher priorities)
+to priority specifications (see defaults below for examples).
+
+The keys you can define for a priority are:
+
+  - `name` //Required string.// Name of the priority.
+  - `keywords` //Required list<string>.// List of unique keywords which identify
+    this priority, like "high" or "low". Each priority must have at least one
+    keyword and two priorities may not share the same keyword.
+  - `short` //Optional string.// Alternate shorter name, used in UIs where
+    there is less space available.
+  - `color` //Optional string.// Color for this priority, like "red" or
+    "blue".
+  - `disabled` //Optional bool.// Set to true to prevent users from choosing
+    this priority when creating or editing tasks. Existing tasks will not be
+    affected, and can be batch edited to a different priority or left to
+    eventually die out.
+
+You can choose the default priority for newly created tasks with
+"maniphest.default-priority".
+EOTEXT
+      ));
+
 
     return array(
       $this->newOption('maniphest.custom-field-definitions', 'wild', array())
@@ -367,30 +393,7 @@ EOTEXT
         $priority_type,
         $priority_defaults)
         ->setSummary(pht('Configure Maniphest priority names.'))
-        ->setDescription(
-          pht(
-            'Allows you to edit or override the default priorities available '.
-            'in Maniphest, like "High", "Normal" and "Low". The configuration '.
-            'should contain a map of priority constants to priority '.
-            'specifications (see defaults below for examples).'.
-            "\n\n".
-            'The keys you can define for a priority are:'.
-            "\n\n".
-            '  - `name` Name of the priority.'."\n".
-            '  - `short` Alternate shorter name, used in UIs where there is '.
-            '    not much space available.'."\n".
-            '  - `color` A color for this priority, like "red" or "blue".'.
-            '  - `keywords` An optional list of keywords which can '.
-            '     be used to select this priority when using `!priority` '.
-            '     commands in email.'."\n".
-            '  - `disabled` Optional boolean to prevent users from choosing '.
-            '     this priority when creating or editing tasks. Existing '.
-            '     tasks will be unaffected, and can be batch edited to a '.
-            '     different priority or left to eventually die out.'.
-            "\n\n".
-            'You can choose which priority is the default for newly created '.
-            'tasks with `%s`.',
-            'maniphest.default-priority')),
+        ->setDescription($priorities_description),
       $this->newOption('maniphest.statuses', $status_type, $status_defaults)
         ->setSummary(pht('Configure Maniphest task statuses.'))
         ->setDescription($status_description)

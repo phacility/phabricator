@@ -260,7 +260,10 @@ EOHELP
         ->setDescription(
           pht('Format for inlined or attached patches.'))
         ->setEnumOptions(
-          array('unified' => 'unified', 'git' => 'git')),
+          array(
+            'unified' => pht('Unified'),
+            'git' => pht('Git'),
+          )),
     );
   }
 
