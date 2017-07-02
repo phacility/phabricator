@@ -20,7 +20,7 @@ final class PhabricatorClusterConfigOptions
   }
 
   public function getOptions() {
-    $databases_type = 'custom:PhabricatorClusterDatabasesConfigOptionType';
+    $databases_type = 'cluster.databases';
     $databases_help = $this->deformat(pht(<<<EOTEXT
 WARNING: This is a prototype option and the description below is currently pure
 fantasy.
@@ -38,7 +38,7 @@ EOTEXT
     $intro_href = PhabricatorEnv::getDoclink('Clustering Introduction');
     $intro_name = pht('Clustering Introduction');
 
-    $search_type = 'custom:PhabricatorClusterSearchConfigOptionType';
+    $search_type = 'cluster.search';
     $search_help = $this->deformat(pht(<<<EOTEXT
 Define one or more fulltext storage services. Here you can configure which
 hosts will handle fulltext search queries and indexing. For help with

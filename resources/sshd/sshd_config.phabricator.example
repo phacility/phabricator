@@ -18,6 +18,7 @@ AllowTcpForwarding no
 PrintMotd no
 PrintLastLog no
 PasswordAuthentication no
+ChallengeResponseAuthentication no
 AuthorizedKeysFile none
 
 PidFile /var/run/sshd-phabricator.pid

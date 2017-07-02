@@ -13,7 +13,7 @@ abstract class PhabricatorSearchManagementWorkflow
     $config_value = PhabricatorEnv::getEnvConfig($config_key);
 
     try {
-      PhabricatorClusterSearchConfigOptionType::validateValue($config_value);
+      PhabricatorClusterSearchConfigType::validateValue($config_value);
     } catch (Exception $ex) {
       throw new PhutilArgumentUsageException(
         pht(

@@ -1,20 +1,17 @@
 <?php
 
-final class PhabricatorClusterSearchConfigOptionType
-  extends PhabricatorConfigJSONOptionType {
+final class PhabricatorClusterSearchConfigType
+  extends PhabricatorJSONConfigType {
 
-  public function validateOption(PhabricatorConfigOption $option, $value) {
+  const TYPEKEY = 'cluster.search';
+
+  public function validateStoredValue(
+    PhabricatorConfigOption $option,
+    $value) {
     self::validateValue($value);
   }
 
   public static function validateValue($value) {
-    if (!is_array($value)) {
-      throw new Exception(
-        pht(
-          'Search cluster configuration is not valid: value must be a '.
-          'list of search hosts.'));
-    }
-
     $engines = PhabricatorSearchService::loadAllFulltextStorageEngines();
 
     foreach ($value as $index => $spec) {

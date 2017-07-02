@@ -20,133 +20,34 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
       return;
     }
 
+    $type = $option->newOptionType();
+    if ($type) {
+      try {
+        $type->validateStoredValue($option, $value);
+        $this->didValidateOption($option, $value);
+      } catch (PhabricatorConfigValidationException $ex) {
+        throw $ex;
+      } catch (Exception $ex) {
+        // If custom validators threw exceptions other than validation
+        // exceptions, convert them to validation exceptions so we repair the
+        // configuration and raise an error.
+        throw new PhabricatorConfigValidationException($ex->getMessage());
+      }
+
+      return;
+    }
+
     if ($option->isCustomType()) {
       try {
         return $option->getCustomObject()->validateOption($option, $value);
       } catch (Exception $ex) {
-        // If custom validators threw exceptions, convert them to configuation
-        // validation exceptions so we repair the configuration and raise
-        // an error.
         throw new PhabricatorConfigValidationException($ex->getMessage());
       }
-    }
-
-    switch ($option->getType()) {
-      case 'bool':
-        if ($value !== true &&
-            $value !== false) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' is of type bool, but value is not true or false.",
-              $option->getKey()));
-        }
-        break;
-      case 'int':
-        if (!is_int($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' is of type int, but value is not an integer.",
-              $option->getKey()));
-        }
-        break;
-      case 'string':
-        if (!is_string($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' is of type string, but value is not a string.",
-              $option->getKey()));
-        }
-        break;
-      case 'class':
-        $symbols = id(new PhutilSymbolLoader())
-          ->setType('class')
-          ->setAncestorClass($option->getBaseClass())
-          ->setConcreteOnly(true)
-          ->selectSymbolsWithoutLoading();
-        $names = ipull($symbols, 'name', 'name');
-        if (empty($names[$value])) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' value must name a class extending '%s'.",
-              $option->getKey(),
-              $option->getBaseClass()));
-        }
-        break;
-      case 'set':
-        $valid = true;
-        if (!is_array($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' must be a set, but value is not an array.",
-              $option->getKey()));
-        }
-        foreach ($value as $v) {
-          if ($v !== true) {
-            throw new PhabricatorConfigValidationException(
-              pht(
-                "Option '%s' must be a set, but array contains values other ".
-                "than 'true'.",
-                $option->getKey()));
-          }
-        }
-        break;
-      case 'list<regex>':
-        $valid = true;
-        if (!is_array($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' must be a list of regular expressions, but value ".
-              "is not an array.",
-              $option->getKey()));
-        }
-        if ($value && array_keys($value) != range(0, count($value) - 1)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' must be a list of regular expressions, but the ".
-              "value is a map with unnatural keys.",
-              $option->getKey()));
-        }
-        foreach ($value as $v) {
-          $ok = @preg_match($v, '');
-          if ($ok === false) {
-            throw new PhabricatorConfigValidationException(
-              pht(
-                "Option '%s' must be a list of regular expressions, but the ".
-                "value '%s' is not a valid regular expression.",
-                $option->getKey(),
-                $v));
-          }
-        }
-        break;
-      case 'list<string>':
-        $valid = true;
-        if (!is_array($value)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' must be a list of strings, but value is not ".
-              "an array.",
-              $option->getKey()));
-        }
-        if ($value && array_keys($value) != range(0, count($value) - 1)) {
-          throw new PhabricatorConfigValidationException(
-            pht(
-              "Option '%s' must be a list of strings, but the value is a ".
-              "map with unnatural keys.",
-              $option->getKey()));
-        }
-        foreach ($value as $v) {
-          if (!is_string($v)) {
-            throw new PhabricatorConfigValidationException(
-              pht(
-                "Option '%s' must be a list of strings, but it contains one ".
-                "or more non-strings.",
-                $option->getKey()));
-          }
-        }
-        break;
-      case 'wild':
-      default:
-        break;
+    } else {
+      throw new Exception(
+        pht(
+          'Unknown configuration option type "%s".',
+          $option->getType()));
     }
 
     $this->didValidateOption($option, $value);

@@ -11,9 +11,9 @@ final class PhabricatorDefaultRequestExceptionHandler
     return pht('Handles all other exceptions.');
   }
 
-  public function canHandleRequestException(
+  public function canHandleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     if (!$this->isPhabricatorSite($request)) {
       return false;
@@ -22,9 +22,9 @@ final class PhabricatorDefaultRequestExceptionHandler
     return true;
   }
 
-  public function handleRequestException(
+  public function handleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     $viewer = $this->getViewer($request);
 
@@ -33,18 +33,18 @@ final class PhabricatorDefaultRequestExceptionHandler
     // the internet. These include requests with bad CSRF tokens and
     // questionable "Host" headers.
     $should_log = true;
-    if ($ex instanceof AphrontMalformedRequestException) {
-      $should_log = !$ex->getIsUnlogged();
+    if ($throwable instanceof AphrontMalformedRequestException) {
+      $should_log = !$throwable->getIsUnlogged();
     }
 
     if ($should_log) {
-      phlog($ex);
+      phlog($throwable);
     }
 
-    $class = get_class($ex);
-    $message = $ex->getMessage();
+    $class = get_class($throwable);
+    $message = $throwable->getMessage();
 
-    if ($ex instanceof AphrontSchemaQueryException) {
+    if ($throwable instanceof AphrontSchemaQueryException) {
       $message .= "\n\n".pht(
         "NOTE: This usually indicates that the MySQL schema has not been ".
         "properly upgraded. Run '%s' to ensure your schema is up to date.",
@@ -54,7 +54,7 @@ final class PhabricatorDefaultRequestExceptionHandler
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
       $trace = id(new AphrontStackTraceView())
         ->setUser($viewer)
-        ->setTrace($ex->getTrace());
+        ->setTrace($throwable->getTrace());
     } else {
       $trace = null;
     }

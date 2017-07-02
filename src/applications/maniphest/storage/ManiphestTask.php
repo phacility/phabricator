@@ -247,10 +247,13 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getPriorityKeyword() {
     $priority = $this->getPriority();
-    $map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
-    $default = array(ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD);
-    $keywords = idx($map, $priority, $default);
-    return head($keywords);
+
+    $keyword = ManiphestTaskPriority::getKeywordForTaskPriority($priority);
+    if ($keyword !== null) {
+      return $keyword;
+    }
+
+    return ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD;
   }
 
   private function comparePriorityTo(ManiphestTask $other) {

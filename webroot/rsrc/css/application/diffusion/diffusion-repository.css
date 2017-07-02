@@ -1,0 +1,13 @@
+/**
+ * @provides diffusion-repository-css
+ */
+
+.diffusion-page-header-view a.phui-header-action-link {
+  display: block;
+  float: none;
+}
+
+.phui-box.phui-object-box.phui-box-blue-property
+  .diffusion-panel-header-view.phui-header-shell {
+    padding: 8px 4px 8px 16px;
+}

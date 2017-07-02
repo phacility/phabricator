@@ -44,6 +44,7 @@ abstract class DiffusionController extends PhabricatorController {
   private function loadContext(array $options) {
     $request = $this->getRequest();
     $viewer = $this->getViewer();
+    require_celerity_resource('diffusion-repository-css');
 
     $identifier = $this->getRepositoryIdentifierFromRequest($request);
 
@@ -203,6 +204,9 @@ abstract class DiffusionController extends PhabricatorController {
     switch ($view) {
       case 'history':
         $view_name = pht('History');
+        break;
+      case 'graph':
+        $view_name = pht('Graph');
         break;
       case 'browse':
         $view_name = pht('Browse');

@@ -163,7 +163,7 @@ final class PhrictionDocumentQuery
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
-    $joins = array();
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->getOrderVector()->containsKey('updated')) {
       $content_dao = new PhrictionContent();
