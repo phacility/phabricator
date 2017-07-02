@@ -14,7 +14,7 @@ final class RepositoryQueryConduitAPIMethod
   public function getMethodStatusDescription() {
     return pht(
       'This method is frozen and will eventually be deprecated. New code '.
-      'should use "diffusion.repository.query" instead.');
+      'should use "diffusion.repository.search" instead.');
   }
 
   public function getMethodDescription() {
