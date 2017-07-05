@@ -123,10 +123,10 @@ abstract class DiffusionController extends PhabricatorController {
   private function buildCrumbList(array $spec = array()) {
 
     $spec = $spec + array(
-      'commit'  => null,
-      'tags'    => null,
-      'branches'    => null,
-      'view'    => null,
+      'commit' => null,
+      'tags' => null,
+      'branches' => null,
+      'view' => null,
     );
 
     $crumb_list = array();
@@ -315,7 +315,7 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected function renderStatusMessage($title, $body) {
     return id(new PHUIInfoView())
-      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
       ->setTitle($title)
       ->setFlush(true)
       ->appendChild($body);
@@ -408,6 +408,76 @@ abstract class DiffusionController extends PhabricatorController {
       ->setUser($this->getViewer())
       ->setPath($readme_path)
       ->setContent($readme_corpus);
+  }
+
+  protected function buildTabsView($key) {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $view = new PHUIListView();
+
+    $view->addMenuItem(
+      id(new PHUIListItemView())
+        ->setKey('home')
+        ->setName(pht('Home'))
+        ->setIcon('fa-home')
+        ->setHref($drequest->generateURI(
+          array(
+            'action' => 'branch',
+            'path' => '/',
+          )))
+        ->setSelected($key == 'home'));
+
+    if (!$repository->isSVN()) {
+      $view->addMenuItem(
+        id(new PHUIListItemView())
+          ->setKey('branch')
+          ->setName(pht('Branches'))
+          ->setIcon('fa-code-fork')
+          ->setHref($drequest->generateURI(
+          array(
+            'action' => 'branches',
+          )))
+          ->setSelected($key == 'branch'));
+    }
+
+    if (!$repository->isSVN()) {
+      $view->addMenuItem(
+        id(new PHUIListItemView())
+          ->setKey('tags')
+          ->setName(pht('Tags'))
+          ->setIcon('fa-tags')
+          ->setHref($drequest->generateURI(
+          array(
+            'action' => 'tags',
+          )))
+          ->setSelected($key == 'tags'));
+    }
+
+    $view->addMenuItem(
+      id(new PHUIListItemView())
+        ->setKey('history')
+        ->setName(pht('History'))
+        ->setIcon('fa-history')
+        ->setHref($drequest->generateURI(
+        array(
+          'action' => 'history',
+        )))
+        ->setSelected($key == 'history'));
+
+    $view->addMenuItem(
+      id(new PHUIListItemView())
+        ->setKey('graph')
+        ->setName(pht('Graph'))
+        ->setIcon('fa-code-fork')
+        ->setHref($drequest->generateURI(
+        array(
+          'action' => 'graph',
+        )))
+        ->setSelected($key == 'graph'));
+
+    return $view;
+
   }
 
 }
