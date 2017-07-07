@@ -71,8 +71,11 @@ final class DiffusionBranchTableController extends DiffusionController {
       ->setHeader(pht('Branches'))
       ->setHeaderIcon('fa-code-fork');
 
+    $tabs = $this->buildTabsView('branch');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter(array(
           $content,
       ));

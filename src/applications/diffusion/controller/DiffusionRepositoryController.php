@@ -84,9 +84,12 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setErrors(array($empty_message));
     }
 
+    $tabs = $this->buildTabsView('home');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
+      ->setTabs($tabs)
       ->setMainColumn(array(
         $property_table,
         $description,
@@ -134,32 +137,9 @@ final class DiffusionRepositoryController extends DiffusionController {
         'limit' => $browse_pager->getPageSize() + 1,
       ));
 
-    if ($this->needTagFuture()) {
-      $tag_limit = $this->getTagLimit();
-      $this->tagFuture = $this->callConduitMethod(
-        'diffusion.tagsquery',
-        array(
-          // On the home page, we want to find tags on any branch.
-          'commit' => null,
-          'limit' => $tag_limit + 1,
-        ));
-    }
-
-    if ($this->needBranchFuture()) {
-      $branch_limit = $this->getBranchLimit();
-      $this->branchFuture = $this->callConduitMethod(
-        'diffusion.branchquery',
-        array(
-          'closed' => false,
-          'limit' => $branch_limit + 1,
-        ));
-    }
-
     $futures = array(
       $this->historyFuture,
       $this->browseFuture,
-      $this->tagFuture,
-      $this->branchFuture,
     );
     $futures = array_filter($futures);
     $futures = new FutureIterator($futures);
@@ -240,26 +220,6 @@ final class DiffusionRepositoryController extends DiffusionController {
       $history_results,
       $history,
       $history_exception);
-
-    try {
-      $content[] = $this->buildTagListTable($drequest);
-    } catch (Exception $ex) {
-      if (!$repository->isImporting()) {
-        $content[] = $this->renderStatusMessage(
-          pht('Unable to Load Tags'),
-          $ex->getMessage());
-      }
-    }
-
-    try {
-      $content[] = $this->buildBranchListTable($drequest);
-    } catch (Exception $ex) {
-      if (!$repository->isImporting()) {
-        $content[] = $this->renderStatusMessage(
-          pht('Unable to Load Branches'),
-          $ex->getMessage());
-      }
-    }
 
     if ($readme) {
       $content[] = $readme;
@@ -366,6 +326,12 @@ final class DiffusionRepositoryController extends DiffusionController {
         $this->renderCloneURI($repository, $uri));
     }
 
+    if (!$view->hasAnyProperties()) {
+      $view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(pht('Repository has no URIs set.'));
+    }
+
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
@@ -412,123 +378,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     return $box;
   }
 
-  private function buildBranchListTable(DiffusionRequest $drequest) {
-    $viewer = $this->getViewer();
-
-    if (!$this->needBranchFuture()) {
-      return null;
-    }
-
-    $branches = $this->branchFuture->resolve();
-    if (!$branches) {
-      return null;
-    }
-
-    $limit = $this->getBranchLimit();
-    $more_branches = (count($branches) > $limit);
-    $branches = array_slice($branches, 0, $limit);
-
-    $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
-
-    $commits = id(new DiffusionCommitQuery())
-      ->setViewer($viewer)
-      ->withIdentifiers(mpull($branches, 'getCommitIdentifier'))
-      ->withRepository($drequest->getRepository())
-      ->execute();
-
-    $table = id(new DiffusionBranchTableView())
-      ->setUser($viewer)
-      ->setDiffusionRequest($drequest)
-      ->setBranches($branches)
-      ->setCommits($commits);
-
-    $panel = id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-    $header = new PHUIHeaderView();
-    $header->setHeader(pht('Branches'));
-
-    if ($more_branches) {
-      $header->setSubheader(pht('Showing %d branches.', $limit));
-    }
-
-    $button = id(new PHUIButtonView())
-      ->setText(pht('Show All'))
-      ->setTag('a')
-      ->setIcon('fa-code-fork')
-      ->setHref($drequest->generateURI(
-      array(
-        'action' => 'branches',
-      )));
-
-    $header->addActionLink($button);
-    $panel->setHeader($header);
-    $panel->setTable($table);
-
-    return $panel;
-  }
-
-  private function buildTagListTable(DiffusionRequest $drequest) {
-    $viewer = $this->getViewer();
-    $repository = $drequest->getRepository();
-
-    if (!$this->needTagFuture()) {
-      return null;
-    }
-
-    $tags = $this->tagFuture->resolve();
-    $tags = DiffusionRepositoryTag::newFromConduit($tags);
-    if (!$tags) {
-      return null;
-    }
-
-    $tag_limit = $this->getTagLimit();
-    $more_tags = (count($tags) > $tag_limit);
-    $tags = array_slice($tags, 0, $tag_limit);
-
-    $commits = id(new DiffusionCommitQuery())
-      ->setViewer($viewer)
-      ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
-      ->withRepository($repository)
-      ->needCommitData(true)
-      ->execute();
-
-    $view = id(new DiffusionTagTableView())
-      ->setUser($viewer)
-      ->setDiffusionRequest($drequest)
-      ->setTags($tags)
-      ->setCommits($commits);
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
-
-    $panel = new PHUIObjectBoxView();
-    $header = new PHUIHeaderView();
-    $header->setHeader(pht('Tags'));
-
-    if ($more_tags) {
-      $header->setSubheader(
-        pht('Showing the %d most recent tags.', $tag_limit));
-    }
-
-    $button = id(new PHUIButtonView())
-      ->setText(pht('Show All Tags'))
-      ->setTag('a')
-      ->setIcon('fa-tag')
-      ->setHref($drequest->generateURI(
-      array(
-        'action' => 'tags',
-      )));
-
-    $header->addActionLink($button);
-
-    $panel->setHeader($header);
-    $panel->setTable($view);
-    $panel->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-
-    return $panel;
-  }
-
   private function buildHistoryTable(
     $history_results,
     $history,
@@ -567,30 +416,10 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $history_table->setIsHead(true);
 
-    $history = id(new PHUIButtonView())
-      ->setText(pht('History'))
-      ->setHref($drequest->generateURI(
-        array(
-          'action' => 'history',
-        )))
-      ->setTag('a')
-      ->setIcon('fa-history');
-
-    $graph = id(new PHUIButtonView())
-      ->setText(pht('Graph'))
-      ->setHref($drequest->generateURI(
-        array(
-          'action' => 'graph',
-        )))
-      ->setTag('a')
-      ->setIcon('fa-code-fork');
-
     $panel = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recent Commits'))
-      ->addActionLink($graph)
-      ->addActionLink($history);
+      ->setHeader(pht('Recent Commits'));
     $panel->setHeader($header);
     $panel->setTable($history_table);
 
@@ -721,34 +550,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setDisplayURI($display);
   }
 
-  private function needTagFuture() {
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        // No tags in SVN.
-        return false;
-    }
-
-    return true;
-  }
-
   private function getTagLimit() {
-    return 15;
-  }
-
-  private function needBranchFuture() {
-    $drequest = $this->getDiffusionRequest();
-
-    if ($drequest->getBranch() === null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private function getBranchLimit() {
     return 15;
   }
 

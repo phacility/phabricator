@@ -46,8 +46,10 @@ final class PhamePostViewController
           ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
           ->appendChild(
-            pht('Only you can see this draft until you publish it. '.
-                'Use "Publish" to publish this post.')));
+            pht(
+              'This is a draft, and is only visible to you and other users '.
+              'who can edit %s. Use "Publish" to publish this post.',
+              $viewer->renderHandle($post->getBlogPHID()))));
     }
 
     if ($post->isArchived()) {
@@ -56,8 +58,10 @@ final class PhamePostViewController
           ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
           ->setTitle(pht('Archived Post'))
           ->appendChild(
-            pht('Only you can see this archived post until you publish it. '.
-                'Use "Publish" to publish this post.')));
+            pht(
+              'This post has been archived, and is only visible to you and '.
+              'other users who can edit %s.',
+              $viewer->renderHandle($post->getBlogPHID()))));
     }
 
     if (!$post->getBlog()) {

@@ -24,6 +24,12 @@ same steps you would if you were creating a backup and then restoring it, you
 will just backup the old machine and then restore the data onto the new
 machine.
 
+WARNING: You need to restart Phabricator after restoring data.
+
+Restarting Phabricator after performing a restore makes sure that caches are
+flushed properly. For complete instructions, see
+@{article:Restarting Phabricator}.
+
 
 Backup: MySQL Databases
 =======================

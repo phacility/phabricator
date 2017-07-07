@@ -119,6 +119,11 @@ final class PhabricatorActionView extends AphrontView {
     return $this->openInNewWindow;
   }
 
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
   public function getID() {
     if (!$this->id) {
       $this->id = celerity_generate_unique_node_id();

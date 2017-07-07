@@ -54,7 +54,7 @@ final class DiffusionRepositoryDatasource
         $parts[] = $monogram;
       }
 
-      $name = implode(' ', $parts);
+      $name = implode("\n", $parts);
 
       $vcs = $repository->getVersionControlSystem();
       $vcs_type = PhabricatorRepositoryType::getNameForRepositoryType($vcs);
