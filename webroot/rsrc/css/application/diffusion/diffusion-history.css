@@ -48,6 +48,16 @@
   margin-right: 4px;
 }
 
+/* - Browse Styles  ----------------------------------------------------------*/
+
+.diffusion-browse-table .commit-detail {
+  padding-left: 32px;
+}
+
+.diffusion-browse-table .commit-detail a {
+  color: {$darkbluetext};
+}
+
 /* - Phone Style  ------------------------------------------------------------*/
 
 .device-phone.diffusion-history-view  .phui-two-column-view

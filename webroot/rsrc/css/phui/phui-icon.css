@@ -45,6 +45,10 @@ img.phui-image-disabled {
   filter: grayscale(100%);
 }
 
+.phui-icon-view.bluetext {
+  color: {$bluetext};
+}
+
 /* - Icon in a Circle ------------------------------------------------------- */
 
 .phui-icon-circle {
