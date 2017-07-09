@@ -98,7 +98,10 @@ final class PhabricatorProjectEditPictureController
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
 
-    $default_image = PhabricatorFile::loadBuiltin($viewer, 'project.png');
+    $builtin = PhabricatorProjectIconSet::getIconImage(
+      $project->getIcon());
+    $default_image = PhabricatorFile::loadBuiltin($this->getViewer(),
+      'projects/'.$builtin);
 
     $images = array();
 

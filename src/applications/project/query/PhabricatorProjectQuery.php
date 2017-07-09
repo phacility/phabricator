@@ -358,8 +358,6 @@ final class PhabricatorProjectQuery
 
   protected function didFilterPage(array $projects) {
     if ($this->needImages) {
-      $default = null;
-
       $file_phids = mpull($projects, 'getProfileImagePHID');
       $file_phids = array_filter($file_phids);
       if ($file_phids) {
@@ -376,12 +374,10 @@ final class PhabricatorProjectQuery
       foreach ($projects as $project) {
         $file = idx($files, $project->getProfileImagePHID());
         if (!$file) {
-          if (!$default) {
-            $default = PhabricatorFile::loadBuiltin(
-              $this->getViewer(),
-              'project.png');
-          }
-          $file = $default;
+          $builtin = PhabricatorProjectIconSet::getIconImage(
+            $project->getIcon());
+          $file = PhabricatorFile::loadBuiltin($this->getViewer(),
+            'projects/'.$builtin);
         }
         $project->attachProfileImageFile($file);
       }
