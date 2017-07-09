@@ -1667,6 +1667,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $repository = $drequest->getRepository();
     $history_uri = $drequest->generateURI(array('action' => 'history'));
     $behind_head = $drequest->getSymbolicCommit();
+    $compare = null;
     $head_uri = $drequest->generateURI(
       array(
         'commit' => '',
@@ -1771,11 +1772,11 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recently Open Revisions'))
-      ->setHeaderIcon('fa-gear');
+      ->setHeader(pht('Recently Open Revisions'));
 
     $view = id(new DifferentialRevisionListView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setRevisions($revisions)
       ->setUser($viewer);
 
