@@ -262,7 +262,8 @@ final class PhabricatorProjectIconSet
 
       $is_disabled = idx($value, 'disabled');
 
-      if (idx($value, 'image')) {
+      $image = idx($value, 'image');
+      if ($image !== null) {
         $builtin = idx($value, 'image');
         $builtin_map = id(new PhabricatorFilesOnDiskBuiltinFile())
           ->getProjectBuiltinFiles();
