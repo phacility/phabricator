@@ -17,6 +17,8 @@ final class DiffusionRepositoryController extends DiffusionController {
       return $response;
     }
 
+    require_celerity_resource('diffusion-css');
+
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
@@ -25,10 +27,12 @@ final class DiffusionRepositoryController extends DiffusionController {
     $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($repository);
-    $curtain = $this->buildCurtain($repository);
     $property_table = $this->buildPropertiesTable($repository);
+    $actions = $this->buildActionList($repository);
     $description = $this->buildDescriptionView($repository);
     $locate_file = $this->buildLocateFile();
+
+    $header->setActionList($actions);
 
     // Before we do any work, make sure we're looking at a some content: we're
     // on a valid branch, and the repository is not empty.
@@ -88,14 +92,13 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setCurtain($curtain)
       ->setTabs($tabs)
-      ->setMainColumn(array(
+      ->setFooter(array(
+        $locate_file,
         $property_table,
         $description,
-        $locate_file,
-      ))
-      ->setFooter($content);
+        $content,
+      ));
 
     return $this->newPage()
       ->setTitle(
@@ -236,7 +239,8 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setPolicyObject($repository)
       ->setProfileHeader(true)
       ->setImage($repository->getProfileImageURI())
-      ->setImageEditURL('/diffusion/picture/'.$repository->getID().'/');
+      ->setImageEditURL('/diffusion/picture/'.$repository->getID().'/')
+      ->addClass('diffusion-profile-header');
 
     if (!$repository->isTracked()) {
       $header->setStatus('fa-ban', 'dark', pht('Inactive'));
@@ -254,13 +258,15 @@ final class DiffusionRepositoryController extends DiffusionController {
     return $header;
   }
 
-  private function buildCurtain(PhabricatorRepository $repository) {
+  private function buildActionList(PhabricatorRepository $repository) {
     $viewer = $this->getViewer();
 
     $edit_uri = $repository->getPathURI('manage/');
-    $curtain = $this->newCurtainView($repository);
+    $action_view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($repository);
 
-    $curtain->addAction(
+    $action_view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Manage Repository'))
         ->setIcon('fa-cogs')
@@ -270,14 +276,14 @@ final class DiffusionRepositoryController extends DiffusionController {
       $push_uri = $this->getApplicationURI(
         'pushlog/?repositories='.$repository->getMonogram());
 
-      $curtain->addAction(
+      $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Push Logs'))
           ->setIcon('fa-list-alt')
           ->setHref($push_uri));
     }
 
-    return $curtain;
+    return $action_view;
   }
 
   private function buildDescriptionView(PhabricatorRepository $repository) {
@@ -290,9 +296,8 @@ final class DiffusionRepositoryController extends DiffusionController {
       $description = new PHUIRemarkupView($viewer, $description);
       $view->addTextContent($description);
       return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Description'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->appendChild($view);
+        ->appendChild($view)
+        ->addClass('diffusion-profile-description');
     }
     return null;
   }
@@ -455,15 +460,12 @@ final class DiffusionRepositoryController extends DiffusionController {
           id(new AphrontFormTypeaheadControl())
             ->setHardpointID('locate-control')
             ->setID('locate-input')
-            ->setLabel(pht('Locate File')));
+            ->setPlaceholder(pht('Locate File')));
       $form_box = id(new PHUIBoxView())
-        ->appendChild($form->buildLayoutView());
-      $locate_panel = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Locate File'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->appendChild($form_box);
+        ->appendChild($form->buildLayoutView())
+        ->addClass('diffusion-profile-locate');
     }
-    return $locate_panel;
+    return $form_box;
   }
 
   private function buildBrowseTable(

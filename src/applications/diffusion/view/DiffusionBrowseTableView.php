@@ -20,7 +20,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
   public function render() {
     $request = $this->getDiffusionRequest();
     $repository = $request->getRepository();
-    require_celerity_resource('diffusion-history-css');
+    require_celerity_resource('diffusion-css');
 
     $base_path = trim($request->getPath(), '/');
     if ($base_path) {

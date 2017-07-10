@@ -1,6 +1,43 @@
 /**
- * @provides diffusion-history-css
+ * @provides diffusion-css
  */
+
+/* - Home Styles  ------------------------------------------------------------*/
+
+.diffusion-profile-header.phui-profile-header .phui-header-col3 {
+  vertical-align: middle;
+}
+
+.diffusion-profile-header .phui-header-action-links a.button {
+  display: block;
+}
+
+.diffusion-profile-locate .phui-form-view {
+  margin: 0 0 16px 0;
+  padding: 0;
+}
+
+.diffusion-profile-locate .phui-form-view .aphront-form-control {
+  padding: 0;
+}
+
+.diffusion-profile-locate .phui-form-view .aphront-form-input {
+  margin: 0;
+  width: 480px;
+}
+
+.device .diffusion-profile-locate .phui-form-view .aphront-form-input {
+  margin: 0;
+  width: 100%;
+}
+
+.diffusion-profile-description.phui-object-box {
+  padding: 0;
+}
+
+.device-phone .diffusion-profile-description.phui-object-box {
+  padding: 0;
+}
 
 /* - List Styles  ------------------------------------------------------------*/
 
