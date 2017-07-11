@@ -27,7 +27,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($repository);
-    $property_table = $this->buildPropertiesTable($repository);
     $actions = $this->buildActionList($repository);
     $description = $this->buildDescriptionView($repository);
     $locate_file = $this->buildLocateFile();
@@ -90,12 +89,28 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $tabs = $this->buildTabsView('home');
 
+    $clone_uri = $drequest->generateURI(
+      array(
+        'action' => 'clone',
+      ));
+
+    $clone_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText('Clone')
+      ->setColor(PHUIButtonView::GREEN)
+      ->setIcon('fa-download')
+      ->setWorkflow(true)
+      ->setHref($clone_uri);
+
+    $bar = id(new PHUILeftRightView())
+      ->setLeft($locate_file)
+      ->setRight($clone_button);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setTabs($tabs)
       ->setFooter(array(
-        $locate_file,
-        $property_table,
+        $bar,
         $description,
         $content,
       ));
@@ -302,87 +317,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     return null;
   }
 
-  private function buildPropertiesTable(PhabricatorRepository $repository) {
-    $viewer = $this->getViewer();
-
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer);
-
-    $display_never = PhabricatorRepositoryURI::DISPLAY_NEVER;
-
-    $uris = $repository->getURIs();
-    foreach ($uris as $uri) {
-      if ($uri->getIsDisabled()) {
-        continue;
-      }
-
-      if ($uri->getEffectiveDisplayType() == $display_never) {
-        continue;
-      }
-
-      if ($repository->isSVN()) {
-        $label = phutil_tag_div('diffusion-clone-label', pht('Checkout'));
-      } else {
-        $label = phutil_tag_div('diffusion-clone-label', pht('Clone'));
-      }
-
-      $view->addProperty(
-        $label,
-        $this->renderCloneURI($repository, $uri));
-    }
-
-    if (!$view->hasAnyProperties()) {
-      $view = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild(pht('Repository has no URIs set.'));
-    }
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Details'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($view);
-
-    $info = null;
-    $drequest = $this->getDiffusionRequest();
-
-    // Try to load alternatives. This may fail for repositories which have not
-    // cloned yet. If it does, just ignore it and continue.
-    try {
-      $alternatives = $drequest->getRefAlternatives();
-    } catch (ConduitClientException $ex) {
-      $alternatives = array();
-    }
-
-    if ($alternatives) {
-      $message = array(
-        pht(
-          'The ref "%s" is ambiguous in this repository.',
-          $drequest->getBranch()),
-        ' ',
-        phutil_tag(
-          'a',
-          array(
-            'href' => $drequest->generateURI(
-              array(
-                'action' => 'refs',
-              )),
-          ),
-          pht('View Alternatives')),
-      );
-
-      $messages = array($message);
-
-      $info = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-        ->setErrors(array($message));
-
-      $box->setInfoView($info);
-    }
-
-
-    return $box;
-  }
-
   private function buildHistoryTable(
     $history_results,
     $history,
@@ -504,52 +438,13 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $browse_uri = $drequest->generateURI(array('action' => 'browse'));
-
-    $browse_panel = id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-    $header = id(new PHUIHeaderView())
-      ->setHeader($repository->getName());
-
-    $button = id(new PHUIButtonView())
-      ->setText(pht('Browse'))
-      ->setTag('a')
-      ->setIcon('fa-code')
-      ->setHref($browse_uri);
-
-    $header->addActionLink($button);
-    $browse_panel->setHeader($header);
-    $browse_panel->setTable($browse_table);
-
     $pager->setURI($browse_uri, 'offset');
 
-    if ($pager->willShowPagingControls()) {
-      $browse_panel->setPager($pager);
-    }
-
-    return $browse_panel;
-  }
-
-  private function renderCloneURI(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryURI $uri) {
-
-    if ($repository->isSVN()) {
-      $display = csprintf(
-        'svn checkout %R %R',
-        (string)$uri->getDisplayURI(),
-        $repository->getCloneName());
-    } else {
-      $display = csprintf('%R', (string)$uri->getDisplayURI());
-    }
-
-    $display = (string)$display;
-    $viewer = $this->getViewer();
-
-    return id(new DiffusionCloneURIView())
-      ->setViewer($viewer)
-      ->setRepository($repository)
-      ->setRepositoryURI($uri)
-      ->setDisplayURI($display);
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText($repository->getName())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($browse_table)
+      ->setPager($pager);
   }
 
   private function getTagLimit() {
