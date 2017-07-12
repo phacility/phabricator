@@ -94,9 +94,15 @@ final class DiffusionRepositoryController extends DiffusionController {
         'action' => 'clone',
       ));
 
+    if ($repository->isSVN()) {
+      $clone_text = pht('Checkout');
+    } else {
+      $clone_text = pht('Clone');
+    }
+
     $clone_button = id(new PHUIButtonView())
       ->setTag('a')
-      ->setText('Clone')
+      ->setText($clone_text)
       ->setColor(PHUIButtonView::GREEN)
       ->setIcon('fa-download')
       ->setWorkflow(true)
@@ -104,16 +110,20 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $bar = id(new PHUILeftRightView())
       ->setLeft($locate_file)
-      ->setRight($clone_button);
+      ->setRight($clone_button)
+      ->addClass('diffusion-action-bar');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setTabs($tabs)
       ->setFooter(array(
         $bar,
         $description,
         $content,
       ));
+
+    if ($page_has_content) {
+      $view->setTabs($tabs);
+    }
 
     return $this->newPage()
       ->setTitle(

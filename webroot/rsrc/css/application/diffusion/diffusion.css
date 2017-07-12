@@ -12,8 +12,12 @@
   display: block;
 }
 
+.diffusion-action-bar {
+  margin-bottom: 16px;
+}
+
 .diffusion-profile-locate .phui-form-view {
-  margin: 0 0 16px 0;
+  margin: 0;
   padding: 0;
 }
 
