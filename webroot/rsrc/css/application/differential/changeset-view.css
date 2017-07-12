@@ -402,10 +402,6 @@ tr.differential-inline-loading {
   line-height: 28px;
 }
 
-.diff-banner .phui-icon-view {
-  margin-right: 4px;
-}
-
 .diff-banner-path {
   color: {$greytext};
 }
