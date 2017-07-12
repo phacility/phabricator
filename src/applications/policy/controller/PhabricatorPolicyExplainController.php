@@ -253,7 +253,7 @@ final class PhabricatorPolicyExplainController
       ->appendParagraph(
         pht(
           'To access this object, users must have first have access '.
-          'capabilties on these other objects:'))
+          'capabilities on these other objects:'))
       ->appendList($items);
   }
 
