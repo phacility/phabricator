@@ -371,7 +371,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $locate_panel = null;
+    $form_box = null;
     if ($repository->canUsePathTree()) {
       Javelin::initBehavior(
         'diffusion-locate-file',
