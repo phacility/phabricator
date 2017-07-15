@@ -29,7 +29,7 @@ final class DiffusionTagListView extends DiffusionView {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
     $viewer = $this->getViewer();
-    require_celerity_resource('diffusion-history-css');
+    require_celerity_resource('diffusion-css');
 
     $buildables = $this->loadBuildables($this->commits);
 

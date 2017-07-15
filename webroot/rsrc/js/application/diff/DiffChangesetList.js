@@ -1610,7 +1610,7 @@ JX.install('DiffChangesetList', {
     _getMenuButton: function() {
       if (!this._menuButton) {
         var button = new JX.PHUIXButtonView()
-          .setIcon('fa-gear')
+          .setIcon('fa-bars')
           .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
 
         var dropdown = new JX.PHUIXDropdownMenu(button.getNode());
@@ -1659,7 +1659,7 @@ JX.install('DiffChangesetList', {
 
           list.addItem(
             new JX.PHUIXActionView()
-              .setIcon('fa-link')
+              .setIcon('fa-external-link')
               .setName(pht('List Inline Comments'))
               .setHref(this.getInlineListURI()));
         }

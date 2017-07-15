@@ -3,6 +3,7 @@
 final class AphrontFormTypeaheadControl extends AphrontFormControl {
 
   private $hardpointID;
+  private $placeholder;
 
   public function setHardpointID($hardpoint_id) {
     $this->hardpointID = $hardpoint_id;
@@ -11,6 +12,11 @@ final class AphrontFormTypeaheadControl extends AphrontFormControl {
 
   public function getHardpointID() {
     return $this->hardpointID;
+  }
+
+  public function setPlaceholder($placeholder) {
+    $this->placeholder = $placeholder;
+    return $this;
   }
 
   protected function getCustomControlClass() {
@@ -30,6 +36,7 @@ final class AphrontFormTypeaheadControl extends AphrontFormControl {
           'type'         => 'text',
           'name'         => $this->getName(),
           'value'        => $this->getValue(),
+          'placeholder'  => $this->placeholder,
           'disabled'     => $this->getDisabled() ? 'disabled' : null,
           'autocomplete' => 'off',
           'id'           => $this->getID(),

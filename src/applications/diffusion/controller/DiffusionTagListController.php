@@ -88,8 +88,11 @@ final class DiffusionTagListController extends DiffusionController {
       ));
     $crumbs->setBorder(true);
 
+    $tabs = $this->buildTabsView('tags');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter($content);
 
     return $this->newPage()

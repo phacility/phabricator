@@ -7,7 +7,7 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
     $viewer = $this->getUser();
     $repository = $drequest->getRepository();
 
-    require_celerity_resource('diffusion-history-css');
+    require_celerity_resource('diffusion-css');
     Javelin::initBehavior('phabricator-tooltips');
 
     $buildables = $this->loadBuildables(

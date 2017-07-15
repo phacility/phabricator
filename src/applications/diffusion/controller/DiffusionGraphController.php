@@ -68,8 +68,11 @@ final class DiffusionGraphController extends DiffusionController {
       ->setTable($graph)
       ->setPager($pager);
 
+    $tabs = $this->buildTabsView('graph');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter($graph_view);
 
     return $this->newPage()
@@ -81,25 +84,17 @@ final class DiffusionGraphController extends DiffusionController {
   private function buildHeader(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
 
-    $tag = $this->renderCommitHashTag($drequest);
-    $history_uri = $drequest->generateURI(
-      array(
-        'action' => 'history',
-      ));
-
-    $history_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('History'))
-      ->setHref($history_uri)
-      ->setIcon('fa-history');
+    $no_path = !strlen($drequest->getPath());
+    if ($no_path) {
+      $header_text = pht('Graph');
+    } else {
+      $header_text = $this->renderPathLinks($drequest, $mode = 'history');
+    }
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setPolicyObject($drequest->getRepository())
-      ->addTag($tag)
-      ->setHeader($this->renderPathLinks($drequest, $mode = 'history'))
-      ->setHeaderIcon('fa-code-fork')
-      ->addActionLink($history_button);
+      ->setHeader($header_text)
+      ->setHeaderIcon('fa-code-fork');
 
     return $header;
 

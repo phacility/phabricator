@@ -23,7 +23,7 @@ final class DiffusionBranchListView extends DiffusionView {
     $repository = $drequest->getRepository();
     $commits = $this->commits;
     $viewer = $this->getUser();
-    require_celerity_resource('diffusion-history-css');
+    require_celerity_resource('diffusion-css');
 
     $buildables = $this->loadBuildables($commits);
     $have_builds = false;

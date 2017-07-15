@@ -98,7 +98,10 @@ final class PhabricatorProjectEditPictureController
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
 
-    $default_image = PhabricatorFile::loadBuiltin($viewer, 'project.png');
+    $builtin = PhabricatorProjectIconSet::getIconImage(
+      $project->getIcon());
+    $default_image = PhabricatorFile::loadBuiltin($this->getViewer(),
+      'projects/'.$builtin);
 
     $images = array();
 
@@ -122,8 +125,10 @@ final class PhabricatorProjectEditPictureController
     }
 
     $builtins = array(
+      'projects/v3/book.png',
       'projects/v3/bug.png',
       'projects/v3/calendar.png',
+      'projects/v3/clipboard.png',
       'projects/v3/cloud.png',
       'projects/v3/creditcard.png',
       'projects/v3/database.png',
@@ -131,12 +136,18 @@ final class PhabricatorProjectEditPictureController
       'projects/v3/experimental.png',
       'projects/v3/flag.png',
       'projects/v3/folder.png',
+      'projects/v3/lightbulb.png',
       'projects/v3/lock.png',
       'projects/v3/mail.png',
+      'projects/v3/marker.png',
       'projects/v3/mobile.png',
       'projects/v3/organization.png',
       'projects/v3/people.png',
+      'projects/v3/piechart.png',
+      'projects/v3/robot.png',
+      'projects/v3/rocket.png',
       'projects/v3/servers.png',
+      'projects/v3/sitemap.png',
       'projects/v3/tag.png',
       'projects/v3/trash.png',
       'projects/v3/truck.png',

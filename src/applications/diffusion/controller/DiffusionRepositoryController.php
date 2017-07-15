@@ -17,6 +17,8 @@ final class DiffusionRepositoryController extends DiffusionController {
       return $response;
     }
 
+    require_celerity_resource('diffusion-css');
+
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
@@ -25,10 +27,11 @@ final class DiffusionRepositoryController extends DiffusionController {
     $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($repository);
-    $curtain = $this->buildCurtain($repository);
-    $property_table = $this->buildPropertiesTable($repository);
+    $actions = $this->buildActionList($repository);
     $description = $this->buildDescriptionView($repository);
     $locate_file = $this->buildLocateFile();
+
+    $header->setActionList($actions);
 
     // Before we do any work, make sure we're looking at a some content: we're
     // on a valid branch, and the repository is not empty.
@@ -84,15 +87,43 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setErrors(array($empty_message));
     }
 
+    $tabs = $this->buildTabsView('home');
+
+    $clone_uri = $drequest->generateURI(
+      array(
+        'action' => 'clone',
+      ));
+
+    if ($repository->isSVN()) {
+      $clone_text = pht('Checkout');
+    } else {
+      $clone_text = pht('Clone');
+    }
+
+    $clone_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText($clone_text)
+      ->setColor(PHUIButtonView::GREEN)
+      ->setIcon('fa-download')
+      ->setWorkflow(true)
+      ->setHref($clone_uri);
+
+    $bar = id(new PHUILeftRightView())
+      ->setLeft($locate_file)
+      ->setRight($clone_button)
+      ->addClass('diffusion-action-bar');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $property_table,
+      ->setFooter(array(
+        $bar,
         $description,
-        $locate_file,
-      ))
-      ->setFooter($content);
+        $content,
+      ));
+
+    if ($page_has_content) {
+      $view->setTabs($tabs);
+    }
 
     return $this->newPage()
       ->setTitle(
@@ -134,32 +165,9 @@ final class DiffusionRepositoryController extends DiffusionController {
         'limit' => $browse_pager->getPageSize() + 1,
       ));
 
-    if ($this->needTagFuture()) {
-      $tag_limit = $this->getTagLimit();
-      $this->tagFuture = $this->callConduitMethod(
-        'diffusion.tagsquery',
-        array(
-          // On the home page, we want to find tags on any branch.
-          'commit' => null,
-          'limit' => $tag_limit + 1,
-        ));
-    }
-
-    if ($this->needBranchFuture()) {
-      $branch_limit = $this->getBranchLimit();
-      $this->branchFuture = $this->callConduitMethod(
-        'diffusion.branchquery',
-        array(
-          'closed' => false,
-          'limit' => $branch_limit + 1,
-        ));
-    }
-
     $futures = array(
       $this->historyFuture,
       $this->browseFuture,
-      $this->tagFuture,
-      $this->branchFuture,
     );
     $futures = array_filter($futures);
     $futures = new FutureIterator($futures);
@@ -241,26 +249,6 @@ final class DiffusionRepositoryController extends DiffusionController {
       $history,
       $history_exception);
 
-    try {
-      $content[] = $this->buildTagListTable($drequest);
-    } catch (Exception $ex) {
-      if (!$repository->isImporting()) {
-        $content[] = $this->renderStatusMessage(
-          pht('Unable to Load Tags'),
-          $ex->getMessage());
-      }
-    }
-
-    try {
-      $content[] = $this->buildBranchListTable($drequest);
-    } catch (Exception $ex) {
-      if (!$repository->isImporting()) {
-        $content[] = $this->renderStatusMessage(
-          pht('Unable to Load Branches'),
-          $ex->getMessage());
-      }
-    }
-
     if ($readme) {
       $content[] = $readme;
     }
@@ -276,7 +264,8 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setPolicyObject($repository)
       ->setProfileHeader(true)
       ->setImage($repository->getProfileImageURI())
-      ->setImageEditURL('/diffusion/picture/'.$repository->getID().'/');
+      ->setImageEditURL('/diffusion/picture/'.$repository->getID().'/')
+      ->addClass('diffusion-profile-header');
 
     if (!$repository->isTracked()) {
       $header->setStatus('fa-ban', 'dark', pht('Inactive'));
@@ -294,13 +283,15 @@ final class DiffusionRepositoryController extends DiffusionController {
     return $header;
   }
 
-  private function buildCurtain(PhabricatorRepository $repository) {
+  private function buildActionList(PhabricatorRepository $repository) {
     $viewer = $this->getViewer();
 
     $edit_uri = $repository->getPathURI('manage/');
-    $curtain = $this->newCurtainView($repository);
+    $action_view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($repository);
 
-    $curtain->addAction(
+    $action_view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Manage Repository'))
         ->setIcon('fa-cogs')
@@ -310,14 +301,14 @@ final class DiffusionRepositoryController extends DiffusionController {
       $push_uri = $this->getApplicationURI(
         'pushlog/?repositories='.$repository->getMonogram());
 
-      $curtain->addAction(
+      $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Push Logs'))
           ->setIcon('fa-list-alt')
           ->setHref($push_uri));
     }
 
-    return $curtain;
+    return $action_view;
   }
 
   private function buildDescriptionView(PhabricatorRepository $repository) {
@@ -330,203 +321,10 @@ final class DiffusionRepositoryController extends DiffusionController {
       $description = new PHUIRemarkupView($viewer, $description);
       $view->addTextContent($description);
       return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Description'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->appendChild($view);
+        ->appendChild($view)
+        ->addClass('diffusion-profile-description');
     }
     return null;
-  }
-
-  private function buildPropertiesTable(PhabricatorRepository $repository) {
-    $viewer = $this->getViewer();
-
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer);
-
-    $display_never = PhabricatorRepositoryURI::DISPLAY_NEVER;
-
-    $uris = $repository->getURIs();
-    foreach ($uris as $uri) {
-      if ($uri->getIsDisabled()) {
-        continue;
-      }
-
-      if ($uri->getEffectiveDisplayType() == $display_never) {
-        continue;
-      }
-
-      if ($repository->isSVN()) {
-        $label = phutil_tag_div('diffusion-clone-label', pht('Checkout'));
-      } else {
-        $label = phutil_tag_div('diffusion-clone-label', pht('Clone'));
-      }
-
-      $view->addProperty(
-        $label,
-        $this->renderCloneURI($repository, $uri));
-    }
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Details'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($view);
-
-    $info = null;
-    $drequest = $this->getDiffusionRequest();
-
-    // Try to load alternatives. This may fail for repositories which have not
-    // cloned yet. If it does, just ignore it and continue.
-    try {
-      $alternatives = $drequest->getRefAlternatives();
-    } catch (ConduitClientException $ex) {
-      $alternatives = array();
-    }
-
-    if ($alternatives) {
-      $message = array(
-        pht(
-          'The ref "%s" is ambiguous in this repository.',
-          $drequest->getBranch()),
-        ' ',
-        phutil_tag(
-          'a',
-          array(
-            'href' => $drequest->generateURI(
-              array(
-                'action' => 'refs',
-              )),
-          ),
-          pht('View Alternatives')),
-      );
-
-      $messages = array($message);
-
-      $info = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-        ->setErrors(array($message));
-
-      $box->setInfoView($info);
-    }
-
-
-    return $box;
-  }
-
-  private function buildBranchListTable(DiffusionRequest $drequest) {
-    $viewer = $this->getViewer();
-
-    if (!$this->needBranchFuture()) {
-      return null;
-    }
-
-    $branches = $this->branchFuture->resolve();
-    if (!$branches) {
-      return null;
-    }
-
-    $limit = $this->getBranchLimit();
-    $more_branches = (count($branches) > $limit);
-    $branches = array_slice($branches, 0, $limit);
-
-    $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
-
-    $commits = id(new DiffusionCommitQuery())
-      ->setViewer($viewer)
-      ->withIdentifiers(mpull($branches, 'getCommitIdentifier'))
-      ->withRepository($drequest->getRepository())
-      ->execute();
-
-    $table = id(new DiffusionBranchTableView())
-      ->setUser($viewer)
-      ->setDiffusionRequest($drequest)
-      ->setBranches($branches)
-      ->setCommits($commits);
-
-    $panel = id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-    $header = new PHUIHeaderView();
-    $header->setHeader(pht('Branches'));
-
-    if ($more_branches) {
-      $header->setSubheader(pht('Showing %d branches.', $limit));
-    }
-
-    $button = id(new PHUIButtonView())
-      ->setText(pht('Show All'))
-      ->setTag('a')
-      ->setIcon('fa-code-fork')
-      ->setHref($drequest->generateURI(
-      array(
-        'action' => 'branches',
-      )));
-
-    $header->addActionLink($button);
-    $panel->setHeader($header);
-    $panel->setTable($table);
-
-    return $panel;
-  }
-
-  private function buildTagListTable(DiffusionRequest $drequest) {
-    $viewer = $this->getViewer();
-    $repository = $drequest->getRepository();
-
-    if (!$this->needTagFuture()) {
-      return null;
-    }
-
-    $tags = $this->tagFuture->resolve();
-    $tags = DiffusionRepositoryTag::newFromConduit($tags);
-    if (!$tags) {
-      return null;
-    }
-
-    $tag_limit = $this->getTagLimit();
-    $more_tags = (count($tags) > $tag_limit);
-    $tags = array_slice($tags, 0, $tag_limit);
-
-    $commits = id(new DiffusionCommitQuery())
-      ->setViewer($viewer)
-      ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
-      ->withRepository($repository)
-      ->needCommitData(true)
-      ->execute();
-
-    $view = id(new DiffusionTagTableView())
-      ->setUser($viewer)
-      ->setDiffusionRequest($drequest)
-      ->setTags($tags)
-      ->setCommits($commits);
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
-
-    $panel = new PHUIObjectBoxView();
-    $header = new PHUIHeaderView();
-    $header->setHeader(pht('Tags'));
-
-    if ($more_tags) {
-      $header->setSubheader(
-        pht('Showing the %d most recent tags.', $tag_limit));
-    }
-
-    $button = id(new PHUIButtonView())
-      ->setText(pht('Show All Tags'))
-      ->setTag('a')
-      ->setIcon('fa-tag')
-      ->setHref($drequest->generateURI(
-      array(
-        'action' => 'tags',
-      )));
-
-    $header->addActionLink($button);
-
-    $panel->setHeader($header);
-    $panel->setTable($view);
-    $panel->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-
-    return $panel;
   }
 
   private function buildHistoryTable(
@@ -567,30 +365,10 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $history_table->setIsHead(true);
 
-    $history = id(new PHUIButtonView())
-      ->setText(pht('History'))
-      ->setHref($drequest->generateURI(
-        array(
-          'action' => 'history',
-        )))
-      ->setTag('a')
-      ->setIcon('fa-history');
-
-    $graph = id(new PHUIButtonView())
-      ->setText(pht('Graph'))
-      ->setHref($drequest->generateURI(
-        array(
-          'action' => 'graph',
-        )))
-      ->setTag('a')
-      ->setIcon('fa-code-fork');
-
     $panel = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recent Commits'))
-      ->addActionLink($graph)
-      ->addActionLink($history);
+      ->setHeader(pht('Recent Commits'));
     $panel->setHeader($header);
     $panel->setTable($history_table);
 
@@ -603,7 +381,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $locate_panel = null;
+    $form_box = null;
     if ($repository->canUsePathTree()) {
       Javelin::initBehavior(
         'diffusion-locate-file',
@@ -626,15 +404,12 @@ final class DiffusionRepositoryController extends DiffusionController {
           id(new AphrontFormTypeaheadControl())
             ->setHardpointID('locate-control')
             ->setID('locate-input')
-            ->setLabel(pht('Locate File')));
+            ->setPlaceholder(pht('Locate File')));
       $form_box = id(new PHUIBoxView())
-        ->appendChild($form->buildLayoutView());
-      $locate_panel = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Locate File'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->appendChild($form_box);
+        ->appendChild($form->buildLayoutView())
+        ->addClass('diffusion-profile-locate');
     }
-    return $locate_panel;
+    return $form_box;
   }
 
   private function buildBrowseTable(
@@ -673,82 +448,16 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $browse_uri = $drequest->generateURI(array('action' => 'browse'));
-
-    $browse_panel = id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-    $header = id(new PHUIHeaderView())
-      ->setHeader($repository->getName());
-
-    $button = id(new PHUIButtonView())
-      ->setText(pht('Browse'))
-      ->setTag('a')
-      ->setIcon('fa-code')
-      ->setHref($browse_uri);
-
-    $header->addActionLink($button);
-    $browse_panel->setHeader($header);
-    $browse_panel->setTable($browse_table);
-
     $pager->setURI($browse_uri, 'offset');
 
-    if ($pager->willShowPagingControls()) {
-      $browse_panel->setPager($pager);
-    }
-
-    return $browse_panel;
-  }
-
-  private function renderCloneURI(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryURI $uri) {
-
-    if ($repository->isSVN()) {
-      $display = csprintf(
-        'svn checkout %R %R',
-        (string)$uri->getDisplayURI(),
-        $repository->getCloneName());
-    } else {
-      $display = csprintf('%R', (string)$uri->getDisplayURI());
-    }
-
-    $display = (string)$display;
-    $viewer = $this->getViewer();
-
-    return id(new DiffusionCloneURIView())
-      ->setViewer($viewer)
-      ->setRepository($repository)
-      ->setRepositoryURI($uri)
-      ->setDisplayURI($display);
-  }
-
-  private function needTagFuture() {
-    $drequest = $this->getDiffusionRequest();
-    $repository = $drequest->getRepository();
-
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        // No tags in SVN.
-        return false;
-    }
-
-    return true;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText($repository->getName())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($browse_table)
+      ->setPager($pager);
   }
 
   private function getTagLimit() {
-    return 15;
-  }
-
-  private function needBranchFuture() {
-    $drequest = $this->getDiffusionRequest();
-
-    if ($drequest->getBranch() === null) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private function getBranchLimit() {
     return 15;
   }
 

@@ -34,6 +34,8 @@ a dictionary, which may contain these keys:
   - `key` //Required string.// Internal key identifying the icon.
   - `name` //Required string.// Human-readable icon name.
   - `icon` //Required string.// Specifies which actual icon image to use.
+  - `image` //Optional string.// Selects a default image. Select an image from
+    `resources/builtins/projects/`.
   - `default` //Optional bool.// Selects a default icon. Exactly one icon must
     be selected as the default.
   - `disabled` //Optional bool.// If true, this icon will no longer be

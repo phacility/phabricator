@@ -1,6 +1,47 @@
 /**
- * @provides diffusion-history-css
+ * @provides diffusion-css
  */
+
+/* - Home Styles  ------------------------------------------------------------*/
+
+.diffusion-profile-header.phui-profile-header .phui-header-col3 {
+  vertical-align: middle;
+}
+
+.diffusion-profile-header .phui-header-action-links a.button {
+  display: block;
+}
+
+.diffusion-action-bar {
+  margin-bottom: 16px;
+}
+
+.diffusion-profile-locate .phui-form-view {
+  margin: 0;
+  padding: 0;
+}
+
+.diffusion-profile-locate .phui-form-view .aphront-form-control {
+  padding: 0;
+}
+
+.diffusion-profile-locate .phui-form-view .aphront-form-input {
+  margin: 0;
+  width: 480px;
+}
+
+.device .diffusion-profile-locate .phui-form-view .aphront-form-input {
+  margin: 0;
+  width: 100%;
+}
+
+.diffusion-profile-description.phui-object-box {
+  padding: 0;
+}
+
+.device-phone .diffusion-profile-description.phui-object-box {
+  padding: 0;
+}
 
 /* - List Styles  ------------------------------------------------------------*/
 
@@ -46,6 +87,16 @@
 
 .diffusion-branch-list .phui-oi-subhead .phui-tag-view {
   margin-right: 4px;
+}
+
+/* - Browse Styles  ----------------------------------------------------------*/
+
+.diffusion-browse-table .commit-detail {
+  padding-left: 32px;
+}
+
+.diffusion-browse-table .commit-detail a {
+  color: {$darkbluetext};
 }
 
 /* - Phone Style  ------------------------------------------------------------*/
