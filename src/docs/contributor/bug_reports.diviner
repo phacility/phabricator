@@ -12,6 +12,7 @@ accept reports which omit reproduction instructions.
 
 For help, see @{article:Providing Reproduction Steps}.
 
+
 Overview
 ========
 
@@ -151,8 +152,8 @@ to reproduce problems.
 For help, see @{article:Providing Reproduction Steps}.
 
 
-Create a Task in Maniphest
-==========================
+For Open Source Users
+=====================
 
 If you're up to date, supported, have collected information about the problem,
 and have the best reproduction instructions you can come up with, you're ready
@@ -161,18 +162,16 @@ to file an issue.
 It is **particularly critical** that you include reproduction steps. We will
 not accept reports which describe issues we can not reproduce.
 
-(NOTE) https://secure.phabricator.com/u/newbug/
+(NOTE) https://discourse.phabricator-community.org/c/bug
 
-If you don't want to file there (or, for example, your bug relates to being
-unable to log in or unable to file an issue in Maniphest) you can file on any
-other channel, but we can address reports much more effectively if they're
-filed against the upstream than if they're filed somewhere else.
 
-| Effectiveness | Filing Method |
-|---|---|
-| Best | Upstream Maniphest |
-| Ehhh | Quora, StackOverflow, Facebook, Jelly, email, etc. |
-| What | Passive-aggressive tweet |
+For Phacility Customers
+=======================
+
+If you've encountered a bug via a Phacility instance or have a paid support
+contract with Phacility, you can find more information on how to get help via
+[[ https://admin.phacility.com/book/phacility/article/support/ | Phacility
+Support ]].
 
 
 Next Steps
