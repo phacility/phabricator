@@ -14,7 +14,7 @@
 .phui-source-fragment strong {
   background-color: {$lightyellow};
   font-weight: normal;
-  color: #000;
+  color: {$blacktext};
 }
 
 .phui-fulltext-tokens {

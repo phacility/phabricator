@@ -5,9 +5,9 @@
 .phabricator-source-code-container {
   overflow-x: auto;
   overflow-y: hidden;
-  border: 1px solid {$sh-lightyellowborder};
+  border: 1px solid {$paste.border};
   border-radius: 3px;
-  background-color: #FFFEF5;
+  background-color: {$paste.content};
 }
 
 .phui-oi .phabricator-source-code-container {
@@ -29,10 +29,10 @@
 }
 
 .phabricator-source-line {
-  background-color: {$sh-yellowbackground};
+  background-color: {$paste.highlight};
   text-align: right;
   padding: 2px 6px 1px 12px;
-  border-right: 1px solid {$sh-lightyellowborder};
+  border-right: 1px solid {$paste.border};
   color: {$sh-yellowtext};
 
   /* When the user selects rows of source, don't visibly select the line
@@ -51,12 +51,12 @@ th.phabricator-source-line a {
 }
 
 th.phabricator-source-line:hover {
-  background: {$sh-lightyellowborder};
+  background: {$paste.border};
   cursor: pointer;
 }
 
 .phabricator-source-highlight {
-  background: {$sh-yellowbackground};
+  background: {$paste.highlight};
 }
 
 .phabricator-source-code-summary {

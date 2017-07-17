@@ -4,7 +4,7 @@
 
 .diffusion-source {
   width: 100%;
-  background: #fff;
+  background: {$page.content};
 }
 
 .diffusion-source tr.phabricator-source-highlight {

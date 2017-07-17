@@ -9,7 +9,7 @@
 }
 
 .phui-document-container {
-  background-color: #fff;
+  background-color: {$page.content};
   position: relative;
   border-bottom: 1px solid #dedee1;
 }
@@ -79,7 +79,7 @@ body.printable {
   width: 260px;
   position: absolute;
   z-index: 30;
-  background-color: #fff;
+  background-color: {$page.content};
   top: 52px;
   left: -40px;
 }
@@ -163,7 +163,7 @@ body.printable {
   .phui-header-header {
   font-size: 24px;
   line-height: 30px;
-  color: #000;
+  color: {$blacktext};
 }
 
 .device-phone .phui-document-view.phui-document-view-pro .phui-header-tall
@@ -228,7 +228,7 @@ body.printable {
 .phui-document-view-pro-box .phui-timeline-title {
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
-  background-color: #fff;
+  background-color: {$page.content};
   border-bottom: 1px solid #F1F1F4;
 }
 

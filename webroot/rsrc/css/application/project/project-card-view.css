@@ -5,7 +5,7 @@
 .project-card-view {
   margin: 0 12px 16px 0;
   text-align: left;
-  background: #fff;
+  background: {$page.content};
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
   box-shadow: {$dropshadow};
@@ -21,9 +21,9 @@
 }
 
 .project-card-view .phui-header-shell .phui-header-image {
-  border: 3px solid #fff;
+  border: 3px solid {$page.content};
   border-radius: 3px;
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .project-card-view .phui-header-shell .phui-header-header {
@@ -71,7 +71,7 @@
 .project-card-header .project-card-name {
   font-size: 20px;
   font-weight: bold;
-  color: #000;
+  color: {$blacktext};
   margin-bottom: 2px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -129,85 +129,48 @@
 
 /* Colors */
 
-.project-card-view.project-card-red {
-  border-color: {$sh-redborder};
-}
-
 .project-card-view.project-card-red .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-redbackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-orange {
-  border-color: {$sh-orangeborder};
+    {$sh-redbackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-orange .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-orangebackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-yellow {
-  border-color: {$sh-yellowborder};
+    {$sh-orangebackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-yellow .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-yellowbackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-green {
-  border-color: {$sh-greenborder};
+    {$sh-yellowbackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-green .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-greenbackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-blue {
-  border-color: {$sh-blueborder};
+    {$sh-greenbackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-blue .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-bluebackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-indigo {
-  border-color: {$sh-indigoborder};
+    {$sh-bluebackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-indigo .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-indigobackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-violet {
-  border-color: {$sh-violetborder};
+    {$sh-indigobackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-violet .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-violetbackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-pink {
-  border-color: {$sh-pinkborder};
+    {$sh-violetbackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-pink .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-pinkbackground} 42px, #fff 42px);
-}
-
-.project-card-view.project-card-grey,
-.project-card-view.project-card-checkered {
-  border-color: {$sh-greyborder};
+    {$sh-pinkbackground} 42px, {$page.content} 42px);
 }
 
 .project-card-view.project-card-grey .phui-header-shell,
 .project-card-view.project-card-checkered .phui-header-shell {
   background: linear-gradient(to bottom,
-    {$sh-greybackground} 42px, #fff 42px);
+    {$sh-greybackground} 42px, {$page.content} 42px);
 }

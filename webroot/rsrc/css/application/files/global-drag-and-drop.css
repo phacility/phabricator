@@ -14,7 +14,7 @@
   top: 30%;
   padding: 18px 0;
 
-  color: #ffffff;
+  color: {$page.content};
   background: rgba({$alphablack}, 0.8);
   border-radius: 18px;
 

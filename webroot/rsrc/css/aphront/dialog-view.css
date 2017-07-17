@@ -7,7 +7,7 @@
   margin: 32px auto 16px;
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .jx-client-dialog .aphront-dialog-view {
@@ -41,7 +41,7 @@
 }
 
 .aphront-dialog-body {
-  background: #fff;
+  background: {$page.content};
   padding: 16px;
   border: none;
 }

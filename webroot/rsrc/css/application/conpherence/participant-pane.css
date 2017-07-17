@@ -65,7 +65,7 @@
 }
 
 .conpherence-participant-pane .person-entry:hover a {
-  color: #000;
+  color: {$blacktext};
 }
 
 .conpherence-participant-pane .person-entry a img {
@@ -99,7 +99,7 @@
 }
 
 .conpherence-participant-pane .person-entry .remove:hover .close-icon {
-  color: #000;
+  color: {$blacktext};
 }
 
 /****** Hide Widgets **********************************************************/

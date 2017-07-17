@@ -5,7 +5,7 @@
 .phui-calendar-list {
   /* When hovering over a day, this allows the hover color to peek through
      the event name, but for event names to mostly remain readable. */
-  background: rgba(255, 255, 255, 0.75);
+
 }
 
 .application-search-view div.phui-calendar-box {

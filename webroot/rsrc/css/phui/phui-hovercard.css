@@ -19,7 +19,7 @@
   box-shadow: {$dropshadow};
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .phui-hovercard-head .phui-header-shell {

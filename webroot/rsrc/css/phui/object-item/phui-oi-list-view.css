@@ -37,7 +37,7 @@ ul.phui-oi-list-view {
   border-color: {$lightgreyborder};
   margin: 5px 0;
   overflow: hidden;
-  background: #fff;
+  background: {$page.content};
   margin-bottom: 4px;
 }
 
@@ -105,7 +105,7 @@ ul.phui-oi-list-view {
 }
 
 .phui-oi-objname {
-  color: #000;
+  color: {$blacktext};
   cursor: text;
   font-weight: bold;
 }
