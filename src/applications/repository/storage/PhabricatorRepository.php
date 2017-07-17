@@ -700,6 +700,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     switch ($action) {
       case 'history':
       case 'graph':
+      case 'clone':
       case 'browse':
       case 'change':
       case 'lastmodified':
@@ -818,6 +819,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         // it came from a URI.
         $uri = rawurldecode("{$path}{$commit}");
         break;
+      case 'clone':
+        $uri = $this->getPathURI("/{$action}/");
+      break;
     }
 
     if ($action == 'rendering-ref') {

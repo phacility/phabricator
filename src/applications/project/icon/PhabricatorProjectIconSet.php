@@ -18,87 +18,104 @@ final class PhabricatorProjectIconSet
         'icon' => 'fa-briefcase',
         'name' => pht('Project'),
         'default' => true,
+        'image' => 'v3/briefcase.png',
       ),
       array(
         'key' => 'tag',
         'icon' => 'fa-tags',
         'name' => pht('Tag'),
+        'image' => 'v3/tag.png',
       ),
       array(
         'key' => 'policy',
         'icon' => 'fa-lock',
         'name' => pht('Policy'),
+        'image' => 'v3/lock.png',
       ),
       array(
         'key' => 'group',
         'icon' => 'fa-users',
         'name' => pht('Group'),
+        'image' => 'v3/people.png',
       ),
       array(
         'key' => 'folder',
         'icon' => 'fa-folder',
         'name' => pht('Folder'),
+        'image' => 'v3/folder.png',
       ),
       array(
         'key' => 'timeline',
         'icon' => 'fa-calendar',
         'name' => pht('Timeline'),
+        'image' => 'v3/calendar.png',
       ),
       array(
         'key' => 'goal',
         'icon' => 'fa-flag-checkered',
         'name' => pht('Goal'),
+        'image' => 'v3/flag.png',
       ),
       array(
         'key' => 'release',
         'icon' => 'fa-truck',
         'name' => pht('Release'),
+        'image' => 'v3/truck.png',
       ),
       array(
         'key' => 'bugs',
         'icon' => 'fa-bug',
         'name' => pht('Bugs'),
+        'image' => 'v3/bug.png',
       ),
       array(
         'key' => 'cleanup',
         'icon' => 'fa-trash-o',
         'name' => pht('Cleanup'),
+        'image' => 'v3/trash.png',
       ),
       array(
         'key' => 'umbrella',
         'icon' => 'fa-umbrella',
         'name' => pht('Umbrella'),
+        'image' => 'v3/umbrella.png',
       ),
       array(
         'key' => 'communication',
         'icon' => 'fa-envelope',
         'name' => pht('Communication'),
+        'image' => 'v3/mail.png',
       ),
       array(
         'key' => 'organization',
         'icon' => 'fa-building',
         'name' => pht('Organization'),
+        'image' => 'v3/organization.png',
       ),
       array(
         'key' => 'infrastructure',
         'icon' => 'fa-cloud',
         'name' => pht('Infrastructure'),
+        'image' => 'v3/cloud.png',
       ),
       array(
         'key' => 'account',
         'icon' => 'fa-credit-card',
         'name' => pht('Account'),
+        'image' => 'v3/creditcard.png',
       ),
       array(
         'key' => 'experimental',
         'icon' => 'fa-flask',
         'name' => pht('Experimental'),
+        'image' => 'v3/experimental.png',
       ),
       array(
         'key' => 'milestone',
         'icon' => 'fa-map-marker',
         'name' => pht('Milestone'),
         'special' => self::SPECIAL_MILESTONE,
+        'image' => 'v3/marker.png',
       ),
     );
   }
@@ -149,6 +166,11 @@ final class PhabricatorProjectIconSet
     return idx($spec, 'name', null);
   }
 
+  public static function getIconImage($key) {
+    $spec = self::getIconSpec($key);
+    return idx($spec, 'image', 'v3/briefcase.png');
+  }
+
   private static function getIconSpec($key) {
     $icons = self::getIconSpecifications();
     foreach ($icons as $icon) {
@@ -190,6 +212,7 @@ final class PhabricatorProjectIconSet
           'key' => 'string',
           'name' => 'string',
           'icon' => 'string',
+          'image' => 'optional string',
           'special' => 'optional string',
           'disabled' => 'optional bool',
           'default' => 'optional bool',
@@ -238,6 +261,26 @@ final class PhabricatorProjectIconSet
       }
 
       $is_disabled = idx($value, 'disabled');
+
+      $image = idx($value, 'image');
+      if ($image !== null) {
+        $builtin = idx($value, 'image');
+        $builtin_map = id(new PhabricatorFilesOnDiskBuiltinFile())
+          ->getProjectBuiltinFiles();
+        $builtin_map = array_flip($builtin_map);
+
+        $root = dirname(phutil_get_library_root('phabricator'));
+        $image = $root.'/resources/builtin/projects/'.$builtin;
+
+        if (!array_key_exists($image, $builtin_map)) {
+            throw new Exception(
+              pht(
+                'The project image ("%s") specified for ("%s") '.
+                'was not found in the folder "resources/builtin/projects/".',
+                $builtin,
+                $key));
+        }
+      }
 
       if (idx($value, 'default')) {
         if ($default === null) {

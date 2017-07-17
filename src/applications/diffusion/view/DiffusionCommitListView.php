@@ -73,7 +73,7 @@ final class DiffusionCommitListView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('diffusion-history-css');
+    require_celerity_resource('diffusion-css');
     return $this->buildList();
   }
 

@@ -302,7 +302,9 @@ final class PHUIObjectBoxView extends AphrontTagView {
 
     $pager = null;
     if ($this->pager) {
-      $pager = phutil_tag_div('phui-object-box-pager', $this->pager);
+      if ($this->pager->willShowPagingControls()) {
+        $pager = phutil_tag_div('phui-object-box-pager', $this->pager);
+      }
     }
 
     $content = array(
