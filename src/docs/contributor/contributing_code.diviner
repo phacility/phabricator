@@ -3,6 +3,22 @@
 
 Describes how to contribute code to Phabricator.
 
+Level Requirements
+==================
+
+To contribute to the Phabricator upstream, you must first pass a series of
+ancient trials and be invited to register an account in the ancestral
+homeland of Phabricator, here on `secure.phabricator.com`. The nature and
+location of these trials is a closely guarded secret.
+
+If you have passed these trials, this document can guide you through
+contributing code.
+
+If you have not yet passed these trials, writing code is normally not the best
+way to contribute to Phabricator. See @{article:Contributor Introduction} for
+more information.
+
+
 Overview
 ========
 
@@ -32,11 +48,7 @@ For general information on contributing to Phabricator, see
 Coordinate First
 ================
 
-Before sending code, you should file a bug report or feature request describing
-what you'd like to write. For details on how to do this, see these articles:
-
-  - @{article:Contributing Bug Reports}
-  - @{article:Contributing Feature Requests}
+Before sending code, you should file a task describing what you'd like to write.
 
 When you file a task, mention that you'd like to write the code to fix it. We
 can help contextualize your request or bug and guide you through writing an
@@ -74,8 +86,7 @@ consider valuable enough to put long-term support resources behind, and that
 you're building it in a way that we're comfortable taking over.
 
 **Not a Good Fit**: Many patches aren't good fits for the upstream: they
-implement features we simply don't want. You can find more information in
-@{article:Contributing Feature Requests}. Coordinating with us first helps
+implement features we simply don't want. Coordinating with us first helps
 make sure we're on the same page and interested in a feature.
 
 The most common type of patch along these lines is a patch which adds new
@@ -217,35 +228,6 @@ can help you through the details during review.
 In general, if you're coordinating with us first, we can usually provide
 guidance on how to implement things. The other articles in this section also
 provide information on how to work in the Phabricator codebase.
-
-Not Sure Where To Get Started?
-==============================
-
-If you don't have a specific bug or feature in mind and just want to write
-some code, you can try to find something simple to get started with.
-
-Because we're usually quick to fix easy bugs and issues, we often don't have a
-very good backlog of starter tasks.
-
-You can try searching in Maniphest for tasks tagged with #easy, which might
-have something, but a lot of time this list is small and the tasks on it aren't
-very fun or interesting even if they aren't technically too difficult.
-
-In general, the best way to contribute is to come to us with a problem you
-encountered or something you're interested in building, and then work with us
-to find a solution to it or a plan to build it. We can help turn a hacky patch
-into something that's upstreamable, and you'll get a fix or feature you want.
-
-You can also look though the rest of the open tasks for something more
-substantive that you're interested in. This will give you a better chance of
-finding something that's relevant to you, but many tasks are large or blocked
-by other large tasks.
-
-If you do find something, feel free to leave a comment like "I'm interested in
-working on this, is this something I could reasonably help with?". We're happy
-to walk through things, break larger tasks down into more detail, provide
-pointers to similar changes and the right places in the codebase to get started,
-and generally figure out how to attack a problem.
 
 
 Next Steps

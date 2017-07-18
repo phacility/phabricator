@@ -32,9 +32,6 @@ The most important things to do are:
 
 The rest of this article walks through these points in detail.
 
-If you have a feature request (not a bug report), see
-@{article:Contributing Feature Requests} for a more tailored guide.
-
 For general information on contributing to Phabricator, see
 @{article:Contributor Introduction}.
 
@@ -179,6 +176,5 @@ Next Steps
 
 Continue by:
 
-  - learning about @{article: Contributing Feature Requests}; or
   - reading general support information in @{article:Support Resources}; or
   - returning to the @{article:Contributor Introduction}.
