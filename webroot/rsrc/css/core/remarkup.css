@@ -3,9 +3,8 @@
  */
 
 .phabricator-remarkup {
-  line-height: 1.61em;
+  line-height: 1.7em;
   word-break: break-word;
-  color: {$darkbluetext};
 }
 
 .phabricator-remarkup p {
