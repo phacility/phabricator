@@ -221,7 +221,7 @@
 }
 
 .phui-timeline-icon {
-  color: {$sh-blueicon};
+  color: {$bluetext};
 }
 
 .phui-icon-view.phui-timeline-icon {
@@ -232,7 +232,7 @@
   height: 26px;
   width: 26px;
   border-radius: 3px;
-  background-color: #E6E9F1;
+  background-color: {$timeline.icon.background};
 }
 
 .phui-timeline-major-event .phui-timeline-icon-fill {

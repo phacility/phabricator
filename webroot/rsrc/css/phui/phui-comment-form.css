@@ -90,7 +90,7 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 }
 
 .phui-comment-action {
-  background-color: rgba(239, 243, 252, .75);
+  background-color: rgba({$alphablue}, .1);
   border-radius: 3px;
   margin: 0px 16px 8px;
   padding: 6px;

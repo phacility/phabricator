@@ -32,15 +32,15 @@ final class CelerityDarkModePostprocessor
 
       // Base Colors
       'red'           => '#c0392b',
-      'lightred'      => '#f4dddb',
+      'lightred'      => '#7f261c',
       'orange'        => '#e67e22',
       'lightorange'   => '#f7e2d4',
       'yellow'        => '#f1c40f',
-      'lightyellow'   => '#fdf5d4',
+      'lightyellow'   => '#a4850a',
       'green'         => '#139543',
-      'lightgreen'    => '#d7eddf',
+      'lightgreen'    => '#0e7032',
       'blue'          => '#2980b9',
-      'lightblue'     => '#daeaf3',
+      'lightblue'     => '#1d5981',
       'sky'           => '#3498db',
       'lightsky'      => '#ddeef9',
       'fire'          => '#e62f17',
@@ -49,7 +49,7 @@ final class CelerityDarkModePostprocessor
       'pink'          => '#da49be',
       'lightpink'     => '#fbeaf8',
       'violet'        => '#8e44ad',
-      'lightviolet'   => '#ecdff1',
+      'lightviolet'   => '#622f78',
       'charcoal'      => '#4b4d51',
       'backdrop'      => '#c4cde0',
       'hoverwhite'    => 'rgba(255,255,255,.6)',
@@ -60,6 +60,7 @@ final class CelerityDarkModePostprocessor
       'hoverselectedblue' => '#e6e9ee',
       'borderinset' => 'inset 0 0 0 1px rgba(55,55,55,.15)',
       'timeline'    => '#4e6078',
+      'timeline.icon.background' => '#416086',
       'bluepropertybackground' => '#2d435f',
 
       // Alphas
@@ -183,12 +184,17 @@ final class CelerityDarkModePostprocessor
       'sh-disabledbackground'   => '#f3f3f3',
 
       // Diffs
-      'new-background' => 'rgba(151, 234, 151, .3)',
-      'new-bright' => 'rgba(151, 234, 151, .6)',
-      'old-background' => 'rgba(251, 175, 175, .3)',
-      'old-bright' => 'rgba(251, 175, 175, .7)',
-      'move-background' => '#fdf5d4',
+      'diff.background' => '#121b27',
+      'new-background' => 'rgba(151, 234, 151, .55)',
+      'new-bright' => 'rgba(151, 234, 151, .75)',
+      'old-background' => 'rgba(251, 175, 175, .55)',
+      'old-bright' => 'rgba(251, 175, 175, .8)',
+      'move-background' => '#faca00',
       'copy-background' => '#f1c40f',
+
+      // Usually light yellow
+      'gentle.highlight' => '#26c1c9',
+      'gentle.highlight.border' => '#21a9b0',
 
       'paste.content' => '#222222',
       'paste.border' => '#000000',

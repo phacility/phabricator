@@ -20,7 +20,7 @@
 }
 
 .differential-diff {
-  background: {$page.content};
+  background: {$diff.background};
   width: 100%;
   border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};
@@ -266,9 +266,9 @@ td.cov-I {
 }
 
 .differential-meta-notice {
-  border-top: 1px solid {$sh-lightyellowborder};
-  border-bottom: 1px solid {$sh-lightyellowborder};
-  background-color: {$sh-yellowbackground};
+  border-top: 1px solid {$gentle.highlight.border};
+  border-bottom: 1px solid {$gentle.highlight.border};
+  background-color: {$gentle.highlight};
   padding: 12px;
 }
 
@@ -304,9 +304,9 @@ td.cov-I {
 }
 
 .differential-loading {
-  border-top: 1px solid {$yellow};
-  border-bottom: 1px solid {$yellow};
-  background-color: {$lightyellow};
+  border-top: 1px solid {$gentle.highlight.border};
+  border-bottom: 1px solid {$gentle.highlight.border};
+  background-color: {$gentle.highlight};
   padding: 12px;
   text-align: center;
 }
@@ -405,7 +405,7 @@ tr.differential-inline-loading {
 .diff-banner-has-unsaved,
 .diff-banner-has-unsubmitted,
 .diff-banner-has-draft-done {
-  background: {$sh-yellowbackground};
+  background: {$gentle.highlight};
 }
 
 .diff-banner-buttons {

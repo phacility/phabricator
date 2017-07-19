@@ -72,6 +72,7 @@ final class CelerityDefaultPostprocessor
       'hoverselectedblue' => '#e6e9ee',
       'borderinset' => 'inset 0 0 0 1px rgba(55,55,55,.15)',
       'timeline'    => '#d5d8e1',
+      'timeline.icon.background' => '#E6E9F1',
       'bluepropertybackground' => '#eff3fc',
 
       // Alphas
@@ -195,12 +196,17 @@ final class CelerityDefaultPostprocessor
       'sh-disabledbackground'   => '#f3f3f3',
 
       // Diffs
+      'diff.background' => '#fff',
       'new-background' => 'rgba(151, 234, 151, .3)',
       'new-bright' => 'rgba(151, 234, 151, .6)',
       'old-background' => 'rgba(251, 175, 175, .3)',
       'old-bright' => 'rgba(251, 175, 175, .7)',
       'move-background' => '#fdf5d4',
       'copy-background' => '#f1c40f',
+
+      // Usually light yellow
+      'gentle.highlight' => '#fdf3da',
+      'gentle.highlight.border' => '#c9b8a8',
 
       'paste.content' => '#fffef5',
       'paste.border' => '#e9dbcd',

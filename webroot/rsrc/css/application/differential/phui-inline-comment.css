@@ -26,7 +26,7 @@
 .differential-inline-comment,
 .differential-inline-comment-edit {
   background: {$page.content};
-  border: 1px solid {$sh-yellowborder};
+  border: 1px solid {$gentle.highlight.border};
   font: {$basefont};
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -48,9 +48,9 @@
 .differential-inline-comment-head {
   font-weight:  bold;
   color: {$darkbluetext};
-  border-bottom: 1px solid {$sh-lightyellowborder};
+  border-bottom: 1px solid {$gentle.highlight.border};
   padding: 4px 5px 4px 8px;
-  background-color: {$sh-yellowbackground};
+  background-color: {$gentle.highlight};
 }
 
 .differential-inline-comment-content {
@@ -209,8 +209,8 @@
 */
 
 .differential-inline-comment .differential-inline-done-label {
-  border-color: {$sh-yellowborder};
-  color: {$sh-yellowicon};
+  border-color: {$gentle.highlight.border};
+  color: {$bluetext};
 }
 
 .differential-inline-comment.inline-state-is-draft
