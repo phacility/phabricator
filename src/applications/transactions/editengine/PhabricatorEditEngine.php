@@ -2484,8 +2484,9 @@ abstract class PhabricatorEditEngine
       $errors = array();
 
       // 手动插入规则信息
-      $data['conditions'] = array(array("always","unconditionally",null));
-      $data['actions'] = array(array("email.other", array($object->getPHID() => $object->getDisplayName())));
+      $projectInfo = array($object->getPHID() => $object->getDisplayName());
+      $data['conditions'] = array(array("projects.exact","any",$projectInfo));
+      $data['actions'] = array(array("email.other", $projectInfo));
 
       $conditions = array();
       foreach ($data['conditions'] as $condition) {
