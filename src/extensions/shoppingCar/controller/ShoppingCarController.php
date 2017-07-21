@@ -13,8 +13,8 @@ final class ShoppingCarController extends PhabricatorController {
     $nav->addLabel(pht('基本信息'));
     $nav->addFilter('add', pht('添加基本信息'));
     $nav->addFilter('list', pht('显示列表'));
-    $nav->addLabel(pht('Burnup'));
-    $nav->addFilter('burn', pht('Burnup Rate'));
+    //$nav->addLabel(pht('Burnup'));
+   // $nav->addFilter('burn', pht('Burnup Rate'));
     
     $this->view = $nav->selectFilter($this->view, 'add');
     
@@ -31,6 +31,16 @@ final class ShoppingCarController extends PhabricatorController {
         default:
             return new Aphront404Response();
     }
+    
+    // 表单提交
+    if ($request->isFormPost()) {
+        $name = $request->getStr('name');
+        $type = $request->getStr('type');
+        $price = $request->getStr('price');
+        $status = $request->getStr('status');
+        $core = $this->renderList();
+    }
+    
     $nav->appendChild($core);
     
     $title = pht('Shopping Car');
@@ -50,7 +60,7 @@ final class ShoppingCarController extends PhabricatorController {
       
       $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->setAction($request->getPath());
+      ->setAction("/shoppingcar/list");
       
       $form->appendControl(id(new AphrontFormTextControl())
                 ->setName('name')
@@ -58,24 +68,25 @@ final class ShoppingCarController extends PhabricatorController {
            ->appendControl(id(new AphrontFormTextControl())
                   ->setName('type')
                   ->setLabel(pht('type')))
-           ->appendChild(id(new AphrontFormTextControl())
+           ->appendControl(id(new AphrontFormTextControl())
                   ->setLabel(pht('price'))
                   ->setName('price'))
-           ->appendChild(
-                  id(new AphrontFormTextControl())
+           ->appendControl(id(new AphrontFormTextControl())
                   ->setLabel(pht('status'))
                   ->setName('status'));
       
       $save_button = id(new PHUIButtonView())
-       ->setTag('a')
-       ->setHref('/shoppingcar/add/')
+       ->setTag('button')
        ->setText(pht('添加'))
+       ->setName("__submit__")
        ->setIcon('fa-floppy-o');
            
       $submit = id(new AphrontFormSubmitControl())
-      ->addButton($save_button);
+                ->addCancelButton($this->getApplicationURI())
+                  //->setValue("添加");
+                ->addButton($save_button);
       
-      $form->appendChild($submit);
+      $form->appendControl($submit);
       
       $table = new PHUITabView();
       $table->appendChild($form);
@@ -91,9 +102,43 @@ final class ShoppingCarController extends PhabricatorController {
       $request = $this->getRequest();
       $viewer = $request->getUser();
       
+      $rows = array();
+      $rows[] = array('a',
+          'b',
+          'c',
+          'd',
+          'e',
+          'f',
+          'g'
+      );
+      $table = new AphrontTableView($rows);
+      $table->setHeaders(
+          array(
+              pht('col1'),
+              pht('col2'),
+              pht('col3'),
+              pht('col4'),
+              pht('col5'),
+              pht('col6'),
+              pht('col7'),
+          ));
+      $table->setColumnClasses(
+          array(
+              '',
+              '',
+              '',
+              '',
+              '',
+              '',
+              '',
+          ));
+      
+      $tab = new PHUITabView();
+      $tab->appendChild($table);
+      
       $panel = new PHUIObjectBoxView();
-      $panel->setHeaderText("this list");
-      $panel->setTable(new PHUITabView());
+      $panel->setHeaderText("列表");
+      $panel->setTable($tab);
       
       return array($panel);
   }
