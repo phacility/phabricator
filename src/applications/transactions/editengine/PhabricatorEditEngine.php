@@ -2541,16 +2541,6 @@ abstract class PhabricatorEditEngine
           $actions[] = $obj;
       }
 
-      // If the client doesn't have a session token, generate an anonymous
-      // session. This is used to provide CSRF protection to logged-out users.
-      $session_engine = new PhabricatorAuthSessionEngine();
-      $phsid = $session_engine->establishSession(
-          PhabricatorAuthSession::TYPE_WEB,
-          null,
-          $partial = false);
-
-      $viewer->attachAlternateCSRFString(PhabricatorHash::weakDigest($phsid));
-
       if (!$errors) {
           $new_state = id(new HeraldRuleSerializer())->serializeRuleComponents(
               $match_all,
