@@ -3,7 +3,7 @@
  */
 
 .phui-two-column-view .phui-two-column-header {
-  background-color: #fff;
+  background-color: {$page.content};
   border-bottom: 1px solid rgba({$alphagrey}, .12);
   margin-bottom: 24px;
 }
@@ -19,7 +19,7 @@
 
 .phui-two-column-header .phui-header-header {
   font-size: 20px;
-  color: #000;
+  color: {$blacktext};
 }
 
 .device-phone .phui-two-column-header .phui-header-header {
@@ -172,7 +172,7 @@
 .phui-two-column-tabs {
   padding: 0 32px;
   margin-bottom: 32px;
-  background: #fff;
+  background: {$page.content};
   box-shadow: 0 1px 3px 0 rgba(0,0,0,0.2);
 }
 

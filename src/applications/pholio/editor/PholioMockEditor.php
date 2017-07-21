@@ -22,6 +22,14 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     return $this->newImages;
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this mock.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

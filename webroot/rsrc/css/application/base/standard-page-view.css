@@ -18,7 +18,7 @@
 }
 
 body.white-background {
-  background: #fff;
+  background: {$page.content};
 }
 
 .phabricator-standard-page-footer {

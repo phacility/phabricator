@@ -32,7 +32,7 @@ td.phabricator-object-selector-search-text {
 
 .phabricator-object-selector-row:hover a {
   text-decoration: none;
-  color: #000;
+  color: {$blacktext};
 }
 
 .phabricator-object-selector-search-text input {

@@ -235,7 +235,7 @@ final class PhabricatorMySQLFulltextStorageEngine
           $value = $stemmer->stemToken($value);
         }
 
-        if (phutil_utf8_strlen($value) < $min_length) {
+        if ($this->isShortToken($value, $min_length)) {
           $fulltext_token->setIsShort(true);
           continue;
         }
@@ -547,6 +547,24 @@ final class PhabricatorMySQLFulltextStorageEngine
     $stopwords = array_fuse($stopwords);
 
     return array($min_len, $stopwords);
+  }
+
+  private function isShortToken($value, $min_length) {
+    // NOTE: The engine tokenizes internally on periods, so terms in the form
+    // "ab.cd", where short substrings are separated by periods, do not produce
+    // any queryable tokens. These terms are meaningful if at least one
+    // substring is longer than the minimum length, like "example.py". See
+    // T12928.
+
+    $parts = preg_split('/[.]+/', $value);
+
+    foreach ($parts as $part) {
+      if (phutil_utf8_strlen($part) >= $min_length) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 }

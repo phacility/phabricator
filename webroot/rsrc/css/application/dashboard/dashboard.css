@@ -20,7 +20,7 @@
 }
 
 .dashboard-box .phui-header-header {
-  color: #000;
+  color: {$blacktext};
 }
 
 .dashboard-view .phui-oi-empty .phui-info-view {

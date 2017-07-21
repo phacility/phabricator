@@ -22,6 +22,14 @@ final class PhabricatorProjectTransactionEditor
     return pht('Projects');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this project.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

@@ -181,7 +181,7 @@
 }
 
 .mock-image-description {
-  background: #fff;
+  background: {$page.content};
   border-top: 1px solid {$thinblueborder};
   text-align: left;
 }

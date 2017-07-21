@@ -4,7 +4,7 @@
 
 .phui-action-panel {
   position: relative;
-  background-color: #fff;
+  background-color: {$page.content};
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
   margin: 0 8px;

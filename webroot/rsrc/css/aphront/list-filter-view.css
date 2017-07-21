@@ -5,7 +5,7 @@
 .aphront-list-filter-wrap {
   border: 1px solid {$lightblueborder};
   margin: 0 16px;
-  background: #fff;
+  background: {$page.content};
   border-radius: 3px;
 }
 

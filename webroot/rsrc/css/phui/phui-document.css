@@ -55,7 +55,7 @@
 }
 
 .phui-document-content {
-  background: #fff;
+  background: {$page.content};
 }
 
 .phui-document-content .phabricator-remarkup {

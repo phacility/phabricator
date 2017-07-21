@@ -88,11 +88,11 @@ a.jx-tokenizer-token:hover {
 
 a.jx-tokenizer-token-function {
   border-color: {$sh-lightgreyborder};
-  background: #fff;
+  background: {$page.content};
 }
 
 a.jx-tokenizer-token-function:hover {
-  background: #fff;
+  background: {$page.content};
 }
 
 a.jx-tokenizer-token-disabled {

@@ -338,7 +338,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-profile-header.phui-header-shell .phui-header-header {
   font-size: 24px;
-  color: #000;
+  color: {$blacktext};
 }
 
 .phui-profile-header .phui-header-col3 {

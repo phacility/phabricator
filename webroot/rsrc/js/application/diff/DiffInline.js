@@ -702,7 +702,14 @@ JX.install('DiffInline', {
         JX.DOM.remove(this._row);
       }
 
-      this.bindToRow(new_row);
+      // If you delete the content on a comment and save it, it acts like a
+      // delete: the server does not return a new row.
+      if (new_row) {
+        this.bindToRow(new_row);
+      } else {
+        this.setDeleted(true);
+        this._row = null;
+      }
 
       this._didUpdate();
     },

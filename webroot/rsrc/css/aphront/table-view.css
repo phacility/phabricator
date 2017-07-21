@@ -9,7 +9,7 @@
 .aphront-table-view {
   width: 100%;
   border-collapse:  collapse;
-  background: #fff;
+  background: {$page.content};
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};
 }

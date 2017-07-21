@@ -20,7 +20,7 @@
 }
 
 .differential-diff {
-  background: #fff;
+  background: {$diff.background};
   width: 100%;
   border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};
@@ -111,14 +111,6 @@
 
 .differential-changeset-immutable .differential-diff th {
   cursor: auto;
-}
-
-.differential-diff th.old {
-  border-right-color: {$old-bright};
-}
-
-.differential-diff th.new {
-  border-right-color: {$new-bright};
 }
 
 .differential-diff td.old {
@@ -274,9 +266,9 @@ td.cov-I {
 }
 
 .differential-meta-notice {
-  border-top: 1px solid {$sh-lightyellowborder};
-  border-bottom: 1px solid {$sh-lightyellowborder};
-  background-color: {$sh-yellowbackground};
+  border-top: 1px solid {$gentle.highlight.border};
+  border-bottom: 1px solid {$gentle.highlight.border};
+  background-color: {$gentle.highlight};
   padding: 12px;
 }
 
@@ -288,7 +280,7 @@ td.cov-I {
   font-size: {$biggestfontsize};
   padding: 2px 0 20px 12px;
   line-height: 20px;
-  color: #000;
+  color: {$blacktext};
 }
 
 .device-phone .differential-changeset h1 {
@@ -312,9 +304,9 @@ td.cov-I {
 }
 
 .differential-loading {
-  border-top: 1px solid {$yellow};
-  border-bottom: 1px solid {$yellow};
-  background-color: {$lightyellow};
+  border-top: 1px solid {$gentle.highlight.border};
+  border-bottom: 1px solid {$gentle.highlight.border};
+  background-color: {$gentle.highlight};
   padding: 12px;
   text-align: center;
 }
@@ -392,7 +384,7 @@ tr.differential-inline-loading {
   top: 0;
   left: 0;
   right: 0;
-  background: #fff;
+  background: {$page.content};
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid {$lightgreyborder};
   padding: 8px 18px;
@@ -413,7 +405,7 @@ tr.differential-inline-loading {
 .diff-banner-has-unsaved,
 .diff-banner-has-unsubmitted,
 .diff-banner-has-draft-done {
-  background: {$sh-yellowbackground};
+  background: {$gentle.highlight};
 }
 
 .diff-banner-buttons {

@@ -143,6 +143,14 @@ Finally, you should run the following commands to enable php support:
 
 Restart lighttpd after making your edits, then continue below.
 
+
+Load Balancer Health Checks
+===========================
+
+If you're using a load balancer in front of your webserver, you can configure
+it to perform health checks using the path `/status/`.
+
+
 = Setup =
 
 Now, navigate to whichever subdomain you set up. You should see instructions to

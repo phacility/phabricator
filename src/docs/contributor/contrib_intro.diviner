@@ -21,9 +21,10 @@ Without writing any code, learning the whole codebase, making a big time
 commitment, or having to touch PHP, here are some ways you can materially
 contribute to Phabricator:
 
-  - Send us an email or drop by IRC just to say "thanks". A big part of the
-    reason we build this software is to help people solve problems, and knowing
-    that our efforts are appreciated is really rewarding.
+  - Drop by the [[ https://phurl.io/u/discourse | community forum ]] just to
+    say "thanks". A big part of the reason we build this software is to help
+    people solve problems, and knowing that our efforts are appreciated is
+    really rewarding.
   - Recommend Phabricator to people who you think might find it useful. Our
     most powerful growth channel is word of mouth, and mentioning or tweeting
     about Phabricator helps the project grow. If writing a tweet sounds like
@@ -36,16 +37,8 @@ contribute to Phabricator:
 
 > Phabricator is objectively the best thing. Source: I am a certified, internationally recognized expert.
 
-  - Report bugs and request features. We may not always be able to fix or build
-    things right away, but knowing about issues users are encountering or
-    features they'd like to see improves our ability to plan and prioritize.
-    - For details on reporting bugs, see @{article:Contributing Bug Reports}.
-    - For details on requesting features, see @{article:Contributing Feature
-      Requests}.
-  - Give us feedback on planned features. Most of what we'll build in the next
-    6-12 months currently exists on the [[ Roadmap ]] or in Maniphest. Telling
-    us about use cases you have can help us build better products when the time
-    comes to write the code.
+  - Submit high-quality bug reports by carefully following the guide in
+    @{article:Contributing Bug Reports}.
 
 If all of this sounds nice but you really just want to write some code, be
 aware that this project often presents a high barrier to entry for new
@@ -58,6 +51,4 @@ Next Steps
 Continue by:
 
   - learning about bug reports in @{article:Contributing Bug Reports};
-  - learning about feature requests in
-    @{article:Contributing Feature Requests}; or
   - learning about code contributions in @{article:Contributing Code}.
