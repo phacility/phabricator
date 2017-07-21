@@ -1084,11 +1084,30 @@ abstract class PhabricatorEditEngine
         ->setContinueOnNoEffect(true);
 
       try {
+
+        // 判断是否是新增加的项目
+        $newProject = true;
+        if ($object->getPHID() && $editor instanceof PhabricatorProjectTransactionEditor) {
+            $newProject = false;
+        }
+
         $xactions = $this->willApplyTransactions($object, $xactions);
 
         $editor->applyTransactions($object, $xactions);
 
         $this->didApplyTransactions($object, $xactions);
+
+        // 在添加项目的时候自动增加一个项目的通知规则
+        if ($newProject && $editor instanceof PhabricatorProjectTransactionEditor) {
+            $e_name = true;
+            $errors = array();
+            list($e_name, $errors) = $this->saveProjectNotificationRule($request, $viewer, $object);
+            if (!$errors) {
+                echo 'success';
+            } else {
+                echo 'fail';
+            }
+        }
 
         return $this->newEditResponse($request, $object, $xactions);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
@@ -2418,6 +2437,138 @@ abstract class PhabricatorEditEngine
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+    /**
+     * 新增加项目的时候自动增加一个通知规则 herald
+     *
+     * author ck
+     *
+     * @param AphrontRequest $request
+     * @param PhabricatorUser $viewer
+     * @param PhabricatorProject $object
+     * @return array
+     */
+  private function saveProjectNotificationRule(AphrontRequest $request, PhabricatorUser $viewer, PhabricatorProject $object) {
+      $adapter = HeraldAdapter::getAdapterForContentType('PhabricatorProjectHeraldAdapter');
+
+      // 手动构造一个form请求
+      $request_data = array();
+      $request_data['name'] = 'herald_rule_for_'.$object->getDisplayName();
+      $request_data['must_match'] = 'all';
+      $request_data['repetition_policy'] = 'every';
+      $request_data['__csrf__'] = $request->getRequestData()['__csrf__']; //保留token否则添加失败
+
+      // 手动构造一个通知规则
+      $rule = new HeraldRule();
+      $rule->setAuthorPHID($viewer->getPHID());
+      $rule->setMustMatchAll(1);
+      $rule->setContentType('PhabricatorProjectHeraldAdapter');
+      $rule->setRuleType('global');
+      $rule->setConfigVersion(38);
+
+      $rule_conditions = $rule->loadConditions();
+      $rule_actions = $rule->loadActions();
+
+      $rule->attachConditions($rule_conditions);
+      $rule->attachActions($rule_actions);
+          
+      $request->setRequestData($request_data);
+      
+      $new_name = $request->getStr('name');
+      $match_all = ($request->getStr('must_match') == 'all');
+      
+      $repetition_policy_param = $request->getStr('repetition_policy');
+      
+      $e_name = true;
+      $errors = array();
+
+      // 手动插入规则信息
+      $projectInfo = array($object->getPHID() => $object->getDisplayName());
+      $data['conditions'] = array(array("projects.exact","any",$projectInfo));
+      $data['actions'] = array(array("email.other", $projectInfo));
+
+      $conditions = array();
+      foreach ($data['conditions'] as $condition) {
+          if ($condition === null) {
+              // We manage this as a sparse array on the client, so may receive
+              // NULL if conditions have been removed.
+              continue;
+          }
+
+          $obj = new HeraldCondition();
+          $obj->setFieldName($condition[0]);
+          $obj->setFieldCondition($condition[1]);
+
+          if (is_array($condition[2])) {
+              $obj->setValue(array_keys($condition[2]));
+          } else {
+              $obj->setValue($condition[2]);
+          }
+
+          try {
+              $adapter->willSaveCondition($obj);
+          } catch (HeraldInvalidConditionException $ex) {
+              $errors[] = $ex->getMessage();
+          }
+
+          $conditions[] = $obj;
+      }
+
+      $actions = array();
+      foreach ($data['actions'] as $action) {
+          if ($action === null) {
+              // Sparse on the client; removals can give us NULLs.
+              continue;
+          }
+
+          if (!isset($action[1])) {
+              // Legitimate for any action which doesn't need a target, like
+              // "Do nothing".
+              $action[1] = null;
+          }
+
+          $obj = new HeraldActionRecord();
+          $obj->setAction($action[0]);
+          $obj->setTarget($action[1]);
+
+          try {
+              $adapter->willSaveAction($rule, $obj);
+          } catch (HeraldInvalidActionException $ex) {
+              $errors[] = $ex->getMessage();
+          }
+
+          $actions[] = $obj;
+      }
+
+      if (!$errors) {
+          $new_state = id(new HeraldRuleSerializer())->serializeRuleComponents(
+              $match_all,
+              $conditions,
+              $actions,
+              $repetition_policy_param);
+
+          $xactions = array();
+          $xactions[] = id(new HeraldRuleTransaction())
+          ->setTransactionType(HeraldRuleTransaction::TYPE_EDIT)
+          ->setNewValue($new_state);
+          $xactions[] = id(new HeraldRuleTransaction())
+          ->setTransactionType(HeraldRuleTransaction::TYPE_NAME)
+          ->setNewValue($new_name);
+
+          try {
+              id(new HeraldRuleEditor())
+              ->setActor($viewer)
+              ->setContinueOnNoEffect(true)
+              ->setContentSourceFromRequest($request)
+              ->applyTransactions($rule, $xactions);
+              return array(null, null);
+          } catch (Exception $ex) {
+              $errors[] = $ex->getMessage();
+          }
+      }
+
+      return array($e_name, $errors);
   }
 
 }
