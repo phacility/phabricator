@@ -58,7 +58,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
    * @task sync
    */
   public function synchronizeWorkingCopyAfterCreation() {
-    if (!$this->shouldEnableSynchronization()) {
+    if (!$this->shouldEnableSynchronization(false)) {
       return;
     }
 
@@ -86,7 +86,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
    * @task sync
    */
   public function synchronizeWorkingCopyAfterHostingChange() {
-    if (!$this->shouldEnableSynchronization()) {
+    if (!$this->shouldEnableSynchronization(false)) {
       return;
     }
 
@@ -133,7 +133,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
    * @task sync
    */
   public function synchronizeWorkingCopyBeforeRead() {
-    if (!$this->shouldEnableSynchronization()) {
+    if (!$this->shouldEnableSynchronization(true)) {
       return;
     }
 
@@ -288,7 +288,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
    * @task sync
    */
   public function synchronizeWorkingCopyBeforeWrite() {
-    if (!$this->shouldEnableSynchronization()) {
+    if (!$this->shouldEnableSynchronization(true)) {
       return;
     }
 
@@ -382,7 +382,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
 
   public function synchronizeWorkingCopyAfterDiscovery($new_version) {
-    if (!$this->shouldEnableSynchronization()) {
+    if (!$this->shouldEnableSynchronization(true)) {
       return;
     }
 
@@ -426,7 +426,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
    * @task sync
    */
   public function synchronizeWorkingCopyAfterWrite() {
-    if (!$this->shouldEnableSynchronization()) {
+    if (!$this->shouldEnableSynchronization(true)) {
       return;
     }
 
@@ -551,7 +551,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
   /**
    * @task internal
    */
-  private function shouldEnableSynchronization() {
+  private function shouldEnableSynchronization($require_device) {
     $repository = $this->getRepository();
 
     $service_phid = $repository->getAlmanacServicePHID();
@@ -563,9 +563,11 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       return false;
     }
 
-    $device = AlmanacKeys::getLiveDevice();
-    if (!$device) {
-      return false;
+    if ($require_device) {
+      $device = AlmanacKeys::getLiveDevice();
+      if (!$device) {
+        return false;
+      }
     }
 
     return true;
