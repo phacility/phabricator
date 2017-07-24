@@ -16,6 +16,23 @@
   margin-bottom: 16px;
 }
 
+.device-phone .diffusion-action-bar {
+  display: block;
+}
+
+.device-phone .diffusion-action-bar .phui-lr-container {
+  display: block;
+}
+
+.device-phone .diffusion-action-bar .phui-lr-container .phui-left-view {
+  display: block;
+}
+
+.device-phone .diffusion-action-bar .phui-lr-container .phui-right-view {
+  padding-top: 12px;
+  display: block;
+}
+
 .diffusion-profile-locate .phui-form-view {
   margin: 0;
   padding: 0;
