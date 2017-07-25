@@ -1051,14 +1051,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
       return null;
     }
 
+    // NOTE: The upstream currently supports only "Land" operations, but
+    // third parties have other operations (see PHI18). For now, we show any
+    // operation that exists. We'll refine this in the future.
+
     $operations = id(new DrydockRepositoryOperationQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($revision->getPHID()))
       ->withIsDismissed(false)
-      ->withOperationTypes(
-        array(
-          DrydockLandRepositoryOperation::OPCONST,
-        ))
       ->execute();
     if (!$operations) {
       return null;
