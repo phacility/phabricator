@@ -25,6 +25,10 @@ final class ManiphestReplyHandler
 
     if ($is_new) {
       $xactions[] = $this->newTransaction()
+        ->setTransactionType(PhabricatorTransactions::TYPE_CREATE)
+        ->setNewValue(true);
+
+      $xactions[] = $this->newTransaction()
         ->setTransactionType(ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue(nonempty($mail->getSubject(), pht('Untitled Task')));
 
