@@ -1,0 +1,1 @@
+ALTER TABLE {$NAMESPACE}_maniphest.maniphest_task ADD estimate VARCHAR(64) NOT NULL DEFAULT '';

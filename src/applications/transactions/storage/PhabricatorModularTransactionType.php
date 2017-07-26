@@ -100,7 +100,7 @@ abstract class PhabricatorModularTransactionType
     return $this;
   }
 
-  private function getStorage() {
+  protected function getStorage() {
     return $this->storage;
   }
 
