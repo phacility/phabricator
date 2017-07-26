@@ -44,6 +44,8 @@ final class ManiphestTask extends ManiphestDAO
   protected $points;
   protected $subtype;
 
+  protected $estimate = '';
+
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
@@ -91,6 +93,7 @@ final class ManiphestTask extends ManiphestDAO
         'points' => 'double?',
         'bridgedObjectPHID' => 'phid?',
         'subtype' => 'text64',
+        'estimate' => 'text',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

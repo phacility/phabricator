@@ -184,6 +184,12 @@ EODOCS
         ->setTransactionType(ManiphestTaskTitleTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getTitle()),
+      id(new PhabricatorTextEditField())
+            ->setKey('estimate')
+            ->setLabel(pht('Estimate time'))
+            ->setTransactionType(ManiphestEstimateTimeTransaction::TRANSACTIONTYPE)
+            ->setIsRequired(false)
+            ->setValue($object->getEstimate()),
       id(new PhabricatorUsersEditField())
         ->setKey('owner')
         ->setAliases(array('ownerPHID', 'assign', 'assigned'))
