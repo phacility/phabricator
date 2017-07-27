@@ -94,7 +94,7 @@ final class PonderQuestionViewController extends PonderController {
       $wiki = new PHUIRemarkupView($viewer, $question->getAnswerWiki());
       $answer_wiki = id(new PHUIObjectBoxView())
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->setHeaderText(pht('ANSWER SUMMARY'))
+        ->setHeaderText(pht('Answer Summary'))
         ->appendChild($wiki)
         ->addClass('ponder-answer-wiki');
     }
