@@ -344,8 +344,8 @@
 }
 
 .phui-timeline-older-transactions-are-hidden {
-  background: {$sh-yellowbackground};
-  border: 1px solid {$sh-yellowborder};
+  background: {$gentle.highlight};
+  border: 1px solid {$gentle.highlight.border};
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};

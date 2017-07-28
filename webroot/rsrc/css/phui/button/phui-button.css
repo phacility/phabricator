@@ -265,6 +265,14 @@ a.policy-control .phui-button-text {
   right: 10px;
 }
 
+.phui-button-text {
+  display: inline-block;
+}
+
+.dropdown .phui-button-text {
+  margin-right: 8px;
+}
+
 .button.has-icon .phui-button-text {
   margin-left: 16px;
 }
