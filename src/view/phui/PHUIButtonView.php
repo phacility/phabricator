@@ -134,6 +134,7 @@ final class PHUIButtonView extends AphrontTagView {
     Javelin::initBehavior('phui-dropdown-menu');
 
     $this->addSigil('phui-dropdown-menu');
+    $this->setDropdown(true);
     $this->setMetadata($actions->getDropdownMenuMetadata());
 
     return $this;
@@ -223,32 +224,29 @@ final class PHUIButtonView extends AphrontTagView {
 
   protected function getTagContent() {
 
-    $icon = null;
-    $text = $this->text;
-    if ($this->icon) {
-      $icon = $this->icon;
+    $icon = $this->icon;
+    $text = null;
+    $subtext = null;
 
-      $subtext = null;
-      if ($this->subtext) {
-        $subtext = phutil_tag(
-          'div',
-          array(
-            'class' => 'phui-button-subtext',
-          ),
-        $this->subtext);
-      }
+    if ($this->subtext) {
+      $subtext = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-button-subtext',
+        ),
+      $this->subtext);
+    }
 
-      if ($this->text !== null) {
-        $text = phutil_tag(
-          'div',
-          array(
-            'class' => 'phui-button-text',
-          ),
-          array(
-            $text,
-            $subtext,
-          ));
-      }
+    if ($this->text !== null) {
+      $text = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-button-text',
+        ),
+        array(
+          $this->text,
+          $subtext,
+        ));
     }
 
     $caret = null;
@@ -259,7 +257,7 @@ final class PHUIButtonView extends AphrontTagView {
     if ($this->iconFirst == true) {
       return array($icon, $text, $caret);
     } else {
-      return array($text, $icon);
+      return array($text, $icon, $caret);
     }
   }
 }

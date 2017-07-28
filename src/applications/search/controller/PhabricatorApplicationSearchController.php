@@ -554,7 +554,7 @@ final class PhabricatorApplicationSearchController
     return id(new PHUIButtonView())
       ->setTag('a')
       ->setHref('#')
-      ->setText(pht('Use Results...'))
+      ->setText(pht('Use Results'))
       ->setIcon('fa-bars')
       ->setDropdownMenu($action_list)
       ->addClass('dropdown');
