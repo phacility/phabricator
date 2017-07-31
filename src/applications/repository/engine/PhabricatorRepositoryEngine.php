@@ -135,6 +135,11 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
       $exists = true;
     }
 
+    // These URIs may have plaintext HTTP credentials. If they do, censor
+    // them for display. See T12945.
+    $display_remote = phutil_censor_credentials($remote_uri);
+    $display_expect = phutil_censor_credentials($expect_remote);
+
     if (!$valid) {
       if (!$exists) {
         // If there's no "origin" remote, just create it regardless of how
@@ -172,8 +177,8 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
             'set the remote URI correctly. To avoid breaking anything, '.
             'Phabricator will not automatically fix this.',
             $repository->getLocalPath(),
-            $remote_uri,
-            $expect_remote);
+            $display_remote,
+            $display_expect);
           throw new Exception($message);
         }
       }
