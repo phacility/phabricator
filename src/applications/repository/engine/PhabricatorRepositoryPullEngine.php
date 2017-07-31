@@ -485,8 +485,8 @@ final class PhabricatorRepositoryPullEngine
 
       // On vulnerable versions of Mercurial, we refuse to clone remotes which
       // contain characters which may be interpreted by the shell.
-      $hg_version = PhabricatorRepositoryVersion::getMercurialVersion();
-      $is_vulnerable = version_compare($hg_version, '3.2.4', '<');
+      $hg_binary = PhutilBinaryAnalyzer::getForBinary('hg');
+      $is_vulnerable = $hg_binary->isMercurialVulnerableToInjection();
       if ($is_vulnerable) {
         $cleartext = $remote->openEnvelope();
         // The use of "%R" here is an attempt to limit collateral damage
@@ -501,7 +501,7 @@ final class PhabricatorRepositoryPullEngine
               'command injection security vulnerability. The remote URI for '.
               'this repository (%s) is potentially unsafe. Upgrade Mercurial '.
               'to at least 3.2.4 to clone it.',
-              $hg_version,
+              $hg_binary->getBinaryVersion(),
               $repository->getMonogram()));
         }
       }

@@ -64,6 +64,29 @@ final class PhabricatorConfigVersionController
         $version_from_file);
     }
 
+    $binaries = PhutilBinaryAnalyzer::getAllBinaries();
+    foreach ($binaries as $binary) {
+      if (!$binary->isBinaryAvailable()) {
+        $binary_info = pht('Not Available');
+      } else {
+        $version = $binary->getBinaryVersion();
+        $path = $binary->getBinaryPath();
+        if ($path === null && $version === null) {
+          $binary_info = pht('-');
+        } else if ($path === null) {
+          $binary_info = $version;
+        } else if ($version === null) {
+          $binary_info = pht('- at %s', $path);
+        } else {
+          $binary_info = pht('%s at %s', $version, $path);
+        }
+      }
+
+      $version_property_list->addProperty(
+        $binary->getBinaryName(),
+        $binary_info);
+    }
+
     return $version_property_list;
   }
 
