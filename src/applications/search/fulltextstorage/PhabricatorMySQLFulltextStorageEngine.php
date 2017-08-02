@@ -554,9 +554,10 @@ final class PhabricatorMySQLFulltextStorageEngine
     // "ab.cd", where short substrings are separated by periods, do not produce
     // any queryable tokens. These terms are meaningful if at least one
     // substring is longer than the minimum length, like "example.py". See
-    // T12928.
+    // T12928. This also applies to words with intermediate apostrophes, like
+    // "to's".
 
-    $parts = preg_split('/[.]+/', $value);
+    $parts = preg_split('/[.\']+/', $value);
 
     foreach ($parts as $part) {
       if (phutil_utf8_strlen($part) >= $min_length) {
