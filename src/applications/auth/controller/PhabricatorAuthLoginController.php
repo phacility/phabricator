@@ -92,8 +92,8 @@ final class PhabricatorAuthLoginController
       } else {
         return $this->renderError(
           pht(
-            'The external account ("%s") you just used to login is already '.
-            'associated with another Phabricator user account. Login to the '.
+            'The external account ("%s") you just used to log in is already '.
+            'associated with another Phabricator user account. Log in to the '.
             'other Phabricator account and unlink the external account before '.
             'linking it to a new Phabricator account.',
             $provider->getProviderName()));
@@ -214,7 +214,7 @@ final class PhabricatorAuthLoginController
     if (!$provider) {
       return $this->renderError(
         pht(
-          'The account you are attempting to login with uses a nonexistent '.
+          'The account you are attempting to log in with uses a nonexistent '.
           'or disabled authentication provider (with key "%s"). An '.
           'administrator may have recently disabled this provider.',
           $this->providerKey));
@@ -240,14 +240,14 @@ final class PhabricatorAuthLoginController
     if ($this->getRequest()->getUser()->isLoggedIn()) {
       $crumbs->addTextCrumb(pht('Link Account'), $provider->getSettingsURI());
     } else {
-      $crumbs->addTextCrumb(pht('Login'), $this->getApplicationURI('start/'));
+      $crumbs->addTextCrumb(pht('Log In'), $this->getApplicationURI('start/'));
     }
 
     $crumbs->addTextCrumb($provider->getProviderName());
     $crumbs->setBorder(true);
 
     return $this->newPage()
-      ->setTitle(pht('Login'))
+      ->setTitle(pht('Log In'))
       ->setCrumbs($crumbs)
       ->appendChild($content);
   }
@@ -257,9 +257,8 @@ final class PhabricatorAuthLoginController
     $message) {
 
     $message = pht(
-      'Authentication provider ("%s") encountered an error during login. %s',
-      $provider->getProviderName(),
-      $message);
+      'Authentication provider ("%s") encountered an error while attempting '.
+      'to log in. %s', $provider->getProviderName(), $message);
 
     return $this->renderError($message);
   }

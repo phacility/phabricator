@@ -198,7 +198,7 @@ final class PhabricatorAuthStartController
     $crumbs->addTextCrumb(pht('Login'));
     $crumbs->setBorder(true);
 
-    $title = pht('Login to Phabricator');
+    $title = pht('Login');
     $view = array(
       $header,
       $invite_message,
@@ -239,8 +239,8 @@ final class PhabricatorAuthStartController
 
     return $this->newDialog()
       ->setTitle(pht('Login Required'))
-      ->appendParagraph(pht('You must login to take this action.'))
-      ->addSubmitButton(pht('Login'))
+      ->appendParagraph(pht('You must log in to take this action.'))
+      ->addSubmitButton(pht('Log In'))
       ->addCancelButton('/');
   }
 

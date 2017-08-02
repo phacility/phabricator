@@ -68,7 +68,7 @@ final class PhabricatorAuthOneTimeLoginController
 
     if (!$token) {
       return $this->newDialog()
-        ->setTitle(pht('Unable to Login'))
+        ->setTitle(pht('Unable to Log In'))
         ->setShortTitle(pht('Login Failure'))
         ->appendParagraph(
           pht(
@@ -170,7 +170,7 @@ final class PhabricatorAuthOneTimeLoginController
       case PhabricatorAuthSessionEngine::ONETIME_USERNAME:
       case PhabricatorAuthSessionEngine::ONETIME_RESET:
       default:
-        $title = pht('Login to Phabricator');
+        $title = pht('Log in to Phabricator');
         break;
     }
 
@@ -193,7 +193,7 @@ final class PhabricatorAuthOneTimeLoginController
 
     $dialog = $this->newDialog()
       ->setTitle($title)
-      ->addSubmitButton(pht('Login (%s)', $target_user->getUsername()))
+      ->addSubmitButton(pht('Log In (%s)', $target_user->getUsername()))
       ->addCancelButton('/');
 
     foreach ($body as $paragraph) {

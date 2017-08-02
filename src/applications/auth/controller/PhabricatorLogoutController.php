@@ -52,9 +52,9 @@ final class PhabricatorLogoutController
 
     if ($viewer->getPHID()) {
       return $this->newDialog()
-        ->setTitle(pht('Log out of Phabricator?'))
+        ->setTitle(pht('Log Out?'))
         ->appendChild(pht('Are you sure you want to log out?'))
-        ->addSubmitButton(pht('Logout'))
+        ->addSubmitButton(pht('Log Out'))
         ->addCancelButton('/');
     }
 

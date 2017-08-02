@@ -100,7 +100,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
 
   public function getDescriptionForCreate() {
     return pht(
-      'Allow users to login or register using a username and password.');
+      'Allow users to log in or register using a username and password.');
   }
 
   public function getAdapter() {
@@ -174,8 +174,8 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     $dialog = id(new AphrontDialogView())
       ->setSubmitURI($this->getLoginURI())
       ->setUser($viewer)
-      ->setTitle(pht('Login to Phabricator'))
-      ->addSubmitButton(pht('Login'));
+      ->setTitle(pht('Log In'))
+      ->addSubmitButton(pht('Log In'));
 
     if ($this->shouldAllowRegistration()) {
       $dialog->addCancelButton(
