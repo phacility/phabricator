@@ -176,3 +176,14 @@ a.handle-status-closed:hover {
   position: absolute;
   left: -50px;
 }
+
+.phabricator-standard-page-tabs {
+  padding: 0 32px;
+  margin-bottom: 32px;
+  background: {$page.content};
+  box-shadow: 0 0 3px 0 rgba(0,0,0,0.2);
+}
+
+.phabricator-standard-page-tabs.phui-list-tabbar .phui-list-item-href {
+  padding: 12px 24px;
+}
