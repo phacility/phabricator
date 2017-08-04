@@ -6,7 +6,7 @@ final class PHUITwoColumnView extends AphrontTagView {
   private $sideColumn = null;
   private $navigation;
   private $display;
-  private $fluid;
+  private $fixed;
   private $header;
   private $subheader;
   private $footer;
@@ -71,8 +71,8 @@ final class PHUITwoColumnView extends AphrontTagView {
     return $this->curtain;
   }
 
-  public function setFluid($fluid) {
-    $this->fluid = $fluid;
+  public function setFixed($fixed) {
+    $this->fixed = $fixed;
     return $this;
   }
 
@@ -94,8 +94,8 @@ final class PHUITwoColumnView extends AphrontTagView {
     $classes[] = 'phui-two-column-view';
     $classes[] = $this->getDisplay();
 
-    if ($this->fluid) {
-      $classes[] = 'phui-two-column-fluid';
+    if ($this->fixed) {
+      $classes[] = 'phui-two-column-fixed';
     }
 
     if ($this->tabs) {
