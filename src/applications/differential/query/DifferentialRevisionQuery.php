@@ -1,13 +1,6 @@
 <?php
 
 /**
- * Flexible query API for Differential revisions. Example:
- *
- *   // Load open revisions
- *   $revisions = id(new DifferentialRevisionQuery())
- *     ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
- *     ->execute();
- *
  * @task config   Query Configuration
  * @task exec     Query Execution
  * @task internal Internals
@@ -18,13 +11,6 @@ final class DifferentialRevisionQuery
   private $pathIDs = array();
 
   private $status             = 'status-any';
-  const STATUS_ANY            = 'status-any';
-  const STATUS_OPEN           = 'status-open';
-  const STATUS_ACCEPTED       = 'status-accepted';
-  const STATUS_NEEDS_REVIEW   = 'status-needs-review';
-  const STATUS_NEEDS_REVISION = 'status-needs-revision';
-  const STATUS_CLOSED         = 'status-closed';
-  const STATUS_ABANDONED      = 'status-abandoned';
 
   private $authors = array();
   private $draftAuthors = array();
@@ -149,7 +135,7 @@ final class DifferentialRevisionQuery
 
   /**
    * Filter results to revisions with a given status. Provide a class constant,
-   * such as `DifferentialRevisionQuery::STATUS_OPEN`.
+   * such as `DifferentialLegacyQuery::STATUS_OPEN`.
    *
    * @param const Class STATUS constant, like STATUS_OPEN.
    * @return this
@@ -711,57 +697,12 @@ final class DifferentialRevisionQuery
     // NOTE: Although the status constants are integers in PHP, the column is a
     // string column in MySQL, and MySQL won't use keys on string columns if
     // you put integers in the query.
-
-    switch ($this->status) {
-      case self::STATUS_ANY:
-        break;
-      case self::STATUS_OPEN:
-        $where[] = qsprintf(
-          $conn_r,
-          'r.status IN (%Ls)',
-          DifferentialRevisionStatus::getOpenStatuses());
-        break;
-      case self::STATUS_NEEDS_REVIEW:
-        $where[] = qsprintf(
-          $conn_r,
-          'r.status IN (%Ls)',
-          array(
-            ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
-          ));
-        break;
-      case self::STATUS_NEEDS_REVISION:
-        $where[] = qsprintf(
-          $conn_r,
-          'r.status IN (%Ls)',
-          array(
-            ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-          ));
-        break;
-      case self::STATUS_ACCEPTED:
-        $where[] = qsprintf(
-          $conn_r,
-          'r.status IN (%Ls)',
-          array(
-            ArcanistDifferentialRevisionStatus::ACCEPTED,
-          ));
-        break;
-      case self::STATUS_CLOSED:
-        $where[] = qsprintf(
-          $conn_r,
-          'r.status IN (%Ls)',
-          DifferentialRevisionStatus::getClosedStatuses());
-        break;
-      case self::STATUS_ABANDONED:
-        $where[] = qsprintf(
-          $conn_r,
-          'r.status IN (%Ls)',
-          array(
-            ArcanistDifferentialRevisionStatus::ABANDONED,
-          ));
-        break;
-      default:
-        throw new Exception(
-          pht("Unknown revision status filter constant '%s'!", $this->status));
+    $statuses = DifferentialLegacyQuery::getQueryValues($this->status);
+    if ($statuses !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.status IN (%Ls)',
+        $statuses);
     }
 
     $where[] = $this->buildWhereClauseParts($conn_r);

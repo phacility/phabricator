@@ -808,7 +808,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $query = id(new DifferentialRevisionQuery())
       ->setViewer($this->getRequest()->getUser())
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withStatus(DifferentialLegacyQuery::STATUS_OPEN)
       ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)

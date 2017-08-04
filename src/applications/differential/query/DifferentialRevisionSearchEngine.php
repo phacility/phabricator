@@ -115,7 +115,7 @@ final class DifferentialRevisionSearchEngine
 
         return $query
           ->setParameter('responsiblePHIDs', array($viewer->getPHID()))
-          ->setParameter('status', DifferentialRevisionQuery::STATUS_OPEN)
+          ->setParameter('status', DifferentialLegacyQuery::STATUS_OPEN)
           ->setParameter('bucket', $bucket_key);
       case 'authored':
         return $query
@@ -129,13 +129,13 @@ final class DifferentialRevisionSearchEngine
 
   private function getStatusOptions() {
     return array(
-      DifferentialRevisionQuery::STATUS_ANY            => pht('All'),
-      DifferentialRevisionQuery::STATUS_OPEN           => pht('Open'),
-      DifferentialRevisionQuery::STATUS_ACCEPTED       => pht('Accepted'),
-      DifferentialRevisionQuery::STATUS_NEEDS_REVIEW   => pht('Needs Review'),
-      DifferentialRevisionQuery::STATUS_NEEDS_REVISION => pht('Needs Revision'),
-      DifferentialRevisionQuery::STATUS_CLOSED         => pht('Closed'),
-      DifferentialRevisionQuery::STATUS_ABANDONED      => pht('Abandoned'),
+      DifferentialLegacyQuery::STATUS_ANY            => pht('All'),
+      DifferentialLegacyQuery::STATUS_OPEN           => pht('Open'),
+      DifferentialLegacyQuery::STATUS_ACCEPTED       => pht('Accepted'),
+      DifferentialLegacyQuery::STATUS_NEEDS_REVIEW   => pht('Needs Review'),
+      DifferentialLegacyQuery::STATUS_NEEDS_REVISION => pht('Needs Revision'),
+      DifferentialLegacyQuery::STATUS_CLOSED         => pht('Closed'),
+      DifferentialLegacyQuery::STATUS_ABANDONED      => pht('Abandoned'),
     );
   }
 
@@ -267,7 +267,7 @@ final class DifferentialRevisionSearchEngine
     $blocking_revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withPHIDs($revision_phids)
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withStatus(DifferentialLegacyQuery::STATUS_OPEN)
       ->execute();
     $blocking_revisions = mpull($blocking_revisions, null, 'getPHID');
 

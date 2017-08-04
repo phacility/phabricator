@@ -12,6 +12,14 @@ final class DifferentialRevisionStatus extends Phobject {
   private $key;
   private $spec = array();
 
+  public function getKey() {
+    return $this->key;
+  }
+
+  public function getLegacyKey() {
+    return idx($this->spec, 'legacy');
+  }
+
   public function getIcon() {
     return idx($this->spec, 'icon');
   }
@@ -50,6 +58,18 @@ final class DifferentialRevisionStatus extends Phobject {
 
   public function isChangePlanned() {
     return ($this->key === self::CHANGES_PLANNED);
+  }
+
+  public static function newForStatus($status) {
+    $result = new self();
+
+    $map = self::getMap();
+    if (isset($map[$status])) {
+      $result->key = $status;
+      $result->spec = $map[$status];
+    }
+
+    return $result;
   }
 
   public static function newForLegacyStatus($legacy_status) {
@@ -132,35 +152,6 @@ final class DifferentialRevisionStatus extends Phobject {
         'color.tag' => 'indigo',
         'color.ansi' => null,
       ),
-    );
-  }
-
-  public static function getClosedStatuses() {
-    $statuses = array(
-      ArcanistDifferentialRevisionStatus::CLOSED,
-      ArcanistDifferentialRevisionStatus::ABANDONED,
-    );
-
-    if (PhabricatorEnv::getEnvConfig('differential.close-on-accept')) {
-      $statuses[] = ArcanistDifferentialRevisionStatus::ACCEPTED;
-    }
-
-    return $statuses;
-  }
-
-  public static function getOpenStatuses() {
-    return array_diff(self::getAllStatuses(), self::getClosedStatuses());
-  }
-
-  public static function getAllStatuses() {
-    return array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED,
-      ArcanistDifferentialRevisionStatus::ACCEPTED,
-      ArcanistDifferentialRevisionStatus::CLOSED,
-      ArcanistDifferentialRevisionStatus::ABANDONED,
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION,
     );
   }
 
