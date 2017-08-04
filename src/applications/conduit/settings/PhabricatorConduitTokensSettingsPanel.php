@@ -108,6 +108,7 @@ final class PhabricatorConduitTokensSettingsPanel
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     return $panel;

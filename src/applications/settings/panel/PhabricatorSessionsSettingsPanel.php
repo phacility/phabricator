@@ -136,7 +136,8 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setTable($table);
+      ->setTable($table)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $panel;
   }

@@ -112,15 +112,27 @@ final class PhabricatorSettingsMainController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($panel->getPanelName());
+    $crumbs->setBorder(true);
+
+    if ($this->user) {
+      $header_text = pht('Edit Settings (%s)', $user->getUserName());
+    } else {
+      $header_text = pht('Edit Global Settings');
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text)
+      ->setHeaderIcon('fa-pencil');
 
     $title = $panel->getPanelName();
 
     $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn($response);
+      ->setHeader($header)
+      ->setFooter($response);
 
     return $this->newPage()
       ->setTitle($title)
+      ->setNavigation($nav)
       ->setCrumbs($crumbs)
       ->appendChild($view);
 

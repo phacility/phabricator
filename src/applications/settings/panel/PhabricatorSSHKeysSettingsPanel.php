@@ -50,6 +50,7 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
 
     $panel->setHeader($header);
     $panel->setTable($table);
+    $panel->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $panel;
   }

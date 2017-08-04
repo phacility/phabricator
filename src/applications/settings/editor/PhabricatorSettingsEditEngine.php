@@ -63,7 +63,12 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit Settings');
+    $user = $object->getUser();
+    if ($user) {
+      return pht('Edit Settings (%s)', $user->getUserName());
+    } else {
+      return pht('Edit Global Settings');
+    }
   }
 
   protected function getObjectEditShortText($object) {
