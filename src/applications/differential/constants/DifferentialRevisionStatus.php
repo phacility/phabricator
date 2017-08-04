@@ -44,6 +44,14 @@ final class DifferentialRevisionStatus extends Phobject {
     return ($this->key === self::NEEDS_REVIEW);
   }
 
+  public function isPublished() {
+    return ($this->key === self::PUBLISHED);
+  }
+
+  public function isChangePlanned() {
+    return ($this->key === self::CHANGES_PLANNED);
+  }
+
   public static function newForLegacyStatus($legacy_status) {
     $result = new self();
 

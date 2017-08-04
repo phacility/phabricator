@@ -628,6 +628,14 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getStatusObject()->isNeedsReview();
   }
 
+  public function isChangePlanned() {
+    return $this->getStatusObject()->isChangePlanned();
+  }
+
+  public function isPublished() {
+    return $this->getStatusObject()->isPublished();
+  }
+
   public function getStatusIcon() {
     return $this->getStatusObject()->getIcon();
   }

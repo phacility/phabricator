@@ -69,7 +69,7 @@ final class DifferentialUpdateRevisionConduitAPIMethod
       throw new ConduitException('ERR_BAD_REVISION');
     }
 
-    if ($revision->getStatus() == ArcanistDifferentialRevisionStatus::CLOSED) {
+    if ($revision->isPublished()) {
       throw new ConduitException('ERR_CLOSED');
     }
 

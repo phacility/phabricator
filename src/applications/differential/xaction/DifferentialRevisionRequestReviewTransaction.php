@@ -37,8 +37,7 @@ final class DifferentialRevisionRequestReviewTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-    if ($object->getStatus() == $status_review) {
+    if ($object->isNeedsReview()) {
       throw new Exception(
         pht(
           'You can not request review of this revision because this '.
