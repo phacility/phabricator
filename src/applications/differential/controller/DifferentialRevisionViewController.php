@@ -508,11 +508,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setPolicyObject($revision)
       ->setHeaderIcon('fa-cog');
 
-    $status = $revision->getStatus();
-    $status_name =
-      DifferentialRevisionStatus::renderFullDescription($status);
+    $status_tag = id(new PHUITagView())
+      ->setName($revision->getStatusDisplayName())
+      ->setIcon($revision->getStatusIcon())
+      ->setColor($revision->getStatusIconColor())
+      ->setType(PHUITagView::TYPE_SHADE);
 
-    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
+    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_tag);
 
     return $view;
   }
