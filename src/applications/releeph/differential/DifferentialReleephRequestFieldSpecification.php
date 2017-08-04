@@ -79,8 +79,7 @@ final class DifferentialReleephRequestFieldSpecification extends Phobject {
       return null;
     }
 
-    $status = $this->getRevision()->getStatus();
-    if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
+    if ($this->getRevision()->isClosed()) {
       $verb = $tense[$this->releephAction]['past'];
     } else {
       $verb = $tense[$this->releephAction]['future'];

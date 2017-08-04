@@ -88,9 +88,7 @@ final class DifferentialFindConduitAPIMethod
         'uri'         => PhabricatorEnv::getProductionURI('/D'.$id),
         'dateCreated' => $revision->getDateCreated(),
         'authorPHID'  => $revision->getAuthorPHID(),
-        'statusName'  =>
-          ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
-            $revision->getStatus()),
+        'statusName'  => $revision->getStatusDisplayName(),
         'sourcePath'  => $diff->getSourcePath(),
       );
     }

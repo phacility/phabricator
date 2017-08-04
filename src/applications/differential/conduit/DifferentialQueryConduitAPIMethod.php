@@ -221,9 +221,7 @@ final class DifferentialQueryConduitAPIMethod
         'dateModified'        => $revision->getDateModified(),
         'authorPHID'          => $revision->getAuthorPHID(),
         'status'              => $revision->getStatus(),
-        'statusName'          =>
-          ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
-            $revision->getStatus()),
+        'statusName'          => $revision->getStatusDisplayName(),
         'properties' => $revision->getProperties(),
         'branch'              => $diff->getBranch(),
         'summary'             => $revision->getSummary(),

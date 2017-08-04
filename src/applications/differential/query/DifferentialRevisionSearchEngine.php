@@ -235,11 +235,9 @@ final class DifferentialRevisionSearchEngine
   }
 
   private function loadUnlandedDependencies(array $revisions) {
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-
     $phids = array();
     foreach ($revisions as $revision) {
-      if ($revision->getStatus() != $status_accepted) {
+      if (!$revision->isAccepted()) {
         continue;
       }
 

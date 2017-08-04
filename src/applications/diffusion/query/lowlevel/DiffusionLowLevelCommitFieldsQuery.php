@@ -122,9 +122,8 @@ final class DiffusionLowLevelCommitFieldsQuery
     $revisions = array_reverse($revisions);
 
     // Try to find an accepted revision first.
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
     foreach ($revisions as $revision) {
-      if ($revision->getStatus() == $status_accepted) {
+      if ($revision->isAccepted()) {
         return $revision;
       }
     }

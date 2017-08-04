@@ -68,8 +68,7 @@ final class DifferentialReviewersField
   public function getWarningsForRevisionHeader(array $handles) {
     $revision = $this->getObject();
 
-    $status_needs_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-    if ($revision->getStatus() != $status_needs_review) {
+    if (!$revision->isNeedsReview()) {
       return array();
     }
 

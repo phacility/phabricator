@@ -83,9 +83,7 @@ final class DifferentialGetRevisionConduitAPIMethod
       'uri' => PhabricatorEnv::getURI('/D'.$revision->getID()),
       'title' => $revision->getTitle(),
       'status' => $revision->getStatus(),
-      'statusName'  =>
-        ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
-          $revision->getStatus()),
+      'statusName'  => $revision->getStatusDisplayName(),
       'summary' => $revision->getSummary(),
       'testPlan' => $revision->getTestPlan(),
       'lineCount' => $revision->getLineCount(),

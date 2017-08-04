@@ -50,8 +50,7 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
 
       $icon = DifferentialRevisionStatus::getRevisionStatusIcon($status);
       $color = DifferentialRevisionStatus::getRevisionStatusColor($status);
-      $name = ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
-        $status);
+      $name = $revision->getStatusDisplayName();
 
       $handle
         ->setStateIcon($icon)
