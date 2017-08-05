@@ -1769,7 +1769,7 @@ phutil_register_library_map(array(
     'PHUIImageMaskExample' => 'applications/uiexample/examples/PHUIImageMaskExample.php',
     'PHUIImageMaskView' => 'view/phui/PHUIImageMaskView.php',
     'PHUIInfoExample' => 'applications/uiexample/examples/PHUIInfoExample.php',
-    'PHUIInfoView' => 'view/form/PHUIInfoView.php',
+    'PHUIInfoView' => 'view/phui/PHUIInfoView.php',
     'PHUIInvisibleCharacterTestCase' => 'view/phui/__tests__/PHUIInvisibleCharacterTestCase.php',
     'PHUIInvisibleCharacterView' => 'view/phui/PHUIInvisibleCharacterView.php',
     'PHUILeftRightExample' => 'applications/uiexample/examples/PHUILeftRightExample.php',
