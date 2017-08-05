@@ -12,6 +12,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
     PhabricatorDestructibleInterface,
+    PhabricatorDestructibleCodexInterface,
     PhabricatorProjectInterface,
     PhabricatorSpacesInterface,
     PhabricatorConduitResultInterface,
@@ -2554,6 +2555,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
 
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorDestructibleCodexInterface  )------------------------------ */
+
+
+  public function newDestructibleCodex() {
+    return new PhabricatorRepositoryDestructibleCodex();
   }
 
 

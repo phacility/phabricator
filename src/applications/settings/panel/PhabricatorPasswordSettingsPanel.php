@@ -206,6 +206,7 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
       ->setHeaderText(pht('Change Password'))
       ->setFormSaved($request->getStr('saved'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     return array(

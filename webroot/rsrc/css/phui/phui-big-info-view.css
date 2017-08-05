@@ -35,3 +35,10 @@
 .phui-big-info-button + .phui-big-info-button {
   margin-left: 12px;
 }
+
+.phui-big-info-view .phui-big-info-image {
+  height: 64px;
+  width: 64px;
+  margin: 0 auto;
+  padding-bottom: 12px;
+}

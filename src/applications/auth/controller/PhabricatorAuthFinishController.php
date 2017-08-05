@@ -54,7 +54,7 @@ final class PhabricatorAuthFinishController
         ->addHiddenInput(AphrontRequest::TYPE_HISEC, true)
         ->appendParagraph(
           pht(
-            'Welcome, %s. To complete the login process, provide your '.
+            'Welcome, %s. To complete the process of logging in, provide your '.
             'multi-factor credentials.',
             phutil_tag('strong', array(), $viewer->getUsername())))
         ->appendChild($form->buildLayoutView())

@@ -76,7 +76,7 @@ final class PhabricatorFileLightboxController
         ->appendChild(
           id(new PHUIButtonView())
           ->setTag('a')
-          ->setText(pht('Login to Comment'))
+          ->setText(pht('Log In to Comment'))
           ->setHref((string)$login_href));
     }
 

@@ -99,12 +99,12 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
         continue;
       }
 
-      $version = null;
+      $version = PhutilBinaryAnalyzer::getForBinary($binary)
+        ->getBinaryVersion();
+
       switch ($vcs['versionControlSystem']) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $bad_versions = array();
-          list($err, $stdout, $stderr) = exec_manual('git --version');
-          $version = trim(substr($stdout, strlen('git version ')));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           $bad_versions = array(
@@ -117,8 +117,6 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
               'for files added in rN (Subversion issue #2873), fixed in 1.7.2.',
               'svn diff -c N'),
           );
-          list($err, $stdout, $stderr) = exec_manual('svn --version --quiet');
-          $version = trim($stdout);
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $bad_versions = array(
@@ -134,7 +132,6 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
               'in 2.2.1. Pushing fails with this version as well; see %s.',
               'T3046#54922'),
           );
-          $version = PhabricatorRepositoryVersion::getMercurialVersion();
           break;
       }
 

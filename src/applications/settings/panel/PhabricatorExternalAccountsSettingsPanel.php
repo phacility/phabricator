@@ -131,10 +131,12 @@ final class PhabricatorExternalAccountsSettingsPanel
 
     $linked_box = id(new PHUIObjectBoxView())
       ->setHeader($linked_head)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($linked);
 
     $linkable_box = id(new PHUIObjectBoxView())
       ->setHeader($linkable_head)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($linkable);
 
     return array(

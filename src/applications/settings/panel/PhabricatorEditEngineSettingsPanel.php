@@ -22,7 +22,6 @@ abstract class PhabricatorEditEngineSettingsPanel
     $engine = id(new PhabricatorSettingsEditEngine())
       ->setController($this->getController())
       ->setNavigation($this->getNavigation())
-      ->setHideHeader(true)
       ->setIsSelfEdit($is_self)
       ->setProfileURI($profile_uri);
 

@@ -199,7 +199,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
               'class' => 'login-to-comment button',
               'href' => $uri,
             ),
-            pht('Login to Comment')));
+            pht('Log In to Comment')));
     }
 
     $data = array();

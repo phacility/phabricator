@@ -157,6 +157,7 @@ final class PhabricatorDesktopNotificationsSettingsPanel
         ->setHeader(pht('Desktop Notifications'))
         ->addActionLink($test_button))
       ->setForm($form)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setInfoView($status_box)
       ->setFormSaved($request->getBool('saved'));
 

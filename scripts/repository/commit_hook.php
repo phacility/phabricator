@@ -48,8 +48,13 @@ if (!$repository) {
 }
 
 if (!$repository->isHosted()) {
-  // This should be redundant, but double check just in case.
-  throw new Exception(pht('Repository "%s" is not hosted!', $argv[1]));
+  // In Mercurial, the "pretxnchangegroup" hook fires for both pulls and
+  // pushes. Normally we only install the hook for hosted repositories, but
+  // if a hosted repository is later converted into an observed repository we
+  // can end up with an observed repository that has the hook installed.
+  // If we're running hooks from an observed repository, just exit without
+  // taking action. For more discussion, see PHI24.
+  return 0;
 }
 
 $engine->setRepository($repository);

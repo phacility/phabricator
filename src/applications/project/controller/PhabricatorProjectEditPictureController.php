@@ -124,38 +124,16 @@ final class PhabricatorProjectEditPictureController
       }
     }
 
-    $builtins = array(
-      'projects/v3/book.png',
-      'projects/v3/bug.png',
-      'projects/v3/calendar.png',
-      'projects/v3/clipboard.png',
-      'projects/v3/cloud.png',
-      'projects/v3/creditcard.png',
-      'projects/v3/database.png',
-      'projects/v3/desktop.png',
-      'projects/v3/experimental.png',
-      'projects/v3/flag.png',
-      'projects/v3/folder.png',
-      'projects/v3/lightbulb.png',
-      'projects/v3/lock.png',
-      'projects/v3/mail.png',
-      'projects/v3/marker.png',
-      'projects/v3/mobile.png',
-      'projects/v3/organization.png',
-      'projects/v3/people.png',
-      'projects/v3/piechart.png',
-      'projects/v3/robot.png',
-      'projects/v3/rocket.png',
-      'projects/v3/servers.png',
-      'projects/v3/sitemap.png',
-      'projects/v3/tag.png',
-      'projects/v3/trash.png',
-      'projects/v3/truck.png',
-      'projects/v3/umbrella.png',
-    );
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $root = $root.'/resources/builtin/projects/v3/';
+
+    $builtins = id(new FileFinder($root))
+      ->withType('f')
+      ->withFollowSymlinks(true)
+      ->find();
 
     foreach ($builtins as $builtin) {
-      $file = PhabricatorFile::loadBuiltin($viewer, $builtin);
+      $file = PhabricatorFile::loadBuiltin($viewer, 'projects/v3/'.$builtin);
       $images[$file->getPHID()] = array(
         'uri' => $file->getBestURI(),
         'tip' => pht('Builtin Image'),
