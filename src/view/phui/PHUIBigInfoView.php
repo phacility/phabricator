@@ -49,6 +49,7 @@ final class PHUIBigInfoView extends AphrontTagView {
   protected function getTagContent() {
     require_celerity_resource('phui-big-info-view-css');
 
+    $icon = null;
     if ($this->icon) {
       $icon = id(new PHUIIconView())
         ->setIcon($this->icon)
