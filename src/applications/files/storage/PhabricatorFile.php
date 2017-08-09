@@ -854,7 +854,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $this->getTransformedURI($transform->getTransformKey());
   }
 
-  private function getTransformedURI($transform, $cdn) {
+  private function getTransformedURI($transform) {
     $parts = array();
     $parts[] = 'file';
     $parts[] = 'xform';
@@ -871,11 +871,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $path = implode('/', $parts);
     $path = $path.'/';
 
-    if ($cdn) {
-      return PhabricatorEnv::getCDNURI($path);
-    } else {
-      return PhabricatorEnv::getURI($path);
-    }
+    return PhabricatorEnv::getCDNURI($path);
   }
 
   public function isViewableInBrowser() {
