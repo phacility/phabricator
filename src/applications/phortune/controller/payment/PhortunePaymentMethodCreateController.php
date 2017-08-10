@@ -123,7 +123,8 @@ final class PhortunePaymentMethodCreateController
           $next_uri = $this->getApplicationURI(
             "cart/{$cart_id}/checkout/?paymentMethodID=".$method->getID());
         } else if ($subscription_id) {
-          $next_uri = $cancel_uri;
+          $next_uri = new PhutilURI($cancel_uri);
+          $next_uri->setQueryParam('added', true);
         } else {
           $account_uri = $this->getApplicationURI($account->getID().'/');
           $next_uri = new PhutilURI($account_uri);
