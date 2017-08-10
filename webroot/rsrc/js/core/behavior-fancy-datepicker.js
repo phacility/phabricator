@@ -287,26 +287,38 @@ JX.behavior('fancy-datepicker', function(config, statics) {
   };
 
   function getValidDate() {
-    var written_date = new Date(value_y, value_m-1, value_d);
+    var year_int = parseInt(value_y, 10);
 
+    if (isNaN(year_int) || year_int < 0) {
+      return new Date();
+    }
+
+    // If the user enters "11" for the year, interpret it as "2011" (which
+    // is almost certainly what they mean) not "1911" (which is the default
+    // behavior of Javascript).
+    if (year_int < 70) {
+      year_int += 2000;
+    }
+
+    var month_int = parseInt(value_m, 10);
+    if (isNaN(month_int) || month_int < 1 || month_int > 12) {
+      return new Date();
+    }
+
+    // In Javascript, January is "0", not "1", so adjust the value down.
+    month_int = month_int - 1;
+
+    var day_int = parseInt(value_d, 10);
+    if (isNaN(day_int) || day_int < 1 || day_int > 31) {
+      return new Date();
+    }
+
+    var written_date = new Date(year_int, month_int, day_int);
     if (isNaN(written_date.getTime())) {
       return new Date();
-    } else {
-      //year 01 should be 2001, not 1901
-      if (written_date.getYear() < 70) {
-        value_y += 2000;
-        written_date = new Date(value_y, value_m-1, value_d);
-      }
-
-      // adjust for a date like February 31
-      var adjust = 1;
-      while (written_date.getMonth() !== value_m-1) {
-        written_date = new Date(value_y, value_m-1, value_d-adjust);
-        adjust++;
-      }
-
-      return written_date;
     }
+
+    return written_date;
   }
 
 
