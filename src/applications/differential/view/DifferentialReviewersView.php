@@ -116,7 +116,7 @@ final class DifferentialReviewersView extends AphrontView {
             }
           } else {
             $icon = 'fa-times-circle-o';
-            $color = 'bluegrey';
+            $color = 'red';
             if ($authority_name !== null) {
               $label = pht(
                 'Requested Changes to Prior Diff (by %s)',
