@@ -627,6 +627,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->setStatus($legacy_status);
   }
 
+  public function getModernRevisionStatus() {
+    return $this->getStatusObject()->getKey();
+  }
+
   public function isClosed() {
     return $this->getStatusObject()->isClosedStatus();
   }
