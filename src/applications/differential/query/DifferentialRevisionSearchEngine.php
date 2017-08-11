@@ -41,8 +41,8 @@ final class DifferentialRevisionSearchEngine
       $query->withRepositoryPHIDs($map['repositoryPHIDs']);
     }
 
-    if ($map['status']) {
-      $query->withStatus($map['status']);
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     return $query;
@@ -77,10 +77,11 @@ final class DifferentialRevisionSearchEngine
         ->setDatasource(new DiffusionRepositoryFunctionDatasource())
         ->setDescription(
           pht('Find revisions from specific repositories.')),
-      id(new PhabricatorSearchSelectField())
-        ->setLabel(pht('Status'))
-        ->setKey('status')
-        ->setOptions($this->getStatusOptions())
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Statuses'))
+        ->setKey('statuses')
+        ->setAliases(array('status'))
+        ->setDatasource(new DifferentialRevisionStatusFunctionDatasource())
         ->setDescription(
           pht('Find revisions with particular statuses.')),
     );
@@ -115,7 +116,7 @@ final class DifferentialRevisionSearchEngine
 
         return $query
           ->setParameter('responsiblePHIDs', array($viewer->getPHID()))
-          ->setParameter('status', DifferentialLegacyQuery::STATUS_OPEN)
+          ->setParameter('statuses', array('open()'))
           ->setParameter('bucket', $bucket_key);
       case 'authored':
         return $query

@@ -28,8 +28,12 @@ final class DifferentialLegacyQuery
           $status));
     }
 
+    return self::getLegacyValues($map[$status]);
+  }
+
+  public static function getLegacyValues(array $modern_values) {
     $values = array();
-    foreach ($map[$status] as $status_constant) {
+    foreach ($modern_values as $status_constant) {
       $status_object = DifferentialRevisionStatus::newForStatus(
         $status_constant);
 

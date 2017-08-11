@@ -25,6 +25,7 @@ final class DifferentialRevisionQuery
   private $repositoryPHIDs;
   private $updatedEpochMin;
   private $updatedEpochMax;
+  private $statuses;
 
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
@@ -143,6 +144,11 @@ final class DifferentialRevisionQuery
    */
   public function withStatus($status_constant) {
     $this->status = $status_constant;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -703,6 +709,13 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.status IN (%Ls)',
         $statuses);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.status in (%Ls)',
+        DifferentialLegacyQuery::getLegacyValues($this->statuses));
     }
 
     $where[] = $this->buildWhereClauseParts($conn_r);
