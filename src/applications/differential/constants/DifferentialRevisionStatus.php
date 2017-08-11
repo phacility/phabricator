@@ -93,6 +93,16 @@ final class DifferentialRevisionStatus extends Phobject {
     return $result;
   }
 
+  public static function getAll() {
+    $result = array();
+
+    foreach (self::getMap() as $key => $spec) {
+      $result[$key] = self::newForStatus($key);
+    }
+
+    return $result;
+  }
+
   private static function getMap() {
     $close_on_accept = PhabricatorEnv::getEnvConfig(
       'differential.close-on-accept');
