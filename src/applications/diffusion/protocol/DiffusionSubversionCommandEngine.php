@@ -44,9 +44,7 @@ final class DiffusionSubversionCommandEngine
   protected function newCustomEnvironment() {
     $env = array();
 
-    if ($this->isAnySSHProtocol()) {
-      $env['SVN_SSH'] = $this->getSSHWrapper();
-    }
+    $env['SVN_SSH'] = $this->getSSHWrapper();
 
     return $env;
   }
