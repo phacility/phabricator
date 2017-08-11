@@ -21,11 +21,6 @@
       "rule": ".login-Disqus",
       "hash": "77b29d56329a3c30b79d6b6673b0e39b"
     },
-    "login-Dropbox": {
-      "name": "login-Dropbox",
-      "rule": ".login-Dropbox",
-      "hash": "5eaf07ae4598227fbbba3474675d18c7"
-    },
     "login-Facebook": {
       "name": "login-Facebook",
       "rule": ".login-Facebook",
@@ -61,20 +56,10 @@
       "rule": ".login-LDAP",
       "hash": "e31df2e9faf8ca0925ef93128a82fa7a"
     },
-    "login-Linkedin": {
-      "name": "login-Linkedin",
-      "rule": ".login-Linkedin",
-      "hash": "b7ee1e92c923462531f3a34093e57127"
-    },
     "login-MediaWiki": {
       "name": "login-MediaWiki",
       "rule": ".login-MediaWiki",
       "hash": "f1f0a9382434081a9a84e7584828c2dd"
-    },
-    "login-Openid": {
-      "name": "login-Openid",
-      "rule": ".login-Openid",
-      "hash": "886f65ad44435344a1fa1c13e7758155"
     },
     "login-PayPal": {
       "name": "login-PayPal",
@@ -84,7 +69,7 @@
     "login-Phabricator": {
       "name": "login-Phabricator",
       "rule": ".login-Phabricator",
-      "hash": "d0f830803593bbcc025d7d5a29ee3ecd"
+      "hash": "54f5ddae4b9d138c438ec00ed42544d2"
     },
     "login-Slack": {
       "name": "login-Slack",
@@ -120,11 +105,6 @@
       "name": "login-WordPressCOM",
       "rule": ".login-WordPressCOM",
       "hash": "9eae4205dbed0c42a18ee4f8e0fa151b"
-    },
-    "login-Yahoo": {
-      "name": "login-Yahoo",
-      "rule": ".login-Yahoo",
-      "hash": "f37822c769f6b8ebd1dda6b3ac89b83b"
     }
   },
   "scales": [
