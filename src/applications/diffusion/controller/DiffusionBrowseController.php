@@ -1758,7 +1758,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withPath($repository->getID(), $path_id)
-      ->withStatus(DifferentialLegacyQuery::STATUS_OPEN)
+      ->withIsOpen(true)
       ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)

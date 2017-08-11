@@ -268,7 +268,7 @@ final class DifferentialRevisionSearchEngine
     $blocking_revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withPHIDs($revision_phids)
-      ->withStatus(DifferentialLegacyQuery::STATUS_OPEN)
+      ->withIsOpen(true)
       ->execute();
     $blocking_revisions = mpull($blocking_revisions, null, 'getPHID');
 

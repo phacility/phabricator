@@ -26,6 +26,7 @@ final class DifferentialRevisionQuery
   private $updatedEpochMin;
   private $updatedEpochMax;
   private $statuses;
+  private $isOpen;
 
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
@@ -149,6 +150,11 @@ final class DifferentialRevisionQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
+    return $this;
+  }
+
+  public function withIsOpen($is_open) {
+    $this->isOpen = $is_open;
     return $this;
   }
 
@@ -716,6 +722,20 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.status in (%Ls)',
         DifferentialLegacyQuery::getLegacyValues($this->statuses));
+    }
+
+    if ($this->isOpen !== null) {
+      if ($this->isOpen) {
+        $statuses = DifferentialLegacyQuery::getQueryValues(
+          DifferentialLegacyQuery::STATUS_OPEN);
+      } else {
+        $statuses = DifferentialLegacyQuery::getQueryValues(
+          DifferentialLegacyQuery::STATUS_CLOSED);
+      }
+      $where[] = qsprintf(
+        $conn_r,
+        'r.status in (%Ls)',
+        $statuses);
     }
 
     $where[] = $this->buildWhereClauseParts($conn_r);
