@@ -125,23 +125,16 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-    $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
-    $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-    $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
         if (!$this->getIsCloseByCommit()) {
-          switch ($object->getStatus()) {
-            case $status_revision:
-            case $status_plan:
-            case $status_abandoned:
-              $object->setStatus($status_review);
-              break;
+          if ($object->isNeedsRevision() ||
+              $object->isChangePlanned() ||
+              $object->isAbandoned()) {
+            $object->setModernRevisionStatus(
+              DifferentialRevisionStatus::NEEDS_REVIEW);
           }
         }
 
@@ -196,8 +189,6 @@ final class DifferentialTransactionEditor
     $actor_phid = $this->getActingAsPHID();
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
 
-    $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-
     $edge_ref_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
 
     $is_sticky_accept = PhabricatorEnv::getEnvConfig(
@@ -220,7 +211,7 @@ final class DifferentialTransactionEditor
         case DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE:
           $downgrade_rejects = true;
           if ((!$is_sticky_accept) ||
-              ($object->getStatus() != $status_plan)) {
+              (!$object->isChangePlanned())) {
             // If the old state isn't "changes planned", downgrade the accepts.
             // This exception allows an accepted revision to go through
             // "Plan Changes" -> "Request Review" and return to "accepted" if
@@ -462,101 +453,113 @@ final class DifferentialTransactionEditor
       }
     }
 
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-    $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-
-    $is_sticky_accept = PhabricatorEnv::getEnvConfig(
-      'differential.sticky-accept');
-
-    $old_status = $object->getStatus();
-    $active_diff = $object->getActiveDiff();
-    switch ($old_status) {
-      case $status_accepted:
-      case $status_revision:
-      case $status_review:
-        // Try to move a revision to "accepted". We look for:
-        //
-        //   - at least one accepting reviewer who is a user; and
-        //   - no rejects; and
-        //   - no rejects of older diffs; and
-        //   - no blocking reviewers.
-
-        $has_accepting_user = false;
-        $has_rejecting_reviewer = false;
-        $has_rejecting_older_reviewer = false;
-        $has_blocking_reviewer = false;
-        foreach ($object->getReviewers() as $reviewer) {
-          $reviewer_status = $reviewer->getReviewerStatus();
-          switch ($reviewer_status) {
-            case DifferentialReviewerStatus::STATUS_REJECTED:
-              $active_phid = $active_diff->getPHID();
-              if ($reviewer->isRejected($active_phid)) {
-                $has_rejecting_reviewer = true;
-              } else {
-                $has_rejecting_older_reviewer = true;
-              }
-              break;
-            case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
-              $has_rejecting_older_reviewer = true;
-              break;
-            case DifferentialReviewerStatus::STATUS_BLOCKING:
-              $has_blocking_reviewer = true;
-              break;
-            case DifferentialReviewerStatus::STATUS_ACCEPTED:
-              if ($reviewer->isUser()) {
-                $active_phid = $active_diff->getPHID();
-                if ($reviewer->isAccepted($active_phid)) {
-                  $has_accepting_user = true;
-                }
-              }
-              break;
-          }
-        }
-
-        $new_status = null;
-        if ($has_accepting_user &&
-            !$has_rejecting_reviewer &&
-            !$has_rejecting_older_reviewer &&
-            !$has_blocking_reviewer) {
-          $new_status = $status_accepted;
-        } else if ($has_rejecting_reviewer) {
-          // This isn't accepted, and there's at least one rejecting reviewer,
-          // so the revision needs changes. This usually happens after a
-          // "reject".
-          $new_status = $status_revision;
-        } else if ($old_status == $status_accepted) {
-          // This revision was accepted, but it no longer satisfies the
-          // conditions for acceptance. This usually happens after an accepting
-          // reviewer resigns or is removed.
-          $new_status = $status_review;
-        }
-
-        if ($new_status !== null && ($new_status != $old_status)) {
-          $xaction = id(new DifferentialTransaction())
-            ->setTransactionType(
-                DifferentialRevisionStatusTransaction::TRANSACTIONTYPE)
-            ->setOldValue($old_status)
-            ->setNewValue($new_status);
-
-          $xaction = $this->populateTransaction($object, $xaction)->save();
-
-          $xactions[] = $xaction;
-
-          $object->setStatus($new_status)->save();
-        }
-        break;
-      default:
-        // Revisions can't transition out of other statuses (like closed or
-        // abandoned) as a side effect of reviewer status changes.
-        break;
-    }
-
-
+    $xactions = $this->updateReviewStatus($object, $xactions);
     $this->markReviewerComments($object, $xactions);
 
     return $xactions;
   }
+
+  private function updateReviewStatus(
+    DifferentialRevision $revision,
+    array $xactions) {
+
+    $was_accepted = $revision->isAccepted();
+    $was_revision = $revision->isNeedsRevision();
+    $was_review = $revision->isNeedsReview();
+    if (!$was_accepted && !$was_revision && !$was_review) {
+      // Revisions can't transition out of other statuses (like closed or
+      // abandoned) as a side effect of reviewer status changes.
+      return $xactions;
+    }
+
+    // Try to move a revision to "accepted". We look for:
+    //
+    //   - at least one accepting reviewer who is a user; and
+    //   - no rejects; and
+    //   - no rejects of older diffs; and
+    //   - no blocking reviewers.
+
+    $has_accepting_user = false;
+    $has_rejecting_reviewer = false;
+    $has_rejecting_older_reviewer = false;
+    $has_blocking_reviewer = false;
+
+    $active_diff = $revision->getActiveDiff();
+    foreach ($revision->getReviewers() as $reviewer) {
+      $reviewer_status = $reviewer->getReviewerStatus();
+      switch ($reviewer_status) {
+        case DifferentialReviewerStatus::STATUS_REJECTED:
+          $active_phid = $active_diff->getPHID();
+          if ($reviewer->isRejected($active_phid)) {
+            $has_rejecting_reviewer = true;
+          } else {
+            $has_rejecting_older_reviewer = true;
+          }
+          break;
+        case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
+          $has_rejecting_older_reviewer = true;
+          break;
+        case DifferentialReviewerStatus::STATUS_BLOCKING:
+          $has_blocking_reviewer = true;
+          break;
+        case DifferentialReviewerStatus::STATUS_ACCEPTED:
+          if ($reviewer->isUser()) {
+            $active_phid = $active_diff->getPHID();
+            if ($reviewer->isAccepted($active_phid)) {
+              $has_accepting_user = true;
+            }
+          }
+          break;
+      }
+    }
+
+    $new_status = null;
+    if ($has_accepting_user &&
+        !$has_rejecting_reviewer &&
+        !$has_rejecting_older_reviewer &&
+        !$has_blocking_reviewer) {
+      $new_status = DifferentialRevisionStatus::ACCEPTED;
+    } else if ($has_rejecting_reviewer) {
+      // This isn't accepted, and there's at least one rejecting reviewer,
+      // so the revision needs changes. This usually happens after a
+      // "reject".
+      $new_status = DifferentialRevisionStatus::NEEDS_REVISION;
+    } else if ($was_accepted) {
+      // This revision was accepted, but it no longer satisfies the
+      // conditions for acceptance. This usually happens after an accepting
+      // reviewer resigns or is removed.
+      $new_status = DifferentialRevisionStatus::NEEDS_REVIEW;
+    }
+
+    if ($new_status === null) {
+      return $xactions;
+    }
+
+    $old_legacy_status = $revision->getStatus();
+    $revision->setModernRevisionStatus($new_status);
+    $new_legacy_status = $revision->getStatus();
+    if ($new_legacy_status == $old_legacy_status) {
+      return $xactions;
+    }
+
+    $xaction = id(new DifferentialTransaction())
+      ->setTransactionType(
+          DifferentialRevisionStatusTransaction::TRANSACTIONTYPE)
+      ->setOldValue($old_legacy_status)
+      ->setNewValue($new_legacy_status);
+
+    $xaction = $this->populateTransaction($revision, $xaction)
+      ->save();
+    $xactions[] = $xaction;
+
+    // Save the status adjustment we made earlier.
+    // TODO: This can be a little cleaner and more obvious once storage
+    // migrates.
+    $revision->save();
+
+    return $xactions;
+  }
+
 
   protected function validateTransaction(
     PhabricatorLiskDAO $object,
