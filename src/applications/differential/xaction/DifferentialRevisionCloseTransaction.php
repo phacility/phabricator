@@ -35,14 +35,10 @@ final class DifferentialRevisionCloseTransaction
   }
 
   public function applyInternalEffects($object, $value) {
+    $was_accepted = $object->isAccepted();
+
     $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-
-    $old_status = $object->getStatus();
-
     $object->setStatus($status_closed);
-
-    $was_accepted = ($old_status == $status_accepted);
 
     $object->setProperty(
       DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED,

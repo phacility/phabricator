@@ -27,8 +27,7 @@ final class DifferentialRevisionRequestReviewTransaction
   }
 
   public function generateOldValue($object) {
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-    return ($object->getStatus() == $status_review);
+    return $object->isNeedsReview();
   }
 
   public function applyInternalEffects($object, $value) {

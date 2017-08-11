@@ -46,8 +46,7 @@ final class DifferentialRevisionPlanChangesTransaction
   }
 
   public function generateOldValue($object) {
-    $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-    return ($object->getStatus() == $status_planned);
+    return $object->isChangePlanned();
   }
 
   public function applyInternalEffects($object, $value) {
