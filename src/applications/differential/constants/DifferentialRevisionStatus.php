@@ -32,6 +32,14 @@ final class DifferentialRevisionStatus extends Phobject {
     return idx($this->spec, 'color.tag', 'bluegrey');
   }
 
+  public function getTimelineIcon() {
+    return idx($this->spec, 'icon.timeline');
+  }
+
+  public function getTimelineColor() {
+    return idx($this->spec, 'color.timeline');
+  }
+
   public function getANSIColor() {
     return idx($this->spec, 'color.ansi');
   }
@@ -54,6 +62,10 @@ final class DifferentialRevisionStatus extends Phobject {
 
   public function isNeedsReview() {
     return ($this->key === self::NEEDS_REVIEW);
+  }
+
+  public function isNeedsRevision() {
+    return ($this->key === self::NEEDS_REVISION);
   }
 
   public function isPublished() {
@@ -116,19 +128,23 @@ final class DifferentialRevisionStatus extends Phobject {
         'name' => pht('Needs Review'),
         'legacy' => 0,
         'icon' => 'fa-code',
+        'icon.timeline' => 'fa-undo',
         'closed' => false,
         'color.icon' => 'grey',
         'color.tag' => 'bluegrey',
         'color.ansi' => 'magenta',
+        'color.timeline' => 'orange',
       ),
       self::NEEDS_REVISION => array(
         'name' => pht('Needs Revision'),
         'legacy' => 1,
         'icon' => 'fa-refresh',
+        'icon.timeline' => 'fa-times',
         'closed' => false,
         'color.icon' => 'red',
         'color.tag' => 'red',
         'color.ansi' => 'red',
+        'color.timeline' => 'red',
       ),
       self::CHANGES_PLANNED => array(
         'name' => pht('Changes Planned'),
@@ -143,10 +159,12 @@ final class DifferentialRevisionStatus extends Phobject {
         'name' => pht('Accepted'),
         'legacy' => 2,
         'icon' => 'fa-check',
+        'icon.timeline' => 'fa-check',
         'closed' => $close_on_accept,
         'color.icon' => 'green',
         'color.tag' => 'green',
         'color.ansi' => 'green',
+        'color.timeline' => 'green',
       ),
       self::PUBLISHED => array(
         'name' => pht('Closed'),

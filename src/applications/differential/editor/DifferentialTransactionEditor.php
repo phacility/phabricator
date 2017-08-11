@@ -71,7 +71,6 @@ final class DifferentialTransactionEditor
 
     $types[] = DifferentialTransaction::TYPE_ACTION;
     $types[] = DifferentialTransaction::TYPE_INLINE;
-    $types[] = DifferentialTransaction::TYPE_STATUS;
     $types[] = DifferentialTransaction::TYPE_UPDATE;
 
     return $types;
@@ -606,7 +605,8 @@ final class DifferentialTransactionEditor
 
         if ($new_status !== null && ($new_status != $old_status)) {
           $xaction = id(new DifferentialTransaction())
-            ->setTransactionType(DifferentialTransaction::TYPE_STATUS)
+            ->setTransactionType(
+                DifferentialRevisionStatusTransaction::TRANSACTIONTYPE)
             ->setOldValue($old_status)
             ->setNewValue($new_status);
 
