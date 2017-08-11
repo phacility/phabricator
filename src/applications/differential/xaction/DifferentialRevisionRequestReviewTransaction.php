@@ -31,8 +31,8 @@ final class DifferentialRevisionRequestReviewTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-    $object->setStatus($status_review);
+    $status_review = DifferentialRevisionStatus::NEEDS_REVIEW;
+    $object->setModernRevisionStatus($status_review);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

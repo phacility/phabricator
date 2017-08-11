@@ -50,8 +50,8 @@ final class DifferentialRevisionPlanChangesTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-    $object->setStatus($status_planned);
+    $status_planned = DifferentialRevisionStatus::CHANGES_PLANNED;
+    $object->setModernRevisionStatus($status_planned);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

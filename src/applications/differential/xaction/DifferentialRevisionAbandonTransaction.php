@@ -47,7 +47,8 @@ final class DifferentialRevisionAbandonTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
+    $status_abandoned = DifferentialRevisionStatus::ABANDONED;
+    $object->setModernRevisionStatus($status_abandoned);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

@@ -72,7 +72,7 @@ final class DifferentialRevision extends DifferentialDAO
       ->attachRepository(null)
       ->attachActiveDiff(null)
       ->attachReviewers(array())
-      ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+      ->setModernRevisionStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
   }
 
   protected function getConfiguration() {
