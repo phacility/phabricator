@@ -39,7 +39,7 @@ final class DifferentialRevisionReopenTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    if ($object->isPublished()) {
+    if (!$object->isPublished()) {
       throw new Exception(
         pht(
           'You can not reopen this revision because it is not closed. '.
