@@ -33,7 +33,6 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
       $revision = $objects[$phid];
 
       $title = $revision->getTitle();
-      $status = $revision->getStatus();
       $monogram = $revision->getMonogram();
       $uri = $revision->getURI();
 
@@ -46,10 +45,8 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
 
-      $status = $revision->getStatus();
-
-      $icon = $revision->getStatusIcon($status);
-      $color = $revision->getStatusIconColor($status);
+      $icon = $revision->getStatusIcon();
+      $color = $revision->getStatusIconColor();
       $name = $revision->getStatusDisplayName();
 
       $handle

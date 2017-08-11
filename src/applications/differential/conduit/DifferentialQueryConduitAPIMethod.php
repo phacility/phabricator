@@ -218,7 +218,7 @@ final class DifferentialQueryConduitAPIMethod
         'dateCreated'         => $revision->getDateCreated(),
         'dateModified'        => $revision->getDateModified(),
         'authorPHID'          => $revision->getAuthorPHID(),
-        'status'              => $revision->getStatus(),
+        'status'              => $revision->getLegacyRevisionStatus(),
         'statusName'          => $revision->getStatusDisplayName(),
         'properties' => $revision->getProperties(),
         'branch'              => $diff->getBranch(),

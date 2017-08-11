@@ -6,11 +6,11 @@ final class DifferentialRevisionStatusTransaction
   const TRANSACTIONTYPE = 'differential.revision.status';
 
   public function generateOldValue($object) {
-    return $object->getStatus();
+    return $object->getLegacyRevisionStatus();
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setStatus($value);
+    $object->setLegacyRevisionStatus($value);
   }
 
   public function getTitle() {

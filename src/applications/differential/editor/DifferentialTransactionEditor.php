@@ -535,9 +535,9 @@ final class DifferentialTransactionEditor
       return $xactions;
     }
 
-    $old_legacy_status = $revision->getStatus();
+    $old_legacy_status = $revision->getLegacyRevisionStatus();
     $revision->setModernRevisionStatus($new_status);
-    $new_legacy_status = $revision->getStatus();
+    $new_legacy_status = $revision->getLegacyRevisionStatus();
     if ($new_legacy_status == $old_legacy_status) {
       return $xactions;
     }
