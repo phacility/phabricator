@@ -27,10 +27,12 @@ final class DifferentialRevisionGraph
 
     if ($object) {
       $status_icon = $object->getStatusIcon();
+      $status_color = $object->getStatusIconColor();
       $status_name = $object->getStatusDisplayName();
 
       $status = array(
-        id(new PHUIIconView())->setIcon($status_icon),
+        id(new PHUIIconView())
+          ->setIcon($status_icon, $status_color),
         ' ',
         $status_name,
       );

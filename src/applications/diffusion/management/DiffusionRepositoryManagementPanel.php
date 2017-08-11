@@ -25,6 +25,10 @@ abstract class DiffusionRepositoryManagementPanel
     return $this->repository;
   }
 
+  final public function getRequest() {
+    return $this->controller->getRequest();
+  }
+
   final public function setController(PhabricatorController $controller) {
     $this->controller = $controller;
     return $this;

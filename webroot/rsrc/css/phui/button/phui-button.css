@@ -50,7 +50,9 @@ input[type="submit"] {
 button .phui-icon-view,
 a.button .phui-icon-view,
 button.button-green .phui-icon-view,
-a.button.button-green .phui-icon-view {
+a.button.button-green .phui-icon-view,
+button.button-red .phui-icon-view,
+a.button.button-red .phui-icon-view {
   color: white;
 }
 
@@ -74,6 +76,14 @@ a.button-green.button:visited {
   background-color: {$green.button.color};
   border-color: {$green.button.color};
   background-image: {$green.button.gradient};
+}
+
+button.button-red,
+a.button-red.button,
+a.button-red.button:visited {
+  background-color: {$red.button.color};
+  border-color: {$red.button.color};
+  background-image: {$red.button.gradient};
 }
 
 button.button-grey,
@@ -120,6 +130,14 @@ button.button-green:hover {
   border-color: #127336;
   background-color: #0DAD48;
   background-image: {$green.button.hover};
+  transition: 0.1s;
+}
+
+a.button.button-red:hover,
+button.button-red:hover {
+  border-color: #79150b;
+  background-color: #0DAD48;
+  background-image: {$red.button.hover};
   transition: 0.1s;
 }
 

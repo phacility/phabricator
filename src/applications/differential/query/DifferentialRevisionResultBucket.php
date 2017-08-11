@@ -15,9 +15,8 @@ abstract class DifferentialRevisionResultBucket
 
     $objects = $this->getRevisionsNotAuthored($objects, $phids);
 
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
     foreach ($objects as $key => $object) {
-      if ($object->getStatus() != $status_review) {
+      if (!$object->isNeedsReview()) {
         continue;
       }
 

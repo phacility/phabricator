@@ -39,10 +39,7 @@ final class DifferentialRevisionReopenTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    // Note that we're testing for "Closed", exactly, not just any closed
-    // status.
-    $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-    if ($object->getStatus() != $status_closed) {
+    if ($object->isPublished()) {
       throw new Exception(
         pht(
           'You can not reopen this revision because it is not closed. '.

@@ -46,3 +46,7 @@
 .phui-side-column .phui-curtain-panel-body .phui-tag-view {
   white-space: pre-wrap;
 }
+
+.device .curtain-no-panels {
+  display: none;
+}

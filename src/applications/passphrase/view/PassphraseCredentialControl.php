@@ -113,11 +113,12 @@ final class PassphraseCredentialControl extends AphrontFormControl {
         'a',
         array(
           'href' => '#',
-          'class' => 'button button-grey',
+          'class' => 'button button-grey mll',
           'sigil' => 'passphrase-credential-add',
           'mustcapture' => true,
+          'style' => 'height: 20px;', // move aphront-form to tables
         ),
-        pht('Add Credential'));
+        pht('Add New Credential'));
     } else {
       $button = null;
     }

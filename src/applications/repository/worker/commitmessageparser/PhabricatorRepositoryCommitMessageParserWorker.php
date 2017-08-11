@@ -203,10 +203,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $revision->getID(),
           $commit->getPHID());
 
-        $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-        $should_close = ($revision->getStatus() != $status_closed) &&
-                        $should_autoclose;
-
+        $should_close = !$revision->isPublished() && $should_autoclose;
         if ($should_close) {
            $commit_close_xaction = id(new DifferentialTransaction())
             ->setTransactionType(DifferentialTransaction::TYPE_ACTION)

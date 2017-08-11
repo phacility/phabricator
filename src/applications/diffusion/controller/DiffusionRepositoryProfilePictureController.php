@@ -109,6 +109,9 @@ final class DiffusionRepositoryProfilePictureController
     }
 
     $builtins = array(
+      'repo/repo-git.png',
+      'repo/repo-svn.png',
+      'repo/repo-hg.png',
       'repo/building.png',
       'repo/cloud.png',
       'repo/commit.png',

@@ -25,12 +25,7 @@ final class DifferentialQueryConduitAPIMethod
     $hash_types = ArcanistDifferentialRevisionHash::getTypes();
     $hash_const = $this->formatStringConstants($hash_types);
 
-    $status_types = array(
-      DifferentialRevisionQuery::STATUS_ANY,
-      DifferentialRevisionQuery::STATUS_OPEN,
-      DifferentialRevisionQuery::STATUS_ACCEPTED,
-      DifferentialRevisionQuery::STATUS_CLOSED,
-    );
+    $status_types = DifferentialLegacyQuery::getAllConstants();
     $status_const = $this->formatStringConstants($status_types);
 
     $order_types = array(
@@ -221,9 +216,7 @@ final class DifferentialQueryConduitAPIMethod
         'dateModified'        => $revision->getDateModified(),
         'authorPHID'          => $revision->getAuthorPHID(),
         'status'              => $revision->getStatus(),
-        'statusName'          =>
-          ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
-            $revision->getStatus()),
+        'statusName'          => $revision->getStatusDisplayName(),
         'properties' => $revision->getProperties(),
         'branch'              => $diff->getBranch(),
         'summary'             => $revision->getSummary(),

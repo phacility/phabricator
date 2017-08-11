@@ -56,9 +56,7 @@ final class DifferentialRevisionPlanChangesTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-
-    if ($object->getStatus() == $status_planned) {
+    if ($object->isChangePlanned()) {
       throw new Exception(
         pht(
           'You can not request review of this revision because this '.

@@ -523,7 +523,6 @@ final class DifferentialRevision extends DifferentialDAO
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        $description[] = pht("A revision's reviewers can always view it.");
         $description[] = pht(
           'If a revision belongs to a repository, other users must be able '.
           'to view the repository in order to view the revision.');
@@ -614,42 +613,44 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function isClosed() {
-    return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
+    return $this->getStatusObject()->isClosedStatus();
   }
 
   public function isAbandoned() {
-    $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
-    return ($this->getStatus() == $status_abandoned);
+    return $this->getStatusObject()->isAbandoned();
   }
 
   public function isAccepted() {
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-    return ($this->getStatus() == $status_accepted);
+    return $this->getStatusObject()->isAccepted();
+  }
+
+  public function isNeedsReview() {
+    return $this->getStatusObject()->isNeedsReview();
+  }
+
+  public function isChangePlanned() {
+    return $this->getStatusObject()->isChangePlanned();
+  }
+
+  public function isPublished() {
+    return $this->getStatusObject()->isPublished();
   }
 
   public function getStatusIcon() {
-    $map = array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW
-        => 'fa-code grey',
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION
-        => 'fa-refresh red',
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED
-        => 'fa-headphones red',
-      ArcanistDifferentialRevisionStatus::ACCEPTED
-        => 'fa-check green',
-      ArcanistDifferentialRevisionStatus::CLOSED
-        => 'fa-check-square-o black',
-      ArcanistDifferentialRevisionStatus::ABANDONED
-        => 'fa-plane black',
-    );
-
-    return idx($map, $this->getStatus());
+    return $this->getStatusObject()->getIcon();
   }
 
   public function getStatusDisplayName() {
+    return $this->getStatusObject()->getDisplayName();
+  }
+
+  public function getStatusIconColor() {
+    return $this->getStatusObject()->getIconColor();
+  }
+
+  public function getStatusObject() {
     $status = $this->getStatus();
-    return ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
-      $status);
+    return DifferentialRevisionStatus::newForLegacyStatus($status);
   }
 
   public function getFlag(PhabricatorUser $viewer) {

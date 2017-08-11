@@ -46,10 +46,17 @@ final class PHUICurtainView extends AphrontTagView {
 
     $panels = $this->renderPanels();
 
-    return id(new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->appendChild($action_list)
       ->appendChild($panels)
       ->addClass('phui-two-column-properties');
+
+    // We want to hide this UI on mobile if there are no child panels
+    if (!$panels) {
+      $box->addClass('curtain-no-panels');
+    }
+
+    return $box;
   }
 
   private function renderPanels() {

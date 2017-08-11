@@ -76,16 +76,17 @@ final class DifferentialBranchField
     PhabricatorApplicationTransactionEditor $editor,
     array $xactions) {
 
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    $revision = $this->getObject();
 
     // Show the "BRANCH" section only if there's a new diff or the revision
     // is "Accepted".
-    if ((!$editor->getDiffUpdateTransaction($xactions)) &&
-        ($this->getObject()->getStatus() != $status_accepted)) {
+    $is_update = (bool)$editor->getDiffUpdateTransaction($xactions);
+    $is_accepted = $revision->isAccepted();
+    if (!$is_update && !$is_accepted) {
       return;
     }
 
-    $branch = $this->getBranchDescription($this->getObject()->getActiveDiff());
+    $branch = $this->getBranchDescription($revision->getActiveDiff());
     if ($branch === null) {
       return;
     }

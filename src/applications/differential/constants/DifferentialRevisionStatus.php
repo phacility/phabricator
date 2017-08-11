@@ -1,107 +1,158 @@
 <?php
 
-/**
- * NOTE: you probably want {@class:ArcanistDifferentialRevisionStatus}.
- * This class just contains a mapping for color within the Differential
- * application.
- */
-
 final class DifferentialRevisionStatus extends Phobject {
 
-  const COLOR_STATUS_DEFAULT = 'bluegrey';
-  const COLOR_STATUS_DARK = 'indigo';
-  const COLOR_STATUS_BLUE = 'blue';
-  const COLOR_STATUS_GREEN = 'green';
-  const COLOR_STATUS_RED = 'red';
+  const NEEDS_REVIEW = 'needs-review';
+  const NEEDS_REVISION = 'needs-revision';
+  const CHANGES_PLANNED = 'changes-planned';
+  const ACCEPTED = 'accepted';
+  const PUBLISHED = 'published';
+  const ABANDONED = 'abandoned';
 
-  public static function getRevisionStatusColor($status) {
-    $default = self::COLOR_STATUS_DEFAULT;
+  private $key;
+  private $spec = array();
 
-    $map = array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW   =>
-        self::COLOR_STATUS_DEFAULT,
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION =>
-        self::COLOR_STATUS_RED,
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED =>
-        self::COLOR_STATUS_RED,
-      ArcanistDifferentialRevisionStatus::ACCEPTED       =>
-        self::COLOR_STATUS_GREEN,
-      ArcanistDifferentialRevisionStatus::CLOSED         =>
-        self::COLOR_STATUS_DARK,
-      ArcanistDifferentialRevisionStatus::ABANDONED      =>
-        self::COLOR_STATUS_DARK,
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION =>
-        self::COLOR_STATUS_BLUE,
-    );
-    return idx($map, $status, $default);
+  public function getKey() {
+    return $this->key;
   }
 
-  public static function getRevisionStatusIcon($status) {
-    $default = 'fa-square-o bluegrey';
-
-    $map = array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW   =>
-        'fa-square-o bluegrey',
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION =>
-        'fa-refresh',
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED =>
-        'fa-headphones',
-      ArcanistDifferentialRevisionStatus::ACCEPTED       =>
-        'fa-check',
-      ArcanistDifferentialRevisionStatus::CLOSED         =>
-        'fa-check-square-o',
-      ArcanistDifferentialRevisionStatus::ABANDONED      =>
-        'fa-plane',
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION =>
-        'fa-question-circle',
-    );
-    return idx($map, $status, $default);
+  public function getLegacyKey() {
+    return idx($this->spec, 'legacy');
   }
 
-  public static function renderFullDescription($status) {
-    $status_name =
-      ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
-
-    $tag = id(new PHUITagView())
-      ->setName($status_name)
-      ->setIcon(self::getRevisionStatusIcon($status))
-      ->setColor(self::getRevisionStatusColor($status))
-      ->setType(PHUITagView::TYPE_SHADE);
-
-    return $tag;
+  public function getIcon() {
+    return idx($this->spec, 'icon');
   }
 
-  public static function getClosedStatuses() {
-    $statuses = array(
-      ArcanistDifferentialRevisionStatus::CLOSED,
-      ArcanistDifferentialRevisionStatus::ABANDONED,
-    );
+  public function getIconColor() {
+    return idx($this->spec, 'color.icon', 'bluegrey');
+  }
 
-    if (PhabricatorEnv::getEnvConfig('differential.close-on-accept')) {
-      $statuses[] = ArcanistDifferentialRevisionStatus::ACCEPTED;
+  public function getTagColor() {
+    return idx($this->spec, 'color.tag', 'bluegrey');
+  }
+
+  public function getDisplayName() {
+    return idx($this->spec, 'name');
+  }
+
+  public function isClosedStatus() {
+    return idx($this->spec, 'closed');
+  }
+
+  public function isAbandoned() {
+    return ($this->key === self::ABANDONED);
+  }
+
+  public function isAccepted() {
+    return ($this->key === self::ACCEPTED);
+  }
+
+  public function isNeedsReview() {
+    return ($this->key === self::NEEDS_REVIEW);
+  }
+
+  public function isPublished() {
+    return ($this->key === self::PUBLISHED);
+  }
+
+  public function isChangePlanned() {
+    return ($this->key === self::CHANGES_PLANNED);
+  }
+
+  public static function newForStatus($status) {
+    $result = new self();
+
+    $map = self::getMap();
+    if (isset($map[$status])) {
+      $result->key = $status;
+      $result->spec = $map[$status];
     }
 
-    return $statuses;
+    return $result;
   }
 
-  public static function getOpenStatuses() {
-    return array_diff(self::getAllStatuses(), self::getClosedStatuses());
+  public static function newForLegacyStatus($legacy_status) {
+    $result = new self();
+
+    $map = self::getMap();
+    foreach ($map as $key => $spec) {
+      if (!isset($spec['legacy'])) {
+        continue;
+      }
+
+      if ($spec['legacy'] != $legacy_status) {
+        continue;
+      }
+
+      $result->key = $key;
+      $result->spec = $spec;
+      break;
+    }
+
+    return $result;
   }
 
-  public static function getAllStatuses() {
+  private static function getMap() {
+    $close_on_accept = PhabricatorEnv::getEnvConfig(
+      'differential.close-on-accept');
+
     return array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED,
-      ArcanistDifferentialRevisionStatus::ACCEPTED,
-      ArcanistDifferentialRevisionStatus::CLOSED,
-      ArcanistDifferentialRevisionStatus::ABANDONED,
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION,
+      self::NEEDS_REVIEW => array(
+        'name' => pht('Needs Review'),
+        'legacy' => 0,
+        'icon' => 'fa-code',
+        'closed' => false,
+        'color.icon' => 'grey',
+        'color.tag' => 'bluegrey',
+        'color.ansi' => 'magenta',
+      ),
+      self::NEEDS_REVISION => array(
+        'name' => pht('Needs Revision'),
+        'legacy' => 1,
+        'icon' => 'fa-refresh',
+        'closed' => false,
+        'color.icon' => 'red',
+        'color.tag' => 'red',
+        'color.ansi' => 'red',
+      ),
+      self::CHANGES_PLANNED => array(
+        'name' => pht('Changes Planned'),
+        'legacy' => 5,
+        'icon' => 'fa-headphones',
+        'closed' => false,
+        'color.icon' => 'red',
+        'color.tag' => 'red',
+        'color.ansi' => 'red',
+      ),
+      self::ACCEPTED => array(
+        'name' => pht('Accepted'),
+        'legacy' => 2,
+        'icon' => 'fa-check',
+        'closed' => $close_on_accept,
+        'color.icon' => 'green',
+        'color.tag' => 'green',
+        'color.ansi' => 'green',
+      ),
+      self::PUBLISHED => array(
+        'name' => pht('Closed'),
+        'legacy' => 3,
+        'icon' => 'fa-check-square-o',
+        'closed' => true,
+        'color.icon' => 'black',
+        'color.tag' => 'indigo',
+        'color.ansi' => 'cyan',
+      ),
+      self::ABANDONED => array(
+        'name' => pht('Abandoned'),
+        'legacy' => 4,
+        'icon' => 'fa-plane',
+        'closed' => true,
+        'color.icon' => 'black',
+        'color.tag' => 'indigo',
+        'color.ansi' => null,
+      ),
     );
-  }
-
-  public static function isClosedStatus($status) {
-    return in_array($status, self::getClosedStatuses());
   }
 
 }
