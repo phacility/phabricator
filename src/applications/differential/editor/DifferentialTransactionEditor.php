@@ -69,7 +69,6 @@ final class DifferentialTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_INLINESTATE;
 
-    $types[] = DifferentialTransaction::TYPE_ACTION;
     $types[] = DifferentialTransaction::TYPE_INLINE;
     $types[] = DifferentialTransaction::TYPE_UPDATE;
 
@@ -81,8 +80,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case DifferentialTransaction::TYPE_ACTION:
-        return null;
       case DifferentialTransaction::TYPE_INLINE:
         return null;
       case DifferentialTransaction::TYPE_UPDATE:
@@ -101,7 +98,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_UPDATE:
         return $xaction->getNewValue();
       case DifferentialTransaction::TYPE_INLINE:
@@ -120,28 +116,6 @@ final class DifferentialTransactionEditor
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
         return $xaction->hasComment();
-      case DifferentialTransaction::TYPE_ACTION:
-        $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-        $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
-        $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-        $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
-        $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-
-        $action_type = $xaction->getNewValue();
-        switch ($action_type) {
-          case DifferentialAction::ACTION_CLOSE:
-            return ($object->getStatus() != $status_closed);
-          case DifferentialAction::ACTION_ABANDON:
-            return ($object->getStatus() != $status_abandoned);
-          case DifferentialAction::ACTION_RECLAIM:
-            return ($object->getStatus() == $status_abandoned);
-          case DifferentialAction::ACTION_REOPEN:
-            return ($object->getStatus() == $status_closed);
-          case DifferentialAction::ACTION_RETHINK:
-            return ($object->getStatus() != $status_plan);
-          case DifferentialAction::ACTION_CLAIM:
-            return ($actor_phid != $object->getAuthorPHID());
-        }
     }
 
     return parent::transactionHasEffect($object, $xaction);
@@ -183,38 +157,6 @@ final class DifferentialTransactionEditor
 
         // TODO: Update the `diffPHID` once we add that.
         return;
-      case DifferentialTransaction::TYPE_ACTION:
-        switch ($xaction->getNewValue()) {
-          case DifferentialAction::ACTION_ABANDON:
-            $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
-            return;
-          case DifferentialAction::ACTION_RETHINK:
-            $object->setStatus($status_plan);
-            return;
-          case DifferentialAction::ACTION_RECLAIM:
-            $object->setStatus($status_review);
-            return;
-          case DifferentialAction::ACTION_REOPEN:
-            $object->setStatus($status_review);
-            return;
-          case DifferentialAction::ACTION_CLOSE:
-            $old_status = $object->getStatus();
-            $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
-            $was_accepted = ($old_status == $status_accepted);
-            $object->setProperty(
-              DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED,
-              $was_accepted);
-            return;
-          case DifferentialAction::ACTION_CLAIM:
-            $object->setAuthorPHID($this->getActingAsPHID());
-            return;
-          default:
-            throw new Exception(
-              pht(
-                'Differential action "%s" is not a valid action!',
-                $xaction->getNewValue()));
-        }
-        break;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -356,16 +298,6 @@ final class DifferentialTransactionEditor
       case DifferentialRevisionCommandeerTransaction::TRANSACTIONTYPE:
         $is_commandeer = true;
         break;
-
-      case DifferentialTransaction::TYPE_ACTION:
-        $action_type = $xaction->getNewValue();
-
-        switch ($action_type) {
-          case DifferentialAction::ACTION_CLAIM:
-            $is_commandeer = true;
-            break;
-        }
-      break;
     }
 
     if ($is_commandeer) {
@@ -375,7 +307,6 @@ final class DifferentialTransactionEditor
     if (!$this->didExpandInlineState) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_COMMENT:
-        case DifferentialTransaction::TYPE_ACTION:
         case DifferentialTransaction::TYPE_UPDATE:
         case DifferentialTransaction::TYPE_INLINE:
           $this->didExpandInlineState = true;
@@ -421,8 +352,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case DifferentialTransaction::TYPE_ACTION:
-        return;
       case DifferentialTransaction::TYPE_INLINE:
         $reply = $xaction->getComment()->getReplyToComment();
         if ($reply && !$reply->getHasReplies()) {
@@ -660,170 +589,10 @@ final class DifferentialTransactionEditor
               $xaction);
           }
           break;
-        case DifferentialTransaction::TYPE_ACTION:
-          $error = $this->validateDifferentialAction(
-            $object,
-            $type,
-            $xaction,
-            $xaction->getNewValue());
-          if ($error) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              $error,
-              $xaction);
-          }
-          break;
       }
     }
 
     return $errors;
-  }
-
-  private function validateDifferentialAction(
-    DifferentialRevision $revision,
-    $type,
-    DifferentialTransaction $xaction,
-    $action) {
-
-    $author_phid = $revision->getAuthorPHID();
-    $actor_phid = $this->getActingAsPHID();
-    $actor_is_author = ($author_phid == $actor_phid);
-
-    $config_abandon_key = 'differential.always-allow-abandon';
-    $always_allow_abandon = PhabricatorEnv::getEnvConfig($config_abandon_key);
-
-    $config_close_key = 'differential.always-allow-close';
-    $always_allow_close = PhabricatorEnv::getEnvConfig($config_close_key);
-
-    $config_reopen_key = 'differential.allow-reopen';
-    $allow_reopen = PhabricatorEnv::getEnvConfig($config_reopen_key);
-
-    $config_self_accept_key = 'differential.allow-self-accept';
-    $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
-
-    $revision_status = $revision->getStatus();
-
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-    $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
-    $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-
-    switch ($action) {
-      case DifferentialAction::ACTION_CLAIM:
-        // You can claim a revision if you're not the owner. If you are, this
-        // is a no-op rather than invalid.
-
-        if ($revision_status == $status_closed) {
-          return pht(
-            'You can not commandeer this revision because it has already been '.
-            'closed.');
-        }
-        break;
-
-      case DifferentialAction::ACTION_ABANDON:
-        if (!$actor_is_author && !$always_allow_abandon) {
-          return pht(
-            'You can not abandon this revision because you do not own it. '.
-            'You can only abandon revisions you own.');
-        }
-
-        if ($revision_status == $status_closed) {
-          return pht(
-            'You can not abandon this revision because it has already been '.
-            'closed.');
-        }
-
-        // NOTE: Abandons of already-abandoned revisions are treated as no-op
-        // instead of invalid. Other abandons are OK.
-
-        break;
-
-      case DifferentialAction::ACTION_RECLAIM:
-        if (!$actor_is_author) {
-          return pht(
-            'You can not reclaim this revision because you do not own '.
-            'it. You can only reclaim revisions you own.');
-        }
-
-        if ($revision_status == $status_closed) {
-          return pht(
-            'You can not reclaim this revision because it has already been '.
-            'closed.');
-        }
-
-        // NOTE: Reclaims of other non-abandoned revisions are treated as no-op
-        // instead of invalid.
-
-        break;
-
-      case DifferentialAction::ACTION_REOPEN:
-        if (!$allow_reopen) {
-          return pht(
-            'The reopen action is not enabled on this Phabricator install. '.
-            'Adjust your configuration to enable it.');
-        }
-
-        // NOTE: If the revision is not closed, this is caught as a no-op
-        // instead of an invalid transaction.
-
-        break;
-
-      case DifferentialAction::ACTION_RETHINK:
-        if (!$actor_is_author) {
-          return pht(
-            'You can not plan changes to this revision because you do not '.
-            'own it. To plan changes to a revision, you must be its owner.');
-        }
-
-        switch ($revision_status) {
-          case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-            // These are OK.
-            break;
-          case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
-            // Let this through, it's a no-op.
-            break;
-          case ArcanistDifferentialRevisionStatus::ABANDONED:
-            return pht(
-              'You can not plan changes to this revision because it has '.
-              'been abandoned.');
-          case ArcanistDifferentialRevisionStatus::CLOSED:
-            return pht(
-              'You can not plan changes to this revision because it has '.
-              'already been closed.');
-          default:
-            throw new Exception(
-              pht(
-                'Encountered unexpected revision status ("%s") when '.
-                'validating "%s" action.',
-                $revision_status,
-                $action));
-        }
-        break;
-
-      case DifferentialAction::ACTION_CLOSE:
-        // We force revisions closed when we discover a corresponding commit.
-        // In this case, revisions are allowed to transition to closed from
-        // any state. This is an automated action taken by the daemons.
-
-        if (!$this->getIsCloseByCommit()) {
-          if (!$actor_is_author && !$always_allow_close) {
-            return pht(
-              'You can not close this revision because you do not own it. To '.
-              'close a revision, you must be its owner.');
-          }
-
-          if ($revision_status != $status_accepted) {
-            return pht(
-              'You can not close this revision because it has not been '.
-              'accepted. You can only close accepted revisions.');
-          }
-        }
-        break;
-    }
-
-    return null;
   }
 
   protected function sortTransactions(array $xactions) {
@@ -1233,14 +1002,6 @@ final class DifferentialTransactionEditor
           // When users commandeer revisions, we may need to trigger
           // signatures or author-based rules.
           return true;
-        case DifferentialTransaction::TYPE_ACTION:
-          switch ($xaction->getNewValue()) {
-            case DifferentialAction::ACTION_CLAIM:
-              // When users commandeer revisions, we may need to trigger
-              // signatures or author-based rules.
-              return true;
-          }
-          break;
       }
     }
 
