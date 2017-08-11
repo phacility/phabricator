@@ -26,7 +26,7 @@ final class DiffusionCommandEngineTestCase extends PhabricatorTestCase {
       ));
 
     $this->assertCommandEngineFormat(
-      'hg xyz',
+      (string)csprintf('hg --config ui.ssh=%s xyz', $ssh_wrapper),
       array(
         'LANG' => 'en_US.UTF-8',
         'HGPLAIN' => '1',
@@ -102,7 +102,7 @@ final class DiffusionCommandEngineTestCase extends PhabricatorTestCase {
       ));
 
     $this->assertCommandEngineFormat(
-      'hg xyz',
+      (string)csprintf('hg --config ui.ssh=%s xyz', $ssh_wrapper),
       array(
         'LANG' => 'en_US.UTF-8',
         'HGPLAIN' => '1',
