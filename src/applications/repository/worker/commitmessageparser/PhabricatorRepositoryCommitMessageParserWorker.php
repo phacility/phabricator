@@ -186,11 +186,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $revision = $revision_query->executeOne();
 
       if ($revision) {
-        if (!$data->getCommitDetail('precommitRevisionStatus')) {
-          $data->setCommitDetail(
-            'precommitRevisionStatus',
-            $revision->getStatus());
-        }
         $commit_drev = DiffusionCommitHasRevisionEdgeType::EDGECONST;
         id(new PhabricatorEdgeEditor())
           ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
