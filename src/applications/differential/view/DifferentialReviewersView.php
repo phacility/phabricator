@@ -158,7 +158,6 @@ final class DifferentialReviewersView extends AphrontView {
 
   private function isCurrent($action_phid) {
     if (!$this->diff) {
-      echo "A\n";
       return true;
     }
 
