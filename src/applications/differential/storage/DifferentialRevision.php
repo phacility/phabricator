@@ -613,26 +613,15 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function setModernRevisionStatus($status) {
-    $status_object = DifferentialRevisionStatus::newForStatus($status);
-
-    if ($status_object->getKey() != $status) {
-      throw new Exception(
-        pht(
-          'Trying to set revision to invalid status "%s".',
-          $status));
-    }
-
-    $legacy_status = $status_object->getLegacyKey();
-
-    return $this->setStatus($legacy_status);
+    return $this->setStatus($status);
   }
 
   public function getModernRevisionStatus() {
-    return $this->getStatusObject()->getKey();
+    return $this->getStatus();
   }
 
   public function getLegacyRevisionStatus() {
-    return $this->getStatus();
+    return $this->getStatusObject()->getLegacyKey();
   }
 
   public function isClosed() {
@@ -677,7 +666,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getStatusObject() {
     $status = $this->getStatus();
-    return DifferentialRevisionStatus::newForLegacyStatus($status);
+    return DifferentialRevisionStatus::newForStatus($status);
   }
 
   public function getFlag(PhabricatorUser $viewer) {

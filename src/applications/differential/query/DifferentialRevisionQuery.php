@@ -695,7 +695,7 @@ final class DifferentialRevisionQuery
       $where[] = qsprintf(
         $conn_r,
         'r.status in (%Ls)',
-        DifferentialLegacyQuery::getLegacyValues($this->statuses));
+        $this->statuses);
     }
 
     if ($this->isOpen !== null) {
@@ -709,7 +709,7 @@ final class DifferentialRevisionQuery
       $where[] = qsprintf(
         $conn_r,
         'r.status in (%Ls)',
-        DifferentialLegacyQuery::getLegacyValues($statuses));
+        $statuses);
     }
 
     $where[] = $this->buildWhereClauseParts($conn_r);

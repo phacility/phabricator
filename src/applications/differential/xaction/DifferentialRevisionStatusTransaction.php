@@ -14,8 +14,7 @@ final class DifferentialRevisionStatusTransaction
   }
 
   public function getTitle() {
-    $new = $this->getNewValue();
-    $status = DifferentialRevisionStatus::newForLegacyStatus($new);
+    $status = $this->newStatusObject();
 
     if ($status->isAccepted()) {
       return pht('This revision is now accepted and ready to land.');

@@ -31,21 +31,6 @@ final class DifferentialLegacyQuery
     return $map[$status];
   }
 
-  public static function getLegacyValues(array $modern_values) {
-    $values = array();
-    foreach ($modern_values as $status_constant) {
-      $status_object = DifferentialRevisionStatus::newForStatus(
-        $status_constant);
-
-      $legacy_key = $status_object->getLegacyKey();
-      if ($legacy_key !== null) {
-        $values[] = $legacy_key;
-      }
-    }
-
-    return $values;
-  }
-
   private static function getMap() {
     $all = array(
       DifferentialRevisionStatus::NEEDS_REVIEW,
