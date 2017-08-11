@@ -897,13 +897,26 @@ final class DifferentialRevision extends DifferentialDAO
         ->setKey('authorPHID')
         ->setType('phid')
         ->setDescription(pht('Revision author PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about revision status.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $status = $this->getStatusObject();
+    $status_info = array(
+      'value' => $status->getKey(),
+      'name' => $status->getDisplayName(),
+      'closed' => $status->isClosedStatus(),
+      'color.ansi' => $status->getANSIColor(),
+    );
+
     return array(
       'title' => $this->getTitle(),
       'authorPHID' => $this->getAuthorPHID(),
+      'status' => $status_info,
     );
   }
 

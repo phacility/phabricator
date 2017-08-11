@@ -32,6 +32,10 @@ final class DifferentialRevisionStatus extends Phobject {
     return idx($this->spec, 'color.tag', 'bluegrey');
   }
 
+  public function getANSIColor() {
+    return idx($this->spec, 'color.ansi');
+  }
+
   public function getDisplayName() {
     return idx($this->spec, 'name');
   }
