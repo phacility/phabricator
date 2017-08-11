@@ -103,7 +103,7 @@ final class DifferentialRevisionAcceptTransaction
         if ($reviewer->isAccepted($diff_phid)) {
           // If a reviewer is already in a full "accepted" state, don't
           // include that reviewer as an option unless we're listing all
-          // reviwers, including reviewers who have already accepted.
+          // reviewers, including reviewers who have already accepted.
           continue;
         }
       }

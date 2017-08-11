@@ -257,7 +257,6 @@ final class DifferentialTransactionEditor
 
     $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
 
-    $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
     $edge_ref_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
 
     $is_sticky_accept = PhabricatorEnv::getEnvConfig(
@@ -296,48 +295,6 @@ final class DifferentialTransactionEditor
     $new_reject = DifferentialReviewerStatus::STATUS_REJECTED;
     $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
     $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
-
-    if ($downgrade_rejects || $downgrade_accepts) {
-      // When a revision is updated, change all "reject" to "rejected older
-      // revision". This means we won't immediately push the update back into
-      // "needs review", but outstanding rejects will still block it from
-      // moving to "accepted".
-
-      // We also do this for "Request Review", even though the diff is not
-      // updated directly. Essentially, this acts like an update which doesn't
-      // actually change the diff text.
-
-      $edits = array();
-      foreach ($object->getReviewers() as $reviewer) {
-        if ($downgrade_rejects) {
-          if ($reviewer->getReviewerStatus() == $new_reject) {
-            $edits[$reviewer->getReviewerPHID()] = array(
-              'data' => array(
-                'status' => $old_reject,
-              ),
-            );
-          }
-        }
-
-        if ($downgrade_accepts) {
-          if ($reviewer->getReviewerStatus() == $new_accept) {
-            $edits[$reviewer->getReviewerPHID()] = array(
-              'data' => array(
-                'status' => $old_accept,
-              ),
-            );
-          }
-        }
-      }
-
-      if ($edits) {
-        $results[] = id(new DifferentialTransaction())
-          ->setTransactionType($type_edge)
-          ->setMetadataValue('edge:type', $edge_reviewer)
-          ->setIgnoreOnNoEffect(true)
-          ->setNewValue(array('+' => $edits));
-      }
-    }
 
     $downgrade = array();
     if ($downgrade_accepts) {
@@ -394,43 +351,6 @@ final class DifferentialTransactionEditor
                 ->setNewValue(array('+' => array($task_phid => $task_phid)));
             }
           }
-        }
-        break;
-
-      case PhabricatorTransactions::TYPE_COMMENT:
-        // When a user leaves a comment, upgrade their reviewer status from
-        // "added" to "commented" if they're also a reviewer. We may further
-        // upgrade this based on other actions in the transaction group.
-
-        if ($this->hasReviewTransaction) {
-          // If we're also applying a review transaction, skip this.
-          break;
-        }
-
-        $status_added = DifferentialReviewerStatus::STATUS_ADDED;
-        $status_commented = DifferentialReviewerStatus::STATUS_COMMENTED;
-
-        $data = array(
-          'status' => $status_commented,
-        );
-
-        $edits = array();
-        foreach ($object->getReviewers() as $reviewer) {
-          if ($reviewer->getReviewerPHID() == $actor_phid) {
-            if ($reviewer->getReviewerStatus() == $status_added) {
-              $edits[$actor_phid] = array(
-                'data' => $data,
-              );
-            }
-          }
-        }
-
-        if ($edits) {
-          $results[] = id(new DifferentialTransaction())
-            ->setTransactionType($type_edge)
-            ->setMetadataValue('edge:type', $edge_reviewer)
-            ->setIgnoreOnNoEffect(true)
-            ->setNewValue(array('+' => $edits));
         }
         break;
 
@@ -573,33 +493,6 @@ final class DifferentialTransactionEditor
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);
-  }
-
-  protected function mergeEdgeData($type, array $u, array $v) {
-    $result = parent::mergeEdgeData($type, $u, $v);
-
-    switch ($type) {
-      case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
-        // When the same reviewer has their status updated by multiple
-        // transactions, we want the strongest status to win. An example of
-        // this is when a user adds a comment and also accepts a revision which
-        // they are a reviewer on. The comment creates a "commented" status,
-        // while the accept creates an "accepted" status. Since accept is
-        // stronger, it should win and persist.
-
-        $u_status = idx($u, 'status');
-        $v_status = idx($v, 'status');
-        $u_str = DifferentialReviewerStatus::getStatusStrength($u_status);
-        $v_str = DifferentialReviewerStatus::getStatusStrength($v_status);
-        if ($u_str > $v_str) {
-          $result['status'] = $u_status;
-        } else {
-          $result['status'] = $v_status;
-        }
-        break;
-    }
-
-    return $result;
   }
 
   protected function applyFinalEffects(
@@ -748,40 +641,6 @@ final class DifferentialTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($type) {
-        case PhabricatorTransactions::TYPE_EDGE:
-          switch ($xaction->getMetadataValue('edge:type')) {
-            case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
-
-              // Prevent the author from becoming a reviewer.
-
-              // NOTE: This is pretty gross, but this restriction is unusual.
-              // If we end up with too much more of this, we should try to clean
-              // this up -- maybe by moving validation to after transactions
-              // are adjusted (so we can just examine the final value) or adding
-              // a second phase there?
-
-              $author_phid = $object->getAuthorPHID();
-              $new = $xaction->getNewValue();
-
-              $add = idx($new, '+', array());
-              $eq = idx($new, '=', array());
-              $phids = array_keys($add + $eq);
-
-              foreach ($phids as $phid) {
-                if (($phid == $author_phid) &&
-                    !$allow_self_accept &&
-                    !$xaction->getIsCommandeerSideEffect()) {
-                  $errors[] =
-                    new PhabricatorApplicationTransactionValidationError(
-                      $type,
-                      pht('Invalid'),
-                      pht('The author of a revision can not be a reviewer.'),
-                      $xaction);
-                }
-              }
-              break;
-          }
-          break;
         case DifferentialTransaction::TYPE_UPDATE:
           $diff = $this->loadDiff($xaction->getNewValue());
           if (!$diff) {
