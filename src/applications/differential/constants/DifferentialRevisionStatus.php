@@ -88,27 +88,6 @@ final class DifferentialRevisionStatus extends Phobject {
     return $result;
   }
 
-  public static function newForLegacyStatus($legacy_status) {
-    $result = new self();
-
-    $map = self::getMap();
-    foreach ($map as $key => $spec) {
-      if (!isset($spec['legacy'])) {
-        continue;
-      }
-
-      if ($spec['legacy'] != $legacy_status) {
-        continue;
-      }
-
-      $result->key = $key;
-      $result->spec = $spec;
-      break;
-    }
-
-    return $result;
-  }
-
   public static function getAll() {
     $result = array();
 

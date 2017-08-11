@@ -41,10 +41,6 @@ final class DifferentialTransaction
       }
     }
 
-    if ($xaction_type == 'differential:status') {
-      return new DifferentialRevisionStatusTransaction();
-    }
-
     return parent::newFallbackModularTransactionType();
   }
 
@@ -513,13 +509,8 @@ final class DifferentialTransaction
   }
 
   private function isStatusTransaction($xaction) {
-    $old_status = 'differential:status';
-    if ($xaction->getTransactionType() == $old_status) {
-      return true;
-    }
-
-    $new_status = DifferentialRevisionStatusTransaction::TRANSACTIONTYPE;
-    if ($xaction->getTransactionType() == $new_status) {
+    $status_type = DifferentialRevisionStatusTransaction::TRANSACTIONTYPE;
+    if ($xaction->getTransactionType() == $status_type) {
       return true;
     }
 

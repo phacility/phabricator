@@ -535,27 +535,25 @@ final class DifferentialTransactionEditor
       return $xactions;
     }
 
-    $old_legacy_status = $revision->getLegacyRevisionStatus();
-    $revision->setModernRevisionStatus($new_status);
-    $new_legacy_status = $revision->getLegacyRevisionStatus();
-    if ($new_legacy_status == $old_legacy_status) {
+    $old_status = $revision->getModernRevisionStatus();
+    if ($new_status == $old_status) {
       return $xactions;
     }
 
     $xaction = id(new DifferentialTransaction())
       ->setTransactionType(
           DifferentialRevisionStatusTransaction::TRANSACTIONTYPE)
-      ->setOldValue($old_legacy_status)
-      ->setNewValue($new_legacy_status);
+      ->setOldValue($old_status)
+      ->setNewValue($new_status);
 
     $xaction = $this->populateTransaction($revision, $xaction)
       ->save();
     $xactions[] = $xaction;
 
     // Save the status adjustment we made earlier.
-    // TODO: This can be a little cleaner and more obvious once storage
-    // migrates.
-    $revision->save();
+    $revision
+      ->setModernRevisionStatus($new_status)
+      ->save();
 
     return $xactions;
   }
