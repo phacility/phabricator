@@ -150,7 +150,10 @@ final class DifferentialQueryConduitAPIMethod
     }
 
     if ($status) {
-      $query->withStatus($status);
+      $statuses = DifferentialLegacyQuery::getModernValues($status);
+      if ($statuses) {
+        $query->withStatuses($statuses);
+      }
     }
     if ($order) {
       $query->setOrder($order);

@@ -15,7 +15,7 @@ final class DifferentialLegacyQuery
     return array_keys(self::getMap());
   }
 
-  public static function getQueryValues($status) {
+  public static function getModernValues($status) {
     if ($status === self::STATUS_ANY) {
       return null;
     }
@@ -28,7 +28,7 @@ final class DifferentialLegacyQuery
           $status));
     }
 
-    return self::getLegacyValues($map[$status]);
+    return $map[$status];
   }
 
   public static function getLegacyValues(array $modern_values) {

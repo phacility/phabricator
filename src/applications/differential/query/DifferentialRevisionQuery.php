@@ -10,8 +10,6 @@ final class DifferentialRevisionQuery
 
   private $pathIDs = array();
 
-  private $status             = 'status-any';
-
   private $authors = array();
   private $draftAuthors = array();
   private $ccs = array();
@@ -132,19 +130,6 @@ final class DifferentialRevisionQuery
    */
   public function withCommitPHIDs(array $commit_phids) {
     $this->commitPHIDs = $commit_phids;
-    return $this;
-  }
-
-  /**
-   * Filter results to revisions with a given status. Provide a class constant,
-   * such as `DifferentialLegacyQuery::STATUS_OPEN`.
-   *
-   * @param const Class STATUS constant, like STATUS_OPEN.
-   * @return this
-   * @task config
-   */
-  public function withStatus($status_constant) {
-    $this->status = $status_constant;
     return $this;
   }
 
@@ -706,17 +691,6 @@ final class DifferentialRevisionQuery
         $this->updatedEpochMax);
     }
 
-    // NOTE: Although the status constants are integers in PHP, the column is a
-    // string column in MySQL, and MySQL won't use keys on string columns if
-    // you put integers in the query.
-    $statuses = DifferentialLegacyQuery::getQueryValues($this->status);
-    if ($statuses !== null) {
-      $where[] = qsprintf(
-        $conn_r,
-        'r.status IN (%Ls)',
-        $statuses);
-    }
-
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn_r,
@@ -726,16 +700,16 @@ final class DifferentialRevisionQuery
 
     if ($this->isOpen !== null) {
       if ($this->isOpen) {
-        $statuses = DifferentialLegacyQuery::getQueryValues(
+        $statuses = DifferentialLegacyQuery::getModernValues(
           DifferentialLegacyQuery::STATUS_OPEN);
       } else {
-        $statuses = DifferentialLegacyQuery::getQueryValues(
+        $statuses = DifferentialLegacyQuery::getModernValues(
           DifferentialLegacyQuery::STATUS_CLOSED);
       }
       $where[] = qsprintf(
         $conn_r,
         'r.status in (%Ls)',
-        $statuses);
+        DifferentialLegacyQuery::getLegacyValues($statuses));
     }
 
     $where[] = $this->buildWhereClauseParts($conn_r);

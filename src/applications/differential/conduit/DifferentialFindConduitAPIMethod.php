@@ -52,12 +52,12 @@ final class DifferentialFindConduitAPIMethod
     switch ($type) {
       case 'open':
         $query
-          ->withStatus(DifferentialLegacyQuery::STATUS_OPEN)
+          ->withIsOpen(true)
           ->withAuthors($guids);
         break;
       case 'committable':
         $query
-          ->withStatus(DifferentialLegacyQuery::STATUS_ACCEPTED)
+          ->withStatuses(DifferentialRevisionStatus::ACCEPTED)
           ->withAuthors($guids);
         break;
       case 'revision-ids':
