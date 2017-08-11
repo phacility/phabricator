@@ -529,7 +529,7 @@ final class PhabricatorRepositoryPullEngine
 
     // This is a local command, but needs credentials.
     $remote = $repository->getRemoteURIEnvelope();
-    $future = $repository->getRemoteCommandFuture('pull -u -- %P', $remote);
+    $future = $repository->getRemoteCommandFuture('pull -- %P', $remote);
     $future->setCWD($path);
 
     try {
