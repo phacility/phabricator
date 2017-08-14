@@ -474,8 +474,12 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     if ($this->namedQueries === null) {
       $named_queries = id(new PhabricatorNamedQueryQuery())
         ->setViewer($viewer)
-        ->withUserPHIDs(array($viewer->getPHID()))
         ->withEngineClassNames(array(get_class($this)))
+        ->withUserPHIDs(
+          array(
+            $viewer->getPHID(),
+            PhabricatorNamedQuery::SCOPE_GLOBAL,
+          ))
         ->execute();
       $named_queries = mpull($named_queries, null, 'getQueryKey');
 
@@ -494,7 +498,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         unset($builtin[$key]);
       }
 
-      $named_queries = msort($named_queries, 'getSortKey');
+      $named_queries = msortv($named_queries, 'getNamedQuerySortVector');
       $this->namedQueries = $named_queries;
     }
 
@@ -631,7 +635,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $sequence = 0;
     foreach ($names as $key => $name) {
       $queries[$key] = id(new PhabricatorNamedQuery())
-        ->setUserPHID($this->requireViewer()->getPHID())
+        ->setUserPHID(PhabricatorNamedQuery::SCOPE_GLOBAL)
         ->setEngineClassName(get_class($this))
         ->setQueryName($name)
         ->setQueryKey($key)

@@ -21,7 +21,11 @@ final class PhabricatorSearchDefaultController
       ->setViewer($viewer)
       ->withEngineClassNames(array($engine_class))
       ->withQueryKeys(array($key))
-      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withUserPHIDs(
+        array(
+          $viewer->getPHID(),
+          PhabricatorNamedQuery::SCOPE_GLOBAL,
+        ))
       ->executeOne();
 
     if (!$named_query && $engine->isBuiltinQuery($key)) {
