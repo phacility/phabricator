@@ -22,8 +22,7 @@ final class DiffusionBrowseController extends DiffusionController {
     // list.
 
     $grep = $request->getStr('grep');
-    $find = $request->getStr('find');
-    if (strlen($grep) || strlen($find)) {
+    if (strlen($grep)) {
       return $this->browseSearch();
     }
 
@@ -58,13 +57,15 @@ final class DiffusionBrowseController extends DiffusionController {
     $drequest = $this->getDiffusionRequest();
     $header = $this->buildHeaderView($drequest);
 
-    $search_form = $this->renderSearchForm();
     $search_results = $this->renderSearchResults();
+    $search_form = $this->renderSearchForm();
 
-    $search_form = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Search'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($search_form);
+    $search_form = phutil_tag(
+      'div',
+      array(
+        'class' => 'diffusion-mobile-search-form',
+      ),
+      $search_form);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -329,8 +330,6 @@ final class DiffusionBrowseController extends DiffusionController {
     $header = $this->buildHeaderView($drequest);
     $header->setHeaderIcon('fa-folder-open');
 
-    $search_form = $this->renderSearchForm();
-
     $empty_result = null;
     $browse_panel = null;
     $branch_panel = null;
@@ -368,12 +367,6 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setTable($browse_table)
         ->setPager($pager);
-
-      $browse_panel->setShowHide(
-        array(pht('Show Search')),
-        pht('Hide Search'),
-        $search_form,
-        '#');
 
       $path = $drequest->getPath();
       $is_branch = (!strlen($path) && $repository->supportsBranchComparison());
@@ -1565,32 +1558,48 @@ final class DiffusionBrowseController extends DiffusionController {
 
   protected function renderSearchForm() {
     $drequest = $this->getDiffusionRequest();
-
-    $forms = array();
-    $form = id(new AphrontFormView())
-      ->setUser($this->getViewer())
-      ->setMethod('GET');
-
+    $viewer = $this->getViewer();
     switch ($drequest->getRepository()->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $forms[] = id(clone $form)
-          ->appendChild(pht('Search is not available in Subversion.'));
-        break;
-      default:
-        $forms[] = id(clone $form)
-          ->appendChild(
-            id(new AphrontFormTextWithSubmitControl())
-              ->setLabel(pht('Pattern'))
-              ->setSubmitLabel(pht('Grep File Content'))
-              ->setName('grep')
-              ->setValue($this->getRequest()->getStr('grep')));
-        break;
+        return null;
     }
 
+    $search_term = $this->getRequest()->getStr('grep');
     require_celerity_resource('diffusion-icons-css');
-    $form_box = phutil_tag_div('diffusion-search-boxen', $forms);
+    require_celerity_resource('diffusion-css');
 
-    return $form_box;
+    $bar = javelin_tag(
+      'input',
+      array(
+        'type' => 'text',
+        'id' => 'diffusion-search-input',
+        'name' => 'grep',
+        'class' => 'diffusion-search-input',
+        'sigil' => 'diffusion-search-input',
+        'placeholder' => pht('Pattern Search'),
+        'value' => $search_term,
+      ));
+
+    $form = phabricator_form(
+      $viewer,
+      array(
+        'method' => 'GET',
+        'sigil' => 'diffusion-search-form',
+        'class' => 'diffusion-search-form',
+        'id' => 'diffusion-search-form',
+      ),
+      array(
+        $bar,
+      ));
+
+    $form_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'diffusion-search-form-view',
+      ),
+      $form);
+
+    return $form_view;
   }
 
   protected function markupText($text) {
@@ -1612,11 +1621,14 @@ final class DiffusionBrowseController extends DiffusionController {
     $viewer = $this->getViewer();
 
     $tag = $this->renderCommitHashTag($drequest);
+    $search = $this->renderSearchForm();
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($this->renderPathLinks($drequest, $mode = 'browse'))
-      ->addTag($tag);
+      ->addActionItem($search)
+      ->addTag($tag)
+      ->addClass('diffusion-browse-header');
 
     return $header;
   }

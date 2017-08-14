@@ -122,6 +122,40 @@
   color: {$darkbluetext};
 }
 
+/* - Search Input ------------------------------------------------------------*/
+
+.diffusion-search-form-view {
+  width: 240px;
+}
+
+.diffusion-search-form-view .diffusion-search-input {
+  width: 240px;
+  border-radius: 20px;
+  padding-left: 12px;
+}
+
+.device-phone .diffusion-browse-header .diffusion-search-form-view {
+  display: none;
+}
+
+.diffusion-mobile-search-form {
+  display: none;
+}
+
+.device-phone .diffusion-mobile-search-form {
+  display: block;
+}
+
+.device-phone .diffusion-search-form-view {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.device-phone .diffusion-search-form-view .diffusion-search-input {
+  width: 100%;
+}
+
+
 /* - Phone Style  ------------------------------------------------------------*/
 
 .device-phone.diffusion-history-view  .phui-two-column-view
