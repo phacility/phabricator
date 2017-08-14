@@ -449,18 +449,6 @@ final class DiffusionBrowseController extends DiffusionController {
               'limit' => $pager->getPageSize() + 1,
               'offset' => $pager->getOffset(),
             ));
-        } else { // Filename search.
-          $search_mode = 'find';
-          $query_string = $request->getStr('find');
-          $results = $this->callConduitWithDiffusionRequest(
-            'diffusion.querypaths',
-            array(
-              'pattern' => $query_string,
-              'commit' => $drequest->getStableCommit(),
-              'path' => $drequest->getPath(),
-              'limit' => $pager->getPageSize() + 1,
-              'offset' => $pager->getOffset(),
-            ));
         }
         break;
     }
@@ -470,12 +458,6 @@ final class DiffusionBrowseController extends DiffusionController {
       $table = $this->renderGrepResults($results, $query_string);
       $header = pht(
         'File content matching "%s" under "%s"',
-        $query_string,
-        nonempty($drequest->getPath(), '/'));
-    } else {
-      $table = $this->renderFindResults($results);
-      $header = pht(
-        'Paths matching "%s" under "%s"',
         $query_string,
         nonempty($drequest->getPath(), '/'));
     }
@@ -1595,13 +1577,6 @@ final class DiffusionBrowseController extends DiffusionController {
           ->appendChild(pht('Search is not available in Subversion.'));
         break;
       default:
-        $forms[] = id(clone $form)
-          ->appendChild(
-            id(new AphrontFormTextWithSubmitControl())
-              ->setLabel(pht('File Name'))
-              ->setSubmitLabel(pht('Search File Names'))
-              ->setName('find')
-              ->setValue($this->getRequest()->getStr('find')));
         $forms[] = id(clone $form)
           ->appendChild(
             id(new AphrontFormTextWithSubmitControl())
