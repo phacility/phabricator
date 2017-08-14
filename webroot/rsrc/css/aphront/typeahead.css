@@ -28,6 +28,9 @@ div.jx-typeahead-results a.jx-result {
   color: {$darkgreytext};
   display: block;
   font-size: {$normalfontsize};
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 div.jx-typeahead-results a.jx-result + a.jx-result {
@@ -68,7 +71,8 @@ div.jx-typeahead-results a.diffusion-locate-file {
 }
 
 .diffusion-locate-file strong {
-  color: {$blue};
+  color: {$fire};
+  text-decoration: underline;
 }
 
 .diffusion-locate-file .phui-icon-view {
