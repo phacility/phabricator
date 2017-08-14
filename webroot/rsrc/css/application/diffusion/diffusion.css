@@ -60,6 +60,12 @@
   padding: 0;
 }
 
+.diffusion-view-browse-header {
+  display: block;
+  padding: 2px 0;
+  font-size: {$biggestfontsize};
+}
+
 /* - List Styles  ------------------------------------------------------------*/
 
 .diffusion-history-list .phui-oi-link {
