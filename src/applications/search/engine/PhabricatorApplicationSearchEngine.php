@@ -511,6 +511,34 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $named_queries;
   }
 
+  public function getDefaultQueryKey() {
+    $viewer = $this->requireViewer();
+
+    $configs = id(new PhabricatorNamedQueryConfigQuery())
+      ->setViewer($viewer)
+      ->withEngineClassNames(array(get_class($this)))
+      ->withScopePHIDs(
+        array(
+          $viewer->getPHID(),
+          PhabricatorNamedQueryConfig::SCOPE_GLOBAL,
+        ))
+      ->execute();
+    $configs = msortv($configs, 'getStrengthSortVector');
+
+    $key_pinned = PhabricatorNamedQueryConfig::PROPERTY_PINNED;
+    $map = $this->loadEnabledNamedQueries();
+    foreach ($configs as $config) {
+      $pinned = $config->getConfigProperty($key_pinned);
+      if (!isset($map[$pinned])) {
+        continue;
+      }
+
+      return $pinned;
+    }
+
+    return head_key($map);
+  }
+
   protected function setQueryProjects(
     PhabricatorCursorPagedPolicyAwareQuery $query,
     PhabricatorSavedQuery $saved) {

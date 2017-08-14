@@ -10,7 +10,6 @@ final class PhabricatorSearchEditController
       ->setViewer($viewer)
       ->withQueryKeys(array($request->getURIData('queryKey')))
       ->executeOne();
-
     if (!$saved_query) {
       return new Aphront404Response();
     }

@@ -127,7 +127,7 @@ final class PhabricatorApplicationSearchController
       if (!$found_query_data) {
         // Otherwise, there's no query data so just run the user's default
         // query for this application.
-        $query_key = head_key($engine->loadEnabledNamedQueries());
+        $query_key = $engine->getDefaultQueryKey();
       }
     }
 
@@ -400,6 +400,8 @@ final class PhabricatorApplicationSearchController
         'orderURI' => '/search/order/'.get_class($engine).'/',
       ));
 
+    $default_key = $engine->getDefaultQueryKey();
+
     foreach ($named_queries as $named_query) {
       $class = get_class($engine);
       $key = $named_query->getQueryKey();
@@ -410,28 +412,64 @@ final class PhabricatorApplicationSearchController
 
       if ($named_query->getIsBuiltin() && $named_query->getIsDisabled()) {
         $icon = 'fa-plus';
+        $disable_name = pht('Enable');
       } else {
         $icon = 'fa-times';
+        if ($named_query->getIsBuiltin()) {
+          $disable_name = pht('Disable');
+        } else {
+          $disable_name = pht('Delete');
+        }
       }
 
       $item->addAction(
         id(new PHUIListItemView())
           ->setIcon($icon)
           ->setHref('/search/delete/'.$key.'/'.$class.'/')
+          ->setRenderNameAsTooltip(true)
+          ->setName($disable_name)
           ->setWorkflow(true));
 
-      if ($named_query->getIsBuiltin()) {
-        if ($named_query->getIsDisabled()) {
-          $item->addIcon('fa-times lightgreytext', pht('Disabled'));
-          $item->setDisabled(true);
-        } else {
-          $item->addIcon('fa-lock lightgreytext', pht('Builtin'));
-        }
+      $default_disabled = $named_query->getIsDisabled();
+      $default_icon = 'fa-thumb-tack';
+
+      if ($default_key === $key) {
+        $default_color = 'green';
       } else {
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-pencil')
-            ->setHref('/search/edit/'.$key.'/'));
+        $default_color = null;
+      }
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon("{$default_icon} {$default_color}")
+          ->setHref('/search/default/'.$key.'/'.$class.'/')
+          ->setRenderNameAsTooltip(true)
+          ->setName(pht('Make Default'))
+          ->setWorkflow(true)
+          ->setDisabled($default_disabled));
+
+      if ($named_query->getIsBuiltin()) {
+        $edit_icon = 'fa-lock lightgreytext';
+        $edit_disabled = true;
+        $edit_name = pht('Builtin');
+        $edit_href = null;
+      } else {
+        $edit_icon = 'fa-pencil';
+        $edit_disabled = false;
+        $edit_name = pht('Edit');
+        $edit_href = '/search/edit/'.$key.'/';
+      }
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon($edit_icon)
+          ->setHref($edit_href)
+          ->setRenderNameAsTooltip(true)
+          ->setName($edit_name)
+          ->setDisabled($edit_disabled));
+
+      if ($named_query->getIsDisabled()) {
+        $item->setDisabled(true);
       }
 
       $item->setGrippable(true);
@@ -610,7 +648,7 @@ final class PhabricatorApplicationSearchController
     $engine_class = get_class($engine);
     $query_key = $this->getQueryKey();
     if (!$query_key) {
-      $query_key = head_key($engine->loadEnabledNamedQueries());
+      $query_key = $engine->getDefaultQueryKey();
     }
 
     $can_use = $engine->canUseInPanelContext();
