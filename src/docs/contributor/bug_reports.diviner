@@ -140,7 +140,7 @@ Reproducibility
 
 The most important part of your report content is instructions on how to
 reproduce the issue. What did you do? If you do it again, does it still break?
-Does it depend on a specific browser? Can you reproduce the issue on a free
+Does it depend on a specific browser? Can you reproduce the issue on a test
 instance on `admin.phabricator.com`?
 
 It is nearly impossible for us to resolve many issues if we can not reproduce
