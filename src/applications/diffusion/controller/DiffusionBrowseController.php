@@ -56,9 +56,10 @@ final class DiffusionBrowseController extends DiffusionController {
   private function browseSearch() {
     $drequest = $this->getDiffusionRequest();
     $header = $this->buildHeaderView($drequest);
+    $path = nonempty(basename($drequest->getPath()), '/');
 
     $search_results = $this->renderSearchResults();
-    $search_form = $this->renderSearchForm();
+    $search_form = $this->renderSearchForm($path);
 
     $search_form = phutil_tag(
       'div',
@@ -1473,52 +1474,6 @@ final class DiffusionBrowseController extends DiffusionController {
     return "{$summary}\n{$date} \xC2\xB7 {$author}";
   }
 
-  protected function renderSearchForm() {
-    $drequest = $this->getDiffusionRequest();
-    $viewer = $this->getViewer();
-    switch ($drequest->getRepository()->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        return null;
-    }
-
-    $search_term = $this->getRequest()->getStr('grep');
-    require_celerity_resource('diffusion-icons-css');
-    require_celerity_resource('diffusion-css');
-
-    $bar = javelin_tag(
-      'input',
-      array(
-        'type' => 'text',
-        'id' => 'diffusion-search-input',
-        'name' => 'grep',
-        'class' => 'diffusion-search-input',
-        'sigil' => 'diffusion-search-input',
-        'placeholder' => pht('Pattern Search'),
-        'value' => $search_term,
-      ));
-
-    $form = phabricator_form(
-      $viewer,
-      array(
-        'method' => 'GET',
-        'sigil' => 'diffusion-search-form',
-        'class' => 'diffusion-search-form',
-        'id' => 'diffusion-search-form',
-      ),
-      array(
-        $bar,
-      ));
-
-    $form_view = phutil_tag(
-      'div',
-      array(
-        'class' => 'diffusion-search-form-view',
-      ),
-      $form);
-
-    return $form_view;
-  }
-
   protected function markupText($text) {
     $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
     $engine->setConfig('viewer', $this->getRequest()->getUser());
@@ -1538,7 +1493,8 @@ final class DiffusionBrowseController extends DiffusionController {
     $viewer = $this->getViewer();
 
     $tag = $this->renderCommitHashTag($drequest);
-    $search = $this->renderSearchForm();
+    $path = nonempty(basename($drequest->getPath()), '/');
+    $search = $this->renderSearchForm($path);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)

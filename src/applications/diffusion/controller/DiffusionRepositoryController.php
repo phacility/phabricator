@@ -300,6 +300,8 @@ final class DiffusionRepositoryController extends DiffusionController {
 
   private function buildHeaderView(PhabricatorRepository $repository) {
     $viewer = $this->getViewer();
+    $search = $this->renderSearchForm();
+
     $header = id(new PHUIHeaderView())
       ->setHeader($repository->getName())
       ->setUser($viewer)
@@ -307,6 +309,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setProfileHeader(true)
       ->setImage($repository->getProfileImageURI())
       ->setImageEditURL('/diffusion/picture/'.$repository->getID().'/')
+      ->addActionItem($search)
       ->addClass('diffusion-profile-header');
 
     if (!$repository->isTracked()) {

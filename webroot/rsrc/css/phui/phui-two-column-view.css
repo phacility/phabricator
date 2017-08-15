@@ -185,6 +185,15 @@
   padding: 0 12px;
 }
 
+.device-phone .phui-two-column-tabs .phui-list-view.phui-list-tabbar {
+  text-align: center;
+}
+
+.device-phone .phui-two-column-tabs .phui-list-view.phui-list-tabbar > li {
+  float: none;
+  display: inline-block;
+}
+
 /* Info View */
 
 .phui-two-column-view .phui-info-view {

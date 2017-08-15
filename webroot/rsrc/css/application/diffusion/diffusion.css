@@ -12,6 +12,10 @@
   display: block;
 }
 
+.device-phone .diffusion-profile-header .phui-header-col1 {
+  display: none;
+}
+
 .diffusion-action-bar {
   margin-bottom: 16px;
 }
@@ -145,7 +149,8 @@
   padding-left: 12px;
 }
 
-.device-phone .diffusion-browse-header .diffusion-search-form-view {
+.device-phone .diffusion-browse-header .diffusion-search-form-view,
+.device-phone .diffusion-profile-header .diffusion-search-form-view {
   display: none;
 }
 

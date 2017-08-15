@@ -410,6 +410,58 @@ abstract class DiffusionController extends PhabricatorController {
       ->setContent($readme_corpus);
   }
 
+  protected function renderSearchForm($path = '/') {
+    $drequest = $this->getDiffusionRequest();
+    $viewer = $this->getViewer();
+    switch ($drequest->getRepository()->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        return null;
+    }
+
+    $search_term = $this->getRequest()->getStr('grep');
+    require_celerity_resource('diffusion-icons-css');
+    require_celerity_resource('diffusion-css');
+
+    $href = $drequest->generateURI(array(
+      'action' => 'browse',
+      'path' => $path,
+    ));
+
+    $bar = javelin_tag(
+      'input',
+      array(
+        'type' => 'text',
+        'id' => 'diffusion-search-input',
+        'name' => 'grep',
+        'class' => 'diffusion-search-input',
+        'sigil' => 'diffusion-search-input',
+        'placeholder' => pht('Pattern Search'),
+        'value' => $search_term,
+      ));
+
+    $form = phabricator_form(
+      $viewer,
+      array(
+        'method' => 'GET',
+        'action' => $href,
+        'sigil' => 'diffusion-search-form',
+        'class' => 'diffusion-search-form',
+        'id' => 'diffusion-search-form',
+      ),
+      array(
+        $bar,
+      ));
+
+    $form_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'diffusion-search-form-view',
+      ),
+      $form);
+
+    return $form_view;
+  }
+
   protected function buildTabsView($key) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
