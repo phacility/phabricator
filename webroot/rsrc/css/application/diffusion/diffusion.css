@@ -122,6 +122,11 @@
   color: {$darkbluetext};
 }
 
+.diffusion-search-result-header.phui-header-shell {
+  border: none;
+  padding-bottom: 24px;
+}
+
 /* - Search Input ------------------------------------------------------------*/
 
 .diffusion-search-form-view {
