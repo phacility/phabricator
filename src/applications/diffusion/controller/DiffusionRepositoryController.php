@@ -31,8 +31,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     $description = $this->buildDescriptionView($repository);
     $locate_file = $this->buildLocateFile();
 
-    $header->setActionList($actions);
-
     // Before we do any work, make sure we're looking at a some content: we're
     // on a valid branch, and the repository is not empty.
     $page_has_content = false;
@@ -113,6 +111,15 @@ final class DiffusionRepositoryController extends DiffusionController {
       $clone_text = pht('Clone');
     }
 
+    $actions_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Actions'))
+      ->setIcon('fa-bars')
+      ->addClass('mmr')
+      ->setColor(PHUIButtonView::GREY)
+      ->setDropdown(true)
+      ->setDropdownMenu($actions);
+
     $clone_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText($clone_text)
@@ -123,7 +130,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $bar = id(new PHUILeftRightView())
       ->setLeft($locate_file)
-      ->setRight(array($this->branchButton, $clone_button))
+      ->setRight(array($this->branchButton, $actions_button, $clone_button))
       ->addClass('diffusion-action-bar');
 
     $view = id(new PHUITwoColumnView())

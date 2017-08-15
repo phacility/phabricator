@@ -33,6 +33,12 @@
   display: block;
 }
 
+.device-phone .diffusion-action-bar .button .phui-button-text {
+  visibility: hidden;
+  width: 0;
+  margin-left: 8px;
+}
+
 .diffusion-profile-locate .phui-form-view {
   margin: 0;
   padding: 0;
