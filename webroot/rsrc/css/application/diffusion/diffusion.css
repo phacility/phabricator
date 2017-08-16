@@ -122,6 +122,12 @@
   margin-right: 4px;
 }
 
+.diffusion-header-branch-tag.phui-tag-view.phui-tag-type-outline
+  .phui-tag-core {
+    padding: 3px 12px 2px;
+    font-size: {$normalfontsize};
+}
+
 /* - Browse Styles  ----------------------------------------------------------*/
 
 .diffusion-browse-table .commit-detail {

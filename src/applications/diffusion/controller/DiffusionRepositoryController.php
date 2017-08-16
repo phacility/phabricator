@@ -98,7 +98,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setErrors(array($empty_message));
     }
 
-    $tabs = $this->buildTabsView('home');
+    $tabs = $this->buildTabsView('code');
 
     $clone_uri = $drequest->generateURI(
       array(
@@ -300,6 +300,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
   private function buildHeaderView(PhabricatorRepository $repository) {
     $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $search = $this->renderSearchForm();
 
     $header = id(new PHUIHeaderView())
@@ -323,6 +324,14 @@ final class DiffusionRepositoryController extends DiffusionController {
         pht('Importing (%s)...', $percentage));
     } else {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
+    }
+
+    if (!$repository->isSVN()) {
+      $default = $repository->getDefaultBranch();
+      if ($default != $drequest->getBranch()) {
+        $branch_tag = $this->renderBranchTag($drequest);
+        $header->addTag($branch_tag);
+      }
     }
 
     return $header;

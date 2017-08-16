@@ -343,6 +343,38 @@ abstract class DiffusionController extends PhabricatorController {
     return $tag;
   }
 
+  protected function renderBranchTag(DiffusionRequest $drequest) {
+    $branch = $drequest->getBranch();
+    $branch = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(24)
+      ->truncateString($branch);
+
+    $tag = id(new PHUITagView())
+      ->setName($branch)
+      ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
+      ->setType(PHUITagView::TYPE_OUTLINE)
+      ->addClass('diffusion-header-branch-tag');
+
+    return $tag;
+  }
+
+  protected function renderSymbolicCommit(DiffusionRequest $drequest) {
+    $symbolic_tag = $drequest->getSymbolicCommit();
+    $symbolic_tag = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(24)
+      ->truncateString($symbolic_tag);
+
+    $tag = id(new PHUITagView())
+      ->setName($symbolic_tag)
+      ->setIcon('fa-tag')
+      ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
+      ->setType(PHUITagView::TYPE_SHADE);
+
+    return $tag;
+  }
+
   protected function renderDirectoryReadme(DiffusionBrowseResultSet $browse) {
     $readme_path = $browse->getReadmePath();
     if ($readme_path === null) {
@@ -470,15 +502,15 @@ abstract class DiffusionController extends PhabricatorController {
 
     $view->addMenuItem(
       id(new PHUIListItemView())
-        ->setKey('home')
-        ->setName(pht('Home'))
-        ->setIcon('fa-home')
+        ->setKey('code')
+        ->setName(pht('Code'))
+        ->setIcon('fa-code')
         ->setHref($drequest->generateURI(
           array(
             'action' => 'branch',
             'path' => '/',
           )))
-        ->setSelected($key == 'home'));
+        ->setSelected($key == 'code'));
 
     if (!$repository->isSVN()) {
       $view->addMenuItem(

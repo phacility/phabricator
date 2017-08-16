@@ -11,6 +11,7 @@ final class DiffusionTagListController extends DiffusionController {
     if ($response) {
       return $response;
     }
+    require_celerity_resource('diffusion-css');
 
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
@@ -49,6 +50,11 @@ final class DiffusionTagListController extends DiffusionController {
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Tags'))
       ->setHeaderIcon('fa-tags');
+
+    if (!$repository->isSVN()) {
+      $branch_tag = $this->renderBranchTag($drequest);
+      $header->addTag($branch_tag);
+    }
 
     if (!$tags) {
       $content = $this->renderStatusMessage(

@@ -76,8 +76,11 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
     $crumbs->setBorder(true);
 
+    $tabs = $this->buildTabsView('code');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter(
         array(
           $search_form,
@@ -291,9 +294,11 @@ final class DiffusionBrowseController extends DiffusionController {
     $crumbs->setBorder(true);
 
     $basename = basename($this->getDiffusionRequest()->getPath());
+    $tabs = $this->buildTabsView('code');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setCurtain($curtain)
       ->setMainColumn(array(
         $content,
@@ -387,9 +392,11 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
 
     $crumbs->setBorder(true);
+    $tabs = $this->buildTabsView('code');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter(
         array(
           $branch_panel,
@@ -1491,8 +1498,10 @@ final class DiffusionBrowseController extends DiffusionController {
 
   protected function buildHeaderView(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
+    $repository = $drequest->getRepository();
 
-    $tag = $this->renderCommitHashTag($drequest);
+    $commit_tag = $this->renderCommitHashTag($drequest);
+
     $path = nonempty(basename($drequest->getPath()), '/');
     $search = $this->renderSearchForm($path);
 
@@ -1500,8 +1509,13 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setUser($viewer)
       ->setHeader($this->renderPathLinks($drequest, $mode = 'browse'))
       ->addActionItem($search)
-      ->addTag($tag)
+      ->addTag($commit_tag)
       ->addClass('diffusion-browse-header');
+
+    if (!$repository->isSVN()) {
+      $branch_tag = $this->renderBranchTag($drequest);
+      $header->addTag($branch_tag);
+    }
 
     return $header;
   }
