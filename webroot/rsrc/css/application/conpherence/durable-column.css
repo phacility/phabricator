@@ -12,7 +12,7 @@
   right: 16px;
   width: 400px;
   height: 360px;
-  background: #fff;
+  background: {$page.content};
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
   box-shadow: 0px 1px 8px rgba(55,55,55, .3);

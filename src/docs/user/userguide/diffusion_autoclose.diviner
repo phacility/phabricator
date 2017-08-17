@@ -17,21 +17,19 @@ troubleshoot it.
 Troubleshooting Autoclose
 =========================
 
-You can check if a branch is currently configured to autoclose on the main
-repository view, or in the branches list view. Hover over the {icon check} or
-{icon times} icon and you should see one of these messages:
+You can check if a branch is currently configured to autoclose on the
+management page for the given repository under the branches menu item.
+You should see one of these statuses next to the name of the branch:
 
-  - {icon check} **Autoclose Enabled** Autoclose is active for this branch.
-  - {icon times} **Repository Importing** This repository is still importing.
+  - **Autoclose On** Autoclose is active for this branch.
+  - **Repository Importing** This repository is still importing.
     Autoclose does not activate until a repository finishes importing for the
     first time. This prevents situations where you import a repository and
     accidentally close hundreds of related objects during import. Autoclose
     will activate for new commits after the initial import completes.
-  - {icon times} **Repository Autoclose Disabled** Autoclose is disabled for
-    this entire repository. You can enable it in **Edit Repository**.
-  - {icon times} **Branch Untracked** This branch is not tracked. Because it
+  - **Tracking Off** This branch is not tracked. Because it
     is not tracked, commits on it won't be seen and won't be discovered.
-  - {icon times} **Branch Autoclose Disabled** Autoclose is not enabled for
+  - **Autoclose Off** Autoclose is not enabled for
     this branch. You can adjust which branches autoclose in **Edit Repository**.
     This option is only available in Git.
 

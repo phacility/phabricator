@@ -483,14 +483,14 @@ final class PhabricatorAuthRegisterController
     if ($can_edit_username) {
       $form->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('Phabricator Username'))
+          ->setLabel(pht('Username'))
           ->setName('username')
           ->setValue($value_username)
           ->setError($e_username));
     } else {
       $form->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Phabricator Username'))
+          ->setLabel(pht('Username'))
           ->setValue($value_username)
           ->setError($e_username));
     }
@@ -546,7 +546,7 @@ final class PhabricatorAuthRegisterController
     } else {
       $submit
         ->addCancelButton($this->getApplicationURI('start/'))
-        ->setValue(pht('Register Phabricator Account'));
+        ->setValue(pht('Register Account'));
     }
 
 
@@ -560,7 +560,7 @@ final class PhabricatorAuthRegisterController
     } else {
       $crumbs->addTextCrumb(pht('Register'));
       $crumbs->addTextCrumb($provider->getProviderName());
-        $title = pht('Phabricator Registration');
+        $title = pht('Create a New Account');
     }
     $crumbs->setBorder(true);
 

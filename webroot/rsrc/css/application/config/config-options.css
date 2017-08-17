@@ -5,8 +5,8 @@
 .config-option-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid {$lightgreyborder};
-  background: #fff;
+  border: 1px solid {$thinblueborder};
+  background: {$page.content};
 }
 
 .config-option-table th,
@@ -52,5 +52,5 @@
 
 .config-options-effective-value,
 .config-option-table .config-options-effective-value th {
-  background: {$lightyellow};
+  background: {$gentle.highlight};
 }

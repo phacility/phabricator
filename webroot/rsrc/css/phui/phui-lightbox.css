@@ -80,7 +80,7 @@
   right: 0;
   width: 360px;
   overflow-y: auto;
-  background: #fff;
+  background: {$page.content};
   opacity: 1;
 }
 
@@ -100,7 +100,7 @@
 }
 
 .lightbox-attachment .lightbox-status {
-  background: #fff;
+  background: {$page.content};
   position: fixed;
   top: 0;
   left: 0;
@@ -121,7 +121,7 @@
 }
 
 .lightbox-attachment .lightbox-status-txt a {
-  color: #000;
+  color: {$blacktext};
   margin-right: 12px;
   font-size: {$biggerfontsize};
 }

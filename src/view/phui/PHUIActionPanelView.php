@@ -4,6 +4,7 @@ final class PHUIActionPanelView extends AphrontTagView {
 
   private $href;
   private $fontIcon;
+  private $image;
   private $header;
   private $subHeader;
   private $bigText;
@@ -26,6 +27,11 @@ final class PHUIActionPanelView extends AphrontTagView {
 
   public function setIcon($image) {
     $this->fontIcon = $image;
+    return $this;
+  }
+
+  public function setImage($image) {
+    $this->image = $image;
     return $this;
   }
 
@@ -87,6 +93,21 @@ final class PHUIActionPanelView extends AphrontTagView {
           'class' => 'phui-action-panel-icon',
         ),
         $fonticon);
+    }
+
+    if ($this->image) {
+      $image = phutil_tag(
+        'img',
+        array(
+          'class' => 'phui-action-panel-image',
+          'src' => $this->image,
+        ));
+      $icon = phutil_tag(
+        'span',
+        array(
+          'class' => 'phui-action-panel-icon',
+        ),
+        $image);
     }
 
     $header = null;

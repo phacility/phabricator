@@ -23,4 +23,11 @@ final class PonderAnswerTransaction
     return 'PonderAnswerTransactionType';
   }
 
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+    $tags[] = PonderQuestionTransaction::MAILTAG_OTHER;
+
+    return $tags;
+  }
+
 }

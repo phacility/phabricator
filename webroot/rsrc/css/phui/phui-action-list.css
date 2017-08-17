@@ -114,7 +114,7 @@
 
 .device-desktop li.phabricator-action-view-label:hover
   .phabricator-action-view-item {
-    background-color: #fff;
+    background-color: {$page.content};
     color: {$bluetext};
 }
 
@@ -157,7 +157,6 @@
   .phabricator-action-view-icon,
 .device-desktop .phabricator-action-view-disabled:hover
   button.phabricator-action-view-icon {
-  background-color: {$greybackground};
   color: {$lightgreytext};
 }
 

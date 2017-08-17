@@ -10,7 +10,7 @@ button.phui-button-simple,
 input[type="submit"].phui-button-simple,
 a.phui-button-simple,
 a.phui-button-simple:visited {
-  background: #fff;
+  background: {$page.content};
   color: {$bluetext};
   border: 1px solid {$lightblueborder};
 }
@@ -26,7 +26,7 @@ a.button.phui-button-simple:hover,
 button.phui-button-simple:hover {
   border-color: {$blueborder};
   background-image: none;
-  background-color: #fff;
+  background-color: {$page.content};
   transition: 0s;
 }
 

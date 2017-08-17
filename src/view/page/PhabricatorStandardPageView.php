@@ -19,6 +19,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
   private $showFooter = true;
   private $showDurableColumn = true;
   private $quicksandConfig = array();
+  private $tabs;
   private $crumbs;
   private $navigation;
 
@@ -157,6 +158,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
   public function getCrumbs() {
     return $this->crumbs;
+  }
+
+  public function setTabs(PHUIListView $tabs) {
+    $tabs->setType(PHUIListView::TABBAR_LIST);
+    $tabs->addClass('phabricator-standard-page-tabs');
+    $this->tabs = $tabs;
+    return $this;
+  }
+
+  public function getTabs() {
+    return $this->tabs;
   }
 
   public function setNavigation(AphrontSideNavFilterView $navigation) {
@@ -528,6 +540,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     $footer = $this->renderFooter();
 
     $nav = $this->getNavigation();
+    $tabs = $this->getTabs();
     if ($nav) {
       $crumbs = $this->getCrumbs();
       if ($crumbs) {
@@ -541,7 +554,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
       $crumbs = $this->getCrumbs();
       if ($crumbs) {
+        if ($this->getTabs()) {
+          $crumbs->setBorder(true);
+        }
         $content[] = $crumbs;
+      }
+
+      $tabs = $this->getTabs();
+      if ($tabs) {
+        $content[] = $tabs;
       }
 
       $content[] = $body;

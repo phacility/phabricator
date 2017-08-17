@@ -37,9 +37,6 @@ final class DiffusionRepositoryEditController
     $crumbs->setBorder(true);
 
     $title = pht('Choose Repository Type');
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Create Repository'))
-      ->setHeaderIcon('fa-plus-square');
 
     $layout = id(new AphrontMultiColumnView())
       ->setFluidLayout(true);
@@ -47,8 +44,10 @@ final class DiffusionRepositoryEditController
     $create_uri = $request->getRequestURI();
 
     foreach ($vcs_types as $vcs_key => $vcs_type) {
+      $image = idx($vcs_type, 'image');
+      $image = PhabricatorFile::loadBuiltin($viewer, $image);
       $action = id(new PHUIActionPanelView())
-        ->setIcon(idx($vcs_type, 'icon'))
+        ->setImage($image->getBestURI())
         ->setHeader(idx($vcs_type, 'create.header'))
         ->setHref($create_uri->alter('vcs', $vcs_key))
         ->setSubheader(idx($vcs_type, 'create.subheader'));
@@ -62,9 +61,12 @@ final class DiffusionRepositoryEditController
     $observe_href = PhabricatorEnv::getDoclink(
       'Diffusion User Guide: Existing Repositories');
 
+    require_celerity_resource('diffusion-css');
+
+    $image = PhabricatorFile::loadBuiltin($viewer, 'repo/repo.png');
     $hints->addColumn(
       id(new PHUIActionPanelView())
-        ->setIcon('fa-book')
+        ->setImage($image->getBestURI())
         ->setHeader(pht('Import or Observe an Existing Repository'))
         ->setHref($observe_href)
         ->setSubheader(
@@ -72,12 +74,15 @@ final class DiffusionRepositoryEditController
             'Review the documentation describing how to import or observe an '.
             'existing repository.')));
 
+    $layout = id(new PHUIBoxView())
+      ->addClass('diffusion-create-repo')
+      ->appendChild($layout);
+
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
+      ->setFixed(true)
       ->setFooter(
         array(
           $layout,
-          phutil_tag('br'),
           $hints,
         ));
 

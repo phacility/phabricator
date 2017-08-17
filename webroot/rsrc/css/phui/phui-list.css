@@ -88,7 +88,7 @@
 }
 
 .device-desktop .phui-list-sidenav .phui-list-item-href:hover .phui-icon-view {
-  color: #fff;
+  color: {$page.content};
 }
 
 /* - Top, Full Width Navigations -----------------------------------------------
@@ -171,7 +171,7 @@
   line-height: 24px;
   font-weight: bold;
   font-size: {$biggerfontsize};
-  border-top: 4px solid #fff;
+  border-top: 4px solid transparent;
 }
 
 .phui-list-tabbar .phui-list-item-selected .phui-list-item-href {
@@ -186,7 +186,6 @@
 
 .device-desktop .phui-list-tabbar .phui-list-item-href:hover {
   color: {$sky};
-  border-bottom: 4px solid $fff;
   text-decoration: none;
 }
 

@@ -119,9 +119,11 @@ final class PhabricatorConduitAPIController
       ->setError((string)$error_code)
       ->setDuration(1000000 * ($time_end - $time_start));
 
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $log->save();
-    unset($unguarded);
+    if (!PhabricatorEnv::isReadOnly()) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $log->save();
+      unset($unguarded);
+    }
 
     $response = id(new ConduitAPIResponse())
       ->setResult($result)

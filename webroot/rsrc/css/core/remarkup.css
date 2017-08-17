@@ -3,7 +3,7 @@
  */
 
 .phabricator-remarkup {
-  line-height: 1.51em;
+  line-height: 1.7em;
   word-break: break-word;
 }
 
@@ -47,7 +47,7 @@
 .phabricator-remarkup .remarkup-code-block pre {
   background: rgba({$alphablue},0.08);
   display: block;
-  color: #000;
+  color: {$blacktext};
   overflow: auto;
   padding: 12px;
   border-radius: 3px;
@@ -80,7 +80,7 @@
 }
 
 .phabricator-remarkup tt.remarkup-monospaced {
-  color: #000;
+  color: {$blacktext};
   background: rgba({$alphablue},0.1);
   padding: 1px 4px;
   border-radius: 3px;
@@ -342,7 +342,7 @@ video.phabricator-media {
 .phabricator-remarkup-toc {
   float: right;
   border-left: 1px solid {$lightblueborder};
-  background: #fff;
+  background: {$page.content};
   width: 160px;
   padding-left: 8px;
   margin: 0 0 4px 8px;
@@ -402,7 +402,7 @@ video.phabricator-media {
   -webkit-font-smoothing: antialiased;
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
-  color: #000;
+  color: {$blacktext};
   min-width: 256px;
   position: relative;
   /*height: 22px;*/
@@ -509,7 +509,7 @@ video.phabricator-media {
 }
 
 .phabricator-remarkup table.remarkup-table td {
-  background: #ffffff;
+  background: {$page.content};
   padding: 3px 6px;
 }
 
@@ -679,7 +679,7 @@ var.remarkup-assist-textarea {
   position: absolute;
   width: 300px;
   box-shadow: {$dropshadow};
-  background: #ffffff;
+  background: {$page.content};
   border: 1px solid {$lightgreyborder};
   border-radius: 3px;
 }
@@ -721,13 +721,13 @@ var.remarkup-assist-textarea {
 .phuix-autocomplete-list a.jx-result:hover {
   text-decoration: none;
   background: {$sh-bluebackground};
-  color: #000;
+  color: {$blacktext};
 }
 
 .phuix-autocomplete-list a.jx-result.focused,
 .phuix-autocomplete-list a.jx-result.focused:hover {
   background: {$sh-bluebackground};
-  color: #000;
+  color: {$blacktext};
 }
 
 
@@ -735,7 +735,7 @@ var.remarkup-assist-textarea {
 
 .phui-box.phui-object-box.phui-comment-form-view.remarkup-assist-pinned {
   position: fixed;
-  background-color: #ffffff;
+  background-color: {$page.content};
   border-top: 1px solid {$lightblueborder};
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
 
@@ -759,7 +759,7 @@ var.remarkup-assist-textarea {
 .remarkup-inline-preview {
   display: block;
   position: relative;
-  background: #fff;
+  background: {$page.content};
   overflow-y: auto;
   box-sizing: border-box;
   width: 100%;
@@ -783,7 +783,7 @@ var.remarkup-assist-textarea {
 }
 
 .remarkup-assist-button.preview-active .phui-icon-view {
-  color: #fff;
+  color: {$page.content};
 }
 
 .remarkup-assist-button.preview-active:hover {
@@ -791,7 +791,7 @@ var.remarkup-assist-textarea {
 }
 
 .remarkup-assist-button.preview-active:hover .phui-icon-view {
-  color: #fff;
+  color: {$page.content};
 }
 
 .remarkup-preview-active .remarkup-assist,
@@ -867,7 +867,7 @@ var.remarkup-assist-textarea {
     border-width: 1px 0 0 0;
     outline: none;
     resize: none;
-    background: #fff !important;
+    background: {$page.content} !important;
 }
 
 .remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea:focus {

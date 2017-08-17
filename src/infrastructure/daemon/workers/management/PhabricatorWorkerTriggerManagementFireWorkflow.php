@@ -84,7 +84,7 @@ final class PhabricatorWorkerTriggerManagementFireWorkflow
         $console->writeOut(
           "%s\n",
           pht(
-            'Trigger is not scheduled to execute. Use --next to simluate '.
+            'Trigger is not scheduled to execute. Use --next to simulate '.
             'a scheduled event.'));
         continue;
       } else {

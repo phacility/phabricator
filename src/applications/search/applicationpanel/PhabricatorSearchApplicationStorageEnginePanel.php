@@ -16,53 +16,60 @@ final class PhabricatorSearchApplicationStorageEnginePanel
     $viewer = $this->getViewer();
     $application = $this->getApplication();
 
-    $active_engine = PhabricatorFulltextStorageEngine::loadEngine();
-    $engines = PhabricatorFulltextStorageEngine::loadAllEngines();
+    $services = PhabricatorSearchService::getAllServices();
 
     $rows = array();
     $rowc = array();
 
-    foreach ($engines as $key => $engine) {
+    foreach ($services as $key => $service) {
       try {
-        $index_exists = $engine->indexExists() ? pht('Yes') : pht('No');
+        $name = $service->getDisplayName();
       } catch (Exception $ex) {
-        $index_exists = pht('N/A');
+        $name = phutil_tag('em', array(), pht('Error'));
       }
 
       try {
-        $index_is_sane = $engine->indexIsSane() ? pht('Yes') : pht('No');
+        $can_read = $service->isReadable() ? pht('Yes') : pht('No');
       } catch (Exception $ex) {
-        $index_is_sane = pht('N/A');
+        $can_read = pht('N/A');
       }
 
-      if ($engine == $active_engine) {
-        $rowc[] = 'highlighted';
-      } else {
-        $rowc[] = null;
+      try {
+        $can_write = $service->isWritable() ? pht('Yes') : pht('No');
+      } catch (Exception $ex) {
+        $can_write = pht('N/A');
       }
 
       $rows[] = array(
-        $key,
-        get_class($engine),
-        $index_exists,
-        $index_is_sane,
+        $name,
+        $can_read,
+        $can_write,
       );
     }
 
+    $instructions = pht(
+      'To configure the search engines, edit [[ %s | `%s` ]] configuration. '.
+      'See **[[ %s | %s ]]** for documentation.',
+      '/config/edit/cluster.search/',
+      'cluster.search',
+      PhabricatorEnv::getDoclink('Cluster: Search'),
+      pht('Cluster: Search'));
+
+
     $table = id(new AphrontTableView($rows))
       ->setNoDataString(pht('No search engines available.'))
+      ->setNotice(new PHUIRemarkupView($viewer, $instructions))
       ->setHeaders(
         array(
-          pht('Key'),
-          pht('Class'),
-          pht('Index Exists'),
-          pht('Index Is Sane'),
+          pht('Engine Name'),
+          pht('Writable'),
+          pht('Readable'),
         ))
       ->setRowClasses($rowc)
       ->setColumnClasses(
         array(
-          '',
           'wide',
+          '',
           '',
         ));
 

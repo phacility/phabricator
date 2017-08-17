@@ -14,7 +14,7 @@
 
 .phui-button-bar-borderless .button .phui-icon-view {
   font-size: 15px;
-  color: rgba({$alphagrey},.4);
+  color: {$bluetext};
 }
 
 .phui-button-bar-borderless .button:hover {
@@ -24,7 +24,7 @@
 }
 
 .phui-button-bar-borderless .button:hover .phui-icon-view {
-  color: rgba({$alphagrey},.9);
+  color: {$sky};
 }
 
 .phui-button-bar-borderless .button {

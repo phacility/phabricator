@@ -114,7 +114,7 @@ final class PhabricatorEmailLoginController
             ->setTitle(pht('Check Your Email'))
             ->setShortTitle(pht('Email Sent'))
             ->appendParagraph(
-              pht('An email has been sent with a link you can use to login.'))
+              pht('An email has been sent with a link you can use to log in.'))
             ->addCancelButton('/', pht('Done'));
         }
       }

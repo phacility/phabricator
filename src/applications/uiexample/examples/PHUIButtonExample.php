@@ -20,6 +20,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
    $colors = array(
      null,
      PHUIButtonView::GREEN,
+     PHUIButtonView::RED,
      PHUIButtonView::GREY,
     );
    $sizes = array(null, PHUIButtonView::SMALL);
@@ -158,7 +159,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
         ->setSize(PHUIButtonView::BIG)
         ->setColor(PHUIButtonView::GREY)
         ->setIcon($image)
-        ->setText(pht('Login or Register'))
+        ->setText(pht('Log In or Register'))
         ->setSubtext($icon)
         ->addClass(PHUI::MARGIN_MEDIUM_RIGHT);
     }

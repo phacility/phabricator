@@ -164,7 +164,7 @@
   position: absolute;
   font-size: {$normalfontsize};
   border: none;
-  background-color: #fff;
+  background-color: {$page.content};
   height: 28px;
   padding: 3px 28px 3px 52px;
   float: left;
@@ -180,7 +180,7 @@
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
-  background: #fff;
+  background: {$page.content};
   opacity: 1;
   color: {$darkbluetext};
   box-shadow: none;
@@ -270,7 +270,7 @@ a.phabricator-core-user-menu .caret:before {
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
-  background: #fff;
+  background: {$page.content};
   word-wrap: break-word;
   overflow-y: auto;
   box-shadow: {$dropshadow};

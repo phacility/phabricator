@@ -14,7 +14,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5),
 only screen and (min-resolution: 1.5dppx) {
   .sprite-login {
     background-image: url(/rsrc/image/sprite-login-X2.png);
-    background-size: 145px 174px;
+    background-size: 145px 145px;
   }
 }
 
@@ -35,28 +35,24 @@ only screen and (min-resolution: 1.5dppx) {
   background-position: -87px 0px;
 }
 
-.login-Dropbox {
+.login-Facebook {
   background-position: -116px 0px;
 }
 
-.login-Facebook {
+.login-Generic {
   background-position: 0px -29px;
 }
 
-.login-Generic {
+.login-Github {
   background-position: -29px -29px;
 }
 
-.login-Github {
+.login-Google {
   background-position: -58px -29px;
 }
 
-.login-Google {
-  background-position: -87px -29px;
-}
-
 .login-HTTP {
-  background-position: -116px -29px;
+  background-position: -87px -29px;
 }
 
 .login-Jira {
@@ -67,54 +63,42 @@ only screen and (min-resolution: 1.5dppx) {
   background-position: -29px -58px;
 }
 
-.login-Linkedin {
+.login-MediaWiki {
   background-position: -58px -58px;
 }
 
-.login-MediaWiki {
+.login-PayPal {
   background-position: -87px -58px;
 }
 
-.login-Openid {
-  background-position: -116px -58px;
-}
-
-.login-PayPal {
+.login-Phabricator {
   background-position: 0px -87px;
 }
 
-.login-Phabricator {
-  background-position: -58px -87px;
-}
-
 .login-Slack {
-  background-position: -87px -87px;
+  background-position: -29px -87px;
 }
 
 .login-Stripe {
-  background-position: -116px -87px;
+  background-position: -58px -87px;
 }
 
 .login-TestPayment {
-  background-position: 0px -116px;
+  background-position: -87px -87px;
 }
 
 .login-TwitchTV {
-  background-position: -29px -116px;
+  background-position: 0px -116px;
 }
 
 .login-Twitter {
-  background-position: -58px -116px;
+  background-position: -29px -116px;
 }
 
 .login-WePay {
-  background-position: -87px -116px;
+  background-position: -58px -116px;
 }
 
 .login-WordPressCOM {
-  background-position: -116px -116px;
-}
-
-.login-Yahoo {
-  background-position: 0px -145px;
+  background-position: -87px -116px;
 }

@@ -153,6 +153,7 @@ final class PhabricatorEmailAddressesSettingsPanel
     }
     $view->setHeader($header);
     $view->setTable($table);
+    $view->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $view;
   }

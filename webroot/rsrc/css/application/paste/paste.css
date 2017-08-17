@@ -3,8 +3,8 @@
  */
 
 .paste-embed {
-  background: {$sh-yellowbackground};
-  border: 1px solid {$sh-lightyellowborder};
+  background: {$paste.content};
+  border: 1px solid {$paste.border};
   border-radius: 3px;
 }
 
@@ -13,7 +13,8 @@
 }
 
 .paste-embed-head {
-  border-bottom: 1px solid {$sh-lightyellowborder};
+  border-bottom: 1px solid {$paste.border};
+  background: {$paste.highlight};
   padding: 8px 12px;
 }
 
@@ -24,4 +25,9 @@
 
 .paste-embed-body {
   overflow-y: auto;
+}
+
+.paste-embed-body .phabricator-source-code-container {
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
 }

@@ -134,13 +134,11 @@ final class DifferentialRevisionRequiredActionResultBucket
   }
 
   private function filterShouldLand(array $phids) {
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-
     $objects = $this->getRevisionsAuthored($this->objects, $phids);
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if ($object->getStatus() != $status_accepted) {
+      if (!$object->isAccepted()) {
         continue;
       }
 
@@ -153,9 +151,8 @@ final class DifferentialRevisionRequiredActionResultBucket
 
   private function filterShouldUpdate(array $phids) {
     $statuses = array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED,
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION,
+      DifferentialRevisionStatus::NEEDS_REVISION,
+      DifferentialRevisionStatus::CHANGES_PLANNED,
     );
     $statuses = array_fuse($statuses);
 
@@ -163,7 +160,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if (empty($statuses[$object->getStatus()])) {
+      if (empty($statuses[$object->getModernRevisionStatus()])) {
         continue;
       }
 
@@ -175,13 +172,11 @@ final class DifferentialRevisionRequiredActionResultBucket
   }
 
   private function filterWaitingForReview(array $phids) {
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-
     $objects = $this->getRevisionsAuthored($this->objects, $phids);
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if ($object->getStatus() != $status_review) {
+      if (!$object->isNeedsReview()) {
         continue;
       }
 
@@ -194,10 +189,9 @@ final class DifferentialRevisionRequiredActionResultBucket
 
   private function filterWaitingOnAuthors(array $phids) {
     $statuses = array(
-      ArcanistDifferentialRevisionStatus::ACCEPTED,
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED,
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION,
+      DifferentialRevisionStatus::ACCEPTED,
+      DifferentialRevisionStatus::NEEDS_REVISION,
+      DifferentialRevisionStatus::CHANGES_PLANNED,
     );
     $statuses = array_fuse($statuses);
 
@@ -205,7 +199,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if (empty($statuses[$object->getStatus()])) {
+      if (empty($statuses[$object->getModernRevisionStatus()])) {
         continue;
       }
 
@@ -217,16 +211,11 @@ final class DifferentialRevisionRequiredActionResultBucket
   }
 
   private function filterWaitingOnOtherReviewers(array $phids) {
-    $statuses = array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
-    );
-    $statuses = array_fuse($statuses);
-
     $objects = $this->getRevisionsNotAuthored($this->objects, $phids);
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if (!isset($statuses[$object->getStatus()])) {
+      if (!$object->isNeedsReview()) {
         continue;
       }
 

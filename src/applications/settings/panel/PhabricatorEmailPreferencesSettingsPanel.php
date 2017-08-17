@@ -136,6 +136,7 @@ final class PhabricatorEmailPreferencesSettingsPanel
       ->setHeaderText(pht('Email Preferences'))
       ->setFormSaved($request->getStr('saved'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     return $form_box;

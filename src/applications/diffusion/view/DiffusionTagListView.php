@@ -52,23 +52,11 @@ final class DiffusionTagListView extends DiffusionView {
           'commit' => $tag->getCommitIdentifier(),
         ));
 
-      $author = null;
-      if ($commit && $commit->getAuthorPHID()) {
-        $author = $this->handles[$commit->getAuthorPHID()]->renderLink();
-      } else if ($commit && $commit->getCommitData()) {
-        $author = self::renderName($commit->getCommitData()->getAuthorName());
+      if ($commit) {
+        $author = $this->renderAuthor($tag, $commit);
       } else {
-        $author = self::renderName($tag->getAuthor());
+        $author = null;
       }
-
-      $committed = phabricator_datetime($commit->getEpoch(), $viewer);
-      $author_name = phutil_tag(
-        'strong',
-        array(
-          'class' => 'diffusion-history-author-name',
-        ),
-        $author);
-      $authored = pht('%s on %s.', $author_name, $committed);
 
       $description = null;
       if ($tag->getType() == 'git/tag') {
@@ -139,16 +127,43 @@ final class DiffusionTagListView extends DiffusionView {
         ->setHref($tag_href)
         ->addAttribute(array($commit_tag))
         ->addAttribute($description)
-        ->addAttribute($authored)
         ->setSideColumn(array(
           $build_view,
           $button_bar,
         ));
 
+      if ($author) {
+        $item->addAttribute($author);
+      }
+
       $list->addItem($item);
     }
 
     return $list;
+  }
+
+  private function renderAuthor(
+    DiffusionRepositoryTag $tag,
+    PhabricatorRepositoryCommit $commit) {
+    $viewer = $this->getViewer();
+
+    if ($commit->getAuthorPHID()) {
+      $author = $this->handles[$commit->getAuthorPHID()]->renderLink();
+    } else if ($commit->getCommitData()) {
+      $author = self::renderName($commit->getCommitData()->getAuthorName());
+    } else {
+      $author = self::renderName($tag->getAuthor());
+    }
+
+    $committed = phabricator_datetime($commit->getEpoch(), $viewer);
+    $author_name = phutil_tag(
+      'strong',
+      array(
+        'class' => 'diffusion-history-author-name',
+      ),
+      $author);
+
+    return pht('%s on %s.', $author_name, $committed);
   }
 
 }

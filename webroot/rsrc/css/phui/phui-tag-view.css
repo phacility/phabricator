@@ -63,12 +63,12 @@ a.phui-tag-view:hover {
 a.phui-tag-type-object,
 a.phui-tag-type-object:link,
 .phui-tag-core-closed .phui-tag-color-object {
-  color: #000;
+  color: {$blacktext};
 }
 
 .phui-tag-type-person {
   white-space: nowrap;
-  color: #19558d;
+  color: {$anchor};
 }
 
 .phui-tag-color-red {
@@ -107,8 +107,8 @@ a.phui-tag-type-object:link,
 }
 
 .phui-tag-color-black {
-  background-color: #333333;
-  border-color: #333333;
+  background-color: {$darkgreybackground};
+  border-color: {$darkgreybackground};
 }
 
 .phui-tag-color-grey {
@@ -117,28 +117,28 @@ a.phui-tag-type-object:link,
 }
 
 .phui-tag-color-white {
-  background-color: #f7f7f7;
-  border-color: #f7f7f7;
+  background-color: {$lightgreybackground};
+  border-color: {$lightgreybackground};
 }
 
 .phui-tag-color-object {
-  background-color: #e7e7e7;
-  border-color: #e7e7e7;
+  background-color: {$greybackground};
+  border-color: {$lightgreyborder};
 }
 
 .phui-tag-color-person {
-  background-color: #f1f7ff;
-  border-color: #f1f7ff;
+  background-color: {$bluebackground};
+  border-color: {$thinblueborder};
 }
 
 a.phui-tag-view:hover
   .phui-tag-core.phui-tag-color-person {
-  border-color: #d9ebfd;
+  border-color: {$lightblueborder};
 }
 
 a.phui-tag-view:hover
   .phui-tag-core.phui-tag-color-object {
-  border-color: #d7d7d7;
+  border-color: {$greyborder};
 }
 
 .phabricator-handle-tag-list-item + .phabricator-handle-tag-list-item {
@@ -514,6 +514,6 @@ a.phui-tag-view:hover.phui-tag-disabled .phui-tag-core {
 }
 
 .phui-tag-type-outline.phui-tag-black .phui-tag-core {
-  color: #000;
-  border-color: #000;
+  color: {$blacktext};
+  border-color: {$blacktext};
 }

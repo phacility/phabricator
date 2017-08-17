@@ -179,7 +179,7 @@
   .phui-timeline-core-content {
   padding: 16px;
   line-height: 18px;
-  background: #fff;
+  background: {$page.content};
   border-top: 1px solid rgba({$alphablue},.1);
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
@@ -221,7 +221,7 @@
 }
 
 .phui-timeline-icon {
-  color: {$sh-blueicon};
+  color: {$bluetext};
 }
 
 .phui-icon-view.phui-timeline-icon {
@@ -232,7 +232,7 @@
   height: 26px;
   width: 26px;
   border-radius: 3px;
-  background-color: #E6E9F1;
+  background-color: {$timeline.icon.background};
 }
 
 .phui-timeline-major-event .phui-timeline-icon-fill {
@@ -260,7 +260,7 @@
 .conpherence-transaction-content .phui-timeline-value,
 .phui-feed-story-head .phui-timeline-value {
   font-style: italic;
-  color: black;
+  color: {$blacktext};
 }
 
 .device-desktop .phui-timeline-extra {
@@ -280,7 +280,7 @@
 }
 
 .phui-timeline-icon-fill.fill-has-color .phui-icon-view {
-  color: #fff;
+  color: {$page.content};
 }
 
 .phui-timeline-icon-fill-red {
@@ -344,8 +344,8 @@
 }
 
 .phui-timeline-older-transactions-are-hidden {
-  background: {$sh-yellowbackground};
-  border: 1px solid {$sh-yellowborder};
+  background: {$gentle.highlight};
+  border: 1px solid {$gentle.highlight.border};
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};

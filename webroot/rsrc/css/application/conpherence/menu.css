@@ -8,7 +8,7 @@
   left: 0;
   right: 0;
   top: 44px;
-  background: #fff;
+  background: {$page.content};
 }
 
 .conpherence-menu-pane {
@@ -137,7 +137,6 @@
   font-weight: bold;
   font-size: {$normalfontsize};
   color: {$darkbluetext};
-  text-shadow: 0px 1px 1px #fff;
   overflow: hidden;
   width: 165px;
   text-overflow: ellipsis;

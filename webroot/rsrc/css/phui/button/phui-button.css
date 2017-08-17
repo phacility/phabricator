@@ -33,9 +33,9 @@ button,
 a.button,
 a.button:visited,
 input[type="submit"] {
-  background-color: #2980b9;
-  border: 1px solid #2980b9;
-  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  background-color: {$blue.button.color};
+  border: 1px solid {$blue.button.color};
+  background-image: {$blue.button.gradient};
   color: white;
   cursor: pointer;
   font-weight: bold;
@@ -50,7 +50,9 @@ input[type="submit"] {
 button .phui-icon-view,
 a.button .phui-icon-view,
 button.button-green .phui-icon-view,
-a.button.button-green .phui-icon-view {
+a.button.button-green .phui-icon-view,
+button.button-red .phui-icon-view,
+a.button.button-red .phui-icon-view {
   color: white;
 }
 
@@ -71,17 +73,25 @@ a.icon:visited {
 button.button-green,
 a.button-green.button,
 a.button-green.button:visited {
-  background-color: {$green};
-  border-color: {$green};
-  background-image: linear-gradient(to bottom, #23BB5B, #139543);
+  background-color: {$green.button.color};
+  border-color: {$green.button.color};
+  background-image: {$green.button.gradient};
+}
+
+button.button-red,
+a.button-red.button,
+a.button-red.button:visited {
+  background-color: {$red.button.color};
+  border-color: {$red.button.color};
+  background-image: {$red.button.gradient};
 }
 
 button.button-grey,
 input[type="submit"].button-grey,
 a.button-grey,
 a.button-grey:visited {
-  background-color: #F7F7F9;
-  background-image: linear-gradient(to bottom, #ffffff, #f1f0f1);
+  background-color: {$grey.button.color};
+  background-image: {$grey.button.gradient};
   border: 1px solid rgba({$alphablue}, 0.3);
   color: {$darkgreytext};
 }
@@ -103,14 +113,14 @@ a.button:hover,
 button:hover {
   text-decoration: none;
   background-color: #2980b9;
-  background-image: linear-gradient(to bottom, #3498db, #1b6ba0);
+  background-image: {$blue.button.hover};
   border-color: #115988;
   transition: 0.1s;
 }
 
 a.button.button-grey:hover,
 button.button-grey:hover {
-  background-image: linear-gradient(to bottom, #ffffff, #eeebec);
+  background-image: {$grey.button.hover};
   border-color: rgba({$alphablue}, 0.4);
   transition: 0.1s;
 }
@@ -119,7 +129,15 @@ a.button.button-green:hover,
 button.button-green:hover {
   border-color: #127336;
   background-color: #0DAD48;
-  background-image: linear-gradient(to bottom, #23BB5B, #178841);
+  background-image: {$green.button.hover};
+  transition: 0.1s;
+}
+
+a.button.button-red:hover,
+button.button-red:hover {
+  border-color: #79150b;
+  background-color: #0DAD48;
+  background-image: {$red.button.hover};
   transition: 0.1s;
 }
 
@@ -163,7 +181,7 @@ button.link:hover {
 .phuix-dropdown-menu {
   position: absolute;
   width: 200px;
-  background: #fff;
+  background: {$page.content};
   margin-top: -1px;
   padding: 12px;
   box-shadow: {$dropshadow};
@@ -205,7 +223,7 @@ a.policy-control .phui-button-text {
   width: 0;
   height: 0;
   vertical-align: top;
-  border-top: 5px solid #fff;
+  border-top: 5px solid {$page.content};
   border-right: 5px solid transparent;
   border-left: 5px solid transparent;
   content: "";
@@ -245,7 +263,7 @@ a.policy-control .phui-button-text {
 }
 
 .button-grey.dropdown .caret {
-  border-top-color: #000;
+  border-top-color: {$blacktext};
 }
 
 /* Icons */
@@ -263,6 +281,14 @@ a.policy-control .phui-button-text {
 .button.icon-last .phui-icon-view {
   left: auto;
   right: 10px;
+}
+
+.phui-button-text {
+  display: inline-block;
+}
+
+.dropdown .phui-button-text {
+  margin-right: 8px;
 }
 
 .button.has-icon .phui-button-text {

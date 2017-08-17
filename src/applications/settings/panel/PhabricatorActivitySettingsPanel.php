@@ -48,6 +48,7 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Account Activity Logs'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     $pager_box = id(new PHUIBoxView())

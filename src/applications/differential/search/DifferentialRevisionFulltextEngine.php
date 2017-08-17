@@ -34,8 +34,7 @@ final class DifferentialRevisionFulltextEngine
 
     // If a revision needs review, the owners are the reviewers. Otherwise, the
     // owner is the author (e.g., accepted, rejected, closed).
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-    if ($revision->getStatus() == $status_review) {
+    if ($revision->isNeedsReview()) {
       $reviewers = $revision->getReviewerPHIDs();
       $reviewers = array_fuse($reviewers);
 

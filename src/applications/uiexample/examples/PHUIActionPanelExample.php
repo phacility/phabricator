@@ -11,9 +11,14 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
   }
 
   public function renderExample() {
+    $viewer = $this->getRequest()->getUser();
 
     $view = id(new AphrontMultiColumnView())
       ->setFluidLayout(true);
+
+    $credit = PhabricatorFile::loadBuiltin(
+      $viewer, 'projects/v3/creditcard.png');
+    $image = $credit->getBestURI();
 
     /* Action Panels */
     $panel1 = id(new PHUIActionPanelView())
@@ -53,7 +58,7 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
 
     /* Action Panels */
     $panel1 = id(new PHUIActionPanelView())
-      ->setIcon('fa-credit-card')
+      ->setImage($image)
       ->setHeader(pht('Account Balance'))
       ->setHref('#')
       ->setSubHeader(pht('You were last billed $2,245.12 on Dec 12, 2014.'))

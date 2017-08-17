@@ -14,12 +14,29 @@ final class PonderAnswerContentTransaction
   }
 
   public function getTitle() {
+    $old = $this->getOldValue();
+
+    if (!strlen($old)) {
+      return pht(
+        '%s added an answer.',
+        $this->renderAuthor());
+    }
+
     return pht(
       '%s updated the answer details.',
       $this->renderAuthor());
   }
 
   public function getTitleForFeed() {
+    $old = $this->getOldValue();
+
+    if (!strlen($old)) {
+      return pht(
+        '%s added %s.',
+        $this->renderAuthor(),
+        $this->renderObject());
+    }
+
     return pht(
       '%s updated the answer details for %s.',
       $this->renderAuthor(),

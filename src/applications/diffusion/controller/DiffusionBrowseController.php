@@ -22,8 +22,7 @@ final class DiffusionBrowseController extends DiffusionController {
     // list.
 
     $grep = $request->getStr('grep');
-    $find = $request->getStr('find');
-    if (strlen($grep) || strlen($find)) {
+    if (strlen($grep)) {
       return $this->browseSearch();
     }
 
@@ -57,14 +56,17 @@ final class DiffusionBrowseController extends DiffusionController {
   private function browseSearch() {
     $drequest = $this->getDiffusionRequest();
     $header = $this->buildHeaderView($drequest);
+    $path = nonempty(basename($drequest->getPath()), '/');
 
-    $search_form = $this->renderSearchForm();
     $search_results = $this->renderSearchResults();
+    $search_form = $this->renderSearchForm($path);
 
-    $search_form = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Search'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($search_form);
+    $search_form = phutil_tag(
+      'div',
+      array(
+        'class' => 'diffusion-mobile-search-form',
+      ),
+      $search_form);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -74,8 +76,11 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
     $crumbs->setBorder(true);
 
+    $tabs = $this->buildTabsView('code');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter(
         array(
           $search_form,
@@ -289,9 +294,11 @@ final class DiffusionBrowseController extends DiffusionController {
     $crumbs->setBorder(true);
 
     $basename = basename($this->getDiffusionRequest()->getPath());
+    $tabs = $this->buildTabsView('code');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setCurtain($curtain)
       ->setMainColumn(array(
         $content,
@@ -328,8 +335,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $header = $this->buildHeaderView($drequest);
     $header->setHeaderIcon('fa-folder-open');
-
-    $search_form = $this->renderSearchForm();
 
     $empty_result = null;
     $browse_panel = null;
@@ -369,12 +374,6 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setTable($browse_table)
         ->setPager($pager);
 
-      $browse_panel->setShowHide(
-        array(pht('Show Search')),
-        pht('Hide Search'),
-        $search_form,
-        '#');
-
       $path = $drequest->getPath();
       $is_branch = (!strlen($path) && $repository->supportsBranchComparison());
       if ($is_branch) {
@@ -393,9 +392,11 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
 
     $crumbs->setBorder(true);
+    $tabs = $this->buildTabsView('code');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter(
         array(
           $branch_panel,
@@ -449,159 +450,58 @@ final class DiffusionBrowseController extends DiffusionController {
               'limit' => $pager->getPageSize() + 1,
               'offset' => $pager->getOffset(),
             ));
-        } else { // Filename search.
-          $search_mode = 'find';
-          $query_string = $request->getStr('find');
-          $results = $this->callConduitWithDiffusionRequest(
-            'diffusion.querypaths',
-            array(
-              'pattern' => $query_string,
-              'commit' => $drequest->getStableCommit(),
-              'path' => $drequest->getPath(),
-              'limit' => $pager->getPageSize() + 1,
-              'offset' => $pager->getOffset(),
-            ));
         }
         break;
     }
     $results = $pager->sliceResults($results);
 
+    $table = null;
+    $header = null;
     if ($search_mode == 'grep') {
       $table = $this->renderGrepResults($results, $query_string);
-      $header = pht(
+      $title = pht(
         'File content matching "%s" under "%s"',
         $query_string,
         nonempty($drequest->getPath(), '/'));
-    } else {
-      $table = $this->renderFindResults($results);
-      $header = pht(
-        'Paths matching "%s" under "%s"',
-        $query_string,
-        nonempty($drequest->getPath(), '/'));
+      $header = id(new PHUIHeaderView())
+        ->setHeader($title)
+        ->addClass('diffusion-search-result-header');
     }
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table)
-      ->setPager($pager);
+    return array($header, $table, $pager);
 
   }
 
   private function renderGrepResults(array $results, $pattern) {
     $drequest = $this->getDiffusionRequest();
-
     require_celerity_resource('phabricator-search-results-css');
 
-    $rows = array();
-    foreach ($results as $result) {
-      list($path, $line, $string) = $result;
-
-      $href = $drequest->generateURI(array(
-        'action' => 'browse',
-        'path' => $path,
-        'line' => $line,
-      ));
-
-      $matches = null;
-      $count = @preg_match_all(
-        '('.$pattern.')u',
-        $string,
-        $matches,
-        PREG_OFFSET_CAPTURE);
-
-      if (!$count) {
-        $output = ltrim($string);
-      } else {
-        $output = array();
-        $cursor = 0;
-        $length = strlen($string);
-        foreach ($matches[0] as $match) {
-          $offset = $match[1];
-          if ($cursor != $offset) {
-            $output[] = array(
-              'text' => substr($string, $cursor, $offset),
-              'highlight' => false,
-            );
-          }
-          $output[] = array(
-            'text' => $match[0],
-            'highlight' => true,
-          );
-          $cursor = $offset + strlen($match[0]);
-        }
-        if ($cursor != $length) {
-          $output[] = array(
-            'text' => substr($string, $cursor),
-            'highlight' => false,
-          );
-        }
-
-        if ($output) {
-          $output[0]['text'] =  ltrim($output[0]['text']);
-        }
-
-        foreach ($output as $key => $segment) {
-          if ($segment['highlight']) {
-            $output[$key] = phutil_tag('strong', array(), $segment['text']);
-          } else {
-            $output[$key] = $segment['text'];
-          }
-        }
-      }
-
-      $string = phutil_tag(
-        'pre',
-        array('class' => 'PhabricatorMonospaced phui-source-fragment'),
-        $output);
-
-      $path = Filesystem::readablePath($path, $drequest->getPath());
-
-      $rows[] = array(
-        phutil_tag('a', array('href' => $href), $path),
-        $line,
-        $string,
-      );
+    if (!$results) {
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+        ->appendChild(
+          pht(
+            'The pattern you searched for was not found in the content of any '.
+            'files.'));
     }
 
-    $table = id(new AphrontTableView($rows))
-      ->setClassName('remarkup-code')
-      ->setHeaders(array(pht('Path'), pht('Line'), pht('String')))
-      ->setColumnClasses(array('', 'n', 'wide'))
-      ->setNoDataString(
-        pht(
-          'The pattern you searched for was not found in the content of any '.
-          'files.'));
-
-    return $table;
-  }
-
-  private function renderFindResults(array $results) {
-    $drequest = $this->getDiffusionRequest();
-
-    $rows = array();
-    foreach ($results as $result) {
-      $href = $drequest->generateURI(array(
-        'action' => 'browse',
-        'path' => $result,
-      ));
-
-      $readable = Filesystem::readablePath($result, $drequest->getPath());
-
-      $rows[] = array(
-        phutil_tag('a', array('href' => $href), $readable),
-      );
+    $grouped = array();
+    foreach ($results as $file) {
+      list($path, $line, $string) = $file;
+      $grouped[$path][] = array($line, $string);
     }
 
-    $table = id(new AphrontTableView($rows))
-      ->setHeaders(array(pht('Path')))
-      ->setColumnClasses(array('wide'))
-      ->setNoDataString(
-        pht(
-          'The pattern you searched for did not match the names of any '.
-          'files.'));
+    $view = array();
+    foreach ($grouped as $path => $matches) {
+      $view[] = id(new DiffusionPatternSearchView())
+        ->setPath($path)
+        ->setMatches($matches)
+        ->setPattern($pattern)
+        ->setDiffusionRequest($drequest)
+        ->render();
+    }
 
-    return $table;
+    return $view;
   }
 
   private function loadLintMessages() {
@@ -1581,43 +1481,6 @@ final class DiffusionBrowseController extends DiffusionController {
     return "{$summary}\n{$date} \xC2\xB7 {$author}";
   }
 
-  protected function renderSearchForm() {
-    $drequest = $this->getDiffusionRequest();
-
-    $forms = array();
-    $form = id(new AphrontFormView())
-      ->setUser($this->getViewer())
-      ->setMethod('GET');
-
-    switch ($drequest->getRepository()->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $forms[] = id(clone $form)
-          ->appendChild(pht('Search is not available in Subversion.'));
-        break;
-      default:
-        $forms[] = id(clone $form)
-          ->appendChild(
-            id(new AphrontFormTextWithSubmitControl())
-              ->setLabel(pht('File Name'))
-              ->setSubmitLabel(pht('Search File Names'))
-              ->setName('find')
-              ->setValue($this->getRequest()->getStr('find')));
-        $forms[] = id(clone $form)
-          ->appendChild(
-            id(new AphrontFormTextWithSubmitControl())
-              ->setLabel(pht('Pattern'))
-              ->setSubmitLabel(pht('Grep File Content'))
-              ->setName('grep')
-              ->setValue($this->getRequest()->getStr('grep')));
-        break;
-    }
-
-    require_celerity_resource('diffusion-icons-css');
-    $form_box = phutil_tag_div('diffusion-search-boxen', $forms);
-
-    return $form_box;
-  }
-
   protected function markupText($text) {
     $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
     $engine->setConfig('viewer', $this->getRequest()->getUser());
@@ -1635,13 +1498,24 @@ final class DiffusionBrowseController extends DiffusionController {
 
   protected function buildHeaderView(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
+    $repository = $drequest->getRepository();
 
-    $tag = $this->renderCommitHashTag($drequest);
+    $commit_tag = $this->renderCommitHashTag($drequest);
+
+    $path = nonempty(basename($drequest->getPath()), '/');
+    $search = $this->renderSearchForm($path);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($this->renderPathLinks($drequest, $mode = 'browse'))
-      ->addTag($tag);
+      ->addActionItem($search)
+      ->addTag($commit_tag)
+      ->addClass('diffusion-browse-header');
+
+    if (!$repository->isSVN()) {
+      $branch_tag = $this->renderBranchTag($drequest);
+      $header->addTag($branch_tag);
+    }
 
     return $header;
   }
@@ -1758,7 +1632,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withPath($repository->getID(), $path_id)
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withIsOpen(true)
       ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)

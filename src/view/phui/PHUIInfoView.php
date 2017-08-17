@@ -95,7 +95,6 @@ final class PHUIInfoView extends AphrontTagView {
   }
 
   public function addButton(PHUIButtonView $button) {
-    $button->setColor(PHUIButtonView::GREY);
     $this->buttons[] = $button;
     return $this;
   }

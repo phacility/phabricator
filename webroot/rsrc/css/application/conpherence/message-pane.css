@@ -25,7 +25,7 @@
 .conpherence-layout .conpherence-content-pane .conpherence-no-threads {
   top: 44px;
   right: 0;
-  background: #fff;
+  background: {$page.content};
   z-index: 26;
 }
 
@@ -411,7 +411,7 @@ body .conpherence-message-pane .aphront-form-control {
   bottom: 0;
   transition: all 0.3s;
   position: fixed;
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .conpherence-layout.loading .conpherence-loading-mask {
@@ -445,7 +445,7 @@ body .conpherence-message-pane .aphront-form-control {
 .show-searchbar .conpherence-search-form-view {
   display: block;
   height: 54px;
-  background: #fff;
+  background: {$page.content};
   position: absolute;
   top: 0;
   left: 0;
@@ -461,7 +461,7 @@ body .conpherence-message-pane .aphront-form-control {
 
 .conpherence-search-results {
   position: absolute;
-  background: #fff;
+  background: {$page.content};
   top: 54px;
   left: 0;
   right: 0;

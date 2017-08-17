@@ -3,36 +3,35 @@
 
 Describes how to file an effective Phabricator bug report.
 
-Include Reproduction Steps!
-===========================
+Level Requirements
+==================
 
-IMPORTANT: When filing a bug report, you **MUST** include reproduction
-instructions. We can not help fix bugs we can not reproduce, and will not
-accept reports which omit reproduction instructions.
+We accept bug reports through two channels: paid support and community
+support.
 
-For help, see @{article:Providing Reproduction Steps}.
+If you are a paying customer, use the
+[[ https://admin.phacility.com/u/support | Support Channel ]] for your account
+to report bugs. This document may help you file reports which we can resolve
+more quickly, but you do not need to read it or follow the guidelines.
+
+Other users can follow the guidelines in this document to file bug reports on
+the community forum.
+
 
 Overview
 ========
 
-Found a bug with Phabricator? Let us know! This article describes how to file
-an effective bug report so we can get your issue fixed or help you work around
-it.
+This article describes how to file an effective Phabricator bug report.
 
 The most important things to do are:
 
   - check the list of common fixes below;
   - make sure Phabricator is up to date;
   - make sure we support your setup;
-  - gather debugging information;
-  - explain how to reproduce the issue; and
-  - create a task in
-    [[ http://secure.phabricator.com/u/newbug/ | Maniphest ]].
+  - gather debugging information; and
+  - explain how to reproduce the issue.
 
 The rest of this article walks through these points in detail.
-
-If you have a feature request (not a bug report), see
-@{article:Contributing Feature Requests} for a more tailored guide.
 
 For general information on contributing to Phabricator, see
 @{article:Contributor Introduction}.
@@ -141,8 +140,8 @@ Reproducibility
 
 The most important part of your report content is instructions on how to
 reproduce the issue. What did you do? If you do it again, does it still break?
-Does it depend on a specific browser? Can you reproduce the issue on
-`secure.phabricator.com`?
+Does it depend on a specific browser? Can you reproduce the issue on a test
+instance on `admin.phabricator.com`?
 
 It is nearly impossible for us to resolve many issues if we can not reproduce
 them. We will not accept reports which do not contain the information required
@@ -151,28 +150,18 @@ to reproduce problems.
 For help, see @{article:Providing Reproduction Steps}.
 
 
-Create a Task in Maniphest
-==========================
+File a Bug Report
+=================
 
-If you're up to date, supported, have collected information about the problem,
-and have the best reproduction instructions you can come up with, you're ready
-to file an issue.
+If you're up to date, have collected information about the problem, and have
+the best reproduction instructions you can come up with, you're ready
+to file a report.
 
-It is **particularly critical** that you include reproduction steps. We will
-not accept reports which describe issues we can not reproduce.
+It is **particularly critical** that you include reproduction steps.
 
-(NOTE) https://secure.phabricator.com/u/newbug/
+You can file a report on the community forum, here:
 
-If you don't want to file there (or, for example, your bug relates to being
-unable to log in or unable to file an issue in Maniphest) you can file on any
-other channel, but we can address reports much more effectively if they're
-filed against the upstream than if they're filed somewhere else.
-
-| Effectiveness | Filing Method |
-|---|---|
-| Best | Upstream Maniphest |
-| Ehhh | Quora, StackOverflow, Facebook, Jelly, email, etc. |
-| What | Passive-aggressive tweet |
+(NOTE) https://discourse.phabricator-community.org/c/bug
 
 
 Next Steps
@@ -180,6 +169,5 @@ Next Steps
 
 Continue by:
 
-  - learning about @{article: Contributing Feature Requests}; or
   - reading general support information in @{article:Support Resources}; or
   - returning to the @{article:Contributor Introduction}.

@@ -5,6 +5,7 @@ final class PHUIBigInfoView extends AphrontTagView {
   private $icon;
   private $title;
   private $description;
+  private $image;
   private $actions = array();
 
   public function setIcon($icon) {
@@ -19,6 +20,11 @@ final class PHUIBigInfoView extends AphrontTagView {
 
   public function setDescription($description) {
     $this->description = $description;
+    return $this;
+  }
+
+  public function setImage($image) {
+    $this->image = $image;
     return $this;
   }
 
@@ -43,16 +49,34 @@ final class PHUIBigInfoView extends AphrontTagView {
   protected function getTagContent() {
     require_celerity_resource('phui-big-info-view-css');
 
-    $icon = id(new PHUIIconView())
-      ->setIcon($this->icon)
-      ->addClass('phui-big-info-icon');
+    $icon = null;
+    if ($this->icon) {
+      $icon = id(new PHUIIconView())
+        ->setIcon($this->icon)
+        ->addClass('phui-big-info-icon');
 
-    $icon = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-big-info-icon-container',
-      ),
-      $icon);
+      $icon = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-big-info-icon-container',
+        ),
+        $icon);
+    }
+
+    if ($this->image) {
+      $image = phutil_tag(
+        'img',
+        array(
+          'class' => 'phui-big-info-image',
+          'src' => $this->image,
+        ));
+      $icon = phutil_tag(
+        'span',
+        array(
+          'class' => 'phui-big-info-icon-container',
+        ),
+        $image);
+    }
 
     $title = phutil_tag(
       'div',

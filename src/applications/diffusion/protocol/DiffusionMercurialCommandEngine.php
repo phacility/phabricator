@@ -11,12 +11,14 @@ final class DiffusionMercurialCommandEngine
   protected function newFormattedCommand($pattern, array $argv) {
     $args = array();
 
-    if ($this->isAnySSHProtocol()) {
-      $pattern = "hg --config ui.ssh=%s {$pattern}";
-      $args[] = $this->getSSHWrapper();
-    } else {
-      $pattern = "hg {$pattern}";
-    }
+    // NOTE: Here, and in Git and Subversion, we override the SSH command even
+    // if the repository does not use an SSH remote, since our SSH wrapper
+    // defuses an attack against older versions of Mercurial, Git and
+    // Subversion (see T12961) and it's possible to execute this attack
+    // in indirect ways, like by using an SSH subrepo inside an HTTP repo.
+
+    $pattern = "hg --config ui.ssh=%s {$pattern}";
+    $args[] = $this->getSSHWrapper();
 
     return array($pattern, array_merge($args, $argv));
   }

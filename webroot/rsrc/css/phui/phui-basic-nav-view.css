@@ -48,7 +48,7 @@
 }
 
 .phui-two-column-view .phui-basic-nav .phabricator-side-menu {
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .phui-basic-nav .phabricator-side-menu {

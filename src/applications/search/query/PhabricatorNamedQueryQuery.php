@@ -28,55 +28,46 @@ final class PhabricatorNamedQueryQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new PhabricatorNamedQuery();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function newResultObject() {
+    return new PhabricatorNamedQuery();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    if ($this->ids) {
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->engineClassNames) {
+    if ($this->engineClassNames !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'engineClassName IN (%Ls)',
         $this->engineClassNames);
     }
 
-    if ($this->userPHIDs) {
+    if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
-    if ($this->queryKeys) {
+    if ($this->queryKeys !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'queryKey IN (%Ls)',
         $this->queryKeys);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

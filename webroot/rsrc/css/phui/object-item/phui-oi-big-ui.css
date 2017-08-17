@@ -17,7 +17,7 @@
 }
 
 .phui-oi-list-big a.phui-oi-link {
-  color: #000;
+  color: {$blacktext};
   font-size: {$biggestfontsize};
 }
 

@@ -35,14 +35,12 @@ final class DifferentialRevisionReopenTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+    $status_review = DifferentialRevisionStatus::NEEDS_REVIEW;
+    $object->setModernRevisionStatus($status_review);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    // Note that we're testing for "Closed", exactly, not just any closed
-    // status.
-    $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-    if ($object->getStatus() != $status_closed) {
+    if (!$object->isPublished()) {
       throw new Exception(
         pht(
           'You can not reopen this revision because it is not closed. '.

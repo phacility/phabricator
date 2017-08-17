@@ -12,9 +12,10 @@
 }
 
 .phui-source-fragment strong {
-  background-color: {$lightyellow};
-  font-weight: normal;
-  color: #000;
+  background-color: {$gentle.highlight};
+  font-weight: 600;
+  color: {$blacktext};
+  letter-spacing: 0.02em;
 }
 
 .phui-fulltext-tokens {

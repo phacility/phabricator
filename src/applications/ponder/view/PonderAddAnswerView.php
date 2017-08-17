@@ -72,7 +72,7 @@ final class PonderAddAnswerView extends AphrontView {
         ->appendChild(
           id(new PHUIButtonView())
           ->setTag('a')
-          ->setText(pht('Login to Answer'))
+          ->setText(pht('Log In to Answer'))
           ->setHref((string)$login_href));
     }
 

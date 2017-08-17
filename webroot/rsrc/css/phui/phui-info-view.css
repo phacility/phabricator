@@ -5,7 +5,7 @@
 .phui-info-view {
   border-style: solid;
   border-width: 1px;
-  background: #fff;
+  background: {$page.content};
   margin: 16px;
   padding: 12px;
   border-radius: 3px;
@@ -38,6 +38,7 @@ div.phui-info-view.phui-info-severity-plain {
 
 .phui-info-view-body {
   line-height: 1.6em;
+  color: {$blacktext};
 }
 
 .phui-info-view.phui-info-has-icon .phui-info-view-body {

@@ -48,6 +48,7 @@ body {
   text-align: left;
   unicode-bidi: embed;
   background: {$page.background};
+  color: {$blacktext};
 
   /* By default, the iPhone zooms all text on the page by some percentage when
      you rotate from portrait mode to landscape mode. Disable this, since it

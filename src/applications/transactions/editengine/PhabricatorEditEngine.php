@@ -29,7 +29,6 @@ abstract class PhabricatorEditEngine
   private $page;
   private $pages;
   private $navigation;
-  private $hideHeader;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -125,15 +124,6 @@ abstract class PhabricatorEditEngine
 
   public function getNavigation() {
     return $this->navigation;
-  }
-
-  public function setHideHeader($hide_header) {
-    $this->hideHeader = $hide_header;
-    return $this;
-  }
-
-  public function getHideHeader() {
-    return $this->hideHeader;
   }
 
 
@@ -1194,15 +1184,10 @@ abstract class PhabricatorEditEngine
 
     $crumbs = $this->buildCrumbs($object, $final = true);
 
-    if ($this->getHideHeader()) {
-      $header = null;
-      $crumbs->setBorder(false);
-    } else {
-      $header = id(new PHUIHeaderView())
-        ->setHeader($header_text)
-        ->setHeaderIcon($header_icon);
-      $crumbs->setBorder(true);
-    }
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text)
+      ->setHeaderIcon($header_icon);
+    $crumbs->setBorder(true);
 
     if ($action_button) {
       $header->addActionLink($action_button);
@@ -1231,19 +1216,19 @@ abstract class PhabricatorEditEngine
       $view->setHeader($header);
     }
 
-    $navigation = $this->getNavigation();
-    if ($navigation) {
-      $view
-        ->setNavigation($navigation)
-        ->setMainColumn($content);
-    } else {
-      $view->setFooter($content);
-    }
+    $view->setFooter($content);
 
-    return $controller->newPage()
+    $page = $controller->newPage()
       ->setTitle($header_text)
       ->setCrumbs($crumbs)
       ->appendChild($view);
+
+    $navigation = $this->getNavigation();
+    if ($navigation) {
+      $page->setNavigation($navigation);
+    }
+
+    return $page;
   }
 
   protected function newEditResponse(

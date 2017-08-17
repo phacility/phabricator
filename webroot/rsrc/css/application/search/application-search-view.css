@@ -3,11 +3,11 @@
  */
 
 .application-search-view {
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .application-search-view .phui-crumbs-view {
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .application-search-view .application-search-results.phui-object-box {

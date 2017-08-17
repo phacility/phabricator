@@ -4,7 +4,7 @@
 
 .phui-action-panel {
   position: relative;
-  background-color: #fff;
+  background-color: {$page.content};
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
   margin: 0 8px;
@@ -45,6 +45,12 @@
   text-align: center;
   vertical-align: middle;
   display: table-cell;
+}
+
+.phui-action-panel-image {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
 }
 
 .phui-action-panel-icon a {

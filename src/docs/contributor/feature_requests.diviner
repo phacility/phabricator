@@ -3,27 +3,34 @@
 
 Describes how to file an effective Phabricator feature request.
 
-Describe Your Problem!
-======================
 
-IMPORTANT: When filing a feature request, you **MUST** describe the root
-problem you are facing. We will not accept feature requests which do not
-include a problem description. See below for details.
+Level Requirements
+==================
+
+We accept feature requests through two channels: paid support and community
+support.
+
+If you are a paying customer, use the
+[[ https://admin.phacility.com/u/support | Support Channel ]] for your account
+to request features. This document may help you frame your requests in a way
+that lets us address them more quickly, but you do not need to read it or
+follow the guidelines.
+
+Other users can file requests on the
+[[ https://phurl.io/u/discourse | community forum ]].
+
 
 Overview
 ========
 
-Have a feature you'd like to see in Phabricator? This article describes how
-to file an effective feature request.
+This article describes how to file an effective feature request.
 
 The most important things to do are:
 
   - understand the upstream;
   - make sure your feature makes sense in the project;
   - align your expectations around timelines and priorities;
-  - describe your problem, not your solution; and
-  - file a task in
-    [[ http://secure.phabricator.com/u/newfeature/ | Maniphest ]].
+  - describe your problem, not your solution.
 
 The rest of this article walks through these points in detail.
 
@@ -139,10 +146,6 @@ give you any updates or predictions about timelines. One day, out of nowhere,
 your feature will materialize. That day may be a decade from now. You should
 have realistic expectations about this when filing a feature request.
 
-If you want a concrete timeline, you can work with us to pay for some control
-over our roadmap. For details, see
-[[ https://secure.phabricator.com/w/prioritization/ | Prioritization ]].
-
 
 Describe Problems
 =================
@@ -217,20 +220,6 @@ time which could be better spent building much more valuable features.
 
 Generally, you should wait until a problem actually occurs before filing a
 request about it.
-
-
-Create a Task in Maniphest
-==========================
-
-If you think your feature might be a good fit for the upstream, have reasonable
-expectations about it, and have a good description of the problem you're trying
-to solve, you're ready to file a feature request.
-
-It is **particularly critical** that you describe the problem you are facing,
-not just the feature you want. We will not accept feature requests which do
-not describe the root problem the feature is intended to resolve.
-
-(NOTE) https://secure.phabricator.com/u/newfeature/
 
 
 Next Steps

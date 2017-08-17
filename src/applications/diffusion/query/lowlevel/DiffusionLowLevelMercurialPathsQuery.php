@@ -24,11 +24,12 @@ final class DiffusionLowLevelMercurialPathsQuery
     $path = $this->path;
     $commit = $this->commit;
 
-    $hg_paths_command = 'locate --print0 --rev %s -I %s';
-    $hg_version = PhabricatorRepositoryVersion::getMercurialVersion();
-    if (PhabricatorRepositoryVersion::isMercurialFilesCommandAvailable(
-      $hg_version)) {
+    $has_files = PhutilBinaryAnalyzer::getForBinary('hg')
+      ->isMercurialFilesCommandAvailable();
+    if ($has_files) {
       $hg_paths_command = 'files --print0 --rev %s -I %s';
+    } else {
+      $hg_paths_command = 'locate --print0 --rev %s -I %s';
     }
 
     $match_against = trim($path, '/');

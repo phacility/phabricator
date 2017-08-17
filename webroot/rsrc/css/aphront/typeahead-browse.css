@@ -11,7 +11,7 @@
 }
 
 .typeahead-browse-more {
-  background: {$lightblue};
+  background: {$lightbluebackground};
   border: 1px solid {$lightblueborder};
   color: {$blue};
 }

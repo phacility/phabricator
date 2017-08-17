@@ -508,11 +508,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setPolicyObject($revision)
       ->setHeaderIcon('fa-cog');
 
-    $status = $revision->getStatus();
-    $status_name =
-      DifferentialRevisionStatus::renderFullDescription($status);
+    $status_tag = id(new PHUITagView())
+      ->setName($revision->getStatusDisplayName())
+      ->setIcon($revision->getStatusIcon())
+      ->setColor($revision->getStatusIconColor())
+      ->setType(PHUITagView::TYPE_SHADE);
 
-    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
+    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_tag);
 
     return $view;
   }
@@ -806,7 +808,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $query = id(new DifferentialRevisionQuery())
       ->setViewer($this->getRequest()->getUser())
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withIsOpen(true)
       ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)

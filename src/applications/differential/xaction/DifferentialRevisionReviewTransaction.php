@@ -210,34 +210,6 @@ abstract class DifferentialRevisionReviewTransaction
       $map = array_select_keys($map, $value);
     }
 
-    // Convert reviewer statuses into edge data.
-    foreach ($map as $reviewer_phid => $reviewer_status) {
-      $map[$reviewer_phid] = array(
-        'data' => array(
-          'status' => $reviewer_status,
-        ),
-      );
-    }
-
-    // This is currently double-writing: to the old (edge) store and the new
-    // (reviewer) store. Do the old edge write first.
-
-    $src_phid = $revision->getPHID();
-    $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
-
-    $editor = new PhabricatorEdgeEditor();
-    foreach ($map as $dst_phid => $edge_data) {
-      if ($status == DifferentialReviewerStatus::STATUS_RESIGNED) {
-        // TODO: For now, we just remove these reviewers. In the future, we will
-        // store resignations explicitly.
-        $editor->removeEdge($src_phid, $edge_type, $dst_phid);
-      } else {
-        $editor->addEdge($src_phid, $edge_type, $dst_phid, $edge_data);
-      }
-    }
-
-    $editor->save();
-
     // Now, do the new write.
 
     if ($map) {
@@ -249,6 +221,7 @@ abstract class DifferentialRevisionReviewTransaction
       }
 
       $table = new DifferentialReviewer();
+      $src_phid = $revision->getPHID();
 
       $reviewers = $table->loadAllWhere(
         'revisionPHID = %s AND reviewerPHID IN (%Ls)',
@@ -256,7 +229,7 @@ abstract class DifferentialRevisionReviewTransaction
         array_keys($map));
       $reviewers = mpull($reviewers, null, 'getReviewerPHID');
 
-      foreach ($map as $dst_phid => $edge_data) {
+      foreach (array_keys($map) as $dst_phid) {
         $reviewer = idx($reviewers, $dst_phid);
         if (!$reviewer) {
           $reviewer = id(new DifferentialReviewer())

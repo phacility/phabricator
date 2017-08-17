@@ -190,6 +190,10 @@ JX.install('DiffChangesetList', {
 
       label = pht('Collapse or expand inline comment.');
       this._installKey('q', label, this._onkeycollapse);
+
+      label = pht('Hide or show all inline comments.');
+      this._installKey('A', label, this._onkeyhideall);
+
     },
 
     isAsleep: function() {
@@ -446,6 +450,15 @@ JX.install('DiffChangesetList', {
 
       var pht = this.getTranslations();
       this._warnUser(pht('You must select a comment to hide.'));
+    },
+
+    _onkeyhideall: function() {
+      var inlines = this._getInlinesByType();
+      if (inlines.visible.length) {
+        this._toggleInlines('all');
+      } else {
+        this._toggleInlines('show');
+      }
     },
 
     _warnUser: function(message) {
@@ -1701,6 +1714,10 @@ JX.install('DiffChangesetList', {
       this._dropdownMenu.close();
       e.prevent();
 
+      this._toggleInlines(type);
+    },
+
+    _toggleInlines: function(type) {
       var inlines = this._getInlinesByType();
 
       // Clear the selection state since we end up in a weird place if the
