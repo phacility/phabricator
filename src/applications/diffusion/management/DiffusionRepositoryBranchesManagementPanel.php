@@ -110,6 +110,7 @@ final class DiffusionRepositoryBranchesManagementPanel
         ->execute();
       $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
       $branches = $pager->sliceResults($branches);
+      $can_close_branches = ($repository->isHg());
 
       $rows = array();
       foreach ($branches as $branch) {
@@ -135,9 +136,9 @@ final class DiffusionRepositoryBranchesManagementPanel
         $rows[] = array(
           $icon,
           $branch_name,
+          $status,
           $tracking ? pht('Tracking') : pht('Off'),
           $autoclosing ? pht('Autoclose On') : pht('Off'),
-          $status,
         );
       }
       $branch_table = new AphrontTableView($rows);
@@ -145,9 +146,9 @@ final class DiffusionRepositoryBranchesManagementPanel
         array(
           '',
           pht('Branch'),
+          pht('Status'),
           pht('Track'),
           pht('Autoclose'),
-          pht('Status'),
         ));
       $branch_table->setColumnClasses(
         array(
@@ -156,6 +157,14 @@ final class DiffusionRepositoryBranchesManagementPanel
           'narrow',
           'narrow',
           'wide',
+        ));
+      $branch_table->setColumnVisibility(
+        array(
+          true,
+          true,
+          $can_close_branches,
+          true,
+          true,
         ));
 
       $box = id(new PHUIObjectBoxView())
