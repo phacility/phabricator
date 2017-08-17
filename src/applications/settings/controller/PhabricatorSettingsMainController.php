@@ -121,18 +121,18 @@ final class PhabricatorSettingsMainController
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($header_text)
-      ->setHeaderIcon('fa-pencil');
+      ->setHeader($header_text);
 
     $title = $panel->getPanelName();
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter($response);
+      ->setFixed(true)
+      ->setNavigation($nav)
+      ->setMainColumn($response);
 
     return $this->newPage()
       ->setTitle($title)
-      ->setNavigation($nav)
       ->setCrumbs($crumbs)
       ->appendChild($view);
 
