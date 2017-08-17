@@ -117,22 +117,43 @@ final class DiffusionRepositoryBranchesManagementPanel
         $tracking = $repository->shouldTrackBranch($branch_name);
         $autoclosing = $repository->shouldAutocloseBranch($branch_name);
 
+        $default = $repository->getDefaultBranch();
+        $icon = null;
+        if ($default == $branch->getShortName()) {
+          $icon = id(new PHUIIconView())
+            ->setIcon('fa-code-fork');
+        }
+
+        $fields = $branch->getRawFields();
+        $closed = idx($fields, 'closed');
+        if ($closed) {
+          $status = pht('Closed');
+        } else {
+          $status = pht('Open');
+        }
+
         $rows[] = array(
+          $icon,
           $branch_name,
           $tracking ? pht('Tracking') : pht('Off'),
           $autoclosing ? pht('Autoclose On') : pht('Off'),
+          $status,
         );
       }
       $branch_table = new AphrontTableView($rows);
       $branch_table->setHeaders(
         array(
+          '',
           pht('Branch'),
           pht('Track'),
           pht('Autoclose'),
+          pht('Status'),
         ));
       $branch_table->setColumnClasses(
         array(
+          '',
           'pri',
+          'narrow',
           'narrow',
           'wide',
         ));
