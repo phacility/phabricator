@@ -148,7 +148,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     if (!$spec['commit'] && !$spec['tags'] && !$spec['branches']) {
       $branch_name = $drequest->getBranch();
-      if ($branch_name) {
+      if (strlen($branch_name)) {
         $repository_name .= ' ('.$branch_name.')';
       }
     }

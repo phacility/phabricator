@@ -565,13 +565,19 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_uri = $drequest->generateURI(array('action' => 'browse'));
     $pager->setURI($browse_uri, 'offset');
 
+    $repository_name = $repository->getName();
+    $branch_name = $drequest->getBranch();
+    if (strlen($branch_name)) {
+      $repository_name .= ' ('.$branch_name.')';
+    }
+
     $header = phutil_tag(
       'a',
       array(
         'href' => $browse_uri,
         'class' => 'diffusion-view-browse-header',
       ),
-      $repository->getName());
+      $repository_name);
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText($header)
