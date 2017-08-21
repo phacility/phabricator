@@ -50,9 +50,15 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
       ->setVersion(phpversion('apcu'));
 
     if (ini_get('apc.enabled')) {
+      if (function_exists('apcu_clear_cache')) {
+        $clear_callback = 'apcu_clear_cache';
+      } else {
+        $clear_callback = 'apc_clear_cache';
+      }
+
       $this
         ->setIsEnabled(true)
-        ->setClearCacheCallback('apc_clear_cache');
+        ->setClearCacheCallback($clear_callback);
       $this->initAPCCommonSpec();
     } else {
       $this->setIsEnabled(false);
