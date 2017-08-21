@@ -21,6 +21,14 @@
   text-align: right;
 }
 
+.phui-left-view .button {
+  margin-right: 8px;
+}
+
+.phui-right-view .button {
+  margin-left: 8px;
+}
+
 .phui-lr-view-top .phui-left-view,
 .phui-lr-view-top .phui-right-view {
   vertical-align: top;

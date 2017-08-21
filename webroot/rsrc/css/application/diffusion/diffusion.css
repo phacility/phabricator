@@ -43,6 +43,16 @@
   margin-left: 8px;
 }
 
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-left-view {
+    display: inline-block;
+}
+
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-right-view {
+    display: inline-block;
+}
+
 .diffusion-profile-locate .phui-form-view {
   margin: 0;
   padding: 0;
