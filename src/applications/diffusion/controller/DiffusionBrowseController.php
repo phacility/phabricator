@@ -1601,6 +1601,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $head = null;
     if ($behind_head) {
       $head = id(new PHUIButtonView())
+        ->setTag('a')
         ->setText(pht('Back to HEAD'))
         ->setHref($head_uri)
         ->setIcon('fa-home')
