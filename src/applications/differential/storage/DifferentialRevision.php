@@ -72,7 +72,7 @@ final class DifferentialRevision extends DifferentialDAO
       ->attachRepository(null)
       ->attachActiveDiff(null)
       ->attachReviewers(array())
-      ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+      ->setModernRevisionStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
   }
 
   protected function getConfiguration() {
@@ -612,6 +612,18 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
+  public function setModernRevisionStatus($status) {
+    return $this->setStatus($status);
+  }
+
+  public function getModernRevisionStatus() {
+    return $this->getStatus();
+  }
+
+  public function getLegacyRevisionStatus() {
+    return $this->getStatusObject()->getLegacyKey();
+  }
+
   public function isClosed() {
     return $this->getStatusObject()->isClosedStatus();
   }
@@ -626,6 +638,10 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function isNeedsReview() {
     return $this->getStatusObject()->isNeedsReview();
+  }
+
+  public function isNeedsRevision() {
+    return $this->getStatusObject()->isNeedsRevision();
   }
 
   public function isChangePlanned() {
@@ -650,7 +666,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getStatusObject() {
     $status = $this->getStatus();
-    return DifferentialRevisionStatus::newForLegacyStatus($status);
+    return DifferentialRevisionStatus::newForStatus($status);
   }
 
   public function getFlag(PhabricatorUser $viewer) {
@@ -897,13 +913,26 @@ final class DifferentialRevision extends DifferentialDAO
         ->setKey('authorPHID')
         ->setType('phid')
         ->setDescription(pht('Revision author PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about revision status.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $status = $this->getStatusObject();
+    $status_info = array(
+      'value' => $status->getKey(),
+      'name' => $status->getDisplayName(),
+      'closed' => $status->isClosedStatus(),
+      'color.ansi' => $status->getANSIColor(),
+    );
+
     return array(
       'title' => $this->getTitle(),
       'authorPHID' => $this->getAuthorPHID(),
+      'status' => $status_info,
     );
   }
 

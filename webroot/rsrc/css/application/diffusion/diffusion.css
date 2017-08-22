@@ -12,6 +12,10 @@
   display: block;
 }
 
+.device-phone .diffusion-profile-header .phui-header-col1 {
+  display: none;
+}
+
 .diffusion-action-bar {
   margin-bottom: 16px;
 }
@@ -31,6 +35,22 @@
 .device-phone .diffusion-action-bar .phui-lr-container .phui-right-view {
   padding-top: 12px;
   display: block;
+}
+
+.device-phone .diffusion-action-bar .button .phui-button-text {
+  visibility: hidden;
+  width: 0;
+  margin-left: 8px;
+}
+
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-left-view {
+    display: inline-block;
+}
+
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-right-view {
+    display: inline-block;
 }
 
 .diffusion-profile-locate .phui-form-view {
@@ -58,6 +78,12 @@
 
 .device-phone .diffusion-profile-description.phui-object-box {
   padding: 0;
+}
+
+.diffusion-view-browse-header {
+  display: block;
+  padding: 2px 0;
+  font-size: {$biggestfontsize};
 }
 
 /* - List Styles  ------------------------------------------------------------*/
@@ -106,6 +132,12 @@
   margin-right: 4px;
 }
 
+.diffusion-header-branch-tag.phui-tag-view.phui-tag-type-outline
+  .phui-tag-core {
+    padding: 3px 12px 2px;
+    font-size: {$normalfontsize};
+}
+
 /* - Browse Styles  ----------------------------------------------------------*/
 
 .diffusion-browse-table .commit-detail {
@@ -115,6 +147,58 @@
 .diffusion-browse-table .commit-detail a {
   color: {$darkbluetext};
 }
+
+.diffusion-search-result-header.phui-header-shell {
+  border: none;
+  padding-bottom: 24px;
+}
+
+/* - Search Input ------------------------------------------------------------*/
+
+.diffusion-search-form-view {
+  width: 240px;
+}
+
+.diffusion-search-form-view .diffusion-search-input {
+  width: 240px;
+  border-radius: 20px;
+  padding-left: 12px;
+}
+
+.device-phone .diffusion-browse-header .diffusion-search-form-view,
+.device-phone .diffusion-profile-header .diffusion-search-form-view {
+  display: none;
+}
+
+.diffusion-mobile-search-form {
+  display: none;
+}
+
+.device-phone .diffusion-mobile-search-form {
+  display: block;
+}
+
+.device-phone .diffusion-search-form-view {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.device-phone .diffusion-search-form-view .diffusion-search-input {
+  width: 100%;
+}
+
+/* - Create Repository -------------------------------------------------------*/
+
+.diffusion-create-repo {
+  margin-top: 32px;
+  margin-bottom: 20px;
+}
+
+.device .diffusion-create-repo {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 
 /* - Phone Style  ------------------------------------------------------------*/
 

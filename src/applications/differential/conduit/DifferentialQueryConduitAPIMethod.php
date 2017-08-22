@@ -150,7 +150,10 @@ final class DifferentialQueryConduitAPIMethod
     }
 
     if ($status) {
-      $query->withStatus($status);
+      $statuses = DifferentialLegacyQuery::getModernValues($status);
+      if ($statuses) {
+        $query->withStatuses($statuses);
+      }
     }
     if ($order) {
       $query->setOrder($order);
@@ -215,7 +218,7 @@ final class DifferentialQueryConduitAPIMethod
         'dateCreated'         => $revision->getDateCreated(),
         'dateModified'        => $revision->getDateModified(),
         'authorPHID'          => $revision->getAuthorPHID(),
-        'status'              => $revision->getStatus(),
+        'status'              => $revision->getLegacyRevisionStatus(),
         'statusName'          => $revision->getStatusDisplayName(),
         'properties' => $revision->getProperties(),
         'branch'              => $diff->getBranch(),

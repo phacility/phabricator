@@ -7,6 +7,12 @@ final class PhabricatorElasticsearchSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
+    // TODO: Avoid fataling if we don't have a master database configured
+    // but have the MySQL search index configured. See T12965.
+    if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
     $services = PhabricatorSearchService::getAllServices();
 
     foreach ($services as $service) {

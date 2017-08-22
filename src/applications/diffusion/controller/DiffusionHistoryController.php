@@ -11,6 +11,7 @@ final class DiffusionHistoryController extends DiffusionController {
     if ($response) {
       return $response;
     }
+    require_celerity_resource('diffusion-css');
 
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
@@ -78,6 +79,7 @@ final class DiffusionHistoryController extends DiffusionController {
 
   private function buildHeader(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
+    $repository = $drequest->getRepository();
 
     $no_path = !strlen($drequest->getPath());
     if ($no_path) {
@@ -90,6 +92,16 @@ final class DiffusionHistoryController extends DiffusionController {
       ->setUser($viewer)
       ->setHeader($header_text)
       ->setHeaderIcon('fa-clock-o');
+
+    if (!$repository->isSVN()) {
+      $branch_tag = $this->renderBranchTag($drequest);
+      $header->addTag($branch_tag);
+    }
+
+    if ($drequest->getSymbolicCommit()) {
+      $symbolic_tag = $this->renderSymbolicCommit($drequest);
+      $header->addTag($symbolic_tag);
+    }
 
     return $header;
 

@@ -148,7 +148,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     if (!$spec['commit'] && !$spec['tags'] && !$spec['branches']) {
       $branch_name = $drequest->getBranch();
-      if ($branch_name) {
+      if (strlen($branch_name)) {
         $repository_name .= ' ('.$branch_name.')';
       }
     }
@@ -343,6 +343,38 @@ abstract class DiffusionController extends PhabricatorController {
     return $tag;
   }
 
+  protected function renderBranchTag(DiffusionRequest $drequest) {
+    $branch = $drequest->getBranch();
+    $branch = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(24)
+      ->truncateString($branch);
+
+    $tag = id(new PHUITagView())
+      ->setName($branch)
+      ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
+      ->setType(PHUITagView::TYPE_OUTLINE)
+      ->addClass('diffusion-header-branch-tag');
+
+    return $tag;
+  }
+
+  protected function renderSymbolicCommit(DiffusionRequest $drequest) {
+    $symbolic_tag = $drequest->getSymbolicCommit();
+    $symbolic_tag = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(24)
+      ->truncateString($symbolic_tag);
+
+    $tag = id(new PHUITagView())
+      ->setName($symbolic_tag)
+      ->setIcon('fa-tag')
+      ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
+      ->setType(PHUITagView::TYPE_SHADE);
+
+    return $tag;
+  }
+
   protected function renderDirectoryReadme(DiffusionBrowseResultSet $browse) {
     $readme_path = $browse->getReadmePath();
     if ($readme_path === null) {
@@ -410,6 +442,58 @@ abstract class DiffusionController extends PhabricatorController {
       ->setContent($readme_corpus);
   }
 
+  protected function renderSearchForm($path = '/') {
+    $drequest = $this->getDiffusionRequest();
+    $viewer = $this->getViewer();
+    switch ($drequest->getRepository()->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        return null;
+    }
+
+    $search_term = $this->getRequest()->getStr('grep');
+    require_celerity_resource('diffusion-icons-css');
+    require_celerity_resource('diffusion-css');
+
+    $href = $drequest->generateURI(array(
+      'action' => 'browse',
+      'path' => $path,
+    ));
+
+    $bar = javelin_tag(
+      'input',
+      array(
+        'type' => 'text',
+        'id' => 'diffusion-search-input',
+        'name' => 'grep',
+        'class' => 'diffusion-search-input',
+        'sigil' => 'diffusion-search-input',
+        'placeholder' => pht('Pattern Search'),
+        'value' => $search_term,
+      ));
+
+    $form = phabricator_form(
+      $viewer,
+      array(
+        'method' => 'GET',
+        'action' => $href,
+        'sigil' => 'diffusion-search-form',
+        'class' => 'diffusion-search-form',
+        'id' => 'diffusion-search-form',
+      ),
+      array(
+        $bar,
+      ));
+
+    $form_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'diffusion-search-form-view',
+      ),
+      $form);
+
+    return $form_view;
+  }
+
   protected function buildTabsView($key) {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
@@ -418,15 +502,15 @@ abstract class DiffusionController extends PhabricatorController {
 
     $view->addMenuItem(
       id(new PHUIListItemView())
-        ->setKey('home')
-        ->setName(pht('Home'))
-        ->setIcon('fa-home')
+        ->setKey('code')
+        ->setName(pht('Code'))
+        ->setIcon('fa-code')
         ->setHref($drequest->generateURI(
           array(
             'action' => 'branch',
             'path' => '/',
           )))
-        ->setSelected($key == 'home'));
+        ->setSelected($key == 'code'));
 
     if (!$repository->isSVN()) {
       $view->addMenuItem(

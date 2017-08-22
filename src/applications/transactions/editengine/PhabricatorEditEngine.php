@@ -1141,10 +1141,8 @@ abstract class PhabricatorEditEngine
 
     if ($this->getIsCreate()) {
       $header_text = $this->getFormHeaderText($object);
-      $header_icon = 'fa-plus-square';
     } else {
       $header_text = $this->getObjectEditTitleText($object);
-      $header_icon = 'fa-pencil';
     }
 
     $show_preview = !$request->isAjax();
@@ -1185,8 +1183,7 @@ abstract class PhabricatorEditEngine
     $crumbs = $this->buildCrumbs($object, $final = true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($header_text)
-      ->setHeaderIcon($header_icon);
+      ->setHeader($header_text);
     $crumbs->setBorder(true);
 
     if ($action_button) {
@@ -1216,8 +1213,6 @@ abstract class PhabricatorEditEngine
       $view->setHeader($header);
     }
 
-    $view->setFooter($content);
-
     $page = $controller->newPage()
       ->setTitle($header_text)
       ->setCrumbs($crumbs)
@@ -1225,7 +1220,11 @@ abstract class PhabricatorEditEngine
 
     $navigation = $this->getNavigation();
     if ($navigation) {
-      $page->setNavigation($navigation);
+      $view->setFixed(true);
+      $view->setNavigation($navigation);
+      $view->setMainColumn($content);
+    } else {
+      $view->setFooter($content);
     }
 
     return $page;

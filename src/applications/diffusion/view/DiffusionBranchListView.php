@@ -74,14 +74,6 @@ final class DiffusionBranchListView extends DiffusionView {
         }
       }
 
-      $fields = $branch->getRawFields();
-      $closed = idx($fields, 'closed');
-      if ($closed) {
-        $status = pht('Closed');
-      } else {
-        $status = pht('Open');
-      }
-
       $browse_href = $drequest->generateURI(
         array(
           'action' => 'browse',
@@ -128,6 +120,18 @@ final class DiffusionBranchListView extends DiffusionView {
         $item->setStatusIcon('fa-code-fork', pht('Default Branch'));
       }
       $item->addAttribute(array($datetime));
+
+      if ($can_close_branches) {
+        $fields = $branch->getRawFields();
+        $closed = idx($fields, 'closed');
+        if ($closed) {
+          $status = pht('Branch Closed');
+          $item->setDisabled(true);
+        } else {
+          $status = pht('Branch Open');
+        }
+        $item->addAttribute($status);
+      }
 
       $list->addItem($item);
 

@@ -151,9 +151,8 @@ final class DifferentialRevisionRequiredActionResultBucket
 
   private function filterShouldUpdate(array $phids) {
     $statuses = array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED,
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION,
+      DifferentialRevisionStatus::NEEDS_REVISION,
+      DifferentialRevisionStatus::CHANGES_PLANNED,
     );
     $statuses = array_fuse($statuses);
 
@@ -161,7 +160,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if (empty($statuses[$object->getStatus()])) {
+      if (empty($statuses[$object->getModernRevisionStatus()])) {
         continue;
       }
 
@@ -190,10 +189,9 @@ final class DifferentialRevisionRequiredActionResultBucket
 
   private function filterWaitingOnAuthors(array $phids) {
     $statuses = array(
-      ArcanistDifferentialRevisionStatus::ACCEPTED,
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED,
-      ArcanistDifferentialRevisionStatus::IN_PREPARATION,
+      DifferentialRevisionStatus::ACCEPTED,
+      DifferentialRevisionStatus::NEEDS_REVISION,
+      DifferentialRevisionStatus::CHANGES_PLANNED,
     );
     $statuses = array_fuse($statuses);
 
@@ -201,7 +199,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if (empty($statuses[$object->getStatus()])) {
+      if (empty($statuses[$object->getModernRevisionStatus()])) {
         continue;
       }
 

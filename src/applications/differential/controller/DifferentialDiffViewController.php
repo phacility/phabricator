@@ -177,7 +177,7 @@ final class DifferentialDiffViewController extends DifferentialController {
     $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withAuthors(array($viewer->getPHID()))
-      ->withStatus(DifferentialLegacyQuery::STATUS_OPEN)
+      ->withIsOpen(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

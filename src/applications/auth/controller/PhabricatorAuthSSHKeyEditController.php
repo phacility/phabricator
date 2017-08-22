@@ -93,7 +93,7 @@ final class PhabricatorAuthSSHKeyEditController
 
       try {
         $editor->applyTransactions($key, $xactions);
-        return id(new AphrontRedirectResponse())->setURI($key->getURI());
+        return id(new AphrontRedirectResponse())->setURI($cancel_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
         $e_name = $ex->getShortMessage($type_name);

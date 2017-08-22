@@ -186,6 +186,7 @@ a.handle-status-closed:hover {
 
 .device .phabricator-standard-page-tabs {
   margin-bottom: 20px;
+  padding: 0 12px;
 }
 
 .device-phone .phabricator-standard-page-tabs {

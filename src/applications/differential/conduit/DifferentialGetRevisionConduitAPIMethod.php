@@ -82,7 +82,7 @@ final class DifferentialGetRevisionConduitAPIMethod
       'authorPHID' => $revision->getAuthorPHID(),
       'uri' => PhabricatorEnv::getURI('/D'.$revision->getID()),
       'title' => $revision->getTitle(),
-      'status' => $revision->getStatus(),
+      'status' => $revision->getLegacyRevisionStatus(),
       'statusName'  => $revision->getStatusDisplayName(),
       'summary' => $revision->getSummary(),
       'testPlan' => $revision->getTestPlan(),

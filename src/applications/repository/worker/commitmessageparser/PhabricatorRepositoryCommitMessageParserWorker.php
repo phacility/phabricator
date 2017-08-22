@@ -186,11 +186,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $revision = $revision_query->executeOne();
 
       if ($revision) {
-        if (!$data->getCommitDetail('precommitRevisionStatus')) {
-          $data->setCommitDetail(
-            'precommitRevisionStatus',
-            $revision->getStatus());
-        }
         $commit_drev = DiffusionCommitHasRevisionEdgeType::EDGECONST;
         id(new PhabricatorEdgeEditor())
           ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
@@ -205,9 +200,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
         $should_close = !$revision->isPublished() && $should_autoclose;
         if ($should_close) {
-           $commit_close_xaction = id(new DifferentialTransaction())
-            ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
-            ->setNewValue(DifferentialAction::ACTION_CLOSE)
+          $type_close = DifferentialRevisionCloseTransaction::TRANSACTIONTYPE;
+
+          $commit_close_xaction = id(new DifferentialTransaction())
+            ->setTransactionType($type_close)
+            ->setNewValue(true)
             ->setMetadataValue('isCommitClose', true);
 
           $commit_close_xaction->setMetadataValue(

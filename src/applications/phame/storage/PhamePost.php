@@ -22,6 +22,7 @@ final class PhamePost extends PhameDAO
   protected $phameTitle;
   protected $body;
   protected $visibility;
+  protected $views;
   protected $configData;
   protected $datePublished;
   protected $blogPHID;
@@ -40,7 +41,8 @@ final class PhamePost extends PhameDAO
       ->setBlogPHID($blog->getPHID())
       ->attachBlog($blog)
       ->setDatePublished(PhabricatorTime::getNow())
-      ->setVisibility(PhameConstants::VISIBILITY_PUBLISHED);
+      ->setVisibility(PhameConstants::VISIBILITY_PUBLISHED)
+      ->setViews(0);
 
     return $post;
   }
@@ -128,6 +130,7 @@ final class PhamePost extends PhameDAO
         'subtitle' => 'text64',
         'phameTitle' => 'sort64?',
         'visibility' => 'uint32',
+        'views' => 'uint32',
         'mailKey' => 'bytes20',
         'headerImagePHID' => 'phid?',
 
