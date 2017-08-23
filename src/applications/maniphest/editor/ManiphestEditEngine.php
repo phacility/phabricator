@@ -251,6 +251,56 @@ EODOCS
         id(new PHUIRemarkupPreviewPanel())
           ->setHeader(pht('Description Preview')));
 
+    $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+    $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+
+    $src_phid = $object->getPHID();
+    if ($src_phid) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array($src_phid))
+        ->withEdgeTypes(
+          array(
+            $parent_type,
+            $subtask_type,
+          ));
+      $edge_query->execute();
+
+      $parent_phids = $edge_query->getDestinationPHIDs(
+        array($src_phid),
+        array($parent_type));
+
+      $subtask_phids = $edge_query->getDestinationPHIDs(
+        array($src_phid),
+        array($subtask_type));
+    } else {
+      $parent_phids = array();
+      $subtask_phids = array();
+    }
+
+    $fields[] = id(new PhabricatorHandlesEditField())
+      ->setKey('parents')
+      ->setLabel(pht('Parents'))
+      ->setDescription(pht('Parent tasks.'))
+      ->setConduitDescription(pht('Change the parents of this task.'))
+      ->setConduitTypeDescription(pht('List of parent task PHIDs.'))
+      ->setUseEdgeTransactions(true)
+      ->setIsConduitOnly(true)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $parent_type)
+      ->setValue($parent_phids);
+
+    $fields[] = id(new PhabricatorHandlesEditField())
+      ->setKey('subtasks')
+      ->setLabel(pht('Subtasks'))
+      ->setDescription(pht('Subtasks.'))
+      ->setConduitDescription(pht('Change the subtasks of this task.'))
+      ->setConduitTypeDescription(pht('List of subtask PHIDs.'))
+      ->setUseEdgeTransactions(true)
+      ->setIsConduitOnly(true)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $subtask_type)
+      ->setValue($parent_phids);
+
     return $fields;
   }
 
