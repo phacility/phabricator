@@ -84,12 +84,12 @@ JX.behavior('desktop-notifications-control', function(config, statics) {
           return;
         }
         var value = e.getTarget().value;
-        if (value == config.desktopMode) {
-          window.Notification.requestPermission(
-            function (permission) {
-              updateFormStatus(permission);
-              updateBrowserStatus(permission);
-            });
+        if ((value == config.desktop) || (value == config.desktopOnly)) {
+            window.Notification.requestPermission(
+              function (permission) {
+                updateFormStatus(permission);
+                updateBrowserStatus(permission);
+              });
         } else {
           var statusEl = JX.$(config.statusID);
           JX.DOM.hide(statusEl);

@@ -27,6 +27,7 @@ JX.install('Notification', {
     _hideTimer : null,
     _duration : 12000,
     _desktopReady : false,
+    _webReady : false,
     _key : null,
     _title : null,
     _body : null,
@@ -35,6 +36,12 @@ JX.install('Notification', {
 
     show : function() {
       var self = JX.Notification;
+
+      // This person doesn't like any real-time notification
+      if (!this._desktopReady && !this._webReady) {
+        return;
+      }
+
       if (!this._visible) {
         this._visible = true;
 
@@ -89,6 +96,11 @@ JX.install('Notification', {
 
     setDesktopReady : function(ready) {
       this._desktopReady = ready;
+      return this;
+    },
+
+    setWebReady : function(ready) {
+      this._webReady = ready;
       return this;
     },
 
