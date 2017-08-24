@@ -107,20 +107,6 @@ final class DifferentialTransactionEditor
     return parent::getCustomTransactionNewValue($object, $xaction);
   }
 
-  protected function transactionHasEffect(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $actor_phid = $this->getActingAsPHID();
-
-    switch ($xaction->getTransactionType()) {
-      case DifferentialTransaction::TYPE_INLINE:
-        return $xaction->hasComment();
-    }
-
-    return parent::transactionHasEffect($object, $xaction);
-  }
-
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {

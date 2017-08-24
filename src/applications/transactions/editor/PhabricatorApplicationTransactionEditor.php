@@ -486,8 +486,6 @@ abstract class PhabricatorApplicationTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_CREATE:
         return true;
-      case PhabricatorTransactions::TYPE_COMMENT:
-        return $xaction->hasComment();
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getApplicationTransactionHasEffect($xaction);
@@ -532,6 +530,10 @@ abstract class PhabricatorApplicationTransactionEditor
         $object,
         $xaction->getOldValue(),
         $xaction->getNewValue());
+    }
+
+    if ($xaction->hasComment()) {
+      return true;
     }
 
     return ($xaction->getOldValue() !== $xaction->getNewValue());
