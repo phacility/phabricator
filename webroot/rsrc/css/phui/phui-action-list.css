@@ -112,12 +112,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.device-desktop li.phabricator-action-view-label:hover
-  .phabricator-action-view-item {
-    background-color: {$page.content};
-    color: {$bluetext};
-}
-
 .phabricator-action-view + .phabricator-action-view-label {
   padding-top: 8px;
 }
