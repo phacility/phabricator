@@ -71,7 +71,7 @@
 .diffusion-rev-link span,
 .diffusion-blame-date a {
   margin: 3px 8px;
-  display: block;
+  float: left;
 }
 
 .diffusion-rev-link span {
