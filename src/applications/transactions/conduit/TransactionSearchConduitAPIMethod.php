@@ -97,7 +97,18 @@ final class TransactionSearchConduitAPIMethod
         continue;
       }
 
-      $modular_template = $xaction->getModularType();
+      // TODO: Hack things so certain transactions which don't have a modular
+      // type yet can use a pseudotype until they modularize. Some day, we'll
+      // modularize everything and remove this.
+      switch ($xaction->getTransactionType()) {
+        case DifferentialTransaction::TYPE_INLINE:
+          $modular_template = new DifferentialRevisionInlineTransaction();
+          break;
+        default:
+          $modular_template = $xaction->getModularType();
+          break;
+      }
+
       $modular_class = get_class($modular_template);
       if (!isset($modular_objects[$modular_class])) {
         try {
@@ -171,6 +182,16 @@ final class TransactionSearchConduitAPIMethod
 
       if (!$fields) {
         $fields = (object)$fields;
+      }
+
+      // If we haven't found a modular type, fallback for some simple core
+      // types. Ideally, we'll modularize everything some day.
+      if ($type === null) {
+        switch ($xaction->getTransactionType()) {
+          case PhabricatorTransactions::TYPE_COMMENT:
+            $type = 'comment';
+            break;
+        }
       }
 
       $data[] = array(
