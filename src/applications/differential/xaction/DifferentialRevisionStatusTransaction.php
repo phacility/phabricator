@@ -70,4 +70,15 @@ final class DifferentialRevisionStatusTransaction
     return DifferentialRevisionStatus::newForStatus($new);
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'status';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array(
+      'old' => $object->getOldValue(),
+      'new' => $object->getNewValue(),
+    );
+  }
+
 }

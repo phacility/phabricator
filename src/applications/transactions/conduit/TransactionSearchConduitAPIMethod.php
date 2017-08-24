@@ -89,6 +89,36 @@ final class TransactionSearchConduitAPIMethod
       $comment_map = array();
     }
 
+    $modular_classes = array();
+    $modular_objects = array();
+    $modular_xactions = array();
+    foreach ($xactions as $xaction) {
+      if (!$xaction instanceof PhabricatorModularTransaction) {
+        continue;
+      }
+
+      $modular_template = $xaction->getModularType();
+      $modular_class = get_class($modular_template);
+      if (!isset($modular_objects[$modular_class])) {
+        try {
+          $modular_object = newv($modular_class, array());
+          $modular_objects[$modular_class] = $modular_object;
+        } catch (Exception $ex) {
+          continue;
+        }
+      }
+
+      $modular_classes[$xaction->getPHID()] = $modular_class;
+      $modular_xactions[$modular_class][] = $xaction;
+    }
+
+    $modular_data_map = array();
+    foreach ($modular_objects as $class => $modular_type) {
+      $modular_data_map[$class] = $modular_type
+        ->setViewer($viewer)
+        ->loadTransactionTypeConduitData($modular_xactions[$class]);
+    }
+
     $data = array();
     foreach ($xactions as $xaction) {
       $comments = idx($comment_map, $xaction->getPHID());
@@ -126,6 +156,18 @@ final class TransactionSearchConduitAPIMethod
       }
 
       $fields = array();
+      $type = null;
+
+      if (isset($modular_classes[$xaction->getPHID()])) {
+        $modular_class = $modular_classes[$xaction->getPHID()];
+        $modular_object = $modular_objects[$modular_class];
+        $modular_data = $modular_data_map[$modular_class];
+
+        $type = $modular_object->getTransactionTypeForConduit($xaction);
+        $fields = $modular_object->getFieldValuesForConduit(
+          $xaction,
+          $modular_data);
+      }
 
       if (!$fields) {
         $fields = (object)$fields;
@@ -134,6 +176,7 @@ final class TransactionSearchConduitAPIMethod
       $data[] = array(
         'id' => (int)$xaction->getID(),
         'phid' => (string)$xaction->getPHID(),
+        'type' => $type,
         'authorPHID' => (string)$xaction->getAuthorPHID(),
         'objectPHID' => (string)$xaction->getObjectPHID(),
         'dateCreated' => (int)$xaction->getDateCreated(),
