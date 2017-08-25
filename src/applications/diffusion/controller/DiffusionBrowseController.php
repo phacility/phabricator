@@ -706,6 +706,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $buttons[] =
       id(new PHUIButtonView())
+        ->setTag('a')
         ->setText(pht('Last Change'))
         ->setColor(PHUIButtonView::GREY)
         ->setHref(
@@ -1175,19 +1176,21 @@ final class DiffusionBrowseController extends DiffusionController {
           ),
           $before_link);
 
-        $object_links = array();
-        $object_links[] = $commit_link;
-        if ($revision_link) {
-          $object_links[] = phutil_tag('span', array(), '/');
-          $object_links[] = $revision_link;
-        }
-
         $row[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-rev-link',
           ),
-          $object_links);
+          $commit_link);
+
+        if ($revision_link) {
+          $row[] = phutil_tag(
+            'th',
+            array(
+              'class' => 'diffusion-blame-revision',
+            ),
+            $revision_link);
+        }
 
         $row[] = phutil_tag(
           'th',

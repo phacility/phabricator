@@ -40,11 +40,12 @@
 .diffusion-blame-date {
   background: {$lightgreybackground};
   font: {$basefont};
-  font-size: {$smallestfontsize};
+  font-size: {$smallerfontsize};
 }
 
 .diffusion-blame-link,
-.diffusion-line-link  {
+.diffusion-line-link,
+.diffusion-blame-revision {
   background: {$lightgreybackground};
 }
 
@@ -53,7 +54,7 @@
   min-width: 130px;
   background: {$lightgreybackground};
   font: {$basefont};
-  font-size: {$smallestfontsize};
+  font-size: {$smallerfontsize};
 }
 
 .diffusion-source a {
@@ -61,17 +62,18 @@
 }
 
 .diffusion-rev-link a {
-  max-width: 340px;
+  max-width: 300px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  margin: 3px 8px;
+  display: block;
 }
 
-.diffusion-rev-link a,
-.diffusion-rev-link span,
-.diffusion-blame-date a {
+.diffusion-blame-date a,
+.diffusion-blame-revision a {
+  float: right;
   margin: 3px 8px;
-  float: left;
 }
 
 .diffusion-rev-link span {
