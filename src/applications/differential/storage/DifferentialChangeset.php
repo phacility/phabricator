@@ -170,7 +170,7 @@ final class DifferentialChangeset extends DifferentialDAO
   }
 
   public function getAnchorName() {
-    return substr(md5($this->getFilename()), 0, 8);
+    return 'change-'.PhabricatorHash::digestForIndex($this->getFilename());
   }
 
   public function getAbsoluteRepositoryPath(

@@ -332,4 +332,16 @@ abstract class PhabricatorModularTransactionType
     return $this->getStorage()->getMetadataValue($key, $default);
   }
 
+  public function loadTransactionTypeConduitData(array $xactions) {
+    return null;
+  }
+
+  public function getTransactionTypeForConduit($xaction) {
+    return null;
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array();
+  }
+
 }

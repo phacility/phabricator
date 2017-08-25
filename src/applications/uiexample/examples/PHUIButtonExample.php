@@ -58,10 +58,12 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       array(
         'text' => pht('Comment'),
         'icon' => 'fa-comment',
+        'dropdown' => true,
       ),
       array(
         'text' => pht('Give Token'),
         'icon' => 'fa-trophy',
+        'dropdown' => true,
       ),
       array(
         'text' => pht('Reverse Time'),
@@ -73,9 +75,11 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       ),
       array(
         'icon' => 'fa-rocket',
+        'dropdown' => true,
       ),
       array(
         'icon' => 'fa-clipboard',
+        'dropdown' => true,
       ),
       array(
         'icon' => 'fa-upload',
@@ -95,7 +99,8 @@ final class PHUIButtonExample extends PhabricatorUIExample {
         ->setColor(PHUIButtonView::GREY)
         ->setIcon(idx($spec, 'icon'))
         ->setText(idx($spec, 'text'))
-        ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+        ->addClass(PHUI::MARGIN_SMALL_RIGHT)
+        ->setDropdown(idx($spec, 'dropdown'));
 
       $copy = idx($spec, 'copy');
       if ($copy !== null) {

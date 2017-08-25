@@ -55,4 +55,15 @@ final class DifferentialRevisionTitleTransaction
     return $errors;
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'title';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array(
+      'old' => $object->getOldValue(),
+      'new' => $object->getNewValue(),
+    );
+  }
+
 }

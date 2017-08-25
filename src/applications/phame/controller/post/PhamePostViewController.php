@@ -18,25 +18,6 @@ final class PhamePostViewController
     $is_live = $this->getIsLive();
     $is_external = $this->getIsExternal();
 
-    // Register a blog "view" count
-    //
-    if (!$post->isDraft() && !$post->isArchived()) {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $xactions = array();
-      $xactions[] = id(new PhamePostTransaction())
-        ->setTransactionType(PhamePostViewsTransaction::TRANSACTIONTYPE)
-        ->setNewValue(null);
-
-      $editor = id(new PhamePostEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnMissingFields(true)
-        ->setContinueOnNoEffect(true);
-
-      $editor->applyTransactions($post, $xactions);
-      unset($unguarded);
-    }
-
     $header = id(new PHUIHeaderView())
       ->addClass('phame-header-bar')
       ->setUser($viewer);
@@ -169,11 +150,6 @@ final class PhamePostViewController
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($post);
-
-    $views = id(new PhutilNumber($post->getViews()));
-    $properties->addProperty(
-      pht('Views'),
-      pht('%s', $views));
 
     $is_live = $this->getIsLive();
     $is_external = $this->getIsExternal();

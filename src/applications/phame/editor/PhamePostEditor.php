@@ -41,12 +41,6 @@ final class PhamePostEditor
     if ($object->isDraft() || $object->isArchived()) {
       return false;
     }
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PhamePostViewsTransaction::TRANSACTIONTYPE:
-        return false;
-      }
-    }
     return true;
   }
 

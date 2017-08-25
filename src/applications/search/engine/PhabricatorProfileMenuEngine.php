@@ -465,7 +465,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $default = null;
     $first = null;
     foreach ($items as $item) {
-      if (!$item->canMakeDefault()) {
+      if (!$item->canMakeDefault() || $item->isDisabled()) {
         continue;
       }
 

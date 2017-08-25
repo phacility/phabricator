@@ -236,8 +236,6 @@ final class ManiphestTaskSearchEngine
     $group = idx($this->getGroupValues(), $group);
     if ($group) {
       $query->setGroupBy($group);
-    } else {
-      $query->setGroupBy(head($this->getGroupValues()));
     }
 
     if ($map['ids']) {

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDesktopNotificationsSettingsPanel
+final class PhabricatorNotificationsSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function isEnabled() {
@@ -14,11 +14,11 @@ final class PhabricatorDesktopNotificationsSettingsPanel
   }
 
   public function getPanelKey() {
-    return 'desktopnotifications';
+    return 'notifications';
   }
 
   public function getPanelName() {
-    return pht('Desktop Notifications');
+    return pht('Notifications');
   }
 
   public function getPanelGroupKey() {
@@ -29,7 +29,7 @@ final class PhabricatorDesktopNotificationsSettingsPanel
     $viewer = $this->getViewer();
     $preferences = $this->getPreferences();
 
-    $notifications_key = PhabricatorDesktopNotificationsSetting::SETTINGKEY;
+    $notifications_key = PhabricatorNotificationsSetting::SETTINGKEY;
     $notifications_value = $preferences->getSettingValue($notifications_key);
 
     if ($request->isFormPost()) {
@@ -43,7 +43,7 @@ final class PhabricatorDesktopNotificationsSettingsPanel
         ->setURI($this->getPanelURI('?saved=true'));
     }
 
-    $title = pht('Desktop Notifications');
+    $title = pht('Notifications');
     $control_id = celerity_generate_unique_node_id();
     $status_id = celerity_generate_unique_node_id();
     $browser_status_id = celerity_generate_unique_node_id();
@@ -97,11 +97,22 @@ final class PhabricatorDesktopNotificationsSettingsPanel
         'id' => $message_id,
       ));
 
+    $saved_box = null;
+    if ($request->getBool('saved')) {
+      $saved_box = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(pht('Changes saved.'));
+    }
+
     $status_box = id(new PHUIInfoView())
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
       ->setID($status_id)
       ->setIsHidden(true)
       ->appendChild($message_container);
+
+    $status_box = id(new PHUIBoxView())
+      ->addClass('mll mlr')
+      ->appendChild($status_box);
 
     $control_config = array(
        'controlID' => $control_id,
@@ -109,7 +120,8 @@ final class PhabricatorDesktopNotificationsSettingsPanel
        'messageID' => $message_id,
        'browserStatusID' => $browser_status_id,
        'defaultMode' => 0,
-       'desktopMode' => 1,
+       'desktop' => 1,
+       'desktopOnly' => 2,
        'cancelAsk' => $cancel_ask,
        'grantedAsk' => $accept_ask,
        'deniedAsk' => $reject_ask,
@@ -127,16 +139,12 @@ final class PhabricatorDesktopNotificationsSettingsPanel
         ->setControlID($control_id)
         ->setName($notifications_key)
         ->setValue($notifications_value)
-        ->setOptions(
-          array(
-            1 => pht('Send Desktop Notifications Too'),
-            0 => pht('Send Application Notifications Only'),
-          ))
+        ->setOptions(PhabricatorNotificationsSetting::getOptionsMap())
         ->setCaption(
           pht(
-            'Should Phabricator send desktop notifications? These are sent '.
-            'in addition to the notifications within the Phabricator '.
-            'application.'))
+            'Phabricator can send real-time notifications to your web browser '.
+            'or to your desktop. Select where you\'d want to receive these '.
+            'real-time updates.'))
         ->initBehavior(
           'desktop-notifications-control',
           $control_config))
@@ -154,12 +162,14 @@ final class PhabricatorDesktopNotificationsSettingsPanel
     $form_box = id(new PHUIObjectBoxView())
       ->setHeader(
         id(new PHUIHeaderView())
-        ->setHeader(pht('Desktop Notifications'))
+        ->setHeader(pht('Notifications'))
         ->addActionLink($test_button))
-      ->setForm($form)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setInfoView($status_box)
-      ->setFormSaved($request->getBool('saved'));
+      ->appendChild(array(
+        $saved_box,
+        $status_box,
+        $form,
+      ));
 
     $browser_status_box = id(new PHUIInfoView())
       ->setID($browser_status_id)
