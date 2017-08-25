@@ -40,7 +40,7 @@ final class DifferentialRevisionInlineTransaction
 
     return array(
       'diff' => array(
-        'id' => $diff->getID(),
+        'id' => (int)$diff->getID(),
         'phid' => $diff->getPHID(),
       ),
       'path' => $changeset->getDisplayFilename(),
