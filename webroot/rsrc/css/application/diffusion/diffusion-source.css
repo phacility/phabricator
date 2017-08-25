@@ -37,24 +37,18 @@
   white-space: nowrap;
 }
 
-.diffusion-blame-date {
+.diffusion-blame-date,
+.diffusion-blame-link,
+.diffusion-blame-revision,
+.diffusion-rev-link {
   background: {$lightgreybackground};
   font: {$basefont};
   font-size: {$smallerfontsize};
-}
-
-.diffusion-blame-link,
-.diffusion-line-link,
-.diffusion-blame-revision {
-  background: {$lightgreybackground};
 }
 
 .diffusion-source th.diffusion-rev-link {
   text-align: left;
   min-width: 130px;
-  background: {$lightgreybackground};
-  font: {$basefont};
-  font-size: {$smallerfontsize};
 }
 
 .diffusion-source a {

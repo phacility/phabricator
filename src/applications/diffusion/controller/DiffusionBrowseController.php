@@ -1183,7 +1183,7 @@ final class DiffusionBrowseController extends DiffusionController {
           ),
           $commit_link);
 
-        if ($revision_link) {
+        if ($revision_map) {
           $row[] = phutil_tag(
             'th',
             array(
