@@ -1134,7 +1134,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $before_link = null;
       $commit_date = null;
 
-      $style = 'border-right: 2px solid '.$line['color'].';';
+      $style = 'border-right: 3px solid '.$line['color'].';';
 
       if ($identifier && !$line['duplicate']) {
         if (isset($commit_links[$identifier])) {
