@@ -27,6 +27,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $spacePHIDs;
   private $spaceIsArchived;
   private $ngrams = array();
+  private $ferretEngine;
+  private $ferretConstraints;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -270,6 +272,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $joins[] = $this->buildEdgeLogicJoinClause($conn);
     $joins[] = $this->buildApplicationSearchJoinClause($conn);
     $joins[] = $this->buildNgramsJoinClause($conn);
+    $joins[] = $this->buildFerretJoinClause($conn);
     return $joins;
   }
 
@@ -292,6 +295,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $where[] = $this->buildEdgeLogicWhereClause($conn);
     $where[] = $this->buildSpacesWhereClause($conn);
     $where[] = $this->buildNgramsWhereClause($conn);
+    $where[] = $this->buildFerretWhereClause($conn);
     return $where;
   }
 
@@ -343,6 +347,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     if ($this->shouldGroupNgramResultRows()) {
+      return true;
+    }
+
+    if ($this->shouldGroupFerretResultRows()) {
       return true;
     }
 
@@ -1370,6 +1378,150 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   protected function isCustomFieldOrderKey($key) {
     $prefix = 'custom:';
     return !strncmp($key, $prefix, strlen($prefix));
+  }
+
+
+/* -(  Ferret  )------------------------------------------------------------- */
+
+
+  public function withFerretConstraint(
+    PhabricatorFerretEngine $engine,
+    $raw_query) {
+
+    if ($this->ferretEngine) {
+      throw new Exception(
+        pht(
+          'Query may not have multiple fulltext constraints.'));
+    }
+
+    if (!strlen($raw_query)) {
+      return $this;
+    }
+
+    $this->ferretEngine = $engine;
+    $this->ferretConstraints = preg_split('/\s+/', $raw_query);
+
+    return $this;
+  }
+
+  protected function buildFerretJoinClause(AphrontDatabaseConnection $conn) {
+    if (!$this->ferretEngine) {
+      return array();
+    }
+
+    $engine = $this->ferretEngine;
+    $ngram_engine = new PhabricatorNgramEngine();
+
+    $ngram_table = $engine->newNgramsObject();
+    $ngram_table_name = $ngram_table->getTableName();
+
+    $flat = array();
+    foreach ($this->ferretConstraints as $term) {
+      $value = $term;
+      $length = count(phutil_utf8v($term));
+
+      if ($length >= 3) {
+        $ngrams = $ngram_engine->getNgramsFromString($value, 'query');
+        $prefix = false;
+      } else if ($length == 2) {
+        $ngrams = $ngram_engine->getNgramsFromString($value, 'prefix');
+        $prefix = false;
+      } else {
+        $ngrams = array(' '.$value);
+        $prefix = true;
+      }
+
+      foreach ($ngrams as $ngram) {
+        $flat[] = array(
+          'table' => $ngram_table_name,
+          'ngram' => $ngram,
+          'prefix' => $prefix,
+        );
+      }
+    }
+
+    // MySQL only allows us to join a maximum of 61 tables per query. Each
+    // ngram is going to cost us a join toward that limit, so if the user
+    // specified a very long query string, just pick 16 of the ngrams
+    // at random.
+    if (count($flat) > 16) {
+      shuffle($flat);
+      $flat = array_slice($flat, 0, 16);
+    }
+
+    $alias = $this->getPrimaryTableAlias();
+    if ($alias) {
+      $phid_column = qsprintf($conn, '%T.%T', $alias, 'phid');
+    } else {
+      $phid_column = qsprintf($conn, '%T', 'phid');
+    }
+
+    $document_table = $engine->newDocumentObject();
+    $field_table = $engine->newFieldObject();
+
+    $joins = array();
+    $joins[] = qsprintf(
+      $conn,
+      'JOIN %T ftdoc ON ftdoc.objectPHID = %Q',
+      $document_table->getTableName(),
+      $phid_column);
+
+    $idx = 1;
+    foreach ($flat as $spec) {
+      $table = $spec['table'];
+      $ngram = $spec['ngram'];
+      $prefix = $spec['prefix'];
+
+      $alias = 'ft'.$idx++;
+
+      if ($prefix) {
+        $joins[] = qsprintf(
+          $conn,
+          'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram LIKE %>',
+          $table,
+          $alias,
+          $alias,
+          $alias,
+          $ngram);
+      } else {
+        $joins[] = qsprintf(
+          $conn,
+          'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram = %s',
+          $table,
+          $alias,
+          $alias,
+          $alias,
+          $ngram);
+      }
+    }
+
+    $joins[] = qsprintf(
+      $conn,
+      'JOIN %T ftfield ON ftdoc.id = ftfield.documentID',
+      $field_table->getTableName());
+
+    return $joins;
+  }
+
+  protected function buildFerretWhereClause(AphrontDatabaseConnection $conn) {
+    if (!$this->ferretEngine) {
+      return array();
+    }
+
+    $where = array();
+    foreach ($this->ferretConstraints as $constraint) {
+      $where[] = qsprintf(
+        $conn,
+        '(ftfield.rawCorpus LIKE %~ OR ftfield.normalCorpus LIKE %~)',
+        $constraint,
+        $constraint);
+    }
+
+    return $where;
+  }
+
+  protected function shouldGroupFerretResultRows() {
+    return (bool)$this->ferretConstraints;
   }
 
 

@@ -49,6 +49,8 @@ final class ManiphestTaskSearchEngine
     $subtype_map = id(new ManiphestTask())->newEditEngineSubtypeMap();
     $hide_subtypes = (count($subtype_map) == 1);
 
+    $hide_ferret = !PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
+
     return array(
       id(new PhabricatorOwnersSearchField())
         ->setLabel(pht('Assigned To'))
@@ -89,6 +91,10 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Contains Words'))
         ->setKey('fulltext'),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Matches (Prototype)'))
+        ->setKey('ferret')
+        ->setIsHidden($hide_ferret),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Open Parents'))
         ->setKey('hasParents')
@@ -145,6 +151,7 @@ final class ManiphestTaskSearchEngine
       'priorities',
       'subtypes',
       'fulltext',
+      'ferret',
       'hasParents',
       'hasSubtasks',
       'parentIDs',
@@ -222,6 +229,12 @@ final class ManiphestTaskSearchEngine
 
     if (strlen($map['fulltext'])) {
       $query->withFullTextSearch($map['fulltext']);
+    }
+
+    if (strlen($map['ferret'])) {
+      $query->withFerretConstraint(
+        id(new ManiphestTask())->newFerretEngine(),
+        $map['ferret']);
     }
 
     if ($map['parentIDs']) {
