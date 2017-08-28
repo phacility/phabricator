@@ -26,9 +26,11 @@ final class PhabricatorNgramEngine extends Phobject {
           break;
       }
 
-      $len = (strlen($token) - 2);
+      $token_v = phutil_utf8v($token);
+      $len = (count($token_v) - 2);
       for ($ii = 0; $ii < $len; $ii++) {
-        $ngram = substr($token, $ii, 3);
+        $ngram = array_slice($token_v, $ii, 3);
+        $ngram = implode('', $ngram);
         $ngrams[$ngram] = $ngram;
       }
     }

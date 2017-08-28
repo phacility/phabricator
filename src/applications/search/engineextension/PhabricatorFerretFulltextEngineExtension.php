@@ -55,6 +55,8 @@ final class PhabricatorFerretFulltextEngineExtension
       ->getNgramsFromString($ngrams_source, 'index');
 
     $ferret_document->openTransaction();
+
+    try {
       $this->deleteOldDocument($engine, $object, $document);
 
       $ferret_document->save();
@@ -85,6 +87,11 @@ final class PhabricatorFerretFulltextEngineExtension
           $ferret_ngrams->getTableName(),
           $chunk);
       }
+    } catch (Exception $ex) {
+      $ferret_document->killTransaction();
+      throw $ex;
+    }
+
     $ferret_document->saveTransaction();
   }
 
