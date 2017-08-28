@@ -86,8 +86,11 @@ final class DiffusionRepositoryBranchesManagementPanel
       $repository->getHumanReadableDetail('close-commits-filter', array()),
       phutil_tag('em', array(), pht('Autoclose On All Branches')));
 
+    $autoclose_disabled = false;
     if ($repository->getDetail('disable-autoclose')) {
-      $autoclose_only = phutil_tag('em', array(), pht('Disabled'));
+      $autoclose_disabled = true;
+      $autoclose_only =
+        phutil_tag('em', array(), pht('Autoclose has been disabled'));
     }
 
     $view->addProperty(pht('Autoclose Only'), $autoclose_only);
@@ -133,12 +136,18 @@ final class DiffusionRepositoryBranchesManagementPanel
           $status = pht('Open');
         }
 
+        if ($autoclose_disabled) {
+          $autoclose_status = pht('Disabled (Repository)');
+        } else {
+          $autoclose_status = pht('Off');
+        }
+
         $rows[] = array(
           $icon,
           $branch_name,
           $status,
           $tracking ? pht('Tracking') : pht('Off'),
-          $autoclosing ? pht('Autoclose On') : pht('Off'),
+          $autoclosing ? pht('Autoclose On') : $autoclose_status,
         );
       }
       $branch_table = new AphrontTableView($rows);
