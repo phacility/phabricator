@@ -281,14 +281,22 @@
 .phui-two-column-fixed.phui-two-column-view
   .phui-basic-nav .phabricator-side-menu .phui-list-item-selected {
     border-radius: 3px;
-    background-color: #f5f9ff;
-    border: 1px solid {$sky};
-    padding-left: 3px;
+    background-color: {$sky};
 }
 
 .phui-two-column-fixed.phui-two-column-view .phui-basic-nav
   .phabricator-side-menu .phui-list-item-href {
     border-radius: 3px;
+}
+
+.phui-two-column-fixed.phui-two-column-view .phui-basic-nav
+  .phabricator-side-menu .phui-list-item-selected a {
+    color: #fff;
+}
+
+.phui-two-column-fixed.phui-two-column-view .phui-basic-nav
+  .phabricator-side-menu .phui-list-item-selected a .phui-icon-view {
+    color: #fff;
 }
 
 .phui-two-column-fixed.phui-two-column-view .phui-header-action-links
