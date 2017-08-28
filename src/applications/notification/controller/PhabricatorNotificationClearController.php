@@ -8,6 +8,17 @@ final class PhabricatorNotificationClearController
     $chrono_key = $request->getStr('chronoKey');
 
     if ($request->isDialogFormPost()) {
+      $should_clear = true;
+    } else {
+      try {
+        $request->validateCSRF();
+        $should_clear = true;
+      } catch (AphrontMalformedRequestException $ex) {
+        $should_clear = false;
+      }
+    }
+
+    if ($should_clear) {
       $table = new PhabricatorFeedStoryNotification();
 
       queryfx(
