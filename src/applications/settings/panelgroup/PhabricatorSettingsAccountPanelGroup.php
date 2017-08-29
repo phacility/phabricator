@@ -6,7 +6,7 @@ final class PhabricatorSettingsAccountPanelGroup
   const PANELGROUPKEY = 'account';
 
   public function getPanelGroupName() {
-    return pht('Account');
+    return null;
   }
 
   protected function getPanelGroupOrder() {

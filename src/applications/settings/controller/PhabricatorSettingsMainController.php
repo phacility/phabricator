@@ -205,7 +205,10 @@ final class PhabricatorSettingsMainController
       if ($panel->getPanelGroupKey() != $group_key) {
         $group_key = $panel->getPanelGroupKey();
         $group = $panel->getPanelGroup();
-        $nav->addLabel($group->getPanelGroupName());
+        $panel_name = $group->getPanelGroupName();
+        if ($panel_name) {
+          $nav->addLabel($panel_name);
+        }
       }
 
       $nav->addFilter($panel->getPanelKey(), $panel->getPanelName());
