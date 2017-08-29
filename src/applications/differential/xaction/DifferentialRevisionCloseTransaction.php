@@ -46,10 +46,12 @@ final class DifferentialRevisionCloseTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    if ($this->getEditor()->getIsCloseByCommit()) {
-      // If we're closing a revision because we discovered a commit, we don't
-      // care what state it was in.
-      return;
+    if ($this->hasEditor()) {
+      if ($this->getEditor()->getIsCloseByCommit()) {
+        // If we're closing a revision because we discovered a commit, we don't
+        // care what state it was in.
+        return;
+      }
     }
 
     if ($object->isClosed()) {
