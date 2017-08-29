@@ -134,6 +134,10 @@ abstract class PhabricatorModularTransactionType
     return $this->editor;
   }
 
+  final protected function hasEditor() {
+    return (bool)$this->editor;
+  }
+
   final protected function getAuthorPHID() {
     return $this->getStorage()->getAuthorPHID();
   }
