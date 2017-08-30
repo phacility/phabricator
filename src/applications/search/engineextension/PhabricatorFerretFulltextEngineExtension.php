@@ -50,8 +50,10 @@ final class PhabricatorFerretFulltextEngineExtension
         continue;
       }
 
-      $normal_corpus = $stemmer->stemCorpus($raw_corpus);
       $term_corpus = $ngram_engine->newTermsCorpus($raw_corpus);
+
+      $normal_corpus = $stemmer->stemCorpus($raw_corpus);
+      $normal_coprus = $ngram_engine->newTermsCorpus($normal_corpus);
 
       if (!isset($ferret_corpus_map[$key])) {
         $ferret_corpus_map[$key] = $empty_template;
@@ -67,16 +69,23 @@ final class PhabricatorFerretFulltextEngineExtension
     }
 
     $ferret_fields = array();
+    $ngrams_source = array();
     foreach ($ferret_corpus_map as $key => $fields) {
       $raw_corpus = $fields['raw'];
       $raw_corpus = implode("\n", $raw_corpus);
+      $ngrams_source[] = $raw_corpus;
 
       $normal_corpus = $fields['normal'];
-      $normal_corpus = implode("\n", $normal_corpus);
+      $normal_corpus = implode(' ', $normal_corpus);
+      if (strlen($normal_corpus)) {
+        $ngrams_source[] = $normal_corpus;
+        $normal_corpus = ' '.$normal_corpus.' ';
+      }
 
       $term_corpus = $fields['term'];
       $term_corpus = implode(' ', $term_corpus);
       if (strlen($term_corpus)) {
+        $ngrams_source[] = $term_corpus;
         $term_corpus = ' '.$term_corpus.' ';
       }
 
@@ -86,9 +95,7 @@ final class PhabricatorFerretFulltextEngineExtension
         ->setTermCorpus($term_corpus)
         ->setNormalCorpus($normal_corpus);
     }
-
-    $ngrams_source = $ferret_corpus_map[$key_all]['raw'];
-    $ngrams_source = implode("\n", $ngrams_source);
+    $ngrams_source = implode(' ', $ngrams_source);
 
     $ngrams = $ngram_engine->getNgramsFromString($ngrams_source, 'index');
 

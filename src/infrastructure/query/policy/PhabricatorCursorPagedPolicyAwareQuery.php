@@ -1409,8 +1409,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return array();
     }
 
+    $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+
     $engine = $this->ferretEngine;
     $ngram_engine = new PhabricatorNgramEngine();
+    $stemmer = new PhutilSearchStemmer();
 
     $ngram_table = $engine->newNgramsObject();
     $ngram_table_name = $ngram_table->getTableName();
@@ -1422,22 +1425,49 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       $length = count(phutil_utf8v($value));
 
-      if ($length >= 3) {
-        $ngrams = $ngram_engine->getNgramsFromString($value, 'query');
-        $prefix = false;
-      } else if ($length == 2) {
-        $ngrams = $ngram_engine->getNgramsFromString($value, 'prefix');
-        $prefix = false;
+      if ($raw_token->getOperator() == $op_sub) {
+        $is_substring = true;
       } else {
-        $ngrams = array(' '.$value);
-        $prefix = true;
+        $is_substring = false;
+      }
+
+      // If the user specified a substring query for a substring which is
+      // shorter than the ngram length, we can't use the ngram index, so
+      // don't do a join. We'll fall back to just doing LIKE on the full
+      // corpus.
+      if ($is_substring) {
+        if ($length < 3) {
+          continue;
+        }
+      }
+
+      if ($raw_token->isQuoted()) {
+        $is_stemmed = false;
+      } else {
+        $is_stemmed = true;
+      }
+
+      if ($is_substring) {
+        $ngrams = $ngram_engine->getNgramsFromString($value, 'query');
+      } else {
+        $ngrams = $ngram_engine->getNgramsFromString($value, 'index');
+
+        // If this is a stemmed term, only look for ngrams present in both the
+        // unstemmed and stemmed variations.
+        if ($is_stemmed) {
+          $stem_value = $stemmer->stemToken($value);
+          $stem_ngrams = $ngram_engine->getNgramsFromString(
+            $stem_value,
+            'index');
+
+          $ngrams = array_intersect($ngrams, $stem_ngrams);
+        }
       }
 
       foreach ($ngrams as $ngram) {
         $flat[] = array(
           'table' => $ngram_table_name,
           'ngram' => $ngram,
-          'prefix' => $prefix,
         );
       }
     }
@@ -1472,29 +1502,17 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     foreach ($flat as $spec) {
       $table = $spec['table'];
       $ngram = $spec['ngram'];
-      $prefix = $spec['prefix'];
 
       $alias = 'ft'.$idx++;
 
-      if ($prefix) {
-        $joins[] = qsprintf(
-          $conn,
-          'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram LIKE %>',
-          $table,
-          $alias,
-          $alias,
-          $alias,
-          $ngram);
-      } else {
-        $joins[] = qsprintf(
-          $conn,
-          'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram = %s',
-          $table,
-          $alias,
-          $alias,
-          $alias,
-          $ngram);
-      }
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram = %s',
+        $table,
+        $alias,
+        $alias,
+        $alias,
+        $ngram);
     }
 
     $joins[] = qsprintf(
@@ -1510,16 +1528,72 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return array();
     }
 
+    $ngram_engine = new PhabricatorNgramEngine();
+    $stemmer = new PhutilSearchStemmer();
+    $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+
     $where = array();
     foreach ($this->ferretTokens as $fulltext_token) {
       $raw_token = $fulltext_token->getToken();
       $value = $raw_token->getValue();
 
-      $where[] = qsprintf(
+      if ($raw_token->getOperator() == $op_sub) {
+        $is_substring = true;
+      } else {
+        $is_substring = false;
+      }
+
+      // If we're doing substring search, we just match against the raw corpus
+      // and we're done.
+      if ($is_substring) {
+        $where[] = qsprintf(
+          $conn,
+          '(ftfield.rawCorpus LIKE %~)',
+          $value);
+        continue;
+      }
+
+      // Otherwise, we need to match against the term corpus and the normal
+      // corpus, so that searching for "raw" does not find "strawberry".
+      if ($raw_token->isQuoted()) {
+        $is_quoted = true;
+        $is_stemmed = false;
+      } else {
+        $is_quoted = false;
+        $is_stemmed = true;
+      }
+
+      $term_constraints = array();
+
+      $term_value = ' '.$ngram_engine->newTermsCorpus($value).' ';
+      $term_constraints[] = qsprintf(
         $conn,
-        '(ftfield.rawCorpus LIKE %~ OR ftfield.normalCorpus LIKE %~)',
-        $value,
-        $value);
+        '(ftfield.termCorpus LIKE %~)',
+        $term_value);
+
+      if ($is_stemmed) {
+        $stem_value = $stemmer->stemToken($value);
+        $stem_value = $ngram_engine->newTermsCorpus($stem_value);
+        $stem_value = ' '.$stem_value.' ';
+
+        $term_constraints[] = qsprintf(
+          $conn,
+          '(ftfield.normalCorpus LIKE %~)',
+          $stem_value);
+      }
+
+      if ($is_quoted) {
+        $where[] = qsprintf(
+          $conn,
+          '(ftfield.rawCorpus LIKE %~ AND (%Q))',
+          $value,
+          implode(' OR ', $term_constraints));
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          '(%Q)',
+          implode(' OR ', $term_constraints));
+      }
     }
 
     return $where;

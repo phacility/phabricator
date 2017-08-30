@@ -92,8 +92,8 @@ final class ManiphestTaskSearchEngine
         ->setLabel(pht('Contains Words'))
         ->setKey('fulltext'),
       id(new PhabricatorSearchTextField())
-        ->setLabel(pht('Matches (Prototype)'))
-        ->setKey('ferret')
+        ->setLabel(pht('Query (Prototype)'))
+        ->setKey('query')
         ->setIsHidden($hide_ferret),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Open Parents'))
@@ -150,8 +150,8 @@ final class ManiphestTaskSearchEngine
       'statuses',
       'priorities',
       'subtypes',
+      'query',
       'fulltext',
-      'ferret',
       'hasParents',
       'hasSubtasks',
       'parentIDs',
@@ -231,8 +231,8 @@ final class ManiphestTaskSearchEngine
       $query->withFullTextSearch($map['fulltext']);
     }
 
-    if (strlen($map['ferret'])) {
-      $raw_query = $map['ferret'];
+    if (strlen($map['query'])) {
+      $raw_query = $map['query'];
 
       $compiler = id(new PhutilSearchQueryCompiler())
         ->setEnableFunctions(true);
