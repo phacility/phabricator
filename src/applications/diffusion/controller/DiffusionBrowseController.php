@@ -371,6 +371,7 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setHeader($browse_header)
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setTable($browse_table)
+        ->addClass('diffusion-mobile-view')
         ->setPager($pager);
 
       $path = $drequest->getPath();
@@ -595,6 +596,8 @@ final class DiffusionBrowseController extends DiffusionController {
       ),
       $rows);
 
+    $corpus_table = phutil_tag_div('diffusion-source-wrap', $corpus_table);
+
     if ($this->getRequest()->isAjax()) {
       return $corpus_table;
     }
@@ -654,6 +657,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($corpus)
+      ->addClass('diffusion-mobile-view')
       ->setCollapsed(true);
 
     $messages = array();
@@ -860,6 +864,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $view = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Owner Packages'))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->addClass('diffusion-mobile-view')
         ->setObjectList($ownership);
     }
 
@@ -1341,6 +1346,7 @@ final class DiffusionBrowseController extends DiffusionController {
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view')
       ->addPropertyList($properties);
   }
 
@@ -1361,6 +1367,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view')
       ->appendChild($text);
 
     return $box;
@@ -1693,15 +1700,20 @@ final class DiffusionBrowseController extends DiffusionController {
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Recently Open Revisions'));
 
-    $view = id(new DifferentialRevisionListView())
+    $list = id(new DifferentialRevisionListView())
+      ->setRevisions($revisions)
+      ->setUser($viewer)
+      ->setNoBox(true);
+
+    $phids = $list->getRequiredHandlePHIDs();
+    $handles = $this->loadViewerHandles($phids);
+    $list->setHandles($handles);
+
+    $view = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setRevisions($revisions)
-      ->setUser($viewer);
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
+      ->addClass('diffusion-mobile-view')
+      ->appendChild($list);
 
     return $view;
   }
@@ -1838,6 +1850,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $corpus = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view')
       ->setCollapsed(true);
 
     if ($messages) {
@@ -1922,6 +1935,7 @@ final class DiffusionBrowseController extends DiffusionController {
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view')
       ->setTable($history_table);
   }
 
