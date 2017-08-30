@@ -1410,6 +1410,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+    $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
 
     $engine = $this->ferretEngine;
     $ngram_engine = new PhabricatorNgramEngine();
@@ -1421,6 +1422,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $flat = array();
     foreach ($this->ferretTokens as $fulltext_token) {
       $raw_token = $fulltext_token->getToken();
+
+      // If this is a negated term like "-pomegranate", don't join the ngram
+      // table since we aren't looking for documents with this term. (We could
+      // LEFT JOIN the table and require a NULL row, but this is probably more
+      // trouble than it's worth.)
+      if ($raw_token->getOperator() == $op_not) {
+        continue;
+      }
+
       $value = $raw_token->getValue();
 
       $length = count(phutil_utf8v($value));
@@ -1530,12 +1540,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $ngram_engine = new PhabricatorNgramEngine();
     $stemmer = new PhutilSearchStemmer();
+
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+    $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
 
     $where = array();
     foreach ($this->ferretTokens as $fulltext_token) {
       $raw_token = $fulltext_token->getToken();
       $value = $raw_token->getValue();
+
+      $is_not = ($raw_token->getOperator() == $op_not);
 
       if ($raw_token->getOperator() == $op_sub) {
         $is_substring = true;
@@ -1546,10 +1560,17 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       // If we're doing substring search, we just match against the raw corpus
       // and we're done.
       if ($is_substring) {
-        $where[] = qsprintf(
-          $conn,
-          '(ftfield.rawCorpus LIKE %~)',
-          $value);
+        if ($is_not) {
+          $where[] = qsprintf(
+            $conn,
+            '(ftfield.rawCorpus NOT LIKE %~)',
+            $value);
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            '(ftfield.rawCorpus LIKE %~)',
+            $value);
+        }
         continue;
       }
 
@@ -1563,13 +1584,26 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $is_stemmed = true;
       }
 
+      // Never stem negated queries, since this can exclude results users
+      // did not mean to exclude and generally confuse things.
+      if ($is_not) {
+        $is_stemmed = false;
+      }
+
       $term_constraints = array();
 
       $term_value = ' '.$ngram_engine->newTermsCorpus($value).' ';
-      $term_constraints[] = qsprintf(
-        $conn,
-        '(ftfield.termCorpus LIKE %~)',
-        $term_value);
+      if ($is_not) {
+        $term_constraints[] = qsprintf(
+          $conn,
+          '(ftfield.termCorpus NOT LIKE %~)',
+          $term_value);
+      } else {
+        $term_constraints[] = qsprintf(
+          $conn,
+          '(ftfield.termCorpus LIKE %~)',
+          $term_value);
+      }
 
       if ($is_stemmed) {
         $stem_value = $stemmer->stemToken($value);
@@ -1582,7 +1616,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           $stem_value);
       }
 
-      if ($is_quoted) {
+      if ($is_not) {
+        $where[] = qsprintf(
+          $conn,
+          '(%Q)',
+          implode(' AND ', $term_constraints));
+      } else if ($is_quoted) {
         $where[] = qsprintf(
           $conn,
           '(ftfield.rawCorpus LIKE %~ AND (%Q))',
