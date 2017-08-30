@@ -30,11 +30,13 @@ final class PhabricatorFerretFulltextEngineExtension
       ->setEpochModified(0);
 
     $stemmer = new PhutilSearchStemmer();
+    $ngram_engine = id(new PhabricatorNgramEngine());
 
     $key_all = PhabricatorSearchDocumentFieldType::FIELD_ALL;
 
     $empty_template = array(
       'raw' => array(),
+      'term' => array(),
       'normal' => array(),
     );
 
@@ -49,15 +51,18 @@ final class PhabricatorFerretFulltextEngineExtension
       }
 
       $normal_corpus = $stemmer->stemCorpus($raw_corpus);
+      $term_corpus = $ngram_engine->newTermsCorpus($raw_corpus);
 
       if (!isset($ferret_corpus_map[$key])) {
         $ferret_corpus_map[$key] = $empty_template;
       }
 
       $ferret_corpus_map[$key]['raw'][] = $raw_corpus;
+      $ferret_corpus_map[$key]['term'][] = $term_corpus;
       $ferret_corpus_map[$key]['normal'][] = $normal_corpus;
 
       $ferret_corpus_map[$key_all]['raw'][] = $raw_corpus;
+      $ferret_corpus_map[$key_all]['term'][] = $term_corpus;
       $ferret_corpus_map[$key_all]['normal'][] = $normal_corpus;
     }
 
@@ -69,17 +74,23 @@ final class PhabricatorFerretFulltextEngineExtension
       $normal_corpus = $fields['normal'];
       $normal_corpus = implode("\n", $normal_corpus);
 
+      $term_corpus = $fields['term'];
+      $term_corpus = implode(' ', $term_corpus);
+      if (strlen($term_corpus)) {
+        $term_corpus = ' '.$term_corpus.' ';
+      }
+
       $ferret_fields[] = $engine->newFieldObject()
         ->setFieldKey($key)
         ->setRawCorpus($raw_corpus)
+        ->setTermCorpus($term_corpus)
         ->setNormalCorpus($normal_corpus);
     }
 
     $ngrams_source = $ferret_corpus_map[$key_all]['raw'];
     $ngrams_source = implode("\n", $ngrams_source);
 
-    $ngrams = id(new PhabricatorNgramEngine())
-      ->getNgramsFromString($ngrams_source, 'index');
+    $ngrams = $ngram_engine->getNgramsFromString($ngrams_source, 'index');
 
     $ferret_document->openTransaction();
 

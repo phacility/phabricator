@@ -40,4 +40,56 @@ final class PhabricatorNgramEngine extends Phobject {
     return array_keys($ngrams);
   }
 
+  public function newTermsCorpus($raw_corpus) {
+    $term_corpus = strtr(
+      $raw_corpus,
+      array(
+        '!' => ' ',
+        '"' => ' ',
+        '#' => ' ',
+        '$' => ' ',
+        '%' => ' ',
+        '&' => ' ',
+        '(' => ' ',
+        ')' => ' ',
+        '*' => ' ',
+        '+' => ' ',
+        ',' => ' ',
+        '-' => ' ',
+        '/' => ' ',
+        ':' => ' ',
+        ';' => ' ',
+        '<' => ' ',
+        '=' => ' ',
+        '>' => ' ',
+        '?' => ' ',
+        '@' => ' ',
+        '[' => ' ',
+        '\\' => ' ',
+        ']' => ' ',
+        '^' => ' ',
+        '`' => ' ',
+        '{' => ' ',
+        '|' => ' ',
+        '}' => ' ',
+        '~' => ' ',
+        '.' => ' ',
+        '_' => ' ',
+        "\n" => ' ',
+        "\r" => ' ',
+        "\t" => ' ',
+      ));
+
+    // NOTE: Single quotes divide terms only if they're at a word boundary.
+    // In contractions, like "whom'st've", the entire word is a single term.
+    $term_corpus = preg_replace('/(^| )[\']+/', ' ', $term_corpus);
+    $term_corpus = preg_replace('/[\']+( |$)/', ' ', $term_corpus);
+
+    $term_corpus = preg_replace('/\s+/u', ' ', $term_corpus);
+    $term_corpus = trim($term_corpus, ' ');
+
+    return $term_corpus;
+  }
+
+
 }

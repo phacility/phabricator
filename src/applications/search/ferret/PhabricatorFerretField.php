@@ -6,6 +6,7 @@ abstract class PhabricatorFerretField
   protected $documentID;
   protected $fieldKey;
   protected $rawCorpus;
+  protected $termCorpus;
   protected $normalCorpus;
 
   abstract public function getIndexKey();
@@ -17,6 +18,7 @@ abstract class PhabricatorFerretField
         'documentID' => 'uint32',
         'fieldKey' => 'text4',
         'rawCorpus' => 'sort',
+        'termCorpus' => 'sort',
         'normalCorpus' => 'sort',
       ),
       self::CONFIG_KEY_SCHEMA => array(
