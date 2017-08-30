@@ -28,7 +28,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $spaceIsArchived;
   private $ngrams = array();
   private $ferretEngine;
-  private $ferretConstraints;
+  private $ferretTokens;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -1386,7 +1386,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   public function withFerretConstraint(
     PhabricatorFerretEngine $engine,
-    $raw_query) {
+    array $fulltext_tokens) {
 
     if ($this->ferretEngine) {
       throw new Exception(
@@ -1394,12 +1394,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'Query may not have multiple fulltext constraints.'));
     }
 
-    if (!strlen($raw_query)) {
+    if (!$fulltext_tokens) {
       return $this;
     }
 
     $this->ferretEngine = $engine;
-    $this->ferretConstraints = preg_split('/\s+/', $raw_query);
+    $this->ferretTokens = $fulltext_tokens;
 
     return $this;
   }
@@ -1416,9 +1416,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $ngram_table_name = $ngram_table->getTableName();
 
     $flat = array();
-    foreach ($this->ferretConstraints as $term) {
-      $value = $term;
-      $length = count(phutil_utf8v($term));
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+      $value = $raw_token->getValue();
+
+      $length = count(phutil_utf8v($value));
 
       if ($length >= 3) {
         $ngrams = $ngram_engine->getNgramsFromString($value, 'query');
@@ -1509,19 +1511,22 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     $where = array();
-    foreach ($this->ferretConstraints as $constraint) {
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+      $value = $raw_token->getValue();
+
       $where[] = qsprintf(
         $conn,
         '(ftfield.rawCorpus LIKE %~ OR ftfield.normalCorpus LIKE %~)',
-        $constraint,
-        $constraint);
+        $value,
+        $value);
     }
 
     return $where;
   }
 
   protected function shouldGroupFerretResultRows() {
-    return (bool)$this->ferretConstraints;
+    return (bool)$this->ferretTokens;
   }
 
 

@@ -232,9 +232,24 @@ final class ManiphestTaskSearchEngine
     }
 
     if (strlen($map['ferret'])) {
+      $raw_query = $map['ferret'];
+
+      $compiler = id(new PhutilSearchQueryCompiler())
+        ->setEnableFunctions(true);
+
+      $raw_tokens = $compiler->newTokens($raw_query);
+
+      $fulltext_tokens = array();
+      foreach ($raw_tokens as $raw_token) {
+        $fulltext_token = id(new PhabricatorFulltextToken())
+          ->setToken($raw_token);
+
+        $fulltext_tokens[] = $fulltext_token;
+      }
+
       $query->withFerretConstraint(
         id(new ManiphestTask())->newFerretEngine(),
-        $map['ferret']);
+        $fulltext_tokens);
     }
 
     if ($map['parentIDs']) {
