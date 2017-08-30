@@ -25,6 +25,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $href = null;
   private $title = null;
   private $disabled;
+  private $selected;
   private $name;
   private $tooltip;
   private $noCSS;
@@ -71,6 +72,11 @@ final class PHUIButtonView extends AphrontTagView {
 
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function setSelected($selected) {
+    $this->selected = $selected;
     return $this;
   }
 
@@ -187,6 +193,10 @@ final class PHUIButtonView extends AphrontTagView {
 
     if ($this->disabled) {
       $classes[] = 'disabled';
+    }
+
+    if ($this->selected) {
+      $classes[] = 'selected';
     }
 
     switch ($this->getButtonType()) {

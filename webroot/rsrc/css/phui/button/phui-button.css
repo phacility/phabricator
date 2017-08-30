@@ -105,6 +105,19 @@ button[disabled] {
   opacity: 0.5;
 }
 
+button.button-grey.selected,
+a.button.button-grey.selected,
+button.button-grey.selected:hover,
+a.button.button-grey.selected:hover {
+  border-color: {$sh-orangetext};
+  color: {$sh-orangetext};
+}
+
+button.button-grey.selected .phui-icon-view,
+a.button-grey.selected .phui-icon-view {
+  color: {$sh-orangetext};
+}
+
 a.phuix-dropdown-open {
   color: {$greytext};
 }

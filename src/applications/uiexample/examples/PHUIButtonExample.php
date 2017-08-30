@@ -83,9 +83,11 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       ),
       array(
         'icon' => 'fa-upload',
+        'disabled' => true,
       ),
       array(
         'icon' => 'fa-street-view',
+        'selected' => true,
       ),
       array(
         'text' => pht('Copy "Quack" to Clipboard'),
@@ -99,6 +101,8 @@ final class PHUIButtonExample extends PhabricatorUIExample {
         ->setColor(PHUIButtonView::GREY)
         ->setIcon(idx($spec, 'icon'))
         ->setText(idx($spec, 'text'))
+        ->setSelected(idx($spec, 'selected'))
+        ->setDisabled(idx($spec, 'disabled'))
         ->addClass(PHUI::MARGIN_SMALL_RIGHT)
         ->setDropdown(idx($spec, 'dropdown'));
 
