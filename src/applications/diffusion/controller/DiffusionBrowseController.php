@@ -730,6 +730,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setText($blame_text)
       ->setIcon($blame_icon)
       ->setUser($viewer)
+      ->setSelected(!$blame_value)
       ->setColor(PHUIButtonView::GREY);
 
     if ($viewer->isLoggedIn()) {
