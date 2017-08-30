@@ -29,6 +29,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $ngrams = array();
   private $ferretEngine;
   private $ferretTokens;
+  private $ferretTables;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -1401,6 +1402,43 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $this->ferretEngine = $engine;
     $this->ferretTokens = $fulltext_tokens;
 
+
+    $function_map = array(
+      'all' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
+      'title' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+    );
+
+    $current_function = 'all';
+    $table_map = array();
+    $idx = 1;
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+      $function = $raw_token->getFunction();
+
+      if ($function === null) {
+        $function = $current_function;
+      }
+
+      if (!isset($function_map[$function])) {
+        throw new PhutilSearchQueryCompilerSyntaxException(
+          pht(
+            'Unknown search function "%s".',
+            $function));
+      }
+
+      if (!isset($table_map[$function])) {
+        $alias = 'ftfield'.$idx++;
+        $table_map[$function] = array(
+          'alias' => $alias,
+          'key' => $function_map[$function],
+        );
+      }
+
+      $current_function = $function;
+    }
+
+    $this->ferretTables = $table_map;
+
     return $this;
   }
 
@@ -1525,10 +1563,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $ngram);
     }
 
-    $joins[] = qsprintf(
-      $conn,
-      'JOIN %T ftfield ON ftdoc.id = ftfield.documentID',
-      $field_table->getTableName());
+    foreach ($this->ferretTables as $table) {
+      $alias = $table['alias'];
+
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T %T ON ftdoc.id = %T.documentID
+          AND %T.fieldKey = %s',
+        $field_table->getTableName(),
+        $alias,
+        $alias,
+        $alias,
+        $table['key']);
+    }
 
     return $joins;
   }
@@ -1540,14 +1587,24 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $ngram_engine = new PhabricatorNgramEngine();
     $stemmer = new PhutilSearchStemmer();
+    $table_map = $this->ferretTables;
 
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
     $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
 
     $where = array();
+    $current_function = 'all';
     foreach ($this->ferretTokens as $fulltext_token) {
       $raw_token = $fulltext_token->getToken();
       $value = $raw_token->getValue();
+
+      $function = $raw_token->getFunction();
+      if ($function === null) {
+        $function = $current_function;
+      }
+      $current_function = $function;
+
+      $table_alias = $table_map[$function]['alias'];
 
       $is_not = ($raw_token->getOperator() == $op_not);
 
@@ -1563,12 +1620,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         if ($is_not) {
           $where[] = qsprintf(
             $conn,
-            '(ftfield.rawCorpus NOT LIKE %~)',
+            '(%T.rawCorpus NOT LIKE %~)',
+            $table_alias,
             $value);
         } else {
           $where[] = qsprintf(
             $conn,
-            '(ftfield.rawCorpus LIKE %~)',
+            '(%T.rawCorpus LIKE %~)',
+            $table_alias,
             $value);
         }
         continue;
@@ -1596,12 +1655,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       if ($is_not) {
         $term_constraints[] = qsprintf(
           $conn,
-          '(ftfield.termCorpus NOT LIKE %~)',
+          '(%T.termCorpus NOT LIKE %~)',
+          $table_alias,
           $term_value);
       } else {
         $term_constraints[] = qsprintf(
           $conn,
-          '(ftfield.termCorpus LIKE %~)',
+          '(%T.termCorpus LIKE %~)',
+          $table_alias,
           $term_value);
       }
 
@@ -1612,7 +1673,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
         $term_constraints[] = qsprintf(
           $conn,
-          '(ftfield.normalCorpus LIKE %~)',
+          '(%T.normalCorpus LIKE %~)',
+          $table_alias,
           $stem_value);
       }
 
@@ -1624,7 +1686,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       } else if ($is_quoted) {
         $where[] = qsprintf(
           $conn,
-          '(ftfield.rawCorpus LIKE %~ AND (%Q))',
+          '(%T.rawCorpus LIKE %~ AND (%Q))',
+          $table_alias,
           $value,
           implode(' OR ', $term_constraints));
       } else {
