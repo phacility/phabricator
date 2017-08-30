@@ -20,8 +20,9 @@ abstract class PhabricatorFerretField
         'normalCorpus' => 'sort',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_document' => array(
+        'key_documentfield' => array(
           'columns' => array('documentID', 'fieldKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
