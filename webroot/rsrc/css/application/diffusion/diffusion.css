@@ -230,11 +230,6 @@
   padding-bottom: 10px;
 }
 
-.device-phone.diffusion-history-view .diffusion-history-list .button.has-icon
-  .phui-button-text {
-    margin: 0;
-}
-
 .device-phone .phui-two-column-view .phui-two-column-content
   .phui-object-box.diffusion-mobile-view {
     margin: 0 -12px 20px;
