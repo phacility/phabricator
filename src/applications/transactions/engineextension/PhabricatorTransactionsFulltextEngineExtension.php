@@ -9,11 +9,11 @@ final class PhabricatorTransactionsFulltextEngineExtension
     return pht('Comments');
   }
 
-  public function shouldIndexFulltextObject($object) {
+  public function shouldEnrichFulltextObject($object) {
     return ($object instanceof PhabricatorApplicationTransactionInterface);
   }
 
-  public function indexFulltextObject(
+  public function enrichFulltextObject(
     $object,
     PhabricatorSearchAbstractDocument $document) {
 

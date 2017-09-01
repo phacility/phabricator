@@ -16,6 +16,7 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorSpacesInterface,
     PhabricatorConduitResultInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     DoorkeeperBridgedObjectInterface,
     PhabricatorEditEngineSubtypeInterface,
     PhabricatorEditEngineLockableInterface {
@@ -601,6 +602,14 @@ final class ManiphestTask extends ManiphestDAO
 
   public function newEditEngineLock() {
     return new ManiphestTaskEditEngineLock();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new ManiphestTaskFerretEngine();
   }
 
 }

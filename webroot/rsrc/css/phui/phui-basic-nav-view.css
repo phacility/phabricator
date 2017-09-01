@@ -64,7 +64,7 @@
 
 .phui-basic-nav .phabricator-side-menu .phui-list-item-href {
   display: block;
-  padding: 6px 8px 6px 20px;
+  padding: 6px 8px 6px 12px;
   color: {$darkbluetext};
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
@@ -72,13 +72,8 @@
   text-overflow: ellipsis
 }
 
-.phui-basic-nav .phabricator-side-menu .phui-list-item-has-icon
-  .phui-list-item-href {
-    padding-left: 12px;
-  }
-
 .phui-basic-nav .phabricator-side-menu .phui-list-item-icon {
-  margin-left: -4px;
+  margin-left: -8px;
   text-align: center;
   width: 30px;
 }
@@ -100,7 +95,6 @@
 
 .phui-basic-nav .phabricator-side-menu .phui-list-item-selected {
   background-color: rgba({$alphablack},.05);
-  border-left: 4px solid {$sky};
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
   font-weight: bold;
@@ -109,12 +103,7 @@
 .device-desktop .phui-basic-nav .phabricator-side-menu
   .phui-list-item-selected
   a.phui-list-item-href:hover {
-  background-color: rgba({$alphablack},.05);
-}
-
-.phui-basic-nav .phabricator-side-menu .phui-list-item-selected
-  .phui-list-item-href {
-  margin-left: -4px;
+    background-color: rgba({$alphablack},.05);
 }
 
 .phui-basic-nav .phabricator-side-menu .phui-list-item-type-label {
@@ -124,6 +113,7 @@
   font-size: 12px;
   font-weight: bold;
   border-style: solid;
+  letter-spacing: 0.02em;
 }
 
 .device-desktop .phui-basic-nav .phabricator-side-menu

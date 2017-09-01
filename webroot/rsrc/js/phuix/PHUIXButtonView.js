@@ -16,6 +16,7 @@ JX.install('PHUIXButtonView', {
 
     _iconView: null,
     _color: null,
+    _selected: null,
     _buttonType: null,
 
     setIcon: function(icon) {
@@ -40,6 +41,13 @@ JX.install('PHUIXButtonView', {
       this._color = color;
       JX.DOM.alterClass(node, 'button-' + this._color, true);
 
+      return this;
+    },
+
+    setSelected: function(selected) {
+      var node = this.getNode();
+      this._selected = selected;
+      JX.DOM.alterClass(node, 'selected', this._selected);
       return this;
     },
 

@@ -57,6 +57,7 @@ final class DiffusionBranchTableController extends DiffusionController {
       $content = id(new PHUIObjectBoxView())
         ->setHeaderText($repository->getName())
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->addClass('diffusion-mobile-view')
         ->setTable($list)
         ->setPager($pager);
     }

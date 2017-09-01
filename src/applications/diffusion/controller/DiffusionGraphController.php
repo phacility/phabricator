@@ -67,6 +67,7 @@ final class DiffusionGraphController extends DiffusionController {
       ->setHeaderText(pht('History Graph'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($graph)
+      ->addClass('diffusion-mobile-view')
       ->setPager($pager);
 
     $tabs = $this->buildTabsView('graph');

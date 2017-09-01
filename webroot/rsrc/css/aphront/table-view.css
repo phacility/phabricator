@@ -4,6 +4,7 @@
 
 .aphront-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .aphront-table-view {
@@ -128,14 +129,8 @@ th.aphront-table-view-sortable-selected {
   padding: 8px 10px;
 }
 
-.device-tablet .aphront-table-view td,
-.device-phone .aphront-table-view td {
-  padding: 6px;
-}
-
 .device-tablet .aphront-table-view th,
 .device-phone .aphront-table-view th {
-  padding: 6px;
   overflow: hidden;
 }
 

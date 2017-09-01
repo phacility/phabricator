@@ -27,6 +27,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $spacePHIDs;
   private $spaceIsArchived;
   private $ngrams = array();
+  private $ferretEngine;
+  private $ferretTokens;
+  private $ferretTables;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -270,6 +273,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $joins[] = $this->buildEdgeLogicJoinClause($conn);
     $joins[] = $this->buildApplicationSearchJoinClause($conn);
     $joins[] = $this->buildNgramsJoinClause($conn);
+    $joins[] = $this->buildFerretJoinClause($conn);
     return $joins;
   }
 
@@ -292,6 +296,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $where[] = $this->buildEdgeLogicWhereClause($conn);
     $where[] = $this->buildSpacesWhereClause($conn);
     $where[] = $this->buildNgramsWhereClause($conn);
+    $where[] = $this->buildFerretWhereClause($conn);
     return $where;
   }
 
@@ -343,6 +348,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     if ($this->shouldGroupNgramResultRows()) {
+      return true;
+    }
+
+    if ($this->shouldGroupFerretResultRows()) {
       return true;
     }
 
@@ -1370,6 +1379,332 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   protected function isCustomFieldOrderKey($key) {
     $prefix = 'custom:';
     return !strncmp($key, $prefix, strlen($prefix));
+  }
+
+
+/* -(  Ferret  )------------------------------------------------------------- */
+
+
+  public function withFerretConstraint(
+    PhabricatorFerretEngine $engine,
+    array $fulltext_tokens) {
+
+    if ($this->ferretEngine) {
+      throw new Exception(
+        pht(
+          'Query may not have multiple fulltext constraints.'));
+    }
+
+    if (!$fulltext_tokens) {
+      return $this;
+    }
+
+    $this->ferretEngine = $engine;
+    $this->ferretTokens = $fulltext_tokens;
+
+
+    $function_map = array(
+      'all' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
+      'title' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+      'body' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
+      'core' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
+    );
+
+    $current_function = 'all';
+    $table_map = array();
+    $idx = 1;
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+      $function = $raw_token->getFunction();
+
+      if ($function === null) {
+        $function = $current_function;
+      }
+
+      if (!isset($function_map[$function])) {
+        throw new PhutilSearchQueryCompilerSyntaxException(
+          pht(
+            'Unknown search function "%s".',
+            $function));
+      }
+
+      if (!isset($table_map[$function])) {
+        $alias = 'ftfield'.$idx++;
+        $table_map[$function] = array(
+          'alias' => $alias,
+          'key' => $function_map[$function],
+        );
+      }
+
+      $current_function = $function;
+    }
+
+    $this->ferretTables = $table_map;
+
+    return $this;
+  }
+
+  protected function buildFerretJoinClause(AphrontDatabaseConnection $conn) {
+    if (!$this->ferretEngine) {
+      return array();
+    }
+
+    $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+    $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
+
+    $engine = $this->ferretEngine;
+    $ngram_engine = new PhabricatorNgramEngine();
+    $stemmer = new PhutilSearchStemmer();
+
+    $ngram_table = $engine->newNgramsObject();
+    $ngram_table_name = $ngram_table->getTableName();
+
+    $flat = array();
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+
+      // If this is a negated term like "-pomegranate", don't join the ngram
+      // table since we aren't looking for documents with this term. (We could
+      // LEFT JOIN the table and require a NULL row, but this is probably more
+      // trouble than it's worth.)
+      if ($raw_token->getOperator() == $op_not) {
+        continue;
+      }
+
+      $value = $raw_token->getValue();
+
+      $length = count(phutil_utf8v($value));
+
+      if ($raw_token->getOperator() == $op_sub) {
+        $is_substring = true;
+      } else {
+        $is_substring = false;
+      }
+
+      // If the user specified a substring query for a substring which is
+      // shorter than the ngram length, we can't use the ngram index, so
+      // don't do a join. We'll fall back to just doing LIKE on the full
+      // corpus.
+      if ($is_substring) {
+        if ($length < 3) {
+          continue;
+        }
+      }
+
+      if ($raw_token->isQuoted()) {
+        $is_stemmed = false;
+      } else {
+        $is_stemmed = true;
+      }
+
+      if ($is_substring) {
+        $ngrams = $ngram_engine->getNgramsFromString($value, 'query');
+      } else {
+        $ngrams = $ngram_engine->getNgramsFromString($value, 'index');
+
+        // If this is a stemmed term, only look for ngrams present in both the
+        // unstemmed and stemmed variations.
+        if ($is_stemmed) {
+          $stem_value = $stemmer->stemToken($value);
+          $stem_ngrams = $ngram_engine->getNgramsFromString(
+            $stem_value,
+            'index');
+
+          $ngrams = array_intersect($ngrams, $stem_ngrams);
+        }
+      }
+
+      foreach ($ngrams as $ngram) {
+        $flat[] = array(
+          'table' => $ngram_table_name,
+          'ngram' => $ngram,
+        );
+      }
+    }
+
+    // MySQL only allows us to join a maximum of 61 tables per query. Each
+    // ngram is going to cost us a join toward that limit, so if the user
+    // specified a very long query string, just pick 16 of the ngrams
+    // at random.
+    if (count($flat) > 16) {
+      shuffle($flat);
+      $flat = array_slice($flat, 0, 16);
+    }
+
+    $alias = $this->getPrimaryTableAlias();
+    if ($alias) {
+      $phid_column = qsprintf($conn, '%T.%T', $alias, 'phid');
+    } else {
+      $phid_column = qsprintf($conn, '%T', 'phid');
+    }
+
+    $document_table = $engine->newDocumentObject();
+    $field_table = $engine->newFieldObject();
+
+    $joins = array();
+    $joins[] = qsprintf(
+      $conn,
+      'JOIN %T ftdoc ON ftdoc.objectPHID = %Q',
+      $document_table->getTableName(),
+      $phid_column);
+
+    $idx = 1;
+    foreach ($flat as $spec) {
+      $table = $spec['table'];
+      $ngram = $spec['ngram'];
+
+      $alias = 'ft'.$idx++;
+
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram = %s',
+        $table,
+        $alias,
+        $alias,
+        $alias,
+        $ngram);
+    }
+
+    foreach ($this->ferretTables as $table) {
+      $alias = $table['alias'];
+
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T %T ON ftdoc.id = %T.documentID
+          AND %T.fieldKey = %s',
+        $field_table->getTableName(),
+        $alias,
+        $alias,
+        $alias,
+        $table['key']);
+    }
+
+    return $joins;
+  }
+
+  protected function buildFerretWhereClause(AphrontDatabaseConnection $conn) {
+    if (!$this->ferretEngine) {
+      return array();
+    }
+
+    $ngram_engine = new PhabricatorNgramEngine();
+    $stemmer = new PhutilSearchStemmer();
+    $table_map = $this->ferretTables;
+
+    $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+    $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
+
+    $where = array();
+    $current_function = 'all';
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+      $value = $raw_token->getValue();
+
+      $function = $raw_token->getFunction();
+      if ($function === null) {
+        $function = $current_function;
+      }
+      $current_function = $function;
+
+      $table_alias = $table_map[$function]['alias'];
+
+      $is_not = ($raw_token->getOperator() == $op_not);
+
+      if ($raw_token->getOperator() == $op_sub) {
+        $is_substring = true;
+      } else {
+        $is_substring = false;
+      }
+
+      // If we're doing substring search, we just match against the raw corpus
+      // and we're done.
+      if ($is_substring) {
+        if ($is_not) {
+          $where[] = qsprintf(
+            $conn,
+            '(%T.rawCorpus NOT LIKE %~)',
+            $table_alias,
+            $value);
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            '(%T.rawCorpus LIKE %~)',
+            $table_alias,
+            $value);
+        }
+        continue;
+      }
+
+      // Otherwise, we need to match against the term corpus and the normal
+      // corpus, so that searching for "raw" does not find "strawberry".
+      if ($raw_token->isQuoted()) {
+        $is_quoted = true;
+        $is_stemmed = false;
+      } else {
+        $is_quoted = false;
+        $is_stemmed = true;
+      }
+
+      // Never stem negated queries, since this can exclude results users
+      // did not mean to exclude and generally confuse things.
+      if ($is_not) {
+        $is_stemmed = false;
+      }
+
+      $term_constraints = array();
+
+      $term_value = ' '.$ngram_engine->newTermsCorpus($value).' ';
+      if ($is_not) {
+        $term_constraints[] = qsprintf(
+          $conn,
+          '(%T.termCorpus NOT LIKE %~)',
+          $table_alias,
+          $term_value);
+      } else {
+        $term_constraints[] = qsprintf(
+          $conn,
+          '(%T.termCorpus LIKE %~)',
+          $table_alias,
+          $term_value);
+      }
+
+      if ($is_stemmed) {
+        $stem_value = $stemmer->stemToken($value);
+        $stem_value = $ngram_engine->newTermsCorpus($stem_value);
+        $stem_value = ' '.$stem_value.' ';
+
+        $term_constraints[] = qsprintf(
+          $conn,
+          '(%T.normalCorpus LIKE %~)',
+          $table_alias,
+          $stem_value);
+      }
+
+      if ($is_not) {
+        $where[] = qsprintf(
+          $conn,
+          '(%Q)',
+          implode(' AND ', $term_constraints));
+      } else if ($is_quoted) {
+        $where[] = qsprintf(
+          $conn,
+          '(%T.rawCorpus LIKE %~ AND (%Q))',
+          $table_alias,
+          $value,
+          implode(' OR ', $term_constraints));
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          '(%Q)',
+          implode(' OR ', $term_constraints));
+      }
+    }
+
+    return $where;
+  }
+
+  protected function shouldGroupFerretResultRows() {
+    return (bool)$this->ferretTokens;
   }
 
 

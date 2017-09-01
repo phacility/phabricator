@@ -9,11 +9,11 @@ final class PhabricatorCustomFieldFulltextEngineExtension
     return pht('Custom Fields');
   }
 
-  public function shouldIndexFulltextObject($object) {
+  public function shouldEnrichFulltextObject($object) {
     return ($object instanceof PhabricatorCustomFieldInterface);
   }
 
-  public function indexFulltextObject(
+  public function enrichFulltextObject(
     $object,
     PhabricatorSearchAbstractDocument $document) {
 

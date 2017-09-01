@@ -9,7 +9,7 @@ final class PhabricatorNotificationPanelController
     $query = id(new PhabricatorNotificationQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
-      ->setLimit(15);
+      ->setLimit(10);
 
     $stories = $query->execute();
 

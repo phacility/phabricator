@@ -5,6 +5,12 @@
 .diffusion-source {
   width: 100%;
   background: {$page.content};
+  overflow: hidden;
+}
+
+.device-phone .diffusion-source-wrap {
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 .diffusion-source tr.phabricator-source-highlight th,
@@ -25,6 +31,11 @@
   padding: 3px 12px;
   width: 100%;
   word-break: break-all;
+}
+
+.device .diffusion-source td {
+  word-break: normal;
+  white-space: nowrap;
 }
 
 .diffusion-browse-type-form {
