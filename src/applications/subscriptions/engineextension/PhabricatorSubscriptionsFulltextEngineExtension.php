@@ -9,11 +9,11 @@ final class PhabricatorSubscriptionsFulltextEngineExtension
     return pht('Subscribers');
   }
 
-  public function shouldIndexFulltextObject($object) {
+  public function shouldEnrichFulltextObject($object) {
     return ($object instanceof PhabricatorSubscribableInterface);
   }
 
-  public function indexFulltextObject(
+  public function enrichFulltextObject(
     $object,
     PhabricatorSearchAbstractDocument $document) {
 
