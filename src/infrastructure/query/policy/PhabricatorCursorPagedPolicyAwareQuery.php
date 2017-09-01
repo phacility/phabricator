@@ -1406,6 +1406,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $function_map = array(
       'all' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
       'title' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+      'body' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
+      'core' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
     );
 
     $current_function = 'all';

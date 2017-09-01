@@ -32,6 +32,25 @@ final class PhabricatorFerretFulltextEngineExtension
     $stemmer = new PhutilSearchStemmer();
     $ngram_engine = id(new PhabricatorNgramEngine());
 
+    // Copy all of the "title" and "body" fields to create new "core" fields.
+    // This allows users to search "in title or body" with the "core:" prefix.
+    $document_fields = $document->getFieldData();
+    $virtual_fields = array();
+    foreach ($document_fields as $field) {
+      $virtual_fields[] = $field;
+
+      list($key, $raw_corpus) = $field;
+      switch ($key) {
+        case PhabricatorSearchDocumentFieldType::FIELD_TITLE:
+        case PhabricatorSearchDocumentFieldType::FIELD_BODY:
+          $virtual_fields[] = array(
+            PhabricatorSearchDocumentFieldType::FIELD_CORE,
+            $raw_corpus,
+          );
+          break;
+      }
+    }
+
     $key_all = PhabricatorSearchDocumentFieldType::FIELD_ALL;
 
     $empty_template = array(
@@ -44,7 +63,7 @@ final class PhabricatorFerretFulltextEngineExtension
       $key_all => $empty_template,
     );
 
-    foreach ($document->getFieldData() as $field) {
+    foreach ($virtual_fields as $field) {
       list($key, $raw_corpus) = $field;
       if (!strlen($raw_corpus)) {
         continue;
