@@ -59,6 +59,7 @@ final class PHUIInfoView extends AphrontTagView {
     } else {
       $icon = id(new PHUIIconView())
         ->setIcon($icon);
+      $this->icon = $icon;
     }
 
     return $this;
