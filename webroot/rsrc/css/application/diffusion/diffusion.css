@@ -43,6 +43,16 @@
   margin-left: 8px;
 }
 
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-left-view {
+    display: inline-block;
+}
+
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-right-view {
+    display: inline-block;
+}
+
 .diffusion-profile-locate .phui-form-view {
   margin: 0;
   padding: 0;
@@ -197,16 +207,6 @@
     border-color: {$thinblueborder};
 }
 
-.device-phone.diffusion-history-view .phui-two-column-view
-  .phui-two-column-footer .phui-header-view {
-    text-align: center;
-}
-
-.device-phone.diffusion-history-view .phui-two-column-content {
-  padding: 0;
-  margin: 0 -4px;
-}
-
 .device-phone.diffusion-history-view .phui-oi-attribute-spacer {
   display: none;
 }
@@ -230,12 +230,10 @@
   padding-bottom: 10px;
 }
 
-.device-phone.diffusion-history-view .diffusion-history-list .button.has-icon
-  .phui-button-text {
-    margin: 0;
-}
-
-.device-phone.diffusion-history-view .diffusion-history-list .button.has-icon
-  .phui-icon-view {
-    display: none;
+.device-phone .phui-two-column-view .phui-two-column-content
+  .phui-object-box.diffusion-mobile-view {
+    margin: 0 -12px 20px;
+    border-left: none;
+    border-right: none;
+    border-color: {$thinblueborder};
 }

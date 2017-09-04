@@ -5,30 +5,43 @@ final class PhabricatorSearchDeleteController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $key = $request->getURIData('queryKey');
-    $engine_class = $request->getURIData('engine');
 
-    $base_class = 'PhabricatorApplicationSearchEngine';
-    if (!is_subclass_of($engine_class, $base_class)) {
-      return new Aphront400Response();
-    }
+    $id = $request->getURIData('id');
+    if ($id) {
+      $named_query = id(new PhabricatorNamedQueryQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$named_query) {
+        return new Aphront404Response();
+      }
 
-    $engine = newv($engine_class, array());
-    $engine->setViewer($viewer);
+      $engine = newv($named_query->getEngineClassName(), array());
+      $engine->setViewer($viewer);
 
-    $named_query = id(new PhabricatorNamedQueryQuery())
-      ->setViewer($viewer)
-      ->withEngineClassNames(array($engine_class))
-      ->withQueryKeys(array($key))
-      ->withUserPHIDs(array($viewer->getPHID()))
-      ->executeOne();
+      $key = $named_query->getQueryKey();
+    } else {
+      $key = $request->getURIData('queryKey');
+      $engine_class = $request->getURIData('engine');
 
-    if (!$named_query && $engine->isBuiltinQuery($key)) {
+      $base_class = 'PhabricatorApplicationSearchEngine';
+      if (!is_subclass_of($engine_class, $base_class)) {
+        return new Aphront400Response();
+      }
+
+      $engine = newv($engine_class, array());
+      $engine->setViewer($viewer);
+
+      if (!$engine->isBuiltinQuery($key)) {
+        return new Aphront404Response();
+      }
+
       $named_query = $engine->getBuiltinQuery($key);
-    }
-
-    if (!$named_query) {
-      return new Aphront404Response();
     }
 
     $builtin = null;

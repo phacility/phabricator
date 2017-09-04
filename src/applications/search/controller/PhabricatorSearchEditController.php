@@ -6,11 +6,31 @@ final class PhabricatorSearchEditController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
+    $id = $request->getURIData('id');
+    if ($id) {
+      $named_query = id(new PhabricatorNamedQueryQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$named_query) {
+        return new Aphront404Response();
+      }
+
+      $query_key = $named_query->getQueryKey();
+    } else {
+      $query_key = $request->getURIData('queryKey');
+      $named_query = null;
+    }
+
     $saved_query = id(new PhabricatorSavedQueryQuery())
       ->setViewer($viewer)
-      ->withQueryKeys(array($request->getURIData('queryKey')))
+      ->withQueryKeys(array($query_key))
       ->executeOne();
-
     if (!$saved_query) {
       return new Aphront404Response();
     }
@@ -20,11 +40,6 @@ final class PhabricatorSearchEditController
     $complete_uri = $engine->getQueryManagementURI();
     $cancel_uri = $complete_uri;
 
-    $named_query = id(new PhabricatorNamedQueryQuery())
-      ->setViewer($viewer)
-      ->withQueryKeys(array($saved_query->getQueryKey()))
-      ->withUserPHIDs(array($viewer->getPHID()))
-      ->executeOne();
     if (!$named_query) {
       $named_query = id(new PhabricatorNamedQuery())
         ->setUserPHID($viewer->getPHID())
@@ -36,12 +51,27 @@ final class PhabricatorSearchEditController
       // management interface.
       $cancel_uri = $engine->getQueryResultsPageURI(
         $saved_query->getQueryKey());
+
+      $is_new = true;
+    } else {
+      $is_new = false;
     }
+
+    $can_global = ($viewer->getIsAdmin() && $is_new);
+
+    $v_global = false;
 
     $e_name = true;
     $errors = array();
 
     if ($request->isFormPost()) {
+      if ($can_global) {
+        $v_global = $request->getBool('global');
+        if ($v_global) {
+          $named_query->setUserPHID(PhabricatorNamedQuery::SCOPE_GLOBAL);
+        }
+      }
+
       $named_query->setQueryName($request->getStr('name'));
       if (!strlen($named_query->getQueryName())) {
         $e_name = pht('Required');
@@ -51,6 +81,7 @@ final class PhabricatorSearchEditController
       }
 
       if (!$errors) {
+
         $named_query->save();
         return id(new AphrontRedirectResponse())->setURI($complete_uri);
       }
@@ -65,6 +96,18 @@ final class PhabricatorSearchEditController
         ->setLabel(pht('Query Name'))
         ->setValue($named_query->getQueryName())
         ->setError($e_name));
+
+    if ($can_global) {
+      $form->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'global',
+            '1',
+            pht(
+              'Save this query as a global query, making it visible to '.
+              'all users.'),
+            $v_global));
+    }
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())

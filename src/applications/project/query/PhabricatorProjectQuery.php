@@ -609,7 +609,8 @@ final class PhabricatorProjectQuery
     }
 
     if ($this->nameTokens !== null) {
-      foreach ($this->nameTokens as $key => $token) {
+      $name_tokens = $this->getNameTokensForQuery($this->nameTokens);
+      foreach ($name_tokens as $key => $token) {
         $token_table = 'token_'.$key;
         $joins[] = qsprintf(
           $conn,
@@ -795,6 +796,24 @@ final class PhabricatorProjectQuery
         $project->attachSlugs($project_slugs);
       }
     }
+  }
+
+  private function getNameTokensForQuery(array $tokens) {
+    // When querying for projects by name, only actually search for the five
+    // longest tokens. MySQL can get grumpy with a large number of JOINs
+    // with LIKEs and queries for more than 5 tokens are essentially never
+    // legitimate searches for projects, but users copy/pasting nonsense.
+    // See also PHI47.
+
+    $length_map = array();
+    foreach ($tokens as $token) {
+      $length_map[$token] = strlen($token);
+    }
+    arsort($length_map);
+
+    $length_map = array_slice($length_map, 0, 5, true);
+
+    return array_keys($length_map);
   }
 
 }

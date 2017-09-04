@@ -12,11 +12,25 @@ abstract class PhabricatorFulltextEngineExtension extends Phobject {
 
   abstract public function getExtensionName();
 
-  abstract public function shouldIndexFulltextObject($object);
+  public function shouldEnrichFulltextObject($object) {
+    return false;
+  }
 
-  abstract public function indexFulltextObject(
+  public function enrichFulltextObject(
     $object,
-    PhabricatorSearchAbstractDocument $document);
+    PhabricatorSearchAbstractDocument $document) {
+    return;
+  }
+
+  public function shouldIndexFulltextObject($object) {
+    return false;
+  }
+
+  public function indexFulltextObject(
+    $object,
+    PhabricatorSearchAbstractDocument $document) {
+    return;
+  }
 
   final public static function getAllExtensions() {
     return id(new PhutilClassMapQuery())

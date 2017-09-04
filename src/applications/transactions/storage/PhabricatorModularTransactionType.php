@@ -134,6 +134,10 @@ abstract class PhabricatorModularTransactionType
     return $this->editor;
   }
 
+  final protected function hasEditor() {
+    return (bool)$this->editor;
+  }
+
   final protected function getAuthorPHID() {
     return $this->getStorage()->getAuthorPHID();
   }
@@ -330,6 +334,18 @@ abstract class PhabricatorModularTransactionType
 
   public function getMetadataValue($key, $default = null) {
     return $this->getStorage()->getMetadataValue($key, $default);
+  }
+
+  public function loadTransactionTypeConduitData(array $xactions) {
+    return null;
+  }
+
+  public function getTransactionTypeForConduit($xaction) {
+    return null;
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array();
   }
 
 }

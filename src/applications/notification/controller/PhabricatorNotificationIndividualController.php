@@ -42,6 +42,7 @@ final class PhabricatorNotificationIndividualController
       'pertinent'         => true,
       'primaryObjectPHID' => $story->getPrimaryObjectPHID(),
       'desktopReady'      => $data['desktopReady'],
+      'webReady'          => $data['webReady'],
       'href'              => $data['href'],
       'icon'              => $data['icon'],
       'title'             => $data['title'],

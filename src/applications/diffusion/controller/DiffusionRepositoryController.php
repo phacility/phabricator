@@ -420,7 +420,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table->setIsHead(true);
 
     $panel = id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view');
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Recent Commits'));
     $panel->setHeader($header);
@@ -565,18 +566,25 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_uri = $drequest->generateURI(array('action' => 'browse'));
     $pager->setURI($browse_uri, 'offset');
 
+    $repository_name = $repository->getName();
+    $branch_name = $drequest->getBranch();
+    if (strlen($branch_name)) {
+      $repository_name .= ' ('.$branch_name.')';
+    }
+
     $header = phutil_tag(
       'a',
       array(
         'href' => $browse_uri,
         'class' => 'diffusion-view-browse-header',
       ),
-      $repository->getName());
+      $repository_name);
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($browse_table)
+      ->addClass('diffusion-mobile-view')
       ->setPager($pager);
   }
 

@@ -40,6 +40,7 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
         $view[] = id(new PHUIObjectBoxView())
           ->setHeader($header)
           ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+          ->addClass('diffusion-mobile-view')
           ->setObjectList($list);
       }
 

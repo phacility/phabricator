@@ -49,6 +49,8 @@ final class ManiphestTaskSearchEngine
     $subtype_map = id(new ManiphestTask())->newEditEngineSubtypeMap();
     $hide_subtypes = (count($subtype_map) == 1);
 
+    $hide_ferret = !PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
+
     return array(
       id(new PhabricatorOwnersSearchField())
         ->setLabel(pht('Assigned To'))
@@ -89,6 +91,10 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Contains Words'))
         ->setKey('fulltext'),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Query (Prototype)'))
+        ->setKey('query')
+        ->setIsHidden($hide_ferret),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Open Parents'))
         ->setKey('hasParents')
@@ -144,6 +150,7 @@ final class ManiphestTaskSearchEngine
       'statuses',
       'priorities',
       'subtypes',
+      'query',
       'fulltext',
       'hasParents',
       'hasSubtasks',
@@ -224,6 +231,27 @@ final class ManiphestTaskSearchEngine
       $query->withFullTextSearch($map['fulltext']);
     }
 
+    if (strlen($map['query'])) {
+      $raw_query = $map['query'];
+
+      $compiler = id(new PhutilSearchQueryCompiler())
+        ->setEnableFunctions(true);
+
+      $raw_tokens = $compiler->newTokens($raw_query);
+
+      $fulltext_tokens = array();
+      foreach ($raw_tokens as $raw_token) {
+        $fulltext_token = id(new PhabricatorFulltextToken())
+          ->setToken($raw_token);
+
+        $fulltext_tokens[] = $fulltext_token;
+      }
+
+      $query->withFerretConstraint(
+        id(new ManiphestTask())->newFerretEngine(),
+        $fulltext_tokens);
+    }
+
     if ($map['parentIDs']) {
       $query->withParentTaskIDs($map['parentIDs']);
     }
@@ -236,8 +264,6 @@ final class ManiphestTaskSearchEngine
     $group = idx($this->getGroupValues(), $group);
     if ($group) {
       $query->setGroupBy($group);
-    } else {
-      $query->setGroupBy(head($this->getGroupValues()));
     }
 
     if ($map['ids']) {

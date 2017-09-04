@@ -134,7 +134,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       array(
         true,
         false,
-        true,
+        false,
         false,
         false,
       ));

@@ -153,6 +153,12 @@ to a Project or to a Home menu, that Dashboard will be presented in the
 context of that menu. This allows customization of different pages of content
 without having the user leave Home or the Project.
 
+To use a Dashboard to replace the default Home menu, install it as a Global
+Menu Item and move it to the topmost item. By default, the first Dashboard
+the menu renders will be selected as the default. Users that modify their
+personal Home menu, will have their topmost Dashboard be their default,
+overriding the Global settings.
+
 
 Writing New Item Types
 ======================

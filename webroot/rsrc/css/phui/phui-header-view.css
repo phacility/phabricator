@@ -187,8 +187,8 @@ body .phui-header-shell.phui-bleed-header
   margin-right: 4px;
 }
 
-.phui-header-subheader .phui-tag-view .phui-icon-view,
-.phui-header-subheader .policy-header-callout .phui-icon-view {
+.phui-header-subheader .phui-tag-view span.phui-icon-view,
+.phui-header-subheader .policy-header-callout span.phui-icon-view {
   display: inline-block;
   margin: -2px 4px -2px 0;
   font-size: 15px;

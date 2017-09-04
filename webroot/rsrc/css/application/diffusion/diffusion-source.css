@@ -5,28 +5,37 @@
 .diffusion-source {
   width: 100%;
   background: {$page.content};
+  overflow: hidden;
 }
 
-.diffusion-source tr.phabricator-source-highlight {
-  background: {$sh-yellowbackground};
+.device-phone .diffusion-source-wrap {
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+
+.diffusion-source tr.phabricator-source-highlight th,
+.diffusion-source tr.phabricator-source-highlight td {
+  background: {$gentle.highlight};
 }
 
 .diffusion-source th {
   text-align: right;
   vertical-align: top;
-  background: {$lightgreybackground};
-  color: {$bluetext};
+  color: {$darkbluetext};
   border-right: 1px solid {$thinblueborder};
 }
 
 .diffusion-source td {
   vertical-align: top;
   white-space: pre-wrap;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  padding-left: 8px;
+  padding: 3px 12px;
   width: 100%;
   word-break: break-all;
+}
+
+.device .diffusion-source td {
+  word-break: normal;
+  white-space: nowrap;
 }
 
 .diffusion-browse-type-form {
@@ -34,12 +43,18 @@
 }
 
 .diffusion-blame-link,
-.diffusion-rev-link {
+.diffusion-rev-link,
+.diffusion-blame-date {
   white-space: nowrap;
 }
 
-.diffusion-blame-link {
-  min-width: 28px;
+.diffusion-blame-date,
+.diffusion-blame-link,
+.diffusion-blame-revision,
+.diffusion-rev-link {
+  background: {$lightgreybackground};
+  font: {$basefont};
+  font-size: {$smallerfontsize};
 }
 
 .diffusion-source th.diffusion-rev-link {
@@ -47,16 +62,23 @@
   min-width: 130px;
 }
 
-.diffusion-blame-link a,
-.diffusion-rev-link a,
-.diffusion-line-link a {
+.diffusion-source a {
   color: {$darkbluetext};
 }
 
-.diffusion-rev-link a,
-.diffusion-rev-link span {
-  margin: 2px 8px 0;
-  display: inline-block;
+.diffusion-rev-link a {
+  max-width: 300px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 3px 8px;
+  display: block;
+}
+
+.diffusion-blame-date a,
+.diffusion-blame-revision a {
+  float: right;
+  margin: 3px 8px;
 }
 
 .diffusion-rev-link span {
@@ -69,7 +91,19 @@
 .diffusion-line-link a {
   /* Give the user a larger click target. */
   display: block;
-  padding: 2px 8px;
+  padding: 4px 8px 3px;
+}
+
+.diffusion-line-link a {
+  color: {$lightgreytext};
+}
+
+.diffusion-blame-link a .phui-icon-view {
+  color: {$bluetext};
+}
+
+.diffusion-blame-link a:hover .phui-icon-view {
+  color: {$sky};
 }
 
 .diffusion-line-link {

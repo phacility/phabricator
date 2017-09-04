@@ -26,9 +26,16 @@ abstract class PhabricatorFulltextEngine
     $object = $this->getObject();
 
     $extensions = PhabricatorFulltextEngineExtension::getAllExtensions();
+
+    $enrich_extensions = array();
+    $index_extensions = array();
     foreach ($extensions as $key => $extension) {
-      if (!$extension->shouldIndexFulltextObject($object)) {
-        unset($extensions[$key]);
+      if ($extension->shouldEnrichFulltextObject($object)) {
+        $enrich_extensions[] = $extension;
+      }
+
+      if ($extension->shouldIndexFulltextObject($object)) {
+        $index_extensions[] = $extension;
       }
     }
 
@@ -36,7 +43,11 @@ abstract class PhabricatorFulltextEngine
 
     $this->buildAbstractDocument($document, $object);
 
-    foreach ($extensions as $extension) {
+    foreach ($enrich_extensions as $extension) {
+      $extension->enrichFulltextObject($object, $document);
+    }
+
+    foreach ($index_extensions as $extension) {
       $extension->indexFulltextObject($object, $document);
     }
 

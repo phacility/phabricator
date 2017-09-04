@@ -17,6 +17,13 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
     if (!hash) {
       return false;
     }
+
+    // If the hash isn't purely numeric, ignore it. Comments always have
+    // numeric hashes. See PHI43 and T12970.
+    if (!hash.match(/^\d+$/)) {
+      return false;
+    }
+
     var id = 'anchor-'+hash;
     try {
       JX.$(id);

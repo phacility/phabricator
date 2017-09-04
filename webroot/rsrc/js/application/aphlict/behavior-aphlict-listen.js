@@ -82,6 +82,7 @@ JX.behavior('aphlict-listen', function(config) {
     new JX.Notification()
       .setContent(JX.$H(response.content))
       .setDesktopReady(response.desktopReady)
+      .setWebReady(response.webReady)
       .setKey(response.primaryObjectPHID)
       .setTitle(response.title)
       .setBody(response.body)

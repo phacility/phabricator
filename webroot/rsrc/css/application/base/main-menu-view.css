@@ -166,7 +166,7 @@
   border: none;
   background-color: {$page.content};
   height: 28px;
-  padding: 3px 28px 3px 52px;
+  padding: 3px 28px 3px 48px;
   float: left;
   width: 280px;
 }
@@ -212,7 +212,7 @@
   position: absolute;
   right: auto;
   left: 12px;
-  width: 46px;
+  width: 40px;
   background: {$greybackground};
   z-index: 1;
 }
@@ -252,7 +252,7 @@ a.phabricator-core-user-menu .caret:before {
 
 .phabricator-main-menu-search-dropdown .caret {
   position: absolute;
-  right: 18px;
+  right: 20px;
   top: 2px;
   border: none;
   margin-top: 1px;

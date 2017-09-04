@@ -105,6 +105,19 @@ button[disabled] {
   opacity: 0.5;
 }
 
+button.button-grey.selected,
+a.button.button-grey.selected,
+button.button-grey.selected:hover,
+a.button.button-grey.selected:hover {
+  border-color: {$sh-orangetext};
+  color: {$sh-orangetext};
+}
+
+button.button-grey.selected .phui-icon-view,
+a.button-grey.selected .phui-icon-view {
+  color: {$sh-orangetext};
+}
+
 a.phuix-dropdown-open {
   color: {$greytext};
 }
@@ -271,11 +284,17 @@ a.policy-control .phui-button-text {
   position: relative;
 }
 
+.button.has-icon.dropdown .phui-icon-view {
+  margin-right: 8px;
+  margin-left: -2px;
+}
+
 .button.has-text .phui-icon-view {
   display: inline-block;
   position: absolute;
   top: 7px;
   left: 12px;
+  margin: 0;
 }
 
 .button.icon-last .phui-icon-view {

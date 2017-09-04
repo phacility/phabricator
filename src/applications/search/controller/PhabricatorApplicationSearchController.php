@@ -127,7 +127,7 @@ final class PhabricatorApplicationSearchController
       if (!$found_query_data) {
         // Otherwise, there's no query data so just run the user's default
         // query for this application.
-        $query_key = head_key($engine->loadEnabledNamedQueries());
+        $query_key = $engine->getDefaultQueryKey();
       }
     }
 
@@ -174,7 +174,7 @@ final class PhabricatorApplicationSearchController
     if ($run_query && !$named_query && $user->isLoggedIn()) {
       $save_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setHref('/search/edit/'.$saved_query->getQueryKey().'/')
+        ->setHref('/search/edit/key/'.$saved_query->getQueryKey().'/')
         ->setText(pht('Save Query'))
         ->setIcon('fa-floppy-o');
       $submit->addButton($save_button);
@@ -377,7 +377,7 @@ final class PhabricatorApplicationSearchController
   private function processEditRequest() {
     $parent = $this->getDelegatingController();
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
     $engine = $this->getSearchEngine();
 
     $nav = $this->getNavigation();
@@ -387,64 +387,41 @@ final class PhabricatorApplicationSearchController
 
     $named_queries = $engine->loadAllNamedQueries();
 
-    $list_id = celerity_generate_unique_node_id();
+    $can_global = $viewer->getIsAdmin();
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($user);
-    $list->setID($list_id);
-
-    Javelin::initBehavior(
-      'search-reorder-queries',
-      array(
-        'listID' => $list_id,
-        'orderURI' => '/search/order/'.get_class($engine).'/',
-      ));
+    $groups = array(
+      'personal' => array(
+        'name' => pht('Personal Saved Queries'),
+        'items' => array(),
+        'edit' => true,
+      ),
+      'global' => array(
+        'name' => pht('Global Saved Queries'),
+        'items' => array(),
+        'edit' => $can_global,
+      ),
+    );
 
     foreach ($named_queries as $named_query) {
-      $class = get_class($engine);
-      $key = $named_query->getQueryKey();
-
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($named_query->getQueryName())
-        ->setHref($engine->getQueryResultsPageURI($key));
-
-      if ($named_query->getIsBuiltin() && $named_query->getIsDisabled()) {
-        $icon = 'fa-plus';
+      if ($named_query->isGlobal()) {
+        $group = 'global';
       } else {
-        $icon = 'fa-times';
+        $group = 'personal';
       }
 
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon($icon)
-          ->setHref('/search/delete/'.$key.'/'.$class.'/')
-          ->setWorkflow(true));
-
-      if ($named_query->getIsBuiltin()) {
-        if ($named_query->getIsDisabled()) {
-          $item->addIcon('fa-times lightgreytext', pht('Disabled'));
-          $item->setDisabled(true);
-        } else {
-          $item->addIcon('fa-lock lightgreytext', pht('Builtin'));
-        }
-      } else {
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-pencil')
-            ->setHref('/search/edit/'.$key.'/'));
-      }
-
-      $item->setGrippable(true);
-      $item->addSigil('named-query');
-      $item->setMetadata(
-        array(
-          'queryKey' => $named_query->getQueryKey(),
-        ));
-
-      $list->addItem($item);
+      $groups[$group]['items'][] = $named_query;
     }
 
-    $list->setNoDataString(pht('No saved queries.'));
+    $default_key = $engine->getDefaultQueryKey();
+
+    $lists = array();
+    foreach ($groups as $group) {
+      $lists[] = $this->newQueryListView(
+        $group['name'],
+        $group['items'],
+        $default_key,
+        $group['edit']);
+    }
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
@@ -457,20 +434,144 @@ final class PhabricatorApplicationSearchController
       ->setHeader(pht('Saved Queries'))
       ->setProfileHeader(true);
 
-    $box = id(new PHUIObjectBoxView())
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setObjectList($list)
-      ->addClass('application-search-results');
-
-    $nav->addClass('application-search-view');
-    require_celerity_resource('application-search-view-css');
+      ->setFooter($lists);
 
     return $this->newPage()
       ->setApplicationMenu($this->buildApplicationMenu())
       ->setTitle(pht('Saved Queries'))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
-      ->appendChild($box);
+      ->appendChild($view);
+  }
+
+  private function newQueryListView(
+    $list_name,
+    array $named_queries,
+    $default_key,
+    $can_edit) {
+
+    $engine = $this->getSearchEngine();
+    $viewer = $this->getViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setViewer($viewer);
+
+    if ($can_edit) {
+      $list_id = celerity_generate_unique_node_id();
+      $list->setID($list_id);
+
+      Javelin::initBehavior(
+        'search-reorder-queries',
+        array(
+          'listID' => $list_id,
+          'orderURI' => '/search/order/'.get_class($engine).'/',
+        ));
+    }
+
+    foreach ($named_queries as $named_query) {
+      $class = get_class($engine);
+      $key = $named_query->getQueryKey();
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($named_query->getQueryName())
+        ->setHref($engine->getQueryResultsPageURI($key));
+
+      if ($named_query->getIsDisabled()) {
+        if ($can_edit) {
+          $item->setDisabled(true);
+        } else {
+          // If an item is disabled and you don't have permission to edit it,
+          // just skip it.
+          continue;
+        }
+      }
+
+      if ($can_edit) {
+        if ($named_query->getIsBuiltin() && $named_query->getIsDisabled()) {
+          $icon = 'fa-plus';
+          $disable_name = pht('Enable');
+        } else {
+          $icon = 'fa-times';
+          if ($named_query->getIsBuiltin()) {
+            $disable_name = pht('Disable');
+          } else {
+            $disable_name = pht('Delete');
+          }
+        }
+
+        if ($named_query->getID()) {
+          $disable_href = '/search/delete/id/'.$named_query->getID().'/';
+        } else {
+          $disable_href = '/search/delete/key/'.$key.'/'.$class.'/';
+        }
+
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon($icon)
+            ->setHref($disable_href)
+            ->setRenderNameAsTooltip(true)
+            ->setName($disable_name)
+            ->setWorkflow(true));
+      }
+
+      $default_disabled = $named_query->getIsDisabled();
+      $default_icon = 'fa-thumb-tack';
+
+      if ($default_key === $key) {
+        $default_color = 'green';
+      } else {
+        $default_color = null;
+      }
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon("{$default_icon} {$default_color}")
+          ->setHref('/search/default/'.$key.'/'.$class.'/')
+          ->setRenderNameAsTooltip(true)
+          ->setName(pht('Make Default'))
+          ->setWorkflow(true)
+          ->setDisabled($default_disabled));
+
+      if ($can_edit) {
+        if ($named_query->getIsBuiltin()) {
+          $edit_icon = 'fa-lock lightgreytext';
+          $edit_disabled = true;
+          $edit_name = pht('Builtin');
+          $edit_href = null;
+        } else {
+          $edit_icon = 'fa-pencil';
+          $edit_disabled = false;
+          $edit_name = pht('Edit');
+          $edit_href = '/search/edit/id/'.$named_query->getID().'/';
+        }
+
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon($edit_icon)
+            ->setHref($edit_href)
+            ->setRenderNameAsTooltip(true)
+            ->setName($edit_name)
+            ->setDisabled($edit_disabled));
+      }
+
+      $item->setGrippable($can_edit);
+      $item->addSigil('named-query');
+      $item->setMetadata(
+        array(
+          'queryKey' => $named_query->getQueryKey(),
+        ));
+
+      $list->addItem($item);
+    }
+
+    $list->setNoDataString(pht('No saved queries.'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText($list_name)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($list);
   }
 
   public function buildApplicationMenu() {
@@ -610,7 +711,7 @@ final class PhabricatorApplicationSearchController
     $engine_class = get_class($engine);
     $query_key = $this->getQueryKey();
     if (!$query_key) {
-      $query_key = head_key($engine->loadEnabledNamedQueries());
+      $query_key = $engine->getDefaultQueryKey();
     }
 
     $can_use = $engine->canUseInPanelContext();

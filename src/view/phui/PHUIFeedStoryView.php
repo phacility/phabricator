@@ -150,13 +150,25 @@ final class PHUIFeedStoryView extends AphrontView {
     if ($this->getShowTimestamp()) {
       if ($this->epoch) {
         if ($user) {
-          $foot = phabricator_datetime($this->epoch, $user);
+          $marker = id(new PHUIIconView())
+            ->setIcon('fa-circle')
+            ->addClass('phabricator-notification-status');
+          $date = phabricator_datetime($this->epoch, $user);
           $foot = phutil_tag(
             'span',
             array(
               'class' => 'phabricator-notification-date',
             ),
-            $foot);
+            $date);
+            $foot = phutil_tag(
+              'div',
+              array(
+                'class' => 'phabricator-notification-foot',
+              ),
+              array(
+                $marker,
+                $date,
+              ));
         } else {
           $foot = null;
         }

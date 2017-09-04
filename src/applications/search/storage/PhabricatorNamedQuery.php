@@ -12,6 +12,8 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   protected $isDisabled = 0;
   protected $sequence   = 0;
 
+  const SCOPE_GLOBAL = 'scope.global';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -31,8 +33,29 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
     ) + parent::getConfiguration();
   }
 
-  public function getSortKey() {
-    return sprintf('~%010d%010d', $this->sequence, $this->getID());
+  public function isGlobal() {
+    if ($this->getIsBuiltin()) {
+      return true;
+    }
+
+    if ($this->getUserPHID() === self::SCOPE_GLOBAL) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public function getNamedQuerySortVector() {
+    if (!$this->isGlobal()) {
+      $phase = 0;
+    } else {
+      $phase = 1;
+    }
+
+    return id(new PhutilSortVector())
+      ->addInt($phase)
+      ->addInt($this->sequence)
+      ->addInt($this->getID());
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
@@ -41,6 +64,7 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -49,9 +73,19 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($viewer->getPHID() == $this->userPHID) {
+    if ($viewer->getPHID() == $this->getUserPHID()) {
       return true;
     }
+
+    if ($this->isGlobal()) {
+      switch ($capability) {
+        case PhabricatorPolicyCapability::CAN_VIEW:
+          return true;
+        case PhabricatorPolicyCapability::CAN_EDIT:
+          return $viewer->getIsAdmin();
+      }
+    }
+
     return false;
   }
 

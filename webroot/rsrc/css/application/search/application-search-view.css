@@ -40,7 +40,7 @@
     padding: 12px 0;
 }
 
-.device-phone .application-search-results
+.device-phone.application-search-view .application-search-results
   .phui-profile-header.phui-header-shell {
   padding: 12px 0 12px 4px;
 }

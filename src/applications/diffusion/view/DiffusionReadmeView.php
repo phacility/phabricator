@@ -105,6 +105,7 @@ final class DiffusionReadmeView extends DiffusionView {
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view')
       ->appendChild($document)
       ->addClass('diffusion-readme-view');
   }
