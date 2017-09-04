@@ -6,6 +6,10 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return pht('Phame');
   }
 
+  public function getMenuName() {
+    return pht('Blogs');
+  }
+
   public function getBaseURI() {
     return '/phame/';
   }
@@ -15,7 +19,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Blog');
+    return pht('Internal and External Blogs');
   }
 
   public function getTitleGlyph() {
