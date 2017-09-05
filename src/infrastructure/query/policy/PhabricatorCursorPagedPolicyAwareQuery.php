@@ -1497,18 +1497,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
 
       if ($is_substring) {
-        $ngrams = $engine->getNgramsFromString($value, 'query');
+        $ngrams = $engine->getSubstringNgramsFromString($value);
       } else {
-        $ngrams = $engine->getNgramsFromString($value, 'index');
+        $ngrams = $engine->getTermNgramsFromString($value);
 
         // If this is a stemmed term, only look for ngrams present in both the
         // unstemmed and stemmed variations.
         if ($is_stemmed) {
           $stem_value = $stemmer->stemToken($value);
-          $stem_ngrams = $engine->getNgramsFromString(
-            $stem_value,
-            'index');
-
+          $stem_ngrams = $engine->getTermNgramsFromString($stem_value);
           $ngrams = array_intersect($ngrams, $stem_ngrams);
         }
       }
@@ -1652,7 +1649,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       $term_constraints = array();
 
-      $term_value = ' '.$engine->newTermsCorpus($value).' ';
+      $term_value = $engine->newTermsCorpus($value);
       if ($is_not) {
         $term_constraints[] = qsprintf(
           $conn,
@@ -1670,7 +1667,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       if ($is_stemmed) {
         $stem_value = $stemmer->stemToken($value);
         $stem_value = $engine->newTermsCorpus($stem_value);
-        $stem_value = ' '.$stem_value.' ';
 
         $term_constraints[] = qsprintf(
           $conn,

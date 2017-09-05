@@ -16,22 +16,23 @@ abstract class PhabricatorFerretEngine extends Phobject {
     return $value;
   }
 
-  public function getNgramsFromString($value, $mode) {
+  public function getTermNgramsFromString($string) {
+    return $this->getNgramsFromString($string, true);
+  }
+
+  public function getSubstringNgramsFromString($string) {
+    return $this->getNgramsFromString($string, false);
+  }
+
+  private function getNgramsFromString($value, $as_term) {
     $tokens = $this->tokenizeString($value);
 
     $ngrams = array();
     foreach ($tokens as $token) {
       $token = phutil_utf8_strtolower($token);
 
-      switch ($mode) {
-        case 'query':
-          break;
-        case 'index':
-          $token = ' '.$token.' ';
-          break;
-        case 'prefix':
-          $token = ' '.$token;
-          break;
+      if ($as_term) {
+        $token = ' '.$token.' ';
       }
 
       $token_v = phutil_utf8v($token);
@@ -95,6 +96,10 @@ abstract class PhabricatorFerretEngine extends Phobject {
 
     $term_corpus = preg_replace('/\s+/u', ' ', $term_corpus);
     $term_corpus = trim($term_corpus, ' ');
+
+    if (strlen($term_corpus)) {
+      $term_corpus = ' '.$term_corpus.' ';
+    }
 
     return $term_corpus;
   }
