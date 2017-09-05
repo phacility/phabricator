@@ -34,10 +34,6 @@
   vertical-align: middle;
 }
 
-.device-phone .phui-header-col3 {
-  vertical-align: top;
-}
-
 body .phui-header-shell.phui-header-no-backgound {
   background-color: transparent;
   border: none;
@@ -339,6 +335,10 @@ body .phui-header-shell.phui-bleed-header
 .phui-profile-header.phui-header-shell .phui-header-header {
   font-size: 24px;
   color: {$blacktext};
+}
+
+.phui-profile-header .phui-header-col3 {
+  vertical-align: top;
 }
 
 .phui-header-view .phui-tag-indigo a {

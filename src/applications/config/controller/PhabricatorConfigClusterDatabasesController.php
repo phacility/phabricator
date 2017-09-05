@@ -9,34 +9,31 @@ final class PhabricatorConfigClusterDatabasesController
 
     $title = pht('Cluster Database Status');
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Databases');
+    $button = id(new PHUIButtonView())
+      ->setIcon('fa-book')
+      ->setHref($doc_href)
+      ->setTag('a')
+      ->setText(pht('Documentation'));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true)
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
+    $header = $this->buildHeaderView($title, $button);
 
-    $crumbs = $this
-      ->buildApplicationCrumbs()
+    $database_status = $this->buildClusterDatabaseStatus();
+    $status = $this->buildConfigBoxView(pht('Status'), $database_status);
+
+    $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb($title)
       ->setBorder(true);
 
-    $database_status = $this->buildClusterDatabaseStatus();
-
-    $content = id(new PhabricatorConfigPageView())
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($database_status);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($status);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function buildClusterDatabaseStatus() {

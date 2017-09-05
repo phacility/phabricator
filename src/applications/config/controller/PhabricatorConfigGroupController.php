@@ -13,7 +13,7 @@ final class PhabricatorConfigGroupController
       return new Aphront404Response();
     }
 
-    $group_uri = PhabricatorConfigGroupConstants::getGroupURI(
+    $group_uri = PhabricatorConfigGroupConstants::getGroupFullURI(
       $options->getGroup());
     $group_name = PhabricatorConfigGroupConstants::getGroupShortName(
       $options->getGroup());
@@ -22,28 +22,28 @@ final class PhabricatorConfigGroupController
     $nav->selectFilter($group_uri);
 
     $title = pht('%s Configuration', $options->getName());
+    $header = $this->buildHeaderView($title);
     $list = $this->buildOptionList($options->getOptions());
+    $group_url = phutil_tag('a', array('href' => $group_uri), $group_name);
 
-    $crumbs = $this
-      ->buildApplicationCrumbs()
+    $box_header = pht("%s \xC2\xBB %s", $group_url, $options->getName());
+    $view = $this->buildConfigBoxView($box_header, $list);
+
+    $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb($group_name, $this->getApplicationURI($group_uri))
       ->addTextCrumb($options->getName())
       ->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
-
-    $content = id(new PhabricatorConfigPageView())
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($list);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function buildOptionList(array $options) {
@@ -77,13 +77,11 @@ final class PhabricatorConfigGroupController
         ->setHref('/config/edit/'.$option->getKey().'/')
         ->addAttribute($summary);
 
-      $label = pht('Current Value:');
       $color = null;
       $db_value = idx($db_values, $option->getKey());
       if ($db_value && !$db_value->getIsDeleted()) {
         $item->setEffect('visited');
         $color = 'violet';
-        $label = pht('Customized Value:');
       }
 
       if ($option->getHidden()) {
@@ -91,6 +89,8 @@ final class PhabricatorConfigGroupController
         $item->setDisabled(true);
       } else if ($option->getLocked()) {
         $item->setStatusIcon('fa-lock '.$color, pht('Locked'));
+      } else if ($color) {
+        $item->setStatusIcon('fa-pencil '.$color, pht('Editable'));
       } else {
         $item->setStatusIcon('fa-pencil-square-o '.$color, pht('Editable'));
       }
@@ -102,14 +102,13 @@ final class PhabricatorConfigGroupController
         $current_value = phutil_tag(
           'div',
           array(
-            'class' => 'config-options-current-value',
+            'class' => 'config-options-current-value '.$color,
           ),
           array(
-            phutil_tag('span', array(), $label),
-            ' '.$current_value,
+            $current_value,
           ));
 
-        $item->appendChild($current_value);
+        $item->setSideColumn($current_value);
       }
 
       $list->addItem($item);
