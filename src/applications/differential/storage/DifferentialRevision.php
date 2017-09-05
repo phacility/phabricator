@@ -15,6 +15,7 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorConduitResultInterface,
     PhabricatorDraftInterface {
 
@@ -897,6 +898,14 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function newFulltextEngine() {
     return new DifferentialRevisionFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new DifferentialRevisionFerretEngine();
   }
 
 
