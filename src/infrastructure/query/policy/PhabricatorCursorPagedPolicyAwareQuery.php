@@ -251,6 +251,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     $select[] = $this->buildEdgeLogicSelectClause($conn);
+    $select[] = $this->buildFerretSelectClause($conn);
 
     return $select;
   }
@@ -769,6 +770,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
+    if ($this->supportsFerretEngine()) {
+      $orders['relevance'] = array(
+        'vector' => array('rank', 'id'),
+        'name' => pht('Relevence'),
+      );
+    }
+
     return $orders;
   }
 
@@ -959,6 +967,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'customfield.index.key' => $digest,
         );
       }
+    }
+
+    if ($this->supportsFerretEngine()) {
+      $columns['rank'] = array(
+        'table' => null,
+        'column' => '_ft_rank',
+        'type' => 'int',
+      );
     }
 
     $cache->setKey($cache_key, $columns);
@@ -1385,9 +1401,22 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 /* -(  Ferret  )------------------------------------------------------------- */
 
 
+  public function supportsFerretEngine() {
+    $object = $this->newResultObject();
+    return ($object instanceof PhabricatorFerretInterface);
+  }
+
+
   public function withFerretConstraint(
     PhabricatorFerretEngine $engine,
     array $fulltext_tokens) {
+
+    if (!$this->supportsFerretEngine()) {
+      throw new Exception(
+        pht(
+          'Query ("%s") does not support the Ferret fulltext engine.',
+          get_class($this)));
+    }
 
     if ($this->ferretEngine) {
       throw new Exception(
@@ -1416,7 +1445,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $raw_field = $engine->getFieldForFunction($function);
 
       if (!isset($table_map[$function])) {
-        $alias = 'ftfield'.$idx++;
+        $alias = 'ftfield_'.$idx++;
         $table_map[$function] = array(
           'alias' => $alias,
           'key' => $raw_field,
@@ -1426,9 +1455,99 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $current_function = $function;
     }
 
+    // Join the title field separately so we can rank results.
+    $table_map['rank'] = array(
+      'alias' => 'ft_rank',
+      'key' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+    );
+
     $this->ferretTables = $table_map;
 
     return $this;
+  }
+
+  protected function buildFerretSelectClause(AphrontDatabaseConnection $conn) {
+    $select = array();
+
+    if (!$this->supportsFerretEngine()) {
+      return $select;
+    }
+
+    if (!$this->ferretEngine) {
+      $select[] = '0 _ft_rank';
+      return $select;
+    }
+
+    $engine = $this->ferretEngine;
+    $stemmer = $engine->newStemmer();
+
+    $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+    $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
+    $table_alias = 'ft_rank';
+
+    $parts = array();
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+      $value = $raw_token->getValue();
+
+      if ($raw_token->getOperator() == $op_not) {
+        // Ignore "not" terms when ranking, since they aren't useful.
+        continue;
+      }
+
+      if ($raw_token->getOperator() == $op_sub) {
+        $is_substring = true;
+      } else {
+        $is_substring = false;
+      }
+
+      if ($is_substring) {
+        $parts[] = qsprintf(
+          $conn,
+          'IF(%T.rawCorpus LIKE %~, 2, 0)',
+          $table_alias,
+          $value);
+        continue;
+      }
+
+      if ($raw_token->isQuoted()) {
+        $is_quoted = true;
+        $is_stemmed = false;
+      } else {
+        $is_quoted = false;
+        $is_stemmed = true;
+      }
+
+      $term_constraints = array();
+
+      $term_value = $engine->newTermsCorpus($value);
+
+      $parts[] = qsprintf(
+        $conn,
+        'IF(%T.termCorpus LIKE %~, 2, 0)',
+        $table_alias,
+        $term_value);
+
+      if ($is_stemmed) {
+        $stem_value = $stemmer->stemToken($value);
+        $stem_value = $engine->newTermsCorpus($stem_value);
+
+        $parts[] = qsprintf(
+          $conn,
+          'IF(%T.normalCorpus LIKE %~, 1, 0)',
+          $table_alias,
+          $stem_value);
+      }
+
+      $parts[] = '0';
+    }
+
+    $select[] = qsprintf(
+      $conn,
+      '%Q _ft_rank',
+      implode(' + ', $parts));
+
+    return $select;
   }
 
   protected function buildFerretJoinClause(AphrontDatabaseConnection $conn) {
