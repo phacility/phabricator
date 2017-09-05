@@ -1453,8 +1453,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
 
     $engine = $this->ferretEngine;
-    $ngram_engine = new PhabricatorNgramEngine();
-    $stemmer = new PhutilSearchStemmer();
+    $stemmer = $engine->newStemmer();
 
     $ngram_table = $engine->newNgramsObject();
     $ngram_table_name = $ngram_table->getTableName();
@@ -1498,15 +1497,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
 
       if ($is_substring) {
-        $ngrams = $ngram_engine->getNgramsFromString($value, 'query');
+        $ngrams = $engine->getNgramsFromString($value, 'query');
       } else {
-        $ngrams = $ngram_engine->getNgramsFromString($value, 'index');
+        $ngrams = $engine->getNgramsFromString($value, 'index');
 
         // If this is a stemmed term, only look for ngrams present in both the
         // unstemmed and stemmed variations.
         if ($is_stemmed) {
           $stem_value = $stemmer->stemToken($value);
-          $stem_ngrams = $ngram_engine->getNgramsFromString(
+          $stem_ngrams = $engine->getNgramsFromString(
             $stem_value,
             'index');
 
@@ -1587,8 +1586,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return array();
     }
 
-    $ngram_engine = new PhabricatorNgramEngine();
-    $stemmer = new PhutilSearchStemmer();
+    $engine = $this->ferretEngine;
+    $stemmer = $engine->newStemmer();
     $table_map = $this->ferretTables;
 
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
@@ -1653,7 +1652,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       $term_constraints = array();
 
-      $term_value = ' '.$ngram_engine->newTermsCorpus($value).' ';
+      $term_value = ' '.$engine->newTermsCorpus($value).' ';
       if ($is_not) {
         $term_constraints[] = qsprintf(
           $conn,
@@ -1670,7 +1669,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       if ($is_stemmed) {
         $stem_value = $stemmer->stemToken($value);
-        $stem_value = $ngram_engine->newTermsCorpus($stem_value);
+        $stem_value = $engine->newTermsCorpus($stem_value);
         $stem_value = ' '.$stem_value.' ';
 
         $term_constraints[] = qsprintf(

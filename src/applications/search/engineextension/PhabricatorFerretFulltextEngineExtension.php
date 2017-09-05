@@ -29,8 +29,7 @@ final class PhabricatorFerretFulltextEngineExtension
       ->setEpochCreated(0)
       ->setEpochModified(0);
 
-    $stemmer = new PhutilSearchStemmer();
-    $ngram_engine = id(new PhabricatorNgramEngine());
+    $stemmer = $engine->newStemmer();
 
     // Copy all of the "title" and "body" fields to create new "core" fields.
     // This allows users to search "in title or body" with the "core:" prefix.
@@ -69,10 +68,10 @@ final class PhabricatorFerretFulltextEngineExtension
         continue;
       }
 
-      $term_corpus = $ngram_engine->newTermsCorpus($raw_corpus);
+      $term_corpus = $engine->newTermsCorpus($raw_corpus);
 
       $normal_corpus = $stemmer->stemCorpus($raw_corpus);
-      $normal_coprus = $ngram_engine->newTermsCorpus($normal_corpus);
+      $normal_coprus = $engine->newTermsCorpus($normal_corpus);
 
       if (!isset($ferret_corpus_map[$key])) {
         $ferret_corpus_map[$key] = $empty_template;
@@ -116,7 +115,7 @@ final class PhabricatorFerretFulltextEngineExtension
     }
     $ngrams_source = implode(' ', $ngrams_source);
 
-    $ngrams = $ngram_engine->getNgramsFromString($ngrams_source, 'index');
+    $ngrams = $engine->getNgramsFromString($ngrams_source, 'index');
 
     $ferret_document->openTransaction();
 

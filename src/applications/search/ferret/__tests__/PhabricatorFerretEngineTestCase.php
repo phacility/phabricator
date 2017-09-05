@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorNgramEngineTestCase
+final class PhabricatorFerretEngineTestCase
   extends PhabricatorTestCase {
 
   public function testTermsCorpus() {
@@ -12,7 +12,8 @@ final class PhabricatorNgramEngineTestCase
         'http example org path to file jpg',
     );
 
-    $engine = new PhabricatorNgramEngine();
+    $engine = new ManiphestTaskFerretEngine();
+
     foreach ($map as $input => $expect) {
       $actual = $engine->newTermsCorpus($input);
 
