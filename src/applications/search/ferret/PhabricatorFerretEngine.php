@@ -6,6 +6,65 @@ abstract class PhabricatorFerretEngine extends Phobject {
   abstract public function newDocumentObject();
   abstract public function newFieldObject();
 
+  public function getDefaultFunctionKey() {
+    return 'all';
+  }
+
+  public function getFieldForFunction($function) {
+    $function = phutil_utf8_strtolower($function);
+
+    $map = $this->getFunctionMap();
+    if (!isset($map[$function])) {
+      throw new PhutilSearchQueryCompilerSyntaxException(
+        pht(
+          'Unknown search function "%s". Supported functions are: %s.',
+          $function,
+          implode(', ', array_keys($map))));
+    }
+
+    return $map[$function]['field'];
+  }
+
+  public function getAllFunctionFields() {
+    $map = $this->getFunctionMap();
+
+    $fields = array();
+    foreach ($map as $key => $spec) {
+      $fields[] = $spec['field'];
+    }
+
+    return $fields;
+  }
+
+  protected function getFunctionMap() {
+    return array(
+      'all' => array(
+        'field' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
+        'aliases' => array(
+          'any',
+        ),
+      ),
+      'title' => array(
+        'field' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+        'aliases' => array(),
+      ),
+      'body' => array(
+        'field' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
+        'aliases' => array(),
+      ),
+      'core' => array(
+        'field' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
+        'aliases' => array(),
+      ),
+      'comment' => array(
+        'field' => PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
+        'aliases' => array(
+          'comments',
+        ),
+      ),
+    );
+  }
+
   public function newStemmer() {
     return new PhutilSearchStemmer();
   }

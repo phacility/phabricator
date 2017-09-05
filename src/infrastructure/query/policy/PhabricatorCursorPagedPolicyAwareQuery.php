@@ -1402,15 +1402,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $this->ferretEngine = $engine;
     $this->ferretTokens = $fulltext_tokens;
 
-
-    $function_map = array(
-      'all' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
-      'title' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
-      'body' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
-      'core' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
-    );
-
-    $current_function = 'all';
+    $current_function = $engine->getDefaultFunctionKey();
     $table_map = array();
     $idx = 1;
     foreach ($this->ferretTokens as $fulltext_token) {
@@ -1421,18 +1413,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $function = $current_function;
       }
 
-      if (!isset($function_map[$function])) {
-        throw new PhutilSearchQueryCompilerSyntaxException(
-          pht(
-            'Unknown search function "%s".',
-            $function));
-      }
+      $raw_field = $engine->getFieldForFunction($function);
 
       if (!isset($table_map[$function])) {
         $alias = 'ftfield'.$idx++;
         $table_map[$function] = array(
           'alias' => $alias,
-          'key' => $function_map[$function],
+          'key' => $raw_field,
         );
       }
 
