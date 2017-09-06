@@ -2069,6 +2069,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $op_null = PhabricatorQueryConstraint::OPERATOR_NULL;
       $has_null = isset($constraints[$op_null]);
 
+      // If we're going to process an only() operator, build a list of the
+      // acceptable set of PHIDs first. We'll only match results which have
+      // no edges to any other PHIDs.
+      $all_phids = array();
+      if (isset($constraints[PhabricatorQueryConstraint::OPERATOR_ONLY])) {
+        foreach ($constraints as $operator => $list) {
+          switch ($operator) {
+            case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
+            case PhabricatorQueryConstraint::OPERATOR_AND:
+            case PhabricatorQueryConstraint::OPERATOR_OR:
+              foreach ($list as $constraint) {
+                $value = (array)$constraint->getValue();
+                foreach ($value as $v) {
+                  $all_phids[$v] = $v;
+                }
+              }
+              break;
+          }
+        }
+      }
+
       foreach ($constraints as $operator => $list) {
         $alias = $this->getEdgeLogicTableAlias($operator, $type);
 
@@ -2133,6 +2154,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
               $alias,
               $type);
             break;
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
+            $joins[] = qsprintf(
+              $conn,
+              'LEFT JOIN %T %T ON %Q = %T.src AND %T.type = %d
+                AND %T.dst NOT IN (%Ls)',
+              $edge_table,
+              $alias,
+              $phid_column,
+              $alias,
+              $alias,
+              $type,
+              $alias,
+              $all_phids);
+            break;
         }
       }
     }
@@ -2159,6 +2194,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $alias = $this->getEdgeLogicTableAlias($operator, $type);
         switch ($operator) {
           case PhabricatorQueryConstraint::OPERATOR_NOT:
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
             $full[] = qsprintf(
               $conn,
               '%T.dst IS NULL',
@@ -2258,6 +2294,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             // discussion, see T12753.
             return true;
           case PhabricatorQueryConstraint::OPERATOR_NULL:
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
             return true;
         }
       }
@@ -2371,6 +2408,34 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             pht(
               'This query is constrained by a project you do not have '.
               'permission to see.'));
+        }
+      }
+    }
+
+    $op_and = PhabricatorQueryConstraint::OPERATOR_AND;
+    $op_or = PhabricatorQueryConstraint::OPERATOR_OR;
+    $op_ancestor = PhabricatorQueryConstraint::OPERATOR_ANCESTOR;
+
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+      foreach ($constraints as $operator => $list) {
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
+            if (count($list) > 1) {
+              throw new PhabricatorEmptyQueryException(
+                pht(
+                  'This query specifies only() more than once.'));
+            }
+
+            $have_and = idx($constraints, $op_and);
+            $have_or = idx($constraints, $op_or);
+            $have_ancestor = idx($constraints, $op_ancestor);
+            if (!$have_and && !$have_or && !$have_ancestor) {
+              throw new PhabricatorEmptyQueryException(
+                pht(
+                  'This query specifies only(), but no other constraints '.
+                  'which it can apply to.'));
+            }
+            break;
         }
       }
     }

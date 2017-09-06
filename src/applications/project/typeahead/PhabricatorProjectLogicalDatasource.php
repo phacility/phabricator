@@ -21,6 +21,7 @@ final class PhabricatorProjectLogicalDatasource
       new PhabricatorProjectLogicalAncestorDatasource(),
       new PhabricatorProjectLogicalOrNotDatasource(),
       new PhabricatorProjectLogicalViewerDatasource(),
+      new PhabricatorProjectLogicalOnlyDatasource(),
       new PhabricatorProjectLogicalUserDatasource(),
     );
   }
