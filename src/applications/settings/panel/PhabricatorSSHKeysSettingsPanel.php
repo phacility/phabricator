@@ -45,14 +45,7 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
       $viewer,
       $user);
 
-    $header->setHeader(pht('SSH Public Keys'));
-    $header->addActionLink($ssh_actions);
-
-    $panel->setHeader($header);
-    $panel->setTable($table);
-    $panel->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-
-    return $panel;
+    return $this->newBox(pht('SSH Public Keys'), $table, array($ssh_actions));
   }
 
 }
