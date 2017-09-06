@@ -15,6 +15,10 @@ final class ManiphestTaskFerretEngine
     return new ManiphestTaskFerretField();
   }
 
+  protected function newSearchEngine() {
+    return new ManiphestTaskSearchEngine();
+  }
+
   protected function getFunctionMap() {
     $map = parent::getFunctionMap();
 

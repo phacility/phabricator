@@ -15,6 +15,10 @@ final class DifferentialRevisionFerretEngine
     return new DifferentialRevisionFerretField();
   }
 
+  protected function newSearchEngine() {
+    return new DifferentialRevisionSearchEngine();
+  }
+
   protected function getFunctionMap() {
     $map = parent::getFunctionMap();
 

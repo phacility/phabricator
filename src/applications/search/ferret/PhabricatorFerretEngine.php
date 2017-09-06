@@ -5,6 +5,7 @@ abstract class PhabricatorFerretEngine extends Phobject {
   abstract public function newNgramsObject();
   abstract public function newDocumentObject();
   abstract public function newFieldObject();
+  abstract protected function newSearchEngine();
 
   public function getDefaultFunctionKey() {
     return 'all';
@@ -67,6 +68,60 @@ abstract class PhabricatorFerretEngine extends Phobject {
 
   public function newStemmer() {
     return new PhutilSearchStemmer();
+  }
+
+  public function newConfiguredFulltextQuery(
+    $object,
+    PhabricatorSavedQuery $query,
+    PhabricatorUser $viewer) {
+
+    $local_query = new PhabricatorSavedQuery();
+    $local_query->setParameter('query', $query->getParameter('query'));
+
+    // TODO: Modularize this piece.
+    $project_phids = $query->getParameter('projectPHIDs');
+    if ($project_phids) {
+      $local_query->setParameter('projectPHIDs', $project_phids);
+    }
+
+    $subscriber_phids = $query->getParameter('subscriberPHIDs');
+    if ($subscriber_phids) {
+      $local_query->setParameter('subscriberPHIDs', $subscriber_phids);
+    }
+
+    $author_phids = $query->getParameter('authorPHIDs');
+    if ($author_phids) {
+      $local_query->setParameter('authorPHIDs', $author_phids);
+    }
+
+    $owner_phids = $query->getParameter('ownerPHIDs');
+    if ($owner_phids) {
+      $local_query->setParameter('ownerPHIDs', $owner_phids);
+    }
+
+    $rel_open = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
+    $rel_closed = PhabricatorSearchRelationship::RELATIONSHIP_CLOSED;
+
+    $statuses = $query->getParameter('statuses');
+    if ($statuses) {
+      $statuses = array_fuse($statuses);
+      if (count($statuses) == 1) {
+        if (isset($statuses[$rel_open])) {
+          $local_query->setParameter('statuses', array('open()'));
+        }
+        if (isset($statuses[$rel_closed])) {
+          $local_query->setParameter('statuses', array('closed()'));
+        }
+      }
+    }
+
+    $search_engine = $this->newSearchEngine()
+      ->setViewer($viewer);
+
+    $engine_query = $search_engine->buildQueryFromSavedQuery($local_query)
+      ->setViewer($viewer);
+
+    return $engine_query;
   }
 
   public function tokenizeString($value) {

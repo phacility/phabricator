@@ -772,7 +772,7 @@ final class DifferentialRevisionQuery
         'column' => 'dateModified',
         'type' => 'int',
       ),
-    );
+    ) + parent::getOrderableColumns();
   }
 
   protected function getPagingValueMap($cursor, array $keys) {
