@@ -23,7 +23,6 @@ final class PholioMockEditController extends PholioController {
       }
 
       $title = pht('Edit Mock: %s', $mock->getName());
-      $header_icon = 'fa-pencil';
 
       $is_new = false;
       $mock_images = $mock->getImages();
@@ -33,7 +32,6 @@ final class PholioMockEditController extends PholioController {
       $mock = PholioMock::initializeNewMock($viewer);
 
       $title = pht('Create Mock');
-      $header_icon = 'fa-plus-square';
 
       $is_new = true;
       $files = array();
@@ -347,9 +345,9 @@ final class PholioMockEditController extends PholioController {
       ->appendChild($submit);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Mock'))
+      ->setHeaderText($title)
       ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -359,12 +357,7 @@ final class PholioMockEditController extends PholioController {
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon($header_icon);
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter($form_box);
 
     return $this->newPage()
