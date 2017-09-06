@@ -22,4 +22,20 @@ abstract class DiffusionRepositoryManageController
     return $crumbs;
   }
 
+  public function newBox($title, $content, $action = null) {
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    if ($action) {
+      $header->addActionItem($action);
+    }
+
+    $view = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($content)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG);
+
+    return $view;
+  }
+
 }

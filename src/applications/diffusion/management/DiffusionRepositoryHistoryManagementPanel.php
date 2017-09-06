@@ -21,8 +21,4 @@ final class DiffusionRepositoryHistoryManagementPanel
     return $this->newTimeline();
   }
 
-  public function buildManagementPanelCurtain() {
-    return null;
-  }
-
 }

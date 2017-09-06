@@ -337,6 +337,10 @@ body .phui-header-shell.phui-bleed-header
   color: {$blacktext};
 }
 
+.phui-profile-header.phui-header-shell .phui-header-header a {
+  color: {$blacktext};
+}
+
 .phui-profile-header .phui-header-col3 {
   vertical-align: top;
 }

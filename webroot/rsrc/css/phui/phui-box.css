@@ -136,3 +136,8 @@ body .phui-box-blue-property .phui-header-shell + .phui-object-box {
 .phui-box-white-config .phui-header-header {
   color: {$bluetext};
 }
+
+.phui-box-white-config .phui-header-action-links .button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
