@@ -54,15 +54,6 @@ abstract class PhabricatorFulltextStorageEngine extends Phobject {
     PhabricatorSearchAbstractDocument $document);
 
   /**
-   * Reconstruct the document for a given PHID. This is used for debugging
-   * and does not need to be perfect if it is unreasonable to implement it.
-   *
-   * @param  phid Document PHID to reconstruct.
-   * @return PhabricatorSearchAbstractDocument Abstract document.
-   */
-  abstract public function reconstructDocument($phid);
-
-  /**
    * Execute a search query.
    *
    * @param PhabricatorSavedQuery A query to execute.
