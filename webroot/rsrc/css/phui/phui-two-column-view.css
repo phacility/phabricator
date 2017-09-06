@@ -13,6 +13,10 @@
   margin-bottom: 24px;
 }
 
+.phui-two-column-view.without-header {
+  margin-top: 24px;
+}
+
 .device .phui-two-column-view .phui-two-column-header {
   margin-bottom: 12px;
 }
