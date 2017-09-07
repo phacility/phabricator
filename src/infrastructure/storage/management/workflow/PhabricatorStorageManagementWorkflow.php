@@ -143,7 +143,7 @@ abstract class PhabricatorStorageManagementWorkflow
       if (!$this->dryRun) {
         $should_analyze = (($err == 0) || ($err == 2));
         if ($should_analyze) {
-          $this->analyzeTables();
+          $this->analyzeTables($api);
         }
       }
     } catch (Exception $ex) {
@@ -1172,12 +1172,13 @@ abstract class PhabricatorStorageManagementWorkflow
       ->lock();
   }
 
-  final protected function analyzeTables() {
+  final protected function analyzeTables(
+    PhabricatorStorageManagementAPI $api) {
+
     // Analyzing tables can sometimes have a significant effect on query
     // performance, particularly for the fulltext ngrams tables. See T12819
     // for some specific examples.
 
-    $api = $this->getSingleAPI();
     $conn = $api->getConn(null);
 
     $patches = $this->getPatches();

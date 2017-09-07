@@ -12,7 +12,8 @@ final class PhabricatorStorageManagementAnalyzeWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
-    $this->analyzeTables();
+    $api = $this->getSingleAPI();
+    $this->analyzeTables($api);
     return 0;
   }
 
