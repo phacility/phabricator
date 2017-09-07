@@ -3,16 +3,12 @@
 final class ManiphestTaskFerretEngine
   extends PhabricatorFerretEngine {
 
-  public function newNgramsObject() {
-    return new ManiphestTaskFerretNgrams();
+  public function getApplicationName() {
+    return 'maniphest';
   }
 
-  public function newDocumentObject() {
-    return new ManiphestTaskFerretDocument();
-  }
-
-  public function newFieldObject() {
-    return new ManiphestTaskFerretField();
+  public function getScopeName() {
+    return 'task';
   }
 
   public function newSearchEngine() {

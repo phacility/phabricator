@@ -3,16 +3,12 @@
 final class DifferentialRevisionFerretEngine
   extends PhabricatorFerretEngine {
 
-  public function newNgramsObject() {
-    return new DifferentialRevisionFerretNgrams();
+  public function getApplicationName() {
+    return 'differential';
   }
 
-  public function newDocumentObject() {
-    return new DifferentialRevisionFerretDocument();
-  }
-
-  public function newFieldObject() {
-    return new DifferentialRevisionFerretField();
+  public function getScopeName() {
+    return 'revision';
   }
 
   public function newSearchEngine() {

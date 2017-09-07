@@ -3,16 +3,12 @@
 final class PhabricatorUserFerretEngine
   extends PhabricatorFerretEngine {
 
-  public function newNgramsObject() {
-    return new PhabricatorUserFerretNgrams();
+  public function getApplicationName() {
+    return 'user';
   }
 
-  public function newDocumentObject() {
-    return new PhabricatorUserFerretDocument();
-  }
-
-  public function newFieldObject() {
-    return new PhabricatorUserFerretField();
+  public function getScopeName() {
+    return 'user';
   }
 
   public function newSearchEngine() {

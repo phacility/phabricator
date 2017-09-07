@@ -47,14 +47,6 @@ final class PhabricatorFerretFulltextEngineExtension
       }
     }
 
-    $ferret_document = $engine->newDocumentObject()
-      ->setObjectPHID($phid)
-      ->setIsClosed($is_closed)
-      ->setEpochCreated($document->getDocumentCreated())
-      ->setEpochModified($document->getDocumentModified())
-      ->setAuthorPHID($author_phid)
-      ->setOwnerPHID($owner_phid);
-
     $stemmer = $engine->newStemmer();
 
     // Copy all of the "title" and "body" fields to create new "core" fields.
@@ -133,32 +125,48 @@ final class PhabricatorFerretFulltextEngineExtension
         $ngrams_source[] = $term_corpus;
       }
 
-      $ferret_fields[] = $engine->newFieldObject()
-        ->setFieldKey($key)
-        ->setRawCorpus($raw_corpus)
-        ->setTermCorpus($term_corpus)
-        ->setNormalCorpus($normal_corpus);
+      $ferret_fields[] = array(
+        'fieldKey' => $key,
+        'rawCorpus' => $raw_corpus,
+        'termCorpus' => $term_corpus,
+        'normalCorpus' => $normal_corpus,
+      );
     }
     $ngrams_source = implode("\n", $ngrams_source);
 
     $ngrams = $engine->getTermNgramsFromString($ngrams_source);
 
-    $ferret_document->openTransaction();
+    $object->openTransaction();
 
     try {
+      $conn = $object->establishConnection('w');
       $this->deleteOldDocument($engine, $object, $document);
 
-      $ferret_document->save();
+      queryfx(
+        $conn,
+        'INSERT INTO %T (objectPHID, isClosed, epochCreated, epochModified,
+          authorPHID, ownerPHID) VALUES (%s, %d, %d, %d, %ns, %ns)',
+        $engine->getDocumentTableName(),
+        $object->getPHID(),
+        $is_closed,
+        $document->getDocumentCreated(),
+        $document->getDocumentModified(),
+        $author_phid,
+        $owner_phid);
 
-      $document_id = $ferret_document->getID();
+      $document_id = $conn->getInsertID();
       foreach ($ferret_fields as $ferret_field) {
-        $ferret_field
-          ->setDocumentID($document_id)
-          ->save();
+        queryfx(
+          $conn,
+          'INSERT INTO %T (documentID, fieldKey, rawCorpus, termCorpus,
+            normalCorpus) VALUES (%d, %s, %s, %s, %s)',
+            $engine->getFieldTableName(),
+            $document_id,
+            $ferret_field['fieldKey'],
+            $ferret_field['rawCorpus'],
+            $ferret_field['termCorpus'],
+            $ferret_field['normalCorpus']);
       }
-
-      $ferret_ngrams = $engine->newNgramsObject();
-      $conn = $ferret_ngrams->establishConnection('w');
 
       $sql = array();
       foreach ($ngrams as $ngram) {
@@ -173,15 +181,15 @@ final class PhabricatorFerretFulltextEngineExtension
         queryfx(
           $conn,
           'INSERT INTO %T (documentID, ngram) VALUES %Q',
-          $ferret_ngrams->getTableName(),
+          $engine->getNgramsTableName(),
           $chunk);
       }
     } catch (Exception $ex) {
-      $ferret_document->killTransaction();
+      $object->killTransaction();
       throw $ex;
     }
 
-    $ferret_document->saveTransaction();
+    $object->saveTransaction();
   }
 
 
@@ -190,32 +198,35 @@ final class PhabricatorFerretFulltextEngineExtension
     $object,
     PhabricatorSearchAbstractDocument $document) {
 
-    $old_document = $engine->newDocumentObject()->loadOneWhere(
-      'objectPHID = %s',
-      $document->getPHID());
+    $conn = $object->establishConnection('w');
+
+    $old_document = queryfx_one(
+      $conn,
+      'SELECT * FROM %T WHERE objectPHID = %s',
+      $engine->getDocumentTableName(),
+      $object->getPHID());
     if (!$old_document) {
       return;
     }
 
-    $conn = $old_document->establishConnection('w');
-    $old_id = $old_document->getID();
+    $old_id = $old_document['id'];
 
     queryfx(
       $conn,
       'DELETE FROM %T WHERE id = %d',
-      $engine->newDocumentObject()->getTableName(),
+      $engine->getDocumentTableName(),
       $old_id);
 
     queryfx(
       $conn,
       'DELETE FROM %T WHERE documentID = %d',
-      $engine->newFieldObject()->getTableName(),
+      $engine->getFieldTableName(),
       $old_id);
 
     queryfx(
       $conn,
       'DELETE FROM %T WHERE documentID = %d',
-      $engine->newNgramsObject()->getTableName(),
+      $engine->getNgramsTableName(),
       $old_id);
   }
 

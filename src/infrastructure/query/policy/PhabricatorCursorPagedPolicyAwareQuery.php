@@ -1623,8 +1623,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $engine = $this->ferretEngine;
     $stemmer = $engine->newStemmer();
 
-    $ngram_table = $engine->newNgramsObject();
-    $ngram_table_name = $ngram_table->getTableName();
+    $ngram_table = $engine->getNgramsTableName();
 
     $flat = array();
     foreach ($this->ferretTokens as $fulltext_token) {
@@ -1680,7 +1679,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       foreach ($ngrams as $ngram) {
         $flat[] = array(
-          'table' => $ngram_table_name,
+          'table' => $ngram_table,
           'ngram' => $ngram,
         );
       }
@@ -1702,14 +1701,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $phid_column = qsprintf($conn, '%T', 'phid');
     }
 
-    $document_table = $engine->newDocumentObject();
-    $field_table = $engine->newFieldObject();
+    $document_table = $engine->getDocumentTableName();
+    $field_table = $engine->getFieldTableName();
 
     $joins = array();
     $joins[] = qsprintf(
       $conn,
       'JOIN %T ft_doc ON ft_doc.objectPHID = %Q',
-      $document_table->getTableName(),
+      $document_table,
       $phid_column);
 
     $idx = 1;
@@ -1736,7 +1735,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $conn,
         'JOIN %T %T ON ft_doc.id = %T.documentID
           AND %T.fieldKey = %s',
-        $field_table->getTableName(),
+        $field_table,
         $alias,
         $alias,
         $alias,
