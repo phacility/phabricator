@@ -139,3 +139,7 @@ h1.phui-info-view-head {
 div.phui-object-box .phui-header-shell + .phui-info-view {
   margin: 16px 0 8px;
 }
+
+div.phui-object-box.phui-box-white-config .phui-header-shell + .phui-info-view {
+  margin: 20px 16px 8px;
+}
