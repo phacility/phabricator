@@ -11,6 +11,10 @@ abstract class PhabricatorFerretEngine extends Phobject {
     return 'all';
   }
 
+  public function getObjectTypeRelevance() {
+    return 1000;
+  }
+
   public function getFieldForFunction($function) {
     $function = phutil_utf8_strtolower($function);
 

@@ -34,7 +34,10 @@ final class PhabricatorFerretMetadata extends Phobject {
   }
 
   public function getRelevanceSortVector() {
+    $engine = $this->getEngine();
+
     return id(new PhutilSortVector())
+      ->addInt($engine->getObjectTypeRelevance())
       ->addInt(-$this->getRelevance());
   }
 
