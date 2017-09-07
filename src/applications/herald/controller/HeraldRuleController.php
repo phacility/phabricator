@@ -238,8 +238,6 @@ final class HeraldRuleController extends HeraldController {
         ? pht('Edit Herald Rule: %s', $rule->getName())
         : pht('Create Herald Rule: %s', idx($content_type_map, $content_type));
 
-    $icon = $rule->getID() ? 'fa-pencil' : 'fa-plus-square';
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
