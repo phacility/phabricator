@@ -241,6 +241,8 @@ final class HeraldRuleController extends HeraldController {
     $icon = $rule->getID() ? 'fa-pencil' : 'fa-plus-square';
 
     $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setFormErrors($errors)
       ->setForm($form);
 
@@ -249,12 +251,7 @@ final class HeraldRuleController extends HeraldController {
       ->addTextCrumb($title)
       ->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-plus-square');
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter($form_box);
 
     return $this->newPage()

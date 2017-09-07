@@ -194,8 +194,9 @@ final class HeraldNewController extends HeraldController {
           ->addCancelButton($cancel_uri, $cancel_text));
 
     $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
       ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
     $crumbs = $this
@@ -203,12 +204,7 @@ final class HeraldNewController extends HeraldController {
       ->addTextCrumb(pht('Create Rule'))
       ->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-plus-square');
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter($form_box);
 
     return $this->newPage()
