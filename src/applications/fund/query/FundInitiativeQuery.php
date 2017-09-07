@@ -42,28 +42,28 @@ final class FundInitiativeQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'i.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'i.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->ownerPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'ownerPHID IN (%Ls)',
+        'i.ownerPHID IN (%Ls)',
         $this->ownerPHIDs);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'i.status IN (%Ls)',
         $this->statuses);
     }
 
@@ -72,6 +72,10 @@ final class FundInitiativeQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorFundApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'i';
   }
 
 }
