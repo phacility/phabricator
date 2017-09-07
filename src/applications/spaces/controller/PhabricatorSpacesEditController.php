@@ -165,8 +165,8 @@ final class PhabricatorSpacesEditController
           ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Space'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setValidationException($validation_exception)
       ->appendChild($form);
 
@@ -179,12 +179,7 @@ final class PhabricatorSpacesEditController
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($header_text)
-      ->setHeaderIcon('fa-pencil');
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter(array(
           $box,
         ));
