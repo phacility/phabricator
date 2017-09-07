@@ -92,13 +92,9 @@ final class PhabricatorPeopleCreateController
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-user');
-
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('User'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
     $guidance_context = new PhabricatorPeopleCreateGuidanceContext();
@@ -109,7 +105,6 @@ final class PhabricatorPeopleCreateController
       ->newInfoView();
 
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter(
         array(
           $guidance,
