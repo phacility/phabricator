@@ -11,65 +11,35 @@ final class FundInitiativeSearchEngine
     return 'PhabricatorFundApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'ownerPHIDs',
-      $this->readUsersFromRequest($request, 'owners'));
-
-    $saved->setParameter(
-      'statuses',
-      $this->readListFromRequest($request, 'statuses'));
-
-    return $saved;
+  public function newQuery() {
+    return new FundInitiativeQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new FundInitiativeQuery())
-      ->needProjectPHIDs(true);
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setKey('ownerPHIDs')
+        ->setAliases(array('owner', 'ownerPHID', 'owners'))
+        ->setLabel(pht('Owners')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
+        ->setLabel(pht('Statuses'))
+        ->setOptions(FundInitiative::getStatusNameMap()),
+    );
+  }
 
-    $owner_phids = $saved->getParameter('ownerPHIDs');
-    if ($owner_phids) {
-      $query->withOwnerPHIDs($owner_phids);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['ownerPHIDs']) {
+      $query->withOwnerPHIDs($map['ownerPHIDs']);
     }
 
-    $statuses = $saved->getParameter('statuses');
-    if ($statuses) {
-      $query->withStatuses($statuses);
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $statuses = $saved->getParameter('statuses', array());
-    $statuses = array_fuse($statuses);
-
-    $owner_phids = $saved->getParameter('ownerPHIDs', array());
-
-    $status_map = FundInitiative::getStatusNameMap();
-    $status_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Statuses'));
-    foreach ($status_map as $status => $name) {
-      $status_control->addCheckbox(
-        'statuses[]',
-        $status,
-        $name,
-        isset($statuses[$status]));
-    }
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Owners'))
-          ->setName('owners')
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue($owner_phids))
-      ->appendChild($status_control);
   }
 
   protected function getURI($path) {
@@ -112,21 +82,6 @@ final class FundInitiativeSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $initiatives,
-    PhabricatorSavedQuery $query) {
-
-    $phids = array();
-    foreach ($initiatives as $initiative) {
-      $phids[] = $initiative->getOwnerPHID();
-      foreach ($initiative->getProjectPHIDs() as $project_phid) {
-        $phids[] = $project_phid;
-      }
-    }
-
-    return $phids;
-  }
-
   protected function renderResultList(
     array $initiatives,
     PhabricatorSavedQuery $query,
@@ -135,7 +90,30 @@ final class FundInitiativeSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $list = id(new PHUIObjectItemListView());
+    $load_phids = array();
+    foreach ($initiatives as $initiative) {
+      $load_phids[] = $initiative->getOwnerPHID();
+    }
+
+    if ($initiatives) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($initiatives, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+
+      $edge_query->execute();
+
+      foreach ($edge_query->getDestinationPHIDs() as $phid) {
+        $load_phids[] = $phid;
+      }
+    }
+
+    $handles = $viewer->loadHandles($load_phids);
+    $handles = iterator_to_array($handles);
+
+    $list = new PHUIObjectItemListView();
     foreach ($initiatives as $initiative) {
       $owner_handle = $handles[$initiative->getOwnerPHID()];
 
@@ -149,9 +127,12 @@ final class FundInitiativeSearchEngine
         $item->setDisabled(true);
       }
 
-      $project_handles = array_select_keys(
-        $handles,
-        $initiative->getProjectPHIDs());
+      $project_phids = $edge_query->getDestinationPHIDs(
+        array(
+          $initiative->getPHID(),
+        ));
+
+      $project_handles = array_select_keys($handles, $project_phids);
       if ($project_handles) {
         $item->addAttribute(
           id(new PHUIHandleTagListView())
@@ -168,9 +149,6 @@ final class FundInitiativeSearchEngine
     $result->setNoDataString(pht('No initiatives found.'));
 
     return $result;
-
-
-    return $list;
   }
 
 }

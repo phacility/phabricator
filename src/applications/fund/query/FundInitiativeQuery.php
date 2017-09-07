@@ -8,8 +8,6 @@ final class FundInitiativeQuery
   private $ownerPHIDs;
   private $statuses;
 
-  private $needProjectPHIDs;
-
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -30,40 +28,12 @@ final class FundInitiativeQuery
     return $this;
   }
 
-  public function needProjectPHIDs($need) {
-    $this->needProjectPHIDs = $need;
-    return $this;
-  }
-
   public function newResultObject() {
     return new FundInitiative();
   }
 
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
-  }
-
-  protected function didFilterPage(array $initiatives) {
-
-    if ($this->needProjectPHIDs) {
-      $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($initiatives, 'getPHID'))
-        ->withEdgeTypes(
-          array(
-            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-          ));
-      $edge_query->execute();
-
-      foreach ($initiatives as $initiative) {
-        $phids = $edge_query->getDestinationPHIDs(
-          array(
-            $initiative->getPHID(),
-          ));
-        $initiative->attachProjectPHIDs($phids);
-      }
-    }
-
-    return $initiatives;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
