@@ -23,11 +23,37 @@ final class PhabricatorFerretFulltextEngineExtension
     $phid = $document->getPHID();
     $engine = $object->newFerretEngine();
 
+    $is_closed = 0;
+    $author_phid = null;
+    $owner_phid = null;
+    foreach ($document->getRelationshipData() as $relationship) {
+      list($related_type, $related_phid) = $relationship;
+      switch ($related_type) {
+        case PhabricatorSearchRelationship::RELATIONSHIP_OPEN:
+          $is_closed = 0;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_CLOSED:
+          $is_closed = 1;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_OWNER:
+          $owner_phid = $related_phid;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_UNOWNED:
+          $owner_phid = null;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR:
+          $author_phid = $related_phid;
+          break;
+      }
+    }
+
     $ferret_document = $engine->newDocumentObject()
       ->setObjectPHID($phid)
-      ->setIsClosed(0)
-      ->setEpochCreated(0)
-      ->setEpochModified(0);
+      ->setIsClosed($is_closed)
+      ->setEpochCreated($document->getDocumentCreated())
+      ->setEpochModified($document->getDocumentModified())
+      ->setAuthorPHID($author_phid)
+      ->setOwnerPHID($owner_phid);
 
     $stemmer = $engine->newStemmer();
 

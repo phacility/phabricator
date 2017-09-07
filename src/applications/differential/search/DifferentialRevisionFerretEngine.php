@@ -15,7 +15,7 @@ final class DifferentialRevisionFerretEngine
     return new DifferentialRevisionFerretField();
   }
 
-  protected function newSearchEngine() {
+  public function newSearchEngine() {
     return new DifferentialRevisionSearchEngine();
   }
 

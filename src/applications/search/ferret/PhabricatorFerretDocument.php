@@ -27,6 +27,18 @@ abstract class PhabricatorFerretDocument
           'columns' => array('objectPHID'),
           'unique' => true,
         ),
+        'key_author' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'key_owner' => array(
+          'columns' => array('ownerPHID'),
+        ),
+        'key_created' => array(
+          'columns' => array('epochCreated'),
+        ),
+        'key_modified' => array(
+          'columns' => array('epochModified'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

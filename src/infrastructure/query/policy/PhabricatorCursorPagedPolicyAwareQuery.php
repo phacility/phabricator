@@ -28,8 +28,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $spaceIsArchived;
   private $ngrams = array();
   private $ferretEngine;
-  private $ferretTokens;
-  private $ferretTables;
+  private $ferretTokens = array();
+  private $ferretTables = array();
+  private $ferretQuery;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -772,7 +773,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     if ($this->supportsFerretEngine()) {
       $orders['relevance'] = array(
-        'vector' => array('rank', 'id'),
+        'vector' => array('rank', 'fulltext-modified', 'id'),
         'name' => pht('Relevence'),
       );
     }
@@ -973,6 +974,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $columns['rank'] = array(
         'table' => null,
         'column' => '_ft_rank',
+        'type' => 'int',
+      );
+      $columns['fulltext-created'] = array(
+        'table' => 'ft_doc',
+        'column' => 'epochCreated',
+        'type' => 'int',
+      );
+      $columns['fulltext-modified'] = array(
+        'table' => 'ft_doc',
+        'column' => 'epochModified',
         'type' => 'int',
       );
     }
@@ -1406,6 +1417,22 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return ($object instanceof PhabricatorFerretInterface);
   }
 
+  public function withFerretQuery(
+    PhabricatorFerretEngine $engine,
+    PhabricatorSavedQuery $query) {
+
+    if (!$this->supportsFerretEngine()) {
+      throw new Exception(
+        pht(
+          'Query ("%s") does not support the Ferret fulltext engine.',
+          get_class($this)));
+    }
+
+    $this->ferretEngine = $engine;
+    $this->ferretQuery = $query;
+
+    return $this;
+  }
 
   public function withFerretConstraint(
     PhabricatorFerretEngine $engine,
@@ -1538,9 +1565,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           $table_alias,
           $stem_value);
       }
-
-      $parts[] = '0';
     }
+
+    $parts[] = '0';
 
     $select[] = qsprintf(
       $conn,
@@ -1646,7 +1673,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $joins = array();
     $joins[] = qsprintf(
       $conn,
-      'JOIN %T ftdoc ON ftdoc.objectPHID = %Q',
+      'JOIN %T ft_doc ON ft_doc.objectPHID = %Q',
       $document_table->getTableName(),
       $phid_column);
 
@@ -1655,11 +1682,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $table = $spec['table'];
       $ngram = $spec['ngram'];
 
-      $alias = 'ft'.$idx++;
+      $alias = 'ftngram_'.$idx++;
 
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram = %s',
+        'JOIN %T %T ON %T.documentID = ft_doc.id AND %T.ngram = %s',
         $table,
         $alias,
         $alias,
@@ -1672,7 +1699,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T %T ON ftdoc.id = %T.documentID
+        'JOIN %T %T ON ft_doc.id = %T.documentID
           AND %T.fieldKey = %s',
         $field_table->getTableName(),
         $alias,
@@ -1798,6 +1825,75 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           $conn,
           '(%Q)',
           implode(' OR ', $term_constraints));
+      }
+    }
+
+    if ($this->ferretQuery) {
+      $query = $this->ferretQuery;
+
+      $author_phids = $query->getParameter('authorPHIDs');
+      if ($author_phids) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.authorPHID IN (%Ls)',
+          $author_phids);
+      }
+
+      $with_unowned = $query->getParameter('withUnowned');
+      $with_any = $query->getParameter('withAnyOwner');
+
+      if ($with_any && $with_unowned) {
+        throw new PhabricatorEmptyQueryException(
+          pht(
+            'This query matches only unowned documents owned by anyone, '.
+            'which is impossible.'));
+      }
+
+      $owner_phids = $query->getParameter('ownerPHIDs');
+      if ($owner_phids && !$with_any) {
+        if ($with_unowned) {
+          $where[] = qsprintf(
+            $conn,
+            'ft_doc.ownerPHID IN (%Ls) OR ft_doc.ownerPHID IS NULL',
+            $owner_phids);
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            'ft_doc.ownerPHID IN (%Ls)',
+            $owner_phids);
+        }
+      } else if ($with_unowned) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.ownerPHID IS NULL');
+      }
+
+      if ($with_any) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.ownerPHID IS NOT NULL');
+      }
+
+      $rel_open = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
+
+      $statuses = $query->getParameter('statuses');
+      $is_closed = null;
+      if ($statuses) {
+        $statuses = array_fuse($statuses);
+        if (count($statuses) == 1) {
+          if (isset($statuses[$rel_open])) {
+            $is_closed = 0;
+          } else {
+            $is_closed = 1;
+          }
+        }
+      }
+
+      if ($is_closed !== null) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.isClosed = %d',
+          $is_closed);
       }
     }
 

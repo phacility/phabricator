@@ -15,7 +15,7 @@ final class ManiphestTaskFerretEngine
     return new ManiphestTaskFerretField();
   }
 
-  protected function newSearchEngine() {
+  public function newSearchEngine() {
     return new ManiphestTaskSearchEngine();
   }
 

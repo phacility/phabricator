@@ -47,6 +47,8 @@ final class PhabricatorFerretFulltextStorageEngine
     $offset = (int)$query->getParameter('offset', 0);
     $limit  = (int)$query->getParameter('limit', 25);
 
+    // NOTE: For now, it's okay to query with the omnipotent viewer here
+    // because we're just returning PHIDs which we'll filter later.
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $type_results = array();
@@ -54,19 +56,31 @@ final class PhabricatorFerretFulltextStorageEngine
       $engine = $spec['engine'];
       $object = $spec['object'];
 
-      // NOTE: For now, it's okay to query with the omnipotent viewer here
-      // because we're just returning PHIDs which we'll filter later.
+      $local_query = new PhabricatorSavedQuery();
+      $local_query->setParameter('query', $query->getParameter('query'));
 
-      $type_query = $engine->newConfiguredFulltextQuery(
-        $object,
-        $query,
-        $viewer);
+      $project_phids = $query->getParameter('projectPHIDs');
+      if ($project_phids) {
+        $local_query->setParameter('projectPHIDs', $project_phids);
+      }
 
-      $type_query
+      $subscriber_phids = $query->getParameter('subscriberPHIDs');
+      if ($subscriber_phids) {
+        $local_query->setParameter('subscriberPHIDs', $subscriber_phids);
+      }
+
+      $search_engine = $engine->newSearchEngine()
+        ->setViewer($viewer);
+
+      $engine_query = $search_engine->buildQueryFromSavedQuery($local_query)
+        ->setViewer($viewer);
+
+      $engine_query
+        ->withFerretQuery($engine, $query)
         ->setOrder('relevance')
         ->setLimit($offset + $limit);
 
-      $results = $type_query->execute();
+      $results = $engine_query->execute();
       $results = mpull($results, null, 'getPHID');
       $type_results[$type] = $results;
     }
