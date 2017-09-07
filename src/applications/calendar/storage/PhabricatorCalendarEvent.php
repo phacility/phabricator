@@ -15,6 +15,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     PhabricatorFlaggableInterface,
     PhabricatorSpacesInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorConduitResultInterface {
 
   protected $name;
@@ -1377,6 +1378,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newFulltextEngine() {
     return new PhabricatorCalendarEventFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorCalendarEventFerretEngine();
   }
 
 
