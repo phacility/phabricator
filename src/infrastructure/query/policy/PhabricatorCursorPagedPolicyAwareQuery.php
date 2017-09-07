@@ -31,6 +31,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $ferretTokens = array();
   private $ferretTables = array();
   private $ferretQuery;
+  private $ferretMetadata = array();
 
   protected function getPageCursors(array $page) {
     return array(
@@ -82,6 +83,18 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->beforeID;
   }
 
+  final public function getFerretMetadata() {
+    if (!$this->supportsFerretEngine()) {
+      throw new Exception(
+        pht(
+          'Unable to retrieve Ferret engine metadata, this class ("%s") does '.
+          'not support the Ferret engine.',
+          get_class($this)));
+    }
+
+    return $this->ferretMetadata;
+  }
+
   protected function loadStandardPage(PhabricatorLiskDAO $table) {
     $rows = $this->loadStandardPageRows($table);
     return $table->loadAllFromArray($rows);
@@ -110,6 +123,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $this->buildHavingClause($conn),
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
+
+    $rows = $this->didLoadRawRows($rows);
+
+    return $rows;
+  }
+
+  protected function didLoadRawRows(array $rows) {
+    if ($this->ferretEngine) {
+      foreach ($rows as $row) {
+        $phid = $row['phid'];
+
+        $metadata = id(new PhabricatorFerretMetadata())
+          ->setPHID($phid)
+          ->setEngine($this->ferretEngine)
+          ->setRelevance(idx($row, '_ft_rank'));
+
+        $this->ferretMetadata[$phid] = $metadata;
+
+        unset($row['_ft_rank']);
+      }
+    }
 
     return $rows;
   }
@@ -172,6 +206,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if ($this->beforeID) {
       $results = array_reverse($results, $preserve_keys = true);
     }
+
     return $results;
   }
 

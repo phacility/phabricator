@@ -320,7 +320,7 @@ final class DifferentialRevisionQuery
    */
   protected function loadPage() {
     $data = $this->loadData();
-
+    $data = $this->didLoadRawRows($data);
     $table = $this->newResultObject();
     return $table->loadAllFromArray($data);
   }

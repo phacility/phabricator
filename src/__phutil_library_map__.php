@@ -2840,6 +2840,7 @@ phutil_register_library_map(array(
     'PhabricatorFerretFulltextEngineExtension' => 'applications/search/engineextension/PhabricatorFerretFulltextEngineExtension.php',
     'PhabricatorFerretFulltextStorageEngine' => 'applications/search/fulltextstorage/PhabricatorFerretFulltextStorageEngine.php',
     'PhabricatorFerretInterface' => 'applications/search/ferret/PhabricatorFerretInterface.php',
+    'PhabricatorFerretMetadata' => 'applications/search/ferret/PhabricatorFerretMetadata.php',
     'PhabricatorFerretNgrams' => 'applications/search/ferret/PhabricatorFerretNgrams.php',
     'PhabricatorFerretSearchEngineExtension' => 'applications/search/engineextension/PhabricatorFerretSearchEngineExtension.php',
     'PhabricatorFile' => 'applications/files/storage/PhabricatorFile.php',
@@ -8175,6 +8176,7 @@ phutil_register_library_map(array(
     'PhabricatorFerretField' => 'PhabricatorSearchDAO',
     'PhabricatorFerretFulltextEngineExtension' => 'PhabricatorFulltextEngineExtension',
     'PhabricatorFerretFulltextStorageEngine' => 'PhabricatorFulltextStorageEngine',
+    'PhabricatorFerretMetadata' => 'Phobject',
     'PhabricatorFerretNgrams' => 'PhabricatorSearchDAO',
     'PhabricatorFerretSearchEngineExtension' => 'PhabricatorSearchEngineExtension',
     'PhabricatorFile' => array(

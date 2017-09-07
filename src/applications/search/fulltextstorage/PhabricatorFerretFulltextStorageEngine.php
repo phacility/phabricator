@@ -52,6 +52,7 @@ final class PhabricatorFerretFulltextStorageEngine
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $type_results = array();
+    $metadata = array();
     foreach ($type_map as $type => $spec) {
       $engine = $spec['engine'];
       $object = $spec['object'];
@@ -83,12 +84,24 @@ final class PhabricatorFerretFulltextStorageEngine
       $results = $engine_query->execute();
       $results = mpull($results, null, 'getPHID');
       $type_results[$type] = $results;
+
+      $metadata += $engine_query->getFerretMetadata();
     }
 
     $list = array();
     foreach ($type_results as $type => $results) {
       $list += $results;
     }
+
+    // Currently, the list is grouped by object type. For example, all the
+    // tasks might be first, then all the revisions, and so on. In each group,
+    // the results are ordered properly.
+
+    // Reorder the results so that the highest-ranking results come first,
+    // no matter which object types they belong to.
+
+    $metadata = msort($metadata, 'getRelevanceSortVector');
+    $list = array_select_keys($list, array_keys($metadata)) + $list;
 
     $result_slice = array_slice($list, $offset, $limit, true);
     return array_keys($result_slice);
