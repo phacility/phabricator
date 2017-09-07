@@ -35,19 +35,12 @@ final class FundInitiativeQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new FundInitiative();
+  }
+
   protected function loadPage() {
-    $table = new FundInitiative();
-    $conn_r = $table->establishConnection('r');
-
-    $rows = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($rows);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function didFilterPage(array $initiatives) {
@@ -73,40 +66,38 @@ final class FundInitiativeQuery
     return $initiatives;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
-
-    $where[] = $this->buildPagingClause($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->ownerPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'ownerPHID IN (%Ls)',
         $this->ownerPHIDs);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'status IN (%Ls)',
         $this->statuses);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {
