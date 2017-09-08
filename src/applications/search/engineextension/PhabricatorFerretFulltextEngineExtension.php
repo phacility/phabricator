@@ -66,9 +66,12 @@ final class PhabricatorFerretFulltextEngineExtension
           );
           break;
       }
-    }
 
-    $key_all = PhabricatorSearchDocumentFieldType::FIELD_ALL;
+      $virtual_fields[] = array(
+        PhabricatorSearchDocumentFieldType::FIELD_ALL,
+        $raw_corpus,
+      );
+    }
 
     $empty_template = array(
       'raw' => array(),
@@ -76,9 +79,7 @@ final class PhabricatorFerretFulltextEngineExtension
       'normal' => array(),
     );
 
-    $ferret_corpus_map = array(
-      $key_all => $empty_template,
-    );
+    $ferret_corpus_map = array();
 
     foreach ($virtual_fields as $field) {
       list($key, $raw_corpus) = $field;
@@ -98,10 +99,6 @@ final class PhabricatorFerretFulltextEngineExtension
       $ferret_corpus_map[$key]['raw'][] = $raw_corpus;
       $ferret_corpus_map[$key]['term'][] = $term_corpus;
       $ferret_corpus_map[$key]['normal'][] = $normal_corpus;
-
-      $ferret_corpus_map[$key_all]['raw'][] = $raw_corpus;
-      $ferret_corpus_map[$key_all]['term'][] = $term_corpus;
-      $ferret_corpus_map[$key_all]['normal'][] = $normal_corpus;
     }
 
     $ferret_fields = array();
