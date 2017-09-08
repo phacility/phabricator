@@ -1666,12 +1666,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       if ($is_substring) {
         $ngrams = $engine->getSubstringNgramsFromString($value);
       } else {
-        $ngrams = $engine->getTermNgramsFromString($value);
+        $terms_value = $engine->newTermsCorpus($value);
+        $ngrams = $engine->getTermNgramsFromString($terms_value);
 
         // If this is a stemmed term, only look for ngrams present in both the
         // unstemmed and stemmed variations.
         if ($is_stemmed) {
-          $stem_value = $stemmer->stemToken($value);
+          $stem_value = $stemmer->stemToken($terms_value);
           $stem_ngrams = $engine->getTermNgramsFromString($stem_value);
           $ngrams = array_intersect($ngrams, $stem_ngrams);
         }
