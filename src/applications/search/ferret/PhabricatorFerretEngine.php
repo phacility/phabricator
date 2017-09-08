@@ -75,7 +75,7 @@ abstract class PhabricatorFerretEngine extends Phobject {
 
   public function tokenizeString($value) {
     $value = trim($value, ' ');
-    $value = preg_split('/ +/', $value);
+    $value = preg_split('/\s+/u', $value);
     return $value;
   }
 
