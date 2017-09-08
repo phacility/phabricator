@@ -45,6 +45,7 @@ final class DiffusionRepositoryURIViewController
     );
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(
       $repository->getDisplayName(),
       $repository->getURI());

@@ -71,23 +71,15 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
         'action',
       ));
 
-    $terminate_button = id(new PHUIButtonView())
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-warning')
       ->setText(pht('Revoke All'))
       ->setHref('/auth/token/revoke/all/')
-      ->setTag('a')
       ->setWorkflow(true)
-      ->setIcon('fa-exclamation-triangle');
+      ->setColor(PHUIButtonView::RED);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Temporary Tokens'))
-      ->addActionLink($terminate_button);
-
-    $panel = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
-
-    return $panel;
+    return $this->newBox(pht('Temporary Tokens'), $table, array($button));
   }
 
 }

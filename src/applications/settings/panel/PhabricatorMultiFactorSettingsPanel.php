@@ -101,34 +101,27 @@ final class PhabricatorMultiFactorSettingsPanel
         true,
       ));
 
-    $panel = new PHUIObjectBoxView();
-    $header = new PHUIHeaderView();
-
     $help_uri = PhabricatorEnv::getDoclink(
       'User Guide: Multi-Factor Authentication');
 
-    $help_button = id(new PHUIButtonView())
+    $buttons = array();
+
+    $buttons[] = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-plus')
+      ->setText(pht('Add Auth Factor'))
+      ->setHref($this->getPanelURI('?new=true'))
+      ->setWorkflow(true)
+      ->setColor(PHUIButtonView::GREY);
+
+    $buttons[] = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-book')
       ->setText(pht('Help'))
       ->setHref($help_uri)
-      ->setTag('a')
-      ->setIcon('fa-info-circle');
+      ->setColor(PHUIButtonView::GREY);
 
-    $create_button = id(new PHUIButtonView())
-      ->setText(pht('Add Authentication Factor'))
-      ->setHref($this->getPanelURI('?new=true'))
-      ->setTag('a')
-      ->setWorkflow(true)
-      ->setIcon('fa-plus');
-
-    $header->setHeader(pht('Authentication Factors'));
-    $header->addActionLink($help_button);
-    $header->addActionLink($create_button);
-
-    $panel->setHeader($header);
-    $panel->setTable($table);
-    $panel->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
-
-    return $panel;
+    return $this->newBox(pht('Authentication Factors'), $table, $buttons);
   }
 
   private function processNew(AphrontRequest $request) {

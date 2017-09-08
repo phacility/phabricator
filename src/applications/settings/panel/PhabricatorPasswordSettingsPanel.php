@@ -91,7 +91,7 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
         // is changed here the CSRF token check will fail.
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-          $envelope = new PhutilOpaqueEnvelope($pass);
+        $envelope = new PhutilOpaqueEnvelope($pass);
           id(new PhabricatorUserEditor())
             ->setActor($user)
             ->changePassword($user, $envelope);
@@ -172,45 +172,47 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
           ->setDisableAutocomplete(true)
           ->setLabel(pht('New Password'))
           ->setError($e_new)
-          ->setName('new_pw'));
-    $form
+          ->setName('new_pw'))
       ->appendChild(
         id(new AphrontFormPasswordControl())
           ->setDisableAutocomplete(true)
           ->setLabel(pht('Confirm Password'))
           ->setCaption($len_caption)
           ->setError($e_conf)
-          ->setName('conf_pw'));
-    $form
+          ->setName('conf_pw'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Change Password')));
 
-    $form->appendChild(
-      id(new AphrontFormStaticControl())
-        ->setLabel(pht('Current Algorithm'))
-        ->setValue(PhabricatorPasswordHasher::getCurrentAlgorithmName(
-          new PhutilOpaqueEnvelope($user->getPasswordHash()))));
+    $properties = id(new PHUIPropertyListView());
 
-    $form->appendChild(
-      id(new AphrontFormStaticControl())
-        ->setLabel(pht('Best Available Algorithm'))
-        ->setValue(PhabricatorPasswordHasher::getBestAlgorithmName()));
+    $properties->addProperty(
+      pht('Current Algorithm'),
+      PhabricatorPasswordHasher::getCurrentAlgorithmName(
+        new PhutilOpaqueEnvelope($user->getPasswordHash())));
 
-    $form->appendRemarkupInstructions(
-      pht(
-        'NOTE: Changing your password will terminate any other outstanding '.
-        'login sessions.'));
+    $properties->addProperty(
+      pht('Best Available Algorithm'),
+      PhabricatorPasswordHasher::getBestAlgorithmName());
 
+    $info_view = id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->appendChild(
+        pht('Changing your password will terminate any other outstanding '.
+            'login sessions.'));
+
+    $algo_box = $this->newBox(pht('Password Algorithms'), $properties);
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Password'))
       ->setFormSaved($request->getStr('saved'))
       ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
     return array(
       $form_box,
+      $algo_box,
+      $info_view,
     );
   }
 

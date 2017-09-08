@@ -154,26 +154,19 @@ final class PhluxEditController extends PhluxController {
     if ($is_new) {
       $title = pht('Create Variable');
       $crumbs->addTextCrumb($title, $request->getRequestURI());
-      $header_icon = 'fa-plus-square';
     } else {
       $title = pht('Edit Variable: %s', $key);
-      $header_icon = 'fa-pencil';
       $crumbs->addTextCrumb($title, $request->getRequestURI());
     }
     $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Variable'))
+      ->setHeaderText($title)
       ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon($header_icon);
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter(array(
         $box,
       ));

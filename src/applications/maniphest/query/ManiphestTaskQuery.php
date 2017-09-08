@@ -247,6 +247,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         break;
     }
 
+    $data = $this->didLoadRawRows($data);
     $tasks = $task_dao->loadAllFromArray($data);
 
     switch ($this->groupBy) {

@@ -55,6 +55,26 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $object->getSchemaKeys());
   }
 
+  protected function buildFerretIndexSchema(PhabricatorFerretEngine $engine) {
+    $this->buildRawSchema(
+      $engine->getApplicationName(),
+      $engine->getDocumentTableName(),
+      $engine->getDocumentSchemaColumns(),
+      $engine->getDocumentSchemaKeys());
+
+    $this->buildRawSchema(
+      $engine->getApplicationName(),
+      $engine->getFieldTableName(),
+      $engine->getFieldSchemaColumns(),
+      $engine->getFieldSchemaKeys());
+
+    $this->buildRawSchema(
+      $engine->getApplicationName(),
+      $engine->getNgramsTableName(),
+      $engine->getNgramsSchemaColumns(),
+      $engine->getNgramsSchemaKeys());
+  }
+
   protected function buildRawSchema(
     $database_name,
     $table_name,

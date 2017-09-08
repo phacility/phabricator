@@ -12,7 +12,8 @@ final class PholioMock extends PholioDAO
     PhabricatorDestructibleInterface,
     PhabricatorSpacesInterface,
     PhabricatorMentionableInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
@@ -317,6 +318,13 @@ final class PholioMock extends PholioDAO
 
   public function newFulltextEngine() {
     return new PholioMockFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+  public function newFerretEngine() {
+    return new PholioMockFerretEngine();
   }
 
 

@@ -10,7 +10,8 @@ final class FundInitiative extends FundDAO
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   protected $name;
   protected $ownerPHID;
@@ -210,6 +211,14 @@ final class FundInitiative extends FundDAO
 
   public function newFulltextEngine() {
     return new FundInitiativeFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new FundInitiativeFerretEngine();
   }
 
 }

@@ -10,33 +10,30 @@ final class PhabricatorConfigClusterSearchController
     $title = pht('Cluster Search');
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Search');
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true)
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
+    $button = id(new PHUIButtonView())
+      ->setIcon('fa-book')
+      ->setHref($doc_href)
+      ->setTag('a')
+      ->setText(pht('Documentation'));
 
-    $crumbs = $this
-      ->buildApplicationCrumbs($nav)
-      ->addTextCrumb($title)
-      ->setBorder(true);
+    $header = $this->buildHeaderView($title, $button);
 
     $search_status = $this->buildClusterSearchStatus();
 
-    $content = id(new PhabricatorConfigPageView())
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($search_status);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($search_status);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function buildClusterSearchStatus() {
@@ -105,15 +102,16 @@ final class PhabricatorConfigClusterSearchController
       ->setNoDataString(pht('No search servers are configured.'))
       ->setHeaders($head);
 
-    $view = id(new PHUIObjectBoxView())
-      ->setHeaderText($service->getDisplayName())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+    $view = $this->buildConfigBoxView(pht('Search Servers'), $table);
 
-    if ($stats_view) {
-      $view->addPropertyList($stats_view);
+    $stats = null;
+    if ($stats_view->hasAnyProperties()) {
+      $stats = $this->buildConfigBoxView(
+        pht('%s Stats', $service->getDisplayName()),
+        $stats_view);
     }
-    return $view;
+
+    return array($stats, $view);
   }
 
   private function renderIndexStats($stats) {

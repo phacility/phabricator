@@ -23,14 +23,31 @@ final class PhabricatorFerretFulltextEngineExtension
     $phid = $document->getPHID();
     $engine = $object->newFerretEngine();
 
-    $ferret_document = $engine->newDocumentObject()
-      ->setObjectPHID($phid)
-      ->setIsClosed(0)
-      ->setEpochCreated(0)
-      ->setEpochModified(0);
+    $is_closed = 0;
+    $author_phid = null;
+    $owner_phid = null;
+    foreach ($document->getRelationshipData() as $relationship) {
+      list($related_type, $related_phid) = $relationship;
+      switch ($related_type) {
+        case PhabricatorSearchRelationship::RELATIONSHIP_OPEN:
+          $is_closed = 0;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_CLOSED:
+          $is_closed = 1;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_OWNER:
+          $owner_phid = $related_phid;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_UNOWNED:
+          $owner_phid = null;
+          break;
+        case PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR:
+          $author_phid = $related_phid;
+          break;
+      }
+    }
 
-    $stemmer = new PhutilSearchStemmer();
-    $ngram_engine = id(new PhabricatorNgramEngine());
+    $stemmer = $engine->newStemmer();
 
     // Copy all of the "title" and "body" fields to create new "core" fields.
     // This allows users to search "in title or body" with the "core:" prefix.
@@ -49,9 +66,12 @@ final class PhabricatorFerretFulltextEngineExtension
           );
           break;
       }
-    }
 
-    $key_all = PhabricatorSearchDocumentFieldType::FIELD_ALL;
+      $virtual_fields[] = array(
+        PhabricatorSearchDocumentFieldType::FIELD_ALL,
+        $raw_corpus,
+      );
+    }
 
     $empty_template = array(
       'raw' => array(),
@@ -59,9 +79,7 @@ final class PhabricatorFerretFulltextEngineExtension
       'normal' => array(),
     );
 
-    $ferret_corpus_map = array(
-      $key_all => $empty_template,
-    );
+    $ferret_corpus_map = array();
 
     foreach ($virtual_fields as $field) {
       list($key, $raw_corpus) = $field;
@@ -69,10 +87,10 @@ final class PhabricatorFerretFulltextEngineExtension
         continue;
       }
 
-      $term_corpus = $ngram_engine->newTermsCorpus($raw_corpus);
+      $term_corpus = $engine->newTermsCorpus($raw_corpus);
 
       $normal_corpus = $stemmer->stemCorpus($raw_corpus);
-      $normal_coprus = $ngram_engine->newTermsCorpus($normal_corpus);
+      $normal_corpus = $engine->newTermsCorpus($normal_corpus);
 
       if (!isset($ferret_corpus_map[$key])) {
         $ferret_corpus_map[$key] = $empty_template;
@@ -81,10 +99,6 @@ final class PhabricatorFerretFulltextEngineExtension
       $ferret_corpus_map[$key]['raw'][] = $raw_corpus;
       $ferret_corpus_map[$key]['term'][] = $term_corpus;
       $ferret_corpus_map[$key]['normal'][] = $normal_corpus;
-
-      $ferret_corpus_map[$key_all]['raw'][] = $raw_corpus;
-      $ferret_corpus_map[$key_all]['term'][] = $term_corpus;
-      $ferret_corpus_map[$key_all]['normal'][] = $normal_corpus;
     }
 
     $ferret_fields = array();
@@ -92,48 +106,64 @@ final class PhabricatorFerretFulltextEngineExtension
     foreach ($ferret_corpus_map as $key => $fields) {
       $raw_corpus = $fields['raw'];
       $raw_corpus = implode("\n", $raw_corpus);
-      $ngrams_source[] = $raw_corpus;
+      if (strlen($raw_corpus)) {
+        $ngrams_source[] = $raw_corpus;
+      }
 
       $normal_corpus = $fields['normal'];
-      $normal_corpus = implode(' ', $normal_corpus);
+      $normal_corpus = implode("\n", $normal_corpus);
       if (strlen($normal_corpus)) {
         $ngrams_source[] = $normal_corpus;
-        $normal_corpus = ' '.$normal_corpus.' ';
       }
 
       $term_corpus = $fields['term'];
-      $term_corpus = implode(' ', $term_corpus);
+      $term_corpus = implode("\n", $term_corpus);
       if (strlen($term_corpus)) {
         $ngrams_source[] = $term_corpus;
-        $term_corpus = ' '.$term_corpus.' ';
       }
 
-      $ferret_fields[] = $engine->newFieldObject()
-        ->setFieldKey($key)
-        ->setRawCorpus($raw_corpus)
-        ->setTermCorpus($term_corpus)
-        ->setNormalCorpus($normal_corpus);
+      $ferret_fields[] = array(
+        'fieldKey' => $key,
+        'rawCorpus' => $raw_corpus,
+        'termCorpus' => $term_corpus,
+        'normalCorpus' => $normal_corpus,
+      );
     }
-    $ngrams_source = implode(' ', $ngrams_source);
+    $ngrams_source = implode("\n", $ngrams_source);
 
-    $ngrams = $ngram_engine->getNgramsFromString($ngrams_source, 'index');
+    $ngrams = $engine->getTermNgramsFromString($ngrams_source);
 
-    $ferret_document->openTransaction();
+    $object->openTransaction();
 
     try {
+      $conn = $object->establishConnection('w');
       $this->deleteOldDocument($engine, $object, $document);
 
-      $ferret_document->save();
+      queryfx(
+        $conn,
+        'INSERT INTO %T (objectPHID, isClosed, epochCreated, epochModified,
+          authorPHID, ownerPHID) VALUES (%s, %d, %d, %d, %ns, %ns)',
+        $engine->getDocumentTableName(),
+        $object->getPHID(),
+        $is_closed,
+        $document->getDocumentCreated(),
+        $document->getDocumentModified(),
+        $author_phid,
+        $owner_phid);
 
-      $document_id = $ferret_document->getID();
+      $document_id = $conn->getInsertID();
       foreach ($ferret_fields as $ferret_field) {
-        $ferret_field
-          ->setDocumentID($document_id)
-          ->save();
+        queryfx(
+          $conn,
+          'INSERT INTO %T (documentID, fieldKey, rawCorpus, termCorpus,
+            normalCorpus) VALUES (%d, %s, %s, %s, %s)',
+            $engine->getFieldTableName(),
+            $document_id,
+            $ferret_field['fieldKey'],
+            $ferret_field['rawCorpus'],
+            $ferret_field['termCorpus'],
+            $ferret_field['normalCorpus']);
       }
-
-      $ferret_ngrams = $engine->newNgramsObject();
-      $conn = $ferret_ngrams->establishConnection('w');
 
       $sql = array();
       foreach ($ngrams as $ngram) {
@@ -148,15 +178,15 @@ final class PhabricatorFerretFulltextEngineExtension
         queryfx(
           $conn,
           'INSERT INTO %T (documentID, ngram) VALUES %Q',
-          $ferret_ngrams->getTableName(),
+          $engine->getNgramsTableName(),
           $chunk);
       }
     } catch (Exception $ex) {
-      $ferret_document->killTransaction();
+      $object->killTransaction();
       throw $ex;
     }
 
-    $ferret_document->saveTransaction();
+    $object->saveTransaction();
   }
 
 
@@ -165,32 +195,35 @@ final class PhabricatorFerretFulltextEngineExtension
     $object,
     PhabricatorSearchAbstractDocument $document) {
 
-    $old_document = $engine->newDocumentObject()->loadOneWhere(
-      'objectPHID = %s',
-      $document->getPHID());
+    $conn = $object->establishConnection('w');
+
+    $old_document = queryfx_one(
+      $conn,
+      'SELECT * FROM %T WHERE objectPHID = %s',
+      $engine->getDocumentTableName(),
+      $object->getPHID());
     if (!$old_document) {
       return;
     }
 
-    $conn = $old_document->establishConnection('w');
-    $old_id = $old_document->getID();
+    $old_id = $old_document['id'];
 
     queryfx(
       $conn,
       'DELETE FROM %T WHERE id = %d',
-      $engine->newDocumentObject()->getTableName(),
+      $engine->getDocumentTableName(),
       $old_id);
 
     queryfx(
       $conn,
       'DELETE FROM %T WHERE documentID = %d',
-      $engine->newFieldObject()->getTableName(),
+      $engine->getFieldTableName(),
       $old_id);
 
     queryfx(
       $conn,
       'DELETE FROM %T WHERE documentID = %d',
-      $engine->newNgramsObject()->getTableName(),
+      $engine->getNgramsTableName(),
       $old_id);
   }
 

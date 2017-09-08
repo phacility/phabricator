@@ -115,3 +115,29 @@ body .phui-box-blue-property .phui-header-shell + .phui-object-box {
   .phui-header-shell {
     background: {$page.content};
 }
+
+/* Config Boxes */
+
+.phui-box-white-config.phui-box-border {
+  border-color: #e2e2e2;
+  border-radius: 5px;
+}
+
+.phui-box-white-config.phui-object-box {
+  padding: 16px 0 0 0;
+}
+
+.phui-box-white-config .phui-header-shell {
+  border-bottom: 1px solid #e2e2e2;
+  overflow: hidden;
+  padding: 0 16px 16px;
+}
+
+.phui-box-white-config .phui-header-header {
+  color: {$bluetext};
+}
+
+.phui-box-white-config .phui-header-action-links .button {
+  margin-top: 0;
+  margin-bottom: 0;
+}

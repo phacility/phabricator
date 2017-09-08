@@ -9,6 +9,7 @@ final class PhabricatorOwnersPackage
     PhabricatorDestructibleInterface,
     PhabricatorConduitResultInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorNgramsInterface {
 
   protected $name;
@@ -612,6 +613,14 @@ final class PhabricatorOwnersPackage
 
   public function newFulltextEngine() {
     return new PhabricatorOwnersPackageFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorOwnersPackageFerretEngine();
   }
 
 

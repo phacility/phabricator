@@ -9,16 +9,15 @@ final class PhabricatorConfigCacheController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('cache/');
 
+    $purge_button = id(new PHUIButtonView())
+      ->setText(pht('Purge Caches'))
+      ->setHref('/config/cache/purge/')
+      ->setTag('a')
+      ->setWorkflow(true)
+      ->setIcon('fa-exclamation-triangle');
+
     $title = pht('Cache Status');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Cache Status'))
-      ->setBorder(true);
+    $header = $this->buildHeaderView($title, $purge_button);
 
     $code_box = $this->renderCodeBox();
     $data_box = $this->renderDataBox();
@@ -28,40 +27,27 @@ final class PhabricatorConfigCacheController
       $data_box,
     );
 
-    $content = id(new PhabricatorConfigPageView())
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($page);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($page);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function renderCodeBox() {
     $cache = PhabricatorOpcodeCacheSpec::getActiveCacheSpec();
-
     $properties = id(new PHUIPropertyListView());
-
     $this->renderCommonProperties($properties, $cache);
-
-    $purge_button = id(new PHUIButtonView())
-      ->setText(pht('Purge Caches'))
-      ->setHref('/config/cache/purge/')
-      ->setTag('a')
-      ->setWorkflow(true)
-      ->setIcon('fa-exclamation-triangle');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Opcode Cache'))
-      ->addActionLink($purge_button);
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($properties);
+    return $this->buildConfigBoxView(pht('Opcode Cache'), $properties);
   }
 
   private function renderDataBox() {
@@ -109,11 +95,9 @@ final class PhabricatorConfigCacheController
           ));
     }
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Data Cache'))
-      ->addPropertyList($properties)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+    $properties = $this->buildConfigBoxView(pht('Data Cache'), $properties);
+    $table = $this->buildConfigBoxView(pht('Cache Storage'), $table);
+    return array($properties, $table);
   }
 
   private function renderCommonProperties(

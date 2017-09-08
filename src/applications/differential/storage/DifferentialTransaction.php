@@ -105,6 +105,18 @@ final class DifferentialTransaction
     return parent::shouldHide();
   }
 
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE:
+        // Don't hide the initial "X added reviewers: ..." transaction during
+        // object creation from mail. See T12118 and PHI54.
+        return false;
+    }
+
+    return parent::shouldHideForMail($xactions);
+  }
+
+
   public function isInlineCommentTransaction() {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:

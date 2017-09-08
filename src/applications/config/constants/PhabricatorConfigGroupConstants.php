@@ -28,8 +28,17 @@ abstract class PhabricatorConfigGroupConstants
   public static function getGroupURI($group) {
     $map = array(
       self::GROUP_CORE  => '/',
-      self::GROUP_APPLICATION => pht('application/'),
-      self::GROUP_DEVELOPER => pht('developer/'),
+      self::GROUP_APPLICATION => 'application/',
+      self::GROUP_DEVELOPER => 'developer/',
+    );
+    return idx($map, $group, '#');
+  }
+
+  public static function getGroupFullURI($group) {
+    $map = array(
+      self::GROUP_CORE  => '/config/',
+      self::GROUP_APPLICATION => '/config/application/',
+      self::GROUP_DEVELOPER => '/config/developer/',
     );
     return idx($map, $group, '#');
   }

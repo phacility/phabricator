@@ -7,31 +7,30 @@ final class PhabricatorConfigVersionController
     $viewer = $request->getViewer();
 
     $title = pht('Version Information');
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
-
     $versions = $this->renderModuleStatus($viewer);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('version/');
+    $header = $this->buildHeaderView($title);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
+    $view = $this->buildConfigBoxView(
+      pht('Installed Versions'),
+      $versions);
 
-    $content = id(new PhabricatorConfigPageView())
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($versions);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
 
   }
 

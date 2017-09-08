@@ -233,7 +233,7 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form)
       ->setFormErrors($errors);
 
@@ -259,7 +259,7 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
     $remove_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Remove VCS Password'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($remove_form);
 
     $saved = null;

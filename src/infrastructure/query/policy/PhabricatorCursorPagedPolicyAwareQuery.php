@@ -28,8 +28,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $spaceIsArchived;
   private $ngrams = array();
   private $ferretEngine;
-  private $ferretTokens;
-  private $ferretTables;
+  private $ferretTokens = array();
+  private $ferretTables = array();
+  private $ferretQuery;
+  private $ferretMetadata = array();
 
   protected function getPageCursors(array $page) {
     return array(
@@ -81,6 +83,18 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->beforeID;
   }
 
+  final public function getFerretMetadata() {
+    if (!$this->supportsFerretEngine()) {
+      throw new Exception(
+        pht(
+          'Unable to retrieve Ferret engine metadata, this class ("%s") does '.
+          'not support the Ferret engine.',
+          get_class($this)));
+    }
+
+    return $this->ferretMetadata;
+  }
+
   protected function loadStandardPage(PhabricatorLiskDAO $table) {
     $rows = $this->loadStandardPageRows($table);
     return $table->loadAllFromArray($rows);
@@ -109,6 +123,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $this->buildHavingClause($conn),
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
+
+    $rows = $this->didLoadRawRows($rows);
+
+    return $rows;
+  }
+
+  protected function didLoadRawRows(array $rows) {
+    if ($this->ferretEngine) {
+      foreach ($rows as $row) {
+        $phid = $row['phid'];
+
+        $metadata = id(new PhabricatorFerretMetadata())
+          ->setPHID($phid)
+          ->setEngine($this->ferretEngine)
+          ->setRelevance(idx($row, '_ft_rank'));
+
+        $this->ferretMetadata[$phid] = $metadata;
+
+        unset($row['_ft_rank']);
+      }
+    }
 
     return $rows;
   }
@@ -171,6 +206,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if ($this->beforeID) {
       $results = array_reverse($results, $preserve_keys = true);
     }
+
     return $results;
   }
 
@@ -251,6 +287,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     $select[] = $this->buildEdgeLogicSelectClause($conn);
+    $select[] = $this->buildFerretSelectClause($conn);
 
     return $select;
   }
@@ -769,6 +806,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
+    if ($this->supportsFerretEngine()) {
+      $orders['relevance'] = array(
+        'vector' => array('rank', 'fulltext-modified', 'id'),
+        'name' => pht('Relevence'),
+      );
+    }
+
     return $orders;
   }
 
@@ -959,6 +1003,24 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'customfield.index.key' => $digest,
         );
       }
+    }
+
+    if ($this->supportsFerretEngine()) {
+      $columns['rank'] = array(
+        'table' => null,
+        'column' => '_ft_rank',
+        'type' => 'int',
+      );
+      $columns['fulltext-created'] = array(
+        'table' => 'ft_doc',
+        'column' => 'epochCreated',
+        'type' => 'int',
+      );
+      $columns['fulltext-modified'] = array(
+        'table' => 'ft_doc',
+        'column' => 'epochModified',
+        'type' => 'int',
+      );
     }
 
     $cache->setKey($cache_key, $columns);
@@ -1385,9 +1447,38 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 /* -(  Ferret  )------------------------------------------------------------- */
 
 
+  public function supportsFerretEngine() {
+    $object = $this->newResultObject();
+    return ($object instanceof PhabricatorFerretInterface);
+  }
+
+  public function withFerretQuery(
+    PhabricatorFerretEngine $engine,
+    PhabricatorSavedQuery $query) {
+
+    if (!$this->supportsFerretEngine()) {
+      throw new Exception(
+        pht(
+          'Query ("%s") does not support the Ferret fulltext engine.',
+          get_class($this)));
+    }
+
+    $this->ferretEngine = $engine;
+    $this->ferretQuery = $query;
+
+    return $this;
+  }
+
   public function withFerretConstraint(
     PhabricatorFerretEngine $engine,
     array $fulltext_tokens) {
+
+    if (!$this->supportsFerretEngine()) {
+      throw new Exception(
+        pht(
+          'Query ("%s") does not support the Ferret fulltext engine.',
+          get_class($this)));
+    }
 
     if ($this->ferretEngine) {
       throw new Exception(
@@ -1402,15 +1493,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $this->ferretEngine = $engine;
     $this->ferretTokens = $fulltext_tokens;
 
-
-    $function_map = array(
-      'all' => PhabricatorSearchDocumentFieldType::FIELD_ALL,
-      'title' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
-      'body' => PhabricatorSearchDocumentFieldType::FIELD_BODY,
-      'core' => PhabricatorSearchDocumentFieldType::FIELD_CORE,
-    );
-
-    $current_function = 'all';
+    $current_function = $engine->getDefaultFunctionKey();
     $table_map = array();
     $idx = 1;
     foreach ($this->ferretTokens as $fulltext_token) {
@@ -1421,27 +1504,112 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $function = $current_function;
       }
 
-      if (!isset($function_map[$function])) {
-        throw new PhutilSearchQueryCompilerSyntaxException(
-          pht(
-            'Unknown search function "%s".',
-            $function));
-      }
+      $raw_field = $engine->getFieldForFunction($function);
 
       if (!isset($table_map[$function])) {
-        $alias = 'ftfield'.$idx++;
+        $alias = 'ftfield_'.$idx++;
         $table_map[$function] = array(
           'alias' => $alias,
-          'key' => $function_map[$function],
+          'key' => $raw_field,
         );
       }
 
       $current_function = $function;
     }
 
+    // Join the title field separately so we can rank results.
+    $table_map['rank'] = array(
+      'alias' => 'ft_rank',
+      'key' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+    );
+
     $this->ferretTables = $table_map;
 
     return $this;
+  }
+
+  protected function buildFerretSelectClause(AphrontDatabaseConnection $conn) {
+    $select = array();
+
+    if (!$this->supportsFerretEngine()) {
+      return $select;
+    }
+
+    if (!$this->ferretEngine) {
+      $select[] = '0 _ft_rank';
+      return $select;
+    }
+
+    $engine = $this->ferretEngine;
+    $stemmer = $engine->newStemmer();
+
+    $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
+    $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
+    $table_alias = 'ft_rank';
+
+    $parts = array();
+    foreach ($this->ferretTokens as $fulltext_token) {
+      $raw_token = $fulltext_token->getToken();
+      $value = $raw_token->getValue();
+
+      if ($raw_token->getOperator() == $op_not) {
+        // Ignore "not" terms when ranking, since they aren't useful.
+        continue;
+      }
+
+      if ($raw_token->getOperator() == $op_sub) {
+        $is_substring = true;
+      } else {
+        $is_substring = false;
+      }
+
+      if ($is_substring) {
+        $parts[] = qsprintf(
+          $conn,
+          'IF(%T.rawCorpus LIKE %~, 2, 0)',
+          $table_alias,
+          $value);
+        continue;
+      }
+
+      if ($raw_token->isQuoted()) {
+        $is_quoted = true;
+        $is_stemmed = false;
+      } else {
+        $is_quoted = false;
+        $is_stemmed = true;
+      }
+
+      $term_constraints = array();
+
+      $term_value = $engine->newTermsCorpus($value);
+
+      $parts[] = qsprintf(
+        $conn,
+        'IF(%T.termCorpus LIKE %~, 2, 0)',
+        $table_alias,
+        $term_value);
+
+      if ($is_stemmed) {
+        $stem_value = $stemmer->stemToken($value);
+        $stem_value = $engine->newTermsCorpus($stem_value);
+
+        $parts[] = qsprintf(
+          $conn,
+          'IF(%T.normalCorpus LIKE %~, 1, 0)',
+          $table_alias,
+          $stem_value);
+      }
+    }
+
+    $parts[] = '0';
+
+    $select[] = qsprintf(
+      $conn,
+      '%Q _ft_rank',
+      implode(' + ', $parts));
+
+    return $select;
   }
 
   protected function buildFerretJoinClause(AphrontDatabaseConnection $conn) {
@@ -1453,11 +1621,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
 
     $engine = $this->ferretEngine;
-    $ngram_engine = new PhabricatorNgramEngine();
-    $stemmer = new PhutilSearchStemmer();
+    $stemmer = $engine->newStemmer();
 
-    $ngram_table = $engine->newNgramsObject();
-    $ngram_table_name = $ngram_table->getTableName();
+    $ngram_table = $engine->getNgramsTableName();
 
     $flat = array();
     foreach ($this->ferretTokens as $fulltext_token) {
@@ -1498,25 +1664,23 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
 
       if ($is_substring) {
-        $ngrams = $ngram_engine->getNgramsFromString($value, 'query');
+        $ngrams = $engine->getSubstringNgramsFromString($value);
       } else {
-        $ngrams = $ngram_engine->getNgramsFromString($value, 'index');
+        $terms_value = $engine->newTermsCorpus($value);
+        $ngrams = $engine->getTermNgramsFromString($terms_value);
 
         // If this is a stemmed term, only look for ngrams present in both the
         // unstemmed and stemmed variations.
         if ($is_stemmed) {
-          $stem_value = $stemmer->stemToken($value);
-          $stem_ngrams = $ngram_engine->getNgramsFromString(
-            $stem_value,
-            'index');
-
+          $stem_value = $stemmer->stemToken($terms_value);
+          $stem_ngrams = $engine->getTermNgramsFromString($stem_value);
           $ngrams = array_intersect($ngrams, $stem_ngrams);
         }
       }
 
       foreach ($ngrams as $ngram) {
         $flat[] = array(
-          'table' => $ngram_table_name,
+          'table' => $ngram_table,
           'ngram' => $ngram,
         );
       }
@@ -1538,14 +1702,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $phid_column = qsprintf($conn, '%T', 'phid');
     }
 
-    $document_table = $engine->newDocumentObject();
-    $field_table = $engine->newFieldObject();
+    $document_table = $engine->getDocumentTableName();
+    $field_table = $engine->getFieldTableName();
 
     $joins = array();
     $joins[] = qsprintf(
       $conn,
-      'JOIN %T ftdoc ON ftdoc.objectPHID = %Q',
-      $document_table->getTableName(),
+      'JOIN %T ft_doc ON ft_doc.objectPHID = %Q',
+      $document_table,
       $phid_column);
 
     $idx = 1;
@@ -1553,11 +1717,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $table = $spec['table'];
       $ngram = $spec['ngram'];
 
-      $alias = 'ft'.$idx++;
+      $alias = 'ftngram_'.$idx++;
 
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T %T ON %T.documentID = ftdoc.id AND %T.ngram = %s',
+        'JOIN %T %T ON %T.documentID = ft_doc.id AND %T.ngram = %s',
         $table,
         $alias,
         $alias,
@@ -1570,9 +1734,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T %T ON ftdoc.id = %T.documentID
+        'JOIN %T %T ON ft_doc.id = %T.documentID
           AND %T.fieldKey = %s',
-        $field_table->getTableName(),
+        $field_table,
         $alias,
         $alias,
         $alias,
@@ -1587,8 +1751,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return array();
     }
 
-    $ngram_engine = new PhabricatorNgramEngine();
-    $stemmer = new PhutilSearchStemmer();
+    $engine = $this->ferretEngine;
+    $stemmer = $engine->newStemmer();
     $table_map = $this->ferretTables;
 
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
@@ -1653,7 +1817,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       $term_constraints = array();
 
-      $term_value = ' '.$ngram_engine->newTermsCorpus($value).' ';
+      $term_value = $engine->newTermsCorpus($value);
       if ($is_not) {
         $term_constraints[] = qsprintf(
           $conn,
@@ -1670,8 +1834,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       if ($is_stemmed) {
         $stem_value = $stemmer->stemToken($value);
-        $stem_value = $ngram_engine->newTermsCorpus($stem_value);
-        $stem_value = ' '.$stem_value.' ';
+        $stem_value = $engine->newTermsCorpus($stem_value);
 
         $term_constraints[] = qsprintf(
           $conn,
@@ -1697,6 +1860,75 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           $conn,
           '(%Q)',
           implode(' OR ', $term_constraints));
+      }
+    }
+
+    if ($this->ferretQuery) {
+      $query = $this->ferretQuery;
+
+      $author_phids = $query->getParameter('authorPHIDs');
+      if ($author_phids) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.authorPHID IN (%Ls)',
+          $author_phids);
+      }
+
+      $with_unowned = $query->getParameter('withUnowned');
+      $with_any = $query->getParameter('withAnyOwner');
+
+      if ($with_any && $with_unowned) {
+        throw new PhabricatorEmptyQueryException(
+          pht(
+            'This query matches only unowned documents owned by anyone, '.
+            'which is impossible.'));
+      }
+
+      $owner_phids = $query->getParameter('ownerPHIDs');
+      if ($owner_phids && !$with_any) {
+        if ($with_unowned) {
+          $where[] = qsprintf(
+            $conn,
+            'ft_doc.ownerPHID IN (%Ls) OR ft_doc.ownerPHID IS NULL',
+            $owner_phids);
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            'ft_doc.ownerPHID IN (%Ls)',
+            $owner_phids);
+        }
+      } else if ($with_unowned) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.ownerPHID IS NULL');
+      }
+
+      if ($with_any) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.ownerPHID IS NOT NULL');
+      }
+
+      $rel_open = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
+
+      $statuses = $query->getParameter('statuses');
+      $is_closed = null;
+      if ($statuses) {
+        $statuses = array_fuse($statuses);
+        if (count($statuses) == 1) {
+          if (isset($statuses[$rel_open])) {
+            $is_closed = 0;
+          } else {
+            $is_closed = 1;
+          }
+        }
+      }
+
+      if ($is_closed !== null) {
+        $where[] = qsprintf(
+          $conn,
+          'ft_doc.isClosed = %d',
+          $is_closed);
       }
     }
 
@@ -1968,6 +2200,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $op_null = PhabricatorQueryConstraint::OPERATOR_NULL;
       $has_null = isset($constraints[$op_null]);
 
+      // If we're going to process an only() operator, build a list of the
+      // acceptable set of PHIDs first. We'll only match results which have
+      // no edges to any other PHIDs.
+      $all_phids = array();
+      if (isset($constraints[PhabricatorQueryConstraint::OPERATOR_ONLY])) {
+        foreach ($constraints as $operator => $list) {
+          switch ($operator) {
+            case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
+            case PhabricatorQueryConstraint::OPERATOR_AND:
+            case PhabricatorQueryConstraint::OPERATOR_OR:
+              foreach ($list as $constraint) {
+                $value = (array)$constraint->getValue();
+                foreach ($value as $v) {
+                  $all_phids[$v] = $v;
+                }
+              }
+              break;
+          }
+        }
+      }
+
       foreach ($constraints as $operator => $list) {
         $alias = $this->getEdgeLogicTableAlias($operator, $type);
 
@@ -2032,6 +2285,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
               $alias,
               $type);
             break;
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
+            $joins[] = qsprintf(
+              $conn,
+              'LEFT JOIN %T %T ON %Q = %T.src AND %T.type = %d
+                AND %T.dst NOT IN (%Ls)',
+              $edge_table,
+              $alias,
+              $phid_column,
+              $alias,
+              $alias,
+              $type,
+              $alias,
+              $all_phids);
+            break;
         }
       }
     }
@@ -2058,6 +2325,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $alias = $this->getEdgeLogicTableAlias($operator, $type);
         switch ($operator) {
           case PhabricatorQueryConstraint::OPERATOR_NOT:
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
             $full[] = qsprintf(
               $conn,
               '%T.dst IS NULL',
@@ -2157,6 +2425,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             // discussion, see T12753.
             return true;
           case PhabricatorQueryConstraint::OPERATOR_NULL:
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
             return true;
         }
       }
@@ -2270,6 +2539,34 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             pht(
               'This query is constrained by a project you do not have '.
               'permission to see.'));
+        }
+      }
+    }
+
+    $op_and = PhabricatorQueryConstraint::OPERATOR_AND;
+    $op_or = PhabricatorQueryConstraint::OPERATOR_OR;
+    $op_ancestor = PhabricatorQueryConstraint::OPERATOR_ANCESTOR;
+
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+      foreach ($constraints as $operator => $list) {
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_ONLY:
+            if (count($list) > 1) {
+              throw new PhabricatorEmptyQueryException(
+                pht(
+                  'This query specifies only() more than once.'));
+            }
+
+            $have_and = idx($constraints, $op_and);
+            $have_or = idx($constraints, $op_or);
+            $have_ancestor = idx($constraints, $op_ancestor);
+            if (!$have_and && !$have_or && !$have_ancestor) {
+              throw new PhabricatorEmptyQueryException(
+                pht(
+                  'This query specifies only(), but no other constraints '.
+                  'which it can apply to.'));
+            }
+            break;
         }
       }
     }

@@ -109,49 +109,49 @@ final class PassphraseCredentialQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'c.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'c.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->credentialTypes !== null) {
       $where[] = qsprintf(
         $conn,
-        'credentialType in (%Ls)',
+        'c.credentialType in (%Ls)',
         $this->credentialTypes);
     }
 
     if ($this->providesTypes !== null) {
       $where[] = qsprintf(
         $conn,
-        'providesType IN (%Ls)',
+        'c.providesType IN (%Ls)',
         $this->providesTypes);
     }
 
     if ($this->isDestroyed !== null) {
       $where[] = qsprintf(
         $conn,
-        'isDestroyed = %d',
+        'c.isDestroyed = %d',
         (int)$this->isDestroyed);
     }
 
     if ($this->allowConduit !== null) {
       $where[] = qsprintf(
         $conn,
-        'allowConduit = %d',
+        'c.allowConduit = %d',
         (int)$this->allowConduit);
     }
 
     if (strlen($this->nameContains)) {
       $where[] = qsprintf(
         $conn,
-        'LOWER(name) LIKE %~',
+        'LOWER(c.name) LIKE %~',
         phutil_utf8_strtolower($this->nameContains));
     }
 
@@ -160,6 +160,10 @@ final class PassphraseCredentialQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPassphraseApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'c';
   }
 
 }

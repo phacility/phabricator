@@ -36,6 +36,8 @@ final class PhabricatorConfigIssueViewController
       $title = $issue->getShortName();
     }
 
+    $header = $this->buildHeaderView($title);
+
     $crumbs = $this
       ->buildApplicationCrumbs()
       ->setBorder(true)
@@ -43,12 +45,16 @@ final class PhabricatorConfigIssueViewController
       ->addTextCrumb($title, $request->getRequestURI())
       ->setBorder(true);
 
+    $content = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($content);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function renderIssue(PhabricatorSetupIssue $issue) {

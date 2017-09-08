@@ -10,8 +10,12 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return pht('Differential');
   }
 
+  public function getMenuName() {
+    return pht('Code Review');
+  }
+
   public function getShortDescription() {
-    return pht('Review Code');
+    return pht('Pre-Commit Review');
   }
 
   public function getIcon() {

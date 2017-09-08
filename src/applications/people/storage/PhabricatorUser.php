@@ -19,6 +19,7 @@ final class PhabricatorUser
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorConduitResultInterface {
 
   const SESSION_TABLE = 'phabricator_session';
@@ -1431,6 +1432,14 @@ final class PhabricatorUser
 
   public function newFulltextEngine() {
     return new PhabricatorUserFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorUserFerretEngine();
   }
 
 

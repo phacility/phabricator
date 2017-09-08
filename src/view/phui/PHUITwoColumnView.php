@@ -106,6 +106,10 @@ final class PHUITwoColumnView extends AphrontTagView {
       $classes[] = 'with-subheader';
     }
 
+    if (!$this->header) {
+      $classes[] = 'without-header';
+    }
+
     return array(
       'class' => implode(' ', $classes),
     );

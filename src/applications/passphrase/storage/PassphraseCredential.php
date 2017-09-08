@@ -8,7 +8,8 @@ final class PassphraseCredential extends PassphraseDAO
     PhabricatorSubscribableInterface,
     PhabricatorDestructibleInterface,
     PhabricatorSpacesInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   protected $name;
   protected $credentialType;
@@ -194,6 +195,14 @@ final class PassphraseCredential extends PassphraseDAO
 
   public function newFulltextEngine() {
     return new PassphraseCredentialFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PassphraseCredentialFerretEngine();
   }
 
 

@@ -148,7 +148,6 @@ final class PhabricatorSetupIssueView extends AphrontView {
         array(
           'href' => '/config/issue/'.$issue->getIssueKey().'/',
           'class' => 'button button-grey',
-          'style' => 'float: right',
         ),
         pht('Reload Page'));
     }
@@ -194,14 +193,24 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-head',
       ),
-      array($name, $status));
+      $name);
+
+    $body = phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-body',
+      ),
+      array(
+        $status,
+        $description,
+      ));
 
     $tail = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-tail',
       ),
-      array($actions));
+      $actions);
 
     $issue = phutil_tag(
       'div',
@@ -210,7 +219,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       array(
         $head,
-        $description,
+        $body,
         $tail,
       ));
 
