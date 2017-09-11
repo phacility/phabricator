@@ -24,9 +24,6 @@ final class PhabricatorRepositorySearchEngine
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Callsigns'))
         ->setKey('callsigns'),
-      id(new PhabricatorSearchTextField())
-        ->setLabel(pht('Name Contains'))
-        ->setKey('name'),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Status'))
         ->setKey('status')
@@ -70,10 +67,6 @@ final class PhabricatorRepositorySearchEngine
 
     if ($map['types']) {
       $query->withTypes($map['types']);
-    }
-
-    if (strlen($map['name'])) {
-      $query->withNameContains($map['name']);
     }
 
     if ($map['uris']) {
