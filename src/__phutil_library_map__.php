@@ -2667,6 +2667,7 @@ phutil_register_library_map(array(
     'PhabricatorDifferentialConfigOptions' => 'applications/differential/config/PhabricatorDifferentialConfigOptions.php',
     'PhabricatorDifferentialExtractWorkflow' => 'applications/differential/management/PhabricatorDifferentialExtractWorkflow.php',
     'PhabricatorDifferentialManagementWorkflow' => 'applications/differential/management/PhabricatorDifferentialManagementWorkflow.php',
+    'PhabricatorDifferentialMigrateHunkWorkflow' => 'applications/differential/management/PhabricatorDifferentialMigrateHunkWorkflow.php',
     'PhabricatorDifferentialRevisionTestDataGenerator' => 'applications/differential/lipsum/PhabricatorDifferentialRevisionTestDataGenerator.php',
     'PhabricatorDiffusionApplication' => 'applications/diffusion/application/PhabricatorDiffusionApplication.php',
     'PhabricatorDiffusionBlameSetting' => 'applications/settings/setting/PhabricatorDiffusionBlameSetting.php',
@@ -5367,6 +5368,7 @@ phutil_register_library_map(array(
     'DifferentialChangeset' => array(
       'DifferentialDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'DifferentialChangesetDetailView' => 'AphrontView',
     'DifferentialChangesetFileTreeSideNavBuilder' => 'Phobject',
@@ -5461,6 +5463,7 @@ phutil_register_library_map(array(
     'DifferentialHunk' => array(
       'DifferentialDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'DifferentialHunkParser' => 'Phobject',
     'DifferentialHunkParserTestCase' => 'PhabricatorTestCase',
@@ -7999,6 +8002,7 @@ phutil_register_library_map(array(
     'PhabricatorDifferentialConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorDifferentialExtractWorkflow' => 'PhabricatorDifferentialManagementWorkflow',
     'PhabricatorDifferentialManagementWorkflow' => 'PhabricatorManagementWorkflow',
+    'PhabricatorDifferentialMigrateHunkWorkflow' => 'PhabricatorDifferentialManagementWorkflow',
     'PhabricatorDifferentialRevisionTestDataGenerator' => 'PhabricatorTestDataGenerator',
     'PhabricatorDiffusionApplication' => 'PhabricatorApplication',
     'PhabricatorDiffusionBlameSetting' => 'PhabricatorInternalSetting',
