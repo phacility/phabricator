@@ -1469,6 +1469,17 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this;
   }
 
+  public function getFerretTokens() {
+    if (!$this->supportsFerretEngine()) {
+      throw new Exception(
+        pht(
+          'Query ("%s") does not support the Ferret fulltext engine.',
+          get_class($this)));
+    }
+
+    return $this->ferretTokens;
+  }
+
   public function withFerretConstraint(
     PhabricatorFerretEngine $engine,
     array $fulltext_tokens) {
