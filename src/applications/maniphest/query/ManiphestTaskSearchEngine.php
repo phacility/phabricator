@@ -86,9 +86,6 @@ final class ManiphestTaskSearchEngine
           pht('Search for tasks with given subtypes.'))
         ->setDatasource(new ManiphestTaskSubtypeDatasource())
         ->setIsHidden($hide_subtypes),
-      id(new PhabricatorSearchTextField())
-        ->setLabel(pht('Contains Words'))
-        ->setKey('fulltext'),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Open Parents'))
         ->setKey('hasParents')
@@ -144,7 +141,6 @@ final class ManiphestTaskSearchEngine
       'statuses',
       'priorities',
       'subtypes',
-      'fulltext',
       'hasParents',
       'hasSubtasks',
       'parentIDs',
@@ -218,10 +214,6 @@ final class ManiphestTaskSearchEngine
 
     if ($map['hasSubtasks'] !== null) {
       $query->withOpenSubtasks($map['hasSubtasks']);
-    }
-
-    if (strlen($map['fulltext'])) {
-      $query->withFullTextSearch($map['fulltext']);
     }
 
     if ($map['parentIDs']) {
