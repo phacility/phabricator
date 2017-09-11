@@ -3197,7 +3197,6 @@ phutil_register_library_map(array(
     'PhabricatorMustVerifyEmailController' => 'applications/auth/controller/PhabricatorMustVerifyEmailController.php',
     'PhabricatorMySQLConfigOptions' => 'applications/config/option/PhabricatorMySQLConfigOptions.php',
     'PhabricatorMySQLFileStorageEngine' => 'applications/files/engine/PhabricatorMySQLFileStorageEngine.php',
-    'PhabricatorMySQLFulltextStorageEngine' => 'applications/search/fulltextstorage/PhabricatorMySQLFulltextStorageEngine.php',
     'PhabricatorMySQLSearchHost' => 'infrastructure/cluster/search/PhabricatorMySQLSearchHost.php',
     'PhabricatorMySQLSetupCheck' => 'applications/config/check/PhabricatorMySQLSetupCheck.php',
     'PhabricatorNamedQuery' => 'applications/search/storage/PhabricatorNamedQuery.php',
@@ -8588,7 +8587,6 @@ phutil_register_library_map(array(
     'PhabricatorMustVerifyEmailController' => 'PhabricatorAuthController',
     'PhabricatorMySQLConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorMySQLFileStorageEngine' => 'PhabricatorFileStorageEngine',
-    'PhabricatorMySQLFulltextStorageEngine' => 'PhabricatorFulltextStorageEngine',
     'PhabricatorMySQLSearchHost' => 'PhabricatorSearchHost',
     'PhabricatorMySQLSetupCheck' => 'PhabricatorSetupCheck',
     'PhabricatorNamedQuery' => array(
