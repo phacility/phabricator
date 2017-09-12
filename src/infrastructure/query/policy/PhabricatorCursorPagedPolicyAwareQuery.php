@@ -1683,6 +1683,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         // If this is a stemmed term, only look for ngrams present in both the
         // unstemmed and stemmed variations.
         if ($is_stemmed) {
+          // Trim the boundary space characters so the stemmer recognizes this
+          // is (or, at least, may be) a normal word and activates.
+          $terms_value = trim($terms_value, ' ');
           $stem_value = $stemmer->stemToken($terms_value);
           $stem_ngrams = $engine->getTermNgramsFromString($stem_value);
           $ngrams = array_intersect($ngrams, $stem_ngrams);
