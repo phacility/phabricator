@@ -3477,7 +3477,7 @@ CREATE TABLE `search_documentfield` (
   `stemmedCorpus` longtext CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT},
   KEY `phid` (`phid`),
   FULLTEXT KEY `key_corpus` (`corpus`,`stemmedCorpus`)
-) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+) ENGINE=MyISAM DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `search_documentrelationship` (
   `phid` varbinary(64) NOT NULL,
@@ -4568,7 +4568,7 @@ CREATE TABLE `conpherence_index` (
   UNIQUE KEY `key_previous` (`previousTransactionPHID`),
   KEY `key_thread` (`threadPHID`),
   FULLTEXT KEY `key_corpus` (`corpus`)
-) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+) ENGINE=MyISAM DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `conpherence_participant` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
