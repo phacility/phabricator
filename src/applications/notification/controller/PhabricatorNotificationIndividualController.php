@@ -38,15 +38,9 @@ final class PhabricatorNotificationIndividualController
     $dict = $builder->buildDict();
     $data = $dict[0];
 
-    $response = array(
+    $response = $data + array(
       'pertinent'         => true,
       'primaryObjectPHID' => $story->getPrimaryObjectPHID(),
-      'desktopReady'      => $data['desktopReady'],
-      'webReady'          => $data['webReady'],
-      'href'              => $data['href'],
-      'icon'              => $data['icon'],
-      'title'             => $data['title'],
-      'body'              => $data['body'],
       'content'           => hsprintf('%s', $content),
       'uniqueID' => 'story/'.$story->getChronologicalKey(),
     );
