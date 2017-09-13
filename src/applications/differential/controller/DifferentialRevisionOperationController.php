@@ -137,9 +137,19 @@ final class DifferentialRevisionOperationController
       return null;
     }
 
-    return $this->newRefQuery($repository)
+    // NOTE: See PHI68. This is a workaround to make "Land Revision" work
+    // until T11823 is fixed properly. If we find multiple refs with the same
+    // name (normally, duplicate "master" refs), just pick the first one.
+
+    $refs = $this->newRefQuery($repository)
       ->withRefNames(array($default_name))
-      ->executeOne();
+      ->execute();
+
+    if ($refs) {
+      return head($refs);
+    }
+
+    return null;
   }
 
   private function getDefaultRefName(
