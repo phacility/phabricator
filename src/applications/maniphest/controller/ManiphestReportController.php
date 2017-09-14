@@ -88,23 +88,40 @@ final class ManiphestReportController extends ManiphestController {
 
     $data = queryfx_all(
       $conn,
-      'SELECT x.oldValue, x.newValue, x.dateCreated FROM %T x %Q
-        WHERE transactionType = %s
+      'SELECT x.transactionType, x.oldValue, x.newValue, x.dateCreated
+        FROM %T x %Q
+        WHERE transactionType IN (%Ls)
         ORDER BY x.dateCreated ASC',
       $table->getTableName(),
       $joins,
-      ManiphestTaskStatusTransaction::TRANSACTIONTYPE);
+      array(
+        ManiphestTaskStatusTransaction::TRANSACTIONTYPE,
+        ManiphestTaskMergedIntoTransaction::TRANSACTIONTYPE,
+      ));
 
     $stats = array();
     $day_buckets = array();
 
     $open_tasks = array();
 
+    $default_status = ManiphestTaskStatus::getDefaultStatus();
+    $duplicate_status = ManiphestTaskStatus::getDuplicateStatus();
     foreach ($data as $key => $row) {
-
-      // NOTE: Hack to avoid json_decode().
-      $oldv = trim($row['oldValue'], '"');
-      $newv = trim($row['newValue'], '"');
+      switch ($row['transactionType']) {
+        case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
+          // NOTE: Hack to avoid json_decode().
+          $oldv = trim($row['oldValue'], '"');
+          $newv = trim($row['newValue'], '"');
+          break;
+        case ManiphestTaskMergedIntoTransaction::TRANSACTIONTYPE:
+          // NOTE: Merging a task does not generate a "status" transaction.
+          // We pretend it did. Note that this is not always accurate: it is
+          // possble to merge a task which was previously closed, but this
+          // fake transaction always counts a merge as a closure.
+          $oldv = $default_status;
+          $newv = $duplicate_status;
+          break;
+      }
 
       if ($oldv == 'null') {
         $old_is_open = false;
