@@ -21,6 +21,7 @@ final class PhabricatorRepositoryRefCursor
   protected $refNameEncoding;
 
   private $repository = self::ATTACHABLE;
+  private $positions = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -69,6 +70,20 @@ final class PhabricatorRepositoryRefCursor
 
   public function getRepository() {
     return $this->assertAttached($this->repository);
+  }
+
+  public function attachPositions(array $positions) {
+    assert_instances_of($positions, 'PhabricatorRepositoryRefPosition');
+    $this->positions = $positions;
+    return $this;
+  }
+
+  public function getPositions() {
+    return $this->assertAttached($this->positions);
+  }
+
+  public function getPositionIdentifiers() {
+    return mpull($this->getPositions(), 'getCommitIdentifier');
   }
 
 
