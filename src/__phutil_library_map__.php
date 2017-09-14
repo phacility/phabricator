@@ -9,6 +9,7 @@
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
+    'AlamancServiceEditConduitAPIMethod' => 'applications/almanac/conduit/AlamancServiceEditConduitAPIMethod.php',
     'AlmanacAddress' => 'applications/almanac/util/AlmanacAddress.php',
     'AlmanacBinding' => 'applications/almanac/storage/AlmanacBinding.php',
     'AlmanacBindingDisableController' => 'applications/almanac/controller/AlmanacBindingDisableController.php',
@@ -36,6 +37,7 @@ phutil_register_library_map(array(
     'AlmanacDAO' => 'applications/almanac/storage/AlmanacDAO.php',
     'AlmanacDevice' => 'applications/almanac/storage/AlmanacDevice.php',
     'AlmanacDeviceController' => 'applications/almanac/controller/AlmanacDeviceController.php',
+    'AlmanacDeviceEditConduitAPIMethod' => 'applications/almanac/conduit/AlmanacDeviceEditConduitAPIMethod.php',
     'AlmanacDeviceEditController' => 'applications/almanac/controller/AlmanacDeviceEditController.php',
     'AlmanacDeviceEditEngine' => 'applications/almanac/editor/AlmanacDeviceEditEngine.php',
     'AlmanacDeviceEditor' => 'applications/almanac/editor/AlmanacDeviceEditor.php',
@@ -4930,6 +4932,7 @@ phutil_register_library_map(array(
     'require_celerity_resource' => 'applications/celerity/api.php',
   ),
   'xmap' => array(
+    'AlamancServiceEditConduitAPIMethod' => 'PhabricatorEditEngineAPIMethod',
     'AlmanacAddress' => 'Phobject',
     'AlmanacBinding' => array(
       'AlmanacDAO',
@@ -4975,6 +4978,7 @@ phutil_register_library_map(array(
       'PhabricatorExtendedPolicyInterface',
     ),
     'AlmanacDeviceController' => 'AlmanacController',
+    'AlmanacDeviceEditConduitAPIMethod' => 'PhabricatorEditEngineAPIMethod',
     'AlmanacDeviceEditController' => 'AlmanacDeviceController',
     'AlmanacDeviceEditEngine' => 'PhabricatorEditEngine',
     'AlmanacDeviceEditor' => 'AlmanacEditor',
