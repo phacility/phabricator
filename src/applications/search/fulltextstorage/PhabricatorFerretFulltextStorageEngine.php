@@ -7,7 +7,7 @@ final class PhabricatorFerretFulltextStorageEngine
   private $engineLimits;
 
   public function getEngineIdentifier() {
-    return 'ferret';
+    return 'mysql';
   }
 
   public function getHostType() {
@@ -86,6 +86,10 @@ final class PhabricatorFerretFulltextStorageEngine
       $type_results[$type] = $results;
 
       $metadata += $engine_query->getFerretMetadata();
+
+      if (!$this->fulltextTokens) {
+        $this->fulltextTokens = $engine_query->getFerretTokens();
+      }
     }
 
     $list = array();

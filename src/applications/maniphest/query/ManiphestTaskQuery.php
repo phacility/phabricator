@@ -24,8 +24,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $subtaskIDs;
   private $subtypes;
 
-  private $fullTextSearch   = '';
-
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
   const STATUS_OPEN         = 'status-open';
@@ -112,11 +110,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withSubscribers(array $subscribers) {
     $this->subscriberPHIDs = $subscribers;
-    return $this;
-  }
-
-  public function withFullTextSearch($fulltext_search) {
-    $this->fullTextSearch = $fulltext_search;
     return $this;
   }
 
@@ -329,7 +322,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $where[] = $this->buildStatusWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
-    $where[] = $this->buildFullTextWhereClause($conn);
 
     if ($this->taskIDs !== null) {
       $where[] = qsprintf(
@@ -479,36 +471,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     return '('.implode(') OR (', $subclause).')';
-  }
-
-  private function buildFullTextWhereClause(AphrontDatabaseConnection $conn) {
-    if (!strlen($this->fullTextSearch)) {
-      return null;
-    }
-
-    // In doing a fulltext search, we first find all the PHIDs that match the
-    // fulltext search, and then use that to limit the rest of the search
-    $fulltext_query = id(new PhabricatorSavedQuery())
-      ->setEngineClassName('PhabricatorSearchApplicationSearchEngine')
-      ->setParameter('query', $this->fullTextSearch);
-
-    // NOTE: Setting this to something larger than 10,000 will raise errors in
-    // Elasticsearch, and billions of results won't fit in memory anyway.
-    $fulltext_query->setParameter('limit', 10000);
-    $fulltext_query->setParameter('types',
-      array(ManiphestTaskPHIDType::TYPECONST));
-
-    $fulltext_results = PhabricatorSearchService::executeSearch(
-      $fulltext_query);
-
-    if (empty($fulltext_results)) {
-      $fulltext_results = array(null);
-    }
-
-    return qsprintf(
-      $conn,
-      'task.phid IN (%Ls)',
-      $fulltext_results);
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {

@@ -1,7 +1,10 @@
 <?php
 
-final class DifferentialChangeset extends DifferentialDAO
-  implements PhabricatorPolicyInterface {
+final class DifferentialChangeset
+  extends DifferentialDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $diffID;
   protected $oldFile;
@@ -235,5 +238,26 @@ final class DifferentialChangeset extends DifferentialDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return $this->getDiff()->hasAutomaticCapability($capability, $viewer);
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->openTransaction();
+
+      $hunks = id(new DifferentialModernHunk())->loadAllWhere(
+        'changesetID = %d',
+        $this->getID());
+      foreach ($hunks as $hunk) {
+        $engine->destroyObject($hunk);
+      }
+
+      $this->delete();
+
+    $this->saveTransaction();
+  }
+
 
 }

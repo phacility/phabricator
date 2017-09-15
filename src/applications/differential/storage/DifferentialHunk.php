@@ -1,7 +1,10 @@
 <?php
 
-abstract class DifferentialHunk extends DifferentialDAO
-  implements PhabricatorPolicyInterface {
+abstract class DifferentialHunk
+  extends DifferentialDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $changesetID;
   protected $oldOffset;
@@ -227,5 +230,15 @@ abstract class DifferentialHunk extends DifferentialDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return $this->getChangeset()->hasAutomaticCapability($capability, $viewer);
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
+  }
+
 
 }

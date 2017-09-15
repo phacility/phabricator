@@ -102,7 +102,10 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
 
     $full_text = $request->getValue('fullText');
     if ($full_text) {
-      $query->withFullTextSearch($full_text);
+      throw new Exception(
+        pht(
+          'Parameter "fullText" is no longer supported. Use method '.
+          '"maniphest.search" with the "query" constraint instead.'));
     }
 
     $status = $request->getValue('status');

@@ -6,7 +6,7 @@ final class PhabricatorFerretSearchEngineExtension
   const EXTENSIONKEY = 'ferret';
 
   public function isExtensionEnabled() {
-    return PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
+    return true;
   }
 
   public function getExtensionName() {
@@ -56,7 +56,7 @@ final class PhabricatorFerretSearchEngineExtension
 
     $fields[] = id(new PhabricatorSearchTextField())
       ->setKey('query')
-      ->setLabel(pht('Query (Prototype)'))
+      ->setLabel(pht('Query'))
       ->setDescription(pht('Fulltext search.'));
 
     return $fields;

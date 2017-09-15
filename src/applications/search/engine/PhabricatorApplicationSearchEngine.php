@@ -324,6 +324,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $result = $head + $body + $tail;
 
+    // Force the fulltext "query" field to the top unconditionally.
+    $result = array_select_keys($result, array('query')) + $result;
+
     foreach ($this->getHiddenFields() as $hidden_key) {
       unset($result[$hidden_key]);
     }

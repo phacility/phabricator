@@ -946,7 +946,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     foreach ($changesets as $changeset_id => $changeset) {
       $path = $changeset->getFilename();
-      $anchor = substr(md5($path), 0, 8);
+      $anchor = $changeset->getAnchorName();
 
       $history_link = $diffusion_view->linkHistory($path);
       $browse_link = $diffusion_view->linkBrowse(
