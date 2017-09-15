@@ -769,7 +769,7 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     $command = csprintf(
-      '%s serve -R %s --stdio',
+      '%s -R %s serve --stdio',
       $bin,
       $repository->getLocalPath());
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
