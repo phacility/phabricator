@@ -54,6 +54,7 @@ final class PhabricatorRepositoryManagementParentsWorkflow
       ->setViewer($this->getViewer())
       ->withRefTypes(array(PhabricatorRepositoryRefCursor::TYPE_BRANCH))
       ->withRepositoryPHIDs(array($repo->getPHID()))
+      ->needPositions(true)
       ->execute();
 
     $graph = array();
@@ -66,23 +67,23 @@ final class PhabricatorRepositoryManagementParentsWorkflow
         "%s\n",
         pht('Rebuilding branch "%s"...', $ref->getRefName()));
 
-      $commit = $ref->getCommitIdentifier();
-
-      if ($repo->isGit()) {
-        $stream = new PhabricatorGitGraphStream($repo, $commit);
-      } else {
-        $stream = new PhabricatorMercurialGraphStream($repo, $commit);
-      }
-
-      $discover = array($commit);
-      while ($discover) {
-        $target = array_pop($discover);
-        if (isset($graph[$target])) {
-          continue;
+      foreach ($ref->getPositionIdentifiers() as $commit) {
+        if ($repo->isGit()) {
+          $stream = new PhabricatorGitGraphStream($repo, $commit);
+        } else {
+          $stream = new PhabricatorMercurialGraphStream($repo, $commit);
         }
-        $graph[$target] = $stream->getParents($target);
-        foreach ($graph[$target] as $parent) {
-          $discover[] = $parent;
+
+        $discover = array($commit);
+        while ($discover) {
+          $target = array_pop($discover);
+          if (isset($graph[$target])) {
+            continue;
+          }
+          $graph[$target] = $stream->getParents($target);
+          foreach ($graph[$target] as $parent) {
+            $discover[] = $parent;
+          }
         }
       }
     }
