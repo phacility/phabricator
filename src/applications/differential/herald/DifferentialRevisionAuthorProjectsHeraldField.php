@@ -10,9 +10,14 @@ final class DifferentialRevisionAuthorProjectsHeraldField
   }
 
   public function getHeraldFieldValue($object) {
-    return PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $object->getAuthorPHID(),
-      PhabricatorProjectMemberOfProjectEdgeType::EDGECONST);
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withMemberPHIDs(array($object->getAuthorPHID()))
+      ->execute();
+
+    return mpull($projects, 'getPHID');
   }
 
   protected function getHeraldFieldStandardType() {
