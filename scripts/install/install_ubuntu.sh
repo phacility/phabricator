@@ -43,7 +43,7 @@ echo
 set +x
 
 sudo apt-get -qq update
-sudo apt-get install \
+sudo apt-get -y install \
   $GIT mysql-server apache2 dpkg-dev \
   php5 php5-mysql php5-gd php5-dev php5-curl php-apc php5-cli php5-json
 
