@@ -26,6 +26,10 @@ final class DifferentialTransactionEditor
     return pht('%s created %s.', $author, $object);
   }
 
+  public function isFirstBroadcast() {
+    return $this->getIsNewObject();
+  }
+
   public function getDiffUpdateTransaction(array $xactions) {
     $type_update = DifferentialTransaction::TYPE_UPDATE;
 
@@ -600,24 +604,25 @@ final class DifferentialTransactionEditor
     return array_values(array_merge($head, $tail));
   }
 
-  protected function requireCapabilities(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {}
-
-    return parent::requireCapabilities($object, $xaction);
-  }
-
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    if (!$object->shouldBroadcast()) {
+      return false;
+    }
+
     return true;
   }
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    if (!$object->shouldBroadcast()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -633,14 +638,25 @@ final class DifferentialTransactionEditor
   protected function getMailAction(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    $action = parent::getMailAction($object, $xactions);
 
-    $strongest = $this->getStrongestAction($object, $xactions);
-    switch ($strongest->getTransactionType()) {
-      case DifferentialTransaction::TYPE_UPDATE:
-        $count = new PhutilNumber($object->getLineCount());
-        $action = pht('%s, %s line(s)', $action, $count);
-        break;
+    $show_lines = false;
+    if ($this->isFirstBroadcast()) {
+      $action = pht('Request');
+
+      $show_lines = true;
+    } else {
+      $action = parent::getMailAction($object, $xactions);
+
+      $strongest = $this->getStrongestAction($object, $xactions);
+      $type_update = DifferentialTransaction::TYPE_UPDATE;
+      if ($strongest->getTransactionType() == $type_update) {
+        $show_lines = true;
+      }
+    }
+
+    if ($show_lines) {
+      $count = new PhutilNumber($object->getLineCount());
+      $action = pht('%s, %s line(s)', $action, $count);
     }
 
     return $action;
@@ -678,6 +694,16 @@ final class DifferentialTransactionEditor
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    $viewer = $this->requireActor();
+
+    // If this is the first time we're sending mail about this revision, we
+    // generate mail for all prior transactions, not just whatever is being
+    // applied now. This gets the "added reviewers" lines and other relevant
+    // information into the mail.
+    if ($this->isFirstBroadcast()) {
+      $xactions = $this->loadUnbroadcastTransactions($object);
+    }
 
     $body = new PhabricatorMetaMTAMailBody();
     $body->setViewer($this->requireActor());
@@ -1489,6 +1515,17 @@ final class DifferentialTransactionEditor
       $diff->getPHID(),
       $object->getPHID(),
       $acting_phid);
+  }
+
+  private function loadUnbroadcastTransactions($object) {
+    $viewer = $this->requireActor();
+
+    $xactions = id(new DifferentialTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->execute();
+
+    return array_reverse($xactions);
   }
 
 }

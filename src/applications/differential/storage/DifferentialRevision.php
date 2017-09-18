@@ -694,6 +694,14 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
+  public function shouldBroadcast() {
+    if (!$this->isDraft()) {
+      return true;
+    }
+
+    return false;
+  }
+
 
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
