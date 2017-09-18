@@ -809,7 +809,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if ($this->supportsFerretEngine()) {
       $orders['relevance'] = array(
         'vector' => array('rank', 'fulltext-modified', 'id'),
-        'name' => pht('Relevence'),
+        'name' => pht('Relevance'),
       );
     }
 
