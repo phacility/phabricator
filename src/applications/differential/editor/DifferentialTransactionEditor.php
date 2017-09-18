@@ -1528,4 +1528,102 @@ final class DifferentialTransactionEditor
     return array_reverse($xactions);
   }
 
+
+  protected function didApplyTransactions($object, array $xactions) {
+    // If a draft revision has no outstanding builds and we're automatically
+    // making drafts public after builds finish, make the revision public.
+    $auto_undraft = true;
+
+    if ($object->isDraft() && $auto_undraft) {
+      $active_builds = $this->hasActiveBuilds($object);
+      if (!$active_builds) {
+        $xaction = $object->getApplicationTransactionTemplate()
+          ->setTransactionType(
+            DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE)
+          ->setOldValue(false)
+          ->setNewValue(true);
+
+        $xaction = $this->populateTransaction($object, $xaction);
+
+        // If we're creating this revision and immediately moving it out of
+        // the draft state, mark this as a create transaction so it gets
+        // hidden in the timeline and mail, since it isn't interesting: it
+        // is as though the draft phase never happened.
+        if ($this->getIsNewObject()) {
+          $xaction->setIsCreateTransaction(true);
+        }
+
+        $object->openTransaction();
+          $object
+            ->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW)
+            ->save();
+
+          $xaction->save();
+        $object->saveTransaction();
+
+        $xactions[] = $xaction;
+      }
+    }
+
+    return $xactions;
+  }
+
+  private function hasActiveBuilds($object) {
+    $viewer = $this->requireActor();
+    $diff = $object->getActiveDiff();
+
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($viewer)
+      ->withContainerPHIDs(array($object->getPHID()))
+      ->withBuildablePHIDs(array($diff->getPHID()))
+      ->withManualBuildables(false)
+      ->execute();
+    if (!$buildables) {
+      return false;
+    }
+
+    $builds = id(new HarbormasterBuildQuery())
+      ->setViewer($viewer)
+      ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
+      ->withBuildStatuses(
+        array(
+          HarbormasterBuildStatus::STATUS_INACTIVE,
+          HarbormasterBuildStatus::STATUS_PENDING,
+          HarbormasterBuildStatus::STATUS_BUILDING,
+          HarbormasterBuildStatus::STATUS_FAILED,
+          HarbormasterBuildStatus::STATUS_ABORTED,
+          HarbormasterBuildStatus::STATUS_ERROR,
+          HarbormasterBuildStatus::STATUS_PAUSED,
+          HarbormasterBuildStatus::STATUS_DEADLOCKED,
+        ))
+      ->needBuildTargets(true)
+      ->execute();
+    if (!$builds) {
+      return false;
+    }
+
+    $active = array();
+    foreach ($builds as $key => $build) {
+      foreach ($build->getBuildTargets() as $target) {
+        if ($target->isAutotarget()) {
+          // Ignore autotargets when looking for active of failed builds. If
+          // local tests fail and you continue anyway, you don't need to
+          // double-confirm them.
+          continue;
+        }
+
+        // This build has at least one real target that's doing something.
+        $active[$key] = $build;
+        break;
+      }
+    }
+
+    if (!$active) {
+      return false;
+    }
+
+    return true;
+  }
+
+
 }
