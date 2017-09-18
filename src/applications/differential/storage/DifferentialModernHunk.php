@@ -51,8 +51,11 @@ final class DifferentialModernHunk extends DifferentialHunk {
 
     $this->dataEncoding = $this->detectEncodingForStorage($text);
     $this->dataType = self::DATATYPE_TEXT;
-    $this->dataFormat = self::DATAFORMAT_RAW;
-    $this->data = $text;
+
+    list($format, $data) = $this->formatDataForStorage($text);
+
+    $this->dataFormat = $format;
+    $this->data = $data;
 
     return $this;
   }
@@ -68,24 +71,13 @@ final class DifferentialModernHunk extends DifferentialHunk {
     return $this;
   }
 
-  public function save() {
-
-    $type = $this->getDataType();
-    $format = $this->getDataFormat();
-
-    // Before saving the data, attempt to compress it.
-    if ($type == self::DATATYPE_TEXT) {
-      if ($format == self::DATAFORMAT_RAW) {
-        $data = $this->getData();
-        $deflated = PhabricatorCaches::maybeDeflateData($data);
-        if ($deflated !== null) {
-          $this->data = $deflated;
-          $this->dataFormat = self::DATAFORMAT_DEFLATED;
-        }
-      }
+  private function formatDataForStorage($data) {
+    $deflated = PhabricatorCaches::maybeDeflateData($data);
+    if ($deflated !== null) {
+      return array(self::DATAFORMAT_DEFLATED, $deflated);
     }
 
-    return parent::save();
+    return array(self::DATAFORMAT_RAW, $data);
   }
 
   public function saveAsText() {
@@ -99,7 +91,10 @@ final class DifferentialModernHunk extends DifferentialHunk {
     $raw_data = $this->getRawData();
 
     $this->setDataType(self::DATATYPE_TEXT);
-    $this->setData($raw_data);
+
+    list($format, $data) = $this->formatDataForStorage($raw_data);
+    $this->setDataFormat($format);
+    $this->setData($data);
 
     $result = $this->save();
 
@@ -118,8 +113,11 @@ final class DifferentialModernHunk extends DifferentialHunk {
 
     $raw_data = $this->getRawData();
 
+    list($format, $data) = $this->formatDataForStorage($raw_data);
+    $this->setDataFormat($format);
+
     $file = PhabricatorFile::newFromFileData(
-      $raw_data,
+      $data,
       array(
         'name' => 'differential-hunk',
         'mime-type' => 'application/octet-stream',
