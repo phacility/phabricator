@@ -653,6 +653,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getStatusObject()->isPublished();
   }
 
+  public function isDraft() {
+    return $this->getStatusObject()->isDraft();
+  }
+
   public function getStatusIcon() {
     return $this->getStatusObject()->getIcon();
   }
