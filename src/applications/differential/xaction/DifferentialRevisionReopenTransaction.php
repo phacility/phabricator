@@ -10,7 +10,8 @@ final class DifferentialRevisionReopenTransaction
     return pht('Reopen Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be reopened for review.');
   }
 

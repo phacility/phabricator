@@ -10,7 +10,8 @@ final class DifferentialRevisionReclaimTransaction
     return pht('Reclaim Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be reclaimed and reopened.');
   }
 
