@@ -799,74 +799,78 @@ final class DiffusionBrowseController extends DiffusionController {
   }
 
   private function buildOwnersList(DiffusionRequest $drequest) {
-
     $viewer = $this->getViewer();
+
+    $have_owners = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorOwnersApplication',
+      $viewer);
+    if (!$have_owners) {
+      return null;
+    }
+
     $repository = $drequest->getRepository();
 
-    $owners = 'PhabricatorOwnersApplication';
-    if (PhabricatorApplication::isClassInstalled($owners)) {
-      $package_query = id(new PhabricatorOwnersPackageQuery())
-        ->setViewer($viewer)
-        ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
-        ->withControl(
-          $repository->getPHID(),
-          array(
-            $drequest->getPath(),
-          ));
-
-      $package_query->execute();
-
-      $packages = $package_query->getControllingPackagesForPath(
+    $package_query = id(new PhabricatorOwnersPackageQuery())
+      ->setViewer($viewer)
+      ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
+      ->withControl(
         $repository->getPHID(),
-        $drequest->getPath());
+        array(
+          $drequest->getPath(),
+        ));
 
-      $ownership = id(new PHUIObjectItemListView())
-        ->setUser($viewer)
-        ->setNoDataString(pht('No Owners'));
+    $package_query->execute();
 
-      if ($packages) {
-        foreach ($packages as $package) {
-          $item = id(new PHUIObjectItemView())
-            ->setObject($package)
-            ->setObjectName($package->getMonogram())
-            ->setHeader($package->getName())
-            ->setHref($package->getURI());
+    $packages = $package_query->getControllingPackagesForPath(
+      $repository->getPHID(),
+      $drequest->getPath());
 
-          $owners = $package->getOwners();
-          if ($owners) {
-            $owner_list = $viewer->renderHandleList(
-              mpull($owners, 'getUserPHID'));
-          } else {
-            $owner_list = phutil_tag('em', array(), pht('None'));
-          }
-          $item->addAttribute(pht('Owners: %s', $owner_list));
+    $ownership = id(new PHUIObjectItemListView())
+      ->setUser($viewer)
+      ->setNoDataString(pht('No Owners'));
 
-          $auto = $package->getAutoReview();
-          $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
-          $spec = idx($autoreview_map, $auto, array());
-          $name = idx($spec, 'name', $auto);
-          $item->addIcon('fa-code', $name);
+    if ($packages) {
+      foreach ($packages as $package) {
+        $item = id(new PHUIObjectItemView())
+          ->setObject($package)
+          ->setObjectName($package->getMonogram())
+          ->setHeader($package->getName())
+          ->setHref($package->getURI());
 
-          if ($package->getAuditingEnabled()) {
-            $item->addIcon('fa-check', pht('Auditing Enabled'));
-          } else {
-            $item->addIcon('fa-ban', pht('No Auditing'));
-          }
-
-          if ($package->isArchived()) {
-            $item->setDisabled(true);
-          }
-
-          $ownership->addItem($item);
+        $owners = $package->getOwners();
+        if ($owners) {
+          $owner_list = $viewer->renderHandleList(
+            mpull($owners, 'getUserPHID'));
+        } else {
+          $owner_list = phutil_tag('em', array(), pht('None'));
         }
-      }
+        $item->addAttribute(pht('Owners: %s', $owner_list));
 
-      $view = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Owner Packages'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->addClass('diffusion-mobile-view')
-        ->setObjectList($ownership);
+        $auto = $package->getAutoReview();
+        $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
+        $spec = idx($autoreview_map, $auto, array());
+        $name = idx($spec, 'name', $auto);
+        $item->addIcon('fa-code', $name);
+
+        if ($package->getAuditingEnabled()) {
+          $item->addIcon('fa-check', pht('Auditing Enabled'));
+        } else {
+          $item->addIcon('fa-ban', pht('No Auditing'));
+        }
+
+        if ($package->isArchived()) {
+          $item->setDisabled(true);
+        }
+
+        $ownership->addItem($item);
+      }
     }
+
+    $view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Owner Packages'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view')
+      ->setObjectList($ownership);
 
     return $view;
   }
