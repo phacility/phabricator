@@ -1390,7 +1390,7 @@ final class PhabricatorUser
       return '/settings/panel/ssh/';
     } else {
       // Otherwise, take them to the administrative panel for this user.
-      return '/settings/'.$this->getID().'/panel/ssh/';
+      return '/settings/user/'.$this->getUsername().'/page/ssh/';
     }
   }
 
