@@ -8,6 +8,7 @@ final class DifferentialRevisionStatus extends Phobject {
   const ACCEPTED = 'accepted';
   const PUBLISHED = 'published';
   const ABANDONED = 'abandoned';
+  const DRAFT = 'draft';
 
   private $key;
   private $spec = array();
@@ -74,6 +75,10 @@ final class DifferentialRevisionStatus extends Phobject {
 
   public function isChangePlanned() {
     return ($this->key === self::CHANGES_PLANNED);
+  }
+
+  public function isDraft() {
+    return ($this->key === self::DRAFT);
   }
 
   public static function newForStatus($status) {
@@ -161,6 +166,16 @@ final class DifferentialRevisionStatus extends Phobject {
         'closed' => true,
         'color.icon' => 'black',
         'color.tag' => 'indigo',
+        'color.ansi' => null,
+      ),
+      self::DRAFT => array(
+        'name' => pht('Draft'),
+        // For legacy clients, treat this as though it is "Needs Review".
+        'legacy' => 0,
+        'icon' => 'fa-file-text-o',
+        'closed' => false,
+        'color.icon' => 'grey',
+        'color.tag' => 'grey',
         'color.ansi' => null,
       ),
     );

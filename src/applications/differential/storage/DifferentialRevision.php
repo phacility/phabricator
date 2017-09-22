@@ -653,6 +653,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getStatusObject()->isPublished();
   }
 
+  public function isDraft() {
+    return $this->getStatusObject()->isDraft();
+  }
+
   public function getStatusIcon() {
     return $this->getStatusObject()->getIcon();
   }
@@ -688,6 +692,14 @@ final class DifferentialRevision extends DifferentialDAO
   public function attachHasDraft(PhabricatorUser $viewer, $has_draft) {
     $this->drafts[$viewer->getCacheFragment()] = $has_draft;
     return $this;
+  }
+
+  public function shouldBroadcast() {
+    if (!$this->isDraft()) {
+      return true;
+    }
+
+    return false;
   }
 
 

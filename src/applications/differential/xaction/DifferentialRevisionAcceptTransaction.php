@@ -10,7 +10,8 @@ final class DifferentialRevisionAcceptTransaction
     return pht("Accept Revision \xE2\x9C\x94");
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('These changes will be approved.');
   }
 

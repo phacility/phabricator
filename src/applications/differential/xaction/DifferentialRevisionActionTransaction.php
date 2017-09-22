@@ -52,7 +52,8 @@ abstract class DifferentialRevisionActionTransaction
     return DifferentialRevisionEditEngine::ACTIONGROUP_REVISION;
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return null;
   }
 
@@ -103,7 +104,7 @@ abstract class DifferentialRevisionActionTransaction
       if ($label !== null) {
         $field->setCommentActionLabel($label);
 
-        $description = $this->getRevisionActionDescription();
+        $description = $this->getRevisionActionDescription($revision);
         $field->setActionDescription($description);
 
         $group_key = $this->getRevisionActionGroupKey();

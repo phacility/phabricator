@@ -71,7 +71,7 @@ final class DifferentialTestPlanField
     PhabricatorApplicationTransactionEditor $editor,
     array $xactions) {
 
-    if (!$editor->getIsNewObject()) {
+    if (!$editor->isFirstBroadcast()) {
       return;
     }
 

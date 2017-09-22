@@ -10,7 +10,8 @@ final class DifferentialRevisionAbandonTransaction
     return pht('Abandon Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be abandoned and closed.');
   }
 

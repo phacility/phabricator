@@ -67,7 +67,7 @@ final class DifferentialSummaryField
     PhabricatorApplicationTransactionEditor $editor,
     array $xactions) {
 
-    if (!$editor->getIsNewObject()) {
+    if (!$editor->isFirstBroadcast()) {
       return;
     }
 
