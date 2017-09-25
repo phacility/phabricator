@@ -7,6 +7,11 @@
   display: none;
 }
 
+!print .phabricator-action-list-view {
+  padding: 4px 0;
+  display: none;
+}
+
 .device .phuix-dropdown-menu .phabricator-action-list-view {
   /* When an action list view appears inside a dropdown menu, don't hide it
      by default. */
