@@ -106,11 +106,25 @@ abstract class PhabricatorFerretEngine extends Phobject {
     $ngrams = array();
     foreach ($unique_tokens as $token => $ignored) {
       $token_v = phutil_utf8v($token);
-      $len = (count($token_v) - 2);
-      for ($ii = 0; $ii < $len; $ii++) {
-        $ngram = array_slice($token_v, $ii, 3);
-        $ngram = implode('', $ngram);
+      $length = count($token_v);
+
+      // NOTE: We're being somewhat clever here to micro-optimize performance,
+      // especially for very long strings. See PHI87.
+
+      $token_l = array();
+      for ($ii = 0; $ii < $length; $ii++) {
+        $token_l[$ii] = strlen($token_v[$ii]);
+      }
+
+      $ngram_count = $length - 2;
+      $cursor = 0;
+      for ($ii = 0; $ii < $ngram_count; $ii++) {
+        $ngram_l = $token_l[$ii] + $token_l[$ii + 1] + $token_l[$ii + 2];
+
+        $ngram = substr($token, $cursor, $ngram_l);
         $ngrams[$ngram] = $ngram;
+
+        $cursor += $token_l[$ii];
       }
     }
 
