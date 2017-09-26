@@ -24,4 +24,34 @@ final class PhabricatorFerretEngineTestCase
     }
   }
 
+  public function testTermNgramExtraction() {
+    $snowman = "\xE2\x98\x83";
+
+    $map = array(
+      'a' => array(' a '),
+      'ab' => array(' ab', 'ab '),
+      'abcdef' => array(' ab', 'abc', 'bcd', 'cde', 'def', 'ef '),
+      "{$snowman}" => array(" {$snowman} "),
+      "x{$snowman}y" => array(
+        " x{$snowman}",
+        "x{$snowman}y",
+        "{$snowman}y ",
+      ),
+      "{$snowman}{$snowman}" => array(
+        " {$snowman}{$snowman}",
+        "{$snowman}{$snowman} ",
+      ),
+    );
+
+    $engine = new ManiphestTaskFerretEngine();
+
+    foreach ($map as $input => $expect) {
+      $actual = $engine->getTermNgramsFromString($input);
+      $this->assertEqual(
+        $actual,
+        $expect,
+        pht('Term ngrams for: %s.', $input));
+    }
+  }
+
 }
