@@ -88,16 +88,23 @@ abstract class PhabricatorFerretEngine extends Phobject {
   }
 
   private function getNgramsFromString($value, $as_term) {
+    $value = phutil_utf8_strtolower($value);
     $tokens = $this->tokenizeString($value);
 
-    $ngrams = array();
+    // First, extract unique tokens from the string. This reduces the number
+    // of `phutil_utf8v()` calls we need to make if we are indexing a large
+    // corpus with redundant terms.
+    $unique_tokens = array();
     foreach ($tokens as $token) {
-      $token = phutil_utf8_strtolower($token);
-
       if ($as_term) {
         $token = ' '.$token.' ';
       }
 
+      $unique_tokens[$token] = true;
+    }
+
+    $ngrams = array();
+    foreach ($unique_tokens as $token => $ignored) {
       $token_v = phutil_utf8v($token);
       $len = (count($token_v) - 2);
       for ($ii = 0; $ii < $len; $ii++) {
