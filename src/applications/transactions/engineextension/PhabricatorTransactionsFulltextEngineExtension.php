@@ -25,6 +25,7 @@ final class PhabricatorTransactionsFulltextEngineExtension
     $xactions = $query
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array($object->getPHID()))
+      ->withComments(true)
       ->needComments(true)
       ->execute();
 
