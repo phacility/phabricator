@@ -12,6 +12,7 @@ final class DifferentialReviewer
   protected $voidedPHID;
 
   private $authority = array();
+  private $changesets = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -52,6 +53,15 @@ final class DifferentialReviewer
   public function hasAuthority(PhabricatorUser $viewer) {
     $cache_fragment = $viewer->getCacheFragment();
     return $this->assertAttachedKey($this->authority, $cache_fragment);
+  }
+
+  public function attachChangesets(array $changesets) {
+    $this->changesets = $changesets;
+    return $this;
+  }
+
+  public function getChangesets() {
+    return $this->assertAttached($this->changesets);
   }
 
   public function isResigned() {
