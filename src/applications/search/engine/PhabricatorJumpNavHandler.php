@@ -50,17 +50,35 @@ final class PhabricatorJumpNavHandler extends Phobject {
               return id(new AphrontRedirectResponse())
                 ->setURI("/diffusion/symbol/$symbol/?jump=true$context");
             case 'find-repository':
-              $name = $matches[1];
+              $raw_query = $matches[1];
+
+              $engine = id(new PhabricatorRepository())
+                ->newFerretEngine();
+
+              $compiler = id(new PhutilSearchQueryCompiler())
+                ->setEnableFunctions(true);
+
+              $raw_tokens = $compiler->newTokens($raw_query);
+
+              $fulltext_tokens = array();
+              foreach ($raw_tokens as $raw_token) {
+                $fulltext_token = id(new PhabricatorFulltextToken())
+                  ->setToken($raw_token);
+                $fulltext_tokens[] = $fulltext_token;
+              }
+
               $repositories = id(new PhabricatorRepositoryQuery())
                 ->setViewer($viewer)
-                ->withNameContains($name)
+                ->withFerretConstraint($engine, $fulltext_tokens)
                 ->execute();
               if (count($repositories) == 1) {
                 // Just one match, jump to repository.
                 $uri = head($repositories)->getURI();
               } else {
                 // More than one match, jump to search.
-                $uri = urisprintf('/diffusion/?order=name&name=%s', $name);
+                $uri = urisprintf(
+                  '/diffusion/?order=name&query=%s',
+                  $raw_query);
               }
               return id(new AphrontRedirectResponse())->setURI($uri);
             default:
