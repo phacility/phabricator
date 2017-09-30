@@ -1557,7 +1557,8 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $commit_tag = $this->renderCommitHashTag($drequest);
 
-    $path = nonempty(basename($drequest->getPath()), '/');
+    $path = nonempty($drequest->getPath(), '/');
+
     $search = $this->renderSearchForm($path);
 
     $header = id(new PHUIHeaderView())

@@ -118,6 +118,8 @@ final class DifferentialDiffViewController extends DifferentialController {
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
 
+    $this->buildPackageMaps($changesets);
+
     $table_of_contents = $this->buildTableOfContents(
       $changesets,
       $changesets,
