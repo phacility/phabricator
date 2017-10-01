@@ -24,7 +24,7 @@ final class DifferentialChangesSinceLastUpdateField
     PhabricatorApplicationTransactionEditor $editor,
     array $xactions) {
 
-    if ($editor->getIsNewObject()) {
+    if ($editor->isFirstBroadcast()) {
       return;
     }
 

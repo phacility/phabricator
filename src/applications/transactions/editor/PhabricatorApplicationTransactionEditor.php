@@ -1105,7 +1105,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $this->heraldForcedEmailPHIDs = $adapter->getForcedEmailPHIDs();
     }
 
-    $this->didApplyTransactions($xactions);
+    $xactions = $this->didApplyTransactions($object, $xactions);
 
     if ($object instanceof PhabricatorCustomFieldInterface) {
       // Maybe this makes more sense to move into the search index itself? For
@@ -1234,9 +1234,9 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xactions;
   }
 
-  protected function didApplyTransactions(array $xactions) {
+  protected function didApplyTransactions($object, array $xactions) {
     // Hook for subclasses.
-    return;
+    return $xactions;
   }
 
 

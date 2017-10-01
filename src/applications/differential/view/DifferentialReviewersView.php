@@ -150,6 +150,12 @@ final class DifferentialReviewersView extends AphrontView {
       $item->setIcon($icon, $color, $label);
       $item->setTarget($handle->renderHovercardLink());
 
+      if ($reviewer->isPackage()) {
+        if (!$reviewer->getChangesets()) {
+          $item->setNote(pht('(Owns No Changed Paths)'));
+        }
+      }
+
       $view->addItem($item);
     }
 

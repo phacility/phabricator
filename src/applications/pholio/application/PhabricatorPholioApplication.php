@@ -6,6 +6,10 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return pht('Pholio');
   }
 
+  public function getMenuName() {
+    return pht('Design Review');
+  }
+
   public function getBaseURI() {
     return '/pholio/';
   }

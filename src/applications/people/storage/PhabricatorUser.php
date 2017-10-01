@@ -19,6 +19,7 @@ final class PhabricatorUser
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorConduitResultInterface {
 
   const SESSION_TABLE = 'phabricator_session';
@@ -1389,7 +1390,7 @@ final class PhabricatorUser
       return '/settings/panel/ssh/';
     } else {
       // Otherwise, take them to the administrative panel for this user.
-      return '/settings/'.$this->getID().'/panel/ssh/';
+      return '/settings/user/'.$this->getUsername().'/page/ssh/';
     }
   }
 
@@ -1431,6 +1432,14 @@ final class PhabricatorUser
 
   public function newFulltextEngine() {
     return new PhabricatorUserFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorUserFerretEngine();
   }
 
 

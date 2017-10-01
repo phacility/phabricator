@@ -41,7 +41,6 @@ abstract class DiffusionRepositoryManagementPanel
   abstract public function getManagementPanelLabel();
   abstract public function getManagementPanelOrder();
   abstract public function buildManagementPanelContent();
-  abstract public function buildManagementPanelCurtain();
 
   public function getManagementPanelIcon() {
     return 'fa-pencil';
@@ -56,22 +55,6 @@ abstract class DiffusionRepositoryManagementPanel
     return true;
   }
 
-  public function getNewActionList() {
-    $viewer = $this->getViewer();
-    $action_id = celerity_generate_unique_node_id();
-
-    return id(new PhabricatorActionListView())
-      ->setViewer($viewer)
-      ->setID($action_id);
-  }
-
-  public function getNewCurtainView(PhabricatorActionListView $action_list) {
-    $viewer = $this->getViewer();
-    return id(new PHUICurtainView())
-      ->setViewer($viewer)
-      ->setActionList($action_list);
-  }
-
   public static function getAllPanels() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
@@ -80,11 +63,20 @@ abstract class DiffusionRepositoryManagementPanel
       ->execute();
   }
 
-  final protected function newBox($header_text, $body) {
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText($header_text)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+  final protected function newBox($header_text, $body, $button = array()) {
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text);
+
+    foreach ($button as $link) {
+      $header->addActionLink($link);
+    }
+
+    $view = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->appendChild($body);
+
+    return $view;
   }
 
   final protected function newTimeline() {

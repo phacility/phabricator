@@ -12,10 +12,6 @@ final class PhabricatorConfigDatabaseIssueController
     $expect = $query->loadExpectedSchemata();
     $comp_servers = $query->buildComparisonSchemata($expect, $actual);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Database Issues'));
-    $crumbs->setBorder(true);
-
     // Collect all open issues.
     $issues = array();
     foreach ($comp_servers as $ref_name => $comp) {
@@ -158,24 +154,27 @@ final class PhabricatorConfigDatabaseIssueController
     }
 
     $title = pht('Database Issues');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
+    $header = $this->buildHeaderView($title);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('dbissue/');
 
-    $content = id(new PhabricatorConfigPageView())
+    $view = $this->buildConfigBoxView(pht('Issues'), $table);
+
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($table);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
 }

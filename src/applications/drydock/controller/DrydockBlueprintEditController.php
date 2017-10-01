@@ -74,6 +74,7 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
     $title = pht('Create New Blueprint');
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('New Blueprint'));
+    $crumbs->setBorder(true);
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -86,12 +87,16 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
     $box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
       ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setFooter($box);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
+      ->appendChild($view);
   }
 
 }

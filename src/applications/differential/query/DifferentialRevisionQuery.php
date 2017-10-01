@@ -320,7 +320,7 @@ final class DifferentialRevisionQuery
    */
   protected function loadPage() {
     $data = $this->loadData();
-
+    $data = $this->didLoadRawRows($data);
     $table = $this->newResultObject();
     return $table->loadAllFromArray($data);
   }
@@ -772,7 +772,7 @@ final class DifferentialRevisionQuery
         'column' => 'dateModified',
         'type' => 'int',
       ),
-    );
+    ) + parent::getOrderableColumns();
   }
 
   protected function getPagingValueMap($cursor, array $keys) {

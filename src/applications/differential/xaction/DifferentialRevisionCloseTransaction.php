@@ -10,7 +10,8 @@ final class DifferentialRevisionCloseTransaction
     return pht('Close Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be closed.');
   }
 

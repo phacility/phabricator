@@ -10,7 +10,8 @@ final class DifferentialRevisionResignTransaction
     return pht('Resign as Reviewer');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('You will resign as a reviewer for this change.');
   }
 
@@ -61,6 +62,11 @@ final class DifferentialRevisionResignTransaction
         pht(
           'You can not resign from this revision because it has already '.
           'been closed. You can only resign from open revisions.'));
+    }
+
+    if ($object->isDraft()) {
+      throw new Exception(
+        pht('You can not resign from a draft revision.'));
     }
 
     $resigned = DifferentialReviewerStatus::STATUS_RESIGNED;

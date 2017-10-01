@@ -138,24 +138,18 @@ final class PhabricatorEmailAddressesSettingsPanel
         $editable,
       ));
 
-    $view = new PHUIObjectBoxView();
-    $header = new PHUIHeaderView();
-    $header->setHeader(pht('Email Addresses'));
-
+    $button = null;
     if ($editable) {
-      $button = new PHUIButtonView();
-      $button->setText(pht('Add New Address'));
-      $button->setTag('a');
-      $button->setHref($uri->alter('new', 'true'));
-      $button->setIcon('fa-plus');
-      $button->addSigil('workflow');
-      $header->addActionLink($button);
+      $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-plus')
+        ->setText(pht('Add New Address'))
+        ->setHref($uri->alter('new', 'true'))
+        ->addSigil('workflow')
+        ->setColor(PHUIButtonView::GREY);
     }
-    $view->setHeader($header);
-    $view->setTable($table);
-    $view->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
-    return $view;
+    return $this->newBox(pht('Email Addresses'), $table, array($button));
   }
 
   private function returnNewAddressResponse(

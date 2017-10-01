@@ -11,28 +11,25 @@ final class PhabricatorConfigApplicationController
 
     $groups = PhabricatorApplicationConfigOptions::loadAll();
     $apps_list = $this->buildConfigOptionsList($groups, 'apps');
+    $apps_list = $this->buildConfigBoxView(pht('Applications'), $apps_list);
 
     $title = pht('Application Settings');
+    $header = $this->buildHeaderView($title);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Applications'))
-      ->setBorder(true);
-
-    $content = id(new PhabricatorConfigPageView())
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($apps_list);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($apps_list);
+
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function buildConfigOptionsList(array $groups, $type) {

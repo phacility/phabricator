@@ -250,10 +250,6 @@ final class PassphraseCredentialEditController extends PassphraseController {
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
       ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Credential Type'))
-          ->setValue($type->getCredentialTypeName()))
-      ->appendChild(
         id(new AphrontFormDividerControl()))
       ->appendControl(
         id(new AphrontFormPolicyControl())
@@ -322,10 +318,9 @@ final class PassphraseCredentialEditController extends PassphraseController {
     $crumbs->setBorder(true);
 
     if ($is_new) {
-      $title = pht('Create New Credential');
+      $title = pht('New Credential: %s', $type->getCredentialTypeName());
       $crumbs->addTextCrumb(pht('Create'));
       $cancel_uri = $this->getApplicationURI();
-      $header_icon = 'fa-plus-square';
     } else {
       $title = pht('Edit Credential: %s', $credential->getName());
       $crumbs->addTextCrumb(
@@ -333,7 +328,6 @@ final class PassphraseCredentialEditController extends PassphraseController {
         '/K'.$credential->getID());
       $crumbs->addTextCrumb(pht('Edit'));
       $cancel_uri = '/K'.$credential->getID();
-      $header_icon = 'fa-pencil';
     }
 
     if ($request->isAjax()) {
@@ -356,18 +350,13 @@ final class PassphraseCredentialEditController extends PassphraseController {
         ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Credential'))
+      ->setHeaderText($title)
       ->setFormErrors($errors)
       ->setValidationException($validation_exception)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon($header_icon);
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter(array(
         $box,
       ));

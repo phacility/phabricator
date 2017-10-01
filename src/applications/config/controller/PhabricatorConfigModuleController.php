@@ -16,27 +16,26 @@ final class PhabricatorConfigModuleController
     $content = $module->renderModuleStatus($request);
     $title = $module->getModuleName();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title);
-    $crumbs->setBorder(true);
-
     $nav = $this->buildSideNavView();
     $nav->selectFilter('module/'.$key.'/');
+    $header = $this->buildHeaderView($title);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
+    $view = $this->buildConfigBoxView($title, $content);
 
-    $content = id(new PhabricatorConfigPageView())
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($content);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
 }

@@ -182,10 +182,10 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->setValue($button));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Diff'))
+      ->setHeaderText($title)
       ->setValidationException($validation_exception)
       ->setForm($form)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setFormErrors($errors);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -197,15 +197,10 @@ final class DifferentialDiffCreateController extends DifferentialController {
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon($header_icon);
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter(array(
-        $info_view,
         $form_box,
+        $info_view,
       ));
 
     return $this->newPage()

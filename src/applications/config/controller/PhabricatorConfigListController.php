@@ -11,28 +11,25 @@ final class PhabricatorConfigListController
 
     $groups = PhabricatorApplicationConfigOptions::loadAll();
     $core_list = $this->buildConfigOptionsList($groups, 'core');
+    $core_list = $this->buildConfigBoxView(pht('Core'), $core_list);
 
     $title = pht('Core Settings');
+    $header = $this->buildHeaderView($title);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Core'))
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
       ->setBorder(true);
 
-    $content = id(new PhabricatorConfigPageView())
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($core_list);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($core_list);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function buildConfigOptionsList(array $groups, $type) {

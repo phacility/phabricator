@@ -10,7 +10,8 @@ final class DifferentialRevisionPlanChangesTransaction
     return pht('Plan Changes');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht(
       'This revision will be removed from review queues until it is revised.');
   }
@@ -55,6 +56,11 @@ final class DifferentialRevisionPlanChangesTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
+    if ($object->isDraft()) {
+      throw new Exception(
+        pht('You can not plan changes to a draft revision.'));
+    }
+
     if ($object->isChangePlanned()) {
       throw new Exception(
         pht(

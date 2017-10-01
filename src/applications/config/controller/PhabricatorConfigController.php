@@ -8,10 +8,10 @@ abstract class PhabricatorConfigController extends PhabricatorController {
 
   public function buildSideNavView($filter = null, $for_app = false) {
 
+
     $guide_href = new PhutilURI('/guides/');
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-    $nav->addLabel(pht('Configuration'));
     $nav->addFilter('/',
       pht('Core Settings'), null, 'fa-gear');
     $nav->addFilter('application/',
@@ -46,7 +46,6 @@ abstract class PhabricatorConfigController extends PhabricatorController {
       pht('Search Servers'), null, 'fa-search');
     $nav->addLabel(pht('Modules'));
 
-
     $modules = PhabricatorConfigModule::getAllModules();
     foreach ($modules as $key => $module) {
       $nav->addFilter('module/'.$key.'/',
@@ -58,6 +57,39 @@ abstract class PhabricatorConfigController extends PhabricatorController {
 
   public function buildApplicationMenu() {
     return $this->buildSideNavView(null, true)->getMenu();
+  }
+
+  public function buildHeaderView($text, $action = null) {
+    $viewer = $this->getViewer();
+
+    $file = PhabricatorFile::loadBuiltin($viewer, 'projects/v3/manage.png');
+    $image = $file->getBestURI($file);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($text)
+      ->setProfileHeader(true)
+      ->setImage($image);
+
+    if ($action) {
+      $header->addActionLink($action);
+    }
+
+    return $header;
+  }
+
+  public function buildConfigBoxView($title, $content, $action = null) {
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    if ($action) {
+      $header->addActionItem($action);
+    }
+
+    $view = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($content)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG);
+
+    return $view;
   }
 
 }

@@ -29,28 +29,25 @@ final class PhabricatorConfigHistoryController
     $object->willRenderTimeline($timeline, $this->getRequest());
 
     $title = pht('Settings History');
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title);
-    $crumbs->setBorder(true);
+    $header = $this->buildHeaderView($title);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('history/');
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
-    $content = id(new PhabricatorConfigPageView())
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($timeline);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($timeline);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
 }

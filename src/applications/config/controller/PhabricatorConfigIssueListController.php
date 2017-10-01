@@ -43,34 +43,34 @@ final class PhabricatorConfigIssueListController
     }
 
     $title = pht('Setup Issues');
+    $header = $this->buildHeaderView($title);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Setup Issues'))
-      ->setBorder(true);
-
-    $page = array(
-      $no_issues,
+    $issue_list = array(
       $important,
       $php,
       $mysql,
       $other,
     );
 
-    $content = id(new PhabricatorConfigPageView())
+    $issue_list = $this->buildConfigBoxView(pht('Issues'), $issue_list);
+
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($page);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn(array(
+        $no_issues,
+        $issue_list,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function buildIssueList(array $issues, $group, $fonticon) {

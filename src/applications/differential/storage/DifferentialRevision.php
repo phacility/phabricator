@@ -15,6 +15,7 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorConduitResultInterface,
     PhabricatorDraftInterface {
 
@@ -652,6 +653,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getStatusObject()->isPublished();
   }
 
+  public function isDraft() {
+    return $this->getStatusObject()->isDraft();
+  }
+
   public function getStatusIcon() {
     return $this->getStatusObject()->getIcon();
   }
@@ -687,6 +692,14 @@ final class DifferentialRevision extends DifferentialDAO
   public function attachHasDraft(PhabricatorUser $viewer, $has_draft) {
     $this->drafts[$viewer->getCacheFragment()] = $has_draft;
     return $this;
+  }
+
+  public function shouldBroadcast() {
+    if (!$this->isDraft()) {
+      return true;
+    }
+
+    return false;
   }
 
 
@@ -897,6 +910,14 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function newFulltextEngine() {
     return new DifferentialRevisionFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new DifferentialRevisionFerretEngine();
   }
 
 

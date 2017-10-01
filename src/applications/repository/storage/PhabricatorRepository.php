@@ -16,7 +16,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorProjectInterface,
     PhabricatorSpacesInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -2631,6 +2632,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function newFulltextEngine() {
     return new PhabricatorRepositoryFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorRepositoryFerretEngine();
   }
 
 }

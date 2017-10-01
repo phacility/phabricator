@@ -326,10 +326,20 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $other_view = $this->renderOtherRevisions($other_revisions);
     }
 
+    $this->buildPackageMaps($changesets);
+
     $toc_view = $this->buildTableOfContents(
       $changesets,
       $visible_changesets,
       $target->loadCoverageMap($viewer));
+
+    // Attach changesets to each reviewer so we can show which Owners package
+    // reviewers own no files.
+    foreach ($revision->getReviewers() as $reviewer) {
+      $reviewer_phid = $reviewer->getReviewerPHID();
+      $reviewer_changesets = $this->getPackageChangesets($reviewer_phid);
+      $reviewer->attachChangesets($reviewer_changesets);
+    }
 
     $tab_group = id(new PHUITabGroupView())
       ->addTab(

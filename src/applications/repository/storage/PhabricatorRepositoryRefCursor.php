@@ -19,10 +19,9 @@ final class PhabricatorRepositoryRefCursor
   protected $refNameHash;
   protected $refNameRaw;
   protected $refNameEncoding;
-  protected $commitIdentifier;
-  protected $isClosed = 0;
 
   private $repository = self::ATTACHABLE;
+  private $positions = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -34,13 +33,12 @@ final class PhabricatorRepositoryRefCursor
       self::CONFIG_COLUMN_SCHEMA => array(
         'refType' => 'text32',
         'refNameHash' => 'bytes12',
-        'commitIdentifier' => 'text40',
         'refNameEncoding' => 'text16?',
-        'isClosed' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_cursor' => array(
+        'key_ref' => array(
           'columns' => array('repositoryPHID', 'refType', 'refNameHash'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -72,6 +70,20 @@ final class PhabricatorRepositoryRefCursor
 
   public function getRepository() {
     return $this->assertAttached($this->repository);
+  }
+
+  public function attachPositions(array $positions) {
+    assert_instances_of($positions, 'PhabricatorRepositoryRefPosition');
+    $this->positions = $positions;
+    return $this;
+  }
+
+  public function getPositions() {
+    return $this->assertAttached($this->positions);
+  }
+
+  public function getPositionIdentifiers() {
+    return mpull($this->getPositions(), 'getCommitIdentifier');
   }
 
 

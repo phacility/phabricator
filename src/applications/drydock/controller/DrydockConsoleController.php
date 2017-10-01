@@ -26,7 +26,8 @@ final class DrydockConsoleController extends DrydockController {
     $viewer = $request->getViewer();
 
     $menu = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setBig(true);
 
     $menu->addItem(
       id(new PHUIObjectItemView())
@@ -64,17 +65,15 @@ final class DrydockConsoleController extends DrydockController {
     $crumbs->addTextCrumb(pht('Console'));
     $crumbs->setBorder(true);
 
-    $box = id(new PHUIObjectBoxView())
-      ->setObjectList($menu);
-
     $title = pht('Drydock Console');
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-truck');
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
+      ->setObjectList($menu);
 
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
+      ->setFixed(true)
       ->setFooter($box);
 
     return $this->newPage()

@@ -61,6 +61,11 @@ body {
   overflow-y: scroll;
 }
 
+body.printable,
+!print body {
+  background: none;
+}
+
 textarea {
   font: inherit;
 }

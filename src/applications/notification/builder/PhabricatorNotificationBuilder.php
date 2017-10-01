@@ -153,8 +153,8 @@ final class PhabricatorNotificationBuilder extends Phobject {
     foreach ($stories as $story) {
       if ($story instanceof PhabricatorApplicationTransactionFeedStory) {
         $dict[] = array(
-          'desktopReady' => $desktop_ready,
-          'webReady'     => $web_ready,
+          'showAnyNotification' => $web_ready,
+          'showDesktopNotification' => $desktop_ready,
           'title'        => $story->renderText(),
           'body'         => $story->renderTextBody(),
           'href'         => $story->getURI(),
@@ -162,8 +162,8 @@ final class PhabricatorNotificationBuilder extends Phobject {
         );
       } else if ($story instanceof PhabricatorNotificationTestFeedStory) {
         $dict[] = array(
-          'desktopReady' => $desktop_ready,
-          'webReady'     => $web_ready,
+          'showAnyNotification' => $web_ready,
+          'showDesktopNotification' => $desktop_ready,
           'title'        => pht('Test Notification'),
           'body'         => $story->renderText(),
           'href'         => null,
@@ -171,8 +171,8 @@ final class PhabricatorNotificationBuilder extends Phobject {
         );
       } else {
         $dict[] = array(
-          'desktopReady' => false,
-          'webReady'     => false,
+          'showWebNotification' => false,
+          'showDesktopNotification' => false,
           'title'        => null,
           'body'         => null,
           'href'         => null,

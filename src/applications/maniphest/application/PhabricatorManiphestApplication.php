@@ -6,6 +6,10 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return pht('Maniphest');
   }
 
+  public function getMenuName() {
+    return pht('Tasks');
+  }
+
   public function getShortDescription() {
     return pht('Tasks and Bugs');
   }

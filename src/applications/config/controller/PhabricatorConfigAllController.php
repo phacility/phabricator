@@ -49,29 +49,29 @@ final class PhabricatorConfigAllController
         ));
 
     $title = pht('Current Settings');
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
+    $header = $this->buildHeaderView($title);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('all/');
 
-    $content = id(new PhabricatorConfigPageView())
+    $view = $this->buildConfigBoxView(
+      pht('All Settings'),
+      $table);
+
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($table);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
 
   }
 

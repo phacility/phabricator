@@ -8,6 +8,7 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorDestructibleInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorProjectInterface,
     PhabricatorApplicationTransactionInterface {
 
@@ -253,6 +254,14 @@ final class PhrictionDocument extends PhrictionDAO
 
   public function newFulltextEngine() {
     return new PhrictionDocumentFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhrictionDocumentFerretEngine();
   }
 
 }

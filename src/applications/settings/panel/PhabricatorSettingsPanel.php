@@ -281,4 +281,21 @@ abstract class PhabricatorSettingsPanel extends Phobject {
     $editor->applyTransactions($preferences, $xactions);
   }
 
+
+  public function newBox($title, $content, $actions = array()) {
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    foreach ($actions as $action) {
+      $header->addActionLink($action);
+    }
+
+    $view = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($content)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG);
+
+    return $view;
+  }
+
 }

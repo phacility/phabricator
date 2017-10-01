@@ -8,7 +8,6 @@ final class PhabricatorRepositoryQuery
   private $callsigns;
   private $types;
   private $uuids;
-  private $nameContains;
   private $uris;
   private $datasourceQuery;
   private $slugs;
@@ -113,11 +112,6 @@ final class PhabricatorRepositoryQuery
 
   public function withUUIDs(array $uuids) {
     $this->uuids = $uuids;
-    return $this;
-  }
-
-  public function withNameContains($contains) {
-    $this->nameContains = $contains;
     return $this;
   }
 
@@ -659,13 +653,6 @@ final class PhabricatorRepositoryQuery
         $conn,
         'r.uuid IN (%Ls)',
         $this->uuids);
-    }
-
-    if (strlen($this->nameContains)) {
-      $where[] = qsprintf(
-        $conn,
-        'r.name LIKE %~',
-        $this->nameContains);
     }
 
     if (strlen($this->datasourceQuery)) {

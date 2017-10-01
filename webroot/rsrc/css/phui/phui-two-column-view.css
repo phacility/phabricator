@@ -13,6 +13,10 @@
   margin-bottom: 24px;
 }
 
+.phui-two-column-view.without-header {
+  margin-top: 24px;
+}
+
 .device .phui-two-column-view .phui-two-column-header {
   margin-bottom: 12px;
 }
@@ -73,6 +77,30 @@
 .device-desktop .phui-two-column-view .phui-side-column {
   float: right;
   width: 300px;
+}
+
+!print .phui-two-column-view .phui-main-column {
+  float: unset;
+  width: unset;
+  margin-bottom: 20px;
+}
+
+!print .phui-two-column-view .phui-side-column {
+  float: unset;
+  width: unset;
+  margin-bottom: 20px;
+}
+
+!print .device-desktop .phui-two-column-view .phui-main-column {
+  float: unset;
+  width: unset;
+  margin-bottom: 20px;
+}
+
+!print .device-desktop .phui-two-column-view .phui-side-column {
+  float: unset;
+  width: unset;
+  margin-bottom: 20px;
 }
 
 .device-desktop .phui-two-column-view.phui-side-column-left .phui-main-column {
@@ -302,4 +330,8 @@
 .phui-two-column-fixed.phui-two-column-view .phui-header-action-links
   .phui-mobile-menu {
     display: block;
+}
+
+!print .phabricator-side-menu {
+  display: none !important;
 }

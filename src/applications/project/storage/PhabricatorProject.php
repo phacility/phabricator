@@ -9,6 +9,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorConduitResultInterface,
     PhabricatorColumnProxyInterface {
 
@@ -726,6 +727,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function newFulltextEngine() {
     return new PhabricatorProjectFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )--------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorProjectFerretEngine();
   }
 
 

@@ -3,16 +3,17 @@
 final class PhabricatorSearchResultView extends AphrontView {
 
   private $handle;
-  private $query;
   private $object;
+  private $tokens;
 
   public function setHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
     return $this;
   }
 
-  public function setQuery(PhabricatorSavedQuery $query) {
-    $this->query = $query;
+  public function setTokens(array $tokens) {
+    assert_instances_of($tokens, 'PhabricatorFulltextToken');
+    $this->tokens = $tokens;
     return $this;
   }
 
@@ -56,88 +57,129 @@ final class PhabricatorSearchResultView extends AphrontView {
    * matched their query.
    */
   private function emboldenQuery($str) {
-    $query = $this->query->getParameter('query');
+    $tokens = $this->tokens;
 
-    if (!strlen($query) || !strlen($str)) {
+    if (!$tokens) {
       return $str;
     }
 
-    // This algorithm is safe but not especially fast, so don't bother if
-    // we're dealing with a lot of data. This mostly prevents silly/malicious
-    // queries from doing anything bad.
-    if (strlen($query) + strlen($str) > 2048) {
+    if (count($tokens) > 16) {
       return $str;
     }
 
-    // Keep track of which characters we're going to make bold. This is
-    // byte oriented, but we'll make sure we don't put a bold in the middle
-    // of a character later.
-    $bold = array_fill(0, strlen($str), false);
+    if (!strlen($str)) {
+      return $str;
+    }
 
-    // Split the query into words.
-    $parts = preg_split('/ +/', $query);
+    if (strlen($str) > 2048) {
+      return $str;
+    }
 
-    // Find all occurrences of each word, and mark them to be emboldened.
-    foreach ($parts as $part) {
-      $part = trim($part);
-      $part = trim($part, '"+');
-      if (!strlen($part)) {
-        continue;
+    $patterns = array();
+    foreach ($tokens as $token) {
+      $raw_token = $token->getToken();
+      $operator = $raw_token->getOperator();
+
+      $value = $raw_token->getValue();
+
+      switch ($operator) {
+        case PhutilSearchQueryCompiler::OPERATOR_SUBSTRING:
+          $patterns[] = '(('.preg_quote($value).'))ui';
+          break;
+        case PhutilSearchQueryCompiler::OPERATOR_AND:
+          $patterns[] = '((?<=\W|^)('.preg_quote($value).')(?=\W|\z))ui';
+          break;
+        default:
+          // Don't highlight anything else, particularly "NOT".
+          break;
       }
+    }
 
+    // Find all matches for all query terms in the document title, then reduce
+    // them to a map from offsets to highlighted sequence lengths. If two terms
+    // match at the same position, we choose the longer one.
+    $all_matches = array();
+    foreach ($patterns as $pattern) {
       $matches = null;
-      $has_matches = preg_match_all(
-        '/(?:^|\b)('.preg_quote($part, '/').')/i',
+      $ok = preg_match_all(
+        $pattern,
         $str,
         $matches,
         PREG_OFFSET_CAPTURE);
-
-      if (!$has_matches) {
+      if (!$ok) {
         continue;
       }
 
-      // Flag the matching part of the range for boldening.
       foreach ($matches[1] as $match) {
-        $offset = $match[1];
-        for ($ii = 0; $ii < strlen($match[0]); $ii++) {
-          $bold[$offset + $ii] = true;
+        $match_text = $match[0];
+        $match_offset = $match[1];
+
+        if (!isset($all_matches[$match_offset])) {
+          $all_matches[$match_offset] = 0;
         }
+
+        $all_matches[$match_offset] = max(
+          $all_matches[$match_offset],
+          strlen($match_text));
       }
     }
 
-    // Split the string into ranges, applying bold styling as required.
-    $out = array();
-    $buf = '';
-    $pos = 0;
-    $is_bold = false;
+    // Go through the string one display glyph at a time. If a glyph starts
+    // on a highlighted byte position, turn on highlighting for the nubmer
+    // of matching bytes. If a query searches for "e" and the document contains
+    // an "e" followed by a bunch of combining marks, this will correctly
+    // highlight the entire glyph.
+    $parts = array();
+    $highlight = 0;
+    $offset = 0;
+    foreach (phutil_utf8v_combined($str) as $character) {
+      $length = strlen($character);
 
-    // Make sure this is UTF8 because phutil_utf8v() will explode if it isn't.
-    $str = phutil_utf8ize($str);
-    foreach (phutil_utf8v($str) as $chr) {
-      if ($bold[$pos] != $is_bold) {
-        if (strlen($buf)) {
-          if ($is_bold) {
-            $out[] = phutil_tag('strong', array(), $buf);
-          } else {
-            $out[] = $buf;
-          }
-          $buf = '';
-        }
-        $is_bold = !$is_bold;
+      if (isset($all_matches[$offset])) {
+        $highlight = $all_matches[$offset];
       }
-      $buf .= $chr;
-      $pos += strlen($chr);
-    }
 
-    if (strlen($buf)) {
-      if ($is_bold) {
-        $out[] = phutil_tag('strong', array(), $buf);
+      if ($highlight > 0) {
+        $is_highlighted = true;
+        $highlight -= $length;
       } else {
-        $out[] = $buf;
+        $is_highlighted = false;
+      }
+
+      $parts[] = array(
+        'text' => $character,
+        'highlighted' => $is_highlighted,
+      );
+
+      $offset += $length;
+    }
+
+    // Combine all the sequences together so we aren't emitting a tag around
+    // every individual character.
+    $last = null;
+    foreach ($parts as $key => $part) {
+      if ($last !== null) {
+        if ($part['highlighted'] == $parts[$last]['highlighted']) {
+          $parts[$last]['text'] .= $part['text'];
+          unset($parts[$key]);
+          continue;
+        }
+      }
+
+      $last = $key;
+    }
+
+    // Finally, add tags.
+    $result = array();
+    foreach ($parts as $part) {
+      if ($part['highlighted']) {
+        $result[] = phutil_tag('strong', array(), $part['text']);
+      } else {
+        $result[] = $part['text'];
       }
     }
 
-    return $out;
+    return $result;
   }
 
 }

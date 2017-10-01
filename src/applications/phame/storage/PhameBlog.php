@@ -10,7 +10,8 @@ final class PhameBlog extends PhameDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
@@ -390,6 +391,14 @@ final class PhameBlog extends PhameDAO
 
   public function newFulltextEngine() {
     return new PhameBlogFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhameBlogFerretEngine();
   }
 
 }

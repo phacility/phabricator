@@ -29,7 +29,7 @@ final class PhabricatorProjectLogicalViewerDatasource
           "\n\n".
           "This normally means //your// projects, but if you save a query ".
           "using this function and send it to someone else, it will mean ".
-          "//their// projects when they run it (they become the currnet ".
+          "//their// projects when they run it (they become the current ".
           "viewer). This can be useful for building dashboard panels."),
       ),
     );

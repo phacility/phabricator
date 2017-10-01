@@ -152,24 +152,17 @@ final class PhabricatorNotificationsSettingsPanel
         id(new AphrontFormSubmitControl())
         ->setValue(pht('Save Preference')));
 
-    $test_button = id(new PHUIButtonView())
+    $button = id(new PHUIButtonView())
       ->setTag('a')
+      ->setIcon('fa-send-o')
       ->setWorkflow(true)
       ->setText(pht('Send Test Notification'))
       ->setHref('/notification/test/')
-      ->setIcon('fa-exclamation-triangle');
+      ->setColor(PHUIButtonView::GREY);
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeader(
-        id(new PHUIHeaderView())
-        ->setHeader(pht('Notifications'))
-        ->addActionLink($test_button))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild(array(
-        $saved_box,
-        $status_box,
-        $form,
-      ));
+    $form_content = array($saved_box, $status_box, $form);
+    $form_box = $this->newBox(
+      pht('Notifications'), $form_content, array($button));
 
     $browser_status_box = id(new PHUIInfoView())
       ->setID($browser_status_id)

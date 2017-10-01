@@ -313,6 +313,15 @@ abstract class PhabricatorEditEngine
 
 
   /**
+   * @task text
+   */
+  protected function getPageHeader($object) {
+    return null;
+  }
+
+
+
+  /**
    * Return a human-readable header describing what this engine is used to do,
    * like "Configure Maniphest Task Forms".
    *
@@ -1169,6 +1178,9 @@ abstract class PhabricatorEditEngine
 
     $form = $this->buildEditForm($object, $fields);
 
+    $crumbs = $this->buildCrumbs($object, $final = true);
+    $crumbs->setBorder(true);
+
     if ($request->isAjax()) {
       return $this->getController()
         ->newDialog()
@@ -1180,21 +1192,18 @@ abstract class PhabricatorEditEngine
         ->addSubmitButton($submit_button);
     }
 
-    $crumbs = $this->buildCrumbs($object, $final = true);
-
-    $header = id(new PHUIHeaderView())
+    $box_header = id(new PHUIHeaderView())
       ->setHeader($header_text);
-    $crumbs->setBorder(true);
 
     if ($action_button) {
-      $header->addActionLink($action_button);
+      $box_header->addActionLink($action_button);
     }
 
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
-      ->setHeaderText($this->getObjectName())
+      ->setHeader($box_header)
       ->setValidationException($validation_exception)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->appendChild($form);
 
     // This is fairly questionable, but in use by Settings.
@@ -1209,8 +1218,9 @@ abstract class PhabricatorEditEngine
 
     $view = new PHUITwoColumnView();
 
-    if ($header) {
-      $view->setHeader($header);
+    $page_header = $this->getPageHeader($object);
+    if ($page_header) {
+      $view->setHeader($page_header);
     }
 
     $page = $controller->newPage()
