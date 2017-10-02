@@ -203,16 +203,29 @@ abstract class PhabricatorApplicationTransactionQuery
       $xaction = $this->getTemplateApplicationTransaction();
       $comment = $xaction->getApplicationTransactionCommentObject();
 
-      if ($this->withComments) {
-        $joins[] = qsprintf(
-          $conn,
-          'JOIN %T c ON x.phid = c.transactionPHID',
-          $comment->getTableName());
+      // Not every transaction type has comments, so we may be able to
+      // implement this constraint trivially.
+
+      if (!$comment) {
+        if ($this->withComments) {
+          throw new PhabricatorEmptyQueryException();
+        } else {
+          // If we're querying for transactions with no comments and the
+          // transaction type does not support comments, we don't need to
+          // do anything.
+        }
       } else {
-        $joins[] = qsprintf(
-          $conn,
-          'LEFT JOIN %T c ON x.phid = c.transactionPHID',
-          $comment->getTableName());
+        if ($this->withComments) {
+          $joins[] = qsprintf(
+            $conn,
+            'JOIN %T c ON x.phid = c.transactionPHID',
+            $comment->getTableName());
+        } else {
+          $joins[] = qsprintf(
+            $conn,
+            'LEFT JOIN %T c ON x.phid = c.transactionPHID',
+            $comment->getTableName());
+        }
       }
     }
 
