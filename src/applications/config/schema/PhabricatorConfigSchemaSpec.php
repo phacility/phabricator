@@ -73,6 +73,12 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $engine->getNgramsTableName(),
       $engine->getNgramsSchemaColumns(),
       $engine->getNgramsSchemaKeys());
+
+    $this->buildRawSchema(
+      $engine->getApplicationName(),
+      $engine->getCommonNgramsTableName(),
+      $engine->getCommonNgramsSchemaColumns(),
+      $engine->getCommonNgramsSchemaKeys());
   }
 
   protected function buildRawSchema(

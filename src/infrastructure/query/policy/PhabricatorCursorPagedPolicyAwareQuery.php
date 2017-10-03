@@ -1700,6 +1700,34 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
+    // Remove common ngrams, like "the", which occur too frequently in
+    // documents to be useful in constraining the query. The best ngrams
+    // are obscure sequences which occur in very few documents.
+
+    if ($flat) {
+      $common_ngrams = queryfx_all(
+        $conn,
+        'SELECT ngram FROM %T WHERE ngram IN (%Ls)',
+        $engine->getCommonNgramsTableName(),
+        ipull($flat, 'ngram'));
+      $common_ngrams = ipull($common_ngrams, 'ngram', 'ngram');
+
+      foreach ($flat as $key => $spec) {
+        $ngram = $spec['ngram'];
+        if (isset($common_ngrams[$ngram])) {
+          unset($flat[$key]);
+          continue;
+        }
+
+        // NOTE: MySQL discards trailing whitespace in CHAR(X) columns.
+        $trim_ngram = rtrim($ngram, ' ');
+        if (isset($common_ngrams[$trim_ngram])) {
+          unset($flat[$key]);
+          continue;
+        }
+      }
+    }
+
     // MySQL only allows us to join a maximum of 61 tables per query. Each
     // ngram is going to cost us a join toward that limit, so if the user
     // specified a very long query string, just pick 16 of the ngrams

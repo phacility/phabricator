@@ -22,17 +22,27 @@ final class DiffusionCommitController extends DiffusionController {
 
     $drequest = $this->getDiffusionRequest();
     $viewer = $request->getUser();
+    $repository = $drequest->getRepository();
+    $commit_identifier = $drequest->getCommit();
+
+    // If this page is being accessed via "/source/xyz/commit/...", redirect
+    // to the canonical URI.
+    $has_callsign = strlen($request->getURIData('repositoryCallsign'));
+    $has_id = strlen($request->getURIData('repositoryID'));
+    if (!$has_callsign && !$has_id) {
+      $canonical_uri = $repository->getCommitURI($commit_identifier);
+      return id(new AphrontRedirectResponse())
+        ->setURI($canonical_uri);
+    }
 
     if ($request->getStr('diff')) {
       return $this->buildRawDiffResponse($drequest);
     }
 
-    $repository = $drequest->getRepository();
-
     $commit = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withRepository($repository)
-      ->withIdentifiers(array($drequest->getCommit()))
+      ->withIdentifiers(array($commit_identifier))
       ->needCommitData(true)
       ->needAuditRequests(true)
       ->executeOne();

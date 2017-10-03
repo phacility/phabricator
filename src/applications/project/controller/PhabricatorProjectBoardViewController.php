@@ -313,6 +313,12 @@ final class PhabricatorProjectBoardViewController
           $columns = $move_engine->getColumns($move_project->getPHID());
           $columns = mpull($columns, null, 'getPHID');
 
+          foreach ($columns as $key => $column) {
+            if ($column->isHidden()) {
+              unset($columns[$key]);
+            }
+          }
+
           $move_column_phid = $request->getStr('moveColumnPHID');
           if (!$move_column_phid) {
             if ($request->getBool('hasColumn')) {

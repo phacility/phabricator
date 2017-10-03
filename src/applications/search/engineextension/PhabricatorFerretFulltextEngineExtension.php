@@ -165,21 +165,46 @@ final class PhabricatorFerretFulltextEngineExtension
             $ferret_field['normalCorpus']);
       }
 
-      $sql = array();
-      foreach ($ngrams as $ngram) {
-        $sql[] = qsprintf(
+      if ($ngrams) {
+        $common = queryfx_all(
           $conn,
-          '(%d, %s)',
-          $document_id,
-          $ngram);
+          'SELECT ngram FROM %T WHERE ngram IN (%Ls)',
+          $engine->getCommonNgramsTableName(),
+          $ngrams);
+        $common = ipull($common, 'ngram', 'ngram');
+
+        foreach ($ngrams as $key => $ngram) {
+          if (isset($common[$ngram])) {
+            unset($ngrams[$key]);
+            continue;
+          }
+
+          // NOTE: MySQL discards trailing whitespace in CHAR(X) columns.
+          $trim_ngram = rtrim($ngram, ' ');
+          if (isset($common[$ngram])) {
+            unset($ngrams[$key]);
+            continue;
+          }
+        }
       }
 
-      foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
-        queryfx(
-          $conn,
-          'INSERT INTO %T (documentID, ngram) VALUES %Q',
-          $engine->getNgramsTableName(),
-          $chunk);
+      if ($ngrams) {
+        $sql = array();
+        foreach ($ngrams as $ngram) {
+          $sql[] = qsprintf(
+            $conn,
+            '(%d, %s)',
+            $document_id,
+            $ngram);
+        }
+
+        foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
+          queryfx(
+            $conn,
+            'INSERT INTO %T (documentID, ngram) VALUES %Q',
+            $engine->getNgramsTableName(),
+            $chunk);
+        }
       }
     } catch (Exception $ex) {
       $object->killTransaction();
