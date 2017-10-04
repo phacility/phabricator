@@ -31,6 +31,13 @@ final class PhabricatorStorageManagementDumpWorkflow
               'of a plaintext file.'),
           ),
           array(
+            'name' => 'no-indexes',
+            'help' => pht(
+              'Do not dump data in rebuildable index tables. This means '.
+              'backups are smaller and faster, but you will need to manually '.
+              'rebuild indexes after performing a restore.'),
+          ),
+          array(
             'name' => 'overwrite',
             'help' => pht(
               'With __--output__, overwrite the output file if it already '.
@@ -49,6 +56,8 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     $console = PhutilConsole::getConsole();
 
+    $with_indexes = !$args->getArg('no-indexes');
+
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
       $namespace = $api->getNamespace();
@@ -65,18 +74,58 @@ final class PhabricatorStorageManagementDumpWorkflow
     $ref = $api->getRef();
     $ref_key = $ref->getRefKey();
 
-    $schemata_map = id(new PhabricatorConfigSchemaQuery())
+    $schemata_query = id(new PhabricatorConfigSchemaQuery())
       ->setAPIs(array($api))
-      ->setRefs(array($ref))
-      ->loadActualSchemata();
-    $schemata = $schemata_map[$ref_key];
+      ->setRefs(array($ref));
+
+    $actual_map = $schemata_query->loadActualSchemata();
+    $expect_map = $schemata_query->loadExpectedSchemata();
+
+    $schemata = $actual_map[$ref_key];
+    $expect = $expect_map[$ref_key];
 
     $targets = array();
     foreach ($schemata->getDatabases() as $database_name => $database) {
+      $expect_database = $expect->getDatabase($database_name);
       foreach ($database->getTables() as $table_name => $table) {
+
+        // NOTE: It's possible for us to find tables in these database which
+        // we don't expect to be there. For example, an older version of
+        // Phabricator may have had a table that was later dropped. We assume
+        // these are data tables and always dump them, erring on the side of
+        // caution.
+
+        $persistence = PhabricatorConfigTableSchema::PERSISTENCE_DATA;
+        if ($expect_database) {
+          $expect_table = $expect_database->getTable($table_name);
+          if ($expect_table) {
+            $persistence = $expect_table->getPersistenceType();
+          }
+        }
+
+        switch ($persistence) {
+          case PhabricatorConfigTableSchema::PERSISTENCE_CACHE:
+            // When dumping tables, leave the data in cache tables in the
+            // database. This will be automatically rebuild after the data
+            // is restored and does not need to be persisted in backups.
+            $with_data = false;
+            break;
+          case PhabricatorConfigTableSchema::PERSISTENCE_INDEX:
+            // When dumping tables, leave index data behind of the caller
+            // specified "--no-indexes". These tables can be rebuilt manually
+            // from other tables, but do not rebuild automatically.
+            $with_data = $with_indexes;
+            break;
+          case PhabricatorConfigTableSchema::PERSISTENCE_DATA:
+          default:
+            $with_data = true;
+            break;
+        }
+
         $targets[] = array(
           'database' => $database_name,
           'table' => $table_name,
+          'data' => $with_data,
         );
       }
     }
@@ -146,6 +195,10 @@ final class PhabricatorStorageManagementDumpWorkflow
     $commands = array();
     foreach ($targets as $target) {
       $target_argv = $argv;
+
+      if (!$target['data']) {
+        $target_argv[] = '--no-data';
+      }
 
       if ($has_password) {
         $commands[] = csprintf(
