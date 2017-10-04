@@ -62,7 +62,24 @@ final class PhabricatorStorageManagementDumpWorkflow
       return 1;
     }
 
-    $databases = $api->getDatabaseList($patches, true);
+    $ref = $api->getRef();
+    $ref_key = $ref->getRefKey();
+
+    $schemata_map = id(new PhabricatorConfigSchemaQuery())
+      ->setAPIs(array($api))
+      ->setRefs(array($ref))
+      ->loadActualSchemata();
+    $schemata = $schemata_map[$ref_key];
+
+    $targets = array();
+    foreach ($schemata->getDatabases() as $database_name => $database) {
+      foreach ($database->getTables() as $table_name => $table) {
+        $targets[] = array(
+          'database' => $database_name,
+          'table' => $table_name,
+        );
+      }
+    }
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
@@ -126,17 +143,28 @@ final class PhabricatorStorageManagementDumpWorkflow
       $argv[] = $port;
     }
 
-    $argv[] = '--databases';
-    foreach ($databases as $database) {
-      $argv[] = $database;
+    $commands = array();
+    foreach ($targets as $target) {
+      $target_argv = $argv;
+
+      if ($has_password) {
+        $commands[] = csprintf(
+          'mysqldump -p%P %Ls -- %R %R',
+          $password,
+          $target_argv,
+          $target['database'],
+          $target['table']);
+      } else {
+        $command = csprintf(
+          'mysqldump %Ls -- %R %R',
+          $target_argv,
+          $target['database'],
+          $target['table']);
+      }
+
+      $commands[] = $command;
     }
 
-
-    if ($has_password) {
-      $command = csprintf('mysqldump -p%P %Ls', $password, $argv);
-    } else {
-      $command = csprintf('mysqldump %Ls', $argv);
-    }
 
     // Decrease the CPU priority of this process so it doesn't contend with
     // other more important things.
@@ -144,17 +172,13 @@ final class PhabricatorStorageManagementDumpWorkflow
       proc_nice(19);
     }
 
-
-    // If we aren't writing to a file, just passthru the command.
-    if ($output_file === null) {
-      return phutil_passthru('%C', $command);
-    }
-
     // If we are writing to a file, stream the command output to disk. This
     // mode makes sure the whole command fails if there's an error (commonly,
     // a full disk). See T6996 for discussion.
 
-    if ($is_compress) {
+    if ($output_file === null) {
+      $file = null;
+    } else if ($is_compress) {
       $file = gzopen($output_file, 'wb1');
     } else {
       $file = fopen($output_file, 'wb');
@@ -167,41 +191,47 @@ final class PhabricatorStorageManagementDumpWorkflow
           $file));
     }
 
-    $future = new ExecFuture('%C', $command);
-
     try {
-      $iterator = id(new FutureIterator(array($future)))
-        ->setUpdateInterval(0.100);
-      foreach ($iterator as $ready) {
-        list($stdout, $stderr) = $future->read();
-        $future->discardBuffers();
+      foreach ($commands as $command) {
+        $future = new ExecFuture('%C', $command);
 
-        if (strlen($stderr)) {
-          fwrite(STDERR, $stderr);
-        }
+        $iterator = id(new FutureIterator(array($future)))
+          ->setUpdateInterval(0.100);
+        foreach ($iterator as $ready) {
+          list($stdout, $stderr) = $future->read();
+          $future->discardBuffers();
 
-        if (strlen($stdout)) {
-          if ($is_compress) {
-            $ok = gzwrite($file, $stdout);
-          } else {
-            $ok = fwrite($file, $stdout);
+          if (strlen($stderr)) {
+            fwrite(STDERR, $stderr);
           }
 
-          if ($ok !== strlen($stdout)) {
-            throw new Exception(
-              pht(
-                'Failed to write %d byte(s) to file "%s".',
-                new PhutilNumber(strlen($stdout)),
-                $output_file));
-          }
-        }
+          if (strlen($stdout)) {
+            if (!$file) {
+              $ok = fwrite(STDOUT, $stdout);
+            } else if ($is_compress) {
+              $ok = gzwrite($file, $stdout);
+            } else {
+              $ok = fwrite($file, $stdout);
+            }
 
-        if ($ready !== null) {
-          $ready->resolvex();
+            if ($ok !== strlen($stdout)) {
+              throw new Exception(
+                pht(
+                  'Failed to write %d byte(s) to file "%s".',
+                  new PhutilNumber(strlen($stdout)),
+                  $output_file));
+            }
+          }
+
+          if ($ready !== null) {
+            $ready->resolvex();
+          }
         }
       }
 
-      if ($is_compress) {
+      if (!$file) {
+        $ok = true;
+      } else if ($is_compress) {
         $ok = gzclose($file);
       } else {
         $ok = fclose($file);
@@ -218,7 +248,9 @@ final class PhabricatorStorageManagementDumpWorkflow
       // we don't leave any confusing artifacts laying around.
 
       try {
-        Filesystem::remove($output_file);
+        if ($file !== null) {
+          Filesystem::remove($output_file);
+        }
       } catch (Exception $ex) {
         // Ignore any errors we hit.
       }
