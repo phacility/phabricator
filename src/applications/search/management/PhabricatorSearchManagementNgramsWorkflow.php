@@ -6,7 +6,10 @@ final class PhabricatorSearchManagementNgramsWorkflow
   protected function didConstruct() {
     $this
       ->setName('ngrams')
-      ->setSynopsis(pht('Recompute common ngrams.'))
+      ->setSynopsis(
+        pht(
+          'Recompute common ngrams. This is an advanced workflow that '.
+          'can harm search quality if used improperly.'))
       ->setArguments(
         array(
           array(
