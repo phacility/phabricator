@@ -31,6 +31,13 @@ final class PhabricatorStorageManagementDumpWorkflow
               'of a plaintext file.'),
           ),
           array(
+            'name' => 'no-indexes',
+            'help' => pht(
+              'Do not dump data in rebuildable index tables. This means '.
+              'backups are smaller and faster, but you will need to manually '.
+              'rebuild indexes after performing a restore.'),
+          ),
+          array(
             'name' => 'overwrite',
             'help' => pht(
               'With __--output__, overwrite the output file if it already '.
@@ -49,6 +56,8 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     $console = PhutilConsole::getConsole();
 
+    $with_indexes = !$args->getArg('no-indexes');
+
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
       $namespace = $api->getNamespace();
@@ -62,7 +71,64 @@ final class PhabricatorStorageManagementDumpWorkflow
       return 1;
     }
 
-    $databases = $api->getDatabaseList($patches, true);
+    $ref = $api->getRef();
+    $ref_key = $ref->getRefKey();
+
+    $schemata_query = id(new PhabricatorConfigSchemaQuery())
+      ->setAPIs(array($api))
+      ->setRefs(array($ref));
+
+    $actual_map = $schemata_query->loadActualSchemata();
+    $expect_map = $schemata_query->loadExpectedSchemata();
+
+    $schemata = $actual_map[$ref_key];
+    $expect = $expect_map[$ref_key];
+
+    $targets = array();
+    foreach ($schemata->getDatabases() as $database_name => $database) {
+      $expect_database = $expect->getDatabase($database_name);
+      foreach ($database->getTables() as $table_name => $table) {
+
+        // NOTE: It's possible for us to find tables in these database which
+        // we don't expect to be there. For example, an older version of
+        // Phabricator may have had a table that was later dropped. We assume
+        // these are data tables and always dump them, erring on the side of
+        // caution.
+
+        $persistence = PhabricatorConfigTableSchema::PERSISTENCE_DATA;
+        if ($expect_database) {
+          $expect_table = $expect_database->getTable($table_name);
+          if ($expect_table) {
+            $persistence = $expect_table->getPersistenceType();
+          }
+        }
+
+        switch ($persistence) {
+          case PhabricatorConfigTableSchema::PERSISTENCE_CACHE:
+            // When dumping tables, leave the data in cache tables in the
+            // database. This will be automatically rebuild after the data
+            // is restored and does not need to be persisted in backups.
+            $with_data = false;
+            break;
+          case PhabricatorConfigTableSchema::PERSISTENCE_INDEX:
+            // When dumping tables, leave index data behind of the caller
+            // specified "--no-indexes". These tables can be rebuilt manually
+            // from other tables, but do not rebuild automatically.
+            $with_data = $with_indexes;
+            break;
+          case PhabricatorConfigTableSchema::PERSISTENCE_DATA:
+          default:
+            $with_data = true;
+            break;
+        }
+
+        $targets[] = array(
+          'database' => $database_name,
+          'table' => $table_name,
+          'data' => $with_data,
+        );
+      }
+    }
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
@@ -126,17 +192,32 @@ final class PhabricatorStorageManagementDumpWorkflow
       $argv[] = $port;
     }
 
-    $argv[] = '--databases';
-    foreach ($databases as $database) {
-      $argv[] = $database;
+    $commands = array();
+    foreach ($targets as $target) {
+      $target_argv = $argv;
+
+      if (!$target['data']) {
+        $target_argv[] = '--no-data';
+      }
+
+      if ($has_password) {
+        $commands[] = csprintf(
+          'mysqldump -p%P %Ls -- %R %R',
+          $password,
+          $target_argv,
+          $target['database'],
+          $target['table']);
+      } else {
+        $command = csprintf(
+          'mysqldump %Ls -- %R %R',
+          $target_argv,
+          $target['database'],
+          $target['table']);
+      }
+
+      $commands[] = $command;
     }
 
-
-    if ($has_password) {
-      $command = csprintf('mysqldump -p%P %Ls', $password, $argv);
-    } else {
-      $command = csprintf('mysqldump %Ls', $argv);
-    }
 
     // Decrease the CPU priority of this process so it doesn't contend with
     // other more important things.
@@ -144,17 +225,13 @@ final class PhabricatorStorageManagementDumpWorkflow
       proc_nice(19);
     }
 
-
-    // If we aren't writing to a file, just passthru the command.
-    if ($output_file === null) {
-      return phutil_passthru('%C', $command);
-    }
-
     // If we are writing to a file, stream the command output to disk. This
     // mode makes sure the whole command fails if there's an error (commonly,
     // a full disk). See T6996 for discussion.
 
-    if ($is_compress) {
+    if ($output_file === null) {
+      $file = null;
+    } else if ($is_compress) {
       $file = gzopen($output_file, 'wb1');
     } else {
       $file = fopen($output_file, 'wb');
@@ -167,41 +244,47 @@ final class PhabricatorStorageManagementDumpWorkflow
           $file));
     }
 
-    $future = new ExecFuture('%C', $command);
-
     try {
-      $iterator = id(new FutureIterator(array($future)))
-        ->setUpdateInterval(0.100);
-      foreach ($iterator as $ready) {
-        list($stdout, $stderr) = $future->read();
-        $future->discardBuffers();
+      foreach ($commands as $command) {
+        $future = new ExecFuture('%C', $command);
 
-        if (strlen($stderr)) {
-          fwrite(STDERR, $stderr);
-        }
+        $iterator = id(new FutureIterator(array($future)))
+          ->setUpdateInterval(0.100);
+        foreach ($iterator as $ready) {
+          list($stdout, $stderr) = $future->read();
+          $future->discardBuffers();
 
-        if (strlen($stdout)) {
-          if ($is_compress) {
-            $ok = gzwrite($file, $stdout);
-          } else {
-            $ok = fwrite($file, $stdout);
+          if (strlen($stderr)) {
+            fwrite(STDERR, $stderr);
           }
 
-          if ($ok !== strlen($stdout)) {
-            throw new Exception(
-              pht(
-                'Failed to write %d byte(s) to file "%s".',
-                new PhutilNumber(strlen($stdout)),
-                $output_file));
-          }
-        }
+          if (strlen($stdout)) {
+            if (!$file) {
+              $ok = fwrite(STDOUT, $stdout);
+            } else if ($is_compress) {
+              $ok = gzwrite($file, $stdout);
+            } else {
+              $ok = fwrite($file, $stdout);
+            }
 
-        if ($ready !== null) {
-          $ready->resolvex();
+            if ($ok !== strlen($stdout)) {
+              throw new Exception(
+                pht(
+                  'Failed to write %d byte(s) to file "%s".',
+                  new PhutilNumber(strlen($stdout)),
+                  $output_file));
+            }
+          }
+
+          if ($ready !== null) {
+            $ready->resolvex();
+          }
         }
       }
 
-      if ($is_compress) {
+      if (!$file) {
+        $ok = true;
+      } else if ($is_compress) {
         $ok = gzclose($file);
       } else {
         $ok = fclose($file);
@@ -218,7 +301,9 @@ final class PhabricatorStorageManagementDumpWorkflow
       // we don't leave any confusing artifacts laying around.
 
       try {
-        Filesystem::remove($output_file);
+        if ($file !== null) {
+          Filesystem::remove($output_file);
+        }
       } catch (Exception $ex) {
         // Ignore any errors we hit.
       }

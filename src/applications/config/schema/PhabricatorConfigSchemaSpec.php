@@ -56,30 +56,52 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   }
 
   protected function buildFerretIndexSchema(PhabricatorFerretEngine $engine) {
+    $index_options = array(
+      'persistence' => PhabricatorConfigTableSchema::PERSISTENCE_INDEX,
+    );
+
     $this->buildRawSchema(
       $engine->getApplicationName(),
       $engine->getDocumentTableName(),
       $engine->getDocumentSchemaColumns(),
-      $engine->getDocumentSchemaKeys());
+      $engine->getDocumentSchemaKeys(),
+      $index_options);
 
     $this->buildRawSchema(
       $engine->getApplicationName(),
       $engine->getFieldTableName(),
       $engine->getFieldSchemaColumns(),
-      $engine->getFieldSchemaKeys());
+      $engine->getFieldSchemaKeys(),
+      $index_options);
 
     $this->buildRawSchema(
       $engine->getApplicationName(),
       $engine->getNgramsTableName(),
       $engine->getNgramsSchemaColumns(),
-      $engine->getNgramsSchemaKeys());
+      $engine->getNgramsSchemaKeys(),
+      $index_options);
+
+    $this->buildRawSchema(
+      $engine->getApplicationName(),
+      $engine->getCommonNgramsTableName(),
+      $engine->getCommonNgramsSchemaColumns(),
+      $engine->getCommonNgramsSchemaKeys(),
+      $index_options);
   }
 
   protected function buildRawSchema(
     $database_name,
     $table_name,
     array $columns,
-    array $keys) {
+    array $keys,
+    array $options = array()) {
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'persistence' => 'optional string',
+      ));
+
     $database = $this->getDatabase($database_name);
 
     $table = $this->newTable($table_name);
@@ -136,6 +158,11 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $key->setIndexType(idx($key_spec, 'type', 'BTREE'));
 
       $table->addKey($key);
+    }
+
+    $persistence_type = idx($options, 'persistence');
+    if ($persistence_type !== null) {
+      $table->setPersistenceType($persistence_type);
     }
 
     $database->addTable($table);

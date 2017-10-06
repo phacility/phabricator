@@ -21,6 +21,9 @@ final class DifferentialSchemaSpec extends PhabricatorConfigSchemaSpec {
         'dateCreated' => array(
           'columns' => array('dateCreated'),
         ),
+      ),
+      array(
+        'persistence' => PhabricatorConfigTableSchema::PERSISTENCE_CACHE,
       ));
 
     $this->buildRawSchema(

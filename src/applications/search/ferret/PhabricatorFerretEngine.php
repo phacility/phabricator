@@ -295,4 +295,35 @@ abstract class PhabricatorFerretEngine extends Phobject {
     );
   }
 
+  public function getCommonNgramsTableName() {
+    $application = $this->getApplicationName();
+    $scope = $this->getScopeName();
+
+    return "{$application}_{$scope}_fngrams_common";
+  }
+
+  public function getCommonNgramsSchemaColumns() {
+    return array(
+      'id' => 'auto',
+      'ngram' => 'char3',
+      'needsCollection' => 'bool',
+    );
+  }
+
+  public function getCommonNgramsSchemaKeys() {
+    return array(
+      'PRIMARY' => array(
+        'columns' => array('id'),
+        'unique' => true,
+      ),
+      'key_ngram' => array(
+        'columns' => array('ngram'),
+        'unique' => true,
+      ),
+      'key_collect' => array(
+        'columns' => array('needsCollection'),
+      ),
+    );
+  }
+
 }

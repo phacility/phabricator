@@ -14,7 +14,7 @@ are:
   - performance and capacity may improve.
 
 This configuration is relatively simple, but has a small impact on availability
-and does nothing to increase resitance to data loss.
+and does nothing to increase resistance to data loss.
 
 
 Clustering Design Goals
