@@ -237,7 +237,7 @@ final class PhabricatorStorageManagementDumpWorkflow
       $file = fopen($output_file, 'wb');
     }
 
-    if (!$file) {
+    if (($output_file !== null) && !$file) {
       throw new Exception(
         pht(
           'Failed to open file "%s" for writing.',
