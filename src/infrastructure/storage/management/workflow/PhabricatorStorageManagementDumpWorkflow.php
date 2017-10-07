@@ -201,7 +201,7 @@ final class PhabricatorStorageManagementDumpWorkflow
       }
 
       if ($has_password) {
-        $commands[] = csprintf(
+        $command = csprintf(
           'mysqldump -p%P %Ls -- %R %R',
           $password,
           $target_argv,
