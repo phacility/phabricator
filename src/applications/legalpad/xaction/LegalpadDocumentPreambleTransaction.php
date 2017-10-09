@@ -3,6 +3,7 @@
 final class LegalpadDocumentPreambleTransaction
   extends LegalpadDocumentTransactionType {
 
+  // TODO: This is misspelled! See T13005.
   const TRANSACTIONTYPE = 'legalpad:premable';
 
   public function generateOldValue($object) {

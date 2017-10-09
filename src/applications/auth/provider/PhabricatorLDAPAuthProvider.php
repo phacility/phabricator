@@ -192,6 +192,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
   const KEY_VERSION                 = 'ldap:version';
   const KEY_REFERRALS               = 'ldap:referrals';
   const KEY_START_TLS               = 'ldap:start-tls';
+  // TODO: This is misspelled! See T13005.
   const KEY_ANONYMOUS_USERNAME      = 'ldap:anoynmous-username';
   const KEY_ANONYMOUS_PASSWORD      = 'ldap:anonymous-password';
   const KEY_ALWAYS_SEARCH           = 'ldap:always-search';
