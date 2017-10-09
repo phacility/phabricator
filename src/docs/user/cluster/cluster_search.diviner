@@ -100,14 +100,14 @@ A typical `mysql` service configuration looks like this:
 Service Type: Elasticsearch
 ======================
 
-The `elasticsearch` sevice type supports these options:
+The `elasticsearch` service type supports these options:
 
 | Key | Description |
 |---|---|
 | `protocol` | Either `"http"` (default) or `"https"`.
 | `port` | Elasticsearch TCP port.
 | `version` | Elasticsearch version, either `2` or `5` (default).
-| `path` | Path for the index. Defaults to `/phabriator`. Advanced.
+| `path` | Path for the index. Defaults to `/phabricator`. Advanced.
 
 A typical `elasticsearch` service configuration looks like this:
 

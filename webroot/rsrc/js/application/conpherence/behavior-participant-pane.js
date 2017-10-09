@@ -69,7 +69,7 @@ JX.behavior('conpherence-participant-pane', function() {
       // While the user is removing themselves, disable the notification
       // update behavior. If we don't do this, the user can get an error
       // when they remove themselves about permissions as the notification
-      // code tries to load what jist happened.
+      // code tries to load what just happened.
       var loadedPhid = threadManager.getLoadedThreadPHID();
       threadManager.setLoadedThreadPHID(null);
 

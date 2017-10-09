@@ -290,7 +290,7 @@ final class ConpherenceThreadQuery
       ->withObjectPHIDs(array_keys($conpherences))
       ->needHandles(true);
 
-    // We have to flip these for the underyling query class. The semantics of
+    // We have to flip these for the underlying query class. The semantics of
     // paging are tricky business.
     if ($this->afterTransactionID) {
       $query->setBeforeID($this->afterTransactionID);

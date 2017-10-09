@@ -101,7 +101,7 @@ final class DiffusionMercurialWireProtocol extends Phobject {
 
   /** If the server version is running 3.4+ it will respond
    * with 'bundle2' capability in the format of "bundle2=(url-encoding)".
-   * Until we maange to properly package up bundles to send back we
+   * Until we manage to properly package up bundles to send back we
    * disallow the client from knowing we speak bundle2 by removing it
    * from the capabilities listing.
    *

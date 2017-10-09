@@ -216,7 +216,7 @@ final class PhabricatorRepositoryMercurialCommitChangeParserWorker
           $changes[$path]['changeType']
             = DifferentialChangeType::TYPE_COPY_AWAY;
         } else if ($existing_type == DifferentialChangeType::TYPE_ADD) {
-          // This change removes a diretory and replaces it with a file. Mark
+          // This change removes a directory and replaces it with a file. Mark
           // it as "change" instead of "add".
           $changes[$path]['changeType'] = DifferentialChangeType::TYPE_CHANGE;
         }

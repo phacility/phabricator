@@ -47,7 +47,7 @@ operations on trusted hosts. For additional discussion, see
 
 This also broadly prevents Drydock from surprising you by coming up with a
 valid but unintended solution to an allocation problem which runs some
-operation on resources that are techincally suitable but not desirable. For
+operation on resources that are technically suitable but not desirable. For
 example, you may not want your Android builds running on your iPhone build
 tier, even if there's no technical reason they can't.
 

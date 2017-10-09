@@ -100,7 +100,7 @@ final class DrydockAuthorization extends DrydockDAO
   }
 
   /**
-   * Apply external authorization effects after a user chagnes the value of a
+   * Apply external authorization effects after a user changes the value of a
    * blueprint selector control an object.
    *
    * @param PhabricatorUser User applying the change.

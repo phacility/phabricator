@@ -46,7 +46,7 @@ final class PhabricatorTimezoneSetting
 
     throw new Exception(
       pht(
-        'Timezone "%s" is not a valid timezone identiifer.',
+        'Timezone "%s" is not a valid timezone identifier.',
         $value));
   }
 

@@ -63,7 +63,7 @@ final class PhabricatorMailManagementUnverifyWorkflow
         echo tsprintf(
           "%s\n",
           pht(
-            'Address "%s" (owned by "%s") is already unveriifed.',
+            'Address "%s" (owned by "%s") is already unverified.',
             $address,
             $user->getUsername()));
         continue;

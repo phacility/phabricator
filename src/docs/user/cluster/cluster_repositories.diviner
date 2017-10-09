@@ -440,7 +440,7 @@ device or devices have up-to-date information.
 
 When Phabricator can not tell which device in a cluster is a leader, it freezes
 the cluster because it is possible that some devices have less data and others
-have more, and if it choses a leader arbitrarily it may destroy some data
+have more, and if it chooses a leader arbitrarily it may destroy some data
 which you would prefer to retain.
 
 To resolve this, you need to tell Phabricator which device has the most

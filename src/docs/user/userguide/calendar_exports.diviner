@@ -61,7 +61,7 @@ To export a group of events:
     - Example: All events tagged `#meetup`.
   - Select the {nav Use Results... > Export Query as .ics} action to turn
     the query into an export.
-  - Name the export with a descritive name.
+  - Name the export with a descriptive name.
   - Select a policy mode for the export (see below for discussion).
   - Click {nav Create New Export} to finish the process.
 

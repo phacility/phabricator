@@ -82,7 +82,7 @@ final class PhabricatorHandleList
       if (!isset($this[$phid])) {
         throw new Exception(
           pht(
-            'Trying to create a new sublist of an existsing handle list, '.
+            'Trying to create a new sublist of an existing handle list, '.
             'but PHID "%s" does not appear in the parent list.',
             $phid));
       }

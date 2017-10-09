@@ -97,7 +97,7 @@ final class PhabricatorProjectColumnQuery
       if ($proxy_phid !== null) {
         $proxy = idx($proxies, $proxy_phid);
 
-        // Only attach valid proxies, so we don't end up getting surprsied if
+        // Only attach valid proxies, so we don't end up getting surprised if
         // an install somehow gets junk into their database.
         if (!($proxy instanceof PhabricatorColumnProxyInterface)) {
           $proxy = null;

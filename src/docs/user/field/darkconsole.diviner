@@ -131,7 +131,7 @@ Generally, this column can help pinpoint these kinds of problems:
   - Unbatched queries which should be batched (see
     @{article:Performance: N+1 Query Problem}).
   - Opportunities to improve performance with caching.
-  - General goofiness in how service calls are woking.
+  - General goofiness in how service calls are working.
 
 If the services tab looks fine, and particularly if a page is slow but the
 "All Services" cost is small, that may indicate a problem in PHP. The best

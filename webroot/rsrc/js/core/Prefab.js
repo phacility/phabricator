@@ -184,7 +184,7 @@ JX.install('Prefab', {
       var self_hits = {};
 
       // We'll put matches where the user's input is a prefix of the name
-      // above mathches where that isn't true.
+      // above matches where that isn't true.
       var prefix_hits = {};
 
       var tokens = this.tokenize(value);
@@ -212,7 +212,7 @@ JX.install('Prefab', {
         }
 
         // If one result is open and one is closed, show the open result
-        // first. The "!" tricks here are becaused closed values are display
+        // first. The "!" tricks here are because closed values are display
         // strings, so the value is either `null` or some truthy string. If
         // we compare the values directly, we'll apply this rule to two
         // objects which are both closed but for different reasons, like

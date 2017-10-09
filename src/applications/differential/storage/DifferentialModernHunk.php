@@ -128,7 +128,7 @@ final class DifferentialModernHunk extends DifferentialHunk {
     $this->setData($file->getPHID());
 
     // NOTE: Because hunks don't have a PHID and we just load hunk data with
-    // the ominipotent viewer, we do not need to attach the file to anything.
+    // the omnipotent viewer, we do not need to attach the file to anything.
 
     $result = $this->save();
 

@@ -112,7 +112,7 @@ final class HeraldCommitAdapter
     $phids[] = $repository_phid;
 
     // NOTE: This is projects for the repository, not for the commit. When
-    // Herald evalutes, commits normally can not have any project tags yet.
+    // Herald evaluates, commits normally can not have any project tags yet.
     $repository_project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository_phid,
       $project_type);

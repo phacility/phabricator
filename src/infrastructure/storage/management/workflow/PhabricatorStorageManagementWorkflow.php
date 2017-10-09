@@ -181,8 +181,8 @@ abstract class PhabricatorStorageManagementWorkflow
     if (!$this->force && !$api->isCharacterSetAvailable('utf8mb4')) {
       $message = pht(
         "You have an old version of MySQL (older than 5.5) which does not ".
-        "support the utf8mb4 character set. We strongly recomend upgrading to ".
-        "5.5 or newer.\n\n".
+        "support the utf8mb4 character set. We strongly recommend upgrading ".
+        "to 5.5 or newer.\n\n".
         "If you apply adjustments now and later update MySQL to 5.5 or newer, ".
         "you'll need to apply adjustments again (and they will take a long ".
         "time).\n\n".

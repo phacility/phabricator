@@ -199,7 +199,7 @@ abstract class DrydockWorker extends PhabricatorWorker {
     $viewer = $this->getViewer();
 
     // Don't reclaim a resource if it has been updated recently. If two
-    // leases are fighting, we don't want them to keep reclaming resources
+    // leases are fighting, we don't want them to keep reclaiming resources
     // from one another forever without making progress, so make resources
     // immune to reclamation for a little while after they activate or update.
 

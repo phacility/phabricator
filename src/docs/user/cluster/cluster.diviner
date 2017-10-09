@@ -225,7 +225,7 @@ Cluster: Notifications
 Configuring multiple notification hosts is simple and has no pre-requisites.
 
 With multiple notification hosts, you can survive the loss of any subset of
-hosts as long as at least one host remains alive. Service may be breifly
+hosts as long as at least one host remains alive. Service may be briefly
 disrupted directly after the incident which destroys the other hosts.
 
 Notifications are noncritical, so this normally has little practical impact

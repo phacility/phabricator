@@ -151,7 +151,7 @@ vcs-user ALL=(daemon-user) SETENV: NOPASSWD: /path/to/x, /path/to/y, ...
 
 This is just a template. In the real configuration file, you need to:
 
-  - Replace `www-user`, `dameon-user` and `vcs-user` with the correct
+  - Replace `www-user`, `daemon-user` and `vcs-user` with the correct
     usernames for your system.
   - List every binary that these users need access to, as described above.
   - Make sure each binary path is the full path to the correct binary location

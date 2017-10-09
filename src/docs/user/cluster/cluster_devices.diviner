@@ -212,7 +212,7 @@ $ ./bin/almanac register \
 For example, you might run this command on `repo001` when using a shared key:
 
 ```
-$ ./bin/almanac register
+$ ./bin/almanac register \
   --device keywarden.mycompany.net \
   --private-key /path/to/private-key \
   --identify-as repo001.mycompany.net

@@ -132,7 +132,7 @@ final class PhabricatorCalendarEventInviteTransaction
         $this->renderHandleList($rem));
     } else {
       return pht(
-        '%s invited %s attendee(s): %s; uninvinted %s attendee(s): %s.',
+        '%s invited %s attendee(s): %s; uninvited %s attendee(s): %s.',
         $this->renderAuthor(),
         phutil_count($add),
         $this->renderHandleList($add),
@@ -161,7 +161,7 @@ final class PhabricatorCalendarEventInviteTransaction
     } else {
       return pht(
         '%s updated the invite list for %s, invited %s: %s; '.
-        'uninvinted %s: %s.',
+        'uninvited %s: %s.',
         $this->renderAuthor(),
         $this->renderObject(),
         phutil_count($add),

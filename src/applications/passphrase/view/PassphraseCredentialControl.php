@@ -67,7 +67,7 @@ final class PassphraseCredentialControl extends AphrontFormControl {
             $user_credential->getName());
         }
       } catch (PhabricatorPolicyException $policy_exception) {
-        // Pull the credential with the ominipotent viewer so we can look up
+        // Pull the credential with the omnipotent viewer so we can look up
         // the ID and provide the monogram.
         $omnipotent_credential = id(new PassphraseCredentialQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())

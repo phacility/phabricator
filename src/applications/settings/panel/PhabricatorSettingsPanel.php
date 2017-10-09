@@ -143,7 +143,7 @@ abstract class PhabricatorSettingsPanel extends Phobject {
   /**
    * Return false to prevent this panel from being displayed or used. You can
    * do, e.g., configuration checks here, to determine if the feature your
-   * panel controls is unavailble in this install. By default, all panels are
+   * panel controls is unavailable in this install. By default, all panels are
    * enabled.
    *
    * @return bool True if the panel should be shown.

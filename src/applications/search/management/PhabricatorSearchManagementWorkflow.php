@@ -5,7 +5,7 @@ abstract class PhabricatorSearchManagementWorkflow
 
   protected function validateClusterSearchConfig() {
     // Configuration is normally validated by setup self-checks on the web
-    // workflow, but users may reasonsably run `bin/search` commands after
+    // workflow, but users may reasonably run `bin/search` commands after
     // making manual edits to "local.json". Re-verify configuration here before
     // continuing.
 

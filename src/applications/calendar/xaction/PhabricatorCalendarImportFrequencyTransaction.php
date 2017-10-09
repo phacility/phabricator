@@ -32,7 +32,7 @@ final class PhabricatorCalendarImportFrequencyTransaction
       if (!isset($valid[$value])) {
         $errors[] = $this->newInvalidError(
           pht(
-            'Import frequency "%s" is not valid. Valid frequences are: %s.',
+            'Import frequency "%s" is not valid. Valid frequencies are: %s.',
             $value,
             implode(', ', $valid)),
           $xaction);

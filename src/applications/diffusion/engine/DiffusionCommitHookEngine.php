@@ -1230,7 +1230,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     // also look at author data (do the commits come from multiple different
     // authors?) and commit date data (is the oldest commit more than 48 hours
     // old), but we don't have immediate access to those and this simple
-    // heruistic might be good enough.
+    // heuristic might be good enough.
 
     $commit_count = 0;
     $type_commit = PhabricatorRepositoryPushLog::REFTYPE_COMMIT;

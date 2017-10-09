@@ -53,7 +53,7 @@ final class DiffusionCommitVerifyTransaction
       throw new Exception(
         pht(
           'You can not request verification of this commit because no '.
-          'auditors have raised conerns with it.'));
+          'auditors have raised concerns with it.'));
     }
   }
 

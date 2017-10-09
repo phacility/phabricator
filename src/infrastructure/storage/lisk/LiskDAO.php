@@ -1121,7 +1121,7 @@ abstract class LiskDAO extends Phobject {
     $this->willSaveObject();
     $data = $this->getAllLiskPropertyValues();
 
-    // Remove colums flagged as nonmutable from the update statement.
+    // Remove columns flagged as nonmutable from the update statement.
     $no_mutate = $this->getConfigOption(self::CONFIG_NO_MUTATE);
     if ($no_mutate) {
       foreach ($no_mutate as $column) {

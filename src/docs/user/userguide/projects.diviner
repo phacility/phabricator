@@ -14,7 +14,7 @@ a name and an icon, and may optionally have members.
 
 For example, you can create projects to provide:
 
-  - **Organization**: Create a project to represent a product or initative,
+  - **Organization**: Create a project to represent a product or initiative,
     then use it to organize related work.
   - **Groups**: Create a project to represent a group of people (like a team),
     then add members of the group as project members.

@@ -104,7 +104,7 @@ abstract class PassphraseCredentialType extends Phobject {
 
 
   /**
-   * Return true if the provided credental requires a password to decrypt.
+   * Return true if the provided credential requires a password to decrypt.
    *
    * @param PhutilOpaqueEnvelope  Credential secret value.
    * @return bool                 True if the credential needs a password.

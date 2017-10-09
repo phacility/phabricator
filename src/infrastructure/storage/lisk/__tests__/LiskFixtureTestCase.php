@@ -98,7 +98,7 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     $obj = new HarbormasterObject();
     $conn_w = $obj->establishConnection('w');
 
-    // Test that the counter bascially behaves as expected.
+    // Test that the counter basically behaves as expected.
     $this->assertEqual(1, LiskDAO::loadNextCounterValue($conn_w, 'a'));
     $this->assertEqual(2, LiskDAO::loadNextCounterValue($conn_w, 'a'));
     $this->assertEqual(3, LiskDAO::loadNextCounterValue($conn_w, 'a'));

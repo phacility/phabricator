@@ -80,7 +80,7 @@ Format: Raw Data
 ================
 
 The `raw` storage format is automatically selected for all newly uploaded
-file data if no key is makred as the `default` key in the keyring. This is
+file data if no key is marked as the `default` key in the keyring. This is
 the behavior of Phabricator if you haven't configured anything.
 
 This format stores raw data without modification.
@@ -137,7 +137,7 @@ To change the format of an individual file, run this command:
 phabricator/ $ ./bin/files encode --as <format> F123 [--key <key>]
 ```
 
-This will change the storage format of the sepcified file.
+This will change the storage format of the specified file.
 
 
 Verifying Storage Formats

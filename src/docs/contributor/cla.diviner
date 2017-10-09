@@ -87,7 +87,7 @@ you to consent. If you are not comfortable with this, do not sign the CLA and
 do not contribute to Phabricator.
 
 **Limitation of Liability**: The second benefit the CLA provides is that it
-makes the terms of your contribition explicitly clear upfront, and it puts us
+makes the terms of your contribution explicitly clear upfront, and it puts us
 in a much stronger legal position if a contributor later claims there is
 ambiguity about ownership of their work. We can point at the document they
 signed as proof that they consented to our use and understood the terms of
@@ -100,7 +100,7 @@ anything we are likely to face, but SCO claimed billions of dollars in damages
 and the litigation has now been ongoing for more than a decade.
 
 We want to avoid situations like this in the future by making the terms of
-contibution explicit upfront.
+contribution explicit upfront.
 
 Generally, we believe the terms of the CLA are fair and reasonable for
 contributors, and that the primary way contributors benefit from contributing
@@ -158,7 +158,7 @@ local law.
 
 If you are unsure, you should speak with your employer or a lawyer. If you
 contribute code you do not own under the individual CLA, you are exposing
-yourself to liability. You may also be exposing us to liablity, but we'll have
+yourself to liability. You may also be exposing us to liability, but we'll have
 the CLA on our side to show that we were unwilling pawns in your malicious
 scheme to defraud your employer.
 

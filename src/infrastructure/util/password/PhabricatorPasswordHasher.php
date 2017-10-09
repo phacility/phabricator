@@ -70,7 +70,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
 
   /**
    * Return an indicator of this hasher's strength. When choosing to hash
-   * new passwords, the strongest available hasher which is usuable for new
+   * new passwords, the strongest available hasher which is usable for new
    * passwords will be used, and the presence of a stronger hasher will
    * prompt users to update their hashes.
    *
@@ -208,7 +208,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    * Get all available password hashers. This may include hashers which can not
    * actually be used (for example, a required extension is missing).
    *
-   * @return list<PhabicatorPasswordHasher> Hasher objects.
+   * @return list<PhabricatorPasswordHasher> Hasher objects.
    * @task hashing
    */
   public static function getAllHashers() {
@@ -243,7 +243,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    * Get all usable password hashers. This may include hashers which are
    * not desirable or advisable.
    *
-   * @return list<PhabicatorPasswordHasher> Hasher objects.
+   * @return list<PhabricatorPasswordHasher> Hasher objects.
    * @task hashing
    */
   public static function getAllUsableHashers() {
@@ -280,7 +280,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
 
 
   /**
-   * Get the hashser for a given stored hash.
+   * Get the hasher for a given stored hash.
    *
    * @return PhabricatorPasswordHasher Corresponding hasher.
    * @task hashing

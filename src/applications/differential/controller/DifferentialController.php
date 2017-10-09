@@ -217,7 +217,7 @@ abstract class DifferentialController extends PhabricatorController {
       // by default and let the user toggle the rest. With modern messages,
       // we can send the user to the Harbormaster detail page. Just show
       // "a lot" of messages in legacy cases to try to strike a balance
-      // between implementation simplicitly and compatibility.
+      // between implementation simplicity and compatibility.
       $legacy_messages = array_slice($legacy_messages, 0, 100);
 
       $messages = array();
