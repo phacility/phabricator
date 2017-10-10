@@ -416,9 +416,12 @@ final class PhabricatorStartup {
 
     // NOTE: We don't filter INPUT_SERVER because we don't want to overwrite
     // changes made in "preamble.php".
+
+    // NOTE: WE don't filter INPUT_POST because we may be constructing it
+    // lazily if "enable_post_data_reading" is disabled.
+
     $filter = array(
       INPUT_GET,
-      INPUT_POST,
       INPUT_ENV,
       INPUT_COOKIE,
     );
@@ -434,9 +437,6 @@ final class PhabricatorStartup {
         case INPUT_COOKIE:
           $_COOKIE = array_merge($_COOKIE, $filtered);
           break;
-        case INPUT_POST:
-          $_POST = array_merge($_POST, $filtered);
-          break;
         case INPUT_ENV;
           $env = array_merge($_ENV, $filtered);
           $_ENV = self::filterEnvSuperglobal($env);
@@ -444,18 +444,28 @@ final class PhabricatorStartup {
       }
     }
 
-    // rebuild $_REQUEST, respecting order declared in ini files
+    self::rebuildRequest();
+  }
+
+  /**
+   * @task validation
+   */
+  public static function rebuildRequest() {
+    // Rebuild $_REQUEST, respecting order declared in ".ini" files.
     $order = ini_get('request_order');
+
     if (!$order) {
       $order = ini_get('variables_order');
     }
+
     if (!$order) {
-      // $_REQUEST will be empty, leave it alone
+      // $_REQUEST will be empty, so leave it alone.
       return;
     }
+
     $_REQUEST = array();
-    for ($i = 0; $i < strlen($order); $i++) {
-      switch ($order[$i]) {
+    for ($ii = 0; $ii < strlen($order); $ii++) {
+      switch ($order[$ii]) {
         case 'G':
           $_REQUEST = array_merge($_REQUEST, $_GET);
           break;
@@ -466,7 +476,7 @@ final class PhabricatorStartup {
           $_REQUEST = array_merge($_REQUEST, $_COOKIE);
           break;
         default:
-          // $_ENV and $_SERVER never go into $_REQUEST
+          // $_ENV and $_SERVER never go into $_REQUEST.
           break;
       }
     }
@@ -590,6 +600,12 @@ final class PhabricatorStartup {
   private static function detectPostMaxSizeTriggered() {
     // If this wasn't a POST, we're fine.
     if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+      return;
+    }
+
+    // If "enable_post_data_reading" is off, we won't have $_POST and this
+    // condition is effectively impossible.
+    if (!ini_get('enable_post_data_reading')) {
       return;
     }
 
