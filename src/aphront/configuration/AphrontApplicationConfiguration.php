@@ -204,20 +204,10 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
     DarkConsoleXHProfPluginAPI::saveProfilerSample($access_log);
 
-    // Add points to the rate limits for this request.
-    $rate_token = PhabricatorStartup::getRateLimitToken();
-    if ($rate_token !== null) {
-      // The base score for a request allows users to make 30 requests per
-      // minute.
-      $score = (1000 / 30);
-
-      // If the user was logged in, let them make more requests.
-      if ($request->getUser() && $request->getUser()->getPHID()) {
-        $score = $score / 5;
-      }
-
-      PhabricatorStartup::addRateLimitScore($rate_token, $score);
-    }
+    PhabricatorStartup::disconnectRateLimits(
+      array(
+        'viewer' => $request->getUser(),
+      ));
 
     if ($processing_exception) {
       throw $processing_exception;
