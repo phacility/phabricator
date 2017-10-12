@@ -13,4 +13,19 @@ final class ManiphestTaskIsDuplicateOfTaskEdgeType
     return true;
   }
 
+  public function getConduitKey() {
+    return 'task.duplicate';
+  }
+
+  public function getConduitName() {
+    return pht('Closed as Duplicate');
+  }
+
+  public function getConduitDescription() {
+    return pht(
+      'The source task has been closed as a duplicate of the '.
+      'destination task.');
+  }
+
+
 }
