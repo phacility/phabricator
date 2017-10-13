@@ -42,7 +42,7 @@ abstract class AphrontView extends Phobject
 
 
   /**
-   * Test if a viewer has been set on this elmeent.
+   * Test if a viewer has been set on this element.
    *
    * @return bool True if a viewer is available.
    */

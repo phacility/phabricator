@@ -699,7 +699,7 @@ final class DifferentialChangesetParser extends Phobject {
     $hunk_parser->parseHunksForLineData($changeset->getHunks());
 
     // Depending on the whitespace mode, we may need to compute a different
-    // set of changes than the set of changes in the hunk data (specificaly,
+    // set of changes than the set of changes in the hunk data (specifically,
     // we might want to consider changed lines which have only whitespace
     // changes as unchanged).
     if ($ignore_all) {
@@ -1192,11 +1192,11 @@ final class DifferentialChangesetParser extends Phobject {
    * Mask - compute the actual lines that need to be shown (because they
    * are near changes lines, near inline comments, or the request has
    * explicitly asked for them, i.e. resulting from the user clicking
-   * "show more"). The $mask returned is a sparesely populated dictionary
+   * "show more"). The $mask returned is a sparsely populated dictionary
    * of $visible_line_number => true.
    *
    * Depths - compute how indented any given line is. The $depths returned
-   * is a sparesely populated dictionary of $visible_line_number => $depth.
+   * is a sparsely populated dictionary of $visible_line_number => $depth.
    *
    * This function also has the side effect of modifying member variable
    * new such that tabs are normalized to spaces for each line of the diff.

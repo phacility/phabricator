@@ -74,7 +74,7 @@ final class PhabricatorAuthManagementRevokeWorkflow
     if (!strlen($from) && !$is_everywhere) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify the target to revoke credentals from with "--from" or '.
+          'Specify the target to revoke credentials from with "--from" or '.
           'specify "--everywhere".'));
     } else if (strlen($from) && $is_everywhere) {
       throw new PhutilArgumentUsageException(

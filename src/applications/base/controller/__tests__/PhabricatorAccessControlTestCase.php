@@ -10,7 +10,7 @@ final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
 
   public function testControllerAccessControls() {
     $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/support/PhabricatorStartup.php';
+    require_once $root.'/support/startup/PhabricatorStartup.php';
 
     $application_configuration = new AphrontDefaultApplicationConfiguration();
 

@@ -151,7 +151,7 @@ thousands of hosts in hundreds of pools, and far beyond that with a little
 work.
 
 Drydock is intended to solve resource management problems at very large scales
-and minimzes blocking operations, locks, and artificial sequencing. Drydock is
+and minimizes blocking operations, locks, and artificial sequencing. Drydock is
 designed to fully utilize an almost arbitrarily large pool of resources and
 improve performance roughly linearly with available hardware.
 

@@ -64,7 +64,7 @@ If you host repositories in Phabricator, you should back them up. You can use
 repository. To back them up, copy them elsewhere.
 
 You can also just clone them and keep the clones up to date, or use
-{nav Add Mirror} to have the mirror somewhere automatically.
+{nav Add Mirror} to have them mirror somewhere automatically.
 
 
 Restore: Hosted Repositories

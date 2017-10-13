@@ -678,7 +678,7 @@ final class PhabricatorEnv extends Phobject {
    * Detect if a URI identifies some valid linkable remote resource.
    *
    * @param string URI to test.
-   * @return bool True if a URI idenfies a remote resource with an allowed
+   * @return bool True if a URI identifies a remote resource with an allowed
    *              protocol.
    * @task uri
    */

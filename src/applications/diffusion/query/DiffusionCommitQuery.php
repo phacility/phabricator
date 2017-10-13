@@ -69,7 +69,7 @@ final class DiffusionCommitQuery
 
   /**
    * Look up commits in a specific repository. Prefer
-   * @{method:withRepositoryIDs}; the underyling table is keyed by ID such
+   * @{method:withRepositoryIDs}; the underlying table is keyed by ID such
    * that this method requires a separate initial query to map PHID to ID.
    */
   public function withRepositoryPHIDs(array $phids) {

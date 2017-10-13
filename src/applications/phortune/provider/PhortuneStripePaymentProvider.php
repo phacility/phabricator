@@ -361,7 +361,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
       case 'error:duplicate_transaction':
       case 'error:processing_error':
       default:
-        // NOTE: These errors currently don't recevive a detailed message.
+        // NOTE: These errors currently don't receive a detailed message.
         // NOTE: We can also end up here with "http:nnn" messages.
 
         // TODO: At least some of these should have a better message, or be

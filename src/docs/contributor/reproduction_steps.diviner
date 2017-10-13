@@ -112,7 +112,7 @@ we'll probably be able to follow them and reproduce the issue ourselves.
 
 If you can't follow your steps because they depend on information which is not
 available on a clean instance (for example, a certain config setting), rewrite
-them to include instrutions to create that information (for example, adjusting
+them to include instructions to create that information (for example, adjusting
 the config to the problematic value).
 
 If you follow your instructions but the issue does not reproduce, the issue
@@ -191,7 +191,7 @@ smaller case which reproduces the problem, which might be something like this:
   - Files like `A`, which have uppercase letters, do not work.
 
 With a simpler reproduction scenario, you can simplify your steps to be more
-tailored and mimimal. This will help us pointpoint the issue more quickly and
+tailored and minimal. This will help us pinpoint the issue more quickly and
 be more certain that we've understood and resolved it.
 
 It is more important that steps be complete than that they be simple, and it's

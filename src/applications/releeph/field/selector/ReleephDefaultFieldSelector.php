@@ -7,7 +7,7 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
    *
    * TODO: This is a giant hacky mess because I am dumb and moved forward on
    * Releeph changes with partial information. Recover from this as gracefully
-   * as possible. This obivously is an abomination. -epriestley
+   * as possible. This obviously is an abomination. -epriestley
    */
   public static function isFacebook() {
     return class_exists('ReleephFacebookKarmaFieldSpecification');

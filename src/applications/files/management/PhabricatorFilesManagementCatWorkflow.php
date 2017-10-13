@@ -24,7 +24,7 @@ final class PhabricatorFilesManagementCatWorkflow
             'help' => pht(
               'DANGEROUS. Attempt to salvage file content even if the '.
               'integrity check fails. If an adversary has tampered with '.
-              'the file, the conent may be unsafe.'),
+              'the file, the content may be unsafe.'),
           ),
           array(
             'name'      => 'names',

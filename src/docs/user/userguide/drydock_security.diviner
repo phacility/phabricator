@@ -141,7 +141,7 @@ host which is not on a privileged subnet. For example, use a
 Even if the host is not privileged, many Drydock processes have some level of
 privilege (enabling them to clone repositories, or report test results back to
 Phabricator). Be aware that tests can hijack credentials they are run with,
-and potentialy hijack credentials given to other processes on the same hosts.
+and potentially hijack credentials given to other processes on the same hosts.
 You should use credentials with a minimum set of privileges and assume all
 processes on a host have the highest level of access that any process on the
 host has.

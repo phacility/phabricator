@@ -47,7 +47,7 @@ final class PassphraseSSHPrivateKeyTextCredentialType
         pht(
           'Decrypting SSH keys requires the `%s` binary, but it '.
           'is not available in %s. Either make it available or strip the '.
-          'password fromt his SSH key manually before uploading it.',
+          'password from this SSH key manually before uploading it.',
           'ssh-keygen',
           '$PATH'));
     }

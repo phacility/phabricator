@@ -106,7 +106,7 @@ final class DifferentialDiffEditor
    * We run Herald as part of transaction validation because Herald can
    * block diff creation for Differential diffs. Its important to do this
    * separately so no Herald logs are saved; these logs could expose
-   * information the Herald rules are inteneded to block.
+   * information the Herald rules are intended to block.
    */
   protected function validateTransaction(
     PhabricatorLiskDAO $object,

@@ -160,7 +160,7 @@ abstract class AphrontHTTPParameterType extends Phobject {
   /**
    * Call another type's existence check.
    *
-   * This method allows a type to reuse the exitence behavior of a different
+   * This method allows a type to reuse the existence behavior of a different
    * type. For example, a "list of users" type may have the same basic
    * existence check that a simpler "list of strings" type has, and can just
    * call the simpler type to reuse its behavior.

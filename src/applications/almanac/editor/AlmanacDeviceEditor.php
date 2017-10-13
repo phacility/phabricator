@@ -204,7 +204,7 @@ final class AlmanacDeviceEditor
                 $xaction);
               $errors[] = $error;
             } else {
-              // TODO: Validate addresses, but IPv6 addresses are not trival
+              // TODO: Validate addresses, but IPv6 addresses are not trivial
               // to validate.
             }
 

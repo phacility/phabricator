@@ -81,12 +81,15 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $engine->getNgramsSchemaKeys(),
       $index_options);
 
+    // NOTE: The common ngrams table is not marked as an index table. It is
+    // tiny and persisting it across a restore saves us a lot of work garbage
+    // collecting common ngrams from the index after it gets built.
+
     $this->buildRawSchema(
       $engine->getApplicationName(),
       $engine->getCommonNgramsTableName(),
       $engine->getCommonNgramsSchemaColumns(),
-      $engine->getCommonNgramsSchemaKeys(),
-      $index_options);
+      $engine->getCommonNgramsSchemaKeys());
   }
 
   protected function buildRawSchema(

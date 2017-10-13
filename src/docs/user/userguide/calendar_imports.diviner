@@ -10,7 +10,7 @@ IMPORTANT: Calendar is a prototype application. See
 @{article:User Guide: Prototype Applications}.
 
 You can import events into Phabricator to other calendar applications or from
-`.ics` files. This document will guide you through how to importe event data
+`.ics` files. This document will guide you through how to import event data
 into Phabricator.
 
 When you import events from another application, they can not be edited in

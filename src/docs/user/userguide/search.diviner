@@ -87,7 +87,7 @@ view show the results you most often want.
 
 You can share queries with other users by sending them the URL. This will run
 the same query for them with all the parameters you've set (they may see
-different results than you do, because they may not have the same permisions).
+different results than you do, because they may not have the same permissions).
 
 
 Typeaheads

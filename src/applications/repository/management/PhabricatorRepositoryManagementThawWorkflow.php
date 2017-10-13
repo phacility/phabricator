@@ -90,7 +90,7 @@ final class PhabricatorRepositoryManagementThawWorkflow
       $risk_message);
 
     $is_force = $args->getArg('force');
-    $prompt = pht('Accept the possibilty of permanent data loss?');
+    $prompt = pht('Accept the possibility of permanent data loss?');
     if (!$is_force && !phutil_console_confirm($prompt)) {
       throw new PhutilArgumentUsageException(
         pht('User aborted the workflow.'));

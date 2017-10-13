@@ -134,7 +134,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     // checks later on to make sure this account is valid for the intended
     // operation. This requires edit permission for completeness and consistency
     // but it won't actually be meaningfully checked because we're using the
-    // ominpotent user.
+    // omnipotent user.
 
     $account = id(new PhabricatorExternalAccountQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())

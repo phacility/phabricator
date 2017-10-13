@@ -175,7 +175,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * So, generally, internal paging must bypass policy controls.
    *
    * This method returns the appropriate viewer, based on the context in which
-   * the paging is occuring.
+   * the paging is occurring.
    *
    * @return PhabricatorUser Viewer for executing paging queries.
    */
@@ -536,7 +536,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    *
    * @param AphrontDatabaseConnection Connection query will execute on.
    * @param list<map> Column description dictionaries.
-   * @param map Additional constuction options.
+   * @param map Additional construction options.
    * @return string Query clause.
    * @task paging
    */

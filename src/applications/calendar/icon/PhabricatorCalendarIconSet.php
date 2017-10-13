@@ -16,7 +16,7 @@ final class PhabricatorCalendarIconSet
       'fa-plane' => pht('Travel'),
       'fa-plus-square' => pht('Health / Appointment'),
 
-      'fa-rocket' => pht('Sabatical / Leave'),
+      'fa-rocket' => pht('Sabbatical / Leave'),
       'fa-home' => pht('Working From Home'),
       'fa-tree' => pht('Holiday'),
       'fa-gamepad' => pht('Staycation'),

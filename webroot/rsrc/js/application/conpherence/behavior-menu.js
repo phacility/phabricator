@@ -94,7 +94,7 @@ JX.behavior('conpherence-menu', function(config) {
   var _oldDevice = null;
 
   /**
-   * Initializes this behavior based on all the configuraton jonx and the
+   * Initializes this behavior based on all the configuration jonx and the
    * result of JX.Device.getDevice();
    */
   function init() {

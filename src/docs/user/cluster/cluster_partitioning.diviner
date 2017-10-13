@@ -21,7 +21,7 @@ This configuration is complex, and very few installs will benefit from pursuing
 it. Phabricator will normally run comfortably with a single database master
 even for large organizations.
 
-Partitioning generally does not do much to increase resiliance or make it
+Partitioning generally does not do much to increase resilience or make it
 easier to recover from disasters, and is primarily a mechanism for scaling and
 operational convenience.
 
@@ -212,14 +212,14 @@ only one master.
 
 `persistent` //(bool)// Enables persistent connections. Defaults to off.
 
-With persitent connections enabled, Phabricator will keep a pool of database
+With persistent connections enabled, Phabricator will keep a pool of database
 connections open between web requests and reuse them when serving subsequent
 requests.
 
 The primary benefit of using persistent connections is that it will greatly
 reduce pressure on how quickly outbound TCP ports are opened and closed. After
 a TCP port closes, it normally can't be used again for about 60 seconds, so
-rapidly cycling ports can cause resource exuastion. If you're seeing failures
+rapidly cycling ports can cause resource exhaustion. If you're seeing failures
 because requests are unable to bind to an outbound port, enabling this option
 is likely to fix the issue. This option may also slightly increase performance.
 

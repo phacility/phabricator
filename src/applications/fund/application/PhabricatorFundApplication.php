@@ -56,7 +56,7 @@ final class PhabricatorFundApplication extends PhabricatorApplication {
     return array(
       FundDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created initiatives.'),
-        'tempate' => FundInitiativePHIDType::TYPECONST,
+        'template' => FundInitiativePHIDType::TYPECONST,
       ),
       FundCreateInitiativesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,

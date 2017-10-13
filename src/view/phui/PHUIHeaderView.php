@@ -166,7 +166,7 @@ final class PHUIHeaderView extends AphrontTagView {
     $classes[] = 'phui-header-shell';
 
     if ($this->noBackground) {
-      $classes[] = 'phui-header-no-backgound';
+      $classes[] = 'phui-header-no-background';
     }
 
     if ($this->bleedHeader) {

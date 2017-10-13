@@ -257,7 +257,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       $filtered[$key] = $object;
     }
 
-    // If we survied the primary checks, apply extended checks to objects
+    // If we survived the primary checks, apply extended checks to objects
     // with extended policies.
     $results = array();
     $extended = array();

@@ -703,7 +703,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     // new repository for the first time is less important than any other
     // daemon task.
 
-    // If the repostitory has finished importing and we're just catching up
+    // If the repository has finished importing and we're just catching up
     // on recent commits, we schedule discovery at COMMIT priority, which is
     // slightly below the default priority.
 

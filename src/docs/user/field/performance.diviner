@@ -34,7 +34,7 @@ Phabricator will need substantial time to process it, it will take a long time
 to download over the network, and your browser will probably not be able to
 render it especially quickly.
 
-We may be able to improve perfomance in some cases, but Phabricator is not
+We may be able to improve performance in some cases, but Phabricator is not
 magic and can not wish away real complexity. The best solution to these problems
 is usually to find another way to solve your problem: for example, maybe the
 100MB document can be split into several smaller documents.
@@ -51,7 +51,7 @@ The upstream will be less able to help resolve unusual workloads with high
 inherent complexity, like these:
 
   - {icon times, color=red} A 100MB wiki page takes a long time to render.
-  - {icon times, color=red} A turing-complete simulation of Conway's Game of
+  - {icon times, color=red} A Turing-complete simulation of Conway's Game of
     Life implemented in 958,000 Herald rules executes slowly.
   - {icon times, color=red} Uploading an 8GB file takes several minutes.
 

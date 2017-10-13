@@ -50,7 +50,7 @@ final class FundInitiativeEditEngine
   }
 
   protected function getObjectName() {
-    return pht('Initivative');
+    return pht('Initiative');
   }
 
   protected function getObjectCreateCancelURI($object) {

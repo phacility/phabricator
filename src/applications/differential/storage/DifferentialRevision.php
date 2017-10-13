@@ -442,7 +442,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     // For each path which the viewer owns a package for, find other packages
     // which that authority can be used to force-accept. Once we find a way to
-    // force-accept a package, we don't need to keep loooking.
+    // force-accept a package, we don't need to keep looking.
     $has_control = array();
     foreach ($force_map as $path => $spec) {
       $path_fragments = PhabricatorOwnersPackage::splitPath($path);
@@ -891,7 +891,7 @@ final class DifferentialRevision extends DifferentialDAO
         self::TABLE_COMMIT,
         $this->getID());
 
-      // we have to do paths a little differentally as they do not have
+      // we have to do paths a little differently as they do not have
       // an id or phid column for delete() to act on
       $dummy_path = new DifferentialAffectedPath();
       queryfx(
