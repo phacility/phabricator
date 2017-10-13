@@ -215,7 +215,10 @@ final class PhabricatorStorageManagementDumpWorkflow
           $target['table']);
       }
 
-      $commands[] = $command;
+      $commands[] = array(
+        'command' => $command,
+        'database' => $target['database'],
+      );
     }
 
 
@@ -244,9 +247,26 @@ final class PhabricatorStorageManagementDumpWorkflow
           $file));
     }
 
+    $created = array();
+
     try {
-      foreach ($commands as $command) {
-        $future = new ExecFuture('%C', $command);
+      foreach ($commands as $spec) {
+        // Because we're dumping database-by-database, we need to generate our
+        // own CREATE DATABASE and USE statements.
+
+        $database = $spec['database'];
+        $preamble = array();
+        if (!isset($created[$database])) {
+          $preamble[] =
+            "CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$database}` ".
+            "/*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin */;\n";
+          $created[$database] = true;
+        }
+        $preamble[] = "USE `{$database}`;\n";
+        $preamble = implode('', $preamble);
+        $this->writeData($preamble, $file, $is_compress, $output_file);
+
+        $future = new ExecFuture('%C', $spec['command']);
 
         $iterator = id(new FutureIterator(array($future)))
           ->setUpdateInterval(0.100);
@@ -258,23 +278,7 @@ final class PhabricatorStorageManagementDumpWorkflow
             fwrite(STDERR, $stderr);
           }
 
-          if (strlen($stdout)) {
-            if (!$file) {
-              $ok = fwrite(STDOUT, $stdout);
-            } else if ($is_compress) {
-              $ok = gzwrite($file, $stdout);
-            } else {
-              $ok = fwrite($file, $stdout);
-            }
-
-            if ($ok !== strlen($stdout)) {
-              throw new Exception(
-                pht(
-                  'Failed to write %d byte(s) to file "%s".',
-                  new PhutilNumber(strlen($stdout)),
-                  $output_file));
-            }
-          }
+          $this->writeData($stdout, $file, $is_compress, $output_file);
 
           if ($ready !== null) {
             $ready->resolvex();
@@ -312,6 +316,29 @@ final class PhabricatorStorageManagementDumpWorkflow
     }
 
     return 0;
+  }
+
+
+  private function writeData($data, $file, $is_compress, $output_file) {
+    if (!strlen($data)) {
+      return;
+    }
+
+    if (!$file) {
+      $ok = fwrite(STDOUT, $data);
+    } else if ($is_compress) {
+      $ok = gzwrite($file, $data);
+    } else {
+      $ok = fwrite($file, $data);
+    }
+
+    if ($ok !== strlen($data)) {
+      throw new Exception(
+        pht(
+          'Failed to write %d byte(s) to file "%s".',
+          new PhutilNumber(strlen($data)),
+          $output_file));
+    }
   }
 
 }
