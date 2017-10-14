@@ -150,6 +150,11 @@ final class PhabricatorStartup {
    * @task hook
    */
   public static function didShutdown() {
+    // Disconnect any active rate limits before we shut down. If we don't do
+    // this, requests which exit early will lock a slot in any active
+    // connection limits, and won't count for rate limits.
+    self::disconnectRateLimits(array());
+
     $event = error_get_last();
 
     if (!$event) {
@@ -729,6 +734,10 @@ final class PhabricatorStartup {
    */
   public static function disconnectRateLimits(array $request_state) {
     $limits = self::$limits;
+
+    // Remove all limits before disconnecting them so this works properly if
+    // it runs twice. (We run this automatically as a shutdown handler.)
+    self::$limits = array();
 
     foreach ($limits as $limit) {
       $limit->didDisconnect($request_state);
