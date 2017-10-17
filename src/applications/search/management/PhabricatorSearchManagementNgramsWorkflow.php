@@ -16,18 +16,48 @@ final class PhabricatorSearchManagementNgramsWorkflow
             'name' => 'reset',
             'help' => pht('Reset all common ngram records.'),
           ),
+          array(
+            'name' => 'threshold',
+            'param' => 'threshold',
+            'help' => pht(
+              'Prune ngrams present in more than this fraction of '.
+              'documents.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $min_documents = 4096;
+
     $is_reset = $args->getArg('reset');
+    $threshold = $args->getArg('threshold');
+
+    if ($is_reset && $threshold !== null) {
+      throw new PhutilArgumentUsageException(
+        pht('Specify either --reset or --threshold, not both.'));
+    }
+
+    if (!$is_reset && $threshold === null) {
+      throw new PhutilArgumentUsageException(
+        pht('Specify either --reset or --threshold.'));
+    }
+
+    if (!$is_reset) {
+      if (!is_numeric($threshold)) {
+        throw new PhutilArgumentUsageException(
+          pht('Specify a numeric threshold between 0 and 1.'));
+      }
+
+      $threshold = (double)$threshold;
+      if ($threshold <= 0 || $threshold >= 1) {
+        throw new PhutilArgumentUsageException(
+          pht('Threshold must be greater than 0.0 and less than 1.0.'));
+      }
+    }
 
     $all_objects = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorFerretInterface')
       ->execute();
-
-    $min_documents = 4096;
-    $threshold = 0.15;
 
     foreach ($all_objects as $object) {
       $engine = $object->newFerretEngine();
