@@ -21,7 +21,7 @@ final class PhabricatorSearchManagementNgramsWorkflow
             'param' => 'threshold',
             'help' => pht(
               'Prune ngrams present in more than this fraction of '.
-              'documents.'),
+              'documents. Provide a value between 0.0 and 1.0.'),
           ),
         ));
   }
