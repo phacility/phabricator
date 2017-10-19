@@ -67,13 +67,19 @@ final class DifferentialRevision extends DifferentialDAO
     $view_policy = $app->getPolicy(
       DifferentialDefaultViewCapability::CAPABILITY);
 
+    if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+      $initial_state = DifferentialRevisionStatus::DRAFT;
+    } else {
+      $initial_state = DifferentialRevisionStatus::NEEDS_REVIEW;
+    }
+
     return id(new DifferentialRevision())
       ->setViewPolicy($view_policy)
       ->setAuthorPHID($actor->getPHID())
       ->attachRepository(null)
       ->attachActiveDiff(null)
       ->attachReviewers(array())
-      ->setModernRevisionStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
+      ->setModernRevisionStatus($initial_state);
   }
 
   protected function getConfiguration() {
