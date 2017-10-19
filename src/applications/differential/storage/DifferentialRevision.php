@@ -708,6 +708,58 @@ final class DifferentialRevision extends DifferentialDAO
     return false;
   }
 
+  public function loadActiveBuilds(PhabricatorUser $viewer) {
+    $diff = $this->getActiveDiff();
+
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($viewer)
+      ->withContainerPHIDs(array($this->getPHID()))
+      ->withBuildablePHIDs(array($diff->getPHID()))
+      ->withManualBuildables(false)
+      ->execute();
+    if (!$buildables) {
+      return array();
+    }
+
+    $builds = id(new HarbormasterBuildQuery())
+      ->setViewer($viewer)
+      ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
+      ->withBuildStatuses(
+        array(
+          HarbormasterBuildStatus::STATUS_INACTIVE,
+          HarbormasterBuildStatus::STATUS_PENDING,
+          HarbormasterBuildStatus::STATUS_BUILDING,
+          HarbormasterBuildStatus::STATUS_FAILED,
+          HarbormasterBuildStatus::STATUS_ABORTED,
+          HarbormasterBuildStatus::STATUS_ERROR,
+          HarbormasterBuildStatus::STATUS_PAUSED,
+          HarbormasterBuildStatus::STATUS_DEADLOCKED,
+        ))
+      ->needBuildTargets(true)
+      ->execute();
+    if (!$builds) {
+      return array();
+    }
+
+    $active = array();
+    foreach ($builds as $key => $build) {
+      foreach ($build->getBuildTargets() as $target) {
+        if ($target->isAutotarget()) {
+          // Ignore autotargets when looking for active of failed builds. If
+          // local tests fail and you continue anyway, you don't need to
+          // double-confirm them.
+          continue;
+        }
+
+        // This build has at least one real target that's doing something.
+        $active[$key] = $build;
+        break;
+      }
+    }
+
+    return $active;
+  }
+
 
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
