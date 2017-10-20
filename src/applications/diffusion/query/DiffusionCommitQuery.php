@@ -177,7 +177,63 @@ final class DiffusionCommitQuery
   }
 
   protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
+    $table = $this->newResultObject();
+    $conn = $table->establishConnection('r');
+
+    $subqueries = array();
+    if ($this->responsiblePHIDs) {
+      $base_authors = $this->authorPHIDs;
+      $base_auditors = $this->auditorPHIDs;
+
+      $responsible_phids = $this->responsiblePHIDs;
+      if ($base_authors) {
+        $all_authors = array_merge($base_authors, $responsible_phids);
+      } else {
+        $all_authors = $responsible_phids;
+      }
+
+      if ($base_auditors) {
+        $all_auditors = array_merge($base_auditors, $responsible_phids);
+      } else {
+        $all_auditors = $responsible_phids;
+      }
+
+      $this->authorPHIDs = $all_authors;
+      $this->auditorPHIDs = $base_auditors;
+      $subqueries[] = $this->buildStandardPageQuery(
+        $conn,
+        $table->getTableName());
+
+      $this->authorPHIDs = $base_authors;
+      $this->auditorPHIDs = $all_auditors;
+      $subqueries[] = $this->buildStandardPageQuery(
+        $conn,
+        $table->getTableName());
+    } else {
+      $subqueries[] = $this->buildStandardPageQuery(
+        $conn,
+        $table->getTableName());
+    }
+
+    if (count($subqueries) > 1) {
+      foreach ($subqueries as $key => $subquery) {
+        $subqueries[$key] = '('.$subquery.')';
+      }
+
+      $query = qsprintf(
+        $conn,
+        '%Q %Q %Q',
+        implode(' UNION DISTINCT ', $subqueries),
+        $this->buildOrderClause($conn, true),
+        $this->buildLimitClause($conn));
+    } else {
+      $query = head($subqueries);
+    }
+
+    $rows = queryfx_all($conn, '%Q', $query);
+    $rows = $this->didLoadRawRows($rows);
+
+    return $table->loadAllFromArray($rows);
   }
 
   protected function willFilterPage(array $commits) {
@@ -487,18 +543,10 @@ final class DiffusionCommitQuery
         $this->auditorPHIDs);
     }
 
-    if ($this->responsiblePHIDs !== null) {
-      $where[] = qsprintf(
-        $conn,
-        '(audit.auditorPHID IN (%Ls) OR commit.authorPHID IN (%Ls))',
-        $this->responsiblePHIDs,
-        $this->responsiblePHIDs);
-    }
-
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'commit.auditStatus IN (%Ls)',
+        'commit.auditStatus IN (%Ld)',
         $this->statuses);
     }
 
@@ -541,10 +589,6 @@ final class DiffusionCommitQuery
     return ($this->auditIDs || $this->auditorPHIDs);
   }
 
-  private function shouldJoinAudit() {
-    return (bool)$this->responsiblePHIDs;
-  }
-
   private function shouldJoinOwners() {
     return (bool)$this->packagePHIDs;
   }
@@ -557,13 +601,6 @@ final class DiffusionCommitQuery
       $join[] = qsprintf(
         $conn,
         'JOIN %T auditor ON commit.phid = auditor.commitPHID',
-        $audit_request->getTableName());
-    }
-
-    if ($this->shouldJoinAudit()) {
-      $join[] = qsprintf(
-        $conn,
-        'LEFT JOIN %T audit ON commit.phid = audit.commitPHID',
         $audit_request->getTableName());
     }
 
@@ -581,10 +618,6 @@ final class DiffusionCommitQuery
 
   protected function shouldGroupQueryResultRows() {
     if ($this->shouldJoinAuditor()) {
-      return true;
-    }
-
-    if ($this->shouldJoinAudit()) {
       return true;
     }
 
