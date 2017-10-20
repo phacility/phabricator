@@ -721,9 +721,10 @@ final class DifferentialRevision extends DifferentialDAO
       return array();
     }
 
-    $builds = id(new HarbormasterBuildQuery())
+    return id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
       ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
+      ->withAutobuilds(false)
       ->withBuildStatuses(
         array(
           HarbormasterBuildStatus::STATUS_INACTIVE,
@@ -735,29 +736,7 @@ final class DifferentialRevision extends DifferentialDAO
           HarbormasterBuildStatus::STATUS_PAUSED,
           HarbormasterBuildStatus::STATUS_DEADLOCKED,
         ))
-      ->needBuildTargets(true)
       ->execute();
-    if (!$builds) {
-      return array();
-    }
-
-    $active = array();
-    foreach ($builds as $key => $build) {
-      foreach ($build->getBuildTargets() as $target) {
-        if ($target->isAutotarget()) {
-          // Ignore autotargets when looking for active of failed builds. If
-          // local tests fail and you continue anyway, you don't need to
-          // double-confirm them.
-          continue;
-        }
-
-        // This build has at least one real target that's doing something.
-        $active[$key] = $build;
-        break;
-      }
-    }
-
-    return $active;
   }
 
 
