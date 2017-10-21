@@ -35,7 +35,15 @@ final class PhabricatorClientRateLimit
     // If the user was logged in, let them make more requests.
     if (isset($request_state['viewer'])) {
       $viewer = $request_state['viewer'];
-      if ($viewer->isLoggedIn()) {
+      if ($viewer->isOmnipotent()) {
+        // If the viewer was omnipotent, this was an intracluster request or
+        // some other kind of special request, so don't give it any points
+        // toward rate limiting.
+        $score = 0;
+      } else if ($viewer->isLoggedIn()) {
+        // If the viewer was logged in, give them fewer points than if they
+        // were logged out, since this traffic is much more likely to be
+        // legitimate.
         $score = 0.25;
       }
     }
