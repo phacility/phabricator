@@ -127,7 +127,7 @@ may have briefly been down, or some configuration wasn't quite right, or the
 daemons were killed halfway through the work.
 
 These commits will retry eventually and usually succeed, but some of the retry
-time limits are very conserative (up to 24 hours) and you might not want to
+time limits are very conservative (up to 24 hours) and you might not want to
 wait that long.
 
 In the Daemon console, temporarily failures usually look like tasks in the
@@ -137,7 +137,7 @@ waiting to retry these tasks.
 
 In the daemon log, these temporary failures might have created log entries, but
 might also not have. For example, if the failure was rooted in a network issue
-that probably will create a log entry, but if the faiulre was rooted in the
+that probably will create a log entry, but if the failure was rooted in the
 daemons being abruptly killed that may not create a log entry.
 
 You can follow the instructions from "Handling Permanent Failures" above to
@@ -167,7 +167,7 @@ Forced Parsing
 ==============
 
 In rare cases, the actual tasks may be lost from the task queue. Usually, they
-have been stolen by gremlins or spritied away by ghosts, or someone may have
+have been stolen by gremlins or spirited away by ghosts, or someone may have
 been too ambitious with running manual SQL commands and deleted a bunch of
 extra things they shouldn't have.
 
@@ -226,7 +226,7 @@ General Tips
 ============
 
 Broadly, `bin/repository` contains several useful debugging commands which
-let you figure out where failures are occuring. You can add the `--trace` flag
+let you figure out where failures are occurring. You can add the `--trace` flag
 to any command to get more details about what it is doing. For any command,
 you can use `help` to learn more about what it does and which flag it takes:
 

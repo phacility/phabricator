@@ -3701,7 +3701,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
       // If a later project in the list is an ancestor of this one, it will
       // have added itself to the map. If any ancestor of this project points
-      // at itself in the map, this project should be dicarded in favor of
+      // at itself in the map, this project should be discarded in favor of
       // that later ancestor.
       foreach ($project->getAncestorProjects() as $ancestor) {
         $ancestor_phid = $ancestor->getPHID();

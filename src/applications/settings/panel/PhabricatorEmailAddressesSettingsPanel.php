@@ -138,9 +138,9 @@ final class PhabricatorEmailAddressesSettingsPanel
         $editable,
       ));
 
-    $button = null;
+    $buttons = array();
     if ($editable) {
-      $button = id(new PHUIButtonView())
+      $buttons[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setIcon('fa-plus')
         ->setText(pht('Add New Address'))
@@ -149,7 +149,7 @@ final class PhabricatorEmailAddressesSettingsPanel
         ->setColor(PHUIButtonView::GREY);
     }
 
-    return $this->newBox(pht('Email Addresses'), $table, array($button));
+    return $this->newBox(pht('Email Addresses'), $table, $buttons);
   }
 
   private function returnNewAddressResponse(

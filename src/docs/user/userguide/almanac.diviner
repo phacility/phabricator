@@ -122,7 +122,7 @@ Each service has a name, and may have properties and bindings.
 **Bindings**: Bindings are connections between services and interfaces. They
 tell callers which devices host a named service.
 
-**Networks**: Networks allow Almanac to distingiush between addresses on
+**Networks**: Networks allow Almanac to distinguish between addresses on
 different networks, like VPNs vs the public internet.
 
 If you have hosts in different VPNs or on private networks, you might have

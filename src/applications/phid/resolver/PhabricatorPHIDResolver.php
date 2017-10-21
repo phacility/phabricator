@@ -3,7 +3,7 @@
 /**
  * Resolve a list of identifiers into PHIDs.
  *
- * This class simplifies the process of convering a list of mixed token types
+ * This class simplifies the process of converting a list of mixed token types
  * (like some PHIDs and some usernames) into a list of just PHIDs.
  */
 abstract class PhabricatorPHIDResolver extends Phobject {

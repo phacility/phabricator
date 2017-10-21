@@ -24,7 +24,7 @@ including these paths:
 
 Any files in those directories are considered to be part of the package, and
 you can now conveniently refer to them (for example, in a Herald rule) by
-refering to the package instead of copy/pasting a huge regular expression
+referring to the package instead of copy/pasting a huge regular expression
 into a bunch of places.
 
 If new source files are later added, or the scope of the package otherwise

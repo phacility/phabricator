@@ -255,7 +255,7 @@ abstract class PhabricatorMailReceiver extends Phobject {
 
 
   /**
-   * Reduce an email address to its canonical form. For example, an adddress
+   * Reduce an email address to its canonical form. For example, an address
    * like:
    *
    *  "Abraham Lincoln" < ALincoln@example.com >

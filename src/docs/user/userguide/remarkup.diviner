@@ -366,7 +366,7 @@ can be found on the date stamp of any transaction/comment):
 
   T123#412       # Link to comment id #412 of task T123
 
-See the Phabricator configuraton setting `remarkup.ignored-object-names` to
+See the Phabricator configuration setting `remarkup.ignored-object-names` to
 modify this behavior.
 
 = Embedding Objects

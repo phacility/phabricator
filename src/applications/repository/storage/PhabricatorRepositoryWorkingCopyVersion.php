@@ -66,7 +66,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
    * may have committed and acknowledged a write on a node that lost the lock
    * partway through the write and is no longer reachable.
    *
-   * In particular, if a node loses its connection to the datbase the global
+   * In particular, if a node loses its connection to the database the global
    * lock is released by default. This is a durable lock which stays locked
    * by default.
    */

@@ -34,7 +34,7 @@ objects, which will also affect their ability to take inline actions in the
 comment form if you're working in an application which supports comments. This
 can streamline the edit workflow for less experienced users.
 
-Anyone can use prefiling, but you must have permission to configure an
+Anyone can use prefilling, but you must have permission to configure an
 application in order to modify the application's forms. By default, only
 administrators can configure applications.
 

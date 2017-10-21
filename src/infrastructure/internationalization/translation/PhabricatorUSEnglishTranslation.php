@@ -730,7 +730,7 @@ final class PhabricatorUSEnglishTranslation
       '%s added %s reverting commit(s) for %s: %s.' => array(
         array(
           '%s added a reverting commit for %3$s: %4$s.',
-          '%s added reverting commitsi for %3$s: %4$s.',
+          '%s added reverting commits for %3$s: %4$s.',
         ),
       ),
 
@@ -1564,7 +1564,7 @@ final class PhabricatorUSEnglishTranslation
       '%s uninvited %s attendee(s): %s.' =>
         '%s uninvited: %3$s.',
 
-      '%s invited %s attendee(s): %s; uninvinted %s attendee(s): %s.' =>
+      '%s invited %s attendee(s): %s; uninvited %s attendee(s): %s.' =>
         '%s invited: %3$s; uninvited: %5$s.',
 
       '%s invited %s attendee(s) to %s: %s.' =>
@@ -1573,7 +1573,7 @@ final class PhabricatorUSEnglishTranslation
       '%s uninvited %s attendee(s) to %s: %s.' =>
         '%s removed invites for %3$s: %4$s.',
 
-      '%s updated the invite list for %s, invited %s: %s; uninvinted %s: %s.' =>
+      '%s updated the invite list for %s, invited %s: %s; uninvited %s: %s.' =>
         '%s updated the invite list for %s, invited: %4$s; uninvited: %6$s.',
 
       'Restart %s build(s)?' => array(

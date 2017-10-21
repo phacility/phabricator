@@ -479,7 +479,7 @@ final class DiffusionCommitController extends DiffusionController {
     // chains of events). This should be rare, but does not indicate a bug
     // or data issue.
 
-    // NOTE: We never query push logs in SVN because the commiter is always
+    // NOTE: We never query push logs in SVN because the committer is always
     // the pusher and the commit time is always the push time; the push log
     // is redundant and we save a query by skipping it.
 

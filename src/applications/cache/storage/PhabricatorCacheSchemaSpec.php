@@ -30,6 +30,9 @@ final class PhabricatorCacheSchemaSpec extends PhabricatorConfigSchemaSpec {
         'key_ttl' => array(
           'columns' => array('cacheExpires'),
         ),
+      ),
+      array(
+        'persistence' => PhabricatorConfigTableSchema::PERSISTENCE_CACHE,
       ));
 
   }

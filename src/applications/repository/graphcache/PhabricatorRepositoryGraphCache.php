@@ -102,6 +102,10 @@ final class PhabricatorRepositoryGraphCache extends Phobject {
         }
 
         // Otherwise, the rebuild gave us the data, so we can keep going.
+
+        $did_fill = true;
+      } else {
+        $did_fill = false;
       }
 
       // Sanity check so we can survive and recover from bad data.
@@ -147,12 +151,17 @@ final class PhabricatorRepositoryGraphCache extends Phobject {
         $commit_id = $parent_id;
 
         // Periodically check if we've spent too long looking for a result
-        // in the cache, and return so we can fall back to a VCS operation. This
-        // keeps us from having a degenerate worst case if, e.g., the cache
-        // is cold and we need to inspect a very large number of blocks
+        // in the cache, and return so we can fall back to a VCS operation.
+        // This keeps us from having a degenerate worst case if, e.g., the
+        // cache is cold and we need to inspect a very large number of blocks
         // to satisfy the query.
 
-        if (((++$iterations) % 64) === 0) {
+        ++$iterations;
+
+        // If we performed a cache fill in this cycle, always check the time
+        // limit, since cache fills may take a significant amount of time.
+
+        if ($did_fill || ($iterations % 64 === 0)) {
           $t_end = microtime(true);
           if (($t_end - $t_start) > $time) {
             return false;

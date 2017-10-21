@@ -359,7 +359,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    *   );
    *
    * Any unspecified fields (including custom fields and fields added
-   * automatically by infrastruture) will be put in the middle.
+   * automatically by infrastructure) will be put in the middle.
    *
    * @return list<string> Default ordering for field keys.
    */

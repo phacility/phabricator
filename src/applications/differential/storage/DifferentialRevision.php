@@ -67,13 +67,19 @@ final class DifferentialRevision extends DifferentialDAO
     $view_policy = $app->getPolicy(
       DifferentialDefaultViewCapability::CAPABILITY);
 
+    if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+      $initial_state = DifferentialRevisionStatus::DRAFT;
+    } else {
+      $initial_state = DifferentialRevisionStatus::NEEDS_REVIEW;
+    }
+
     return id(new DifferentialRevision())
       ->setViewPolicy($view_policy)
       ->setAuthorPHID($actor->getPHID())
       ->attachRepository(null)
       ->attachActiveDiff(null)
       ->attachReviewers(array())
-      ->setModernRevisionStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
+      ->setModernRevisionStatus($initial_state);
   }
 
   protected function getConfiguration() {
@@ -442,7 +448,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     // For each path which the viewer owns a package for, find other packages
     // which that authority can be used to force-accept. Once we find a way to
-    // force-accept a package, we don't need to keep loooking.
+    // force-accept a package, we don't need to keep looking.
     $has_control = array();
     foreach ($force_map as $path => $spec) {
       $path_fragments = PhabricatorOwnersPackage::splitPath($path);
@@ -702,6 +708,58 @@ final class DifferentialRevision extends DifferentialDAO
     return false;
   }
 
+  public function loadActiveBuilds(PhabricatorUser $viewer) {
+    $diff = $this->getActiveDiff();
+
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($viewer)
+      ->withContainerPHIDs(array($this->getPHID()))
+      ->withBuildablePHIDs(array($diff->getPHID()))
+      ->withManualBuildables(false)
+      ->execute();
+    if (!$buildables) {
+      return array();
+    }
+
+    $builds = id(new HarbormasterBuildQuery())
+      ->setViewer($viewer)
+      ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
+      ->withBuildStatuses(
+        array(
+          HarbormasterBuildStatus::STATUS_INACTIVE,
+          HarbormasterBuildStatus::STATUS_PENDING,
+          HarbormasterBuildStatus::STATUS_BUILDING,
+          HarbormasterBuildStatus::STATUS_FAILED,
+          HarbormasterBuildStatus::STATUS_ABORTED,
+          HarbormasterBuildStatus::STATUS_ERROR,
+          HarbormasterBuildStatus::STATUS_PAUSED,
+          HarbormasterBuildStatus::STATUS_DEADLOCKED,
+        ))
+      ->needBuildTargets(true)
+      ->execute();
+    if (!$builds) {
+      return array();
+    }
+
+    $active = array();
+    foreach ($builds as $key => $build) {
+      foreach ($build->getBuildTargets() as $target) {
+        if ($target->isAutotarget()) {
+          // Ignore autotargets when looking for active of failed builds. If
+          // local tests fail and you continue anyway, you don't need to
+          // double-confirm them.
+          continue;
+        }
+
+        // This build has at least one real target that's doing something.
+        $active[$key] = $build;
+        break;
+      }
+    }
+
+    return $active;
+  }
+
 
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
@@ -891,7 +949,7 @@ final class DifferentialRevision extends DifferentialDAO
         self::TABLE_COMMIT,
         $this->getID());
 
-      // we have to do paths a little differentally as they do not have
+      // we have to do paths a little differently as they do not have
       // an id or phid column for delete() to act on
       $dummy_path = new DifferentialAffectedPath();
       queryfx(

@@ -134,7 +134,7 @@ final class PhabricatorCalendarImportEditEngine
       $fields[] = id(new PhabricatorSelectEditField())
         ->setKey('frequency')
         ->setLabel(pht('Update Automatically'))
-        ->setDescription(pht('Configure an automatic update frequncy.'))
+        ->setDescription(pht('Configure an automatic update frequency.'))
         ->setTransactionType(
           PhabricatorCalendarImportFrequencyTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(pht('Set the automatic update frequency.'))

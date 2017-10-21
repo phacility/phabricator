@@ -82,7 +82,7 @@ final class PhabricatorOwnersPackageTestCase extends PhabricatorTestCase {
 
     // Now, add a more specific path to Package #1. This tests nested ownership
     // in packages with weak dominion rules. This time, Package #1 should end
-    // up back on top, with Package #2 cedeing control to its more specific
+    // up back on top, with Package #2 ceding control to its more specific
     // path.
     $rows[] = array(
       'id' => 1,

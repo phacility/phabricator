@@ -10,7 +10,7 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
 
   // NOTE: The negative lookbehind prevents matches like "mail@lists", while
   // allowing constructs like "@tomo/@mroch". Since we now allow periods in
-  // usernames, we can't resonably distinguish that "@company.com" isn't a
+  // usernames, we can't reasonably distinguish that "@company.com" isn't a
   // username, so we'll incorrectly pick it up, but there's little to be done
   // about that. We forbid terminal periods so that we can correctly capture
   // "@joe" instead of "@joe." in "Hey, @joe.".

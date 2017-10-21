@@ -763,7 +763,7 @@ abstract class PhabricatorEditEngine
    * Load an object given a configured query.
    *
    * @param PhabricatorPolicyAwareQuery Configured query.
-   * @param list<const> List of required capabilitiy constants, or omit for
+   * @param list<const> List of required capability constants, or omit for
    *  defaults.
    * @return object|null Object, or null if no such object exists.
    * @task load
@@ -1382,7 +1382,7 @@ abstract class PhabricatorEditEngine
    * and that field is visible and editable for the user.
    *
    * For example, you can use it to test if a user is able to reassign tasks
-   * or not, prior to rendering dedicated UI for task reassingment.
+   * or not, prior to rendering dedicated UI for task reassignment.
    *
    * Note that this method does NOT test if the user can actually edit the
    * current object, just if they have access to the related field.

@@ -270,7 +270,7 @@ abstract class PhabricatorOAuth1AuthProvider
   }
 
   private function getHandshakeTokenKeyFromClientCode($client_code) {
-    // NOTE: This is very slightly coersive since the TemporaryToken table
+    // NOTE: This is very slightly coercive since the TemporaryToken table
     // expects an "objectPHID" as an identifier, but nothing about the storage
     // is bound to PHIDs.
 

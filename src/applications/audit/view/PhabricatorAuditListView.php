@@ -63,7 +63,7 @@ final class PhabricatorAuditListView extends AphrontView {
       return $summary;
     }
 
-    // No summary, so either this is still impoting or just has an empty
+    // No summary, so either this is still importing or just has an empty
     // commit message.
 
     if (!$commit->isImported()) {

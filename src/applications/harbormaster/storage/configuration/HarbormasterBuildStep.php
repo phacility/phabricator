@@ -38,7 +38,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
         // T6203/NULLABILITY
         // This should not be nullable. Current `null` values indicate steps
         // which predated editable names. These should be backfilled with
-        // default names, then the code for handling `null` shoudl be removed.
+        // default names, then the code for handling `null` should be removed.
         'name' => 'text255?',
         'stepAutoKey' => 'text32?',
       ),

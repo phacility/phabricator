@@ -41,6 +41,20 @@ final class DifferentialChangesetOneUpRenderer
 
     $column_width = 4;
 
+    $aural_minus = javelin_tag(
+      'span',
+      array(
+        'aural' => true,
+      ),
+      '- ');
+
+    $aural_plus = javelin_tag(
+      'span',
+      array(
+        'aural' => true,
+      ),
+      '+ ');
+
     $out = array();
     foreach ($primitives as $k => $p) {
       $type = $p['type'];
@@ -55,8 +69,10 @@ final class DifferentialChangesetOneUpRenderer
           if ($is_old) {
             if ($p['htype']) {
               $class = 'left old';
+              $aural = $aural_minus;
             } else {
               $class = 'left';
+              $aural = null;
             }
 
             if ($type == 'old-file') {
@@ -79,14 +95,20 @@ final class DifferentialChangesetOneUpRenderer
               ),
               $line);
 
+            $render = $p['render'];
+            if ($aural !== null) {
+              $render = array($aural, $render);
+            }
+
             $cells[] = phutil_tag('th', array('class' => $class));
             $cells[] = $no_copy;
-            $cells[] = phutil_tag('td', array('class' => $class), $p['render']);
+            $cells[] = phutil_tag('td', array('class' => $class), $render);
             $cells[] = $no_coverage;
           } else {
             if ($p['htype']) {
               $class = 'right new';
               $cells[] = phutil_tag('th', array('class' => $class));
+              $aural = $aural_plus;
             } else {
               $class = 'right';
               if ($left_prefix) {
@@ -98,6 +120,7 @@ final class DifferentialChangesetOneUpRenderer
               $oline = $p['oline'];
 
               $cells[] = phutil_tag('th', array('id' => $left_id), $oline);
+              $aural = null;
             }
 
             if ($type == 'new-file') {
@@ -120,8 +143,13 @@ final class DifferentialChangesetOneUpRenderer
               ),
               $line);
 
+            $render = $p['render'];
+            if ($aural !== null) {
+              $render = array($aural, $render);
+            }
+
             $cells[] = $no_copy;
-            $cells[] = phutil_tag('td', array('class' => $class), $p['render']);
+            $cells[] = phutil_tag('td', array('class' => $class), $render);
             $cells[] = $no_coverage;
           }
 

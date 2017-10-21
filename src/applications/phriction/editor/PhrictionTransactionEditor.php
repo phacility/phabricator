@@ -452,7 +452,7 @@ final class PhrictionTransactionEditor
     $verb) {
 
     $errors = array();
-    // NOTE: We use the ominpotent user for these checks because policy
+    // NOTE: We use the omnipotent user for these checks because policy
     // doesn't matter; existence does.
     $other_doc_viewer = PhabricatorUser::getOmnipotentUser();
     $ancestral_slugs = PhabricatorSlug::getAncestry($object->getSlug());

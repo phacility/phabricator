@@ -226,7 +226,7 @@ final class PhabricatorAuthSSHKeyEditor
       ->addHeader('Thread-Topic', $phid);
 
     // The primary value of this mail is alerting users to account compromises,
-    // so force delivery. In particular, this mail should still be delievered
+    // so force delivery. In particular, this mail should still be delivered
     // even if "self mail" is disabled.
     $mail->setForceDelivery(true);
 

@@ -972,7 +972,7 @@ final class ManiphestTransactionEditor
 
     $object_phid = $object->getPHID();
 
-    // We're doing layout with the ominpotent viewer to make sure we don't
+    // We're doing layout with the omnipotent viewer to make sure we don't
     // remove positions in columns that exist, but which the actual actor
     // can't see.
     $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();

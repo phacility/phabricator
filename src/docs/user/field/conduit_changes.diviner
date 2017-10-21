@@ -11,7 +11,7 @@ For example, when we write a new application, it usually adds several new API
 methods and may update older methods.
 
 This document discusses API stability and how to minimize disruption when
-transitionig between API versions.
+transitioning between API versions.
 
 
 Method Statuses

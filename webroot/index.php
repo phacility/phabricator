@@ -37,7 +37,12 @@ function phabricator_startup() {
   // Load the PhabricatorStartup class itself.
   $t_startup = microtime(true);
   $root = dirname(dirname(__FILE__));
-  require_once $root.'/support/PhabricatorStartup.php';
+  require_once $root.'/support/startup/PhabricatorStartup.php';
+
+  // Load client limit classes so the preamble can configure limits.
+  require_once $root.'/support/startup/PhabricatorClientLimit.php';
+  require_once $root.'/support/startup/PhabricatorClientRateLimit.php';
+  require_once $root.'/support/startup/PhabricatorClientConnectionLimit.php';
 
   // If the preamble script exists, load it.
   $t_preamble = microtime(true);

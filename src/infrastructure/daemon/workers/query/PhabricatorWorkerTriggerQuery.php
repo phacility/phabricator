@@ -5,7 +5,7 @@ final class PhabricatorWorkerTriggerQuery
 
   // NOTE: This is a PolicyAware query so it can work with other infrastructure
   // like handles; triggers themselves are low-level and do not have
-  // meaninguful policies.
+  // meaningful policies.
 
   const ORDER_ID = 'id';
   const ORDER_EXECUTION = 'execution';
@@ -69,7 +69,7 @@ final class PhabricatorWorkerTriggerQuery
 
   protected function nextPage(array $page) {
     // NOTE: We don't implement paging because we don't currently ever need
-    // it and paging ORDER_EXCUTION is a hassle.
+    // it and paging ORDER_EXECUTION is a hassle.
     throw new PhutilMethodNotImplementedException();
   }
 

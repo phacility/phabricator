@@ -261,6 +261,7 @@ final class PhabricatorConfigDatabaseStatusController
         $this->renderAttr(
           $table->getCollation(),
           $table->hasIssue($collation_issue)),
+        $table->getPersistenceTypeDisplayName(),
       );
     }
 
@@ -270,11 +271,13 @@ final class PhabricatorConfigDatabaseStatusController
           null,
           pht('Table'),
           pht('Collation'),
+          pht('Persistence'),
         ))
       ->setColumnClasses(
         array(
           null,
           'wide pri',
+          null,
           null,
         ));
 

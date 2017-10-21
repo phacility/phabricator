@@ -49,7 +49,7 @@ final class PhabricatorUserPreferencesQuery
    * If no settings exist for a user, a new empty settings object with
    * appropriate defaults is returned.
    *
-   * @param bool True to generat synthetic preferences for missing users.
+   * @param bool True to generate synthetic preferences for missing users.
    */
   public function needSyntheticPreferences($synthetic) {
     $this->synthetic = $synthetic;

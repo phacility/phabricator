@@ -79,7 +79,7 @@ final class PhabricatorAuthRegisterController
     }
 
     if ($default_email !== null) {
-      // We should bypass policy here becase e.g. limiting an application use
+      // We should bypass policy here because e.g. limiting an application use
       // to a subset of users should not allow the others to overwrite
       // configured application emails.
       $application_email = id(new PhabricatorMetaMTAApplicationEmailQuery())

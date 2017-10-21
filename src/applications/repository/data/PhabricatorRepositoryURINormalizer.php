@@ -27,10 +27,10 @@
  *     // URIs are very unlikely to be the same repository.
  *   }
  *
- * Because a repository can be hosted at arbitrarly many arbitrary URIs, there
+ * Because a repository can be hosted at arbitrarily many arbitrary URIs, there
  * is no way to completely prevent false negatives by only examining URIs
  * (that is, repositories with totally different URIs could really be the same).
- * However, normalization is relatively agressive and false negatives should
+ * However, normalization is relatively aggressive and false negatives should
  * be rare: if normalization says two URIs are different repositories, they
  * probably are.
  *

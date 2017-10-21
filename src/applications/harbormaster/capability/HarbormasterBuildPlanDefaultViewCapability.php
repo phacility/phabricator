@@ -3,6 +3,7 @@
 final class HarbormasterBuildPlanDefaultViewCapability
   extends PhabricatorPolicyCapability {
 
+  // TODO: This is misspelled! See T13005.
   const CAPABILITY = 'harbomaster.plan.default.view';
 
   public function getCapabilityName() {

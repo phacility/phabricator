@@ -33,7 +33,7 @@ final class PhabricatorStatusUIExample extends PhabricatorUIExample {
     $view->addItem(
       id(new PHUIStatusItemView())
         ->setIcon(PHUIStatusItemView::ICON_WARNING, 'dark', pht('Caution'))
-        ->setTarget(pht('Pomegranite'))
+        ->setTarget(pht('Pomegranate'))
         ->setNote(pht('Lots of seeds. Watch out.')));
 
     $view->addItem(

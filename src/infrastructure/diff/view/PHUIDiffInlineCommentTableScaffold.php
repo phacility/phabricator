@@ -4,7 +4,7 @@
  * Wraps an inline comment row scaffold in a table.
  *
  * This scaffold is used to ship inlines over the wire to the client, so they
- * arrive in a form that's easy to mainipulate (a valid table node).
+ * arrive in a form that's easy to manipulate (a valid table node).
  */
 final class PHUIDiffInlineCommentTableScaffold extends AphrontView {
 

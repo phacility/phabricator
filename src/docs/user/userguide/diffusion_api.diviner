@@ -147,7 +147,7 @@ Activate the Repository
 =======================
 
 Now that any URIs have been configured, activate the repository with another
-call to `diffusion.repository.edit`. This time, modify the existing repostitory
+call to `diffusion.repository.edit`. This time, modify the existing repository
 instead of creating a new one:
 
 ```

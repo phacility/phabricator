@@ -241,7 +241,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       // NOTE: We have not acquired the lease yet, so it is possible that the
       // resource we just built will be snatched up by some other lease before
       // we can acquire it. This is not problematic: we'll retry a little later
-      // and should suceed eventually.
+      // and should succeed eventually.
     }
 
     $resources = $this->rankResources($resources, $lease);
@@ -261,7 +261,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     if (!$allocated) {
       throw new PhutilAggregateException(
         pht(
-          'Unable to acquire lease "%s" on any resouce.',
+          'Unable to acquire lease "%s" on any resource.',
           $lease->getPHID()),
         $exceptions);
     }
@@ -725,7 +725,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     // performed the read above and now, the resource might have closed, so
     // we may activate leases on dead resources. At least for now, this seems
     // fine: a resource dying right before we activate a lease on it should not
-    // be distinguisahble from a resource dying right after we activate a lease
+    // be distinguishable from a resource dying right after we activate a lease
     // on it. We end up with an active lease on a dead resource either way, and
     // can not prevent resources dying from lightning strikes.
 

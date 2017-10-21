@@ -160,7 +160,7 @@ final class PHUIDiffGraphView extends Phobject {
 
             $terminated[$ii] = true;
 
-            // If this thread is joinining some other node here, we don't want
+            // If this thread is joining some other node here, we don't want
             // to terminate it.
             if (isset($graph[$key + 1])) {
               $joins = $graph[$key + 1]['join'];

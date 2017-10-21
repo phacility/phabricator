@@ -108,7 +108,7 @@ abstract class PhabricatorApplication
    *
    * Launchable applications can be pinned to the home page, and show up in the
    * "Launcher" view of the Applications application. Making an application
-   * unlauncahble prevents pinning and hides it from this view.
+   * unlaunchable prevents pinning and hides it from this view.
    *
    * Usually, an application should be marked unlaunchable if:
    *

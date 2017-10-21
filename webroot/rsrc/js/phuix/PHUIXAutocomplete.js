@@ -543,7 +543,7 @@ JX.install('PHUIXAutocomplete', {
 
       // If the input is terminated by a space or another word-terminating
       // punctuation mark, we're going to deactivate if the results can not
-      // be refined by addding more words.
+      // be refined by adding more words.
 
       // The idea is that if you type "@alan ab", you're allowed to keep
       // editing "ab" until you type a space, period, or other terminator,

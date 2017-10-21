@@ -7,6 +7,11 @@ final class PhabricatorConfigTableSchema
   private $engine;
   private $columns = array();
   private $keys = array();
+  private $persistenceType = self::PERSISTENCE_DATA;
+
+  const PERSISTENCE_DATA = 'data';
+  const PERSISTENCE_CACHE = 'cache';
+  const PERSISTENCE_INDEX = 'index';
 
   public function addColumn(PhabricatorConfigColumnSchema $column) {
     $key = $column->getName();
@@ -43,6 +48,27 @@ final class PhabricatorConfigTableSchema
 
   public function getKey($key) {
     return idx($this->getKeys(), $key);
+  }
+
+  public function setPersistenceType($persistence_type) {
+    $this->persistenceType = $persistence_type;
+    return $this;
+  }
+
+  public function getPersistenceType() {
+    return $this->persistenceType;
+  }
+
+  public function getPersistenceTypeDisplayName() {
+    $map = array(
+      self::PERSISTENCE_DATA => pht('Data'),
+      self::PERSISTENCE_CACHE => pht('Cache'),
+      self::PERSISTENCE_INDEX => pht('Index'),
+    );
+
+    $type = $this->getPersistenceType();
+
+    return idx($map, $type, $type);
   }
 
   protected function getSubschemata() {

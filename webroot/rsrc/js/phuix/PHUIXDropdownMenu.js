@@ -124,7 +124,7 @@ JX.install('PHUIXDropdownMenu', {
       }
 
       // If this action was built dynamically with PHUIXActionView, don't
-      // do anything by default. The caller is repsonsible for installing a
+      // do anything by default. The caller is responsible for installing a
       // handler if they want to react to clicks.
       if (e.getNode('phuix-action-view')) {
         return;

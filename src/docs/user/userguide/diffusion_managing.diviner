@@ -121,7 +121,7 @@ It is normally a good idea to leave this protection enabled because most
 scalable workflows rarely rewrite repository history and it's easy to make
 mistakes which are expensive to correct if this protection is disabled.
 
-If you do occasionally need to rewite published history, you can treat this
+If you do occasionally need to rewrite published history, you can treat this
 option like a safety: disable it, perform required rewrites, then enable it
 again.
 
@@ -148,7 +148,7 @@ Repositories can be deactivated. Deactivating a repository has these effects:
   - the repository will be hidden from view in default queries.
 
 When repositories are created for the first time, they are deactivated. This
-gives you an opportuinty to customize settings, like adjusting policies or
+gives you an opportunity to customize settings, like adjusting policies or
 configuring a URI to observe. You must activate a repository before it will
 start working normally.
 
@@ -177,7 +177,7 @@ The **Policies** section of the management interface allows you to review and
 manage repository access policies.
 
 You can configure granular access policies for each repository to control who
-can view, clone, administate, and push to the repository.
+can view, clone, administrate, and push to the repository.
 
 
 Policies: View
@@ -302,7 +302,7 @@ Actions
 The **Actions** panel can configure notifications and publishing behavior.
 
 Normally, Phabricator publishes notifications when it discovers new commits.
-You can disable publishing for a repository by turning off **Publish/Noitfy**.
+You can disable publishing for a repository by turning off **Publish/Notify**.
 This will disable notifications, feed, and Herald (including audits and build
 plans) for this repository.
 
@@ -347,7 +347,7 @@ Commit Identifiers
 ==================
 
 Diffusion uses repository identifiers and information about the commit itself
-to generate globally unique identifers for each commit, like `rE12345`.
+to generate globally unique identifiers for each commit, like `rE12345`.
 
 Each commit may have several identifiers:
 

@@ -64,7 +64,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
    * is a coarse compatibility check between a lease and a resource.
    *
    * @param DrydockBlueprint Concrete blueprint to allocate for.
-   * @param DrydockResource Candidiate resource to allocate the lease on.
+   * @param DrydockResource Candidate resource to allocate the lease on.
    * @param DrydockLease Pending lease that wants to allocate here.
    * @return bool True if the resource and lease are compatible.
    * @task lease
@@ -76,7 +76,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 
 
   /**
-   * Acquire a lease. Allows resources to peform setup as leases are brought
+   * Acquire a lease. Allows resources to perform setup as leases are brought
    * online.
    *
    * If acquisition fails, throw an exception.

@@ -23,7 +23,7 @@ final class PhabricatorCalendarEventFrequencyTransaction
     // month, it means "the 30th of every month" as far as the RRULE is
     // concerned. Such an event will not occur on months with fewer days.
 
-    // This is surprising, and proably not what the user wants. Instead,
+    // This is surprising, and probably not what the user wants. Instead,
     // schedule these events relative to the end of the month: on the "-1st",
     // "-2nd" or "-3rd" day of the month. For example, a monthly event on
     // the 31st of a 31-day month translates to "every month, on the last
@@ -66,7 +66,7 @@ final class PhabricatorCalendarEventFrequencyTransaction
       if (!isset($valid[$value])) {
         $errors[] = $this->newInvalidError(
           pht(
-            'Event frequency "%s" is not valid. Valid frequences are: %s.',
+            'Event frequency "%s" is not valid. Valid frequencies are: %s.',
             $value,
             implode(', ', $valid)),
           $xaction);

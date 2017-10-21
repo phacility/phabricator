@@ -8,7 +8,7 @@
  * calendar views - one for the conpherence calendar widget and one for the
  * user profile calendar view. These have slight differences such as
  * conpherence showing both a three day "today 'til 2 days from now" *and*
- * a Sunday -> Saturday list, whilest the profile view shows a more simple
+ * a Sunday -> Saturday list, whilst the profile view shows a more simple
  * seven day rolling list of events.
  */
 final class CalendarTimeUtil extends Phobject {
