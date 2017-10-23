@@ -1565,6 +1565,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return $select;
     }
 
+    $vector = $this->getOrderVector();
+    if (!$vector->containsKey('rank')) {
+      // We only need to SELECT the virtual "_ft_rank" column if we're
+      // actually sorting the results by rank.
+      return $select;
+    }
+
     if (!$this->ferretEngine) {
       $select[] = '0 _ft_rank';
       return $select;
