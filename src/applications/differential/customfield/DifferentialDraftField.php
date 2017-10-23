@@ -24,7 +24,7 @@ final class DifferentialDraftField
     return true;
   }
 
-  public function renderPropertyViewValue() {
+  public function renderPropertyViewValue(array $handles) {
     return null;
   }
 
