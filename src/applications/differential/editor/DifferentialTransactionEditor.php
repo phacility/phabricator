@@ -1537,7 +1537,13 @@ final class DifferentialTransactionEditor
     if ($object->isDraft() && $auto_undraft) {
       $active_builds = $this->hasActiveBuilds($object);
       if (!$active_builds) {
+        // When Harbormaster moves a revision out of the draft state, we
+        // attribute the action to the revision author since this is more
+        // natural and more useful.
+        $author_phid = $object->getAuthorPHID();
+
         $xaction = $object->getApplicationTransactionTemplate()
+          ->setAuthorPHID($author_phid)
           ->setTransactionType(
             DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE)
           ->setOldValue(false)
