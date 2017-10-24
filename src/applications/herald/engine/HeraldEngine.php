@@ -12,6 +12,9 @@ final class HeraldEngine extends Phobject {
   protected $object;
   private $dryRun;
 
+  private $forbiddenFields = array();
+  private $forbiddenActions = array();
+
   public function setDryRun($dry_run) {
     $this->dryRun = $dry_run;
     return $this;
@@ -76,39 +79,42 @@ final class HeraldEngine extends Phobject {
           // This is not a dry run, and this rule is only supposed to be
           // applied a single time, and it's already been applied...
           // That means automatic failure.
-          $xscript = id(new HeraldRuleTranscript())
-            ->setRuleID($rule->getID())
+          $this->newRuleTranscript($rule)
             ->setResult(false)
-            ->setRuleName($rule->getName())
-            ->setRuleOwner($rule->getAuthorPHID())
             ->setReason(
               pht(
                 'This rule is only supposed to be repeated a single time, '.
                 'and it has already been applied.'));
-          $this->transcript->addRuleTranscript($xscript);
+
           $rule_matches = false;
         } else {
-          $rule_matches = $this->doesRuleMatch($rule, $object);
+          if ($this->isForbidden($rule, $object)) {
+            $this->newRuleTranscript($rule)
+              ->setResult(HeraldRuleTranscript::RESULT_FORBIDDEN)
+              ->setReason(
+                pht(
+                  'Object state is not compatible with rule.'));
+
+            $rule_matches = false;
+          } else {
+            $rule_matches = $this->doesRuleMatch($rule, $object);
+          }
         }
       } catch (HeraldRecursiveConditionsException $ex) {
         $names = array();
-        foreach ($this->stack as $rule_id => $ignored) {
-          $names[] = '"'.$rules[$rule_id]->getName().'"';
+        foreach ($this->stack as $rule_phid => $ignored) {
+          $names[] = '"'.$rules[$rule_phid]->getName().'"';
         }
         $names = implode(', ', $names);
-        foreach ($this->stack as $rule_id => $ignored) {
-          $xscript = new HeraldRuleTranscript();
-          $xscript->setRuleID($rule_id);
-          $xscript->setResult(false);
-          $xscript->setReason(
-            pht(
-              "Rules %s are recursively dependent upon one another! ".
-              "Don't do this! You have formed an unresolvable cycle in the ".
-              "dependency graph!",
-              $names));
-          $xscript->setRuleName($rules[$rule_id]->getName());
-          $xscript->setRuleOwner($rules[$rule_id]->getAuthorPHID());
-          $this->transcript->addRuleTranscript($xscript);
+        foreach ($this->stack as $rule_phid => $ignored) {
+          $this->newRuleTranscript($rules[$rule_phid])
+            ->setResult(false)
+            ->setReason(
+              pht(
+                "Rules %s are recursively dependent upon one another! ".
+                "Don't do this! You have formed an unresolvable cycle in the ".
+                "dependency graph!",
+                $names));
         }
         $rule_matches = false;
       }
@@ -309,14 +315,9 @@ final class HeraldEngine extends Phobject {
       }
     }
 
-    $rule_transcript = new HeraldRuleTranscript();
-    $rule_transcript->setRuleID($rule->getID());
-    $rule_transcript->setResult($result);
-    $rule_transcript->setReason($reason);
-    $rule_transcript->setRuleName($rule->getName());
-    $rule_transcript->setRuleOwner($rule->getAuthorPHID());
-
-    $this->transcript->addRuleTranscript($rule_transcript);
+    $this->newRuleTranscript($rule)
+      ->setResult($result)
+      ->setReason($reason);
 
     return $result;
   }
@@ -327,16 +328,7 @@ final class HeraldEngine extends Phobject {
     HeraldAdapter $object) {
 
     $object_value = $this->getConditionObjectValue($condition, $object);
-    $test_value   = $condition->getValue();
-
-    $cond = $condition->getFieldCondition();
-
-    $transcript = new HeraldConditionTranscript();
-    $transcript->setRuleID($rule->getID());
-    $transcript->setConditionID($condition->getID());
-    $transcript->setFieldName($condition->getFieldName());
-    $transcript->setCondition($cond);
-    $transcript->setTestValue($test_value);
+    $transcript = $this->newConditionTranscript($rule, $condition);
 
     try {
       $result = $object->doesConditionMatch(
@@ -350,8 +342,6 @@ final class HeraldEngine extends Phobject {
     }
 
     $transcript->setResult($result);
-
-    $this->transcript->addConditionTranscript($transcript);
 
     return $result;
   }
@@ -444,6 +434,138 @@ final class HeraldEngine extends Phobject {
     }
 
     return false;
+  }
+
+  private function newRuleTranscript(HeraldRule $rule) {
+    $xscript = id(new HeraldRuleTranscript())
+      ->setRuleID($rule->getID())
+      ->setRuleName($rule->getName())
+      ->setRuleOwner($rule->getAuthorPHID());
+
+    $this->transcript->addRuleTranscript($xscript);
+
+    return $xscript;
+  }
+
+  private function newConditionTranscript(
+    HeraldRule $rule,
+    HeraldCondition $condition) {
+
+    $xscript = id(new HeraldConditionTranscript())
+      ->setRuleID($rule->getID())
+      ->setConditionID($condition->getID())
+      ->setFieldName($condition->getFieldName())
+      ->setCondition($condition->getFieldCondition())
+      ->setTestValue($condition->getValue());
+
+    $this->transcript->addConditionTranscript($xscript);
+
+    return $xscript;
+  }
+
+  private function newApplyTranscript(
+    HeraldAdapter $adapter,
+    HeraldRule $rule,
+    HeraldActionRecord $action) {
+
+    $effect = id(new HeraldEffect())
+      ->setObjectPHID($adapter->getPHID())
+      ->setAction($action->getAction())
+      ->setTarget($action->getTarget())
+      ->setRule($rule);
+
+    $xscript = new HeraldApplyTranscript($effect, false);
+
+    $this->transcript->addApplyTranscript($xscript);
+
+    return $xscript;
+  }
+
+  private function isForbidden(
+    HeraldRule $rule,
+    HeraldAdapter $adapter) {
+
+    $forbidden = $adapter->getForbiddenActions();
+    if (!$forbidden) {
+      return false;
+    }
+
+    $forbidden = array_fuse($forbidden);
+
+    $is_forbidden = false;
+
+    foreach ($rule->getConditions() as $condition) {
+      $field_key = $condition->getFieldName();
+
+      if (!isset($this->forbiddenFields[$field_key])) {
+        $reason = null;
+
+        try {
+          $states = $adapter->getRequiredFieldStates($field_key);
+        } catch (Exception $ex) {
+          $states = array();
+        }
+
+        foreach ($states as $state) {
+          if (!isset($forbidden[$state])) {
+            continue;
+          }
+          $reason = $adapter->getForbiddenReason($state);
+          break;
+        }
+
+        $this->forbiddenFields[$field_key] = $reason;
+      }
+
+      $forbidden_reason = $this->forbiddenFields[$field_key];
+      if ($forbidden_reason !== null) {
+        $this->newConditionTranscript($rule, $condition)
+          ->setResult(HeraldConditionTranscript::RESULT_FORBIDDEN)
+          ->setNote($forbidden_reason);
+
+        $is_forbidden = true;
+      }
+    }
+
+    foreach ($rule->getActions() as $action_record) {
+      $action_key = $action_record->getAction();
+
+      if (!isset($this->forbiddenActions[$action_key])) {
+        $reason = null;
+
+        try {
+          $states = $adapter->getRequiredActionStates($action_key);
+        } catch (Exception $ex) {
+          $states = array();
+        }
+
+        foreach ($states as $state) {
+          if (!isset($forbidden[$state])) {
+            continue;
+          }
+          $reason = $adapter->getForbiddenReason($state);
+          break;
+        }
+
+        $this->forbiddenActions[$action_key] = $reason;
+      }
+
+      $forbidden_reason = $this->forbiddenActions[$action_key];
+      if ($forbidden_reason !== null) {
+        $this->newApplyTranscript($adapter, $rule, $action_record)
+          ->setAppliedReason(
+            array(
+              array(
+                'type' => HeraldAction::DO_STANDARD_FORBIDDEN,
+                'data' => $forbidden_reason,
+              ),
+            ));
+
+        $is_forbidden = true;
+      }
+    }
+
+    return $is_forbidden;
   }
 
 }

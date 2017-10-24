@@ -17,6 +17,7 @@ abstract class HeraldAction extends Phobject {
   const DO_STANDARD_PERMISSION = 'do.standard.permission';
   const DO_STANDARD_INVALID_ACTION = 'do.standard.invalid-action';
   const DO_STANDARD_WRONG_RULE_TYPE = 'do.standard.wrong-rule-type';
+  const DO_STANDARD_FORBIDDEN = 'do.standard.forbidden';
 
   abstract public function getHeraldActionName();
   abstract public function supportsObject($object);
@@ -24,6 +25,10 @@ abstract class HeraldAction extends Phobject {
   abstract public function applyEffect($object, HeraldEffect $effect);
 
   abstract public function renderActionDescription($value);
+
+  public function getRequiredAdapterStates() {
+    return array();
+  }
 
   protected function renderActionEffectDescription($type, $data) {
     return null;
@@ -336,6 +341,11 @@ abstract class HeraldAction extends Phobject {
         'color' => 'red',
         'name' => pht('Wrong Rule Type'),
       ),
+      self::DO_STANDARD_FORBIDDEN => array(
+        'icon' => 'fa-ban',
+        'color' => 'violet',
+        'name' => pht('Forbidden'),
+      ),
     );
   }
 
@@ -381,6 +391,8 @@ abstract class HeraldAction extends Phobject {
         return pht(
           'This action does not support rules of type "%s".',
           $data);
+      case self::DO_STANDARD_FORBIDDEN:
+        return HeraldStateReasons::getExplanation($data);
     }
 
     return null;
