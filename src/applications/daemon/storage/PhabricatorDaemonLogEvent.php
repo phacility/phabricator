@@ -18,6 +18,9 @@ final class PhabricatorDaemonLogEvent extends PhabricatorDaemonDAO {
         'logID' => array(
           'columns' => array('logID', 'epoch'),
         ),
+        'key_epoch' => array(
+          'columns' => array('epoch'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
