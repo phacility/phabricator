@@ -83,6 +83,9 @@ final class DrydockLease extends DrydockDAO
         'key_resource' => array(
           'columns' => array('resourcePHID', 'status'),
         ),
+        'key_status' => array(
+          'columns' => array('status'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
