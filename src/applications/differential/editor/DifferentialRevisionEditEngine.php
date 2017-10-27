@@ -235,6 +235,22 @@ final class DifferentialRevisionEditEngine
       $fields[] = $action->newEditField($object, $viewer);
     }
 
+    $fields[] = id(new PhabricatorBoolEditField())
+      ->setKey('draft')
+      ->setLabel(pht('Hold as Draft'))
+      ->setIsConduitOnly(true)
+      ->setOptions(
+        pht('Autosubmit Once Builds Finish'),
+        pht('Hold as Draft'))
+      ->setTransactionType(
+        DifferentialRevisionHoldDraftTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('Hold revision as as draft.'))
+      ->setConduitDescription(
+        pht(
+          'Change autosubmission from draft state after builds finish.'))
+      ->setConduitTypeDescription(pht('New "Hold as Draft" setting.'))
+      ->setValue($object->getHoldAsDraft());
+
     return $fields;
   }
 

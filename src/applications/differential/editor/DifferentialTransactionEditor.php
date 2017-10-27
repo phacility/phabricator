@@ -1540,7 +1540,7 @@ final class DifferentialTransactionEditor
   protected function didApplyTransactions($object, array $xactions) {
     // If a draft revision has no outstanding builds and we're automatically
     // making drafts public after builds finish, make the revision public.
-    $auto_undraft = true;
+    $auto_undraft = !$object->getHoldAsDraft();
 
     if ($object->isDraft() && $auto_undraft) {
       $active_builds = $this->hasActiveBuilds($object);

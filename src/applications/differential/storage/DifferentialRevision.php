@@ -57,6 +57,7 @@ final class DifferentialRevision extends DifferentialDAO
   const RELATION_SUBSCRIBED   = 'subd';
 
   const PROPERTY_CLOSED_FROM_ACCEPTED = 'wasAcceptedBeforeClose';
+  const PROPERTY_DRAFT_HOLD = 'draft.hold';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -706,6 +707,14 @@ final class DifferentialRevision extends DifferentialDAO
     }
 
     return false;
+  }
+
+  public function getHoldAsDraft() {
+    return $this->getProperty(self::PROPERTY_DRAFT_HOLD, false);
+  }
+
+  public function setHoldAsDraft($hold) {
+    return $this->setProperty(self::PROPERTY_DRAFT_HOLD, $hold);
   }
 
   public function loadActiveBuilds(PhabricatorUser $viewer) {
