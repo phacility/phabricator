@@ -36,6 +36,7 @@ final class DifferentialParseCommitMessageConduitAPIMethod
     $field_map = $parser->parseFields($corpus);
 
     $errors = $parser->getErrors();
+    $xactions = $parser->getTransactions();
 
     $revision_id_value = idx(
       $field_map,
@@ -49,6 +50,7 @@ final class DifferentialParseCommitMessageConduitAPIMethod
         'value' => $revision_id_value,
         'validDomain' => $revision_id_valid_domain,
       ),
+      'transactions' => $xactions,
     );
   }
 
