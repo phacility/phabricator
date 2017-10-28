@@ -37,6 +37,7 @@ abstract class HeraldAdapter extends Phobject {
   private $fieldMap;
   private $actionMap;
   private $edgeCache = array();
+  private $forbiddenActions = array();
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -1114,6 +1115,40 @@ abstract class HeraldAdapter extends Phobject {
       $this->edgeCache[$type] = array_fuse($phids);
     }
     return $this->edgeCache[$type];
+  }
+
+
+/* -(  Forbidden Actions  )-------------------------------------------------- */
+
+
+  final public function getForbiddenActions() {
+    return array_keys($this->forbiddenActions);
+  }
+
+  final public function setForbiddenAction($action, $reason) {
+    $this->forbiddenActions[$action] = $reason;
+    return $this;
+  }
+
+  final public function getRequiredFieldStates($field_key) {
+    return $this->requireFieldImplementation($field_key)
+      ->getRequiredAdapterStates();
+  }
+
+  final public function getRequiredActionStates($action_key) {
+    return $this->requireActionImplementation($action_key)
+      ->getRequiredAdapterStates();
+  }
+
+  final public function getForbiddenReason($action) {
+    if (!isset($this->forbiddenActions[$action])) {
+      throw new Exception(
+        pht(
+          'Action "%s" is not forbidden!',
+          $action));
+    }
+
+    return $this->forbiddenActions[$action];
   }
 
 }

@@ -1003,26 +1003,7 @@ final class DifferentialTransactionEditor
   protected function shouldApplyHeraldRules(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    if ($this->getIsNewObject()) {
-      return true;
-    }
-
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case DifferentialTransaction::TYPE_UPDATE:
-          if (!$this->getIsCloseByCommit()) {
-            return true;
-          }
-          break;
-        case DifferentialRevisionCommandeerTransaction::TRANSACTIONTYPE:
-          // When users commandeer revisions, we may need to trigger
-          // signatures or author-based rules.
-          return true;
-      }
-    }
-
-    return parent::shouldApplyHeraldRules($object, $xactions);
+    return true;
   }
 
   protected function didApplyHeraldRules(
@@ -1210,6 +1191,33 @@ final class DifferentialTransactionEditor
     $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
       $revision,
       $revision->getActiveDiff());
+
+    // If the object is still a draft, prevent "Send me an email" and other
+    // similar rules from acting yet.
+    if (!$object->shouldBroadcast()) {
+      $adapter->setForbiddenAction(
+        HeraldMailableState::STATECONST,
+        DifferentialHeraldStateReasons::REASON_DRAFT);
+    }
+
+    // If this edit didn't actually change the diff (for example, a user
+    // edited the title or changed subscribers), prevent "Run build plan"
+    // and other similar rules from acting yet, since the build results will
+    // not (or, at least, should not) change unless the actual source changes.
+    $has_update = false;
+    $type_update = DifferentialTransaction::TYPE_UPDATE;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $type_update) {
+        $has_update = true;
+        break;
+      }
+    }
+
+    if (!$has_update) {
+      $adapter->setForbiddenAction(
+        HeraldBuildableState::STATECONST,
+        DifferentialHeraldStateReasons::REASON_UNCHANGED);
+    }
 
     return $adapter;
   }
@@ -1537,7 +1545,13 @@ final class DifferentialTransactionEditor
     if ($object->isDraft() && $auto_undraft) {
       $active_builds = $this->hasActiveBuilds($object);
       if (!$active_builds) {
+        // When Harbormaster moves a revision out of the draft state, we
+        // attribute the action to the revision author since this is more
+        // natural and more useful.
+        $author_phid = $object->getAuthorPHID();
+
         $xaction = $object->getApplicationTransactionTemplate()
+          ->setAuthorPHID($author_phid)
           ->setTransactionType(
             DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE)
           ->setOldValue(false)

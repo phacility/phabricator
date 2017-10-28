@@ -134,6 +134,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
           'columns' => array('builtinKey'),
           'unique' => true,
         ),
+        'key_engine' => array(
+          'columns' => array('storageEngine', 'storageHandle(64)'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

@@ -6,6 +6,12 @@ abstract class PhabricatorMetaMTAEmailHeraldAction
   const DO_SEND = 'do.send';
   const DO_FORCE = 'do.force';
 
+  public function getRequiredAdapterStates() {
+    return array(
+      HeraldMailableState::STATECONST,
+    );
+  }
+
   public function supportsObject($object) {
     // NOTE: This implementation lacks generality, but there's no great way to
     // figure out if something generates email right now.

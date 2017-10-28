@@ -10,6 +10,7 @@ final class HarbormasterBuildQuery
   private $buildPlanPHIDs;
   private $initiatorPHIDs;
   private $needBuildTargets;
+  private $autobuilds;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -38,6 +39,11 @@ final class HarbormasterBuildQuery
 
   public function withInitiatorPHIDs(array $initiator_phids) {
     $this->initiatorPHIDs = $initiator_phids;
+    return $this;
+  }
+
+  public function withAutobuilds($with_autobuilds) {
+    $this->autobuilds = $with_autobuilds;
     return $this;
   }
 
@@ -141,50 +147,87 @@ final class HarbormasterBuildQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'b.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid in (%Ls)',
+        'b.phid in (%Ls)',
         $this->phids);
     }
 
     if ($this->buildStatuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'buildStatus in (%Ls)',
+        'b.buildStatus in (%Ls)',
         $this->buildStatuses);
     }
 
     if ($this->buildablePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'buildablePHID IN (%Ls)',
+        'b.buildablePHID IN (%Ls)',
         $this->buildablePHIDs);
     }
 
     if ($this->buildPlanPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'buildPlanPHID IN (%Ls)',
+        'b.buildPlanPHID IN (%Ls)',
         $this->buildPlanPHIDs);
     }
 
     if ($this->initiatorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'initiatorPHID IN (%Ls)',
+        'b.initiatorPHID IN (%Ls)',
         $this->initiatorPHIDs);
+    }
+
+    if ($this->autobuilds !== null) {
+      if ($this->autobuilds) {
+        $where[] = qsprintf(
+          $conn,
+          'p.planAutoKey IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'p.planAutoKey IS NULL');
+      }
     }
 
     return $where;
   }
 
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->shouldJoinPlanTable()) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T p ON b.buildPlanPHID = p.phid',
+        id(new HarbormasterBuildPlan())->getTableName());
+    }
+
+    return $joins;
+  }
+
+  private function shouldJoinPlanTable() {
+    if ($this->autobuilds !== null) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function getQueryApplicationClass() {
     return 'PhabricatorHarbormasterApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'b';
   }
 
 }

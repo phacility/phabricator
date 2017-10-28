@@ -10,6 +10,8 @@ final class HeraldConditionTranscript extends Phobject {
   protected $note;
   protected $result;
 
+  const RESULT_FORBIDDEN = 'forbidden';
+
   public function setRuleID($rule_id) {
     $this->ruleID = $rule_id;
     return $this;
@@ -72,4 +74,9 @@ final class HeraldConditionTranscript extends Phobject {
   public function getResult() {
     return $this->result;
   }
+
+  public function isForbidden() {
+    return ($this->getResult() === self::RESULT_FORBIDDEN);
+  }
+
 }
