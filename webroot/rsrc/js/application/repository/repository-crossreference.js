@@ -46,8 +46,19 @@ JX.behavior('repository-crossreference', function(config, statics) {
         if (!isSignalkey(e)) {
           return;
         }
+
+        var target = e.getTarget();
+
+        try {
+          // If we're in an inline comment, don't link symbols.
+          if (JX.DOM.findAbove(target, 'div', 'differential-inline-comment')) {
+            return;
+          }
+        } catch (ex) {
+          // Continue if we're not inside an inline comment.
+        }
+
         if (e.getType() === 'mouseover') {
-          var target = e.getTarget();
           while (target !== document.body) {
             if (JX.DOM.isNode(target, 'span') &&
                (target.className in class_map)) {
@@ -58,7 +69,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
             target = target.parentNode;
           }
         } else if (e.getType() === 'click') {
-          openSearch(e.getTarget(), lang);
+          openSearch(target, lang);
         }
       });
   }
