@@ -9,6 +9,7 @@ final class DifferentialTransactionEditor
   private $didExpandInlineState = false;
   private $hasReviewTransaction = false;
   private $affectedPaths;
+  private $firstBroadcast = false;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -27,7 +28,7 @@ final class DifferentialTransactionEditor
   }
 
   public function isFirstBroadcast() {
-    return $this->getIsNewObject();
+    return $this->firstBroadcast;
   }
 
   public function getDiffUpdateTransaction(array $xactions) {
@@ -1449,11 +1450,13 @@ final class DifferentialTransactionEditor
   protected function getCustomWorkerState() {
     return array(
       'changedPriorToCommitURI' => $this->changedPriorToCommitURI,
+      'firstBroadcast' => $this->firstBroadcast,
     );
   }
 
   protected function loadCustomWorkerState(array $state) {
     $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
+    $this->firstBroadcast = idx($state, 'firstBroadcast');
     return $this;
   }
 
@@ -1565,6 +1568,19 @@ final class DifferentialTransactionEditor
         // attribute the action to the revision author since this is more
         // natural and more useful.
         $author_phid = $object->getAuthorPHID();
+
+        // Additionally, we change the acting PHID for the transaction set
+        // to the author if it isn't already a user so that mail comes from
+        // the natural author.
+        $acting_phid = $this->getActingAsPHID();
+        $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
+        if (phid_get_type($acting_phid) != $user_type) {
+          $this->setActingAsPHID($author_phid);
+        }
+
+        // Mark this as the first broadcast we're sending about the revision
+        // so mail can generate specially.
+        $this->firstBroadcast = true;
 
         $xaction = $object->getApplicationTransactionTemplate()
           ->setAuthorPHID($author_phid)
