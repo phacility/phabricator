@@ -1815,6 +1815,11 @@ final class DiffusionBrowseController extends DiffusionController {
           'class' => 'diffusion-author-link',
           'style' => $style,
           'href' => $href,
+          'sigil' => 'has-tooltip',
+          'meta' => array(
+            'tip' => $handles[$phid]->getName(),
+            'align' => 'E',
+          ),
         ));
     }
 
