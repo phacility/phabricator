@@ -1204,16 +1204,32 @@ final class DifferentialTransactionEditor
     // edited the title or changed subscribers), prevent "Run build plan"
     // and other similar rules from acting yet, since the build results will
     // not (or, at least, should not) change unless the actual source changes.
+    // We also don't run Differential builds if the update was caused by
+    // discovering a commit, as the expectation is that Diffusion builds take
+    // over once things land.
     $has_update = false;
+    $has_commit = false;
+
     $type_update = DifferentialTransaction::TYPE_UPDATE;
     foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() == $type_update) {
-        $has_update = true;
-        break;
+      if ($xaction->getTransactionType() != $type_update) {
+        continue;
       }
+
+      if ($xaction->getMetadataValue('isCommitUpdate')) {
+        $has_commit = true;
+      } else {
+        $has_update = true;
+      }
+
+      break;
     }
 
-    if (!$has_update) {
+    if ($has_commit) {
+      $adapter->setForbiddenAction(
+        HeraldBuildableState::STATECONST,
+        DifferentialHeraldStateReasons::REASON_LANDED);
+    } else if (!$has_update) {
       $adapter->setForbiddenAction(
         HeraldBuildableState::STATECONST,
         DifferentialHeraldStateReasons::REASON_UNCHANGED);
