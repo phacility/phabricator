@@ -66,7 +66,7 @@
 
 .diffusion-rev-link a,
 .diffusion-rev-link span {
-  margin: 2px 8px 0;
+  margin: 0 8px 0 0;
   display: inline-block;
 }
 
@@ -89,4 +89,14 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.diffusion-rev-link .diffusion-author-link {
+  display: inline-block;
+  padding: 0;
+  margin: 2px 4px -4px 4px;
+  width: 16px;
+  height: 16px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }

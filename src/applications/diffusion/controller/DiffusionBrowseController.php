@@ -969,6 +969,24 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $handles = $viewer->loadHandles($phids);
 
+    $author_phids = array();
+    $author_map = array();
+    foreach ($blame_commits as $commit) {
+      $commit_identifier = $commit->getCommitIdentifier();
+
+      $author_phid = '';
+      if (isset($revision_map[$commit_identifier])) {
+        $revision_id = $revision_map[$commit_identifier];
+        $revision = $revisions[$revision_id];
+        $author_phid = $revision->getAuthorPHID();
+      } else {
+        $author_phid = $commit->getAuthorPHID();
+      }
+
+      $author_map[$commit_identifier] = $author_phid;
+      $author_phids[$author_phid] = $author_phid;
+    }
+
     $colors = array();
     if ($blame_commits) {
       $epochs = array();
@@ -1113,6 +1131,7 @@ final class DiffusionBrowseController extends DiffusionController {
     // blame outputs.
     $commit_links = $this->renderCommitLinks($blame_commits, $handles);
     $revision_links = $this->renderRevisionLinks($revisions, $handles);
+    $author_links = $this->renderAuthorLinks($author_map, $handles);
 
     if ($this->coverage) {
       require_celerity_resource('differential-changeset-view-css');
@@ -1145,6 +1164,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $revision_link = null;
       $commit_link = null;
+      $author_link = null;
       $before_link = null;
 
       $style = 'background: '.$line['color'].';';
@@ -1152,6 +1172,7 @@ final class DiffusionBrowseController extends DiffusionController {
       if ($identifier && !$line['duplicate']) {
         if (isset($commit_links[$identifier])) {
           $commit_link = $commit_links[$identifier];
+          $author_link = $author_links[$author_map[$identifier]];
         }
 
         if (isset($revision_map[$identifier])) {
@@ -1185,6 +1206,7 @@ final class DiffusionBrowseController extends DiffusionController {
           $before_link);
 
         $object_links = array();
+        $object_links[] = $author_link;
         $object_links[] = $commit_link;
         if ($revision_link) {
           $object_links[] = phutil_tag('span', array(), '/');
@@ -1770,6 +1792,33 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     return array($identifiers, $commits);
+  }
+
+  private function renderAuthorLinks(array $authors, $handles) {
+    $links = array();
+
+    foreach ($authors as $phid) {
+      if (!strlen($phid)) {
+        // This means we couldn't identify an author for the commit or the
+        // revision. We just render a blank for alignment.
+        $style = null;
+        $href = null;
+      } else {
+        $src = $handles[$phid]->getImageURI();
+        $style = 'background-image: url('.$src.');';
+        $href = $handles[$phid]->getURI();
+      }
+
+      $links[$phid] = javelin_tag(
+        $href ? 'a' : 'span',
+        array(
+          'class' => 'diffusion-author-link',
+          'style' => $style,
+          'href' => $href,
+        ));
+    }
+
+    return $links;
   }
 
   private function renderCommitLinks(array $commits, $handles) {
