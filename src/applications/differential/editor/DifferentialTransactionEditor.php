@@ -630,6 +630,10 @@ final class DifferentialTransactionEditor
     $phids = array();
     $phids[] = $object->getAuthorPHID();
     foreach ($object->getReviewers() as $reviewer) {
+      if ($reviewer->isResigned()) {
+        continue;
+      }
+
       $phids[] = $reviewer->getReviewerPHID();
     }
     return $phids;
