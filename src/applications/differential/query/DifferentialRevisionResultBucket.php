@@ -53,7 +53,8 @@ abstract class DifferentialRevisionResultBucket
   protected function hasReviewersWithStatus(
     DifferentialRevision $revision,
     array $phids,
-    array $statuses) {
+    array $statuses,
+    $current = null) {
 
     foreach ($revision->getReviewers() as $reviewer) {
       $reviewer_phid = $reviewer->getReviewerPHID();
@@ -64,6 +65,16 @@ abstract class DifferentialRevisionResultBucket
       $status = $reviewer->getReviewerStatus();
       if (empty($statuses[$status])) {
         continue;
+      }
+
+      if ($current !== null) {
+        if ($status == DifferentialReviewerStatus::STATUS_ACCEPTED) {
+          $diff_phid = $revision->getActiveDiffPHID();
+          $is_current = $reviewer->isAccepted($diff_phid);
+          if ($is_current !== $current) {
+            continue;
+          }
+        }
       }
 
       return true;
