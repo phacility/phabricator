@@ -138,8 +138,7 @@ final class DifferentialTransactionEditor
           $object->setRepositoryPHID($diff->getRepositoryPHID());
         }
         $object->attachActiveDiff($diff);
-
-        // TODO: Update the `diffPHID` once we add that.
+        $object->setActiveDiffPHID($diff->getPHID());
         return;
     }
 

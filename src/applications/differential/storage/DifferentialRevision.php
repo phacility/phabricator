@@ -35,6 +35,8 @@ final class DifferentialRevision extends DifferentialDAO
   protected $mailKey;
   protected $branchName;
   protected $repositoryPHID;
+  protected $activeDiffPHID;
+
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
   protected $properties = array();
