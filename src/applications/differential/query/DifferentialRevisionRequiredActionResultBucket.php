@@ -138,7 +138,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if (!$this->hasReviewersWithStatus($object, $phids, $reviewing, false)) {
+      if (!$this->hasReviewersWithStatus($object, $phids, $reviewing, true)) {
         continue;
       }
 

@@ -54,7 +54,7 @@ abstract class DifferentialRevisionResultBucket
     DifferentialRevision $revision,
     array $phids,
     array $statuses,
-    $current = null) {
+    $include_voided = null) {
 
     foreach ($revision->getReviewers() as $reviewer) {
       $reviewer_phid = $reviewer->getReviewerPHID();
@@ -67,11 +67,10 @@ abstract class DifferentialRevisionResultBucket
         continue;
       }
 
-      if ($current !== null) {
+      if ($include_voided !== null) {
         if ($status == DifferentialReviewerStatus::STATUS_ACCEPTED) {
-          $diff_phid = $revision->getActiveDiffPHID();
-          $is_current = $reviewer->isAccepted($diff_phid);
-          if ($is_current !== $current) {
+          $is_voided = (bool)$reviewer->getVoidedPHID();
+          if ($is_voided !== $include_voided) {
             continue;
           }
         }
