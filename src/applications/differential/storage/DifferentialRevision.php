@@ -986,6 +986,18 @@ final class DifferentialRevision extends DifferentialDAO
         ->setKey('status')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about revision status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('repositoryPHID')
+        ->setType('phid?')
+        ->setDescription(pht('Revision repository PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('diffPHID')
+        ->setType('phid')
+        ->setDescription(pht('Active diff PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('summary')
+        ->setType('string')
+        ->setDescription(pht('Revision summary.')),
     );
   }
 
@@ -1002,6 +1014,9 @@ final class DifferentialRevision extends DifferentialDAO
       'title' => $this->getTitle(),
       'authorPHID' => $this->getAuthorPHID(),
       'status' => $status_info,
+      'repositoryPHID' => $this->getRepositoryPHID(),
+      'diffPHID' => $this->getActiveDiffPHID(),
+      'summary' => $this->getSummary(),
     );
   }
 

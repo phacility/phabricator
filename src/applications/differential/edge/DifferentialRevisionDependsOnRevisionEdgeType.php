@@ -17,6 +17,19 @@ final class DifferentialRevisionDependsOnRevisionEdgeType
     return true;
   }
 
+  public function getConduitKey() {
+    return 'revision.parent';
+  }
+
+  public function getConduitName() {
+    return pht('Revision Has Parent');
+  }
+
+  public function getConduitDescription() {
+    return pht(
+      'The source revision depends on changes in the destination revision.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,
