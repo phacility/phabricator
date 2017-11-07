@@ -32,14 +32,7 @@ final class DifferentialLegacyQuery
   }
 
   private static function getMap() {
-    $all = array(
-      DifferentialRevisionStatus::NEEDS_REVIEW,
-      DifferentialRevisionStatus::NEEDS_REVISION,
-      DifferentialRevisionStatus::CHANGES_PLANNED,
-      DifferentialRevisionStatus::ACCEPTED,
-      DifferentialRevisionStatus::PUBLISHED,
-      DifferentialRevisionStatus::ABANDONED,
-    );
+    $all = array_keys(DifferentialRevisionStatus::getAll());
 
     $open = array();
     $closed = array();
@@ -61,6 +54,9 @@ final class DifferentialLegacyQuery
       ),
       self::STATUS_NEEDS_REVIEW => array(
         DifferentialRevisionStatus::NEEDS_REVIEW,
+
+        // For legacy callers, "Draft" is treated as "Needs Review".
+        DifferentialRevisionStatus::DRAFT,
       ),
       self::STATUS_NEEDS_REVISION => array(
         DifferentialRevisionStatus::NEEDS_REVISION,
