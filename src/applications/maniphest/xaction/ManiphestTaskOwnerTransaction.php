@@ -154,5 +154,15 @@ final class ManiphestTaskOwnerTransaction
 
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'owner';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array(
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
+    );
+  }
 
 }

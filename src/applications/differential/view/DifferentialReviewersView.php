@@ -47,6 +47,7 @@ final class DifferentialReviewersView extends AphrontView {
 
       $action_phid = $reviewer->getLastActionDiffPHID();
       $is_current_action = $this->isCurrent($action_phid);
+      $is_voided = (bool)$reviewer->getVoidedPHID();
 
       $comment_phid = $reviewer->getLastCommentDiffPHID();
       $is_current_comment = $this->isCurrent($comment_phid);
@@ -86,7 +87,7 @@ final class DifferentialReviewersView extends AphrontView {
           break;
 
         case DifferentialReviewerStatus::STATUS_ACCEPTED:
-          if ($is_current_action) {
+          if ($is_current_action && !$is_voided) {
             $icon = PHUIStatusItemView::ICON_ACCEPT;
             $color = 'green';
             if ($authority_name !== null) {
@@ -97,7 +98,12 @@ final class DifferentialReviewersView extends AphrontView {
           } else {
             $icon = 'fa-check-circle-o';
             $color = 'bluegrey';
-            if ($authority_name !== null) {
+
+            if (!$is_current_action && $is_voided) {
+              // The reviewer accepted the revision, but later the author
+              // used "Request Review" to request an updated review.
+              $label = pht('Accepted Earlier');
+            } else if ($authority_name !== null) {
               $label = pht('Accepted Prior Diff (by %s)', $authority_name);
             } else {
               $label = pht('Accepted Prior Diff');

@@ -111,7 +111,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     AphrontDatabaseConnection $conn,
     $table_name) {
 
-    $rows = queryfx_all(
+    $query = $this->buildStandardPageQuery($conn, $table_name);
+
+    $rows = queryfx_all($conn, '%Q', $query);
+    $rows = $this->didLoadRawRows($rows);
+
+    return $rows;
+  }
+
+  protected function buildStandardPageQuery(
+    AphrontDatabaseConnection $conn,
+    $table_name) {
+
+    return qsprintf(
       $conn,
       '%Q FROM %T %Q %Q %Q %Q %Q %Q %Q',
       $this->buildSelectClause($conn),
@@ -123,10 +135,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $this->buildHavingClause($conn),
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
-
-    $rows = $this->didLoadRawRows($rows);
-
-    return $rows;
   }
 
   protected function didLoadRawRows(array $rows) {
@@ -1032,7 +1040,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   /**
    * @task order
    */
-  final protected function buildOrderClause(AphrontDatabaseConnection $conn) {
+  final protected function buildOrderClause(
+    AphrontDatabaseConnection $conn,
+    $for_union = false) {
+
     $orderable = $this->getOrderableColumns();
     $vector = $this->getOrderVector();
 
@@ -1045,7 +1056,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $parts[] = $part;
     }
 
-    return $this->formatOrderClause($conn, $parts);
+    return $this->formatOrderClause($conn, $parts, $for_union);
   }
 
 
@@ -1054,7 +1065,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function formatOrderClause(
     AphrontDatabaseConnection $conn,
-    array $parts) {
+    array $parts,
+    $for_union = false) {
 
     $is_query_reversed = false;
     if ($this->getBeforeID()) {
@@ -1075,6 +1087,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
 
       $table = idx($part, 'table');
+
+      // When we're building an ORDER BY clause for a sequence of UNION
+      // statements, we can't refer to tables from the subqueries.
+      if ($for_union) {
+        $table = null;
+      }
+
       $column = $part['column'];
 
       if ($table !== null) {
@@ -1543,6 +1562,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $select = array();
 
     if (!$this->supportsFerretEngine()) {
+      return $select;
+    }
+
+    $vector = $this->getOrderVector();
+    if (!$vector->containsKey('rank')) {
+      // We only need to SELECT the virtual "_ft_rank" column if we're
+      // actually sorting the results by rank.
       return $select;
     }
 

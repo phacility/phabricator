@@ -35,6 +35,8 @@ final class DifferentialRevision extends DifferentialDAO
   protected $mailKey;
   protected $branchName;
   protected $repositoryPHID;
+  protected $activeDiffPHID;
+
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
   protected $properties = array();
@@ -57,6 +59,7 @@ final class DifferentialRevision extends DifferentialDAO
   const RELATION_SUBSCRIBED   = 'subd';
 
   const PROPERTY_CLOSED_FROM_ACCEPTED = 'wasAcceptedBeforeClose';
+  const PROPERTY_DRAFT_HOLD = 'draft.hold';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -708,6 +711,14 @@ final class DifferentialRevision extends DifferentialDAO
     return false;
   }
 
+  public function getHoldAsDraft() {
+    return $this->getProperty(self::PROPERTY_DRAFT_HOLD, false);
+  }
+
+  public function setHoldAsDraft($hold) {
+    return $this->setProperty(self::PROPERTY_DRAFT_HOLD, $hold);
+  }
+
   public function loadActiveBuilds(PhabricatorUser $viewer) {
     $diff = $this->getActiveDiff();
 
@@ -721,9 +732,10 @@ final class DifferentialRevision extends DifferentialDAO
       return array();
     }
 
-    $builds = id(new HarbormasterBuildQuery())
+    return id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
       ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
+      ->withAutobuilds(false)
       ->withBuildStatuses(
         array(
           HarbormasterBuildStatus::STATUS_INACTIVE,
@@ -735,29 +747,7 @@ final class DifferentialRevision extends DifferentialDAO
           HarbormasterBuildStatus::STATUS_PAUSED,
           HarbormasterBuildStatus::STATUS_DEADLOCKED,
         ))
-      ->needBuildTargets(true)
       ->execute();
-    if (!$builds) {
-      return array();
-    }
-
-    $active = array();
-    foreach ($builds as $key => $build) {
-      foreach ($build->getBuildTargets() as $target) {
-        if ($target->isAutotarget()) {
-          // Ignore autotargets when looking for active of failed builds. If
-          // local tests fail and you continue anyway, you don't need to
-          // double-confirm them.
-          continue;
-        }
-
-        // This build has at least one real target that's doing something.
-        $active[$key] = $build;
-        break;
-      }
-    }
-
-    return $active;
   }
 
 
@@ -996,6 +986,18 @@ final class DifferentialRevision extends DifferentialDAO
         ->setKey('status')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about revision status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('repositoryPHID')
+        ->setType('phid?')
+        ->setDescription(pht('Revision repository PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('diffPHID')
+        ->setType('phid')
+        ->setDescription(pht('Active diff PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('summary')
+        ->setType('string')
+        ->setDescription(pht('Revision summary.')),
     );
   }
 
@@ -1012,6 +1014,9 @@ final class DifferentialRevision extends DifferentialDAO
       'title' => $this->getTitle(),
       'authorPHID' => $this->getAuthorPHID(),
       'status' => $status_info,
+      'repositoryPHID' => $this->getRepositoryPHID(),
+      'diffPHID' => $this->getActiveDiffPHID(),
+      'summary' => $this->getSummary(),
     );
   }
 

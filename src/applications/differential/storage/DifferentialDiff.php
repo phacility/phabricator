@@ -9,7 +9,8 @@ final class DifferentialDiff
     HarbormasterCircleCIBuildableInterface,
     HarbormasterBuildkiteBuildableInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   protected $revisionID;
   protected $authorPHID;
@@ -739,5 +740,83 @@ final class DifferentialDiff
 
     $this->saveTransaction();
   }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('revisionPHID')
+        ->setType('phid')
+        ->setDescription(pht('Associated revision PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('Revision author PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('repositoryPHID')
+        ->setType('phid')
+        ->setDescription(pht('Associated repository PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('refs')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('List of related VCS references.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $refs = array();
+
+    $branch = $this->getBranch();
+    if (strlen($branch)) {
+      $refs[] = array(
+        'type' => 'branch',
+        'name' => $branch,
+      );
+    }
+
+    $onto = $this->loadTargetBranch();
+    if (strlen($onto)) {
+      $refs[] = array(
+        'type' => 'onto',
+        'name' => $onto,
+      );
+    }
+
+    $base = $this->getSourceControlBaseRevision();
+    if (strlen($base)) {
+      $refs[] = array(
+        'type' => 'base',
+        'identifier' => $base,
+      );
+    }
+
+    $bookmark = $this->getBookmark();
+    if (strlen($bookmark)) {
+      $refs[] = array(
+        'type' => 'bookmark',
+        'name' => $bookmark,
+      );
+    }
+
+    $revision_phid = null;
+    if ($this->getRevisionID()) {
+      $revision_phid = $this->getRevision()->getPHID();
+    }
+
+    return array(
+      'revisionPHID' => $revision_phid,
+      'authorPHID' => $this->getAuthorPHID(),
+      'repositoryPHID' => $this->getRepositoryPHID(),
+      'refs' => $refs,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
 
 }

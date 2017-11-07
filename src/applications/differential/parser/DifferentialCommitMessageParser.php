@@ -28,6 +28,7 @@ final class DifferentialCommitMessageParser extends Phobject {
   private $errors;
   private $commitMessageFields;
   private $raiseMissingFieldErrors = true;
+  private $xactions;
 
   public static function newStandardParser(PhabricatorUser $viewer) {
     $key_title = DifferentialTitleCommitMessageField::FIELDKEY;
@@ -134,6 +135,7 @@ final class DifferentialCommitMessageParser extends Phobject {
    */
   public function parseCorpus($corpus) {
     $this->errors = array();
+    $this->xactions = array();
 
     $label_map = $this->getLabelMap();
     $key_title = $this->titleKey;
@@ -284,12 +286,25 @@ final class DifferentialCommitMessageParser extends Phobject {
       try {
         $result = $field->parseFieldValue($text_value);
         $result_map[$field_key] = $result;
+
+        try {
+          $xactions = $field->getFieldTransactions($result);
+          foreach ($xactions as $xaction) {
+            $this->xactions[] = $xaction;
+          }
+        } catch (Exception $ex) {
+          $this->errors[] = pht(
+            'Error extracting field transactions from "%s": %s',
+            $field->getFieldName(),
+            $ex->getMessage());
+        }
       } catch (DifferentialFieldParseException $ex) {
         $this->errors[] = pht(
           'Error parsing field "%s": %s',
           $field->getFieldName(),
           $ex->getMessage());
       }
+
     }
 
     if ($this->getRaiseMissingFieldErrors()) {
@@ -314,6 +329,14 @@ final class DifferentialCommitMessageParser extends Phobject {
    */
   public function getErrors() {
     return $this->errors;
+  }
+
+
+  /**
+   * @task parse
+   */
+  public function getTransactions() {
+    return $this->xactions;
   }
 
 

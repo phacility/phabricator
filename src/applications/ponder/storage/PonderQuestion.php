@@ -11,7 +11,8 @@ final class PonderQuestion extends PonderDAO
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
     PhabricatorSpacesInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -299,5 +300,14 @@ final class PonderQuestion extends PonderDAO
   public function newFulltextEngine() {
     return new PonderQuestionFulltextEngine();
   }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PonderQuestionFerretEngine();
+  }
+
 
 }

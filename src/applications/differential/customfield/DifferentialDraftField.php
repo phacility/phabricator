@@ -36,6 +36,12 @@ final class DifferentialDraftField
       return array();
     }
 
+    // If the author has held this revision as a draft explicitly, don't
+    // show any misleading messages about it autosubmitting later.
+    if ($revision->getHoldAsDraft()) {
+      return array();
+    }
+
     $warnings = array();
 
     $blocking_map = array(

@@ -43,6 +43,9 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
         'key_target' => array(
           'columns' => array('buildTargetPHID', 'artifactType'),
         ),
+        'key_index' => array(
+          'columns' => array('artifactIndex'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

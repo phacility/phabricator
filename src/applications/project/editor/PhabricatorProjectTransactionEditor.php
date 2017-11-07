@@ -120,16 +120,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectStatusTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectImageTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectIconTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectColorTransaction::TRANSACTIONTYPE:
-        PhabricatorPolicyFilter::requireCapability(
-          $this->requireActor(),
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        return;
       case PhabricatorProjectLockTransaction::TRANSACTIONTYPE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),

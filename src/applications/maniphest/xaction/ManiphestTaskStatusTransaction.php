@@ -229,4 +229,15 @@ final class ManiphestTaskStatusTransaction
 
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'status';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array(
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
+    );
+  }
+
 }

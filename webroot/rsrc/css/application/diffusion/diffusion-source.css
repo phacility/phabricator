@@ -13,22 +13,24 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.diffusion-source tr.phabricator-source-highlight th,
-.diffusion-source tr.phabricator-source-highlight td {
-  background: {$gentle.highlight};
+.diffusion-source tr.phabricator-source-highlight {
+  background: {$sh-yellowbackground};
 }
 
 .diffusion-source th {
   text-align: right;
   vertical-align: top;
-  color: {$darkbluetext};
+  background: {$lightgreybackground};
+  color: {$bluetext};
   border-right: 1px solid {$thinblueborder};
 }
 
 .diffusion-source td {
   vertical-align: top;
   white-space: pre-wrap;
-  padding: 3px 12px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 8px;
   width: 100%;
   word-break: break-all;
 }
@@ -43,18 +45,12 @@
 }
 
 .diffusion-blame-link,
-.diffusion-rev-link,
-.diffusion-blame-date {
+.diffusion-rev-link {
   white-space: nowrap;
 }
 
-.diffusion-blame-date,
-.diffusion-blame-link,
-.diffusion-blame-revision,
-.diffusion-rev-link {
-  background: {$lightgreybackground};
-  font: {$basefont};
-  font-size: {$smallerfontsize};
+.diffusion-blame-link {
+  min-width: 28px;
 }
 
 .diffusion-source th.diffusion-rev-link {
@@ -62,27 +58,20 @@
   min-width: 130px;
 }
 
-.diffusion-source a {
+.diffusion-blame-link a,
+.diffusion-rev-link a,
+.diffusion-line-link a {
   color: {$darkbluetext};
 }
 
 .diffusion-rev-link a {
-  max-width: 300px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  margin: 3px 8px;
-  display: block;
-}
-
-.diffusion-blame-date a,
-.diffusion-blame-revision a {
-  float: right;
-  margin: 3px 8px;
+  margin: 0 8px 0 0;
+  display: inline-block;
 }
 
 .diffusion-rev-link span {
-  margin-right: -4px;
+  display: inline-block;
+  margin-right: 4px;
   margin-left: -4px;
   color: {$lightgreytext};
 }
@@ -91,19 +80,7 @@
 .diffusion-line-link a {
   /* Give the user a larger click target. */
   display: block;
-  padding: 4px 8px 3px;
-}
-
-.diffusion-line-link a {
-  color: {$lightgreytext};
-}
-
-.diffusion-blame-link a .phui-icon-view {
-  color: {$bluetext};
-}
-
-.diffusion-blame-link a:hover .phui-icon-view {
-  color: {$sky};
+  padding: 2px 8px;
 }
 
 .diffusion-line-link {
@@ -112,4 +89,14 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.diffusion-rev-link .diffusion-author-link {
+  display: inline-block;
+  padding: 0;
+  margin: 2px 6px -4px 8px;
+  width: 16px;
+  height: 16px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }

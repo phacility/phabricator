@@ -11,6 +11,16 @@ final class DifferentialQueryDiffsConduitAPIMethod
     return pht('Query differential diffs which match certain criteria.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "differential.diff.search" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<uint>',

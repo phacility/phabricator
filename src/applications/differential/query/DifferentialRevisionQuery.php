@@ -38,8 +38,6 @@ final class DifferentialRevisionQuery
   private $needDrafts;
   private $needFlags;
 
-  private $buildingGlobalOrder;
-
 
 /* -(  Query Configuration  )------------------------------------------------ */
 
@@ -484,12 +482,11 @@ final class DifferentialRevisionQuery
     }
 
     if (count($selects) > 1) {
-      $this->buildingGlobalOrder = true;
       $query = qsprintf(
         $conn_r,
         '%Q %Q %Q',
         implode(' UNION DISTINCT ', $selects),
-        $this->buildOrderClause($conn_r),
+        $this->buildOrderClause($conn_r, true),
         $this->buildLimitClause($conn_r));
     } else {
       $query = head($selects);
@@ -513,7 +510,6 @@ final class DifferentialRevisionQuery
     $group_by = $this->buildGroupClause($conn_r);
     $having = $this->buildHavingClause($conn_r);
 
-    $this->buildingGlobalOrder = false;
     $order_by = $this->buildOrderClause($conn_r);
 
     $limit = $this->buildLimitClause($conn_r);
@@ -758,17 +754,9 @@ final class DifferentialRevisionQuery
   }
 
   public function getOrderableColumns() {
-    $primary = ($this->buildingGlobalOrder ? null : 'r');
-
     return array(
-      'id' => array(
-        'table' => $primary,
-        'column' => 'id',
-        'type' => 'int',
-        'unique' => true,
-      ),
       'updated' => array(
-        'table' => $primary,
+        'table' => $this->getPrimaryTableAlias(),
         'column' => 'dateModified',
         'type' => 'int',
       ),
