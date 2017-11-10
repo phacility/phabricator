@@ -47,7 +47,7 @@ final class DiffusionExistsQueryConduitAPIMethod
     $commit = $request->getValue('commit');
     list($err, $stdout) = $repository->execLocalCommand(
       'id --rev %s',
-      $commit);
+      hgsprintf('%s', $commit));
     return !$err;
   }
 

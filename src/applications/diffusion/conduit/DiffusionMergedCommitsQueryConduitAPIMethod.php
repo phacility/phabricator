@@ -77,7 +77,7 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
     list($parents) = $repository->execxLocalCommand(
       'parents --template=%s --rev %s',
       '{node}\\n',
-      $commit);
+      hgsprintf('%s', $commit));
     $parents = explode("\n", trim($parents));
 
     if (count($parents) < 2) {
