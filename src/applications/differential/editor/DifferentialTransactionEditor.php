@@ -1612,6 +1612,13 @@ final class DifferentialTransactionEditor
 
         $xactions[] = $xaction;
       }
+    } else {
+      // If this revision is being created into some state other than "Draft",
+      // this is the first broadcast and should include sections like "SUMMARY"
+      // and "TEST PLAN".
+      if ($this->getIsNewObject()) {
+        $this->firstBroadcast = true;
+      }
     }
 
     return $xactions;
