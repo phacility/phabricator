@@ -86,6 +86,7 @@ EOHELP
         array(
           '/\.py$/',
           '/\.l?hs$/',
+          '/\.ya?ml$/',
         ))
         ->setDescription(
           pht(
