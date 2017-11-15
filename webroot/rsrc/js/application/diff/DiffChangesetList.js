@@ -465,7 +465,7 @@ JX.install('DiffChangesetList', {
       new JX.Notification()
         .setContent(message)
         .alterClassName('jx-notification-alert', true)
-        .setDuration(1000)
+        .setDuration(3000)
         .show();
     },
 
@@ -691,6 +691,7 @@ JX.install('DiffChangesetList', {
         'div',
         'differential-changeset');
 
+      var changeset_list = this;
       var changeset = this.getChangesetForNode(node);
 
       var menu = new JX.PHUIXDropdownMenu(button);
@@ -738,6 +739,22 @@ JX.install('DiffChangesetList', {
       var up_item = new JX.PHUIXActionView()
         .setHandler(function(e) {
           if (changeset.isLoaded()) {
+
+            // Don't let the user swap display modes if a comment is being
+            // edited, since they might lose their work. See PHI180.
+            var inlines = changeset.getInlines();
+            for (var ii = 0; ii < inlines.length; ii++) {
+              if (inlines[ii].isEditing()) {
+                changeset_list._warnUser(
+                  pht(
+                    'Finish editing inline comments before changing display ' +
+                    'modes.'));
+                e.prevent();
+                menu.close();
+                return;
+              }
+            }
+
             var renderer = changeset.getRenderer();
             if (renderer == '1up') {
               renderer = '2up';
