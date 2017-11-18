@@ -16,6 +16,15 @@ final class DifferentialRevisionHoldDraftTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setHoldAsDraft($value);
+
+    // If draft isn't the default state but we're creating a new revision
+    // and holding it as a draft, put it in draft mode. See PHI206.
+    // TODO: This can probably be removed once Draft is the universal default.
+    if ($this->isNewObject()) {
+      if ($object->isNeedsReview()) {
+        $object->setModernRevisionStatus(DifferentialRevisionStatus::DRAFT);
+      }
+    }
   }
 
   public function getTitle() {
