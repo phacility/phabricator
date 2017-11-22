@@ -96,10 +96,11 @@ final class DiffusionPatternSearchView extends DiffusionView {
 
     $path_title = Filesystem::readablePath($this->path, $drequest->getPath());
 
-    $href = $drequest->generateURI(array(
-      'action' => 'browse',
-      'path' => $path_title,
-    ));
+    $href = $drequest->generateURI(
+      array(
+        'action' => 'browse',
+        'path' => $this->path,
+      ));
 
     $title = phutil_tag('a', array('href' => $href), $path_title);
 
