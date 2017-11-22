@@ -936,7 +936,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       ),
       array(
         'og:image',
-        PhabricatorCustomLogoConfigType::getLogoURI($viewer),
+        celerity_get_resource_uri('rsrc/favicons/opengraph-144x144.png'),
       ),
     );
 

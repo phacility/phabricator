@@ -59,9 +59,15 @@ abstract class AphrontPageView extends AphrontView {
       ),
       array($body, $tail));
 
+    if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
+      $html_open_tag = hsprintf('<html prefix="og: http://ogp.me/ns#">');
+    } else {
+      $html_open_tag = hsprintf('<html>');
+    }
+
     $response = hsprintf(
       '<!DOCTYPE html>'.
-      '<html>'.
+      '%s'.
         '<head>'.
           '<meta charset="UTF-8" />'.
           '<title>%s</title>'.
@@ -69,6 +75,7 @@ abstract class AphrontPageView extends AphrontView {
         '</head>'.
         '%s'.
       '</html>',
+      $html_open_tag,
       $title,
       $head,
       $body);

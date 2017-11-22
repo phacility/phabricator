@@ -292,6 +292,7 @@ return array(
     'rsrc/favicons/mstile-310x150.png' => '4a49d3ee',
     'rsrc/favicons/mstile-310x310.png' => 'a52ab264',
     'rsrc/favicons/mstile-70x70.png' => '5edce7b8',
+    'rsrc/favicons/opengraph-144x144.png' => '648fb0fc',
     'rsrc/image/BFCFDA.png' => 'd5ec91f4',
     'rsrc/image/actions/edit.png' => '2fc41442',
     'rsrc/image/avatar.png' => '17d346a4',
