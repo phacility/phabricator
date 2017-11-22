@@ -13,39 +13,6 @@ final class PhabricatorCustomLogoConfigType
     return idx($logo, 'wordmarkText');
   }
 
-  public static function getLogoURI(PhabricatorUser $viewer) {
-    $logo_uri = null;
-
-    $custom_header = self::getLogoImagePHID();
-    if ($custom_header) {
-      $cache = PhabricatorCaches::getImmutableCache();
-      $cache_key_logo = 'ui.custom-header.logo-phid.v3.'.$custom_header;
-      $logo_uri = $cache->getKey($cache_key_logo);
-
-      if (!$logo_uri) {
-        // NOTE: If the file policy has been changed to be restrictive, we'll
-        // miss here and just show the default logo. The cache will fill later
-        // when someone who can see the file loads the page. This might be a
-        // little spooky, see T11982.
-        $files = id(new PhabricatorFileQuery())
-          ->setViewer($viewer)
-          ->withPHIDs(array($custom_header))
-          ->execute();
-        $file = head($files);
-        if ($file) {
-          $logo_uri = $file->getViewURI();
-          $cache->setKey($cache_key_logo, $logo_uri);
-        }
-      }
-    }
-
-    if (!$logo_uri) {
-      $logo_uri = celerity_get_resource_uri('/rsrc/image/logo/light-eye.png');
-    }
-
-    return $logo_uri;
-  }
-
   public function validateOption(PhabricatorConfigOption $option, $value) {
     if (!is_array($value)) {
       throw new Exception(

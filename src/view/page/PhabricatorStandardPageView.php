@@ -426,11 +426,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     }
 
     return hsprintf(
-      '%s%s%s%s',
+      '%s%s%s',
       parent::getHead(),
       $font_css,
-      $response->renderSingleResource('javelin-magical-init', 'phabricator'),
-      $this->newOpenGraphTags());
+      $response->renderSingleResource('javelin-magical-init', 'phabricator'));
   }
 
   public function setGlyph($glyph) {
@@ -910,47 +909,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     }
 
     return $response;
-  }
-
-  private function newOpenGraphTags() {
-    // If we don't allow public access, there's no point in emitting OpenGraph
-    // tags because external systems can't fetch pages.
-    if (!PhabricatorEnv::getEnvConfig('policy.allow-public')) {
-      return array();
-    }
-
-    $viewer = $this->getViewer();
-
-    $properties = array(
-      array(
-        'og:title',
-        $this->getTitle(),
-      ),
-      array(
-        'og:type',
-        'website',
-      ),
-      array(
-        'og:url',
-        PhabricatorEnv::getProductionURI($this->getRequest()->getRequestURI()),
-      ),
-      array(
-        'og:image',
-        celerity_get_resource_uri('rsrc/favicons/opengraph-144x144.png'),
-      ),
-    );
-
-    $tags = array();
-    foreach ($properties as $property) {
-      $tags[] = phutil_tag(
-        'meta',
-        array(
-          'property' => $property[0],
-          'content' => $property[1],
-        ));
-    }
-
-    return $tags;
   }
 
 }
