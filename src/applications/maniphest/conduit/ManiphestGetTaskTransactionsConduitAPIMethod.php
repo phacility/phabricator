@@ -21,6 +21,16 @@ final class ManiphestGetTaskTransactionsConduitAPIMethod
     return 'nonempty list<dict<string, wild>>';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "transaction.search" instead.');
+  }
+
   protected function execute(ConduitAPIRequest $request) {
     $results = array();
     $task_ids = $request->getValue('ids');

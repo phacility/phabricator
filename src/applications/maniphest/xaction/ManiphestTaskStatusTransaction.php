@@ -6,9 +6,6 @@ final class ManiphestTaskStatusTransaction
   const TRANSACTIONTYPE = 'status';
 
   public function generateOldValue($object) {
-    if ($this->isNewObject()) {
-      return null;
-    }
     return $object->getStatus();
   }
 

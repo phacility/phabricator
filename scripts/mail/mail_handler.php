@@ -38,15 +38,19 @@ $parser->setText(file_get_contents('php://stdin'));
 $content = array();
 foreach (array('text', 'html') as $part) {
   $part_body = $parser->getMessageBody($part);
-  $part_headers = $parser->getMessageBodyHeaders($part);
-  $content_type = idx($part_headers, 'content-type');
-  if (
-    !phutil_is_utf8($part_body) &&
-    (preg_match('/charset="(.*?)"/', $content_type, $matches) ||
-     preg_match('/charset=(\S+)/', $content_type, $matches))
-  ) {
-    $part_body = phutil_utf8_convert($part_body, 'UTF-8', $matches[1]);
+
+  if (strlen($part_body) && !phutil_is_utf8($part_body)) {
+    $part_headers = $parser->getMessageBodyHeaders($part);
+    if (!is_array($part_headers)) {
+      $part_headers = array();
+    }
+    $content_type = idx($part_headers, 'content-type');
+    if (preg_match('/charset="(.*?)"/', $content_type, $matches) ||
+        preg_match('/charset=(\S+)/', $content_type, $matches)) {
+      $part_body = phutil_utf8_convert($part_body, 'UTF-8', $matches[1]);
+    }
   }
+
   $content[$part] = $part_body;
 }
 
