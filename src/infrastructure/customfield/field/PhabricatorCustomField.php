@@ -34,6 +34,7 @@ abstract class PhabricatorCustomField extends Phobject {
   const ROLE_CONDUIT                  = 'conduit';
   const ROLE_HERALD                   = 'herald';
   const ROLE_EDITENGINE = 'EditEngine';
+  const ROLE_HERALDACTION = 'herald.action';
 
 
 /* -(  Building Applications with Custom Fields  )--------------------------- */
@@ -293,6 +294,8 @@ abstract class PhabricatorCustomField extends Phobject {
         return $this->shouldAppearInTransactionMail();
       case self::ROLE_HERALD:
         return $this->shouldAppearInHerald();
+      case self::ROLE_HERALDACTION:
+        return $this->shouldAppearInHeraldActions();
       case self::ROLE_EDITENGINE:
         return $this->shouldAppearInEditView() ||
                $this->shouldAppearInEditEngine();
@@ -1475,5 +1478,57 @@ abstract class PhabricatorCustomField extends Phobject {
     return null;
   }
 
+
+  public function shouldAppearInHeraldActions() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInHeraldActions();
+    }
+    return false;
+  }
+
+
+  public function getHeraldActionName() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldActionName();
+    }
+
+    return null;
+  }
+
+
+  public function getHeraldActionStandardType() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldActionStandardType();
+    }
+
+    return null;
+  }
+
+
+  public function getHeraldActionDescription($value) {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldActionDescription($value);
+    }
+
+    return null;
+  }
+
+
+  public function getHeraldActionEffectDescription($value) {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldActionEffectDescription($value);
+    }
+
+    return null;
+  }
+
+
+  public function getHeraldActionDatasource() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldActionDatasource();
+    }
+
+    return null;
+  }
 
 }
