@@ -425,6 +425,7 @@ final class PhabricatorRepositoryQuery
         'type' => 'string',
         'unique' => true,
         'reverse' => true,
+        'null' => 'tail',
       ),
       'name' => array(
         'table' => 'r',

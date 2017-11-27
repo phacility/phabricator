@@ -35,16 +35,23 @@ $args->parse(
 $parser = new MimeMailParser();
 $parser->setText(file_get_contents('php://stdin'));
 
-$text_body = $parser->getMessageBody('text');
+$content = array();
+foreach (array('text', 'html') as $part) {
+  $part_body = $parser->getMessageBody($part);
 
-$text_body_headers = $parser->getMessageBodyHeaders('text');
-$content_type = idx($text_body_headers, 'content-type');
-if (
-  !phutil_is_utf8($text_body) &&
-  (preg_match('/charset="(.*?)"/', $content_type, $matches) ||
-   preg_match('/charset=(\S+)/', $content_type, $matches))
-) {
-  $text_body = phutil_utf8_convert($text_body, 'UTF-8', $matches[1]);
+  if (strlen($part_body) && !phutil_is_utf8($part_body)) {
+    $part_headers = $parser->getMessageBodyHeaders($part);
+    if (!is_array($part_headers)) {
+      $part_headers = array();
+    }
+    $content_type = idx($part_headers, 'content-type');
+    if (preg_match('/charset="(.*?)"/', $content_type, $matches) ||
+        preg_match('/charset=(\S+)/', $content_type, $matches)) {
+      $part_body = phutil_utf8_convert($part_body, 'UTF-8', $matches[1]);
+    }
+  }
+
+  $content[$part] = $part_body;
 }
 
 $headers = $parser->getHeaders();
@@ -57,10 +64,7 @@ if ($args->getArg('process-duplicates')) {
 
 $received = new PhabricatorMetaMTAReceivedMail();
 $received->setHeaders($headers);
-$received->setBodies(array(
-  'text' => $text_body,
-  'html' => $parser->getMessageBody('html'),
-));
+$received->setBodies($content);
 
 $attachments = array();
 foreach ($parser->getAttachments() as $attachment) {

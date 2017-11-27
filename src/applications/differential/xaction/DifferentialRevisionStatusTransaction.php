@@ -74,10 +74,10 @@ final class DifferentialRevisionStatusTransaction
     return 'status';
   }
 
-  public function getFieldValuesForConduit($object, $data) {
+  public function getFieldValuesForConduit($xaction, $data) {
     return array(
-      'old' => $object->getOldValue(),
-      'new' => $object->getNewValue(),
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
     );
   }
 

@@ -123,6 +123,14 @@ final class DifferentialRevisionRequiredActionResultBucket
     $reviewing = array(
       DifferentialReviewerStatus::STATUS_ADDED,
       DifferentialReviewerStatus::STATUS_COMMENTED,
+
+      // If an author has used "Request Review" to put an accepted revision
+      // back into the "Needs Review" state, include "Accepted" reviewers
+      // whose reviews have been voided in the "Should Review" bucket.
+
+      // If we don't do this, they end up in "Waiting on Other Reviewers",
+      // even if there are no other reviewers.
+      DifferentialReviewerStatus::STATUS_ACCEPTED,
     );
     $reviewing = array_fuse($reviewing);
 
@@ -130,7 +138,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $results = array();
     foreach ($objects as $key => $object) {
-      if (!$this->hasReviewersWithStatus($object, $phids, $reviewing)) {
+      if (!$this->hasReviewersWithStatus($object, $phids, $reviewing, true)) {
         continue;
       }
 

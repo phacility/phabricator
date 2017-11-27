@@ -9,6 +9,7 @@ final class DifferentialTransactionEditor
   private $didExpandInlineState = false;
   private $hasReviewTransaction = false;
   private $affectedPaths;
+  private $firstBroadcast = false;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -27,7 +28,7 @@ final class DifferentialTransactionEditor
   }
 
   public function isFirstBroadcast() {
-    return $this->getIsNewObject();
+    return $this->firstBroadcast;
   }
 
   public function getDiffUpdateTransaction(array $xactions) {
@@ -137,8 +138,7 @@ final class DifferentialTransactionEditor
           $object->setRepositoryPHID($diff->getRepositoryPHID());
         }
         $object->attachActiveDiff($diff);
-
-        // TODO: Update the `diffPHID` once we add that.
+        $object->setActiveDiffPHID($diff->getPHID());
         return;
     }
 
@@ -630,6 +630,10 @@ final class DifferentialTransactionEditor
     $phids = array();
     $phids[] = $object->getAuthorPHID();
     foreach ($object->getReviewers() as $reviewer) {
+      if ($reviewer->isResigned()) {
+        continue;
+      }
+
       $phids[] = $reviewer->getReviewerPHID();
     }
     return $phids;
@@ -1204,16 +1208,32 @@ final class DifferentialTransactionEditor
     // edited the title or changed subscribers), prevent "Run build plan"
     // and other similar rules from acting yet, since the build results will
     // not (or, at least, should not) change unless the actual source changes.
+    // We also don't run Differential builds if the update was caused by
+    // discovering a commit, as the expectation is that Diffusion builds take
+    // over once things land.
     $has_update = false;
+    $has_commit = false;
+
     $type_update = DifferentialTransaction::TYPE_UPDATE;
     foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() == $type_update) {
-        $has_update = true;
-        break;
+      if ($xaction->getTransactionType() != $type_update) {
+        continue;
       }
+
+      if ($xaction->getMetadataValue('isCommitUpdate')) {
+        $has_commit = true;
+      } else {
+        $has_update = true;
+      }
+
+      break;
     }
 
-    if (!$has_update) {
+    if ($has_commit) {
+      $adapter->setForbiddenAction(
+        HeraldBuildableState::STATECONST,
+        DifferentialHeraldStateReasons::REASON_LANDED);
+    } else if (!$has_update) {
       $adapter->setForbiddenAction(
         HeraldBuildableState::STATECONST,
         DifferentialHeraldStateReasons::REASON_UNCHANGED);
@@ -1433,11 +1453,13 @@ final class DifferentialTransactionEditor
   protected function getCustomWorkerState() {
     return array(
       'changedPriorToCommitURI' => $this->changedPriorToCommitURI,
+      'firstBroadcast' => $this->firstBroadcast,
     );
   }
 
   protected function loadCustomWorkerState(array $state) {
     $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
+    $this->firstBroadcast = idx($state, 'firstBroadcast');
     return $this;
   }
 
@@ -1540,7 +1562,7 @@ final class DifferentialTransactionEditor
   protected function didApplyTransactions($object, array $xactions) {
     // If a draft revision has no outstanding builds and we're automatically
     // making drafts public after builds finish, make the revision public.
-    $auto_undraft = true;
+    $auto_undraft = !$object->getHoldAsDraft();
 
     if ($object->isDraft() && $auto_undraft) {
       $active_builds = $this->hasActiveBuilds($object);
@@ -1549,6 +1571,19 @@ final class DifferentialTransactionEditor
         // attribute the action to the revision author since this is more
         // natural and more useful.
         $author_phid = $object->getAuthorPHID();
+
+        // Additionally, we change the acting PHID for the transaction set
+        // to the author if it isn't already a user so that mail comes from
+        // the natural author.
+        $acting_phid = $this->getActingAsPHID();
+        $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
+        if (phid_get_type($acting_phid) != $user_type) {
+          $this->setActingAsPHID($author_phid);
+        }
+
+        // Mark this as the first broadcast we're sending about the revision
+        // so mail can generate specially.
+        $this->firstBroadcast = true;
 
         $xaction = $object->getApplicationTransactionTemplate()
           ->setAuthorPHID($author_phid)
@@ -1576,6 +1611,13 @@ final class DifferentialTransactionEditor
         $object->saveTransaction();
 
         $xactions[] = $xaction;
+      }
+    } else {
+      // If this revision is being created into some state other than "Draft",
+      // this is the first broadcast and should include sections like "SUMMARY"
+      // and "TEST PLAN".
+      if ($this->getIsNewObject()) {
+        $this->firstBroadcast = true;
       }
     }
 

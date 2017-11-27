@@ -13,6 +13,20 @@ final class DifferentialRevisionDependedOnByRevisionEdgeType
     return true;
   }
 
+  public function getConduitKey() {
+    return 'revision.child';
+  }
+
+  public function getConduitName() {
+    return pht('Revision Has Child');
+  }
+
+  public function getConduitDescription() {
+    return pht(
+      'The source revision makes changes required by the destination '.
+      'revision.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,

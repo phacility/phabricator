@@ -97,7 +97,7 @@ final class DiffusionSearchQueryConduitAPIMethod
 
     $results = array();
     $future = $repository->getLocalCommandFuture(
-      'grep --rev %s --print0 --line-number %s %s',
+      'grep --rev %s --print0 --line-number -- %s %s',
       hgsprintf('ancestors(%s)', $drequest->getStableCommit()),
       $grep,
       $path);
