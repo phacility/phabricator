@@ -137,10 +137,6 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     if ($this->shouldRequireEnabledUser()) {
-      if ($user->isLoggedIn() && !$user->getIsApproved()) {
-        $controller = new PhabricatorAuthNeedsApprovalController();
-        return $this->delegateToController($controller);
-      }
       if ($user->getIsDisabled()) {
         $controller = new PhabricatorDisabledUserController();
         return $this->delegateToController($controller);
@@ -232,6 +228,17 @@ abstract class PhabricatorController extends AphrontController {
           ->setViewer($user)
           ->withPHIDs(array($application->getPHID()))
           ->executeOne();
+      }
+
+      // If users need approval, require they wait here. We do this near the
+      // end so they can take other actions (like verifying email, signing
+      // documents, and enrolling in MFA) while waiting for an admin to take a
+      // look at things. See T13024 for more discussion.
+      if ($this->shouldRequireEnabledUser()) {
+        if ($user->isLoggedIn() && !$user->getIsApproved()) {
+          $controller = new PhabricatorAuthNeedsApprovalController();
+          return $this->delegateToController($controller);
+        }
       }
     }
 
