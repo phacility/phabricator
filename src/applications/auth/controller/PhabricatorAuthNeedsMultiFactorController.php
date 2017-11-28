@@ -15,6 +15,12 @@ final class PhabricatorAuthNeedsMultiFactorController
     return false;
   }
 
+  public function shouldRequireEmailVerification() {
+    // Users who haven't verified their email addresses yet can still enroll
+    // in MFA.
+    return false;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
