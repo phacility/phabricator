@@ -227,45 +227,9 @@ abstract class PhabricatorController extends AphrontController {
     }
 
 
-    if (!$this->shouldAllowLegallyNonCompliantUsers()) {
-      $legalpad_class = 'PhabricatorLegalpadApplication';
-      $legalpad = id(new PhabricatorApplicationQuery())
-        ->setViewer($user)
-        ->withClasses(array($legalpad_class))
-        ->withInstalled(true)
-        ->execute();
-      $legalpad = head($legalpad);
-
-      $doc_query = id(new LegalpadDocumentQuery())
-        ->setViewer($user)
-        ->withSignatureRequired(1)
-        ->needViewerSignatures(true);
-
-      if ($user->hasSession() &&
-          !$user->getSession()->getIsPartial() &&
-          !$user->getSession()->getSignedLegalpadDocuments() &&
-          $user->isLoggedIn() &&
-          $legalpad) {
-
-        $sign_docs = $doc_query->execute();
-        $must_sign_docs = array();
-        foreach ($sign_docs as $sign_doc) {
-          if (!$sign_doc->getUserSignature($user->getPHID())) {
-            $must_sign_docs[] = $sign_doc;
-          }
-        }
-        if ($must_sign_docs) {
-          $controller = new LegalpadDocumentSignController();
-          $this->getRequest()->setURIMap(array(
-            'id' => head($must_sign_docs)->getID(),
-          ));
-          $this->setCurrentApplication($legalpad);
-          return $this->delegateToController($controller);
-        } else {
-          $engine = id(new PhabricatorAuthSessionEngine())
-            ->signLegalpadDocuments($user, $sign_docs);
-        }
-      }
+    $result = $this->requireLegalpadSignatures();
+    if ($result !== null) {
+      return $result;
     }
 
     // NOTE: We do this last so that users get a login page instead of a 403
@@ -556,6 +520,76 @@ abstract class PhabricatorController extends AphrontController {
     // I can use it in EditEngine. We could do this without making it public
     // by using controller delegation, or make it properly public.
     return $this->buildApplicationCrumbs();
+  }
+
+  private function requireLegalpadSignatures() {
+    if ($this->shouldAllowLegallyNonCompliantUsers()) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    if (!$viewer->hasSession()) {
+      return null;
+    }
+
+    $session = $viewer->getSession();
+    if ($session->getIsPartial()) {
+      // If the user hasn't made it through MFA yet, require they survive
+      // MFA first.
+      return null;
+    }
+
+    if ($session->getSignedLegalpadDocuments()) {
+      return null;
+    }
+
+    if (!$viewer->isLoggedIn()) {
+      return null;
+    }
+
+    $legalpad_class = 'PhabricatorLegalpadApplication';
+    $legalpad_installed = PhabricatorApplication::isClassInstalledForViewer(
+      $legalpad_class,
+      $viewer);
+    if (!$legalpad_installed) {
+      return null;
+    }
+
+    $sign_docs = id(new LegalpadDocumentQuery())
+      ->setViewer($viewer)
+      ->withSignatureRequired(1)
+      ->needViewerSignatures(true)
+      ->execute();
+
+    $must_sign_docs = array();
+    foreach ($sign_docs as $sign_doc) {
+      if (!$sign_doc->getUserSignature($viewer->getPHID())) {
+        $must_sign_docs[] = $sign_doc;
+      }
+    }
+
+    if (!$must_sign_docs) {
+      // If nothing needs to be signed (either because there are no documents
+      // which require a signature, or because the user has already signed
+      // all of them) mark the session as good and continue.
+      $engine = id(new PhabricatorAuthSessionEngine())
+        ->signLegalpadDocuments($viewer, $sign_docs);
+
+      return null;
+    }
+
+    $request = $this->getRequest();
+    $request->setURIMap(
+      array(
+        'id' => head($must_sign_docs)->getID(),
+      ));
+
+    $application = PhabricatorApplication::getByClass($legalpad_class);
+    $this->setCurrentApplication($application);
+
+    $controller = new LegalpadDocumentSignController();
+    return $this->delegateToController($controller);
   }
 
 
