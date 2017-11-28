@@ -560,6 +560,7 @@ abstract class PhabricatorController extends AphrontController {
       ->setViewer($viewer)
       ->withSignatureRequired(1)
       ->needViewerSignatures(true)
+      ->setOrder('oldest')
       ->execute();
 
     $must_sign_docs = array();
