@@ -160,6 +160,15 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
+    // Require users sign Legalpad documents before we check if they have
+    // MFA. If we don't do this, they can get stuck in a state where they
+    // can't add MFA until they sign, and can't sign until they add MFA.
+    // See T13024 and PHI223.
+    $result = $this->requireLegalpadSignatures();
+    if ($result !== null) {
+      return $result;
+    }
+
     // Check if the user needs to configure MFA.
     $need_mfa = $this->shouldRequireMultiFactorEnrollment();
     $have_mfa = $user->getIsEnrolledInMultiFactor();
@@ -224,12 +233,6 @@ abstract class PhabricatorController extends AphrontController {
           ->withPHIDs(array($application->getPHID()))
           ->executeOne();
       }
-    }
-
-
-    $result = $this->requireLegalpadSignatures();
-    if ($result !== null) {
-      return $result;
     }
 
     // NOTE: We do this last so that users get a login page instead of a 403
@@ -523,6 +526,10 @@ abstract class PhabricatorController extends AphrontController {
   }
 
   private function requireLegalpadSignatures() {
+    if (!$this->shouldRequireLogin()) {
+      return null;
+    }
+
     if ($this->shouldAllowLegallyNonCompliantUsers()) {
       return null;
     }
