@@ -618,6 +618,10 @@ abstract class PhabricatorApplication
       ')?';
   }
 
+  protected function getBulkRoutePattern($base = null) {
+    return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
+  }
+
   protected function getQueryRoutePattern($base = null) {
     return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
   }

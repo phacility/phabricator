@@ -255,7 +255,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
       $user,
       array(
         'method' => 'POST',
-        'action' => '/maniphest/batch/',
+        'action' => '/maniphest/bulk/',
         'id'     => 'batch-select-form',
       ),
       $editor);

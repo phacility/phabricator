@@ -32,6 +32,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $selectableName;
   private $selectableValue;
   private $isSelected;
+  private $isForbidden;
 
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
@@ -164,10 +165,17 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
-  public function setSelectable($name, $value, $is_selected) {
+  public function setSelectable(
+    $name,
+    $value,
+    $is_selected,
+    $is_forbidden = false) {
+
     $this->selectableName = $name;
     $this->selectableValue = $value;
     $this->isSelected = $is_selected;
+    $this->isForbidden = $is_forbidden;
+
     return $this;
   }
 
@@ -299,11 +307,13 @@ final class PHUIObjectItemView extends AphrontTagView {
         throw new Exception(pht('Invalid effect!'));
     }
 
-    if ($this->isSelected) {
+    if ($this->isForbidden) {
+      $item_classes[] = 'phui-oi-forbidden';
+    } else if ($this->isSelected) {
       $item_classes[] = 'phui-oi-selected';
     }
 
-    if ($this->selectableName !== null) {
+    if ($this->selectableName !== null && !$this->isForbidden) {
       $item_classes[] = 'phui-oi-selectable';
       $sigils[] = 'phui-oi-selectable';
 
@@ -654,14 +664,18 @@ final class PHUIObjectItemView extends AphrontTagView {
     }
 
     if ($this->selectableName !== null) {
-      $checkbox = phutil_tag(
-        'input',
-        array(
-          'type' => 'checkbox',
-          'name' => $this->selectableName,
-          'value' => $this->selectableValue,
-          'checked' => ($this->isSelected ? 'checked' : null),
-        ));
+      if (!$this->isForbidden) {
+        $checkbox = phutil_tag(
+          'input',
+          array(
+            'type' => 'checkbox',
+            'name' => $this->selectableName,
+            'value' => $this->selectableValue,
+            'checked' => ($this->isSelected ? 'checked' : null),
+          ));
+      } else {
+        $checkbox = null;
+      }
 
       $column0 = phutil_tag(
         'div',

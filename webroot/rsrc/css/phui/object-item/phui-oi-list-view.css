@@ -455,6 +455,10 @@ ul.phui-oi-list-view .phui-oi-selected
   border-color: {$sh-blueborder};
 }
 
+.phui-oi-forbidden {
+  background: {$sh-redbackground};
+}
+
 
 /* - Handle Icons --------------------------------------------------------------
 
