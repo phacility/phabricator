@@ -46,8 +46,20 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->withRepositoryPHIDs(array($repository->getPHID()))
         ->withRefTypes(array(PhabricatorRepositoryRefCursor::TYPE_BRANCH))
         ->withRefNames(array($drequest->getBranch()))
+        ->needPositions(true)
         ->execute();
-      if ($ref_cursors) {
+
+      // It's possible that this branch previously existed, but has been
+      // deleted. Make sure we have valid cursor positions, not just cursors.
+      $any_positions = false;
+      foreach ($ref_cursors as $ref_cursor) {
+        if ($ref_cursor->getPositions()) {
+          $any_positions = true;
+          break;
+        }
+      }
+
+      if ($any_positions) {
         // This is a valid branch, so we necessarily have some content.
         $page_has_content = true;
       } else {
