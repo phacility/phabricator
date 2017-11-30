@@ -89,12 +89,7 @@ final class ManiphestBatchEditController extends ManiphestController {
         ->setURI($job->getMonitorURI());
     }
 
-    $handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
-
-    $list = new ManiphestTaskListView();
-    $list->setTasks($tasks);
-    $list->setUser($viewer);
-    $list->setHandles($handles);
+    $list = $this->newBulkObjectList($tasks);
 
     $template = new AphrontTokenizerTemplateView();
     $template = $template->render();
@@ -142,21 +137,8 @@ final class ManiphestBatchEditController extends ManiphestController {
         'statusMap'   => ManiphestTaskStatus::getTaskStatusMap(),
       ));
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->addHiddenInput('board', $board_id)
-      ->setID('maniphest-batch-edit-form');
-
-    foreach ($tasks as $task) {
-      $form->appendChild(
-        phutil_tag(
-          'input',
-          array(
-            'type' => 'hidden',
-            'name' => 'batch[]',
-            'value' => $task->getID(),
-          )));
-    }
+    $form = id(new PHUIFormLayoutView())
+      ->setUser($viewer);
 
     $form->appendChild(
       phutil_tag(
@@ -166,6 +148,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           'name' => 'actions',
           'id'   => 'batch-form-actions',
         )));
+
     $form->appendChild(
       id(new PHUIFormInsetView())
         ->setTitle(pht('Actions'))
@@ -210,17 +193,63 @@ final class ManiphestBatchEditController extends ManiphestController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter(array(
+
+    $complete_form = phabricator_form(
+      $viewer,
+      array(
+        'action' => $request->getRequestURI(),
+        'method' => 'POST',
+        'id' => 'maniphest-batch-edit-form',
+      ),
+      array(
+        phutil_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'board',
+            'value' => $board_id,
+          )),
         $task_box,
         $form_box,
       ));
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($complete_form);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild($view);
+  }
+
+  private function newBulkObjectList(array $objects) {
+    $viewer = $this->getViewer();
+    $objects = mpull($objects, null, 'getPHID');
+
+    $handles = $viewer->loadHandles(array_keys($objects));
+
+    $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
+
+    $list = id(new PHUIObjectItemListView())
+      ->setViewer($viewer)
+      ->setFlush(true);
+
+    foreach ($objects as $phid => $object) {
+      $handle = $handles[$phid];
+
+      $is_closed = ($handle->getStatus() === $status_closed);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($handle->getFullName())
+        ->setHref($handle->getURI())
+        ->setDisabled($is_closed)
+        ->setSelectable('batch[]', $object->getID(), true);
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

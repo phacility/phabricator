@@ -29,6 +29,10 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $coverImage;
   private $description;
 
+  private $selectableName;
+  private $selectableValue;
+  private $isSelected;
+
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
     return $this;
@@ -160,6 +164,13 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
+  public function setSelectable($name, $value, $is_selected) {
+    $this->selectableName = $name;
+    $this->selectableValue = $value;
+    $this->isSelected = $is_selected;
+    return $this;
+  }
+
   public function setEpoch($epoch) {
     $date = phabricator_datetime($epoch, $this->getUser());
     $this->addIcon('none', $date);
@@ -239,6 +250,8 @@ final class PHUIObjectItemView extends AphrontTagView {
   }
 
   protected function getTagAttributes() {
+    $sigils = array();
+
     $item_classes = array();
     $item_classes[] = 'phui-oi';
 
@@ -286,6 +299,17 @@ final class PHUIObjectItemView extends AphrontTagView {
         throw new Exception(pht('Invalid effect!'));
     }
 
+    if ($this->isSelected) {
+      $item_classes[] = 'phui-oi-selected';
+    }
+
+    if ($this->selectableName !== null) {
+      $item_classes[] = 'phui-oi-selectable';
+      $sigils[] = 'phui-oi-selectable';
+
+      Javelin::initBehavior('phui-selectable-list');
+    }
+
     if ($this->getGrippable()) {
       $item_classes[] = 'phui-oi-grippable';
     }
@@ -300,6 +324,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     return array(
       'class' => $item_classes,
+      'sigil' => $sigils,
     );
   }
 
@@ -626,6 +651,24 @@ final class PHUIObjectItemView extends AphrontTagView {
           'class' => 'phui-oi-col0 phui-oi-countdown',
         ),
         $countdown);
+    }
+
+    if ($this->selectableName !== null) {
+      $checkbox = phutil_tag(
+        'input',
+        array(
+          'type' => 'checkbox',
+          'name' => $this->selectableName,
+          'value' => $this->selectableValue,
+          'checked' => ($this->isSelected ? 'checked' : null),
+        ));
+
+      $column0 = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-oi-col0 phui-oi-checkbox',
+        ),
+        $checkbox);
     }
 
     $column1 = phutil_tag(
