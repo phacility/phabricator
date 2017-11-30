@@ -268,6 +268,16 @@ final class DifferentialDiffExtractionEngine extends Phobject {
 
     $xactions = array();
 
+    // If the revision isn't closed or "Accepted", write a warning into the
+    // transaction log. This makes it more clear when users bend the rules.
+    if (!$revision->isClosed() && !$revision->isAccepted()) {
+      $wrong_type = DifferentialRevisionWrongStateTransaction::TRANSACTIONTYPE;
+
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType($wrong_type)
+        ->setNewValue($revision->getModernRevisionStatus());
+    }
+
     $xactions[] = id(new DifferentialTransaction())
       ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
       ->setIgnoreOnNoEffect(true)
