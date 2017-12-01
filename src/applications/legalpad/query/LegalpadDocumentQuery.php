@@ -77,23 +77,12 @@ final class LegalpadDocumentQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new LegalpadDocument();
+  }
+
   protected function loadPage() {
-    $table = new LegalpadDocument();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT d.* FROM %T d %Q %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $documents = $table->loadAllFromArray($data);
-
-    return $documents;
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $documents) {
@@ -134,12 +123,12 @@ final class LegalpadDocumentQuery
     return $documents;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->contributorPHIDs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN edge contributor ON contributor.src = d.phid
           AND contributor.type = %d',
         PhabricatorObjectHasContributorEdgeType::EDGECONST);
@@ -147,79 +136,81 @@ final class LegalpadDocumentQuery
 
     if ($this->signerPHIDs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T signer ON signer.documentPHID = d.phid
           AND signer.signerPHID IN (%Ls)',
         id(new LegalpadDocumentSignature())->getTableName(),
         $this->signerPHIDs);
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
-  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
-    if ($this->contributorPHIDs || $this->signerPHIDs) {
-      return 'GROUP BY d.id';
-    } else {
-      return '';
+  protected function shouldGroupQueryResultRows() {
+    if ($this->contributorPHIDs) {
+      return true;
     }
+
+    if ($this->signerPHIDs) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'd.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'd.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->creatorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'd.creatorPHID IN (%Ls)',
         $this->creatorPHIDs);
     }
 
     if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'd.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'd.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->contributorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'contributor.dst IN (%Ls)',
         $this->contributorPHIDs);
     }
 
     if ($this->signatureRequired !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'd.requireSignature = %d',
         $this->signatureRequired);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   private function loadDocumentBodies(array $documents) {
@@ -273,6 +264,10 @@ final class LegalpadDocumentQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorLegalpadApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'd';
   }
 
 }

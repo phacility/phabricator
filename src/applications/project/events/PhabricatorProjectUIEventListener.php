@@ -8,8 +8,16 @@ final class PhabricatorProjectUIEventListener
   }
 
   public function handleEvent(PhutilEvent $event) {
+    $object = $event->getValue('object');
+
     switch ($event->getType()) {
       case PhabricatorEventType::TYPE_UI_WILLRENDERPROPERTIES:
+        // Hacky solution so that property list view on Diffusion
+        // commits shows build status, but not Projects, Subscriptions,
+        // or Tokens.
+        if ($object instanceof PhabricatorRepositoryCommit) {
+          return;
+        }
         $this->handlePropertyEvent($event);
         break;
     }

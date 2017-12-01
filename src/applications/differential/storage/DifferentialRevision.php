@@ -60,6 +60,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   const PROPERTY_CLOSED_FROM_ACCEPTED = 'wasAcceptedBeforeClose';
   const PROPERTY_DRAFT_HOLD = 'draft.hold';
+  const PROPERTY_HAS_BROADCAST = 'draft.broadcast';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -718,6 +719,15 @@ final class DifferentialRevision extends DifferentialDAO
   public function setHoldAsDraft($hold) {
     return $this->setProperty(self::PROPERTY_DRAFT_HOLD, $hold);
   }
+
+  public function getHasBroadcast() {
+    return $this->getProperty(self::PROPERTY_HAS_BROADCAST, false);
+  }
+
+  public function setHasBroadcast($has_broadcast) {
+    return $this->setProperty(self::PROPERTY_HAS_BROADCAST, $has_broadcast);
+  }
+
 
   public function loadActiveBuilds(PhabricatorUser $viewer) {
     $diff = $this->getActiveDiff();

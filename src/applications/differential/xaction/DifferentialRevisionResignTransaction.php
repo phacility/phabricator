@@ -64,11 +64,6 @@ final class DifferentialRevisionResignTransaction
           'been closed. You can only resign from open revisions.'));
     }
 
-    if ($object->isDraft()) {
-      throw new Exception(
-        pht('You can not resign from a draft revision.'));
-    }
-
     $resigned = DifferentialReviewerStatus::STATUS_RESIGNED;
     if ($this->getViewerReviewerStatus($object, $viewer) == $resigned) {
       throw new Exception(

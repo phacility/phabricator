@@ -438,7 +438,8 @@ final class DiffusionCommitController extends DiffusionController {
     $repository = $drequest->getRepository();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($this->getRequest()->getUser());
+      ->setUser($this->getRequest()->getUser())
+      ->setObject($commit);
 
     $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($commit_phid))

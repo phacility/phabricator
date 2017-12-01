@@ -9,8 +9,26 @@ final class PhabricatorAuthNeedsMultiFactorController
     return false;
   }
 
+  public function shouldRequireEnabledUser() {
+    // Users who haven't been approved yet are allowed to enroll in MFA. We'll
+    // kick disabled users out later.
+    return false;
+  }
+
+  public function shouldRequireEmailVerification() {
+    // Users who haven't verified their email addresses yet can still enroll
+    // in MFA.
+    return false;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
+
+    if ($viewer->getIsDisabled()) {
+      // We allowed unapproved and disabled users to hit this controller, but
+      // want to kick out disabled users now.
+      return new Aphront400Response();
+    }
 
     $panel = id(new PhabricatorMultiFactorSettingsPanel())
       ->setUser($viewer)

@@ -10,6 +10,10 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     return false;
   }
 
+  public function shouldAllowPartialSessions() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $this->phid = $request->getURIData('phid');

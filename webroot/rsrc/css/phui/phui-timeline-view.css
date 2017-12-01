@@ -315,6 +315,10 @@
   background-color: {$violet};
 }
 
+.phui-timeline-icon-fill-pink {
+  background-color: {$pink};
+}
+
 .phui-timeline-icon-fill-grey {
   background-color: #888;
 }
