@@ -562,25 +562,25 @@ abstract class PhabricatorController extends AphrontController {
       return null;
     }
 
+    $must_sign_docs = array();
+    $sign_docs = array();
+
     $legalpad_class = 'PhabricatorLegalpadApplication';
     $legalpad_installed = PhabricatorApplication::isClassInstalledForViewer(
       $legalpad_class,
       $viewer);
-    if (!$legalpad_installed) {
-      return null;
-    }
+    if ($legalpad_installed) {
+      $sign_docs = id(new LegalpadDocumentQuery())
+        ->setViewer($viewer)
+        ->withSignatureRequired(1)
+        ->needViewerSignatures(true)
+        ->setOrder('oldest')
+        ->execute();
 
-    $sign_docs = id(new LegalpadDocumentQuery())
-      ->setViewer($viewer)
-      ->withSignatureRequired(1)
-      ->needViewerSignatures(true)
-      ->setOrder('oldest')
-      ->execute();
-
-    $must_sign_docs = array();
-    foreach ($sign_docs as $sign_doc) {
-      if (!$sign_doc->getUserSignature($viewer->getPHID())) {
-        $must_sign_docs[] = $sign_doc;
+      foreach ($sign_docs as $sign_doc) {
+        if (!$sign_doc->getUserSignature($viewer->getPHID())) {
+          $must_sign_docs[] = $sign_doc;
+        }
       }
     }
 
