@@ -106,7 +106,7 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     if (!$is_full) {
       foreach ($extensions as $key => $extension) {
-        if (!$extension->shouldAllowPartialSessions()) {
+        if ($extension->shouldRequireFullSession()) {
           unset($extensions[$key]);
         }
       }

@@ -9,8 +9,8 @@ final class PeopleMainMenuBarExtension
     return $viewer->isLoggedIn();
   }
 
-  public function shouldAllowPartialSessions() {
-    return true;
+  public function shouldRequireFullSession() {
+    return false;
   }
 
   public function getExtensionOrder() {
