@@ -51,8 +51,8 @@ abstract class PhabricatorMainMenuBarExtension extends Phobject {
     return true;
   }
 
-  public function shouldAllowPartialSessions() {
-    return false;
+  public function shouldRequireFullSession() {
+    return true;
   }
 
   public function isExtensionEnabledForViewer(PhabricatorUser $viewer) {
