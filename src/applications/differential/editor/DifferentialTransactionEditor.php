@@ -1588,10 +1588,7 @@ final class DifferentialTransactionEditor
           ->setAuthorPHID($author_phid)
           ->setTransactionType(
             DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE)
-          ->setOldValue(false)
           ->setNewValue(true);
-
-        $xaction = $this->populateTransaction($object, $xaction);
 
         // If we're creating this revision and immediately moving it out of
         // the draft state, mark this as a create transaction so it gets
@@ -1601,15 +1598,10 @@ final class DifferentialTransactionEditor
           $xaction->setIsCreateTransaction(true);
         }
 
-        $object->openTransaction();
-          $object
-            ->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW)
-            ->save();
-
-          $xaction->save();
-        $object->saveTransaction();
-
-        $xactions[] = $xaction;
+        // Queue this transaction and apply it separately after the current
+        // batch of transactions finishes so that Herald can fire on the new
+        // revision state. See T13027 for discussion.
+        $this->queueTransaction($xaction);
       }
     }
 
