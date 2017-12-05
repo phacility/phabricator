@@ -130,7 +130,7 @@ final class DiffusionHistoryQueryConduitAPIMethod
     } else {
       $path_arg = '';
       $revset_arg = hgsprintf(
-        'branch(%s) and reverse(ancestors(%s))',
+        'reverse(ancestors(%s)) and branch(%s)',
         $drequest->getBranch(),
         $commit_hash);
     }
