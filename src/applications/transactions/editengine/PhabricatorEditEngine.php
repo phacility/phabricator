@@ -630,6 +630,15 @@ abstract class PhabricatorEditEngine
     return $this->isCreate;
   }
 
+  /**
+   * Initialize a new object for documentation creation.
+   *
+   * @return object Newly initialized object.
+   * @task load
+   */
+  protected function newEditableObjectForDocumentation() {
+    return $this->newEditableObject();
+  }
 
   /**
    * Flag this workflow as a create or edit.
@@ -2198,7 +2207,7 @@ abstract class PhabricatorEditEngine
       return array();
     }
 
-    $object = $this->newEditableObject();
+    $object = $this->newEditableObjectForDocumentation();
     $fields = $this->buildEditFields($object);
     return $this->getConduitEditTypesFromFields($fields);
   }
