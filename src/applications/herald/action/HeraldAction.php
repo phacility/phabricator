@@ -9,6 +9,7 @@ abstract class HeraldAction extends Phobject {
   const STANDARD_NONE = 'standard.none';
   const STANDARD_PHID_LIST = 'standard.phid.list';
   const STANDARD_TEXT = 'standard.text';
+  const STANDARD_REMARKUP = 'standard.remarkup';
 
   const DO_STANDARD_EMPTY = 'do.standard.empty';
   const DO_STANDARD_NO_EFFECT = 'do.standard.no-effect';
@@ -60,6 +61,8 @@ abstract class HeraldAction extends Phobject {
         return new HeraldEmptyFieldValue();
       case self::STANDARD_TEXT:
         return new HeraldTextFieldValue();
+      case self::STANDARD_REMARKUP:
+        return new HeraldRemarkupFieldValue();
       case self::STANDARD_PHID_LIST:
         $tokenizer = id(new HeraldTokenizerFieldValue())
           ->setKey($this->getHeraldActionName())

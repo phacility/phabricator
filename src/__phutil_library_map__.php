@@ -1337,6 +1337,7 @@ phutil_register_library_map(array(
     'HeraldApplyTranscript' => 'applications/herald/storage/transcript/HeraldApplyTranscript.php',
     'HeraldBasicFieldGroup' => 'applications/herald/field/HeraldBasicFieldGroup.php',
     'HeraldBuildableState' => 'applications/herald/state/HeraldBuildableState.php',
+    'HeraldCommentAction' => 'applications/herald/action/HeraldCommentAction.php',
     'HeraldCommitAdapter' => 'applications/diffusion/herald/HeraldCommitAdapter.php',
     'HeraldCondition' => 'applications/herald/storage/HeraldCondition.php',
     'HeraldConditionTranscript' => 'applications/herald/storage/transcript/HeraldConditionTranscript.php',
@@ -1378,6 +1379,7 @@ phutil_register_library_map(array(
     'HeraldProjectsField' => 'applications/project/herald/HeraldProjectsField.php',
     'HeraldRecursiveConditionsException' => 'applications/herald/engine/exception/HeraldRecursiveConditionsException.php',
     'HeraldRelatedFieldGroup' => 'applications/herald/field/HeraldRelatedFieldGroup.php',
+    'HeraldRemarkupFieldValue' => 'applications/herald/value/HeraldRemarkupFieldValue.php',
     'HeraldRemarkupRule' => 'applications/herald/remarkup/HeraldRemarkupRule.php',
     'HeraldRepetitionPolicyConfig' => 'applications/herald/config/HeraldRepetitionPolicyConfig.php',
     'HeraldRule' => 'applications/herald/storage/HeraldRule.php',
@@ -6488,6 +6490,7 @@ phutil_register_library_map(array(
     'HeraldApplyTranscript' => 'Phobject',
     'HeraldBasicFieldGroup' => 'HeraldFieldGroup',
     'HeraldBuildableState' => 'HeraldState',
+    'HeraldCommentAction' => 'HeraldAction',
     'HeraldCommitAdapter' => array(
       'HeraldAdapter',
       'HarbormasterBuildableAdapterInterface',
@@ -6535,6 +6538,7 @@ phutil_register_library_map(array(
     'HeraldProjectsField' => 'HeraldField',
     'HeraldRecursiveConditionsException' => 'Exception',
     'HeraldRelatedFieldGroup' => 'HeraldFieldGroup',
+    'HeraldRemarkupFieldValue' => 'HeraldFieldValue',
     'HeraldRemarkupRule' => 'PhabricatorObjectRemarkupRule',
     'HeraldRepetitionPolicyConfig' => 'Phobject',
     'HeraldRule' => array(
