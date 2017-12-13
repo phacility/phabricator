@@ -1627,8 +1627,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
-    // TODO: Unprototype this feature.
-    if (!PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+    if (!PhabricatorEnv::getEnvConfig('diffusion.allow-git-lfs')) {
       return false;
     }
 
