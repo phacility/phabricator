@@ -916,7 +916,8 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setTag('a')
       ->setText($text)
       ->setHref($href)
-      ->setIcon($icon);
+      ->setIcon($icon)
+      ->setColor(PHUIButtonView::GREY);
   }
 
   private function buildDisplayRows(
@@ -1924,7 +1925,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     try {
       $file = $this->loadGitLFSFile($ref);
-      $data = $this->renderGitLFSButton();
+      $this->corpusButtons[] = $this->renderGitLFSButton();
     } catch (Exception $ex) {
       $severity = PHUIInfoView::SEVERITY_ERROR;
       $messages[] = pht('The data for this file could not be loaded.');
