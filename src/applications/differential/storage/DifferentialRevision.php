@@ -61,6 +61,8 @@ final class DifferentialRevision extends DifferentialDAO
   const PROPERTY_CLOSED_FROM_ACCEPTED = 'wasAcceptedBeforeClose';
   const PROPERTY_DRAFT_HOLD = 'draft.hold';
   const PROPERTY_HAS_BROADCAST = 'draft.broadcast';
+  const PROPERTY_LINES_ADDED = 'lines.added';
+  const PROPERTY_LINES_REMOVED = 'lines.removed';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -728,6 +730,21 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->setProperty(self::PROPERTY_HAS_BROADCAST, $has_broadcast);
   }
 
+  public function setAddedLineCount($count) {
+    return $this->setProperty(self::PROPERTY_LINES_ADDED, $count);
+  }
+
+  public function getAddedLineCount() {
+    return $this->getProperty(self::PROPERTY_LINES_ADDED);
+  }
+
+  public function setRemovedLineCount($count) {
+    return $this->setProperty(self::PROPERTY_LINES_REMOVED, $count);
+  }
+
+  public function getRemovedLineCount() {
+    return $this->getProperty(self::PROPERTY_LINES_REMOVED);
+  }
 
   public function loadActiveBuilds(PhabricatorUser $viewer) {
     $diff = $this->getActiveDiff();

@@ -132,12 +132,14 @@ final class DifferentialTransactionEditor
 
         $diff = $this->requireDiff($xaction->getNewValue());
 
-        $object->setLineCount($diff->getLineCount());
+        $this->updateRevisionLineCounts($object, $diff);
+
         if ($this->repositoryPHIDOverride !== false) {
           $object->setRepositoryPHID($this->repositoryPHIDOverride);
         } else {
           $object->setRepositoryPHID($diff->getRepositoryPHID());
         }
+
         $object->attachActiveDiff($diff);
         $object->setActiveDiffPHID($diff->getPHID());
         return;
@@ -1645,5 +1647,25 @@ final class DifferentialTransactionEditor
     return true;
   }
 
+  private function updateRevisionLineCounts(
+    DifferentialRevision $revision,
+    DifferentialDiff $diff) {
+
+    $revision->setLineCount($diff->getLineCount());
+
+    $conn = $revision->establishConnection('r');
+
+    $row = queryfx_one(
+      $conn,
+      'SELECT SUM(addLines) A, SUM(delLines) D FROM %T
+        WHERE diffID = %d',
+      id(new DifferentialChangeset())->getTableName(),
+      $diff->getID());
+
+    if ($row) {
+      $revision->setAddedLineCount((int)$row['A']);
+      $revision->setRemovedLineCount((int)$row['D']);
+    }
+  }
 
 }
