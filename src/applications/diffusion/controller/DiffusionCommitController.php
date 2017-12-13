@@ -39,20 +39,23 @@ final class DiffusionCommitController extends DiffusionController {
       return $this->buildRawDiffResponse($drequest);
     }
 
-    $commit = id(new DiffusionCommitQuery())
+    $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withRepository($repository)
       ->withIdentifiers(array($commit_identifier))
       ->needCommitData(true)
       ->needAuditRequests(true)
-      ->executeOne();
+      ->setLimit(100)
+      ->execute();
+
+    $multiple_results = count($commits) > 1;
 
     $crumbs = $this->buildCrumbs(array(
-      'commit' => true,
+      'commit' => !$multiple_results,
     ));
     $crumbs->setBorder(true);
 
-    if (!$commit) {
+    if (!$commits) {
       if (!$this->getCommitExists()) {
         return new Aphront404Response();
       }
@@ -70,7 +73,40 @@ final class DiffusionCommitController extends DiffusionController {
         ->setTitle($title)
         ->setCrumbs($crumbs)
         ->appendChild($error);
+    } else if ($multiple_results) {
 
+      $warning_message =
+        pht(
+          'The identifier %s is ambiguous and matches more than one commit.',
+          phutil_tag(
+            'strong',
+            array(),
+            $commit_identifier));
+
+      $error = id(new PHUIInfoView())
+        ->setTitle(pht('Ambiguous Commit'))
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->appendChild($warning_message);
+
+      $list = id(new DiffusionCommitListView())
+        ->setViewer($viewer)
+        ->setCommits($commits)
+        ->setNoDataString(pht('No recent commits.'));
+
+      $crumbs->addTextCrumb(pht('Ambiguous Commit'));
+
+      $matched_commits = id(new PHUITwoColumnView())
+        ->setFooter(array(
+          $error,
+          $list,
+        ));
+
+      return $this->newPage()
+        ->setTitle(pht('Ambiguous Commit'))
+        ->setCrumbs($crumbs)
+        ->appendChild($matched_commits);
+    } else {
+      $commit = head($commits);
     }
 
     $audit_requests = $commit->getAudits();

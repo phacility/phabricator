@@ -70,6 +70,8 @@ abstract class PhabricatorApplicationTransactionEditor
   private $feedRelatedPHIDs = array();
   private $modularTypes;
 
+  private $transactionQueue = array();
+
   const STORAGE_ENCODING_BINARY = 'binary';
 
   /**
@@ -1173,6 +1175,8 @@ abstract class PhabricatorApplicationTransactionEditor
         'objectPHID' => $object->getPHID(),
         'priority' => PhabricatorWorker::PRIORITY_ALERTS,
       ));
+
+    $this->flushTransactionQueue($object);
 
     return $xactions;
   }
@@ -3862,6 +3866,41 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getCreateObjectTitleForFeed($author, $object) {
     return pht('%s created an object: %s.', $author, $object);
+  }
+
+/* -(  Queue  )-------------------------------------------------------------- */
+
+  protected function queueTransaction(
+    PhabricatorApplicationTransaction $xaction) {
+    $this->transactionQueue[] = $xaction;
+    return $this;
+  }
+
+  private function flushTransactionQueue($object) {
+    if (!$this->transactionQueue) {
+      return;
+    }
+
+    $xactions = $this->transactionQueue;
+    $this->transactionQueue = array();
+
+    $editor = $this->newQueueEditor();
+
+    return $editor->applyTransactions($object, $xactions);
+  }
+
+  private function newQueueEditor() {
+    $editor = id(newv(get_class($this), array()))
+      ->setActor($this->getActor())
+      ->setContentSource($this->getContentSource())
+      ->setContinueOnNoEffect($this->getContinueOnNoEffect())
+      ->setContinueOnMissingFields($this->getContinueOnMissingFields());
+
+    if ($this->actingAsPHID !== null) {
+      $editor->setActingAsPHID($this->actingAsPHID);
+    }
+
+    return $editor;
   }
 
 }
