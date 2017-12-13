@@ -64,6 +64,7 @@ final class FileUploadChunkConduitAPIMethod
     $params = array(
       'name' => $file->getMonogram().'.chunk-'.$chunk->getID(),
       'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+      'chunk' => true,
     );
 
     if ($mime_type !== null) {

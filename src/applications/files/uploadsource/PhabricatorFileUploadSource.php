@@ -189,6 +189,7 @@ abstract class PhabricatorFileUploadSource
     $params = array(
       'name' => $file->getMonogram().'.chunk-'.$offset,
       'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+      'chunk' => true,
     );
 
     // If this isn't the initial chunk, provide a dummy MIME type so we do not
