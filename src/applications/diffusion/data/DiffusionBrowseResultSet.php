@@ -3,6 +3,7 @@
 final class DiffusionBrowseResultSet extends Phobject {
 
   const REASON_IS_FILE              = 'is-file';
+  const REASON_IS_SUBMODULE         = 'is-submodule';
   const REASON_IS_DELETED           = 'is-deleted';
   const REASON_IS_NONEXISTENT       = 'nonexistent';
   const REASON_BAD_COMMIT           = 'bad-commit';

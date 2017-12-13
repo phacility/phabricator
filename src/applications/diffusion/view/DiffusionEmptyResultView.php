@@ -40,6 +40,13 @@ final class DiffusionEmptyResultView extends DiffusionView {
         $body = pht('This path was an empty directory at %s.', $commit);
         $severity = PHUIInfoView::SEVERITY_NOTICE;
         break;
+      case DiffusionBrowseResultSet::REASON_IS_SUBMODULE:
+        $title = pht('Submodule');
+        // TODO: We could improve this, but it is normally difficult to
+        // reach this page for a submodule.
+        $body = pht('This path was a submodule at %s.', $commit);
+        $severity = PHUIInfoView::SEVERITY_NOTICE;
+        break;
       case DiffusionBrowseResultSet::REASON_IS_DELETED:
         $deleted = $this->browseResultSet->getDeletedAtCommit();
         $existed = $this->browseResultSet->getExistedAtCommit();
