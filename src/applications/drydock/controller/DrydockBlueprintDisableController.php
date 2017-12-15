@@ -28,7 +28,8 @@ final class DrydockBlueprintDisableController
       $xactions = array();
 
       $xactions[] = id(new DrydockBlueprintTransaction())
-        ->setTransactionType(DrydockBlueprintTransaction::TYPE_DISABLED)
+        ->setTransactionType(
+          DrydockBlueprintDisableTransaction::TRANSACTIONTYPE)
         ->setNewValue($is_disable ? 1 : 0);
 
       $editor = id(new DrydockBlueprintEditor())

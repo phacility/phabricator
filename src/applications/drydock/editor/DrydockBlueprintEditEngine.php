@@ -121,7 +121,7 @@ final class DrydockBlueprintEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the blueprint.'))
-        ->setTransactionType(DrydockBlueprintTransaction::TYPE_NAME)
+        ->setTransactionType(DrydockBlueprintNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getBlueprintName()),
     );
