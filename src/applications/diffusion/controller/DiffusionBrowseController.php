@@ -1804,10 +1804,17 @@ final class DiffusionBrowseController extends DiffusionController {
         // revision. We just render a blank for alignment.
         $style = null;
         $href = null;
+        $sigil = null;
+        $meta = null;
       } else {
         $src = $handles[$phid]->getImageURI();
         $style = 'background-image: url('.$src.');';
         $href = $handles[$phid]->getURI();
+        $sigil = 'has-tooltip';
+        $meta = array(
+          'tip' => $handles[$phid]->getName(),
+          'align' => 'E',
+        );
       }
 
       $links[$phid] = javelin_tag(
@@ -1816,11 +1823,8 @@ final class DiffusionBrowseController extends DiffusionController {
           'class' => 'diffusion-author-link',
           'style' => $style,
           'href' => $href,
-          'sigil' => 'has-tooltip',
-          'meta' => array(
-            'tip' => $handles[$phid]->getName(),
-            'align' => 'E',
-          ),
+          'sigil' => $sigil,
+          'meta' => $meta,
         ));
     }
 
