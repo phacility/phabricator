@@ -37,6 +37,12 @@
   padding: 2px 4px;
 }
 
+.herald-action-table td textarea {
+  width: 95%;
+  height: 8em;
+  padding: 2px 4px;
+}
+
 .herald-action-table td.target {
   width: 100%;
 }

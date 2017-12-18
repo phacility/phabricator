@@ -217,6 +217,11 @@ JX.install('HeraldRuleEditor', {
           get_fn = function() { return input.value; };
           set_fn = function(v) { input.value = v; };
           break;
+        case 'herald.control.remarkup':
+          input = JX.$N('textarea');
+          get_fn = function() { return input.value; };
+          set_fn = function(v) { input.value = v; };
+          break;
         case 'herald.control.select':
           var options;
 

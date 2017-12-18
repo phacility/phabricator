@@ -52,6 +52,36 @@ final class DiffusionBrowseQueryConduitAPIMethod
           $commit,
           $path);
       } catch (CommandException $e) {
+        // The "cat-file" command may fail if the path legitimately does not
+        // exist, but it may also fail if the path is a submodule. This can
+        // produce either "Not a valid object name" or "could not get object
+        // info".
+
+        // To detect if we have a submodule, use `git ls-tree`. If the path
+        // is a submodule, we'll get a "160000" mode mask with type "commit".
+
+        list($sub_err, $sub_stdout) = $repository->execLocalCommand(
+          'ls-tree %s -- %s',
+          $commit,
+          $path);
+        if (!$sub_err) {
+          // If the path failed "cat-file" but "ls-tree" worked, we assume it
+          // must be a submodule. If it is, the output will look something
+          // like this:
+          //
+          //   160000 commit <hash> <path>
+          //
+          // We make sure it has the 160000 mode mask to confirm that it's
+          // definitely a submodule.
+          $mode = (int)$sub_stdout;
+          if ($mode & 160000) {
+            $submodule_reason = DiffusionBrowseResultSet::REASON_IS_SUBMODULE;
+            $result
+              ->setReasonForEmptyResultSet($submodule_reason);
+            return $result;
+          }
+        }
+
         $stderr = $e->getStderr();
         if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
           // Grab two logs, since the first one is when the object was deleted.
