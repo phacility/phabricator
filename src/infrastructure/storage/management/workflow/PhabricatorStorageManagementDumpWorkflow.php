@@ -187,6 +187,22 @@ final class PhabricatorStorageManagementDumpWorkflow
     $argv[] = '-h';
     $argv[] = $host;
 
+    // MySQL's default "max_allowed_packet" setting is fairly conservative
+    // (16MB). If we try to dump a row which is larger than this limit, the
+    // dump will fail.
+
+    // We encourage users to increase this limit during setup, but modifying
+    // the "[mysqld]" section of the configuration file (instead of
+    // "[mysqldump]" section) won't apply to "mysqldump" and we can not easily
+    // detect what the "mysqldump" setting is.
+
+    // Since no user would ever reasonably want a dump to fail because a row
+    // was too large, just manually force this setting to the largest supported
+    // value.
+
+    $argv[] = '--max-allowed-packet';
+    $argv[] = '1G';
+
     if ($port) {
       $argv[] = '--port';
       $argv[] = $port;
