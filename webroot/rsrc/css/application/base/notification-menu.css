@@ -3,8 +3,9 @@
  */
 
 .phabricator-notification-menu {
-  background: #fff;
-  font-size: {$smallestfontsize};
+  background: {$page.content};
+  font-size: {$smallerfontsize};
+  line-height: 18px;
   word-wrap: break-word;
   overflow-y: auto;
   box-shadow: {$dropshadow};
@@ -12,9 +13,8 @@
   border-radius: 3px;
 }
 
-.phabricator-notification .phabricator-notification-date {
-  margin-left: 8px;
-  color: {$lightgreytext};
+.phabricator-notification {
+  padding: 8px 12px;
 }
 
 .phabricator-notification-menu-loading {
@@ -44,11 +44,7 @@
 }
 
 .phabricator-notification-list .phabricator-notification {
-  padding: 10px 4px;
-}
-
-.phabricator-notification {
-  padding: 6px 8px;
+  padding: 8px;
 }
 
 .phabricator-notification-menu .phabricator-notification {
@@ -56,7 +52,7 @@
 }
 
 .device-desktop .phabricator-notification-menu .phabricator-notification:hover {
-  background: {$hoverblue};
+  background: {$lightgreybackground};
 }
 
 .device-desktop .phabricator-notification-menu
@@ -65,7 +61,7 @@
 }
 
 .phabricator-notification + .phabricator-notification {
-  border-top: 1px solid {$hoverborder};
+  border-top: 1px solid {$thinblueborder};
 }
 
 .no-notifications {
@@ -81,9 +77,34 @@
   color: {$lightgreytext};
 }
 
+.phabricator-notification-foot {
+  color: {$lightgreytext};
+  font-size: {$smallestfontsize};
+  line-height: 18px;
+  position: relative;
+}
+
+.phabricator-notification-unread .phabricator-notification-foot {
+  padding-left: 10px;
+}
+
+.phabricator-notification-foot .phabricator-notification-status {
+  display: none;
+}
+
+.phabricator-notification-unread .phabricator-notification-foot
+  .phabricator-notification-status {
+    font-size: 7px;
+    color: {$lightgreytext};
+    position: absolute;
+    display: inline-block;
+    top: 6px;
+    left: 0;
+}
+
 .phabricator-notification-header {
   font-weight: bold;
-  padding: 10px 8px;
+  padding: 10px 12px;
   font-size: {$smallerfontsize};
   border-bottom: 1px solid {$thinblueborder};
 }

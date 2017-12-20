@@ -338,7 +338,7 @@ final class DiffusionRepositoryEditEngine
         ->setIsCopyable(true)
         ->setDescription(pht('Track only these branches.'))
         ->setConduitDescription(pht('Set the tracked branches.'))
-        ->setConduitTypeDescription(pht('New tracked branchs.'))
+        ->setConduitTypeDescription(pht('New tracked branches.'))
         ->setValue($track_value),
       id(new PhabricatorTextAreaEditField())
         ->setIsStringList(true)
@@ -349,7 +349,7 @@ final class DiffusionRepositoryEditEngine
         ->setIsCopyable(true)
         ->setDescription(pht('Autoclose commits on only these branches.'))
         ->setConduitDescription(pht('Set the autoclose branches.'))
-        ->setConduitTypeDescription(pht('New default tracked branchs.'))
+        ->setConduitTypeDescription(pht('New default tracked branches.'))
         ->setValue($autoclose_value),
       id(new PhabricatorTextEditField())
         ->setKey('importOnly')
@@ -396,7 +396,7 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(
           pht('Change symbol languages for this repository.'))
         ->setConduitTypeDescription(
-          pht('New symbol langauges.'))
+          pht('New symbol languages.'))
         ->setValue($object->getSymbolLanguages()),
       id(new PhabricatorDatasourceEditField())
         ->setKey('symbolRepositoryPHIDs')

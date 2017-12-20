@@ -116,7 +116,7 @@ Restart nginx after making your edits, then continue to "Setup" below.
 
 = Webserver: Configuring lighttpd =
 
-NOTE: Follow these instructions to use lighttpd. To use Apache or niginx, scroll
+NOTE: Follow these instructions to use lighttpd. To use Apache or nginx, scroll
 up to their sections.
 
 For lighttpd, add a section like this to your lighttpd.conf:
@@ -138,10 +138,18 @@ server.modules list:
 
 Finally, you should run the following commands to enable php support:
 
-  $ sudo apt-get install php5-cgi  # for ubuntu; other distros should be similar
+  $ sudo apt-get install php5-cgi  # for Ubuntu; other distros should be similar
   $ sudo lighty-enable-mod fastcgi-php
 
 Restart lighttpd after making your edits, then continue below.
+
+
+Load Balancer Health Checks
+===========================
+
+If you're using a load balancer in front of your webserver, you can configure
+it to perform health checks using the path `/status/`.
+
 
 = Setup =
 

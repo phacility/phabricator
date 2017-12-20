@@ -19,6 +19,7 @@ final class PhabricatorUser
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorConduitResultInterface {
 
   const SESSION_TABLE = 'phabricator_session';
@@ -406,7 +407,7 @@ final class PhabricatorUser
     $token = substr($token, $breach_prelen + self::CSRF_SALT_LENGTH);
 
     // When the user posts a form, we check that it contains a valid CSRF token.
-    // Tokens cycle each hour (every CSRF_CYLCE_FREQUENCY seconds) and we accept
+    // Tokens cycle each hour (every CSRF_CYCLE_FREQUENCY seconds) and we accept
     // either the current token, the next token (users can submit a "future"
     // token if you have two web frontends that have some clock skew) or any of
     // the last 6 tokens. This means that pages are valid for up to 7 hours.
@@ -1179,7 +1180,7 @@ final class PhabricatorUser
   /**
    * Get a scalar string identifying this user.
    *
-   * This is similar to using the PHID, but distinguishes between ominpotent
+   * This is similar to using the PHID, but distinguishes between omnipotent
    * and public users explicitly. This allows safe construction of cache keys
    * or cache buckets which do not conflate public and omnipotent users.
    *
@@ -1389,7 +1390,7 @@ final class PhabricatorUser
       return '/settings/panel/ssh/';
     } else {
       // Otherwise, take them to the administrative panel for this user.
-      return '/settings/'.$this->getID().'/panel/ssh/';
+      return '/settings/user/'.$this->getUsername().'/page/ssh/';
     }
   }
 
@@ -1434,6 +1435,14 @@ final class PhabricatorUser
   }
 
 
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhabricatorUserFerretEngine();
+  }
+
+
 /* -(  PhabricatorConduitResultInterface  )---------------------------------- */
 
 
@@ -1450,7 +1459,7 @@ final class PhabricatorUser
       id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('roles')
         ->setType('list<string>')
-        ->setDescription(pht('List of acccount roles.')),
+        ->setDescription(pht('List of account roles.')),
     );
   }
 

@@ -10,7 +10,8 @@ final class DifferentialRevisionAcceptTransaction
     return pht("Accept Revision \xE2\x9C\x94");
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('These changes will be approved.');
   }
 
@@ -103,7 +104,7 @@ final class DifferentialRevisionAcceptTransaction
         if ($reviewer->isAccepted($diff_phid)) {
           // If a reviewer is already in a full "accepted" state, don't
           // include that reviewer as an option unless we're listing all
-          // reviwers, including reviewers who have already accepted.
+          // reviewers, including reviewers who have already accepted.
           continue;
         }
       }
@@ -159,6 +160,11 @@ final class DifferentialRevisionAcceptTransaction
         pht(
           'You can not accept this revision because it has already been '.
           'closed. Only open revisions can be accepted.'));
+    }
+
+    if ($object->isDraft()) {
+      throw new Exception(
+        pht('You can not accept a draft revision.'));
     }
 
     $config_key = 'differential.allow-self-accept';

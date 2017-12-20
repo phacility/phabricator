@@ -126,7 +126,7 @@ match the content. You can use these together to express conditions like
 For example, if you want to match revisions which add or remove calls to a
 "muffinize" function, //but only in JS files//, you can set the value to
 `["/\\.js$/", "/muffinize/"]` or similar. This condition is satisfied only
-when the filename matches the first expression and the conent matches the
+when the filename matches the first expression and the content matches the
 second expression.
 
 **Another Herald rule**: you can create Herald rules which depend on other

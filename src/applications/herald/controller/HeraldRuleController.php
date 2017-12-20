@@ -191,7 +191,7 @@ final class HeraldRuleController extends HeraldController {
             'a',
             array(
               'href' => '#',
-              'class' => 'button green',
+              'class' => 'button button-green',
               'sigil' => 'create-condition',
               'mustcapture' => true,
             ),
@@ -212,7 +212,7 @@ final class HeraldRuleController extends HeraldController {
             'a',
             array(
               'href' => '#',
-              'class' => 'button green',
+              'class' => 'button button-green',
               'sigil' => 'create-action',
               'mustcapture' => true,
             ),
@@ -238,9 +238,9 @@ final class HeraldRuleController extends HeraldController {
         ? pht('Edit Herald Rule: %s', $rule->getName())
         : pht('Create Herald Rule: %s', idx($content_type_map, $content_type));
 
-    $icon = $rule->getID() ? 'fa-pencil' : 'fa-plus-square';
-
     $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setFormErrors($errors)
       ->setForm($form);
 
@@ -249,12 +249,7 @@ final class HeraldRuleController extends HeraldController {
       ->addTextCrumb($title)
       ->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-plus-square');
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter($form_box);
 
     return $this->newPage()

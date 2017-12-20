@@ -124,7 +124,7 @@ final class PhrequentTimeBlock extends Phobject {
               }
             } else {
               // Here, we've prematurely ended a deeper stratum. Merge higher
-              // stata. This looks like this:
+              // strata. This looks like this:
               //
               //                V
               //                V

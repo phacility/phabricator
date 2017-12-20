@@ -21,12 +21,12 @@ final class PhabricatorUIConfigOptions
 
   public function getOptions() {
     $options = array(
-      'blindigo' => 'blindigo',
-      'red' => 'red',
-      'blue' => 'blue',
-      'green' => 'green',
-      'indigo' => 'indigo',
-      'dark' => 'dark',
+      'blindigo' => pht('Blindigo'),
+      'red' => pht('Red'),
+      'blue' => pht('Blue'),
+      'green' => pht('Green'),
+      'indigo' => pht('Indigo'),
+      'dark' => pht('Dark'),
     );
 
     $example = <<<EOJSON
@@ -46,6 +46,7 @@ final class PhabricatorUIConfigOptions
 EOJSON;
 
     $logo_type = 'custom:PhabricatorCustomLogoConfigType';
+    $footer_type = 'custom:PhabricatorCustomUIFooterConfigType';
 
     return array(
       $this->newOption('ui.header-color', 'enum', 'blindigo')
@@ -63,7 +64,7 @@ EOJSON;
             "Phabricator logo in the site header.\n\n".
             "  - **Wordmark**: Choose new text to display next to the logo. ".
             "By default, the header displays //Phabricator//.\n\n")),
-      $this->newOption('ui.footer-items', 'list<wild>', array())
+      $this->newOption('ui.footer-items', $footer_type, array())
         ->setSummary(
           pht(
             'Allows you to add footer links on most pages.'))

@@ -58,7 +58,10 @@ abstract class DiffusionView extends AphrontView {
       id(new PHUIIconView())->setIcon('fa-history bluegrey'));
   }
 
-  final public function linkBrowse($path, array $details = array()) {
+  final public function linkBrowse(
+    $path,
+    array $details = array(),
+    $button = false) {
     require_celerity_resource('diffusion-icons-css');
     Javelin::initBehavior('phabricator-tooltips');
 
@@ -111,6 +114,15 @@ abstract class DiffusionView extends AphrontView {
       );
     }
 
+    if ($button) {
+      return id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-code')
+        ->setHref($href)
+        ->setToolTip(pht('Browse'))
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE);
+    }
+
     return javelin_tag(
       'a',
       array(
@@ -144,6 +156,19 @@ abstract class DiffusionView extends AphrontView {
       $commit_name);
   }
 
+  final public static function linkDetail(
+    PhabricatorRepository $repository,
+    $commit,
+    $detail) {
+
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $repository->getCommitURI($commit),
+      ),
+      $detail);
+  }
+
   final public static function linkRevision($id) {
     if (!$id) {
       return null;
@@ -168,7 +193,7 @@ abstract class DiffusionView extends AphrontView {
           'sigil' => 'has-tooltip',
           'meta'  => array(
             'tip'   => $email->getAddress(),
-            'align' => 'E',
+            'align' => 'S',
             'size'  => 'auto',
           ),
         ),
@@ -177,30 +202,37 @@ abstract class DiffusionView extends AphrontView {
     return hsprintf('%s', $name);
   }
 
-  final protected function renderBuildable(HarbormasterBuildable $buildable) {
+  final protected function renderBuildable(
+    HarbormasterBuildable $buildable,
+    $type = null) {
     $status = $buildable->getBuildableStatus();
+    Javelin::initBehavior('phabricator-tooltips');
 
     $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
     $color = HarbormasterBuildable::getBuildableStatusColor($status);
     $name = HarbormasterBuildable::getBuildableStatusName($status);
 
-    $icon_view = id(new PHUIIconView())
-      ->setIcon($icon.' '.$color);
+    if ($type == 'button') {
+      return id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText($name)
+        ->setIcon($icon)
+        ->setColor($color)
+        ->setHref('/'.$buildable->getMonogram())
+        ->addClass('mmr')
+        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
+        ->addClass('diffusion-list-build-status');
+    }
 
-    $tooltip_view = javelin_tag(
-      'span',
-      array(
-        'sigil' => 'has-tooltip',
-        'meta' => array('tip' => $name),
-      ),
-      $icon_view);
+    return id(new PHUIIconView())
+      ->setIcon($icon.' '.$color)
+      ->addSigil('has-tooltip')
+      ->setHref('/'.$buildable->getMonogram())
+      ->setMetadata(
+        array(
+          'tip' => $name,
+        ));
 
-    Javelin::initBehavior('phabricator-tooltips');
-
-    return phutil_tag(
-      'a',
-      array('href' => '/'.$buildable->getMonogram()),
-      $tooltip_view);
   }
 
   final protected function loadBuildables(array $commits) {

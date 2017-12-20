@@ -22,27 +22,40 @@ final class DiffusionCommitController extends DiffusionController {
 
     $drequest = $this->getDiffusionRequest();
     $viewer = $request->getUser();
+    $repository = $drequest->getRepository();
+    $commit_identifier = $drequest->getCommit();
+
+    // If this page is being accessed via "/source/xyz/commit/...", redirect
+    // to the canonical URI.
+    $has_callsign = strlen($request->getURIData('repositoryCallsign'));
+    $has_id = strlen($request->getURIData('repositoryID'));
+    if (!$has_callsign && !$has_id) {
+      $canonical_uri = $repository->getCommitURI($commit_identifier);
+      return id(new AphrontRedirectResponse())
+        ->setURI($canonical_uri);
+    }
 
     if ($request->getStr('diff')) {
       return $this->buildRawDiffResponse($drequest);
     }
 
-    $repository = $drequest->getRepository();
-
-    $commit = id(new DiffusionCommitQuery())
+    $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withRepository($repository)
-      ->withIdentifiers(array($drequest->getCommit()))
+      ->withIdentifiers(array($commit_identifier))
       ->needCommitData(true)
       ->needAuditRequests(true)
-      ->executeOne();
+      ->setLimit(100)
+      ->execute();
+
+    $multiple_results = count($commits) > 1;
 
     $crumbs = $this->buildCrumbs(array(
-      'commit' => true,
+      'commit' => !$multiple_results,
     ));
     $crumbs->setBorder(true);
 
-    if (!$commit) {
+    if (!$commits) {
       if (!$this->getCommitExists()) {
         return new Aphront404Response();
       }
@@ -60,7 +73,40 @@ final class DiffusionCommitController extends DiffusionController {
         ->setTitle($title)
         ->setCrumbs($crumbs)
         ->appendChild($error);
+    } else if ($multiple_results) {
 
+      $warning_message =
+        pht(
+          'The identifier %s is ambiguous and matches more than one commit.',
+          phutil_tag(
+            'strong',
+            array(),
+            $commit_identifier));
+
+      $error = id(new PHUIInfoView())
+        ->setTitle(pht('Ambiguous Commit'))
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->appendChild($warning_message);
+
+      $list = id(new DiffusionCommitListView())
+        ->setViewer($viewer)
+        ->setCommits($commits)
+        ->setNoDataString(pht('No recent commits.'));
+
+      $crumbs->addTextCrumb(pht('Ambiguous Commit'));
+
+      $matched_commits = id(new PHUITwoColumnView())
+        ->setFooter(array(
+          $error,
+          $list,
+        ));
+
+      return $this->newPage()
+        ->setTitle(pht('Ambiguous Commit'))
+        ->setCrumbs($crumbs)
+        ->appendChild($matched_commits);
+    } else {
+      $commit = head($commits);
     }
 
     $audit_requests = $commit->getAudits();
@@ -428,7 +474,8 @@ final class DiffusionCommitController extends DiffusionController {
     $repository = $drequest->getRepository();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($this->getRequest()->getUser());
+      ->setUser($this->getRequest()->getUser())
+      ->setObject($commit);
 
     $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($commit_phid))
@@ -469,7 +516,7 @@ final class DiffusionCommitController extends DiffusionController {
     // chains of events). This should be rare, but does not indicate a bug
     // or data issue.
 
-    // NOTE: We never query push logs in SVN because the commiter is always
+    // NOTE: We never query push logs in SVN because the committer is always
     // the pusher and the commit time is always the push time; the push log
     // is redundant and we save a query by skipping it.
 
@@ -946,7 +993,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     foreach ($changesets as $changeset_id => $changeset) {
       $path = $changeset->getFilename();
-      $anchor = substr(md5($path), 0, 8);
+      $anchor = $changeset->getAnchorName();
 
       $history_link = $diffusion_view->linkHistory($path);
       $browse_link = $diffusion_view->linkBrowse(

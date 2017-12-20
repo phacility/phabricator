@@ -8,6 +8,7 @@ final class ProjectBoardTaskCard extends Phobject {
   private $owner;
   private $canEdit;
   private $coverImageFile;
+  private $hideArchivedProjects;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -33,6 +34,15 @@ final class ProjectBoardTaskCard extends Phobject {
 
   public function getCoverImageFile() {
     return $this->coverImageFile;
+  }
+
+  public function setHideArchivedProjects($hide_archived_projects) {
+    $this->hideArchivedProjects = $hide_archived_projects;
+    return $this;
+  }
+
+  public function getHideArchivedProjects() {
+    return $this->hideArchivedProjects;
   }
 
   public function setTask(ManiphestTask $task) {
@@ -126,10 +136,12 @@ final class ProjectBoardTaskCard extends Phobject {
     $project_handles = $this->getProjectHandles();
 
     // Remove any archived projects from the list.
-    if ($project_handles) {
-      foreach ($project_handles as $key => $handle) {
-        if ($handle->getStatus() == PhabricatorObjectHandle::STATUS_CLOSED) {
-          unset($project_handles[$key]);
+    if ($this->hideArchivedProjects) {
+      if ($project_handles) {
+        foreach ($project_handles as $key => $handle) {
+          if ($handle->getStatus() == PhabricatorObjectHandle::STATUS_CLOSED) {
+            unset($project_handles[$key]);
+          }
         }
       }
     }

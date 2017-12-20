@@ -118,6 +118,8 @@ final class DifferentialDiffViewController extends DifferentialController {
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
 
+    $this->buildPackageMaps($changesets);
+
     $table_of_contents = $this->buildTableOfContents(
       $changesets,
       $changesets,
@@ -177,7 +179,7 @@ final class DifferentialDiffViewController extends DifferentialController {
     $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withAuthors(array($viewer->getPHID()))
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withIsOpen(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

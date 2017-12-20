@@ -88,11 +88,11 @@ a.jx-tokenizer-token:hover {
 
 a.jx-tokenizer-token-function {
   border-color: {$sh-lightgreyborder};
-  background: #fff;
+  background: {$page.content};
 }
 
 a.jx-tokenizer-token-function:hover {
-  background: #fff;
+  background: {$page.content};
 }
 
 a.jx-tokenizer-token-disabled {
@@ -181,4 +181,5 @@ a.jx-tokenizer-token-invalid:hover {
 .button.tokenizer-browse-button .phui-icon-view {
   top: 7px;
   left: 9px;
+  position: absolute;
 }

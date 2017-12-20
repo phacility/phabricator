@@ -9,7 +9,13 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
   protected function executeChecks() {
     $refs = PhabricatorDatabaseRef::getActiveDatabaseRefs();
     foreach ($refs as $ref) {
-      $this->executeRefChecks($ref);
+      try {
+        $this->executeRefChecks($ref);
+      } catch (AphrontConnectionQueryException $ex) {
+        // If we're unable to connect to a host, just skip the checks for it.
+        // This can happen if we're restarting during a cluster incident. See
+        // T12966 for discussion.
+      }
     }
   }
 

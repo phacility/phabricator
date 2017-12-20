@@ -5,7 +5,7 @@
 .phui-big-info-view {
   padding: 64px 32px;
   margin: 16px 4px;
-  background-color: {$sh-greybackground};
+  background-color: {$page.sidenav};
   text-align: center;
 }
 
@@ -34,4 +34,11 @@
 
 .phui-big-info-button + .phui-big-info-button {
   margin-left: 12px;
+}
+
+.phui-big-info-view .phui-big-info-image {
+  height: 64px;
+  width: 64px;
+  margin: 0 auto;
+  padding-bottom: 12px;
 }

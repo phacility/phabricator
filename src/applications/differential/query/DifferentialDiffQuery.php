@@ -6,6 +6,7 @@ final class DifferentialDiffQuery
   private $ids;
   private $phids;
   private $revisionIDs;
+  private $revisionPHIDs;
   private $commitPHIDs;
   private $hasRevision;
 
@@ -24,6 +25,11 @@ final class DifferentialDiffQuery
 
   public function withRevisionIDs(array $revision_ids) {
     $this->revisionIDs = $revision_ids;
+    return $this;
+  }
+
+  public function withRevisionPHIDs(array $revision_phids) {
+    $this->revisionPHIDs = $revision_phids;
     return $this;
   }
 
@@ -158,6 +164,25 @@ final class DifferentialDiffQuery
           $conn,
           'revisionID IS NULL');
       }
+    }
+
+    if ($this->revisionPHIDs !== null) {
+      $viewer = $this->getViewer();
+
+      $revisions = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->setParentQuery($this)
+        ->withPHIDs($this->revisionPHIDs)
+        ->execute();
+      $revision_ids = mpull($revisions, 'getID');
+      if (!$revision_ids) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $where[] = qsprintf(
+        $conn,
+        'revisionID IN (%Ls)',
+        $revision_ids);
     }
 
     return $where;

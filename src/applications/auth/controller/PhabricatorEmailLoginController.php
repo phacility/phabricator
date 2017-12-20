@@ -71,8 +71,11 @@ final class PhabricatorEmailLoginController
             $target_email->getUserPHID());
           if ($verified_addresses) {
             $errors[] = pht(
-              'That email address is not verified. You can only send '.
-              'password reset links to a verified address.');
+              'That email address is not verified, but the account it is '.
+              'connected to has at least one other verified address. When an '.
+              'account has at least one verified address, you can only send '.
+              'password reset links to one of the verified addresses. Try '.
+              'a verified address instead.');
             $e_email = pht('Unverified');
           }
         }
@@ -114,7 +117,7 @@ final class PhabricatorEmailLoginController
             ->setTitle(pht('Check Your Email'))
             ->setShortTitle(pht('Email Sent'))
             ->appendParagraph(
-              pht('An email has been sent with a link you can use to login.'))
+              pht('An email has been sent with a link you can use to log in.'))
             ->addCancelButton('/', pht('Done'));
         }
       }

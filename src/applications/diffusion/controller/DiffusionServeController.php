@@ -768,7 +768,10 @@ final class DiffusionServeController extends DiffusionController {
       $input = strlen($input)."\n".$input."0\n";
     }
 
-    $command = csprintf('%s serve --stdio', $bin);
+    $command = csprintf(
+      '%s -R %s serve --stdio',
+      $bin,
+      $repository->getLocalPath());
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     list($err, $stdout, $stderr) = id(new ExecFuture('%C', $command))

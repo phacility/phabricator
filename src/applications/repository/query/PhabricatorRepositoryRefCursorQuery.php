@@ -9,6 +9,7 @@ final class PhabricatorRepositoryRefCursorQuery
   private $refTypes;
   private $refNames;
   private $datasourceQuery;
+  private $needPositions;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -40,6 +41,11 @@ final class PhabricatorRepositoryRefCursorQuery
     return $this;
   }
 
+  public function needPositions($need) {
+    $this->needPositions = $need;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorRepositoryRefCursor();
   }
@@ -66,6 +72,22 @@ final class PhabricatorRepositoryRefCursorQuery
         continue;
       }
       $ref->attachRepository($repository);
+    }
+
+    if (!$refs) {
+      return $refs;
+    }
+
+    if ($this->needPositions) {
+      $positions = id(new PhabricatorRepositoryRefPosition())->loadAllWhere(
+        'cursorID IN (%Ld)',
+        mpull($refs, 'getID'));
+      $positions = mgroup($positions, 'getCursorID');
+
+      foreach ($refs as $key => $ref) {
+        $ref_positions = idx($positions, $ref->getID(), array());
+        $ref->attachPositions($ref_positions);
+      }
     }
 
     return $refs;

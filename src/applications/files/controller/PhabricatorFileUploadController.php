@@ -90,17 +90,12 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       ->setShowIfSupportedID($support_id);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('File'))
+      ->setHeaderText($title)
       ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-upload');
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter(array(
         $form_box,
         $global_upload,

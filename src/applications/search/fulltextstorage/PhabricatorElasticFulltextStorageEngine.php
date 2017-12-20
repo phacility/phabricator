@@ -105,42 +105,6 @@ class PhabricatorElasticFulltextStorageEngine
     $this->executeRequest($host, "/{$type}/{$phid}/", $spec, 'PUT');
   }
 
-  public function reconstructDocument($phid) {
-    $type = phid_get_type($phid);
-    $host = $this->getHostForRead();
-    $response = $this->executeRequest($host, "/{$type}/{$phid}", array());
-
-    if (empty($response['exists'])) {
-      return null;
-    }
-
-    $hit = $response['_source'];
-
-    $doc = new PhabricatorSearchAbstractDocument();
-    $doc->setPHID($phid);
-    $doc->setDocumentType($response['_type']);
-    $doc->setDocumentTitle($hit['title']);
-    $doc->setDocumentCreated($hit['dateCreated']);
-    $doc->setDocumentModified($hit[$this->getTimestampField()]);
-
-    foreach ($hit['field'] as $fdef) {
-      $field_type = $fdef['type'];
-      $doc->addField($field_type, $hit[$field_type], $fdef['aux']);
-    }
-
-    foreach ($hit['relationship'] as $rtype => $rships) {
-      foreach ($rships as $rship) {
-        $doc->addRelationship(
-          $rtype,
-          $rship['phid'],
-          $rship['phidType'],
-          $rship['when']);
-      }
-    }
-
-    return $doc;
-  }
-
   private function buildSpec(PhabricatorSavedQuery $query) {
     $q = new PhabricatorElasticsearchQueryBuilder('bool');
     $query_string = $query->getParameter('query');

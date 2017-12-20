@@ -13,7 +13,7 @@ final class DiffusionRepositoryEditUpdateController
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $panel_uri = id(new DiffusionRepositoryStatusManagementPanel())
+    $panel_uri = id(new DiffusionRepositoryBasicsManagementPanel())
       ->setRepository($repository)
       ->getPanelURI();
 

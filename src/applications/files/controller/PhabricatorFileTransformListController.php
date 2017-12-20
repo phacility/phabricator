@@ -68,7 +68,7 @@ final class PhabricatorFileTransformListController
         $view_link = phutil_tag(
           'a',
           array(
-            'class' => 'small grey button',
+            'class' => 'small button button-grey',
             'href' => $view_href,
           ),
           $view_text);

@@ -50,8 +50,9 @@ final class PhortuneSubscriptionProduct
   public function didPurchaseProduct(
     PhortuneProduct $product,
     PhortunePurchase $purchase) {
-    // TODO: Callback the subscription.
-    return;
+    return $this->getSubscription()->didPurchaseProduct(
+      $product,
+      $purchase);
   }
 
   public function didRefundProduct(

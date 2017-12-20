@@ -71,7 +71,7 @@ final class DifferentialChangeType extends Phobject {
       self::FILE_TEXT => 'fa-file-text-o',
       self::FILE_IMAGE => 'fa-file-image-o',
       self::FILE_BINARY => 'fa-file',
-      self::FILE_DIRECTORY => 'fa-folder-open',
+      self::FILE_DIRECTORY => 'fa-folder',
       self::FILE_SYMLINK => 'fa-link',
       self::FILE_DELETED => 'fa-file',
       self::FILE_NORMAL => 'fa-file-text-o',
@@ -83,14 +83,14 @@ final class DifferentialChangeType extends Phobject {
 
   public static function getIconColorForFileType($type) {
     static $icons = array(
-      self::FILE_TEXT => 'black',
-      self::FILE_IMAGE => 'black',
+      self::FILE_TEXT => 'bluetext',
+      self::FILE_IMAGE => 'bluetext',
       self::FILE_BINARY => 'green',
-      self::FILE_DIRECTORY => 'blue',
-      self::FILE_SYMLINK => 'blue',
+      self::FILE_DIRECTORY => 'bluetext',
+      self::FILE_SYMLINK => 'bluetext',
       self::FILE_DELETED => 'red',
-      self::FILE_NORMAL => 'black',
-      self::FILE_SUBMODULE => 'blue',
+      self::FILE_NORMAL => 'bluetext',
+      self::FILE_SUBMODULE => 'bluetext',
     );
 
     return idx($icons, $type, 'black');

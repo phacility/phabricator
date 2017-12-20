@@ -23,7 +23,7 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
   }
 
   public function getFlavorText() {
-    return pht('Login with Phabricator');
+    return pht('Log In with Phabricator');
   }
 
   public function getApplicationGroup() {

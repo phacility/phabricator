@@ -10,7 +10,8 @@ final class DifferentialRevisionCommandeerTransaction
     return pht('Commandeer Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('You will take control of this revision and become its author.');
   }
 
@@ -63,6 +64,11 @@ final class DifferentialRevisionCommandeerTransaction
         pht(
           'You can not commandeer this revision because it has already '.
           'been closed. You can only commandeer open revisions.'));
+    }
+
+    if ($object->isDraft()) {
+      throw new Exception(
+        pht('You can not commandeer a draft revision.'));
     }
 
     if ($this->isViewerRevisionAuthor($object, $viewer)) {

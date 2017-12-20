@@ -5,20 +5,20 @@
 .config-option-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid {$lightgreyborder};
-  background: #fff;
+  border: none;
+  background: {$page.content};
 }
 
 .config-option-table th,
 .config-option-table td {
-  padding: 4px 12px;
-  border: 1px solid {$lightgreyborder};
+  padding: 8px 12px;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .config-option-table th {
   background: {$lightgreybackground};
   color: {$bluetext};
-  text-align: right;
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -37,20 +37,22 @@
 .config-option-table .column-labels th {
   font-weight: bold;
   color: {$bluetext};
-  text-align: center;
-  background: {$greybackground};
+  background: {$lightgreybackground};
+  border-right: 1px solid {$thinblueborder};
 }
 
 .config-options-current-value {
-  padding: 0 8px 6px;
-  white-space: pre-wrap;
+  white-space: nowrap;
+  width: 200px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.config-options-current-value span {
-  color: {$greytext};
+.config-options-current-value.violet {
+  color: {$violet};
 }
 
 .config-options-effective-value,
 .config-option-table .config-options-effective-value th {
-  background: {$lightyellow};
+  background: {$gentle.highlight};
 }

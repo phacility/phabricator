@@ -80,11 +80,11 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
       $dialog->addCancelButton($this->getSettingsURI());
     } else {
       if ($this->shouldAllowRegistration()) {
-        $dialog->setTitle(pht('Login or Register with LDAP'));
-        $dialog->addSubmitButton(pht('Login or Register'));
+        $dialog->setTitle(pht('Log In or Register with LDAP'));
+        $dialog->addSubmitButton(pht('Log In or Register'));
       } else {
-        $dialog->setTitle(pht('Login with LDAP'));
-        $dialog->addSubmitButton(pht('Login'));
+        $dialog->setTitle(pht('Log In with LDAP'));
+        $dialog->addSubmitButton(pht('Log In'));
       }
       if ($mode == 'login') {
         $dialog->addCancelButton($this->getStartURI());
@@ -192,6 +192,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
   const KEY_VERSION                 = 'ldap:version';
   const KEY_REFERRALS               = 'ldap:referrals';
   const KEY_START_TLS               = 'ldap:start-tls';
+  // TODO: This is misspelled! See T13005.
   const KEY_ANONYMOUS_USERNAME      = 'ldap:anoynmous-username';
   const KEY_ANONYMOUS_PASSWORD      = 'ldap:anonymous-password';
   const KEY_ALWAYS_SEARCH           = 'ldap:always-search';
@@ -315,7 +316,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
         "credentials (which is more complicated, but more powerful).\n\n".
         "For many installs, direct binding is sufficient. However, you may ".
         "want to search first if:\n\n".
-        "  - You want users to be able to login with either their username ".
+        "  - You want users to be able to log in with either their username ".
         "    or their email address.\n".
         "  - The login/username is not part of the distinguished name in ".
         "    your LDAP records.\n".
@@ -344,16 +345,16 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
         "`sn`, which will work the same way direct binding works:\n\n".
         "  lang=text,name=Simple Example\n".
         "  sn\n\n".
-        "A slightly more complex configuration might let the user login with ".
+        "A slightly more complex configuration might let the user log in with ".
         "either their login name or email address:\n\n".
         "  lang=text,name=Match Several Attributes\n".
         "  mail\n".
         "  sn\n\n".
         "If your LDAP directory is more complex, or you want to perform ".
         "sophisticated filtering, you can use more complex queries. Depending ".
-        "on your directory structure, this example might allow users to login ".
-        "with either their email address or username, but only if they're in ".
-        "specific departments:\n\n".
+        "on your directory structure, this example might allow users to log ".
+        "in with either their email address or username, but only if they're ".
+        "in specific departments:\n\n".
         "  lang=text,name=Complex Example\n".
         "  (&(mail=\${login})(|(departmentNumber=1)(departmentNumber=2)))\n".
         "  (&(sn=\${login})(|(departmentNumber=1)(departmentNumber=2)))\n\n".

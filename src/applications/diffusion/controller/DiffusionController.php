@@ -44,6 +44,7 @@ abstract class DiffusionController extends PhabricatorController {
   private function loadContext(array $options) {
     $request = $this->getRequest();
     $viewer = $this->getViewer();
+    require_celerity_resource('diffusion-repository-css');
 
     $identifier = $this->getRepositoryIdentifierFromRequest($request);
 
@@ -122,10 +123,10 @@ abstract class DiffusionController extends PhabricatorController {
   private function buildCrumbList(array $spec = array()) {
 
     $spec = $spec + array(
-      'commit'  => null,
-      'tags'    => null,
-      'branches'    => null,
-      'view'    => null,
+      'commit' => null,
+      'tags' => null,
+      'branches' => null,
+      'view' => null,
     );
 
     $crumb_list = array();
@@ -147,7 +148,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     if (!$spec['commit'] && !$spec['tags'] && !$spec['branches']) {
       $branch_name = $drequest->getBranch();
-      if ($branch_name) {
+      if (strlen($branch_name)) {
         $repository_name .= ' ('.$branch_name.')';
       }
     }
@@ -203,6 +204,9 @@ abstract class DiffusionController extends PhabricatorController {
     switch ($view) {
       case 'history':
         $view_name = pht('History');
+        break;
+      case 'graph':
+        $view_name = pht('Graph');
         break;
       case 'browse':
         $view_name = pht('Browse');
@@ -311,7 +315,7 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected function renderStatusMessage($title, $body) {
     return id(new PHUIInfoView())
-      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
       ->setTitle($title)
       ->setFlush(true)
       ->appendChild($body);
@@ -333,6 +337,39 @@ abstract class DiffusionController extends PhabricatorController {
     $tag = id(new PHUITagView())
       ->setName($commit)
       ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
+      ->setType(PHUITagView::TYPE_SHADE);
+
+    return $tag;
+  }
+
+  protected function renderBranchTag(DiffusionRequest $drequest) {
+    $branch = $drequest->getBranch();
+    $branch = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(24)
+      ->truncateString($branch);
+
+    $tag = id(new PHUITagView())
+      ->setName($branch)
+      ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
+      ->setType(PHUITagView::TYPE_OUTLINE)
+      ->addClass('diffusion-header-branch-tag');
+
+    return $tag;
+  }
+
+  protected function renderSymbolicCommit(DiffusionRequest $drequest) {
+    $symbolic_tag = $drequest->getSymbolicCommit();
+    $symbolic_tag = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(24)
+      ->truncateString($symbolic_tag);
+
+    $tag = id(new PHUITagView())
+      ->setName($symbolic_tag)
+      ->setIcon('fa-tag')
+      ->setColor(PHUITagView::COLOR_INDIGO)
+      ->setBorder(PHUITagView::BORDER_NONE)
       ->setType(PHUITagView::TYPE_SHADE);
 
     return $tag;
@@ -403,6 +440,128 @@ abstract class DiffusionController extends PhabricatorController {
       ->setUser($this->getViewer())
       ->setPath($readme_path)
       ->setContent($readme_corpus);
+  }
+
+  protected function renderSearchForm($path = '/') {
+    $drequest = $this->getDiffusionRequest();
+    $viewer = $this->getViewer();
+    switch ($drequest->getRepository()->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        return null;
+    }
+
+    $search_term = $this->getRequest()->getStr('grep');
+    require_celerity_resource('diffusion-icons-css');
+    require_celerity_resource('diffusion-css');
+
+    $href = $drequest->generateURI(array(
+      'action' => 'browse',
+      'path' => $path,
+    ));
+
+    $bar = javelin_tag(
+      'input',
+      array(
+        'type' => 'text',
+        'id' => 'diffusion-search-input',
+        'name' => 'grep',
+        'class' => 'diffusion-search-input',
+        'sigil' => 'diffusion-search-input',
+        'placeholder' => pht('Pattern Search'),
+        'value' => $search_term,
+      ));
+
+    $form = phabricator_form(
+      $viewer,
+      array(
+        'method' => 'GET',
+        'action' => $href,
+        'sigil' => 'diffusion-search-form',
+        'class' => 'diffusion-search-form',
+        'id' => 'diffusion-search-form',
+      ),
+      array(
+        $bar,
+      ));
+
+    $form_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'diffusion-search-form-view',
+      ),
+      $form);
+
+    return $form_view;
+  }
+
+  protected function buildTabsView($key) {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $view = new PHUIListView();
+
+    $view->addMenuItem(
+      id(new PHUIListItemView())
+        ->setKey('code')
+        ->setName(pht('Code'))
+        ->setIcon('fa-code')
+        ->setHref($drequest->generateURI(
+          array(
+            'action' => 'branch',
+            'path' => '/',
+          )))
+        ->setSelected($key == 'code'));
+
+    if (!$repository->isSVN()) {
+      $view->addMenuItem(
+        id(new PHUIListItemView())
+          ->setKey('branch')
+          ->setName(pht('Branches'))
+          ->setIcon('fa-code-fork')
+          ->setHref($drequest->generateURI(
+          array(
+            'action' => 'branches',
+          )))
+          ->setSelected($key == 'branch'));
+    }
+
+    if (!$repository->isSVN()) {
+      $view->addMenuItem(
+        id(new PHUIListItemView())
+          ->setKey('tags')
+          ->setName(pht('Tags'))
+          ->setIcon('fa-tags')
+          ->setHref($drequest->generateURI(
+          array(
+            'action' => 'tags',
+          )))
+          ->setSelected($key == 'tags'));
+    }
+
+    $view->addMenuItem(
+      id(new PHUIListItemView())
+        ->setKey('history')
+        ->setName(pht('History'))
+        ->setIcon('fa-history')
+        ->setHref($drequest->generateURI(
+        array(
+          'action' => 'history',
+        )))
+        ->setSelected($key == 'history'));
+
+    $view->addMenuItem(
+      id(new PHUIListItemView())
+        ->setKey('graph')
+        ->setName(pht('Graph'))
+        ->setIcon('fa-code-fork')
+        ->setHref($drequest->generateURI(
+        array(
+          'action' => 'graph',
+        )))
+        ->setSelected($key == 'graph'));
+
+    return $view;
+
   }
 
 }

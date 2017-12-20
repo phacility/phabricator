@@ -40,6 +40,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_PROFILE = 'profile';
   const METADATA_STORAGE = 'storage';
   const METADATA_INTEGRITY = 'integrity';
+  const METADATA_CHUNK = 'chunk';
 
   const STATUS_ACTIVE = 'active';
   const STATUS_DELETED = 'deleted';
@@ -134,6 +135,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
           'columns' => array('builtinKey'),
           'unique' => true,
         ),
+        'key_engine' => array(
+          'columns' => array('storageEngine', 'storageHandle(64)'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -178,9 +182,17 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
 
     $tmp_name = idx($spec, 'tmp_name');
-    $is_valid = @is_uploaded_file($tmp_name);
-    if (!$is_valid) {
-      throw new Exception(pht('File is not an uploaded file.'));
+
+    // NOTE: If we parsed the request body ourselves, the files we wrote will
+    // not be registered in the `is_uploaded_file()` list. It's fine to skip
+    // this check: it just protects against sloppy code from the long ago era
+    // of "register_globals".
+
+    if (ini_get('enable_post_data_reading')) {
+      $is_valid = @is_uploaded_file($tmp_name);
+      if (!$is_valid) {
+        throw new Exception(pht('File is not an uploaded file.'));
+      }
     }
 
     $file_data = Filesystem::readFile($tmp_name);
@@ -393,12 +405,13 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $tmp = new TempFile();
       Filesystem::writeFile($tmp, $data);
       $file->setMimeType(Filesystem::getMimeType($tmp));
+      unset($tmp);
     }
 
     try {
       $file->updateDimensions(false);
     } catch (Exception $ex) {
-      // Do nothing
+      // Do nothing.
     }
 
     $file->saveAndIndex();
@@ -1045,9 +1058,20 @@ final class PhabricatorFile extends PhabricatorFileDAO
       throw new Exception(pht('Cannot retrieve image information.'));
     }
 
+    if ($this->getIsChunk()) {
+      throw new Exception(
+        pht('Refusing to assess image dimensions of file chunk.'));
+    }
+
+    $engine = $this->instantiateStorageEngine();
+    if ($engine->isChunkEngine()) {
+      throw new Exception(
+        pht('Refusing to assess image dimensions of chunked file.'));
+    }
+
     $data = $this->loadFileData();
 
-    $img = imagecreatefromstring($data);
+    $img = @imagecreatefromstring($data);
     if ($img === false) {
       throw new Exception(pht('Error when decoding image.'));
     }
@@ -1243,6 +1267,15 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $this;
   }
 
+  public function getIsChunk() {
+    return idx($this->metadata, self::METADATA_CHUNK);
+  }
+
+  public function setIsChunk($value) {
+    $this->metadata[self::METADATA_CHUNK] = $value;
+    return $this;
+  }
+
   public function setIntegrityHash($integrity_hash) {
     $this->metadata[self::METADATA_INTEGRITY] = $integrity_hash;
     return $this;
@@ -1327,6 +1360,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'mime-type' => 'optional string',
         'builtin' => 'optional string',
         'storageEngines' => 'optional list<PhabricatorFileStorageEngine>',
+        'chunk' => 'optional bool',
       ));
 
     $file_name = idx($params, 'name');
@@ -1402,6 +1436,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $mime_type = idx($params, 'mime-type');
     if ($mime_type) {
       $this->setMimeType($mime_type);
+    }
+
+    $is_chunk = idx($params, 'chunk');
+    if ($is_chunk) {
+      $this->setIsChunk(true);
     }
 
     return $this;

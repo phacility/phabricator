@@ -1,0 +1,40 @@
+/**
+ * @provides phui-left-right-css
+ */
+
+.phui-left-right-view {
+  display: table;
+  width: 100%;
+}
+
+.phui-lr-container {
+  display: table-row;
+}
+
+.phui-left-view {
+  display: table-cell;
+  text-align: left;
+}
+
+.phui-right-view {
+  display: table-cell;
+  text-align: right;
+}
+
+.phui-left-view .button {
+  margin-right: 8px;
+}
+
+.phui-right-view .button {
+  margin-left: 8px;
+}
+
+.phui-lr-view-top .phui-left-view,
+.phui-lr-view-top .phui-right-view {
+  vertical-align: top;
+}
+
+.phui-lr-view-bottom .phui-left-view,
+.phui-lr-view-bottom .phui-right-view {
+  vertical-align: bottom;
+}

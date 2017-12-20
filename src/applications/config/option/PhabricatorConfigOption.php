@@ -175,6 +175,12 @@ final class PhabricatorConfigOption
     return $this->type;
   }
 
+  public function newOptionType() {
+    $type_key = $this->getType();
+    $type_map = PhabricatorConfigType::getAllTypes();
+    return idx($type_map, $type_key);
+  }
+
   public function isCustomType() {
     return !strncmp($this->getType(), 'custom:', 7);
   }

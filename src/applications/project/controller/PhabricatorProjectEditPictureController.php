@@ -98,7 +98,10 @@ final class PhabricatorProjectEditPictureController
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
 
-    $default_image = PhabricatorFile::loadBuiltin($viewer, 'project.png');
+    $builtin = PhabricatorProjectIconSet::getIconImage(
+      $project->getIcon());
+    $default_image = PhabricatorFile::loadBuiltin($this->getViewer(),
+      'projects/'.$builtin);
 
     $images = array();
 
@@ -121,9 +124,25 @@ final class PhabricatorProjectEditPictureController
       }
     }
 
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $root = $root.'/resources/builtin/projects/v3/';
+
+    $builtins = id(new FileFinder($root))
+      ->withType('f')
+      ->withFollowSymlinks(true)
+      ->find();
+
+    foreach ($builtins as $builtin) {
+      $file = PhabricatorFile::loadBuiltin($viewer, 'projects/v3/'.$builtin);
+      $images[$file->getPHID()] = array(
+        'uri' => $file->getBestURI(),
+        'tip' => pht('Builtin Image'),
+      );
+    }
+
     $images[PhabricatorPHIDConstants::PHID_VOID] = array(
       'uri' => $default_image->getBestURI(),
-      'tip' => pht('No Picture'),
+      'tip' => pht('Default Picture'),
     );
 
     require_celerity_resource('people-profile-css');
@@ -134,7 +153,7 @@ final class PhabricatorProjectEditPictureController
       $button = javelin_tag(
         'button',
         array(
-          'class' => 'grey profile-image-button',
+          'class' => 'button-grey profile-image-button',
           'sigil' => 'has-tooltip',
           'meta' => array(
             'tip' => $spec['tip'],
@@ -200,7 +219,7 @@ final class PhabricatorProjectEditPictureController
     $compose_button = javelin_tag(
       'button',
       array(
-        'class' => 'grey',
+        'class' => 'button-grey',
         'id' => $launch_id,
         'sigil' => 'icon-composer',
       ),
@@ -227,7 +246,7 @@ final class PhabricatorProjectEditPictureController
 
     $form->appendChild(
       id(new AphrontFormMarkupControl())
-        ->setLabel(pht('Quick Create'))
+        ->setLabel(pht('Custom'))
         ->setValue($compose_form));
 
     $upload_form = id(new AphrontFormView())
@@ -285,7 +304,7 @@ final class PhabricatorProjectEditPictureController
     $default_button = javelin_tag(
       'button',
       array(
-        'class' => 'grey profile-image-button',
+        'class' => 'button-grey profile-image-button',
         'sigil' => 'has-tooltip',
         'meta' => array(
           'tip' => pht('Use Icon and Color'),

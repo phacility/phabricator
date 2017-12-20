@@ -46,9 +46,7 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
       ->setLogs($logs)
       ->setHandles($handles);
 
-    $panel = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Account Activity Logs'))
-      ->setTable($table);
+    $panel = $this->newBox(pht('Account Activity Logs'), $table);
 
     $pager_box = id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)

@@ -17,9 +17,14 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI('view/')));
 
-    foreach ($classes as $class => $obj) {
-      $name = $obj->getName();
-      $nav->addFilter($class, $name);
+    $groups = mgroup($classes, 'getCategory');
+    ksort($groups);
+    foreach ($groups as $group => $group_classes) {
+      $nav->addLabel($group);
+      foreach ($group_classes as $class => $obj) {
+        $name = $obj->getName();
+        $nav->addFilter($class, $name);
+      }
     }
 
     $selected = $nav->selectFilter($id, head_key($classes));

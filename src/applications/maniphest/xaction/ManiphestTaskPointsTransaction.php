@@ -17,10 +17,6 @@ final class ManiphestTaskPointsTransaction
     $object->setPoints($value);
   }
 
-  public function shouldHideForFeed() {
-    return true;
-  }
-
   public function shouldHide() {
     if (!ManiphestTaskPoints::getIsEnabled()) {
       return true;
@@ -110,5 +106,17 @@ final class ManiphestTaskPointsTransaction
     }
     return $value;
   }
+
+  public function getTransactionTypeForConduit($xaction) {
+    return 'points';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array(
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
+    );
+  }
+
 
 }

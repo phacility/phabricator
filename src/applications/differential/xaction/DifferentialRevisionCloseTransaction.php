@@ -10,7 +10,8 @@ final class DifferentialRevisionCloseTransaction
     return pht('Close Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be closed.');
   }
 
@@ -35,14 +36,10 @@ final class DifferentialRevisionCloseTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    $was_accepted = $object->isAccepted();
 
-    $old_status = $object->getStatus();
-
-    $object->setStatus($status_closed);
-
-    $was_accepted = ($old_status == $status_accepted);
+    $status_published = DifferentialRevisionStatus::PUBLISHED;
+    $object->setModernRevisionStatus($status_published);
 
     $object->setProperty(
       DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED,
@@ -50,6 +47,14 @@ final class DifferentialRevisionCloseTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
+    if ($this->hasEditor()) {
+      if ($this->getEditor()->getIsCloseByCommit()) {
+        // If we're closing a revision because we discovered a commit, we don't
+        // care what state it was in.
+        return;
+      }
+    }
+
     if ($object->isClosed()) {
       throw new Exception(
         pht(
@@ -78,9 +83,50 @@ final class DifferentialRevisionCloseTransaction
   }
 
   public function getTitle() {
-    return pht(
-      '%s closed this revision.',
-      $this->renderAuthor());
+    if (!$this->getMetadataValue('isCommitClose')) {
+      return pht(
+        '%s closed this revision.',
+        $this->renderAuthor());
+    }
+
+    $commit_phid = $this->getMetadataValue('commitPHID');
+    $committer_phid = $this->getMetadataValue('committerPHID');
+    $author_phid = $this->getMetadataValue('authorPHID');
+
+    if ($committer_phid) {
+      $committer_name = $this->renderHandle($committer_phid);
+    } else {
+      $committer_name = $this->getMetadataValue('committerName');
+    }
+
+    if ($author_phid) {
+      $author_name = $this->renderHandle($author_phid);
+    } else {
+      $author_name = $this->getMetadatavalue('authorName');
+    }
+
+    $same_phid =
+      strlen($committer_phid) &&
+      strlen($author_phid) &&
+      ($committer_phid == $author_phid);
+
+    $same_name =
+      !strlen($committer_phid) &&
+      !strlen($author_phid) &&
+      ($committer_name == $author_name);
+
+    if ($same_name || $same_phid) {
+      return pht(
+        'Closed by commit %s (authored by %s).',
+        $this->renderHandle($commit_phid),
+        $author_name);
+    } else {
+      return pht(
+        'Closed by commit %s (authored by %s, committed by %s).',
+        $this->renderHandle($commit_phid),
+        $author_name,
+        $committer_name);
+    }
   }
 
   public function getTitleForFeed() {

@@ -23,12 +23,29 @@ final class DiffusionRepositoryURIViewController
       return new Aphront404Response();
     }
 
+    // For display, reload the URI by loading it through the repository. This
+    // may adjust builtin URIs for repository configuration, so we may end up
+    // with a different view of builtin URIs than we'd see if we loaded them
+    // directly from the database. See T12884.
+    $repository_with_uris = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->needURIs(true)
+      ->execute();
+
+    $repository_uris = $repository->getURIs();
+    $repository_uris = mpull($repository_uris, null, 'getID');
+    $uri = idx($repository_uris, $uri->getID());
+    if (!$uri) {
+      return new Aphront404Response();
+    }
+
     $title = array(
       pht('URI'),
       $repository->getDisplayName(),
     );
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(
       $repository->getDisplayName(),
       $repository->getURI());

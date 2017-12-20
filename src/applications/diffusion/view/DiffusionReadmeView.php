@@ -98,9 +98,14 @@ final class DiffusionReadmeView extends DiffusionView {
       ->setFluid(true)
       ->appendChild($readme_content);
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($readme_name)
+      ->addClass('diffusion-panel-header-view');
+
     return id(new PHUIObjectBoxView())
-      ->setHeaderText($readme_name)
+      ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('diffusion-mobile-view')
       ->appendChild($document)
       ->addClass('diffusion-readme-view');
   }

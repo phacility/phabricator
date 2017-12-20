@@ -404,7 +404,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           'a',
           array(
             'href' => '/conpherence/search/',
-            'class' => 'button grey',
+            'class' => 'button button-grey',
           ),
           pht('Find Rooms')),
       );

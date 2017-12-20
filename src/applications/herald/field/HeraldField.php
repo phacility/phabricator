@@ -20,6 +20,10 @@ abstract class HeraldField extends Phobject {
     return null;
   }
 
+  public function getRequiredAdapterStates() {
+    return array();
+  }
+
   protected function getHeraldFieldStandardType() {
     throw new PhutilMethodNotImplementedException();
   }

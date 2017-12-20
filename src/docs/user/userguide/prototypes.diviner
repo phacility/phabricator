@@ -9,8 +9,6 @@ Overview
 Phabricator includes //prototype applications//, which are applications in an
 early stage of development.
 
-IMPORTANT: The upstream does not offer support for these applications.
-
 When we begin working on a new application, we usually implement it as a
 prototype first. This allows us to get a better sense of how the application
 might work and integrate with other applications, and what technical and product
@@ -32,34 +30,3 @@ on hold indefinitely if we're less excited about it after we begin building it.
 
 If you're interested in previewing upcoming applications, you can use the
 `phabricator.show-prototypes` configuration setting to enable prototypes.
-
-Feedback on Prototypes
-======================
-
-We're usually interested in this sort of feedback on prototypes:
-
-  - {icon check, color=green} **Use Cases**: If we're building something that
-    you think you'd use, we'd love to hear about your use cases for it. This can
-    help us figure out what features to add and how users may think about, use,
-    and integrate the application.
-  - {icon check, color=green} **General Interest**: Is an application something
-    you're looking forward to? Knowing which applications users are interested
-    in can help us set priorities.
-
-We're usually **not** interested in this sort of feedback on prototypes:
-
-  - {icon times, color=red} **Support Requests**: We do not support these
-    applications. Use them at your own risk, or wait for them to leave the
-    prototype phase.
-  - {icon times, color=red} **Bug Reports**: We know these applications don't
-    work well yet, and usually know about most of the open bugs. Even if we
-    don't, whatever isn't working yet may change completely before the
-    application leaves the prototype phase.
-  - {icon times, color=red} **Contributions / Pull Requests**: These
-    applications are usually in too early a state to accept contributions. Let
-    us know about your use case, but wait for release to send code.
-
-Overall, using prototypes makes it easier for us to explore and develop
-application ideas, and to share a preview of what's coming in the future with
-users, but prototypes are not yet full applications and we do not provide
-support until applications leave the prototype phase.

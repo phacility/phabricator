@@ -61,6 +61,7 @@ final class PhabricatorPeopleProfileTasksController
       ->withStatuses($open)
       ->needProjectPHIDs(true)
       ->setLimit(100)
+      ->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY)
       ->execute();
 
     $handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);

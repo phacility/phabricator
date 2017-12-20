@@ -21,7 +21,7 @@ Configuring Retention Policies
 
 You can reconfigure the data retention policies for most collectors.
 
-The default retention polcies should be suitable for most installs. However,
+The default retention policies should be suitable for most installs. However,
 you might want to **decrease** retention to reduce the amount of disk space
 used by some high-volume log that you don't find particularly interesting, or
 to adhere to an organizational data retention policy.

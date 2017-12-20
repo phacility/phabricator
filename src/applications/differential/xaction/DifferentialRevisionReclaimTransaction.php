@@ -10,7 +10,8 @@ final class DifferentialRevisionReclaimTransaction
     return pht('Reclaim Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be reclaimed and reopened.');
   }
 
@@ -47,7 +48,8 @@ final class DifferentialRevisionReclaimTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+    $status_review = DifferentialRevisionStatus::NEEDS_REVIEW;
+    $object->setModernRevisionStatus($status_review);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

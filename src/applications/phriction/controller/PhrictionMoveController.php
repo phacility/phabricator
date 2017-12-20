@@ -60,6 +60,7 @@ final class PhrictionMoveController extends PhrictionController {
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
         ->setDescription($v_note);
 
       $xactions = array();

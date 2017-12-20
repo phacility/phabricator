@@ -146,8 +146,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $user = $this->createUser();
     $user->save();
 
-    $user2 = $this->createUser();
-    $user2->save();
+    $user->setAllowInlineCacheGeneration(true);
 
     $proj = $this->createProject($user);
 
@@ -1289,12 +1288,19 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $new_name = $proj->getName().' '.mt_rand();
 
-    $xaction = new PhabricatorProjectTransaction();
-    $xaction->setTransactionType(
-      PhabricatorProjectNameTransaction::TRANSACTIONTYPE);
-    $xaction->setNewValue($new_name);
+    $params = array(
+      'objectIdentifier' => $proj->getID(),
+      'transactions' => array(
+        array(
+          'type' => 'name',
+          'value' => $new_name,
+        ),
+      ),
+    );
 
-    $this->applyTransactions($proj, $user, array($xaction));
+    id(new ConduitCall('project.edit', $params))
+      ->setUser($user)
+      ->execute();
 
     return true;
   }

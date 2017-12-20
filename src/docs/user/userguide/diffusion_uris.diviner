@@ -20,7 +20,7 @@ is hosted elsewhere (like GitHub or Bitbucket) and track updates to the remote
 repository. This will create a read-only copy of the repository in Phabricator.
 
 **Mirror Repositories**: Phabricator can publish any repository to mirrors,
-overwiting them with an exact copy of the repository that stays up to date as
+overwriting them with an exact copy of the repository that stays up to date as
 the source changes. This works with both local repositories that Phabricator is
 hosting and remote repositories that Phabricator is observing.
 
@@ -239,6 +239,11 @@ You can not add a URI in Observe mode if an existing builtin URI is in
 authorities: the observed remote copy and the hosted local copy. Take the
 other URI out of //Read/Write// mode first.
 
+WARNING: If you observe a remote repository, the entire state of the working
+copy that Phabricator maintains will be deleted and replaced with the state of
+the remote. If some changes are present only in Phabricator's working copy,
+they will be unrecoverably destroyed.
+
 **Mirror**: Phabricator will push any changes made to this repository to the
 remote URI, keeping a read-only mirror hosted at that URI up to date.
 
@@ -250,6 +255,11 @@ to mirror a repository to itself.
 It is possible to mirror a repository to another repository that is also
 hosted by Phabricator by adding that other repository's URI, although this is
 silly and probably very rarely of any use.
+
+WARNING: If you mirror to a remote repository, the entire state of that remote
+will be replaced with the state of the working copy Phabricator maintains. If
+some changes are present only in the remote, they will be unrecoverably
+destroyed.
 
 **None**: Phabricator will not fetch changes from or push changes to this URI.
 For builtin URIs, it will not let users fetch changes from or push changes to
@@ -293,7 +303,7 @@ For builtin URIs in //Read Only// or //Read/Write// mode, the most
 human-readable URI defaults to //Always// and the others default to //Never//.
 
 **Always**: This URI will be shown to users as a clone/checkout URI. You can
-add URIs in this mode to cutomize exactly what users are shown.
+add URIs in this mode to customize exactly what users are shown.
 
 **Never**: This URI will not be shown to users. You can hide less-preferred
 URIs to guide users to the URIs they should be using to interact with the

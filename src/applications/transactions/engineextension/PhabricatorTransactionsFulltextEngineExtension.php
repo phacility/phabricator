@@ -9,11 +9,11 @@ final class PhabricatorTransactionsFulltextEngineExtension
     return pht('Comments');
   }
 
-  public function shouldIndexFulltextObject($object) {
+  public function shouldEnrichFulltextObject($object) {
     return ($object instanceof PhabricatorApplicationTransactionInterface);
   }
 
-  public function indexFulltextObject(
+  public function enrichFulltextObject(
     $object,
     PhabricatorSearchAbstractDocument $document) {
 
@@ -25,6 +25,7 @@ final class PhabricatorTransactionsFulltextEngineExtension
     $xactions = $query
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array($object->getPHID()))
+      ->withComments(true)
       ->needComments(true)
       ->execute();
 

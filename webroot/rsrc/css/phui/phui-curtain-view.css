@@ -21,6 +21,26 @@
   border-top: 1px solid {$greybackground};
 }
 
+!print .phui-curtain-panel + .phui-curtain-panel {
+  padding: 8px 0;
+  border-top: none;
+}
+
+!print .device-desktop .phabricator-action-list-view + .phui-curtain-panel {
+  padding: 8px 0;
+  border-top: none;
+}
+
+!print .device-desktop .phui-curtain-panel + .phui-curtain-panel {
+  padding: 8px 0;
+  border-top: none;
+}
+
+!print .phabricator-action-list-view + .phui-curtain-panel {
+  padding: 8px 0;
+  border-top: none;
+}
+
 .phui-curtain-panel-header {
   padding: 0 0 4px;
   color: {$bluetext};
@@ -37,6 +57,10 @@
   padding: 0;
 }
 
+!print .phui-curtain-panel-body {
+  padding: 0;
+}
+
 /* Project tags */
 
 .phui-curtain-panel-body .phabricator-handle-tag-list-item {
@@ -45,4 +69,12 @@
 
 .phui-side-column .phui-curtain-panel-body .phui-tag-view {
   white-space: pre-wrap;
+}
+
+.device .curtain-no-panels {
+  display: none;
+}
+
+!print .curtain-no-panels {
+  display: none;
 }

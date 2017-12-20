@@ -20,6 +20,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
   public function render() {
     $request = $this->getDiffusionRequest();
     $repository = $request->getRepository();
+    require_celerity_resource('diffusion-css');
 
     $base_path = trim($request->getPath(), '/');
     if ($base_path) {
@@ -74,7 +75,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
       $dict = array(
         'lint'      => celerity_generate_unique_node_id(),
-        'commit'    => celerity_generate_unique_node_id(),
         'date'      => celerity_generate_unique_node_id(),
         'author'    => celerity_generate_unique_node_id(),
         'details'   => celerity_generate_unique_node_id(),
@@ -86,13 +86,13 @@ final class DiffusionBrowseTableView extends DiffusionView {
       }
 
       $rows[] = array(
-        $history_link,
         $browse_link,
         idx($dict, 'lint'),
-        $dict['commit'],
         $dict['details'],
         $dict['date'],
+        $history_link,
       );
+
     }
 
     if ($need_pull) {
@@ -113,27 +113,16 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $lint = $request->getLint();
 
     $view = new AphrontTableView($rows);
-    $view->setHeaders(
-      array(
-        null,
-        pht('Path'),
-        ($lint ? $lint : pht('Lint')),
-        pht('Modified'),
-        pht('Details'),
-        pht('Committed'),
-      ));
     $view->setColumnClasses(
       array(
-        'nudgeright',
         '',
         '',
-        '',
-        'wide',
+        'wide commit-detail',
         'right',
+        'right narrow',
       ));
     $view->setColumnVisibility(
       array(
-        true,
         true,
         $show_lint,
         true,
@@ -144,15 +133,14 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $view->setDeviceVisibility(
       array(
         true,
-        true,
         false,
         false,
-        true,
+        false,
         false,
       ));
 
 
-    return $view->render();
+    return phutil_tag_div('diffusion-browse-table', $view->render());
   }
 
 }

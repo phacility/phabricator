@@ -27,7 +27,7 @@ JX.install('Device', {
       var self = JX.Device;
 
       // Even when we emit a '<meta name="viewport" ... />' tag which tells
-      // devices to fit the conent to the screen width, we'll sometimes measure
+      // devices to fit the content to the screen width, we'll sometimes measure
       // a viewport dimension which is larger than the available screen width,
       // particularly if we check too early.
 

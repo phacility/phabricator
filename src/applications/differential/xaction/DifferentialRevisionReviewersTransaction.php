@@ -106,43 +106,9 @@ final class DifferentialRevisionReviewersTransaction
   public function applyExternalEffects($object, $value) {
     $src_phid = $object->getPHID();
 
-    // This is currently double-writing: to the old (edge) store and the new
-    // (reviewer) store. Do the old edge write first.
-
     $old = $this->generateOldValue($object);
     $new = $value;
-    $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
-
-    $editor = new PhabricatorEdgeEditor();
-
     $rem = array_diff_key($old, $new);
-    foreach ($rem as $dst_phid => $status) {
-      $editor->removeEdge($src_phid, $edge_type, $dst_phid);
-    }
-
-    foreach ($new as $dst_phid => $status) {
-      $old_status = idx($old, $dst_phid);
-      if ($old_status === $status) {
-        continue;
-      }
-
-      $data = array(
-        'data' => array(
-          'status' => $status,
-
-          // TODO: This seemes like it's buggy before the Modular Transactions
-          // changes. Figure out what's going on here? We don't have a very
-          // clean way to get the active diff ID right now.
-          'diffID' => null,
-        ),
-      );
-
-      $editor->addEdge($src_phid, $edge_type, $dst_phid, $data);
-    }
-
-    $editor->save();
-
-    // Now, do the new write.
 
     $table = new DifferentialReviewer();
     $table_name = $table->getTableName();

@@ -7,6 +7,12 @@ final class HarbormasterRunBuildPlansHeraldAction
 
   const ACTIONCONST = 'harbormaster.build';
 
+  public function getRequiredAdapterStates() {
+    return array(
+      HeraldBuildableState::STATECONST,
+    );
+  }
+
   public function getActionGroupKey() {
     return HeraldSupportActionGroup::ACTIONGROUPKEY;
   }

@@ -9,6 +9,10 @@ final class PhabricatorAuthMainMenuBarExtension
     return true;
   }
 
+  public function shouldRequireFullSession() {
+    return false;
+  }
+
   public function getExtensionOrder() {
     return 900;
   }

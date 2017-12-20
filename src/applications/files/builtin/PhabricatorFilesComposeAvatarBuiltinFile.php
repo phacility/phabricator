@@ -58,6 +58,14 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
   }
 
   private function composeImage($color, $image, $border) {
+    // If we don't have the GD extension installed, just return a static
+    // default profile image rather than trying to compose a dynamic one.
+    if (!function_exists('imagecreatefromstring')) {
+      $root = dirname(phutil_get_library_root('phabricator'));
+      $default_path = $root.'/resources/builtin/profile.png';
+      return Filesystem::readFile($default_path);
+    }
+
     $color_const = hexdec(trim($color, '#'));
     $true_border = self::rgba2gd($border);
     $image_map = self::getImageMap();

@@ -260,7 +260,7 @@ JX.install('DiffusionLocateFileSource', {
 
     /**
      * Score a matching string by finding the longest prefix of the search
-     * query it contains continguously.
+     * query it contains contiguously.
      */
     scoreMatch: function(haystack, haypos, search) {
       var pos = 0;

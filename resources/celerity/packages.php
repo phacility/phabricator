@@ -93,6 +93,7 @@ return array(
     'phabricator-core-css',
     'phabricator-zindex-css',
     'phui-button-css',
+    'phui-button-simple-css',
     'phui-theme-css',
     'phabricator-standard-page-view',
     'aphront-dialog-view-css',
@@ -202,9 +203,6 @@ return array(
 
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
-
-    'phabricator-scroll-objective',
-    'phabricator-scroll-objective-list',
 
     'phabricator-diff-inline',
     'phabricator-diff-changeset',

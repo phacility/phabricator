@@ -63,7 +63,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       $button_verify = javelin_tag(
         'a',
         array(
-          'class' => 'button small grey',
+          'class' => 'button small button-grey',
           'href'  => $uri->alter('verify', $email->getID()),
           'sigil' => 'workflow',
         ),
@@ -72,7 +72,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       $button_make_primary = javelin_tag(
         'a',
         array(
-          'class' => 'button small grey',
+          'class' => 'button small button-grey',
           'href'  => $uri->alter('primary', $email->getID()),
           'sigil' => 'workflow',
         ),
@@ -81,7 +81,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       $button_remove = javelin_tag(
         'a',
         array(
-          'class'   => 'button small grey',
+          'class'   => 'button small button-grey',
           'href'    => $uri->alter('delete', $email->getID()),
           'sigil'   => 'workflow',
         ),
@@ -138,23 +138,18 @@ final class PhabricatorEmailAddressesSettingsPanel
         $editable,
       ));
 
-    $view = new PHUIObjectBoxView();
-    $header = new PHUIHeaderView();
-    $header->setHeader(pht('Email Addresses'));
-
+    $buttons = array();
     if ($editable) {
-      $button = new PHUIButtonView();
-      $button->setText(pht('Add New Address'));
-      $button->setTag('a');
-      $button->setHref($uri->alter('new', 'true'));
-      $button->setIcon('fa-plus');
-      $button->addSigil('workflow');
-      $header->addActionLink($button);
+      $buttons[] = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-plus')
+        ->setText(pht('Add New Address'))
+        ->setHref($uri->alter('new', 'true'))
+        ->addSigil('workflow')
+        ->setColor(PHUIButtonView::GREY);
     }
-    $view->setHeader($header);
-    $view->setTable($table);
 
-    return $view;
+    return $this->newBox(pht('Email Addresses'), $table, $buttons);
   }
 
   private function returnNewAddressResponse(

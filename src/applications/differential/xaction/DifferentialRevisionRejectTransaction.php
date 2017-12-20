@@ -10,7 +10,8 @@ final class DifferentialRevisionRejectTransaction
     return pht("Request Changes \xE2\x9C\x98");
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be returned to the author for updates.');
   }
 
@@ -70,6 +71,11 @@ final class DifferentialRevisionRejectTransaction
           'You can not request changes to this revision because you are the '.
           'revision author. You can only request changes to revisions you do '.
           'not own.'));
+    }
+
+    if ($object->isDraft()) {
+      throw new Exception(
+        pht('You can not request changes to a draft revision.'));
     }
 
     if ($this->isViewerFullyRejected($object, $viewer)) {

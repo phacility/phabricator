@@ -4,6 +4,7 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
+    $added = $request->getBool('added');
 
     $subscription = id(new PhortuneSubscriptionQuery())
       ->setViewer($viewer)
@@ -112,6 +113,7 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
       pht('Subscription %d', $subscription->getID()),
       $view_uri);
     $crumbs->addTextCrumb(pht('Edit'));
+    $crumbs->setBorder(true);
 
 
     $uri = $this->getApplicationURI($account->getID().'/card/new/');
@@ -123,19 +125,23 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
       'a',
       array(
         'href' => $uri,
-        'class' => 'button grey',
+        'class' => 'button button-grey',
       ),
       pht('Add Payment Method...'));
 
+    $radio = id(new AphrontFormRadioButtonControl())
+      ->setName('defaultPaymentMethodPHID')
+      ->setLabel(pht('Autopay With'))
+      ->setValue($current_phid)
+      ->setError($e_method);
+
+    foreach ($options as $key => $value) {
+      $radio->addButton($key, $value, null);
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('defaultPaymentMethodPHID')
-          ->setLabel(pht('Autopay With'))
-          ->setValue($current_phid)
-          ->setError($e_method)
-          ->setOptions($options))
+      ->appendChild($radio)
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setValue($add_method_button))
@@ -150,6 +156,13 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setFormErrors($errors)
       ->appendChild($form);
+
+    if ($added) {
+      $info_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_SUCCESS)
+        ->appendChild(pht('Payment method has been successfully added.'));
+      $box->setInfoView($info_view);
+    }
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit %s', $subscription->getSubscriptionName()))

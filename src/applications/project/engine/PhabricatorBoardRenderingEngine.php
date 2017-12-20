@@ -67,7 +67,9 @@ final class PhabricatorBoardRenderingEngine extends Phobject {
     $project_phids = $object->getProjectPHIDs();
     $project_handles = array_select_keys($this->handles, $project_phids);
     if ($project_handles) {
-      $card->setProjectHandles($project_handles);
+      $card
+        ->setHideArchivedProjects(true)
+        ->setProjectHandles($project_handles);
     }
 
     $cover_phid = $object->getCoverImageThumbnailPHID();

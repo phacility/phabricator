@@ -60,4 +60,7 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
   public function supportsHiding();
   public function isHidden();
 
+  public function getDateModified();
+  public function getDateCreated();
+
 }

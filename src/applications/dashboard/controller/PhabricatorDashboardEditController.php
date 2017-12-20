@@ -184,19 +184,14 @@ final class PhabricatorDashboardEditController
           ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Dashboard'))
+      ->setHeaderText($title)
       ->setForm($form)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setValidationException($validation_exception);
 
     $crumbs->setBorder(true);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon($header_icon);
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter($box);
 
     return $this->newPage()

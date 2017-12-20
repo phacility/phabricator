@@ -10,11 +10,11 @@ final class PonderQuestionEditor
   }
 
   public function getCreateObjectTitle($author, $object) {
-    return pht('%s created this question.', $author);
+    return pht('%s asked this question.', $author);
   }
 
   public function getCreateObjectTitleForFeed($author, $object) {
-    return pht('%s created %s.', $author, $object);
+    return pht('%s asked %s.', $author, $object);
   }
 
   /**

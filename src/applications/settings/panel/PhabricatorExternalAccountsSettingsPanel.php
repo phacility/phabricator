@@ -31,12 +31,10 @@ final class PhabricatorExternalAccountsSettingsPanel
         ))
       ->execute();
 
-    $linked_head = id(new PHUIHeaderView())
-      ->setHeader(pht('Linked Accounts and Authentication'));
+    $linked_head = pht('Linked Accounts and Authentication');
 
     $linked = id(new PHUIObjectItemListView())
       ->setUser($viewer)
-      ->setFlush(true)
       ->setNoDataString(pht('You have no linked accounts.'));
 
     $login_accounts = 0;
@@ -47,7 +45,7 @@ final class PhabricatorExternalAccountsSettingsPanel
     }
 
     foreach ($accounts as $account) {
-      $item = id(new PHUIObjectItemView());
+      $item = new PHUIObjectItemView();
 
       $provider = idx($providers, $account->getProviderKey());
       if ($provider) {
@@ -94,12 +92,10 @@ final class PhabricatorExternalAccountsSettingsPanel
       $linked->addItem($item);
     }
 
-    $linkable_head = id(new PHUIHeaderView())
-      ->setHeader(pht('Add External Account'));
+    $linkable_head = pht('Add External Account');
 
     $linkable = id(new PHUIObjectItemListView())
       ->setUser($viewer)
-      ->setFlush(true)
       ->setNoDataString(
         pht('Your account is linked with all available providers.'));
 
@@ -118,24 +114,19 @@ final class PhabricatorExternalAccountsSettingsPanel
 
       $link_uri = '/auth/link/'.$provider->getProviderKey().'/';
 
-      $item = id(new PHUIObjectItemView());
-      $item->setHeader($provider->getProviderName());
-      $item->setHref($link_uri);
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon('fa-link')
-          ->setHref($link_uri));
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($provider->getProviderName())
+        ->setHref($link_uri)
+        ->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('fa-link')
+            ->setHref($link_uri));
 
       $linkable->addItem($item);
     }
 
-    $linked_box = id(new PHUIObjectBoxView())
-      ->setHeader($linked_head)
-      ->setObjectList($linked);
-
-    $linkable_box = id(new PHUIObjectBoxView())
-      ->setHeader($linkable_head)
-      ->setObjectList($linkable);
+    $linked_box = $this->newBox($linked_head, $linked);
+    $linkable_box = $this->newBox($linkable_head, $linkable);
 
     return array(
       $linked_box,

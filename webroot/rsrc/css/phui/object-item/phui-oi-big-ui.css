@@ -17,7 +17,7 @@
 }
 
 .phui-oi-list-big a.phui-oi-link {
-  color: #000;
+  color: {$blacktext};
   font-size: {$biggestfontsize};
 }
 
@@ -31,7 +31,7 @@
 }
 
 .device-desktop .phui-oi-list-big .phui-oi {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .phui-oi-list-big .phui-oi-col0 {
@@ -45,4 +45,17 @@
 
 .phui-oi-list-big .phui-oi-visited a.phui-oi-link {
   color: {$violet};
+}
+
+.phui-box-white-config .phui-oi-list-big.phui-oi-list-view {
+  padding: 8px 8px 4px;
+}
+
+.phui-box-white-config .phui-oi-frame {
+  padding: 4px 8px 0;
+}
+
+.device-desktop .phui-box-white-config .phui-oi:hover .phui-oi-frame {
+  background-color: {$hoverblue};
+  border-radius: 3px;
 }

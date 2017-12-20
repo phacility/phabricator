@@ -196,6 +196,7 @@
 
 .aphront-form-control-markup .aphront-form-input {
   font-size: {$normalfontsize};
+  padding: 3px 0;
 }
 
 .aphront-form-control-static .aphront-form-input {

@@ -15,6 +15,7 @@ final class DifferentialModernHunk extends DifferentialHunk {
 
   private $rawData;
   private $forcedEncoding;
+  private $fileData;
 
   public function getTableName() {
     return 'differential_hunk_modern';
@@ -50,8 +51,11 @@ final class DifferentialModernHunk extends DifferentialHunk {
 
     $this->dataEncoding = $this->detectEncodingForStorage($text);
     $this->dataType = self::DATATYPE_TEXT;
-    $this->dataFormat = self::DATAFORMAT_RAW;
-    $this->data = $text;
+
+    list($format, $data) = $this->formatDataForStorage($text);
+
+    $this->dataFormat = $format;
+    $this->data = $data;
 
     return $this;
   }
@@ -67,24 +71,70 @@ final class DifferentialModernHunk extends DifferentialHunk {
     return $this;
   }
 
-  public function save() {
-
-    $type = $this->getDataType();
-    $format = $this->getDataFormat();
-
-    // Before saving the data, attempt to compress it.
-    if ($type == self::DATATYPE_TEXT) {
-      if ($format == self::DATAFORMAT_RAW) {
-        $data = $this->getData();
-        $deflated = PhabricatorCaches::maybeDeflateData($data);
-        if ($deflated !== null) {
-          $this->data = $deflated;
-          $this->dataFormat = self::DATAFORMAT_DEFLATED;
-        }
-      }
+  private function formatDataForStorage($data) {
+    $deflated = PhabricatorCaches::maybeDeflateData($data);
+    if ($deflated !== null) {
+      return array(self::DATAFORMAT_DEFLATED, $deflated);
     }
 
-    return parent::save();
+    return array(self::DATAFORMAT_RAW, $data);
+  }
+
+  public function saveAsText() {
+    $old_type = $this->getDataType();
+    $old_data = $this->getData();
+
+    if ($old_type == self::DATATYPE_TEXT) {
+      return $this;
+    }
+
+    $raw_data = $this->getRawData();
+
+    $this->setDataType(self::DATATYPE_TEXT);
+
+    list($format, $data) = $this->formatDataForStorage($raw_data);
+    $this->setDataFormat($format);
+    $this->setData($data);
+
+    $result = $this->save();
+
+    $this->destroyData($old_type, $old_data);
+
+    return $result;
+  }
+
+  public function saveAsFile() {
+    $old_type = $this->getDataType();
+    $old_data = $this->getData();
+
+    if ($old_type == self::DATATYPE_FILE) {
+      return $this;
+    }
+
+    $raw_data = $this->getRawData();
+
+    list($format, $data) = $this->formatDataForStorage($raw_data);
+    $this->setDataFormat($format);
+
+    $file = PhabricatorFile::newFromFileData(
+      $data,
+      array(
+        'name' => 'differential-hunk',
+        'mime-type' => 'application/octet-stream',
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+      ));
+
+    $this->setDataType(self::DATATYPE_FILE);
+    $this->setData($file->getPHID());
+
+    // NOTE: Because hunks don't have a PHID and we just load hunk data with
+    // the omnipotent viewer, we do not need to attach the file to anything.
+
+    $result = $this->save();
+
+    $this->destroyData($old_type, $old_data);
+
+    return $result;
   }
 
   private function getRawData() {
@@ -98,6 +148,8 @@ final class DifferentialModernHunk extends DifferentialHunk {
           $data = $data;
           break;
         case self::DATATYPE_FILE:
+          $data = $this->loadFileData();
+          break;
         default:
           throw new Exception(
             pht('Hunk has unsupported data type "%s"!', $type));
@@ -121,6 +173,77 @@ final class DifferentialModernHunk extends DifferentialHunk {
     }
 
     return $this->rawData;
+  }
+
+  private function loadFileData() {
+    if ($this->fileData === null) {
+      $type = $this->getDataType();
+      if ($type !== self::DATATYPE_FILE) {
+        throw new Exception(
+          pht(
+            'Unable to load file data for hunk with wrong data type ("%s").',
+            $type));
+      }
+
+      $file_phid = $this->getData();
+
+      $file = $this->loadRawFile($file_phid);
+      $data = $file->loadFileData();
+
+      $this->fileData = $data;
+    }
+
+    return $this->fileData;
+  }
+
+  private function loadRawFile($file_phid) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->execute();
+    if (!$files) {
+      throw new Exception(
+        pht(
+          'Failed to load file ("%s") with hunk data.',
+          $file_phid));
+    }
+
+    $file = head($files);
+
+    return $file;
+  }
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $type = $this->getDataType();
+    $data = $this->getData();
+
+    $this->destroyData($type, $data, $engine);
+
+    return parent::destroyObjectPermanently($engine);
+  }
+
+
+  private function destroyData(
+    $type,
+    $data,
+    PhabricatorDestructionEngine $engine = null) {
+
+    if (!$engine) {
+      $engine = new PhabricatorDestructionEngine();
+    }
+
+    switch ($type) {
+      case self::DATATYPE_FILE:
+        $file = $this->loadRawFile($data);
+        $engine->destroyObject($file);
+        break;
+    }
   }
 
 }

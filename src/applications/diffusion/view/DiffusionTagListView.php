@@ -29,44 +29,33 @@ final class DiffusionTagListView extends DiffusionView {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
     $viewer = $this->getViewer();
+    require_celerity_resource('diffusion-css');
 
     $buildables = $this->loadBuildables($this->commits);
-    $has_builds = false;
 
-    $rows = array();
+    $list = id(new PHUIObjectItemListView())
+      ->setFlush(true)
+      ->addClass('diffusion-history-list');
     foreach ($this->tags as $tag) {
       $commit = idx($this->commits, $tag->getCommitIdentifier());
+      $button_bar = new PHUIButtonBarView();
 
-      $tag_link = phutil_tag(
-        'a',
+      $tag_href = $drequest->generateURI(
         array(
-          'href' => $drequest->generateURI(
-            array(
-              'action' => 'browse',
-              'commit' => $tag->getName(),
-            )),
-        ),
-        $tag->getName());
+          'action' => 'history',
+          'commit' => $tag->getName(),
+        ));
 
-      $commit_link = phutil_tag(
-        'a',
+      $commit_href = $drequest->generateURI(
         array(
-          'href' => $drequest->generateURI(
-            array(
-              'action' => 'commit',
-              'commit' => $tag->getCommitIdentifier(),
-            )),
-        ),
-          $repository->formatCommitName(
-            $tag->getCommitIdentifier()));
+          'action' => 'commit',
+          'commit' => $tag->getCommitIdentifier(),
+        ));
 
-      $author = null;
-      if ($commit && $commit->getAuthorPHID()) {
-        $author = $this->handles[$commit->getAuthorPHID()]->renderLink();
-      } else if ($commit && $commit->getCommitData()) {
-        $author = self::renderName($commit->getCommitData()->getAuthorName());
+      if ($commit) {
+        $author = $this->renderAuthor($tag, $commit);
       } else {
-        $author = self::renderName($tag->getAuthor());
+        $author = null;
       }
 
       $description = null;
@@ -83,58 +72,98 @@ final class DiffusionTagListView extends DiffusionView {
         }
       }
 
-      $build = null;
+      $build_view = null;
       if ($commit) {
         $buildable = idx($buildables, $commit->getPHID());
         if ($buildable) {
-          $build = $this->renderBuildable($buildable);
-          $has_builds = true;
+          $build_view = $this->renderBuildable($buildable, 'button');
         }
       }
 
-      $history = $this->linkTagHistory($tag->getName());
+      if ($repository->supportsBranchComparison()) {
+        $compare_uri = $drequest->generateURI(
+          array(
+            'action' => 'compare',
+            'head' => $tag->getName(),
+          ));
 
-      $rows[] = array(
-        $history,
-        $tag_link,
-        $commit_link,
-        $build,
-        $author,
-        $description,
-        $viewer->formatShortDateTime($tag->getEpoch()),
-      );
-    }
+        $button_bar->addButton(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setIcon('fa-balance-scale')
+            ->setToolTip(pht('Compare'))
+            ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
+            ->setWorkflow(true)
+            ->setHref($compare_uri));
+      }
 
-    $table = id(new AphrontTableView($rows))
-      ->setHeaders(
+      $commit_name = $repository->formatCommitName(
+        $tag->getCommitIdentifier(), $local = true);
+
+      $browse_href = $drequest->generateURI(
         array(
-          null,
-          pht('Tag'),
-          pht('Commit'),
-          null,
-          pht('Author'),
-          pht('Description'),
-          pht('Created'),
-        ))
-      ->setColumnClasses(
-        array(
-          'nudgeright',
-          'pri',
-          '',
-          '',
-          '',
-          'wide',
-          'right',
-        ))
-      ->setColumnVisibility(
-        array(
-          true,
-          true,
-          true,
-          $has_builds,
+          'action' => 'browse',
+          'commit' => $tag->getName(),
         ));
 
-    return $table->render();
+      $button_bar->addButton(
+        id(new PHUIButtonView())
+          ->setTooltip(pht('Browse'))
+          ->setIcon('fa-code')
+          ->setHref($browse_href)
+          ->setTag('a')
+          ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE));
+
+      $commit_tag = id(new PHUITagView())
+        ->setName($commit_name)
+        ->setHref($commit_href)
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setColor(PHUITagView::COLOR_INDIGO)
+        ->setBorder(PHUITagView::BORDER_NONE)
+        ->setSlimShady(true);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($tag->getName())
+        ->setHref($tag_href)
+        ->addAttribute(array($commit_tag))
+        ->addAttribute($description)
+        ->setSideColumn(array(
+          $build_view,
+          $button_bar,
+        ));
+
+      if ($author) {
+        $item->addAttribute($author);
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
+  }
+
+  private function renderAuthor(
+    DiffusionRepositoryTag $tag,
+    PhabricatorRepositoryCommit $commit) {
+    $viewer = $this->getViewer();
+
+    if ($commit->getAuthorPHID()) {
+      $author = $this->handles[$commit->getAuthorPHID()]->renderLink();
+    } else if ($commit->getCommitData()) {
+      $author = self::renderName($commit->getCommitData()->getAuthorName());
+    } else {
+      $author = self::renderName($tag->getAuthor());
+    }
+
+    $committed = phabricator_datetime($commit->getEpoch(), $viewer);
+    $author_name = phutil_tag(
+      'strong',
+      array(
+        'class' => 'diffusion-history-author-name',
+      ),
+      $author);
+
+    return pht('%s on %s.', $author_name, $committed);
   }
 
 }

@@ -3,11 +3,15 @@
 final class PhabricatorFilesComposeAvatarExample extends PhabricatorUIExample {
 
   public function getName() {
-    return pht('Generate Avatar Images');
+    return pht('Avatars');
   }
 
   public function getDescription() {
     return pht('Tests various color palettes and sizes.');
+  }
+
+  public function getCategory() {
+    return pht('Technical');
   }
 
   public function renderExample() {

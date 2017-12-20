@@ -63,7 +63,13 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit Settings');
+    $page = $this->getSelectedPage();
+
+    if ($page) {
+      return $page->getLabel();
+    }
+
+    return pht('Settings');
   }
 
   protected function getObjectEditShortText($object) {
@@ -90,6 +96,20 @@ final class PhabricatorSettingsEditEngine
     }
 
     return pht('Settings');
+  }
+
+  protected function getPageHeader($object) {
+    $user = $object->getUser();
+    if ($user) {
+      $text = pht('Edit Settings (%s)', $user->getUserName());
+    } else {
+      $text = pht('Edit Global Settings');
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($text);
+
+    return $header;
   }
 
   protected function getEditorURI() {

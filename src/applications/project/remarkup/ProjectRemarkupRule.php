@@ -24,7 +24,7 @@ final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
   protected function getObjectIDPattern() {
     // NOTE: The latter half of this rule matches monograms with internal
     // periods, like `#domain.com`, but does not match monograms with terminal
-    // periods, because they're probably just puncutation.
+    // periods, because they're probably just punctuation.
 
     // Broadly, this will not match every possible project monogram, and we
     // accept some false negatives -- like `#dot.` -- in order to avoid a bunch

@@ -10,7 +10,8 @@ final class DifferentialRevisionResignTransaction
     return pht('Resign as Reviewer');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('You will resign as a reviewer for this change.');
   }
 

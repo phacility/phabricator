@@ -28,6 +28,8 @@ final class PHUITagView extends AphrontTagView {
   const COLOR_OBJECT        = 'object';
   const COLOR_PERSON        = 'person';
 
+  const BORDER_NONE         = 'border-none';
+
   private $type;
   private $href;
   private $name;
@@ -40,6 +42,7 @@ final class PHUITagView extends AphrontTagView {
   private $icon;
   private $shade;
   private $slimShady;
+  private $border;
 
   public function setType($type) {
     $this->type = $type;
@@ -104,6 +107,11 @@ final class PHUITagView extends AphrontTagView {
     return $this;
   }
 
+  public function setBorder($border) {
+    $this->border = $border;
+    return $this;
+  }
+
   public function setIcon($icon) {
     $this->icon = $icon;
     return $this;
@@ -140,6 +148,10 @@ final class PHUITagView extends AphrontTagView {
 
     if ($this->icon) {
       $classes[] = 'phui-tag-icon-view';
+    }
+
+    if ($this->border) {
+      $classes[] = 'phui-tag-'.$this->border;
     }
 
     if ($this->phid) {

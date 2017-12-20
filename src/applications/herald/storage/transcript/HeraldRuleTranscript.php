@@ -9,6 +9,12 @@ final class HeraldRuleTranscript extends Phobject {
   protected $ruleName;
   protected $ruleOwner;
 
+  const RESULT_FORBIDDEN = 'forbidden';
+
+  public function isForbidden() {
+    return ($this->getResult() === self::RESULT_FORBIDDEN);
+  }
+
   public function setResult($result) {
     $this->result = $result;
     return $this;

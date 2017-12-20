@@ -20,6 +20,7 @@ input.diffusion-clone-uri {
 
 .diffusion-browse-name {
   margin-left: 8px;
+  letter-spacing: 0.02em;
 }
 
 .diffusion-link-icon + .diffusion-link-icon {

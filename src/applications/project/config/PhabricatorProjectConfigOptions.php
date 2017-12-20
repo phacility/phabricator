@@ -21,7 +21,7 @@ final class PhabricatorProjectConfigOptions
 
   public function getOptions() {
     $default_icons = PhabricatorProjectIconSet::getDefaultConfiguration();
-    $icons_type = 'custom:PhabricatorProjectIconsConfigOptionType';
+    $icons_type = 'project.icons';
 
     $icons_description = $this->deformat(pht(<<<EOTEXT
 Allows you to change and customize the available project icons.
@@ -34,6 +34,8 @@ a dictionary, which may contain these keys:
   - `key` //Required string.// Internal key identifying the icon.
   - `name` //Required string.// Human-readable icon name.
   - `icon` //Required string.// Specifies which actual icon image to use.
+  - `image` //Optional string.// Selects a default image. Select an image from
+    `resources/builtins/projects/`.
   - `default` //Optional bool.// Selects a default icon. Exactly one icon must
     be selected as the default.
   - `disabled` //Optional bool.// If true, this icon will no longer be
@@ -48,7 +50,7 @@ EOTEXT
       ));
 
     $default_colors = PhabricatorProjectIconSet::getDefaultColorMap();
-    $colors_type = 'custom:PhabricatorProjectColorsConfigOptionType';
+    $colors_type = 'project.colors';
 
     $colors_description = $this->deformat(pht(<<<EOTEXT
 Allows you to relabel project colors.

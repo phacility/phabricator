@@ -56,6 +56,10 @@ final class PhabricatorFulltextToken extends Phobject {
           $shade = PHUITagView::COLOR_RED;
           $icon = 'fa-minus';
           break;
+        case PhutilSearchQueryCompiler::OPERATOR_SUBSTRING:
+          $tip = pht('Substring Search');
+          $shade = PHUITagView::COLOR_VIOLET;
+          break;
         default:
           $shade = PHUITagView::COLOR_BLUE;
           break;

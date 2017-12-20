@@ -88,7 +88,7 @@ that you're looking at a problem which is deeper in the stack, and you need
 to go down further to identify and understand it.
 
 Conversely, if the "Wall Time (Exclusive)" column is large, or the children
-of a call are all cheap, there's probably something expesive happening in the
+of a call are all cheap, there's probably something expensive happening in the
 call itself.
 
 The "Count" column can also sometimes tip you off that something is amiss, if

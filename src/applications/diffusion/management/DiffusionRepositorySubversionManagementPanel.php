@@ -19,44 +19,13 @@ final class DiffusionRepositorySubversionManagementPanel
   }
 
   public function getManagementPanelIcon() {
-    $repository = $this->getRepository();
-
-    $has_any = (bool)$repository->getDetail('svn-subpath');
-
-    if ($has_any) {
-      return 'fa-database';
-    } else {
-      return 'fa-database grey';
-    }
+    return 'fa-folder';
   }
 
   protected function getEditEngineFieldKeys() {
     return array(
       'importOnly',
     );
-  }
-
-  public function buildManagementPanelCurtain() {
-    $repository = $this->getRepository();
-    $viewer = $this->getViewer();
-    $action_list = $this->getNewActionList();
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $subversion_uri = $this->getEditPageURI();
-
-    $action_list->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-pencil')
-        ->setName(pht('Edit Properties'))
-        ->setHref($subversion_uri)
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    return $this->getNewCurtainView($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -71,8 +40,22 @@ final class DiffusionRepositorySubversionManagementPanel
       phutil_tag('em', array(), pht('Import Entire Repository')));
     $view->addProperty(pht('Import Only'), $default_branch);
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
-    return $this->newBox(pht('Subversion'), $view);
+    $subversion_uri = $this->getEditPageURI();
+
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-pencil')
+      ->setText(pht('Edit'))
+      ->setHref($subversion_uri)
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
+    return $this->newBox(pht('Subversion'), $view, array($button));
   }
 
 }

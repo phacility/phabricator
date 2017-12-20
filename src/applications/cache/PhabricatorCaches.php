@@ -51,6 +51,12 @@ final class PhabricatorCaches extends Phobject {
    */
   public static function destroyRequestCache() {
     self::$requestCache = null;
+
+    // See T12997. Force the GC to run when the request cache is destroyed to
+    // clean up any cycles which may still be hanging around.
+    if (function_exists('gc_collect_cycles')) {
+      gc_collect_cycles();
+    }
   }
 
 

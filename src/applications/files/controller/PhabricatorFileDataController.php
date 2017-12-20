@@ -10,6 +10,10 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     return false;
   }
 
+  public function shouldAllowPartialSessions() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $this->phid = $request->getURIData('phid');
@@ -119,7 +123,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     // make this logic simpler and more consistent.
 
     // Beyond making the policy check itself more consistent, this also makes
-    // sure we're consitent about returning HTTP 404 on bad requests instead
+    // sure we're consistent about returning HTTP 404 on bad requests instead
     // of serving HTTP 200 with a login page, which can mislead some clients.
 
     $viewer = PhabricatorUser::getOmnipotentUser();

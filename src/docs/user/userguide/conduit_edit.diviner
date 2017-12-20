@@ -37,7 +37,7 @@ Editing Objects
 
 To edit objects, pass a list of transactions and use `objectIdentifier` to
 specify which object to apply them to. You can normally pass an ID or PHID,
-and many applicaitons also allow you to pass a monogram (for example, you can
+and many applications also allow you to pass a monogram (for example, you can
 edit a task by passing `T123`).
 
 

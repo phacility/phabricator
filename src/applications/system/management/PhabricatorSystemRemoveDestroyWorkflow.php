@@ -145,6 +145,7 @@ EOBANNER;
 
     $console->writeOut("%s\n", pht('Destroying objects...'));
 
+    $notes = array();
     foreach ($named_objects as $object_name => $object) {
       $console->writeOut(
         pht(
@@ -152,8 +153,14 @@ EOBANNER;
           get_class($object),
           $object_name));
 
-      id(new PhabricatorDestructionEngine())
-        ->destroyObject($object);
+      $engine = id(new PhabricatorDestructionEngine())
+        ->setCollectNotes(true);
+
+      $engine->destroyObject($object);
+
+      foreach ($engine->getNotes() as $note) {
+        $notes[] = $note;
+      }
     }
 
     $console->writeOut(
@@ -161,6 +168,12 @@ EOBANNER;
       pht(
         'Permanently destroyed %s object(s).',
         phutil_count($named_objects)));
+
+    if ($notes) {
+      id(new PhutilConsoleList())
+        ->addItems($notes)
+        ->draw();
+    }
 
     return 0;
   }

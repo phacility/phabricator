@@ -52,8 +52,9 @@ final class DifferentialCloseConduitAPIMethod
 
     $xactions = array();
     $xactions[] = id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
-      ->setNewValue(DifferentialAction::ACTION_CLOSE);
+      ->setTransactionType(
+        DifferentialRevisionCloseTransaction::TRANSACTIONTYPE)
+      ->setNewValue(true);
 
     $content_source = $request->newContentSource();
 

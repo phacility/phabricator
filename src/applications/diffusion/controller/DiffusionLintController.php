@@ -167,6 +167,7 @@ final class DiffusionLintController extends DiffusionController {
         'path'   => true,
         'view'   => 'lint',
       ));
+    $crumbs->setBorder(true);
 
     if ($drequest) {
       $title[] = $drequest->getRepository()->getDisplayName();
@@ -178,7 +179,7 @@ final class DiffusionLintController extends DiffusionController {
       $branch = $drequest->loadBranch();
 
       $header = id(new PHUIHeaderView())
-        ->setHeader($this->renderPathLinks($drequest, 'lint'))
+        ->setHeader(pht('Lint: %s', $this->renderPathLinks($drequest, 'lint')))
         ->setUser($viewer)
         ->setHeaderIcon('fa-code');
       $actions = $this->buildActionView($drequest);
@@ -465,6 +466,7 @@ final class DiffusionLintController extends DiffusionController {
         'path'   => true,
         'view'   => 'lint',
       ));
+    $crumbs->setBorder(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Lint: %s', $drequest->getRepository()->getDisplayName()))

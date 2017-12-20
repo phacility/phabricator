@@ -29,6 +29,7 @@
   position: absolute;
 }
 
+
 .phame-blog-description + .phui-document-view-pro-box {
   border-top: 1px solid rgba({$alphablue}, 0.20);
 }
@@ -38,11 +39,11 @@
 }
 
 .phame-home-view .phui-side-column {
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .phame-home-view {
-  background-color: #fff;
+  background-color: {$page.content};
   border-bottom: 1px solid rgba({$alphagrey},.1);
 }
 
@@ -145,7 +146,7 @@
   width: 360px;
   float: right;
   text-align: right;
-  color: #000;
+  color: {$blacktext};
   position: relative;
 }
 
@@ -179,7 +180,7 @@
   width: 360px;
   float: left;
   text-align: left;
-  color: #000;
+  color: {$blacktext};
   position: relative;
 }
 
@@ -258,7 +259,7 @@
 
 /* Hero Image */
 .phame-header-hero {
-  background-color: #fff;
+  background-color: {$page.content};
   margin-top: 16px;
 }
 
@@ -281,7 +282,7 @@
 .phame-mega-header {
   margin: 0 auto;
   text-align: center;
-  background: #fff;
+  background: {$page.content};
   padding: 16px 0 24px;
 }
 
@@ -290,7 +291,7 @@
 }
 
 .phame-mega-header .phame-header-title {
-  color: #000;
+  color: {$blacktext};
   font-size: 28px;
   font-weight: bold;
   padding-top: 24px;

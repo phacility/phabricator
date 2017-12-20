@@ -10,39 +10,39 @@ final class PhabricatorConfigClusterRepositoriesController
     $title = pht('Cluster Repository Status');
 
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
+    $button = id(new PHUIButtonView())
+      ->setIcon('fa-book')
+      ->setHref($doc_href)
+      ->setTag('a')
+      ->setText(pht('Documentation'));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true)
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Repository Servers'))
-      ->setBorder(true);
+    $header = $this->buildHeaderView($title, $button);
 
     $repository_status = $this->buildClusterRepositoryStatus();
-    $repository_errors = $this->buildClusterRepositoryErrors();
+    $repo_status = $this->buildConfigBoxView(
+      pht('Repository Status'), $repository_status);
 
-    $content = id(new PhabricatorConfigPageView())
+    $repository_errors = $this->buildClusterRepositoryErrors();
+    $repo_errors = $this->buildConfigBoxView(
+      pht('Repository Errors'), $repository_errors);
+
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
+
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent(
-        array(
-          $repository_status,
-          $repository_errors,
-        ));
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn(array(
+        $repo_status,
+        $repo_errors,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
   private function buildClusterRepositoryStatus() {

@@ -9,11 +9,11 @@ final class PhabricatorProjectsFulltextEngineExtension
     return pht('Projects');
   }
 
-  public function shouldIndexFulltextObject($object) {
+  public function shouldEnrichFulltextObject($object) {
     return ($object instanceof PhabricatorProjectInterface);
   }
 
-  public function indexFulltextObject(
+  public function enrichFulltextObject(
     $object,
     PhabricatorSearchAbstractDocument $document) {
 

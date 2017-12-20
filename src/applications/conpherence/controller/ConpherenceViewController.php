@@ -195,7 +195,7 @@ final class ConpherenceViewController extends
         ->appendChild(
           id(new PHUIButtonView())
           ->setTag('a')
-          ->setText(pht('Login to Participate'))
+          ->setText(pht('Log In to Participate'))
           ->setHref((string)$login_href));
     }
   }

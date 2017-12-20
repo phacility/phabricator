@@ -107,6 +107,19 @@ final class PHUIDiffInlineCommentDetailView
         break;
     }
 
+    $is_draft_done = false;
+    switch ($inline->getFixedState()) {
+      case PhabricatorInlineCommentInterface::STATE_DRAFT:
+      case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
+        $is_draft_done = true;
+        break;
+    }
+
+    $is_synthetic = false;
+    if ($inline->getSyntheticAuthor()) {
+      $is_synthetic = true;
+    }
+
     $metadata = array(
       'id' => $inline->getID(),
       'phid' => $inline->getPHID(),
@@ -120,6 +133,8 @@ final class PHUIDiffInlineCommentDetailView
       'isDraft' => $inline->isDraft(),
       'isFixed' => $is_fixed,
       'isGhost' => $inline->getIsGhost(),
+      'isSynthetic' => $is_synthetic,
+      'isDraftDone' => $is_draft_done,
     );
 
     $sigil = 'differential-inline-comment';
@@ -135,11 +150,6 @@ final class PHUIDiffInlineCommentDetailView
     $handles = $this->handles;
 
     $links = array();
-
-    $is_synthetic = false;
-    if ($inline->getSyntheticAuthor()) {
-      $is_synthetic = true;
-    }
 
     $draft_text = null;
     if (!$is_synthetic) {
@@ -264,7 +274,7 @@ final class PHUIDiffInlineCommentDetailView
     if (!$this->preview && $this->canHide()) {
       $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
-        ->setTooltip(pht('Hide Comment'))
+        ->setTooltip(pht('Collapse'))
         ->setIcon('fa-times')
         ->addSigil('hide-inline')
         ->setMustCapture(true);

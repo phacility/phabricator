@@ -17,6 +17,10 @@ abstract class PhabricatorUIExample extends Phobject {
   abstract public function getDescription();
   abstract public function renderExample();
 
+  public function getCategory() {
+    return pht('General');
+  }
+
   protected function createBasicDummyHandle($name, $type, $fullname = null,
     $uri = null) {
 

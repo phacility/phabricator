@@ -35,13 +35,13 @@
 }
 
 .phui-document-content
-  .phui-header-shell.phui-header-no-backgound {
+  .phui-header-shell.phui-header-no-background {
   border-bottom: 1px solid {$thinblueborder};
   margin: 0 0 16px 0;
 }
 
 .phui-document-content
-  .phui-header-shell.phui-header-no-backgound
+  .phui-header-shell.phui-header-no-background
   .phui-header-view {
   padding: 8px 0 4px;
 }
@@ -55,7 +55,7 @@
 }
 
 .phui-document-content {
-  background: #fff;
+  background: {$page.content};
 }
 
 .phui-document-content .phabricator-remarkup {

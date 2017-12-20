@@ -10,8 +10,12 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return pht('Differential');
   }
 
+  public function getMenuName() {
+    return pht('Code Review');
+  }
+
   public function getShortDescription() {
-    return pht('Review Code');
+    return pht('Pre-Commit Review');
   }
 
   public function getIcon() {
@@ -41,12 +45,6 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return "\xE2\x9A\x99";
   }
 
-  public function getEventListeners() {
-    return array(
-      new DifferentialLandingActionMenuEventListener(),
-    );
-  }
-
   public function getOverview() {
     return pht(
       'Differential is a **code review application** which allows '.
@@ -69,14 +67,14 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
             => 'DifferentialRevisionEditController',
           $this->getEditRoutePattern('attach/(?P<diffID>[^/]+)/to/')
             => 'DifferentialRevisionEditController',
-          'land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
-            => 'DifferentialRevisionLandController',
           'closedetails/(?P<phid>[^/]+)/'
             => 'DifferentialRevisionCloseDetailsController',
           'update/(?P<revisionID>[1-9]\d*)/'
             => 'DifferentialDiffCreateController',
           'operation/(?P<id>[1-9]\d*)/'
             => 'DifferentialRevisionOperationController',
+          'inlines/(?P<id>[1-9]\d*)/'
+            => 'DifferentialRevisionInlinesController',
         ),
         'comment/' => array(
           'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',

@@ -6,15 +6,15 @@
 }
 
 .setup-issue-shell {
-  max-width: 760px;
+  max-width: 880px;
   margin: 16px auto;
 }
 
 .setup-issue {
   background: #fff;
-  border: 1px solid #BFCFDA;
-  padding: 8px;
-  border-radius: 3px;
+  border: 1px solid #e4e5e6;
+  padding: 0;
+  border-radius: 5px;
 }
 
 .setup-issue p {
@@ -24,29 +24,30 @@
 .setup-issue table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #BFCFDA;
+  border: 1px solid #e2e2e2;
 }
 
 .setup-issue table th {
   text-align: right;
   width: 30%;
   background: #F8F9FC;
-  border: 1px solid #BFCFDA;
+  border: 1px solid #e2e2e2;
   padding: 8px;
 }
 
 .setup-issue table td {
-  border: 1px solid #BFCFDA;
+  border: 1px solid #e2e2e2;
   padding: 8px;
   word-break: break-word;
 }
 
 .setup-issue pre {
   width: auto;
-  border: 1px solid #BFCFDA;
-  padding: 10px 2%;
+  border: 1px solid #e2e2e2;
+  padding: 12px;
   background: #F8F9FC;
   overflow-x: auto;
+  border-radius: 3px;
 }
 
 .setup-issue tt {
@@ -60,51 +61,51 @@
 }
 
 .setup-issue-instructions {
-  font-size: 14px;
-  padding: 12px 0;
+  font-size: 13px;
+  padding: 16px;
   line-height: 20px;
-  background: #fff;
-  border-bottom: 1px solid #BFCFDA;
-  margin: 0 12px;
+  background: rgba(71,87,120,0.08);
+  border-radius: 3px;
 }
 
 .setup-fatal .setup-issue-instructions {
-  color: #c0392b;
+  color: #af1404;
   background: #f4dddb;
-  padding: 12px;
-  margin: 0 0 12px;
-  border-bottom: 1px solid #c0392b;
 }
 
 .setup-issue-name {
-  color: #464C5C;
-  padding: 4px 8px 12px;
-  border-bottom: 1px solid #BFCFDA;
   font-size: 15px;
   font-weight: bold;
+  color: #6B748C;
+  border-bottom: 1px solid #e2e2e2;
+  overflow: hidden;
+  padding: 16px;
+  line-height: 24px;
 }
 
-.setup-issue-tail {
-  margin-top: 12px;
+.setup-issue-body {
+  padding: 16px 16px 0 16px;
 }
 
 .setup-issue-status {
-  margin: 12px 4px 0;
+  margin: 0 0 16px 0;
   padding: 12px;
   background: #FDF5D4;
-  color: #bc7837;
-  border: 1px solid #bc7837;
+  color: #ab8206;
   border-radius: 3px;
 }
 
 .setup-issue-actions {
-  padding: 8px 12px;
-  border-top: 1px solid #dfdfdf;
-  background-color: #f7f7f7;
-  border-bottom-right-radius: 3px;
-  border-bottom-left-radius: 3px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
   overflow: hidden;
-  margin: 0 -8px -8px -8px;
+  text-align: right;
+}
+
+.setup-issue-actions .button {
+  margin-left: 8px;
 }
 
 .setup-issue-next {
@@ -112,14 +113,17 @@
   border: 1px solid #BFCFDA;
   background: #daeaf3;
   text-align: center;
-  font-size: 16px;
   margin: 12px 0;
   color: #2980b9;
   border-radius: 3px;
 }
 
 .setup-issue-config {
-  padding: 8px 12px;
+  padding: 12px 0;
+}
+
+.setup-issue-config + .setup-issue-config {
+  padding-top: 0;
 }
 
 .setup-issue ul {
@@ -133,4 +137,13 @@
   padding: 4px;
   text-align: right;
   color: #74777D;
+}
+
+.phui-two-column-view .setup-issue-background {
+  padding: 0;
+}
+
+.phui-two-column-view .setup-issue-shell {
+  width: auto;
+  margin: 0;
 }

@@ -22,6 +22,14 @@ final class PhabricatorProjectTransactionEditor
     return pht('Projects');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this project.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -112,16 +120,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectNameTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectStatusTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectImageTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectIconTransaction::TRANSACTIONTYPE:
-      case PhabricatorProjectColorTransaction::TRANSACTIONTYPE:
-        PhabricatorPolicyFilter::requireCapability(
-          $this->requireActor(),
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        return;
       case PhabricatorProjectLockTransaction::TRANSACTIONTYPE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
@@ -296,10 +294,6 @@ final class PhabricatorProjectTransactionEditor
       }
     }
 
-    if ($this->getIsNewObject()) {
-      $this->setDefaultProfilePicture($object);
-    }
-
     // TODO: We should dump an informational transaction onto the parent
     // project to show that we created the sub-thing.
 
@@ -456,34 +450,6 @@ final class PhabricatorProjectTransactionEditor
 
     return $results;
   }
-
-  private function setDefaultProfilePicture(PhabricatorProject $project) {
-    if ($project->isMilestone()) {
-      return;
-    }
-
-    $compose_color = $project->getDisplayIconComposeColor();
-    $compose_icon = $project->getDisplayIconComposeIcon();
-
-    $builtin = id(new PhabricatorFilesComposeIconBuiltinFile())
-      ->setColor($compose_color)
-      ->setIcon($compose_icon);
-
-    $data = $builtin->loadBuiltinFileData();
-
-    $file = PhabricatorFile::newFromFileData(
-      $data,
-      array(
-        'name' => $builtin->getBuiltinDisplayName(),
-        'profile' => true,
-        'canCDN' => true,
-      ));
-
-    $project
-      ->setProfileImagePHID($file->getPHID())
-      ->save();
-  }
-
 
   protected function shouldApplyHeraldRules(
     PhabricatorLiskDAO $object,

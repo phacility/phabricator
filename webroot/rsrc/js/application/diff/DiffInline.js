@@ -14,7 +14,6 @@ JX.install('DiffInline', {
     _phid: null,
     _changesetID: null,
     _row: null,
-    _hidden: false,
     _number: null,
     _length: null,
     _displaySide: null,
@@ -29,20 +28,22 @@ JX.install('DiffInline', {
     _isLoading: false,
 
     _changeset: null,
-    _objective: null,
 
+    _isCollapsed: false,
     _isDraft: null,
+    _isDraftDone: null,
     _isFixed: null,
     _isEditing: false,
     _isNew: false,
+    _isSynthetic: false,
+    _isHidden: false,
 
     bindToRow: function(row) {
       this._row = row;
-      this._objective.setAnchor(this._row);
 
       var row_data = JX.Stratcom.getData(row);
       row_data.inline = this;
-      this._hidden = row_data.hidden || false;
+      this._isCollapsed = row_data.hidden || false;
 
       // TODO: Get smarter about this once we do more editing, this is pretty
       // hacky.
@@ -73,6 +74,8 @@ JX.install('DiffInline', {
       this._isDraft = data.isDraft;
       this._isFixed = data.isFixed;
       this._isGhost = data.isGhost;
+      this._isSynthetic = data.isSynthetic;
+      this._isDraftDone = data.isDraftDone;
 
       this._changesetID = data.changesetID;
       this._isNew = false;
@@ -80,9 +83,39 @@ JX.install('DiffInline', {
 
       this.setInvisible(false);
 
-      this.updateObjective();
-
       return this;
+    },
+
+    isDraft: function() {
+      return this._isDraft;
+    },
+
+    isDone: function() {
+      return this._isFixed;
+    },
+
+    isEditing: function() {
+      return this._isEditing;
+    },
+
+    isDeleted: function() {
+      return this._isDeleted;
+    },
+
+    isSynthetic: function() {
+      return this._isSynthetic;
+    },
+
+    isDraftDone: function() {
+      return this._isDraftDone;
+    },
+
+    isHidden: function() {
+      return this._isHidden;
+    },
+
+    isGhost: function() {
+      return this._isGhost;
     },
 
     bindToRange: function(data) {
@@ -171,14 +204,6 @@ JX.install('DiffInline', {
 
     setChangeset: function(changeset) {
       this._changeset = changeset;
-
-      var objectives = changeset.getChangesetList().getObjectives();
-
-      // Create this inline's objective, but don't show it yet.
-      this._objective = objectives.newObjective()
-        .setCallback(JX.bind(this, this._onobjective))
-        .hide();
-
       return this;
     },
 
@@ -188,82 +213,13 @@ JX.install('DiffInline', {
 
     setEditing: function(editing) {
       this._isEditing = editing;
-      this.updateObjective();
       return this;
     },
 
-    _onobjective: function() {
-      this.getChangeset().getChangesetList().selectInline(this);
-    },
-
-    updateObjective: function() {
-      var objective = this._objective;
-
-      if (this.isHidden() || this._isDeleted) {
-        objective.hide();
-        return;
-      }
-
-      // If this is a new comment which we aren't editing, don't show anything:
-      // the use started a comment or reply, then cancelled it.
-      if (this._isNew && !this._isEditing) {
-        objective.hide();
-        return;
-      }
-
-      var changeset = this.getChangeset();
-      if (!changeset.isVisible()) {
-        objective.hide();
-        return;
-      }
-
-      var pht = changeset.getChangesetList().getTranslations();
-
-      var icon = 'fa-comment';
-      var color = 'bluegrey';
-      var tooltip = this._snippet;
-      var anchor = this._row;
-      var should_stack = false;
-
-      if (this._isEditing) {
-        icon = 'fa-star';
-        color = 'pink';
-        tooltip = pht('Editing Comment');
-
-        // If we're editing, anchor to the row with the editor instead of the
-        // actual comment row (which is invisible and can have a misleading
-        // position).
-        anchor = this._row.nextSibling;
-      } else if (this._isDraft) {
-        // This inline is an unsubmitted draft.
-        icon = 'fa-pencil';
-        color = 'indigo';
-      } else if (this._isFixed) {
-        // This inline has been marked done.
-        icon = 'fa-check';
-        color = 'grey';
-      } else if (this._isGhost) {
-        icon = 'fa-comment-o';
-        color = 'grey';
-      } else if (this._replyToCommentPHID) {
-        icon = 'fa-reply';
-        should_stack = true;
-      }
-
-      if (changeset.getChangesetList().getSelectedInline() === this) {
-        // TODO: Maybe add some other kind of effect here, since we're only
-        // using color to show this?
-        color = 'yellow';
-      }
-
-
-      objective
-        .setAnchor(anchor)
-        .setIcon(icon)
-        .setColor(color)
-        .setTooltip(tooltip)
-        .setShouldStack(should_stack)
-        .show();
+    setHidden: function(hidden) {
+      this._isHidden = hidden;
+      this._redraw();
+      return this;
     },
 
     canReply: function() {
@@ -290,7 +246,7 @@ JX.install('DiffInline', {
       return true;
     },
 
-    canHide: function() {
+    canCollapse: function() {
       if (!JX.DOM.scry(this._row, 'a', 'hide-inline').length) {
         return false;
       }
@@ -316,24 +272,21 @@ JX.install('DiffInline', {
 
       JX.Stratcom.getData(row).inline = this;
       this._row = row;
-      this._objective.setAnchor(this._row);
 
       this._id = null;
       this._phid = null;
-      this._hidden = false;
+      this._isCollapsed = false;
 
       this._originalText = null;
 
       return row;
     },
 
-    setHidden: function(hidden) {
-      this._hidden = hidden;
-
-      JX.DOM.alterClass(this._row, 'inline-hidden', this._hidden);
+    setCollapsed: function(collapsed) {
+      this._isCollapsed = collapsed;
 
       var op;
-      if (hidden) {
+      if (collapsed) {
         op = 'hide';
       } else {
         op = 'show';
@@ -346,11 +299,12 @@ JX.install('DiffInline', {
         .setHandler(JX.bag)
         .start();
 
+      this._redraw();
       this._didUpdate(true);
     },
 
-    isHidden: function() {
-      return this._hidden;
+    isCollapsed: function() {
+      return this._isCollapsed;
     },
 
     toggleDone: function() {
@@ -388,6 +342,7 @@ JX.install('DiffInline', {
       JX.DOM.alterClass(comment, 'inline-state-is-draft', response.draftState);
 
       this._isFixed = response.isChecked;
+      this._isDraftDone = !!response.draftState;
 
       this._didUpdate();
     },
@@ -747,7 +702,14 @@ JX.install('DiffInline', {
         JX.DOM.remove(this._row);
       }
 
-      this.bindToRow(new_row);
+      // If you delete the content on a comment and save it, it acts like a
+      // delete: the server does not return a new row.
+      if (new_row) {
+        this.bindToRow(new_row);
+      } else {
+        this.setDeleted(true);
+        this._row = null;
+      }
 
       this._didUpdate();
     },
@@ -759,8 +721,6 @@ JX.install('DiffInline', {
         this.getChangeset().getChangesetList().redrawPreview();
       }
 
-      this.updateObjective();
-
       this.getChangeset().getChangesetList().redrawCursor();
       this.getChangeset().getChangesetList().resetHover();
 
@@ -770,12 +730,15 @@ JX.install('DiffInline', {
     },
 
     _redraw: function() {
-      var is_invisible = (this._isInvisible || this._isDeleted);
-      var is_loading = (this._isLoading);
+      var is_invisible =
+        (this._isInvisible || this._isDeleted || this._isHidden);
+      var is_loading = this._isLoading;
+      var is_collapsed = (this._isCollapsed && !this._isHidden);
 
       var row = this._row;
       JX.DOM.alterClass(row, 'differential-inline-hidden', is_invisible);
       JX.DOM.alterClass(row, 'differential-inline-loading', is_loading);
+      JX.DOM.alterClass(row, 'inline-hidden', is_collapsed);
     },
 
     _removeRow: function(row) {

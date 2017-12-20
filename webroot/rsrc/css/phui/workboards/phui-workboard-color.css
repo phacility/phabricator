@@ -7,7 +7,7 @@
 }
 
 .phui-workboard-no-color {
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .phui-workboard-color .phui-crumbs-view {

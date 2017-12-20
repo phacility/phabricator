@@ -70,6 +70,8 @@ abstract class PhabricatorApplicationTransactionEditor
   private $feedRelatedPHIDs = array();
   private $modularTypes;
 
+  private $transactionQueue = array();
+
   const STORAGE_ENCODING_BINARY = 'binary';
 
   /**
@@ -486,8 +488,6 @@ abstract class PhabricatorApplicationTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_CREATE:
         return true;
-      case PhabricatorTransactions::TYPE_COMMENT:
-        return $xaction->hasComment();
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getApplicationTransactionHasEffect($xaction);
@@ -532,6 +532,10 @@ abstract class PhabricatorApplicationTransactionEditor
         $object,
         $xaction->getOldValue(),
         $xaction->getNewValue());
+    }
+
+    if ($xaction->hasComment()) {
+      return true;
     }
 
     return ($xaction->getOldValue() !== $xaction->getNewValue());
@@ -1103,7 +1107,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $this->heraldForcedEmailPHIDs = $adapter->getForcedEmailPHIDs();
     }
 
-    $this->didApplyTransactions($xactions);
+    $xactions = $this->didApplyTransactions($object, $xactions);
 
     if ($object instanceof PhabricatorCustomFieldInterface) {
       // Maybe this makes more sense to move into the search index itself? For
@@ -1172,6 +1176,8 @@ abstract class PhabricatorApplicationTransactionEditor
         'priority' => PhabricatorWorker::PRIORITY_ALERTS,
       ));
 
+    $this->flushTransactionQueue($object);
+
     return $xactions;
   }
 
@@ -1232,9 +1238,9 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xactions;
   }
 
-  protected function didApplyTransactions(array $xactions) {
+  protected function didApplyTransactions($object, array $xactions) {
     // Hook for subclasses.
-    return;
+    return $xactions;
   }
 
 
@@ -3699,7 +3705,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
       // If a later project in the list is an ancestor of this one, it will
       // have added itself to the map. If any ancestor of this project points
-      // at itself in the map, this project should be dicarded in favor of
+      // at itself in the map, this project should be discarded in favor of
       // that later ancestor.
       foreach ($project->getAncestorProjects() as $ancestor) {
         $ancestor_phid = $ancestor->getPHID();
@@ -3860,6 +3866,41 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getCreateObjectTitleForFeed($author, $object) {
     return pht('%s created an object: %s.', $author, $object);
+  }
+
+/* -(  Queue  )-------------------------------------------------------------- */
+
+  protected function queueTransaction(
+    PhabricatorApplicationTransaction $xaction) {
+    $this->transactionQueue[] = $xaction;
+    return $this;
+  }
+
+  private function flushTransactionQueue($object) {
+    if (!$this->transactionQueue) {
+      return;
+    }
+
+    $xactions = $this->transactionQueue;
+    $this->transactionQueue = array();
+
+    $editor = $this->newQueueEditor();
+
+    return $editor->applyTransactions($object, $xactions);
+  }
+
+  private function newQueueEditor() {
+    $editor = id(newv(get_class($this), array()))
+      ->setActor($this->getActor())
+      ->setContentSource($this->getContentSource())
+      ->setContinueOnNoEffect($this->getContinueOnNoEffect())
+      ->setContinueOnMissingFields($this->getContinueOnMissingFields());
+
+    if ($this->actingAsPHID !== null) {
+      $editor->setActingAsPHID($this->actingAsPHID);
+    }
+
+    return $editor;
   }
 
 }

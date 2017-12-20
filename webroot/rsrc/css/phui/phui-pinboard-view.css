@@ -16,7 +16,7 @@
   margin: 0 12px 16px 0;
   text-align: left;
   width: 280px;
-  background: #fff;
+  background: {$page.content};
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
 }
@@ -95,7 +95,7 @@
 .dashboard-panel .phui-pinboard-view {
   margin: 0;
   padding: 16px 12px 0 12px;
-  background: #fff;
+  background: {$page.content};
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};

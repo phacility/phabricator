@@ -13,20 +13,20 @@ final class PhabricatorPolicyRequestExceptionHandler
       'do something they do not have permission to do.');
   }
 
-  public function canHandleRequestException(
+  public function canHandleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     if (!$this->isPhabricatorSite($request)) {
       return false;
     }
 
-    return ($ex instanceof PhabricatorPolicyException);
+    return ($throwable instanceof PhabricatorPolicyException);
   }
 
-  public function handleRequestException(
+  public function handleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     $viewer = $this->getViewer($request);
 
@@ -52,12 +52,12 @@ final class PhabricatorPolicyRequestExceptionHandler
         array(
           'class' => 'aphront-policy-rejection',
         ),
-        $ex->getRejection()),
+        $throwable->getRejection()),
     );
 
     $list = null;
-    if ($ex->getCapabilityName()) {
-      $list = $ex->getMoreInfo();
+    if ($throwable->getCapabilityName()) {
+      $list = $throwable->getMoreInfo();
       foreach ($list as $key => $item) {
         $list[$key] = $item;
       }
@@ -67,12 +67,14 @@ final class PhabricatorPolicyRequestExceptionHandler
         array(
           'class' => 'aphront-capability-details',
         ),
-        pht('Users with the "%s" capability:', $ex->getCapabilityName()));
+        pht(
+          'Users with the "%s" capability:',
+          $throwable->getCapabilityName()));
 
     }
 
     $dialog = id(new AphrontDialogView())
-      ->setTitle($ex->getTitle())
+      ->setTitle($throwable->getTitle())
       ->setClass('aphront-access-dialog')
       ->setUser($viewer)
       ->appendChild($content);

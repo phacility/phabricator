@@ -100,7 +100,10 @@ final class PhabricatorManiphestTaskTestDataGenerator
   }
 
   public function generateTaskPriority() {
-    return array_rand(ManiphestTaskPriority::getTaskPriorityMap());
+    $pri = array_rand(ManiphestTaskPriority::getTaskPriorityMap());
+    $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+    $keyword = head(idx($keyword_map, $pri));
+    return $keyword;
   }
 
   public function generateTaskSubPriority() {

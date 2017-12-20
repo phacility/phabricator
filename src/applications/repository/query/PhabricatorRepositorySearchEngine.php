@@ -15,7 +15,8 @@ final class PhabricatorRepositorySearchEngine
     return id(new PhabricatorRepositoryQuery())
       ->needProjectPHIDs(true)
       ->needCommitCounts(true)
-      ->needMostRecentCommits(true);
+      ->needMostRecentCommits(true)
+      ->needProfileImage(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -23,9 +24,6 @@ final class PhabricatorRepositorySearchEngine
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Callsigns'))
         ->setKey('callsigns'),
-      id(new PhabricatorSearchTextField())
-        ->setLabel(pht('Name Contains'))
-        ->setKey('name'),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Status'))
         ->setKey('status')
@@ -69,10 +67,6 @@ final class PhabricatorRepositorySearchEngine
 
     if ($map['types']) {
       $query->withTypes($map['types']);
-    }
-
-    if (strlen($map['name'])) {
-      $query->withNameContains($map['name']);
     }
 
     if ($map['uris']) {
@@ -165,7 +159,8 @@ final class PhabricatorRepositorySearchEngine
         ->setObject($repository)
         ->setHeader($repository->getName())
         ->setObjectName($repository->getMonogram())
-        ->setHref($repository->getURI());
+        ->setHref($repository->getURI())
+        ->setImageURI($repository->getProfileImageURI());
 
       $commit = $repository->getMostRecentCommit();
       if ($commit) {

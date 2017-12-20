@@ -7,6 +7,11 @@
   display: none;
 }
 
+!print .phabricator-action-list-view {
+  padding: 4px 0;
+  display: none;
+}
+
 .device .phuix-dropdown-menu .phabricator-action-list-view {
   /* When an action list view appears inside a dropdown menu, don't hide it
      by default. */
@@ -112,12 +117,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.device-desktop li.phabricator-action-view-label:hover
-  .phabricator-action-view-item {
-    background-color: #fff;
-    color: {$bluetext};
-}
-
 .phabricator-action-view + .phabricator-action-view-label {
   padding-top: 8px;
 }
@@ -157,7 +156,6 @@
   .phabricator-action-view-icon,
 .device-desktop .phabricator-action-view-disabled:hover
   button.phabricator-action-view-icon {
-  background-color: {$greybackground};
   color: {$lightgreytext};
 }
 

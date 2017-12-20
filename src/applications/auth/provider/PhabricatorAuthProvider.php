@@ -389,7 +389,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
    * @param   AphrontRequest  HTTP request.
    * @param   string          Request mode string.
    * @param   map             Additional parameters, see above.
-   * @return  wild            Login button.
+   * @return  wild            Log in button.
    */
   protected function renderStandardLoginButton(
     AphrontRequest $request,
@@ -414,9 +414,9 @@ abstract class PhabricatorAuthProvider extends Phobject {
     } else if ($mode == 'invite') {
       $button_text = pht('Register Account');
     } else if ($this->shouldAllowRegistration()) {
-      $button_text = pht('Login or Register');
+      $button_text = pht('Log In or Register');
     } else {
-      $button_text = pht('Login');
+      $button_text = pht('Log In');
     }
 
     $icon = id(new PHUIIconView())

@@ -4,7 +4,13 @@
 
 .diffusion-source {
   width: 100%;
-  background: #fff;
+  background: {$page.content};
+  overflow: hidden;
+}
+
+.device-phone .diffusion-source-wrap {
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 .diffusion-source tr.phabricator-source-highlight {
@@ -27,6 +33,11 @@
   padding-left: 8px;
   width: 100%;
   word-break: break-all;
+}
+
+.device .diffusion-source td {
+  word-break: normal;
+  white-space: nowrap;
 }
 
 .diffusion-browse-type-form {
@@ -53,14 +64,14 @@
   color: {$darkbluetext};
 }
 
-.diffusion-rev-link a,
-.diffusion-rev-link span {
-  margin: 2px 8px 0;
+.diffusion-rev-link a {
+  margin: 0 8px 0 0;
   display: inline-block;
 }
 
 .diffusion-rev-link span {
-  margin-right: -4px;
+  display: inline-block;
+  margin-right: 4px;
   margin-left: -4px;
   color: {$lightgreytext};
 }
@@ -78,4 +89,14 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.diffusion-rev-link .diffusion-author-link {
+  display: inline-block;
+  padding: 0;
+  margin: 2px 6px -4px 8px;
+  width: 16px;
+  height: 16px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }

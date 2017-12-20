@@ -58,7 +58,7 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
         $button = phutil_tag(
           'a',
           array(
-            'class' => 'small grey button disabled',
+            'class' => 'small button button-grey disabled',
           ),
           pht('Current'));
       } else {
@@ -67,7 +67,7 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
           'a',
           array(
             'href' => '/auth/session/terminate/'.$session->getID().'/',
-            'class' => 'small grey button',
+            'class' => 'small button button-grey',
             'sigil' => 'workflow',
           ),
           pht('Terminate'));
@@ -112,33 +112,27 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
         'action',
       ));
 
-    $terminate_button = id(new PHUIButtonView())
+    $buttons = array();
+    $buttons[] = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-warning')
       ->setText(pht('Terminate All Sessions'))
       ->setHref('/auth/session/terminate/all/')
-      ->setTag('a')
       ->setWorkflow(true)
-      ->setIcon('fa-exclamation-triangle');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Active Login Sessions'))
-      ->addActionLink($terminate_button);
+      ->setColor(PHUIButtonView::RED);
 
     $hisec = ($viewer->getSession()->getHighSecurityUntil() - time());
     if ($hisec > 0) {
-      $hisec_button = id(new PHUIButtonView())
+      $buttons[] = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-lock')
         ->setText(pht('Leave High Security'))
         ->setHref('/auth/session/downgrade/')
-        ->setTag('a')
         ->setWorkflow(true)
-        ->setIcon('fa-lock');
-      $header->addActionLink($hisec_button);
+        ->setColor(PHUIButtonView::RED);
     }
 
-    $panel = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setTable($table);
-
-    return $panel;
+    return $this->newBox(pht('Active Login Sessions'), $table, $buttons);
   }
 
 }

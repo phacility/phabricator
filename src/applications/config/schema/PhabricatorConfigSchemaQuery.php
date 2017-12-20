@@ -338,6 +338,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
           $comp_table->addKey($comp_key);
         }
 
+        $comp_table->setPersistenceType($expect_table->getPersistenceType());
+
         $comp_database->addTable($comp_table);
       }
       $comp_server->addDatabase($comp_database);

@@ -1,0 +1,131 @@
+/**
+ * @provides phui-button-simple-css
+ * @requires phui-button-css
+ */
+
+
+/* - Basic -------------------------------------------------------------------*/
+
+button.phui-button-simple,
+input[type="submit"].phui-button-simple,
+a.phui-button-simple,
+a.phui-button-simple:visited {
+  background: {$page.content};
+  color: {$bluetext};
+  border: 1px solid {$lightblueborder};
+}
+
+button.phui-button-simple .phui-icon-view,
+input[type="submit"].phui-button-simple .phui-icon-view,
+a.phui-button-simple .phui-icon-view,
+a.phui-button-simple:visited .phui-icon-view {
+  color: {$lightbluetext};
+}
+
+a.button.phui-button-simple:hover,
+button.phui-button-simple:hover {
+  border-color: {$blueborder};
+  background-image: none;
+  background-color: {$page.content};
+  transition: 0s;
+}
+
+a.phui-button-simple.current {
+  background: {$lightblue};
+}
+
+
+/* - Red  --------------------------------------------------------------------*/
+
+button.phui-button-simple.button-red,
+input[type="submit"].phui-button-simple.button-red,
+a.phui-button-simple.button-red,
+a.phui-button-simple.button-red:visited {
+  background: {$sh-redbackground};
+  color: {$redtext};
+  border: 1px solid {$sh-redborder};
+}
+
+button.phui-button-simple.button-red .phui-icon-view,
+input[type="submit"].phui-button-simple.button-red .phui-icon-view,
+a.phui-button-simple.button-red .phui-icon-view,
+a.phui-button-simple.button-red:visited .phui-icon-view {
+  color: {$redtext};
+}
+
+a.button.phui-button-simple.button-red:hover,
+button.phui-button-simple.button-red:hover {
+  border-color: {$sh-redtext};
+  background-image: none;
+  background-color: {$sh-redbackground};
+  transition: 0s;
+}
+
+/* - Green  ------------------------------------------------------------------*/
+
+button.phui-button-simple.button-green,
+input[type="submit"].phui-button-simple.button-green,
+a.phui-button-simple.button-green,
+a.phui-button-simple.button-green:visited {
+  background: {$sh-greenbackground};
+  color: {$greentext};
+  border: 1px solid {$sh-greenborder};
+}
+
+button.phui-button-simple.button-green .phui-icon-view,
+input[type="submit"].phui-button-simple.button-green .phui-icon-view,
+a.phui-button-simple.button-green .phui-icon-view,
+a.phui-button-simple.button-green:visited .phui-icon-view {
+  color: {$greentext};
+}
+
+a.button.phui-button-simple.button-green:hover,
+button.phui-button-simple.button-green:hover {
+  border-color: {$sh-greentext};
+  background-image: none;
+  background-color: {$sh-greenbackground};
+  transition: 0s;
+}
+
+/* - Yellow  -----------------------------------------------------------------*/
+
+button.phui-button-simple.button-yellow,
+input[type="submit"].phui-button-simple.button-yellow,
+a.phui-button-simple.button-yellow,
+a.phui-button-simple.button-yellow:visited {
+  background-color: {$sh-yellowbackground};
+  color: {$sh-yellowtext};
+  border: 1px solid {$sh-yellowborder};
+}
+
+button.phui-button-simple.button-yellow .phui-icon-view,
+input[type="submit"].phui-button-simple.button-yellow .phui-icon-view,
+a.phui-button-simple.button-yellow .phui-icon-view,
+a.phui-button-simple.button-yellow:visited .phui-icon-view {
+  color: {$sh-yellowicon};
+}
+
+a.button.phui-button-simple.button-yellow:hover,
+button.phui-button-simple.button-yellow:hover {
+  border-color: {$sh-yellowtext};
+  background-image: none;
+  background-color: {$sh-yellowbackground};
+  transition: 0s;
+}
+
+
+/* - Misc  -------------------------------------------------------------------*/
+
+a.button.phui-button-simple .phui-icon-view {
+  border: none;
+}
+
+a.button.phui-button-simple.phuix-dropdown-open {
+  background-color: #fff;
+  color: {$blue};
+  box-shadow: none;
+}
+
+a.button.phui-button-simple.phuix-dropdown-open:hover .phui-icon-view {
+  color: {$blue};
+}

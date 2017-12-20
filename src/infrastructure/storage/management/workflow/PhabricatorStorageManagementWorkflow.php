@@ -137,6 +137,15 @@ abstract class PhabricatorStorageManagementWorkflow
 
     try {
       $err = $this->doAdjustSchemata($api, $unsafe);
+
+      // Analyze tables if we're not doing a dry run and adjustments are either
+      // all clear or have minor errors like surplus tables.
+      if (!$this->dryRun) {
+        $should_analyze = (($err == 0) || ($err == 2));
+        if ($should_analyze) {
+          $this->analyzeTables($api);
+        }
+      }
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
@@ -172,8 +181,8 @@ abstract class PhabricatorStorageManagementWorkflow
     if (!$this->force && !$api->isCharacterSetAvailable('utf8mb4')) {
       $message = pht(
         "You have an old version of MySQL (older than 5.5) which does not ".
-        "support the utf8mb4 character set. We strongly recomend upgrading to ".
-        "5.5 or newer.\n\n".
+        "support the utf8mb4 character set. We strongly recommend upgrading ".
+        "to 5.5 or newer.\n\n".
         "If you apply adjustments now and later update MySQL to 5.5 or newer, ".
         "you'll need to apply adjustments again (and they will take a long ".
         "time).\n\n".
@@ -1161,6 +1170,56 @@ abstract class PhabricatorStorageManagementWorkflow
     return PhabricatorGlobalLock::newLock($lock_name)
       ->useSpecificConnection($api->getConn(null))
       ->lock();
+  }
+
+  final protected function analyzeTables(
+    PhabricatorStorageManagementAPI $api) {
+
+    // Analyzing tables can sometimes have a significant effect on query
+    // performance, particularly for the fulltext ngrams tables. See T12819
+    // for some specific examples.
+
+    $conn = $api->getConn(null);
+
+    $patches = $this->getPatches();
+    $databases = $api->getDatabaseList($patches, true);
+
+    $this->logInfo(
+      pht('ANALYZE'),
+      pht('Analyzing tables...'));
+
+    $targets = array();
+    foreach ($databases as $database) {
+      queryfx($conn, 'USE %C', $database);
+      $tables = queryfx_all($conn, 'SHOW TABLE STATUS');
+      foreach ($tables as $table) {
+        $table_name = $table['Name'];
+
+        $targets[] = array(
+          'database' => $database,
+          'table' => $table_name,
+        );
+      }
+    }
+
+    $bar = id(new PhutilConsoleProgressBar())
+      ->setTotal(count($targets));
+    foreach ($targets as $target) {
+      queryfx(
+        $conn,
+        'ANALYZE TABLE %T.%T',
+        $target['database'],
+        $target['table']);
+
+      $bar->update(1);
+    }
+    $bar->done();
+
+    $this->logOkay(
+      pht('ANALYZED'),
+      pht(
+        'Analyzed %d table(s).',
+        count($targets)));
   }
 
 }

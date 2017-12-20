@@ -42,5 +42,13 @@ final class PhabricatorConfigCoreSchemaSpec
         ));
     }
 
+    $ferret_objects = id(new PhutilClassMapQuery())
+      ->setAncestorClass('PhabricatorFerretInterface')
+      ->execute();
+
+    foreach ($ferret_objects as $ferret_object) {
+      $engine = $ferret_object->newFerretEngine();
+      $this->buildFerretIndexSchema($engine);
+    }
   }
 }

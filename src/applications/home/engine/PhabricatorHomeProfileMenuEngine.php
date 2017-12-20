@@ -49,7 +49,7 @@ final class PhabricatorHomeProfileMenuEngine
     $items[] = $this->newItem()
       ->setBuiltinKey(PhabricatorHomeConstants::ITEM_APPS_LABEL)
       ->setMenuItemKey(PhabricatorLabelProfileMenuItem::MENUITEMKEY)
-      ->setMenuItemProperties(array('name' => pht('Applications')));
+      ->setMenuItemProperties(array('name' => pht('Favorites')));
 
     foreach ($applications as $application) {
       if (!$application->isPinnedByDefault($viewer)) {

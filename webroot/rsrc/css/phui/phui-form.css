@@ -22,7 +22,7 @@ div.jx-tokenizer-container {
   display: inline-block;
   height: 30px;
   line-height: 18px;
-  color: #333;
+  color: inherit;
   vertical-align: middle;
   font: {$basefont};
   -webkit-font-smoothing: antialiased;
@@ -45,7 +45,7 @@ input[type="tel"],
 input[type="color"],
 div.jx-tokenizer-container {
   padding: 4px 6px;
-  background-color: #ffffff;
+  background-color: {$page.content};
   border: 1px solid {$greyborder};
   border-radius: 3px;
 
@@ -105,10 +105,9 @@ select {
   -moz-appearance: none;
   appearance: none;
 
-  background: #fff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
+  background: {$page.content} url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
   background-size: 8px 10px;
   border-radius: 3px;
-  color: {$darkbluetext};
   border: 1px solid {$greyborder};
   height: 30px;
   padding: 0 24px 0 8px;

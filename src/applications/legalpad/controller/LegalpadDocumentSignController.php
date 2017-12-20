@@ -236,7 +236,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     // Use the last content update as the modified date. We don't want to
     // show that a document like a TOS was "updated" by an incidental change
-    // to a field like the preamble or privacy settings which does not acutally
+    // to a field like the preamble or privacy settings which does not actually
     // affect the content of the agreement.
     $content_updated = $document_body->getDateCreated();
 

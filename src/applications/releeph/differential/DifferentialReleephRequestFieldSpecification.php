@@ -5,7 +5,7 @@
  *
  * 1: To parse "Releeph: picks RQ<nn>" headers in commits created by
  * arc-releeph so that RQs committed by arc-releeph have real
- * PhabricatorRepositoryCommits associated with them (instaed of just the SHA
+ * PhabricatorRepositoryCommits associated with them (instead of just the SHA
  * of the commit, as seen by the pusher).
  *
  * 2: If requestors want to commit directly to their release branch, they can
@@ -79,8 +79,7 @@ final class DifferentialReleephRequestFieldSpecification extends Phobject {
       return null;
     }
 
-    $status = $this->getRevision()->getStatus();
-    if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
+    if ($this->getRevision()->isClosed()) {
       $verb = $tense[$this->releephAction]['past'];
     } else {
       $verb = $tense[$this->releephAction]['future'];

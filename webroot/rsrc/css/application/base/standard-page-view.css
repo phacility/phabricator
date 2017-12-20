@@ -18,7 +18,7 @@
 }
 
 body.white-background {
-  background: #fff;
+  background: {$page.content};
 }
 
 .phabricator-standard-page-footer {
@@ -175,4 +175,30 @@ a.handle-status-closed:hover {
 .jx-scrollbar-link {
   position: absolute;
   left: -50px;
+}
+
+.phabricator-standard-page-tabs {
+  padding: 0 32px;
+  margin-bottom: 32px;
+  background: {$page.content};
+  box-shadow: 0 0 3px 0 rgba(0,0,0,0.2);
+}
+
+.device .phabricator-standard-page-tabs {
+  margin-bottom: 20px;
+  padding: 0 12px;
+}
+
+.device-phone .phabricator-standard-page-tabs {
+  text-align: center;
+}
+
+.device-phone
+  .phabricator-standard-page-tabs.phui-list-view.phui-list-tabbar > li {
+    display: inline-block;
+    float: none;
+}
+
+.phabricator-standard-page-tabs.phui-list-tabbar .phui-list-item-href {
+  padding: 12px 24px;
 }

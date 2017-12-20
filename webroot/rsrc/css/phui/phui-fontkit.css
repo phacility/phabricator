@@ -3,7 +3,7 @@
  */
 
 .diviner-document-section .phui-header-header {
-  color: #000;
+  color: {$blacktext};
 }
 
 .phui-document-view .phabricator-remarkup .remarkup-header {

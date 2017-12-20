@@ -53,7 +53,7 @@ final class DiffusionCommitConcernTransaction
     }
 
     // Even if you've already raised a concern, you can raise again as long
-    // as the author requsted you verify.
+    // as the author requested you verify.
     $state_verify = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
 
     if ($this->isViewerFullyRejected($object, $viewer)) {

@@ -1,0 +1,61 @@
+/**
+ * @provides phui-button-bar-css
+ * @requires phui-button-css
+ * @requires phui-button-simple-css
+ */
+
+.phui-button-bar-borderless .button {
+  border: 0;
+  background-color: transparent;
+  background-image: none;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.phui-button-bar-borderless .button .phui-icon-view {
+  font-size: 15px;
+  color: {$bluetext};
+}
+
+.phui-button-bar-borderless .button:hover {
+  background-color: transparent;
+  background-image: none;
+  border-radius: 3px;
+}
+
+.phui-button-bar-borderless .button:hover .phui-icon-view {
+  color: {$sky};
+}
+
+.phui-button-bar-borderless .button {
+  border: 0;
+}
+
+.phui-button-bar .phui-button-bar-first {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.phui-button-bar .phui-button-bar-middle {
+  border-radius: 0;
+  border-left: none;
+}
+
+.phui-button-bar .phui-button-bar-last {
+  border-left: none;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.phui-button-bar .button.simple:hover {
+  border-color: {$lightblueborder};
+  background-color: #fff;
+  background-image: none;
+  color: {$sky};
+}
+
+.phui-button-bar .button.simple:hover .phui-icon-view {
+  border-color: {$lightblueborder};
+  color: {$sky};
+  background-image: none;
+}

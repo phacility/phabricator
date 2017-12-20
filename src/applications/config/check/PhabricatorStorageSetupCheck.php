@@ -85,7 +85,7 @@ final class PhabricatorStorageSetupCheck extends PhabricatorSetupCheck {
           'be buffered into memory before being written to permanent '.
           'storage. Phabricator needs memory available to store these '.
           'chunks while they are uploaded, but PHP is currently configured '.
-          'to severly limit the available memory.'.
+          'to severely limit the available memory.'.
           "\n\n".
           'PHP processes currently have very little free memory available '.
           '(%s). To work well, processes should have at least %s.'.

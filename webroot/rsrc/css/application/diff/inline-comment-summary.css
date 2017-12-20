@@ -16,8 +16,7 @@
 .phabricator-inline-summary-table .inline-comment-summary-table-header {
   font-weight: bold;
   padding: 16px 1px 8px;
-  background: #fff;
-  color: #000;
+  color: {$blacktext};
   border-bottom: 1px solid {$thinblueborder};
 }
 
@@ -25,14 +24,14 @@
   padding: 4px 8px;
   white-space: nowrap;
   color: {$darkbluetext};
-  background: white;
+  background: {$page.content};
 }
 
 .phabricator-inline-summary-table td.inline-line-number {
   padding: 0;
   width: 100px;
   white-space: nowrap;
-  background: #F8F9FC;
+  background: {$lightgreybackground};
   font-family: "Menlo", "Consolas", monospace;
   font-size: {$smallestfontsize};
   color: {$bluetext};

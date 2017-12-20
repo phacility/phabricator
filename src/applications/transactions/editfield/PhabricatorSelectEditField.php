@@ -4,6 +4,7 @@ final class PhabricatorSelectEditField
   extends PhabricatorEditField {
 
   private $options;
+  private $optionAliases = array();
 
   public function setOptions(array $options) {
     $this->options = $options;
@@ -15,6 +16,24 @@ final class PhabricatorSelectEditField
       throw new PhutilInvalidStateException('setOptions');
     }
     return $this->options;
+  }
+
+  public function setOptionAliases(array $option_aliases) {
+    $this->optionAliases = $option_aliases;
+    return $this;
+  }
+
+  public function getOptionAliases() {
+    return $this->optionAliases;
+  }
+
+  protected function getDefaultValueFromConfiguration($value) {
+    return $this->getCanonicalValue($value);
+  }
+
+  protected function getValueForControl() {
+    $value = parent::getValueForControl();
+    return $this->getCanonicalValue($value);
   }
 
   protected function newControl() {
@@ -33,6 +52,18 @@ final class PhabricatorSelectEditField
 
   protected function newConduitParameterType() {
     return new ConduitStringParameterType();
+  }
+
+  private function getCanonicalValue($value) {
+    $options = $this->getOptions();
+    if (!isset($options[$value])) {
+      $aliases = $this->getOptionAliases();
+      if (isset($aliases[$value])) {
+        $value = $aliases[$value];
+      }
+    }
+
+    return $value;
   }
 
 }

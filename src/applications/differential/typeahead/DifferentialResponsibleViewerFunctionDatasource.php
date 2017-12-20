@@ -22,7 +22,7 @@ final class DifferentialResponsibleViewerFunctionDatasource
         'summary' => pht('Use the current viewing user.'),
         'description' => pht(
           'Show revisions the current viewer is responsible for. This '.
-          'function inclues revisions the viewer is responsible for through '.
+          'function includes revisions the viewer is responsible for through '.
           'membership in projects and packages.'),
       ),
     );

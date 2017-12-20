@@ -3,7 +3,7 @@
  */
 
 body .phui-box.phui-object-box.phui-comment-form-view {
-  background-color: #fff;
+  background-color: {$page.content};
   margin-left: 62px;
   position: relative;
 }
@@ -67,7 +67,7 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 }
 
 .phui-comment-form-view .aphront-form-input .remarkup-assist-textarea:focus {
-  background-color: #fff;
+  background-color: {$page.content};
 }
 
 .device-phone .phui-comment-form-view .aphront-form-input
@@ -90,7 +90,7 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 }
 
 .phui-comment-action {
-  background-color: rgba(239, 243, 252, .75);
+  background-color: rgba({$alphablue}, .1);
   border-radius: 3px;
   margin: 0px 16px 8px;
   padding: 6px;
@@ -106,7 +106,7 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 
 .phui-comment-form-view .phui-comment-action-bar {
   border-bottom: 1px solid {$thinblueborder};
-  background-color: rgba(239, 243, 252, .75);
+  background-color: {$bluepropertybackground};
   padding: 4px 12px 4px 12px;
   margin-bottom: 16px;
 }

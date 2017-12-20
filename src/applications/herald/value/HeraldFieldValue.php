@@ -8,6 +8,7 @@ abstract class HeraldFieldValue extends Phobject {
   const CONTROL_TEXT = 'herald.control.text';
   const CONTROL_SELECT = 'herald.control.select';
   const CONTROL_TOKENIZER = 'herald.control.tokenizer';
+  const CONTROL_REMARKUP = 'herald.control.remarkup';
 
   abstract public function getFieldValueKey();
   abstract public function getControlType();

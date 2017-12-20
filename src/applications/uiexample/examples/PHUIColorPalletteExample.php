@@ -10,6 +10,10 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
     return pht('A Standard Palette of Colors for use.');
   }
 
+  public function getCategory() {
+    return pht('Catalogs');
+  }
+
   public function renderExample() {
 
     $colors = array(
@@ -97,7 +101,7 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       'a',
       array(
         'href' => 'http://color.hailpixel.com/#'.implode(',', $url),
-        'class' => 'button grey mlb',
+        'class' => 'button button-grey mlb',
       ),
       pht('Color Palette'));
 

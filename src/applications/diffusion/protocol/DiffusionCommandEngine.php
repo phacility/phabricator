@@ -178,7 +178,7 @@ abstract class DiffusionCommandEngine extends Phobject {
       if (!$device) {
         throw new Exception(
           pht(
-            'Attempting to build a reposiory command (for repository "%s") '.
+            'Attempting to build a repository command (for repository "%s") '.
             'as device, but this host ("%s") is not configured as a cluster '.
             'device.',
             $repository->getDisplayName(),

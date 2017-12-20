@@ -65,4 +65,40 @@ abstract class PhabricatorStandardCustomFieldTokenizer
     return new ConduitPHIDListParameterType();
   }
 
+  public function shouldAppearInHeraldActions() {
+    return true;
+  }
+
+  public function getHeraldActionName() {
+    return pht('Set "%s" to', $this->getFieldName());
+  }
+
+  public function getHeraldActionDescription($value) {
+    $list = $this->renderHeraldHandleList($value);
+    return pht('Set "%s" to: %s.', $this->getFieldName(), $list);
+  }
+
+  public function getHeraldActionEffectDescription($value) {
+    return $this->renderHeraldHandleList($value);
+  }
+
+  public function getHeraldActionStandardType() {
+    return HeraldAction::STANDARD_PHID_LIST;
+  }
+
+  public function getHeraldActionDatasource() {
+    return $this->getDatasource();
+  }
+
+  private function renderHeraldHandleList($value) {
+    if (!is_array($value)) {
+      return pht('(Invalid List)');
+    } else {
+      return $this->getViewer()
+        ->renderHandleList($value)
+        ->setAsInline(true)
+        ->render();
+    }
+  }
+
 }

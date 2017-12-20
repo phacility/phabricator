@@ -42,8 +42,7 @@ final class PhabricatorDashboardPanelDatasource
       $properties = $panel->getProperties();
 
       $result = id(new PhabricatorTypeaheadResult())
-        ->setName($panel->getName())
-        ->setDisplayName($monogram.' '.$panel->getName())
+        ->setName($monogram.' '.$panel->getName())
         ->setPHID($id)
         ->setIcon($impl->getIcon())
         ->addAttribute($type_text);

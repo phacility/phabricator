@@ -70,7 +70,7 @@ spaces exist. This simplifies the UI for users with limited access.
 Space Policies
 ==============
 
-Briefly, spacess affect policies like this:
+Briefly, spaces affect policies like this:
 
   - Spaces apply their view policy to all objects inside the space.
   - Space policies are absolute, and stronger than all other policies. A

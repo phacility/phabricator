@@ -35,6 +35,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
 
   const BLUE = 'phui-box-blue';
   const BLUE_PROPERTY = 'phui-box-blue-property';
+  const WHITE_CONFIG = 'phui-box-white-config';
   const GREY = 'phui-box-grey';
 
   public function addPropertyList(PHUIPropertyListView $property_list) {
@@ -302,7 +303,9 @@ final class PHUIObjectBoxView extends AphrontTagView {
 
     $pager = null;
     if ($this->pager) {
-      $pager = phutil_tag_div('phui-object-box-pager', $this->pager);
+      if ($this->pager->willShowPagingControls()) {
+        $pager = phutil_tag_div('phui-object-box-pager', $this->pager);
+      }
     }
 
     $content = array(

@@ -48,4 +48,12 @@ abstract class PhortuneSubscriptionImplementation extends Phobject {
     PhortunePurchase $purchase) {
     return null;
   }
+
+  public function didPurchaseProduct(
+    PhortuneSubscription $subscription,
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return null;
+  }
+
 }

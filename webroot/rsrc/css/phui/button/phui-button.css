@@ -1,0 +1,340 @@
+/**
+ * @provides phui-button-css
+ */
+
+
+button,
+a.button {
+  font: {$basefont};
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+button.phabricator-action-view-item {
+  -webkit-font-smoothing: auto;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+button:focus,
+a.button:focus {
+  outline: 0;
+  box-shadow: 0 0 2pt 2pt rgba(82, 168, 236, 0.7);
+}
+
+button,
+a.button,
+a.button:visited,
+input[type="submit"] {
+  background-color: {$blue.button.color};
+  border: 1px solid {$blue.button.color};
+  background-image: {$blue.button.gradient};
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: {$normalfontsize};
+  display: inline-block;
+  padding: 4px 14px 5px;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 3px;
+}
+
+button .phui-icon-view,
+a.button .phui-icon-view,
+button.button-green .phui-icon-view,
+a.button.button-green .phui-icon-view,
+button.button-red .phui-icon-view,
+a.button.button-red .phui-icon-view {
+  color: white;
+}
+
+button.button-grey .phui-icon-view,
+a.button.button-grey .phui-icon-view {
+  color: {$darkbluetext};
+}
+
+/* Buttons with images (full size only) */
+button.icon,
+a.icon,
+a.icon:visited {
+  padding-left: 0;
+  position: relative;
+  text-indent: 29px;
+}
+
+button.button-green,
+a.button-green.button,
+a.button-green.button:visited {
+  background-color: {$green.button.color};
+  border-color: {$green.button.color};
+  background-image: {$green.button.gradient};
+}
+
+button.button-red,
+a.button-red.button,
+a.button-red.button:visited {
+  background-color: {$red.button.color};
+  border-color: {$red.button.color};
+  background-image: {$red.button.gradient};
+}
+
+button.button-grey,
+input[type="submit"].button-grey,
+a.button-grey,
+a.button-grey:visited {
+  background-color: {$grey.button.color};
+  background-image: {$grey.button.gradient};
+  border: 1px solid rgba({$alphablue}, 0.3);
+  color: {$darkgreytext};
+}
+
+a.disabled,
+button.disabled,
+button[disabled] {
+  filter:alpha(opacity=50);
+  -moz-opacity: 0.5;
+  -khtml-opacity: 0.5;
+  opacity: 0.5;
+}
+
+button.button-grey.selected,
+a.button.button-grey.selected,
+button.button-grey.selected:hover,
+a.button.button-grey.selected:hover {
+  border-color: {$sh-orangetext};
+  color: {$sh-orangetext};
+}
+
+button.button-grey.selected .phui-icon-view,
+a.button-grey.selected .phui-icon-view {
+  color: {$sh-orangetext};
+}
+
+a.phuix-dropdown-open {
+  color: {$greytext};
+}
+
+a.button:hover,
+button:hover {
+  text-decoration: none;
+  background-color: #2980b9;
+  background-image: {$blue.button.hover};
+  border-color: #115988;
+  transition: 0.1s;
+}
+
+a.button.button-grey:hover,
+button.button-grey:hover {
+  background-image: {$grey.button.hover};
+  border-color: rgba({$alphablue}, 0.4);
+  transition: 0.1s;
+}
+
+a.button.button-green:hover,
+button.button-green:hover {
+  border-color: #127336;
+  background-color: #0DAD48;
+  background-image: {$green.button.hover};
+  transition: 0.1s;
+}
+
+a.button.button-red:hover,
+button.button-red:hover {
+  border-color: #79150b;
+  background-color: #0DAD48;
+  background-image: {$red.button.hover};
+  transition: 0.1s;
+}
+
+body a.button.disabled:hover,
+body button.disabled:hover,
+body a.button.disabled:active,
+body button.disabled:active {
+  box-shadow: none;
+}
+
+button.small,
+a.small,
+a.small:visited {
+  padding: 2px 8px;
+  height: auto;
+  font-size: {$smallestfontsize};
+  line-height: 16px;
+}
+
+button.link {
+  display: inline;
+  border: none;
+  background: transparent;
+  background-image: none;
+  font-weight: normal;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  border-bottom: none;
+  text-decoration: none;
+  color: #19558D;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+button.link:hover {
+  text-decoration: underline;
+}
+
+.phuix-dropdown-menu {
+  position: absolute;
+  width: 200px;
+  background: {$page.content};
+  margin-top: -1px;
+  padding: 12px;
+  box-shadow: {$dropshadow};
+  border: 1px solid {$lightgreyborder};
+  border-radius: 3px;
+  margin-bottom: 16px;
+}
+
+.phuix-dropdown-menu a:focus {
+  /* We automatically focus links in dropdown menus for assistive devices, but
+     this is distracting for visual user agents. */
+  outline: none;
+}
+
+a.policy-control {
+  width: 240px;
+  text-align: left;
+}
+
+a.policy-control .caret {
+  float: right;
+}
+
+a.policy-control .phui-button-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.device-phone a.button.policy-control {
+  display: block;
+  float: none;
+  width: auto;
+}
+
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: top;
+  border-top: 5px solid {$page.content};
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: "";
+}
+
+.caret-right {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-left: 7px solid {$greytext};
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
+.caret-left {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-right: 7px solid {$greytext};
+  border-bottom: 5px solid transparent;
+  border-top: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
+.dropdown .caret {
+  margin-top: 7px;
+  margin-right: -4px;
+}
+
+.small.dropdown .caret {
+  margin-top: 6px;
+}
+
+.button-grey.dropdown .caret {
+  border-top-color: {$blacktext};
+}
+
+/* Icons */
+.button.has-icon {
+  position: relative;
+}
+
+.button.has-icon.dropdown .phui-icon-view {
+  margin-right: 8px;
+  margin-left: -2px;
+}
+
+.button.has-text .phui-icon-view {
+  display: inline-block;
+  position: absolute;
+  top: 7px;
+  left: 12px;
+  margin: 0;
+}
+
+.button.icon-last .phui-icon-view {
+  left: auto;
+  right: 10px;
+}
+
+.phui-button-text {
+  display: inline-block;
+}
+
+.dropdown .phui-button-text {
+  margin-right: 8px;
+}
+
+.button.has-icon .phui-button-text {
+  margin-left: 16px;
+}
+
+.button.has-icon.icon-last .phui-button-text {
+  margin: 0 16px 0 0;
+}
+
+/* Login Buttons */
+
+.button.big.has-icon {
+  padding: 4px 20px 4px 14px;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.button.big.has-icon .phui-button-text {
+  margin-left: 30px;
+  display: block;
+}
+
+.button.big.has-icon .phui-button-subtext {
+  color: {$greytext};
+  font-size: {$smallerfontsize};
+  line-height: 15px;
+  font-weight: normal;
+}
+

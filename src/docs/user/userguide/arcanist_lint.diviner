@@ -169,7 +169,7 @@ Normally, you will be presented with lint messages as you are sending code for
 review. In that context, the severities behave like this:
 
   - `error` When a file contains lint errors, they are always reported. These
-    are intended to be severe problems, like a syntax error. Unresoved lint
+    are intended to be severe problems, like a syntax error. Unresolved lint
     errors require you to confirm that you want to continue.
   - `warning` When a file contains warnings, they are reported by default only
     if they appear on lines that you have changed. They are intended to be

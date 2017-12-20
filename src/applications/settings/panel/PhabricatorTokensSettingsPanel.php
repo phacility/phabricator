@@ -30,7 +30,7 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
           'a',
           array(
             'href' => '/auth/token/revoke/'.$token->getID().'/',
-            'class' => 'small grey button',
+            'class' => 'small button button-grey',
             'sigil' => 'workflow',
           ),
           pht('Revoke'));
@@ -38,7 +38,7 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
         $button = javelin_tag(
           'a',
           array(
-            'class' => 'small grey button disabled',
+            'class' => 'small button button-grey disabled',
           ),
           pht('Revoke'));
       }
@@ -71,22 +71,15 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
         'action',
       ));
 
-    $terminate_button = id(new PHUIButtonView())
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-warning')
       ->setText(pht('Revoke All'))
       ->setHref('/auth/token/revoke/all/')
-      ->setTag('a')
       ->setWorkflow(true)
-      ->setIcon('fa-exclamation-triangle');
+      ->setColor(PHUIButtonView::RED);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Temporary Tokens'))
-      ->addActionLink($terminate_button);
-
-    $panel = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setTable($table);
-
-    return $panel;
+    return $this->newBox(pht('Temporary Tokens'), $table, array($button));
   }
 
 }

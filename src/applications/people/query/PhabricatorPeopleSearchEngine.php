@@ -79,7 +79,7 @@ final class PhabricatorPeopleSearchEngine
         ->setOptions(
           pht('(Show All)'),
           pht('Show Only Unapproved Users'),
-          pht('Hide Unappproved Users'))
+          pht('Hide Unapproved Users'))
         ->setDescription(
           pht(
             'Pass true to find only users awaiting administrative approval, '.

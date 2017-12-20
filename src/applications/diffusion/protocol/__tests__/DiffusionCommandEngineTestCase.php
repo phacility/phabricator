@@ -26,7 +26,7 @@ final class DiffusionCommandEngineTestCase extends PhabricatorTestCase {
       ));
 
     $this->assertCommandEngineFormat(
-      'hg xyz',
+      (string)csprintf('hg --config ui.ssh=%s xyz', $ssh_wrapper),
       array(
         'LANG' => 'en_US.UTF-8',
         'HGPLAIN' => '1',
@@ -102,7 +102,7 @@ final class DiffusionCommandEngineTestCase extends PhabricatorTestCase {
       ));
 
     $this->assertCommandEngineFormat(
-      'hg xyz',
+      (string)csprintf('hg --config ui.ssh=%s xyz', $ssh_wrapper),
       array(
         'LANG' => 'en_US.UTF-8',
         'HGPLAIN' => '1',
@@ -123,6 +123,62 @@ final class DiffusionCommandEngineTestCase extends PhabricatorTestCase {
         'argv' => 'xyz',
         'protocol' => 'https',
       ));
+
+    // Test that filtering defenses for "--config" and "--debugger" flag
+    // injections in Mercurial are functional. See T13012.
+
+    $caught = null;
+    try {
+      $this->assertCommandEngineFormat(
+        '',
+        array(),
+        array(
+          'vcs' => $type_hg,
+          'argv' => '--debugger',
+        ));
+    } catch (DiffusionMercurialFlagInjectionException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue(
+      ($caught instanceof DiffusionMercurialFlagInjectionException),
+      pht('Expected "--debugger" injection in Mercurial to throw.'));
+
+
+    $caught = null;
+    try {
+      $this->assertCommandEngineFormat(
+        '',
+        array(),
+        array(
+          'vcs' => $type_hg,
+          'argv' => '--config=x',
+        ));
+    } catch (DiffusionMercurialFlagInjectionException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue(
+      ($caught instanceof DiffusionMercurialFlagInjectionException),
+      pht('Expected "--config" injection in Mercurial to throw.'));
+
+    $caught = null;
+    try {
+      $this->assertCommandEngineFormat(
+        '',
+        array(),
+        array(
+          'vcs' => $type_hg,
+          'argv' => (string)csprintf('%s', '--config=x'),
+        ));
+    } catch (DiffusionMercurialFlagInjectionException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue(
+      ($caught instanceof DiffusionMercurialFlagInjectionException),
+      pht('Expected quoted "--config" injection in Mercurial to throw.'));
+
   }
 
   private function assertCommandEngineFormat(

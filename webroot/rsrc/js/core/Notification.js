@@ -26,7 +26,7 @@ JX.install('Notification', {
     _visible : false,
     _hideTimer : null,
     _duration : 12000,
-    _desktopReady : false,
+    _asDesktop : false,
     _key : null,
     _title : null,
     _body : null,
@@ -35,6 +35,7 @@ JX.install('Notification', {
 
     show : function() {
       var self = JX.Notification;
+
       if (!this._visible) {
         this._visible = true;
 
@@ -44,7 +45,7 @@ JX.install('Notification', {
 
       if (self.supportsDesktopNotifications() &&
           self.desktopNotificationsEnabled() &&
-          this._desktopReady) {
+          this._asDesktop) {
         // Note: specifying "tag" means that notifications with matching
         // keys will aggregate.
         var n = new window.Notification(this._title, {
@@ -87,8 +88,8 @@ JX.install('Notification', {
       return this;
     },
 
-    setDesktopReady : function(ready) {
-      this._desktopReady = ready;
+    setShowAsDesktopNotification : function(mode) {
+      this._asDesktop = mode;
       return this;
     },
 

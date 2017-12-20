@@ -20,7 +20,7 @@ final class PhabricatorNotificationConfigOptions
   }
 
   public function getOptions() {
-    $servers_type = 'custom:PhabricatorNotificationServersConfigOptionType';
+    $servers_type = 'cluster.notifications';
     $servers_help = $this->deformat(pht(<<<EOTEXT
 Provide a list of notification servers to enable real-time notifications.
 

@@ -152,7 +152,7 @@ final class PhortuneCartCheckoutController
       $new_method = javelin_tag(
         'a',
         array(
-          'class' => 'button grey',
+          'class' => 'button button-grey',
           'href'  => $payment_method_uri,
         ),
         pht('Add New Payment Method'));

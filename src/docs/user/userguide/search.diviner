@@ -87,7 +87,7 @@ view show the results you most often want.
 
 You can share queries with other users by sending them the URL. This will run
 the same query for them with all the parameters you've set (they may see
-different results than you do, because they may not have the same permisions).
+different results than you do, because they may not have the same permissions).
 
 
 Typeaheads
@@ -123,3 +123,53 @@ Another useful function is the `viewer()` function, which works as though you'd
 typed your own username when you run the query. However, if you send the query
 to someone else, it will show results for //their// username when they run it.
 This can be particularly useful when creating dashboard panels.
+
+
+Fulltext Search
+===============
+
+Global search and some applications provide **fulltext search**. In
+applications, this is a field called {nav Query}.
+
+Fulltext search allows you to search the text content of objects and supports
+some special syntax. These features are supported:
+
+  - Substring search with `~platypus`.
+  - Field search with `title:platypus`.
+  - Filtering out matches with `-platypus`.
+  - Quoted terms with `"platypus attorney"`.
+  - Combining features with `title:~"platypus attorney"`.
+
+See below for more detail.
+
+**Substrings**: Normally, query terms are searched for as words, so searching
+for `read` won't find documents which only contain the word `threaded`, even
+though "read" is a substring of "threaded". With the substring operator, `~`,
+you can search for substrings instead: the query `~read` will match documents
+which contain that text anywhere, even in the middle of a word.
+
+**Quoted Terms**: When you search for multiple terms, documents which match
+each term will be returned, even if the terms are not adjacent in the document.
+For example, the query `void star` will match a document titled `A star in the
+void`, because it matches both `void` and `star`. To search for an exact
+sequence of terms, quote them: `"void star"`. This query will only match
+documents which use those terms as written.
+
+**Stemming**: Searching for a term like `rearming` will find documents which
+contain variations of the word, like `rearm`, `rearms`, and `rearmed`. To
+search for an an exact word, quote the term: `"rearming"`.
+
+**Field Search**: By default, query terms are searched for in the title, body,
+and comments. If you only want to search for a term in titles, use `title:`.
+For example, `title:platypus` only finds documents with that term in the
+title. This can be combined with other operators, for example `title:~platypus`
+or `title:"platypus attorney"`. These scopes are also supported:
+
+  - `title:...` searches titles.
+  - `body:...` searches bodies (descriptions or summaries).
+  - `core:...` searches titles and bodies, but not comments.
+  - `comments:...` searches only comments.
+
+**Filtering Matches**: You can remove documents which match certain terms from
+the result set with `-`. For example: `platypus -mammal`. Documents which match
+negated terms will be filtered out of the result set.

@@ -106,45 +106,45 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'p.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'p.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->bloggerPHIDs) {
+    if ($this->bloggerPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'bloggerPHID IN (%Ls)',
+        'p.bloggerPHID IN (%Ls)',
         $this->bloggerPHIDs);
     }
 
-    if ($this->visibility) {
+    if ($this->visibility !== null) {
       $where[] = qsprintf(
         $conn,
-        'visibility IN (%Ld)',
+        'p.visibility IN (%Ld)',
         $this->visibility);
     }
 
     if ($this->publishedAfter !== null) {
       $where[] = qsprintf(
         $conn,
-        'datePublished > %d',
+        'p.datePublished > %d',
         $this->publishedAfter);
     }
 
     if ($this->blogPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'blogPHID in (%Ls)',
+        'p.blogPHID in (%Ls)',
         $this->blogPHIDs);
     }
 
@@ -163,6 +163,7 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   public function getOrderableColumns() {
     return parent::getOrderableColumns() + array(
       'datePublished' => array(
+        'table' => $this->getPrimaryTableAlias(),
         'column' => 'datePublished',
         'type' => 'int',
         'reverse' => false,
@@ -184,6 +185,10 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   public function getQueryApplicationClass() {
     // TODO: Does setting this break public blogs?
     return null;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'p';
   }
 
 }

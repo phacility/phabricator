@@ -10,7 +10,8 @@ final class DifferentialRevisionPlanChangesTransaction
     return pht('Plan Changes');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht(
       'This revision will be removed from review queues until it is revised.');
   }
@@ -46,19 +47,21 @@ final class DifferentialRevisionPlanChangesTransaction
   }
 
   public function generateOldValue($object) {
-    $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-    return ($object->getStatus() == $status_planned);
+    return $object->isChangePlanned();
   }
 
   public function applyInternalEffects($object, $value) {
-    $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
-    $object->setStatus($status_planned);
+    $status_planned = DifferentialRevisionStatus::CHANGES_PLANNED;
+    $object->setModernRevisionStatus($status_planned);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
+    if ($object->isDraft()) {
+      throw new Exception(
+        pht('You can not plan changes to a draft revision.'));
+    }
 
-    if ($object->getStatus() == $status_planned) {
+    if ($object->isChangePlanned()) {
       throw new Exception(
         pht(
           'You can not request review of this revision because this '.

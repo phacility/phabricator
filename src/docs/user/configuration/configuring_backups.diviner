@@ -24,6 +24,12 @@ same steps you would if you were creating a backup and then restoring it, you
 will just backup the old machine and then restore the data onto the new
 machine.
 
+WARNING: You need to restart Phabricator after restoring data.
+
+Restarting Phabricator after performing a restore makes sure that caches are
+flushed properly. For complete instructions, see
+@{article:Restarting Phabricator}.
+
 
 Backup: MySQL Databases
 =======================
@@ -58,7 +64,7 @@ If you host repositories in Phabricator, you should back them up. You can use
 repository. To back them up, copy them elsewhere.
 
 You can also just clone them and keep the clones up to date, or use
-{nav Add Mirror} to have the mirror somewhere automatically.
+{nav Add Mirror} to have them mirror somewhere automatically.
 
 
 Restore: Hosted Repositories
@@ -137,6 +143,24 @@ has the backups can:
 Some of this information is durable, so disclosure of even a very old backup may
 present a risk. If you restrict access to the Phabricator host or database, you
 should also restrict access to the backups.
+
+
+Skipping Indexes
+================
+
+By default, `bin/storage dump` does not dump all of the data in the database:
+it skips some caches which can be rebuilt automatically and do not need to be
+backed up. Some of these caches are very large, so the size of the dump may
+be significantly smaller than the size of the databases.
+
+If you have a large amount of data, you can specify `--no-indexes` when taking
+a database dump to skip additional tables which contain search indexes. This
+will reduce the size (and increase the speed) of the backup. This is an
+advanced option which most installs will not benefit from.
+
+This index data can be rebuilt after a restore, but will not be rebuilt
+automatically. If you choose to use this flag, you must manually rebuild
+indexes after a restore (for details, see ((reindex))).
 
 
 Next Steps

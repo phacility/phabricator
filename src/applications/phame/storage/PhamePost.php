@@ -11,7 +11,8 @@ final class PhamePost extends PhameDAO
     PhabricatorDestructibleInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
   const MARKUP_FIELD_SUMMARY = 'markup:summary';
@@ -200,8 +201,9 @@ final class PhamePost extends PhameDAO
   }
 
   public function getPolicy($capability) {
-    // Draft posts are visible only to the author. Published posts are visible
-    // to whoever the blog is visible to.
+    // Draft and archived posts are visible only to the author and other
+    // users who can edit the blog. Published posts are visible to whoever
+    // the blog is visible to.
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
@@ -384,6 +386,14 @@ final class PhamePost extends PhameDAO
 
   public function newFulltextEngine() {
     return new PhamePostFulltextEngine();
+  }
+
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+
+  public function newFerretEngine() {
+    return new PhamePostFerretEngine();
   }
 
 }

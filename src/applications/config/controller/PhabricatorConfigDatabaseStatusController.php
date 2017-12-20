@@ -132,27 +132,24 @@ final class PhabricatorConfigDatabaseStatusController
     }
 
     $doc_link = PhabricatorEnv::getDoclink('Managing Storage Adjustments');
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-book')
+      ->setHref($doc_link)
+      ->setText(pht('Documentation'));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true)
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setIcon('fa-book')
-          ->setHref($doc_link)
-          ->setText(pht('Learn More')));
+    $header = $this->buildHeaderView($title, $button);
 
-    $content = id(new PhabricatorConfigPageView())
+    $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setContent($body);
+      ->setNavigation($nav)
+      ->setFixed(true)
+      ->setMainColumn($body);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->appendChild($content)
-      ->addClass('white-background');
+      ->appendChild($content);
   }
 
 
@@ -221,11 +218,12 @@ final class PhabricatorConfigDatabaseStatusController
         ));
 
     $title = pht('Database Status');
-
     $properties = $this->buildProperties(
       array(
       ),
       $comp->getIssues());
+    $properties = $this->buildConfigBoxView(pht('Properties'), $properties);
+    $table = $this->buildConfigBoxView(pht('Database'), $table);
 
     return $this->buildResponse($title, array($properties, $table));
   }
@@ -263,6 +261,7 @@ final class PhabricatorConfigDatabaseStatusController
         $this->renderAttr(
           $table->getCollation(),
           $table->hasIssue($collation_issue)),
+        $table->getPersistenceTypeDisplayName(),
       );
     }
 
@@ -272,15 +271,17 @@ final class PhabricatorConfigDatabaseStatusController
           null,
           pht('Table'),
           pht('Collation'),
+          pht('Persistence'),
         ))
       ->setColumnClasses(
         array(
           null,
           'wide pri',
           null,
+          null,
         ));
 
-    $title = pht('Database: %s', $database_name);
+    $title = $database_name;
 
     $actual_database = $actual->getDatabase($database_name);
     if ($actual_database) {
@@ -324,6 +325,9 @@ final class PhabricatorConfigDatabaseStatusController
         ),
       ),
       $database->getIssues());
+
+    $properties = $this->buildConfigBoxView(pht('Properties'), $properties);
+    $table = $this->buildConfigBoxView(pht('Database'), $table);
 
     return $this->buildResponse($title, array($properties, $table));
   }
@@ -503,7 +507,7 @@ final class PhabricatorConfigDatabaseStatusController
           null,
         ));
 
-    $title = pht('Database: %s.%s', $database_name, $table_name);
+    $title = pht('%s.%s', $database_name, $table_name);
 
     if ($actual_table) {
       $actual_collation = $actual_table->getCollation();
@@ -534,8 +538,14 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $table->getIssues());
 
+    $box_header = pht('%s.%s', $database_name, $table_name);
+
+    $properties = $this->buildConfigBoxView(pht('Properties'), $properties);
+    $table = $this->buildConfigBoxView(pht('Database'), $table_view);
+    $keys = $this->buildConfigBoxView(pht('Keys'), $keys_view);
+
     return $this->buildResponse(
-      $title, array($properties, $table_view, $keys_view));
+      $title, array($properties, $table, $keys));
   }
 
   private function renderColumn(
@@ -613,7 +623,7 @@ final class PhabricatorConfigDatabaseStatusController
 
 
     $title = pht(
-      'Database Status: %s.%s.%s',
+      '%s.%s.%s',
       $database_name,
       $table_name,
       $column_name);
@@ -670,6 +680,8 @@ final class PhabricatorConfigDatabaseStatusController
         ),
       ),
       $column->getIssues());
+
+    $properties = $this->buildConfigBoxView(pht('Properties'), $properties);
 
     return $this->buildResponse($title, $properties);
   }
@@ -734,7 +746,7 @@ final class PhabricatorConfigDatabaseStatusController
     }
 
     $title = pht(
-      'Database Status: %s.%s (%s)',
+      '%s.%s (%s)',
       $database_name,
       $table_name,
       $key_name);
@@ -763,6 +775,8 @@ final class PhabricatorConfigDatabaseStatusController
         ),
       ),
       $key->getIssues());
+
+    $properties = $this->buildConfigBoxView(pht('Properties'), $properties);
 
     return $this->buildResponse($title, $properties);
   }

@@ -77,6 +77,8 @@ final class ManiphestEditEngine
     $status_map = $this->getTaskStatusMap($object);
     $priority_map = $this->getTaskPriorityMap($object);
 
+    $alias_map = ManiphestTaskPriority::getTaskPriorityAliasMap();
+
     if ($object->isClosed()) {
       $default_status = ManiphestTaskStatus::getDefaultStatus();
     } else {
@@ -215,8 +217,9 @@ EODOCS
         ->setConduitTypeDescription(pht('New task priority constant.'))
         ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
-        ->setValue($object->getPriority())
+        ->setValue($object->getPriorityKeyword())
         ->setOptions($priority_map)
+        ->setOptionAliases($alias_map)
         ->setCommentActionLabel(pht('Change Priority')),
     );
 
@@ -247,6 +250,56 @@ EODOCS
       ->setPreviewPanel(
         id(new PHUIRemarkupPreviewPanel())
           ->setHeader(pht('Description Preview')));
+
+    $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+    $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+
+    $src_phid = $object->getPHID();
+    if ($src_phid) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array($src_phid))
+        ->withEdgeTypes(
+          array(
+            $parent_type,
+            $subtask_type,
+          ));
+      $edge_query->execute();
+
+      $parent_phids = $edge_query->getDestinationPHIDs(
+        array($src_phid),
+        array($parent_type));
+
+      $subtask_phids = $edge_query->getDestinationPHIDs(
+        array($src_phid),
+        array($subtask_type));
+    } else {
+      $parent_phids = array();
+      $subtask_phids = array();
+    }
+
+    $fields[] = id(new PhabricatorHandlesEditField())
+      ->setKey('parents')
+      ->setLabel(pht('Parents'))
+      ->setDescription(pht('Parent tasks.'))
+      ->setConduitDescription(pht('Change the parents of this task.'))
+      ->setConduitTypeDescription(pht('List of parent task PHIDs.'))
+      ->setUseEdgeTransactions(true)
+      ->setIsConduitOnly(true)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $parent_type)
+      ->setValue($parent_phids);
+
+    $fields[] = id(new PhabricatorHandlesEditField())
+      ->setKey('subtasks')
+      ->setLabel(pht('Subtasks'))
+      ->setDescription(pht('Subtasks.'))
+      ->setConduitDescription(pht('Change the subtasks of this task.'))
+      ->setConduitTypeDescription(pht('List of subtask PHIDs.'))
+      ->setUseEdgeTransactions(true)
+      ->setIsConduitOnly(true)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $subtask_type)
+      ->setValue($parent_phids);
 
     return $fields;
   }
@@ -289,29 +342,29 @@ EODOCS
 
   private function getTaskPriorityMap(ManiphestTask $task) {
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+    $priority_keywords = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
     $current_priority = $task->getPriority();
+    $results = array();
+
+    foreach ($priority_map as $priority => $priority_name) {
+      $disabled = ManiphestTaskPriority::isDisabledPriority($priority);
+      if ($disabled && !($priority == $current_priority)) {
+        continue;
+      }
+
+      $keyword = head(idx($priority_keywords, $priority));
+      $results[$keyword] = $priority_name;
+    }
 
     // If the current value isn't a legitimate one, put it in the dropdown
-    // anyway so saving the form doesn't cause a side effects.
+    // anyway so saving the form doesn't cause any side effects.
     if (idx($priority_map, $current_priority) === null) {
-      $priority_map[$current_priority] = pht(
+      $results[ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD] = pht(
         '<Unknown: %s>',
         $current_priority);
     }
 
-    foreach ($priority_map as $priority => $priority_name) {
-      // Always keep the current priority.
-      if ($priority == $current_priority) {
-        continue;
-      }
-
-      if (ManiphestTaskPriority::isDisabledPriority($priority)) {
-        unset($priority_map[$priority]);
-        continue;
-      }
-    }
-
-    return $priority_map;
+    return $results;
   }
 
   protected function newEditResponse(

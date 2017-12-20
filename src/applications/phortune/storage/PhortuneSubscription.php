@@ -232,6 +232,15 @@ final class PhortuneSubscription extends PhortuneDAO
       $purchase);
   }
 
+  public function didPurchaseProduct(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return $this->getImplementation()->didPurchaseProduct(
+      $this,
+      $product,
+      $purchase);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -48,7 +48,7 @@ final class DiffusionBranchTableController extends DiffusionController {
         ->withRepository($repository)
         ->execute();
 
-      $table = id(new DiffusionBranchTableView())
+      $list = id(new DiffusionBranchListView())
         ->setUser($viewer)
         ->setBranches($branches)
         ->setCommits($commits)
@@ -57,7 +57,8 @@ final class DiffusionBranchTableController extends DiffusionController {
       $content = id(new PHUIObjectBoxView())
         ->setHeaderText($repository->getName())
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->setTable($table)
+        ->addClass('diffusion-mobile-view')
+        ->setTable($list)
         ->setPager($pager);
     }
 
@@ -71,8 +72,16 @@ final class DiffusionBranchTableController extends DiffusionController {
       ->setHeader(pht('Branches'))
       ->setHeaderIcon('fa-code-fork');
 
+    if (!$repository->isSVN()) {
+      $branch_tag = $this->renderBranchTag($drequest);
+      $header->addTag($branch_tag);
+    }
+
+    $tabs = $this->buildTabsView('branch');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter(array(
           $content,
       ));
@@ -84,10 +93,7 @@ final class DiffusionBranchTableController extends DiffusionController {
           $repository->getDisplayName(),
         ))
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-        ));
+      ->appendChild($view);
   }
 
 }

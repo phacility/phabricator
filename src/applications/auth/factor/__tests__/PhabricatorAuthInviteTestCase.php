@@ -51,7 +51,7 @@ final class PhabricatorAuthInviteTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
 
-    // This first time should accept the invite and verify the addresss.
+    // This first time should accept the invite and verify the address.
     $this->assertTrue(
       ($caught instanceof PhabricatorAuthInviteRegisteredException));
 

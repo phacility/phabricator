@@ -13,26 +13,26 @@ final class PhabricatorHighSecurityRequestExceptionHandler
       'to present MFA credentials to take an action.');
   }
 
-  public function canHandleRequestException(
+  public function canHandleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     if (!$this->isPhabricatorSite($request)) {
       return false;
     }
 
-    return ($ex instanceof PhabricatorAuthHighSecurityRequiredException);
+    return ($throwable instanceof PhabricatorAuthHighSecurityRequiredException);
   }
 
-  public function handleRequestException(
+  public function handleRequestThrowable(
     AphrontRequest $request,
-    Exception $ex) {
+    $throwable) {
 
     $viewer = $this->getViewer($request);
 
     $form = id(new PhabricatorAuthSessionEngine())->renderHighSecurityForm(
-      $ex->getFactors(),
-      $ex->getFactorValidationResults(),
+      $throwable->getFactors(),
+      $throwable->getFactorValidationResults(),
       $viewer,
       $request);
 
@@ -61,7 +61,7 @@ final class PhabricatorHighSecurityRequestExceptionHandler
           'period of time. When you are finished taking sensitive '.
           'actions, you should leave high security.'))
       ->setSubmitURI($request->getPath())
-      ->addCancelButton($ex->getCancelURI())
+      ->addCancelButton($throwable->getCancelURI())
       ->addSubmitButton(pht('Enter High Security'));
 
     $request_parameters = $request->getPassthroughRequestParameters(

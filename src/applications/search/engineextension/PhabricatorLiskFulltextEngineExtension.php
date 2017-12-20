@@ -9,7 +9,7 @@ final class PhabricatorLiskFulltextEngineExtension
     return pht('Lisk Builtin Properties');
   }
 
-  public function shouldIndexFulltextObject($object) {
+  public function shouldEnrichFulltextObject($object) {
     if (!($object instanceof PhabricatorLiskDAO)) {
       return false;
     }
@@ -21,7 +21,7 @@ final class PhabricatorLiskFulltextEngineExtension
     return true;
   }
 
-  public function indexFulltextObject(
+  public function enrichFulltextObject(
     $object,
     PhabricatorSearchAbstractDocument $document) {
 

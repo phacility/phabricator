@@ -4,7 +4,7 @@
 
 .invisible-special {
   font-family: monospace;
-  color: #000;
+  color: {$blacktext};
   background: rgba({$alphablue},0.1);
   padding: 1px 4px;
   border-radius: 3px;

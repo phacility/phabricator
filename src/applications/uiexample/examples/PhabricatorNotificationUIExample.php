@@ -12,6 +12,10 @@ final class PhabricatorNotificationUIExample extends PhabricatorUIExample {
       phutil_tag('tt', array(), 'JX.Notification'));
   }
 
+  public function getCategory() {
+    return pht('Technical');
+  }
+
   public function renderExample() {
     require_celerity_resource('phabricator-notification-css');
     Javelin::initBehavior('phabricator-notification-example');
@@ -20,7 +24,7 @@ final class PhabricatorNotificationUIExample extends PhabricatorUIExample {
       'a',
       array(
         'sigil' => 'notification-example',
-        'class' => 'button green',
+        'class' => 'button button-green',
       ),
       pht('Show Notification'));
 

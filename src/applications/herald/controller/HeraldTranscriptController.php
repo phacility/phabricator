@@ -273,7 +273,11 @@ final class HeraldTranscriptController extends HeraldController {
           ->setTarget(phutil_tag('strong', array(), pht('Conditions'))));
 
       foreach ($cond_xscripts as $cond_xscript) {
-        if ($cond_xscript->getResult()) {
+        if ($cond_xscript->isForbidden()) {
+          $icon = 'fa-ban';
+          $color = 'indigo';
+          $result = pht('Forbidden');
+        } else if ($cond_xscript->getResult()) {
           $icon = 'fa-check';
           $color = 'green';
           $result = pht('Passed');
@@ -284,12 +288,17 @@ final class HeraldTranscriptController extends HeraldController {
         }
 
         if ($cond_xscript->getNote()) {
+          $note_text = $cond_xscript->getNote();
+          if ($cond_xscript->isForbidden()) {
+            $note_text = HeraldStateReasons::getExplanation($note_text);
+          }
+
           $note = phutil_tag(
             'div',
             array(
               'class' => 'herald-condition-note',
             ),
-            $cond_xscript->getNote());
+            $note_text);
         } else {
           $note = null;
         }
@@ -310,7 +319,12 @@ final class HeraldTranscriptController extends HeraldController {
         $cond_list->addItem($cond_item);
       }
 
-      if ($rule_xscript->getResult()) {
+      if ($rule_xscript->isForbidden()) {
+        $last_icon = 'fa-ban';
+        $last_color = 'indigo';
+        $last_result = pht('Forbidden');
+        $last_note = pht('Object state prevented rule evaluation.');
+      } else if ($rule_xscript->getResult()) {
         $last_icon = 'fa-check-circle';
         $last_color = 'green';
         $last_result = pht('Passed');

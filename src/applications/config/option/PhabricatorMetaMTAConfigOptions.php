@@ -138,15 +138,19 @@ EODOC
   ,
   'metamta.public-replies'));
 
+    $adapter_doc_href = PhabricatorEnv::getDoclink(
+      'Configuring Outbound Email');
+    $adapter_doc_name = pht('Configuring Outbound Email');
     $adapter_description = $this->deformat(pht(<<<EODOC
 Adapter class to use to transmit mail to the MTA. The default uses
 PHPMailerLite, which will invoke "sendmail". This is appropriate if sendmail
 actually works on your host, but if you haven't configured mail it may not be so
 great. A number of other mailers are available (e.g., SES, SendGrid, SMTP,
-custom mailers), consult "Configuring Outbound Email" in the documentation for
-details.
+custom mailers) - consult [[ %s | %s ]] for details.
 EODOC
-));
+  ,
+  $adapter_doc_href,
+  $adapter_doc_name));
 
     $placeholder_description = $this->deformat(pht(<<<EODOC
 When sending a message that has no To recipient (i.e. all recipients are CC'd,
@@ -297,9 +301,9 @@ EODOC
       $this->newOption('metamta.user-address-format', 'enum', 'full')
         ->setEnumOptions(
           array(
-            'short' => 'short',
-            'real' => 'real',
-            'full' => 'full',
+            'short' => pht('Short'),
+            'real' => pht('Real'),
+            'full' => pht('Full'),
           ))
         ->setSummary(pht('Control how Phabricator renders user names in mail.'))
         ->setDescription($address_description)

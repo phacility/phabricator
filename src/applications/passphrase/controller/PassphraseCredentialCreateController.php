@@ -52,17 +52,12 @@ final class PassphraseCredentialCreateController extends PassphraseController {
     $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Credential'))
+      ->setHeaderText($title)
       ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setForm($form);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-plus-square');
-
     $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
       ->setFooter($box);
 
     return $this->newPage()

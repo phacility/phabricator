@@ -30,7 +30,7 @@ final class PHUIFormIconSetControl
 
     $classes = array();
     $classes[] = 'button';
-    $classes[] = 'grey';
+    $classes[] = 'button-grey';
 
     if ($is_disabled) {
       $classes[] = 'disabled';

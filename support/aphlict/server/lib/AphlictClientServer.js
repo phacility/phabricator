@@ -92,8 +92,14 @@ JX.install('AphlictClientServer', {
       var server = this._server.listen.apply(this._server, arguments);
       var wss = new WebSocket.Server({server: server});
 
-      wss.on('connection', function(ws) {
-        var path = url.parse(ws.upgradeReq.url).pathname;
+      // This function checks for upgradeReq which is only available in
+      // ws2 by default, not ws3. See T12755 for more information.
+      wss.on('connection', function(ws, request) {
+        if ('upgradeReq' in ws) {
+          request = ws.upgradeReq;
+        }
+
+        var path = url.parse(request.url).pathname;
         var instance = self._parseInstanceFromPath(path);
 
         var listener = self.getListenerList(instance).addListener(ws);

@@ -142,7 +142,7 @@ final class HarbormasterSendMessageConduitAPIMethod
       "=============\n".
       "When you send Harbormaster a message, you must include a `type`, ".
       "which describes the overall state of the build. For example, use ".
-      "`pass` to tell Harbomaster that a build completed successfully.".
+      "`pass` to tell Harbormaster that a build completed successfully.".
       "\n\n".
       "Supported message types are:".
       "\n\n".
@@ -155,7 +155,7 @@ final class HarbormasterSendMessageConduitAPIMethod
       "message, but you can also send a `work` message to report intermediate ".
       "results.\n\n".
       "To provide unit test results, pass a list of results in the `unit` ".
-      "parameter. Each result shoud be a dictionary with these keys:".
+      "parameter. Each result should be a dictionary with these keys:".
       "\n\n".
       "%s".
       "\n\n".

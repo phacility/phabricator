@@ -10,7 +10,8 @@ final class DifferentialRevisionAbandonTransaction
     return pht('Abandon Revision');
   }
 
-  protected function getRevisionActionDescription() {
+  protected function getRevisionActionDescription(
+    DifferentialRevision $revision) {
     return pht('This revision will be abandoned and closed.');
   }
 
@@ -47,7 +48,8 @@ final class DifferentialRevisionAbandonTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
+    $status_abandoned = DifferentialRevisionStatus::ABANDONED;
+    $object->setModernRevisionStatus($status_abandoned);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

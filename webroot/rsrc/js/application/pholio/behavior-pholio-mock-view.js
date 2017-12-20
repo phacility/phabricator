@@ -201,7 +201,7 @@ JX.behavior('pholio-mock-view', function(config, statics) {
   }
 
   function render_image_header(image) {
-    // Render image dimensions and visible size. If we have this infomation
+    // Render image dimensions and visible size. If we have this information
     // from the server we can display some of it immediately; otherwise, we need
     // to wait for the image to load so we can read dimension information from
     // it.

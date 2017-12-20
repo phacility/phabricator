@@ -33,4 +33,14 @@ final class ManiphestQueryStatusesConduitAPIMethod
     return $results;
   }
 
+  public function getMethodStatus() {
+     return self::METHOD_STATUS_FROZEN;
+   }
+
+   public function getMethodStatusDescription() {
+     return pht(
+       'This method is frozen and will eventually be deprecated. New code '.
+       'should use "maniphest.status.search" instead.');
+   }
+
 }

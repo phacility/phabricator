@@ -62,7 +62,19 @@ final class PholioImageReplaceTransaction
   }
 
   public function extractFilePHIDs($object, $value) {
-    return array($value);
+    $file_phids = array();
+
+    $editor = $this->getEditor();
+    $images = $editor->getNewImages();
+    foreach ($images as $image) {
+      if ($image->getPHID() !== $value) {
+        continue;
+      }
+
+      $file_phids[] = $image->getFilePHID();
+    }
+
+    return $file_phids;
   }
 
 }

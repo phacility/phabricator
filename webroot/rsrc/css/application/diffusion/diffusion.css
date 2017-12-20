@@ -1,0 +1,239 @@
+/**
+ * @provides diffusion-css
+ */
+
+/* - Home Styles  ------------------------------------------------------------*/
+
+.diffusion-profile-header.phui-profile-header .phui-header-col3 {
+  vertical-align: middle;
+}
+
+.diffusion-profile-header .phui-header-action-links a.button {
+  display: block;
+}
+
+.device-phone .diffusion-profile-header .phui-header-col1 {
+  display: none;
+}
+
+.diffusion-action-bar {
+  margin-bottom: 16px;
+}
+
+.device-phone .diffusion-action-bar {
+  display: block;
+}
+
+.device-phone .diffusion-action-bar .phui-lr-container {
+  display: block;
+}
+
+.device-phone .diffusion-action-bar .phui-lr-container .phui-left-view {
+  display: block;
+}
+
+.device-phone .diffusion-action-bar .phui-lr-container .phui-right-view {
+  padding-top: 12px;
+  display: block;
+}
+
+.device-phone .diffusion-action-bar .button .phui-button-text {
+  visibility: hidden;
+  width: 0;
+  margin-left: 8px;
+}
+
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-left-view {
+    display: inline-block;
+}
+
+.device-phone .full-mobile-buttons.diffusion-action-bar .phui-lr-container
+  .phui-right-view {
+    display: inline-block;
+}
+
+.diffusion-profile-locate .phui-form-view {
+  margin: 0;
+  padding: 0;
+}
+
+.diffusion-profile-locate .phui-form-view .aphront-form-control {
+  padding: 0;
+}
+
+.diffusion-profile-locate .phui-form-view .aphront-form-input {
+  margin: 0;
+  width: 480px;
+}
+
+.device .diffusion-profile-locate .phui-form-view .aphront-form-input {
+  margin: 0;
+  width: 100%;
+}
+
+.diffusion-profile-description.phui-object-box {
+  padding: 0;
+}
+
+.device-phone .diffusion-profile-description.phui-object-box {
+  padding: 0;
+}
+
+.diffusion-view-browse-header {
+  display: block;
+  padding: 2px 0;
+  font-size: {$biggestfontsize};
+}
+
+/* - List Styles  ------------------------------------------------------------*/
+
+.diffusion-history-list .phui-oi-link {
+  color: {$blacktext};
+  font-size: {$biggerfontsize};
+}
+
+.diffusion-history-message {
+  background-color: {$bluebackground};
+  padding: 16px;
+  margin: 4px 0;
+  border-radius: 5px;
+  color: {$darkbluetext};
+}
+
+.diffusion-history-list .phui-oi-attribute {
+  font-size: {$smallerfontsize};
+  letter-spacing: 0.01em;
+}
+
+.diffusion-history-author-name a {
+  color: {$darkbluetext};
+}
+
+.diffusion-history-list .diffusion-differential-tag {
+  margin-left: 4px;
+}
+
+/* - Branch Styles  ----------------------------------------------------------*/
+
+.diffusion-branch-list .phui-oi-attribute a {
+  color: {$darkbluetext};
+}
+
+.diffusion-branch-list .phui-oi-attribute-spacer {
+  visibility: hidden;
+}
+
+.diffusion-branch-list .phui-oi-subhead {
+  color: {$bluetext};
+}
+
+.diffusion-branch-list .phui-oi-subhead .phui-tag-view {
+  margin-right: 4px;
+}
+
+.diffusion-header-branch-tag.phui-tag-view.phui-tag-type-outline
+  .phui-tag-core {
+    padding: 3px 12px 2px;
+    font-size: {$normalfontsize};
+}
+
+/* - Browse Styles  ----------------------------------------------------------*/
+
+.diffusion-browse-table .commit-detail {
+  padding-left: 32px;
+}
+
+.diffusion-browse-table .commit-detail a {
+  color: {$darkbluetext};
+}
+
+.diffusion-search-result-header.phui-header-shell {
+  border: none;
+  padding-bottom: 24px;
+}
+
+/* - Search Input ------------------------------------------------------------*/
+
+.diffusion-search-form-view {
+  width: 240px;
+}
+
+.diffusion-search-form-view .diffusion-search-input {
+  width: 240px;
+  border-radius: 20px;
+  padding-left: 12px;
+}
+
+.device-phone .diffusion-browse-header .diffusion-search-form-view,
+.device-phone .diffusion-profile-header .diffusion-search-form-view {
+  display: none;
+}
+
+.diffusion-mobile-search-form {
+  display: none;
+}
+
+.device-phone .diffusion-mobile-search-form {
+  display: block;
+}
+
+.device-phone .diffusion-search-form-view {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.device-phone .diffusion-search-form-view .diffusion-search-input {
+  width: 100%;
+}
+
+/* - Create Repository -------------------------------------------------------*/
+
+.diffusion-create-repo {
+  margin-top: 32px;
+  margin-bottom: 20px;
+}
+
+.device .diffusion-create-repo {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+/* - Phone Style  ------------------------------------------------------------*/
+
+.device-phone.diffusion-history-view  .phui-two-column-view
+  .phui-two-column-footer .phui-object-box {
+    border-color: {$thinblueborder};
+}
+
+.device-phone.diffusion-history-view .phui-oi-attribute-spacer {
+  display: none;
+}
+
+.device-phone.diffusion-history-view .phui-oi-attribute {
+  display: block;
+  margin: 0 0 4px 0;
+}
+
+.device-phone.diffusion-history-view .phui-oi-image {
+  height: 36px;
+  width: 36px;
+  margin-top: 10px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-with-image .phui-oi-content-box {
+  margin-left: 44px;
+}
+
+.device-phone.diffusion-history-view .phui-oi-col2.phui-oi-side-column {
+  padding-bottom: 10px;
+}
+
+.device-phone .phui-two-column-view .phui-two-column-content
+  .phui-object-box.diffusion-mobile-view {
+    margin: 0 -12px 20px;
+    border-left: none;
+    border-right: none;
+    border-color: {$thinblueborder};
+}

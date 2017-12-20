@@ -88,7 +88,7 @@
 }
 
 .device-desktop .phui-list-sidenav .phui-list-item-href:hover .phui-icon-view {
-  color: #fff;
+  color: {$page.content};
 }
 
 /* - Top, Full Width Navigations -----------------------------------------------
@@ -137,6 +137,76 @@
   width: 14px;
   display: block;
   font-size: 14px;
+}
+
+.device-phone .phui-list-view.phui-list-navbar > li {
+  float: none;
+  border: none;
+}
+
+/* - Two Column View, Responsive Navigations -----------------------------------
+
+  Sets a two column page with a responsive, top navbar
+
+*/
+
+.phui-list-view.phui-list-tabbar {
+  list-style: none;
+  overflow: hidden;
+}
+
+.phui-list-view.phui-list-tabbar > li {
+  list-style: none;
+  float: left;
+  display: block;
+}
+
+.phui-list-view.phui-list-tabbar > li > * {
+  display: block;
+}
+
+.phui-list-tabbar .phui-list-item-href {
+  color: {$bluetext};
+  padding: 8px 24px;
+  line-height: 24px;
+  font-weight: bold;
+  font-size: {$biggerfontsize};
+  border-top: 4px solid transparent;
+}
+
+.phui-list-tabbar .phui-list-item-selected .phui-list-item-href {
+  color: {$sky};
+  border-bottom: 4px solid {$sky};
+}
+
+.phui-list-tabbar .phui-list-item-selected .phui-list-item-href
+  .phui-icon-view {
+    color: {$sky};
+}
+
+.device-desktop .phui-list-tabbar .phui-list-item-href:hover {
+  color: {$sky};
+  text-decoration: none;
+}
+
+.phui-list-tabbar .phui-list-item-icon {
+  height: 20px;
+  width: 20px;
+  display: none;
+  font-size: 20px;
+  text-align: center;
+}
+
+.device-phone .phui-list-tabbar .phui-list-item-icon {
+  display: inline-block;
+}
+
+.device-phone .phui-list-tabbar .phui-list-item-name {
+  display: none;
+}
+
+.device-phone .phui-list-tabbar .phui-list-item-href {
+  padding: 8px 16px;
 }
 
 .device-phone .phui-list-view.phui-list-navbar > li {

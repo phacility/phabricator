@@ -9,7 +9,7 @@
 }
 
 .phui-document-container {
-  background-color: #fff;
+  background-color: {$page.content};
   position: relative;
   border-bottom: 1px solid #dedee1;
 }
@@ -64,19 +64,11 @@ body.printable {
 .phui-document-view-pro .phui-document-toc {
   position: absolute;
   top: 34px;
-  left: -36px;
+  left: -44px;
 }
 
 .printable .phui-document-view-pro a.phui-document-toc {
   display: none;
-}
-
-a.button.phui-document-toc {
-  display: inline-block;
-  height: 16px;
-  width: 20px;
-  padding-left: 8px;
-  padding-right: 8px;
 }
 
 .phui-document-view-pro .phui-document-toc-list {
@@ -87,7 +79,7 @@ a.button.phui-document-toc {
   width: 260px;
   position: absolute;
   z-index: 30;
-  background-color: #fff;
+  background-color: {$page.content};
   top: 52px;
   left: -40px;
 }
@@ -105,12 +97,7 @@ a.button.phui-document-toc {
 }
 
 .phui-document-toc-open .phui-document-toc {
-  background-color: {$blue};
-  border-color: {$blue};
-}
-
-.phui-document-toc-open .phui-document-toc .phui-icon-view {
-  color: #fff;
+  border-color: {$blueborder};
 }
 
 .phui-document-view-pro .phui-document-toc-content {
@@ -176,7 +163,7 @@ a.button.phui-document-toc {
   .phui-header-header {
   font-size: 24px;
   line-height: 30px;
-  color: #000;
+  color: {$blacktext};
 }
 
 .device-phone .phui-document-view.phui-document-view-pro .phui-header-tall
@@ -241,7 +228,7 @@ a.button.phui-document-toc {
 .phui-document-view-pro-box .phui-timeline-title {
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
-  background-color: #fff;
+  background-color: {$page.content};
   border-bottom: 1px solid #F1F1F4;
 }
 

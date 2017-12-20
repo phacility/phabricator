@@ -3,7 +3,7 @@
  */
 
 .phui-workcard.phui-oi {
-  background-color: #fff;
+  background-color: {$page.content};
   border-radius: 3px;
   margin-bottom: 8px;
   border-left-width: 4px;
@@ -37,7 +37,7 @@
 .phui-workcard .phui-oi-link {
   white-space: normal;
   font-weight: normal;
-  color: #000;
+  color: {$blacktext};
   margin-left: 2px;
 }
 

@@ -141,7 +141,7 @@ final class HarbormasterBuildViewController
         if ($ended) {
           $when[] = pht(
             'Completed at %s',
-            phabricator_datetime($started, $viewer));
+            phabricator_datetime($ended, $viewer));
 
           $duration = ($ended - $started);
           if ($duration) {

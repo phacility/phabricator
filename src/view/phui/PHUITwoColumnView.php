@@ -6,10 +6,11 @@ final class PHUITwoColumnView extends AphrontTagView {
   private $sideColumn = null;
   private $navigation;
   private $display;
-  private $fluid;
+  private $fixed;
   private $header;
   private $subheader;
   private $footer;
+  private $tabs;
   private $propertySection = array();
   private $curtain;
 
@@ -42,6 +43,12 @@ final class PHUITwoColumnView extends AphrontTagView {
     return $this;
   }
 
+  public function setTabs(PHUIListView $tabs) {
+    $tabs->setType(PHUIListView::TABBAR_LIST);
+    $this->tabs = $tabs;
+    return $this;
+  }
+
   public function setFooter($footer) {
     $this->footer = $footer;
     return $this;
@@ -64,8 +71,8 @@ final class PHUITwoColumnView extends AphrontTagView {
     return $this->curtain;
   }
 
-  public function setFluid($fluid) {
-    $this->fluid = $fluid;
+  public function setFixed($fixed) {
+    $this->fixed = $fixed;
     return $this;
   }
 
@@ -87,12 +94,20 @@ final class PHUITwoColumnView extends AphrontTagView {
     $classes[] = 'phui-two-column-view';
     $classes[] = $this->getDisplay();
 
-    if ($this->fluid) {
-      $classes[] = 'phui-two-column-fluid';
+    if ($this->fixed) {
+      $classes[] = 'phui-two-column-fixed';
+    }
+
+    if ($this->tabs) {
+      $classes[] = 'with-tabs';
     }
 
     if ($this->subheader) {
       $classes[] = 'with-subheader';
+    }
+
+    if (!$this->header) {
+      $classes[] = 'without-header';
     }
 
     return array(
@@ -124,6 +139,12 @@ final class PHUITwoColumnView extends AphrontTagView {
         'phui-two-column-header', $this->header);
     }
 
+    $tabs = null;
+    if ($this->tabs) {
+      $tabs = phutil_tag_div(
+        'phui-two-column-tabs', $this->tabs);
+    }
+
     $subheader = null;
     if ($this->subheader) {
       $subheader = phutil_tag_div(
@@ -137,6 +158,7 @@ final class PHUITwoColumnView extends AphrontTagView {
       ),
       array(
         $header,
+        $tabs,
         $subheader,
         $table,
         $footer,

@@ -45,18 +45,23 @@ final class LegalpadDocumentEditor
     }
 
     if ($is_contribution) {
+      $text = $object->getDocumentBody()->getText();
+      $title = $object->getDocumentBody()->getTitle();
       $object->setVersions($object->getVersions() + 1);
-      $body = $object->getDocumentBody();
+
+      $body = new LegalpadDocumentBody();
+      $body->setCreatorPHID($this->getActingAsPHID());
+      $body->setText($text);
+      $body->setTitle($title);
       $body->setVersion($object->getVersions());
       $body->setDocumentPHID($object->getPHID());
       $body->save();
 
       $object->setDocumentBodyPHID($body->getPHID());
 
-      $actor = $this->getActor();
       $type = PhabricatorContributedToObjectEdgeType::EDGECONST;
       id(new PhabricatorEdgeEditor())
-        ->addEdge($actor->getPHID(), $type, $object->getPHID())
+        ->addEdge($this->getActingAsPHID(), $type, $object->getPHID())
         ->save();
 
       $type = PhabricatorObjectHasContributorEdgeType::EDGECONST;

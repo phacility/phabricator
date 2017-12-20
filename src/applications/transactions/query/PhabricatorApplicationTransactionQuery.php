@@ -7,6 +7,7 @@ abstract class PhabricatorApplicationTransactionQuery
   private $objectPHIDs;
   private $authorPHIDs;
   private $transactionTypes;
+  private $withComments;
 
   private $needComments = true;
   private $needHandles  = true;
@@ -34,10 +35,6 @@ abstract class PhabricatorApplicationTransactionQuery
 
   abstract public function getTemplateApplicationTransaction();
 
-  protected function buildMoreWhereClauses(AphrontDatabaseConnection $conn_r) {
-    return array();
-  }
-
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
     return $this;
@@ -58,6 +55,11 @@ abstract class PhabricatorApplicationTransactionQuery
     return $this;
   }
 
+  public function withComments($with_comments) {
+    $this->withComments = $with_comments;
+    return $this;
+  }
+
   public function needComments($need) {
     $this->needComments = $need;
     return $this;
@@ -70,17 +72,8 @@ abstract class PhabricatorApplicationTransactionQuery
 
   protected function loadPage() {
     $table = $this->getTemplateApplicationTransaction();
-    $conn_r = $table->establishConnection('r');
 
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T x %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $xactions = $table->loadAllFromArray($data);
+    $xactions = $this->loadStandardPage($table);
 
     foreach ($xactions as $xaction) {
       $xaction->attachViewer($this->getViewer());
@@ -161,50 +154,99 @@ abstract class PhabricatorApplicationTransactionQuery
     return $xactions;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'phid IN (%Ls)',
+        $conn,
+        'x.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->objectPHIDs) {
+    if ($this->objectPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'objectPHID IN (%Ls)',
+        $conn,
+        'x.objectPHID IN (%Ls)',
         $this->objectPHIDs);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'authorPHID IN (%Ls)',
+        $conn,
+        'x.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->transactionTypes) {
+    if ($this->transactionTypes !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'transactionType IN (%Ls)',
+        $conn,
+        'x.transactionType IN (%Ls)',
         $this->transactionTypes);
     }
 
-    foreach ($this->buildMoreWhereClauses($conn_r) as $clause) {
-      $where[] = $clause;
+    if ($this->withComments !== null) {
+      if (!$this->withComments) {
+        $where[] = qsprintf(
+          $conn,
+          'c.id IS NULL');
+      }
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->withComments !== null) {
+      $xaction = $this->getTemplateApplicationTransaction();
+      $comment = $xaction->getApplicationTransactionCommentObject();
+
+      // Not every transaction type has comments, so we may be able to
+      // implement this constraint trivially.
+
+      if (!$comment) {
+        if ($this->withComments) {
+          throw new PhabricatorEmptyQueryException();
+        } else {
+          // If we're querying for transactions with no comments and the
+          // transaction type does not support comments, we don't need to
+          // do anything.
+        }
+      } else {
+        if ($this->withComments) {
+          $joins[] = qsprintf(
+            $conn,
+            'JOIN %T c ON x.phid = c.transactionPHID',
+            $comment->getTableName());
+        } else {
+          $joins[] = qsprintf(
+            $conn,
+            'LEFT JOIN %T c ON x.phid = c.transactionPHID',
+            $comment->getTableName());
+        }
+      }
+    }
+
+    return $joins;
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->withComments !== null) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
+  }
 
   public function getQueryApplicationClass() {
     // TODO: Sort this out?
     return null;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'x';
   }
 
 }

@@ -14,20 +14,7 @@ final class DiffusionRepositoryActionsManagementPanel
   }
 
   public function getManagementPanelIcon() {
-    $repository = $this->getRepository();
-
-    $has_any =
-      $repository->getDetail('herald-disabled') ||
-      $repository->getDetail('disable-autoclose');
-
-    // NOTE: Any value here really means something is disabled, so try to
-    // hint that a little bit with the icon.
-
-    if ($has_any) {
-      return 'fa-comment-o';
-    } else {
-      return 'fa-commenting grey';
-    }
+    return 'fa-flash';
   }
 
   protected function getEditEngineFieldKeys() {
@@ -35,29 +22,6 @@ final class DiffusionRepositoryActionsManagementPanel
       'publish',
       'autoclose',
     );
-  }
-
-  public function buildManagementPanelCurtain() {
-    $repository = $this->getRepository();
-    $viewer = $this->getViewer();
-    $action_list = $this->getNewActionList();
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $actions_uri = $this->getEditPageURI();
-
-    $action_list->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-pencil')
-        ->setName(pht('Edit Actions'))
-        ->setHref($actions_uri)
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    return $this->getNewCurtainView($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -79,7 +43,22 @@ final class DiffusionRepositoryActionsManagementPanel
     $autoclose = phutil_tag('em', array(), $autoclose);
     $view->addProperty(pht('Autoclose'), $autoclose);
 
-    return $this->newBox(pht('Actions'), $view);
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $actions_uri = $this->getEditPageURI();
+
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-pencil')
+      ->setText(pht('Edit'))
+      ->setHref($actions_uri)
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
+    return $this->newBox(pht('Actions'), $view, array($button));
   }
 
 }

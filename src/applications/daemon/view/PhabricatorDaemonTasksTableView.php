@@ -41,7 +41,7 @@ final class PhabricatorDaemonTasksTableView extends AphrontView {
           'a',
           array(
             'href' => '/daemon/task/'.$task->getID().'/',
-            'class' => 'button small grey',
+            'class' => 'button small button-grey',
           ),
           pht('View Task')),
       );

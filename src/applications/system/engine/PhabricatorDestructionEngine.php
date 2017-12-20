@@ -3,6 +3,17 @@
 final class PhabricatorDestructionEngine extends Phobject {
 
   private $rootLogID;
+  private $collectNotes;
+  private $notes = array();
+
+  public function setCollectNotes($collect_notes) {
+    $this->collectNotes = $collect_notes;
+    return $this;
+  }
+
+  public function getNotes() {
+    return $this->notes;
+  }
 
   public function getViewer() {
     return PhabricatorUser::getOmnipotentUser();
@@ -34,6 +45,18 @@ final class PhabricatorDestructionEngine extends Phobject {
 
     if (!$this->rootLogID) {
       $this->rootLogID = $log->getID();
+    }
+
+    if ($this->collectNotes) {
+      if ($object instanceof PhabricatorDestructibleCodexInterface) {
+        $codex = PhabricatorDestructibleCodex::newFromObject(
+          $object,
+          $this->getViewer());
+
+        foreach ($codex->getDestructionNotes() as $note) {
+          $this->notes[] = $note;
+        }
+      }
     }
 
     $object->destroyObjectPermanently($this);

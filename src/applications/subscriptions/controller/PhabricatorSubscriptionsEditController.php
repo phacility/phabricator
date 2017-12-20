@@ -83,7 +83,7 @@ final class PhabricatorSubscriptionsEditController
     } else {
 
       // TODO: Eventually, get rid of this once everything implements
-      // PhabriatorApplicationTransactionInterface.
+      // PhabricatorApplicationTransactionInterface.
 
       $editor = id(new PhabricatorSubscriptionsEditor())
         ->setActor($viewer)

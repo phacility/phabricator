@@ -55,28 +55,28 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'b.status IN (%Ls)',
         $this->statuses);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ls)',
+        'b.id IN (%Ls)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'b.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->domain !== null) {
       $where[] = qsprintf(
         $conn,
-        'domain = %s',
+        'b.domain = %s',
         $this->domain);
     }
 
@@ -141,6 +141,10 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   public function getQueryApplicationClass() {
     // TODO: Can we set this without breaking public blogs?
     return null;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'b';
   }
 
 }

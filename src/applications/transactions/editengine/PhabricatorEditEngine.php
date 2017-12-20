@@ -29,7 +29,6 @@ abstract class PhabricatorEditEngine
   private $page;
   private $pages;
   private $navigation;
-  private $hideHeader;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -125,15 +124,6 @@ abstract class PhabricatorEditEngine
 
   public function getNavigation() {
     return $this->navigation;
-  }
-
-  public function setHideHeader($hide_header) {
-    $this->hideHeader = $hide_header;
-    return $this;
-  }
-
-  public function getHideHeader() {
-    return $this->hideHeader;
   }
 
 
@@ -320,6 +310,15 @@ abstract class PhabricatorEditEngine
   protected function getCommentViewButtonText($object) {
     return $this->getCommentViewSeriousButtonText($object);
   }
+
+
+  /**
+   * @task text
+   */
+  protected function getPageHeader($object) {
+    return null;
+  }
+
 
 
   /**
@@ -631,6 +630,15 @@ abstract class PhabricatorEditEngine
     return $this->isCreate;
   }
 
+  /**
+   * Initialize a new object for documentation creation.
+   *
+   * @return object Newly initialized object.
+   * @task load
+   */
+  protected function newEditableObjectForDocumentation() {
+    return $this->newEditableObject();
+  }
 
   /**
    * Flag this workflow as a create or edit.
@@ -764,7 +772,7 @@ abstract class PhabricatorEditEngine
    * Load an object given a configured query.
    *
    * @param PhabricatorPolicyAwareQuery Configured query.
-   * @param list<const> List of required capabilitiy constants, or omit for
+   * @param list<const> List of required capability constants, or omit for
    *  defaults.
    * @return object|null Object, or null if no such object exists.
    * @task load
@@ -1151,10 +1159,8 @@ abstract class PhabricatorEditEngine
 
     if ($this->getIsCreate()) {
       $header_text = $this->getFormHeaderText($object);
-      $header_icon = 'fa-plus-square';
     } else {
       $header_text = $this->getObjectEditTitleText($object);
-      $header_icon = 'fa-pencil';
     }
 
     $show_preview = !$request->isAjax();
@@ -1181,6 +1187,9 @@ abstract class PhabricatorEditEngine
 
     $form = $this->buildEditForm($object, $fields);
 
+    $crumbs = $this->buildCrumbs($object, $final = true);
+    $crumbs->setBorder(true);
+
     if ($request->isAjax()) {
       return $this->getController()
         ->newDialog()
@@ -1192,27 +1201,18 @@ abstract class PhabricatorEditEngine
         ->addSubmitButton($submit_button);
     }
 
-    $crumbs = $this->buildCrumbs($object, $final = true);
-
-    if ($this->getHideHeader()) {
-      $header = null;
-      $crumbs->setBorder(false);
-    } else {
-      $header = id(new PHUIHeaderView())
-        ->setHeader($header_text)
-        ->setHeaderIcon($header_icon);
-      $crumbs->setBorder(true);
-    }
+    $box_header = id(new PHUIHeaderView())
+      ->setHeader($header_text);
 
     if ($action_button) {
-      $header->addActionLink($action_button);
+      $box_header->addActionLink($action_button);
     }
 
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
-      ->setHeaderText($this->getObjectName())
+      ->setHeader($box_header)
       ->setValidationException($validation_exception)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->appendChild($form);
 
     // This is fairly questionable, but in use by Settings.
@@ -1227,23 +1227,26 @@ abstract class PhabricatorEditEngine
 
     $view = new PHUITwoColumnView();
 
-    if ($header) {
-      $view->setHeader($header);
+    $page_header = $this->getPageHeader($object);
+    if ($page_header) {
+      $view->setHeader($page_header);
     }
+
+    $page = $controller->newPage()
+      ->setTitle($header_text)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
 
     $navigation = $this->getNavigation();
     if ($navigation) {
-      $view
-        ->setNavigation($navigation)
-        ->setMainColumn($content);
+      $view->setFixed(true);
+      $view->setNavigation($navigation);
+      $view->setMainColumn($content);
     } else {
       $view->setFooter($content);
     }
 
-    return $controller->newPage()
-      ->setTitle($header_text)
-      ->setCrumbs($crumbs)
-      ->appendChild($view);
+    return $page;
   }
 
   protected function newEditResponse(
@@ -1388,7 +1391,7 @@ abstract class PhabricatorEditEngine
    * and that field is visible and editable for the user.
    *
    * For example, you can use it to test if a user is able to reassign tasks
-   * or not, prior to rendering dedicated UI for task reassingment.
+   * or not, prior to rendering dedicated UI for task reassignment.
    *
    * Note that this method does NOT test if the user can actually edit the
    * current object, just if they have access to the related field.
@@ -2204,7 +2207,7 @@ abstract class PhabricatorEditEngine
       return array();
     }
 
-    $object = $this->newEditableObject();
+    $object = $this->newEditableObjectForDocumentation();
     $fields = $this->buildEditFields($object);
     return $this->getConduitEditTypesFromFields($fields);
   }

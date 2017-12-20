@@ -11,6 +11,7 @@ final class DiffusionHistoryController extends DiffusionController {
     if ($response) {
       return $response;
     }
+    require_celerity_resource('diffusion-css');
 
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
@@ -26,11 +27,6 @@ final class DiffusionHistoryController extends DiffusionController {
       'limit' => $pager->getPageSize() + 1,
     );
 
-    if (!$request->getBool('copies')) {
-      $params['needDirectChanges'] = true;
-      $params['needChildChanges'] = true;
-    }
-
     $history_results = $this->callConduitWithDiffusionRequest(
       'diffusion.historyquery',
       $params);
@@ -39,27 +35,12 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history = $pager->sliceResults($history);
 
-    $show_graph = !strlen($drequest->getPath());
-    $history_table = id(new DiffusionHistoryTableView())
-      ->setUser($request->getUser())
+    $history_list = id(new DiffusionHistoryListView())
+      ->setViewer($viewer)
       ->setDiffusionRequest($drequest)
       ->setHistory($history);
 
-    $history_table->loadRevisions();
-
-    if ($show_graph) {
-      $history_table->setParents($history_results['parents']);
-      $history_table->setIsHead(!$pager->getOffset());
-      $history_table->setIsTail(!$pager->getHasMorePages());
-    }
-
-    $history_header = $this->buildHistoryHeader($drequest);
-    $history_panel = id(new PHUIObjectBoxView())
-      ->setHeader($history_header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($history_table)
-      ->setPager($pager);
-
+    $history_list->loadRevisions();
     $header = $this->buildHeader($drequest);
 
     $crumbs = $this->buildCrumbs(
@@ -70,83 +51,60 @@ final class DiffusionHistoryController extends DiffusionController {
       ));
     $crumbs->setBorder(true);
 
+    $title = array(
+      pht('History'),
+      $repository->getDisplayName(),
+    );
+
+    $pager = id(new PHUIBoxView())
+      ->addClass('mlb')
+      ->appendChild($pager);
+
+    $tabs = $this->buildTabsView('history');
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setTabs($tabs)
       ->setFooter(array(
-        $history_panel,
+        $history_list,
+        $pager,
       ));
 
     return $this->newPage()
-      ->setTitle(
-        array(
-          pht('History'),
-          $repository->getDisplayName(),
-        ))
+      ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-        ));
+      ->appendChild($view)
+      ->addClass('diffusion-history-view');
   }
 
   private function buildHeader(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
+    $repository = $drequest->getRepository();
 
-    $tag = $this->renderCommitHashTag($drequest);
+    $no_path = !strlen($drequest->getPath());
+    if ($no_path) {
+      $header_text = pht('History');
+    } else {
+      $header_text = $this->renderPathLinks($drequest, $mode = 'history');
+    }
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setPolicyObject($drequest->getRepository())
-      ->addTag($tag)
-      ->setHeader($this->renderPathLinks($drequest, $mode = 'history'))
+      ->setHeader($header_text)
       ->setHeaderIcon('fa-clock-o');
 
-    return $header;
-
-  }
-
-  private function buildHistoryHeader(DiffusionRequest $drequest) {
-    $viewer = $this->getViewer();
-
-    $browse_uri = $drequest->generateURI(
-      array(
-        'action' => 'browse',
-      ));
-
-    $browse_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Browse'))
-      ->setHref($browse_uri)
-      ->setIcon('fa-files-o');
-
-    // TODO: Sometimes we do have a change view, we need to look at the most
-    // recent history entry to figure it out.
-
-    $request = $this->getRequest();
-    if ($request->getBool('copies')) {
-      $branch_name = pht('Hide Copies/Branches');
-      $branch_uri = $request->getRequestURI()
-        ->alter('offset', null)
-        ->alter('copies', null);
-    } else {
-      $branch_name = pht('Show Copies/Branches');
-      $branch_uri = $request->getRequestURI()
-        ->alter('offset', null)
-        ->alter('copies', true);
+    if (!$repository->isSVN()) {
+      $branch_tag = $this->renderBranchTag($drequest);
+      $header->addTag($branch_tag);
     }
 
-    $branch_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText($branch_name)
-      ->setIcon('fa-code-fork')
-      ->setHref($branch_uri);
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('History'))
-      ->addActionLink($browse_button)
-      ->addActionLink($branch_button);
+    if ($drequest->getSymbolicCommit()) {
+      $symbolic_tag = $this->renderSymbolicCommit($drequest);
+      $header->addTag($symbolic_tag);
+    }
 
     return $header;
+
   }
 
 }
