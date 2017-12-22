@@ -65,6 +65,16 @@ final class HarbormasterQueryBuildsConduitAPIMethod
       $fields = idx($build_data, 'fields', array());
       unset($build_data['fields']);
       unset($build_data['attachments']);
+
+      // To retain backward compatibility, remove newer keys from the
+      // result array.
+      $fields['buildStatus'] = array_select_keys(
+        $fields['buildStatus'],
+        array(
+          'value',
+          'name',
+        ));
+
       $data[] = array_mergev(array($build_data, $querybuilds, $fields));
     }
 

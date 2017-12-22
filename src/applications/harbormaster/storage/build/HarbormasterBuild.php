@@ -435,6 +435,8 @@ final class HarbormasterBuild extends HarbormasterDAO
       'buildStatus' => array(
         'value' => $status,
         'name' => HarbormasterBuildStatus::getBuildStatusName($status),
+        'color.ansi' =>
+          HarbormasterBuildStatus::getBuildStatusANSIColor($status),
       ),
       'initiatorPHID' => nonempty($this->getInitiatorPHID(), null),
       'name' => $this->getName(),
