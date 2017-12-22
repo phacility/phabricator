@@ -1,12 +1,12 @@
 <?php
 
-final class DiffusionCommitRevisionReviewersHeraldField
+final class DiffusionCommitRevisionAcceptingReviewersHeraldField
   extends DiffusionCommitHeraldField {
 
-  const FIELDCONST = 'diffusion.commit.revision.reviewers';
+  const FIELDCONST = 'diffusion.commit.revision.accepting';
 
   public function getHeraldFieldName() {
-    return pht('Differential reviewers');
+    return pht('Accepting reviewers');
   }
 
   public function getFieldGroupKey() {
@@ -20,7 +20,16 @@ final class DiffusionCommitRevisionReviewersHeraldField
       return array();
     }
 
-    return $revision->getReviewerPHIDs();
+    $diff_phid = $revision->getActiveDiffPHID();
+
+    $reviewer_phids = array();
+    foreach ($revision->getReviewers() as $reviewer) {
+      if ($reviewer->isAccepted($diff_phid)) {
+        $reviewer_phids[] = $reviewer->getReviewerPHID();
+      }
+    }
+
+    return $reviewer_phids;
   }
 
   protected function getHeraldFieldStandardType() {
