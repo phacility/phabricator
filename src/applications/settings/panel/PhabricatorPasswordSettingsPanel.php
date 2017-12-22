@@ -35,23 +35,10 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
     $min_len = (int)$min_len;
 
-    // NOTE: To change your password, you need to prove you own the account,
-    // either by providing the old password or by carrying a token to
-    // the workflow from a password reset email.
-
-    $key = $request->getStr('key');
-    $password_type = PhabricatorAuthPasswordResetTemporaryTokenType::TOKENTYPE;
-
-    $token = null;
-    if ($key) {
-      $token = id(new PhabricatorAuthTemporaryTokenQuery())
-        ->setViewer($user)
-        ->withTokenResources(array($user->getPHID()))
-        ->withTokenTypes(array($password_type))
-        ->withTokenCodes(array(PhabricatorHash::weakDigest($key)))
-        ->withExpired(false)
-        ->executeOne();
-    }
+    // NOTE: Users can also change passwords through the separate "set/reset"
+    // interface which is reached by logging in with a one-time token after
+    // registration or password reset. If this flow changes, that flow may
+    // also need to change.
 
     $e_old = true;
     $e_new = true;
@@ -59,12 +46,10 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
     $errors = array();
     if ($request->isFormPost()) {
-      if (!$token) {
-        $envelope = new PhutilOpaqueEnvelope($request->getStr('old_pw'));
-        if (!$user->comparePassword($envelope)) {
-          $errors[] = pht('The old password you entered is incorrect.');
-          $e_old = pht('Invalid');
-        }
+      $envelope = new PhutilOpaqueEnvelope($request->getStr('old_pw'));
+      if (!$user->comparePassword($envelope)) {
+        $errors[] = pht('The old password you entered is incorrect.');
+        $e_old = pht('Invalid');
       }
 
       $pass = $request->getStr('new_pw');
@@ -98,16 +83,7 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
         unset($unguarded);
 
-        if ($token) {
-          // Destroy the token.
-          $token->delete();
-
-          // If this is a password set/reset, kick the user to the home page
-          // after we update their account.
-          $next = '/';
-        } else {
-          $next = $this->getPanelURI('?saved=true');
-        }
+        $next = $this->getPanelURI('?saved=true');
 
         id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
           $user,
@@ -125,19 +101,15 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
       } catch (PhabricatorPasswordHasherUnavailableException $ex) {
         $can_upgrade = false;
 
-        // Only show this stuff if we aren't on the reset workflow. We can
-        // do resets regardless of the old hasher's availability.
-        if (!$token) {
-          $errors[] = pht(
-            'Your password is currently hashed using an algorithm which is '.
-            'no longer available on this install.');
-          $errors[] = pht(
-            'Because the algorithm implementation is missing, your password '.
-            'can not be used or updated.');
-          $errors[] = pht(
-            'To set a new password, request a password reset link from the '.
-            'login screen and then follow the instructions.');
-        }
+        $errors[] = pht(
+          'Your password is currently hashed using an algorithm which is '.
+          'no longer available on this install.');
+        $errors[] = pht(
+          'Because the algorithm implementation is missing, your password '.
+          'can not be used or updated.');
+        $errors[] = pht(
+          'To set a new password, request a password reset link from the '.
+          'login screen and then follow the instructions.');
       }
 
       if ($can_upgrade) {
@@ -153,20 +125,13 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
       $len_caption = pht('Minimum password length: %d characters.', $min_len);
     }
 
-    $form = new AphrontFormView();
-    $form
-      ->setUser($user)
-      ->addHiddenInput('key', $key);
-
-    if (!$token) {
-      $form->appendChild(
+    $form = id(new AphrontFormView())
+      ->setViewer($user)
+      ->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel(pht('Old Password'))
           ->setError($e_old)
-          ->setName('old_pw'));
-    }
-
-    $form
+          ->setName('old_pw'))
       ->appendChild(
         id(new AphrontFormPasswordControl())
           ->setDisableAutocomplete(true)

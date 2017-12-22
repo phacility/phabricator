@@ -84,6 +84,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             => 'PhabricatorAuthSSHKeyDeactivateController',
           'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
         ),
+        'password/' => 'PhabricatorAuthSetPasswordController',
       ),
 
       '/oauth/(?P<provider>\w+)/login/'
