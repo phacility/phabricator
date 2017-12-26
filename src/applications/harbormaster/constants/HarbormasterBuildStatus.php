@@ -55,67 +55,28 @@ final class HarbormasterBuildStatus extends Phobject {
    * @return string Human-readable name.
    */
   public static function getBuildStatusName($status) {
-    $map = self::getBuildStatusMap();
-    return idx($map, $status, pht('Unknown ("%s")', $status));
+    $spec = self::getBuildStatusSpec($status);
+    return idx($spec, 'name', pht('Unknown ("%s")', $status));
   }
 
   public static function getBuildStatusMap() {
-    return array(
-      self::STATUS_INACTIVE => pht('Inactive'),
-      self::STATUS_PENDING => pht('Pending'),
-      self::STATUS_BUILDING => pht('Building'),
-      self::STATUS_PASSED => pht('Passed'),
-      self::STATUS_FAILED => pht('Failed'),
-      self::STATUS_ABORTED => pht('Aborted'),
-      self::STATUS_ERROR => pht('Unexpected Error'),
-      self::STATUS_PAUSED => pht('Paused'),
-      self::STATUS_DEADLOCKED => pht('Deadlocked'),
-    );
+    $specs = self::getBuildStatusSpecMap();
+    return ipull($specs, 'name');
   }
 
   public static function getBuildStatusIcon($status) {
-    switch ($status) {
-      case self::STATUS_INACTIVE:
-      case self::STATUS_PENDING:
-        return PHUIStatusItemView::ICON_OPEN;
-      case self::STATUS_BUILDING:
-        return PHUIStatusItemView::ICON_RIGHT;
-      case self::STATUS_PASSED:
-        return PHUIStatusItemView::ICON_ACCEPT;
-      case self::STATUS_FAILED:
-        return PHUIStatusItemView::ICON_REJECT;
-      case self::STATUS_ABORTED:
-        return PHUIStatusItemView::ICON_MINUS;
-      case self::STATUS_ERROR:
-        return PHUIStatusItemView::ICON_MINUS;
-      case self::STATUS_PAUSED:
-        return PHUIStatusItemView::ICON_MINUS;
-      case self::STATUS_DEADLOCKED:
-        return PHUIStatusItemView::ICON_WARNING;
-      default:
-        return PHUIStatusItemView::ICON_QUESTION;
-    }
+    $spec = self::getBuildStatusSpec($status);
+    return idx($spec, 'icon', 'fa-question-circle');
   }
 
   public static function getBuildStatusColor($status) {
-    switch ($status) {
-      case self::STATUS_INACTIVE:
-        return 'dark';
-      case self::STATUS_PENDING:
-      case self::STATUS_BUILDING:
-        return 'blue';
-      case self::STATUS_PASSED:
-        return 'green';
-      case self::STATUS_FAILED:
-      case self::STATUS_ABORTED:
-      case self::STATUS_ERROR:
-      case self::STATUS_DEADLOCKED:
-        return 'red';
-      case self::STATUS_PAUSED:
-        return 'dark';
-      default:
-        return 'bluegrey';
-    }
+    $spec = self::getBuildStatusSpec($status);
+    return idx($spec, 'color', 'bluegrey');
+  }
+
+  public static function getBuildStatusANSIColor($status) {
+    $spec = self::getBuildStatusSpec($status);
+    return idx($spec, 'color.ansi', 'magenta');
   }
 
   public static function getWaitingStatusConstants() {
@@ -140,6 +101,69 @@ final class HarbormasterBuildStatus extends Phobject {
       self::STATUS_ERROR,
       self::STATUS_DEADLOCKED,
     );
+  }
+
+  private static function getBuildStatusSpecMap() {
+    return array(
+      self::STATUS_INACTIVE => array(
+        'name' => pht('Inactive'),
+        'icon' => 'fa-circle-o',
+        'color' => 'dark',
+        'color.ansi' => 'yellow',
+      ),
+      self::STATUS_PENDING => array(
+        'name' => pht('Pending'),
+        'icon' => 'fa-circle-o',
+        'color' => 'blue',
+        'color.ansi' => 'yellow',
+      ),
+      self::STATUS_BUILDING => array(
+        'name' => pht('Building'),
+        'icon' => 'fa-chevron-circle-right',
+        'color' => 'blue',
+        'color.ansi' => 'yellow',
+      ),
+      self::STATUS_PASSED => array(
+        'name' => pht('Passed'),
+        'icon' => 'fa-check-circle',
+        'color' => 'green',
+        'color.ansi' => 'green',
+      ),
+      self::STATUS_FAILED => array(
+        'name' => pht('Failed'),
+        'icon' => 'fa-times-circle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+      ),
+      self::STATUS_ABORTED => array(
+        'name' => pht('Aborted'),
+        'icon' => 'fa-minus-circle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+      ),
+      self::STATUS_ERROR => array(
+        'name' => pht('Unexpected Error'),
+        'icon' => 'fa-minus-circle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+      ),
+      self::STATUS_PAUSED => array(
+        'name' => pht('Paused'),
+        'icon' => 'fa-minus-circle',
+        'color' => 'dark',
+        'color.ansi' => 'yellow',
+      ),
+      self::STATUS_DEADLOCKED => array(
+        'name' => pht('Deadlocked'),
+        'icon' => 'fa-exclamation-circle',
+        'color' => 'red',
+        'color.ansi' => 'red',
+      ),
+    );
+  }
+
+  private static function getBuildStatusSpec($status) {
+    return idx(self::getBuildStatusSpecMap(), $status, array());
   }
 
 }

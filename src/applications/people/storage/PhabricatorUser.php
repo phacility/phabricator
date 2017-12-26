@@ -262,6 +262,10 @@ final class PhabricatorUser
       PhabricatorPeopleUserPHIDType::TYPECONST);
   }
 
+  public function hasPassword() {
+    return (bool)strlen($this->passwordHash);
+  }
+
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
     if (!$this->getPHID()) {
       throw new Exception(

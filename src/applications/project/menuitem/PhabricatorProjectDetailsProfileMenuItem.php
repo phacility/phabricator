@@ -13,6 +13,11 @@ final class PhabricatorProjectDetailsProfileMenuItem
     return pht('Project Details');
   }
 
+  public function canHideMenuItem(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return false;
+  }
+
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;
