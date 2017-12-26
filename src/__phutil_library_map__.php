@@ -1025,6 +1025,7 @@ phutil_register_library_map(array(
     'DrydockBlueprintTransaction' => 'applications/drydock/storage/DrydockBlueprintTransaction.php',
     'DrydockBlueprintTransactionQuery' => 'applications/drydock/query/DrydockBlueprintTransactionQuery.php',
     'DrydockBlueprintTransactionType' => 'applications/drydock/xaction/DrydockBlueprintTransactionType.php',
+    'DrydockBlueprintTypeTransaction' => 'applications/drydock/xaction/DrydockBlueprintTypeTransaction.php',
     'DrydockBlueprintViewController' => 'applications/drydock/controller/DrydockBlueprintViewController.php',
     'DrydockCommand' => 'applications/drydock/storage/DrydockCommand.php',
     'DrydockCommandError' => 'applications/drydock/exception/DrydockCommandError.php',
@@ -6122,6 +6123,7 @@ phutil_register_library_map(array(
     'DrydockBlueprintTransaction' => 'PhabricatorModularTransaction',
     'DrydockBlueprintTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'DrydockBlueprintTransactionType' => 'PhabricatorModularTransactionType',
+    'DrydockBlueprintTypeTransaction' => 'DrydockBlueprintTransactionType',
     'DrydockBlueprintViewController' => 'DrydockBlueprintController',
     'DrydockCommand' => array(
       'DrydockDAO',
