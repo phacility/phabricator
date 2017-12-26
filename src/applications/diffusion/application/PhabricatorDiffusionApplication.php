@@ -89,6 +89,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         'edit/' => array(
           'activate/' => 'DiffusionRepositoryEditActivateController',
           'dangerous/' => 'DiffusionRepositoryEditDangerousController',
+          'enormous/' => 'DiffusionRepositoryEditEnormousController',
           'delete/' => 'DiffusionRepositoryEditDeleteController',
           'update/' => 'DiffusionRepositoryEditUpdateController',
           'testautomation/' => 'DiffusionRepositoryTestAutomationController',

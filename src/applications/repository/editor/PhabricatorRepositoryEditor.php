@@ -28,6 +28,7 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DANGEROUS;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_ENORMOUS;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SLUG;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SERVICE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE;
@@ -76,6 +77,8 @@ final class PhabricatorRepositoryEditor
         return $object->getPushPolicy();
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         return $object->shouldAllowDangerousChanges();
+      case PhabricatorRepositoryTransaction::TYPE_ENORMOUS:
+        return $object->shouldAllowEnormousChanges();
       case PhabricatorRepositoryTransaction::TYPE_SLUG:
         return $object->getRepositorySlug();
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
@@ -110,6 +113,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_VCS:
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
+      case PhabricatorRepositoryTransaction::TYPE_ENORMOUS:
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
@@ -184,6 +188,9 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         $object->setDetail('allow-dangerous-changes', $xaction->getNewValue());
         return;
+      case PhabricatorRepositoryTransaction::TYPE_ENORMOUS:
+        $object->setDetail('allow-enormous-changes', $xaction->getNewValue());
+        return;
       case PhabricatorRepositoryTransaction::TYPE_SLUG:
         $object->setRepositorySlug($xaction->getNewValue());
         return;
@@ -248,6 +255,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
+      case PhabricatorRepositoryTransaction::TYPE_ENORMOUS:
       case PhabricatorRepositoryTransaction::TYPE_SLUG:
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
