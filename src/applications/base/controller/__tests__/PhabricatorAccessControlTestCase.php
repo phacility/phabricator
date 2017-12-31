@@ -159,10 +159,10 @@ final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
         $u_unverified,
         $u_admin,
         $u_public,
+        $u_notapproved,
       ),
       array(
         $u_disabled,
-        $u_notapproved,
       ));
 
 
@@ -224,7 +224,7 @@ final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
       ));
 
     $this->checkAccess(
-      pht('Application Controller'),
+      pht('Application Controller, No Login Required'),
       id(clone $app_controller)->setConfig('login', false),
       $request,
       array(
@@ -232,10 +232,10 @@ final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
         $u_unverified,
         $u_admin,
         $u_public,
+        $u_notapproved,
       ),
       array(
         $u_disabled,
-        $u_notapproved,
       ));
   }
 

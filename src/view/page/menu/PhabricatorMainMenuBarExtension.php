@@ -5,6 +5,7 @@ abstract class PhabricatorMainMenuBarExtension extends Phobject {
   private $viewer;
   private $application;
   private $controller;
+  private $isFullSession;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -33,11 +34,24 @@ abstract class PhabricatorMainMenuBarExtension extends Phobject {
     return $this->controller;
   }
 
+  public function setIsFullSession($is_full_session) {
+    $this->isFullSession = $is_full_session;
+    return $this;
+  }
+
+  public function getIsFullSession() {
+    return $this->isFullSession;
+  }
+
   final public function getExtensionKey() {
     return $this->getPhobjectClassConstant('MAINMENUBARKEY');
   }
 
   public function isExtensionEnabled() {
+    return true;
+  }
+
+  public function shouldRequireFullSession() {
     return true;
   }
 

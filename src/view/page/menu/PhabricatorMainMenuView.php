@@ -46,7 +46,9 @@ final class PhabricatorMainMenuView extends AphrontView {
     $app_button = '';
     $aural = null;
 
-    if ($viewer->isLoggedIn() && $viewer->isUserActivated()) {
+    $is_full = $this->isFullSession($viewer);
+
+    if ($is_full) {
       list($menu, $dropdowns, $aural) = $this->renderNotificationMenu();
       if (array_filter($menu)) {
         $alerts[] = $menu;
@@ -54,14 +56,18 @@ final class PhabricatorMainMenuView extends AphrontView {
       $menu_bar = array_merge($menu_bar, $dropdowns);
       $app_button = $this->renderApplicationMenuButton();
       $search_button = $this->renderSearchMenuButton($header_id);
-    } else {
+    } else if (!$viewer->isLoggedIn()) {
       $app_button = $this->renderApplicationMenuButton();
       if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
         $search_button = $this->renderSearchMenuButton($header_id);
       }
     }
 
-    $search_menu = $this->renderPhabricatorSearchMenu();
+    if ($search_button) {
+      $search_menu = $this->renderPhabricatorSearchMenu();
+    } else {
+      $search_menu = null;
+    }
 
     if ($alerts) {
       $alerts = javelin_tag(
@@ -84,7 +90,9 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $extensions = PhabricatorMainMenuBarExtension::getAllEnabledExtensions();
     foreach ($extensions as $extension) {
-      $extension->setViewer($viewer);
+      $extension
+        ->setViewer($viewer)
+        ->setIsFullSession($is_full);
 
       $controller = $this->getController();
       if ($controller) {
@@ -92,6 +100,14 @@ final class PhabricatorMainMenuView extends AphrontView {
         $application = $controller->getCurrentApplication();
         if ($application) {
           $extension->setApplication($application);
+        }
+      }
+    }
+
+    if (!$is_full) {
+      foreach ($extensions as $key => $extension) {
+        if ($extension->shouldRequireFullSession()) {
+          unset($extensions[$key]);
         }
       }
     }
@@ -675,6 +691,40 @@ final class PhabricatorMainMenuView extends AphrontView {
       $dropdowns,
       $aural,
     );
+  }
+
+  private function isFullSession(PhabricatorUser $viewer) {
+    if (!$viewer->isLoggedIn()) {
+      return false;
+    }
+
+    if (!$viewer->isUserActivated()) {
+      return false;
+    }
+
+    if (!$viewer->hasSession()) {
+      return false;
+    }
+
+    $session = $viewer->getSession();
+    if ($session->getIsPartial()) {
+      return false;
+    }
+
+    if (!$session->getSignedLegalpadDocuments()) {
+      return false;
+    }
+
+    $mfa_key = 'security.require-multi-factor-auth';
+    $need_mfa = PhabricatorEnv::getEnvConfig($mfa_key);
+    if ($need_mfa) {
+      $have_mfa = $viewer->getIsEnrolledInMultiFactor();
+      if (!$have_mfa) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 }

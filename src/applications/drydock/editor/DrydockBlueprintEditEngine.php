@@ -51,6 +51,17 @@ final class DrydockBlueprintEditEngine
     return $blueprint;
   }
 
+  protected function newEditableObjectForDocumentation() {
+    // In order to generate the proper list of fields/transactions for a
+    // blueprint, a blueprint's type needs to be known upfront, and there's
+    // currently no way to pre-specify the type. Hardcoding an implementation
+    // here prevents the fatal on the Conduit API page and allows transactions
+    // to be edited.
+    $impl = new DrydockWorkingCopyBlueprintImplementation();
+    $this->setBlueprintImplementation($impl);
+    return $this->newEditableObject();
+  }
+
   protected function newObjectQuery() {
     return new DrydockBlueprintQuery();
   }

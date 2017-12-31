@@ -162,6 +162,11 @@ final class DifferentialRevisionAcceptTransaction
           'closed. Only open revisions can be accepted.'));
     }
 
+    if ($object->isDraft()) {
+      throw new Exception(
+        pht('You can not accept a draft revision.'));
+    }
+
     $config_key = 'differential.allow-self-accept';
     if (!PhabricatorEnv::getEnvConfig($config_key)) {
       if ($this->isViewerRevisionAuthor($object, $viewer)) {

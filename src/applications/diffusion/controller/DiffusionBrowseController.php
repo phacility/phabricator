@@ -916,7 +916,8 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setTag('a')
       ->setText($text)
       ->setHref($href)
-      ->setIcon($icon);
+      ->setIcon($icon)
+      ->setColor(PHUIButtonView::GREY);
   }
 
   private function buildDisplayRows(
@@ -1803,10 +1804,17 @@ final class DiffusionBrowseController extends DiffusionController {
         // revision. We just render a blank for alignment.
         $style = null;
         $href = null;
+        $sigil = null;
+        $meta = null;
       } else {
         $src = $handles[$phid]->getImageURI();
         $style = 'background-image: url('.$src.');';
         $href = $handles[$phid]->getURI();
+        $sigil = 'has-tooltip';
+        $meta = array(
+          'tip' => $handles[$phid]->getName(),
+          'align' => 'E',
+        );
       }
 
       $links[$phid] = javelin_tag(
@@ -1815,11 +1823,8 @@ final class DiffusionBrowseController extends DiffusionController {
           'class' => 'diffusion-author-link',
           'style' => $style,
           'href' => $href,
-          'sigil' => 'has-tooltip',
-          'meta' => array(
-            'tip' => $handles[$phid]->getName(),
-            'align' => 'E',
-          ),
+          'sigil' => $sigil,
+          'meta' => $meta,
         ));
     }
 
@@ -1924,7 +1929,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     try {
       $file = $this->loadGitLFSFile($ref);
-      $data = $this->renderGitLFSButton();
+      $this->corpusButtons[] = $this->renderGitLFSButton();
     } catch (Exception $ex) {
       $severity = PHUIInfoView::SEVERITY_ERROR;
       $messages[] = pht('The data for this file could not be loaded.');

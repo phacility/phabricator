@@ -239,6 +239,11 @@ You can not add a URI in Observe mode if an existing builtin URI is in
 authorities: the observed remote copy and the hosted local copy. Take the
 other URI out of //Read/Write// mode first.
 
+WARNING: If you observe a remote repository, the entire state of the working
+copy that Phabricator maintains will be deleted and replaced with the state of
+the remote. If some changes are present only in Phabricator's working copy,
+they will be unrecoverably destroyed.
+
 **Mirror**: Phabricator will push any changes made to this repository to the
 remote URI, keeping a read-only mirror hosted at that URI up to date.
 
@@ -250,6 +255,11 @@ to mirror a repository to itself.
 It is possible to mirror a repository to another repository that is also
 hosted by Phabricator by adding that other repository's URI, although this is
 silly and probably very rarely of any use.
+
+WARNING: If you mirror to a remote repository, the entire state of that remote
+will be replaced with the state of the working copy Phabricator maintains. If
+some changes are present only in the remote, they will be unrecoverably
+destroyed.
 
 **None**: Phabricator will not fetch changes from or push changes to this URI.
 For builtin URIs, it will not let users fetch changes from or push changes to

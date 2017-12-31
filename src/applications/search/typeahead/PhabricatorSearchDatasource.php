@@ -16,14 +16,8 @@ final class PhabricatorSearchDatasource
   }
 
   public function getComponentDatasources() {
-    $sources = array(
-      new PhabricatorPeopleDatasource(),
-      new PhabricatorProjectDatasource(),
-      new PhabricatorApplicationDatasource(),
-      new PhabricatorTypeaheadMonogramDatasource(),
-      new DiffusionRepositoryDatasource(),
-      new DiffusionSymbolDatasource(),
-    );
+    $sources = id(new PhabricatorQuickSearchEngine())
+      ->getAllDatasources();
 
     // These results are always rendered in the full browse display mode, so
     // set the browse flag on all component sources.
