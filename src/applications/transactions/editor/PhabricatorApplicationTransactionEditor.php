@@ -68,6 +68,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mailCCPHIDs = array();
   private $feedNotifyPHIDs = array();
   private $feedRelatedPHIDs = array();
+  private $feedShouldPublish = false;
   private $modularTypes;
 
   private $transactionQueue = array();
@@ -1159,6 +1160,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
+      $this->feedShouldPublish = true;
       $this->feedRelatedPHIDs = $this->getFeedRelatedPHIDs($object, $xactions);
       $this->feedNotifyPHIDs = $this->getFeedNotifyPHIDs($object, $xactions);
     }
@@ -1216,8 +1218,7 @@ abstract class PhabricatorApplicationTransactionEditor
         ));
     }
 
-    if ($this->shouldPublishFeedStory($object, $xactions)) {
-
+    if ($this->feedShouldPublish) {
       $mailed = array();
       foreach ($messages as $mail) {
         foreach ($mail->buildRecipientList() as $phid) {
@@ -3512,6 +3513,7 @@ abstract class PhabricatorApplicationTransactionEditor
       'mailCCPHIDs',
       'feedNotifyPHIDs',
       'feedRelatedPHIDs',
+      'feedShouldPublish',
     );
   }
 
