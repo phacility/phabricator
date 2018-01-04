@@ -192,6 +192,13 @@ final class DiffusionMercurialWireClientSSHProtocolChannel
           $this->state = 'data-bytes';
         }
       } else if ($this->state == 'data-bytes') {
+        // If we don't have any more bytes on the buffer yet, just bail:
+        // otherwise, we'll emit a pointless and possibly harmful 0-byte data
+        // frame. See T13036 for discussion.
+        if (!strlen($this->buffer)) {
+          break;
+        }
+
         $bytes = substr($this->buffer, 0, $this->expectBytes);
         $this->buffer = substr($this->buffer, strlen($bytes));
         $this->expectBytes -= strlen($bytes);
