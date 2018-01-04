@@ -99,13 +99,66 @@ final class ManiphestReportController extends ManiphestController {
         ManiphestTaskMergedIntoTransaction::TRANSACTIONTYPE,
       ));
 
+    // See PHI273. After the move to EditEngine, we no longer create a
+    // "status" transaction if a task is created directly into the default
+    // status. This likely impacted API/email tasks after 2016 and all other
+    // tasks after late 2017. Until Facts can fix this properly, use the
+    // task creation dates to generate synthetic transactions which look like
+    // the older transactions that this page expects.
+
+    $default_status = ManiphestTaskStatus::getDefaultStatus();
+    $duplicate_status = ManiphestTaskStatus::getDuplicateStatus();
+
+    // Build synthetic transactions which take status from `null` to the
+    // default value.
+    $create_rows = queryfx_all(
+      $conn,
+      'SELECT dateCreated FROM %T',
+      id(new ManiphestTask())->getTableName());
+    foreach ($create_rows as $key => $create_row) {
+      $create_rows[$key] = array(
+        'transactionType' => 'status',
+        'oldValue' => null,
+        'newValue' => $default_status,
+        'dateCreated' => $create_row['dateCreated'],
+      );
+    }
+
+    // Remove any actual legacy status transactions which take status from
+    // `null` to any open status.
+    foreach ($data as $key => $row) {
+      if ($row['transactionType'] != 'status') {
+        continue;
+      }
+
+      $oldv = trim($row['oldValue'], '"');
+      $newv = trim($row['oldValue'], '"');
+
+      // If this is a status change, preserve it.
+      if ($oldv != 'null') {
+        continue;
+      }
+
+      // If this task was created directly into a closed status, preserve
+      // the transaction.
+      if (!ManiphestTaskStatus::isOpenStatus($newv)) {
+        continue;
+      }
+
+      // If this is a legacy "create" transaction, discard it in favor of the
+      // synthetic one.
+      unset($data[$key]);
+    }
+
+    // Merge the synthetic rows into the real transactions.
+    $data = array_merge($create_rows, $data);
+    $data = array_values($data);
+
     $stats = array();
     $day_buckets = array();
 
     $open_tasks = array();
 
-    $default_status = ManiphestTaskStatus::getDefaultStatus();
-    $duplicate_status = ManiphestTaskStatus::getDuplicateStatus();
     foreach ($data as $key => $row) {
       switch ($row['transactionType']) {
         case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
