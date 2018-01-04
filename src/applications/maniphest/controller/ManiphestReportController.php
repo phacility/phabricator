@@ -75,12 +75,19 @@ final class ManiphestReportController extends ManiphestController {
     $conn = $table->establishConnection('r');
 
     $joins = '';
+    $create_joins = '';
     if ($project_phid) {
       $joins = qsprintf(
         $conn,
         'JOIN %T t ON x.objectPHID = t.phid
           JOIN %T p ON p.src = t.phid AND p.type = %d AND p.dst = %s',
         id(new ManiphestTask())->getTableName(),
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        $project_phid);
+      $create_joins = qsprintf(
+        $conn,
+        'JOIN %T p ON p.src = t.phid AND p.type = %d AND p.dst = %s',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         $project_phid);
@@ -113,8 +120,9 @@ final class ManiphestReportController extends ManiphestController {
     // default value.
     $create_rows = queryfx_all(
       $conn,
-      'SELECT dateCreated FROM %T',
-      id(new ManiphestTask())->getTableName());
+      'SELECT t.dateCreated FROM %T t %Q',
+      id(new ManiphestTask())->getTableName(),
+      $create_joins);
     foreach ($create_rows as $key => $create_row) {
       $create_rows[$key] = array(
         'transactionType' => 'status',
