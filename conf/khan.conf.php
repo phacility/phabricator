@@ -42,19 +42,6 @@ return array(
   'differential.require-test-plan-field' => false,
   'differential.allow-reopen' => true,
 
-  // Custom arc diff field to enable fixture frog to create appropriate links
-  // to component fixtures
-  'differential.custom-field-definitions' => array(
-    'khan:components-for-review' => array(
-      'name'       => 'Components for Review',
-      'type'       => 'text',
-      'caption'    => 'Components whose fixtures should be posted for review
-                      formatted as a comma-separated list. [NOTE: This feature
-                      is not yet implemented.]',
-      'required'   => false,
-    ),
-  ),
-
   // Tell hipchat about phabricator reviews being created, and the like.
   'feed.http-hooks' => array(
      'https://khan-webhooks.appspot.com/phabricator-feed'
