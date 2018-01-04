@@ -109,14 +109,7 @@ final class DiffusionMercurialServeSSHWorkflow
       $this->didSeeWrite = true;
     }
 
-    $raw_message = $message['raw'];
-    if ($command == 'capabilities') {
-      $raw_message = DiffusionMercurialWireProtocol::filterBundle2Capability(
-        $raw_message);
-    }
-
-    // If we're good, return the raw message data.
-    return $raw_message;
+    return $message['raw'];
   }
 
   protected function raiseWrongVCSException(
