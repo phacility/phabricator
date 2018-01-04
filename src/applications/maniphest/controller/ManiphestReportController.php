@@ -153,6 +153,7 @@ final class ManiphestReportController extends ManiphestController {
     // Merge the synthetic rows into the real transactions.
     $data = array_merge($create_rows, $data);
     $data = array_values($data);
+    $data = isort($data, 'dateCreated');
 
     $stats = array();
     $day_buckets = array();
