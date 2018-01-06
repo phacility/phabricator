@@ -23,12 +23,14 @@ final class PhabricatorRepositoryPushLog
   const CHANGEFLAG_APPEND = 4;
   const CHANGEFLAG_REWRITE = 8;
   const CHANGEFLAG_DANGEROUS = 16;
+  const CHANGEFLAG_ENORMOUS = 32;
 
   const REJECT_ACCEPT = 0;
   const REJECT_DANGEROUS = 1;
   const REJECT_HERALD = 2;
   const REJECT_EXTERNAL = 3;
   const REJECT_BROKEN = 4;
+  const REJECT_ENORMOUS = 5;
 
   protected $repositoryPHID;
   protected $epoch;

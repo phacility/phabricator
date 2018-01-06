@@ -37,7 +37,7 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
   public function getDiffContent($type) {
     if ($this->changesets === null) {
       try {
-        $this->changesets = $this->getHookEngine()->loadChangesetsForCommit(
+        $this->changesets = $this->getHookEngine()->getChangesetsForCommit(
           $this->getObject()->getRefNew());
       } catch (Exception $ex) {
         $this->changesets = $ex;

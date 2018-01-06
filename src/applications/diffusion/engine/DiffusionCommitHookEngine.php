@@ -34,6 +34,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $rejectCode = PhabricatorRepositoryPushLog::REJECT_BROKEN;
   private $rejectDetails;
   private $emailPHIDs = array();
+  private $changesets = array();
 
 
 /* -(  Config  )------------------------------------------------------------- */
@@ -131,6 +132,15 @@ final class DiffusionCommitHookEngine extends Phobject {
       $this->applyHeraldRefRules($ref_updates, $all_updates);
 
       $content_updates = $this->findContentUpdates($ref_updates);
+
+      try {
+        $this->rejectEnormousChanges($content_updates);
+      } catch (DiffusionCommitHookRejectException $ex) {
+        // If we're rejecting enormous changes, flag everything.
+        $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_ENORMOUS;
+        throw $ex;
+      }
+
       $all_updates = array_merge($all_updates, $content_updates);
 
       $this->applyHeraldContentRules($content_updates, $all_updates);
@@ -1079,7 +1089,37 @@ final class DiffusionCommitHookEngine extends Phobject {
       ->setEpoch(time());
   }
 
-  public function loadChangesetsForCommit($identifier) {
+  private function rejectEnormousChanges(array $content_updates) {
+    $repository = $this->getRepository();
+    if ($repository->shouldAllowEnormousChanges()) {
+      return;
+    }
+
+    foreach ($content_updates as $update) {
+      $identifier = $update->getRefNew();
+      try {
+        $changesets = $this->loadChangesetsForCommit($identifier);
+        $this->changesets[$identifier] = $changesets;
+      } catch (Exception $ex) {
+        $this->changesets[$identifier] = $ex;
+
+        $message = pht(
+          'ENORMOUS CHANGE'.
+          "\n".
+          'Enormous change protection is enabled for this repository, but '.
+          'you are pushing an enormous change ("%s"). Edit the repository '.
+          'configuration before making enormous changes.'.
+          "\n\n".
+          "Content Exception: %s",
+          $identifier,
+          $ex->getMessage());
+
+        throw new DiffusionCommitHookRejectException($message);
+      }
+    }
+  }
+
+  private function loadChangesetsForCommit($identifier) {
     $byte_limit = HeraldCommitAdapter::getEnormousByteLimit();
     $time_limit = HeraldCommitAdapter::getEnormousTimeLimit();
 
@@ -1126,9 +1166,10 @@ final class DiffusionCommitHookEngine extends Phobject {
     if (strlen($raw_diff) >= $byte_limit) {
       throw new Exception(
         pht(
-          'The raw text of this change is enormous (larger than %d '.
-          'bytes). Herald can not process it.',
-          $byte_limit));
+          'The raw text of this change ("%s") is enormous (larger than %s '.
+          'bytes).',
+          $identifier,
+          new PhutilNumber($byte_limit)));
     }
 
     if (!strlen($raw_diff)) {
@@ -1141,6 +1182,20 @@ final class DiffusionCommitHookEngine extends Phobject {
     $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $changes);
     return $diff->getChangesets();
+  }
+
+  public function getChangesetsForCommit($identifier) {
+    if (isset($this->changesets[$identifier])) {
+      $cached = $this->changesets[$identifier];
+
+      if ($cached instanceof Exception) {
+        throw $cached;
+      }
+
+      return $cached;
+    }
+
+    return $this->loadChangesetsForCommit($identifier);
   }
 
   public function loadCommitRefForCommit($identifier) {

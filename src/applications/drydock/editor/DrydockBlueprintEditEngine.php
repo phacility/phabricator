@@ -51,6 +51,38 @@ final class DrydockBlueprintEditEngine
     return $blueprint;
   }
 
+  protected function newEditableObjectFromConduit(array $raw_xactions) {
+    $type = null;
+    foreach ($raw_xactions as $raw_xaction) {
+      if ($raw_xaction['type'] !== 'type') {
+        continue;
+      }
+
+      $type = $raw_xaction['value'];
+    }
+
+    if ($type === null) {
+      throw new Exception(
+        pht(
+          'When creating a new Drydock blueprint via the Conduit API, you '.
+          'must provide a "type" transaction to select a type.'));
+    }
+
+    $map = DrydockBlueprintImplementation::getAllBlueprintImplementations();
+    if (!isset($map[$type])) {
+      throw new Exception(
+        pht(
+          'Blueprint type "%s" is unrecognized. Valid types are: %s.',
+          $type,
+          implode(', ', array_keys($map))));
+    }
+
+    $impl = clone $map[$type];
+    $this->setBlueprintImplementation($impl);
+
+    return $this->newEditableObject();
+  }
+
   protected function newEditableObjectForDocumentation() {
     // In order to generate the proper list of fields/transactions for a
     // blueprint, a blueprint's type needs to be known upfront, and there's
@@ -112,16 +144,27 @@ final class DrydockBlueprintEditEngine
     $impl = $object->getImplementation();
 
     return array(
+      // This field appears in the web UI
       id(new PhabricatorStaticEditField())
-        ->setKey('type')
+        ->setKey('displayType')
         ->setLabel(pht('Blueprint Type'))
         ->setDescription(pht('Type of blueprint.'))
         ->setValue($impl->getBlueprintName()),
       id(new PhabricatorTextEditField())
+        ->setKey('type')
+        ->setLabel(pht('Type'))
+        ->setIsConduitOnly(true)
+        ->setTransactionType(
+          DrydockBlueprintTypeTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('When creating a blueprint, set the type.'))
+        ->setConduitDescription(pht('Set the blueprint type.'))
+        ->setConduitTypeDescription(pht('Blueprint type.'))
+        ->setValue($object->getClassName()),
+      id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the blueprint.'))
-        ->setTransactionType(DrydockBlueprintTransaction::TYPE_NAME)
+        ->setTransactionType(DrydockBlueprintNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getBlueprintName()),
     );

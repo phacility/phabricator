@@ -43,6 +43,7 @@ final class DiffusionRepositoryBasicsManagementPanel
     $delete_uri = $repository->getPathURI('edit/delete/');
     $encoding_uri = $this->getEditPageURI('encoding');
     $dangerous_uri = $repository->getPathURI('edit/dangerous/');
+    $enormous_uri = $repository->getPathURI('edit/enormous/');
 
     if ($repository->isTracked()) {
       $activate_label = pht('Deactivate Repository');
@@ -57,6 +58,15 @@ final class DiffusionRepositoryBasicsManagementPanel
     } else {
       $dangerous_name = pht('Allow Dangerous Changes');
       $can_dangerous = ($can_edit && $repository->canAllowDangerousChanges());
+    }
+
+    $should_enormous = $repository->shouldAllowEnormousChanges();
+    if ($should_enormous) {
+      $enormous_name = pht('Prevent Enormous Changes');
+      $can_enormous = $can_edit;
+    } else {
+      $enormous_name = pht('Allow Enormous Changes');
+      $can_enormous = ($can_edit && $repository->canAllowEnormousChanges());
     }
 
     $action_list->addAction(
@@ -78,6 +88,13 @@ final class DiffusionRepositoryBasicsManagementPanel
         ->setName($dangerous_name)
         ->setHref($dangerous_uri)
         ->setDisabled(!$can_dangerous)
+        ->setWorkflow(true));
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setName($enormous_name)
+        ->setHref($enormous_uri)
+        ->setDisabled(!$can_enormous)
         ->setWorkflow(true));
 
     $action_list->addAction(
@@ -197,6 +214,20 @@ final class DiffusionRepositoryBasicsManagementPanel
     }
 
     $view->addProperty(pht('Dangerous Changes'), $dangerous);
+
+    $can_enormous = $repository->canAllowEnormousChanges();
+    if (!$can_enormous) {
+      $enormous = phutil_tag('em', array(), pht('Not Preventable'));
+    } else {
+      $should_enormous = $repository->shouldAllowEnormousChanges();
+      if ($should_enormous) {
+        $enormous = pht('Allowed');
+      } else {
+        $enormous = pht('Not Allowed');
+      }
+    }
+
+    $view->addProperty(pht('Enormous Changes'), $enormous);
 
     return $view;
   }
