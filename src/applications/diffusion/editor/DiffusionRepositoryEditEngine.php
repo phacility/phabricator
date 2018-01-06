@@ -318,7 +318,7 @@ final class DiffusionRepositoryEditEngine
           pht('Prevent Enormous Changes'),
           pht('Allow Enormous Changes'))
         ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_ENORMOUS)
-        ->setDescription(pht('Permit enomrous changes to be made.'))
+        ->setDescription(pht('Permit enormous changes to be made.'))
         ->setConduitDescription(pht('Allow or prevent enormous changes.'))
         ->setConduitTypeDescription(pht('New protection setting.'))
         ->setValue($object->shouldAllowEnormousChanges()),
