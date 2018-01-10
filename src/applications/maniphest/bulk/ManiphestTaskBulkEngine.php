@@ -18,6 +18,10 @@ final class ManiphestTaskBulkEngine
     return new ManiphestTaskSearchEngine();
   }
 
+  public function newEditEngine() {
+    return new ManiphestEditEngine();
+  }
+
   public function getDoneURI() {
     $board_uri = $this->getBoardURI();
     if ($board_uri) {

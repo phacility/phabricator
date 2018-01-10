@@ -17,6 +17,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $previewPanel;
   private $controlID;
   private $controlInstructions;
+  private $bulkEditLabel;
 
   private $description;
   private $conduitDescription;
@@ -45,6 +46,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $isConduitOnly = false;
 
   private $conduitEditTypes;
+  private $bulkEditTypes;
 
   public function setKey($key) {
     $this->key = $key;
@@ -62,6 +64,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getLabel() {
     return $this->label;
+  }
+
+  public function setBulkEditLabel($bulk_edit_label) {
+    $this->bulkEditLabel = $bulk_edit_label;
+    return $this;
+  }
+
+  public function getBulkEditLabel() {
+    return $this->bulkEditLabel;
   }
 
   public function setViewer(PhabricatorUser $viewer) {
@@ -625,6 +636,22 @@ abstract class PhabricatorEditField extends Phobject {
     return new AphrontStringHTTPParameterType();
   }
 
+  protected function getBulkParameterType() {
+    $type = $this->newBulkParameterType();
+
+    if (!$type) {
+      return null;
+    }
+
+    $type->setViewer($this->getViewer());
+
+    return $type;
+  }
+
+  protected function newBulkParameterType() {
+    return null;
+  }
+
   public function getConduitParameterType() {
     $type = $this->newConduitParameterType();
 
@@ -657,8 +684,15 @@ abstract class PhabricatorEditField extends Phobject {
       return null;
     }
 
-    return id(new PhabricatorSimpleEditType())
+    $edit_type = id(new PhabricatorSimpleEditType())
       ->setConduitParameterType($parameter_type);
+
+    $bulk_type = $this->getBulkParameterType();
+    if ($bulk_type) {
+      $edit_type->setBulkParameterType($bulk_type);
+    }
+
+    return $edit_type;
   }
 
   protected function getEditType() {
@@ -709,6 +743,31 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function newConduitEditTypes() {
+    $edit_type = $this->getEditType();
+
+    if (!$edit_type) {
+      return array();
+    }
+
+    return array($edit_type);
+  }
+
+  final public function getBulkEditTypes() {
+    if ($this->bulkEditTypes === null) {
+      $edit_types = $this->newBulkEditTypes();
+      $edit_types = mpull($edit_types, null, 'getEditType');
+
+      foreach ($edit_types as $edit_type) {
+        $edit_type->setEditField($this);
+      }
+
+      $this->bulkEditTypes = $edit_types;
+    }
+
+    return $this->bulkEditTypes;
+  }
+
+  protected function newBulkEditTypes() {
     $edit_type = $this->getEditType();
 
     if (!$edit_type) {

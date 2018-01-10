@@ -178,6 +178,7 @@ EODOCS
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
+        ->setBulkEditLabel(pht('Set title to'))
         ->setDescription(pht('Name of the task.'))
         ->setConduitDescription(pht('Rename the task.'))
         ->setConduitTypeDescription(pht('New task name.'))

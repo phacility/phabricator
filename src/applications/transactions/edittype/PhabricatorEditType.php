@@ -14,6 +14,9 @@ abstract class PhabricatorEditType extends Phobject {
   private $conduitTypeDescription;
   private $conduitParameterType;
 
+  private $bulkParameterType;
+  private $bulkEditLabel;
+
   public function setLabel($label) {
     $this->label = $label;
     return $this;
@@ -21,6 +24,19 @@ abstract class PhabricatorEditType extends Phobject {
 
   public function getLabel() {
     return $this->label;
+  }
+
+  public function setBulkEditLabel($bulk_edit_label) {
+    $this->bulkEditLabel = $bulk_edit_label;
+    return $this;
+  }
+
+  public function getBulkEditLabel() {
+    if ($this->bulkEditLabel !== null) {
+      return $this->bulkEditLabel;
+    }
+
+    return $this->getField()->getBulkEditLabel();
   }
 
   public function setField(PhabricatorEditField $field) {
@@ -84,6 +100,30 @@ abstract class PhabricatorEditType extends Phobject {
   public function getEditField() {
     return $this->editField;
   }
+
+
+/* -(  Bulk  )--------------------------------------------------------------- */
+
+
+  protected function newBulkParameterType() {
+    if ($this->bulkParameterType) {
+      return clone $this->bulkParameterType;
+    }
+
+    return null;
+  }
+
+
+  public function setBulkParameterType(BulkParameterType $type) {
+    $this->bulkParameterType = $type;
+    return $this;
+  }
+
+
+  public function getBulkParameterType() {
+    return $this->newBulkParameterType();
+  }
+
 
 /* -(  Conduit  )------------------------------------------------------------ */
 

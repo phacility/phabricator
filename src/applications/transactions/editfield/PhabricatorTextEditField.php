@@ -29,4 +29,8 @@ final class PhabricatorTextEditField
     return new ConduitStringParameterType();
   }
 
+  protected function newBulkParameterType() {
+    return new BulkStringParameterType();
+  }
+
 }

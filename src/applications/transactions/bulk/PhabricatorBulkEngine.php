@@ -10,7 +10,10 @@ abstract class PhabricatorBulkEngine extends Phobject {
   private $editableList;
   private $targetList;
 
+  private $rootFormID;
+
   abstract public function newSearchEngine();
+  abstract public function newEditEngine();
 
   public function getCancelURI() {
     $saved_query = $this->savedQuery;
@@ -118,7 +121,7 @@ abstract class PhabricatorBulkEngine extends Phobject {
       array(
         'action' => $this->getBulkURI(),
         'method' => 'POST',
-        'id' => 'maniphest-batch-edit-form',
+        'id' => $this->getRootFormID(),
       ),
       array(
         $this->newContextInputs(),
@@ -290,95 +293,60 @@ abstract class PhabricatorBulkEngine extends Phobject {
 
   private function newBulkActionForm() {
     $viewer = $this->getViewer();
+    $input_id = celerity_generate_unique_node_id();
+
+    $edit_engine = id($this->newEditEngine())
+      ->setViewer($viewer);
+
+    $edit_map = $edit_engine->newBulkEditMap();
+
+    require_celerity_resource('phui-bulk-editor-css');
+
+    Javelin::initBehavior(
+      'bulk-editor',
+      array(
+        'rootNodeID' => $this->getRootFormID(),
+        'inputNodeID' => $input_id,
+        'edits' => $edit_map,
+      ));
 
     $cancel_uri = $this->getCancelURI();
 
-    $template = new AphrontTokenizerTemplateView();
-    $template = $template->render();
-
-    $projects_source = new PhabricatorProjectDatasource();
-    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $mailable_source->setViewer($viewer);
-    $owner_source = new ManiphestAssigneeDatasource();
-    $owner_source->setViewer($viewer);
-    $spaces_source = id(new PhabricatorSpacesNamespaceDatasource())
-      ->setViewer($viewer);
-
-    require_celerity_resource('maniphest-batch-editor');
-
-    Javelin::initBehavior(
-      'maniphest-batch-editor',
-      array(
-        'root' => 'maniphest-batch-edit-form',
-        'tokenizerTemplate' => $template,
-        'sources' => array(
-          'project' => array(
-            'src' => $projects_source->getDatasourceURI(),
-            'placeholder' => $projects_source->getPlaceholderText(),
-            'browseURI' => $projects_source->getBrowseURI(),
-          ),
-          'owner' => array(
-            'src' => $owner_source->getDatasourceURI(),
-            'placeholder' => $owner_source->getPlaceholderText(),
-            'browseURI' => $owner_source->getBrowseURI(),
-            'limit' => 1,
-          ),
-          'cc' => array(
-            'src' => $mailable_source->getDatasourceURI(),
-            'placeholder' => $mailable_source->getPlaceholderText(),
-            'browseURI' => $mailable_source->getBrowseURI(),
-          ),
-          'spaces' => array(
-            'src' => $spaces_source->getDatasourceURI(),
-            'placeholder' => $spaces_source->getPlaceholderText(),
-            'browseURI' => $spaces_source->getBrowseURI(),
-            'limit' => 1,
-          ),
-        ),
-        'input' => 'batch-form-actions',
-        'priorityMap' => ManiphestTaskPriority::getTaskPriorityMap(),
-        'statusMap'   => ManiphestTaskStatus::getTaskStatusMap(),
-      ));
-
-    $form = id(new PHUIFormLayoutView())
-      ->setUser($viewer);
-
-    $form->appendChild(
-      phutil_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => 'actions',
-          'id'   => 'batch-form-actions',
-        )));
-
-    $form->appendChild(
-      id(new PHUIFormInsetView())
-        ->setTitle(pht('Bulk Edit Actions'))
-        ->setRightButton(
-          javelin_tag(
-            'a',
-            array(
-              'href' => '#',
-              'class' => 'button button-green',
-              'sigil' => 'add-action',
-              'mustcapture' => true,
-            ),
-            pht('Add Another Action')))
-        ->setContent(
-          javelin_tag(
-            'table',
-            array(
-              'sigil' => 'maniphest-batch-actions',
-              'class' => 'maniphest-batch-actions-table',
-            ),
-            '')))
+    return id(new PHUIFormLayoutView())
+      ->setViewer($viewer)
+      ->appendChild(
+        phutil_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'xactions',
+            'id'   => $input_id,
+          )))
+      ->appendChild(
+        id(new PHUIFormInsetView())
+          ->setTitle(pht('Bulk Edit Actions'))
+          ->setRightButton(
+            javelin_tag(
+              'a',
+              array(
+                'href' => '#',
+                'class' => 'button button-green',
+                'sigil' => 'add-action',
+                'mustcapture' => true,
+              ),
+              pht('Add Another Action')))
+          ->setContent(
+            javelin_tag(
+              'table',
+              array(
+                'sigil' => 'bulk-actions',
+                'class' => 'bulk-edit-table',
+              ),
+              '')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Apply Bulk Edit'))
           ->addCancelButton($cancel_uri));
-
-    return $form;
   }
 
   private function buildEditResponse() {
@@ -405,31 +373,33 @@ abstract class PhabricatorBulkEngine extends Phobject {
           'You have not selected any objects to edit.'));
     }
 
-    $raw_actions = $request->getStr('actions');
-    if ($raw_actions) {
-      $actions = phutil_json_decode($raw_actions);
+    $raw_xactions = $request->getStr('xactions');
+    if ($raw_xactions) {
+      $raw_xactions = phutil_json_decode($raw_xactions);
     } else {
-      $actions = array();
+      $raw_xactions = array();
     }
 
-    if (!$actions) {
+    if (!$raw_xactions) {
       throw new Exception(
         pht(
           'You have not chosen any edits to apply.'));
     }
+
+    $edit_engine = id($this->newEditEngine())
+      ->setViewer($viewer);
+
+    $xactions = $edit_engine->newRawBulkTransactions($raw_xactions);
 
     $cancel_uri = $this->getCancelURI();
     $done_uri = $this->getDoneURI();
 
     $job = PhabricatorWorkerBulkJob::initializeNewJob(
       $viewer,
-      // TODO: This is a Maniphest-specific job type for now, but will become
-      // a generic one so it gets to live here for now instead of in the task
-      // specific BulkEngine subclass.
-      new ManiphestTaskEditBulkJobType(),
+      new PhabricatorEditEngineBulkJobType(),
       array(
-        'taskPHIDs' => mpull($objects, 'getPHID'),
-        'actions' => $actions,
+        'objectPHIDs' => mpull($objects, 'getPHID'),
+        'xactions' => $xactions,
         'cancelURI' => $cancel_uri,
         'doneURI' => $done_uri,
       ));
@@ -449,6 +419,14 @@ abstract class PhabricatorBulkEngine extends Phobject {
 
     return id(new AphrontRedirectResponse())
       ->setURI($job->getMonitorURI());
+  }
+
+  private function getRootFormID() {
+    if (!$this->rootFormID) {
+      $this->rootFormID = celerity_generate_unique_node_id();
+    }
+
+    return $this->rootFormID;
   }
 
 }

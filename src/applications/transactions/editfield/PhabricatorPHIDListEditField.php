@@ -104,6 +104,10 @@ abstract class PhabricatorPHIDListEditField
     return $type;
   }
 
+  protected function newBulkEditTypes() {
+    return $this->newConduitEditTypes();
+  }
+
   protected function newConduitEditTypes() {
     if (!$this->getUseEdgeTransactions()) {
       return parent::newConduitEditTypes();

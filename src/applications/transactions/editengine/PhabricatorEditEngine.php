@@ -2421,6 +2421,71 @@ abstract class PhabricatorEditEngine
   }
 
 
+/* -(  Bulk Edits  )--------------------------------------------------------- */
+
+
+  final public function newBulkEditMap() {
+    $config = $this->loadDefaultConfiguration();
+    if (!$config) {
+      throw new Exception(
+        pht('No default edit engine configuration for bulk edit.'));
+    }
+
+    $object = $this->newEditableObject();
+    $fields = $this->buildEditFields($object);
+
+    $edit_types = $this->getBulkEditTypesFromFields($fields);
+
+    $map = array();
+    foreach ($edit_types as $key => $type) {
+      $bulk_type = $type->getBulkParameterType();
+      if ($bulk_type === null) {
+        continue;
+      }
+
+      $bulk_label = $type->getBulkEditLabel();
+      if ($bulk_label === null) {
+        continue;
+      }
+
+      $map[] = array(
+        'label' => $bulk_label,
+        'xaction' => $type->getTransactionType(),
+        'control' => array(
+          'type' => $bulk_type->getPHUIXControlType(),
+          'spec' => (object)$bulk_type->getPHUIXControlSpecification(),
+        ),
+      );
+    }
+
+    return $map;
+  }
+
+
+  final public function newRawBulkTransactions(array $xactions) {
+    return $xactions;
+  }
+
+  private function getBulkEditTypesFromFields(array $fields) {
+    $types = array();
+
+    foreach ($fields as $field) {
+      $field_types = $field->getBulkEditTypes();
+
+      if ($field_types === null) {
+        continue;
+      }
+
+      foreach ($field_types as $field_type) {
+        $field_type->setField($field);
+        $types[$field_type->getEditType()] = $field_type;
+      }
+    }
+
+    return $types;
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

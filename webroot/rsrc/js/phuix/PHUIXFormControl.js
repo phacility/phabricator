@@ -14,6 +14,7 @@ JX.install('PHUIXFormControl', {
     _className: null,
     _valueSetCallback: null,
     _valueGetCallback: null,
+    _rawInputNode: null,
 
     setLabel: function(label) {
       JX.DOM.setContent(this._getLabelNode(), label);
@@ -53,6 +54,9 @@ JX.install('PHUIXFormControl', {
         case 'checkboxes':
           input = this._newCheckboxes(spec);
           break;
+        case 'text':
+          input = this._newText(spec);
+          break;
         default:
           // TODO: Default or better error?
           JX.$E('Bad Input Type');
@@ -62,6 +66,7 @@ JX.install('PHUIXFormControl', {
       JX.DOM.setContent(node, input.node);
       this._valueGetCallback = input.get;
       this._valueSetCallback = input.set;
+      this._rawInputNode = input.node;
 
       return this;
     },
@@ -73,6 +78,10 @@ JX.install('PHUIXFormControl', {
 
     getValue: function() {
       return this._valueGetCallback();
+    },
+
+    getRawInputNode: function() {
+      return this._rawInputNode;
     },
 
     getNode: function() {
@@ -281,6 +290,10 @@ JX.install('PHUIXFormControl', {
     },
 
     _newPoints: function(spec) {
+      return this._newText();
+    },
+
+    _newText: function(spec) {
       var attrs = {
         type: 'text',
         value: spec.value
