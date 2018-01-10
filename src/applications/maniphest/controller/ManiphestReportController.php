@@ -140,7 +140,7 @@ final class ManiphestReportController extends ManiphestController {
       }
 
       $oldv = trim($row['oldValue'], '"');
-      $newv = trim($row['oldValue'], '"');
+      $newv = trim($row['newValue'], '"');
 
       // If this is a status change, preserve it.
       if ($oldv != 'null') {
