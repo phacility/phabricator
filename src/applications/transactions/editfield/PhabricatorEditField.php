@@ -643,7 +643,9 @@ abstract class PhabricatorEditField extends Phobject {
       return null;
     }
 
-    $type->setViewer($this->getViewer());
+    $type
+      ->setField($this)
+      ->setViewer($this->getViewer());
 
     return $type;
   }
