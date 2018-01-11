@@ -2498,6 +2498,8 @@ abstract class PhabricatorEditEngine
       // but it's possible that this isn't the case.
       $xaction['type'] = $edit_type->getTransactionType();
 
+      $xaction['metadata'] = $edit_type->getMetadata();
+
       $xaction = $edit_type->newRawBulkTransaction($xaction);
       if ($xaction === null) {
         unset($xactions[$key]);

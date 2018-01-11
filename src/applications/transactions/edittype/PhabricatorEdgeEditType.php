@@ -34,4 +34,28 @@ final class PhabricatorEdgeEditType
     return array($xaction);
   }
 
+  protected function newBulkParameterType() {
+    if (!$this->getDatasource()) {
+      return null;
+    }
+
+    return id(new BulkTokenizerParameterType())
+      ->setDatasource($this->getDatasource());
+  }
+
+
+  public function newRawBulkTransaction(array $xaction) {
+    $value = idx($xaction, 'value');
+
+    if ($this->getEdgeOperation() !== null) {
+      $value = array_fuse($value);
+      $value = array(
+        $this->getEdgeOperation() => $value,
+      );
+      $xaction['value'] = $value;
+    }
+
+    return $xaction;
+  }
+
 }

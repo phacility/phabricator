@@ -769,6 +769,19 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->bulkEditTypes;
   }
 
+  final public function getBulkEditType($key) {
+    $edit_types = $this->getBulkEditTypes();
+
+    if (empty($edit_types[$key])) {
+      throw new Exception(
+        pht(
+          'This EditField does not provide a Bulk EditType with key "%s".',
+          $key));
+    }
+
+    return $edit_types[$key];
+  }
+
   protected function newBulkEditTypes() {
     $edit_type = $this->getEditType();
 

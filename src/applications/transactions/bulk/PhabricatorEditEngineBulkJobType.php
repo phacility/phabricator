@@ -82,6 +82,12 @@ final class PhabricatorEditEngineBulkJobType
         $xaction->attachComment($comment);
       }
 
+      if (isset($raw_xaction['metadata'])) {
+        foreach ($raw_xaction['metadata'] as $meta_key => $meta_value) {
+          $xaction->setMetadataValue($meta_key, $meta_value);
+        }
+      }
+
       $xactions[] = $xaction;
     }
 
