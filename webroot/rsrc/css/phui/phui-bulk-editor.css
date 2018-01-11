@@ -20,3 +20,8 @@
 .bulk-edit-input input {
   width: 100%;
 }
+
+.bulk-edit-input textarea {
+  width: 100%;
+  height: 8em;
+}

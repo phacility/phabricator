@@ -70,8 +70,17 @@ final class PhabricatorEditEngineBulkJobType
 
     foreach ($raw_xactions as $raw_xaction) {
       $xaction = $object->getApplicationTransactionTemplate()
-        ->setTransactionType($raw_xaction['type'])
-        ->setNewValue($raw_xaction['value']);
+        ->setTransactionType($raw_xaction['type']);
+
+      if (isset($raw_xaction['value'])) {
+        $xaction->setNewValue($raw_xaction['value']);
+      }
+
+      if (isset($raw_xaction['comment'])) {
+        $comment = $xaction->getApplicationTransactionCommentObject()
+          ->setContent($raw_xaction['comment']);
+        $xaction->attachComment($comment);
+      }
 
       $xactions[] = $xaction;
     }

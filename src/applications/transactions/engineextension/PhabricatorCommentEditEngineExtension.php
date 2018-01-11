@@ -46,6 +46,7 @@ final class PhabricatorCommentEditEngineExtension
     $comment_field = id(new PhabricatorCommentEditField())
       ->setKey(self::EDITKEY)
       ->setLabel(pht('Comments'))
+      ->setBulkEditLabel(pht('Add comment'))
       ->setAliases(array('comments'))
       ->setIsHidden(true)
       ->setIsReorderable(false)

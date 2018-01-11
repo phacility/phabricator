@@ -2450,7 +2450,7 @@ abstract class PhabricatorEditEngine
 
       $map[] = array(
         'label' => $bulk_label,
-        'xaction' => $type->getTransactionType(),
+        'xaction' => $key,
         'control' => array(
           'type' => $bulk_type->getPHUIXControlType(),
           'spec' => (object)$bulk_type->getPHUIXControlSpecification(),
@@ -2463,6 +2463,50 @@ abstract class PhabricatorEditEngine
 
 
   final public function newRawBulkTransactions(array $xactions) {
+    $config = $this->loadDefaultConfiguration();
+    if (!$config) {
+      throw new Exception(
+        pht('No default edit engine configuration for bulk edit.'));
+    }
+
+    $object = $this->newEditableObject();
+    $fields = $this->buildEditFields($object);
+
+    $edit_types = $this->getBulkEditTypesFromFields($fields);
+
+    foreach ($xactions as $key => $xaction) {
+      PhutilTypeSpec::checkMap(
+        $xaction,
+        array(
+          'type' => 'string',
+          'value' => 'optional wild',
+          'comment' => 'optional string',
+        ));
+
+      $type = $xaction['type'];
+      if (!isset($edit_types[$type])) {
+        throw new Exception(
+          pht(
+            'Unsupported bulk edit type "%s".',
+            $type));
+      }
+
+      $edit_type = $edit_types[$type];
+
+      // Replace the edit type with the underlying transaction type. Usually
+      // these are 1:1 and the transaction type just has more internal noise,
+      // but it's possible that this isn't the case.
+      $xaction['type'] = $edit_type->getTransactionType();
+
+      $xaction = $edit_type->newRawBulkTransaction($xaction);
+      if ($xaction === null) {
+        unset($xactions[$key]);
+        continue;
+      }
+
+      $xactions[$key] = $xaction;
+    }
+
     return $xactions;
   }
 

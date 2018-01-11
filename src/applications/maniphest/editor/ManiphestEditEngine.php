@@ -245,6 +245,7 @@ EODOCS
     $fields[] = id(new PhabricatorRemarkupEditField())
       ->setKey('description')
       ->setLabel(pht('Description'))
+      ->setBulkEditLabel(pht('Set description to'))
       ->setDescription(pht('Task description.'))
       ->setConduitDescription(pht('Update the task description.'))
       ->setConduitTypeDescription(pht('New task description.'))

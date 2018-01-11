@@ -142,7 +142,7 @@ return array(
     'rsrc/css/phui/phui-basic-nav-view.css' => '98c11ab3',
     'rsrc/css/phui/phui-big-info-view.css' => 'acc3492c',
     'rsrc/css/phui/phui-box.css' => '4bd6cdb9',
-    'rsrc/css/phui/phui-bulk-editor.css' => '1fe728a8',
+    'rsrc/css/phui/phui-bulk-editor.css' => '9a81e5d5',
     'rsrc/css/phui/phui-chart.css' => '6bf6f78e',
     'rsrc/css/phui/phui-cms.css' => '504b4b23',
     'rsrc/css/phui/phui-comment-form.css' => 'ac68149f',
@@ -532,7 +532,7 @@ return array(
     'rsrc/js/phuix/PHUIXButtonView.js' => '8a91e1ac',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => '04b2ae03',
     'rsrc/js/phuix/PHUIXExample.js' => '68af71ca',
-    'rsrc/js/phuix/PHUIXFormControl.js' => '68bb05aa',
+    'rsrc/js/phuix/PHUIXFormControl.js' => '1dd0870c',
     'rsrc/js/phuix/PHUIXIconView.js' => 'bff6884b',
   ),
   'symbols' => array(
@@ -822,7 +822,7 @@ return array(
     'phui-basic-nav-view-css' => '98c11ab3',
     'phui-big-info-view-css' => 'acc3492c',
     'phui-box-css' => '4bd6cdb9',
-    'phui-bulk-editor-css' => '1fe728a8',
+    'phui-bulk-editor-css' => '9a81e5d5',
     'phui-button-bar-css' => 'f1ff5494',
     'phui-button-css' => '1863cc6e',
     'phui-button-simple-css' => '8e1baf68',
@@ -884,7 +884,7 @@ return array(
     'phuix-autocomplete' => 'e0731603',
     'phuix-button-view' => '8a91e1ac',
     'phuix-dropdown-menu' => '04b2ae03',
-    'phuix-form-control-view' => '68bb05aa',
+    'phuix-form-control-view' => '1dd0870c',
     'phuix-icon-view' => 'bff6884b',
     'policy-css' => '957ea14c',
     'policy-edit-css' => '815c66f7',
@@ -1028,6 +1028,10 @@ return array(
       'javelin-vector',
       'javelin-request',
       'javelin-uri',
+    ),
+    '1dd0870c' => array(
+      'javelin-install',
+      'javelin-dom',
     ),
     '1e911d0f' => array(
       'javelin-stratcom',
@@ -1444,10 +1448,6 @@ return array(
       'javelin-install',
       'javelin-dom',
       'phuix-button-view',
-    ),
-    '68bb05aa' => array(
-      'javelin-install',
-      'javelin-dom',
     ),
     '69adf288' => array(
       'javelin-install',

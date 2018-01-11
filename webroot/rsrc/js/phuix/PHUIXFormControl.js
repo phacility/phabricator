@@ -57,6 +57,9 @@ JX.install('PHUIXFormControl', {
         case 'text':
           input = this._newText(spec);
           break;
+        case 'remarkup':
+          input = this._newRemarkup(spec);
+          break;
         default:
           // TODO: Default or better error?
           JX.$E('Bad Input Type');
@@ -300,6 +303,28 @@ JX.install('PHUIXFormControl', {
       };
 
       var node = JX.$N('input', attrs);
+
+      return {
+        node: node,
+        get: function() {
+          return node.value;
+        },
+        set: function(value) {
+          node.value = value;
+        }
+      };
+    },
+
+    _newRemarkup: function(spec) {
+      var attrs = {};
+
+      // We could imagine a world where this renders a full remarkup control
+      // with all the hint buttons and client behaviors, but today much of that
+      // behavior is defined server-side and thus this isn't a world we
+      // currently live in.
+
+      var node = JX.$N('textarea', attrs);
+      node.value = spec.value || '';
 
       return {
         node: node,

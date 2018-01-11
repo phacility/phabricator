@@ -125,6 +125,11 @@ abstract class PhabricatorEditType extends Phobject {
   }
 
 
+  public function newRawBulkTransaction(array $xaction) {
+    return $xaction;
+  }
+
+
 /* -(  Conduit  )------------------------------------------------------------ */
 
 
