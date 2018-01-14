@@ -180,6 +180,15 @@ final class DiffusionMercurialWireClientSSHProtocolChannel
           $this->state = 'arguments';
         }
       } else if ($this->state == 'data-length') {
+
+        // We're reading the length of a chunk of raw data. It looks like
+        // this:
+        //
+        //   <length-in-bytes>\n
+        //
+        // The length is human-readable text (for example, "4096"), and
+        // may be 0.
+
         $line = $this->readProtocolLine();
         if ($line === null) {
           break;
@@ -192,9 +201,26 @@ final class DiffusionMercurialWireClientSSHProtocolChannel
           $this->state = 'data-bytes';
         }
       } else if ($this->state == 'data-bytes') {
+
+        // We're reading some known, nonzero number of raw bytes of data.
+
+        // If we don't have any more bytes on the buffer yet, just bail:
+        // otherwise, we'll emit a pointless and possibly harmful 0-byte data
+        // frame. See T13036 for discussion.
+        if (!strlen($this->buffer)) {
+          break;
+        }
+
         $bytes = substr($this->buffer, 0, $this->expectBytes);
         $this->buffer = substr($this->buffer, strlen($bytes));
         $this->expectBytes -= strlen($bytes);
+
+        // NOTE: We emit a data frame as soon as we read some data. This can
+        // cause us to repackage frames: for example, if we receive one large
+        // frame slowly, we may emit it as several smaller frames. In theory
+        // this is good; in practice, Mercurial never seems to select a frame
+        // size larger than 4096 bytes naturally and this may be more
+        // complexity and trouble than it is worth. See T13036.
 
         $messages[] = $this->newDataMessage($bytes);
 

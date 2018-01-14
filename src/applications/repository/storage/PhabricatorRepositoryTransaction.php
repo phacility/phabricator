@@ -16,6 +16,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_AUTOCLOSE = 'repo:autoclose';
   const TYPE_PUSH_POLICY = 'repo:push-policy';
   const TYPE_DANGEROUS = 'repo:dangerous';
+  const TYPE_ENORMOUS = 'repo:enormous';
   const TYPE_SLUG = 'repo:slug';
   const TYPE_SERVICE = 'repo:service';
   const TYPE_SYMBOLS_SOURCES = 'repo:symbol-source';
@@ -374,6 +375,16 @@ final class PhabricatorRepositoryTransaction
         } else {
           return pht(
             '%s enabled protection against dangerous changes.',
+            $this->renderHandleLink($author_phid));
+        }
+      case self::TYPE_ENORMOUS:
+        if ($new) {
+          return pht(
+            '%s disabled protection against enormous changes.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s enabled protection against enormous changes.',
             $this->renderHandleLink($author_phid));
         }
       case self::TYPE_SLUG:

@@ -277,9 +277,9 @@ final class DiffusionCommitController extends DiffusionController {
           'This commit is empty and does not affect any paths.'));
     } else if ($was_limited) {
       $info_panel = $this->renderStatusMessage(
-        pht('Enormous Commit'),
+        pht('Very Large Commit'),
         pht(
-          'This commit is enormous, and affects more than %d files. '.
+          'This commit is very large, and affects more than %d files. '.
           'Changes are not shown.',
           $hard_limit));
     } else if (!$this->getCommitExists()) {

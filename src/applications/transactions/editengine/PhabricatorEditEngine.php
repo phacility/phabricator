@@ -631,6 +631,17 @@ abstract class PhabricatorEditEngine
   }
 
   /**
+   * Initialize a new object for object creation via Conduit.
+   *
+   * @return object Newly initialized object.
+   * @param list<wild> Raw transactions.
+   * @task load
+   */
+  protected function newEditableObjectFromConduit(array $raw_xactions) {
+    return $this->newEditableObject();
+  }
+
+  /**
    * Initialize a new object for documentation creation.
    *
    * @return object Newly initialized object.
@@ -2031,6 +2042,8 @@ abstract class PhabricatorEditEngine
           get_class($this)));
     }
 
+    $raw_xactions = $this->getRawConduitTransactions($request);
+
     $identifier = $request->getValue('objectIdentifier');
     if ($identifier) {
       $this->setIsCreate(false);
@@ -2039,7 +2052,7 @@ abstract class PhabricatorEditEngine
       $this->requireCreateCapability();
 
       $this->setIsCreate(true);
-      $object = $this->newEditableObject();
+      $object = $this->newEditableObjectFromConduit($raw_xactions);
     }
 
     $this->validateObject($object);
@@ -2049,7 +2062,11 @@ abstract class PhabricatorEditEngine
     $types = $this->getConduitEditTypesFromFields($fields);
     $template = $object->getApplicationTransactionTemplate();
 
-    $xactions = $this->getConduitTransactions($request, $types, $template);
+    $xactions = $this->getConduitTransactions(
+      $request,
+      $raw_xactions,
+      $types,
+      $template);
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)
@@ -2078,23 +2095,7 @@ abstract class PhabricatorEditEngine
     );
   }
 
-
-  /**
-   * Generate transactions which can be applied from edit actions in a Conduit
-   * request.
-   *
-   * @param ConduitAPIRequest The request.
-   * @param list<PhabricatorEditType> Supported edit types.
-   * @param PhabricatorApplicationTransaction Template transaction.
-   * @return list<PhabricatorApplicationTransaction> Generated transactions.
-   * @task conduit
-   */
-  private function getConduitTransactions(
-    ConduitAPIRequest $request,
-    array $types,
-    PhabricatorApplicationTransaction $template) {
-
-    $viewer = $request->getUser();
+  private function getRawConduitTransactions(ConduitAPIRequest $request) {
     $transactions_key = 'transactions';
 
     $xactions = $request->getValue($transactions_key);
@@ -2124,7 +2125,33 @@ abstract class PhabricatorEditEngine
             $transactions_key,
             $key));
       }
+    }
 
+    return $xactions;
+  }
+
+
+  /**
+   * Generate transactions which can be applied from edit actions in a Conduit
+   * request.
+   *
+   * @param ConduitAPIRequest The request.
+   * @param list<wild> Raw conduit transactions.
+   * @param list<PhabricatorEditType> Supported edit types.
+   * @param PhabricatorApplicationTransaction Template transaction.
+   * @return list<PhabricatorApplicationTransaction> Generated transactions.
+   * @task conduit
+   */
+  private function getConduitTransactions(
+    ConduitAPIRequest $request,
+    array $xactions,
+    array $types,
+    PhabricatorApplicationTransaction $template) {
+
+    $viewer = $request->getUser();
+    $results = array();
+
+    foreach ($xactions as $key => $xaction) {
       $type = $xaction['type'];
       if (empty($types[$type])) {
         throw new Exception(
@@ -2136,8 +2163,6 @@ abstract class PhabricatorEditEngine
             implode(', ', array_keys($types))));
       }
     }
-
-    $results = array();
 
     if ($this->getIsCreate()) {
       $results[] = id(clone $template)
