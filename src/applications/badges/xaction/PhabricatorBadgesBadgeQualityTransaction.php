@@ -37,11 +37,11 @@ final class PhabricatorBadgesBadgeQualityTransaction
     $new = $this->getQualityLabel($this->getNewValue());
 
     return pht(
-      '%s updated %s quality from %s to %s.',
+      '%s updated the quality of %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
-      $new,
-      $old);
+      $old,
+      $new);
   }
 
   public function validateTransactions($object, array $xactions) {
