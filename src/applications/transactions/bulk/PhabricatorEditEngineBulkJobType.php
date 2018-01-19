@@ -72,8 +72,8 @@ final class PhabricatorEditEngineBulkJobType
       $xaction = $object->getApplicationTransactionTemplate()
         ->setTransactionType($raw_xaction['type']);
 
-      if (isset($raw_xaction['value'])) {
-        $xaction->setNewValue($raw_xaction['value']);
+      if (isset($raw_xaction['new'])) {
+        $xaction->setNewValue($raw_xaction['new']);
       }
 
       if (isset($raw_xaction['comment'])) {
@@ -86,6 +86,10 @@ final class PhabricatorEditEngineBulkJobType
         foreach ($raw_xaction['metadata'] as $meta_key => $meta_value) {
           $xaction->setMetadataValue($meta_key, $meta_value);
         }
+      }
+
+      if (array_key_exists('old', $raw_xaction)) {
+        $xaction->setOldValue($raw_xaction['old']);
       }
 
       $xactions[] = $xaction;

@@ -19,20 +19,4 @@ final class PhabricatorDatasourceEditType
     return '?';
   }
 
-  public function newRawBulkTransaction(array $xaction) {
-    $value = idx($xaction, 'value');
-
-    if ($this->getIsSingleValue()) {
-      if ($value) {
-        $value = head($value);
-      } else {
-        $value = null;
-      }
-
-      $xaction['value'] = $value;
-    }
-
-    return $xaction;
-  }
-
 }

@@ -2472,14 +2472,15 @@ abstract class PhabricatorEditEngine
     $fields = $this->buildEditFields($object);
 
     $edit_types = $this->getBulkEditTypesFromFields($fields);
+    $template = $object->getApplicationTransactionTemplate();
 
+    $raw_xactions = array();
     foreach ($xactions as $key => $xaction) {
       PhutilTypeSpec::checkMap(
         $xaction,
         array(
           'type' => 'string',
           'value' => 'optional wild',
-          'comment' => 'optional string',
         ));
 
       $type = $xaction['type'];
@@ -2497,18 +2498,31 @@ abstract class PhabricatorEditEngine
       // but it's possible that this isn't the case.
       $xaction['type'] = $edit_type->getTransactionType();
 
-      $xaction['metadata'] = $edit_type->getMetadata();
+      $xaction_objects = $edit_type->generateTransactions(
+        clone $template,
+        $xaction);
 
-      $xaction = $edit_type->newRawBulkTransaction($xaction);
-      if ($xaction === null) {
-        unset($xactions[$key]);
-        continue;
+      foreach ($xaction_objects as $xaction_object) {
+        $raw_xaction = array(
+          'type' => $xaction_object->getTransactionType(),
+          'metadata' => $xaction_object->getMetadata(),
+          'new' => $xaction_object->getNewValue(),
+        );
+
+        if ($xaction_object->hasOldValue()) {
+          $raw_xaction['old'] = $xaction_object->getOldValue();
+        }
+
+        if ($xaction_object->hasComment()) {
+          $comment = $xaction_object->getComment();
+          $raw_xaction['comment'] = $comment->getContent();
+        }
+
+        $raw_xactions[] = $raw_xaction;
       }
-
-      $xactions[$key] = $xaction;
     }
 
-    return $xactions;
+    return $raw_xactions;
   }
 
   private function getBulkEditTypesFromFields(array $fields) {
