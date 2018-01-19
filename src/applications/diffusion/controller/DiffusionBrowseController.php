@@ -947,6 +947,10 @@ final class DiffusionBrowseController extends DiffusionController {
       }
 
       foreach ($revision_ids as $commit_phid => $revision_id) {
+        // If the viewer can't actually see this revision, skip it.
+        if (!isset($revisions[$revision_id])) {
+          continue;
+        }
         $revision_map[$commit_map[$commit_phid]] = $revision_id;
       }
     }
