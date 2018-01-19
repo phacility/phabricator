@@ -91,6 +91,10 @@ abstract class PhabricatorEditType extends Phobject {
     return $this->editField;
   }
 
+  protected function getTransactionValueFromValue($value) {
+    return $value;
+  }
+
 
 /* -(  Bulk  )--------------------------------------------------------------- */
 
@@ -112,6 +116,10 @@ abstract class PhabricatorEditType extends Phobject {
 
   public function getBulkParameterType() {
     return $this->newBulkParameterType();
+  }
+
+  public function getTransactionValueFromBulkEdit($value) {
+    return $this->getTransactionValueFromValue($value);
   }
 
 
@@ -190,6 +198,10 @@ abstract class PhabricatorEditType extends Phobject {
     }
 
     return $this->conduitDocumentation;
+  }
+
+  public function getTransactionValueFromConduit($value) {
+    return $this->getTransactionValueFromValue($value);
   }
 
 }

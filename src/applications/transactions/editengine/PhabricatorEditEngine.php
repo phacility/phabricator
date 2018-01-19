@@ -2169,6 +2169,8 @@ abstract class PhabricatorEditEngine
         ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
     }
 
+    $is_strict = $request->getIsStrictlyTyped();
+
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
 
@@ -2179,10 +2181,10 @@ abstract class PhabricatorEditEngine
       $parameter_type->setViewer($viewer);
 
       try {
-        $xaction['value'] = $parameter_type->getValue(
-          $xaction,
-          'value',
-          $request->getIsStrictlyTyped());
+        $value = $xaction['value'];
+        $value = $parameter_type->getValue($xaction, 'value', $is_strict);
+        $value = $type->getTransactionValueFromConduit($value);
+        $xaction['value'] = $value;
       } catch (Exception $ex) {
         throw new PhutilProxyException(
           pht(
@@ -2497,6 +2499,10 @@ abstract class PhabricatorEditEngine
       // these are 1:1 and the transaction type just has more internal noise,
       // but it's possible that this isn't the case.
       $xaction['type'] = $edit_type->getTransactionType();
+
+      $value = $xaction['value'];
+      $value = $edit_type->getTransactionValueFromBulkEdit($value);
+      $xaction['value'] = $value;
 
       $xaction_objects = $edit_type->generateTransactions(
         clone $template,
