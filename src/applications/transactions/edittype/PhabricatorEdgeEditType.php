@@ -43,7 +43,6 @@ final class PhabricatorEdgeEditType
       ->setDatasource($this->getDatasource());
   }
 
-
   public function newRawBulkTransaction(array $xaction) {
     $value = idx($xaction, 'value');
 

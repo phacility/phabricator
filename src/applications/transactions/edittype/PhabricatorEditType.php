@@ -6,7 +6,6 @@ abstract class PhabricatorEditType extends Phobject {
   private $editField;
   private $transactionType;
   private $label;
-  private $field;
   private $metadata = array();
 
   private $conduitDescription;
@@ -36,16 +35,7 @@ abstract class PhabricatorEditType extends Phobject {
       return $this->bulkEditLabel;
     }
 
-    return $this->getField()->getBulkEditLabel();
-  }
-
-  public function setField(PhabricatorEditField $field) {
-    $this->field = $field;
-    return $this;
-  }
-
-  public function getField() {
-    return $this->field;
+    return $this->getEditField()->getBulkEditLabel();
   }
 
   public function setEditType($edit_type) {

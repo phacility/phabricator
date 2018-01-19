@@ -189,6 +189,7 @@ EODOCS
         ->setKey('owner')
         ->setAliases(array('ownerPHID', 'assign', 'assigned'))
         ->setLabel(pht('Assigned To'))
+        ->setBulkEditLabel(pht('Assign to'))
         ->setDescription(pht('User who is responsible for the task.'))
         ->setConduitDescription(pht('Reassign the task.'))
         ->setConduitTypeDescription(

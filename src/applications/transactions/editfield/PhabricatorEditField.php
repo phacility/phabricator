@@ -681,50 +681,49 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function newEditType() {
-    $parameter_type = $this->getConduitParameterType();
-    if (!$parameter_type) {
-      return null;
-    }
-
-    $edit_type = id(new PhabricatorSimpleEditType())
-      ->setConduitParameterType($parameter_type);
-
-    $bulk_type = $this->getBulkParameterType();
-    if ($bulk_type) {
-      $edit_type->setBulkParameterType($bulk_type);
-    }
-
-    return $edit_type;
+    return new PhabricatorSimpleEditType();
   }
 
   protected function getEditType() {
     $transaction_type = $this->getTransactionType();
-
     if ($transaction_type === null) {
       return null;
     }
 
-    $type_key = $this->getEditTypeKey();
     $edit_type = $this->newEditType();
     if (!$edit_type) {
       return null;
     }
 
-    return $edit_type
-      ->setEditType($type_key)
+    $type_key = $this->getEditTypeKey();
+
+    $edit_type
+      ->setEditField($this)
       ->setTransactionType($transaction_type)
+      ->setEditType($type_key)
       ->setMetadata($this->getMetadata());
+
+    if (!$edit_type->getConduitParameterType()) {
+      $conduit_parameter = $this->getConduitParameterType();
+      if ($conduit_parameter) {
+        $edit_type->setConduitParameterType($conduit_parameter);
+      }
+    }
+
+    if (!$edit_type->getBulkParameterType()) {
+      $bulk_parameter = $this->getBulkParameterType();
+      if ($bulk_parameter) {
+        $edit_type->setBulkParameterType($bulk_parameter);
+      }
+    }
+
+    return $edit_type;
   }
 
   final public function getConduitEditTypes() {
     if ($this->conduitEditTypes === null) {
       $edit_types = $this->newConduitEditTypes();
       $edit_types = mpull($edit_types, null, 'getEditType');
-
-      foreach ($edit_types as $edit_type) {
-        $edit_type->setEditField($this);
-      }
-
       $this->conduitEditTypes = $edit_types;
     }
 
@@ -758,11 +757,6 @@ abstract class PhabricatorEditField extends Phobject {
     if ($this->bulkEditTypes === null) {
       $edit_types = $this->newBulkEditTypes();
       $edit_types = mpull($edit_types, null, 'getEditType');
-
-      foreach ($edit_types as $edit_type) {
-        $edit_type->setEditField($this);
-      }
-
       $this->bulkEditTypes = $edit_types;
     }
 

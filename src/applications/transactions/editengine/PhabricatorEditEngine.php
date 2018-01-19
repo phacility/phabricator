@@ -2219,7 +2219,6 @@ abstract class PhabricatorEditEngine
       }
 
       foreach ($field_types as $field_type) {
-        $field_type->setField($field);
         $types[$field_type->getEditType()] = $field_type;
       }
     }
@@ -2523,7 +2522,6 @@ abstract class PhabricatorEditEngine
       }
 
       foreach ($field_types as $field_type) {
-        $field_type->setField($field);
         $types[$field_type->getEditType()] = $field_type;
       }
     }
