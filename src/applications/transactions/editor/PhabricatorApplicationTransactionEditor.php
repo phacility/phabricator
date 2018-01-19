@@ -59,7 +59,6 @@ abstract class PhabricatorApplicationTransactionEditor
   private $isHeraldEditor;
   private $isInverseEdgeEditor;
   private $actingAsPHID;
-  private $disableEmail;
 
   private $heraldEmailPHIDs = array();
   private $heraldForcedEmailPHIDs = array();
@@ -204,21 +203,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getIsHeraldEditor() {
     return $this->isHeraldEditor;
-  }
-
-  /**
-   * Prevent this editor from generating email when applying transactions.
-   *
-   * @param bool  True to disable email.
-   * @return this
-   */
-  public function setDisableEmail($disable_email) {
-    $this->disableEmail = $disable_email;
-    return $this;
-  }
-
-  public function getDisableEmail() {
-    return $this->disableEmail;
   }
 
   public function setUnmentionablePHIDMap(array $map) {
@@ -1152,11 +1136,9 @@ abstract class PhabricatorApplicationTransactionEditor
     // Editors need to pass into workers.
     $object = $this->willPublish($object, $xactions);
 
-    if (!$this->getDisableEmail()) {
-      if ($this->shouldSendMail($object, $xactions)) {
-        $this->mailToPHIDs = $this->getMailTo($object);
-        $this->mailCCPHIDs = $this->getMailCC($object);
-      }
+    if ($this->shouldSendMail($object, $xactions)) {
+      $this->mailToPHIDs = $this->getMailTo($object);
+      $this->mailCCPHIDs = $this->getMailCC($object);
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
@@ -1204,10 +1186,8 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->object = $object;
 
     $messages = array();
-    if (!$this->getDisableEmail()) {
-      if ($this->shouldSendMail($object, $xactions)) {
-        $messages = $this->buildMail($object, $xactions);
-      }
+    if ($this->shouldSendMail($object, $xactions)) {
+      $messages = $this->buildMail($object, $xactions);
     }
 
     if ($this->supportsSearch()) {
@@ -3504,7 +3484,6 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getAutomaticStateProperties() {
     return array(
       'parentMessageID',
-      'disableEmail',
       'isNewObject',
       'heraldEmailPHIDs',
       'heraldForcedEmailPHIDs',
