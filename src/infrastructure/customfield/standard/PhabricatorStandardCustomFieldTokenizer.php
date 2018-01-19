@@ -68,6 +68,11 @@ abstract class PhabricatorStandardCustomFieldTokenizer
   protected function newBulkParameterType() {
     $datasource = $this->getDatasource();
 
+    $limit = $this->getFieldConfigValue('limit');
+    if ($limit) {
+      $datasource->setLimit($limit);
+    }
+
     return id(new BulkTokenizerParameterType())
       ->setDatasource($datasource);
   }
