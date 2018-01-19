@@ -15,6 +15,7 @@ abstract class PhabricatorEditType extends Phobject {
 
   private $bulkParameterType;
   private $bulkEditLabel;
+  private $bulkEditGroupKey;
 
   public function setLabel($label) {
     $this->label = $label;
@@ -36,6 +37,19 @@ abstract class PhabricatorEditType extends Phobject {
     }
 
     return $this->getEditField()->getBulkEditLabel();
+  }
+
+  public function setBulkEditGroupKey($key) {
+    $this->bulkEditGroupKey = $key;
+    return $this;
+  }
+
+  public function getBulkEditGroupKey() {
+    if ($this->bulkEditGroupKey !== null) {
+      return $this->bulkEditGroupKey;
+    }
+
+    return $this->getEditField()->getBulkEditGroupKey();
   }
 
   public function setEditType($edit_type) {

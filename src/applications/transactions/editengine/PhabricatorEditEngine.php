@@ -181,6 +181,11 @@ abstract class PhabricatorEditEngine
         $field
           ->setViewer($viewer)
           ->setObject($object);
+
+        $group_key = $field->getBulkEditGroupKey();
+        if ($group_key === null) {
+          $field->setBulkEditGroupKey('extension');
+        }
       }
 
       $extension_fields = mpull($extension_fields, null, 'getKey');
@@ -2424,6 +2429,60 @@ abstract class PhabricatorEditEngine
 
 /* -(  Bulk Edits  )--------------------------------------------------------- */
 
+  final public function newBulkEditGroupMap() {
+    $groups = $this->newBulkEditGroups();
+
+    $map = array();
+    foreach ($groups as $group) {
+      $key = $group->getKey();
+
+      if (isset($map[$key])) {
+        throw new Exception(
+          pht(
+            'Two bulk edit groups have the same key ("%s"). Each bulk edit '.
+            'group must have a unique key.',
+            $key));
+      }
+
+      $map[$key] = $group;
+    }
+
+    if ($this->isEngineExtensible()) {
+      $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    } else {
+      $extensions = array();
+    }
+
+    foreach ($extensions as $extension) {
+      $extension_groups = $extension->newBulkEditGroups($this);
+      foreach ($extension_groups as $group) {
+        $key = $group->getKey();
+
+        if (isset($map[$key])) {
+          throw new Exception(
+            pht(
+              'Extension "%s" defines a bulk edit group with the same key '.
+              '("%s") as the main editor or another extension. Each bulk '.
+              'edit group must have a unique key.'));
+        }
+
+        $map[$key] = $group;
+      }
+    }
+
+    return $map;
+  }
+
+  protected function newBulkEditGroups() {
+    return array(
+      id(new PhabricatorBulkEditGroup())
+        ->setKey('default')
+        ->setLabel(pht('Primary Fields')),
+      id(new PhabricatorBulkEditGroup())
+        ->setKey('extension')
+        ->setLabel(pht('Support Applications')),
+    );
+  }
 
   final public function newBulkEditMap() {
     $config = $this->loadDefaultConfiguration();
@@ -2434,6 +2493,7 @@ abstract class PhabricatorEditEngine
 
     $object = $this->newEditableObject();
     $fields = $this->buildEditFields($object);
+    $groups = $this->newBulkEditGroupMap();
 
     $edit_types = $this->getBulkEditTypesFromFields($fields);
 
@@ -2449,9 +2509,24 @@ abstract class PhabricatorEditEngine
         continue;
       }
 
+      $group_key = $type->getBulkEditGroupKey();
+      if (!$group_key) {
+        $group_key = 'default';
+      }
+
+      if (!isset($groups[$group_key])) {
+        throw new Exception(
+          pht(
+            'Field "%s" has a bulk edit group key ("%s") with no '.
+            'corresponding bulk edit group.',
+            $key,
+            $group_key));
+      }
+
       $map[] = array(
         'label' => $bulk_label,
         'xaction' => $key,
+        'group' => $group_key,
         'control' => array(
           'type' => $bulk_type->getPHUIXControlType(),
           'spec' => (object)$bulk_type->getPHUIXControlSpecification(),

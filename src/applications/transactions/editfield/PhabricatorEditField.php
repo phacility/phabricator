@@ -18,6 +18,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $controlID;
   private $controlInstructions;
   private $bulkEditLabel;
+  private $bulkEditGroupKey;
 
   private $description;
   private $conduitDescription;
@@ -73,6 +74,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getBulkEditLabel() {
     return $this->bulkEditLabel;
+  }
+
+  public function setBulkEditGroupKey($key) {
+    $this->bulkEditGroupKey = $key;
+    return $this;
+  }
+
+  public function getBulkEditGroupKey() {
+    return $this->bulkEditGroupKey;
   }
 
   public function setViewer(PhabricatorUser $viewer) {

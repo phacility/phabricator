@@ -33,6 +33,14 @@ final class PhabricatorCommentEditEngineExtension
     return (bool)$comment;
   }
 
+  public function newBulkEditGroups(PhabricatorEditEngine $engine) {
+    return array(
+      id(new PhabricatorBulkEditGroup())
+        ->setKey('comments')
+        ->setLabel(pht('Comments')),
+    );
+  }
+
   public function buildCustomEditFields(
     PhabricatorEditEngine $engine,
     PhabricatorApplicationTransactionInterface $object) {
@@ -47,6 +55,7 @@ final class PhabricatorCommentEditEngineExtension
       ->setKey(self::EDITKEY)
       ->setLabel(pht('Comments'))
       ->setBulkEditLabel(pht('Add comment'))
+      ->setBulkEditGroupKey('comments')
       ->setAliases(array('comments'))
       ->setIsHidden(true)
       ->setIsReorderable(false)

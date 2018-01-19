@@ -218,7 +218,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
         'disabled'    => 'disabled',
         'class'       => 'disabled',
       ),
-      pht("Batch Edit Selected \xC2\xBB"));
+      pht("Bulk Edit Selected \xC2\xBB"));
 
     $export = javelin_tag(
       'a',

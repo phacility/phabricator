@@ -3,7 +3,6 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-util
- *           phabricator-prefab
  *           multirow-row-manager
  *           javelin-json
  *           phuix-form-control-view
@@ -31,11 +30,9 @@ JX.behavior('bulk-editor', function(config) {
   }
 
   function renderRow() {
-    var action_select = JX.Prefab.renderSelect(
-      option_map,
-      null,
-      null,
-      option_order);
+    var action_select = new JX.PHUIXFormControl()
+      .setControl('optgroups', config.optgroups)
+      .getRawInputNode();
 
     var cell = JX.$N('td', {className: 'bulk-edit-input'});
     var vfunc = null;

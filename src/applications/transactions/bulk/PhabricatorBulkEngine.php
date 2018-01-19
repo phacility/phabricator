@@ -299,6 +299,29 @@ abstract class PhabricatorBulkEngine extends Phobject {
       ->setViewer($viewer);
 
     $edit_map = $edit_engine->newBulkEditMap();
+    $groups = $edit_engine->newBulkEditGroupMap();
+
+    $spec = array();
+    $option_groups = igroup($edit_map, 'group');
+    foreach ($groups as $group_key => $group) {
+      $options = idx($option_groups, $group_key, array());
+      if (!$options) {
+        continue;
+      }
+
+      $option_map = array();
+      foreach ($options as $option) {
+        $option_map[] = array(
+          'key' => $option['xaction'],
+          'label' => $option['label'],
+        );
+      }
+
+      $spec[] = array(
+        'label' => $group->getLabel(),
+        'options' => $option_map,
+      );
+    }
 
     require_celerity_resource('phui-bulk-editor-css');
 
@@ -308,6 +331,9 @@ abstract class PhabricatorBulkEngine extends Phobject {
         'rootNodeID' => $this->getRootFormID(),
         'inputNodeID' => $input_id,
         'edits' => $edit_map,
+        'optgroups' => array(
+          'groups' => $spec,
+        ),
       ));
 
     $cancel_uri = $this->getCancelURI();
