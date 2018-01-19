@@ -12,10 +12,36 @@ final class PhabricatorEditEngineBulkJobType
   }
 
   public function getDescriptionForConfirm(PhabricatorWorkerBulkJob $job) {
-    return pht(
+    $parts = array();
+
+    $parts[] = pht(
       'You are about to apply a bulk edit which will affect '.
       '%s object(s).',
       new PhutilNumber($job->getSize()));
+
+    if ($job->getIsSilent()) {
+      $parts[] = pht(
+        'If you start work now, this edit will be applied silently: it will '.
+        'not send mail or publish notifications.');
+    } else {
+      $parts[] = pht(
+        'If you start work now, this edit will send mail and publish '.
+        'notifications normally.');
+
+      $parts[] = pht('To silence this edit, run this command:');
+
+      $command = csprintf(
+        'phabricator/ $ ./bin/bulk make-silent --id %R',
+        $job->getID());
+      $command = (string)$command;
+
+      $parts[] = phutil_tag('tt', array(), $command);
+
+      $parts[] = pht(
+        'After running this command, reload this page to see the new setting.');
+    }
+
+    return $parts;
   }
 
   public function getJobSize(PhabricatorWorkerBulkJob $job) {
@@ -56,12 +82,14 @@ final class PhabricatorEditEngineBulkJobType
 
     $raw_xactions = $job->getParameter('xactions');
     $xactions = $this->buildTransactions($object, $raw_xactions);
+    $is_silent = $job->getIsSilent();
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($actor)
       ->setContentSource($job->newContentSource())
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
+      ->setIsSilent($is_silent)
       ->applyTransactions($object, $xactions);
   }
 

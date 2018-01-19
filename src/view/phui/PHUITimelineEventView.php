@@ -584,6 +584,14 @@ final class PHUITimelineEventView extends AphrontView {
         }
         $extra[] = $date;
       }
+
+      // If this edit was applied silently, give user a hint that they should
+      // not expect to have received any mail or notifications.
+      if ($this->getIsSilent()) {
+        $extra[] = id(new PHUIIconView())
+          ->setIcon('fa-bell-slash', 'red')
+          ->setTooltip(pht('Silent Edit'));
+      }
     }
 
     $extra = javelin_tag(

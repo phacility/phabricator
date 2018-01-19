@@ -49,13 +49,22 @@ final class PhabricatorDaemonBulkJobMonitorController
           return id(new AphrontRedirectResponse())
             ->setURI($job->getMonitorURI());
         } else {
-          return $this->newDialog()
-            ->setTitle(pht('Confirm Bulk Job'))
-            ->appendParagraph($job->getDescriptionForConfirm())
+          $dialog = $this->newDialog()
+            ->setTitle(pht('Confirm Bulk Job'));
+
+          $confirm = $job->getDescriptionForConfirm();
+          $confirm = (array)$confirm;
+          foreach ($confirm as $paragraph) {
+            $dialog->appendParagraph($paragraph);
+          }
+
+          $dialog
             ->appendParagraph(
               pht('Start work on this bulk job?'))
             ->addCancelButton($job->getManageURI(), pht('Details'))
             ->addSubmitButton(pht('Start Work'));
+
+          return $dialog;
         }
       } else {
         return $this->newDialog()
