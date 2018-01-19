@@ -12,6 +12,8 @@ abstract class PhabricatorFileUploadSource
   private $shouldChunk;
   private $didRewind;
   private $totalBytesWritten = 0;
+  private $totalBytesRead = 0;
+  private $byteLimit = 0;
 
   public function setName($name) {
     $this->name = $name;
@@ -38,6 +40,15 @@ abstract class PhabricatorFileUploadSource
 
   public function getViewPolicy() {
     return $this->viewPolicy;
+  }
+
+  public function setByteLimit($byte_limit) {
+    $this->byteLimit = $byte_limit;
+    return $this;
+  }
+
+  public function getByteLimit() {
+    return $this->byteLimit;
   }
 
   public function uploadFile() {
@@ -81,8 +92,15 @@ abstract class PhabricatorFileUploadSource
       return false;
     }
 
+    $read_bytes = $data->current();
+    $this->totalBytesRead += strlen($read_bytes);
+
+    if ($this->byteLimit && ($this->totalBytesRead > $this->byteLimit)) {
+      throw new PhabricatorFileUploadSourceByteLimitException();
+    }
+
     $rope = $this->getRope();
-    $rope->append($data->current());
+    $rope->append($read_bytes);
 
     return true;
   }
@@ -160,8 +178,10 @@ abstract class PhabricatorFileUploadSource
       }
     }
 
-    // If we have extra bytes at the end, write them.
-    if ($rope->getByteLength()) {
+    // If we have extra bytes at the end, write them. Note that it's possible
+    // that we have more than one chunk of bytes left if the read was very
+    // fast.
+    while ($rope->getByteLength()) {
       $this->writeChunk($file, $engine);
     }
 
