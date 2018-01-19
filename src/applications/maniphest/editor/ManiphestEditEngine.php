@@ -234,6 +234,7 @@ EODOCS
       $fields[] = id(new PhabricatorPointsEditField())
         ->setKey('points')
         ->setLabel($points_label)
+        ->setBulkEditLabel($action_label)
         ->setDescription(pht('Point value of the task.'))
         ->setConduitDescription(pht('Change the task point value.'))
         ->setConduitTypeDescription(pht('New task point value.'))
