@@ -3,8 +3,15 @@
 final class BulkSelectParameterType
   extends BulkParameterType {
 
+  private $options;
+
+  public function setOptions(array $options) {
+    $this->options = $options;
+    return $this;
+  }
+
   public function getOptions() {
-    return $this->getField()->getOptions();
+    return $this->options;
   }
 
   public function getPHUIXControlType() {

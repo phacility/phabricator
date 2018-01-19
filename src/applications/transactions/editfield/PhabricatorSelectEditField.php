@@ -55,7 +55,8 @@ final class PhabricatorSelectEditField
   }
 
   protected function newBulkParameterType() {
-    return new BulkSelectParameterType();
+    return id(new BulkSelectParameterType())
+      ->setOptions($this->getOptions());
   }
 
   private function getCanonicalValue($value) {
