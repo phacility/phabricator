@@ -94,7 +94,14 @@ abstract class PhabricatorStandardCustomFieldTokenizer
   }
 
   public function getHeraldActionDatasource() {
-    return $this->getDatasource();
+    $datasource = $this->getDatasource();
+
+    $limit = $this->getFieldConfigValue('limit');
+    if ($limit) {
+      $datasource->setLimit($limit);
+    }
+
+    return $datasource;
   }
 
   private function renderHeraldHandleList($value) {

@@ -22,9 +22,8 @@ final class ManiphestTaskAssignOtherHeraldAction
   }
 
   protected function getDatasource() {
-    // TODO: Eventually, it would be nice to get "limit = 1" exported from here
-    // up to the UI.
-    return new ManiphestAssigneeDatasource();
+    return id(new ManiphestAssigneeDatasource())
+      ->setLimit(1);
   }
 
   public function renderActionDescription($value) {
