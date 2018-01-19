@@ -29,6 +29,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $authorPHID;
   private $badges = array();
   private $pinboardItems = array();
+  private $isSilent;
 
   public function setAuthorPHID($author_phid) {
     $this->authorPHID = $author_phid;
@@ -175,6 +176,15 @@ final class PHUITimelineEventView extends AphrontView {
   public function setColor($color) {
     $this->color = $color;
     return $this;
+  }
+
+  public function setIsSilent($is_silent) {
+    $this->isSilent = $is_silent;
+    return $this;
+  }
+
+  public function getIsSilent() {
+    return $this->isSilent;
   }
 
   public function setReallyMajorEvent($me) {

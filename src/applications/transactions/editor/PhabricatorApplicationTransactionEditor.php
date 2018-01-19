@@ -68,7 +68,9 @@ abstract class PhabricatorApplicationTransactionEditor
   private $feedNotifyPHIDs = array();
   private $feedRelatedPHIDs = array();
   private $feedShouldPublish = false;
+  private $mailShouldSend = false;
   private $modularTypes;
+  private $silent;
 
   private $transactionQueue = array();
 
@@ -185,6 +187,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getIsPreview() {
     return $this->isPreview;
+  }
+
+  public function setIsSilent($silent) {
+    $this->silent = $silent;
+    return $this;
+  }
+
+  public function getIsSilent() {
+    return $this->silent;
   }
 
   public function setIsInverseEdgeEditor($is_inverse_edge_editor) {
@@ -790,6 +801,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $xaction->setObjectPHID($object->getPHID());
     }
 
+    if ($this->getIsSilent()) {
+      $xaction->setIsSilentTransaction(true);
+    }
+
     return $xaction;
   }
 
@@ -1136,15 +1151,22 @@ abstract class PhabricatorApplicationTransactionEditor
     // Editors need to pass into workers.
     $object = $this->willPublish($object, $xactions);
 
-    if ($this->shouldSendMail($object, $xactions)) {
-      $this->mailToPHIDs = $this->getMailTo($object);
-      $this->mailCCPHIDs = $this->getMailCC($object);
-    }
+    if (!$this->getIsSilent()) {
+      if ($this->shouldSendMail($object, $xactions)) {
+        $this->mailShouldSend = true;
+        $this->mailToPHIDs = $this->getMailTo($object);
+        $this->mailCCPHIDs = $this->getMailCC($object);
+      }
 
-    if ($this->shouldPublishFeedStory($object, $xactions)) {
-      $this->feedShouldPublish = true;
-      $this->feedRelatedPHIDs = $this->getFeedRelatedPHIDs($object, $xactions);
-      $this->feedNotifyPHIDs = $this->getFeedNotifyPHIDs($object, $xactions);
+      if ($this->shouldPublishFeedStory($object, $xactions)) {
+        $this->feedShouldPublish = true;
+        $this->feedRelatedPHIDs = $this->getFeedRelatedPHIDs(
+          $object,
+          $xactions);
+        $this->feedNotifyPHIDs = $this->getFeedNotifyPHIDs(
+          $object,
+          $xactions);
+      }
     }
 
     PhabricatorWorker::scheduleTask(
@@ -1186,7 +1208,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->object = $object;
 
     $messages = array();
-    if ($this->shouldSendMail($object, $xactions)) {
+    if ($this->mailShouldSend) {
       $messages = $this->buildMail($object, $xactions);
     }
 
@@ -3138,6 +3160,16 @@ abstract class PhabricatorApplicationTransactionEditor
       $adapter->setApplicationEmail($this->getApplicationEmail());
     }
 
+    // If this editor is operating in silent mode, tell Herald that we aren't
+    // going to send any mail. This allows it to skip "the first time this
+    // rule matches, send me an email" rules which would otherwise match even
+    // though we aren't going to send any mail.
+    if ($this->getIsSilent()) {
+      $adapter->setForbiddenAction(
+        HeraldMailableState::STATECONST,
+        HeraldCoreStateReasons::REASON_SILENT);
+    }
+
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);
@@ -3493,6 +3525,7 @@ abstract class PhabricatorApplicationTransactionEditor
       'feedNotifyPHIDs',
       'feedRelatedPHIDs',
       'feedShouldPublish',
+      'mailShouldSend',
     );
   }
 
@@ -3875,7 +3908,8 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setActor($this->getActor())
       ->setContentSource($this->getContentSource())
       ->setContinueOnNoEffect($this->getContinueOnNoEffect())
-      ->setContinueOnMissingFields($this->getContinueOnMissingFields());
+      ->setContinueOnMissingFields($this->getContinueOnMissingFields())
+      ->setIsSilent($this->getIsSilent());
 
     if ($this->actingAsPHID !== null) {
       $editor->setActingAsPHID($this->actingAsPHID);
