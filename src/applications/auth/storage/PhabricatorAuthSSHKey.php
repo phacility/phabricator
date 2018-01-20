@@ -139,7 +139,7 @@ final class PhabricatorAuthSSHKey
   public function describeAutomaticCapability($capability) {
     if (!$this->getIsACtive()) {
       return pht(
-        'Deactivated SSH keys can not be edited or reactivated.');
+        'Revoked SSH keys can not be edited or reinstated.');
     }
 
     return pht(

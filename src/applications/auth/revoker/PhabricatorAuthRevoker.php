@@ -5,7 +5,7 @@ abstract class PhabricatorAuthRevoker
 
   private $viewer;
 
-  abstract public function revokeAlLCredentials();
+  abstract public function revokeAllCredentials();
   abstract public function revokeCredentialsFrom($object);
 
   public function setViewer(PhabricatorUser $viewer) {
