@@ -1,52 +1,52 @@
 <?php
 
-final class PhabricatorAuthSSHRevoker
+final class PhabricatorAuthPasswordRevoker
   extends PhabricatorAuthRevoker {
 
-  const REVOKERKEY = 'ssh';
+  const REVOKERKEY = 'password';
 
   public function revokeAllCredentials() {
-    $query = new PhabricatorAuthSSHKeyQuery();
+    $query = new PhabricatorAuthPasswordQuery();
     return $this->revokeWithQuery($query);
   }
 
   public function revokeCredentialsFrom($object) {
-    $query = id(new PhabricatorAuthSSHKeyQuery())
+    $query = id(new PhabricatorAuthPasswordQuery())
       ->withObjectPHIDs(array($object->getPHID()));
-
     return $this->revokeWithQuery($query);
   }
 
-  private function revokeWithQuery(PhabricatorAuthSSHKeyQuery $query) {
+  private function revokeWithQuery(PhabricatorAuthPasswordQuery $query) {
     $viewer = $this->getViewer();
 
-    // We're only going to revoke keys which have not already been revoked.
-
-    $ssh_keys = $query
+    $passwords = $query
       ->setViewer($viewer)
-      ->withIsActive(true)
+      ->withIsRevoked(false)
       ->execute();
 
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorDaemonContentSource::SOURCECONST);
 
-    $auth_phid = id(new PhabricatorAuthApplication())->getPHID();
-    foreach ($ssh_keys as $ssh_key) {
-      $xactions = array();
-      $xactions[] = $ssh_key->getApplicationTransactionTemplate()
-        ->setTransactionType(PhabricatorAuthSSHKeyTransaction::TYPE_DEACTIVATE)
-        ->setNewValue(1);
+    $revoke_type = PhabricatorAuthPasswordRevokeTransaction::TRANSACTIONTYPE;
 
-      $editor = $ssh_key->getApplicationTransactionEditor()
+    $auth_phid = id(new PhabricatorAuthApplication())->getPHID();
+    foreach ($passwords as $password) {
+      $xactions = array();
+
+      $xactions[] = $password->getApplicationTransactionTemplate()
+        ->setTransactionType($revoke_type)
+        ->setNewValue(true);
+
+      $editor = $password->getApplicationTransactionEditor()
         ->setActor($viewer)
         ->setActingAsPHID($auth_phid)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
         ->setContentSource($content_source)
-        ->applyTransactions($ssh_key, $xactions);
+        ->applyTransactions($password, $xactions);
     }
 
-    return count($ssh_keys);
+    return count($passwords);
   }
 
 }
