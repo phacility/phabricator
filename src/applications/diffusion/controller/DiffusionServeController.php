@@ -715,28 +715,17 @@ final class DiffusionServeController extends DiffusionController {
       return null;
     }
 
-    $password_entry = id(new PhabricatorRepositoryVCSPassword())
-      ->loadOneWhere('userPHID = %s', $user->getPHID());
-    if (!$password_entry) {
-      // User doesn't have a password set.
+    $request = $this->getRequest();
+    $content_source = PhabricatorContentSource::newFromRequest($request);
+
+    $engine = id(new PhabricatorAuthPasswordEngine())
+      ->setViewer($user)
+      ->setContentSource($content_source)
+      ->setPasswordType(PhabricatorAuthPassword::PASSWORD_TYPE_VCS)
+      ->setObject($user);
+
+    if (!$engine->isValidPassword($password)) {
       return null;
-    }
-
-    if (!$password_entry->comparePassword($password, $user)) {
-      // Password doesn't match.
-      return null;
-    }
-
-    // If the user's password is stored using a less-than-optimal hash, upgrade
-    // them to the strongest available hash.
-
-    $hash_envelope = new PhutilOpaqueEnvelope(
-      $password_entry->getPasswordHash());
-    if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
-      $password_entry->setPassword($password, $user);
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $password_entry->save();
-      unset($unguarded);
     }
 
     return $user;

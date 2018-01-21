@@ -35,13 +35,20 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
       $request,
       '/settings/');
 
-    $vcspassword = id(new PhabricatorRepositoryVCSPassword())
-      ->loadOneWhere(
-        'userPHID = %s',
-        $user->getPHID());
-    if (!$vcspassword) {
-      $vcspassword = id(new PhabricatorRepositoryVCSPassword());
-      $vcspassword->setUserPHID($user->getPHID());
+    $vcs_type = PhabricatorAuthPassword::PASSWORD_TYPE_VCS;
+
+    $vcspasswords = id(new PhabricatorAuthPasswordQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($user->getPHID()))
+      ->withPasswordTypes(array($vcs_type))
+      ->withIsRevoked(false)
+      ->execute();
+    if ($vcspasswords) {
+      $vcspassword = head($vcspasswords);
+    } else {
+      $vcspassword = PhabricatorAuthPassword::initializeNewPassword(
+        $user,
+        $vcs_type);
     }
 
     $panel_uri = $this->getPanelURI('?saved=true');
@@ -77,23 +84,32 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
       if (!$errors) {
         $envelope = new PhutilOpaqueEnvelope($new_password);
+        $content_source = PhabricatorContentSource::newFromRequest($request);
 
-        try {
-          // NOTE: This test is against $viewer (not $user), so that the error
-          // message below makes sense in the case that the two are different,
-          // and because an admin reusing their own password is bad, while
-          // system agents generally do not have passwords anyway.
+        // NOTE: This test is against $viewer (not $user), so that the error
+        // message below makes sense in the case that the two are different,
+        // and because an admin reusing their own password is bad, while
+        // system agents generally do not have passwords anyway.
 
-          $same_password = $viewer->comparePassword($envelope);
-        } catch (PhabricatorPasswordHasherUnavailableException $ex) {
-          // If we're missing the hasher, just let the user continue.
-          $same_password = false;
-        }
+        $engine = id(new PhabricatorAuthPasswordEngine())
+          ->setViewer($viewer)
+          ->setContentSource($content_source)
+          ->setObject($viewer)
+          ->setPasswordType($vcs_type);
+
+        $same_password = !$engine->isUniquePassword($envelope);
+        $revoked_password = $engine->isRevokedPassword($envelope);
 
         if ($new_password !== $confirm) {
           $e_password = pht('Does Not Match');
           $e_confirm = pht('Does Not Match');
           $errors[] = pht('Password and confirmation do not match.');
+        } else if ($revoked_password) {
+          $e_password = pht('Revoked');
+          $e_confirm = pht('Revoked');
+          $errors[] = pht(
+            'This password has been revoked. You must choose a new, unique '.
+            'password.');
         } else if ($same_password) {
           $e_password = pht('Not Unique');
           $e_confirm = pht('Not Unique');
