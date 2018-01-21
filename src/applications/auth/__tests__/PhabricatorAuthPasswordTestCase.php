@@ -99,6 +99,91 @@ final class PhabricatorAuthPasswordTestCase extends PhabricatorTestCase {
     $this->assertTrue($account_engine->isUniquePassword($password2));
   }
 
+  public function testPasswordUpgrade() {
+    $weak_hasher = new PhabricatorIteratedMD5PasswordHasher();
+
+    // Make sure we have two different hashers, and that the second one is
+    // stronger than iterated MD5. The most common reason this would fail is
+    // if an install does not have bcrypt available.
+    $strong_hasher = PhabricatorPasswordHasher::getBestHasher();
+    if ($strong_hasher->getStrength() <= $weak_hasher->getStrength()) {
+      $this->assertSkipped(
+        pht(
+          'Multiple password hashers of different strengths are not '.
+          'available, so hash upgrading can not be tested.'));
+    }
+
+    $envelope = new PhutilOpaqueEnvelope('lunar1997');
+
+    $user = $this->generateNewTestUser();
+    $type = PhabricatorAuthPassword::PASSWORD_TYPE_TEST;
+    $content_source = $this->newContentSource();
+
+    $engine = id(new PhabricatorAuthPasswordEngine())
+      ->setViewer($user)
+      ->setContentSource($content_source)
+      ->setPasswordType($type)
+      ->setObject($user);
+
+    $password = PhabricatorAuthPassword::initializeNewPassword($user, $type)
+      ->setPasswordWithHasher($envelope, $user, $weak_hasher)
+      ->save();
+
+    $weak_name = $weak_hasher->getHashName();
+    $strong_name = $strong_hasher->getHashName();
+
+    // Since we explicitly used the weak hasher, the password should have
+    // been hashed with it.
+    $actual_hasher = $password->getHasher();
+    $this->assertEqual($weak_name, $actual_hasher->getHashName());
+
+    $is_valid = $engine
+      ->setUpgradeHashers(false)
+      ->isValidPassword($envelope, $user);
+    $password->reload();
+
+    // Since we disabled hasher upgrading, the password should not have been
+    // rehashed.
+    $this->assertTrue($is_valid);
+    $actual_hasher = $password->getHasher();
+    $this->assertEqual($weak_name, $actual_hasher->getHashName());
+
+    $is_valid = $engine
+      ->setUpgradeHashers(true)
+      ->isValidPassword($envelope, $user);
+    $password->reload();
+
+    // Now that we enabled hasher upgrading, the password should have been
+    // automatically rehashed into the stronger format.
+    $this->assertTrue($is_valid);
+    $actual_hasher = $password->getHasher();
+    $this->assertEqual($strong_name, $actual_hasher->getHashName());
+
+    // We should also have an "upgrade" transaction in the transaction record
+    // now which records the two hasher names.
+    $xactions = id(new PhabricatorAuthPasswordTransactionQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($password->getPHID()))
+      ->withTransactionTypes(
+        array(
+          PhabricatorAuthPasswordUpgradeTransaction::TRANSACTIONTYPE,
+        ))
+      ->execute();
+
+    $this->assertEqual(1, count($xactions));
+    $xaction = head($xactions);
+
+    $this->assertEqual($weak_name, $xaction->getOldValue());
+    $this->assertEqual($strong_name, $xaction->getNewValue());
+
+    $is_valid = $engine
+      ->isValidPassword($envelope, $user);
+
+    // Finally, the password should still be valid after all the dust has
+    // settled.
+    $this->assertTrue($is_valid);
+  }
+
   private function revokePassword(
     PhabricatorUser $actor,
     PhabricatorAuthPassword $password) {

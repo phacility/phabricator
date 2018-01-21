@@ -224,7 +224,6 @@ final class PhabricatorAuthPasswordEngine
 
       $xactions[] = $password->getApplicationTransactionTemplate()
         ->setTransactionType($upgrade_type)
-        ->setOldValue($old_hasher->getHashName())
         ->setNewValue($new_hasher->getHashName());
 
       $editor = $password->getApplicationTransactionEditor()
@@ -232,6 +231,7 @@ final class PhabricatorAuthPasswordEngine
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
         ->setContentSource($content_source)
+        ->setOldHasher($old_hasher)
         ->applyTransactions($password, $xactions);
     }
     unset($unguarded);

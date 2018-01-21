@@ -6,11 +6,17 @@ final class PhabricatorAuthPasswordUpgradeTransaction
   const TRANSACTIONTYPE = 'password.upgrade';
 
   public function generateOldValue($object) {
-    return $this->getStorage()->getOldValue();
+    $old_hasher = $this->getEditor()->getOldHasher();
+
+    if (!$old_hasher) {
+      throw new PhutilInvalidStateException('setOldHasher');
+    }
+
+    return $old_hasher->getHashName();
   }
 
   public function generateNewValue($object, $value) {
-    return (bool)$value;
+    return $value;
   }
 
   public function getTitle() {
