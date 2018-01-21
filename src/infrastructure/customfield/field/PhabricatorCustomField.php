@@ -1119,6 +1119,11 @@ abstract class PhabricatorCustomField extends Phobject {
       $field->setCustomFieldConduitParameterType($conduit_type);
     }
 
+    $bulk_type = $this->getBulkParameterType();
+    if ($bulk_type) {
+      $field->setCustomFieldBulkParameterType($bulk_type);
+    }
+
     return $field;
   }
 
@@ -1133,14 +1138,36 @@ abstract class PhabricatorCustomField extends Phobject {
       $conduit_only = false;
     }
 
+    $bulk_label = $this->getBulkEditLabel();
+
     return $this->newEditField()
       ->setKey($this->getFieldKey())
       ->setEditTypeKey($this->getModernFieldKey())
       ->setLabel($this->getFieldName())
+      ->setBulkEditLabel($bulk_label)
       ->setDescription($this->getFieldDescription())
       ->setTransactionType($this->getApplicationTransactionType())
       ->setIsConduitOnly($conduit_only)
       ->setValue($this->getNewValueForApplicationTransactions());
+  }
+
+  protected function getBulkEditLabel() {
+    if ($this->proxy) {
+      return $this->proxy->getBulkEditLabel();
+    }
+
+    return pht('Set "%s" to', $this->getFieldName());
+  }
+
+  public function getBulkParameterType() {
+    return $this->newBulkParameterType();
+  }
+
+  protected function newBulkParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->newBulkParameterType();
+    }
+    return null;
   }
 
   protected function getHTTPParameterType() {

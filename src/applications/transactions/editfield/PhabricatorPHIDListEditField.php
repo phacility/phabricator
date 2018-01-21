@@ -98,10 +98,12 @@ abstract class PhabricatorPHIDListEditField
       return new PhabricatorEdgeEditType();
     }
 
-    $type = new PhabricatorDatasourceEditType();
-    $type->setIsSingleValue($this->getIsSingleValue());
-    $type->setConduitParameterType($this->newConduitParameterType());
-    return $type;
+    return id(new PhabricatorDatasourceEditType())
+      ->setIsSingleValue($this->getIsSingleValue());
+  }
+
+  protected function newBulkEditTypes() {
+    return $this->newConduitEditTypes();
   }
 
   protected function newConduitEditTypes() {

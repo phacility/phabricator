@@ -65,6 +65,13 @@ abstract class PhabricatorStandardCustomFieldTokenizer
     return new ConduitPHIDListParameterType();
   }
 
+  protected function newBulkParameterType() {
+    $datasource = $this->getDatasource();
+
+    return id(new BulkTokenizerParameterType())
+      ->setDatasource($datasource);
+  }
+
   public function shouldAppearInHeraldActions() {
     return true;
   }

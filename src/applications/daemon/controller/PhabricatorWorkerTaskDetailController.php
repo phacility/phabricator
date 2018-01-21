@@ -79,12 +79,19 @@ final class PhabricatorWorkerTaskDetailController
       ->appendChild($view);
   }
 
-  private function buildPropertyListView(
-    PhabricatorWorkerTask $task) {
-
-    $viewer = $this->getRequest()->getUser();
+  private function buildPropertyListView(PhabricatorWorkerTask $task) {
+    $viewer = $this->getViewer();
 
     $view = new PHUIPropertyListView();
+
+    $object_phid = $task->getObjectPHID();
+    if ($object_phid) {
+      $handles = $viewer->loadHandles(array($object_phid));
+      $handle = $handles[$object_phid];
+      if ($handle->isComplete()) {
+        $view->addProperty(pht('Object'), $handle->renderLink());
+      }
+    }
 
     if ($task->isArchived()) {
       switch ($task->getResult()) {

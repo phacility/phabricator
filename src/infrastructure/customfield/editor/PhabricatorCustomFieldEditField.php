@@ -6,6 +6,7 @@ final class PhabricatorCustomFieldEditField
   private $customField;
   private $httpParameterType;
   private $conduitParameterType;
+  private $bulkParameterType;
 
   public function setCustomField(PhabricatorCustomField $custom_field) {
     $this->customField = $custom_field;
@@ -36,6 +37,16 @@ final class PhabricatorCustomFieldEditField
     return $this->conduitParameterType;
   }
 
+  public function setCustomFieldBulkParameterType(
+    BulkParameterType $type) {
+    $this->bulkParameterType = $type;
+    return $this;
+  }
+
+  public function getCustomFieldBulkParameterType() {
+    return $this->bulkParameterType;
+  }
+
   protected function buildControl() {
     if ($this->getIsConduitOnly()) {
       return null;
@@ -51,15 +62,8 @@ final class PhabricatorCustomFieldEditField
   }
 
   protected function newEditType() {
-    $type = id(new PhabricatorCustomFieldEditType())
+    return id(new PhabricatorCustomFieldEditType())
       ->setCustomField($this->getCustomField());
-
-    $conduit_type = $this->newConduitParameterType();
-    if ($conduit_type) {
-      $type->setConduitParameterType($conduit_type);
-    }
-
-    return $type;
   }
 
   public function getValueForTransaction() {
@@ -108,6 +112,16 @@ final class PhabricatorCustomFieldEditField
 
   protected function newConduitParameterType() {
     $type = $this->getCustomFieldConduitParameterType();
+
+    if ($type) {
+      return clone $type;
+    }
+
+    return null;
+  }
+
+  protected function newBulkParameterType() {
+    $type = $this->getCustomFieldBulkParameterType();
 
     if ($type) {
       return clone $type;

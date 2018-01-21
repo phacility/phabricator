@@ -158,6 +158,14 @@ abstract class PhabricatorApplicationTransaction
     return (bool)$this->getMetadataValue('core.default', false);
   }
 
+  public function setIsSilentTransaction($silent) {
+    return $this->setMetadataValue('core.silent', $silent);
+  }
+
+  public function getIsSilentTransaction() {
+    return (bool)$this->getMetadataValue('core.silent', false);
+  }
+
   public function attachComment(
     PhabricatorApplicationTransactionComment $comment) {
     $this->comment = $comment;
@@ -1513,6 +1521,12 @@ abstract class PhabricatorApplicationTransaction
       // Don't group transactions which happened more than 2 minutes apart.
       $apart = abs($xaction->getDateCreated() - $this->getDateCreated());
       if ($apart > (60 * 2)) {
+        return false;
+      }
+
+      // Don't group silent and nonsilent transactions together.
+      $is_silent = $this->getIsSilentTransaction();
+      if ($is_silent != $xaction->getIsSilentTransaction()) {
         return false;
       }
     }

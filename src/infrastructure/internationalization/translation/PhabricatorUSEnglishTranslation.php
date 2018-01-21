@@ -1639,6 +1639,13 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      'You are about to apply a bulk edit which will affect '.
+      '%s object(s).' => array(
+        'You are about to apply a bulk edit to a single object.',
+        'You are about to apply a bulk edit which will affect '.
+        '%s objects.',
+      ),
+
     );
   }
 

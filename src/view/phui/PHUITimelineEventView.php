@@ -29,6 +29,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $authorPHID;
   private $badges = array();
   private $pinboardItems = array();
+  private $isSilent;
 
   public function setAuthorPHID($author_phid) {
     $this->authorPHID = $author_phid;
@@ -175,6 +176,15 @@ final class PHUITimelineEventView extends AphrontView {
   public function setColor($color) {
     $this->color = $color;
     return $this;
+  }
+
+  public function setIsSilent($is_silent) {
+    $this->isSilent = $is_silent;
+    return $this;
+  }
+
+  public function getIsSilent() {
+    return $this->isSilent;
   }
 
   public function setReallyMajorEvent($me) {
@@ -573,6 +583,14 @@ final class PHUITimelineEventView extends AphrontView {
           );
         }
         $extra[] = $date;
+      }
+
+      // If this edit was applied silently, give user a hint that they should
+      // not expect to have received any mail or notifications.
+      if ($this->getIsSilent()) {
+        $extra[] = id(new PHUIIconView())
+          ->setIcon('fa-bell-slash', 'red')
+          ->setTooltip(pht('Silent Edit'));
       }
     }
 

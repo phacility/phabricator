@@ -40,4 +40,14 @@ final class PhabricatorCustomFieldEditType
     return array($xaction);
   }
 
+  protected function getTransactionValueFromValue($value) {
+    $field = $this->getCustomField();
+
+    // Avoid changing the value of the field itself, since later calls would
+    // incorrectly reflect the new value.
+    $clone = clone $field;
+    $clone->setValueFromApplicationTransactions($value);
+    return $clone->getNewValueForApplicationTransactions();
+  }
+
 }

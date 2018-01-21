@@ -14,6 +14,7 @@ JX.install('PHUIXFormControl', {
     _className: null,
     _valueSetCallback: null,
     _valueGetCallback: null,
+    _rawInputNode: null,
 
     setLabel: function(label) {
       JX.DOM.setContent(this._getLabelNode(), label);
@@ -53,6 +54,12 @@ JX.install('PHUIXFormControl', {
         case 'checkboxes':
           input = this._newCheckboxes(spec);
           break;
+        case 'text':
+          input = this._newText(spec);
+          break;
+        case 'remarkup':
+          input = this._newRemarkup(spec);
+          break;
         default:
           // TODO: Default or better error?
           JX.$E('Bad Input Type');
@@ -62,6 +69,7 @@ JX.install('PHUIXFormControl', {
       JX.DOM.setContent(node, input.node);
       this._valueGetCallback = input.get;
       this._valueSetCallback = input.set;
+      this._rawInputNode = input.node;
 
       return this;
     },
@@ -73,6 +81,10 @@ JX.install('PHUIXFormControl', {
 
     getValue: function() {
       return this._valueGetCallback();
+    },
+
+    getRawInputNode: function() {
+      return this._rawInputNode;
     },
 
     getNode: function() {
@@ -281,12 +293,38 @@ JX.install('PHUIXFormControl', {
     },
 
     _newPoints: function(spec) {
+      return this._newText();
+    },
+
+    _newText: function(spec) {
       var attrs = {
         type: 'text',
         value: spec.value
       };
 
       var node = JX.$N('input', attrs);
+
+      return {
+        node: node,
+        get: function() {
+          return node.value;
+        },
+        set: function(value) {
+          node.value = value;
+        }
+      };
+    },
+
+    _newRemarkup: function(spec) {
+      var attrs = {};
+
+      // We could imagine a world where this renders a full remarkup control
+      // with all the hint buttons and client behaviors, but today much of that
+      // behavior is defined server-side and thus this isn't a world we
+      // currently live in.
+
+      var node = JX.$N('textarea', attrs);
+      node.value = spec.value || '';
 
       return {
         node: node,
