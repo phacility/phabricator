@@ -10,6 +10,7 @@ final class PhabricatorAuthPassword
   protected $objectPHID;
   protected $passwordType;
   protected $passwordHash;
+  protected $passwordSalt;
   protected $isRevoked;
 
   private $object = self::ATTACHABLE;
@@ -19,7 +20,7 @@ final class PhabricatorAuthPassword
   const PASSWORD_TYPE_TEST = 'test';
 
   public static function initializeNewPassword(
-    PhabricatorUser $object,
+    PhabricatorPasswordHashInterface $object,
     $type) {
 
     return id(new self())
@@ -35,6 +36,7 @@ final class PhabricatorAuthPassword
       self::CONFIG_COLUMN_SCHEMA => array(
         'passwordType' => 'text64',
         'passwordHash' => 'text128',
+        'passwordSalt' => 'text64',
         'isRevoked' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -70,7 +72,7 @@ final class PhabricatorAuthPassword
 
   public function upgradePasswordHasher(
     PhutilOpaqueEnvelope $envelope,
-    PhabricatorUser $object) {
+    PhabricatorPasswordHashInterface $object) {
 
     // Before we make changes, double check that this is really the correct
     // password. It could be really bad if we "upgraded" a password and changed
@@ -88,7 +90,7 @@ final class PhabricatorAuthPassword
 
   public function setPassword(
     PhutilOpaqueEnvelope $password,
-    PhabricatorUser $object) {
+    PhabricatorPasswordHashInterface $object) {
 
     $hasher = PhabricatorPasswordHasher::getBestHasher();
     return $this->setPasswordWithHasher($password, $object, $hasher);
@@ -96,8 +98,17 @@ final class PhabricatorAuthPassword
 
   public function setPasswordWithHasher(
     PhutilOpaqueEnvelope $password,
-    PhabricatorUser $object,
+    PhabricatorPasswordHashInterface $object,
     PhabricatorPasswordHasher $hasher) {
+
+    if (!strlen($password->openEnvelope())) {
+      throw new Exception(
+        pht('Attempting to set an empty password!'));
+    }
+
+    // Generate (or regenerate) the salt first.
+    $new_salt = Filesystem::readRandomCharacters(64);
+    $this->setPasswordSalt($new_salt);
 
     $digest = $this->digestPassword($password, $object);
     $hash = $hasher->getPasswordHashForStorage($digest);
@@ -108,7 +119,7 @@ final class PhabricatorAuthPassword
 
   public function comparePassword(
     PhutilOpaqueEnvelope $password,
-    PhabricatorUser $object) {
+    PhabricatorPasswordHashInterface $object) {
 
     $digest = $this->digestPassword($password, $object);
     $hash = $this->newPasswordEnvelope();
@@ -122,7 +133,7 @@ final class PhabricatorAuthPassword
 
   private function digestPassword(
     PhutilOpaqueEnvelope $password,
-    PhabricatorUser $object) {
+    PhabricatorPasswordHashInterface $object) {
 
     $object_phid = $object->getPHID();
 
@@ -135,9 +146,17 @@ final class PhabricatorAuthPassword
           $object->getPHID()));
     }
 
-    $raw_input = PhabricatorHash::digestPassword($password, $object_phid);
+    $digest = $object->newPasswordDigest($password, $this);
 
-    return new PhutilOpaqueEnvelope($raw_input);
+    if (!($digest instanceof PhutilOpaqueEnvelope)) {
+      throw new Exception(
+        pht(
+          'Failed to digest password: object ("%s") did not return an '.
+          'opaque envelope with a password digest.',
+          $object->getPHID()));
+    }
+
+    return $digest;
   }
 
 

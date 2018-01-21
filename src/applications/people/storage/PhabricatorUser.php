@@ -20,7 +20,8 @@ final class PhabricatorUser
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorPasswordHashInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -1619,5 +1620,67 @@ final class PhabricatorUser
 
     return $variables[$variable_key];
   }
+
+/* -(  PhabricatorPasswordHashInterface  )----------------------------------- */
+
+
+  public function newPasswordDigest(
+    PhutilOpaqueEnvelope $envelope,
+    PhabricatorAuthPassword $password) {
+
+    // Before passwords are hashed, they are digested. The goal of digestion
+    // is twofold: to reduce the length of very long passwords to something
+    // reasonable; and to salt the password in case the best available hasher
+    // does not include salt automatically.
+
+    // Users may choose arbitrarily long passwords, and attackers may try to
+    // attack the system by probing it with very long passwords. When large
+    // inputs are passed to hashers -- which are intentionally slow -- it
+    // can result in unacceptably long runtimes. The classic attack here is
+    // to try to log in with a 64MB password and see if that locks up the
+    // machine for the next century. By digesting passwords to a standard
+    // length first, the length of the raw input does not impact the runtime
+    // of the hashing algorithm.
+
+    // Some hashers like bcrypt are self-salting, while other hashers are not.
+    // Applying salt while digesting passwords ensures that hashes are salted
+    // whether we ultimately select a self-salting hasher or not.
+
+    // For legacy compatibility reasons, the VCS and Account password digest
+    // algorithms are significantly more complicated than necessary to achieve
+    // these goals. This is because they once used a different hashing and
+    // salting process. When we upgraded to the modern modular hasher
+    // infrastructure, we just bolted it onto the end of the existing pipelines
+    // so that upgrading didn't break all users' credentials.
+
+    // New implementations can (and, generally, should) safely select the
+    // simple HMAC SHA256 digest at the bottom of the function, which does
+    // everything that a digest callback should without any needless legacy
+    // baggage on top.
+
+    switch ($password->getPasswordType()) {
+      case PhabricatorAuthPassword::PASSWORD_TYPE_VCS:
+        // VCS passwords use an iterated HMAC SHA1 as a digest algorithm. They
+        // originally used this as a hasher, but it became a digest alorithm
+        // once hashing was upgraded to include bcrypt.
+        $digest = $envelope->openEnvelope();
+        $salt = $this->getPHID();
+        for ($ii = 0; $ii < 1000; $ii++) {
+          $digest = PhabricatorHash::weakDigest($digest, $salt);
+        }
+        return new PhutilOpaqueEnvelope($digest);
+    }
+
+    // For passwords which do not have some crazy legacy reason to use some
+    // other digest algorithm, HMAC SHA256 is an excellent choice. It satisfies
+    // the digest requirements and is simple.
+
+    $digest = PhabricatorHash::digestHMACSHA256(
+      $envelope->openEnvelope(),
+      $password->getPasswordSalt());
+
+    return new PhutilOpaqueEnvelope($digest);
+  }
+
 
 }

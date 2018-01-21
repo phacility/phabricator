@@ -30,24 +30,6 @@ final class PhabricatorHash extends Phobject {
 
 
   /**
-   * Digest a string into a password hash. This is similar to @{method:digest},
-   * but requires a salt and iterates the hash to increase cost.
-   */
-  public static function digestPassword(PhutilOpaqueEnvelope $envelope, $salt) {
-    $result = $envelope->openEnvelope();
-    if (!$result) {
-      throw new Exception(pht('Trying to digest empty password!'));
-    }
-
-    for ($ii = 0; $ii < 1000; $ii++) {
-      $result = self::weakDigest($result, $salt);
-    }
-
-    return $result;
-  }
-
-
-  /**
    * Digest a string for use in, e.g., a MySQL index. This produces a short
    * (12-byte), case-sensitive alphanumeric string with 72 bits of entropy,
    * which is generally safe in most contexts (notably, URLs).
