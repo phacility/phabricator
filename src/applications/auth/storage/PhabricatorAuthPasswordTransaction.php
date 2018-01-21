@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorAuthPasswordTransaction
-  extends PhabricatorApplicationTransaction {
+  extends PhabricatorModularTransaction {
 
   public function getApplicationName() {
     return 'auth';

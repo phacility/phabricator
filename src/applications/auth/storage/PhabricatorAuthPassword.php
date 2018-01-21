@@ -58,11 +58,46 @@ final class PhabricatorAuthPassword
     return $this;
   }
 
+  public function getHasher() {
+    $hash = $this->newPasswordEnvelope();
+    return PhabricatorPasswordHasher::getHasherForHash($hash);
+  }
+
+  public function canUpgrade() {
+    $hash = $this->newPasswordEnvelope();
+    return PhabricatorPasswordHasher::canUpgradeHash($hash);
+  }
+
+  public function upgradePasswordHasher(
+    PhutilOpaqueEnvelope $envelope,
+    PhabricatorUser $object) {
+
+    // Before we make changes, double check that this is really the correct
+    // password. It could be really bad if we "upgraded" a password and changed
+    // the secret!
+
+    if (!$this->comparePassword($envelope, $object)) {
+      throw new Exception(
+        pht(
+          'Attempting to upgrade password hasher, but the password for the '.
+          'upgrade is not the stored credential!'));
+    }
+
+    return $this->setPassword($envelope, $object);
+  }
+
   public function setPassword(
     PhutilOpaqueEnvelope $password,
     PhabricatorUser $object) {
 
     $hasher = PhabricatorPasswordHasher::getBestHasher();
+    return $this->setPasswordWithHasher($password, $object, $hasher);
+  }
+
+  public function setPasswordWithHasher(
+    PhutilOpaqueEnvelope $password,
+    PhabricatorUser $object,
+    PhabricatorPasswordHasher $hasher) {
 
     $digest = $this->digestPassword($password, $object);
     $hash = $hasher->getPasswordHashForStorage($digest);
@@ -76,10 +111,13 @@ final class PhabricatorAuthPassword
     PhabricatorUser $object) {
 
     $digest = $this->digestPassword($password, $object);
-    $raw_hash = $this->getPasswordHash();
-    $hash = new PhutilOpaqueEnvelope($raw_hash);
+    $hash = $this->newPasswordEnvelope();
 
     return PhabricatorPasswordHasher::comparePassword($digest, $hash);
+  }
+
+  private function newPasswordEnvelope() {
+    return new PhutilOpaqueEnvelope($this->getPasswordHash());
   }
 
   private function digestPassword(
