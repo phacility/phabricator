@@ -1,7 +1,7 @@
 <?php
 
-// Populate VCS passwords (which we copied from the old "VCS Password" table
-// in the last migration) with new PHIDs.
+// Populate account passwords (which we copied from the user table in the last
+// migration) with new PHIDs.
 
 $table = new PhabricatorAuthPassword();
 $conn = $table->establishConnection('w');

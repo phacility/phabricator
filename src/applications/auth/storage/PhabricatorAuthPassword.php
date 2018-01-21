@@ -127,7 +127,7 @@ final class PhabricatorAuthPassword
     return PhabricatorPasswordHasher::comparePassword($digest, $hash);
   }
 
-  private function newPasswordEnvelope() {
+  public function newPasswordEnvelope() {
     return new PhutilOpaqueEnvelope($this->getPasswordHash());
   }
 

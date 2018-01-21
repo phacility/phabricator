@@ -110,20 +110,27 @@ final class PhabricatorAuthPasswordEngine
         pht('Very Weak'));
     }
 
-    if ($this->isRevokedPassword($password)) {
-      throw new PhabricatorAuthPasswordException(
-        pht(
-          'The password you entered has been revoked. You can not reuse '.
-          'a password which has been revoked. Choose a new password.'),
-        pht('Revoked'));
-    }
+    // If we're creating a brand new object (like registering a new user)
+    // and it does not have a PHID yet, it isn't possible for it to have any
+    // revoked passwords or colliding passwords either, so we can skip these
+    // checks.
 
-    if (!$this->isUniquePassword($password)) {
-      throw new PhabricatorAuthPasswordException(
-        pht(
-          'The password you entered is the same as another password '.
-          'associated with your account. Each password must be unique.'),
-        pht('Not Unique'));
+    if ($this->getObject()->getPHID()) {
+      if ($this->isRevokedPassword($password)) {
+        throw new PhabricatorAuthPasswordException(
+          pht(
+            'The password you entered has been revoked. You can not reuse '.
+            'a password which has been revoked. Choose a new password.'),
+          pht('Revoked'));
+      }
+
+      if (!$this->isUniquePassword($password)) {
+        throw new PhabricatorAuthPasswordException(
+          pht(
+            'The password you entered is the same as another password '.
+            'associated with your account. Each password must be unique.'),
+          pht('Not Unique'));
+      }
     }
   }
 
