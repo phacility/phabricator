@@ -34,6 +34,10 @@ final class PhabricatorAuthManagementRevokeWorkflow
             'name' => 'everywhere',
             'help' => pht('Revoke from all credential owners.'),
           ),
+          array(
+            'name' => 'force',
+            'help' => pht('Revoke credentials without prompting.'),
+          ),
         ));
   }
 
@@ -41,6 +45,7 @@ final class PhabricatorAuthManagementRevokeWorkflow
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $all_types = PhabricatorAuthRevoker::getAllRevokers();
+    $is_force = $args->getArg('force');
 
     $type = $args->getArg('type');
     $is_everything = $args->getArg('everything');
@@ -97,7 +102,7 @@ final class PhabricatorAuthManagementRevokeWorkflow
       }
     }
 
-    if ($is_everywhere) {
+    if ($is_everywhere && !$is_force) {
       echo id(new PhutilConsoleBlock())
         ->addParagraph(
           pht(
