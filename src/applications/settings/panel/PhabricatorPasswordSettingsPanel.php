@@ -25,11 +25,13 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
   }
 
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getUser();
+    $user = $this->getUser();
+
     $content_source = PhabricatorContentSource::newFromRequest($request);
 
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $user,
+      $viewer,
       $request,
       '/settings/');
 
@@ -44,7 +46,7 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     $account_type = PhabricatorAuthPassword::PASSWORD_TYPE_ACCOUNT;
 
     $password_objects = id(new PhabricatorAuthPasswordQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withObjectPHIDs(array($user->getPHID()))
       ->withPasswordTypes(array($account_type))
       ->withIsRevoked(false)
@@ -63,10 +65,18 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
     $errors = array();
     if ($request->isFormPost()) {
+      // Rate limit guesses about the old password. This page requires MFA and
+      // session compromise already, so this is mostly just to stop researchers
+      // from reporting this as a vulnerability.
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhabricatorAuthChangePasswordAction(),
+        1);
+
       $envelope = new PhutilOpaqueEnvelope($request->getStr('old_pw'));
 
       $engine = id(new PhabricatorAuthPasswordEngine())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->setContentSource($content_source)
         ->setPasswordType($account_type)
         ->setObject($user);
@@ -79,6 +89,12 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
         $e_old = pht('Invalid');
       } else {
         $e_old = null;
+
+        // Refund the user an action credit for getting the password right.
+        PhabricatorSystemActionEngine::willTakeAction(
+          array($viewer->getPHID()),
+          new PhabricatorAuthChangePasswordAction(),
+          -1);
       }
 
       $pass = $request->getStr('new_pw');
@@ -142,7 +158,7 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     }
 
     $form = id(new AphrontFormView())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel(pht('Old Password'))
