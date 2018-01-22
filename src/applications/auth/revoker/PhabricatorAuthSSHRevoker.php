@@ -5,6 +5,18 @@ final class PhabricatorAuthSSHRevoker
 
   const REVOKERKEY = 'ssh';
 
+  public function getRevokerName() {
+    return pht('SSH Keys');
+  }
+
+  public function getRevokerDescription() {
+    return pht(
+      "Revokes all SSH public keys.\n\n".
+      "SSH public keys are revoked, not just removed. Users will need to ".
+      "generate and upload new, unique keys before they can access ".
+      "repositories or other services over SSH.");
+  }
+
   public function revokeAllCredentials() {
     $query = new PhabricatorAuthSSHKeyQuery();
     return $this->revokeWithQuery($query);

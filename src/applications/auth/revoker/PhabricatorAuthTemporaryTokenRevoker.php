@@ -5,6 +5,19 @@ final class PhabricatorAuthTemporaryTokenRevoker
 
   const REVOKERKEY = 'temporary';
 
+  public function getRevokerName() {
+    return pht('Temporary Tokens');
+  }
+
+  public function getRevokerDescription() {
+    return pht(
+      "Revokes temporary authentication tokens.\n\n".
+      "Temporary tokens are used in password reset mail, welcome mail, and ".
+      "by some other systems like Git LFS. Revoking temporary tokens will ".
+      "invalidate existing links in password reset and invite mail that ".
+      "was sent before the revocation occurred.");
+  }
+
   public function revokeAllCredentials() {
     $table = new PhabricatorAuthTemporaryToken();
     $conn = $table->establishConnection('w');
