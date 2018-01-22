@@ -29,8 +29,6 @@ final class PhabricatorUser
 
   protected $userName;
   protected $realName;
-  protected $passwordSalt;
-  protected $passwordHash;
   protected $profileImagePHID;
   protected $defaultProfileImagePHID;
   protected $defaultProfileImageVersion;
@@ -217,8 +215,6 @@ final class PhabricatorUser
       self::CONFIG_COLUMN_SCHEMA => array(
         'userName' => 'sort64',
         'realName' => 'text128',
-        'passwordSalt' => 'text32?',
-        'passwordHash' => 'text128?',
         'profileImagePHID' => 'phid?',
         'conduitCertificate' => 'text255',
         'isSystemAgent' => 'bool',
