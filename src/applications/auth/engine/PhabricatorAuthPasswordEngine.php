@@ -54,6 +54,79 @@ final class PhabricatorAuthPasswordEngine
     return $this->upgradeHashers;
   }
 
+  public function checkNewPassword(
+    PhutilOpaqueEnvelope $password,
+    PhutilOpaqueEnvelope $confirm,
+    $can_skip = false) {
+
+    $raw_password = $password->openEnvelope();
+
+    if (!strlen($raw_password)) {
+      if ($can_skip) {
+        throw new PhabricatorAuthPasswordException(
+          pht('You must choose a password or skip this step.'),
+          pht('Required'));
+      } else {
+        throw new PhabricatorAuthPasswordException(
+          pht('You must choose a password.'),
+          pht('Required'));
+      }
+    }
+
+    $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
+    $min_len = (int)$min_len;
+    if ($min_len) {
+      if (strlen($raw_password) < $min_len) {
+        throw new PhabricatorAuthPasswordException(
+          pht(
+            'The selected password is too short. Passwords must be a minimum '.
+            'of %s characters long.',
+            new PhutilNumber($min_len)),
+          pht('Too Short'));
+      }
+    }
+
+    $raw_confirm = $confirm->openEnvelope();
+
+    if (!strlen($raw_confirm)) {
+      throw new PhabricatorAuthPasswordException(
+        pht('You must confirm the selected password.'),
+        null,
+        pht('Required'));
+    }
+
+    if ($raw_password !== $raw_confirm) {
+      throw new PhabricatorAuthPasswordException(
+        pht('The password and confirmation do not match.'),
+        pht('Invalid'),
+        pht('Invalid'));
+    }
+
+    if (PhabricatorCommonPasswords::isCommonPassword($raw_password)) {
+      throw new PhabricatorAuthPasswordException(
+        pht(
+          'The selected password is very weak: it is one of the most common '.
+          'passwords in use. Choose a stronger password.'),
+        pht('Very Weak'));
+    }
+
+    if ($this->isRevokedPassword($password)) {
+      throw new PhabricatorAuthPasswordException(
+        pht(
+          'The password you entered has been revoked. You can not reuse '.
+          'a password which has been revoked. Choose a new password.'),
+        pht('Revoked'));
+    }
+
+    if (!$this->isUniquePassword($password)) {
+      throw new PhabricatorAuthPasswordException(
+        pht(
+          'The password you entered is the same as another password '.
+          'associated with your account. Each password must be unique.'),
+        pht('Not Unique'));
+    }
+  }
+
   public function isValidPassword(PhutilOpaqueEnvelope $envelope) {
     $this->requireSetup();
 

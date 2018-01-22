@@ -58,6 +58,19 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
     $e_password = true;
     $e_confirm = true;
 
+    $content_source = PhabricatorContentSource::newFromRequest($request);
+
+    // NOTE: This test is against $viewer (not $user), so that the error
+    // message below makes sense in the case that the two are different,
+    // and because an admin reusing their own password is bad, while
+    // system agents generally do not have passwords anyway.
+
+    $engine = id(new PhabricatorAuthPasswordEngine())
+      ->setViewer($viewer)
+      ->setContentSource($content_source)
+      ->setObject($viewer)
+      ->setPasswordType($vcs_type);
+
     if ($request->isFormPost()) {
       if ($request->getBool('remove')) {
         if ($vcspassword->getID()) {
@@ -68,71 +81,26 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
       $new_password = $request->getStr('password');
       $confirm = $request->getStr('confirm');
-      if (!strlen($new_password)) {
-        $e_password = pht('Required');
-        $errors[] = pht('Password is required.');
-      } else {
-        $e_password = null;
-      }
 
-      if (!strlen($confirm)) {
-        $e_confirm = pht('Required');
-        $errors[] = pht('You must confirm the new password.');
-      } else {
+      $envelope = new PhutilOpaqueEnvelope($new_password);
+      $confirm_envelope = new PhutilOpaqueEnvelope($confirm);
+
+      try {
+        $engine->checkNewPassword($envelope, $confirm_envelope);
+        $e_password = null;
         $e_confirm = null;
+      } catch (PhabricatorAuthPasswordException $ex) {
+        $errors[] = $ex->getMessage();
+        $e_password = $ex->getPasswordError();
+        $e_confirm = $ex->getConfirmError();
       }
 
       if (!$errors) {
-        $envelope = new PhutilOpaqueEnvelope($new_password);
-        $content_source = PhabricatorContentSource::newFromRequest($request);
+        $vcspassword
+          ->setPassword($envelope, $user)
+          ->save();
 
-        // NOTE: This test is against $viewer (not $user), so that the error
-        // message below makes sense in the case that the two are different,
-        // and because an admin reusing their own password is bad, while
-        // system agents generally do not have passwords anyway.
-
-        $engine = id(new PhabricatorAuthPasswordEngine())
-          ->setViewer($viewer)
-          ->setContentSource($content_source)
-          ->setObject($viewer)
-          ->setPasswordType($vcs_type);
-
-        $same_password = !$engine->isUniquePassword($envelope);
-        $revoked_password = $engine->isRevokedPassword($envelope);
-
-        if ($new_password !== $confirm) {
-          $e_password = pht('Does Not Match');
-          $e_confirm = pht('Does Not Match');
-          $errors[] = pht('Password and confirmation do not match.');
-        } else if ($revoked_password) {
-          $e_password = pht('Revoked');
-          $e_confirm = pht('Revoked');
-          $errors[] = pht(
-            'This password has been revoked. You must choose a new, unique '.
-            'password.');
-        } else if ($same_password) {
-          $e_password = pht('Not Unique');
-          $e_confirm = pht('Not Unique');
-          $errors[] = pht(
-            'This password is the same as another password associated '.
-            'with your account. You must use a unique password for '.
-            'VCS access.');
-        } else if (
-          PhabricatorCommonPasswords::isCommonPassword($new_password)) {
-          $e_password = pht('Very Weak');
-          $e_confirm = pht('Very Weak');
-          $errors[] = pht(
-            'This password is extremely weak: it is one of the most common '.
-            'passwords in use. Choose a stronger password.');
-        }
-
-
-        if (!$errors) {
-          $vcspassword->setPassword($envelope, $user);
-          $vcspassword->save();
-
-          return id(new AphrontRedirectResponse())->setURI($panel_uri);
-        }
+        return id(new AphrontRedirectResponse())->setURI($panel_uri);
       }
     }
 
