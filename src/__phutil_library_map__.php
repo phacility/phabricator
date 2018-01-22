@@ -9620,7 +9620,7 @@ phutil_register_library_map(array(
     'PhabricatorSSHKeysSettingsPanel' => 'PhabricatorSettingsPanel',
     'PhabricatorSSHLog' => 'Phobject',
     'PhabricatorSSHPassthruCommand' => 'Phobject',
-    'PhabricatorSSHWorkflow' => 'PhabricatorManagementWorkflow',
+    'PhabricatorSSHWorkflow' => 'PhutilArgumentWorkflow',
     'PhabricatorSavedQuery' => array(
       'PhabricatorSearchDAO',
       'PhabricatorPolicyInterface',

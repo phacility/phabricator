@@ -15,7 +15,7 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
   protected function executeRepositoryOperations() {
     $repository = $this->getRepository();
-    $viewer = $this->getUser();
+    $viewer = $this->getSSHUser();
     $device = AlmanacKeys::getLiveDevice();
 
     $skip_sync = $this->shouldSkipReadSynchronization();

@@ -245,7 +245,7 @@ try {
   }
 
   $workflow = $parsed_args->parseWorkflows($workflows);
-  $workflow->setUser($user);
+  $workflow->setSSHUser($user);
   $workflow->setOriginalArguments($original_argv);
   $workflow->setIsClusterRequest($is_cluster_request);
 
