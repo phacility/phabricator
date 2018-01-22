@@ -1590,7 +1590,7 @@ final class PhabricatorUser
     // Applying salt while digesting passwords ensures that hashes are salted
     // whether we ultimately select a self-salting hasher or not.
 
-    // For legacy compatibility reasons, the VCS and Account password digest
+    // For legacy compatibility reasons, old VCS and Account password digest
     // algorithms are significantly more complicated than necessary to achieve
     // these goals. This is because they once used a different hashing and
     // salting process. When we upgraded to the modern modular hasher
@@ -1602,43 +1602,44 @@ final class PhabricatorUser
     // everything that a digest callback should without any needless legacy
     // baggage on top.
 
-    switch ($password->getPasswordType()) {
-      case PhabricatorAuthPassword::PASSWORD_TYPE_VCS:
-        // VCS passwords use an iterated HMAC SHA1 as a digest algorithm. They
-        // originally used this as a hasher, but it became a digest alorithm
-        // once hashing was upgraded to include bcrypt.
-        $digest = $envelope->openEnvelope();
-        $salt = $this->getPHID();
-        for ($ii = 0; $ii < 1000; $ii++) {
-          $digest = PhabricatorHash::weakDigest($digest, $salt);
-        }
-        return new PhutilOpaqueEnvelope($digest);
-      case PhabricatorAuthPassword::PASSWORD_TYPE_ACCOUNT:
-        // Account passwords use this weird mess of salt and do not digest
-        // the input to a standard length.
+    if ($password->getLegacyDigestFormat() == 'v1') {
+      switch ($password->getPasswordType()) {
+        case PhabricatorAuthPassword::PASSWORD_TYPE_VCS:
+          // Old VCS passwords use an iterated HMAC SHA1 as a digest algorithm.
+          // They originally used this as a hasher, but it became a digest
+          // algorithm once hashing was upgraded to include bcrypt.
+          $digest = $envelope->openEnvelope();
+          $salt = $this->getPHID();
+          for ($ii = 0; $ii < 1000; $ii++) {
+            $digest = PhabricatorHash::weakDigest($digest, $salt);
+          }
+          return new PhutilOpaqueEnvelope($digest);
+        case PhabricatorAuthPassword::PASSWORD_TYPE_ACCOUNT:
+          // Account passwords previously used this weird mess of salt and did
+          // not digest the input to a standard length.
 
-        // TODO: We should build a migration pathway forward from this which
-        // uses a better (HMAC SHA256) digest algorithm. Beyond this being
-        // a weird special case, there are two actual problems with this,
-        // although neither are particularly severe:
+          // Beyond this being a weird special case, there are two actual
+          // problems with this, although neither are particularly severe:
 
-        // First, because we do not normalize the length of passwords, this
-        // algorithm may make us vulnerable to DOS attacks where attacker
-        // attempt to use very long inputs to slow down hashers.
+          // First, because we do not normalize the length of passwords, this
+          // algorithm may make us vulnerable to DOS attacks where an attacker
+          // attempts to use a very long input to slow down hashers.
 
-        // Second, because the username is part of the hash algorithm, renaming
-        // a user breaks their password. This isn't a huge deal but it's pretty
-        // silly. There's no security justification for this behavior, I just
-        // didn't think about the implication when I wrote it originally.
+          // Second, because the username is part of the hash algorithm,
+          // renaming a user breaks their password. This isn't a huge deal but
+          // it's pretty silly. There's no security justification for this
+          // behavior, I just didn't think about the implication when I wrote
+          // it originally.
 
-        $parts = array(
-          $this->getUsername(),
-          $envelope->openEnvelope(),
-          $this->getPHID(),
-          $password->getPasswordSalt(),
-        );
+          $parts = array(
+            $this->getUsername(),
+            $envelope->openEnvelope(),
+            $this->getPHID(),
+            $password->getPasswordSalt(),
+          );
 
-        return new PhutilOpaqueEnvelope(implode('', $parts));
+          return new PhutilOpaqueEnvelope(implode('', $parts));
+      }
     }
 
     // For passwords which do not have some crazy legacy reason to use some

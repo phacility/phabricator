@@ -12,6 +12,7 @@ final class PhabricatorAuthPassword
   protected $passwordHash;
   protected $passwordSalt;
   protected $isRevoked;
+  protected $legacyDigestFormat;
 
   private $object = self::ATTACHABLE;
 
@@ -38,6 +39,7 @@ final class PhabricatorAuthPassword
         'passwordHash' => 'text128',
         'passwordSalt' => 'text64',
         'isRevoked' => 'bool',
+        'legacyDigestFormat' => 'text32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_role' => array(
@@ -66,6 +68,12 @@ final class PhabricatorAuthPassword
   }
 
   public function canUpgrade() {
+    // If this password uses a legacy digest format, we can upgrade it to the
+    // new digest format even if a better hasher isn't available.
+    if ($this->getLegacyDigestFormat() !== null) {
+      return true;
+    }
+
     $hash = $this->newPasswordEnvelope();
     return PhabricatorPasswordHasher::canUpgradeHash($hash);
   }
@@ -109,6 +117,9 @@ final class PhabricatorAuthPassword
     // Generate (or regenerate) the salt first.
     $new_salt = Filesystem::readRandomCharacters(64);
     $this->setPasswordSalt($new_salt);
+
+    // Clear any legacy digest format to force a modern digest.
+    $this->setLegacyDigestFormat(null);
 
     $digest = $this->digestPassword($password, $object);
     $hash = $hasher->getPasswordHashForStorage($digest);
