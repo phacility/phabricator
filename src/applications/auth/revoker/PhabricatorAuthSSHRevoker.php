@@ -43,6 +43,7 @@ final class PhabricatorAuthSSHRevoker
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
         ->setContentSource($content_source)
+        ->setIsAdministrativeEdit(true)
         ->applyTransactions($ssh_key, $xactions);
     }
 

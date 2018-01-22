@@ -3,6 +3,17 @@
 final class PhabricatorAuthSSHKeyEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $isAdministrativeEdit;
+
+  public function setIsAdministrativeEdit($is_administrative_edit) {
+    $this->isAdministrativeEdit = $is_administrative_edit;
+    return $this;
+  }
+
+  public function getIsAdministrativeEdit() {
+    return $this->isAdministrativeEdit;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorAuthApplication';
   }
@@ -239,11 +250,13 @@ final class PhabricatorAuthSSHKeyEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $body->addTextSection(
-      pht('SECURITY WARNING'),
-      pht(
-        'If you do not recognize this change, it may indicate your account '.
-        'has been compromised.'));
+    if (!$this->getIsAdministrativeEdit()) {
+      $body->addTextSection(
+        pht('SECURITY WARNING'),
+        pht(
+          'If you do not recognize this change, it may indicate your account '.
+          'has been compromised.'));
+    }
 
     $detail_uri = $object->getURI();
     $detail_uri = PhabricatorEnv::getProductionURI($detail_uri);
@@ -252,5 +265,18 @@ final class PhabricatorAuthSSHKeyEditor
 
     return $body;
   }
+
+
+  protected function getCustomWorkerState() {
+    return array(
+      'isAdministrativeEdit' => $this->isAdministrativeEdit,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->isAdministrativeEdit = idx($state, 'isAdministrativeEdit');
+    return $this;
+  }
+
 
 }
