@@ -9,8 +9,8 @@ final class PhabricatorAuthManagementRecoverWorkflow
       ->setExamples('**recover** __username__')
       ->setSynopsis(
         pht(
-          'Recover access to an administrative account if you have locked '.
-          'yourself out of Phabricator.'))
+          'Recover access to an account if you have locked yourself out '.
+          'of Phabricator.'))
       ->setArguments(
         array(
           'username' => array(
@@ -21,23 +21,6 @@ final class PhabricatorAuthManagementRecoverWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-
-    $can_recover = id(new PhabricatorPeopleQuery())
-      ->setViewer($this->getViewer())
-      ->withIsAdmin(true)
-      ->execute();
-    if (!$can_recover) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'This Phabricator installation has no recoverable administrator '.
-          'accounts. You can use `%s` to create a new administrator '.
-          'account or make an existing user an administrator.',
-          'bin/accountadmin'));
-    }
-    $can_recover = mpull($can_recover, 'getUsername');
-    sort($can_recover);
-    $can_recover = implode(', ', $can_recover);
-
     $usernames = $args->getArg('username');
     if (!$usernames) {
       throw new PhutilArgumentUsageException(
@@ -57,18 +40,8 @@ final class PhabricatorAuthManagementRecoverWorkflow
     if (!$user) {
       throw new PhutilArgumentUsageException(
         pht(
-          'No such user "%s". Recoverable administrator accounts are: %s.',
-          $username,
-          $can_recover));
-    }
-
-    if (!$user->getIsAdmin()) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'You can only recover administrator accounts, but %s is not an '.
-          'administrator. Recoverable administrator accounts are: %s.',
-          $username,
-          $can_recover));
+          'No such user "%s" to recover.',
+          $username));
     }
 
     if (!$user->canEstablishWebSessions()) {
