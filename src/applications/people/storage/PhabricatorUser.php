@@ -21,7 +21,7 @@ final class PhabricatorUser
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorPasswordHashInterface {
+    PhabricatorAuthPasswordHashInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -1565,7 +1565,7 @@ final class PhabricatorUser
     return $variables[$variable_key];
   }
 
-/* -(  PhabricatorPasswordHashInterface  )----------------------------------- */
+/* -(  PhabricatorAuthPasswordHashInterface  )------------------------------- */
 
 
   public function newPasswordDigest(

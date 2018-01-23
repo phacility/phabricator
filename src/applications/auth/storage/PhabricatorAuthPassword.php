@@ -21,7 +21,7 @@ final class PhabricatorAuthPassword
   const PASSWORD_TYPE_TEST = 'test';
 
   public static function initializeNewPassword(
-    PhabricatorPasswordHashInterface $object,
+    PhabricatorAuthPasswordHashInterface $object,
     $type) {
 
     return id(new self())
@@ -80,7 +80,7 @@ final class PhabricatorAuthPassword
 
   public function upgradePasswordHasher(
     PhutilOpaqueEnvelope $envelope,
-    PhabricatorPasswordHashInterface $object) {
+    PhabricatorAuthPasswordHashInterface $object) {
 
     // Before we make changes, double check that this is really the correct
     // password. It could be really bad if we "upgraded" a password and changed
@@ -98,7 +98,7 @@ final class PhabricatorAuthPassword
 
   public function setPassword(
     PhutilOpaqueEnvelope $password,
-    PhabricatorPasswordHashInterface $object) {
+    PhabricatorAuthPasswordHashInterface $object) {
 
     $hasher = PhabricatorPasswordHasher::getBestHasher();
     return $this->setPasswordWithHasher($password, $object, $hasher);
@@ -106,7 +106,7 @@ final class PhabricatorAuthPassword
 
   public function setPasswordWithHasher(
     PhutilOpaqueEnvelope $password,
-    PhabricatorPasswordHashInterface $object,
+    PhabricatorAuthPasswordHashInterface $object,
     PhabricatorPasswordHasher $hasher) {
 
     if (!strlen($password->openEnvelope())) {
@@ -130,7 +130,7 @@ final class PhabricatorAuthPassword
 
   public function comparePassword(
     PhutilOpaqueEnvelope $password,
-    PhabricatorPasswordHashInterface $object) {
+    PhabricatorAuthPasswordHashInterface $object) {
 
     $digest = $this->digestPassword($password, $object);
     $hash = $this->newPasswordEnvelope();
@@ -144,7 +144,7 @@ final class PhabricatorAuthPassword
 
   private function digestPassword(
     PhutilOpaqueEnvelope $password,
-    PhabricatorPasswordHashInterface $object) {
+    PhabricatorAuthPasswordHashInterface $object) {
 
     $object_phid = $object->getPHID();
 

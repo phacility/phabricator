@@ -1,6 +1,6 @@
 <?php
 
-interface PhabricatorPasswordHashInterface {
+interface PhabricatorAuthPasswordHashInterface {
 
   public function newPasswordDigest(
     PhutilOpaqueEnvelope $envelope,

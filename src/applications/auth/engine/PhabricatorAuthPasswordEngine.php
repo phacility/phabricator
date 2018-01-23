@@ -27,7 +27,7 @@ final class PhabricatorAuthPasswordEngine
     return $this->contentSource;
   }
 
-  public function setObject(PhabricatorPasswordHashInterface $object) {
+  public function setObject(PhabricatorAuthPasswordHashInterface $object) {
     $this->object = $object;
     return $this;
   }
