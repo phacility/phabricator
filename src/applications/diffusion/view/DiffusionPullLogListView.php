@@ -94,7 +94,7 @@ final class DiffusionPullLogListView extends AphrontView {
           pht('From'),
           pht('Via'),
           null,
-          pht('Error'),
+          pht('Code'),
           pht('Date'),
         ))
       ->setColumnClasses(

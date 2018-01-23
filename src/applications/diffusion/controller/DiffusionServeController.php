@@ -104,15 +104,29 @@ final class DiffusionServeController extends DiffusionController {
     try {
       $remote_addr = $request->getRemoteAddress();
 
+      if ($request->isHTTPS()) {
+        $remote_protocol = PhabricatorRepositoryPullEvent::PROTOCOL_HTTPS;
+      } else {
+        $remote_protocol = PhabricatorRepositoryPullEvent::PROTOCOL_HTTP;
+      }
+
       $pull_event = id(new PhabricatorRepositoryPullEvent())
         ->setEpoch(PhabricatorTime::getNow())
         ->setRemoteAddress($remote_addr)
-        ->setRemoteProtocol('http');
+        ->setRemoteProtocol($remote_protocol);
 
       if ($response) {
-        $pull_event
-          ->setResultType('wild')
-          ->setResultCode($response->getHTTPResponseCode());
+        $response_code = $response->getHTTPResponseCode();
+
+        if ($response_code == 200) {
+          $pull_event
+            ->setResultType(PhabricatorRepositoryPullEvent::RESULT_PULL)
+            ->setResultCode($response_code);
+        } else {
+          $pull_event
+            ->setResultType(PhabricatorRepositoryPullEvent::RESULT_ERROR)
+            ->setResultCode($response_code);
+        }
 
         if ($response instanceof PhabricatorVCSResponse) {
           $pull_event->setProperties(
@@ -122,7 +136,7 @@ final class DiffusionServeController extends DiffusionController {
         }
       } else {
         $pull_event
-          ->setResultType('exception')
+          ->setResultType(PhabricatorRepositoryPullEvent::RESULT_EXCEPTION)
           ->setResultCode(500)
           ->setProperties(
             array(

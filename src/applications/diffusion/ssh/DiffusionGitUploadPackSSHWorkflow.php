@@ -61,11 +61,11 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
     if ($err) {
       $pull_event
-        ->setResultType('error')
+        ->setResultType(PhabricatorRepositoryPullEvent::RESULT_ERROR)
         ->setResultCode($err);
     } else {
       $pull_event
-        ->setResultType('pull')
+        ->setResultType(PhabricatorRepositoryPullEvent::RESULT_PULL)
         ->setResultCode(0);
     }
 

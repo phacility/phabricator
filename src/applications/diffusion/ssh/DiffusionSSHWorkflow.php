@@ -272,7 +272,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return id(new PhabricatorRepositoryPullEvent())
       ->setEpoch(PhabricatorTime::getNow())
       ->setRemoteAddress($remote_address)
-      ->setRemoteProtocol('ssh')
+      ->setRemoteProtocol(PhabricatorRepositoryPullEvent::PROTOCOL_SSH)
       ->setPullerPHID($viewer->getPHID())
       ->setRepositoryPHID($repository->getPHID());
   }
