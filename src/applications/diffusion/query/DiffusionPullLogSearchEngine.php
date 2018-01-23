@@ -47,6 +47,87 @@ final class DiffusionPullLogSearchEngine
     );
   }
 
+  protected function newExportFields() {
+    return array(
+      id(new PhabricatorIDExportField())
+        ->setKey('id')
+        ->setLabel(pht('ID')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('phid')
+        ->setLabel(pht('PHID')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('repositoryPHID')
+        ->setLabel(pht('Repository PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('repository')
+        ->setLabel(pht('Repository')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('pullerPHID')
+        ->setLabel(pht('Puller PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('puller')
+        ->setLabel(pht('Puller')),
+      id(new PhabricatorStringExportField())
+        ->setKey('protocol')
+        ->setLabel(pht('Protocol')),
+      id(new PhabricatorStringExportField())
+        ->setKey('result')
+        ->setLabel(pht('Result')),
+      id(new PhabricatorStringExportField())
+        ->setKey('code')
+        ->setLabel(pht('Code')),
+      id(new PhabricatorEpochExportField())
+        ->setKey('date')
+        ->setLabel(pht('Date')),
+    );
+  }
+
+  public function newExport(array $events) {
+    $viewer = $this->requireViewer();
+
+    $phids = array();
+    foreach ($events as $event) {
+      if ($event->getPullerPHID()) {
+        $phids[] = $event->getPullerPHID();
+      }
+    }
+    $handles = $viewer->loadHandles($phids);
+
+    $export = array();
+    foreach ($events as $event) {
+      $repository = $event->getRepository();
+      if ($repository) {
+        $repository_phid = $repository->getPHID();
+        $repository_name = $repository->getDisplayName();
+      } else {
+        $repository_phid = null;
+        $repository_name = null;
+      }
+
+      $puller_phid = $event->getPullerPHID();
+      if ($puller_phid) {
+        $puller_name = $handles[$puller_phid]->getName();
+      } else {
+        $puller_name = null;
+      }
+
+      $export[] = array(
+        'id' => $event->getID(),
+        'phid' => $event->getPHID(),
+        'repositoryPHID' => $repository_phid,
+        'repository' => $repository_name,
+        'pullerPHID' => $puller_phid,
+        'puller' => $puller_name,
+        'protocol' => $event->getRemoteProtocol(),
+        'result' => $event->getResultType(),
+        'code' => $event->getResultCode(),
+        'date' => $event->getEpoch(),
+      );
+    }
+
+    return $export;
+  }
+
   protected function getURI($path) {
     return '/diffusion/pulllog/'.$path;
   }

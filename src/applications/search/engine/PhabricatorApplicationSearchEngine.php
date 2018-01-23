@@ -413,6 +413,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $this->getURI('');
   }
 
+  public function getExportURI($query_key) {
+    return $this->getURI('query/'.$query_key.'/export/');
+  }
+
 
   /**
    * Return the URI to a path within the application. Used to construct default
@@ -1438,6 +1442,19 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
   public function newUseResultsActions(PhabricatorSavedQuery $saved) {
+    return array();
+  }
+
+
+/* -(  Export  )------------------------------------------------------------- */
+
+
+  public function canExport() {
+    $fields = $this->newExportFields();
+    return (bool)$fields;
+  }
+
+  protected function newExportFields() {
     return array();
   }
 

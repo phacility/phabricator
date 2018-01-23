@@ -66,6 +66,11 @@ final class PhabricatorApplicationSearchController
   public function processRequest() {
     $this->validateDelegatingController();
 
+    $query_action = $this->getRequest()->getURIData('queryAction');
+    if ($query_action == 'export') {
+      return $this->processExportRequest();
+    }
+
     $key = $this->getQueryKey();
     if ($key == 'edit') {
       return $this->processEditRequest();
@@ -372,6 +377,96 @@ final class PhabricatorApplicationSearchController
       ->setNavigation($nav)
       ->addClass('application-search-view')
       ->appendChild($body);
+  }
+
+  private function processExportRequest() {
+    $viewer = $this->getViewer();
+    $engine = $this->getSearchEngine();
+    $request = $this->getRequest();
+
+    if (!$this->canExport()) {
+      return new Aphront404Response();
+    }
+
+    $query_key = $this->getQueryKey();
+    if ($engine->isBuiltinQuery($query_key)) {
+      $saved_query = $engine->buildSavedQueryFromBuiltin($query_key);
+    } else if ($query_key) {
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($viewer)
+        ->withQueryKeys(array($query_key))
+        ->executeOne();
+      if (!$saved_query) {
+        return new Aphront404Response();
+      }
+    }
+
+    $cancel_uri = $engine->getQueryResultsPageURI($query_key);
+
+    $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
+
+    if ($named_query) {
+      $filename = $named_query->getQueryName();
+    } else {
+      $filename = $engine->getResultTypeDescription();
+    }
+    $filename = phutil_utf8_strtolower($filename);
+    $filename = PhabricatorFile::normalizeFileName($filename);
+
+    if ($request->isFormPost()) {
+      $query = $engine->buildQueryFromSavedQuery($saved_query);
+
+      // NOTE: We aren't reading the pager from the request. Exports always
+      // affect the entire result set.
+      $pager = $engine->newPagerForSavedQuery($saved_query);
+      $pager->setPageSize(0x7FFFFFFF);
+
+      $objects = $engine->executeQuery($query, $pager);
+
+      $extension = 'json';
+      $mime_type = 'application/json';
+      $filename = $filename.'.'.$extension;
+
+      $result = $engine->newExport($objects);
+      $result = id(new PhutilJSON())
+        ->encodeAsList($result);
+
+      $file = PhabricatorFile::newFromFileData(
+        $result,
+        array(
+          'name' => $filename,
+          'authorPHID' => $viewer->getPHID(),
+          'ttl.relative' => phutil_units('15 minutes in seconds'),
+          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+          'mime-type' => $mime_type,
+        ));
+
+      return $this->newDialog()
+        ->setTitle(pht('Download Results'))
+        ->appendParagraph(
+          pht('Click the download button to download the exported data.'))
+        ->addCancelButton($cancel_uri, pht('Done'))
+        ->setSubmitURI($file->getDownloadURI())
+        ->setDisableWorkflowOnSubmit(true)
+        ->addSubmitButton(pht('Download Results'));
+    }
+
+    $export_form = id(new AphrontFormView())
+      ->setViewer($viewer)
+      ->appendControl(
+        id(new AphrontFormSelectControl())
+          ->setName('format')
+          ->setLabel(pht('Format'))
+          ->setOptions(
+            array(
+              'json' => 'JSON',
+            )));
+
+    return $this->newDialog()
+      ->setTitle(pht('Export Results'))
+      ->appendForm($export_form)
+      ->addCancelButton($cancel_uri)
+      ->addSubmitButton(pht('Continue'));
   }
 
   private function processEditRequest() {
@@ -720,12 +815,20 @@ final class PhabricatorApplicationSearchController
       $viewer);
 
     if ($can_use && $is_installed) {
-      $dashboard_uri = '/dashboard/install/';
       $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-dashboard')
         ->setName(pht('Add to Dashboard'))
         ->setWorkflow(true)
         ->setHref("/dashboard/panel/install/{$engine_class}/{$query_key}/");
+    }
+
+    if ($this->canExport()) {
+      $export_uri = $engine->getExportURI($query_key);
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-download')
+        ->setName(pht('Export Results'))
+        ->setWorkflow(true)
+        ->setHref($export_uri);
     }
 
     if ($is_dev) {
@@ -751,6 +854,24 @@ final class PhabricatorApplicationSearchController
     }
 
     return $actions;
+  }
+
+  private function canExport() {
+    $engine = $this->getSearchEngine();
+    if (!$engine->canExport()) {
+      return false;
+    }
+
+    // Don't allow logged-out users to perform exports. There's no technical
+    // or policy reason they can't, but we don't normally give them access
+    // to write files or jobs. For now, just err on the side of caution.
+
+    $viewer = $this->getViewer();
+    if (!$viewer->getPHID()) {
+      return false;
+    }
+
+    return true;
   }
 
 }
