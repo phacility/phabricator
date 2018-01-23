@@ -51,7 +51,7 @@ final class PhabricatorRepositoryPullEvent
       PhabricatorRepositoryPullEventPHIDType::TYPECONST);
   }
 
-  public function attachRepository(PhabricatorRepository $repository) {
+  public function attachRepository(PhabricatorRepository $repository = null) {
     $this->repository = $repository;
     return $this;
   }
@@ -59,6 +59,38 @@ final class PhabricatorRepositoryPullEvent
   public function getRepository() {
     return $this->assertAttached($this->repository);
   }
+
+  public function getRemoteProtocolDisplayName() {
+    $map = array(
+      'ssh' => pht('SSH'),
+      'http' => pht('HTTP'),
+    );
+
+    $protocol = $this->getRemoteProtocol();
+
+    return idx($map, $protocol, $protocol);
+  }
+
+  public function newResultIcon() {
+    $icon = new PHUIIconView();
+    $type = $this->getResultType();
+
+    switch ($type) {
+      case 'wild':
+        $icon
+          ->setIcon('fa-question indigo')
+          ->setTooltip(pht('Unknown ("%s")', $type));
+        break;
+      case 'pull':
+        $icon
+          ->setIcon('fa-download green')
+          ->setTooltip(pht('Pull'));
+        break;
+    }
+
+    return $icon;
+  }
+
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
@@ -71,10 +103,18 @@ final class PhabricatorRepositoryPullEvent
   }
 
   public function getPolicy($capability) {
-    return $this->getRepository()->getPolicy($capability);
+    if ($this->getRepository()) {
+      return $this->getRepository()->getPolicy($capability);
+    }
+
+    return PhabricatorPolicies::POLICY_ADMIN;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if (!$this->getRepository()) {
+      return false;
+    }
+
     return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
   }
 

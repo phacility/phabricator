@@ -1,6 +1,6 @@
 <?php
 
-abstract class DiffusionPushLogController extends DiffusionController {
+abstract class DiffusionLogController extends DiffusionController {
 
   protected function shouldLoadDiffusionRequest() {
     return false;
