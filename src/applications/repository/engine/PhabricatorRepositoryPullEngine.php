@@ -399,6 +399,11 @@ final class PhabricatorRepositoryPullEngine
       'ls-remote %P',
       $remote_envelope);
 
+    // Empty repositories don't have any refs.
+    if (!strlen(rtrim($stdout))) {
+      return array();
+    }
+
     $map = array();
     $lines = phutil_split_lines($stdout, false);
     foreach ($lines as $line) {
