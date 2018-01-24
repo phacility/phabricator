@@ -1565,9 +1565,29 @@ final class DifferentialTransactionEditor
 
 
   protected function didApplyTransactions($object, array $xactions) {
+    // In a moment, we're going to try to publish draft revisions which have
+    // completed all their builds. However, we only want to do that if the
+    // actor is either the revision author or an omnipotent user (generally,
+    // the Harbormaster application).
+
+    // If we let any actor publish the revision as a side effect of other
+    // changes then an unlucky third party who innocently comments on the draft
+    // can end up racing Harbormaster and promoting the revision. At best, this
+    // is confusing. It can also run into validation problems with the "Request
+    // Review" transaction. See PHI309 for some discussion.
+    $author_phid = $object->getAuthorPHID();
+    $viewer = $this->requireActor();
+    $can_undraft =
+      ($this->getActingAsPHID() === $author_phid) ||
+      ($viewer->isOmnipotent());
+
     // If a draft revision has no outstanding builds and we're automatically
     // making drafts public after builds finish, make the revision public.
-    $auto_undraft = !$object->getHoldAsDraft();
+    if ($can_undraft) {
+      $auto_undraft = !$object->getHoldAsDraft();
+    } else {
+      $auto_undraft = false;
+    }
 
     if ($object->isDraft() && $auto_undraft) {
       $active_builds = $this->hasActiveBuilds($object);
@@ -1575,7 +1595,6 @@ final class DifferentialTransactionEditor
         // When Harbormaster moves a revision out of the draft state, we
         // attribute the action to the revision author since this is more
         // natural and more useful.
-        $author_phid = $object->getAuthorPHID();
 
         // Additionally, we change the acting PHID for the transaction set
         // to the author if it isn't already a user so that mail comes from
