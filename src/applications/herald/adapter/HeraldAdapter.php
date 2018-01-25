@@ -764,9 +764,19 @@ abstract class HeraldAdapter extends Phobject {
 
 
   public function getRepetitionOptions() {
-    return array(
-      HeraldRepetitionPolicyConfig::EVERY,
-    );
+    $options = array();
+
+    $options[] = HeraldRepetitionPolicyConfig::EVERY;
+
+    // Some rules, like pre-commit rules, only ever fire once. It doesn't
+    // make sense to use state-based repetition policies like "only the first
+    // time" for these rules.
+
+    if (!$this->isSingleEventAdapter()) {
+      $options[] = HeraldRepetitionPolicyConfig::FIRST;
+    }
+
+    return $options;
   }
 
   protected function initializeNewAdapter() {

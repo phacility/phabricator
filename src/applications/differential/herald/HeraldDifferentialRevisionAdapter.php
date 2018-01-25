@@ -69,13 +69,6 @@ final class HeraldDifferentialRevisionAdapter
     }
   }
 
-  public function getRepetitionOptions() {
-    return array(
-      HeraldRepetitionPolicyConfig::EVERY,
-      HeraldRepetitionPolicyConfig::FIRST,
-    );
-  }
-
   public static function newLegacyAdapter(
     DifferentialRevision $revision,
     DifferentialDiff $diff) {
