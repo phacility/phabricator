@@ -32,6 +32,7 @@ final class HeraldRule extends HeraldDAO
 
   const REPEAT_EVERY = 'every';
   const REPEAT_FIRST = 'first';
+  const REPEAT_CHANGE = 'change';
 
   protected function getConfiguration() {
     return array(
@@ -282,6 +283,10 @@ final class HeraldRule extends HeraldDAO
     return ($this->getRepetitionPolicyStringConstant() === self::REPEAT_FIRST);
   }
 
+  public function isRepeatOnChange() {
+    return ($this->getRepetitionPolicyStringConstant() === self::REPEAT_CHANGE);
+  }
+
   public static function getRepetitionPolicySelectOptionMap() {
     $map = self::getRepetitionPolicyMap();
     return ipull($map, 'select');
@@ -290,10 +295,13 @@ final class HeraldRule extends HeraldDAO
   private static function getRepetitionPolicyMap() {
     return array(
       self::REPEAT_EVERY => array(
-        'select' => pht('every time'),
+        'select' => pht('every time this rule matches:'),
       ),
       self::REPEAT_FIRST => array(
-        'select' => pht('only the first time'),
+        'select' => pht('only the first time this rule matches:'),
+      ),
+      self::REPEAT_CHANGE => array(
+        'select' => pht('if this rule did not match the last time:'),
       ),
     );
   }

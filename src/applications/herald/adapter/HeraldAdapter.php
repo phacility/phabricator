@@ -774,6 +774,7 @@ abstract class HeraldAdapter extends Phobject {
 
     if (!$this->isSingleEventAdapter()) {
       $options[] = HeraldRule::REPEAT_FIRST;
+      $options[] = HeraldRule::REPEAT_CHANGE;
     }
 
     return $options;
@@ -897,12 +898,15 @@ abstract class HeraldAdapter extends Phobject {
         ));
     }
 
-    if ($rule->isRepeatEvery()) {
-      $action_text =
-        pht('Take these actions every time this rule matches:');
+    if ($rule->isRepeatFirst()) {
+      $action_text = pht(
+        'Take these actions the first time this rule matches:');
+    } else if ($rule->isRepeatOnChange()) {
+      $action_text = pht(
+        'Take these actions if this rule did not match the last time:');
     } else {
-      $action_text =
-        pht('Take these actions the first time this rule matches:');
+      $action_text = pht(
+        'Take these actions every time this rule matches:');
     }
 
     $action_title = phutil_tag(

@@ -218,7 +218,7 @@ final class HeraldRuleController extends HeraldController {
             ),
             pht('New Action')))
           ->setDescription(pht(
-            'Take these actions %s this rule matches:',
+            'Take these actions %s',
             $repetition_selector))
           ->setContent(javelin_tag(
               'table',
