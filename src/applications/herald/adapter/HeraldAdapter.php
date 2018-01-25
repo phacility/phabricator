@@ -38,6 +38,7 @@ abstract class HeraldAdapter extends Phobject {
   private $actionMap;
   private $edgeCache = array();
   private $forbiddenActions = array();
+  private $viewer;
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -55,10 +56,29 @@ abstract class HeraldAdapter extends Phobject {
     return $this;
   }
 
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    // See PHI276. Normally, Herald runs without regard for policy checks.
+    // However, we use a real viewer during test console runs: this makes
+    // intracluster calls to Diffusion APIs work even if web nodes don't
+    // have privileged credentials.
+
+    if ($this->viewer) {
+      return $this->viewer;
+    }
+
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
     return $this;
   }
+
   public function getContentSource() {
     return $this->contentSource;
   }

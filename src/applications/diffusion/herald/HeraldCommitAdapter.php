@@ -209,7 +209,7 @@ final class HeraldCommitAdapter
   }
 
   private function loadCommitDiff() {
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $byte_limit = self::getEnormousByteLimit();
     $time_limit = self::getEnormousTimeLimit();
