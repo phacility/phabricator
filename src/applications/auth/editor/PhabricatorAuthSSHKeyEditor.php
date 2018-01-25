@@ -104,6 +104,7 @@ final class PhabricatorAuthSSHKeyEditor
     array $xactions) {
 
     $errors = parent::validateTransaction($object, $type, $xactions);
+    $viewer = $this->requireActor();
 
     switch ($type) {
       case PhabricatorAuthSSHKeyTransaction::TYPE_NAME:
@@ -149,6 +150,30 @@ final class PhabricatorAuthSSHKeyEditor
                 pht('Invalid'),
                 $ex->getMessage(),
                 $xaction);
+              continue;
+            }
+
+            // The database does not have a unique key on just the <keyBody>
+            // column because we allow multiple accounts to revoke the same
+            // key, so we can't rely on database constraints to prevent users
+            // from adding keys that are on the revocation list back to their
+            // accounts. Explicitly check for a revoked copy of the key.
+
+            $revoked_keys = id(new PhabricatorAuthSSHKeyQuery())
+              ->setViewer($viewer)
+              ->withObjectPHIDs(array($object->getObjectPHID()))
+              ->withIsActive(0)
+              ->withKeys(array($public_key))
+              ->execute();
+            if ($revoked_keys) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Revoked'),
+                pht(
+                  'This key has been revoked. Choose or generate a new, '.
+                  'unique key.'),
+                $xaction);
+              continue;
             }
           }
         }
