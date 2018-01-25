@@ -1399,7 +1399,6 @@ phutil_register_library_map(array(
     'HeraldRelatedFieldGroup' => 'applications/herald/field/HeraldRelatedFieldGroup.php',
     'HeraldRemarkupFieldValue' => 'applications/herald/value/HeraldRemarkupFieldValue.php',
     'HeraldRemarkupRule' => 'applications/herald/remarkup/HeraldRemarkupRule.php',
-    'HeraldRepetitionPolicyConfig' => 'applications/herald/config/HeraldRepetitionPolicyConfig.php',
     'HeraldRule' => 'applications/herald/storage/HeraldRule.php',
     'HeraldRuleController' => 'applications/herald/controller/HeraldRuleController.php',
     'HeraldRuleDatasource' => 'applications/herald/typeahead/HeraldRuleDatasource.php',
@@ -6602,7 +6601,6 @@ phutil_register_library_map(array(
     'HeraldRelatedFieldGroup' => 'HeraldFieldGroup',
     'HeraldRemarkupFieldValue' => 'HeraldFieldValue',
     'HeraldRemarkupRule' => 'PhabricatorObjectRemarkupRule',
-    'HeraldRepetitionPolicyConfig' => 'Phobject',
     'HeraldRule' => array(
       'HeraldDAO',
       'PhabricatorApplicationTransactionInterface',

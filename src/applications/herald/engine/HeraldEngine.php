@@ -68,9 +68,7 @@ final class HeraldEngine extends Phobject {
     foreach ($rules as $phid => $rule) {
       $this->stack = array();
 
-      $policy_first = HeraldRepetitionPolicyConfig::FIRST;
-      $policy_first_int = HeraldRepetitionPolicyConfig::toInt($policy_first);
-      $is_first_only = ($rule->getRepetitionPolicy() == $policy_first_int);
+      $is_first_only = $rule->isRepeatFirst();
 
       try {
         if (!$this->getDryRun() &&
@@ -175,8 +173,6 @@ final class HeraldEngine extends Phobject {
 
     $rules = mpull($rules, null, 'getID');
     $applied_ids = array();
-    $first_policy = HeraldRepetitionPolicyConfig::toInt(
-      HeraldRepetitionPolicyConfig::FIRST);
 
     // Mark all the rules that have had their effects applied as having been
     // executed for the current object.
@@ -194,7 +190,7 @@ final class HeraldEngine extends Phobject {
         continue;
       }
 
-      if ($rule->getRepetitionPolicy() == $first_policy) {
+      if ($rule->isRepeatFirst()) {
         $applied_ids[] = $rule_id;
       }
     }

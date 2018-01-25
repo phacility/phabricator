@@ -766,14 +766,14 @@ abstract class HeraldAdapter extends Phobject {
   public function getRepetitionOptions() {
     $options = array();
 
-    $options[] = HeraldRepetitionPolicyConfig::EVERY;
+    $options[] = HeraldRule::REPEAT_EVERY;
 
     // Some rules, like pre-commit rules, only ever fire once. It doesn't
     // make sense to use state-based repetition policies like "only the first
     // time" for these rules.
 
     if (!$this->isSingleEventAdapter()) {
-      $options[] = HeraldRepetitionPolicyConfig::FIRST;
+      $options[] = HeraldRule::REPEAT_FIRST;
     }
 
     return $options;
@@ -897,10 +897,7 @@ abstract class HeraldAdapter extends Phobject {
         ));
     }
 
-    $integer_code_for_every = HeraldRepetitionPolicyConfig::toInt(
-      HeraldRepetitionPolicyConfig::EVERY);
-
-    if ($rule->getRepetitionPolicy() == $integer_code_for_every) {
+    if ($rule->isRepeatEvery()) {
       $action_text =
         pht('Take these actions every time this rule matches:');
     } else {

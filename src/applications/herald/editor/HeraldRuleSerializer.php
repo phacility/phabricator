@@ -9,7 +9,7 @@ final class HeraldRuleSerializer extends Phobject {
       (bool)$rule->getMustMatchAll(),
       $rule->getConditions(),
       $rule->getActions(),
-      HeraldRepetitionPolicyConfig::toString($rule->getRepetitionPolicy()));
+      $rule->getRepetitionPolicyStringConstant());
   }
 
   public function serializeRuleComponents(

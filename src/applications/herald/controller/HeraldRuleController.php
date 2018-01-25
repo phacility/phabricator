@@ -373,8 +373,7 @@ final class HeraldRuleController extends HeraldController {
     // mutate current rule, so it would be sent to the client in the right state
     $rule->setMustMatchAll((int)$match_all);
     $rule->setName($new_name);
-    $rule->setRepetitionPolicy(
-      HeraldRepetitionPolicyConfig::toInt($repetition_policy_param));
+    $rule->setRepetitionPolicyStringConstant($repetition_policy_param);
     $rule->attachConditions($conditions);
     $rule->attachActions($actions);
 
@@ -594,11 +593,10 @@ final class HeraldRuleController extends HeraldController {
    * time) this rule matches..." element.
    */
   private function renderRepetitionSelector($rule, HeraldAdapter $adapter) {
-    $repetition_policy = HeraldRepetitionPolicyConfig::toString(
-      $rule->getRepetitionPolicy());
+    $repetition_policy = $rule->getRepetitionPolicyStringConstant();
 
     $repetition_options = $adapter->getRepetitionOptions();
-    $repetition_names = HeraldRepetitionPolicyConfig::getMap();
+    $repetition_names = HeraldRule::getRepetitionPolicySelectOptionMap();
     $repetition_map = array_select_keys($repetition_names, $repetition_options);
 
     if (count($repetition_map) < 2) {

@@ -30,6 +30,9 @@ final class HeraldRule extends HeraldDAO
   private $actions;
   private $triggerObject = self::ATTACHABLE;
 
+  const REPEAT_EVERY = 'every';
+  const REPEAT_FIRST = 'first';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -251,6 +254,74 @@ final class HeraldRule extends HeraldDAO
 
   public function getMonogram() {
     return 'H'.$this->getID();
+  }
+
+
+/* -(  Repetition Policies  )------------------------------------------------ */
+
+
+  public function getRepetitionPolicyStringConstant() {
+    $map = self::getRepetitionPolicyMap();
+    $map = ipull($map, 'key.string', 'key.int');
+
+    return idx($map, $this->getRepetitionPolicyIntegerConstant());
+  }
+
+  public function getRepetitionPolicyIntegerConstant() {
+    $map = self::getRepetitionPolicyMap();
+    $map = ipull($map, 'key.int', 'key.int');
+    $int = $this->getRepetitionPolicy();
+
+    if (!isset($map[$int])) {
+      return head_key($map);
+    }
+
+    return $int;
+  }
+
+  public function setRepetitionPolicyStringConstant($value) {
+    $map = self::getRepetitionPolicyMap();
+    $map = ipull($map, 'key.int', 'key.string');
+
+    if (!isset($map[$value])) {
+      throw new Exception(
+        pht(
+          'Rule repetition string constant "%s" is unknown.',
+          $value));
+    }
+
+    $int = $map[$value];
+
+    return $this->setRepetitionPolicy($int);
+  }
+
+  public function isRepeatEvery() {
+    return ($this->getRepetitionPolicyStringConstant() === self::REPEAT_EVERY);
+  }
+
+  public function isRepeatFirst() {
+    return ($this->getRepetitionPolicyStringConstant() === self::REPEAT_FIRST);
+  }
+
+  public static function getRepetitionPolicySelectOptionMap() {
+    $map = self::getRepetitionPolicyMap();
+    $map = ipull($map, 'select', 'key.string');
+    return $map;
+  }
+
+  private static function getRepetitionPolicyMap() {
+    return array(
+      self::REPEAT_EVERY => array(
+        'key.int' => 1,
+        'key.string' => self::REPEAT_EVERY,
+        'select' => pht('every time'),
+      ),
+      self::REPEAT_FIRST => array(
+        'key.int' => 0,
+        'key.string' => self::REPEAT_FIRST,
+        'select' => pht('only the first time'),
+      ),
+    );
   }
 
 
