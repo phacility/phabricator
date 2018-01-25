@@ -1362,6 +1362,7 @@ phutil_register_library_map(array(
     'HeraldController' => 'applications/herald/controller/HeraldController.php',
     'HeraldCoreStateReasons' => 'applications/herald/state/HeraldCoreStateReasons.php',
     'HeraldDAO' => 'applications/herald/storage/HeraldDAO.php',
+    'HeraldDeprecatedFieldGroup' => 'applications/herald/field/HeraldDeprecatedFieldGroup.php',
     'HeraldDifferentialAdapter' => 'applications/differential/herald/HeraldDifferentialAdapter.php',
     'HeraldDifferentialDiffAdapter' => 'applications/differential/herald/HeraldDifferentialDiffAdapter.php',
     'HeraldDifferentialRevisionAdapter' => 'applications/differential/herald/HeraldDifferentialRevisionAdapter.php',
@@ -6561,6 +6562,7 @@ phutil_register_library_map(array(
     'HeraldController' => 'PhabricatorController',
     'HeraldCoreStateReasons' => 'HeraldStateReasons',
     'HeraldDAO' => 'PhabricatorLiskDAO',
+    'HeraldDeprecatedFieldGroup' => 'HeraldFieldGroup',
     'HeraldDifferentialAdapter' => 'HeraldAdapter',
     'HeraldDifferentialDiffAdapter' => 'HeraldDifferentialAdapter',
     'HeraldDifferentialRevisionAdapter' => array(

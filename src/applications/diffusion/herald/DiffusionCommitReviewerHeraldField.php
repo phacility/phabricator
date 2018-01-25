@@ -6,7 +6,11 @@ final class DiffusionCommitReviewerHeraldField
   const FIELDCONST = 'diffusion.commit.reviewer';
 
   public function getHeraldFieldName() {
-    return pht('Reviewer');
+    return pht('Reviewer (Deprecated)');
+  }
+
+  public function getFieldGroupKey() {
+    return HeraldDeprecatedFieldGroup::FIELDGROUPKEY;
   }
 
   public function getHeraldFieldValue($object) {
