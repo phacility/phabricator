@@ -41,13 +41,10 @@ final class HeraldRule extends HeraldDAO
         'contentType' => 'text255',
         'mustMatchAll' => 'bool',
         'configVersion' => 'uint32',
+        'repetitionPolicy' => 'text32',
         'ruleType' => 'text32',
         'isDisabled' => 'uint32',
         'triggerObjectPHID' => 'phid?',
-
-        // T6203/NULLABILITY
-        // This should not be nullable.
-        'repetitionPolicy' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
@@ -261,27 +258,11 @@ final class HeraldRule extends HeraldDAO
 
 
   public function getRepetitionPolicyStringConstant() {
-    $map = self::getRepetitionPolicyMap();
-    $map = ipull($map, 'key.string', 'key.int');
-
-    return idx($map, $this->getRepetitionPolicyIntegerConstant());
-  }
-
-  public function getRepetitionPolicyIntegerConstant() {
-    $map = self::getRepetitionPolicyMap();
-    $map = ipull($map, 'key.int', 'key.int');
-    $int = $this->getRepetitionPolicy();
-
-    if (!isset($map[$int])) {
-      return head_key($map);
-    }
-
-    return $int;
+    return $this->getRepetitionPolicy();
   }
 
   public function setRepetitionPolicyStringConstant($value) {
     $map = self::getRepetitionPolicyMap();
-    $map = ipull($map, 'key.int', 'key.string');
 
     if (!isset($map[$value])) {
       throw new Exception(
@@ -290,9 +271,7 @@ final class HeraldRule extends HeraldDAO
           $value));
     }
 
-    $int = $map[$value];
-
-    return $this->setRepetitionPolicy($int);
+    return $this->setRepetitionPolicy($value);
   }
 
   public function isRepeatEvery() {
@@ -305,20 +284,15 @@ final class HeraldRule extends HeraldDAO
 
   public static function getRepetitionPolicySelectOptionMap() {
     $map = self::getRepetitionPolicyMap();
-    $map = ipull($map, 'select', 'key.string');
-    return $map;
+    return ipull($map, 'select');
   }
 
   private static function getRepetitionPolicyMap() {
     return array(
       self::REPEAT_EVERY => array(
-        'key.int' => 1,
-        'key.string' => self::REPEAT_EVERY,
         'select' => pht('every time'),
       ),
       self::REPEAT_FIRST => array(
-        'key.int' => 0,
-        'key.string' => self::REPEAT_FIRST,
         'select' => pht('only the first time'),
       ),
     );
