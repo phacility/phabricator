@@ -1454,6 +1454,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return (bool)$fields;
   }
 
+  final public function newExportFieldList() {
+    return $this->newExportFields();
+  }
+
   protected function newExportFields() {
     return array();
   }

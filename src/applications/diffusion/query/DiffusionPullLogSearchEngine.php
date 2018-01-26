@@ -73,7 +73,7 @@ final class DiffusionPullLogSearchEngine
       id(new PhabricatorStringExportField())
         ->setKey('result')
         ->setLabel(pht('Result')),
-      id(new PhabricatorStringExportField())
+      id(new PhabricatorIntExportField())
         ->setKey('code')
         ->setLabel(pht('Code')),
       id(new PhabricatorEpochExportField())

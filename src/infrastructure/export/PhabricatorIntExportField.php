@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorIDExportField
+final class PhabricatorIntExportField
   extends PhabricatorExportField {
 
   public function getNaturalValue($value) {

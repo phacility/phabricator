@@ -413,42 +413,80 @@ final class PhabricatorApplicationSearchController
     $filename = phutil_utf8_strtolower($filename);
     $filename = PhabricatorFile::normalizeFileName($filename);
 
+    $formats = PhabricatorExportFormat::getAllEnabledExportFormats();
+    $format_options = mpull($formats, 'getExportFormatName');
+
+    $errors = array();
+
+    $e_format = null;
     if ($request->isFormPost()) {
-      $query = $engine->buildQueryFromSavedQuery($saved_query);
+      $format_key = $request->getStr('format');
+      $format = idx($formats, $format_key);
 
-      // NOTE: We aren't reading the pager from the request. Exports always
-      // affect the entire result set.
-      $pager = $engine->newPagerForSavedQuery($saved_query);
-      $pager->setPageSize(0x7FFFFFFF);
+      if (!$format) {
+        $e_format = pht('Invalid');
+        $errors[] = pht('Choose a valid export format.');
+      }
 
-      $objects = $engine->executeQuery($query, $pager);
+      if (!$errors) {
+        $query = $engine->buildQueryFromSavedQuery($saved_query);
 
-      $extension = 'json';
-      $mime_type = 'application/json';
-      $filename = $filename.'.'.$extension;
+        // NOTE: We aren't reading the pager from the request. Exports always
+        // affect the entire result set.
+        $pager = $engine->newPagerForSavedQuery($saved_query);
+        $pager->setPageSize(0x7FFFFFFF);
 
-      $result = $engine->newExport($objects);
-      $result = id(new PhutilJSON())
-        ->encodeAsList($result);
+        $objects = $engine->executeQuery($query, $pager);
 
-      $file = PhabricatorFile::newFromFileData(
-        $result,
-        array(
-          'name' => $filename,
-          'authorPHID' => $viewer->getPHID(),
-          'ttl.relative' => phutil_units('15 minutes in seconds'),
-          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-          'mime-type' => $mime_type,
-        ));
+        $extension = $format->getFileExtension();
+        $mime_type = $format->getMIMEContentType();
+        $filename = $filename.'.'.$extension;
 
-      return $this->newDialog()
-        ->setTitle(pht('Download Results'))
-        ->appendParagraph(
-          pht('Click the download button to download the exported data.'))
-        ->addCancelButton($cancel_uri, pht('Done'))
-        ->setSubmitURI($file->getDownloadURI())
-        ->setDisableWorkflowOnSubmit(true)
-        ->addSubmitButton(pht('Download Results'));
+        $format = clone $format;
+        $format->setViewer($viewer);
+
+        $export_data = $engine->newExport($objects);
+
+        if (count($export_data) !== count($objects)) {
+          throw new Exception(
+            pht(
+              'Search engine exported the wrong number of objects, expected '.
+              '%s but got %s.',
+              phutil_count($objects),
+              phutil_count($export_data)));
+        }
+
+        $objects = array_values($objects);
+        $export_data = array_values($export_data);
+
+        $field_list = $engine->newExportFieldList();
+        $field_list = mpull($field_list, null, 'getKey');
+
+        for ($ii = 0; $ii < count($objects); $ii++) {
+          $format->addObject($objects[$ii], $field_list, $export_data[$ii]);
+        }
+
+        $export_result = $format->newFileData();
+
+        $file = PhabricatorFile::newFromFileData(
+          $export_result,
+          array(
+            'name' => $filename,
+            'authorPHID' => $viewer->getPHID(),
+            'ttl.relative' => phutil_units('15 minutes in seconds'),
+            'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+            'mime-type' => $mime_type,
+          ));
+
+        return $this->newDialog()
+          ->setTitle(pht('Download Results'))
+          ->appendParagraph(
+            pht('Click the download button to download the exported data.'))
+          ->addCancelButton($cancel_uri, pht('Done'))
+          ->setSubmitURI($file->getDownloadURI())
+          ->setDisableWorkflowOnSubmit(true)
+          ->addSubmitButton(pht('Download Data'));
+      }
     }
 
     $export_form = id(new AphrontFormView())
@@ -457,13 +495,12 @@ final class PhabricatorApplicationSearchController
         id(new AphrontFormSelectControl())
           ->setName('format')
           ->setLabel(pht('Format'))
-          ->setOptions(
-            array(
-              'json' => 'JSON',
-            )));
+          ->setError($e_format)
+          ->setOptions($format_options));
 
     return $this->newDialog()
       ->setTitle(pht('Export Results'))
+      ->setErrors($errors)
       ->appendForm($export_form)
       ->addCancelButton($cancel_uri)
       ->addSubmitButton(pht('Continue'));
@@ -826,7 +863,7 @@ final class PhabricatorApplicationSearchController
       $export_uri = $engine->getExportURI($query_key);
       $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-download')
-        ->setName(pht('Export Results'))
+        ->setName(pht('Export Data'))
         ->setWorkflow(true)
         ->setHref($export_uri);
     }
