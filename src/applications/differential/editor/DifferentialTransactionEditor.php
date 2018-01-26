@@ -700,19 +700,25 @@ final class DifferentialTransactionEditor
       ->addHeader('Thread-Topic', $thread_topic);
   }
 
-  protected function buildMailBody(
+  protected function getTransactionsForMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    $viewer = $this->requireActor();
-
     // If this is the first time we're sending mail about this revision, we
     // generate mail for all prior transactions, not just whatever is being
     // applied now. This gets the "added reviewers" lines and other relevant
     // information into the mail.
     if ($this->isFirstBroadcast()) {
-      $xactions = $this->loadUnbroadcastTransactions($object);
+      return $this->loadUnbroadcastTransactions($object);
     }
+
+    return $xactions;
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $viewer = $this->requireActor();
 
     $body = new PhabricatorMetaMTAMailBody();
     $body->setViewer($this->requireActor());

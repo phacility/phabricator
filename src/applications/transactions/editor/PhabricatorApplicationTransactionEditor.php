@@ -2546,6 +2546,12 @@ abstract class PhabricatorApplicationTransactionEditor
     return $messages;
   }
 
+  protected function getTransactionsForMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $xactions;
+  }
+
   private function buildMailForTarget(
     PhabricatorLiskDAO $object,
     array $xactions,
@@ -2566,17 +2572,19 @@ abstract class PhabricatorApplicationTransactionEditor
       return null;
     }
 
-    $mail = $this->buildMailTemplate($object);
-    $body = $this->buildMailBody($object, $xactions);
+    $mail_xactions = $this->getTransactionsForMail($object, $xactions);
 
-    $mail_tags = $this->getMailTags($object, $xactions);
-    $action = $this->getMailAction($object, $xactions);
+    $mail = $this->buildMailTemplate($object);
+    $body = $this->buildMailBody($object, $mail_xactions);
+
+    $mail_tags = $this->getMailTags($object, $mail_xactions);
+    $action = $this->getMailAction($object, $mail_xactions);
 
     if (PhabricatorEnv::getEnvConfig('metamta.email-preferences')) {
       $this->addEmailPreferenceSectionToMailBody(
         $body,
         $object,
-        $xactions);
+        $mail_xactions);
     }
 
     $mail
