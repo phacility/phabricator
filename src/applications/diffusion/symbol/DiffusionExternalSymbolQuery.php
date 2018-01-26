@@ -9,6 +9,7 @@ final class DiffusionExternalSymbolQuery extends Phobject {
   private $paths = array();
   private $lines = array();
   private $repositories = array();
+  private $characterPositions = array();
 
   public function withLanguages(array $languages) {
     $this->languages = $languages;
@@ -37,6 +38,11 @@ final class DiffusionExternalSymbolQuery extends Phobject {
 
   public function withLines(array $lines) {
     $this->lines = $lines;
+    return $this;
+  }
+
+  public function withCharacterPositions(array $positions) {
+    $this->characterPositions = $positions;
     return $this;
   }
 
@@ -72,6 +78,10 @@ final class DiffusionExternalSymbolQuery extends Phobject {
 
   public function getRepositories() {
     return $this->repositories;
+  }
+
+  public function getCharacterPositions() {
+    return $this->characterPositions;
   }
 
   public function matchesAnyLanguage(array $languages) {

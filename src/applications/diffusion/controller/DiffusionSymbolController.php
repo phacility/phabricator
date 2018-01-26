@@ -69,6 +69,13 @@ final class DiffusionSymbolController extends DiffusionController {
       $external_query->withLines(array($request->getInt('line')));
     }
 
+    if ($request->getInt('char')) {
+      $external_query->withCharacterPositions(
+        array(
+          $request->getInt('char'),
+        ));
+    }
+
     if ($repos) {
       $external_query->withRepositories($repos);
     }

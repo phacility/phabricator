@@ -28,8 +28,8 @@ JX.behavior('repository-crossreference', function(config, statics) {
     nf : 'function',
     na : null,
     nb : 'builtin',
-    n : null,
-    };
+    n : null
+  };
 
   function link(element, lang) {
     JX.DOM.alterClass(element, 'repository-crossreference', true);
@@ -58,8 +58,15 @@ JX.behavior('repository-crossreference', function(config, statics) {
           // Continue if we're not inside an inline comment.
         }
 
+        // If only part of the symbol was edited, the symbol name itself will
+        // have another "<span />" inside of it which highlights only the
+        // edited part. Skip over it.
+        if (JX.DOM.isNode(target, 'span') && (target.className === 'bright')) {
+          target = target.parentNode;
+        }
+
         if (e.getType() === 'mouseover') {
-          while (target !== document.body) {
+          while (target && target !== document.body) {
             if (JX.DOM.isNode(target, 'span') &&
                (target.className in class_map)) {
               highlighted = target;
@@ -105,6 +112,11 @@ JX.behavior('repository-crossreference', function(config, statics) {
     var path = getPath(target);
     if (path !== null) {
       query.path = path;
+    }
+
+    var char = getChar(target);
+    if (char !== null) {
+      query.char = char;
     }
 
     var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
@@ -171,6 +183,32 @@ JX.behavior('repository-crossreference', function(config, statics) {
     }
 
     return JX.Stratcom.getData(changeset).path;
+  }
+
+  function getChar(target) {
+    var cell = JX.DOM.findAbove(target, 'td');
+    if (!cell) {
+      return null;
+    }
+
+    var char = 1;
+    for (var ii = 0; ii < cell.childNodes.length; ii++) {
+      var node = cell.childNodes[ii];
+
+      if (node === target) {
+        return char;
+      }
+
+      var content = '' + node.textContent;
+
+      // Strip off any ZWS characters. These are marker characters used to
+      // improve copy/paste behavior.
+      content = content.replace(/\u200B/g, '');
+
+      char += content.length;
+    }
+
+    return null;
   }
 
   if (config.container) {
