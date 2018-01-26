@@ -6,6 +6,10 @@ final class PhabricatorCommentEditType extends PhabricatorEditType {
     return new ConduitStringParameterType();
   }
 
+  protected function newBulkParameterType() {
+    return new BulkRemarkupParameterType();
+  }
+
   public function generateTransactions(
     PhabricatorApplicationTransaction $template,
     array $spec) {

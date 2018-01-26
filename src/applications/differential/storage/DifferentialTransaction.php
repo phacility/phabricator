@@ -100,6 +100,13 @@ final class DifferentialTransaction
           return true;
         }
         break;
+      case DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE:
+        // Don't hide the initial "X requested review: ..." transaction from
+        // mail or feed even when it occurs during creation. We need this
+        // transaction to survive so we'll generate mail and feed stories when
+        // revisions immediately leave the draft state. See T13035 for
+        // discussion.
+        return false;
     }
 
     return parent::shouldHide();
@@ -110,12 +117,6 @@ final class DifferentialTransaction
       case DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE:
         // Don't hide the initial "X added reviewers: ..." transaction during
         // object creation from mail. See T12118 and PHI54.
-        return false;
-      case DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE:
-        // Don't hide the initial "X requested review: ..." transaction from
-        // mail even when it occurs during creation. We need this transaction
-        // to survive so we'll generate mail when revisions immediately leave
-        // the draft state. See T13035 for discussion.
         return false;
     }
 

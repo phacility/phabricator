@@ -181,6 +181,11 @@ abstract class PhabricatorEditEngine
         $field
           ->setViewer($viewer)
           ->setObject($object);
+
+        $group_key = $field->getBulkEditGroupKey();
+        if ($group_key === null) {
+          $field->setBulkEditGroupKey('extension');
+        }
       }
 
       $extension_fields = mpull($extension_fields, null, 'getKey');
@@ -2169,6 +2174,8 @@ abstract class PhabricatorEditEngine
         ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
     }
 
+    $is_strict = $request->getIsStrictlyTyped();
+
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
 
@@ -2179,10 +2186,10 @@ abstract class PhabricatorEditEngine
       $parameter_type->setViewer($viewer);
 
       try {
-        $xaction['value'] = $parameter_type->getValue(
-          $xaction,
-          'value',
-          $request->getIsStrictlyTyped());
+        $value = $xaction['value'];
+        $value = $parameter_type->getValue($xaction, 'value', $is_strict);
+        $value = $type->getTransactionValueFromConduit($value);
+        $xaction['value'] = $value;
       } catch (Exception $ex) {
         throw new PhutilProxyException(
           pht(
@@ -2219,7 +2226,6 @@ abstract class PhabricatorEditEngine
       }
 
       foreach ($field_types as $field_type) {
-        $field_type->setField($field);
         $types[$field_type->getEditType()] = $field_type;
       }
     }
@@ -2418,6 +2424,204 @@ abstract class PhabricatorEditEngine
 
   protected function didApplyTransactions($object, array $xactions) {
     return;
+  }
+
+
+/* -(  Bulk Edits  )--------------------------------------------------------- */
+
+  final public function newBulkEditGroupMap() {
+    $groups = $this->newBulkEditGroups();
+
+    $map = array();
+    foreach ($groups as $group) {
+      $key = $group->getKey();
+
+      if (isset($map[$key])) {
+        throw new Exception(
+          pht(
+            'Two bulk edit groups have the same key ("%s"). Each bulk edit '.
+            'group must have a unique key.',
+            $key));
+      }
+
+      $map[$key] = $group;
+    }
+
+    if ($this->isEngineExtensible()) {
+      $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    } else {
+      $extensions = array();
+    }
+
+    foreach ($extensions as $extension) {
+      $extension_groups = $extension->newBulkEditGroups($this);
+      foreach ($extension_groups as $group) {
+        $key = $group->getKey();
+
+        if (isset($map[$key])) {
+          throw new Exception(
+            pht(
+              'Extension "%s" defines a bulk edit group with the same key '.
+              '("%s") as the main editor or another extension. Each bulk '.
+              'edit group must have a unique key.'));
+        }
+
+        $map[$key] = $group;
+      }
+    }
+
+    return $map;
+  }
+
+  protected function newBulkEditGroups() {
+    return array(
+      id(new PhabricatorBulkEditGroup())
+        ->setKey('default')
+        ->setLabel(pht('Primary Fields')),
+      id(new PhabricatorBulkEditGroup())
+        ->setKey('extension')
+        ->setLabel(pht('Support Applications')),
+    );
+  }
+
+  final public function newBulkEditMap() {
+    $config = $this->loadDefaultConfiguration();
+    if (!$config) {
+      throw new Exception(
+        pht('No default edit engine configuration for bulk edit.'));
+    }
+
+    $object = $this->newEditableObject();
+    $fields = $this->buildEditFields($object);
+    $groups = $this->newBulkEditGroupMap();
+
+    $edit_types = $this->getBulkEditTypesFromFields($fields);
+
+    $map = array();
+    foreach ($edit_types as $key => $type) {
+      $bulk_type = $type->getBulkParameterType();
+      if ($bulk_type === null) {
+        continue;
+      }
+
+      $bulk_label = $type->getBulkEditLabel();
+      if ($bulk_label === null) {
+        continue;
+      }
+
+      $group_key = $type->getBulkEditGroupKey();
+      if (!$group_key) {
+        $group_key = 'default';
+      }
+
+      if (!isset($groups[$group_key])) {
+        throw new Exception(
+          pht(
+            'Field "%s" has a bulk edit group key ("%s") with no '.
+            'corresponding bulk edit group.',
+            $key,
+            $group_key));
+      }
+
+      $map[] = array(
+        'label' => $bulk_label,
+        'xaction' => $key,
+        'group' => $group_key,
+        'control' => array(
+          'type' => $bulk_type->getPHUIXControlType(),
+          'spec' => (object)$bulk_type->getPHUIXControlSpecification(),
+        ),
+      );
+    }
+
+    return $map;
+  }
+
+
+  final public function newRawBulkTransactions(array $xactions) {
+    $config = $this->loadDefaultConfiguration();
+    if (!$config) {
+      throw new Exception(
+        pht('No default edit engine configuration for bulk edit.'));
+    }
+
+    $object = $this->newEditableObject();
+    $fields = $this->buildEditFields($object);
+
+    $edit_types = $this->getBulkEditTypesFromFields($fields);
+    $template = $object->getApplicationTransactionTemplate();
+
+    $raw_xactions = array();
+    foreach ($xactions as $key => $xaction) {
+      PhutilTypeSpec::checkMap(
+        $xaction,
+        array(
+          'type' => 'string',
+          'value' => 'optional wild',
+        ));
+
+      $type = $xaction['type'];
+      if (!isset($edit_types[$type])) {
+        throw new Exception(
+          pht(
+            'Unsupported bulk edit type "%s".',
+            $type));
+      }
+
+      $edit_type = $edit_types[$type];
+
+      // Replace the edit type with the underlying transaction type. Usually
+      // these are 1:1 and the transaction type just has more internal noise,
+      // but it's possible that this isn't the case.
+      $xaction['type'] = $edit_type->getTransactionType();
+
+      $value = $xaction['value'];
+      $value = $edit_type->getTransactionValueFromBulkEdit($value);
+      $xaction['value'] = $value;
+
+      $xaction_objects = $edit_type->generateTransactions(
+        clone $template,
+        $xaction);
+
+      foreach ($xaction_objects as $xaction_object) {
+        $raw_xaction = array(
+          'type' => $xaction_object->getTransactionType(),
+          'metadata' => $xaction_object->getMetadata(),
+          'new' => $xaction_object->getNewValue(),
+        );
+
+        if ($xaction_object->hasOldValue()) {
+          $raw_xaction['old'] = $xaction_object->getOldValue();
+        }
+
+        if ($xaction_object->hasComment()) {
+          $comment = $xaction_object->getComment();
+          $raw_xaction['comment'] = $comment->getContent();
+        }
+
+        $raw_xactions[] = $raw_xaction;
+      }
+    }
+
+    return $raw_xactions;
+  }
+
+  private function getBulkEditTypesFromFields(array $fields) {
+    $types = array();
+
+    foreach ($fields as $field) {
+      $field_types = $field->getBulkEditTypes();
+
+      if ($field_types === null) {
+        continue;
+      }
+
+      foreach ($field_types as $field_type) {
+        $types[$field_type->getEditType()] = $field_type;
+      }
+    }
+
+    return $types;
   }
 
 

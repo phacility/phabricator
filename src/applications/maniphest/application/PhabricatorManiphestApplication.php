@@ -52,7 +52,7 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
       '/maniphest/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'ManiphestTaskListController',
         'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
-        'batch/' => 'ManiphestBatchEditController',
+        $this->getBulkRoutePattern('bulk/') => 'ManiphestBulkEditController',
         'task/' => array(
           $this->getEditRoutePattern('edit/')
             => 'ManiphestTaskEditController',

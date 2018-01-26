@@ -11,63 +11,40 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return 'PhabricatorDiffusionApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'repositoryPHIDs',
-      $this->readPHIDsFromRequest(
-        $request,
-        'repositories',
-        array(
-          PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
-        )));
-
-    $saved->setParameter(
-      'pusherPHIDs',
-      $this->readUsersFromRequest(
-        $request,
-        'pushers'));
-
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorRepositoryPushLogQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorRepositoryPushLogQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $repository_phids = $saved->getParameter('repositoryPHIDs');
-    if ($repository_phids) {
-      $query->withRepositoryPHIDs($repository_phids);
+    if ($map['repositoryPHIDs']) {
+      $query->withRepositoryPHIDs($map['repositoryPHIDs']);
     }
 
-    $pusher_phids = $saved->getParameter('pusherPHIDs');
-    if ($pusher_phids) {
-      $query->withPusherPHIDs($pusher_phids);
+    if ($map['pusherPHIDs']) {
+      $query->withPusherPHIDs($map['pusherPHIDs']);
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $repository_phids = $saved_query->getParameter('repositoryPHIDs', array());
-    $pusher_phids = $saved_query->getParameter('pusherPHIDs', array());
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new DiffusionRepositoryDatasource())
-          ->setName('repositories')
-          ->setLabel(pht('Repositories'))
-          ->setValue($repository_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('pushers')
-          ->setLabel(pht('Pushers'))
-          ->setValue($pusher_phids));
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchDatasourceField())
+        ->setDatasource(new DiffusionRepositoryDatasource())
+        ->setKey('repositoryPHIDs')
+        ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
+        ->setLabel(pht('Repositories'))
+        ->setDescription(
+          pht('Search for pull logs for specific repositories.')),
+      id(new PhabricatorUsersSearchField())
+        ->setKey('pusherPHIDs')
+        ->setAliases(array('pusher', 'pushers', 'pusherPHID'))
+        ->setLabel(pht('Pushers'))
+        ->setDescription(
+          pht('Search for pull logs by specific users.')),
+    );
   }
 
   protected function getURI($path) {

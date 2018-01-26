@@ -1,10 +1,7 @@
 <?php
 
-final class DiffusionPushLogListController extends DiffusionPushLogController {
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+final class DiffusionPushLogListController
+  extends DiffusionLogController {
 
   public function handleRequest(AphrontRequest $request) {
     return id(new PhabricatorRepositoryPushLogSearchEngine())

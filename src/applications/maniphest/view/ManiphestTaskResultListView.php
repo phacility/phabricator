@@ -218,7 +218,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
         'disabled'    => 'disabled',
         'class'       => 'disabled',
       ),
-      pht("Batch Edit Selected \xC2\xBB"));
+      pht("Bulk Edit Selected \xC2\xBB"));
 
     $export = javelin_tag(
       'a',
@@ -255,7 +255,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
       $user,
       array(
         'method' => 'POST',
-        'action' => '/maniphest/batch/',
+        'action' => '/maniphest/bulk/',
         'id'     => 'batch-select-form',
       ),
       $editor);

@@ -49,13 +49,6 @@ final class PhabricatorCalendarEventHeraldAdapter extends HeraldAdapter {
     }
   }
 
-  public function getRepetitionOptions() {
-    return array(
-      HeraldRepetitionPolicyConfig::EVERY,
-      HeraldRepetitionPolicyConfig::FIRST,
-    );
-  }
-
   public function getHeraldName() {
     return $this->getObject()->getMonogram();
   }

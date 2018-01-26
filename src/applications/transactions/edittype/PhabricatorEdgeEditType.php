@@ -34,4 +34,13 @@ final class PhabricatorEdgeEditType
     return array($xaction);
   }
 
+  protected function newBulkParameterType() {
+    if (!$this->getDatasource()) {
+      return null;
+    }
+
+    return id(new BulkTokenizerParameterType())
+      ->setDatasource($this->getDatasource());
+  }
+
 }

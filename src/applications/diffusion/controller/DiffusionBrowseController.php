@@ -658,6 +658,11 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($corpus)
       ->addClass('diffusion-mobile-view')
+      ->addSigil('diffusion-file-content-view')
+      ->setMetadata(
+        array(
+          'path' => $this->getDiffusionRequest()->getPath(),
+        ))
       ->setCollapsed(true);
 
     $messages = array();
@@ -947,6 +952,10 @@ final class DiffusionBrowseController extends DiffusionController {
       }
 
       foreach ($revision_ids as $commit_phid => $revision_id) {
+        // If the viewer can't actually see this revision, skip it.
+        if (!isset($revisions[$revision_id])) {
+          continue;
+        }
         $revision_map[$commit_map[$commit_phid]] = $revision_id;
       }
     }

@@ -173,7 +173,7 @@ final class DifferentialChangeset
   }
 
   public function getAnchorName() {
-    return 'change-'.PhabricatorHash::digestForIndex($this->getFilename());
+    return 'change-'.PhabricatorHash::digestForAnchor($this->getFilename());
   }
 
   public function getAbsoluteRepositoryPath(

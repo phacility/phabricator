@@ -6,13 +6,16 @@ abstract class PhabricatorEditType extends Phobject {
   private $editField;
   private $transactionType;
   private $label;
-  private $field;
   private $metadata = array();
 
   private $conduitDescription;
   private $conduitDocumentation;
   private $conduitTypeDescription;
   private $conduitParameterType;
+
+  private $bulkParameterType;
+  private $bulkEditLabel;
+  private $bulkEditGroupKey;
 
   public function setLabel($label) {
     $this->label = $label;
@@ -23,13 +26,30 @@ abstract class PhabricatorEditType extends Phobject {
     return $this->label;
   }
 
-  public function setField(PhabricatorEditField $field) {
-    $this->field = $field;
+  public function setBulkEditLabel($bulk_edit_label) {
+    $this->bulkEditLabel = $bulk_edit_label;
     return $this;
   }
 
-  public function getField() {
-    return $this->field;
+  public function getBulkEditLabel() {
+    if ($this->bulkEditLabel !== null) {
+      return $this->bulkEditLabel;
+    }
+
+    return $this->getEditField()->getBulkEditLabel();
+  }
+
+  public function setBulkEditGroupKey($key) {
+    $this->bulkEditGroupKey = $key;
+    return $this;
+  }
+
+  public function getBulkEditGroupKey() {
+    if ($this->bulkEditGroupKey !== null) {
+      return $this->bulkEditGroupKey;
+    }
+
+    return $this->getEditField()->getBulkEditGroupKey();
   }
 
   public function setEditType($edit_type) {
@@ -84,6 +104,38 @@ abstract class PhabricatorEditType extends Phobject {
   public function getEditField() {
     return $this->editField;
   }
+
+  protected function getTransactionValueFromValue($value) {
+    return $value;
+  }
+
+
+/* -(  Bulk  )--------------------------------------------------------------- */
+
+
+  protected function newBulkParameterType() {
+    if ($this->bulkParameterType) {
+      return clone $this->bulkParameterType;
+    }
+
+    return null;
+  }
+
+
+  public function setBulkParameterType(BulkParameterType $type) {
+    $this->bulkParameterType = $type;
+    return $this;
+  }
+
+
+  public function getBulkParameterType() {
+    return $this->newBulkParameterType();
+  }
+
+  public function getTransactionValueFromBulkEdit($value) {
+    return $this->getTransactionValueFromValue($value);
+  }
+
 
 /* -(  Conduit  )------------------------------------------------------------ */
 
@@ -160,6 +212,10 @@ abstract class PhabricatorEditType extends Phobject {
     }
 
     return $this->conduitDocumentation;
+  }
+
+  public function getTransactionValueFromConduit($value) {
+    return $this->getTransactionValueFromValue($value);
   }
 
 }

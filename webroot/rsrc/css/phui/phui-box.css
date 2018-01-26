@@ -103,6 +103,10 @@ body.device .phui-box-blue-property.phui-object-box.phui-object-box-collapsed
   padding: 2px 8px;
 }
 
+.phui-box-blue-property .phui-oi-list-view.phui-oi-list-flush {
+  padding: 0;
+}
+
 body .phui-box-blue-property.phui-object-box.phui-object-box-collapsed {
   padding: 0;
 }

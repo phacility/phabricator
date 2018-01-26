@@ -66,8 +66,10 @@ final class HeraldRuleEditor
         $object->setMustMatchAll((int)$new_state['match_all']);
         $object->attachConditions($new_state['conditions']);
         $object->attachActions($new_state['actions']);
-        $object->setRepetitionPolicy(
-          HeraldRepetitionPolicyConfig::toInt($new_state['repetition_policy']));
+
+        $new_repetition = $new_state['repetition_policy'];
+        $object->setRepetitionPolicyStringConstant($new_repetition);
+
         return $object;
     }
 

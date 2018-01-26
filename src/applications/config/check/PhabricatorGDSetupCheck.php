@@ -18,7 +18,8 @@ final class PhabricatorGDSetupCheck extends PhabricatorSetupCheck {
 
       $this->newIssue('extension.gd')
         ->setName(pht("Missing '%s' Extension", 'gd'))
-        ->setMessage($message);
+        ->setMessage($message)
+        ->addPHPExtension('gd');
     } else {
       $image_type_map = array(
         'imagecreatefrompng'  => 'PNG',

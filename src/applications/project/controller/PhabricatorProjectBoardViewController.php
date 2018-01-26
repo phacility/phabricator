@@ -230,14 +230,23 @@ final class PhabricatorProjectBoardViewController
           ->addCancelButton($board_uri);
       }
 
-      $batch_ids = mpull($batch_tasks, 'getID');
-      $batch_ids = implode(',', $batch_ids);
+      // Create a saved query to hold the working set. This allows us to get
+      // around URI length limitations with a long "?ids=..." query string.
+      // For details, see T10268.
+      $search_engine = id(new ManiphestTaskSearchEngine())
+        ->setViewer($viewer);
 
-      $batch_uri = new PhutilURI('/maniphest/batch/');
-      $batch_uri->setQueryParam('board', $this->id);
-      $batch_uri->setQueryParam('batch', $batch_ids);
+      $saved_query = $search_engine->newSavedQuery();
+      $saved_query->setParameter('ids', mpull($batch_tasks, 'getID'));
+      $search_engine->saveQuery($saved_query);
+
+      $query_key = $saved_query->getQueryKey();
+
+      $bulk_uri = new PhutilURI("/maniphest/bulk/query/{$query_key}/");
+      $bulk_uri->setQueryParam('board', $this->id);
+
       return id(new AphrontRedirectResponse())
-        ->setURI($batch_uri);
+        ->setURI($bulk_uri);
     }
 
     $move_id = $request->getStr('move');
@@ -1048,7 +1057,7 @@ final class PhabricatorProjectBoardViewController
 
     $column_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-list-ul')
-      ->setName(pht('Batch Edit Tasks...'))
+      ->setName(pht('Bulk Edit Tasks...'))
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
 

@@ -56,4 +56,16 @@ abstract class PhabricatorTokenizerEditField
     return $action;
   }
 
+  protected function newBulkParameterType() {
+    $datasource = $this->newDatasource()
+      ->setViewer($this->getViewer());
+
+    if ($this->getIsSingleValue()) {
+      $datasource->setLimit(1);
+    }
+
+    return id(new BulkTokenizerParameterType())
+      ->setDatasource($datasource);
+  }
+
 }

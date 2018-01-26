@@ -455,6 +455,10 @@ ul.phui-oi-list-view .phui-oi-selected
   border-color: {$sh-blueborder};
 }
 
+.phui-oi-forbidden {
+  background: {$sh-redbackground};
+}
+
 
 /* - Handle Icons --------------------------------------------------------------
 
@@ -663,4 +667,23 @@ ul.phui-oi-list-view .phui-oi-selected
 .device-phone .phui-oi-col2.phui-oi-side-column {
   padding: 0 8px 8px;
   text-align: left;
+}
+
+.phui-oi-col0.phui-oi-checkbox {
+  width: 28px;
+  text-align: center;
+}
+
+.phui-oi-selectable {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* When the list selection state can be toggled on the client (as in the bulk
+  editor), keep the border color consistent to make the interaction feel more
+  robust. */
+ul.phui-oi-list-view .phui-oi-selectable
+  .phui-oi-frame {
+  border-color: {$blueborder};
 }

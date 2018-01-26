@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuthSSHKeyDeactivateController
+final class PhabricatorAuthSSHKeyRevokeController
   extends PhabricatorAuthSSHKeyController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -46,14 +46,14 @@ final class PhabricatorAuthSSHKeyDeactivateController
     $name = phutil_tag('strong', array(), $key->getName());
 
     return $this->newDialog()
-      ->setTitle(pht('Deactivate SSH Public Key'))
+      ->setTitle(pht('Revoke SSH Public Key'))
       ->appendParagraph(
         pht(
-          'The key "%s" will be permanently deactivated, and you will no '.
+          'The key "%s" will be permanently revoked, and you will no '.
           'longer be able to use the corresponding private key to '.
           'authenticate.',
           $name))
-      ->addSubmitButton(pht('Deactivate Public Key'))
+      ->addSubmitButton(pht('Revoke Public Key'))
       ->addCancelButton($cancel_uri);
   }
 

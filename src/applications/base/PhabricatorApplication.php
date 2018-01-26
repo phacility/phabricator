@@ -618,8 +618,12 @@ abstract class PhabricatorApplication
       ')?';
   }
 
-  protected function getQueryRoutePattern($base = null) {
+  protected function getBulkRoutePattern($base = null) {
     return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
+  }
+
+  protected function getQueryRoutePattern($base = null) {
+    return $base.'(?:query/(?P<queryKey>[^/]+)/(?:(?P<queryAction>[^/]+)/)?)?';
   }
 
   protected function getProfileMenuRouting($controller) {

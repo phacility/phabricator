@@ -54,6 +54,11 @@ final class PhabricatorSelectEditField
     return new ConduitStringParameterType();
   }
 
+  protected function newBulkParameterType() {
+    return id(new BulkSelectParameterType())
+      ->setOptions($this->getOptions());
+  }
+
   private function getCanonicalValue($value) {
     $options = $this->getOptions();
     if (!isset($options[$value])) {

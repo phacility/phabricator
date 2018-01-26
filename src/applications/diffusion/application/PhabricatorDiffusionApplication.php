@@ -124,6 +124,9 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DiffusionPushLogListController',
           'view/(?P<id>\d+)/' => 'DiffusionPushEventViewController',
         ),
+        'pulllog/' => array(
+          $this->getQueryRoutePattern() => 'DiffusionPullLogListController',
+        ),
         '(?P<repositoryCallsign>[A-Z]+)' => $repository_routes,
         '(?P<repositoryID>[1-9]\d*)' => $repository_routes,
 

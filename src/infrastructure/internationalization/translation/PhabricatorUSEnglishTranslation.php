@@ -1639,6 +1639,18 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      'You are about to apply a bulk edit which will affect '.
+      '%s object(s).' => array(
+        'You are about to apply a bulk edit to a single object.',
+        'You are about to apply a bulk edit which will affect '.
+        '%s objects.',
+      ),
+
+      'Destroyed %s credential(s) of type "%s".' => array(
+        'Destroyed one credential of type "%2$s".',
+        'Destroyed %s credentials of type "%s".',
+      ),
+
     );
   }
 

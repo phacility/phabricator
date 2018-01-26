@@ -58,6 +58,7 @@ final class HeraldTokenizerFieldValue
         'datasourceURI' => $datasource->getDatasourceURI(),
         'browseURI' => $datasource->getBrowseURI(),
         'placeholder' => $datasource->getPlaceholderText(),
+        'limit' => $datasource->getLimit(),
       ),
     );
   }

@@ -1,11 +1,7 @@
 <?php
 
 final class DiffusionPushEventViewController
-  extends DiffusionPushLogController {
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+  extends DiffusionLogController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();

@@ -423,7 +423,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
       ->setIcon($xaction->getIcon())
       ->setColor($xaction->getColor())
-      ->setHideCommentOptions($this->getHideCommentOptions());
+      ->setHideCommentOptions($this->getHideCommentOptions())
+      ->setIsSilent($xaction->getIsSilentTransaction());
 
     list($token, $token_removed) = $xaction->getToken();
     if ($token) {

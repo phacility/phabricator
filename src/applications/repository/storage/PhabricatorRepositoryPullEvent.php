@@ -15,6 +15,14 @@ final class PhabricatorRepositoryPullEvent
 
   private $repository = self::ATTACHABLE;
 
+  const RESULT_PULL = 'pull';
+  const RESULT_ERROR = 'error';
+  const RESULT_EXCEPTION = 'exception';
+
+  const PROTOCOL_HTTP = 'http';
+  const PROTOCOL_HTTPS = 'https';
+  const PROTOCOL_SSH = 'ssh';
+
   public static function initializeNewEvent(PhabricatorUser $viewer) {
     return id(new PhabricatorRepositoryPushEvent())
       ->setPusherPHID($viewer->getPHID());
@@ -51,13 +59,74 @@ final class PhabricatorRepositoryPullEvent
       PhabricatorRepositoryPullEventPHIDType::TYPECONST);
   }
 
-  public function attachRepository(PhabricatorRepository $repository) {
+  public function attachRepository(PhabricatorRepository $repository = null) {
     $this->repository = $repository;
     return $this;
   }
 
   public function getRepository() {
     return $this->assertAttached($this->repository);
+  }
+
+  public function getRemoteProtocolDisplayName() {
+    $map = array(
+      self::PROTOCOL_SSH => pht('SSH'),
+      self::PROTOCOL_HTTP => pht('HTTP'),
+      self::PROTOCOL_HTTPS => pht('HTTPS'),
+    );
+
+    $protocol = $this->getRemoteProtocol();
+
+    return idx($map, $protocol, $protocol);
+  }
+
+  public function newResultIcon() {
+    $icon = new PHUIIconView();
+    $type = $this->getResultType();
+    $code = $this->getResultCode();
+
+    $protocol = $this->getRemoteProtocol();
+
+    $is_any_http =
+      ($protocol === self::PROTOCOL_HTTP) ||
+      ($protocol === self::PROTOCOL_HTTPS);
+
+    // If this was an HTTP request and we responded with a 401, that means
+    // the user didn't provide credentials. This is technically an error, but
+    // it's routine and just causes the client to prompt them. Show a more
+    // comforting icon and description in the UI.
+    if ($is_any_http) {
+      if ($code == 401) {
+        return $icon
+          ->setIcon('fa-key blue')
+          ->setTooltip(pht('Authentication Required'));
+      }
+    }
+
+    switch ($type) {
+      case self::RESULT_ERROR:
+        $icon
+          ->setIcon('fa-times red')
+          ->setTooltip(pht('Error'));
+        break;
+      case self::RESULT_EXCEPTION:
+        $icon
+          ->setIcon('fa-exclamation-triangle red')
+          ->setTooltip(pht('Exception'));
+        break;
+      case self::RESULT_PULL:
+        $icon
+          ->setIcon('fa-download green')
+          ->setTooltip(pht('Pull'));
+        break;
+      default:
+        $icon
+          ->setIcon('fa-question indigo')
+          ->setTooltip(pht('Unknown ("%s")', $type));
+        break;
+    }
+
+    return $icon;
   }
 
 
@@ -71,10 +140,18 @@ final class PhabricatorRepositoryPullEvent
   }
 
   public function getPolicy($capability) {
-    return $this->getRepository()->getPolicy($capability);
+    if ($this->getRepository()) {
+      return $this->getRepository()->getPolicy($capability);
+    }
+
+    return PhabricatorPolicies::POLICY_ADMIN;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if (!$this->getRepository()) {
+      return false;
+    }
+
     return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
   }
 

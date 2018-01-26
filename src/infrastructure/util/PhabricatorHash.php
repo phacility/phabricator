@@ -3,6 +3,7 @@
 final class PhabricatorHash extends Phobject {
 
   const INDEX_DIGEST_LENGTH = 12;
+  const ANCHOR_DIGEST_LENGTH = 12;
 
   /**
    * Digest a string using HMAC+SHA1.
@@ -30,24 +31,6 @@ final class PhabricatorHash extends Phobject {
 
 
   /**
-   * Digest a string into a password hash. This is similar to @{method:digest},
-   * but requires a salt and iterates the hash to increase cost.
-   */
-  public static function digestPassword(PhutilOpaqueEnvelope $envelope, $salt) {
-    $result = $envelope->openEnvelope();
-    if (!$result) {
-      throw new Exception(pht('Trying to digest empty password!'));
-    }
-
-    for ($ii = 0; $ii < 1000; $ii++) {
-      $result = self::weakDigest($result, $salt);
-    }
-
-    return $result;
-  }
-
-
-  /**
    * Digest a string for use in, e.g., a MySQL index. This produces a short
    * (12-byte), case-sensitive alphanumeric string with 72 bits of entropy,
    * which is generally safe in most contexts (notably, URLs).
@@ -56,8 +39,8 @@ final class PhabricatorHash extends Phobject {
    * related hashing (for general purpose hashing, see @{method:digest}).
    *
    * @param   string  Input string.
-   * @return  string  12-byte, case-sensitive alphanumeric hash of the string
-   *                  which
+   * @return  string  12-byte, case-sensitive, mostly-alphanumeric hash of
+   *                  the string.
    */
   public static function digestForIndex($string) {
     $hash = sha1($string, $raw_output = true);
@@ -80,6 +63,62 @@ final class PhabricatorHash extends Phobject {
 
     return $result;
   }
+
+  /**
+   * Digest a string for use in HTML page anchors. This is similar to
+   * @{method:digestForIndex} but produces purely alphanumeric output.
+   *
+   * This tries to be mostly compatible with the index digest to limit how
+   * much stuff we're breaking by switching to it. For additional discussion,
+   * see T13045.
+   *
+   * @param   string  Input string.
+   * @return  string  12-byte, case-sensitive, purely-alphanumeric hash of
+   *                  the string.
+   */
+  public static function digestForAnchor($string) {
+    $hash = sha1($string, $raw_output = true);
+
+    static $map;
+    if ($map === null) {
+      $map = '0123456789'.
+             'abcdefghij'.
+             'klmnopqrst'.
+             'uvwxyzABCD'.
+             'EFGHIJKLMN'.
+             'OPQRSTUVWX'.
+             'YZ';
+    }
+
+    $result = '';
+    $accum = 0;
+    $map_size = strlen($map);
+    for ($ii = 0; $ii < self::ANCHOR_DIGEST_LENGTH; $ii++) {
+      $byte = ord($hash[$ii]);
+      $low_bits = ($byte & 0x3F);
+      $accum = ($accum + $byte) % $map_size;
+
+      if ($low_bits < $map_size) {
+        // If an index digest would produce any alphanumeric character, just
+        // use that character. This means that these digests are the same as
+        // digests created with "digestForIndex()" in all positions where the
+        // output character is some character other than "." or "_".
+        $result .= $map[$low_bits];
+      } else {
+        // If an index digest would produce a non-alphumeric character ("." or
+        // "_"), pick an alphanumeric character instead. We accumulate an
+        // index into the alphanumeric character list to try to preserve
+        // entropy here. We could use this strategy for all bytes instead,
+        // but then these digests would differ from digests created with
+        // "digestForIndex()" in all positions, instead of just a small number
+        // of positions.
+        $result .= $map[$accum];
+      }
+    }
+
+    return $result;
+  }
+
 
   public static function digestToRange($string, $min, $max) {
     if ($min > $max) {

@@ -41,7 +41,7 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/people/' => array(
-        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorPeopleListController',
+        $this->getQueryRoutePattern() => 'PhabricatorPeopleListController',
         'logs/(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorPeopleLogsController',
         'invite/' => array(
@@ -76,7 +76,7 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
           'PhabricatorPeopleProfilePictureController',
         'manage/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileManageController',
-        ),
+      ),
       '/p/(?P<username>[\w._-]+)/' => array(
         '' => 'PhabricatorPeopleProfileViewController',
         'item/' => $this->getProfileMenuRouting(
