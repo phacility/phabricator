@@ -94,12 +94,15 @@ JX.behavior('repository-crossreference', function(config, statics) {
     };
     var c = target.className;
     c = c.replace(classHighlight, '').trim();
+
     if (class_map[c]) {
       query.type = class_map[c];
     }
+
     if (target.hasAttribute('data-symbol-context')) {
       query.context = target.getAttribute('data-symbol-context');
     }
+
     if (target.hasAttribute('data-symbol-name')) {
       symbol = target.getAttribute('data-symbol-name');
     }
@@ -176,13 +179,26 @@ JX.behavior('repository-crossreference', function(config, statics) {
   }
 
   function getPath(target) {
-    var changeset = JX.DOM.findAbove(target, 'div', 'differential-changeset');
-
-    if (!changeset) {
-      return null;
+    // This method works in Differential, when browsing a changset.
+    var changeset;
+    try {
+      changeset = JX.DOM.findAbove(target, 'div', 'differential-changeset');
+      return JX.Stratcom.getData(changeset).path;
+    } catch (ex) {
+      // Ignore.
     }
 
-    return JX.Stratcom.getData(changeset).path;
+    // This method works in Diffusion, when viewing the content of a file at
+    // a particular commit.
+    var file;
+    try {
+      file = JX.DOM.findAbove(target, 'div', 'diffusion-file-content-view');
+      return JX.Stratcom.getData(file).path;
+    } catch (ex) {
+      // Ignore.
+    }
+
+    return null;
   }
 
   function getChar(target) {
