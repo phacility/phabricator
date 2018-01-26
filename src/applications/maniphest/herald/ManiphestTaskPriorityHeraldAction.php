@@ -61,7 +61,8 @@ final class ManiphestTaskPriorityHeraldAction
   }
 
   protected function getDatasource() {
-    return new ManiphestTaskPriorityDatasource();
+    return id(new ManiphestTaskPriorityDatasource())
+      ->setLimit(1);
   }
 
   protected function getDatasourceValueMap() {
