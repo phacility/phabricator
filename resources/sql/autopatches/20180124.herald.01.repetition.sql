@@ -5,6 +5,10 @@
 
 */
 
+UPDATE {$NAMESPACE}_herald.herald_rule
+  SET repetitionPolicy = '1'
+  WHERE repetitionPolicy IS NULL;
+
 ALTER TABLE {$NAMESPACE}_herald.herald_rule
   CHANGE repetitionPolicy
     repetitionPolicy VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT};
