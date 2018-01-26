@@ -396,9 +396,12 @@ final class PhabricatorApplicationSearchController
         ->setViewer($viewer)
         ->withQueryKeys(array($query_key))
         ->executeOne();
-      if (!$saved_query) {
-        return new Aphront404Response();
-      }
+    } else {
+      $saved_query = null;
+    }
+
+    if (!$saved_query) {
+      return new Aphront404Response();
     }
 
     $cancel_uri = $engine->getQueryResultsPageURI($query_key);

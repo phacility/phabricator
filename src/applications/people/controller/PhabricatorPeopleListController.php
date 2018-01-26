@@ -16,7 +16,7 @@ final class PhabricatorPeopleListController
       PeopleBrowseUserDirectoryCapability::CAPABILITY);
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($request->getURIData('key'))
+      ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine(new PhabricatorPeopleSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
