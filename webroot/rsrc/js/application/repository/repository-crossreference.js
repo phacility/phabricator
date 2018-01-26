@@ -96,6 +96,17 @@ JX.behavior('repository-crossreference', function(config, statics) {
     if (target.hasAttribute('data-symbol-name')) {
       symbol = target.getAttribute('data-symbol-name');
     }
+
+    var line = getLineNumber(target);
+    if (line !== null) {
+      query.line = line;
+    }
+
+    var path = getPath(target);
+    if (path !== null) {
+      query.path = path;
+    }
+
     var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
     uri.addQueryParams(query);
     window.open(uri);
@@ -109,6 +120,57 @@ JX.behavior('repository-crossreference', function(config, statics) {
         link(blocks[i], lang);
       }
     }
+  }
+
+  function getLineNumber(target) {
+
+    // Figure out the line number by finding the most recent "<th />" in this
+    // row with a number in it. We may need to skip over one "<th />" if the
+    // diff is being displayed in unified mode.
+
+    var cell = JX.DOM.findAbove(target, 'td');
+    if (!cell) {
+      return null;
+    }
+
+    var row = JX.DOM.findAbove(target, 'tr');
+    if (!row) {
+      return null;
+    }
+
+    var ii;
+
+    var cell_list = [];
+    for (ii = 0; ii < row.childNodes.length; ii++) {
+      cell_list.push(row.childNodes[ii]);
+    }
+    cell_list.reverse();
+
+    var found = false;
+    for (ii = 0; ii < cell_list.length; ii++) {
+      if (cell_list[ii] === cell) {
+        found = true;
+      }
+
+      if (found && JX.DOM.isType(cell_list[ii], 'th')) {
+        var int_value = parseInt(cell_list[ii].textContent, 10);
+        if (int_value) {
+          return int_value;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function getPath(target) {
+    var changeset = JX.DOM.findAbove(target, 'div', 'differential-changeset');
+
+    if (!changeset) {
+      return null;
+    }
+
+    return JX.Stratcom.getData(changeset).path;
   }
 
   if (config.container) {
