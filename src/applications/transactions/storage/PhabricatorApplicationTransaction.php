@@ -302,8 +302,8 @@ abstract class PhabricatorApplicationTransaction
         $phids[] = $new;
         break;
       case PhabricatorTransactions::TYPE_EDGE:
-        $phids[] = ipull($old, 'dst');
-        $phids[] = ipull($new, 'dst');
+        $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+        $phids[] = $record->getChangedPHIDs();
         break;
       case PhabricatorTransactions::TYPE_COLUMNS:
         foreach ($new as $move) {
@@ -632,9 +632,8 @@ abstract class PhabricatorApplicationTransaction
             return true;
             break;
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
-            $new = ipull($this->getNewValue(), 'dst');
-            $old = ipull($this->getOldValue(), 'dst');
-            $add = array_diff($new, $old);
+            $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+            $add = $record->getAddedPHIDs();
             $add_value = reset($add);
             $add_handle = $this->getHandle($add_value);
             if ($add_handle->getPolicyFiltered()) {
@@ -933,10 +932,10 @@ abstract class PhabricatorApplicationTransaction
         }
         break;
       case PhabricatorTransactions::TYPE_EDGE:
-        $new = ipull($new, 'dst');
-        $old = ipull($old, 'dst');
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
+        $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+        $add = $record->getAddedPHIDs();
+        $rem = $record->getRemovedPHIDs();
+
         $type = $this->getMetadata('edge:type');
         $type = head($type);
 
@@ -1172,10 +1171,10 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($new));
         }
       case PhabricatorTransactions::TYPE_EDGE:
-        $new = ipull($new, 'dst');
-        $old = ipull($old, 'dst');
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
+        $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+        $add = $record->getAddedPHIDs();
+        $rem = $record->getRemovedPHIDs();
+
         $type = $this->getMetadata('edge:type');
         $type = head($type);
 
