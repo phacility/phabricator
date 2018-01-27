@@ -87,19 +87,6 @@ final class DifferentialTransaction
         }
         break;
 
-      case PhabricatorTransactions::TYPE_EDGE:
-        $add = array_diff_key($new, $old);
-        $rem = array_diff_key($old, $new);
-
-        // Hide metadata-only edge transactions. These correspond to users
-        // accepting or rejecting revisions, but the change is always explicit
-        // because of the TYPE_ACTION transaction. Rendering these transactions
-        // just creates clutter.
-
-        if (!$add && !$rem) {
-          return true;
-        }
-        break;
       case DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE:
         // Don't hide the initial "X requested review: ..." transaction from
         // mail or feed even when it occurs during creation. We need this
