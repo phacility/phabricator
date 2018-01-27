@@ -303,6 +303,7 @@ abstract class PhabricatorBulkEngine extends Phobject {
 
     $spec = array();
     $option_groups = igroup($edit_map, 'group');
+    $default_value = null;
     foreach ($groups as $group_key => $group) {
       $options = idx($option_groups, $group_key, array());
       if (!$options) {
@@ -315,6 +316,10 @@ abstract class PhabricatorBulkEngine extends Phobject {
           'key' => $option['xaction'],
           'label' => $option['label'],
         );
+
+        if ($default_value === null) {
+          $default_value = $option['xaction'];
+        }
       }
 
       $spec[] = array(
@@ -332,6 +337,7 @@ abstract class PhabricatorBulkEngine extends Phobject {
         'inputNodeID' => $input_id,
         'edits' => $edit_map,
         'optgroups' => array(
+          'value' => $default_value,
           'groups' => $spec,
         ),
       ));

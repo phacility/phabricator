@@ -320,4 +320,41 @@ final class PhabricatorPeopleSearchEngine
     return $result;
   }
 
+  protected function newExportFields() {
+    return array(
+      id(new PhabricatorIDExportField())
+        ->setKey('id')
+        ->setLabel(pht('ID')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('phid')
+        ->setLabel(pht('PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('username')
+        ->setLabel(pht('Username')),
+      id(new PhabricatorStringExportField())
+        ->setKey('realName')
+        ->setLabel(pht('Real Name')),
+      id(new PhabricatorEpochExportField())
+        ->setKey('created')
+        ->setLabel(pht('Date Created')),
+    );
+  }
+
+  public function newExport(array $users) {
+    $viewer = $this->requireViewer();
+
+    $export = array();
+    foreach ($users as $user) {
+      $export[] = array(
+        'id' => $user->getID(),
+        'phid' => $user->getPHID(),
+        'username' => $user->getUsername(),
+        'realName' => $user->getRealName(),
+        'created' => $user->getDateCreated(),
+      );
+    }
+
+    return $export;
+  }
+
 }

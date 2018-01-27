@@ -20,7 +20,8 @@ final class PhabricatorUser
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorAuthPasswordHashInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -28,8 +29,6 @@ final class PhabricatorUser
 
   protected $userName;
   protected $realName;
-  protected $passwordSalt;
-  protected $passwordHash;
   protected $profileImagePHID;
   protected $defaultProfileImagePHID;
   protected $defaultProfileImageVersion;
@@ -216,8 +215,6 @@ final class PhabricatorUser
       self::CONFIG_COLUMN_SCHEMA => array(
         'userName' => 'sort64',
         'realName' => 'text128',
-        'passwordSalt' => 'text32?',
-        'passwordHash' => 'text128?',
         'profileImagePHID' => 'phid?',
         'conduitCertificate' => 'text255',
         'isSystemAgent' => 'bool',
@@ -260,28 +257,6 @@ final class PhabricatorUser
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPeopleUserPHIDType::TYPECONST);
-  }
-
-  public function hasPassword() {
-    return (bool)strlen($this->passwordHash);
-  }
-
-  public function setPassword(PhutilOpaqueEnvelope $envelope) {
-    if (!$this->getPHID()) {
-      throw new Exception(
-        pht(
-          'You can not set a password for an unsaved user because their PHID '.
-          'is a salt component in the password hash.'));
-    }
-
-    if (!strlen($envelope->openEnvelope())) {
-      $this->setPasswordHash('');
-    } else {
-      $this->setPasswordSalt(md5(Filesystem::readRandomBytes(32)));
-      $hash = $this->hashPassword($envelope);
-      $this->setPasswordHash($hash->openEnvelope());
-    }
-    return $this;
   }
 
   public function getMonogram() {
@@ -329,36 +304,6 @@ final class PhabricatorUser
 
   private function generateConduitCertificate() {
     return Filesystem::readRandomCharacters(255);
-  }
-
-  public function comparePassword(PhutilOpaqueEnvelope $envelope) {
-    if (!strlen($envelope->openEnvelope())) {
-      return false;
-    }
-    if (!strlen($this->getPasswordHash())) {
-      return false;
-    }
-
-    return PhabricatorPasswordHasher::comparePassword(
-      $this->getPasswordHashInput($envelope),
-      new PhutilOpaqueEnvelope($this->getPasswordHash()));
-  }
-
-  private function getPasswordHashInput(PhutilOpaqueEnvelope $password) {
-    $input =
-      $this->getUsername().
-      $password->openEnvelope().
-      $this->getPHID().
-      $this->getPasswordSalt();
-
-    return new PhutilOpaqueEnvelope($input);
-  }
-
-  private function hashPassword(PhutilOpaqueEnvelope $password) {
-    $hasher = PhabricatorPasswordHasher::getBestHasher();
-
-    $input_envelope = $this->getPasswordHashInput($password);
-    return $hasher->getPasswordHashForStorage($input_envelope);
   }
 
   const CSRF_CYCLE_FREQUENCY  = 3600;
@@ -1619,5 +1564,94 @@ final class PhabricatorUser
 
     return $variables[$variable_key];
   }
+
+/* -(  PhabricatorAuthPasswordHashInterface  )------------------------------- */
+
+
+  public function newPasswordDigest(
+    PhutilOpaqueEnvelope $envelope,
+    PhabricatorAuthPassword $password) {
+
+    // Before passwords are hashed, they are digested. The goal of digestion
+    // is twofold: to reduce the length of very long passwords to something
+    // reasonable; and to salt the password in case the best available hasher
+    // does not include salt automatically.
+
+    // Users may choose arbitrarily long passwords, and attackers may try to
+    // attack the system by probing it with very long passwords. When large
+    // inputs are passed to hashers -- which are intentionally slow -- it
+    // can result in unacceptably long runtimes. The classic attack here is
+    // to try to log in with a 64MB password and see if that locks up the
+    // machine for the next century. By digesting passwords to a standard
+    // length first, the length of the raw input does not impact the runtime
+    // of the hashing algorithm.
+
+    // Some hashers like bcrypt are self-salting, while other hashers are not.
+    // Applying salt while digesting passwords ensures that hashes are salted
+    // whether we ultimately select a self-salting hasher or not.
+
+    // For legacy compatibility reasons, old VCS and Account password digest
+    // algorithms are significantly more complicated than necessary to achieve
+    // these goals. This is because they once used a different hashing and
+    // salting process. When we upgraded to the modern modular hasher
+    // infrastructure, we just bolted it onto the end of the existing pipelines
+    // so that upgrading didn't break all users' credentials.
+
+    // New implementations can (and, generally, should) safely select the
+    // simple HMAC SHA256 digest at the bottom of the function, which does
+    // everything that a digest callback should without any needless legacy
+    // baggage on top.
+
+    if ($password->getLegacyDigestFormat() == 'v1') {
+      switch ($password->getPasswordType()) {
+        case PhabricatorAuthPassword::PASSWORD_TYPE_VCS:
+          // Old VCS passwords use an iterated HMAC SHA1 as a digest algorithm.
+          // They originally used this as a hasher, but it became a digest
+          // algorithm once hashing was upgraded to include bcrypt.
+          $digest = $envelope->openEnvelope();
+          $salt = $this->getPHID();
+          for ($ii = 0; $ii < 1000; $ii++) {
+            $digest = PhabricatorHash::weakDigest($digest, $salt);
+          }
+          return new PhutilOpaqueEnvelope($digest);
+        case PhabricatorAuthPassword::PASSWORD_TYPE_ACCOUNT:
+          // Account passwords previously used this weird mess of salt and did
+          // not digest the input to a standard length.
+
+          // Beyond this being a weird special case, there are two actual
+          // problems with this, although neither are particularly severe:
+
+          // First, because we do not normalize the length of passwords, this
+          // algorithm may make us vulnerable to DOS attacks where an attacker
+          // attempts to use a very long input to slow down hashers.
+
+          // Second, because the username is part of the hash algorithm,
+          // renaming a user breaks their password. This isn't a huge deal but
+          // it's pretty silly. There's no security justification for this
+          // behavior, I just didn't think about the implication when I wrote
+          // it originally.
+
+          $parts = array(
+            $this->getUsername(),
+            $envelope->openEnvelope(),
+            $this->getPHID(),
+            $password->getPasswordSalt(),
+          );
+
+          return new PhutilOpaqueEnvelope(implode('', $parts));
+      }
+    }
+
+    // For passwords which do not have some crazy legacy reason to use some
+    // other digest algorithm, HMAC SHA256 is an excellent choice. It satisfies
+    // the digest requirements and is simple.
+
+    $digest = PhabricatorHash::digestHMACSHA256(
+      $envelope->openEnvelope(),
+      $password->getPasswordSalt());
+
+    return new PhutilOpaqueEnvelope($digest);
+  }
+
 
 }

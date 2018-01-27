@@ -26,7 +26,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
   public function getEnvironment() {
     $env = array(
-      DiffusionCommitHookEngine::ENV_USER => $this->getUser()->getUsername(),
+      DiffusionCommitHookEngine::ENV_USER => $this->getSSHUser()->getUsername(),
       DiffusionCommitHookEngine::ENV_REMOTE_PROTOCOL => 'ssh',
     );
 
@@ -122,14 +122,14 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
       $key_path,
       $port,
       $host,
-      '@'.$this->getUser()->getUsername(),
+      '@'.$this->getSSHUser()->getUsername(),
       $this->getOriginalArguments());
   }
 
   final public function execute(PhutilArgumentParser $args) {
     $this->args = $args;
 
-    $viewer = $this->getUser();
+    $viewer = $this->getSSHUser();
     $have_diffusion = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorDiffusionApplication',
       $viewer);
@@ -164,7 +164,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   }
 
   protected function loadRepositoryWithPath($path, $vcs) {
-    $viewer = $this->getUser();
+    $viewer = $this->getSSHUser();
 
     $info = PhabricatorRepository::parseRepositoryServicePath($path, $vcs);
     if ($info === null) {
@@ -214,7 +214,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     }
 
     $repository = $this->getRepository();
-    $viewer = $this->getUser();
+    $viewer = $this->getSSHUser();
 
     if ($viewer->isOmnipotent()) {
       throw new Exception(
@@ -252,7 +252,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   }
 
   protected function shouldSkipReadSynchronization() {
-    $viewer = $this->getUser();
+    $viewer = $this->getSSHUser();
 
     // Currently, the only case where devices interact over SSH without
     // assuming user credentials is when synchronizing before a read. These
@@ -265,14 +265,14 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   }
 
   protected function newPullEvent() {
-    $viewer = $this->getViewer();
+    $viewer = $this->getSSHUser();
     $repository = $this->getRepository();
     $remote_address = $this->getSSHRemoteAddress();
 
     return id(new PhabricatorRepositoryPullEvent())
       ->setEpoch(PhabricatorTime::getNow())
       ->setRemoteAddress($remote_address)
-      ->setRemoteProtocol('ssh')
+      ->setRemoteProtocol(PhabricatorRepositoryPullEvent::PROTOCOL_SSH)
       ->setPullerPHID($viewer->getPHID())
       ->setRepositoryPHID($repository->getPHID());
   }

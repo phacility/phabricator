@@ -658,6 +658,11 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($corpus)
       ->addClass('diffusion-mobile-view')
+      ->addSigil('diffusion-file-content-view')
+      ->setMetadata(
+        array(
+          'path' => $this->getDiffusionRequest()->getPath(),
+        ))
       ->setCollapsed(true);
 
     $messages = array();

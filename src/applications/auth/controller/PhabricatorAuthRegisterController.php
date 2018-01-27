@@ -61,6 +61,9 @@ final class PhabricatorAuthRegisterController
     $default_username = $account->getUsername();
     $default_realname = $account->getRealName();
 
+    $account_type = PhabricatorAuthPassword::PASSWORD_TYPE_ACCOUNT;
+    $content_source = PhabricatorContentSource::newFromRequest($request);
+
     $default_email = $account->getEmail();
 
     if ($invite) {
@@ -285,27 +288,22 @@ final class PhabricatorAuthRegisterController
       if ($must_set_password) {
         $value_password = $request->getStr('password');
         $value_confirm = $request->getStr('confirm');
-        if (!strlen($value_password)) {
-          $e_password = pht('Required');
-          $errors[] = pht('You must choose a password.');
-        } else if ($value_password !== $value_confirm) {
-          $e_password = pht('No Match');
-          $errors[] = pht('Password and confirmation must match.');
-        } else if (strlen($value_password) < $min_len) {
-          $e_password = pht('Too Short');
-          $errors[] = pht(
-            'Password is too short (must be at least %d characters long).',
-            $min_len);
-        } else if (
-          PhabricatorCommonPasswords::isCommonPassword($value_password)) {
 
-          $e_password = pht('Very Weak');
-          $errors[] = pht(
-            'Password is pathologically weak. This password is one of the '.
-            'most common passwords in use, and is extremely easy for '.
-            'attackers to guess. You must choose a stronger password.');
-        } else {
+        $password_envelope = new PhutilOpaqueEnvelope($value_password);
+        $confirm_envelope = new PhutilOpaqueEnvelope($value_confirm);
+
+        $engine = id(new PhabricatorAuthPasswordEngine())
+          ->setViewer($user)
+          ->setContentSource($content_source)
+          ->setPasswordType($account_type)
+          ->setObject($user);
+
+        try {
+          $engine->checkNewPassword($password_envelope, $confirm_envelope);
           $e_password = null;
+        } catch (PhabricatorAuthPasswordException $ex) {
+          $errors[] = $ex->getMessage();
+          $e_password = $ex->getPasswordError();
         }
       }
 
@@ -408,8 +406,13 @@ final class PhabricatorAuthRegisterController
 
             $editor->createNewUser($user, $email_obj, $allow_reassign_email);
             if ($must_set_password) {
-              $envelope = new PhutilOpaqueEnvelope($value_password);
-              $editor->changePassword($user, $envelope);
+              $password_object = PhabricatorAuthPassword::initializeNewPassword(
+                $user,
+                $account_type);
+
+              $password_object
+                ->setPassword($password_envelope, $user)
+                ->save();
             }
 
             if ($is_setup) {

@@ -3,6 +3,17 @@
 final class PhabricatorAuthSSHKeyEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $isAdministrativeEdit;
+
+  public function setIsAdministrativeEdit($is_administrative_edit) {
+    $this->isAdministrativeEdit = $is_administrative_edit;
+    return $this;
+  }
+
+  public function getIsAdministrativeEdit() {
+    return $this->isAdministrativeEdit;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorAuthApplication';
   }
@@ -93,6 +104,7 @@ final class PhabricatorAuthSSHKeyEditor
     array $xactions) {
 
     $errors = parent::validateTransaction($object, $type, $xactions);
+    $viewer = $this->requireActor();
 
     switch ($type) {
       case PhabricatorAuthSSHKeyTransaction::TYPE_NAME:
@@ -138,6 +150,30 @@ final class PhabricatorAuthSSHKeyEditor
                 pht('Invalid'),
                 $ex->getMessage(),
                 $xaction);
+              continue;
+            }
+
+            // The database does not have a unique key on just the <keyBody>
+            // column because we allow multiple accounts to revoke the same
+            // key, so we can't rely on database constraints to prevent users
+            // from adding keys that are on the revocation list back to their
+            // accounts. Explicitly check for a revoked copy of the key.
+
+            $revoked_keys = id(new PhabricatorAuthSSHKeyQuery())
+              ->setViewer($viewer)
+              ->withObjectPHIDs(array($object->getObjectPHID()))
+              ->withIsActive(0)
+              ->withKeys(array($public_key))
+              ->execute();
+            if ($revoked_keys) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Revoked'),
+                pht(
+                  'This key has been revoked. Choose or generate a new, '.
+                  'unique key.'),
+                $xaction);
+              continue;
             }
           }
         }
@@ -239,11 +275,13 @@ final class PhabricatorAuthSSHKeyEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $body->addTextSection(
-      pht('SECURITY WARNING'),
-      pht(
-        'If you do not recognize this change, it may indicate your account '.
-        'has been compromised.'));
+    if (!$this->getIsAdministrativeEdit()) {
+      $body->addTextSection(
+        pht('SECURITY WARNING'),
+        pht(
+          'If you do not recognize this change, it may indicate your account '.
+          'has been compromised.'));
+    }
 
     $detail_uri = $object->getURI();
     $detail_uri = PhabricatorEnv::getProductionURI($detail_uri);
@@ -252,5 +290,18 @@ final class PhabricatorAuthSSHKeyEditor
 
     return $body;
   }
+
+
+  protected function getCustomWorkerState() {
+    return array(
+      'isAdministrativeEdit' => $this->isAdministrativeEdit,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->isAdministrativeEdit = idx($state, 'isAdministrativeEdit');
+    return $this;
+  }
+
 
 }

@@ -38,6 +38,7 @@ abstract class HeraldAdapter extends Phobject {
   private $actionMap;
   private $edgeCache = array();
   private $forbiddenActions = array();
+  private $viewer;
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -55,10 +56,29 @@ abstract class HeraldAdapter extends Phobject {
     return $this;
   }
 
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    // See PHI276. Normally, Herald runs without regard for policy checks.
+    // However, we use a real viewer during test console runs: this makes
+    // intracluster calls to Diffusion APIs work even if web nodes don't
+    // have privileged credentials.
+
+    if ($this->viewer) {
+      return $this->viewer;
+    }
+
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
     return $this;
   }
+
   public function getContentSource() {
     return $this->contentSource;
   }
@@ -764,9 +784,20 @@ abstract class HeraldAdapter extends Phobject {
 
 
   public function getRepetitionOptions() {
-    return array(
-      HeraldRepetitionPolicyConfig::EVERY,
-    );
+    $options = array();
+
+    $options[] = HeraldRule::REPEAT_EVERY;
+
+    // Some rules, like pre-commit rules, only ever fire once. It doesn't
+    // make sense to use state-based repetition policies like "only the first
+    // time" for these rules.
+
+    if (!$this->isSingleEventAdapter()) {
+      $options[] = HeraldRule::REPEAT_FIRST;
+      $options[] = HeraldRule::REPEAT_CHANGE;
+    }
+
+    return $options;
   }
 
   protected function initializeNewAdapter() {
@@ -887,15 +918,15 @@ abstract class HeraldAdapter extends Phobject {
         ));
     }
 
-    $integer_code_for_every = HeraldRepetitionPolicyConfig::toInt(
-      HeraldRepetitionPolicyConfig::EVERY);
-
-    if ($rule->getRepetitionPolicy() == $integer_code_for_every) {
-      $action_text =
-        pht('Take these actions every time this rule matches:');
+    if ($rule->isRepeatFirst()) {
+      $action_text = pht(
+        'Take these actions the first time this rule matches:');
+    } else if ($rule->isRepeatOnChange()) {
+      $action_text = pht(
+        'Take these actions if this rule did not match the last time:');
     } else {
-      $action_text =
-        pht('Take these actions the first time this rule matches:');
+      $action_text = pht(
+        'Take these actions every time this rule matches:');
     }
 
     $action_title = phutil_tag(

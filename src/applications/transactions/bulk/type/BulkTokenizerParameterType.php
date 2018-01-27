@@ -23,7 +23,6 @@ final class BulkTokenizerParameterType
     $template_markup = $template->render();
 
     $datasource = $this->getDatasource();
-    $limit = null;
 
     return array(
       'markup' => (string)hsprintf('%s', $template_markup),
@@ -31,7 +30,7 @@ final class BulkTokenizerParameterType
         'src' => $datasource->getDatasourceURI(),
         'browseURI' => $datasource->getBrowseURI(),
         'placeholder' => $datasource->getPlaceholderText(),
-        'limit' => $limit,
+        'limit' => $datasource->getLimit(),
       ),
       'value' => null,
     );

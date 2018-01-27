@@ -54,6 +54,12 @@ final class DiffusionSearchQueryConduitAPIMethod
     $limit = $request->getValue('limit');
     $offset = $request->getValue('offset');
 
+    // Starting with Git 2.16.0, Git assumes passing an empty argument is
+    // an error and recommends you pass "." instead.
+    if (!strlen($path)) {
+      $path = '.';
+    }
+
     $results = array();
     $future = $repository->getLocalCommandFuture(
       // NOTE: --perl-regexp is available only with libpcre compiled in.

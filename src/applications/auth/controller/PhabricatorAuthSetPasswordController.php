@@ -40,8 +40,30 @@ final class PhabricatorAuthSetPasswordController
       return new Aphront404Response();
     }
 
-    $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
-    $min_len = (int)$min_len;
+    $content_source = PhabricatorContentSource::newFromRequest($request);
+    $account_type = PhabricatorAuthPassword::PASSWORD_TYPE_ACCOUNT;
+
+    $password_objects = id(new PhabricatorAuthPasswordQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($viewer->getPHID()))
+      ->withPasswordTypes(array($account_type))
+      ->withIsRevoked(false)
+      ->execute();
+    if ($password_objects) {
+      $password_object = head($password_objects);
+      $has_password = true;
+    } else {
+      $password_object = PhabricatorAuthPassword::initializeNewPassword(
+        $viewer,
+        $account_type);
+      $has_password = false;
+    }
+
+    $engine = id(new PhabricatorAuthPasswordEngine())
+      ->setViewer($viewer)
+      ->setContentSource($content_source)
+      ->setPasswordType($account_type)
+      ->setObject($viewer);
 
     $e_password = true;
     $e_confirm = true;
@@ -50,46 +72,23 @@ final class PhabricatorAuthSetPasswordController
       $password = $request->getStr('password');
       $confirm = $request->getStr('confirm');
 
-      $e_password = null;
-      $e_confirm = null;
+      $password_envelope = new PhutilOpaqueEnvelope($password);
+      $confirm_envelope = new PhutilOpaqueEnvelope($confirm);
 
-      if (!strlen($password)) {
-        $errors[] = pht('You must choose a password or skip this step.');
-        $e_password = pht('Required');
-      } else if (strlen($password) < $min_len) {
-        $errors[] = pht(
-          'The selected password is too short. Passwords must be a minimum '.
-          'of %s characters.',
-          new PhutilNumber($min_len));
-        $e_password = pht('Too Short');
-      } else if (!strlen($confirm)) {
-        $errors[] = pht('You must confirm the selecetd password.');
-        $e_confirm = pht('Required');
-      } else if ($password !== $confirm) {
-        $errors[] = pht('The password and confirmation do not match.');
-        $e_password = pht('Invalid');
-        $e_confirm = pht('Invalid');
-      } else if (PhabricatorCommonPasswords::isCommonPassword($password)) {
-        $e_password = pht('Very Weak');
-        $errors[] = pht(
-          'The selected password is very weak: it is one of the most common '.
-          'passwords in use. Choose a stronger password.');
+      try {
+        $engine->checkNewPassword($password_envelope, $confirm_envelope, true);
+        $e_password = null;
+        $e_confirm = null;
+      } catch (PhabricatorAuthPasswordException $ex) {
+        $errors[] = $ex->getMessage();
+        $e_password = $ex->getPasswordError();
+        $e_confirm = $ex->getConfirmError();
       }
 
       if (!$errors) {
-        $envelope = new PhutilOpaqueEnvelope($password);
-
-        // This write is unguarded because the CSRF token has already
-        // been checked in the call to $request->isFormPost() and
-        // the CSRF token depends on the password hash, so when it
-        // is changed here the CSRF token check will fail.
-        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-          id(new PhabricatorUserEditor())
-            ->setActor($viewer)
-            ->changePassword($viewer, $envelope);
-
-        unset($unguarded);
+        $password_object
+          ->setPassword($password_envelope, $viewer)
+          ->save();
 
         // Destroy the token.
         $auth_token->delete();
@@ -98,12 +97,15 @@ final class PhabricatorAuthSetPasswordController
       }
     }
 
+    $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
+    $min_len = (int)$min_len;
+
     $len_caption = null;
     if ($min_len) {
       $len_caption = pht('Minimum password length: %d characters.', $min_len);
     }
 
-    if ($viewer->hasPassword()) {
+    if ($has_password) {
       $title = pht('Reset Password');
       $crumb = pht('Reset Password');
       $submit = pht('Reset Password');

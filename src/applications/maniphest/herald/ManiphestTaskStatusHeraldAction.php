@@ -58,7 +58,8 @@ final class ManiphestTaskStatusHeraldAction
   }
 
   protected function getDatasource() {
-    return new ManiphestTaskStatusDatasource();
+    return id(new ManiphestTaskStatusDatasource())
+      ->setLimit(1);
   }
 
   protected function getDatasourceValueMap() {

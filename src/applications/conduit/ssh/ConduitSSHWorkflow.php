@@ -46,7 +46,7 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
 
     try {
       $call = new ConduitCall($method, $params);
-      $call->setUser($this->getUser());
+      $call->setUser($this->getSSHUser());
 
       $result = $call->execute();
     } catch (ConduitException $ex) {
@@ -77,7 +77,7 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
 
     $connection_id = idx($metadata, 'connectionID');
     $log = id(new PhabricatorConduitMethodCallLog())
-      ->setCallerPHID($this->getUser()->getPHID())
+      ->setCallerPHID($this->getSSHUser()->getPHID())
       ->setConnectionID($connection_id)
       ->setMethod($method)
       ->setError((string)$error_code)

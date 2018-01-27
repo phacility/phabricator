@@ -204,6 +204,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'loaded' => $this->getLoaded(),
           'undoTemplates' => hsprintf('%s', $renderer->renderUndoTemplates()),
           'displayPath' => hsprintf('%s', $display_parts),
+          'path' => $display_filename,
           'icon' => $display_icon,
         ),
         'class' => $class,

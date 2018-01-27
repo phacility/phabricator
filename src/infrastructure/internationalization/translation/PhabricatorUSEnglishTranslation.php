@@ -1646,6 +1646,11 @@ final class PhabricatorUSEnglishTranslation
         '%s objects.',
       ),
 
+      'Destroyed %s credential(s) of type "%s".' => array(
+        'Destroyed one credential of type "%2$s".',
+        'Destroyed %s credentials of type "%s".',
+      ),
+
     );
   }
 

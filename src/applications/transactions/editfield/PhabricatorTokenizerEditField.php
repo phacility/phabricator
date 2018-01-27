@@ -60,6 +60,10 @@ abstract class PhabricatorTokenizerEditField
     $datasource = $this->newDatasource()
       ->setViewer($this->getViewer());
 
+    if ($this->getIsSingleValue()) {
+      $datasource->setLimit(1);
+    }
+
     return id(new BulkTokenizerParameterType())
       ->setDatasource($datasource);
   }

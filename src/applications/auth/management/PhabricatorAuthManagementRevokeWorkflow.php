@@ -7,7 +7,8 @@ final class PhabricatorAuthManagementRevokeWorkflow
     $this
       ->setName('revoke')
       ->setExamples(
-        "**revoke** --type __type__ --from __user__\n".
+        "**revoke** --list\n".
+        "**revoke** --type __type__ --from __@user__\n".
         "**revoke** --everything --everywhere")
       ->setSynopsis(
         pht(
@@ -16,15 +17,20 @@ final class PhabricatorAuthManagementRevokeWorkflow
         array(
           array(
             'name' => 'from',
-            'param' => 'user',
+            'param' => 'object',
             'help' => pht(
-              'Revoke credentials for the specified user.'),
+              'Revoke credentials for the specified object. To revoke '.
+              'credentials for a user, use "@username".'),
           ),
           array(
             'name' => 'type',
             'param' => 'type',
+            'help' => pht('Revoke credentials of the given type.'),
+          ),
+          array(
+            'name' => 'list',
             'help' => pht(
-              'Revoke credentials of the given type.'),
+              'List information about available credential revokers.'),
           ),
           array(
             'name' => 'everything',
@@ -34,21 +40,37 @@ final class PhabricatorAuthManagementRevokeWorkflow
             'name' => 'everywhere',
             'help' => pht('Revoke from all credential owners.'),
           ),
+          array(
+            'name' => 'force',
+            'help' => pht('Revoke credentials without prompting.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $all_types = PhabricatorAuthRevoker::getAllRevokers();
+    $is_force = $args->getArg('force');
+
+    // The "--list" flag is compatible with revoker selection flags like
+    // "--type" to filter the list, but not compatible with target selection
+    // flags like "--from".
+    $is_list = $args->getArg('list');
 
     $type = $args->getArg('type');
     $is_everything = $args->getArg('everything');
     if (!strlen($type) && !$is_everything) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Specify the credential type to revoke with "--type" or specify '.
-          '"--everything".'));
+      if ($is_list) {
+        // By default, "bin/revoke --list" implies "--everything".
+        $types = $all_types;
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Specify the credential type to revoke with "--type" or specify '.
+            '"--everything". Use "--list" to list available credential '.
+            'types.'));
+      }
     } else if (strlen($type) && $is_everything) {
       throw new PhutilArgumentUsageException(
         pht(
@@ -70,6 +92,32 @@ final class PhabricatorAuthManagementRevokeWorkflow
 
     $is_everywhere = $args->getArg('everywhere');
     $from = $args->getArg('from');
+
+    if ($is_list) {
+      if (strlen($from) || $is_everywhere) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'You can not "--list" and revoke credentials (with "--from" or '.
+            '"--everywhere") in the same operation.'));
+      }
+    }
+
+    if ($is_list) {
+      $last_key = last_key($types);
+      foreach ($types as $key => $type) {
+        echo tsprintf(
+          "**%s** (%s)\n\n",
+          $type->getRevokerKey(),
+          $type->getRevokerName());
+
+        id(new PhutilConsoleBlock())
+          ->addParagraph(tsprintf('%B', $type->getRevokerDescription()))
+          ->draw();
+      }
+
+      return 0;
+    }
+
     $target = null;
     if (!strlen($from) && !$is_everywhere) {
       throw new PhutilArgumentUsageException(
@@ -97,7 +145,7 @@ final class PhabricatorAuthManagementRevokeWorkflow
       }
     }
 
-    if ($is_everywhere) {
+    if ($is_everywhere && !$is_force) {
       echo id(new PhutilConsoleBlock())
         ->addParagraph(
           pht(
@@ -128,6 +176,13 @@ final class PhabricatorAuthManagementRevokeWorkflow
           'Destroyed %s credential(s) of type "%s".',
           new PhutilNumber($count),
           $type->getRevokerKey()));
+
+      $guidance = $type->getRevokerNextSteps();
+      if ($guidance !== null) {
+        echo tsprintf(
+          "%s\n",
+          $guidance);
+      }
     }
 
     echo tsprintf(

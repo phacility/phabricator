@@ -283,7 +283,8 @@ JX.install('HeraldRuleEditor', {
       var tokenizerConfig = {
         src: spec.datasourceURI,
         placeholder: spec.placeholder,
-        browseURI: spec.browseURI
+        browseURI: spec.browseURI,
+        limit: spec.limit
       };
 
       var build = JX.Prefab.newTokenizerFromTemplate(

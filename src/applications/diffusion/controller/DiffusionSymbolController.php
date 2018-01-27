@@ -22,6 +22,7 @@ final class DiffusionSymbolController extends DiffusionController {
       $query->setLanguage($request->getStr('lang'));
     }
 
+    $repos = array();
     if ($request->getStr('repositories')) {
       $phids = $request->getStr('repositories');
       $phids = explode(',', $phids);
@@ -33,9 +34,9 @@ final class DiffusionSymbolController extends DiffusionController {
           ->withPHIDs($phids)
           ->execute();
 
-        $repos = mpull($repos, 'getPHID');
-        if ($repos) {
-          $query->withRepositoryPHIDs($repos);
+        $repo_phids = mpull($repos, 'getPHID');
+        if ($repo_phids) {
+          $query->withRepositoryPHIDs($repo_phids);
         }
       }
     }
@@ -44,7 +45,6 @@ final class DiffusionSymbolController extends DiffusionController {
     $query->needRepositories(true);
 
     $symbols = $query->execute();
-
 
     $external_query = id(new DiffusionExternalSymbolQuery())
       ->withNames(array($name));
@@ -61,13 +61,51 @@ final class DiffusionSymbolController extends DiffusionController {
       $external_query->withLanguages(array($request->getStr('lang')));
     }
 
+    if ($request->getStr('path')) {
+      $external_query->withPaths(array($request->getStr('path')));
+    }
+
+    if ($request->getInt('line')) {
+      $external_query->withLines(array($request->getInt('line')));
+    }
+
+    if ($request->getInt('char')) {
+      $external_query->withCharacterPositions(
+        array(
+          $request->getInt('char'),
+        ));
+    }
+
+    if ($repos) {
+      $external_query->withRepositories($repos);
+    }
+
     $external_sources = id(new PhutilClassMapQuery())
       ->setAncestorClass('DiffusionExternalSymbolsSource')
       ->execute();
 
     $results = array($symbols);
     foreach ($external_sources as $source) {
-      $results[] = $source->executeQuery($external_query);
+      $source_results = $source->executeQuery($external_query);
+
+      if (!is_array($source_results)) {
+        throw new Exception(
+          pht(
+            'Expected a list of results from external symbol source "%s".',
+            get_class($source)));
+      }
+
+      try {
+        assert_instances_of($source_results, 'PhabricatorRepositorySymbol');
+      } catch (InvalidArgumentException $ex) {
+        throw new Exception(
+          pht(
+            'Expected a list of PhabricatorRepositorySymbol objects '.
+            'from external symbol source "%s".',
+            get_class($source)));
+      }
+
+      $results[] = $source_results;
     }
     $symbols = array_mergev($results);
 

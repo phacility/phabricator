@@ -623,7 +623,7 @@ abstract class PhabricatorApplication
   }
 
   protected function getQueryRoutePattern($base = null) {
-    return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
+    return $base.'(?:query/(?P<queryKey>[^/]+)/(?:(?P<queryAction>[^/]+)/)?)?';
   }
 
   protected function getProfileMenuRouting($controller) {

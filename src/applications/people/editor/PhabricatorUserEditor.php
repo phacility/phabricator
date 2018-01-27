@@ -132,33 +132,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
   /**
    * @task edit
    */
-  public function changePassword(
-    PhabricatorUser $user,
-    PhutilOpaqueEnvelope $envelope) {
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    $user->openTransaction();
-      $user->reload();
-
-      $user->setPassword($envelope);
-      $user->save();
-
-      $log = PhabricatorUserLog::initializeNewLog(
-        $this->requireActor(),
-        $user->getPHID(),
-        PhabricatorUserLog::ACTION_CHANGE_PASSWORD);
-      $log->save();
-
-    $user->saveTransaction();
-  }
-
-
-  /**
-   * @task edit
-   */
   public function changeUsername(PhabricatorUser $user, $username) {
     $actor = $this->requireActor();
 

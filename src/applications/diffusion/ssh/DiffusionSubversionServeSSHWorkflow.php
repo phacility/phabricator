@@ -154,7 +154,7 @@ final class DiffusionSubversionServeSSHWorkflow
     } else {
       $command = csprintf(
         'svnserve -t --tunnel-user=%s',
-        $this->getUser()->getUsername());
+        $this->getSSHUser()->getUsername());
       $cwd = PhabricatorEnv::getEmptyCWD();
     }
 

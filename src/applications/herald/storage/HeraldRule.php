@@ -30,6 +30,10 @@ final class HeraldRule extends HeraldDAO
   private $actions;
   private $triggerObject = self::ATTACHABLE;
 
+  const REPEAT_EVERY = 'every';
+  const REPEAT_FIRST = 'first';
+  const REPEAT_CHANGE = 'change';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -38,13 +42,10 @@ final class HeraldRule extends HeraldDAO
         'contentType' => 'text255',
         'mustMatchAll' => 'bool',
         'configVersion' => 'uint32',
+        'repetitionPolicy' => 'text32',
         'ruleType' => 'text32',
         'isDisabled' => 'uint32',
         'triggerObjectPHID' => 'phid?',
-
-        // T6203/NULLABILITY
-        // This should not be nullable.
-        'repetitionPolicy' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
@@ -251,6 +252,58 @@ final class HeraldRule extends HeraldDAO
 
   public function getMonogram() {
     return 'H'.$this->getID();
+  }
+
+
+/* -(  Repetition Policies  )------------------------------------------------ */
+
+
+  public function getRepetitionPolicyStringConstant() {
+    return $this->getRepetitionPolicy();
+  }
+
+  public function setRepetitionPolicyStringConstant($value) {
+    $map = self::getRepetitionPolicyMap();
+
+    if (!isset($map[$value])) {
+      throw new Exception(
+        pht(
+          'Rule repetition string constant "%s" is unknown.',
+          $value));
+    }
+
+    return $this->setRepetitionPolicy($value);
+  }
+
+  public function isRepeatEvery() {
+    return ($this->getRepetitionPolicyStringConstant() === self::REPEAT_EVERY);
+  }
+
+  public function isRepeatFirst() {
+    return ($this->getRepetitionPolicyStringConstant() === self::REPEAT_FIRST);
+  }
+
+  public function isRepeatOnChange() {
+    return ($this->getRepetitionPolicyStringConstant() === self::REPEAT_CHANGE);
+  }
+
+  public static function getRepetitionPolicySelectOptionMap() {
+    $map = self::getRepetitionPolicyMap();
+    return ipull($map, 'select');
+  }
+
+  private static function getRepetitionPolicyMap() {
+    return array(
+      self::REPEAT_EVERY => array(
+        'select' => pht('every time this rule matches:'),
+      ),
+      self::REPEAT_FIRST => array(
+        'select' => pht('only the first time this rule matches:'),
+      ),
+      self::REPEAT_CHANGE => array(
+        'select' => pht('if this rule did not match the last time:'),
+      ),
+    );
   }
 
 

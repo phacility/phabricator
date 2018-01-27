@@ -14,6 +14,7 @@ final class HeraldEngine extends Phobject {
 
   private $forbiddenFields = array();
   private $forbiddenActions = array();
+  private $skipEffects = array();
 
   public function setDryRun($dry_run) {
     $this->dryRun = $dry_run;
@@ -68,9 +69,7 @@ final class HeraldEngine extends Phobject {
     foreach ($rules as $phid => $rule) {
       $this->stack = array();
 
-      $policy_first = HeraldRepetitionPolicyConfig::FIRST;
-      $policy_first_int = HeraldRepetitionPolicyConfig::toInt($policy_first);
-      $is_first_only = ($rule->getRepetitionPolicy() == $policy_first_int);
+      $is_first_only = $rule->isRepeatFirst();
 
       try {
         if (!$this->getDryRun() &&
@@ -173,15 +172,31 @@ final class HeraldEngine extends Phobject {
       return;
     }
 
-    $rules = mpull($rules, null, 'getID');
-    $applied_ids = array();
-    $first_policy = HeraldRepetitionPolicyConfig::toInt(
-      HeraldRepetitionPolicyConfig::FIRST);
+    // Update the "applied" state table. How this table works depends on the
+    // repetition policy for the rule.
+    //
+    // REPEAT_EVERY: We delete existing rows for the rule, then write nothing.
+    // This policy doesn't use any state.
+    //
+    // REPEAT_FIRST: We keep existing rows, then write additional rows for
+    // rules which fired. This policy accumulates state over the life of the
+    // object.
+    //
+    // REPEAT_CHANGE: We delete existing rows, then write all the rows which
+    // matched. This policy only uses the state from the previous run.
 
-    // Mark all the rules that have had their effects applied as having been
-    // executed for the current object.
+    $rules = mpull($rules, null, 'getID');
     $rule_ids = mpull($xscripts, 'getRuleID');
 
+    $delete_ids = array();
+    foreach ($rules as $rule_id => $rule) {
+      if ($rule->isRepeatFirst()) {
+        continue;
+      }
+      $delete_ids[] = $rule_id;
+    }
+
+    $applied_ids = array();
     foreach ($rule_ids as $rule_id) {
       if (!$rule_id) {
         // Some apply transcripts are purely informational and not associated
@@ -194,26 +209,44 @@ final class HeraldEngine extends Phobject {
         continue;
       }
 
-      if ($rule->getRepetitionPolicy() == $first_policy) {
+      if ($rule->isRepeatFirst() || $rule->isRepeatOnChange()) {
         $applied_ids[] = $rule_id;
       }
     }
 
-    if ($applied_ids) {
+    // Also include "only if this rule did not match the last time" rules
+    // which matched but were skipped in the "applied" list.
+    foreach ($this->skipEffects as $rule_id => $ignored) {
+      $applied_ids[] = $rule_id;
+    }
+
+    if ($delete_ids || $applied_ids) {
       $conn_w = id(new HeraldRule())->establishConnection('w');
-      $sql = array();
-      foreach ($applied_ids as $id) {
-        $sql[] = qsprintf(
+
+      if ($delete_ids) {
+        queryfx(
           $conn_w,
-          '(%s, %d)',
+          'DELETE FROM %T WHERE phid = %s AND ruleID IN (%Ld)',
+          HeraldRule::TABLE_RULE_APPLIED,
           $adapter->getPHID(),
-          $id);
+          $delete_ids);
       }
-      queryfx(
-        $conn_w,
-        'INSERT IGNORE INTO %T (phid, ruleID) VALUES %Q',
-        HeraldRule::TABLE_RULE_APPLIED,
-        implode(', ', $sql));
+
+      if ($applied_ids) {
+        $sql = array();
+        foreach ($applied_ids as $id) {
+          $sql[] = qsprintf(
+            $conn_w,
+            '(%s, %d)',
+            $adapter->getPHID(),
+            $id);
+        }
+        queryfx(
+          $conn_w,
+          'INSERT IGNORE INTO %T (phid, ruleID) VALUES %Q',
+          HeraldRule::TABLE_RULE_APPLIED,
+          implode(', ', $sql));
+      }
     }
   }
 
@@ -315,6 +348,30 @@ final class HeraldEngine extends Phobject {
       }
     }
 
+    // If this rule matched, and is set to run "if it did not match the last
+    // time", and we matched the last time, we're going to return a match in
+    // the transcript but set a flag so we don't actually apply any effects.
+
+    // We need the rule to match so that storage gets updated properly. If we
+    // just pretend the rule didn't match it won't cause any effects (which
+    // is correct), but it also won't set the "it matched" flag in storage,
+    // so the next run after this one would incorrectly trigger again.
+
+    $is_dry_run = $this->getDryRun();
+    if ($result && !$is_dry_run) {
+      $is_on_change = $rule->isRepeatOnChange();
+      if ($is_on_change) {
+        $did_apply = $rule->getRuleApplied($object->getPHID());
+        if ($did_apply) {
+          $reason = pht(
+            'This rule matched, but did not take any actions because it '.
+            'is configured to act only if it did not match the last time.');
+
+          $this->skipEffects[$rule->getID()] = true;
+        }
+      }
+    }
+
     $this->newRuleTranscript($rule)
       ->setResult($result)
       ->setReason($reason);
@@ -366,6 +423,11 @@ final class HeraldEngine extends Phobject {
   protected function getRuleEffects(
     HeraldRule $rule,
     HeraldAdapter $object) {
+
+    $rule_id = $rule->getID();
+    if (isset($this->skipEffects[$rule_id])) {
+      return array();
+    }
 
     $effects = array();
     foreach ($rule->getActions() as $action) {

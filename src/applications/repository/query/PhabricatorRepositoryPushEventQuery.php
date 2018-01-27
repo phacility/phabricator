@@ -34,19 +34,12 @@ final class PhabricatorRepositoryPushEventQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorRepositoryPushEvent();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorRepositoryPushEvent();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $events) {
@@ -88,40 +81,38 @@ final class PhabricatorRepositoryPushEventQuery
     return $events;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->repositoryPHIDs) {
+    if ($this->repositoryPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
-    if ($this->pusherPHIDs) {
+    if ($this->pusherPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'pusherPHID in (%Ls)',
         $this->pusherPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

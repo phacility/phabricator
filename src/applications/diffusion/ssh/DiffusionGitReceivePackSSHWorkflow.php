@@ -15,7 +15,7 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
   protected function executeRepositoryOperations() {
     $repository = $this->getRepository();
-    $viewer = $this->getUser();
+    $viewer = $this->getSSHUser();
     $device = AlmanacKeys::getLiveDevice();
 
     // This is a write, and must have write access.
