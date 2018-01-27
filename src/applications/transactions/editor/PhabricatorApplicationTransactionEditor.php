@@ -999,7 +999,31 @@ abstract class PhabricatorApplicationTransactionEditor
           $xaction->setPHID($xaction->generatePHID());
           $comment_editor->applyEdit($xaction, $xaction->getComment());
         } else {
-          $xaction->save();
+
+          // TODO: This is a transitional hack to let us migrate edge
+          // transactions to a more efficient storage format. For now, we're
+          // going to write a new slim format to the database but keep the old
+          // bulky format on the objects so we don't have to upgrade all the
+          // edit logic to the new format yet. See T13051.
+
+          $edge_type = PhabricatorTransactions::TYPE_EDGE;
+          if ($xaction->getTransactionType() == $edge_type) {
+            $bulky_old = $xaction->getOldValue();
+            $bulky_new = $xaction->getNewValue();
+
+            $record = PhabricatorEdgeChangeRecord::newFromTransaction($xaction);
+            $slim_old = $record->getModernOldEdgeTransactionData();
+            $slim_new = $record->getModernNewEdgeTransactionData();
+
+            $xaction->setOldValue($slim_old);
+            $xaction->setNewValue($slim_new);
+            $xaction->save();
+
+            $xaction->setOldValue($bulky_old);
+            $xaction->setNewValue($bulky_new);
+          } else {
+            $xaction->save();
+          }
         }
       }
 

@@ -44,10 +44,18 @@ final class PhabricatorEdgeChangeRecord
     return array_keys($rem);
   }
 
+  public function getModernOldEdgeTransactionData() {
+    return $this->getRemovedPHIDs();
+  }
+
+  public function getModernNewEdgeTransactionData() {
+    return $this->getAddedPHIDs();
+  }
+
   private function getOldDestinationPHIDs() {
     if ($this->xaction) {
       $old = $this->xaction->getOldValue();
-      return ipull($old, 'dst');
+      return $this->getPHIDsFromTransactionValue($old);
     }
 
     throw new Exception(
@@ -57,12 +65,27 @@ final class PhabricatorEdgeChangeRecord
   private function getNewDestinationPHIDs() {
     if ($this->xaction) {
       $new = $this->xaction->getNewValue();
-      return ipull($new, 'dst');
+      return $this->getPHIDsFromTransactionValue($new);
     }
 
     throw new Exception(
       pht('Edge change record is not configured with any change data.'));
   }
 
+  private function getPHIDsFromTransactionValue($value) {
+    if (!$value) {
+      return array();
+    }
+
+    // If the list items are arrays, this is an older-style map of
+    // dictionaries.
+    $head = head($value);
+    if (is_array($head)) {
+      return ipull($value, 'dst');
+    }
+
+    // If the list items are not arrays, this is a newer-style list of PHIDs.
+    return $value;
+  }
 
 }
