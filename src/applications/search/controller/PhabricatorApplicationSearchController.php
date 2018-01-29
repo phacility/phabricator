@@ -444,6 +444,17 @@ final class PhabricatorApplicationSearchController
       $format_key = head_key($format_options);
     }
 
+    // Check if this is a large result set or not. If we're exporting a
+    // large amount of data, we'll build the actual export file in the daemons.
+
+    $threshold = 1000;
+    $query = $engine->buildQueryFromSavedQuery($saved_query);
+    $pager = $engine->newPagerForSavedQuery($saved_query);
+    $pager->setPageSize($threshold + 1);
+    $objects = $engine->executeQuery($query, $pager);
+    $object_count = count($objects);
+    $is_large_export = ($object_count > $threshold);
+
     $errors = array();
 
     $e_format = null;
@@ -475,59 +486,31 @@ final class PhabricatorApplicationSearchController
       if (!$errors) {
         $this->writeExportFormatPreference($format_key);
 
-        $query = $engine->buildQueryFromSavedQuery($saved_query);
-
-        // NOTE: We aren't reading the pager from the request. Exports always
-        // affect the entire result set.
-        $pager = $engine->newPagerForSavedQuery($saved_query);
-        $pager->setPageSize(0x7FFFFFFF);
-
-        $objects = $engine->executeQuery($query, $pager);
-
-        $extension = $format->getFileExtension();
-        $mime_type = $format->getMIMEContentType();
-        $filename = $filename.'.'.$extension;
-
-        $format = id(clone $format)
+        $export_engine = id(new PhabricatorExportEngine())
           ->setViewer($viewer)
-          ->setTitle($sheet_title);
+          ->setSearchEngine($engine)
+          ->setSavedQuery($saved_query)
+          ->setTitle($sheet_title)
+          ->setFilename($filename)
+          ->setExportFormat($format);
 
-        $export_data = $engine->newExport($objects);
-        $objects = array_values($objects);
+        if ($is_large_export) {
+          $job = $export_engine->newBulkJob($request);
 
-        $field_list = $engine->newExportFieldList();
-        $field_list = mpull($field_list, null, 'getKey');
+          return id(new AphrontRedirectResponse())
+            ->setURI($job->getMonitorURI());
+        } else {
+          $file = $export_engine->exportFile();
 
-        $format->addHeaders($field_list);
-        for ($ii = 0; $ii < count($objects); $ii++) {
-          $format->addObject($objects[$ii], $field_list, $export_data[$ii]);
+          return $this->newDialog()
+            ->setTitle(pht('Download Results'))
+            ->appendParagraph(
+              pht('Click the download button to download the exported data.'))
+            ->addCancelButton($cancel_uri, pht('Done'))
+            ->setSubmitURI($file->getDownloadURI())
+            ->setDisableWorkflowOnSubmit(true)
+            ->addSubmitButton(pht('Download Data'));
         }
-
-        $export_result = $format->newFileData();
-
-        // We have all the data in one big string and aren't actually
-        // streaming it, but pretending that we are allows us to actviate
-        // the chunk engine and store large files.
-        $iterator = new ArrayIterator(array($export_result));
-
-        $source = id(new PhabricatorIteratorFileUploadSource())
-          ->setName($filename)
-          ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
-          ->setMIMEType($mime_type)
-          ->setRelativeTTL(phutil_units('60 minutes in seconds'))
-          ->setAuthorPHID($viewer->getPHID())
-          ->setIterator($iterator);
-
-        $file = $source->uploadFile();
-
-        return $this->newDialog()
-          ->setTitle(pht('Download Results'))
-          ->appendParagraph(
-            pht('Click the download button to download the exported data.'))
-          ->addCancelButton($cancel_uri, pht('Done'))
-          ->setSubmitURI($file->getDownloadURI())
-          ->setDisableWorkflowOnSubmit(true)
-          ->addSubmitButton(pht('Download Data'));
       }
     }
 

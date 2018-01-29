@@ -25,4 +25,24 @@ abstract class PhabricatorWorkerBulkJobType extends Phobject {
       ->execute();
   }
 
+  public function getCurtainActions(
+    PhabricatorUser $viewer,
+    PhabricatorWorkerBulkJob $job) {
+
+    if ($job->isConfirming()) {
+      $continue_uri = $job->getMonitorURI();
+    } else {
+      $continue_uri = $job->getDoneURI();
+    }
+
+    $continue = id(new PhabricatorActionView())
+      ->setHref($continue_uri)
+      ->setIcon('fa-arrow-circle-o-right')
+      ->setName(pht('Continue'));
+
+    return array(
+      $continue,
+    );
+  }
+
 }
