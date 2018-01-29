@@ -461,15 +461,20 @@ final class PhabricatorApplicationSearchController
 
         $export_result = $format->newFileData();
 
-        $file = PhabricatorFile::newFromFileData(
-          $export_result,
-          array(
-            'name' => $filename,
-            'authorPHID' => $viewer->getPHID(),
-            'ttl.relative' => phutil_units('15 minutes in seconds'),
-            'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-            'mime-type' => $mime_type,
-          ));
+        // We have all the data in one big string and aren't actually
+        // streaming it, but pretending that we are allows us to actviate
+        // the chunk engine and store large files.
+        $iterator = new ArrayIterator(array($export_result));
+
+        $source = id(new PhabricatorIteratorFileUploadSource())
+          ->setName($filename)
+          ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+          ->setMIMEType($mime_type)
+          ->setRelativeTTL(phutil_units('60 minutes in seconds'))
+          ->setAuthorPHID($viewer->getPHID())
+          ->setIterator($iterator);
+
+        $file = $source->uploadFile();
 
         return $this->newDialog()
           ->setTitle(pht('Download Results'))
