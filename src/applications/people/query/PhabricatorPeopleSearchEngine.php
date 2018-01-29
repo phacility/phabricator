@@ -328,9 +328,6 @@ final class PhabricatorPeopleSearchEngine
       id(new PhabricatorStringExportField())
         ->setKey('realName')
         ->setLabel(pht('Real Name')),
-      id(new PhabricatorEpochExportField())
-        ->setKey('created')
-        ->setLabel(pht('Date Created')),
     );
   }
 
@@ -342,7 +339,6 @@ final class PhabricatorPeopleSearchEngine
       $export[] = array(
         'username' => $user->getUsername(),
         'realName' => $user->getRealName(),
-        'created' => $user->getDateCreated(),
       );
     }
 

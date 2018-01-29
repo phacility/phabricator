@@ -25,7 +25,13 @@ abstract class PhabricatorExportField
   }
 
   public function getTextValue($value) {
-    return (string)$this->getNaturalValue($value);
+    $natural_value = $this->getNaturalValue($value);
+
+    if ($natural_value === null) {
+      return null;
+    }
+
+    return (string)$natural_value;
   }
 
   public function getNaturalValue($value) {

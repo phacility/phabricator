@@ -464,7 +464,7 @@ final class ManiphestTaskSearchEngine
         ->setLabel(pht('Priority Name')),
       id(new PhabricatorStringExportField())
         ->setKey('subtype')
-        ->setLabel('string'),
+        ->setLabel('Subtype'),
       id(new PhabricatorURIExportField())
         ->setKey('uri')
         ->setLabel(pht('URI')),
