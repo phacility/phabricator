@@ -32,4 +32,19 @@ abstract class PhabricatorExportField
     return $value;
   }
 
+  public function getPHPExcelValue($value) {
+    return $this->getTextValue($value);
+  }
+
+  /**
+   * @phutil-external-symbol class PHPExcel_Cell_DataType
+   */
+  public function formatPHPExcelCell($cell, $style) {
+    $cell->setDataType(PHPExcel_Cell_DataType::TYPE_STRING);
+  }
+
+  public function getCharacterWidth() {
+    return 24;
+  }
+
 }

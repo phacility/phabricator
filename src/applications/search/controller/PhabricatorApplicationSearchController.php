@@ -410,8 +410,10 @@ final class PhabricatorApplicationSearchController
 
     if ($named_query) {
       $filename = $named_query->getQueryName();
+      $sheet_title = $named_query->getQueryName();
     } else {
       $filename = $engine->getResultTypeDescription();
+      $sheet_title = $engine->getResultTypeDescription();
     }
     $filename = phutil_utf8_strtolower($filename);
     $filename = PhabricatorFile::normalizeFileName($filename);
@@ -445,8 +447,9 @@ final class PhabricatorApplicationSearchController
         $mime_type = $format->getMIMEContentType();
         $filename = $filename.'.'.$extension;
 
-        $format = clone $format;
-        $format->setViewer($viewer);
+        $format = id(clone $format)
+          ->setViewer($viewer)
+          ->setTitle($sheet_title);
 
         $export_data = $engine->newExport($objects);
         $objects = array_values($objects);

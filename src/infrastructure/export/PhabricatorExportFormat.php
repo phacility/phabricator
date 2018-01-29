@@ -4,6 +4,7 @@ abstract class PhabricatorExportFormat
   extends Phobject {
 
   private $viewer;
+  private $title;
 
   final public function getExportFormatKey() {
     return $this->getPhobjectClassConstant('EXPORTKEY');
@@ -16,6 +17,15 @@ abstract class PhabricatorExportFormat
 
   final public function getViewer() {
     return $this->viewer;
+  }
+
+  final public function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+
+  final public function getTitle() {
+    return $this->title;
   }
 
   abstract public function getExportFormatName();

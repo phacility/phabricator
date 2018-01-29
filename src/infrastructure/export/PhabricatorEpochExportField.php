@@ -24,4 +24,24 @@ final class PhabricatorEpochExportField
     return (int)$value;
   }
 
+  public function getPHPExcelValue($value) {
+    $epoch = $this->getNaturalValue($value);
+
+    $seconds_per_day = phutil_units('1 day in seconds');
+    $offset = ($seconds_per_day * 25569);
+
+    return ($epoch + $offset) / $seconds_per_day;
+  }
+
+  /**
+   * @phutil-external-symbol class PHPExcel_Style_NumberFormat
+   */
+  public function formatPHPExcelCell($cell, $style) {
+    $code = PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2;
+
+    $style
+      ->getNumberFormat()
+      ->setFormatCode($code);
+  }
+
 }

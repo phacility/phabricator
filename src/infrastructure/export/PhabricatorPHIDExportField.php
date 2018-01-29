@@ -1,4 +1,10 @@
 <?php
 
 final class PhabricatorPHIDExportField
-  extends PhabricatorExportField {}
+  extends PhabricatorExportField {
+
+  public function getCharacterWidth() {
+    return 32;
+  }
+
+}

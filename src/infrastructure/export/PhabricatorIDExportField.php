@@ -7,4 +7,8 @@ final class PhabricatorIDExportField
     return (int)$value;
   }
 
+  public function getCharacterWidth() {
+    return 12;
+  }
+
 }
