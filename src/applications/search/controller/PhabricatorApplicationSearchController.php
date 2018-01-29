@@ -418,8 +418,24 @@ final class PhabricatorApplicationSearchController
     $filename = phutil_utf8_strtolower($filename);
     $filename = PhabricatorFile::normalizeFileName($filename);
 
-    $formats = PhabricatorExportFormat::getAllEnabledExportFormats();
-    $format_options = mpull($formats, 'getExportFormatName');
+    $all_formats = PhabricatorExportFormat::getAllExportFormats();
+
+    $available_options = array();
+    $unavailable_options = array();
+    $formats = array();
+    $unavailable_formats = array();
+    foreach ($all_formats as $key => $format) {
+      if ($format->isExportFormatEnabled()) {
+        $available_options[$key] = $format->getExportFormatName();
+        $formats[$key] = $format;
+      } else {
+        $unavailable_options[$key] = pht(
+          '%s (Not Available)',
+          $format->getExportFormatName());
+        $unavailable_formats[$key] = $format;
+      }
+    }
+    $format_options = $available_options + $unavailable_options;
 
     // Try to default to the format the user used last time. If you just
     // exported to Excel, you probably want to export to Excel again.
@@ -433,6 +449,22 @@ final class PhabricatorApplicationSearchController
     $e_format = null;
     if ($request->isFormPost()) {
       $format_key = $request->getStr('format');
+
+      if (isset($unavailable_formats[$format_key])) {
+        $unavailable = $unavailable_formats[$format_key];
+        $instructions = $unavailable->getInstallInstructions();
+
+        $markup = id(new PHUIRemarkupView($viewer, $instructions))
+          ->setRemarkupOption(
+            PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS,
+            false);
+
+        return $this->newDialog()
+          ->setTitle(pht('Export Format Not Available'))
+          ->appendChild($markup)
+          ->addCancelButton($cancel_uri, pht('Done'));
+      }
+
       $format = idx($formats, $format_key);
 
       if (!$format) {

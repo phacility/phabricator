@@ -14,7 +14,30 @@ final class PhabricatorExcelExportFormat
   }
 
   public function isExportFormatEnabled() {
-    return true;
+    // TODO: PHPExcel has a dependency on the PHP zip extension. We should test
+    // for that here, since it fatals if we don't have the ZipArchive class.
+    return @include_once 'PHPExcel.php';
+  }
+
+  public function getInstallInstructions() {
+    return pht(<<<EOHELP
+Data can not be exported to Excel because the PHPExcel library is not
+installed. This software component is required for Phabricator to create
+Excel files.
+
+You can install PHPExcel from GitHub:
+
+> https://github.com/PHPOffice/PHPExcel
+
+Briefly:
+
+  - Clone that repository somewhere on the sever
+    (like `/path/to/example/PHPExcel`).
+  - Update your PHP `%s` setting (in `php.ini`) to include the PHPExcel
+    `Classes` directory (like `/path/to/example/PHPExcel/Classes`).
+EOHELP
+      ,
+      'include_path');
   }
 
   public function getFileExtension() {

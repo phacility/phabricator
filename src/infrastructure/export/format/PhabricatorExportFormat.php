@@ -50,16 +50,4 @@ abstract class PhabricatorExportFormat
       ->execute();
   }
 
-  final public static function getAllEnabledExportFormats() {
-    $formats = self::getAllExportFormats();
-
-    foreach ($formats as $key => $format) {
-      if (!$format->isExportFormatEnabled()) {
-        unset($formats[$key]);
-      }
-    }
-
-    return $formats;
-  }
-
 }
