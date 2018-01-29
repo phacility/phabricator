@@ -22,6 +22,10 @@ abstract class PhabricatorExportFormat
   abstract public function getMIMEContentType();
   abstract public function getFileExtension();
 
+  public function addHeaders(array $fields) {
+    return;
+  }
+
   abstract public function addObject($object, array $fields, array $map);
   abstract public function newFileData();
 

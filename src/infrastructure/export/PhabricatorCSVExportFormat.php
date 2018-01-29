@@ -23,21 +23,34 @@ final class PhabricatorCSVExportFormat
     return 'text/csv';
   }
 
+  public function addHeaders(array $fields) {
+    $headers = mpull($fields, 'getLabel');
+    $this->addRow($headers);
+  }
+
   public function addObject($object, array $fields, array $map) {
     $values = array();
     foreach ($fields as $key => $field) {
       $value = $map[$key];
       $value = $field->getTextValue($value);
+      $values[] = $value;
+    }
 
+    $this->addRow($values);
+  }
+
+  private function addRow(array $values) {
+    $row = array();
+    foreach ($values as $value) {
       if (preg_match('/\s|,|\"/', $value)) {
         $value = str_replace('"', '""', $value);
         $value = '"'.$value.'"';
       }
 
-      $values[] = $value;
+      $row[] = $value;
     }
 
-    $this->rows[] = implode(',', $values);
+    $this->rows[] = implode(',', $row);
   }
 
   public function newFileData() {

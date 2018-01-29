@@ -454,6 +454,7 @@ final class PhabricatorApplicationSearchController
         $field_list = $engine->newExportFieldList();
         $field_list = mpull($field_list, null, 'getKey');
 
+        $format->addHeaders($field_list);
         for ($ii = 0; $ii < count($objects); $ii++) {
           $format->addObject($objects[$ii], $field_list, $export_data[$ii]);
         }
