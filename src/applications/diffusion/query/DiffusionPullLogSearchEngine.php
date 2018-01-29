@@ -49,12 +49,6 @@ final class DiffusionPullLogSearchEngine
 
   protected function newExportFields() {
     return array(
-      id(new PhabricatorIDExportField())
-        ->setKey('id')
-        ->setLabel(pht('ID')),
-      id(new PhabricatorPHIDExportField())
-        ->setKey('phid')
-        ->setLabel(pht('PHID')),
       id(new PhabricatorPHIDExportField())
         ->setKey('repositoryPHID')
         ->setLabel(pht('Repository PHID')),
@@ -82,7 +76,7 @@ final class DiffusionPullLogSearchEngine
     );
   }
 
-  public function newExport(array $events) {
+  protected function newExportData(array $events) {
     $viewer = $this->requireViewer();
 
     $phids = array();
@@ -112,8 +106,6 @@ final class DiffusionPullLogSearchEngine
       }
 
       $export[] = array(
-        'id' => $event->getID(),
-        'phid' => $event->getPHID(),
         'repositoryPHID' => $repository_phid,
         'repository' => $repository_name,
         'pullerPHID' => $puller_phid,

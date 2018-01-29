@@ -1455,11 +1455,74 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
   final public function newExportFieldList() {
-    return $this->newExportFields();
+    $builtin_fields = array(
+      id(new PhabricatorIDExportField())
+        ->setKey('id')
+        ->setLabel(pht('ID')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('phid')
+        ->setLabel(pht('PHID')),
+    );
+
+    $fields = mpull($builtin_fields, null, 'getKey');
+
+    $export_fields = $this->newExportFields();
+    foreach ($export_fields as $export_field) {
+      $key = $export_field->getKey();
+
+      if (isset($fields[$key])) {
+        throw new Exception(
+          pht(
+            'Search engine ("%s") defines an export field with a key ("%s") '.
+            'that collides with another field. Each field must have a '.
+            'unique key.',
+            get_class($this),
+            $key));
+      }
+
+      $fields[$key] = $export_field;
+    }
+
+    return $fields;
+  }
+
+  final public function newExport(array $objects) {
+    $objects = array_values($objects);
+    $n = count($objects);
+
+    $maps = array();
+    foreach ($objects as $object) {
+      $maps[] = array(
+        'id' => $object->getID(),
+        'phid' => $object->getPHID(),
+      );
+    }
+
+    $export_data = $this->newExportData($objects);
+    $export_data = array_values($export_data);
+    if (count($export_data) !== count($objects)) {
+      throw new Exception(
+        pht(
+          'Search engine ("%s") exported the wrong number of objects, '.
+          'expected %s but got %s.',
+          get_class($this),
+          phutil_count($objects),
+          phutil_count($export_data)));
+    }
+
+    for ($ii = 0; $ii < $n; $ii++) {
+      $maps[$ii] += $export_data[$ii];
+    }
+
+    return $maps;
   }
 
   protected function newExportFields() {
     return array();
+  }
+
+  protected function newExportData(array $objects) {
+    throw new PhutilMethodNotImplementedException();
   }
 
 }

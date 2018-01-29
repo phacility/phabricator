@@ -449,18 +449,7 @@ final class PhabricatorApplicationSearchController
         $format->setViewer($viewer);
 
         $export_data = $engine->newExport($objects);
-
-        if (count($export_data) !== count($objects)) {
-          throw new Exception(
-            pht(
-              'Search engine exported the wrong number of objects, expected '.
-              '%s but got %s.',
-              phutil_count($objects),
-              phutil_count($export_data)));
-        }
-
         $objects = array_values($objects);
-        $export_data = array_values($export_data);
 
         $field_list = $engine->newExportFieldList();
         $field_list = mpull($field_list, null, 'getKey');
