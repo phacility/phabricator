@@ -154,7 +154,7 @@ final class PhabricatorApplicationSearchController
       $saved_query = $engine->buildSavedQueryFromRequest($request);
 
       // Save the query to generate a query key, so "Save Custom Query..." and
-      // other features like Maniphest's "Export..." work correctly.
+      // other features like "Bulk Edit" and "Export Data" work correctly.
       $engine->saveQuery($saved_query);
     }
 
