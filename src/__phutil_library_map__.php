@@ -2852,6 +2852,7 @@ phutil_register_library_map(array(
     'PhabricatorExportEngineExtension' => 'infrastructure/export/engine/PhabricatorExportEngineExtension.php',
     'PhabricatorExportField' => 'infrastructure/export/field/PhabricatorExportField.php',
     'PhabricatorExportFormat' => 'infrastructure/export/format/PhabricatorExportFormat.php',
+    'PhabricatorExportFormatSetting' => 'infrastructure/export/engine/PhabricatorExportFormatSetting.php',
     'PhabricatorExtendedPolicyInterface' => 'applications/policy/interface/PhabricatorExtendedPolicyInterface.php',
     'PhabricatorExtendingPhabricatorConfigOptions' => 'applications/config/option/PhabricatorExtendingPhabricatorConfigOptions.php',
     'PhabricatorExtensionsSetupCheck' => 'applications/config/check/PhabricatorExtensionsSetupCheck.php',
@@ -8288,6 +8289,7 @@ phutil_register_library_map(array(
     'PhabricatorExportEngineExtension' => 'Phobject',
     'PhabricatorExportField' => 'Phobject',
     'PhabricatorExportFormat' => 'Phobject',
+    'PhabricatorExportFormatSetting' => 'PhabricatorInternalSetting',
     'PhabricatorExtendingPhabricatorConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorExtensionsSetupCheck' => 'PhabricatorSetupCheck',
     'PhabricatorExternalAccount' => array(

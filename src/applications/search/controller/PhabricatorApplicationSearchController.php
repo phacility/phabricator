@@ -421,6 +421,13 @@ final class PhabricatorApplicationSearchController
     $formats = PhabricatorExportFormat::getAllEnabledExportFormats();
     $format_options = mpull($formats, 'getExportFormatName');
 
+    // Try to default to the format the user used last time. If you just
+    // exported to Excel, you probably want to export to Excel again.
+    $format_key = $this->readExportFormatPreference();
+    if (!isset($formats[$format_key])) {
+      $format_key = head_key($format_options);
+    }
+
     $errors = array();
 
     $e_format = null;
@@ -434,6 +441,8 @@ final class PhabricatorApplicationSearchController
       }
 
       if (!$errors) {
+        $this->writeExportFormatPreference($format_key);
+
         $query = $engine->buildQueryFromSavedQuery($saved_query);
 
         // NOTE: We aren't reading the pager from the request. Exports always
@@ -497,6 +506,7 @@ final class PhabricatorApplicationSearchController
           ->setName('format')
           ->setLabel(pht('Format'))
           ->setError($e_format)
+          ->setValue($format_key)
           ->setOptions($format_options));
 
     return $this->newDialog()
@@ -910,6 +920,34 @@ final class PhabricatorApplicationSearchController
     }
 
     return true;
+  }
+
+  private function readExportFormatPreference() {
+    $viewer = $this->getViewer();
+    $export_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+    return $viewer->getUserSetting($export_key);
+  }
+
+  private function writeExportFormatPreference($value) {
+    $viewer = $this->getViewer();
+    $request = $this->getRequest();
+
+    if (!$viewer->isLoggedIn()) {
+      return;
+    }
+
+    $export_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+    $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
+
+    $editor = id(new PhabricatorUserPreferencesEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+    $xactions[] = $preferences->newTransaction($export_key, $value);
+    $editor->applyTransactions($preferences, $xactions);
   }
 
 }
