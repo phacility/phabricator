@@ -3,7 +3,6 @@
 final class PhabricatorUserLogView extends AphrontView {
 
   private $logs;
-  private $handles;
   private $searchBaseURI;
 
   public function setSearchBaseURI($search_base_uri) {
@@ -17,16 +16,16 @@ final class PhabricatorUserLogView extends AphrontView {
     return $this;
   }
 
-  public function setHandles(array $handles) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-    $this->handles = $handles;
-    return $this;
-  }
-
   public function render() {
     $logs = $this->logs;
-    $handles = $this->handles;
     $viewer = $this->getUser();
+
+    $phids = array();
+    foreach ($logs as $log) {
+      $phids[] = $log->getActorPHID();
+      $phids[] = $log->getUserPHID();
+    }
+    $handles = $viewer->loadHandles($phids);
 
     $action_map = PhabricatorUserLog::getActionTypeMap();
     $base_uri = $this->searchBaseURI;

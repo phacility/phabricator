@@ -15,34 +15,8 @@ final class PhabricatorPeopleLogSearchEngine
     return 500;
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'userPHIDs',
-      $this->readUsersFromRequest($request, 'users'));
-
-    $saved->setParameter(
-      'actorPHIDs',
-      $this->readUsersFromRequest($request, 'actors'));
-
-    $saved->setParameter(
-      'actions',
-      $this->readListFromRequest($request, 'actions'));
-
-    $saved->setParameter(
-      'ip',
-      $request->getStr('ip'));
-
-    $saved->setParameter(
-      'sessions',
-      $this->readListFromRequest($request, 'sessions'));
-
-    return $saved;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorPeopleLogQuery());
+  public function newQuery() {
+    $query = new PhabricatorPeopleLogQuery();
 
     // NOTE: If the viewer isn't an administrator, always restrict the query to
     // related records. This echoes the policy logic of these logs. This is
@@ -54,82 +28,61 @@ final class PhabricatorPeopleLogSearchEngine
       $query->withRelatedPHIDs(array($viewer->getPHID()));
     }
 
-    $actor_phids = $saved->getParameter('actorPHIDs', array());
-    if ($actor_phids) {
-      $query->withActorPHIDs($actor_phids);
+    return $query;
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['userPHIDs']) {
+      $query->withUserPHIDs($map['userPHIDs']);
     }
 
-    $user_phids = $saved->getParameter('userPHIDs', array());
-    if ($user_phids) {
-      $query->withUserPHIDs($user_phids);
+    if ($map['actorPHIDs']) {
+      $query->withActorPHIDs($map['actorPHIDs']);
     }
 
-    $actions = $saved->getParameter('actions', array());
-    if ($actions) {
-      $query->withActions($actions);
+    if ($map['actions']) {
+      $query->withActions($map['actions']);
     }
 
-    $remote_prefix = $saved->getParameter('ip');
-    if (strlen($remote_prefix)) {
-      $query->withRemoteAddressprefix($remote_prefix);
+    if (strlen($map['ip'])) {
+      $query->withRemoteAddressPrefix($map['ip']);
     }
 
-    $sessions = $saved->getParameter('sessions', array());
-    if ($sessions) {
-      $query->withSessionKeys($sessions);
+    if ($map['sessions']) {
+      $query->withSessionKeys($map['sessions']);
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $actor_phids = $saved->getParameter('actorPHIDs', array());
-    $user_phids = $saved->getParameter('userPHIDs', array());
-
-    $actions = $saved->getParameter('actions', array());
-    $remote_prefix = $saved->getParameter('ip');
-    $sessions = $saved->getParameter('sessions', array());
-
-    $actions = array_fuse($actions);
-    $action_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Actions'));
-    $action_types = PhabricatorUserLog::getActionTypeMap();
-    foreach ($action_types as $type => $label) {
-      $action_control->addCheckbox(
-        'actions[]',
-        $type,
-        $label,
-        isset($actions[$label]));
-    }
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('actors')
-          ->setLabel(pht('Actors'))
-          ->setValue($actor_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('users')
-          ->setLabel(pht('Users'))
-          ->setValue($user_phids))
-      ->appendChild($action_control)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Filter IP'))
-          ->setName('ip')
-          ->setValue($remote_prefix))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Sessions'))
-          ->setName('sessions')
-          ->setValue(implode(', ', $sessions)));
-
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setKey('userPHIDs')
+        ->setAliases(array('users', 'user', 'userPHID'))
+        ->setLabel(pht('Users'))
+        ->setDescription(pht('Search for activity affecting specific users.')),
+      id(new PhabricatorUsersSearchField())
+        ->setKey('actorPHIDs')
+        ->setAliases(array('actors', 'actor', 'actorPHID'))
+        ->setLabel(pht('Actors'))
+        ->setDescription(pht('Search for activity by specific users.')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('actions')
+        ->setLabel(pht('Actions'))
+        ->setDescription(pht('Search for particular types of activity.'))
+        ->setOptions(PhabricatorUserLog::getActionTypeMap()),
+      id(new PhabricatorSearchTextField())
+        ->setKey('ip')
+        ->setLabel(pht('Filter IP'))
+        ->setDescription(pht('Search for actions by remote address.')),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('sessions')
+        ->setLabel(pht('Sessions'))
+        ->setDescription(pht('Search for activity in particular sessions.')),
+    );
   }
 
   protected function getURI($path) {
@@ -156,19 +109,6 @@ final class PhabricatorPeopleLogSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $logs,
-    PhabricatorSavedQuery $query) {
-
-    $phids = array();
-    foreach ($logs as $log) {
-      $phids[$log->getActorPHID()] = true;
-      $phids[$log->getUserPHID()] = true;
-    }
-
-    return array_keys($phids);
-  }
-
   protected function renderResultList(
     array $logs,
     PhabricatorSavedQuery $query,
@@ -179,16 +119,13 @@ final class PhabricatorPeopleLogSearchEngine
 
     $table = id(new PhabricatorUserLogView())
       ->setUser($viewer)
-      ->setLogs($logs)
-      ->setHandles($handles);
+      ->setLogs($logs);
 
     if ($viewer->getIsAdmin()) {
       $table->setSearchBaseURI($this->getApplicationURI('logs/'));
     }
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setTable($table);
-
-    return $result;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setTable($table);
   }
 }

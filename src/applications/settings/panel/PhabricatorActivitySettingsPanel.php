@@ -43,8 +43,7 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
 
     $table = id(new PhabricatorUserLogView())
       ->setUser($viewer)
-      ->setLogs($logs)
-      ->setHandles($handles);
+      ->setLogs($logs);
 
     $panel = $this->newBox(pht('Account Activity Logs'), $table);
 

@@ -40,70 +40,61 @@ final class PhabricatorPeopleLogQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table  = new PhabricatorUserLog();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function newResultObject() {
+    return new PhabricatorUserLog();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->actorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'actorPHID IN (%Ls)',
         $this->actorPHIDs);
     }
 
     if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
     if ($this->relatedPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'actorPHID IN (%Ls) OR userPHID IN (%Ls)',
+        $conn,
+        '(actorPHID IN (%Ls) OR userPHID IN (%Ls))',
         $this->relatedPHIDs,
         $this->relatedPHIDs);
     }
 
     if ($this->sessionKeys !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'session IN (%Ls)',
         $this->sessionKeys);
     }
 
     if ($this->actions !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'action IN (%Ls)',
         $this->actions);
     }
 
     if ($this->remoteAddressPrefix !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'remoteAddr LIKE %>',
         $this->remoteAddressPrefix);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {
