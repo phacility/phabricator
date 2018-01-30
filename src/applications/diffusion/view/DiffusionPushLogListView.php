@@ -28,6 +28,9 @@ final class DiffusionPushLogListView extends AphrontView {
     // Only administrators can view remote addresses.
     $remotes_visible = $viewer->getIsAdmin();
 
+    $flag_map = PhabricatorRepositoryPushLog::getFlagDisplayNames();
+    $reject_map = PhabricatorRepositoryPushLog::getRejectCodeDisplayNames();
+
     $rows = array();
     $any_host = false;
     foreach ($logs as $log) {
@@ -59,6 +62,23 @@ final class DiffusionPushLogListView extends AphrontView {
         $device = null;
       }
 
+      $flags = $log->getChangeFlags();
+      $flag_names = array();
+      foreach ($flag_map as $flag_key => $flag_name) {
+        if (($flags & $flag_key) === $flag_key) {
+          $flag_names[] = $flag_name;
+        }
+      }
+      $flag_names = phutil_implode_html(
+        phutil_tag('br'),
+        $flag_names);
+
+      $reject_code = $log->getPushEvent()->getRejectCode();
+      $reject_label = idx(
+        $reject_map,
+        $reject_code,
+        pht('Unknown ("%s")', $reject_code));
+
       $rows[] = array(
         phutil_tag(
           'a',
@@ -85,10 +105,8 @@ final class DiffusionPushLogListView extends AphrontView {
             'href' => $repository->getCommitURI($log->getRefNew()),
           ),
           $log->getRefNewShort()),
-
-        // TODO: Make these human-readable.
-        $log->getChangeFlags(),
-        $log->getPushEvent()->getRejectCode(),
+        $flag_names,
+        $reject_label,
         $viewer->formatShortDateTime($log->getEpoch()),
       );
     }
@@ -107,7 +125,7 @@ final class DiffusionPushLogListView extends AphrontView {
           pht('Old'),
           pht('New'),
           pht('Flags'),
-          pht('Code'),
+          pht('Result'),
           pht('Date'),
         ))
       ->setColumnClasses(
@@ -122,6 +140,8 @@ final class DiffusionPushLogListView extends AphrontView {
           'wide',
           'n',
           'n',
+          '',
+          '',
           'right',
         ))
       ->setColumnVisibility(
