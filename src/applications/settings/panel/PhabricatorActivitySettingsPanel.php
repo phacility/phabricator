@@ -26,21 +26,6 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
       ->withRelatedPHIDs(array($user->getPHID()))
       ->executeWithCursorPager($pager);
 
-    $phids = array();
-    foreach ($logs as $log) {
-      $phids[] = $log->getUserPHID();
-      $phids[] = $log->getActorPHID();
-    }
-
-    if ($phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs($phids)
-        ->execute();
-    } else {
-      $handles = array();
-    }
-
     $table = id(new PhabricatorUserLogView())
       ->setUser($viewer)
       ->setLogs($logs);
