@@ -60,7 +60,9 @@ final class DiffusionPullLogSearchEngine
   }
 
   protected function newExportFields() {
-    return array(
+    $viewer = $this->requireViewer();
+
+    $fields = array(
       id(new PhabricatorPHIDExportField())
         ->setKey('repositoryPHID')
         ->setLabel(pht('Repository PHID')),
@@ -86,6 +88,14 @@ final class DiffusionPullLogSearchEngine
         ->setKey('date')
         ->setLabel(pht('Date')),
     );
+
+    if ($viewer->getIsAdmin()) {
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('remoteAddress')
+        ->setLabel(pht('Remote Address'));
+    }
+
+    return $fields;
   }
 
   protected function newExportData(array $events) {
@@ -117,7 +127,7 @@ final class DiffusionPullLogSearchEngine
         $puller_name = null;
       }
 
-      $export[] = array(
+      $map = array(
         'repositoryPHID' => $repository_phid,
         'repository' => $repository_name,
         'pullerPHID' => $puller_phid,
@@ -127,6 +137,12 @@ final class DiffusionPullLogSearchEngine
         'code' => $event->getResultCode(),
         'date' => $event->getEpoch(),
       );
+
+      if ($viewer->getIsAdmin()) {
+        $map['remoteAddress'] = $event->getRemoteAddress();
+      }
+
+      $export[] = $map;
     }
 
     return $export;
