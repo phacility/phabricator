@@ -42,6 +42,16 @@ final class PhabricatorCSVExportFormat
   private function addRow(array $values) {
     $row = array();
     foreach ($values as $value) {
+
+      // Excel is extremely interested in executing arbitrary code it finds in
+      // untrusted CSV files downloaded from the internet. When a cell looks
+      // like it might be too tempting for Excel to ignore, mangle the value
+      // to dissuade remote code execution. See T12800.
+
+      if (preg_match('/^\s*[+=@-]/', $value)) {
+        $value = '(!) '.$value;
+      }
+
       if (preg_match('/\s|,|\"/', $value)) {
         $value = str_replace('"', '""', $value);
         $value = '"'.$value.'"';
