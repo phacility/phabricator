@@ -1455,14 +1455,19 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
   final public function newExportFieldList() {
+    $object = $this->newResultObject();
+
     $builtin_fields = array(
       id(new PhabricatorIDExportField())
         ->setKey('id')
         ->setLabel(pht('ID')),
-      id(new PhabricatorPHIDExportField())
-        ->setKey('phid')
-        ->setLabel(pht('PHID')),
     );
+
+    if ($object->getConfigOption(LiskDAO::CONFIG_AUX_PHID)) {
+      $builtin_fields[] = id(new PhabricatorPHIDExportField())
+        ->setKey('phid')
+        ->setLabel(pht('PHID'));
+    }
 
     $fields = mpull($builtin_fields, null, 'getKey');
 
@@ -1507,15 +1512,23 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
   final public function newExport(array $objects) {
+    $object = $this->newResultObject();
+    $has_phid = $object->getConfigOption(LiskDAO::CONFIG_AUX_PHID);
+
     $objects = array_values($objects);
     $n = count($objects);
 
     $maps = array();
     foreach ($objects as $object) {
-      $maps[] = array(
+      $map = array(
         'id' => $object->getID(),
-        'phid' => $object->getPHID(),
       );
+
+      if ($has_phid) {
+        $map['phid'] = $object->getPHID();
+      }
+
+      $maps[] = $map;
     }
 
     $export_data = $this->newExportData($objects);

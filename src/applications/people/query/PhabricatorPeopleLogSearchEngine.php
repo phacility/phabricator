@@ -128,4 +128,102 @@ final class PhabricatorPeopleLogSearchEngine
     return id(new PhabricatorApplicationSearchResultView())
       ->setTable($table);
   }
+
+  protected function newExportFields() {
+    $viewer = $this->requireViewer();
+
+    $fields = array(
+      $fields[] = id(new PhabricatorPHIDExportField())
+        ->setKey('actorPHID')
+        ->setLabel(pht('Actor PHID')),
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('actor')
+        ->setLabel(pht('Actor')),
+      $fields[] = id(new PhabricatorPHIDExportField())
+        ->setKey('userPHID')
+        ->setLabel(pht('User PHID')),
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('user')
+        ->setLabel(pht('User')),
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('action')
+        ->setLabel(pht('Action')),
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('actionName')
+        ->setLabel(pht('Action Name')),
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('session')
+        ->setLabel(pht('Session')),
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('old')
+        ->setLabel(pht('Old Value')),
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('new')
+        ->setLabel(pht('New Value')),
+    );
+
+    if ($viewer->getIsAdmin()) {
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('remoteAddress')
+        ->setLabel(pht('Remote Address'));
+    }
+
+    return $fields;
+  }
+
+  protected function newExportData(array $logs) {
+    $viewer = $this->requireViewer();
+
+
+    $phids = array();
+    foreach ($logs as $log) {
+      $phids[] = $log->getUserPHID();
+      $phids[] = $log->getActorPHID();
+    }
+    $handles = $viewer->loadHandles($phids);
+
+    $action_map = PhabricatorUserLog::getActionTypeMap();
+
+    $export = array();
+    foreach ($logs as $log) {
+
+      $user_phid = $log->getUserPHID();
+      if ($user_phid) {
+        $user_name = $handles[$user_phid]->getName();
+      } else {
+        $user_name = null;
+      }
+
+      $actor_phid = $log->getActorPHID();
+      if ($actor_phid) {
+        $actor_name = $handles[$actor_phid]->getName();
+      } else {
+        $actor_name = null;
+      }
+
+      $action = $log->getAction();
+      $action_name = idx($action_map, $action, pht('Unknown ("%s")', $action));
+
+      $map = array(
+        'actorPHID' => $actor_phid,
+        'actor' => $actor_name,
+        'userPHID' => $user_phid,
+        'user' => $user_name,
+        'action' => $action,
+        'actionName' => $action_name,
+        'session' => substr($log->getSession(), 0, 6),
+        'old' => $log->getOldValue(),
+        'new' => $log->getNewValue(),
+      );
+
+      if ($viewer->getIsAdmin()) {
+        $map['remoteAddress'] = $log->getRemoteAddr();
+      }
+
+      $export[] = $map;
+    }
+
+    return $export;
+  }
+
 }
