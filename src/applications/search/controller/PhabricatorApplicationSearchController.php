@@ -7,6 +7,7 @@ final class PhabricatorApplicationSearchController
   private $navigation;
   private $queryKey;
   private $preface;
+  private $activeQuery;
 
   public function setPreface($preface) {
     $this->preface = $preface;
@@ -43,6 +44,14 @@ final class PhabricatorApplicationSearchController
 
   protected function getSearchEngine() {
     return $this->searchEngine;
+  }
+
+  protected function getActiveQuery() {
+    if (!$this->activeQuery) {
+      throw new Exception(pht('There is no active query yet.'));
+    }
+
+    return $this->activeQuery;
   }
 
   protected function validateDelegatingController() {
@@ -157,6 +166,8 @@ final class PhabricatorApplicationSearchController
       // other features like "Bulk Edit" and "Export Data" work correctly.
       $engine->saveQuery($saved_query);
     }
+
+    $this->activeQuery = $saved_query;
 
     $nav->selectFilter(
       'query/'.$saved_query->getQueryKey(),
@@ -867,10 +878,8 @@ final class PhabricatorApplicationSearchController
 
     $engine = $this->getSearchEngine();
     $engine_class = get_class($engine);
-    $query_key = $this->getQueryKey();
-    if (!$query_key) {
-      $query_key = $engine->getDefaultQueryKey();
-    }
+
+    $query_key = $this->getActiveQuery()->getQueryKey();
 
     $can_use = $engine->canUseInPanelContext();
     $is_installed = PhabricatorApplication::isClassInstalledForViewer(
