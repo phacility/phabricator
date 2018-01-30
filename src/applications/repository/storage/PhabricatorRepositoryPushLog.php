@@ -124,6 +124,9 @@ final class PhabricatorRepositoryPushLog
         'key_pusher' => array(
           'columns' => array('pusherPHID'),
         ),
+        'key_epoch' => array(
+          'columns' => array('epoch'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

@@ -9,6 +9,8 @@ final class PhabricatorPeopleLogQuery
   private $sessionKeys;
   private $actions;
   private $remoteAddressPrefix;
+  private $dateCreatedMin;
+  private $dateCreatedMax;
 
   public function withActorPHIDs(array $actor_phids) {
     $this->actorPHIDs = $actor_phids;
@@ -37,6 +39,12 @@ final class PhabricatorPeopleLogQuery
 
   public function withRemoteAddressPrefix($remote_address_prefix) {
     $this->remoteAddressPrefix = $remote_address_prefix;
+    return $this;
+  }
+
+  public function withDateCreatedBetween($min, $max) {
+    $this->dateCreatedMin = $min;
+    $this->dateCreatedMax = $max;
     return $this;
   }
 
@@ -92,6 +100,20 @@ final class PhabricatorPeopleLogQuery
         $conn,
         'remoteAddr LIKE %>',
         $this->remoteAddressPrefix);
+    }
+
+    if ($this->dateCreatedMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'dateCreated >= %d',
+        $this->dateCreatedMin);
+    }
+
+    if ($this->dateCreatedMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'dateCreated <= %d',
+        $this->dateCreatedMax);
     }
 
     return $where;

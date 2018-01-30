@@ -10,6 +10,8 @@ final class PhabricatorRepositoryPushLogQuery
   private $refTypes;
   private $newRefs;
   private $pushEventPHIDs;
+  private $epochMin;
+  private $epochMax;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -43,6 +45,12 @@ final class PhabricatorRepositoryPushLogQuery
 
   public function withPushEventPHIDs(array $phids) {
     $this->pushEventPHIDs = $phids;
+    return $this;
+  }
+
+  public function withEpochBetween($min, $max) {
+    $this->epochMin = $min;
+    $this->epochMax = $max;
     return $this;
   }
 
@@ -125,6 +133,20 @@ final class PhabricatorRepositoryPushLogQuery
         $conn,
         'refNew IN (%Ls)',
         $this->newRefs);
+    }
+
+    if ($this->epochMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'epoch >= %d',
+        $this->epochMin);
+    }
+
+    if ($this->epochMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'epoch <= %d',
+        $this->epochMax);
     }
 
     return $where;

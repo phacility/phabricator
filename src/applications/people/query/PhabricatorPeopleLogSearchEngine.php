@@ -54,6 +54,12 @@ final class PhabricatorPeopleLogSearchEngine
       $query->withSessionKeys($map['sessions']);
     }
 
+    if ($map['createdStart'] || $map['createdEnd']) {
+      $query->withDateCreatedBetween(
+        $map['createdStart'],
+        $map['createdEnd']);
+    }
+
     return $query;
   }
 
@@ -82,6 +88,12 @@ final class PhabricatorPeopleLogSearchEngine
         ->setKey('sessions')
         ->setLabel(pht('Sessions'))
         ->setDescription(pht('Search for activity in particular sessions.')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created After'))
+        ->setKey('createdStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created Before'))
+        ->setKey('createdEnd'),
     );
   }
 

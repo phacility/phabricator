@@ -26,6 +26,12 @@ final class PhabricatorRepositoryPushLogSearchEngine
       $query->withPusherPHIDs($map['pusherPHIDs']);
     }
 
+    if ($map['createdStart'] || $map['createdEnd']) {
+      $query->withEpochBetween(
+        $map['createdStart'],
+        $map['createdEnd']);
+    }
+
     return $query;
   }
 
@@ -44,6 +50,12 @@ final class PhabricatorRepositoryPushLogSearchEngine
         ->setLabel(pht('Pushers'))
         ->setDescription(
           pht('Search for pull logs by specific users.')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created After'))
+        ->setKey('createdStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created Before'))
+        ->setKey('createdEnd'),
     );
   }
 
