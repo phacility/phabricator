@@ -15,6 +15,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
   protected function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     if ($this->shouldSkipImportStep()) {
       // This worker has no followup tasks, so we can just bail out
@@ -50,7 +51,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
       id(new PhabricatorDiffusionApplication())->getPHID());
 
     $editor = id(new PhabricatorAuditEditor())
-      ->setActor(PhabricatorUser::getOmnipotentUser())
+      ->setActor($viewer)
       ->setActingAsPHID($acting_as_phid)
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect(true)
@@ -68,29 +69,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
         'committerName' => $data->getCommitDetail('committer'),
         'committerPHID' => $data->getCommitDetail('committerPHID'),
       ));
-
-    $reverts_refs = id(new DifferentialCustomFieldRevertsParser())
-      ->parseCorpus($data->getCommitMessage());
-    $reverts = array_mergev(ipull($reverts_refs, 'monograms'));
-
-    if ($reverts) {
-      $reverted_commits = id(new DiffusionCommitQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withRepository($repository)
-        ->withIdentifiers($reverts)
-        ->execute();
-      $reverted_commit_phids = mpull($reverted_commits, 'getPHID', 'getPHID');
-
-      // NOTE: Skip any write attempts if a user cleverly implies a commit
-      // reverts itself.
-      unset($reverted_commit_phids[$commit->getPHID()]);
-
-      $reverts_edge = DiffusionCommitRevertsCommitEdgeType::EDGECONST;
-      $xactions[] = id(new PhabricatorAuditTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $reverts_edge)
-        ->setNewValue(array('+' => array_fuse($reverted_commit_phids)));
-    }
 
     try {
       $raw_patch = $this->loadRawPatchText($repository, $commit);

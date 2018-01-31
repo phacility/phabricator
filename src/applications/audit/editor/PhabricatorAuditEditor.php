@@ -358,9 +358,17 @@ final class PhabricatorAuditEditor
     array $changes,
     PhutilMarkupEngine $engine) {
 
-    // we are only really trying to find unmentionable phids here...
-    // don't bother with this outside initial commit (i.e. create)
-    // transaction
+    $actor = $this->getActor();
+    $result = array();
+
+    // Some interactions (like "Fixes Txxx" interacting with Maniphest) have
+    // already been processed, so we're only re-parsing them here to avoid
+    // generating an extra redundant mention. Other interactions are being
+    // processed for the first time.
+
+    // We're only recognizing magic in the commit message itself, not in
+    // audit comments.
+
     $is_commit = false;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
@@ -370,8 +378,6 @@ final class PhabricatorAuditEditor
       }
     }
 
-    // "result" is always an array....
-    $result = array();
     if (!$is_commit) {
       return $result;
     }
@@ -403,6 +409,46 @@ final class PhabricatorAuditEditor
       ->withNames($monograms)
       ->execute();
     $phid_map[] = mpull($objects, 'getPHID', 'getPHID');
+
+
+    $reverts_refs = id(new DifferentialCustomFieldRevertsParser())
+      ->parseCorpus($huge_block);
+    $reverts = array_mergev(ipull($reverts_refs, 'monograms'));
+    if ($reverts) {
+      // Only allow commits to revert other commits in the same repository.
+      $reverted_commits = id(new DiffusionCommitQuery())
+        ->setViewer($actor)
+        ->withRepository($object->getRepository())
+        ->withIdentifiers($reverts)
+        ->execute();
+
+      $reverted_revisions = id(new PhabricatorObjectQuery())
+        ->setViewer($actor)
+        ->withNames($reverts)
+        ->withTypes(
+          array(
+            DifferentialRevisionPHIDType::TYPECONST,
+          ))
+        ->execute();
+
+      $reverted_phids =
+        mpull($reverted_commits, 'getPHID', 'getPHID') +
+        mpull($reverted_revisions, 'getPHID', 'getPHID');
+
+      // NOTE: Skip any write attempts if a user cleverly implies a commit
+      // reverts itself, although this would be exceptionally clever in Git
+      // or Mercurial.
+      unset($reverted_phids[$object->getPHID()]);
+
+      $reverts_edge = DiffusionCommitRevertsCommitEdgeType::EDGECONST;
+      $result[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $reverts_edge)
+        ->setNewValue(array('+' => $reverted_phids));
+
+      $phid_map[] = $reverted_phids;
+    }
+
     $phid_map = array_mergev($phid_map);
     $this->setUnmentionablePHIDMap($phid_map);
 
