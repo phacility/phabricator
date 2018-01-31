@@ -55,4 +55,16 @@ abstract class PhabricatorPHIDListEditType
     }
   }
 
+  public function getTransactionValueFromBulkEdit($value) {
+    if (!$this->getIsSingleValue()) {
+      return $value;
+    }
+
+    if ($value) {
+      return head($value);
+    }
+
+    return null;
+  }
+
 }
