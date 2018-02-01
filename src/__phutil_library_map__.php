@@ -8739,6 +8739,7 @@ phutil_register_library_map(array(
     'PhabricatorMetaMTAMail' => array(
       'PhabricatorMetaMTADAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorMetaMTAMailBody' => 'Phobject',
     'PhabricatorMetaMTAMailBodyTestCase' => 'PhabricatorTestCase',

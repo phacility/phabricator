@@ -5,7 +5,9 @@
  */
 final class PhabricatorMetaMTAMail
   extends PhabricatorMetaMTADAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   const RETRY_DELAY   = 5;
 
@@ -1041,20 +1043,6 @@ final class PhabricatorMetaMTAMail
     }
   }
 
-  public function delete() {
-    $this->openTransaction();
-      queryfx(
-        $this->establishConnection('w'),
-        'DELETE FROM %T WHERE src = %s AND type = %d',
-        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        $this->getPHID(),
-        PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
-      $ret = parent::delete();
-    $this->saveTransaction();
-
-    return $ret;
-  }
-
   public function generateHeaders() {
     $headers = array();
 
@@ -1305,5 +1293,13 @@ final class PhabricatorMetaMTAMail
       'The mail sender and message recipients can always see the mail.');
   }
 
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
+  }
 
 }

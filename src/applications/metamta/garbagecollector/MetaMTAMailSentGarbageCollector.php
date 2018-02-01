@@ -18,8 +18,9 @@ final class MetaMTAMailSentGarbageCollector
       'dateCreated < %d LIMIT 100',
       $this->getGarbageEpoch());
 
+    $engine = new PhabricatorDestructionEngine();
     foreach ($mails as $mail) {
-      $mail->delete();
+      $engine->destroyObject($mail);
     }
 
     return (count($mails) == 100);
