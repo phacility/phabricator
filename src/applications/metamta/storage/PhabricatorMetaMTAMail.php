@@ -21,7 +21,10 @@ final class PhabricatorMetaMTAMail
   public function __construct() {
 
     $this->status     = PhabricatorMailOutboundStatus::STATUS_QUEUE;
-    $this->parameters = array('sensitive' => true);
+    $this->parameters = array(
+      'sensitive' => true,
+      'mustEncrypt' => false,
+    );
 
     parent::__construct();
   }
@@ -247,6 +250,15 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('sensitive', true);
   }
 
+  public function setMustEncrypt($bool) {
+    $this->setParam('mustEncrypt', $bool);
+    return $this;
+  }
+
+  public function getMustEncrypt() {
+    return $this->getParam('mustEncrypt', false);
+  }
+
   public function setHTMLBody($html) {
     $this->setParam('html-body', $html);
     return $this;
@@ -431,6 +443,7 @@ final class PhabricatorMetaMTAMail
       unset($params['is-first-message']);
 
       $is_threaded = (bool)idx($params, 'thread-id');
+      $must_encrypt = $this->getMustEncrypt();
 
       $reply_to_name = idx($params, 'reply-to-name', '');
       unset($params['reply-to-name']);
@@ -502,6 +515,11 @@ final class PhabricatorMetaMTAMail
               mpull($cc_actors, 'getEmailAddress'));
             break;
           case 'attachments':
+            // If the mail content must be encrypted, don't add attachments.
+            if ($must_encrypt) {
+              break;
+            }
+
             $value = $this->getAttachments();
             foreach ($value as $attachment) {
               $mailer->addAttachment(
@@ -521,14 +539,20 @@ final class PhabricatorMetaMTAMail
 
             $subject[] = trim(idx($params, 'subject-prefix'));
 
-            $vary_prefix = idx($params, 'vary-subject-prefix');
-            if ($vary_prefix != '') {
-              if ($this->shouldVarySubject($preferences)) {
-                $subject[] = $vary_prefix;
+            // If mail content must be encrypted, we replace the subject with
+            // a generic one.
+            if ($must_encrypt) {
+              $subject[] = pht('Object Updated');
+            } else {
+              $vary_prefix = idx($params, 'vary-subject-prefix');
+              if ($vary_prefix != '') {
+                if ($this->shouldVarySubject($preferences)) {
+                  $subject[] = $vary_prefix;
+                }
               }
-            }
 
-            $subject[] = $value;
+              $subject[] = $value;
+            }
 
             $mailer->setSubject(implode(' ', array_filter($subject)));
             break;
@@ -567,7 +591,22 @@ final class PhabricatorMetaMTAMail
         }
       }
 
-      $body = idx($params, 'body', '');
+      $raw_body = idx($params, 'body', '');
+      $body = $raw_body;
+      if ($must_encrypt) {
+        $parts = array();
+        $parts[] = pht(
+          'The content for this message can only be transmitted over a '.
+          'secure channel. To view the message content, follow this '.
+          'link:');
+
+        $parts[] = PhabricatorEnv::getProductionURI($this->getURI());
+
+        $body = implode("\n\n", $parts);
+      } else {
+        $body = $raw_body;
+      }
+
       $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
       if (strlen($body) > $max) {
         $body = id(new PhutilUTF8StringTruncator())
@@ -578,18 +617,32 @@ final class PhabricatorMetaMTAMail
       }
       $mailer->setBody($body);
 
-      $html_emails = $this->shouldSendHTML($preferences);
-      if ($html_emails && isset($params['html-body'])) {
+      // If we sent a different message body than we were asked to, record
+      // what we actually sent to make debugging and diagnostics easier.
+      if ($body !== $raw_body) {
+        $this->setParam('body.sent', $body);
+      }
+
+      if ($must_encrypt) {
+        $send_html = false;
+      } else {
+        $send_html = $this->shouldSendHTML($preferences);
+      }
+
+      if ($send_html && isset($params['html-body'])) {
         $mailer->setHTMLBody($params['html-body']);
       }
 
       // Pass the headers to the mailer, then save the state so we can show
-      // them in the web UI.
-      foreach ($headers as $header) {
+      // them in the web UI. If the mail must be encrypted, we remove headers
+      // which are not on a strict whitelist to avoid disclosing information.
+      $filtered_headers = $this->filterHeaders($headers, $must_encrypt);
+      foreach ($filtered_headers as $header) {
         list($header_key, $header_value) = $header;
         $mailer->addHeader($header_key, $header_value);
       }
-      $this->setParam('headers.sent', $headers);
+      $this->setParam('headers.unfiltered', $headers);
+      $this->setParam('headers.sent', $filtered_headers);
 
       // Save the final deliverability outcomes and reasoning so we can
       // explain why things happened the way they did.
@@ -1002,8 +1055,6 @@ final class PhabricatorMetaMTAMail
     // Some clients respect this to suppress OOF and other auto-responses.
     $headers[] = array('X-Auto-Response-Suppress', 'All');
 
-    // If the message has mailtags, filter out any recipients who don't want
-    // to receive this type of mail.
     $mailtags = $this->getParam('mailtags');
     if ($mailtags) {
       $tag_header = array();
@@ -1028,11 +1079,28 @@ final class PhabricatorMetaMTAMail
       $headers[] = array('Precedence', 'bulk');
     }
 
+    if ($this->getMustEncrypt()) {
+      $headers[] = array('X-Phabricator-Must-Encrypt', 'Yes');
+    }
+
     return $headers;
   }
 
   public function getDeliveredHeaders() {
     return $this->getParam('headers.sent');
+  }
+
+  public function getUnfilteredHeaders() {
+    $unfiltered = $this->getParam('headers.unfiltered');
+
+    if ($unfiltered === null) {
+      // Older versions of Phabricator did not filter headers, and thus did
+      // not record unfiltered headers. If we don't have unfiltered header
+      // data just return the delivered headers for compatibility.
+      return $this->getDeliveredHeaders();
+    }
+
+    return $unfiltered;
   }
 
   public function getDeliveredActors() {
@@ -1045,6 +1113,54 @@ final class PhabricatorMetaMTAMail
 
   public function getDeliveredRoutingMap() {
     return $this->getParam('routingmap.sent');
+  }
+
+  public function getDeliveredBody() {
+    return $this->getParam('body.sent');
+  }
+
+  private function filterHeaders(array $headers, $must_encrypt) {
+    if (!$must_encrypt) {
+      return $headers;
+    }
+
+    $whitelist = array(
+      'In-Reply-To',
+      'Message-ID',
+      'Precedence',
+      'References',
+      'Thread-Index',
+
+      'X-Mail-Transport-Agent',
+      'X-Auto-Response-Suppress',
+
+      'X-Phabricator-Sent-This-Message',
+      'X-Phabricator-Must-Encrypt',
+    );
+
+    // NOTE: The major header we want to drop is "X-Phabricator-Mail-Tags".
+    // This header contains a significant amount of meaningful information
+    // about the object.
+
+    $whitelist_map = array();
+    foreach ($whitelist as $term) {
+      $whitelist_map[phutil_utf8_strtolower($term)] = true;
+    }
+
+    foreach ($headers as $key => $header) {
+      list($name, $value) = $header;
+      $name = phutil_utf8_strtolower($name);
+
+      if (!isset($whitelist_map[$name])) {
+        unset($headers[$key]);
+      }
+    }
+
+    return $headers;
+  }
+
+  public function getURI() {
+    return '/mail/detail/'.$this->getID().'/';
   }
 
 

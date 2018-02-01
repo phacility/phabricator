@@ -32,6 +32,23 @@ final class PhabricatorMetaMTAMailViewController
     $color = PhabricatorMailOutboundStatus::getStatusColor($status);
     $header->setStatus($icon, $color, $name);
 
+    if ($mail->getMustEncrypt()) {
+      Javelin::initBehavior('phabricator-tooltips');
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setColor('blue')
+          ->setName(pht('Must Encrypt'))
+          ->setIcon('fa-shield blue')
+          ->addSigil('has-tooltip')
+          ->setMetadata(
+            array(
+              'tip' => pht(
+                'Message content can only be transmitted over secure '.
+                'channels.'),
+            )));
+    }
+
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Mail %d', $mail->getID()))
       ->setBorder(true);
