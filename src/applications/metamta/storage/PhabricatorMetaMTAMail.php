@@ -197,6 +197,35 @@ final class PhabricatorMetaMTAMail
     return $result;
   }
 
+  public function getAttachmentFilePHIDs() {
+    $file_phids = array();
+
+    $dictionaries = $this->getParam('attachments');
+    if ($dictionaries) {
+      foreach ($dictionaries as $dictionary) {
+        $file_phid = idx($dictionary, 'filePHID');
+        if ($file_phid) {
+          $file_phids[] = $file_phid;
+        }
+      }
+    }
+
+    return $file_phids;
+  }
+
+  public function loadAttachedFiles(PhabricatorUser $viewer) {
+    $file_phids = $this->getAttachmentFilePHIDs();
+
+    if (!$file_phids) {
+      return array();
+    }
+
+    return id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($file_phids)
+      ->execute();
+  }
+
   public function setAttachments(array $attachments) {
     assert_instances_of($attachments, 'PhabricatorMetaMTAAttachment');
     $this->setParam('attachments', mpull($attachments, 'toDictionary'));
@@ -526,6 +555,12 @@ final class PhabricatorMetaMTAMail
               mpull($cc_actors, 'getEmailAddress'));
             break;
           case 'attachments':
+            $attached_viewer = PhabricatorUser::getOmnipotentUser();
+            $files = $this->loadAttachedFiles($attached_viewer);
+            foreach ($files as $file) {
+              $file->attachToObject($this->getPHID());
+            }
+
             // If the mail content must be encrypted, don't add attachments.
             if ($must_encrypt) {
               break;
@@ -1299,6 +1334,12 @@ final class PhabricatorMetaMTAMail
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
+
+    $files = $this->loadAttachedFiles($engine->getViewer());
+    foreach ($files as $file) {
+      $engine->destroyObject($file);
+    }
+
     $this->delete();
   }
 

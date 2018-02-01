@@ -151,6 +151,12 @@ final class PhabricatorMetaMTAMailViewController
 
     $properties->addTextContent($body);
 
+    $file_phids = $mail->getAttachmentFilePHIDs();
+    if ($file_phids) {
+      $properties->addProperty(
+        pht('Attached Files'),
+        $viewer->loadHandles($file_phids)->renderList());
+    }
 
     return $properties;
   }
