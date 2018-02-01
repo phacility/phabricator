@@ -39,6 +39,7 @@ abstract class HeraldAdapter extends Phobject {
   private $edgeCache = array();
   private $forbiddenActions = array();
   private $viewer;
+  private $mustEncryptReasons = array();
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -1180,6 +1181,19 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $this->forbiddenActions[$action];
+  }
+
+
+/* -(  Must Encrypt  )------------------------------------------------------- */
+
+
+  final public function addMustEncryptReason($reason) {
+    $this->mustEncryptReasons[] = $reason;
+    return $this;
+  }
+
+  final public function getMustEncryptReasons() {
+    return $this->mustEncryptReasons;
   }
 
 }

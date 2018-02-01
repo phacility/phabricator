@@ -71,6 +71,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mailShouldSend = false;
   private $modularTypes;
   private $silent;
+  private $mustEncrypt;
 
   private $transactionQueue = array();
 
@@ -2549,6 +2550,13 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->loadHandles($xactions);
 
         $mail = $this->buildMailForTarget($object, $xactions, $target);
+
+        if ($this->mustEncrypt) {
+          $mail
+            ->setMustEncrypt(true)
+            ->setMustEncryptReasons($this->mustEncrypt);
+        }
+
       } catch (Exception $ex) {
         $caught = $ex;
       }
@@ -3214,6 +3222,8 @@ abstract class PhabricatorApplicationTransactionEditor
         $adapter->getQueuedHarbormasterBuildRequests());
     }
 
+    $this->mustEncrypt = $adapter->getMustEncryptReasons();
+
     return array_merge(
       $this->didApplyHeraldRules($object, $adapter, $xscript),
       $adapter->getQueuedTransactions());
@@ -3558,6 +3568,7 @@ abstract class PhabricatorApplicationTransactionEditor
       'feedRelatedPHIDs',
       'feedShouldPublish',
       'mailShouldSend',
+      'mustEncrypt',
     );
   }
 

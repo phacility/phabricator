@@ -259,6 +259,15 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('mustEncrypt', false);
   }
 
+  public function setMustEncryptReasons(array $reasons) {
+    $this->setParam('mustEncryptReasons', $reasons);
+    return $this;
+  }
+
+  public function getMustEncryptReasons() {
+    return $this->getParam('mustEncryptReasons', array());
+  }
+
   public function setHTMLBody($html) {
     $this->setParam('html-body', $html);
     return $this;

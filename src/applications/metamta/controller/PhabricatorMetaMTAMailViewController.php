@@ -175,6 +175,15 @@ final class PhabricatorMetaMTAMailViewController
       $properties->addProperty($key, $value);
     }
 
+    $encrypt_phids = $mail->getMustEncryptReasons();
+    if ($encrypt_phids) {
+      $properties->addProperty(
+        pht('Must Encrypt'),
+        $viewer->loadHandles($encrypt_phids)
+          ->renderList());
+    }
+
+
     return $properties;
   }
 
