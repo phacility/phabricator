@@ -16,7 +16,7 @@ final class PhabricatorMailMustEncryptHeraldAction
       'Require mail content be transmitted only over secure channels.');
   }
   public function supportsObject($object) {
-    return self::isMailGeneratingObject($object);
+    return PhabricatorMetaMTAEmailHeraldAction::isMailGeneratingObject($object);
   }
 
   public function getActionGroupKey() {
