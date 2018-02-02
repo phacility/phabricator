@@ -71,17 +71,9 @@ final class PhabricatorDaemonBulkJobViewController
     $viewer = $this->getViewer();
     $curtain = $this->newCurtainView($job);
 
-    if ($job->isConfirming()) {
-      $continue_uri = $job->getMonitorURI();
-    } else {
-      $continue_uri = $job->getDoneURI();
+    foreach ($job->getCurtainActions($viewer) as $action) {
+      $curtain->addAction($action);
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setHref($continue_uri)
-        ->setIcon('fa-arrow-circle-o-right')
-        ->setName(pht('Continue')));
 
     return $curtain;
   }

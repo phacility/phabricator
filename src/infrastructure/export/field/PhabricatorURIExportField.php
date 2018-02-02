@@ -1,4 +1,4 @@
 <?php
 
-final class PhabricatorPHIDExportField
+final class PhabricatorURIExportField
   extends PhabricatorExportField {}

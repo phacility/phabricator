@@ -4,6 +4,7 @@ abstract class PhabricatorExportFormat
   extends Phobject {
 
   private $viewer;
+  private $title;
 
   final public function getExportFormatKey() {
     return $this->getPhobjectClassConstant('EXPORTKEY');
@@ -18,9 +19,22 @@ abstract class PhabricatorExportFormat
     return $this->viewer;
   }
 
+  final public function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+
+  final public function getTitle() {
+    return $this->title;
+  }
+
   abstract public function getExportFormatName();
   abstract public function getMIMEContentType();
   abstract public function getFileExtension();
+
+  public function addHeaders(array $fields) {
+    return;
+  }
 
   abstract public function addObject($object, array $fields, array $map);
   abstract public function newFileData();
@@ -34,18 +48,6 @@ abstract class PhabricatorExportFormat
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getExportFormatKey')
       ->execute();
-  }
-
-  final public static function getAllEnabledExportFormats() {
-    $formats = self::getAllExportFormats();
-
-    foreach ($formats as $key => $format) {
-      if (!$format->isExportFormatEnabled()) {
-        unset($formats[$key]);
-      }
-    }
-
-    return $formats;
   }
 
 }

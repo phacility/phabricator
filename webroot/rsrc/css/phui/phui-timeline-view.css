@@ -390,10 +390,6 @@
   outline: none;
 }
 
-.phui-timeline-menu .phui-icon-view {
-  color: {$lightgreytext};
-}
-
 a.phui-timeline-menu .phui-icon-view {
   color: {$bluetext};
 }

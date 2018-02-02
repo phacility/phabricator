@@ -432,4 +432,111 @@ final class ManiphestTaskSearchEngine
     return $view;
   }
 
+
+  protected function newExportFields() {
+    $fields = array(
+      id(new PhabricatorStringExportField())
+        ->setKey('monogram')
+        ->setLabel(pht('Monogram')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('authorPHID')
+        ->setLabel(pht('Author PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('author')
+        ->setLabel(pht('Author')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('ownerPHID')
+        ->setLabel(pht('Owner PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('owner')
+        ->setLabel(pht('Owner')),
+      id(new PhabricatorStringExportField())
+        ->setKey('status')
+        ->setLabel(pht('Status')),
+      id(new PhabricatorStringExportField())
+        ->setKey('statusName')
+        ->setLabel(pht('Status Name')),
+      id(new PhabricatorStringExportField())
+        ->setKey('priority')
+        ->setLabel(pht('Priority')),
+      id(new PhabricatorStringExportField())
+        ->setKey('priorityName')
+        ->setLabel(pht('Priority Name')),
+      id(new PhabricatorStringExportField())
+        ->setKey('subtype')
+        ->setLabel('Subtype'),
+      id(new PhabricatorURIExportField())
+        ->setKey('uri')
+        ->setLabel(pht('URI')),
+      id(new PhabricatorStringExportField())
+        ->setKey('title')
+        ->setLabel(pht('Title')),
+      id(new PhabricatorStringExportField())
+        ->setKey('description')
+        ->setLabel(pht('Description')),
+    );
+
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $fields[] = id(new PhabricatorIntExportField())
+        ->setKey('points')
+        ->setLabel('Points');
+    }
+
+    return $fields;
+  }
+
+  protected function newExportData(array $tasks) {
+    $viewer = $this->requireViewer();
+
+    $phids = array();
+    foreach ($tasks as $task) {
+      $phids[] = $task->getAuthorPHID();
+      $phids[] = $task->getOwnerPHID();
+    }
+    $handles = $viewer->loadHandles($phids);
+
+    $export = array();
+    foreach ($tasks as $task) {
+
+      $author_phid = $task->getAuthorPHID();
+      if ($author_phid) {
+        $author_name = $handles[$author_phid]->getName();
+      } else {
+        $author_name = null;
+      }
+
+      $owner_phid = $task->getOwnerPHID();
+      if ($owner_phid) {
+        $owner_name = $handles[$owner_phid]->getName();
+      } else {
+        $owner_name = null;
+      }
+
+      $status_value = $task->getStatus();
+      $status_name = ManiphestTaskStatus::getTaskStatusName($status_value);
+
+      $priority_value = $task->getPriority();
+      $priority_name = ManiphestTaskPriority::getTaskPriorityName(
+        $priority_value);
+
+      $export[] = array(
+        'monogram' => $task->getMonogram(),
+        'authorPHID' => $author_phid,
+        'author' => $author_name,
+        'ownerPHID' => $owner_phid,
+        'owner' => $owner_name,
+        'status' => $status_value,
+        'statusName' => $status_name,
+        'priority' => $priority_value,
+        'priorityName' => $priority_name,
+        'points' => $task->getPoints(),
+        'subtype' => $task->getSubtype(),
+        'title' => $task->getTitle(),
+        'uri' => PhabricatorEnv::getProductionURI($task->getURI()),
+        'description' => $task->getDescription(),
+      );
+    }
+
+    return $export;
+  }
 }

@@ -196,6 +196,7 @@ EODOCS
           pht('New task owner, or `null` to unassign.'))
         ->setTransactionType(ManiphestTaskOwnerTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
+        ->setIsNullable(true)
         ->setSingleValue($object->getOwnerPHID())
         ->setCommentActionLabel(pht('Assign / Claim'))
         ->setCommentActionValue($owner_value),

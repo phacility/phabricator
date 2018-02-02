@@ -272,8 +272,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file->setByteSize($length);
 
     // NOTE: Once we receive the first chunk, we'll detect its MIME type and
-    // update the parent file. This matters for large media files like video.
-    $file->setMimeType('application/octet-stream');
+    // update the parent file if a MIME type hasn't been provided. This matters
+    // for large media files like video.
+    $mime_type = idx($params, 'mime-type');
+    if (!strlen($mime_type)) {
+      $file->setMimeType('application/octet-stream');
+    }
 
     $chunked_hash = idx($params, 'chunkedHash');
 

@@ -77,6 +77,10 @@ abstract class PhabricatorWorkerBulkJobWorker
         pht('Job actor does not have permission to edit job.'));
     }
 
+    // Allow the worker to fill user caches inline; bulk jobs occasionally
+    // need to access user preferences.
+    $actor->setAllowInlineCacheGeneration(true);
+
     return $actor;
   }
 

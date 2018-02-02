@@ -9,4 +9,9 @@ final class DiffusionPushLogListController
       ->buildResponse();
   }
 
+  protected function buildApplicationCrumbs() {
+    return parent::buildApplicationCrumbs()
+      ->addTextCrumb(pht('Push Logs'), $this->getApplicationURI('pushlog/'));
+  }
+
 }

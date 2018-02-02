@@ -6,6 +6,8 @@ abstract class PhabricatorFileUploadSource
   private $name;
   private $relativeTTL;
   private $viewPolicy;
+  private $mimeType;
+  private $authorPHID;
 
   private $rope;
   private $data;
@@ -49,6 +51,24 @@ abstract class PhabricatorFileUploadSource
 
   public function getByteLimit() {
     return $this->byteLimit;
+  }
+
+  public function setMIMEType($mime_type) {
+    $this->mimeType = $mime_type;
+    return $this;
+  }
+
+  public function getMIMEType() {
+    return $this->mimeType;
+  }
+
+  public function setAuthorPHID($author_phid) {
+    $this->authorPHID = $author_phid;
+    return $this;
+  }
+
+  public function getAuthorPHID() {
+    return $this->authorPHID;
   }
 
   public function uploadFile() {
@@ -243,6 +263,16 @@ abstract class PhabricatorFileUploadSource
     $ttl = $this->getRelativeTTL();
     if ($ttl !== null) {
       $parameters['ttl.relative'] = $ttl;
+    }
+
+    $mime_type = $this->getMimeType();
+    if ($mime_type !== null) {
+      $parameters['mime-type'] = $mime_type;
+    }
+
+    $author_phid = $this->getAuthorPHID();
+    if ($author_phid !== null) {
+      $parameters['authorPHID'] = $author_phid;
     }
 
     return $parameters;

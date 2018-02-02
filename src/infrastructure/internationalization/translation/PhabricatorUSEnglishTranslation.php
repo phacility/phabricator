@@ -676,73 +676,73 @@ final class PhabricatorUSEnglishTranslation
       '%s edited commit(s), added %s: %s; removed %s: %s.' =>
         '%s edited commits, added %3$s; removed %5$s.',
 
-      '%s added %s reverted commit(s): %s.' => array(
+      '%s added %s reverted change(s): %s.' => array(
         array(
-          '%s added a reverted commit: %3$s.',
-          '%s added reverted commits: %3$s.',
+          '%s added a reverted change: %3$s.',
+          '%s added reverted changes: %3$s.',
         ),
       ),
 
-      '%s removed %s reverted commit(s): %s.' => array(
+      '%s removed %s reverted change(s): %s.' => array(
         array(
-          '%s removed a reverted commit: %3$s.',
-          '%s removed reverted commits: %3$s.',
+          '%s removed a reverted change: %3$s.',
+          '%s removed reverted changes: %3$s.',
         ),
       ),
 
-      '%s edited reverted commit(s), added %s: %s; removed %s: %s.' =>
-        '%s edited reverted commits, added %3$s; removed %5$s.',
+      '%s edited reverted change(s), added %s: %s; removed %s: %s.' =>
+        '%s edited reverted changes, added %3$s; removed %5$s.',
 
-      '%s added %s reverted commit(s) for %s: %s.' => array(
+      '%s added %s reverted change(s) for %s: %s.' => array(
         array(
-          '%s added a reverted commit for %3$s: %4$s.',
-          '%s added reverted commits for %3$s: %4$s.',
+          '%s added a reverted change for %3$s: %4$s.',
+          '%s added reverted changes for %3$s: %4$s.',
         ),
       ),
 
-      '%s removed %s reverted commit(s) for %s: %s.' => array(
+      '%s removed %s reverted change(s) for %s: %s.' => array(
         array(
-          '%s removed a reverted commit for %3$s: %4$s.',
-          '%s removed reverted commits for %3$s: %4$s.',
+          '%s removed a reverted change for %3$s: %4$s.',
+          '%s removed reverted changes for %3$s: %4$s.',
         ),
       ),
 
-      '%s edited reverted commit(s) for %s, added %s: %s; removed %s: %s.' =>
-        '%s edited reverted commits for %2$s, added %4$s; removed %6$s.',
+      '%s edited reverted change(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited reverted changes for %2$s, added %4$s; removed %6$s.',
 
-      '%s added %s reverting commit(s): %s.' => array(
+      '%s added %s reverting change(s): %s.' => array(
         array(
-          '%s added a reverting commit: %3$s.',
-          '%s added reverting commits: %3$s.',
+          '%s added a reverting change: %3$s.',
+          '%s added reverting changes: %3$s.',
         ),
       ),
 
-      '%s removed %s reverting commit(s): %s.' => array(
+      '%s removed %s reverting change(s): %s.' => array(
         array(
-          '%s removed a reverting commit: %3$s.',
-          '%s removed reverting commits: %3$s.',
+          '%s removed a reverting change: %3$s.',
+          '%s removed reverting changes: %3$s.',
         ),
       ),
 
-      '%s edited reverting commit(s), added %s: %s; removed %s: %s.' =>
-        '%s edited reverting commits, added %3$s; removed %5$s.',
+      '%s edited reverting change(s), added %s: %s; removed %s: %s.' =>
+        '%s edited reverting changes, added %3$s; removed %5$s.',
 
-      '%s added %s reverting commit(s) for %s: %s.' => array(
+      '%s added %s reverting change(s) for %s: %s.' => array(
         array(
-          '%s added a reverting commit for %3$s: %4$s.',
-          '%s added reverting commits for %3$s: %4$s.',
+          '%s added a reverting change for %3$s: %4$s.',
+          '%s added reverting changes for %3$s: %4$s.',
         ),
       ),
 
-      '%s removed %s reverting commit(s) for %s: %s.' => array(
+      '%s removed %s reverting change(s) for %s: %s.' => array(
         array(
-          '%s removed a reverting commit for %3$s: %4$s.',
-          '%s removed reverting commits for %3$s: %4$s.',
+          '%s removed a reverting change for %3$s: %4$s.',
+          '%s removed reverting changes for %3$s: %4$s.',
         ),
       ),
 
-      '%s edited reverting commit(s) for %s, added %s: %s; removed %s: %s.' =>
-        '%s edited reverting commits for %s, added %4$s; removed %6$s.',
+      '%s edited reverting change(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited reverting changes for %s, added %4$s; removed %6$s.',
 
       '%s changed project member(s), added %d: %s; removed %d: %s.' =>
         '%s changed project members, added %3$s; removed %5$s.',

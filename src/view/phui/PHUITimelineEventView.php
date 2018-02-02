@@ -301,18 +301,14 @@ final class PHUITimelineEventView extends AphrontView {
 
     $menu = null;
     $items = array();
-    $has_menu = false;
     if (!$this->getIsPreview() && !$this->getHideCommentOptions()) {
       foreach ($this->getEventGroup() as $event) {
         $items[] = $event->getMenuItems($this->anchor);
-        if ($event->hasChildren()) {
-          $has_menu = true;
-        }
       }
       $items = array_mergev($items);
     }
 
-    if ($items || $has_menu) {
+    if ($items) {
       $icon = id(new PHUIIconView())
         ->setIcon('fa-caret-down');
       $aural = javelin_tag(
@@ -351,6 +347,8 @@ final class PHUITimelineEventView extends AphrontView {
         ));
 
       $has_menu = true;
+    } else {
+      $has_menu = false;
     }
 
     // Render "extra" information (timestamp, etc).

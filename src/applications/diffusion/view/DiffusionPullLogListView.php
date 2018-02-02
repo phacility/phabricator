@@ -22,24 +22,10 @@ final class DiffusionPullLogListView extends AphrontView {
     }
     $handles = $viewer->loadHandles($handle_phids);
 
-    // Figure out which repositories are editable. We only let you see remote
-    // IPs if you have edit capability on a repository.
-    $editable_repos = array();
-    if ($events) {
-      $editable_repos = id(new PhabricatorRepositoryQuery())
-        ->setViewer($viewer)
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->withPHIDs(mpull($events, 'getRepositoryPHID'))
-        ->execute();
-      $editable_repos = mpull($editable_repos, null, 'getPHID');
-    }
+    // Only administrators can view remote addresses.
+    $remotes_visible = $viewer->getIsAdmin();
 
     $rows = array();
-    $any_host = false;
     foreach ($events as $event) {
       if ($event->getRepositoryPHID()) {
         $repository = $event->getRepository();
@@ -47,13 +33,10 @@ final class DiffusionPullLogListView extends AphrontView {
         $repository = null;
       }
 
-      // Reveal this if it's valid and the user can edit the repository. For
-      // invalid requests you currently have to go fishing in the database.
-      $remote_address = '-';
-      if ($repository) {
-        if (isset($editable_repos[$event->getRepositoryPHID()])) {
-          $remote_address = $event->getRemoteAddress();
-        }
+      if ($remotes_visible) {
+        $remote_address = $event->getRemoteAddress();
+      } else {
+        $remote_address = null;
       }
 
       $event_id = $event->getID();
@@ -107,6 +90,13 @@ final class DiffusionPullLogListView extends AphrontView {
           '',
           'n',
           'right',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          true,
+          true,
+          $remotes_visible,
         ));
 
     return $table;
