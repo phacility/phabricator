@@ -299,6 +299,22 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('mustEncryptReasons', array());
   }
 
+  public function setMailStamps(array $stamps) {
+    return $this->setParam('stamps', $stamps);
+  }
+
+  public function getMailStamps() {
+    return $this->getParam('stamps', array());
+  }
+
+  public function setMailStampMetadata($metadata) {
+    return $this->setParam('stampMetadata', $metadata);
+  }
+
+  public function getMailStampMetadata() {
+    return $this->getParam('stampMetadata', array());
+  }
+
   public function setHTMLBody($html) {
     $this->setParam('html-body', $html);
     return $this;
@@ -635,6 +651,11 @@ final class PhabricatorMetaMTAMail
             // constructing the message.
             break;
         }
+      }
+
+      $stamps = $this->getMailStamps();
+      if ($stamps) {
+        $headers[] = array('X-Phabricator-Stamps', implode(', ', $stamps));
       }
 
       $raw_body = idx($params, 'body', '');
@@ -1302,6 +1323,14 @@ final class PhabricatorMetaMTAMail
       PhabricatorEmailFormatSetting::SETTINGKEY);
 
     return ($value == PhabricatorEmailFormatSetting::VALUE_HTML_EMAIL);
+  }
+
+  public function shouldRenderMailStampsInBody($viewer) {
+    $preferences = $this->loadPreferences($viewer->getPHID());
+    $value = $preferences->getSettingValue(
+      PhabricatorEmailStampsSetting::SETTINGKEY);
+
+    return ($value == PhabricatorEmailStampsSetting::VALUE_BODY_STAMPS);
   }
 
 

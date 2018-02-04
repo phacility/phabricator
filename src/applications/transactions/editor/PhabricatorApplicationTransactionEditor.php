@@ -72,6 +72,8 @@ abstract class PhabricatorApplicationTransactionEditor
   private $modularTypes;
   private $silent;
   private $mustEncrypt;
+  private $stampTemplates = array();
+  private $mailStamps = array();
 
   private $transactionQueue = array();
 
@@ -1181,6 +1183,12 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->mailShouldSend = true;
         $this->mailToPHIDs = $this->getMailTo($object);
         $this->mailCCPHIDs = $this->getMailCC($object);
+
+        $mail_xactions = $this->getTransactionsForMail($object, $xactions);
+        $stamps = $this->newMailStamps($object, $xactions);
+        foreach ($stamps as $stamp) {
+          $this->mailStamps[] = $stamp->toDictionary();
+        }
       }
 
       if ($this->shouldPublishFeedStory($object, $xactions)) {
@@ -2611,6 +2619,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $mail_tags = $this->getMailTags($object, $mail_xactions);
     $action = $this->getMailAction($object, $mail_xactions);
+    $stamps = $this->generateMailStamps($object, $this->mailStamps);
 
     if (PhabricatorEnv::getEnvConfig('metamta.email-preferences')) {
       $this->addEmailPreferenceSectionToMailBody(
@@ -2647,6 +2656,18 @@ abstract class PhabricatorApplicationTransactionEditor
 
     if ($this->getParentMessageID()) {
       $mail->setParentMessageID($this->getParentMessageID());
+    }
+
+    // If we have stamps, attach the raw dictionary version (not the actual
+    // objects) to the mail so that debugging tools can see what we used to
+    // render the final list.
+    if ($this->mailStamps) {
+      $mail->setMailStampMetadata($this->mailStamps);
+    }
+
+    // If we have rendered stamps, attach them to the mail.
+    if ($stamps) {
+      $mail->setMailStamps($stamps);
     }
 
     return $target->willSendMail($mail);
@@ -3569,6 +3590,7 @@ abstract class PhabricatorApplicationTransactionEditor
       'feedShouldPublish',
       'mailShouldSend',
       'mustEncrypt',
+      'mailStamps',
     );
   }
 
@@ -3959,6 +3981,133 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $editor;
+  }
+
+
+/* -(  Stamps  )------------------------------------------------------------- */
+
+
+  public function newMailStampTemplates($object) {
+    $actor = $this->getActor();
+
+    $templates = array();
+
+    $extensions = $this->newMailExtensions($object);
+    foreach ($extensions as $extension) {
+      $stamps = $extension->newMailStampTemplates($object);
+      foreach ($stamps as $stamp) {
+        $key = $stamp->getKey();
+        if (isset($templates[$key])) {
+          throw new Exception(
+            pht(
+              'Mail extension ("%s") defines a stamp template with the '.
+              'same key ("%s") as another template. Each stamp template '.
+              'must have a unique key.',
+              get_class($extension),
+              $key));
+        }
+
+        $stamp->setViewer($actor);
+
+        $templates[$key] = $stamp;
+      }
+    }
+
+    return $templates;
+  }
+
+  final public function getMailStamp($key) {
+    if (!isset($this->stampTemplates)) {
+      throw new PhutilInvalidStateException('newMailStampTemplates');
+    }
+
+    if (!isset($this->stampTemplates[$key])) {
+      throw new Exception(
+        pht(
+          'Editor ("%s") has no mail stamp template with provided key ("%s").',
+          get_class($this),
+          $key));
+    }
+
+    return $this->stampTemplates[$key];
+  }
+
+  private function newMailStamps($object, array $xactions) {
+    $actor = $this->getActor();
+
+    $this->stampTemplates = $this->newMailStampTemplates($object);
+
+    $extensions = $this->newMailExtensions($object);
+    $stamps = array();
+    foreach ($extensions as $extension) {
+      $extension->newMailStamps($object, $xactions);
+    }
+
+    return $this->stampTemplates;
+  }
+
+  private function newMailExtensions($object) {
+    $actor = $this->getActor();
+
+    $all_extensions = PhabricatorMailEngineExtension::getAllExtensions();
+
+    $extensions = array();
+    foreach ($all_extensions as $key => $template) {
+      $extension = id(clone $template)
+        ->setViewer($actor)
+        ->setEditor($this);
+
+      if ($extension->supportsObject($object)) {
+        $extensions[$key] = $extension;
+      }
+    }
+
+    return $extensions;
+  }
+
+  private function generateMailStamps($object, $data) {
+    if (!$data || !is_array($data)) {
+      return null;
+    }
+
+    $templates = $this->newMailStampTemplates($object);
+    foreach ($data as $spec) {
+      if (!is_array($spec)) {
+        continue;
+      }
+
+      $key = idx($spec, 'key');
+      if (!isset($templates[$key])) {
+        continue;
+      }
+
+      $type = idx($spec, 'type');
+      if ($templates[$key]->getStampType() !== $type) {
+        continue;
+      }
+
+      $value = idx($spec, 'value');
+      $templates[$key]->setValueFromDictionary($value);
+    }
+
+    $results = array();
+    foreach ($templates as $template) {
+      $value = $template->getValueForRendering();
+
+      $rendered = $template->renderStamps($value);
+      if ($rendered === null) {
+        continue;
+      }
+
+      $rendered = (array)$rendered;
+      foreach ($rendered as $stamp) {
+        $results[] = $stamp;
+      }
+    }
+
+    sort($results);
+
+    return $results;
   }
 
 }
