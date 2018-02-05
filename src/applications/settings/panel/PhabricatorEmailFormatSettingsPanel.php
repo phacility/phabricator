@@ -14,7 +14,7 @@ final class PhabricatorEmailFormatSettingsPanel
   }
 
   public function isUserPanel() {
-    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
+    return PhabricatorMetaMTAMail::shouldMailEachRecipient();
   }
 
   public function isManagementPanel() {

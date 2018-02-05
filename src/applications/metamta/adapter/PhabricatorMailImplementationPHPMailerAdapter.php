@@ -19,8 +19,8 @@ final class PhabricatorMailImplementationPHPMailerAdapter
     $this->mailer->Encoding = $encoding;
 
     // By default, PHPMailer sends one mail per recipient. We handle
-    // multiplexing higher in the stack, so tell it to send mail exactly
-    // like we ask.
+    // combining or separating To and Cc higher in the stack, so tell it to
+    // send mail exactly like we ask.
     $this->mailer->SingleTo = false;
 
     $mailer = PhabricatorEnv::getEnvConfig('phpmailer.mailer');

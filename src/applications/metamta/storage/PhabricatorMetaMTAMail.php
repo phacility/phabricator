@@ -507,8 +507,8 @@ final class PhabricatorMetaMTAMail
       $add_cc = array();
       $add_to = array();
 
-      // If multiplexing is enabled, some recipients will be in "Cc"
-      // rather than "To". We'll move them to "To" later (or supply a
+      // If we're sending one mail to everyone, some recipients will be in
+      // "Cc" rather than "To". We'll move them to "To" later (or supply a
       // dummy "To") but need to look for the recipient in either the
       // "To" or "Cc" fields here.
       $target_phid = head(idx($params, 'to', array()));
@@ -847,7 +847,7 @@ final class PhabricatorMetaMTAMail
     return base64_encode($base);
   }
 
-  public static function shouldMultiplexAllMail() {
+  public static function shouldMailEachRecipient() {
     return PhabricatorEnv::getEnvConfig('metamta.one-mail-per-recipient');
   }
 
@@ -1290,7 +1290,7 @@ final class PhabricatorMetaMTAMail
   private function loadPreferences($target_phid) {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
-    if (self::shouldMultiplexAllMail()) {
+    if (self::shouldMailEachRecipient()) {
       $preferences = id(new PhabricatorUserPreferencesQuery())
         ->setViewer($viewer)
         ->withUserPHIDs(array($target_phid))

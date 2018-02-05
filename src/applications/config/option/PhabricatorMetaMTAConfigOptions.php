@@ -153,9 +153,9 @@ EODOC
   $adapter_doc_name));
 
     $placeholder_description = $this->deformat(pht(<<<EODOC
-When sending a message that has no To recipient (i.e. all recipients are CC'd,
-for example when multiplexing mail), set the To field to the following value. If
-no value is set, messages with no To will have their CCs upgraded to To.
+When sending a message that has no To recipient (i.e. all recipients are CC'd),
+set the To field to the following value. If no value is set, messages with no
+To will have their CCs upgraded to To.
 EODOC
 ));
 
