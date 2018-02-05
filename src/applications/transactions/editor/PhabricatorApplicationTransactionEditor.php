@@ -205,6 +205,25 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->mustEncrypt;
   }
 
+  public function getHeraldRuleMonograms() {
+    // Convert the stored "<123>, <456>" string into a list: "H123", "H456".
+    $list = $this->heraldHeader;
+    $list = preg_split('/[, ]+/', $list);
+
+    foreach ($list as $key => $item) {
+      $item = trim($item, '<>');
+
+      if (!is_numeric($item)) {
+        unset($list[$key]);
+        continue;
+      }
+
+      $list[$key] = 'H'.$item;
+    }
+
+    return $list;
+  }
+
   public function setIsInverseEdgeEditor($is_inverse_edge_editor) {
     $this->isInverseEdgeEditor = $is_inverse_edge_editor;
     return $this;
@@ -4109,7 +4128,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
-    sort($results);
+    natcasesort($results);
 
     return $results;
   }

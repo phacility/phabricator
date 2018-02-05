@@ -36,13 +36,9 @@ final class PhabricatorEditorMailEngineExtension
       ->setKey('mention')
       ->setLabel(pht('Mentioned User'));
 
-    $templates[] = id(new PhabricatorViewerMailStamp())
-      ->setKey('self-actor')
-      ->setLabel(pht('You Acted'));
-
-    $templates[] = id(new PhabricatorViewerMailStamp())
-      ->setKey('self-mention')
-      ->setLabel(pht('You Were Mentioned'));
+    $templates[] = id(new PhabricatorStringMailStamp())
+      ->setKey('herald')
+      ->setLabel(pht('Herald Rule'));
 
     return $templates;
   }
@@ -71,11 +67,8 @@ final class PhabricatorEditorMailEngineExtension
     $this->getMailStamp('mention')
       ->setValue($mentioned_phids);
 
-    $this->getMailStamp('self-actor')
-      ->setValue($editor->getActingAsPHID());
-
-    $this->getMailStamp('self-mention')
-      ->setValue($mentioned_phids);
+    $this->getMailStamp('herald')
+      ->setValue($editor->getHeraldRuleMonograms());
   }
 
 }

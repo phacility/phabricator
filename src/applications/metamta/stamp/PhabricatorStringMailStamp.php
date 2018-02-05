@@ -6,11 +6,21 @@ final class PhabricatorStringMailStamp
   const STAMPTYPE = 'string';
 
   public function renderStamps($value) {
-    if (!strlen($value)) {
+    if ($value === null || $value === '') {
       return null;
     }
 
-    return $this->renderStamp($this->getKey(), $value);
+    $value = (array)$value;
+    if (!$value) {
+      return null;
+    }
+
+    $results = array();
+    foreach ($value as $v) {
+      $results[] = $this->renderStamp($this->getKey(), $v);
+    }
+
+    return $results;
   }
 
 }

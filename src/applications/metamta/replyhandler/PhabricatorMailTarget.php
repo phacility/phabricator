@@ -70,14 +70,14 @@ final class PhabricatorMailTarget extends Phobject {
       $body .= "\n";
       $body .= pht('STAMPS');
       $body .= "\n";
-      $body .= implode(', ', $stamps);
+      $body .= implode(' ', $stamps);
       $body .= "\n";
 
       if ($has_html) {
         $html = array();
         $html[] = phutil_tag('strong', array(), pht('STAMPS'));
         $html[] = phutil_tag('br');
-        $html[] = phutil_implode_html(', ', $stamps);
+        $html[] = phutil_implode_html(' ', $stamps);
         $html[] = phutil_tag('br');
         $html = phutil_tag('div', array(), $html);
         $html_body .= hsprintf('%s', $html);
