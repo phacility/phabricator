@@ -182,7 +182,9 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $supports_message_id,
     $is_first_mail) {
 
-    $mailer = new PhabricatorMailImplementationTestAdapter(
+    $mailer = new PhabricatorMailImplementationTestAdapter();
+
+    $mailer->prepareForSend(
       array(
         'supportsMessageIDHeader' => $supports_message_id,
       ));

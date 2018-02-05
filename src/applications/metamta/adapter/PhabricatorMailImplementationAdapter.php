@@ -2,6 +2,9 @@
 
 abstract class PhabricatorMailImplementationAdapter extends Phobject {
 
+  private $key;
+  private $options = array();
+
   abstract public function setFrom($email, $name = '');
   abstract public function addReplyTo($email, $name = '');
   abstract public function addTos(array $emails);
@@ -11,6 +14,7 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
   abstract public function setBody($plaintext_body);
   abstract public function setHTMLBody($html_body);
   abstract public function setSubject($subject);
+
 
   /**
    * Some mailers, notably Amazon SES, do not support us setting a specific
@@ -31,5 +35,41 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
    * @return bool True on success.
    */
   abstract public function send();
+
+  final public function setKey($key) {
+    $this->key = $key;
+    return $this;
+  }
+
+  final public function getKey() {
+    return $this->key;
+  }
+
+  final public function getOption($key) {
+    if (!array_key_exists($key, $this->options)) {
+      throw new Exception(
+        pht(
+          'Mailer ("%s") is attempting to access unknown option ("%s").',
+          get_class($this),
+          $key));
+    }
+
+    return $this->options[$key];
+  }
+
+  final public function setOptions(array $options) {
+    $this->validateOptions($options);
+    $this->options = $options;
+    return $this;
+  }
+
+  abstract protected function validateOptions(array $options);
+
+  abstract public function newDefaultOptions();
+  abstract public function newLegacyOptions();
+
+  public function prepareForSend() {
+    return;
+  }
 
 }

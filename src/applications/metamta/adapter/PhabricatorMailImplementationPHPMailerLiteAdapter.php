@@ -8,17 +8,37 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
 
   protected $mailer;
 
+  protected function validateOptions(array $options) {
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'encoding' => 'string',
+      ));
+  }
+
+  public function newDefaultOptions() {
+    return array(
+      'encoding' => 'base64',
+    );
+  }
+
+  public function newLegacyOptions() {
+    return array(
+      'encoding' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding'),
+    );
+  }
+
   /**
    * @phutil-external-symbol class PHPMailerLite
    */
-  public function __construct() {
+  public function prepareForSend() {
     $root = phutil_get_library_root('phabricator');
     $root = dirname($root);
     require_once $root.'/externals/phpmailer/class.phpmailer-lite.php';
     $this->mailer = new PHPMailerLite($use_exceptions = true);
     $this->mailer->CharSet = 'utf-8';
 
-    $encoding = PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding');
+    $encoding = $this->getOption('encoding');
     $this->mailer->Encoding = $encoding;
 
     // By default, PHPMailerLite sends one mail per recipient. We handle

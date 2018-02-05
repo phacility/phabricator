@@ -453,11 +453,6 @@ final class PhabricatorMetaMTAMail
     return $result;
   }
 
-  public function buildDefaultMailer() {
-    return PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');
-  }
-
-
   /**
    * Attempt to deliver an email immediately, in this process.
    *
@@ -468,13 +463,31 @@ final class PhabricatorMetaMTAMail
       throw new Exception(pht('Trying to send an already-sent mail!'));
     }
 
-    $mailers = array(
-      $this->buildDefaultMailer(),
-    );
+    $mailers = $this->newMailers();
 
     return $this->sendWithMailers($mailers);
   }
 
+  private function newMailers() {
+    $mailers = array();
+
+    $mailer = PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');
+
+    $defaults = $mailer->newDefaultOptions();
+    $options = $mailer->newLegacyOptions();
+
+    $options = $options + $defaults;
+
+    $mailer
+      ->setKey('default')
+      ->setOptions($options);
+
+    $mailer->prepareForSend();
+
+    $mailers[] = $mailer;
+
+    return $mailers;
+  }
 
   public function sendWithMailers(array $mailers) {
     $exceptions = array();

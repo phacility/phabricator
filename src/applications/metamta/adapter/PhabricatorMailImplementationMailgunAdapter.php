@@ -71,9 +71,32 @@ final class PhabricatorMailImplementationMailgunAdapter
     return true;
   }
 
+  protected function validateOptions(array $options) {
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'api-key' => 'string',
+        'domain' => 'string',
+      ));
+  }
+
+  public function newDefaultOptions() {
+    return array(
+      'api-key' => null,
+      'domain' => null,
+    );
+  }
+
+  public function newLegacyOptions() {
+    return array(
+      'api-key' => PhabricatorEnv::getEnvConfig('mailgun.api-key'),
+      'domain' => PhabricatorEnv::getEnvConfig('mailgun.domain'),
+    );
+  }
+
   public function send() {
-    $key = PhabricatorEnv::getEnvConfig('mailgun.api-key');
-    $domain = PhabricatorEnv::getEnvConfig('mailgun.domain');
+    $key = $this->getOption('api-key');
+    $domain = $this->getOption('domain');
     $params = array();
 
     $params['to'] = implode(', ', idx($this->params, 'tos', array()));
