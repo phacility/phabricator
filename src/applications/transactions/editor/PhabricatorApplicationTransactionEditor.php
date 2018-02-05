@@ -179,7 +179,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->isNewObject;
   }
 
-  protected function getMentionedPHIDs() {
+  public function getMentionedPHIDs() {
     return $this->mentionedPHIDs;
   }
 
@@ -199,6 +199,10 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getIsSilent() {
     return $this->silent;
+  }
+
+  public function getMustEncrypt() {
+    return $this->mustEncrypt;
   }
 
   public function setIsInverseEdgeEditor($is_inverse_edge_editor) {

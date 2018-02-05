@@ -31,6 +31,7 @@ final class PhabricatorObjectHandle
   private $subtitle;
   private $tokenIcon;
   private $commandLineObjectName;
+  private $mailStampName;
 
   private $stateIcon;
   private $stateColor;
@@ -132,6 +133,15 @@ final class PhabricatorObjectHandle
       return $this->getName();
     }
     return $this->objectName;
+  }
+
+  public function setMailStampName($mail_stamp_name) {
+    $this->mailStampName = $mail_stamp_name;
+    return $this;
+  }
+
+  public function getMailStampName() {
+    return $this->mailStampName;
   }
 
   public function setURI($uri) {

@@ -39,11 +39,14 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $user = $objects[$phid];
       $realname = $user->getRealName();
+      $username = $user->getUsername();
 
-      $handle->setName($user->getUsername());
-      $handle->setURI('/p/'.$user->getUsername().'/');
-      $handle->setFullName($user->getFullName());
-      $handle->setImageURI($user->getProfileImageURI());
+      $handle
+        ->setName($username)
+        ->setURI('/p/'.$username.'/')
+        ->setFullName($user->getFullName())
+        ->setImageURI($user->getProfileImageURI())
+        ->setMailStampName('@'.$username);
 
       if ($user->getIsMailingList()) {
         $handle->setIcon('fa-envelope-o');
