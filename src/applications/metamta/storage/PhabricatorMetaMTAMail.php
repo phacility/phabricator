@@ -461,359 +461,392 @@ final class PhabricatorMetaMTAMail
   /**
    * Attempt to deliver an email immediately, in this process.
    *
-   * @param bool  Try to deliver this email even if it has already been
-   *              delivered or is in backoff after a failed delivery attempt.
-   * @param PhabricatorMailImplementationAdapter Use a specific mail adapter,
-   *              instead of the default.
-   *
    * @return void
    */
-  public function sendNow(
-    $force_send = false,
-    PhabricatorMailImplementationAdapter $mailer = null) {
-
-    if ($mailer === null) {
-      $mailer = $this->buildDefaultMailer();
+  public function sendNow() {
+    if ($this->getStatus() != PhabricatorMailOutboundStatus::STATUS_QUEUE) {
+      throw new Exception(pht('Trying to send an already-sent mail!'));
     }
 
-    if (!$force_send) {
-      if ($this->getStatus() != PhabricatorMailOutboundStatus::STATUS_QUEUE) {
-        throw new Exception(pht('Trying to send an already-sent mail!'));
-      }
-    }
+    $mailers = array(
+      $this->buildDefaultMailer(),
+    );
 
-    try {
-      $headers = $this->generateHeaders();
+    return $this->sendWithMailers($mailers);
+  }
 
-      $params = $this->parameters;
 
-      $actors = $this->loadAllActors();
-      $deliverable_actors = $this->filterDeliverableActors($actors);
+  public function sendWithMailers(array $mailers) {
+    $exceptions = array();
+    foreach ($mailers as $template_mailer) {
+      $mailer = null;
 
-      $default_from = PhabricatorEnv::getEnvConfig('metamta.default-address');
-      if (empty($params['from'])) {
-        $mailer->setFrom($default_from);
-      }
-
-      $is_first = idx($params, 'is-first-message');
-      unset($params['is-first-message']);
-
-      $is_threaded = (bool)idx($params, 'thread-id');
-      $must_encrypt = $this->getMustEncrypt();
-
-      $reply_to_name = idx($params, 'reply-to-name', '');
-      unset($params['reply-to-name']);
-
-      $add_cc = array();
-      $add_to = array();
-
-      // If we're sending one mail to everyone, some recipients will be in
-      // "Cc" rather than "To". We'll move them to "To" later (or supply a
-      // dummy "To") but need to look for the recipient in either the
-      // "To" or "Cc" fields here.
-      $target_phid = head(idx($params, 'to', array()));
-      if (!$target_phid) {
-        $target_phid = head(idx($params, 'cc', array()));
+      try {
+        $mailer = $this->buildMailer($template_mailer);
+      } catch (Exception $ex) {
+        $exceptions[] = $ex;
+        continue;
       }
 
-      $preferences = $this->loadPreferences($target_phid);
-
-      foreach ($params as $key => $value) {
-        switch ($key) {
-          case 'raw-from':
-            list($from_email, $from_name) = $value;
-            $mailer->setFrom($from_email, $from_name);
-            break;
-          case 'from':
-            $from = $value;
-            $actor_email = null;
-            $actor_name = null;
-            $actor = idx($actors, $from);
-            if ($actor) {
-              $actor_email = $actor->getEmailAddress();
-              $actor_name = $actor->getName();
-            }
-            $can_send_as_user = $actor_email &&
-              PhabricatorEnv::getEnvConfig('metamta.can-send-as-user');
-
-            if ($can_send_as_user) {
-              $mailer->setFrom($actor_email, $actor_name);
-            } else {
-              $from_email = coalesce($actor_email, $default_from);
-              $from_name = coalesce($actor_name, pht('Phabricator'));
-
-              if (empty($params['reply-to'])) {
-                $params['reply-to'] = $from_email;
-                $params['reply-to-name'] = $from_name;
-              }
-
-              $mailer->setFrom($default_from, $from_name);
-            }
-            break;
-          case 'reply-to':
-            $mailer->addReplyTo($value, $reply_to_name);
-            break;
-          case 'to':
-            $to_phids = $this->expandRecipients($value);
-            $to_actors = array_select_keys($deliverable_actors, $to_phids);
-            $add_to = array_merge(
-              $add_to,
-              mpull($to_actors, 'getEmailAddress'));
-            break;
-          case 'raw-to':
-            $add_to = array_merge($add_to, $value);
-            break;
-          case 'cc':
-            $cc_phids = $this->expandRecipients($value);
-            $cc_actors = array_select_keys($deliverable_actors, $cc_phids);
-            $add_cc = array_merge(
-              $add_cc,
-              mpull($cc_actors, 'getEmailAddress'));
-            break;
-          case 'attachments':
-            $attached_viewer = PhabricatorUser::getOmnipotentUser();
-            $files = $this->loadAttachedFiles($attached_viewer);
-            foreach ($files as $file) {
-              $file->attachToObject($this->getPHID());
-            }
-
-            // If the mail content must be encrypted, don't add attachments.
-            if ($must_encrypt) {
-              break;
-            }
-
-            $value = $this->getAttachments();
-            foreach ($value as $attachment) {
-              $mailer->addAttachment(
-                $attachment->getData(),
-                $attachment->getFilename(),
-                $attachment->getMimeType());
-            }
-            break;
-          case 'subject':
-            $subject = array();
-
-            if ($is_threaded) {
-              if ($this->shouldAddRePrefix($preferences)) {
-                $subject[] = 'Re:';
-              }
-            }
-
-            $subject[] = trim(idx($params, 'subject-prefix'));
-
-            // If mail content must be encrypted, we replace the subject with
-            // a generic one.
-            if ($must_encrypt) {
-              $subject[] = pht('Object Updated');
-            } else {
-              $vary_prefix = idx($params, 'vary-subject-prefix');
-              if ($vary_prefix != '') {
-                if ($this->shouldVarySubject($preferences)) {
-                  $subject[] = $vary_prefix;
-                }
-              }
-
-              $subject[] = $value;
-            }
-
-            $mailer->setSubject(implode(' ', array_filter($subject)));
-            break;
-          case 'thread-id':
-
-            // NOTE: Gmail freaks out about In-Reply-To and References which
-            // aren't in the form "<string@domain.tld>"; this is also required
-            // by RFC 2822, although some clients are more liberal in what they
-            // accept.
-            $domain = PhabricatorEnv::getEnvConfig('metamta.domain');
-            $value = '<'.$value.'@'.$domain.'>';
-
-            if ($is_first && $mailer->supportsMessageIDHeader()) {
-              $headers[] = array('Message-ID',  $value);
-            } else {
-              $in_reply_to = $value;
-              $references = array($value);
-              $parent_id = $this->getParentMessageID();
-              if ($parent_id) {
-                $in_reply_to = $parent_id;
-                // By RFC 2822, the most immediate parent should appear last
-                // in the "References" header, so this order is intentional.
-                $references[] = $parent_id;
-              }
-              $references = implode(' ', $references);
-              $headers[] = array('In-Reply-To', $in_reply_to);
-              $headers[] = array('References',  $references);
-            }
-            $thread_index = $this->generateThreadIndex($value, $is_first);
-            $headers[] = array('Thread-Index', $thread_index);
-            break;
-          default:
-            // Other parameters are handled elsewhere or are not relevant to
-            // constructing the message.
-            break;
-        }
+      if (!$mailer) {
+        // If we don't get a mailer back, that means the mail doesn't
+        // actually need to be sent (for example, because recipients have
+        // declined to receive the mail). Void it and return.
+        return $this
+          ->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID)
+          ->save();
       }
 
-      $stamps = $this->getMailStamps();
-      if ($stamps) {
-        $headers[] = array('X-Phabricator-Stamps', implode(', ', $stamps));
-      }
-
-      $raw_body = idx($params, 'body', '');
-      $body = $raw_body;
-      if ($must_encrypt) {
-        $parts = array();
-        $parts[] = pht(
-          'The content for this message can only be transmitted over a '.
-          'secure channel. To view the message content, follow this '.
-          'link:');
-
-        $parts[] = PhabricatorEnv::getProductionURI($this->getURI());
-
-        $body = implode("\n\n", $parts);
-      } else {
-        $body = $raw_body;
-      }
-
-      $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
-      if (strlen($body) > $max) {
-        $body = id(new PhutilUTF8StringTruncator())
-          ->setMaximumBytes($max)
-          ->truncateString($body);
-        $body .= "\n";
-        $body .= pht('(This email was truncated at %d bytes.)', $max);
-      }
-      $mailer->setBody($body);
-
-      // If we sent a different message body than we were asked to, record
-      // what we actually sent to make debugging and diagnostics easier.
-      if ($body !== $raw_body) {
-        $this->setParam('body.sent', $body);
-      }
-
-      if ($must_encrypt) {
-        $send_html = false;
-      } else {
-        $send_html = $this->shouldSendHTML($preferences);
-      }
-
-      if ($send_html && isset($params['html-body'])) {
-        $mailer->setHTMLBody($params['html-body']);
-      }
-
-      // Pass the headers to the mailer, then save the state so we can show
-      // them in the web UI. If the mail must be encrypted, we remove headers
-      // which are not on a strict whitelist to avoid disclosing information.
-      $filtered_headers = $this->filterHeaders($headers, $must_encrypt);
-      foreach ($filtered_headers as $header) {
-        list($header_key, $header_value) = $header;
-        $mailer->addHeader($header_key, $header_value);
-      }
-      $this->setParam('headers.unfiltered', $headers);
-      $this->setParam('headers.sent', $filtered_headers);
-
-      // Save the final deliverability outcomes and reasoning so we can
-      // explain why things happened the way they did.
-      $actor_list = array();
-      foreach ($actors as $actor) {
-        $actor_list[$actor->getPHID()] = array(
-          'deliverable' => $actor->isDeliverable(),
-          'reasons' => $actor->getDeliverabilityReasons(),
-        );
-      }
-      $this->setParam('actors.sent', $actor_list);
-
-      $this->setParam('routing.sent', $this->getParam('routing'));
-      $this->setParam('routingmap.sent', $this->getRoutingRuleMap());
-
-      if (!$add_to && !$add_cc) {
-        $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
-        $this->setMessage(
-          pht(
-            'Message has no valid recipients: all To/Cc are disabled, '.
-            'invalid, or configured not to receive this mail.'));
-        return $this->save();
-      }
-
-      if ($this->getIsErrorEmail()) {
-        $all_recipients = array_merge($add_to, $add_cc);
-        if ($this->shouldRateLimitMail($all_recipients)) {
-          $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
-          $this->setMessage(
+      try {
+        $ok = $mailer->send();
+        if (!$ok) {
+          // TODO: At some point, we should clean this up and make all mailers
+          // throw.
+          throw new Exception(
             pht(
-              'This is an error email, but one or more recipients have '.
-              'exceeded the error email rate limit. Declining to deliver '.
-              'message.'));
-          return $this->save();
+              'Mail adapter encountered an unexpected, unspecified '.
+              'failure.'));
         }
+      } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
+        // If any mailer raises a permanent failure, stop trying to send the
+        // mail with other mailers.
+        $this
+          ->setStatus(PhabricatorMailOutboundStatus::STATUS_FAIL)
+          ->setMessage($ex->getMessage())
+          ->save();
+
+        throw $ex;
+      } catch (Exception $ex) {
+        $exceptions[] = $ex;
+        continue;
       }
 
-      if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
-        $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
+      return $this
+        ->setStatus(PhabricatorMailOutboundStatus::STATUS_SENT)
+        ->save();
+    }
+
+    // If we make it here, no mailer could send the mail but no mailer failed
+    // permanently either. We update the error message for the mail, but leave
+    // it in the current status (usually, STATUS_QUEUE) and try again later.
+
+    $messages = array();
+    foreach ($exceptions as $ex) {
+      $messages[] = $ex->getMessage();
+    }
+    $messages = implode("\n\n", $messages);
+
+    $this
+      ->setMessage($messages)
+      ->save();
+
+    if (count($exceptions) === 1) {
+      throw head($exceptions);
+    }
+
+    throw new PhutilAggregateException(
+      pht('Encountered multiple exceptions while transmitting mail.'),
+      $exceptions);
+  }
+
+  private function buildMailer(PhabricatorMailImplementationAdapter $mailer) {
+    $headers = $this->generateHeaders();
+
+    $params = $this->parameters;
+
+    $actors = $this->loadAllActors();
+    $deliverable_actors = $this->filterDeliverableActors($actors);
+
+    $default_from = PhabricatorEnv::getEnvConfig('metamta.default-address');
+    if (empty($params['from'])) {
+      $mailer->setFrom($default_from);
+    }
+
+    $is_first = idx($params, 'is-first-message');
+    unset($params['is-first-message']);
+
+    $is_threaded = (bool)idx($params, 'thread-id');
+    $must_encrypt = $this->getMustEncrypt();
+
+    $reply_to_name = idx($params, 'reply-to-name', '');
+    unset($params['reply-to-name']);
+
+    $add_cc = array();
+    $add_to = array();
+
+    // If we're sending one mail to everyone, some recipients will be in
+    // "Cc" rather than "To". We'll move them to "To" later (or supply a
+    // dummy "To") but need to look for the recipient in either the
+    // "To" or "Cc" fields here.
+    $target_phid = head(idx($params, 'to', array()));
+    if (!$target_phid) {
+      $target_phid = head(idx($params, 'cc', array()));
+    }
+
+    $preferences = $this->loadPreferences($target_phid);
+
+    foreach ($params as $key => $value) {
+      switch ($key) {
+        case 'raw-from':
+          list($from_email, $from_name) = $value;
+          $mailer->setFrom($from_email, $from_name);
+          break;
+        case 'from':
+          $from = $value;
+          $actor_email = null;
+          $actor_name = null;
+          $actor = idx($actors, $from);
+          if ($actor) {
+            $actor_email = $actor->getEmailAddress();
+            $actor_name = $actor->getName();
+          }
+          $can_send_as_user = $actor_email &&
+            PhabricatorEnv::getEnvConfig('metamta.can-send-as-user');
+
+          if ($can_send_as_user) {
+            $mailer->setFrom($actor_email, $actor_name);
+          } else {
+            $from_email = coalesce($actor_email, $default_from);
+            $from_name = coalesce($actor_name, pht('Phabricator'));
+
+            if (empty($params['reply-to'])) {
+              $params['reply-to'] = $from_email;
+              $params['reply-to-name'] = $from_name;
+            }
+
+            $mailer->setFrom($default_from, $from_name);
+          }
+          break;
+        case 'reply-to':
+          $mailer->addReplyTo($value, $reply_to_name);
+          break;
+        case 'to':
+          $to_phids = $this->expandRecipients($value);
+          $to_actors = array_select_keys($deliverable_actors, $to_phids);
+          $add_to = array_merge(
+            $add_to,
+            mpull($to_actors, 'getEmailAddress'));
+          break;
+        case 'raw-to':
+          $add_to = array_merge($add_to, $value);
+          break;
+        case 'cc':
+          $cc_phids = $this->expandRecipients($value);
+          $cc_actors = array_select_keys($deliverable_actors, $cc_phids);
+          $add_cc = array_merge(
+            $add_cc,
+            mpull($cc_actors, 'getEmailAddress'));
+          break;
+        case 'attachments':
+          $attached_viewer = PhabricatorUser::getOmnipotentUser();
+          $files = $this->loadAttachedFiles($attached_viewer);
+          foreach ($files as $file) {
+            $file->attachToObject($this->getPHID());
+          }
+
+          // If the mail content must be encrypted, don't add attachments.
+          if ($must_encrypt) {
+            break;
+          }
+
+          $value = $this->getAttachments();
+          foreach ($value as $attachment) {
+            $mailer->addAttachment(
+              $attachment->getData(),
+              $attachment->getFilename(),
+              $attachment->getMimeType());
+          }
+          break;
+        case 'subject':
+          $subject = array();
+
+          if ($is_threaded) {
+            if ($this->shouldAddRePrefix($preferences)) {
+              $subject[] = 'Re:';
+            }
+          }
+
+          $subject[] = trim(idx($params, 'subject-prefix'));
+
+          // If mail content must be encrypted, we replace the subject with
+          // a generic one.
+          if ($must_encrypt) {
+            $subject[] = pht('Object Updated');
+          } else {
+            $vary_prefix = idx($params, 'vary-subject-prefix');
+            if ($vary_prefix != '') {
+              if ($this->shouldVarySubject($preferences)) {
+                $subject[] = $vary_prefix;
+              }
+            }
+
+            $subject[] = $value;
+          }
+
+          $mailer->setSubject(implode(' ', array_filter($subject)));
+          break;
+        case 'thread-id':
+
+          // NOTE: Gmail freaks out about In-Reply-To and References which
+          // aren't in the form "<string@domain.tld>"; this is also required
+          // by RFC 2822, although some clients are more liberal in what they
+          // accept.
+          $domain = PhabricatorEnv::getEnvConfig('metamta.domain');
+          $value = '<'.$value.'@'.$domain.'>';
+
+          if ($is_first && $mailer->supportsMessageIDHeader()) {
+            $headers[] = array('Message-ID',  $value);
+          } else {
+            $in_reply_to = $value;
+            $references = array($value);
+            $parent_id = $this->getParentMessageID();
+            if ($parent_id) {
+              $in_reply_to = $parent_id;
+              // By RFC 2822, the most immediate parent should appear last
+              // in the "References" header, so this order is intentional.
+              $references[] = $parent_id;
+            }
+            $references = implode(' ', $references);
+            $headers[] = array('In-Reply-To', $in_reply_to);
+            $headers[] = array('References',  $references);
+          }
+          $thread_index = $this->generateThreadIndex($value, $is_first);
+          $headers[] = array('Thread-Index', $thread_index);
+          break;
+        default:
+          // Other parameters are handled elsewhere or are not relevant to
+          // constructing the message.
+          break;
+      }
+    }
+
+    $stamps = $this->getMailStamps();
+    if ($stamps) {
+      $headers[] = array('X-Phabricator-Stamps', implode(', ', $stamps));
+    }
+
+    $raw_body = idx($params, 'body', '');
+    $body = $raw_body;
+    if ($must_encrypt) {
+      $parts = array();
+      $parts[] = pht(
+        'The content for this message can only be transmitted over a '.
+        'secure channel. To view the message content, follow this '.
+        'link:');
+
+      $parts[] = PhabricatorEnv::getProductionURI($this->getURI());
+
+      $body = implode("\n\n", $parts);
+    } else {
+      $body = $raw_body;
+    }
+
+    $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
+    if (strlen($body) > $max) {
+      $body = id(new PhutilUTF8StringTruncator())
+        ->setMaximumBytes($max)
+        ->truncateString($body);
+      $body .= "\n";
+      $body .= pht('(This email was truncated at %d bytes.)', $max);
+    }
+    $mailer->setBody($body);
+
+    // If we sent a different message body than we were asked to, record
+    // what we actually sent to make debugging and diagnostics easier.
+    if ($body !== $raw_body) {
+      $this->setParam('body.sent', $body);
+    }
+
+    if ($must_encrypt) {
+      $send_html = false;
+    } else {
+      $send_html = $this->shouldSendHTML($preferences);
+    }
+
+    if ($send_html && isset($params['html-body'])) {
+      $mailer->setHTMLBody($params['html-body']);
+    }
+
+    // Pass the headers to the mailer, then save the state so we can show
+    // them in the web UI. If the mail must be encrypted, we remove headers
+    // which are not on a strict whitelist to avoid disclosing information.
+    $filtered_headers = $this->filterHeaders($headers, $must_encrypt);
+    foreach ($filtered_headers as $header) {
+      list($header_key, $header_value) = $header;
+      $mailer->addHeader($header_key, $header_value);
+    }
+    $this->setParam('headers.unfiltered', $headers);
+    $this->setParam('headers.sent', $filtered_headers);
+
+    // Save the final deliverability outcomes and reasoning so we can
+    // explain why things happened the way they did.
+    $actor_list = array();
+    foreach ($actors as $actor) {
+      $actor_list[$actor->getPHID()] = array(
+        'deliverable' => $actor->isDeliverable(),
+        'reasons' => $actor->getDeliverabilityReasons(),
+      );
+    }
+    $this->setParam('actors.sent', $actor_list);
+
+    $this->setParam('routing.sent', $this->getParam('routing'));
+    $this->setParam('routingmap.sent', $this->getRoutingRuleMap());
+
+    if (!$add_to && !$add_cc) {
+      $this->setMessage(
+        pht(
+          'Message has no valid recipients: all To/Cc are disabled, '.
+          'invalid, or configured not to receive this mail.'));
+
+      return null;
+    }
+
+    if ($this->getIsErrorEmail()) {
+      $all_recipients = array_merge($add_to, $add_cc);
+      if ($this->shouldRateLimitMail($all_recipients)) {
         $this->setMessage(
           pht(
-            'Phabricator is running in silent mode. See `%s` '.
-            'in the configuration to change this setting.',
-            'phabricator.silent'));
-        return $this->save();
+            'This is an error email, but one or more recipients have '.
+            'exceeded the error email rate limit. Declining to deliver '.
+            'message.'));
+
+        return null;
       }
-
-      // Some mailers require a valid "To:" in order to deliver mail. If we
-      // don't have any "To:", try to fill it in with a placeholder "To:".
-      // If that also fails, move the "Cc:" line to "To:".
-      if (!$add_to) {
-        $placeholder_key = 'metamta.placeholder-to-recipient';
-        $placeholder = PhabricatorEnv::getEnvConfig($placeholder_key);
-        if ($placeholder !== null) {
-          $add_to = array($placeholder);
-        } else {
-          $add_to = $add_cc;
-          $add_cc = array();
-        }
-      }
-
-      $add_to = array_unique($add_to);
-      $add_cc = array_diff(array_unique($add_cc), $add_to);
-
-      $mailer->addTos($add_to);
-      if ($add_cc) {
-        $mailer->addCCs($add_cc);
-      }
-    } catch (Exception $ex) {
-      $this
-        ->setStatus(PhabricatorMailOutboundStatus::STATUS_FAIL)
-        ->setMessage($ex->getMessage())
-        ->save();
-
-      throw $ex;
     }
 
-    try {
-      $ok = $mailer->send();
-      if (!$ok) {
-        // TODO: At some point, we should clean this up and make all mailers
-        // throw.
-        throw new Exception(
-          pht('Mail adapter encountered an unexpected, unspecified failure.'));
-      }
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $this->setMessage(
+        pht(
+          'Phabricator is running in silent mode. See `%s` '.
+          'in the configuration to change this setting.',
+          'phabricator.silent'));
 
-      $this->setStatus(PhabricatorMailOutboundStatus::STATUS_SENT);
-      $this->save();
-
-      return $this;
-    } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
-      $this
-        ->setStatus(PhabricatorMailOutboundStatus::STATUS_FAIL)
-        ->setMessage($ex->getMessage())
-        ->save();
-
-      throw $ex;
-    } catch (Exception $ex) {
-      $this
-        ->setMessage($ex->getMessage()."\n".$ex->getTraceAsString())
-        ->save();
-
-      throw $ex;
+      return null;
     }
+
+    // Some mailers require a valid "To:" in order to deliver mail. If we
+    // don't have any "To:", try to fill it in with a placeholder "To:".
+    // If that also fails, move the "Cc:" line to "To:".
+    if (!$add_to) {
+      $placeholder_key = 'metamta.placeholder-to-recipient';
+      $placeholder = PhabricatorEnv::getEnvConfig($placeholder_key);
+      if ($placeholder !== null) {
+        $add_to = array($placeholder);
+      } else {
+        $add_to = $add_cc;
+        $add_cc = array();
+      }
+    }
+
+    $add_to = array_unique($add_to);
+    $add_cc = array_diff(array_unique($add_cc), $add_to);
+
+    $mailer->addTos($add_to);
+    if ($add_cc) {
+      $mailer->addCCs($add_cc);
+    }
+
+    return $mailer;
   }
 
   private function generateThreadIndex($seed, $is_first_mail) {

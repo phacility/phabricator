@@ -18,7 +18,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mail->addTos(array($phid));
 
     $mailer = new PhabricatorMailImplementationTestAdapter();
-    $mail->sendNow($force = true, $mailer);
+    $mail->sendWithMailers(array($mailer));
     $this->assertEqual(
       PhabricatorMailOutboundStatus::STATUS_SENT,
       $mail->getStatus());
@@ -31,7 +31,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mailer = new PhabricatorMailImplementationTestAdapter();
     $mailer->setFailTemporarily(true);
     try {
-      $mail->sendNow($force = true, $mailer);
+      $mail->sendWithMailers(array($mailer));
     } catch (Exception $ex) {
       // Ignore.
     }
@@ -47,7 +47,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mailer = new PhabricatorMailImplementationTestAdapter();
     $mailer->setFailPermanently(true);
     try {
-      $mail->sendNow($force = true, $mailer);
+      $mail->sendWithMailers(array($mailer));
     } catch (Exception $ex) {
       // Ignore.
     }
@@ -191,7 +191,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $mail = new PhabricatorMetaMTAMail();
     $mail->setThreadID($thread_id, $is_first_mail);
-    $mail->sendNow($force = true, $mailer);
+    $mail->sendWithMailers(array($mailer));
 
     $guts = $mailer->getGuts();
     $dict = ipull($guts['headers'], 1, 0);
