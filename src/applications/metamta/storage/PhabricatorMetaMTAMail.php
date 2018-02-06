@@ -463,33 +463,85 @@ final class PhabricatorMetaMTAMail
       throw new Exception(pht('Trying to send an already-sent mail!'));
     }
 
-    $mailers = $this->newMailers();
+    $mailers = self::newMailers();
 
     return $this->sendWithMailers($mailers);
   }
 
-  private function newMailers() {
+  public static function newMailers() {
     $mailers = array();
 
-    $mailer = PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');
+    $config = PhabricatorEnv::getEnvConfig('cluster.mailers');
+    if ($config === null) {
+      $mailer = PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');
 
-    $defaults = $mailer->newDefaultOptions();
-    $options = $mailer->newLegacyOptions();
+      $defaults = $mailer->newDefaultOptions();
+      $options = $mailer->newLegacyOptions();
 
-    $options = $options + $defaults;
+      $options = $options + $defaults;
 
-    $mailer
-      ->setKey('default')
-      ->setOptions($options);
+      $mailer
+        ->setKey('default')
+        ->setPriority(-1)
+        ->setOptions($options);
 
-    $mailer->prepareForSend();
+      $mailers[] = $mailer;
+    } else {
+      $adapters = PhabricatorMailImplementationAdapter::getAllAdapters();
+      $next_priority = -1;
 
-    $mailers[] = $mailer;
+      foreach ($config as $spec) {
+        $type = $spec['type'];
+        if (!isset($adapters[$type])) {
+          throw new Exception(
+            pht(
+              'Unknown mailer ("%s")!',
+              $type));
+        }
 
-    return $mailers;
+        $key = $spec['key'];
+        $mailer = id(clone $adapters[$type])
+          ->setKey($key);
+
+        $priority = idx($spec, 'priority');
+        if (!$priority) {
+          $priority = $next_priority;
+          $next_priority--;
+        }
+        $mailer->setPriority($priority);
+
+        $defaults = $mailer->newDefaultOptions();
+        $options = idx($spec, 'options', array()) + $defaults;
+        $mailer->setOptions($options);
+      }
+    }
+
+    $sorted = array();
+    $groups = mgroup($mailers, 'getPriority');
+    ksort($groups);
+    foreach ($groups as $group) {
+      // Reorder services within the same priority group randomly.
+      shuffle($group);
+      foreach ($group as $mailer) {
+        $sorted[] = $mailer;
+      }
+    }
+
+    foreach ($sorted as $mailer) {
+      $mailer->prepareForSend();
+    }
+
+    return $sorted;
   }
 
   public function sendWithMailers(array $mailers) {
+    if (!$mailers) {
+      return $this
+        ->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID)
+        ->setMessage(pht('No mailers are configured.'))
+        ->save();
+    }
+
     $exceptions = array();
     foreach ($mailers as $template_mailer) {
       $mailer = null;
@@ -863,6 +915,12 @@ final class PhabricatorMetaMTAMail
     $mailer->addTos($add_to);
     if ($add_cc) {
       $mailer->addCCs($add_cc);
+    }
+
+    // Keep track of which mailer actually ended up accepting the message.
+    $mailer_key = $mailer->getKey();
+    if ($mailer_key !== null) {
+      $this->setParam('mailer.key', $mailer_key);
     }
 
     return $mailer;

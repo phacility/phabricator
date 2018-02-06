@@ -3,6 +3,7 @@
 abstract class PhabricatorMailImplementationAdapter extends Phobject {
 
   private $key;
+  private $priority;
   private $options = array();
 
   final public function getAdapterType() {
@@ -55,6 +56,15 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
 
   final public function getKey() {
     return $this->key;
+  }
+
+  final public function setPriority($priority) {
+    $this->priority = $priority;
+    return $this;
+  }
+
+  final public function getPriority() {
+    return $this->priority;
   }
 
   final public function getOption($key) {

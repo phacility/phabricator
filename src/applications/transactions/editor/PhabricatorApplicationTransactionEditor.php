@@ -2575,12 +2575,13 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $mail = $this->buildMailForTarget($object, $xactions, $target);
 
-        if ($this->mustEncrypt) {
-          $mail
-            ->setMustEncrypt(true)
-            ->setMustEncryptReasons($this->mustEncrypt);
+        if ($mail) {
+          if ($this->mustEncrypt) {
+            $mail
+              ->setMustEncrypt(true)
+              ->setMustEncryptReasons($this->mustEncrypt);
+          }
         }
-
       } catch (Exception $ex) {
         $caught = $ex;
       }
