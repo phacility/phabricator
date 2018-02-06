@@ -592,6 +592,12 @@ final class PhabricatorMetaMTAMail
           $mailer->setFrom($from_email, $from_name);
           break;
         case 'from':
+          // If the mail content must be encrypted, disguise the sender.
+          if ($must_encrypt) {
+            $mailer->setFrom($default_from, pht('Phabricator'));
+            break;
+          }
+
           $from = $value;
           $actor_email = null;
           $actor_name = null;
