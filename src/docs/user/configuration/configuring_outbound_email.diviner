@@ -12,6 +12,7 @@ including a local mailer or various third-party services. Options include:
 | Send Mail With | Setup | Cost | Inbound | Notes |
 |---------|-------|------|---------|-------|
 | Mailgun | Easy | Cheap | Yes | Recommended |
+| Postmark | Easy | Cheap | Yes | Recommended |
 | Amazon SES | Easy | Cheap | No | Recommended |
 | SendGrid | Medium | Cheap | Yes | Discouraged |
 | External SMTP | Medium | Varies | No | Gmail, etc. |
@@ -145,6 +146,17 @@ To use this mailer, set `type` to `mailgun`, then configure these `options`:
 
   - `api-key`: Required string. Your Mailgun API key.
   - `domain`: Required string. Your Mailgun domain.
+
+
+Mailer: Postmark
+================
+
+Postmark is a third-party email delivery serivice. You can learn more at
+<https://www.postmarkapp.com/>.
+
+To use this mailer, set `type` to `postmark`, then configure these `options`:
+
+  - `access-token`: Required string. Your Postmark access token.
 
 
 Mailer: Amazon SES

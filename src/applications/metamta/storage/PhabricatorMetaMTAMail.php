@@ -319,6 +319,10 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('mailer.key');
   }
 
+  public function setTryMailers(array $mailers) {
+    return $this->setParam('mailers.try', $mailers);
+  }
+
   public function setHTMLBody($html) {
     $this->setParam('html-body', $html);
     return $this;
@@ -468,6 +472,12 @@ final class PhabricatorMetaMTAMail
     }
 
     $mailers = self::newMailers();
+
+    $try_mailers = $this->getParam('mailers.try');
+    if ($try_mailers) {
+      $mailers = mpull($mailers, null, 'getKey');
+      $mailers = array_select_keys($mailers, $try_mailers);
+    }
 
     return $this->sendWithMailers($mailers);
   }

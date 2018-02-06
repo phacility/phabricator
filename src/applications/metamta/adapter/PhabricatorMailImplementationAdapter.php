@@ -94,4 +94,13 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
     return;
   }
 
+  protected function renderAddress($email, $name = null) {
+    if (strlen($name)) {
+      // TODO: This needs to be escaped correctly.
+      return "{$name} <{$email}>";
+    } else {
+      return $email;
+    }
+  }
+
 }
