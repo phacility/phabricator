@@ -513,12 +513,14 @@ final class PhabricatorMetaMTAMail
         $defaults = $mailer->newDefaultOptions();
         $options = idx($spec, 'options', array()) + $defaults;
         $mailer->setOptions($options);
+
+        $mailers[] = $mailer;
       }
     }
 
     $sorted = array();
     $groups = mgroup($mailers, 'getPriority');
-    ksort($groups);
+    krsort($groups);
     foreach ($groups as $group) {
       // Reorder services within the same priority group randomly.
       shuffle($group);
