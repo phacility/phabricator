@@ -315,6 +315,10 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('stampMetadata', array());
   }
 
+  public function getMailerKey() {
+    return $this->getParam('mailer.key');
+  }
+
   public function setHTMLBody($html) {
     $this->setParam('html-body', $html);
     return $this;
@@ -586,6 +590,12 @@ final class PhabricatorMetaMTAMail
       } catch (Exception $ex) {
         $exceptions[] = $ex;
         continue;
+      }
+
+      // Keep track of which mailer actually ended up accepting the message.
+      $mailer_key = $mailer->getKey();
+      if ($mailer_key !== null) {
+        $this->setParam('mailer.key', $mailer_key);
       }
 
       return $this
@@ -917,12 +927,6 @@ final class PhabricatorMetaMTAMail
     $mailer->addTos($add_to);
     if ($add_cc) {
       $mailer->addCCs($add_cc);
-    }
-
-    // Keep track of which mailer actually ended up accepting the message.
-    $mailer_key = $mailer->getKey();
-    if ($mailer_key !== null) {
-      $this->setParam('mailer.key', $mailer_key);
     }
 
     return $mailer;

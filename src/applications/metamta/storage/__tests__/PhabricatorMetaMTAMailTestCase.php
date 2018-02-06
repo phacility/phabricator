@@ -253,4 +253,82 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       ->executeOne();
   }
 
+  public function testMailerFailover() {
+    $user = $this->generateNewTestUser();
+    $phid = $user->getPHID();
+
+    $status_sent = PhabricatorMailOutboundStatus::STATUS_SENT;
+    $status_queue = PhabricatorMailOutboundStatus::STATUS_QUEUE;
+    $status_fail = PhabricatorMailOutboundStatus::STATUS_FAIL;
+
+    $mailer1 = id(new PhabricatorMailImplementationTestAdapter())
+      ->setKey('mailer1');
+
+    $mailer2 = id(new PhabricatorMailImplementationTestAdapter())
+      ->setKey('mailer2');
+
+    $mailers = array(
+      $mailer1,
+      $mailer2,
+    );
+
+    // Send mail with both mailers active. The first mailer should be used.
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($phid))
+      ->sendWithMailers($mailers);
+    $this->assertEqual($status_sent, $mail->getStatus());
+    $this->assertEqual('mailer1', $mail->getMailerKey());
+
+
+    // If the first mailer fails, the mail should be sent with the second
+    // mailer. Since we transmitted the mail, this doesn't raise an exception.
+    $mailer1->setFailTemporarily(true);
+
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($phid))
+      ->sendWithMailers($mailers);
+    $this->assertEqual($status_sent, $mail->getStatus());
+    $this->assertEqual('mailer2', $mail->getMailerKey());
+
+
+    // If both mailers fail, the mail should remain in queue.
+    $mailer2->setFailTemporarily(true);
+
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($phid));
+
+    $caught = null;
+    try {
+      $mail->sendWithMailers($mailers);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue($caught instanceof Exception);
+    $this->assertEqual($status_queue, $mail->getStatus());
+    $this->assertEqual(null, $mail->getMailerKey());
+
+    $mailer1->setFailTemporarily(false);
+    $mailer2->setFailTemporarily(false);
+
+
+    // If the first mailer fails permanently, the mail should fail even though
+    // the second mailer isn't configured to fail.
+    $mailer1->setFailPermanently(true);
+
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($phid));
+
+    $caught = null;
+    try {
+      $mail->sendWithMailers($mailers);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue($caught instanceof Exception);
+    $this->assertEqual($status_fail, $mail->getStatus());
+    $this->assertEqual(null, $mail->getMailerKey());
+  }
+
 }
