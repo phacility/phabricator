@@ -202,7 +202,7 @@ EODOC
 
     return array(
       $this->newOption('cluster.mailers', 'cluster.mailers', null)
-        ->setLocked(true)
+        ->setHidden(true)
         ->setDescription($mailers_description),
       $this->newOption(
         'metamta.default-address',

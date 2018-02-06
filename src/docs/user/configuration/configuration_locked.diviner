@@ -27,6 +27,24 @@ can edit it from the CLI instead, with `bin/config`:
 phabricator/ $ ./bin/config set <key> <value>
 ```
 
+Some configuration options take complicated values which can be difficult
+to escape properly for the shell. The easiest way to set these options is
+to use the `--stdin` flag. First, put your desired value in a `config.json`
+file:
+
+```name=config.json, lang=json
+{
+  "duck": "quack",
+  "cow": "moo"
+}
+```
+
+Then, set it with `--stdin` like this:
+
+```
+phabricator/ $ ./bin/config set <key> --stdin < config.json
+```
+
 A few settings have alternate CLI tools. Refer to the setting page for
 details.
 
@@ -98,4 +116,6 @@ Next Steps
 
 Continue by:
 
+  - learning more about advanced options with
+    @{Configuration User Guide: Advanced Configuration}; or
   - returning to the @{article: Configuration Guide}.

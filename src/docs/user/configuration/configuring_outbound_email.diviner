@@ -101,6 +101,40 @@ Once you've selected a mailer, find the corresponding section below for
 instructions on configuring it.
 
 
+Setting Complex Configuration
+=============================
+
+Mailers can not be edited from the web UI. If mailers could be edited from
+the web UI, it would give an attacker who compromised an administrator account
+a lot of power: they could redirect mail to a server they control and then
+intercept mail for any other account, including password reset mail.
+
+For more information about locked configuration options, see
+@{article:Configuration Guide: Locked and Hidden Configuration}.
+
+Setting `cluster.mailers` from the command line using `bin/config set` can be
+tricky because of shell escaping. The easiest way to do it is to use the
+`--stdin` flag. First, put your desired configuration in a file like this:
+
+```lang=json, name=mailers.json
+[
+  {
+    "key": "test-mailer",
+    "type": "test"
+  }
+]
+```
+
+Then set the value like this:
+
+```
+phabricator/ $ ./bin/config set --stdin < mailers.json
+```
+
+For alternatives and more information on configuration, see
+@{article:Configuration User Guide: Advanced Configuration}
+
+
 Mailer: Mailgun
 ===============
 
