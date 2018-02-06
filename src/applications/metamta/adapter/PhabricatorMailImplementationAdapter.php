@@ -5,6 +5,18 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
   private $key;
   private $options = array();
 
+  final public function getAdapterType() {
+    return $this->getPhobjectClassConstant('ADAPTERTYPE');
+  }
+
+  final public static function getAllAdapters() {
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getAdapterType')
+      ->execute();
+  }
+
+
   abstract public function setFrom($email, $name = '');
   abstract public function addReplyTo($email, $name = '');
   abstract public function addTos(array $emails);

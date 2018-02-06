@@ -6,6 +6,8 @@
 final class PhabricatorMailImplementationMailgunAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  const ADAPTERTYPE = 'mailgun';
+
   private $params = array();
   private $attachments = array();
 

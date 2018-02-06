@@ -6,6 +6,8 @@
 class PhabricatorMailImplementationPHPMailerLiteAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  const ADAPTERTYPE = 'sendmail';
+
   protected $mailer;
 
   protected function validateOptions(array $options) {

@@ -6,6 +6,8 @@
 final class PhabricatorMailImplementationSendGridAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  const ADAPTERTYPE = 'sendgrid';
+
   private $params = array();
 
   protected function validateOptions(array $options) {

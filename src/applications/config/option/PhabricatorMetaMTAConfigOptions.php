@@ -138,19 +138,14 @@ EODOC
   ,
   'metamta.public-replies'));
 
-    $adapter_doc_href = PhabricatorEnv::getDoclink(
-      'Configuring Outbound Email');
-    $adapter_doc_name = pht('Configuring Outbound Email');
     $adapter_description = $this->deformat(pht(<<<EODOC
 Adapter class to use to transmit mail to the MTA. The default uses
 PHPMailerLite, which will invoke "sendmail". This is appropriate if sendmail
 actually works on your host, but if you haven't configured mail it may not be so
 great. A number of other mailers are available (e.g., SES, SendGrid, SMTP,
-custom mailers) - consult [[ %s | %s ]] for details.
+custom mailers). This option is deprecated in favor of 'cluster.mailers'.
 EODOC
-  ,
-  $adapter_doc_href,
-  $adapter_doc_name));
+));
 
     $placeholder_description = $this->deformat(pht(<<<EODOC
 When sending a message that has no To recipient (i.e. all recipients are CC'd),
@@ -197,7 +192,18 @@ The default is `full`.
 EODOC
 ));
 
+    $mailers_description = $this->deformat(pht(<<<EODOC
+Define one or more mail transmission services. For help with configuring
+mailers, see **[[ %s | %s ]]** in the documentation.
+EODOC
+      ,
+      PhabricatorEnv::getDoclink('Configuring Outbound Email'),
+      pht('Configuring Outbound Email')));
+
     return array(
+      $this->newOption('cluster.mailers', 'cluster.mailers', null)
+        ->setLocked(true)
+        ->setDescription($mailers_description),
       $this->newOption(
         'metamta.default-address',
         'string',

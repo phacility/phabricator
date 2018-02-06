@@ -3,6 +3,8 @@
 final class PhabricatorMailImplementationPHPMailerAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  const ADAPTERTYPE = 'smtp';
+
   private $mailer;
 
   protected function validateOptions(array $options) {

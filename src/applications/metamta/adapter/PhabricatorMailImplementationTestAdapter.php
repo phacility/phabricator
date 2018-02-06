@@ -7,6 +7,8 @@
 final class PhabricatorMailImplementationTestAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  const ADAPTERTYPE = 'test';
+
   private $guts = array();
   private $config = array();
 

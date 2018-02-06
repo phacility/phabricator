@@ -3,6 +3,8 @@
 final class PhabricatorMailImplementationAmazonSESAdapter
   extends PhabricatorMailImplementationPHPMailerLiteAdapter {
 
+  const ADAPTERTYPE = 'ses';
+
   private $message;
   private $isHTML;
 
