@@ -40,6 +40,10 @@ final class PhabricatorEditorMailEngineExtension
       ->setKey('herald')
       ->setLabel(pht('Herald Rule'));
 
+    $templates[] = id(new PhabricatorPHIDMailStamp())
+      ->setKey('removed')
+      ->setLabel(pht('Recipient Removed'));
+
     return $templates;
   }
 
@@ -69,6 +73,9 @@ final class PhabricatorEditorMailEngineExtension
 
     $this->getMailStamp('herald')
       ->setValue($editor->getHeraldRuleMonograms());
+
+    $this->getMailStamp('removed')
+      ->setValue($editor->getRemovedRecipientPHIDs());
   }
 
 }

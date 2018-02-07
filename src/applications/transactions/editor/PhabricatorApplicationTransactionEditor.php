@@ -74,6 +74,9 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mustEncrypt;
   private $stampTemplates = array();
   private $mailStamps = array();
+  private $oldTo = array();
+  private $oldCC = array();
+  private $mailRemovedPHIDs = array();
 
   private $transactionQueue = array();
 
@@ -916,6 +919,8 @@ abstract class PhabricatorApplicationTransactionEditor
       $this->willApplyTransactions($object, $xactions);
 
       if ($object->getID()) {
+        $this->buildOldRecipientLists($object, $xactions);
+
         foreach ($xactions as $xaction) {
 
           // If any of the transactions require a read lock, hold one and
@@ -1199,6 +1204,10 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->mailShouldSend = true;
         $this->mailToPHIDs = $this->getMailTo($object);
         $this->mailCCPHIDs = $this->getMailCC($object);
+
+        // Add any recipients who were previously on the notification list
+        // but were removed by this change.
+        $this->applyOldRecipientLists();
 
         $mail_xactions = $this->getTransactionsForMail($object, $xactions);
         $stamps = $this->newMailStamps($object, $xactions);
@@ -4125,6 +4134,67 @@ abstract class PhabricatorApplicationTransactionEditor
     natcasesort($results);
 
     return $results;
+  }
+
+  public function getRemovedRecipientPHIDs() {
+    return $this->mailRemovedPHIDs;
+  }
+
+  private function buildOldRecipientLists($object, $xactions) {
+    // See T4776. Before we start making any changes, build a list of the old
+    // recipients. If a change removes a user from the recipient list for an
+    // object we still want to notify the user about that change. This allows
+    // them to respond if they didn't want to be removed.
+
+    if (!$this->shouldSendMail($object, $xactions)) {
+      return;
+    }
+
+    $this->oldTo = $this->getMailTo($object);
+    $this->oldCC = $this->getMailCC($object);
+
+    return $this;
+  }
+
+  private function applyOldRecipientLists() {
+    $actor_phid = $this->getActingAsPHID();
+
+    // If you took yourself off the recipient list (for example, by
+    // unsubscribing or resigning) assume that you know what you did and
+    // don't need to be notified.
+
+    // If you just moved from "To" to "Cc" (or vice versa), you're still a
+    // recipient so we don't need to add you back in.
+
+    $map = array_fuse($this->mailToPHIDs) + array_fuse($this->mailCCPHIDs);
+
+    foreach ($this->oldTo as $phid) {
+      if ($phid === $actor_phid) {
+        continue;
+      }
+
+      if (isset($map[$phid])) {
+        continue;
+      }
+
+      $this->mailToPHIDs[] = $phid;
+      $this->mailRemovedPHIDs[] = $phid;
+    }
+
+    foreach ($this->oldCC as $phid) {
+      if ($phid === $actor_phid) {
+        continue;
+      }
+
+      if (isset($map[$phid])) {
+        continue;
+      }
+
+      $this->mailCCPHIDs[] = $phid;
+      $this->mailRemovedPHIDs[] = $phid;
+    }
+
+    return $this;
   }
 
 }
