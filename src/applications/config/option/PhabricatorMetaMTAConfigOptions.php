@@ -66,7 +66,9 @@ of each approach are:
       received a similar message, but can not prevent all stray email arising
       from "Reply All".
     - Not supported with a private reply-to address.
-    - Mails are sent in the server default translation.
+    - Mail messages are sent in the server default translation.
+    - Mail that must be delivered over secure channels will leak the recipient
+      list in the "To" and "Cc" headers.
   - One mail to each user:
     - Policy controls work correctly and are enforced per-user.
     - Recipients need to look in the mail body to see To/Cc.
@@ -77,7 +79,7 @@ of each approach are:
     - "Reply All" will never send extra mail to other users involved in the
       thread.
     - Required if private reply-to addresses are configured.
-    - Mails are sent in the language of user preference.
+    - Mail messages are sent in the language of user preference.
 
 EODOC
 ));
