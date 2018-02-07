@@ -632,6 +632,8 @@ final class DifferentialTransactionEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $this->requireReviewers($object);
+
     $phids = array();
     $phids[] = $object->getAuthorPHID();
     foreach ($object->getReviewers() as $reviewer) {
@@ -645,6 +647,8 @@ final class DifferentialTransactionEditor
   }
 
   protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
+    $this->requireReviewers($object);
+
     $phids = array();
 
     foreach ($object->getReviewers() as $reviewer) {
@@ -1736,5 +1740,26 @@ final class DifferentialTransactionEditor
       $revision->setRemovedLineCount((int)$row['D']);
     }
   }
+
+  private function requireReviewers(DifferentialRevision $revision) {
+    if ($revision->hasAttachedReviewers()) {
+      return;
+    }
+
+    $with_reviewers = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->needReviewers(true)
+      ->withPHIDs(array($revision->getPHID()))
+      ->executeOne();
+    if (!$with_reviewers) {
+      throw new Exception(
+        pht(
+          'Failed to reload revision ("%s").',
+          $revision->getPHID()));
+    }
+
+    $revision->attachReviewers($with_reviewers->getReviewers());
+  }
+
 
 }

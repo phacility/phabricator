@@ -583,6 +583,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
+  public function hasAttachedReviewers() {
+    return ($this->reviewerStatus !== self::ATTACHABLE);
+  }
+
   public function getReviewerPHIDs() {
     $reviewers = $this->getReviewers();
     return mpull($reviewers, 'getReviewerPHID');
