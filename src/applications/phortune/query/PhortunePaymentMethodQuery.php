@@ -34,19 +34,12 @@ final class PhortunePaymentMethodQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhortunePaymentMethod();
+  }
+
   protected function loadPage() {
-    $table = new PhortunePaymentMethod();
-    $conn = $table->establishConnection('r');
-
-    $rows = queryfx_all(
-      $conn,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn),
-      $this->buildOrderClause($conn),
-      $this->buildLimitClause($conn));
-
-    return $table->loadAllFromArray($rows);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $methods) {
@@ -106,8 +99,8 @@ final class PhortunePaymentMethodQuery
     return $methods;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
@@ -144,9 +137,7 @@ final class PhortunePaymentMethodQuery
         $this->statuses);
     }
 
-    $where[] = $this->buildPagingClause($conn);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

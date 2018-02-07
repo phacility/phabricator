@@ -141,6 +141,10 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
     $method = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($subscription->getDefaultPaymentMethodPHID()))
+      ->withStatuses(
+        array(
+          PhortunePaymentMethod::STATUS_ACTIVE,
+        ))
       ->executeOne();
     if (!$method) {
       $issues[] = pht(
