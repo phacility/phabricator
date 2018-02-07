@@ -48,12 +48,10 @@ final class PhameBlogEditor
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $phid = $object->getPHID();
     $name = $object->getName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject($name)
-      ->addHeader('Thread-Topic', $phid);
+      ->setSubject($name);
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {

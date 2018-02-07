@@ -689,15 +689,10 @@ final class DifferentialTransactionEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $title = $object->getTitle();
-
-    $original_title = $object->getOriginalTitle();
-
     $subject = "D{$id}: {$title}";
-    $thread_topic = "D{$id}: {$original_title}";
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject($subject)
-      ->addHeader('Thread-Topic', $thread_topic);
+      ->setSubject($subject);
   }
 
   protected function getTransactionsForMail(

@@ -1262,6 +1262,11 @@ final class PhabricatorMetaMTAMail
       $headers[] = array('X-Phabricator-Must-Encrypt', 'Yes');
     }
 
+    $related_phid = $this->getRelatedPHID();
+    if ($related_phid) {
+      $headers[] = array('Thread-Topic', $related_phid);
+    }
+
     return $headers;
   }
 
@@ -1309,6 +1314,7 @@ final class PhabricatorMetaMTAMail
       'Precedence',
       'References',
       'Thread-Index',
+      'Thread-Topic',
 
       'X-Mail-Transport-Agent',
       'X-Auto-Response-Suppress',

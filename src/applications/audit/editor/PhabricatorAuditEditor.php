@@ -473,17 +473,14 @@ final class PhabricatorAuditEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $identifier = $object->getCommitIdentifier();
     $repository = $object->getRepository();
-    $monogram = $repository->getMonogram();
 
     $summary = $object->getSummary();
     $name = $repository->formatCommitName($identifier);
 
     $subject = "{$name}: {$summary}";
-    $thread_topic = "Commit {$monogram}{$identifier}";
 
     $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject($subject)
-      ->addHeader('Thread-Topic', $thread_topic);
+      ->setSubject($subject);
 
     $this->attachPatch(
       $template,

@@ -50,8 +50,7 @@ final class FundInitiativeEditor
     $name = $object->getName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("{$monogram}: {$name}")
-      ->addHeader('Thread-Topic', $monogram);
+      ->setSubject("{$monogram}: {$name}");
   }
 
   protected function buildMailBody(

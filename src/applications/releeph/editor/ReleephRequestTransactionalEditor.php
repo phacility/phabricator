@@ -196,11 +196,9 @@ final class ReleephRequestTransactionalEditor
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
-    $phid = $object->getPHID();
     $title = $object->getSummaryForDisplay();
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("RQ{$id}: {$title}")
-      ->addHeader('Thread-Topic', "RQ{$id}: {$phid}");
+      ->setSubject("RQ{$id}: {$title}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {

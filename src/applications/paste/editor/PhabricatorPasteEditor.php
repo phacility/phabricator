@@ -72,8 +72,7 @@ final class PhabricatorPasteEditor
     $name = $object->getTitle();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("P{$id}: {$name}")
-      ->addHeader('Thread-Topic', "P{$id}");
+      ->setSubject("P{$id}: {$name}");
   }
 
   protected function buildMailBody(

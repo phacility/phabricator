@@ -146,11 +146,9 @@ final class PonderQuestionEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $title = $object->getTitle();
-    $original_title = $object->getOriginalTitle();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("Q{$id}: {$title}")
-      ->addHeader('Thread-Topic', "Q{$id}: {$original_title}");
+      ->setSubject("Q{$id}: {$title}");
   }
 
   protected function buildMailBody(

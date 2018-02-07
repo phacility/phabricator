@@ -112,11 +112,9 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $name = $object->getName();
-    $original_name = $object->getOriginalName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("M{$id}: {$name}")
-      ->addHeader('Thread-Topic', "M{$id}: {$original_name}");
+      ->setSubject("M{$id}: {$name}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
