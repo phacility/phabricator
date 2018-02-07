@@ -75,8 +75,26 @@ final class PhabricatorMetaMTAMailViewController
           ->setKey('metadata')
           ->appendChild($this->buildMetadataProperties($mail)));
 
+    $header_view = id(new PHUIHeaderView())
+      ->setHeader(pht('Mail'));
+
+    $object_phid = $mail->getRelatedPHID();
+    if ($object_phid) {
+      $handles = $viewer->loadHandles(array($object_phid));
+      $handle = $handles[$object_phid];
+      if ($handle->isComplete() && $handle->getURI()) {
+        $view_button = id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText(pht('View Object'))
+          ->setIcon('fa-chevron-right')
+          ->setHref($handle->getURI());
+
+        $header_view->addActionLink($view_button);
+      }
+    }
+
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Mail'))
+      ->setHeader($header_view)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addTabGroup($tab_group);
 
