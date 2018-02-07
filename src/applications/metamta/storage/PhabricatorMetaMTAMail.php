@@ -482,6 +482,20 @@ final class PhabricatorMetaMTAMail
     return $this->sendWithMailers($mailers);
   }
 
+  public static function newMailersWithTypes(array $types) {
+    $mailers = self::newMailers();
+    $types = array_fuse($types);
+
+    foreach ($mailers as $key => $mailer) {
+      $mailer_type = $mailer->getAdapterType();
+      if (!isset($types[$mailer_type])) {
+        unset($mailers[$key]);
+      }
+    }
+
+    return array_values($mailers);
+  }
+
   public static function newMailers() {
     $mailers = array();
 

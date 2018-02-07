@@ -17,15 +17,12 @@ final class PhabricatorMetaMTAMailgunReceiveController
     // inbound mail from any of them. Test the signature to see if it matches
     // any configured Mailgun mailer.
 
-    $mailers = PhabricatorMetaMTAMail::newMailers();
-    $mailgun_type = PhabricatorMailImplementationMailgunAdapter::ADAPTERTYPE;
+    $mailers = PhabricatorMetaMTAMail::newMailersWithTypes(
+      array(
+        PhabricatorMailImplementationMailgunAdapter::ADAPTERTYPE,
+      ));
     foreach ($mailers as $mailer) {
-      if ($mailer->getAdapterType() != $mailgun_type) {
-        continue;
-      }
-
       $api_key = $mailer->getOption('api-key');
-
       $hash = hash_hmac('sha256', $timestamp.$token, $api_key);
       if (phutil_hashes_are_identical($sig, $hash)) {
         return true;
