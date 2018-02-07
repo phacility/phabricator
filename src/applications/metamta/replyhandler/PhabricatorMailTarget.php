@@ -77,7 +77,13 @@ final class PhabricatorMailTarget extends Phobject {
         $html = array();
         $html[] = phutil_tag('strong', array(), pht('STAMPS'));
         $html[] = phutil_tag('br');
-        $html[] = phutil_implode_html(' ', $stamps);
+        $html[] = phutil_tag(
+          'span',
+          array(
+            'style' => 'font-size: smaller; color: #92969D',
+          ),
+          phutil_implode_html(' ', $stamps));
+        $html[] = phutil_tag('br');
         $html[] = phutil_tag('br');
         $html = phutil_tag('div', array(), $html);
         $html_body .= hsprintf('%s', $html);
