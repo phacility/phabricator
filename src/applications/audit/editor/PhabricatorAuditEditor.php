@@ -496,7 +496,6 @@ final class PhabricatorAuditEditor
       $phids[] = $object->getAuthorPHID();
     }
 
-    $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
     foreach ($object->getAudits() as $audit) {
       if (!$audit->isInteresting()) {
         // Don't send mail to uninteresting auditors, like packages which
@@ -504,12 +503,24 @@ final class PhabricatorAuditEditor
         continue;
       }
 
-      if ($audit->getAuditStatus() != $status_resigned) {
+      if (!$audit->isResigned()) {
         $phids[] = $audit->getAuditorPHID();
       }
     }
 
     $phids[] = $this->getActingAsPHID();
+
+    return $phids;
+  }
+
+  protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    foreach ($object->getAudits() as $auditor) {
+      if ($auditor->isResigned()) {
+        $phids[] = $auditor->getAuditorPHID();
+      }
+    }
 
     return $phids;
   }

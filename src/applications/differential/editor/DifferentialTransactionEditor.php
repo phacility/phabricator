@@ -644,6 +644,18 @@ final class DifferentialTransactionEditor
     return $phids;
   }
 
+  protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    foreach ($object->getReviewers() as $reviewer) {
+      if ($reviewer->isResigned()) {
+        $phids[] = $reviewer->getReviewerPHID();
+      }
+    }
+
+    return $phids;
+  }
+
   protected function getMailAction(
     PhabricatorLiskDAO $object,
     array $xactions) {

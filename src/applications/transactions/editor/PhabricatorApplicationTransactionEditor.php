@@ -77,6 +77,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $oldTo = array();
   private $oldCC = array();
   private $mailRemovedPHIDs = array();
+  private $mailUnexpandablePHIDs = array();
 
   private $transactionQueue = array();
 
@@ -1204,6 +1205,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->mailShouldSend = true;
         $this->mailToPHIDs = $this->getMailTo($object);
         $this->mailCCPHIDs = $this->getMailCC($object);
+        $this->mailUnexpandablePHIDs = $this->newMailUnexpandablePHIDs($object);
 
         // Add any recipients who were previously on the notification list
         // but were removed by this change.
@@ -2562,7 +2564,13 @@ abstract class PhabricatorApplicationTransactionEditor
     $email_cc = $this->mailCCPHIDs;
     $email_cc = array_merge($email_cc, $this->heraldEmailPHIDs);
 
+    $unexpandable = $this->mailUnexpandablePHIDs;
+    if (!is_array($unexpandable)) {
+      $unexpandable = array();
+    }
+
     $targets = $this->buildReplyHandler($object)
+      ->setUnexpandablePHIDs($unexpandable)
       ->getMailTargets($email_to, $email_cc);
 
     // Set this explicitly before we start swapping out the effective actor.
@@ -2814,6 +2822,11 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function getMailTo(PhabricatorLiskDAO $object) {
     throw new Exception(pht('Capability not supported.'));
+  }
+
+
+  protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
+    return array();
   }
 
 
@@ -3617,6 +3630,7 @@ abstract class PhabricatorApplicationTransactionEditor
       'mailShouldSend',
       'mustEncrypt',
       'mailStamps',
+      'mailUnexpandablePHIDs',
     );
   }
 

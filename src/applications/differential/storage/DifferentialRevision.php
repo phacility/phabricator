@@ -820,9 +820,15 @@ final class DifferentialRevision extends DifferentialDAO
     }
 
     foreach ($reviewers as $reviewer) {
-      if ($reviewer->getReviewerPHID() == $phid) {
-        return true;
+      if ($reviewer->getReviewerPHID() !== $phid) {
+        continue;
       }
+
+      if ($reviewer->isResigned()) {
+        continue;
+      }
+
+      return true;
     }
 
     return false;
