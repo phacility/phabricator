@@ -522,7 +522,6 @@ final class ManiphestTransactionEditor
       'status' => '""',
       'priority' => 0,
       'title' => '""',
-      'originalTitle' => '""',
       'description' => '""',
       'dateCreated' => 0,
       'dateModified' => 0,

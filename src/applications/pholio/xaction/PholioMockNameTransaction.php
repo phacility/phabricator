@@ -15,9 +15,6 @@ final class PholioMockNameTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setName($value);
-    if ($object->getOriginalName() === null) {
-      $object->setOriginalName($this->getNewValue());
-    }
   }
 
   public function getTitle() {

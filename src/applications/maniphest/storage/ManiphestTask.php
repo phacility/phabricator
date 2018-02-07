@@ -31,7 +31,6 @@ final class ManiphestTask extends ManiphestDAO
   protected $subpriority = 0;
 
   protected $title = '';
-  protected $originalTitle = '';
   protected $description = '';
   protected $originalEmailSource;
   protected $mailKey;
@@ -83,7 +82,6 @@ final class ManiphestTask extends ManiphestDAO
         'status' => 'text64',
         'priority' => 'uint32',
         'title' => 'sort',
-        'originalTitle' => 'text',
         'description' => 'text',
         'mailKey' => 'bytes20',
         'ownerOrdering' => 'text64?',
@@ -173,14 +171,6 @@ final class ManiphestTask extends ManiphestDAO
 
   public function setOwnerPHID($phid) {
     $this->ownerPHID = nonempty($phid, null);
-    return $this;
-  }
-
-  public function setTitle($title) {
-    $this->title = $title;
-    if (!$this->getID()) {
-      $this->originalTitle = $title;
-    }
     return $this;
   }
 

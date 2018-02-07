@@ -20,7 +20,6 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorDraftInterface {
 
   protected $title = '';
-  protected $originalTitle;
   protected $status;
 
   protected $summary = '';
@@ -98,7 +97,6 @@ final class DifferentialRevision extends DifferentialDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
-        'originalTitle' => 'text255',
         'status' => 'text32',
         'summary' => 'text',
         'testPlan' => 'text',
@@ -153,14 +151,6 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getURI() {
     return '/'.$this->getMonogram();
-  }
-
-  public function setTitle($title) {
-    $this->title = $title;
-    if (!$this->getID()) {
-      $this->originalTitle = $title;
-    }
-    return $this;
   }
 
   public function loadIDsByCommitPHIDs($phids) {
