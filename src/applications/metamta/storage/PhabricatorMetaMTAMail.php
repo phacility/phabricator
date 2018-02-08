@@ -829,7 +829,7 @@ final class PhabricatorMetaMTAMail
 
     $stamps = $this->getMailStamps();
     if ($stamps) {
-      $headers[] = array('X-Phabricator-Stamps', implode(', ', $stamps));
+      $headers[] = array('X-Phabricator-Stamps', implode(' ', $stamps));
     }
 
     $raw_body = idx($params, 'body', '');
