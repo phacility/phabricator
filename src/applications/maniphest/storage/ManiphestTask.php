@@ -44,6 +44,9 @@ final class ManiphestTask extends ManiphestDAO
   protected $points;
   protected $subtype;
 
+  protected $closedEpoch;
+  protected $closerPHID;
+
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
@@ -90,6 +93,8 @@ final class ManiphestTask extends ManiphestDAO
         'points' => 'double?',
         'bridgedObjectPHID' => 'phid?',
         'subtype' => 'text64',
+        'closedEpoch' => 'epoch?',
+        'closerPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -130,6 +135,12 @@ final class ManiphestTask extends ManiphestDAO
         ),
         'key_subtype' => array(
           'columns' => array('subtype'),
+        ),
+        'key_closed' => array(
+          'columns' => array('closedEpoch'),
+        ),
+        'key_closer' => array(
+          'columns' => array('closerPHID', 'closedEpoch'),
         ),
       ),
     ) + parent::getConfiguration();
