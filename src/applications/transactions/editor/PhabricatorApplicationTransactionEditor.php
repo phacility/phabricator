@@ -78,6 +78,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $oldCC = array();
   private $mailRemovedPHIDs = array();
   private $mailUnexpandablePHIDs = array();
+  private $mailMutedPHIDs = array();
 
   private $transactionQueue = array();
 
@@ -1210,6 +1211,14 @@ abstract class PhabricatorApplicationTransactionEditor
         // Add any recipients who were previously on the notification list
         // but were removed by this change.
         $this->applyOldRecipientLists();
+
+        if ($object instanceof PhabricatorSubscribableInterface) {
+          $this->mailMutedPHIDs = PhabricatorEdgeQuery::loadDestinationPHIDs(
+            $object->getPHID(),
+            PhabricatorMutedByEdgeType::EDGECONST);
+        } else {
+          $this->mailMutedPHIDs = array();
+        }
 
         $mail_xactions = $this->getTransactionsForMail($object, $xactions);
         $stamps = $this->newMailStamps($object, $xactions);
@@ -2662,6 +2671,11 @@ abstract class PhabricatorApplicationTransactionEditor
         $mail_xactions);
     }
 
+    $muted_phids = $this->mailMutedPHIDs;
+    if (!is_array($muted_phids)) {
+      $muted_phids = array();
+    }
+
     $mail
       ->setSensitiveContent(false)
       ->setFrom($this->getActingAsPHID())
@@ -2670,6 +2684,7 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setThreadID($this->getMailThreadID($object), $this->getIsNewObject())
       ->setRelatedPHID($object->getPHID())
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
+      ->setMutedPHIDs($muted_phids)
       ->setForceHeraldMailRecipientPHIDs($this->heraldForcedEmailPHIDs)
       ->setMailTags($mail_tags)
       ->setIsBulk(true)
@@ -3186,6 +3201,18 @@ abstract class PhabricatorApplicationTransactionEditor
     $related_phids = $this->feedRelatedPHIDs;
     $subscribed_phids = $this->feedNotifyPHIDs;
 
+    // Remove muted users from the subscription list so they don't get
+    // notifications, either.
+    $muted_phids = $this->mailMutedPHIDs;
+    if (!is_array($muted_phids)) {
+      $muted_phids = array();
+    }
+    $subscribed_phids = array_fuse($subscribed_phids);
+    foreach ($muted_phids as $muted_phid) {
+      unset($subscribed_phids[$muted_phid]);
+    }
+    $subscribed_phids = array_values($subscribed_phids);
+
     $story_type = $this->getFeedStoryType();
     $story_data = $this->getFeedStoryData($object, $xactions);
 
@@ -3632,6 +3659,7 @@ abstract class PhabricatorApplicationTransactionEditor
       'mustEncrypt',
       'mailStamps',
       'mailUnexpandablePHIDs',
+      'mailMutedPHIDs',
     );
   }
 

@@ -160,6 +160,15 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('exclude', array());
   }
 
+  public function setMutedPHIDs(array $muted) {
+    $this->setParam('muted', $muted);
+    return $this;
+  }
+
+  private function getMutedPHIDs() {
+    return $this->getParam('muted', array());
+  }
+
   public function setForceHeraldMailRecipientPHIDs(array $force) {
     $this->setParam('herald-force-recipients', $force);
     return $this;
@@ -1111,6 +1120,18 @@ final class PhabricatorMetaMTAMail
       if ($actor->isDeliverable()) {
         $deliverable[] = $phid;
       }
+    }
+
+    // Exclude muted recipients. We're doing this after saving deliverability
+    // so that Herald "Send me an email" actions can still punch through a
+    // mute.
+
+    foreach ($this->getMutedPHIDs() as $muted_phid) {
+      $muted_actor = idx($actors, $muted_phid);
+      if (!$muted_actor) {
+        continue;
+      }
+      $muted_actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_MUTED);
     }
 
     // For the rest of the rules, order matters. We're going to run all the

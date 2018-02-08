@@ -21,6 +21,7 @@ final class PhabricatorActionView extends AphrontView {
   private $order;
   private $color;
   private $type;
+  private $highlight;
 
   const TYPE_DIVIDER  = 'type-divider';
   const TYPE_LABEL  = 'label';
@@ -70,6 +71,15 @@ final class PhabricatorActionView extends AphrontView {
 
   public function getHref() {
     return $this->href;
+  }
+
+  public function setHighlight($highlight) {
+    $this->highlight = $highlight;
+    return $this;
+  }
+
+  public function getHighlight() {
+    return $this->highlight;
   }
 
   public function setIcon($icon) {
