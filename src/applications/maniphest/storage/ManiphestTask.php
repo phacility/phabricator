@@ -513,6 +513,16 @@ final class ManiphestTask extends ManiphestDAO
         ->setKey('subtype')
         ->setType('string')
         ->setDescription(pht('Subtype of the task.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('closerPHID')
+        ->setType('phid?')
+        ->setDescription(
+          pht('User who closed the task, if the task is closed.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dateClosed')
+        ->setType('int?')
+        ->setDescription(
+          pht('Epoch timestamp when the task was closed.')),
     );
   }
 
@@ -532,6 +542,11 @@ final class ManiphestTask extends ManiphestDAO
       'color' => ManiphestTaskPriority::getTaskPriorityColor($priority_value),
     );
 
+    $closed_epoch = $this->getClosedEpoch();
+    if ($closed_epoch !== null) {
+      $closed_epoch = (int)$closed_epoch;
+    }
+
     return array(
       'name' => $this->getTitle(),
       'description' => array(
@@ -543,6 +558,8 @@ final class ManiphestTask extends ManiphestDAO
       'priority' => $priority_info,
       'points' => $this->getPoints(),
       'subtype' => $this->getSubtype(),
+      'closerPHID' => $this->getCloserPHID(),
+      'dateClosed' => $closed_epoch,
     );
   }
 

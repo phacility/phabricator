@@ -456,6 +456,15 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorStringExportField())
         ->setKey('statusName')
         ->setLabel(pht('Status Name')),
+      id(new PhabricatorEpochExportField())
+        ->setKey('dateClosed')
+        ->setLabel(pht('Date Closed')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('closerPHID')
+        ->setLabel(pht('Closer PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('closer')
+        ->setLabel(pht('Closer')),
       id(new PhabricatorStringExportField())
         ->setKey('priority')
         ->setLabel(pht('Priority')),
@@ -492,6 +501,7 @@ final class ManiphestTaskSearchEngine
     foreach ($tasks as $task) {
       $phids[] = $task->getAuthorPHID();
       $phids[] = $task->getOwnerPHID();
+      $phids[] = $task->getCloserPHID();
     }
     $handles = $viewer->loadHandles($phids);
 
@@ -510,6 +520,13 @@ final class ManiphestTaskSearchEngine
         $owner_name = $handles[$owner_phid]->getName();
       } else {
         $owner_name = null;
+      }
+
+      $closer_phid = $task->getCloserPHID();
+      if ($closer_phid) {
+        $closer_name = $handles[$closer_phid]->getName();
+      } else {
+        $closer_name = null;
       }
 
       $status_value = $task->getStatus();
@@ -534,6 +551,9 @@ final class ManiphestTaskSearchEngine
         'title' => $task->getTitle(),
         'uri' => PhabricatorEnv::getProductionURI($task->getURI()),
         'description' => $task->getDescription(),
+        'dateClosed' => $task->getClosedEpoch(),
+        'closerPHID' => $closer_phid,
+        'closer' => $closer_name,
       );
     }
 
