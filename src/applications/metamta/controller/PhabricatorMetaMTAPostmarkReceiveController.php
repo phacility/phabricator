@@ -20,6 +20,21 @@ final class PhabricatorMetaMTAPostmarkReceiveController
       return new Aphront404Response();
     }
 
+    $remote_address = $request->getRemoteAddress();
+    $any_remote_match = false;
+    foreach ($mailers as $mailer) {
+      $inbound_addresses = $mailer->getOption('inbound-addresses');
+      $cidr_list = PhutilCIDRList::newList($inbound_addresses);
+      if ($cidr_list->containsAddress($remote_address)) {
+        $any_remote_match = true;
+        break;
+      }
+    }
+
+    if (!$any_remote_match) {
+      return new Aphront400Response();
+    }
+
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     $raw_input = PhabricatorStartup::getRawInput();
 

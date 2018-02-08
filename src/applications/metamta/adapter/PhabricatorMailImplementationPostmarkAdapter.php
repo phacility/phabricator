@@ -73,12 +73,24 @@ final class PhabricatorMailImplementationPostmarkAdapter
       $options,
       array(
         'access-token' => 'string',
+        'inbound-addresses' => 'list<string>',
       ));
+
+    // Make sure this is properly formatted.
+    PhutilCIDRList::newList($options['inbound-addresses']);
   }
 
   public function newDefaultOptions() {
     return array(
       'access-token' => null,
+      'inbound-addresses' => array(
+        // Via Postmark support circa February 2018, see:
+        //
+        // https://postmarkapp.com/support/article/800-ips-for-firewalls
+        //
+        // "Configuring Outbound Email" should be updated if this changes.
+        '50.31.156.6/32',
+      ),
     );
   }
 

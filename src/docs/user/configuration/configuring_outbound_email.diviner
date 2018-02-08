@@ -157,6 +157,23 @@ Postmark is a third-party email delivery serivice. You can learn more at
 To use this mailer, set `type` to `postmark`, then configure these `options`:
 
   - `access-token`: Required string. Your Postmark access token.
+  - `inbound-addresses`: Optional list<string>. Address ranges which you
+    will accept inbound Postmark HTTP webook requests from.
+
+The default address list is preconfigured with Postmark's address range, so
+you generally will not need to set or adjust it.
+
+The option accepts a list of CIDR ranges, like `1.2.3.4/16` (IPv4) or
+`::ffff:0:0/96` (IPv6). The default ranges are:
+
+```lang=json
+[
+  "50.31.156.6/32"
+]
+```
+
+The default address ranges were last updated in February 2018, and were
+documented at: <https://postmarkapp.com/support/article/800-ips-for-firewalls>
 
 
 Mailer: Amazon SES
