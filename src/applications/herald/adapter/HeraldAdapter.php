@@ -40,6 +40,7 @@ abstract class HeraldAdapter extends Phobject {
   private $forbiddenActions = array();
   private $viewer;
   private $mustEncryptReasons = array();
+  private $actingAsPHID;
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -47,6 +48,15 @@ abstract class HeraldAdapter extends Phobject {
 
   public function getForcedEmailPHIDs() {
     return array_values($this->forcedEmailPHIDs);
+  }
+
+  final public function setActingAsPHID($acting_as_phid) {
+    $this->actingAsPHID = $acting_as_phid;
+    return $this;
+  }
+
+  final public function getActingAsPHID() {
+    return $this->actingAsPHID;
   }
 
   public function addEmailPHID($phid, $force) {

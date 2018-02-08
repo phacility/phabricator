@@ -3254,6 +3254,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $adapter = $this->buildHeraldAdapter($object, $xactions)
       ->setContentSource($this->getContentSource())
       ->setIsNewObject($this->getIsNewObject())
+      ->setActingAsPHID($this->getActingAsPHID())
       ->setAppliedTransactions($xactions);
 
     if ($this->getApplicationEmail()) {
