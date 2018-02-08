@@ -75,7 +75,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     }
 
     if ($this->getEngine()->isTextMode()) {
-      return PhabricatorEnv::getProductionURI($href);
+      return $text.' <'.PhabricatorEnv::getProductionURI($href).'>';
     } else if ($this->getEngine()->isHTMLMailMode()) {
       $href = PhabricatorEnv::getProductionURI($href);
       return $this->renderObjectTagForMail($text, $href, $handle);
