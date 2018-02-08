@@ -66,27 +66,28 @@ final class PhabricatorMailTarget extends Phobject {
 
     if ($show_stamps) {
       $stamps = $mail->getMailStamps();
+      if ($stamps) {
+        $body .= "\n";
+        $body .= pht('STAMPS');
+        $body .= "\n";
+        $body .= implode(' ', $stamps);
+        $body .= "\n";
 
-      $body .= "\n";
-      $body .= pht('STAMPS');
-      $body .= "\n";
-      $body .= implode(' ', $stamps);
-      $body .= "\n";
-
-      if ($has_html) {
-        $html = array();
-        $html[] = phutil_tag('strong', array(), pht('STAMPS'));
-        $html[] = phutil_tag('br');
-        $html[] = phutil_tag(
-          'span',
-          array(
-            'style' => 'font-size: smaller; color: #92969D',
-          ),
-          phutil_implode_html(' ', $stamps));
-        $html[] = phutil_tag('br');
-        $html[] = phutil_tag('br');
-        $html = phutil_tag('div', array(), $html);
-        $html_body .= hsprintf('%s', $html);
+        if ($has_html) {
+          $html = array();
+          $html[] = phutil_tag('strong', array(), pht('STAMPS'));
+          $html[] = phutil_tag('br');
+          $html[] = phutil_tag(
+            'span',
+            array(
+              'style' => 'font-size: smaller; color: #92969D',
+            ),
+            phutil_implode_html(' ', $stamps));
+          $html[] = phutil_tag('br');
+          $html[] = phutil_tag('br');
+          $html = phutil_tag('div', array(), $html);
+          $html_body .= hsprintf('%s', $html);
+        }
       }
     }
 
