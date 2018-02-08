@@ -126,6 +126,17 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Updated Before'))
         ->setKey('modifiedEnd'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Closed After'))
+        ->setKey('closedStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Closed Before'))
+        ->setKey('closedEnd'),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Closed By'))
+        ->setKey('closerPHIDs')
+        ->setAliases(array('closer', 'closerPHID', 'closers'))
+        ->setDescription(pht('Search for tasks closed by certain users.')),
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Page Size'))
         ->setKey('limit'),
@@ -153,6 +164,9 @@ final class ManiphestTaskSearchEngine
       'createdEnd',
       'modifiedStart',
       'modifiedEnd',
+      'closedStart',
+      'closedEnd',
+      'closerPHIDs',
       'limit',
     );
   }
@@ -206,6 +220,14 @@ final class ManiphestTaskSearchEngine
 
     if ($map['modifiedEnd']) {
       $query->withDateModifiedBefore($map['modifiedEnd']);
+    }
+
+    if ($map['closedStart'] || $map['closedEnd']) {
+      $query->withClosedEpochBetween($map['closedStart'], $map['closedEnd']);
+    }
+
+    if ($map['closerPHIDs']) {
+      $query->withCloserPHIDs($map['closerPHIDs']);
     }
 
     if ($map['hasParents'] !== null) {
