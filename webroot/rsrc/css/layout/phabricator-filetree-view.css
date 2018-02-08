@@ -54,3 +54,15 @@
   background-color: {$hovergrey};
   border-left: 4px solid {$sky};
 }
+
+.phabricator-filetree .filetree-added {
+  background: {$sh-greenbackground};
+}
+
+.phabricator-filetree .filetree-deleted {
+  background: {$sh-redbackground};
+}
+
+.phabricator-filetree .filetree-movecopy {
+  background: {$sh-orangebackground};
+}
