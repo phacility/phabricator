@@ -21,7 +21,7 @@ final class PhabricatorMailImplementationMailgunAdapter
     if (empty($this->params['reply-to'])) {
       $this->params['reply-to'] = array();
     }
-    $this->params['reply-to'][] = "{$name} <{$email}>";
+    $this->params['reply-to'][] = $this->renderAddress($name, $email);
     return $this;
   }
 
@@ -110,11 +110,8 @@ final class PhabricatorMailImplementationMailgunAdapter
     }
 
     $from = idx($this->params, 'from');
-    if (idx($this->params, 'from-name')) {
-      $params['from'] = "\"{$this->params['from-name']}\" <{$from}>";
-    } else {
-      $params['from'] = $from;
-    }
+    $from_name = idx($this->params, 'from-name');
+    $params['from'] = $this->renderAddress($from, $from_name);
 
     if (idx($this->params, 'reply-to')) {
       $replyto = $this->params['reply-to'];
