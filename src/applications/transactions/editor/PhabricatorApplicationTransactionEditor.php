@@ -4290,6 +4290,7 @@ abstract class PhabricatorApplicationTransactionEditor
         ->setObjectPHID($object->getPHID())
         ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
         ->setTriggerPHIDs($trigger_phids)
+        ->setRetryMode(HeraldWebhookRequest::RETRY_FOREVER)
         ->setIsSilentAction((bool)$this->getIsSilent())
         ->setIsSecureAction((bool)$this->getMustEncrypt())
         ->save();

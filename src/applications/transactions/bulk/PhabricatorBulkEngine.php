@@ -377,7 +377,7 @@ abstract class PhabricatorBulkEngine extends Phobject {
               '')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Apply Bulk Edit'))
+          ->setValue(pht('Continue'))
           ->addCancelButton($cancel_uri));
   }
 

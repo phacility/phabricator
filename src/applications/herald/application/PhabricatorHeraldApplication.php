@@ -28,6 +28,10 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
         'name' => pht('Herald User Guide'),
         'href' => PhabricatorEnv::getDoclink('Herald User Guide'),
       ),
+      array(
+        'name' => pht('User Guide: Webhooks'),
+        'href' => PhabricatorEnv::getDoclink('User Guide: Webhooks'),
+      ),
     );
   }
 

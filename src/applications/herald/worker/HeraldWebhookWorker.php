@@ -155,6 +155,7 @@ final class HeraldWebhookWorker
         'test' => $request->getIsTestAction(),
         'silent' => $request->getIsSilentAction(),
         'secure' => $request->getIsSecureAction(),
+        'epoch' => (int)$request->getDateCreated(),
       ),
       'transactions' => $xaction_data,
     );
