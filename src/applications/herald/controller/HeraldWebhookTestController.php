@@ -52,6 +52,7 @@ final class HeraldWebhookTestController
 
         $request = HeraldWebhookRequest::initializeNewWebhookRequest($hook)
           ->setObjectPHID($object->getPHID())
+          ->setTriggerPHIDs(array($viewer->getPHID()))
           ->setIsTestAction(true)
           ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
           ->save();

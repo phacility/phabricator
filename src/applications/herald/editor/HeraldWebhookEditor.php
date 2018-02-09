@@ -19,4 +19,13 @@ final class HeraldWebhookEditor
     return pht('%s created %s.', $author, $object);
   }
 
+  public function getTransactionTypes() {
+    $types = parent::getTransactionTypes();
+
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+
+    return $types;
+  }
+
 }

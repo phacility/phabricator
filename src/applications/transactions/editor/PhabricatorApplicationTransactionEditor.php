@@ -79,6 +79,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mailRemovedPHIDs = array();
   private $mailUnexpandablePHIDs = array();
   private $mailMutedPHIDs = array();
+  private $webhookMap = array();
 
   private $transactionQueue = array();
 
@@ -1306,6 +1307,8 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($messages as $mail) {
       $mail->save();
     }
+
+    $this->queueWebhooks($object, $xactions);
 
     return $xactions;
   }
@@ -3660,6 +3663,8 @@ abstract class PhabricatorApplicationTransactionEditor
       'mailStamps',
       'mailUnexpandablePHIDs',
       'mailMutedPHIDs',
+      'webhookMap',
+      'silent',
     );
   }
 
@@ -4238,6 +4243,58 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $this;
+  }
+
+  private function queueWebhooks($object, array $xactions) {
+    $hook_viewer = PhabricatorUser::getOmnipotentUser();
+
+    $webhook_map = $this->webhookMap;
+    if (!is_array($webhook_map)) {
+      $webhook_map = array();
+    }
+
+    // Add any "Firehose" hooks to the list of hooks we're going to call.
+    $firehose_hooks = id(new HeraldWebhookQuery())
+      ->setViewer($hook_viewer)
+      ->withStatuses(
+        array(
+          HeraldWebhook::HOOKSTATUS_FIREHOSE,
+        ))
+      ->execute();
+    foreach ($firehose_hooks as $firehose_hook) {
+      // This is "the hook itself is the reason this hook is being called",
+      // since we're including it because it's configured as a firehose
+      // hook.
+      $hook_phid = $firehose_hook->getPHID();
+      $webhook_map[$hook_phid][] = $hook_phid;
+    }
+
+    if (!$webhook_map) {
+      return;
+    }
+
+    // NOTE: We're going to queue calls to disabled webhooks, they'll just
+    // immediately fail in the worker queue. This makes the behavior more
+    // visible.
+
+    $call_hooks = id(new HeraldWebhookQuery())
+      ->setViewer($hook_viewer)
+      ->withPHIDs(array_keys($webhook_map))
+      ->execute();
+
+    foreach ($call_hooks as $call_hook) {
+      $trigger_phids = idx($webhook_map, $call_hook->getPHID());
+
+      $request = HeraldWebhookRequest::initializeNewWebhookRequest($call_hook)
+        ->setObjectPHID($object->getPHID())
+        ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
+        ->setTriggerPHIDs($trigger_phids)
+        ->setIsSilentAction((bool)$this->getIsSilent())
+        ->setIsSecureAction((bool)$this->getMustEncrypt())
+        ->save();
+
+      $request->queueCall();
+    }
   }
 
 }

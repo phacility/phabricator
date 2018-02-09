@@ -78,11 +78,14 @@ final class HeraldWebhookCallManagementWorkflow
       ->setLimit(10)
       ->execute();
 
+    $application_phid = id(new PhabricatorHeraldApplication())->getPHID();
+
     $request = HeraldWebhookRequest::initializeNewWebhookRequest($hook)
       ->setObjectPHID($object->getPHID())
       ->setIsTestAction(true)
       ->setIsSilentAction((bool)$args->getArg('silent'))
       ->setIsSecureAction((bool)$args->getArg('secure'))
+      ->setTriggerPHIDs(array($application_phid))
       ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
       ->save();
 

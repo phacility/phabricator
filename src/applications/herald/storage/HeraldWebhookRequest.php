@@ -116,6 +116,14 @@ final class HeraldWebhookRequest
     return $this->getProperty('transactionPHIDs', array());
   }
 
+  public function setTriggerPHIDs(array $phids) {
+    return $this->setProperty('triggerPHIDs', $phids);
+  }
+
+  public function getTriggerPHIDs() {
+    return $this->getProperty('triggerPHIDs', array());
+  }
+
   public function setIsSilentAction($bool) {
     return $this->setProperty('silent', $bool);
   }

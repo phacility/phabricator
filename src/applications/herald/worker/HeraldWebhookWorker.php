@@ -138,11 +138,19 @@ final class HeraldWebhookWorker
       );
     }
 
+    $trigger_data = array();
+    foreach ($request->getTriggerPHIDs() as $trigger_phid) {
+      $trigger_data[] = array(
+        'phid' => $trigger_phid,
+      );
+    }
+
     $payload = array(
-      'triggers' => array(),
       'object' => array(
+        'type' => phid_get_type($object->getPHID()),
         'phid' => $object->getPHID(),
       ),
+      'triggers' => $trigger_data,
       'action' => array(
         'test' => $request->getIsTestAction(),
         'silent' => $request->getIsSilentAction(),

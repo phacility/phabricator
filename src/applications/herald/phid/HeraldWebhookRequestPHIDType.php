@@ -31,8 +31,7 @@ final class HeraldWebhookRequestPHIDType extends PhabricatorPHIDType {
 
     foreach ($handles as $phid => $handle) {
       $request = $objects[$phid];
-
-      // TODO: Fill this in.
+      $handle->setName(pht('Webhook Request %d', $request->getID()));
     }
   }
 
