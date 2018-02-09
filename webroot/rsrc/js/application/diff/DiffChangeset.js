@@ -27,6 +27,7 @@ JX.install('DiffChangeset', {
     this._highlight = data.highlight;
     this._encoding = data.encoding;
     this._loaded = data.loaded;
+    this._treeNodeID = data.treeNodeID;
 
     this._leftID = data.left;
     this._rightID = data.right;
@@ -62,6 +63,7 @@ JX.install('DiffChangeset', {
 
     _changesetList: null,
     _icon: null,
+    _treeNodeID: null,
 
     getLeftChangesetID: function() {
       return this._leftID;
@@ -737,7 +739,8 @@ JX.install('DiffChangeset', {
 
     _rebuildAllInlines: function() {
       var rows = JX.DOM.scry(this._node, 'tr');
-      for (var ii = 0; ii < rows.length; ii++) {
+      var ii;
+      for (ii = 0; ii < rows.length; ii++) {
         var row = rows[ii];
         if (this._getRowType(row) != 'comment') {
           continue;
@@ -747,6 +750,75 @@ JX.install('DiffChangeset', {
         // them to this Changeset's list of inlines.
         this.getInlineForRow(row);
       }
+    },
+
+    redrawFileTree: function() {
+      var tree;
+      try {
+        tree = JX.$(this._treeNodeID);
+      } catch (e) {
+        return;
+      }
+
+      var inlines = this._inlines;
+      var done = [];
+      var undone = [];
+      var inline;
+
+      for (var ii = 0; ii < inlines.length; ii++) {
+        inline = inlines[ii];
+
+        if (inline.isDeleted()) {
+          continue;
+        }
+
+        if (inline.isSynthetic()) {
+          continue;
+        }
+
+        if (inline.isEditing()) {
+          continue;
+        }
+
+        if (!inline.getID()) {
+          // These are new comments which have been cancelled, and do not
+          // count as anything.
+          continue;
+        }
+
+        if (inline.isDraft()) {
+          continue;
+        }
+
+        if (!inline.isDone()) {
+          undone.push(inline);
+        } else {
+          done.push(inline);
+        }
+      }
+
+      var total = done.length + undone.length;
+
+      var hint;
+      var is_visible;
+      var is_completed;
+      if (total) {
+        if (done.length) {
+          hint = [done.length, '/', total];
+        } else  {
+          hint = total;
+        }
+        is_visible = true;
+        is_completed = (done.length == total);
+      } else {
+        hint = '-';
+        is_visible = false;
+        is_completed = false;
+      }
+
+      JX.DOM.setContent(tree, hint);
+      JX.DOM.alterClass(tree, 'filetree-comments-visible', is_visible);
+      JX.DOM.alterClass(tree, 'filetree-comments-completed', is_completed);
     },
 
     toggleVisibility: function() {

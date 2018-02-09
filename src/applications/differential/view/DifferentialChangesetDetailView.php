@@ -206,6 +206,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'displayPath' => hsprintf('%s', $display_parts),
           'path' => $display_filename,
           'icon' => $display_icon,
+          'treeNodeID' => 'tree-node-'.$changeset->getAnchorName(),
         ),
         'class' => $class,
         'id'    => $id,
