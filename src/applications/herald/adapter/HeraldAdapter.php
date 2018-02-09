@@ -41,6 +41,7 @@ abstract class HeraldAdapter extends Phobject {
   private $viewer;
   private $mustEncryptReasons = array();
   private $actingAsPHID;
+  private $webhookMap = array();
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -1204,6 +1205,19 @@ abstract class HeraldAdapter extends Phobject {
 
   final public function getMustEncryptReasons() {
     return $this->mustEncryptReasons;
+  }
+
+
+/* -(  Webhooks  )----------------------------------------------------------- */
+
+
+  final public function queueWebhook($webhook_phid, $rule_phid) {
+    $this->webhookMap[$webhook_phid][] = $rule_phid;
+    return $this;
+  }
+
+  final public function getWebhookMap() {
+    return $this->webhookMap;
   }
 
 }

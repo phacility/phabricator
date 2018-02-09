@@ -1156,6 +1156,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $adapter = $this->getHeraldAdapter();
       $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
       $this->heraldForcedEmailPHIDs = $adapter->getForcedEmailPHIDs();
+      $this->webhookMap = $adapter->getWebhookMap();
     }
 
     $xactions = $this->didApplyTransactions($object, $xactions);
