@@ -81,6 +81,8 @@ final class AlmanacManagementTrustKeyWorkflow
     $key->setIsTrusted(1);
     $key->save();
 
+    PhabricatorAuthSSHKeyQuery::deleteSSHKeyCache();
+
     $console->writeOut(
       "**<bg:green> %s </bg>** %s\n",
       pht('TRUSTED'),
