@@ -85,6 +85,8 @@ final class PhabricatorClusterMailersConfigType
 
       $options = idx($spec, 'options', array());
       try {
+        $defaults = $adapters[$type]->newDefaultOptions();
+        $options = $options + $defaults;
         id(clone $adapters[$type])->setOptions($options);
       } catch (Exception $ex) {
         throw $this->newException(
