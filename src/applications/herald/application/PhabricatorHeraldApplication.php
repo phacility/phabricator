@@ -62,6 +62,17 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
           '(?P<id>[1-9]\d*)/'
             => 'HeraldTranscriptController',
         ),
+        'webhook/' => array(
+          $this->getQueryRoutePattern() => 'HeraldWebhookListController',
+          'view/(?P<id>\d+)/(?:request/(?P<requestID>[^/]+)/)?' =>
+            'HeraldWebhookViewController',
+          $this->getEditRoutePattern('edit/') => 'HeraldWebhookEditController',
+          'test/(?P<id>\d+)/' => 'HeraldWebhookTestController',
+          'key/' => array(
+            'view/(?P<id>\d+)/' => 'HeraldWebhookViewKeyController',
+            'cycle/(?P<id>\d+)/' => 'HeraldWebhookCycleKeyController',
+          ),
+        ),
       ),
     );
   }
@@ -70,6 +81,9 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
     return array(
       HeraldManageGlobalRulesCapability::CAPABILITY => array(
         'caption' => pht('Global rules can bypass access controls.'),
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      HeraldCreateWebhooksCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );
