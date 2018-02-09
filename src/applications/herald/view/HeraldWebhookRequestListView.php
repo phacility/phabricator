@@ -44,12 +44,20 @@ final class HeraldWebhookRequestListView
         $rowc[] = null;
       }
 
+      $last_epoch = $request->getLastRequestEpoch();
+      if ($request->getLastRequestEpoch()) {
+        $last_request = phabricator_datetime($last_epoch, $viewer);
+      } else {
+        $last_request = null;
+      }
+
       $rows[] = array(
         $request->getID(),
         $icon,
         $handles[$request->getObjectPHID()]->renderLink(),
         $request->getErrorType(),
         $request->getErrorCode(),
+        $last_request,
       );
     }
 
@@ -62,12 +70,14 @@ final class HeraldWebhookRequestListView
           pht('Object'),
           pht('Type'),
           pht('Code'),
+          pht('Requested At'),
         ))
       ->setColumnClasses(
         array(
           'n',
           '',
           'wide',
+          '',
           '',
           '',
         ));

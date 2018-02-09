@@ -19,26 +19,74 @@ final class HeraldWebhookTestController
       return new Aphront404Response();
     }
 
+    $v_object = null;
+    $e_object = null;
+    $errors = array();
     if ($request->isFormPost()) {
-      $object = $hook;
 
-      $request = HeraldWebhookRequest::initializeNewWebhookRequest($hook)
-        ->setObjectPHID($object->getPHID())
-        ->save();
+      $v_object = $request->getStr('object');
+      if (!strlen($v_object)) {
+        $object = $hook;
+      } else {
+        $objects = id(new PhabricatorObjectQuery())
+          ->setViewer($viewer)
+          ->withNames(array($v_object))
+          ->execute();
+        if ($objects) {
+          $object = head($objects);
+        } else {
+          $e_object = pht('Invalid');
+          $errors[] = pht('Specified object could not be loaded.');
+        }
+      }
 
-      $request->queueCall();
+      if (!$errors) {
+        $xaction_query =
+          PhabricatorApplicationTransactionQuery::newQueryForObject($object);
 
-      $next_uri = $hook->getURI().'request/'.$request->getID().'/';
+        $xactions = $xaction_query
+          ->withObjectPHIDs(array($object->getPHID()))
+          ->setViewer($viewer)
+          ->setLimit(10)
+          ->execute();
 
-      return id(new AphrontRedirectResponse())->setURI($next_uri);
+        $request = HeraldWebhookRequest::initializeNewWebhookRequest($hook)
+          ->setObjectPHID($object->getPHID())
+          ->setIsTestAction(true)
+          ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
+          ->save();
+
+        $request->queueCall();
+
+        $next_uri = $hook->getURI().'request/'.$request->getID().'/';
+
+        return id(new AphrontRedirectResponse())->setURI($next_uri);
+      }
     }
 
+    $instructions = <<<EOREMARKUP
+Optionally, choose an object to generate test data for (like `D123` or `T234`).
+
+The 10 most recent transactions for the object will be submitted to the webhook.
+EOREMARKUP;
+
+    $form = id(new AphrontFormView())
+      ->setViewer($viewer)
+      ->appendControl(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Object'))
+          ->setName('object')
+          ->setError($e_object)
+          ->setValue($v_object));
+
     return $this->newDialog()
+      ->setErrors($errors)
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle(pht('New Test Request'))
-      ->appendParagraph(
-        pht('This will make a new test request to the configured URI.'))
+      ->appendParagraph(new PHUIRemarkupView($viewer, $instructions))
+      ->appendForm($form)
       ->addCancelButton($hook->getURI())
-      ->addSubmitButton(pht('Make Request'));
+      ->addSubmitButton(pht('Test Webhook'));
   }
 
 

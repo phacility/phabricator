@@ -6,7 +6,7 @@ final class HeraldWebhookCallManagementWorkflow
   protected function didConstruct() {
     $this
       ->setName('call')
-      ->setExamples('**call** --id __id__')
+      ->setExamples('**call** --id __id__ [--object __object__]')
       ->setSynopsis(pht('Call a webhook.'))
       ->setArguments(
         array(
@@ -14,6 +14,19 @@ final class HeraldWebhookCallManagementWorkflow
             'name' => 'id',
             'param' => 'id',
             'help' => pht('Webhook ID to call'),
+          ),
+          array(
+            'name' => 'object',
+            'param' => 'object',
+            'help' => pht('Submit transactions for a particular object.'),
+          ),
+          array(
+            'name' => 'silent',
+            'help' => pht('Set the "silent" flag on the request.'),
+          ),
+          array(
+            'name' => 'secure',
+            'help' => pht('Set the "secure" flag on the request.'),
           ),
         ));
   }
@@ -39,12 +52,38 @@ final class HeraldWebhookCallManagementWorkflow
           $id));
     }
 
-    $object = $hook;
+    $object_name = $args->getArg('object');
+    if ($object_name === null) {
+      $object = $hook;
+    } else {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withNames(array($object_name))
+        ->execute();
+      if (!$objects) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Unable to load specified object ("%s").',
+            $object_name));
+      }
+      $object = head($objects);
+    }
 
-    $application_phid = id(new PhabricatorHeraldApplication())->getPHID();
+    $xaction_query =
+      PhabricatorApplicationTransactionQuery::newQueryForObject($object);
+
+    $xactions = $xaction_query
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->setViewer($viewer)
+      ->setLimit(10)
+      ->execute();
 
     $request = HeraldWebhookRequest::initializeNewWebhookRequest($hook)
       ->setObjectPHID($object->getPHID())
+      ->setIsTestAction(true)
+      ->setIsSilentAction((bool)$args->getArg('silent'))
+      ->setIsSecureAction((bool)$args->getArg('secure'))
+      ->setTransactionPHIDs(mpull($xactions, 'getPHID'))
       ->save();
 
     PhabricatorWorker::setRunAllTasksInProcess(true);

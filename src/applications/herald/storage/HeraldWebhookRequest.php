@@ -116,6 +116,30 @@ final class HeraldWebhookRequest
     return $this->getProperty('transactionPHIDs', array());
   }
 
+  public function setIsSilentAction($bool) {
+    return $this->setProperty('silent', $bool);
+  }
+
+  public function getIsSilentAction() {
+    return $this->getProperty('silent', false);
+  }
+
+  public function setIsTestAction($bool) {
+    return $this->setProperty('test', $bool);
+  }
+
+  public function getIsTestAction() {
+    return $this->getProperty('test', false);
+  }
+
+  public function setIsSecureAction($bool) {
+    return $this->setProperty('secure', $bool);
+  }
+
+  public function getIsSecureAction() {
+    return $this->getProperty('secure', false);
+  }
+
   public function queueCall() {
     PhabricatorWorker::scheduleTask(
       'HeraldWebhookWorker',

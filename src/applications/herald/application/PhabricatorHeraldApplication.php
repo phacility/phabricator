@@ -68,10 +68,8 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
             'HeraldWebhookViewController',
           $this->getEditRoutePattern('edit/') => 'HeraldWebhookEditController',
           'test/(?P<id>\d+)/' => 'HeraldWebhookTestController',
-          'key/' => array(
-            'view/(?P<id>\d+)/' => 'HeraldWebhookViewKeyController',
-            'cycle/(?P<id>\d+)/' => 'HeraldWebhookCycleKeyController',
-          ),
+          'key/(?P<action>view|cycle)/(?P<id>\d+)/' =>
+            'HeraldWebhookKeyController',
         ),
       ),
     );

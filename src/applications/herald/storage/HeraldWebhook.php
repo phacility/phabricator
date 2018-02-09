@@ -5,7 +5,8 @@ final class HeraldWebhook
   implements
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorProjectInterface {
 
   protected $name;
   protected $webhookURI;
@@ -44,7 +45,7 @@ final class HeraldWebhook
       ->setStatus(self::HOOKSTATUS_ENABLED)
       ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->setEditPolicy($viewer->getPHID())
-      ->setHmacKey(Filesystem::readRandomCharacters(32));
+      ->regenerateHMACKey();
   }
 
   public function getURI() {
@@ -56,16 +57,79 @@ final class HeraldWebhook
   }
 
   public static function getStatusDisplayNameMap() {
-    return array(
-      self::HOOKSTATUS_FIREHOSE => pht('Firehose'),
-      self::HOOKSTATUS_ENABLED => pht('Enabled'),
-      self::HOOKSTATUS_DISABLED => pht('Disabled'),
+    $specs = self::getStatusSpecifications();
+    return ipull($specs, 'name', 'key');
+  }
+
+  private static function getStatusSpecifications() {
+    $specs = array(
+      array(
+        'key' => self::HOOKSTATUS_FIREHOSE,
+        'name' => pht('Firehose'),
+        'color' => 'orange',
+        'icon' => 'fa-star-o',
+      ),
+      array(
+        'key' => self::HOOKSTATUS_ENABLED,
+        'name' => pht('Enabled'),
+        'color' => 'bluegrey',
+        'icon' => 'fa-check',
+      ),
+      array(
+        'key' => self::HOOKSTATUS_DISABLED,
+        'name' => pht('Disabled'),
+        'color' => 'dark',
+        'icon' => 'fa-ban',
+      ),
     );
+
+    return ipull($specs, null, 'key');
+  }
+
+
+  private static function getSpecificationForStatus($status) {
+    $specs = self::getStatusSpecifications();
+
+    if (isset($specs[$status])) {
+      return $specs[$status];
+    }
+
+    return array(
+      'key' => $status,
+      'name' => pht('Unknown ("%s")', $status),
+      'icon' => 'fa-question',
+      'color' => 'indigo',
+    );
+  }
+
+  public static function getDisplayNameForStatus($status) {
+    $spec = self::getSpecificationForStatus($status);
+    return $spec['name'];
+  }
+
+  public static function getIconForStatus($status) {
+    $spec = self::getSpecificationForStatus($status);
+    return $spec['icon'];
+  }
+
+  public static function getColorForStatus($status) {
+    $spec = self::getSpecificationForStatus($status);
+    return $spec['color'];
   }
 
   public function getStatusDisplayName() {
     $status = $this->getStatus();
-    return idx($this->getStatusDisplayNameMap(), $status);
+    return self::getDisplayNameForStatus($status);
+  }
+
+  public function getStatusIcon() {
+    $status = $this->getStatus();
+    return self::getIconForStatus($status);
+  }
+
+  public function getStatusColor() {
+    $status = $this->getStatus();
+    return self::getColorForStatus($status);
   }
 
   public function getErrorBackoffWindow() {
@@ -101,6 +165,9 @@ final class HeraldWebhook
     return false;
   }
 
+  public function regenerateHMACKey() {
+    return $this->setHMACKey(Filesystem::readRandomCharacters(32));
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

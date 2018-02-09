@@ -143,10 +143,15 @@ final class HeraldWebhookWorker
       'object' => array(
         'phid' => $object->getPHID(),
       ),
+      'action' => array(
+        'test' => $request->getIsTestAction(),
+        'silent' => $request->getIsSilentAction(),
+        'secure' => $request->getIsSecureAction(),
+      ),
       'transactions' => $xaction_data,
     );
 
-    $payload = phutil_json_encode($payload);
+    $payload = id(new PhutilJSON())->encodeFormatted($payload);
     $key = $hook->getHmacKey();
     $signature = PhabricatorHash::digestHMACSHA256($payload, $key);
     $uri = $hook->getWebhookURI();

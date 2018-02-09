@@ -14,20 +14,32 @@ final class HeraldWebhookStatusTransaction
   }
 
   public function getTitle() {
+    $old_value = $this->getOldValue();
+    $new_value = $this->getNewValue();
+
+    $old_status = HeraldWebhook::getDisplayNameForStatus($old_value);
+    $new_status = HeraldWebhook::getDisplayNameForStatus($new_value);
+
     return pht(
       '%s changed hook status from %s to %s.',
       $this->renderAuthor(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+      $this->renderValue($old_status),
+      $this->renderValue($new_status));
   }
 
   public function getTitleForFeed() {
+    $old_value = $this->getOldValue();
+    $new_value = $this->getNewValue();
+
+    $old_status = HeraldWebhook::getDisplayNameForStatus($old_value);
+    $new_status = HeraldWebhook::getDisplayNameForStatus($new_value);
+
     return pht(
       '%s changed %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+      $this->renderValue($old_status),
+      $this->renderValue($new_status));
   }
 
   public function validateTransactions($object, array $xactions) {

@@ -94,10 +94,15 @@ final class HeraldWebhookViewController
 
     $title = $hook->getName();
 
+    $status_icon = $hook->getStatusIcon();
+    $status_color = $hook->getStatusColor();
+    $status_name = $hook->getStatusDisplayName();
+
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setViewer($viewer)
       ->setPolicyObject($hook)
+      ->setStatus($status_icon, $status_color, $status_name)
       ->setHeaderIcon('fa-cloud-upload');
 
     return $header;
@@ -117,6 +122,9 @@ final class HeraldWebhookViewController
     $edit_uri = $this->getApplicationURI("webhook/edit/{$id}/");
     $test_uri = $this->getApplicationURI("webhook/test/{$id}/");
 
+    $key_view_uri = $this->getApplicationURI("webhook/key/view/{$id}/");
+    $key_cycle_uri = $this->getApplicationURI("webhook/key/cycle/{$id}/");
+
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Webhook'))
@@ -132,6 +140,22 @@ final class HeraldWebhookViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(true)
         ->setHref($test_uri));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View HMAC Key'))
+        ->setIcon('fa-key')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true)
+        ->setHref($key_view_uri));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Regenerate HMAC Key'))
+        ->setIcon('fa-refresh')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true)
+        ->setHref($key_cycle_uri));
 
     return $curtain;
   }

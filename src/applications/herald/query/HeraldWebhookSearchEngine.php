@@ -80,9 +80,16 @@ final class HeraldWebhookSearchEngine
       ->setViewer($viewer);
     foreach ($hooks as $hook) {
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Hook %d', $hook->getID()))
+        ->setObjectName(pht('Webhook %d', $hook->getID()))
         ->setHeader($hook->getName())
-        ->setHref($hook->getURI());
+        ->setHref($hook->getURI())
+        ->addAttribute($hook->getWebhookURI());
+
+      $item->addIcon($hook->getStatusIcon(), $hook->getStatusDisplayName());
+
+      if ($hook->isDisabled()) {
+        $item->setDisabled(true);
+      }
 
       $list->addItem($item);
     }
