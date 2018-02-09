@@ -240,6 +240,7 @@ You can use this adapter to send mail via an external SMTP server, like Gmail.
 To use this mailer, set `type` to `smtp`, then configure these `options`:
 
   - `host`: Required string. The hostname of your SMTP server.
+  - `port`: Optional int. The port to connect to on your SMTP server.
   - `user`: Optional string. Username used for authentication.
   - `password`: Optional string. Password for authentication.
   - `protocol`: Optional string. Set to `tls` or `ssl` if necessary. Use
