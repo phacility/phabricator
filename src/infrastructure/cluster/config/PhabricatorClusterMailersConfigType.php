@@ -63,8 +63,8 @@ final class PhabricatorClusterMailersConfigType
       }
       $map[$key] = true;
 
-      $priority = idx($spec, 'priority', 0);
-      if ($priority <= 0) {
+      $priority = idx($spec, 'priority');
+      if ($priority !== null && $priority <= 0) {
         throw $this->newException(
           pht(
             'Mailer configuration ("%s") is invalid: priority must be '.
