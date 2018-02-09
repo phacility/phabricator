@@ -21,7 +21,7 @@ final class PhabricatorMailImplementationMailgunAdapter
     if (empty($this->params['reply-to'])) {
       $this->params['reply-to'] = array();
     }
-    $this->params['reply-to'][] = $this->renderAddress($name, $email);
+    $this->params['reply-to'][] = $this->renderAddress($email, $name);
     return $this;
   }
 
