@@ -183,6 +183,10 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->audits);
   }
 
+  public function hasAttachedAudits() {
+    return ($this->audits !== self::ATTACHABLE);
+  }
+
   public function loadAndAttachAuditAuthority(
     PhabricatorUser $viewer,
     $actor_phid = null) {

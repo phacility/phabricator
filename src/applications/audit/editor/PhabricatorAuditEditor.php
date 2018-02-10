@@ -490,6 +490,8 @@ final class PhabricatorAuditEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $this->requireAuditors($object);
+
     $phids = array();
 
     if ($object->getAuthorPHID()) {
@@ -514,6 +516,8 @@ final class PhabricatorAuditEditor
   }
 
   protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
+    $this->requireAuditors($object);
+
     $phids = array();
 
     foreach ($object->getAudits() as $auditor) {
@@ -854,6 +858,26 @@ final class PhabricatorAuditEditor
       ->needAuditRequests(true)
       ->needCommitData(true)
       ->executeOne();
+  }
+
+  private function requireAuditors(PhabricatorRepositoryCommit $commit) {
+    if ($commit->hasAttachedAudits()) {
+      return;
+    }
+
+    $with_auditors = id(new DiffusionCommitQuery())
+      ->setViewer($this->getActor())
+      ->needAuditRequests(true)
+      ->withPHIDs(array($commit->getPHID()))
+      ->executeOne();
+    if (!$with_auditors) {
+      throw new Exception(
+        pht(
+          'Failed to reload commit ("%s").',
+          $commit->getPHID()));
+    }
+
+    $commit->attachAudits($with_auditors->getAudits());
   }
 
 }
