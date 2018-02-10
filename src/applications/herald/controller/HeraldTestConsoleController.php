@@ -41,6 +41,7 @@ final class HeraldTestConsoleController extends HeraldController {
 
     $adapter
       ->setIsNewObject(false)
+      ->setActingAsPHID($viewer->getPHID())
       ->setViewer($viewer);
 
     $rules = id(new HeraldRuleQuery())

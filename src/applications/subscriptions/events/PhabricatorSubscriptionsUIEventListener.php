@@ -42,6 +42,28 @@ final class PhabricatorSubscriptionsUIEventListener
       return;
     }
 
+    $src_phid = $object->getPHID();
+    $subscribed_type = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
+    $muted_type = PhabricatorMutedByEdgeType::EDGECONST;
+
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array($src_phid))
+      ->withEdgeTypes(
+        array(
+          $subscribed_type,
+          $muted_type,
+        ))
+      ->withDestinationPHIDs(array($user_phid))
+      ->execute();
+
+    if ($user_phid) {
+      $is_subscribed = isset($edges[$src_phid][$subscribed_type][$user_phid]);
+      $is_muted = isset($edges[$src_phid][$muted_type][$user_phid]);
+    } else {
+      $is_subscribed = false;
+      $is_muted = false;
+    }
+
     if ($user_phid && $object->isAutomaticallySubscribed($user_phid)) {
       $sub_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
@@ -51,22 +73,9 @@ final class PhabricatorSubscriptionsUIEventListener
         ->setName(pht('Automatically Subscribed'))
         ->setIcon('fa-check-circle lightgreytext');
     } else {
-      $subscribed = false;
-      if ($user->isLoggedIn()) {
-        $src_phid = $object->getPHID();
-        $edge_type = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
-
-        $edges = id(new PhabricatorEdgeQuery())
-          ->withSourcePHIDs(array($src_phid))
-          ->withEdgeTypes(array($edge_type))
-          ->withDestinationPHIDs(array($user_phid))
-          ->execute();
-        $subscribed = isset($edges[$src_phid][$edge_type][$user_phid]);
-      }
-
       $can_interact = PhabricatorPolicyFilter::canInteract($user, $object);
 
-      if ($subscribed) {
+      if ($is_subscribed) {
         $sub_action = id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setRenderAsForm(true)
@@ -89,8 +98,26 @@ final class PhabricatorSubscriptionsUIEventListener
       }
     }
 
+    $mute_action = id(new PhabricatorActionView())
+      ->setWorkflow(true)
+      ->setHref('/subscriptions/mute/'.$object->getPHID().'/')
+      ->setDisabled(!$user_phid);
+
+    if (!$is_muted) {
+      $mute_action
+        ->setName(pht('Mute Notifications'))
+        ->setIcon('fa-volume-up');
+    } else {
+      $mute_action
+        ->setName(pht('Unmute Notifications'))
+        ->setIcon('fa-volume-off')
+        ->setColor(PhabricatorActionView::RED);
+    }
+
+
     $actions = $event->getValue('actions');
     $actions[] = $sub_action;
+    $actions[] = $mute_action;
     $event->setValue('actions', $actions);
   }
 

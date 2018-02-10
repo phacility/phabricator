@@ -3,7 +3,8 @@
 
 How to effectively manage Phabricator email notifications.
 
-= Overview =
+Overview
+========
 
 Phabricator uses email as a major notification channel, but the amount of email
 it sends can seem overwhelming if you're working on an active team. This
@@ -13,69 +14,35 @@ By far the best approach to managing mail is to **write mail rules** to
 categorize mail. Essentially all modern mail clients allow you to quickly
 write sophisticated rules to route, categorize, or delete email.
 
-= Reducing Email =
+Reducing Email
+==============
 
 You can reduce the amount of email you receive by turning off some types of
 email in {nav Settings > Email Preferences}. For example, you can turn off email
 produced by your own actions (like when you comment on a revision), and some
 types of less-important notifications about events.
 
-= Mail Rules =
+Mail Rules
+==========
 
 The best approach to managing mail is to write mail rules. Simply writing rules
 to move mail from Differential, Maniphest and Herald to separate folders will
 vastly simplify mail management.
 
-Phabricator also sets a large number of headers (see below) which can allow you
-to write more sophisticated mail rules.
+Phabricator also adds mail headers (see below) which can allow you to write
+more sophisticated mail rules.
 
-= Mail Headers =
+Mail Headers
+============
 
-Phabricator sends a variety of mail headers that can be useful in crafting rules
-to route and manage mail.
+Phabricator sends various information in mail headers that can be useful in
+crafting rules to route and manage mail. To see a full list of headers, use
+the "View Raw Message" feature in your mail client.
 
-Headers in plural contain lists. A list containing two items, `1` and
-`15` will generally be formatted like this:
+The most useful header for routing is generally `X-Phabricator-Stamps`. This
+is a list of attributes which describe the object the mail is about and the
+actions which the mail informs you about.
 
-  X-Header: <1>, <15>
-
-The intent is to allow you to write a rule which matches against "<1>". If you
-just match against "1", you'll incorrectly match "15", but matching "<1>" will
-correctly match only "<1>".
-
-Some other headers use a single value but can be presented multiple times.
-It is to support e-mail clients which are not able to create rules using regular
-expressions or wildcards (namely Outlook).
-
-The headers Phabricator adds to mail are:
-
-  - `X-Phabricator-Sent-This-Message`: this is attached to all mail
-    Phabricator sends. You can use it to differentiate between email from
-    Phabricator and replies/forwards of Phabricator mail from human beings.
-  - `X-Phabricator-To`: this is attached to all mail Phabricator sends.
-    It shows the PHIDs of the original "To" line, before any mutation
-    by the mailer configuration.
-  - `X-Phabricator-Cc`: this is attached to all mail Phabricator sends.
-    It shows the PHIDs of the original "Cc" line, before any mutation by the
-    mailer configuration.
-  - `X-Differential-Author`: this is attached to Differential mail and shows
-    the revision's author. You can use it to filter mail about your revisions
-    (or other users' revisions).
-  - `X-Differential-Reviewer`: this is attached to Differential mail and
-    shows the reviewers. You can use it to filter mail about revisions you
-    are reviewing, versus revisions you are explicitly CC'd on or CC'd as
-    a result of Herald rules.
-  - `X-Differential-Reviewers`: list version of the previous.
-  - `X-Differential-CC`: this is attached to Differential mail and shows
-    the CCs on the revision.
-  - `X-Differential-CCs`: list version of the previous.
-  - `X-Differential-Explicit-CC`: this is attached to Differential mail and
-    shows the explicit CCs on the revision (those that were added by humans,
-    not by Herald).
-  - `X-Differential-Explicit-CCs`: list version of the previous.
-  - `X-Phabricator-Mail-Tags`: this is attached to some mail and has
-    a list of descriptors about the mail. (This is fairly new and subject
-    to some change.)
-  - `X-Herald-Rules`: this is attached to some mail and shows Herald rule
-    IDs which have triggered for the object. You can use this to sort or
-    categorize mail that has triggered specific rules.
+If you use a client which can not perform header matching (like Gmail), you can
+change the {nav Settings > Email Format > Send Stamps} setting to include the
+stamps in the mail body and then match them with body rules.

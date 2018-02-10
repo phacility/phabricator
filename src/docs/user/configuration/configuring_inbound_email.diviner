@@ -14,6 +14,7 @@ There are a few approaches available:
 | Receive Mail With | Setup | Cost | Notes |
 |--------|-------|------|-------|
 | Mailgun | Easy | Cheap | Recommended |
+| Postmark | Easy | Cheap | Recommended |
 | SendGrid | Easy | Cheap | |
 | Local MTA | Extremely Difficult | Free | Strongly discouraged! |
 
@@ -129,6 +130,21 @@ like this:
     `forward("https://phabricator.example.com/mail/mailgun/")`. Replace the
     example domain with your actual domain.
   - Set the `mailgun.api-key` config key to your Mailgun API key.
+
+Postmark Setup
+==============
+
+To process inbound mail from Postmark, configure this URI as your inbound
+webhook URI in the Postmark control panel:
+
+```
+https://<phabricator.yourdomain.com>/mail/postmark/
+```
+
+See also the Postmark section in @{article:Configuring Outbound Email} for
+discussion of the remote address whitelist used to verify that requests this
+endpoint receives are authentic requests originating from Postmark.
+
 
 = SendGrid Setup =
 

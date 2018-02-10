@@ -126,6 +126,17 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Updated Before'))
         ->setKey('modifiedEnd'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Closed After'))
+        ->setKey('closedStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Closed Before'))
+        ->setKey('closedEnd'),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Closed By'))
+        ->setKey('closerPHIDs')
+        ->setAliases(array('closer', 'closerPHID', 'closers'))
+        ->setDescription(pht('Search for tasks closed by certain users.')),
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Page Size'))
         ->setKey('limit'),
@@ -153,6 +164,9 @@ final class ManiphestTaskSearchEngine
       'createdEnd',
       'modifiedStart',
       'modifiedEnd',
+      'closedStart',
+      'closedEnd',
+      'closerPHIDs',
       'limit',
     );
   }
@@ -206,6 +220,14 @@ final class ManiphestTaskSearchEngine
 
     if ($map['modifiedEnd']) {
       $query->withDateModifiedBefore($map['modifiedEnd']);
+    }
+
+    if ($map['closedStart'] || $map['closedEnd']) {
+      $query->withClosedEpochBetween($map['closedStart'], $map['closedEnd']);
+    }
+
+    if ($map['closerPHIDs']) {
+      $query->withCloserPHIDs($map['closerPHIDs']);
     }
 
     if ($map['hasParents'] !== null) {
@@ -456,6 +478,15 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorStringExportField())
         ->setKey('statusName')
         ->setLabel(pht('Status Name')),
+      id(new PhabricatorEpochExportField())
+        ->setKey('dateClosed')
+        ->setLabel(pht('Date Closed')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('closerPHID')
+        ->setLabel(pht('Closer PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('closer')
+        ->setLabel(pht('Closer')),
       id(new PhabricatorStringExportField())
         ->setKey('priority')
         ->setLabel(pht('Priority')),
@@ -492,6 +523,7 @@ final class ManiphestTaskSearchEngine
     foreach ($tasks as $task) {
       $phids[] = $task->getAuthorPHID();
       $phids[] = $task->getOwnerPHID();
+      $phids[] = $task->getCloserPHID();
     }
     $handles = $viewer->loadHandles($phids);
 
@@ -510,6 +542,13 @@ final class ManiphestTaskSearchEngine
         $owner_name = $handles[$owner_phid]->getName();
       } else {
         $owner_name = null;
+      }
+
+      $closer_phid = $task->getCloserPHID();
+      if ($closer_phid) {
+        $closer_name = $handles[$closer_phid]->getName();
+      } else {
+        $closer_name = null;
       }
 
       $status_value = $task->getStatus();
@@ -534,6 +573,9 @@ final class ManiphestTaskSearchEngine
         'title' => $task->getTitle(),
         'uri' => PhabricatorEnv::getProductionURI($task->getURI()),
         'description' => $task->getDescription(),
+        'dateClosed' => $task->getClosedEpoch(),
+        'closerPHID' => $closer_phid,
+        'closer' => $closer_name,
       );
     }
 

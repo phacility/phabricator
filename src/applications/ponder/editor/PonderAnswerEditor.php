@@ -57,8 +57,7 @@ final class PonderAnswerEditor extends PonderEditor {
     $id = $object->getID();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("ANSR{$id}")
-      ->addHeader('Thread-Topic', "ANSR{$id}");
+      ->setSubject("ANSR{$id}");
   }
 
   protected function buildMailBody(

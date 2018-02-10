@@ -915,6 +915,11 @@ JX.install('DiffChangesetList', {
       this._bannerChangeset = null;
 
       this._redrawBanner();
+
+      var changesets = this._changesets;
+      for (var ii = 0; ii < changesets.length; ii++) {
+        changesets[ii].redrawFileTree();
+      }
     },
 
     _onscroll: function() {

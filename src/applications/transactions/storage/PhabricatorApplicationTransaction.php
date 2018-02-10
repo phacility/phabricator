@@ -643,6 +643,8 @@ abstract class PhabricatorApplicationTransaction
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
           case ManiphestTaskHasDuplicateTaskEdgeType::EDGECONST:
           case ManiphestTaskIsDuplicateOfTaskEdgeType::EDGECONST:
+          case PhabricatorMutedEdgeType::EDGECONST:
+          case PhabricatorMutedByEdgeType::EDGECONST:
             return true;
             break;
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:

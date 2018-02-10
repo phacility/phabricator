@@ -299,12 +299,10 @@ final class PhrictionTransactionEditor
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $id = $object->getID();
     $title = $object->getContent()->getTitle();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject($title)
-      ->addHeader('Thread-Topic', $object->getPHID());
+      ->setSubject($title);
   }
 
   protected function buildMailBody(

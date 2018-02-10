@@ -28,6 +28,10 @@ JX.behavior('phabricator-nav', function(config) {
   JX.enableDispatch(document.body, 'mousemove');
 
   JX.DOM.listen(drag, 'mousedown', null, function(e) {
+    if (!e.isNormalMouseEvent()) {
+      return;
+    }
+
     dragging = JX.$V(e);
 
     // Show the "col-resize" cursor on the whole document while we're

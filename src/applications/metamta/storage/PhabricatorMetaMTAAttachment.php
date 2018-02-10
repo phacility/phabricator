@@ -1,9 +1,12 @@
 <?php
 
 final class PhabricatorMetaMTAAttachment extends Phobject {
-  protected $data;
-  protected $filename;
-  protected $mimetype;
+
+  private $data;
+  private $filename;
+  private $mimetype;
+  private $file;
+  private $filePHID;
 
   public function __construct($data, $filename, $mimetype) {
     $this->setData($data);
@@ -39,18 +42,49 @@ final class PhabricatorMetaMTAAttachment extends Phobject {
   }
 
   public function toDictionary() {
+    if (!$this->file) {
+      $iterator = new ArrayIterator(array($this->getData()));
+
+      $source = id(new PhabricatorIteratorFileUploadSource())
+        ->setName($this->getFilename())
+        ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+        ->setMIMEType($this->getMimeType())
+        ->setIterator($iterator);
+
+      $this->file = $source->uploadFile();
+    }
+
     return array(
       'filename' => $this->getFilename(),
       'mimetype' => $this->getMimeType(),
-      'data' => $this->getData(),
+      'filePHID' => $this->file->getPHID(),
     );
   }
 
   public static function newFromDictionary(array $dict) {
-    return new PhabricatorMetaMTAAttachment(
+    $file = null;
+
+    $file_phid = idx($dict, 'filePHID');
+    if ($file_phid) {
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs(array($file_phid))
+        ->executeOne();
+      if ($file) {
+        $dict['data'] = $file->loadFileData();
+      }
+    }
+
+    $attachment = new self(
       idx($dict, 'data'),
       idx($dict, 'filename'),
       idx($dict, 'mimetype'));
+
+    if ($file) {
+      $attachment->file = $file;
+    }
+
+    return $attachment;
   }
 
 }

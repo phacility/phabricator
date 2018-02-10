@@ -10,7 +10,7 @@ final class ManiphestTaskMergedIntoTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
+    $this->updateStatus($object, ManiphestTaskStatus::getDuplicateStatus());
   }
 
   public function getActionName() {

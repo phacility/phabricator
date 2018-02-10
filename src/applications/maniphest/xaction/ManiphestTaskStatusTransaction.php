@@ -10,7 +10,7 @@ final class ManiphestTaskStatusTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setStatus($value);
+    $this->updateStatus($object, $value);
   }
 
   public function shouldHide() {

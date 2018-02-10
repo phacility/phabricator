@@ -37,7 +37,11 @@ final class DiffusionQueryPathsConduitAPIMethod
     $commit = $request->getValue('commit');
     $repository = $drequest->getRepository();
 
-    // http://comments.gmane.org/gmane.comp.version-control.git/197735
+    // Recent versions of Git don't work if you pass the empty string, and
+    // require "." to list everything.
+    if (!strlen($path)) {
+      $path = '.';
+    }
 
     $future = $repository->getLocalCommandFuture(
       'ls-tree --name-only -r -z %s -- %s',

@@ -297,7 +297,11 @@ final class DiffusionCommitHookEngine extends Phobject {
       return;
     }
 
-    $adapter_template->setHookEngine($this);
+    $viewer = $this->getViewer();
+
+    $adapter_template
+      ->setHookEngine($this)
+      ->setActingAsPHID($viewer->getPHID());
 
     $engine = new HeraldEngine();
     $rules = null;

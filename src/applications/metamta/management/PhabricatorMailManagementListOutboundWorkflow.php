@@ -37,6 +37,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
     $table = id(new PhutilConsoleTable())
       ->setShowHeader(false)
       ->addColumn('id',      array('title' => pht('ID')))
+      ->addColumn('encrypt', array('title' => pht('#')))
       ->addColumn('status',  array('title' => pht('Status')))
       ->addColumn('subject', array('title' => pht('Subject')));
 
@@ -45,6 +46,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
 
       $table->addRow(array(
         'id'      => $mail->getID(),
+        'encrypt' => ($mail->getMustEncrypt() ? '#' : ' '),
         'status'  => PhabricatorMailOutboundStatus::getStatusName($status),
         'subject' => $mail->getSubject(),
       ));

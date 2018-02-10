@@ -86,9 +86,24 @@ final class ManiphestTaskListView extends ManiphestView {
 
       $item->setStatusIcon($icon.' '.$color, $tooltip);
 
-      $item->addIcon(
-        'none',
-        phabricator_datetime($task->getDateModified(), $this->getUser()));
+      if ($task->isClosed()) {
+        $closed_epoch = $task->getClosedEpoch();
+
+        // We don't expect a task to be closed without a closed epoch, but
+        // recover if we find one. This can happen with older objects or with
+        // lipsum test data.
+        if (!$closed_epoch) {
+          $closed_epoch = $task->getDateModified();
+        }
+
+        $item->addIcon(
+          'fa-check-square-o grey',
+          phabricator_datetime($closed_epoch, $this->getUser()));
+      } else {
+        $item->addIcon(
+          'none',
+          phabricator_datetime($task->getDateModified(), $this->getUser()));
+      }
 
       if ($this->showSubpriorityControls) {
         $item->setGrippable(true);

@@ -39,6 +39,9 @@ abstract class HeraldAdapter extends Phobject {
   private $edgeCache = array();
   private $forbiddenActions = array();
   private $viewer;
+  private $mustEncryptReasons = array();
+  private $actingAsPHID;
+  private $webhookMap = array();
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -46,6 +49,15 @@ abstract class HeraldAdapter extends Phobject {
 
   public function getForcedEmailPHIDs() {
     return array_values($this->forcedEmailPHIDs);
+  }
+
+  final public function setActingAsPHID($acting_as_phid) {
+    $this->actingAsPHID = $acting_as_phid;
+    return $this;
+  }
+
+  final public function getActingAsPHID() {
+    return $this->actingAsPHID;
   }
 
   public function addEmailPHID($phid, $force) {
@@ -1180,6 +1192,32 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $this->forbiddenActions[$action];
+  }
+
+
+/* -(  Must Encrypt  )------------------------------------------------------- */
+
+
+  final public function addMustEncryptReason($reason) {
+    $this->mustEncryptReasons[] = $reason;
+    return $this;
+  }
+
+  final public function getMustEncryptReasons() {
+    return $this->mustEncryptReasons;
+  }
+
+
+/* -(  Webhooks  )----------------------------------------------------------- */
+
+
+  final public function queueWebhook($webhook_phid, $rule_phid) {
+    $this->webhookMap[$webhook_phid][] = $rule_phid;
+    return $this;
+  }
+
+  final public function getWebhookMap() {
+    return $this->webhookMap;
   }
 
 }

@@ -395,6 +395,11 @@ final class PhabricatorStartup {
     if (function_exists('libxml_disable_entity_loader')) {
       libxml_disable_entity_loader(true);
     }
+
+    // See T13060. If the locale for this process (the parent process) is not
+    // a UTF-8 locale we can encounter problems when launching subprocesses
+    // which receive UTF-8 parameters in their command line argument list.
+    @setlocale(LC_ALL, 'en_US.UTF-8');
   }
 
 

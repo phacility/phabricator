@@ -473,17 +473,14 @@ final class PhabricatorAuditEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $identifier = $object->getCommitIdentifier();
     $repository = $object->getRepository();
-    $monogram = $repository->getMonogram();
 
     $summary = $object->getSummary();
     $name = $repository->formatCommitName($identifier);
 
     $subject = "{$name}: {$summary}";
-    $thread_topic = "Commit {$monogram}{$identifier}";
 
     $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject($subject)
-      ->addHeader('Thread-Topic', $thread_topic);
+      ->setSubject($subject);
 
     $this->attachPatch(
       $template,
@@ -493,13 +490,14 @@ final class PhabricatorAuditEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $this->requireAuditors($object);
+
     $phids = array();
 
     if ($object->getAuthorPHID()) {
       $phids[] = $object->getAuthorPHID();
     }
 
-    $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
     foreach ($object->getAudits() as $audit) {
       if (!$audit->isInteresting()) {
         // Don't send mail to uninteresting auditors, like packages which
@@ -507,12 +505,26 @@ final class PhabricatorAuditEditor
         continue;
       }
 
-      if ($audit->getAuditStatus() != $status_resigned) {
+      if (!$audit->isResigned()) {
         $phids[] = $audit->getAuditorPHID();
       }
     }
 
     $phids[] = $this->getActingAsPHID();
+
+    return $phids;
+  }
+
+  protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
+    $this->requireAuditors($object);
+
+    $phids = array();
+
+    foreach ($object->getAudits() as $auditor) {
+      if ($auditor->isResigned()) {
+        $phids[] = $auditor->getAuditorPHID();
+      }
+    }
 
     return $phids;
   }
@@ -846,6 +858,26 @@ final class PhabricatorAuditEditor
       ->needAuditRequests(true)
       ->needCommitData(true)
       ->executeOne();
+  }
+
+  private function requireAuditors(PhabricatorRepositoryCommit $commit) {
+    if ($commit->hasAttachedAudits()) {
+      return;
+    }
+
+    $with_auditors = id(new DiffusionCommitQuery())
+      ->setViewer($this->getActor())
+      ->needAuditRequests(true)
+      ->withPHIDs(array($commit->getPHID()))
+      ->executeOne();
+    if (!$with_auditors) {
+      throw new Exception(
+        pht(
+          'Failed to reload commit ("%s").',
+          $commit->getPHID()));
+    }
+
+    $commit->attachAudits($with_auditors->getAudits());
   }
 
 }

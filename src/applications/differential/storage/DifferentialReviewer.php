@@ -69,6 +69,11 @@ final class DifferentialReviewer
     return ($this->getReviewerStatus() == $status_resigned);
   }
 
+  public function isBlocking() {
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+    return ($this->getReviewerStatus() == $status_blocking);
+  }
+
   public function isRejected($diff_phid) {
     $status_rejected = DifferentialReviewerStatus::STATUS_REJECTED;
 

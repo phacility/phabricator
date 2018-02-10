@@ -124,12 +124,10 @@ final class LegalpadDocumentEditor
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
-    $phid = $object->getPHID();
     $title = $object->getDocumentBody()->getTitle();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("L{$id}: {$title}")
-      ->addHeader('Thread-Topic', "L{$id}: {$phid}");
+      ->setSubject("L{$id}: {$title}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {

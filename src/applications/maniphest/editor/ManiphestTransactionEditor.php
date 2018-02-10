@@ -206,8 +206,7 @@ final class ManiphestTransactionEditor
     $title = $object->getTitle();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("T{$id}: {$title}")
-      ->addHeader('Thread-Topic', "T{$id}: ".$object->getOriginalTitle());
+      ->setSubject("T{$id}: {$title}");
   }
 
   protected function buildMailBody(
@@ -523,7 +522,6 @@ final class ManiphestTransactionEditor
       'status' => '""',
       'priority' => 0,
       'title' => '""',
-      'originalTitle' => '""',
       'description' => '""',
       'dateCreated' => 0,
       'dateModified' => 0,

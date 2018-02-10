@@ -79,7 +79,7 @@ final class PhabricatorMailManagementShowOutboundWorkflow
 
       $info = array();
 
-      $info[] = pht('PROPERTIES');
+      $info[] = $this->newSectionHeader(pht('PROPERTIES'));
       $info[] = pht('ID: %d', $message->getID());
       $info[] = pht('Status: %s', $message->getStatus());
       $info[] = pht('Related PHID: %s', $message->getRelatedPHID());
@@ -87,15 +87,17 @@ final class PhabricatorMailManagementShowOutboundWorkflow
 
       $ignore = array(
         'body' => true,
+        'body.sent' => true,
         'html-body' => true,
         'headers' => true,
         'attachments' => true,
         'headers.sent' => true,
+        'headers.unfiltered' => true,
         'authors.sent' => true,
       );
 
       $info[] = null;
-      $info[] = pht('PARAMETERS');
+      $info[] = $this->newSectionHeader(pht('PARAMETERS'));
       $parameters = $message->getParameters();
       foreach ($parameters as $key => $value) {
         if (isset($ignore[$key])) {
@@ -110,22 +112,40 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       }
 
       $info[] = null;
-      $info[] = pht('HEADERS');
+      $info[] = $this->newSectionHeader(pht('HEADERS'));
 
       $headers = $message->getDeliveredHeaders();
-      if (!$headers) {
+      $unfiltered = $message->getUnfilteredHeaders();
+      if (!$unfiltered) {
         $headers = $message->generateHeaders();
+        $unfiltered = $headers;
       }
 
+      $header_map = array();
       foreach ($headers as $header) {
         list($name, $value) = $header;
-        $info[] = "{$name}: {$value}";
+        $header_map[$name.':'.$value] = true;
+      }
+
+      foreach ($unfiltered as $header) {
+        list($name, $value) = $header;
+        $was_sent = isset($header_map[$name.':'.$value]);
+
+        if ($was_sent) {
+          $marker = ' ';
+        } else {
+          $marker = '#';
+        }
+
+        $info[] = "{$marker} {$name}: {$value}";
       }
 
       $attachments = idx($parameters, 'attachments');
       if ($attachments) {
         $info[] = null;
-        $info[] = pht('ATTACHMENTS');
+
+        $info[] = $this->newSectionHeader(pht('ATTACHMENTS'));
+
         foreach ($attachments as $attachment) {
           $info[] = idx($attachment, 'filename', pht('Unnamed File'));
         }
@@ -136,7 +156,9 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       $actors = $message->getDeliveredActors();
       if ($actors) {
         $info[] = null;
-        $info[] = pht('RECIPIENTS');
+
+        $info[] = $this->newSectionHeader(pht('RECIPIENTS'));
+
         foreach ($actors as $actor_phid => $actor_info) {
           $actor = idx($all_actors, $actor_phid);
           if ($actor) {
@@ -162,15 +184,22 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       }
 
       $info[] = null;
-      $info[] = pht('TEXT BODY');
+      $info[] = $this->newSectionHeader(pht('TEXT BODY'));
       if (strlen($message->getBody())) {
-        $info[] = $message->getBody();
+        $info[] = tsprintf('%B', $message->getBody());
       } else {
         $info[] = pht('(This message has no text body.)');
       }
 
+      $delivered_body = $message->getDeliveredBody();
+      if ($delivered_body !== null) {
+        $info[] = null;
+        $info[] = $this->newSectionHeader(pht('BODY AS DELIVERED'), true);
+        $info[] = tsprintf('%B', $delivered_body);
+      }
+
       $info[] = null;
-      $info[] = pht('HTML BODY');
+      $info[] = $this->newSectionHeader(pht('HTML BODY'));
       if (strlen($message->getHTMLBody())) {
         $info[] = $message->getHTMLBody();
         $info[] = null;
@@ -183,6 +212,14 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       if ($message_key != $last_key) {
         $console->writeOut("\n%s\n\n", str_repeat('-', 80));
       }
+    }
+  }
+
+  private function newSectionHeader($label, $emphasize = false) {
+    if ($emphasize) {
+      return tsprintf('**<bg:yellow> %s </bg>**', $label);
+    } else {
+      return tsprintf('**<bg:blue> %s </bg>**', $label);
     }
   }
 

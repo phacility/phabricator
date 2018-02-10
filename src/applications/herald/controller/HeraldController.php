@@ -6,18 +6,6 @@ abstract class HeraldController extends PhabricatorController {
     return $this->buildSideNavView()->getMenu();
   }
 
-  protected function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Herald Rule'))
-        ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('fa-plus-square'));
-
-    return $crumbs;
-  }
-
   public function buildSideNavView() {
     $viewer = $this->getViewer();
 
@@ -29,8 +17,11 @@ abstract class HeraldController extends PhabricatorController {
       ->addNavigationItems($nav->getMenu());
 
     $nav->addLabel(pht('Utilities'))
-        ->addFilter('test', pht('Test Console'))
-        ->addFilter('transcript', pht('Transcripts'));
+      ->addFilter('test', pht('Test Console'))
+      ->addFilter('transcript', pht('Transcripts'));
+
+    $nav->addLabel(pht('Webhooks'))
+      ->addFilter('webhook', pht('Webhooks'));
 
     $nav->selectFilter(null);
 

@@ -6,7 +6,9 @@ final class PhabricatorConfigManagementSetWorkflow
   protected function didConstruct() {
     $this
       ->setName('set')
-      ->setExamples('**set** __key__ __value__')
+      ->setExamples(
+        "**set** __key__ __value__\n".
+        "**set** __key__ --stdin < value.json")
       ->setSynopsis(pht('Set a local configuration value.'))
       ->setArguments(
         array(
@@ -15,6 +17,10 @@ final class PhabricatorConfigManagementSetWorkflow
             'help'  => pht(
               'Update configuration in the database instead of '.
               'in local configuration.'),
+          ),
+          array(
+            'name' => 'stdin',
+            'help' => pht('Read option value from stdin.'),
           ),
           array(
             'name'      => 'args',
@@ -31,22 +37,36 @@ final class PhabricatorConfigManagementSetWorkflow
         pht('Specify a configuration key and a value to set it to.'));
     }
 
+    $is_stdin = $args->getArg('stdin');
+
     $key = $argv[0];
 
-    if (count($argv) == 1) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          "Specify a value to set the key '%s' to.",
-          $key));
+    if ($is_stdin) {
+      if (count($argv) > 1) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Too many arguments: expected only a key when using "--stdin".'));
+      }
+
+      fprintf(STDERR, tsprintf("%s\n", pht('Reading value from stdin...')));
+      $value = file_get_contents('php://stdin');
+    } else {
+      if (count($argv) == 1) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            "Specify a value to set the key '%s' to.",
+            $key));
+      }
+
+      if (count($argv) > 2) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Too many arguments: expected one key and one value.'));
+      }
+
+      $value = $argv[1];
     }
 
-    $value = $argv[1];
-
-    if (count($argv) > 2) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Too many arguments: expected one key and one value.'));
-    }
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$key])) {
