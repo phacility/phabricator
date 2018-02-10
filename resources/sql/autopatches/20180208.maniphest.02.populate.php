@@ -20,8 +20,8 @@ foreach (new LiskMigrationIterator($table) as $task) {
   // where the task was closed. A merge also counts as a close, even though
   // it doesn't currently produce a separate transaction.
 
-  $type_merge = ManiphestTaskStatusTransaction::TRANSACTIONTYPE;
-  $type_status = ManiphestTaskMergedIntoTransaction::TRANSACTIONTYPE;
+  $type_status = ManiphestTaskStatusTransaction::TRANSACTIONTYPE;
+  $type_merge = ManiphestTaskMergedIntoTransaction::TRANSACTIONTYPE;
 
   $xactions = id(new ManiphestTransactionQuery())
     ->setViewer($viewer)
