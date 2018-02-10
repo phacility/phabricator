@@ -5,7 +5,7 @@ final class DifferentialHunkTestCase extends PhutilTestCase {
   public function testMakeChanges() {
     $root = dirname(__FILE__).'/hunk/';
 
-    $hunk = new DifferentialModernHunk();
+    $hunk = new DifferentialHunk();
     $hunk->setChanges(Filesystem::readFile($root.'basic.diff'));
     $hunk->setOldOffset(1);
     $hunk->setNewOffset(11);
@@ -23,7 +23,7 @@ final class DifferentialHunkTestCase extends PhutilTestCase {
     );
     $this->assertEqual($added, $hunk->getAddedLines());
 
-    $hunk = new DifferentialModernHunk();
+    $hunk = new DifferentialHunk();
     $hunk->setChanges(Filesystem::readFile($root.'newline.diff'));
     $hunk->setOldOffset(1);
     $hunk->setNewOffset(11);
