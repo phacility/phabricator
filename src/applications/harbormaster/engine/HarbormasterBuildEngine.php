@@ -443,15 +443,11 @@ final class HarbormasterBuildEngine extends Phobject {
     $all_pass = true;
     $any_fail = false;
     foreach ($buildable->getBuilds() as $build) {
-      if ($build->getBuildStatus() != HarbormasterBuildStatus::STATUS_PASSED) {
+      if (!$build->isPassed()) {
         $all_pass = false;
       }
-      if (in_array($build->getBuildStatus(), array(
-          HarbormasterBuildStatus::STATUS_FAILED,
-          HarbormasterBuildStatus::STATUS_ERROR,
-          HarbormasterBuildStatus::STATUS_DEADLOCKED,
-        ))) {
 
+      if ($build->isComplete() && !$build->isPassed()) {
         $any_fail = true;
       }
     }
