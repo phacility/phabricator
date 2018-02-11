@@ -38,7 +38,7 @@ final class PhabricatorMailImplementationPHPMailerAdapter
       'host' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-host'),
       'port' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-port'),
       'user' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-user'),
-      'password' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-passsword'),
+      'password' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-password'),
       'protocol' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-protocol'),
       'encoding' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding'),
       'mailer' => PhabricatorEnv::getEnvConfig('phpmailer.mailer'),
