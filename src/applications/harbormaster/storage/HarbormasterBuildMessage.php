@@ -14,7 +14,7 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
   protected $type;
   protected $isConsumed;
 
-  private $buildTarget = self::ATTACHABLE;
+  private $receiver = self::ATTACHABLE;
 
   public static function initializeNewMessage(PhabricatorUser $actor) {
     $actor_phid = $actor->getPHID();
@@ -41,12 +41,24 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
     ) + parent::getConfiguration();
   }
 
-  public function getBuildTarget() {
-    return $this->assertAttached($this->buildTarget);
+  public function getReceiverPHID() {
+    return $this->getBuildTargetPHID();
   }
 
-  public function attachBuildTarget(HarbormasterBuildTarget $target) {
-    $this->buildTarget = $target;
+  public function setReceiverPHID($phid) {
+    return $this->setBuildTargetPHID($phid);
+  }
+
+  public function getReceiver() {
+    return $this->assertAttached($this->receiver);
+  }
+
+  public function getBuildTarget() {
+    return $this->getReceiver();
+  }
+
+  public function attachReceiver($receiver) {
+    $this->receiver = $receiver;
     return $this;
   }
 
@@ -61,17 +73,17 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
   }
 
   public function getPolicy($capability) {
-    return $this->getBuildTarget()->getPolicy($capability);
+    return $this->getReceiver()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getBuildTarget()->hasAutomaticCapability(
+    return $this->getReceiver()->hasAutomaticCapability(
       $capability,
       $viewer);
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('Build messages have the same policies as their targets.');
+    return pht('Build messages have the same policies as their receivers.');
   }
 
 }

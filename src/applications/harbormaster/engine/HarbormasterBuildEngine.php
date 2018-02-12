@@ -382,12 +382,12 @@ final class HarbormasterBuildEngine extends Phobject {
 
     $messages = id(new HarbormasterBuildMessageQuery())
       ->setViewer($this->getViewer())
-      ->withBuildTargetPHIDs(array_keys($waiting_targets))
+      ->withReceiverPHIDs(array_keys($waiting_targets))
       ->withConsumed(false)
       ->execute();
 
     foreach ($messages as $message) {
-      $target = $waiting_targets[$message->getBuildTargetPHID()];
+      $target = $waiting_targets[$message->getReceiverPHID()];
 
       switch ($message->getType()) {
         case HarbormasterMessageType::MESSAGE_PASS:
