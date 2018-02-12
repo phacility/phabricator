@@ -194,11 +194,6 @@ final class PonderQuestion extends PonderDAO
     return parent::save();
   }
 
-  public function getOriginalTitle() {
-    // TODO: Make this actually save/return the original title.
-    return $this->getTitle();
-  }
-
   public function getFullTitle() {
     $id = $this->getID();
     $title = $this->getTitle();

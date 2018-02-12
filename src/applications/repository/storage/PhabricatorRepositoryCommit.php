@@ -183,6 +183,10 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->audits);
   }
 
+  public function hasAttachedAudits() {
+    return ($this->audits !== self::ATTACHABLE);
+  }
+
   public function loadAndAttachAuditAuthority(
     PhabricatorUser $viewer,
     $actor_phid = null) {
@@ -657,7 +661,8 @@ final class PhabricatorRepositoryCommit
   public function isAutomaticallySubscribed($phid) {
 
     // TODO: This should also list auditors, but handling that is a bit messy
-    // right now because we are not guaranteed to have the data.
+    // right now because we are not guaranteed to have the data. (It should not
+    // include resigned auditors.)
 
     return ($phid == $this->getAuthorPHID());
   }

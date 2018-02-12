@@ -45,11 +45,12 @@ final class PhabricatorProjectProjectPHIDType extends PhabricatorPHIDType {
 
       if (strlen($slug)) {
         $handle->setObjectName('#'.$slug);
+        $handle->setMailStampName('#'.$slug);
         $handle->setURI("/tag/{$slug}/");
       } else {
         // We set the name to the project's PHID to avoid a parse error when a
         // project has no hashtag (as is the case with milestones by default).
-        // See T12659 for more details
+        // See T12659 for more details.
         $handle->setCommandLineObjectName($project->getPHID());
         $handle->setURI("/project/view/{$id}/");
       }

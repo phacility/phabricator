@@ -95,15 +95,20 @@
     color: {$sky};
 }
 
-.device-desktop .phabricator-action-view-href.action-item-red:hover
-  .phabricator-action-view-item {
-    background-color: {$sh-redbackground};
-    color: {$sh-redtext};
+.phabricator-action-view.action-item-red {
+  background-color: {$sh-redbackground};
 }
 
-.device-desktop .phabricator-action-view-href.action-item-red:hover
+.phabricator-action-view.action-item-red .phabricator-action-view-item,
+.phabricator-action-view.action-item-red .phabricator-action-view-icon {
+  color: {$sh-redtext};
+}
+
+.device-desktop .phabricator-action-view.action-item-red:hover
+  .phabricator-action-view-item,
+.device-desktop .phabricator-action-view.action-item-red:hover
   .phabricator-action-view-icon {
-    color: {$red};
+  color: {$red};
 }
 
 .phabricator-action-view-label .phabricator-action-view-item,

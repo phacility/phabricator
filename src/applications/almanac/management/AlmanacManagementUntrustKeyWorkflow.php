@@ -43,6 +43,8 @@ final class AlmanacManagementUntrustKeyWorkflow
     $key->setIsTrusted(0);
     $key->save();
 
+    PhabricatorAuthSSHKeyQuery::deleteSSHKeyCache();
+
     $console->writeOut(
       "**<bg:green> %s </bg>** %s\n",
       pht('TRUST REVOKED'),

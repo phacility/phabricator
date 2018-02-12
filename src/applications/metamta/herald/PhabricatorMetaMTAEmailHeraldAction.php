@@ -13,6 +13,10 @@ abstract class PhabricatorMetaMTAEmailHeraldAction
   }
 
   public function supportsObject($object) {
+    return self::isMailGeneratingObject($object);
+  }
+
+  public static function isMailGeneratingObject($object) {
     // NOTE: This implementation lacks generality, but there's no great way to
     // figure out if something generates email right now.
 

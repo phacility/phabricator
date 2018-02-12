@@ -113,7 +113,6 @@ final class PeopleMainMenuBarExtension
         ->setName(pht('Log Out %s', $viewer->getUsername()))
         ->addSigil('logout-item')
         ->setHref('/logout/')
-        ->setColor(PhabricatorActionView::RED)
         ->setWorkflow(true));
 
     return $view;

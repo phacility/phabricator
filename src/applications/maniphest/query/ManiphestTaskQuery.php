@@ -23,6 +23,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $parentTaskIDs;
   private $subtaskIDs;
   private $subtypes;
+  private $closedEpochMin;
+  private $closedEpochMax;
+  private $closerPHIDs;
 
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
@@ -176,6 +179,17 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withDateModifiedAfter($date_modified_after) {
     $this->dateModifiedAfter = $date_modified_after;
+    return $this;
+  }
+
+  public function withClosedEpochBetween($min, $max) {
+    $this->closedEpochMin = $min;
+    $this->closedEpochMax = $max;
+    return $this;
+  }
+
+  public function withCloserPHIDs(array $phids) {
+    $this->closerPHIDs = $phids;
     return $this;
   }
 
@@ -377,6 +391,27 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn,
         'task.dateModified <= %d',
         $this->dateModifiedBefore);
+    }
+
+    if ($this->closedEpochMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.closedEpoch >= %d',
+        $this->closedEpochMin);
+    }
+
+    if ($this->closedEpochMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.closedEpoch <= %d',
+        $this->closedEpochMax);
+    }
+
+    if ($this->closerPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.closerPHID IN (%Ls)',
+        $this->closerPHIDs);
     }
 
     if ($this->priorities !== null) {
@@ -722,7 +757,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       'outdated' => array(
         'vector' => array('-updated', '-id'),
         'name' => pht('Date Updated (Oldest First)'),
-       ),
+      ),
+      'closed' => array(
+        'vector' => array('closed', 'id'),
+        'name' => pht('Date Closed (Latest First)'),
+      ),
       'title' => array(
         'vector' => array('title', 'id'),
         'name' => pht('Title'),
@@ -741,6 +780,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         'outdated',
         'newest',
         'oldest',
+        'closed',
         'title',
       )) + $orders;
 
@@ -790,6 +830,12 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         'column' => 'dateModified',
         'type' => 'int',
       ),
+      'closed' => array(
+        'table' => 'task',
+        'column' => 'closedEpoch',
+        'type' => 'int',
+        'null' => 'tail',
+      ),
     );
   }
 
@@ -808,6 +854,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       'status' => $task->getStatus(),
       'title' => $task->getTitle(),
       'updated' => $task->getDateModified(),
+      'closed' => $task->getClosedEpoch(),
     );
 
     foreach ($keys as $key) {

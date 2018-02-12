@@ -6,7 +6,32 @@
 final class PhabricatorMailImplementationSendGridAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  const ADAPTERTYPE = 'sendgrid';
+
   private $params = array();
+
+  protected function validateOptions(array $options) {
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'api-user' => 'string',
+        'api-key' => 'string',
+      ));
+  }
+
+  public function newDefaultOptions() {
+    return array(
+      'api-user' => null,
+      'api-key' => null,
+    );
+  }
+
+  public function newLegacyOptions() {
+    return array(
+      'api-user' => PhabricatorEnv::getEnvConfig('sendgrid.api-user'),
+      'api-key' => PhabricatorEnv::getEnvConfig('sendgrid.api-key'),
+    );
+  }
 
   public function setFrom($email, $name = '') {
     $this->params['from'] = $email;
@@ -73,8 +98,8 @@ final class PhabricatorMailImplementationSendGridAdapter
 
   public function send() {
 
-    $user = PhabricatorEnv::getEnvConfig('sendgrid.api-user');
-    $key  = PhabricatorEnv::getEnvConfig('sendgrid.api-key');
+    $user = $this->getOption('api-user');
+    $key = $this->getOption('api-key');
 
     if (!$user || !$key) {
       throw new Exception(

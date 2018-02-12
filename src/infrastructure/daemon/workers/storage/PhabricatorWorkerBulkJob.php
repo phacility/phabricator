@@ -180,6 +180,10 @@ final class PhabricatorWorkerBulkJob
     return $this->getJobImplementation()->getJobName($this);
   }
 
+  public function getCurtainActions(PhabricatorUser $viewer) {
+    return $this->getJobImplementation()->getCurtainActions($viewer, $this);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

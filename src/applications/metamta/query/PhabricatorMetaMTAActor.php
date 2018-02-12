@@ -21,6 +21,7 @@ final class PhabricatorMetaMTAActor extends Phobject {
   const REASON_ROUTE_AS_NOTIFICATION = 'route-as-notification';
   const REASON_ROUTE_AS_MAIL = 'route-as-mail';
   const REASON_UNVERIFIED = 'unverified';
+  const REASON_MUTED = 'muted';
 
   private $phid;
   private $emailAddress;
@@ -116,6 +117,7 @@ final class PhabricatorMetaMTAActor extends Phobject {
       self::REASON_ROUTE_AS_NOTIFICATION => pht('Route as Notification'),
       self::REASON_ROUTE_AS_MAIL => pht('Route as Mail'),
       self::REASON_UNVERIFIED => pht('Address Not Verified'),
+      self::REASON_MUTED => pht('Muted'),
     );
 
     return idx($names, $reason, pht('Unknown ("%s")', $reason));
@@ -172,6 +174,8 @@ final class PhabricatorMetaMTAActor extends Phobject {
         'in Herald.'),
       self::REASON_UNVERIFIED => pht(
         'This recipient does not have a verified primary email address.'),
+      self::REASON_MUTED => pht(
+        'This recipient has muted notifications for this object.'),
     );
 
     return idx($descriptions, $reason, pht('Unknown Reason ("%s")', $reason));

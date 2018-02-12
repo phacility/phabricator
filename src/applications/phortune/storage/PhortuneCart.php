@@ -118,6 +118,13 @@ final class PhortuneCart extends PhortuneDAO
       ->setAmountAsCurrency($this->getTotalPriceAsCurrency());
 
     if ($method) {
+      if (!$method->isActive()) {
+        throw new Exception(
+          pht(
+            'Attempting to apply a charge using an inactive '.
+            'payment method ("%s")!',
+            $method->getPHID()));
+      }
       $charge->setPaymentMethodPHID($method->getPHID());
     }
 

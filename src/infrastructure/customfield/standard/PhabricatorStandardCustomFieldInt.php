@@ -124,4 +124,8 @@ final class PhabricatorStandardCustomFieldInt
     return new ConduitIntParameterType();
   }
 
+  protected function newExportFieldType() {
+    return new PhabricatorIntExportField();
+  }
+
 }

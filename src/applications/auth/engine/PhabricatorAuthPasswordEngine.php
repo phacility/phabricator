@@ -300,6 +300,10 @@ final class PhabricatorAuthPasswordEngine
       $password->upgradePasswordHasher($envelope, $this->getObject());
       $new_hasher = $password->getHasher();
 
+      // NOTE: We must save the change before applying transactions because
+      // the editor will reload the object to obtain a read lock.
+      $password->save();
+
       $xactions = array();
 
       $xactions[] = $password->getApplicationTransactionTemplate()

@@ -36,9 +36,11 @@ final class PhabricatorSpacesNamespacePHIDType
       $monogram = $namespace->getMonogram();
       $name = $namespace->getNamespaceName();
 
-      $handle->setName($name);
-      $handle->setFullName(pht('%s %s', $monogram, $name));
-      $handle->setURI('/'.$monogram);
+      $handle
+        ->setName($name)
+        ->setFullName(pht('%s %s', $monogram, $name))
+        ->setURI('/'.$monogram)
+        ->setMailStampName($monogram);
 
       if ($namespace->getIsArchived()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);

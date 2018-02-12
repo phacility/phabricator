@@ -7,6 +7,7 @@ final class PhabricatorApplicationSearchController
   private $navigation;
   private $queryKey;
   private $preface;
+  private $activeQuery;
 
   public function setPreface($preface) {
     $this->preface = $preface;
@@ -43,6 +44,14 @@ final class PhabricatorApplicationSearchController
 
   protected function getSearchEngine() {
     return $this->searchEngine;
+  }
+
+  protected function getActiveQuery() {
+    if (!$this->activeQuery) {
+      throw new Exception(pht('There is no active query yet.'));
+    }
+
+    return $this->activeQuery;
   }
 
   protected function validateDelegatingController() {
@@ -154,9 +163,11 @@ final class PhabricatorApplicationSearchController
       $saved_query = $engine->buildSavedQueryFromRequest($request);
 
       // Save the query to generate a query key, so "Save Custom Query..." and
-      // other features like Maniphest's "Export..." work correctly.
+      // other features like "Bulk Edit" and "Export Data" work correctly.
       $engine->saveQuery($saved_query);
     }
+
+    $this->activeQuery = $saved_query;
 
     $nav->selectFilter(
       'query/'.$saved_query->getQueryKey(),
@@ -410,20 +421,72 @@ final class PhabricatorApplicationSearchController
 
     if ($named_query) {
       $filename = $named_query->getQueryName();
+      $sheet_title = $named_query->getQueryName();
     } else {
       $filename = $engine->getResultTypeDescription();
+      $sheet_title = $engine->getResultTypeDescription();
     }
     $filename = phutil_utf8_strtolower($filename);
     $filename = PhabricatorFile::normalizeFileName($filename);
 
-    $formats = PhabricatorExportFormat::getAllEnabledExportFormats();
-    $format_options = mpull($formats, 'getExportFormatName');
+    $all_formats = PhabricatorExportFormat::getAllExportFormats();
+
+    $available_options = array();
+    $unavailable_options = array();
+    $formats = array();
+    $unavailable_formats = array();
+    foreach ($all_formats as $key => $format) {
+      if ($format->isExportFormatEnabled()) {
+        $available_options[$key] = $format->getExportFormatName();
+        $formats[$key] = $format;
+      } else {
+        $unavailable_options[$key] = pht(
+          '%s (Not Available)',
+          $format->getExportFormatName());
+        $unavailable_formats[$key] = $format;
+      }
+    }
+    $format_options = $available_options + $unavailable_options;
+
+    // Try to default to the format the user used last time. If you just
+    // exported to Excel, you probably want to export to Excel again.
+    $format_key = $this->readExportFormatPreference();
+    if (!isset($formats[$format_key])) {
+      $format_key = head_key($format_options);
+    }
+
+    // Check if this is a large result set or not. If we're exporting a
+    // large amount of data, we'll build the actual export file in the daemons.
+
+    $threshold = 1000;
+    $query = $engine->buildQueryFromSavedQuery($saved_query);
+    $pager = $engine->newPagerForSavedQuery($saved_query);
+    $pager->setPageSize($threshold + 1);
+    $objects = $engine->executeQuery($query, $pager);
+    $object_count = count($objects);
+    $is_large_export = ($object_count > $threshold);
 
     $errors = array();
 
     $e_format = null;
     if ($request->isFormPost()) {
       $format_key = $request->getStr('format');
+
+      if (isset($unavailable_formats[$format_key])) {
+        $unavailable = $unavailable_formats[$format_key];
+        $instructions = $unavailable->getInstallInstructions();
+
+        $markup = id(new PHUIRemarkupView($viewer, $instructions))
+          ->setRemarkupOption(
+            PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS,
+            false);
+
+        return $this->newDialog()
+          ->setTitle(pht('Export Format Not Available'))
+          ->appendChild($markup)
+          ->addCancelButton($cancel_uri, pht('Done'));
+      }
+
       $format = idx($formats, $format_key);
 
       if (!$format) {
@@ -432,63 +495,33 @@ final class PhabricatorApplicationSearchController
       }
 
       if (!$errors) {
-        $query = $engine->buildQueryFromSavedQuery($saved_query);
+        $this->writeExportFormatPreference($format_key);
 
-        // NOTE: We aren't reading the pager from the request. Exports always
-        // affect the entire result set.
-        $pager = $engine->newPagerForSavedQuery($saved_query);
-        $pager->setPageSize(0x7FFFFFFF);
+        $export_engine = id(new PhabricatorExportEngine())
+          ->setViewer($viewer)
+          ->setSearchEngine($engine)
+          ->setSavedQuery($saved_query)
+          ->setTitle($sheet_title)
+          ->setFilename($filename)
+          ->setExportFormat($format);
 
-        $objects = $engine->executeQuery($query, $pager);
+        if ($is_large_export) {
+          $job = $export_engine->newBulkJob($request);
 
-        $extension = $format->getFileExtension();
-        $mime_type = $format->getMIMEContentType();
-        $filename = $filename.'.'.$extension;
+          return id(new AphrontRedirectResponse())
+            ->setURI($job->getMonitorURI());
+        } else {
+          $file = $export_engine->exportFile();
 
-        $format = clone $format;
-        $format->setViewer($viewer);
-
-        $export_data = $engine->newExport($objects);
-
-        if (count($export_data) !== count($objects)) {
-          throw new Exception(
-            pht(
-              'Search engine exported the wrong number of objects, expected '.
-              '%s but got %s.',
-              phutil_count($objects),
-              phutil_count($export_data)));
+          return $this->newDialog()
+            ->setTitle(pht('Download Results'))
+            ->appendParagraph(
+              pht('Click the download button to download the exported data.'))
+            ->addCancelButton($cancel_uri, pht('Done'))
+            ->setSubmitURI($file->getDownloadURI())
+            ->setDisableWorkflowOnSubmit(true)
+            ->addSubmitButton(pht('Download Data'));
         }
-
-        $objects = array_values($objects);
-        $export_data = array_values($export_data);
-
-        $field_list = $engine->newExportFieldList();
-        $field_list = mpull($field_list, null, 'getKey');
-
-        for ($ii = 0; $ii < count($objects); $ii++) {
-          $format->addObject($objects[$ii], $field_list, $export_data[$ii]);
-        }
-
-        $export_result = $format->newFileData();
-
-        $file = PhabricatorFile::newFromFileData(
-          $export_result,
-          array(
-            'name' => $filename,
-            'authorPHID' => $viewer->getPHID(),
-            'ttl.relative' => phutil_units('15 minutes in seconds'),
-            'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-            'mime-type' => $mime_type,
-          ));
-
-        return $this->newDialog()
-          ->setTitle(pht('Download Results'))
-          ->appendParagraph(
-            pht('Click the download button to download the exported data.'))
-          ->addCancelButton($cancel_uri, pht('Done'))
-          ->setSubmitURI($file->getDownloadURI())
-          ->setDisableWorkflowOnSubmit(true)
-          ->addSubmitButton(pht('Download Data'));
       }
     }
 
@@ -499,6 +532,7 @@ final class PhabricatorApplicationSearchController
           ->setName('format')
           ->setLabel(pht('Format'))
           ->setError($e_format)
+          ->setValue($format_key)
           ->setOptions($format_options));
 
     return $this->newDialog()
@@ -844,10 +878,8 @@ final class PhabricatorApplicationSearchController
 
     $engine = $this->getSearchEngine();
     $engine_class = get_class($engine);
-    $query_key = $this->getQueryKey();
-    if (!$query_key) {
-      $query_key = $engine->getDefaultQueryKey();
-    }
+
+    $query_key = $this->getActiveQuery()->getQueryKey();
 
     $can_use = $engine->canUseInPanelContext();
     $is_installed = PhabricatorApplication::isClassInstalledForViewer(
@@ -912,6 +944,34 @@ final class PhabricatorApplicationSearchController
     }
 
     return true;
+  }
+
+  private function readExportFormatPreference() {
+    $viewer = $this->getViewer();
+    $export_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+    return $viewer->getUserSetting($export_key);
+  }
+
+  private function writeExportFormatPreference($value) {
+    $viewer = $this->getViewer();
+    $request = $this->getRequest();
+
+    if (!$viewer->isLoggedIn()) {
+      return;
+    }
+
+    $export_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+    $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
+
+    $editor = id(new PhabricatorUserPreferencesEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+    $xactions[] = $preferences->newTransaction($export_key, $value);
+    $editor->applyTransactions($preferences, $xactions);
   }
 
 }

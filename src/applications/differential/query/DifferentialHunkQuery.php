@@ -30,25 +30,12 @@ final class DifferentialHunkQuery
     }
   }
 
+  public function newResultObject() {
+    return new DifferentialHunk();
+  }
+
   protected function loadPage() {
-    $all_results = array();
-
-    // Load modern hunks.
-    $table = new DifferentialModernHunk();
-    $conn_r = $table->establishConnection('r');
-
-    $modern_data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-    $modern_results = $table->loadAllFromArray($modern_data);
-
-    // Strip all the IDs off since they're not unique and nothing should be
-    // using them.
-    return array_values($modern_results);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $hunks) {
@@ -76,8 +63,8 @@ final class DifferentialHunkQuery
     return $hunks;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if (!$this->changesets) {
       throw new Exception(
@@ -87,13 +74,11 @@ final class DifferentialHunkQuery
     }
 
     $where[] = qsprintf(
-      $conn_r,
+      $conn,
       'changesetID IN (%Ld)',
       mpull($this->changesets, 'getID'));
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

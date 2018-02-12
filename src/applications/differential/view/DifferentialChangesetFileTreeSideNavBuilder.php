@@ -83,6 +83,9 @@ final class DifferentialChangesetFileTreeSideNavBuilder extends Phobject {
     while (($path = $path->getNextNode())) {
       $data = $path->getData();
 
+      $classes = array();
+      $classes[] = 'phabricator-filetree-item';
+
       $name = $path->getName();
       $style = 'padding-left: '.(2 + (3 * $path->getDepth())).'px';
 
@@ -90,13 +93,23 @@ final class DifferentialChangesetFileTreeSideNavBuilder extends Phobject {
       if ($data) {
         $href = '#'.$data->getAnchorName();
         $title = $name;
-        $icon = id(new PHUIIconView())
-          ->setIcon('fa-file-text-o bluetext');
+
+        $icon = $data->newFileTreeIcon();
+        $classes[] = $data->getFileTreeClass();
+
+        $count = phutil_tag(
+          'span',
+          array(
+            'class' => 'filetree-progress-hint',
+            'id' => 'tree-node-'.$data->getAnchorName(),
+          ));
       } else {
         $name .= '/';
         $title = $path->getFullPath().'/';
         $icon = id(new PHUIIconView())
           ->setIcon('fa-folder-open blue');
+
+        $count = null;
       }
 
       $name_element = phutil_tag(
@@ -106,15 +119,16 @@ final class DifferentialChangesetFileTreeSideNavBuilder extends Phobject {
         ),
         $name);
 
+
       $filetree[] = javelin_tag(
         $href ? 'a' : 'span',
         array(
           'href' => $href,
           'style' => $style,
           'title' => $title,
-          'class' => 'phabricator-filetree-item',
+          'class' => implode(' ', $classes),
         ),
-        array($icon, $name_element));
+        array($count, $icon, $name_element));
     }
     $tree->destroy();
 

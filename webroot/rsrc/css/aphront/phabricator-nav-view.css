@@ -44,7 +44,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 205px;
+  left: 410px;
   width: 7px;
 
   cursor: col-resize;
@@ -66,7 +66,7 @@
 
 .device-desktop .phabricator-standard-page-body .has-drag-nav
   .phabricator-nav-content {
-  margin-left: 212px;
+  margin-left: 417px;
 }
 
 .device-desktop .phabricator-standard-page-body .has-drag-nav
@@ -81,7 +81,7 @@
 }
 
 .device-desktop .phui-navigation-shell .has-drag-nav .phabricator-nav-local {
-  width: 205px;
+  width: 410px;
   padding: 0;
   background: transparent;
 }

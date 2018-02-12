@@ -31,7 +31,6 @@ final class ManiphestTask extends ManiphestDAO
   protected $subpriority = 0;
 
   protected $title = '';
-  protected $originalTitle = '';
   protected $description = '';
   protected $originalEmailSource;
   protected $mailKey;
@@ -44,6 +43,9 @@ final class ManiphestTask extends ManiphestDAO
   protected $properties = array();
   protected $points;
   protected $subtype;
+
+  protected $closedEpoch;
+  protected $closerPHID;
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
@@ -83,7 +85,6 @@ final class ManiphestTask extends ManiphestDAO
         'status' => 'text64',
         'priority' => 'uint32',
         'title' => 'sort',
-        'originalTitle' => 'text',
         'description' => 'text',
         'mailKey' => 'bytes20',
         'ownerOrdering' => 'text64?',
@@ -92,6 +93,8 @@ final class ManiphestTask extends ManiphestDAO
         'points' => 'double?',
         'bridgedObjectPHID' => 'phid?',
         'subtype' => 'text64',
+        'closedEpoch' => 'epoch?',
+        'closerPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -133,6 +136,12 @@ final class ManiphestTask extends ManiphestDAO
         'key_subtype' => array(
           'columns' => array('subtype'),
         ),
+        'key_closed' => array(
+          'columns' => array('closedEpoch'),
+        ),
+        'key_closer' => array(
+          'columns' => array('closerPHID', 'closedEpoch'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -173,14 +182,6 @@ final class ManiphestTask extends ManiphestDAO
 
   public function setOwnerPHID($phid) {
     $this->ownerPHID = nonempty($phid, null);
-    return $this;
-  }
-
-  public function setTitle($title) {
-    $this->title = $title;
-    if (!$this->getID()) {
-      $this->originalTitle = $title;
-    }
     return $this;
   }
 
@@ -512,6 +513,16 @@ final class ManiphestTask extends ManiphestDAO
         ->setKey('subtype')
         ->setType('string')
         ->setDescription(pht('Subtype of the task.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('closerPHID')
+        ->setType('phid?')
+        ->setDescription(
+          pht('User who closed the task, if the task is closed.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dateClosed')
+        ->setType('int?')
+        ->setDescription(
+          pht('Epoch timestamp when the task was closed.')),
     );
   }
 
@@ -531,6 +542,11 @@ final class ManiphestTask extends ManiphestDAO
       'color' => ManiphestTaskPriority::getTaskPriorityColor($priority_value),
     );
 
+    $closed_epoch = $this->getClosedEpoch();
+    if ($closed_epoch !== null) {
+      $closed_epoch = (int)$closed_epoch;
+    }
+
     return array(
       'name' => $this->getTitle(),
       'description' => array(
@@ -542,6 +558,8 @@ final class ManiphestTask extends ManiphestDAO
       'priority' => $priority_info,
       'points' => $this->getPoints(),
       'subtype' => $this->getSubtype(),
+      'closerPHID' => $this->getCloserPHID(),
+      'dateClosed' => $closed_epoch,
     );
   }
 

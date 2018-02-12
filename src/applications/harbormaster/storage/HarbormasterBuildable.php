@@ -58,6 +58,18 @@ final class HarbormasterBuildable extends HarbormasterDAO
     }
   }
 
+  public function getStatusIcon() {
+    return self::getBuildableStatusIcon($this->getBuildableStatus());
+  }
+
+  public function getStatusDisplayName() {
+    return self::getBuildableStatusName($this->getBuildableStatus());
+  }
+
+  public function getStatusColor() {
+    return self::getBuildableStatusColor($this->getBuildableStatus());
+  }
+
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
       ->setIsManualBuildable(0)

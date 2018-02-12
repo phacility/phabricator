@@ -76,4 +76,8 @@ final class PhabricatorStandardCustomFieldText
     return new ConduitStringParameterType();
   }
 
+  protected function newExportFieldType() {
+    return new PhabricatorStringExportField();
+  }
+
 }

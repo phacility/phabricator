@@ -293,7 +293,7 @@ JX.install('PHUIXFormControl', {
     },
 
     _newPoints: function(spec) {
-      return this._newText();
+      return this._newText(spec);
     },
 
     _newText: function(spec) {

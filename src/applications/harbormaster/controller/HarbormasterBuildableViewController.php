@@ -36,6 +36,10 @@ final class HarbormasterBuildableViewController
       ->setHeader($title)
       ->setUser($viewer)
       ->setPolicyObject($buildable)
+      ->setStatus(
+        $buildable->getStatusIcon(),
+        $buildable->getStatusColor(),
+        $buildable->getStatusDisplayName())
       ->setHeaderIcon('fa-recycle');
 
     $timeline = $this->buildTransactionTimeline(

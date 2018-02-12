@@ -219,12 +219,10 @@ final class PhabricatorProjectTransactionEditor
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $id = $object->getID();
     $name = $object->getName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("{$name}")
-      ->addHeader('Thread-Topic', "Project {$id}");
+      ->setSubject("{$name}");
   }
 
   protected function buildMailBody(

@@ -26,6 +26,12 @@ final class DiffusionPullLogSearchEngine
       $query->withPullerPHIDs($map['pullerPHIDs']);
     }
 
+    if ($map['createdStart'] || $map['createdEnd']) {
+      $query->withEpochBetween(
+        $map['createdStart'],
+        $map['createdEnd']);
+    }
+
     return $query;
   }
 
@@ -44,17 +50,19 @@ final class DiffusionPullLogSearchEngine
         ->setLabel(pht('Pullers'))
         ->setDescription(
           pht('Search for pull logs by specific users.')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created After'))
+        ->setKey('createdStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created Before'))
+        ->setKey('createdEnd'),
     );
   }
 
   protected function newExportFields() {
-    return array(
-      id(new PhabricatorIDExportField())
-        ->setKey('id')
-        ->setLabel(pht('ID')),
-      id(new PhabricatorPHIDExportField())
-        ->setKey('phid')
-        ->setLabel(pht('PHID')),
+    $viewer = $this->requireViewer();
+
+    $fields = array(
       id(new PhabricatorPHIDExportField())
         ->setKey('repositoryPHID')
         ->setLabel(pht('Repository PHID')),
@@ -80,9 +88,17 @@ final class DiffusionPullLogSearchEngine
         ->setKey('date')
         ->setLabel(pht('Date')),
     );
+
+    if ($viewer->getIsAdmin()) {
+      $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('remoteAddress')
+        ->setLabel(pht('Remote Address'));
+    }
+
+    return $fields;
   }
 
-  public function newExport(array $events) {
+  protected function newExportData(array $events) {
     $viewer = $this->requireViewer();
 
     $phids = array();
@@ -111,9 +127,7 @@ final class DiffusionPullLogSearchEngine
         $puller_name = null;
       }
 
-      $export[] = array(
-        'id' => $event->getID(),
-        'phid' => $event->getPHID(),
+      $map = array(
         'repositoryPHID' => $repository_phid,
         'repository' => $repository_name,
         'pullerPHID' => $puller_phid,
@@ -123,6 +137,12 @@ final class DiffusionPullLogSearchEngine
         'code' => $event->getResultCode(),
         'date' => $event->getEpoch(),
       );
+
+      if ($viewer->getIsAdmin()) {
+        $map['remoteAddress'] = $event->getRemoteAddress();
+      }
+
+      $export[] = $map;
     }
 
     return $export;

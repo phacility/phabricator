@@ -32,6 +32,23 @@ final class PhabricatorMetaMTAMailViewController
     $color = PhabricatorMailOutboundStatus::getStatusColor($status);
     $header->setStatus($icon, $color, $name);
 
+    if ($mail->getMustEncrypt()) {
+      Javelin::initBehavior('phabricator-tooltips');
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setColor('blue')
+          ->setName(pht('Must Encrypt'))
+          ->setIcon('fa-shield blue')
+          ->addSigil('has-tooltip')
+          ->setMetadata(
+            array(
+              'tip' => pht(
+                'Message content can only be transmitted over secure '.
+                'channels.'),
+            )));
+    }
+
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Mail %d', $mail->getID()))
       ->setBorder(true);
@@ -58,8 +75,26 @@ final class PhabricatorMetaMTAMailViewController
           ->setKey('metadata')
           ->appendChild($this->buildMetadataProperties($mail)));
 
+    $header_view = id(new PHUIHeaderView())
+      ->setHeader(pht('Mail'));
+
+    $object_phid = $mail->getRelatedPHID();
+    if ($object_phid) {
+      $handles = $viewer->loadHandles(array($object_phid));
+      $handle = $handles[$object_phid];
+      if ($handle->isComplete() && $handle->getURI()) {
+        $view_button = id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText(pht('View Object'))
+          ->setIcon('fa-chevron-right')
+          ->setHref($handle->getURI());
+
+        $header_view->addActionLink($view_button);
+      }
+    }
+
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Mail'))
+      ->setHeader($header_view)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addTabGroup($tab_group);
 
@@ -134,6 +169,12 @@ final class PhabricatorMetaMTAMailViewController
 
     $properties->addTextContent($body);
 
+    $file_phids = $mail->getAttachmentFilePHIDs();
+    if ($file_phids) {
+      $properties->addProperty(
+        pht('Attached Files'),
+        $viewer->loadHandles($file_phids)->renderList());
+    }
 
     return $properties;
   }
@@ -157,6 +198,15 @@ final class PhabricatorMetaMTAMailViewController
       list($key, $value) = $header;
       $properties->addProperty($key, $value);
     }
+
+    $encrypt_phids = $mail->getMustEncryptReasons();
+    if ($encrypt_phids) {
+      $properties->addProperty(
+        pht('Must Encrypt'),
+        $viewer->loadHandles($encrypt_phids)
+          ->renderList());
+    }
+
 
     return $properties;
   }

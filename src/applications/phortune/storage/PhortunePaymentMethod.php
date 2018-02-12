@@ -128,6 +128,10 @@ final class PhortunePaymentMethod extends PhortuneDAO
     return $month.'/'.$year;
   }
 
+  public function isActive() {
+    return ($this->getStatus() === self::STATUS_ACTIVE);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -6,6 +6,7 @@ abstract class PhabricatorPHIDListEditType
   private $datasource;
   private $isSingleValue;
   private $defaultValue;
+  private $isNullable;
 
   public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
     $this->datasource = $datasource;
@@ -30,16 +31,17 @@ abstract class PhabricatorPHIDListEditType
     return $this;
   }
 
-  public function getDefaultValue() {
-    return $this->defaultValue;
+  public function setIsNullable($is_nullable) {
+    $this->isNullable = $is_nullable;
+    return $this;
   }
 
-  public function getValueType() {
-    if ($this->getIsSingleValue()) {
-      return 'phid';
-    } else {
-      return 'list<phid>';
-    }
+  public function getIsNullable() {
+    return $this->isNullable;
+  }
+
+  public function getDefaultValue() {
+    return $this->defaultValue;
   }
 
   protected function newConduitParameterType() {
@@ -49,10 +51,23 @@ abstract class PhabricatorPHIDListEditType
     }
 
     if ($this->getIsSingleValue()) {
-      return new ConduitPHIDParameterType();
+      return id(new ConduitPHIDParameterType())
+        ->setIsNullable($this->getIsNullable());
     } else {
       return new ConduitPHIDListParameterType();
     }
+  }
+
+  public function getTransactionValueFromBulkEdit($value) {
+    if (!$this->getIsSingleValue()) {
+      return $value;
+    }
+
+    if ($value) {
+      return head($value);
+    }
+
+    return null;
   }
 
 }

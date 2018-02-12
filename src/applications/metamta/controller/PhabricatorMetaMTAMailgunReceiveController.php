@@ -8,14 +8,28 @@ final class PhabricatorMetaMTAMailgunReceiveController
   }
 
   private function verifyMessage() {
-    $api_key = PhabricatorEnv::getEnvConfig('mailgun.api-key');
     $request = $this->getRequest();
     $timestamp = $request->getStr('timestamp');
     $token = $request->getStr('token');
     $sig = $request->getStr('signature');
-    $hash = hash_hmac('sha256', $timestamp.$token, $api_key);
 
-    return phutil_hashes_are_identical($sig, $hash);
+    // An install may configure multiple Mailgun mailers, and we might receive
+    // inbound mail from any of them. Test the signature to see if it matches
+    // any configured Mailgun mailer.
+
+    $mailers = PhabricatorMetaMTAMail::newMailersWithTypes(
+      array(
+        PhabricatorMailImplementationMailgunAdapter::ADAPTERTYPE,
+      ));
+    foreach ($mailers as $mailer) {
+      $api_key = $mailer->getOption('api-key');
+      $hash = hash_hmac('sha256', $timestamp.$token, $api_key);
+      if (phutil_hashes_are_identical($sig, $hash)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function handleRequest(AphrontRequest $request) {

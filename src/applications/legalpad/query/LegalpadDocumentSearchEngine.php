@@ -176,7 +176,7 @@ final class LegalpadDocumentSearchEngine
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Create a Document'))
-      ->setHref('/legalpad/create/')
+      ->setHref('/legalpad/edit/')
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getIcon();

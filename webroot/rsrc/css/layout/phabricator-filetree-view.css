@@ -50,7 +50,42 @@
   background-color: {$hovergrey};
 }
 
+.phabricator-filetree .filetree-added {
+  background: {$sh-greenbackground};
+}
+
+.phabricator-filetree .filetree-deleted {
+  background: {$sh-redbackground};
+}
+
+.phabricator-filetree .filetree-movecopy {
+  background: {$sh-orangebackground};
+}
+
 .phabricator-filetree .phabricator-active-nav-focus {
   background-color: {$hovergrey};
   border-left: 4px solid {$sky};
+}
+
+.phabricator-filetree .filetree-progress-hint {
+  width: 24px;
+  margin-right: 6px;
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: smaller;
+  background: {$greybackground};
+  text-align: center;
+  opacity: 0.5;
+}
+
+.phabricator-filetree .filetree-comments-visible {
+  background: {$lightblue};
+  opacity: 0.75;
+  color: {$darkgreytext};
+}
+
+.phabricator-filetree .filetree-comments-completed {
+  background: {$darkgreybackground};
+  color: {$greytext};
 }

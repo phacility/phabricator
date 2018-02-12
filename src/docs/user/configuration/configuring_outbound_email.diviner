@@ -3,43 +3,41 @@
 
 Instructions for configuring Phabricator to send mail.
 
-= Overview =
+Overview
+========
 
-Phabricator can send outbound email via several different providers, called
-"Adapters".
+Phabricator can send outbound email through several different mail services,
+including a local mailer or various third-party services. Options include:
 
 | Send Mail With | Setup | Cost | Inbound | Notes |
 |---------|-------|------|---------|-------|
 | Mailgun | Easy | Cheap | Yes | Recommended |
+| Postmark | Easy | Cheap | Yes | Recommended |
 | Amazon SES | Easy | Cheap | No | Recommended |
-| SendGrid | Medium | Cheap | Yes | Discouraged (See Note) |
+| SendGrid | Medium | Cheap | Yes | Discouraged |
 | External SMTP | Medium | Varies | No | Gmail, etc. |
-| Local SMTP | Hard | Free | No | (Default) sendmail, postfix, etc |
-| Custom | Hard | Free | No | Write an adapter for some other service. |
+| Local SMTP | Hard | Free | No | sendmail, postfix, etc |
+| Custom | Hard | Free | No | Write a custom mailer for some other service. |
 | Drop in a Hole | Easy | Free | No | Drops mail in a deep, dark hole. |
 
-Of these options, sending mail via local SMTP is the default, but usually
-requires some configuration to get working. See below for details on how to
-select and configure a delivery method.
+See below for details on how to select and configure mail delivery for each
+mailer.
 
 Overall, Mailgun and SES are much easier to set up, and using one of them is
 recommended. In particular, Mailgun will also let you set up inbound email
 easily.
 
 If you have some internal mail service you'd like to use you can also
-write a custom adapter, but this requires digging into the code.
+write a custom mailer, but this requires digging into the code.
 
 Phabricator sends mail in the background, so the daemons need to be running for
 it to be able to deliver mail. You should receive setup warnings if they are
 not. For more information on using daemons, see
 @{article:Managing Daemons with phd}.
 
-**Note on SendGrid**: Users have experienced a number of odd issues with
-SendGrid, compared to fewer issues with other mailers. We discourage SendGrid
-unless you're already using it. If you send to SendGrid via SMTP, you may need
-to adjust `phpmailer.smtp-encoding`.
 
-= Basics =
+Basics
+======
 
 Regardless of how outbound email is delivered, you should configure these keys
 in your configuration:
@@ -51,33 +49,175 @@ in your configuration:
   - **metamta.can-send-as-user** should be left as `false` in most cases,
     but see the documentation for details.
 
-= Configuring Mail Adapters =
 
-To choose how mail will be sent, change the `metamta.mail-adapter` key in
-your configuration. Possible values are listed in the UI:
+Configuring Mailers
+===================
 
-  - `PhabricatorMailImplementationAmazonMailgunAdapter`: use Mailgun, see
-    "Adapter: Mailgun".
-  - `PhabricatorMailImplementationAmazonSESAdapter`: use Amazon SES, see
-    "Adapter: Amazon SES".
-  - `PhabricatorMailImplementationPHPMailerLiteAdapter`: default, uses
-    "sendmail", see "Adapter: Sendmail".
-  - `PhabricatorMailImplementationPHPMailerAdapter`: uses SMTP, see
-    "Adapter: SMTP".
-  - `PhabricatorMailImplementationSendGridAdapter`: use SendGrid, see
-    "Adapter: SendGrid".
-  - `Some Custom Class You Write`: use a custom adapter you write, see
-    "Adapter: Custom".
-  - `PhabricatorMailImplementationTestAdapter`: this will
-    **completely disable** outbound mail. You can use this if you don't want to
-    send outbound mail, or want to skip this step for now and configure it
-    later.
+Configure one or more mailers by listing them in the the `cluster.mailers`
+configuration option. Most installs only need to configure one mailer, but you
+can configure multiple mailers to provide greater availability in the event of
+a service disruption.
 
-= Adapter: Sendmail =
+A valid `cluster.mailers` configuration looks something like this:
 
-This is the default, and selected by choosing
-`PhabricatorMailImplementationPHPMailerLiteAdapter` as the value for
-**metamta.mail-adapter**. This requires a `sendmail` binary to be installed on
+```lang=json
+[
+  {
+    "key": "mycompany-mailgun",
+    "type": "mailgun",
+    "options": {
+      "domain": "mycompany.com",
+      "api-key": "..."
+    }
+  },
+  ...
+]
+```
+
+The supported keys for each mailer are:
+
+  - `key`: Required string. A unique name for this mailer.
+  - `type`: Required string. Identifies the type of mailer. See below for
+    options.
+  - `priority`: Optional string. Advanced option which controls load balancing
+    and failover behavior. See below for details.
+  - `options`: Optional map. Additional options for the mailer type.
+
+The `type` field can be used to select these third-party mailers:
+
+  - `mailgun`: Use Mailgun.
+  - `ses`: Use Amazon SES.
+  - `sendgrid`: Use Sendgrid.
+
+It also supports these local mailers:
+
+  - `sendmail`: Use the local `sendmail` binary.
+  - `smtp`: Connect directly to an SMTP server.
+  - `test`: Internal mailer for testing. Does not send mail.
+
+You can also write your own mailer by extending
+`PhabricatorMailImplementationAdapter`.
+
+Once you've selected a mailer, find the corresponding section below for
+instructions on configuring it.
+
+
+Setting Complex Configuration
+=============================
+
+Mailers can not be edited from the web UI. If mailers could be edited from
+the web UI, it would give an attacker who compromised an administrator account
+a lot of power: they could redirect mail to a server they control and then
+intercept mail for any other account, including password reset mail.
+
+For more information about locked configuration options, see
+@{article:Configuration Guide: Locked and Hidden Configuration}.
+
+Setting `cluster.mailers` from the command line using `bin/config set` can be
+tricky because of shell escaping. The easiest way to do it is to use the
+`--stdin` flag. First, put your desired configuration in a file like this:
+
+```lang=json, name=mailers.json
+[
+  {
+    "key": "test-mailer",
+    "type": "test"
+  }
+]
+```
+
+Then set the value like this:
+
+```
+phabricator/ $ ./bin/config set --stdin < mailers.json
+```
+
+For alternatives and more information on configuration, see
+@{article:Configuration User Guide: Advanced Configuration}
+
+
+Mailer: Mailgun
+===============
+
+Mailgun is a third-party email delivery service. You can learn more at
+<http://www.mailgun.com>. Mailgun is easy to configure and works well.
+
+To use this mailer, set `type` to `mailgun`, then configure these `options`:
+
+  - `api-key`: Required string. Your Mailgun API key.
+  - `domain`: Required string. Your Mailgun domain.
+
+
+Mailer: Postmark
+================
+
+Postmark is a third-party email delivery serivice. You can learn more at
+<https://www.postmarkapp.com/>.
+
+To use this mailer, set `type` to `postmark`, then configure these `options`:
+
+  - `access-token`: Required string. Your Postmark access token.
+  - `inbound-addresses`: Optional list<string>. Address ranges which you
+    will accept inbound Postmark HTTP webook requests from.
+
+The default address list is preconfigured with Postmark's address range, so
+you generally will not need to set or adjust it.
+
+The option accepts a list of CIDR ranges, like `1.2.3.4/16` (IPv4) or
+`::ffff:0:0/96` (IPv6). The default ranges are:
+
+```lang=json
+[
+  "50.31.156.6/32"
+]
+```
+
+The default address ranges were last updated in February 2018, and were
+documented at: <https://postmarkapp.com/support/article/800-ips-for-firewalls>
+
+
+Mailer: Amazon SES
+==================
+
+Amazon SES is Amazon's cloud email service. You can learn more at
+<http://aws.amazon.com/ses/>.
+
+To use this mailer, set `type` to `ses`, then configure these `options`:
+
+  - `access-key`: Required string. Your Amazon SES access key.
+  - `secret-key`: Required string. Your Amazon SES secret key.
+  - `endpoint`: Required string. Your Amazon SES endpoint.
+
+NOTE: Amazon SES **requires you to verify your "From" address**. Configure
+which "From" address to use by setting "`metamta.default-address`" in your
+config, then follow the Amazon SES verification process to verify it. You
+won't be able to send email until you do this!
+
+
+Mailer: SendGrid
+================
+
+SendGrid is a third-party email delivery service. You can learn more at
+<http://sendgrid.com/>.
+
+You can configure SendGrid in two ways: you can send via SMTP or via the REST
+API. To use SMTP, configure Phabricator to use an `smtp` mailer.
+
+To use the REST API mailer, set `type` to `sendgrid`, then configure
+these `options`:
+
+  - `api-user`: Required string. Your SendGrid login name.
+  - `api-key`: Required string. Your SendGrid API key.
+
+NOTE: Users have experienced a number of odd issues with SendGrid, compared to
+fewer issues with other mailers. We discourage SendGrid unless you're already
+using it.
+
+
+Mailer: Sendmail
+================
+
+This requires a `sendmail` binary to be installed on
 the system. Most MTAs (e.g., sendmail, qmail, postfix) should do this, but your
 machine may not have one installed by default. For install instructions, consult
 the documentation for your favorite MTA.
@@ -88,96 +228,33 @@ document. If you can already send outbound email from the command line or know
 how to configure it, this option is straightforward. If you have no idea how to
 do any of this, strongly consider using Mailgun or Amazon SES instead.
 
-If you experience issues with mail getting mangled (for example, arriving with
-too many or too few newlines) you may try adjusting `phpmailer.smtp-encoding`.
+To use this mailer, set `type` to `sendmail`. There are no `options` to
+configure.
 
-= Adapter: SMTP =
+
+Mailer: STMP
+============
 
 You can use this adapter to send mail via an external SMTP server, like Gmail.
-To do this, set these configuration keys:
 
-  - **metamta.mail-adapter**: set to
-    `PhabricatorMailImplementationPHPMailerAdapter`.
-  - **phpmailer.mailer**: set to `smtp`.
-  - **phpmailer.smtp-host**: set to hostname of your SMTP server.
-  - **phpmailer.smtp-port**: set to port of your SMTP server.
-  - **phpmailer.smtp-user**: set to your username used for authentication.
-  - **phpmailer.smtp-password**: set to your password used for authentication.
-  - **phpmailer.smtp-protocol**: set to `tls` or `ssl` if necessary. Use
+To use this mailer, set `type` to `smtp`, then configure these `options`:
+
+  - `host`: Required string. The hostname of your SMTP server.
+  - `port`: Optional int. The port to connect to on your SMTP server.
+  - `user`: Optional string. Username used for authentication.
+  - `password`: Optional string. Password for authentication.
+  - `protocol`: Optional string. Set to `tls` or `ssl` if necessary. Use
     `ssl` for Gmail.
-  - **phpmailer.smtp-encoding**: Normally safe to leave as the default, but
-    adjusting it may help resolve mail mangling issues (for example, mail
-    arriving with too many or too few newlines).
 
-= Adapter: Mailgun =
 
-Mailgun is an email delivery service. You can learn more at
-<http://www.mailgun.com>. Mailgun isn't free, but is very easy to configure
-and works well.
+Disable Mail
+============
 
-To use Mailgun, sign up for an account, then set these configuration keys:
+To disable mail, just don't configure any mailers.
 
-  - **metamta.mail-adapter**: set to
-    `PhabricatorMailImplementationMailgunAdapter`.
-  - **mailgun.api-key**: set to your Mailgun API key.
-  - **mailgun.domain**: set to your Mailgun domain.
 
-= Adapter: Amazon SES =
-
-Amazon SES is Amazon's cloud email service. It is not free, but is easier to
-configure than sendmail and can simplify outbound email configuration. To use
-Amazon SES, you need to sign up for an account with Amazon at
-<http://aws.amazon.com/ses/>.
-
-To configure Phabricator to use Amazon SES, set these configuration keys:
-
-  - **metamta.mail-adapter**: set to
-    "PhabricatorMailImplementationAmazonSESAdapter".
-  - **amazon-ses.access-key**: set to your Amazon SES access key.
-  - **amazon-ses.secret-key**: set to your Amazon SES secret key.
-  - **amazon-ses.endpoint**: Set to your Amazon SES endpoint.
-
-NOTE: Amazon SES **requires you to verify your "From" address**. Configure which
-"From" address to use by setting "`metamta.default-address`" in your config,
-then follow the Amazon SES verification process to verify it. You won't be able
-to send email until you do this!
-
-= Adapter: SendGrid =
-
-SendGrid is an email delivery service like Amazon SES. You can learn more at
-<http://sendgrid.com/>. It is easy to configure, but not free.
-
-You can configure SendGrid in two ways: you can send via SMTP or via the REST
-API. To use SMTP, just configure `sendmail` and leave Phabricator's setup
-with defaults. To use the REST API, follow the instructions in this section.
-
-To configure Phabricator to use SendGrid, set these configuration keys:
-
-  - **metamta.mail-adapter**: set to
-    "PhabricatorMailImplementationSendGridAdapter".
-  - **sendgrid.api-user**: set to your SendGrid login name.
-  - **sendgrid.api-key**: set to your SendGrid password.
-
-If you're logged into your SendGrid account, you may be able to find this
-information easily by visiting <http://sendgrid.com/developer>.
-
-= Adapter: Custom =
-
-You can provide a custom adapter by writing a concrete subclass of
-@{class:PhabricatorMailImplementationAdapter} and setting it as the
-`metamta.mail-adapter`.
-
-TODO: This should be better documented once extending Phabricator is better
-documented.
-
-= Adapter: Disable Outbound Mail =
-
-You can use the @{class:PhabricatorMailImplementationTestAdapter} to completely
-disable outbound mail, if you don't want to send mail or don't want to configure
-it yet. Just set **metamta.mail-adapter** to
-`PhabricatorMailImplementationTestAdapter`.
-
-= Testing and Debugging Outbound Email =
+Testing and Debugging Outbound Email
+====================================
 
 You can use the `bin/mail` utility to test, debug, and examine outbound mail. In
 particular:
@@ -191,7 +268,59 @@ Run `bin/mail help <command>` for more help on using these commands.
 You can monitor daemons using the Daemon Console (`/daemon/`, or click
 **Daemon Console** from the homepage).
 
-= Next Steps =
+
+Priorities
+==========
+
+By default, Phabricator will try each mailer in order: it will try the first
+mailer first. If that fails (for example, because the service is not available
+at the moment) it will try the second mailer, and so on.
+
+If you want to load balance between multiple mailers instead of using one as
+a primary, you can set `priority`. Phabricator will start with mailers in the
+highest priority group and go through them randomly, then fall back to the
+next group.
+
+For example, if you have two SMTP servers and you want to balance requests
+between them and then fall back to Mailgun if both fail, configure priorities
+like this:
+
+```lang=json
+[
+  {
+    "key": "smtp-uswest",
+    "type": "smtp",
+    "priority": 300,
+    "options": "..."
+  },
+  {
+    "key": "smtp-useast",
+    "type": "smtp",
+    "priority": 300,
+    "options": "..."
+  },
+  {
+    "key": "mailgun-fallback",
+    "type": "mailgun",
+    "options": "..."
+  }
+}
+```
+
+Phabricator will start with servers in the highest priority group (the group
+with the **largest** `priority` number). In this example, the highest group is
+`300`, which has the two SMTP servers. They'll be tried in random order first.
+
+If both fail, Phabricator will move on to the next priority group. In this
+example, there are no other priority groups.
+
+If it still hasn't sent the mail, Phabricator will try servers which are not
+in any priority group, in the configured order. In this example there is
+only one such server, so it will try to send via Mailgun.
+
+
+Next Steps
+==========
 
 Continue by:
 

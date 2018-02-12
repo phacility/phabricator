@@ -35,6 +35,7 @@ abstract class PhabricatorCustomField extends Phobject {
   const ROLE_HERALD                   = 'herald';
   const ROLE_EDITENGINE = 'EditEngine';
   const ROLE_HERALDACTION = 'herald.action';
+  const ROLE_EXPORT = 'export';
 
 
 /* -(  Building Applications with Custom Fields  )--------------------------- */
@@ -299,6 +300,8 @@ abstract class PhabricatorCustomField extends Phobject {
       case self::ROLE_EDITENGINE:
         return $this->shouldAppearInEditView() ||
                $this->shouldAppearInEditEngine();
+      case self::ROLE_EXPORT:
+        return $this->shouldAppearInDataExport();
       case self::ROLE_DEFAULT:
         return true;
       default:
@@ -1359,6 +1362,46 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->updateAbstractDocument($document);
     }
     return $document;
+  }
+
+
+/* -(  Data Export  )-------------------------------------------------------- */
+
+
+  public function shouldAppearInDataExport() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInDataExport();
+    }
+
+    try {
+      $this->newExportFieldType();
+      return true;
+    } catch (PhabricatorCustomFieldImplementationIncompleteException $ex) {
+      return false;
+    }
+  }
+
+  public function newExportField() {
+    if ($this->proxy) {
+      return $this->proxy->newExportField();
+    }
+
+    return $this->newExportFieldType()
+      ->setLabel($this->getFieldName());
+  }
+
+  public function newExportData() {
+    if ($this->proxy) {
+      return $this->proxy->newExportData();
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+  protected function newExportFieldType() {
+    if ($this->proxy) {
+      return $this->proxy->newExportFieldType();
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
 

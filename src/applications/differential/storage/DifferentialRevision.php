@@ -20,7 +20,6 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorDraftInterface {
 
   protected $title = '';
-  protected $originalTitle;
   protected $status;
 
   protected $summary = '';
@@ -98,7 +97,6 @@ final class DifferentialRevision extends DifferentialDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
-        'originalTitle' => 'text255',
         'status' => 'text32',
         'summary' => 'text',
         'testPlan' => 'text',
@@ -153,14 +151,6 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getURI() {
     return '/'.$this->getMonogram();
-  }
-
-  public function setTitle($title) {
-    $this->title = $title;
-    if (!$this->getID()) {
-      $this->originalTitle = $title;
-    }
-    return $this;
   }
 
   public function loadIDsByCommitPHIDs($phids) {
@@ -593,6 +583,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
+  public function hasAttachedReviewers() {
+    return ($this->reviewerStatus !== self::ATTACHABLE);
+  }
+
   public function getReviewerPHIDs() {
     $reviewers = $this->getReviewers();
     return mpull($reviewers, 'getReviewerPHID');
@@ -830,9 +824,15 @@ final class DifferentialRevision extends DifferentialDAO
     }
 
     foreach ($reviewers as $reviewer) {
-      if ($reviewer->getReviewerPHID() == $phid) {
-        return true;
+      if ($reviewer->getReviewerPHID() !== $phid) {
+        continue;
       }
+
+      if ($reviewer->isResigned()) {
+        continue;
+      }
+
+      return true;
     }
 
     return false;

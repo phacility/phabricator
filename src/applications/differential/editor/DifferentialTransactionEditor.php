@@ -632,6 +632,8 @@ final class DifferentialTransactionEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $this->requireReviewers($object);
+
     $phids = array();
     $phids[] = $object->getAuthorPHID();
     foreach ($object->getReviewers() as $reviewer) {
@@ -641,6 +643,20 @@ final class DifferentialTransactionEditor
 
       $phids[] = $reviewer->getReviewerPHID();
     }
+    return $phids;
+  }
+
+  protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
+    $this->requireReviewers($object);
+
+    $phids = array();
+
+    foreach ($object->getReviewers() as $reviewer) {
+      if ($reviewer->isResigned()) {
+        $phids[] = $reviewer->getReviewerPHID();
+      }
+    }
+
     return $phids;
   }
 
@@ -689,15 +705,10 @@ final class DifferentialTransactionEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $title = $object->getTitle();
-
-    $original_title = $object->getOriginalTitle();
-
     $subject = "D{$id}: {$title}";
-    $thread_topic = "D{$id}: {$original_title}";
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject($subject)
-      ->addHeader('Thread-Topic', $thread_topic);
+      ->setSubject($subject);
   }
 
   protected function getTransactionsForMail(
@@ -919,7 +930,44 @@ final class DifferentialTransactionEditor
       }
     }
 
-    $this->setUnmentionablePHIDMap(array_merge($task_phids, $rev_phids));
+    $revert_refs = id(new DifferentialCustomFieldRevertsParser())
+      ->parseCorpus($content_block);
+
+    $revert_monograms = array();
+    foreach ($revert_refs as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $revert_monograms[] = $monogram;
+      }
+    }
+
+    if ($revert_monograms) {
+      $revert_objects = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getActor())
+        ->withNames($revert_monograms)
+        ->withTypes(
+          array(
+            DifferentialRevisionPHIDType::TYPECONST,
+            PhabricatorRepositoryCommitPHIDType::TYPECONST,
+          ))
+        ->execute();
+
+      $revert_phids = mpull($revert_objects, 'getPHID', 'getPHID');
+
+      // Don't let an object revert itself, although other silly stuff like
+      // cycles of objects reverting each other is not prevented.
+      unset($revert_phids[$object->getPHID()]);
+
+      $revert_type = DiffusionCommitRevertsCommitEdgeType::EDGECONST;
+      $edges[$revert_type] = $revert_phids;
+    } else {
+      $revert_phids = array();
+    }
+
+    $this->setUnmentionablePHIDMap(
+      array_merge(
+        $task_phids,
+        $rev_phids,
+        $revert_phids));
 
     $result = array();
     foreach ($edges as $type => $specs) {
@@ -1692,5 +1740,26 @@ final class DifferentialTransactionEditor
       $revision->setRemovedLineCount((int)$row['D']);
     }
   }
+
+  private function requireReviewers(DifferentialRevision $revision) {
+    if ($revision->hasAttachedReviewers()) {
+      return;
+    }
+
+    $with_reviewers = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->needReviewers(true)
+      ->withPHIDs(array($revision->getPHID()))
+      ->executeOne();
+    if (!$with_reviewers) {
+      throw new Exception(
+        pht(
+          'Failed to reload revision ("%s").',
+          $revision->getPHID()));
+    }
+
+    $revision->attachReviewers($with_reviewers->getReviewers());
+  }
+
 
 }

@@ -68,8 +68,7 @@ final class PhabricatorPhurlURLEditor
     $name = $object->getName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("U{$id}: {$name}")
-      ->addHeader('Thread-Topic', "U{$id}: ".$object->getName());
+      ->setSubject("U{$id}: {$name}");
   }
 
   protected function buildMailBody(

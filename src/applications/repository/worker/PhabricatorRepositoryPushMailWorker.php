@@ -123,8 +123,8 @@ final class PhabricatorRepositoryPushMailWorker
       ->setSubject($subject)
       ->setFrom($event->getPusherPHID())
       ->setBody($body->render())
+      ->setHTMLBody($body->renderHTML())
       ->setThreadID($event->getPHID(), $is_new = true)
-      ->addHeader('Thread-Topic', $subject)
       ->setIsBulk(true);
 
     return $target->willSendMail($mail);

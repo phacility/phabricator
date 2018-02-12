@@ -255,11 +255,9 @@ final class PhabricatorAuthSSHKeyEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $name = $object->getName();
-    $phid = $object->getPHID();
 
     $mail = id(new PhabricatorMetaMTAMail())
-      ->setSubject(pht('SSH Key %d: %s', $id, $name))
-      ->addHeader('Thread-Topic', $phid);
+      ->setSubject(pht('SSH Key %d: %s', $id, $name));
 
     // The primary value of this mail is alerting users to account compromises,
     // so force delivery. In particular, this mail should still be delivered

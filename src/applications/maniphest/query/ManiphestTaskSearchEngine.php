@@ -126,6 +126,17 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Updated Before'))
         ->setKey('modifiedEnd'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Closed After'))
+        ->setKey('closedStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Closed Before'))
+        ->setKey('closedEnd'),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Closed By'))
+        ->setKey('closerPHIDs')
+        ->setAliases(array('closer', 'closerPHID', 'closers'))
+        ->setDescription(pht('Search for tasks closed by certain users.')),
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Page Size'))
         ->setKey('limit'),
@@ -153,6 +164,9 @@ final class ManiphestTaskSearchEngine
       'createdEnd',
       'modifiedStart',
       'modifiedEnd',
+      'closedStart',
+      'closedEnd',
+      'closerPHIDs',
       'limit',
     );
   }
@@ -206,6 +220,14 @@ final class ManiphestTaskSearchEngine
 
     if ($map['modifiedEnd']) {
       $query->withDateModifiedBefore($map['modifiedEnd']);
+    }
+
+    if ($map['closedStart'] || $map['closedEnd']) {
+      $query->withClosedEpochBetween($map['closedStart'], $map['closedEnd']);
+    }
+
+    if ($map['closerPHIDs']) {
+      $query->withCloserPHIDs($map['closerPHIDs']);
     }
 
     if ($map['hasParents'] !== null) {
@@ -432,4 +454,131 @@ final class ManiphestTaskSearchEngine
     return $view;
   }
 
+
+  protected function newExportFields() {
+    $fields = array(
+      id(new PhabricatorStringExportField())
+        ->setKey('monogram')
+        ->setLabel(pht('Monogram')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('authorPHID')
+        ->setLabel(pht('Author PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('author')
+        ->setLabel(pht('Author')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('ownerPHID')
+        ->setLabel(pht('Owner PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('owner')
+        ->setLabel(pht('Owner')),
+      id(new PhabricatorStringExportField())
+        ->setKey('status')
+        ->setLabel(pht('Status')),
+      id(new PhabricatorStringExportField())
+        ->setKey('statusName')
+        ->setLabel(pht('Status Name')),
+      id(new PhabricatorEpochExportField())
+        ->setKey('dateClosed')
+        ->setLabel(pht('Date Closed')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('closerPHID')
+        ->setLabel(pht('Closer PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('closer')
+        ->setLabel(pht('Closer')),
+      id(new PhabricatorStringExportField())
+        ->setKey('priority')
+        ->setLabel(pht('Priority')),
+      id(new PhabricatorStringExportField())
+        ->setKey('priorityName')
+        ->setLabel(pht('Priority Name')),
+      id(new PhabricatorStringExportField())
+        ->setKey('subtype')
+        ->setLabel('Subtype'),
+      id(new PhabricatorURIExportField())
+        ->setKey('uri')
+        ->setLabel(pht('URI')),
+      id(new PhabricatorStringExportField())
+        ->setKey('title')
+        ->setLabel(pht('Title')),
+      id(new PhabricatorStringExportField())
+        ->setKey('description')
+        ->setLabel(pht('Description')),
+    );
+
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $fields[] = id(new PhabricatorIntExportField())
+        ->setKey('points')
+        ->setLabel('Points');
+    }
+
+    return $fields;
+  }
+
+  protected function newExportData(array $tasks) {
+    $viewer = $this->requireViewer();
+
+    $phids = array();
+    foreach ($tasks as $task) {
+      $phids[] = $task->getAuthorPHID();
+      $phids[] = $task->getOwnerPHID();
+      $phids[] = $task->getCloserPHID();
+    }
+    $handles = $viewer->loadHandles($phids);
+
+    $export = array();
+    foreach ($tasks as $task) {
+
+      $author_phid = $task->getAuthorPHID();
+      if ($author_phid) {
+        $author_name = $handles[$author_phid]->getName();
+      } else {
+        $author_name = null;
+      }
+
+      $owner_phid = $task->getOwnerPHID();
+      if ($owner_phid) {
+        $owner_name = $handles[$owner_phid]->getName();
+      } else {
+        $owner_name = null;
+      }
+
+      $closer_phid = $task->getCloserPHID();
+      if ($closer_phid) {
+        $closer_name = $handles[$closer_phid]->getName();
+      } else {
+        $closer_name = null;
+      }
+
+      $status_value = $task->getStatus();
+      $status_name = ManiphestTaskStatus::getTaskStatusName($status_value);
+
+      $priority_value = $task->getPriority();
+      $priority_name = ManiphestTaskPriority::getTaskPriorityName(
+        $priority_value);
+
+      $export[] = array(
+        'monogram' => $task->getMonogram(),
+        'authorPHID' => $author_phid,
+        'author' => $author_name,
+        'ownerPHID' => $owner_phid,
+        'owner' => $owner_name,
+        'status' => $status_value,
+        'statusName' => $status_name,
+        'priority' => $priority_value,
+        'priorityName' => $priority_name,
+        'points' => $task->getPoints(),
+        'subtype' => $task->getSubtype(),
+        'title' => $task->getTitle(),
+        'uri' => PhabricatorEnv::getProductionURI($task->getURI()),
+        'description' => $task->getDescription(),
+        'dateClosed' => $task->getClosedEpoch(),
+        'closerPHID' => $closer_phid,
+        'closer' => $closer_name,
+      );
+    }
+
+    return $export;
+  }
 }

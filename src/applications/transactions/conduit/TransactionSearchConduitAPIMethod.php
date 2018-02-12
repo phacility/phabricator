@@ -22,6 +22,7 @@ final class TransactionSearchConduitAPIMethod
   protected function defineParamTypes() {
     return array(
       'objectIdentifier' => 'phid|string',
+      'constraints' => 'map<string, wild>',
     ) + $this->getPagerParamTypes();
   }
 
@@ -66,10 +67,23 @@ final class TransactionSearchConduitAPIMethod
     $xaction_query = PhabricatorApplicationTransactionQuery::newQueryForObject(
       $object);
 
-    $xactions = $xaction_query
+    $xaction_query
       ->withObjectPHIDs(array($object->getPHID()))
-      ->setViewer($viewer)
-      ->executeWithCursorPager($pager);
+      ->setViewer($viewer);
+
+    $constraints = $request->getValue('constraints', array());
+    PhutilTypeSpec::checkMap(
+      $constraints,
+      array(
+        'phids' => 'optional list<string>',
+      ));
+
+    $with_phids = idx($constraints, 'phids');
+    if ($with_phids) {
+      $xaction_query->withPHIDs($with_phids);
+    }
+
+    $xactions = $xaction_query->executeWithCursorPager($pager);
 
     if ($xactions) {
       $template = head($xactions)->getApplicationTransactionCommentObject();

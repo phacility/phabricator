@@ -1985,8 +1985,7 @@ abstract class PhabricatorEditEngine
     if (!$is_preview) {
       PhabricatorVersionedDraft::purgeDrafts(
         $object->getPHID(),
-        $viewer->getPHID(),
-        $this->loadDraftVersion($object));
+        $viewer->getPHID());
 
       $draft_engine = $this->newDraftEngine($object);
       if ($draft_engine) {

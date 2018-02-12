@@ -118,11 +118,11 @@ final class DifferentialChangeset
   public function delete() {
     $this->openTransaction();
 
-      $modern_hunks = id(new DifferentialModernHunk())->loadAllWhere(
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
         'changesetID = %d',
         $this->getID());
-      foreach ($modern_hunks as $modern_hunk) {
-        $modern_hunk->delete();
+      foreach ($hunks as $hunk) {
+        $hunk->delete();
       }
 
       $this->unsavedHunks = array();
@@ -221,6 +221,51 @@ final class DifferentialChangeset
     return $this->assertAttached($this->diff);
   }
 
+  public function newFileTreeIcon() {
+    $file_type = $this->getFileType();
+    $change_type = $this->getChangeType();
+
+    $change_icons = array(
+      DifferentialChangeType::TYPE_DELETE => 'fa-file-o',
+    );
+
+    if (isset($change_icons[$change_type])) {
+      $icon = $change_icons[$change_type];
+    } else {
+      $icon = DifferentialChangeType::getIconForFileType($file_type);
+    }
+
+    $change_colors = array(
+      DifferentialChangeType::TYPE_ADD => 'green',
+      DifferentialChangeType::TYPE_DELETE => 'red',
+      DifferentialChangeType::TYPE_MOVE_AWAY => 'orange',
+      DifferentialChangeType::TYPE_MOVE_HERE => 'orange',
+      DifferentialChangeType::TYPE_COPY_HERE => 'orange',
+      DifferentialChangeType::TYPE_MULTICOPY => 'orange',
+    );
+
+    $color = idx($change_colors, $change_type, 'bluetext');
+
+    return id(new PHUIIconView())
+      ->setIcon($icon.' '.$color);
+  }
+
+  public function getFileTreeClass() {
+    switch ($this->getChangeType()) {
+      case DifferentialChangeType::TYPE_ADD:
+        return 'filetree-added';
+      case DifferentialChangeType::TYPE_DELETE:
+        return 'filetree-deleted';
+      case DifferentialChangeType::TYPE_MOVE_AWAY:
+      case DifferentialChangeType::TYPE_MOVE_HERE:
+      case DifferentialChangeType::TYPE_COPY_HERE:
+      case DifferentialChangeType::TYPE_MULTICOPY:
+        return 'filetree-movecopy';
+    }
+
+    return null;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -247,7 +292,7 @@ final class DifferentialChangeset
     PhabricatorDestructionEngine $engine) {
     $this->openTransaction();
 
-      $hunks = id(new DifferentialModernHunk())->loadAllWhere(
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
         'changesetID = %d',
         $this->getID());
       foreach ($hunks as $hunk) {

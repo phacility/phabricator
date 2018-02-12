@@ -8,6 +8,16 @@ final class PhabricatorMetaMTASendGridReceiveController
   }
 
   public function handleRequest(AphrontRequest $request) {
+    // SendGrid doesn't sign payloads so we can't be sure that SendGrid
+    // actually sent this request, but require a configured SendGrid mailer
+    // before we activate this endpoint.
+    $mailers = PhabricatorMetaMTAMail::newMailersWithTypes(
+      array(
+        PhabricatorMailImplementationSendGridAdapter::ADAPTERTYPE,
+      ));
+    if (!$mailers) {
+      return new Aphront404Response();
+    }
 
     // No CSRF for SendGrid.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
