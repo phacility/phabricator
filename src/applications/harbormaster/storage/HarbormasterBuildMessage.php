@@ -10,7 +10,7 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
   implements PhabricatorPolicyInterface {
 
   protected $authorPHID;
-  protected $buildTargetPHID;
+  protected $receiverPHID;
   protected $type;
   protected $isConsumed;
 
@@ -34,27 +34,15 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
         'isConsumed' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_buildtarget' => array(
-          'columns' => array('buildTargetPHID'),
+        'key_receiver' => array(
+          'columns' => array('receiverPHID'),
         ),
       ),
     ) + parent::getConfiguration();
   }
 
-  public function getReceiverPHID() {
-    return $this->getBuildTargetPHID();
-  }
-
-  public function setReceiverPHID($phid) {
-    return $this->setBuildTargetPHID($phid);
-  }
-
   public function getReceiver() {
     return $this->assertAttached($this->receiver);
-  }
-
-  public function getBuildTarget() {
-    return $this->getReceiver();
   }
 
   public function attachReceiver($receiver) {

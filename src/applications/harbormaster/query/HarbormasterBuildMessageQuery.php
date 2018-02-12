@@ -71,7 +71,7 @@ final class HarbormasterBuildMessageQuery
     if ($this->receiverPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'buildTargetPHID IN (%Ls)',
+        'receiverPHID IN (%Ls)',
         $this->receiverPHIDs);
     }
 
