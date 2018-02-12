@@ -453,11 +453,11 @@ final class HarbormasterBuildEngine extends Phobject {
     }
 
     if ($any_fail) {
-      $new_status = HarbormasterBuildable::STATUS_FAILED;
+      $new_status = HarbormasterBuildableStatus::STATUS_FAILED;
     } else if ($all_pass) {
-      $new_status = HarbormasterBuildable::STATUS_PASSED;
+      $new_status = HarbormasterBuildableStatus::STATUS_PASSED;
     } else {
-      $new_status = HarbormasterBuildable::STATUS_BUILDING;
+      $new_status = HarbormasterBuildableStatus::STATUS_BUILDING;
     }
 
     $old_status = $buildable->getBuildableStatus();
@@ -477,9 +477,10 @@ final class HarbormasterBuildEngine extends Phobject {
     // can look at the results themselves, and other users generally don't
     // care about the outcome.
 
-    $should_publish = $did_update &&
-                      $new_status != HarbormasterBuildable::STATUS_BUILDING &&
-                      !$buildable->getIsManualBuildable();
+    $should_publish =
+      ($did_update) &&
+      ($new_status != HarbormasterBuildableStatus::STATUS_BUILDING) &&
+      (!$buildable->getIsManualBuildable());
 
     if (!$should_publish) {
       return;

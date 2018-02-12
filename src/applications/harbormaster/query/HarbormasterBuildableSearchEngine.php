@@ -33,7 +33,7 @@ final class HarbormasterBuildableSearchEngine
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Statuses'))
-        ->setOptions(HarbormasterBuildable::getBuildStatusMap())
+        ->setOptions(HarbormasterBuildableStatus::getOptionMap())
         ->setDescription(pht('Search for builds by buildable status.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Manual'))
@@ -169,11 +169,9 @@ final class HarbormasterBuildableSearchEngine
         $item->addIcon('fa-wrench grey', pht('Manual'));
       }
 
-      $status = $buildable->getBuildableStatus();
-
-      $status_icon = HarbormasterBuildable::getBuildableStatusIcon($status);
-      $status_color = HarbormasterBuildable::getBuildableStatusColor($status);
-      $status_label = HarbormasterBuildable::getBuildableStatusName($status);
+      $status_icon = $buildable->getStatusIcon();
+      $status_color = $buildable->getStatusColor();
+      $status_label = $buildable->getStatusDisplayName();
 
       $item->setStatusIcon("{$status_icon} {$status_color}", $status_label);
 
