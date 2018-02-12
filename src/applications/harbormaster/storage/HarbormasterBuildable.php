@@ -18,7 +18,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
       ->setIsManualBuildable(0)
-      ->setBuildableStatus(HarbormasterBuildableStatus::STATUS_BUILDING);
+      ->setBuildableStatus(HarbormasterBuildableStatus::STATUS_PREPARING);
   }
 
   public function getMonogram() {
@@ -225,6 +225,38 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public function getStatusColor() {
     return $this->getBuildableStatusObject()->getColor();
+  }
+
+  public function isPreparing() {
+    return $this->getBuildableStatusObject()->isPreparing();
+  }
+
+
+/* -(  Messages  )----------------------------------------------------------- */
+
+
+  public function sendMessage(
+    PhabricatorUser $viewer,
+    $message_type,
+    $queue_update) {
+
+    $message = HarbormasterBuildMessage::initializeNewMessage($viewer)
+      ->setReceiverPHID($this->getPHID())
+      ->setType($message_type)
+      ->save();
+
+    if ($queue_update) {
+      PhabricatorWorker::scheduleTask(
+        'HarbormasterBuildWorker',
+        array(
+          'buildablePHID' => $this->getPHID(),
+        ),
+        array(
+          'objectPHID' => $this->getPHID(),
+        ));
+    }
+
+    return $message;
   }
 
 

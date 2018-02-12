@@ -2,6 +2,7 @@
 
 final class HarbormasterBuildableStatus extends Phobject {
 
+  const STATUS_PREPARING = 'preparing';
   const STATUS_BUILDING = 'building';
   const STATUS_PASSED = 'passed';
   const STATUS_FAILED = 'failed';
@@ -42,12 +43,21 @@ final class HarbormasterBuildableStatus extends Phobject {
     return $this->getProperty('color');
   }
 
+  public function isPreparing() {
+    return ($this->key === self::STATUS_PREPARING);
+  }
+
   public static function getOptionMap() {
     return ipull(self::getSpecifications(), 'name');
   }
 
   private static function getSpecifications() {
     return array(
+      self::STATUS_PREPARING => array(
+        'name' => pht('Preparing'),
+        'color' => 'blue',
+        'icon' => 'fa-hourglass-o',
+      ),
       self::STATUS_BUILDING => array(
         'name' => pht('Building'),
         'color' => 'blue',

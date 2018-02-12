@@ -3262,10 +3262,32 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->setHeraldTranscript($xscript);
 
     if ($adapter instanceof HarbormasterBuildableAdapterInterface) {
+      $buildable_phid = $adapter->getHarbormasterBuildablePHID();
+
       HarbormasterBuildable::applyBuildPlans(
-        $adapter->getHarbormasterBuildablePHID(),
+        $buildable_phid,
         $adapter->getHarbormasterContainerPHID(),
         $adapter->getQueuedHarbormasterBuildRequests());
+
+      // Whether we queued any builds or not, any automatic buildable for this
+      // object is now done preparing builds and can transition into a
+      // completed status.
+      $buildables = id(new HarbormasterBuildableQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withManualBuildables(false)
+        ->withBuildablePHIDs(array($buildable_phid))
+        ->execute();
+      foreach ($buildables as $buildable) {
+        // If this buildable has already moved beyond preparation, we don't
+        // need to nudge it again.
+        if (!$buildable->isPreparing()) {
+          continue;
+        }
+        $buildable->sendMessage(
+          $this->getActor(),
+          HarbormasterMessageType::BUILDABLE_BUILD,
+          true);
+      }
     }
 
     $this->mustEncrypt = $adapter->getMustEncryptReasons();
