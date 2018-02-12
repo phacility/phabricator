@@ -7,6 +7,7 @@ final class HarbormasterMessageType extends Phobject {
   const MESSAGE_WORK = 'work';
 
   const BUILDABLE_BUILD = 'build';
+  const BUILDABLE_CONTAINER = 'container';
 
   public static function getAllMessages() {
     return array_keys(self::getMessageSpecifications());

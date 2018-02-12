@@ -447,10 +447,14 @@ final class HarbormasterBuildEngine extends Phobject {
       ->execute();
 
     $done_preparing = false;
+    $update_container = false;
     foreach ($messages as $message) {
       switch ($message->getType()) {
         case HarbormasterMessageType::BUILDABLE_BUILD:
           $done_preparing = true;
+          break;
+        case HarbormasterMessageType::BUILDABLE_CONTAINER:
+          $update_container = true;
           break;
         default:
           break;
@@ -463,11 +467,24 @@ final class HarbormasterBuildEngine extends Phobject {
 
     // If we received a "build" command, all builds are scheduled and we can
     // move out of "preparing" into "building".
-
     if ($done_preparing) {
       if ($buildable->isPreparing()) {
         $buildable
           ->setBuildableStatus(HarbormasterBuildableStatus::STATUS_BUILDING)
+          ->save();
+      }
+    }
+
+    // If we've been informed that the container for the buildable has
+    // changed, update it.
+    if ($update_container) {
+      $object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($buildable->getBuildablePHID()))
+        ->executeOne();
+      if ($object) {
+        $buildable
+          ->setContainerPHID($object->getHarbormasterContainerPHID())
           ->save();
       }
     }
