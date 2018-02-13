@@ -53,6 +53,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
 
       $lease
         ->setStatus(DrydockLeaseStatus::STATUS_PENDING)
+        ->setResourcePHID(null)
         ->save();
 
       $lease->logEvent(
@@ -301,23 +302,38 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $resources = $this->rankResources($resources, $lease);
 
     $exceptions = array();
+    $yields = array();
     $allocated = false;
     foreach ($resources as $resource) {
       try {
         $this->acquireLease($resource, $lease);
         $allocated = true;
         break;
+      } catch (DrydockResourceLockException $ex) {
+        // We need to lock the resource to actually acquire it. If we aren't
+        // able to acquire the lock quickly enough, we can yield and try again
+        // later.
+        $yields[] = $ex;
+      } catch (DrydockAcquiredBrokenResourceException $ex) {
+        // If a resource was reclaimed or destroyed by the time we actually
+        // got around to acquiring it, we just got unlucky. We can yield and
+        // try again later.
+        $yields[] = $ex;
       } catch (Exception $ex) {
         $exceptions[] = $ex;
       }
     }
 
     if (!$allocated) {
-      throw new PhutilAggregateException(
-        pht(
-          'Unable to acquire lease "%s" on any resource.',
-          $lease->getPHID()),
-        $exceptions);
+      if ($yields) {
+        throw new PhabricatorWorkerYieldException(15);
+      } else {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to acquire lease "%s" on any resource.',
+            $lease->getPHID()),
+          $exceptions);
+      }
     }
   }
 

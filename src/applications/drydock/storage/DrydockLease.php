@@ -213,30 +213,75 @@ final class DrydockLease extends DrydockDAO
       }
     }
 
-    $this->openTransaction();
+    // Before we associate the lease with the resource, we lock the resource
+    // and reload it to make sure it is still pending or active. If we don't
+    // do this, the resource may have just been reclaimed. (Once we acquire
+    // the resource that stops it from being released, so we're nearly safe.)
+
+    $resource_phid = $resource->getPHID();
+    $hash = PhabricatorHash::digestForIndex($resource_phid);
+    $lock_key = 'drydock.resource:'.$hash;
+    $lock = PhabricatorGlobalLock::newLock($lock_key);
 
     try {
-      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
-      $this->slotLocks = array();
-    } catch (DrydockSlotLockException $ex) {
-      $this->killTransaction();
-
-      $this->logEvent(
-        DrydockSlotLockFailureLogType::LOGCONST,
-        array(
-          'locks' => $ex->getLockMap(),
-        ));
-
-      throw $ex;
+      $lock->lock(15);
+    } catch (Exception $ex) {
+      throw new DrydockResourceLockException(
+        pht(
+          'Failed to acquire lock for resource ("%s") while trying to '.
+          'acquire lease ("%s").',
+          $resource->getPHID(),
+          $this->getPHID()));
     }
 
-    $this
-      ->setResourcePHID($resource->getPHID())
-      ->attachResource($resource)
-      ->setStatus($new_status)
-      ->save();
+    $resource->reload();
 
-    $this->saveTransaction();
+    if (($resource->getStatus() !== DrydockResourceStatus::STATUS_ACTIVE) &&
+        ($resource->getStatus() !== DrydockResourceStatus::STATUS_PENDING)) {
+      throw new DrydockAcquiredBrokenResourceException(
+        pht(
+          'Trying to acquire lease ("%s") on a resource ("%s") in the '.
+          'wrong status ("%s").',
+          $this->getPHID(),
+          $resource->getPHID(),
+          $resource->getStatus()));
+    }
+
+    $caught = null;
+    try {
+      $this->openTransaction();
+
+      try {
+        DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+        $this->slotLocks = array();
+      } catch (DrydockSlotLockException $ex) {
+        $this->killTransaction();
+
+        $this->logEvent(
+          DrydockSlotLockFailureLogType::LOGCONST,
+          array(
+            'locks' => $ex->getLockMap(),
+          ));
+
+        throw $ex;
+      }
+
+      $this
+        ->setResourcePHID($resource->getPHID())
+        ->attachResource($resource)
+        ->setStatus($new_status)
+        ->save();
+
+      $this->saveTransaction();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $lock->unlock();
+
+    if ($caught) {
+      throw $caught;
+    }
 
     $this->isAcquired = true;
 
