@@ -95,7 +95,7 @@ final class DrydockLeaseStatus
         'key' => self::STATUS_DESTROYED,
         'name' => pht('Destroyed'),
         'icon' => 'fa-times',
-        'color' => 'red',
+        'color' => 'grey',
         'isReleasable' => false,
         'isCommandable' => false,
         'isActivating' => false,
