@@ -43,6 +43,26 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
   private function handleUpdate(DrydockLease $lease) {
     try {
       $this->updateLease($lease);
+    } catch (DrydockAcquiredBrokenResourceException $ex) {
+      // If this lease acquired a resource but failed to activate, we don't
+      // need to break the lease. We can throw it back in the pool and let
+      // it take another shot at acquiring a new resource.
+
+      // Before we throw it back, release any locks the lease is holding.
+      DrydockSlotLock::releaseLocks($lease->getPHID());
+
+      $lease
+        ->setStatus(DrydockLeaseStatus::STATUS_PENDING)
+        ->save();
+
+      $lease->logEvent(
+        DrydockLeaseReacquireLogType::LOGCONST,
+        array(
+          'class' => get_class($ex),
+          'message' => $ex->getMessage(),
+        ));
+
+      $this->yieldLease($lease, $ex);
     } catch (Exception $ex) {
       if ($this->isTemporaryException($ex)) {
         $this->yieldLease($lease, $ex);
@@ -749,9 +769,12 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     }
 
     if ($resource_status != DrydockResourceStatus::STATUS_ACTIVE) {
-      throw new Exception(
+      throw new DrydockAcquiredBrokenResourceException(
         pht(
-          'Trying to activate lease on a dead resource (in status "%s").',
+          'Trying to activate lease ("%s") on a resource ("%s") in '.
+          'the wrong status ("%s").',
+          $lease->getPHID(),
+          $resource->getPHID(),
           $resource_status));
     }
 
