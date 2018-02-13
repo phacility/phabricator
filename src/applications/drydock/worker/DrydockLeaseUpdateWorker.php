@@ -216,17 +216,51 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
           // this.
           break;
         } catch (Exception $ex) {
+          // This failure is not normally expected, so log it. It can be
+          // caused by something mundane and recoverable, however (see below
+          // for discussion).
+
+          // We log to the blueprint separately from the log to the lease:
+          // the lease is not attached to a blueprint yet so the lease log
+          // will not show up on the blueprint; more than one blueprint may
+          // fail; and the lease is not really impacted (and won't log) if at
+          // least one blueprint actually works.
+
+          $blueprint->logEvent(
+            DrydockResourceAllocationFailureLogType::LOGCONST,
+            array(
+              'class' => get_class($ex),
+              'message' => $ex->getMessage(),
+            ));
+
           $exceptions[] = $ex;
         }
       }
 
       if (!$resources) {
-        throw new PhutilAggregateException(
+        // If one or more blueprints claimed that they would be able to
+        // allocate resources but none are actually able to allocate resources,
+        // log the failure and yield so we try again soon.
+
+        // This can happen if some unexpected issue occurs during allocation
+        // (for example, a call to build a VM fails for some reason) or if we
+        // raced another allocator and the blueprint is now full.
+
+        $ex = new PhutilAggregateException(
           pht(
             'All blueprints failed to allocate a suitable new resource when '.
-            'trying to allocate lease "%s".',
+            'trying to allocate lease ("%s").',
             $lease->getPHID()),
           $exceptions);
+
+        $lease->logEvent(
+          DrydockLeaseAllocationFailureLogType::LOGCONST,
+          array(
+            'class' => get_class($ex),
+            'message' => $ex->getMessage(),
+          ));
+
+        throw new PhabricatorWorkerYieldException(15);
       }
 
       $resources = $this->removeUnacquirableResources($resources, $lease);
