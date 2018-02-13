@@ -175,25 +175,6 @@ final class DrydockLease extends DrydockDAO
     return $this;
   }
 
-  public function isActivating() {
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_PENDING:
-      case DrydockLeaseStatus::STATUS_ACQUIRED:
-        return true;
-    }
-
-    return false;
-  }
-
-  public function isActive() {
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_ACTIVE:
-        return true;
-    }
-
-    return false;
-  }
-
   public function setActivateWhenAcquired($activate) {
     $this->activateWhenAcquired = true;
     return $this;
@@ -325,30 +306,6 @@ final class DrydockLease extends DrydockDAO
     return $this->isActivated;
   }
 
-  public function canRelease() {
-    if (!$this->getID()) {
-      return false;
-    }
-
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_RELEASED:
-      case DrydockLeaseStatus::STATUS_DESTROYED:
-        return false;
-      default:
-        return true;
-    }
-  }
-
-  public function canReceiveCommands() {
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_RELEASED:
-      case DrydockLeaseStatus::STATUS_DESTROYED:
-        return false;
-      default:
-        return true;
-    }
-  }
-
   public function scheduleUpdate($epoch = null) {
     PhabricatorWorker::scheduleTask(
       'DrydockLeaseUpdateWorker',
@@ -439,6 +396,46 @@ final class DrydockLease extends DrydockDAO
   public function getURI() {
     $id = $this->getID();
     return "/drydock/lease/{$id}/";
+  }
+
+
+/* -(  Status  )------------------------------------------------------------- */
+
+
+  public function getStatusObject() {
+    return DrydockLeaseStatus::newStatusObject($this->getStatus());
+  }
+
+  public function getStatusIcon() {
+    return $this->getStatusObject()->getIcon();
+  }
+
+  public function getStatusColor() {
+    return $this->getStatusObject()->getColor();
+  }
+
+  public function getStatusDisplayName() {
+    return $this->getStatusObject()->getDisplayName();
+  }
+
+  public function isActivating() {
+    return $this->getStatusObject()->isActivating();
+  }
+
+  public function isActive() {
+    return $this->getStatusObject()->isActive();
+  }
+
+  public function canRelease() {
+    if (!$this->getID()) {
+      return false;
+    }
+
+    return $this->getStatusObject()->canRelease();
+  }
+
+  public function canReceiveCommands() {
+    return $this->getStatusObject()->canReceiveCommands();
   }
 
 
