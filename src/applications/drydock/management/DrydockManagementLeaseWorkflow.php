@@ -90,13 +90,89 @@ final class DrydockManagementLeaseWorkflow
       "%s\n",
       pht('Waiting for daemons to activate lease...'));
 
-    $lease->waitUntilActive();
+    $this->waitUntilActive($lease);
 
     echo tsprintf(
       "%s\n",
       pht('Activated lease "%s".', $lease->getID()));
 
     return 0;
+  }
+
+
+  private function waitUntilActive(DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
+    $log_cursor = 0;
+    $log_types = DrydockLogType::getAllLogTypes();
+
+    $is_active = false;
+    while (!$is_active) {
+      $lease->reload();
+
+      // While we're waiting, show the user any logs which the daemons have
+      // generated to give them some clue about what's going on.
+      $logs = id(new DrydockLogQuery())
+        ->setViewer($viewer)
+        ->withLeasePHIDs(array($lease->getPHID()))
+        ->setBeforeID($log_cursor)
+        ->execute();
+      if ($logs) {
+        $logs = mpull($logs, null, 'getID');
+        ksort($logs);
+        $log_cursor = last_key($logs);
+      }
+
+      foreach ($logs as $log) {
+        $type_key = $log->getType();
+        if (isset($log_types[$type_key])) {
+          $type_object = id(clone $log_types[$type_key])
+            ->setLog($log)
+            ->setViewer($viewer);
+
+          $log_data = $log->getData();
+
+          $type = $type_object->getLogTypeName();
+          $data = $type_object->renderLog($log_data);
+        } else {
+          $type = pht('Unknown ("%s")', $type_key);
+          $data = null;
+        }
+
+        echo tsprintf(
+          "<%s> %B\n",
+          $type,
+          $data);
+      }
+
+      $status = $lease->getStatus();
+
+      switch ($status) {
+        case DrydockLeaseStatus::STATUS_ACTIVE:
+          $is_active = true;
+          break;
+        case DrydockLeaseStatus::STATUS_RELEASED:
+          throw new Exception(pht('Lease has already been released!'));
+        case DrydockLeaseStatus::STATUS_DESTROYED:
+          throw new Exception(pht('Lease has already been destroyed!'));
+        case DrydockLeaseStatus::STATUS_BROKEN:
+          throw new Exception(pht('Lease has been broken!'));
+        case DrydockLeaseStatus::STATUS_PENDING:
+        case DrydockLeaseStatus::STATUS_ACQUIRED:
+          break;
+        default:
+          throw new Exception(
+            pht(
+              'Lease has unknown status "%s".',
+              $status));
+      }
+
+      if ($is_active) {
+        break;
+      } else {
+        sleep(1);
+      }
+    }
   }
 
 }

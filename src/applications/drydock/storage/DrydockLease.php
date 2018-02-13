@@ -194,38 +194,6 @@ final class DrydockLease extends DrydockDAO
     return false;
   }
 
-  public function waitUntilActive() {
-    while (true) {
-      $lease = $this->reload();
-      if (!$lease) {
-        throw new Exception(pht('Failed to reload lease.'));
-      }
-
-      $status = $lease->getStatus();
-
-      switch ($status) {
-        case DrydockLeaseStatus::STATUS_ACTIVE:
-          return;
-        case DrydockLeaseStatus::STATUS_RELEASED:
-          throw new Exception(pht('Lease has already been released!'));
-        case DrydockLeaseStatus::STATUS_DESTROYED:
-          throw new Exception(pht('Lease has already been destroyed!'));
-        case DrydockLeaseStatus::STATUS_BROKEN:
-          throw new Exception(pht('Lease has been broken!'));
-        case DrydockLeaseStatus::STATUS_PENDING:
-        case DrydockLeaseStatus::STATUS_ACQUIRED:
-          break;
-        default:
-          throw new Exception(
-            pht(
-              'Lease has unknown status "%s".',
-              $status));
-      }
-
-      sleep(1);
-    }
-  }
-
   public function setActivateWhenAcquired($activate) {
     $this->activateWhenAcquired = true;
     return $this;
