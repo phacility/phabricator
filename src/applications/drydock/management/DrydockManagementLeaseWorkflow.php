@@ -62,6 +62,10 @@ final class DrydockManagementLeaseWorkflow
     $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
     $lease->setAuthorizingPHID($drydock_phid);
 
+    if ($attributes) {
+      $lease->setAttributes($attributes);
+    }
+
     // TODO: This is not hugely scalable, although this is a debugging workflow
     // so maybe it's fine. Do we even need `bin/drydock lease` in the long run?
     $all_blueprints = id(new DrydockBlueprintQuery())
@@ -75,10 +79,6 @@ final class DrydockManagementLeaseWorkflow
           'satisfy the requested lease.'));
     }
     $lease->setAllowedBlueprintPHIDs($allowed_phids);
-
-    if ($attributes) {
-      $lease->setAttributes($attributes);
-    }
 
     if ($until) {
       $lease->setUntil($until);
