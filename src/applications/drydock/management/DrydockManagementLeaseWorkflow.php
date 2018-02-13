@@ -84,21 +84,51 @@ final class DrydockManagementLeaseWorkflow
       $lease->setUntil($until);
     }
 
+    // If something fatals or the user interrupts the process (for example,
+    // with "^C"), release the lease. We'll cancel this below, if the lease
+    // actually activates.
+    $lease->setReleaseOnDestruction(true);
+
+    // TODO: This would probably be better handled with PhutilSignalRouter,
+    // but it currently doesn't route SIGINT. We're initializing it to setup
+    // SIGTERM handling and make eventual migration easier.
+    $router = PhutilSignalRouter::getRouter();
+    pcntl_signal(SIGINT, array($this, 'didReceiveInterrupt'));
+
+    $t_start = microtime(true);
     $lease->queueForActivation();
 
     echo tsprintf(
-      "%s\n",
+      "%s\n\n        __%s__\n\n%s\n",
+      pht('Queued lease for activation:'),
+      PhabricatorEnv::getProductionURI($lease->getURI()),
       pht('Waiting for daemons to activate lease...'));
 
     $this->waitUntilActive($lease);
 
+    // Now that we've survived activation and the lease is good, make it
+    // durable.
+    $lease->setReleaseOnDestruction(false);
+    $t_end = microtime(true);
+
     echo tsprintf(
-      "%s\n",
-      pht('Activated lease "%s".', $lease->getID()));
+      "%s\n\n        %s\n\n%s\n",
+      pht(
+        'Activation complete. This lease is permanent until manually '.
+        'released with:'),
+      pht('$ ./bin/drydock release-lease --id %d', $lease->getID()),
+      pht(
+        'Lease activated in %sms.',
+        new PhutilNumber((int)(($t_end - $t_start) * 1000))));
 
     return 0;
   }
 
+  public function didReceiveInterrupt($signo) {
+    // Doing this makes us run destructors, particularly the "release on
+    // destruction" trigger on the lease.
+    exit(128 + $signo);
+  }
 
   private function waitUntilActive(DrydockLease $lease) {
     $viewer = $this->getViewer();

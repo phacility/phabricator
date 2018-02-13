@@ -36,8 +36,8 @@ final class DrydockLease extends DrydockDAO
    * a lease, as you don't need to explicitly handle exceptions to properly
    * release the lease.
    */
-  public function releaseOnDestruction() {
-    $this->releaseOnDestruction = true;
+  public function setReleaseOnDestruction($release) {
+    $this->releaseOnDestruction = $release;
     return $this;
   }
 
@@ -434,6 +434,11 @@ final class DrydockLease extends DrydockDAO
     }
 
     return $this;
+  }
+
+  public function getURI() {
+    $id = $this->getID();
+    return "/drydock/lease/{$id}/";
   }
 
 

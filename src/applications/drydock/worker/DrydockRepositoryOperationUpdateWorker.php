@@ -62,7 +62,7 @@ final class DrydockRepositoryOperationUpdateWorker
         DrydockCommandInterface::INTERFACE_TYPE);
 
       // No matter what happens here, destroy the lease away once we're done.
-      $lease->releaseOnDestruction(true);
+      $lease->setReleaseOnDestruction(true);
 
       $operation->applyOperation($interface);
 
