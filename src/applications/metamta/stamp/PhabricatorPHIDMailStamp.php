@@ -15,6 +15,15 @@ final class PhabricatorPHIDMailStamp
       return null;
     }
 
+    // TODO: This recovers from a bug where blocking reviewers were serialized
+    // incorrectly into the flat mail stamp list in the worker queue as arrays.
+    // It can be removed some time after February 2018.
+    foreach ($value as $key => $v) {
+      if (is_array($v)) {
+        unset($value[$key]);
+      }
+    }
+
     $viewer = $this->getViewer();
     $handles = $viewer->loadHandles($value);
 
