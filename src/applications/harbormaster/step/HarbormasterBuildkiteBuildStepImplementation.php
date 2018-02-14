@@ -72,6 +72,11 @@ EOTEXT
     HarbormasterBuildTarget $build_target) {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $this->logSilencedCall($build, $build_target, pht('Buildkite'));
+      throw new HarbormasterBuildFailureException();
+    }
+
     $buildable = $build->getBuildable();
 
     $object = $buildable->getBuildableObject();
