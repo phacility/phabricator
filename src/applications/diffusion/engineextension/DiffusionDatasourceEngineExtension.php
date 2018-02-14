@@ -1,7 +1,7 @@
 <?php
 
-final class DiffusionQuickSearchEngineExtension
-  extends PhabricatorQuickSearchEngineExtension {
+final class DiffusionDatasourceEngineExtension
+  extends PhabricatorDatasourceEngineExtension {
 
   public function newQuickSearchDatasources() {
     return array(
