@@ -26,6 +26,7 @@ final class PhabricatorMailImplementationAmazonSESAdapter
         'access-key' => 'string',
         'secret-key' => 'string',
         'endpoint' => 'string',
+        'encoding' => 'string',
       ));
   }
 
@@ -34,6 +35,7 @@ final class PhabricatorMailImplementationAmazonSESAdapter
       'access-key' => null,
       'secret-key' => null,
       'endpoint' => null,
+      'encoding' => 'base64',
     );
   }
 
@@ -42,6 +44,7 @@ final class PhabricatorMailImplementationAmazonSESAdapter
       'access-key' => PhabricatorEnv::getEnvConfig('amazon-ses.access-key'),
       'secret-key' => PhabricatorEnv::getEnvConfig('amazon-ses.secret-key'),
       'endpoint' => PhabricatorEnv::getEnvConfig('amazon-ses.endpoint'),
+      'encoding' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding'),
     );
   }
 
