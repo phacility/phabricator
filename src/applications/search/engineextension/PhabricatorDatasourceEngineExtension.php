@@ -21,6 +21,11 @@ abstract class PhabricatorDatasourceEngineExtension extends Phobject {
     return null;
   }
 
+  public function newDatasourcesForCompositeDatasource(
+    PhabricatorTypeaheadCompositeDatasource $datasource) {
+    return array();
+  }
+
   final public static function getAllExtensions() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)

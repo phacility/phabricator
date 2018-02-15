@@ -34,4 +34,22 @@ final class PhabricatorDatasourceEngine extends Phobject {
     return null;
   }
 
+  public function newDatasourcesForCompositeDatasource(
+    PhabricatorTypeaheadCompositeDatasource $datasource) {
+    $viewer = $this->getViewer();
+    $extensions = PhabricatorDatasourceEngineExtension::getAllExtensions();
+
+    $sources = array();
+    foreach ($extensions as $extension) {
+      $extension_sources = id(clone $extension)
+        ->setViewer($viewer)
+        ->newDatasourcesForCompositeDatasource($datasource);
+      foreach ($extension_sources as $extension_source) {
+        $sources[] = $extension_source;
+      }
+    }
+
+    return $sources;
+  }
+
 }
