@@ -22,16 +22,13 @@ final class PhrictionHistoryController
 
     $current = $document->getContent();
 
-    $pager = new PHUIPagerView();
-    $pager->setOffset($request->getInt('page'));
-    $pager->setURI($request->getRequestURI(), 'page');
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
 
-    $history = id(new PhrictionContent())->loadAllWhere(
-      'documentID = %d ORDER BY version DESC LIMIT %d, %d',
-      $document->getID(),
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
-    $history = $pager->sliceResults($history);
+    $history = id(new PhrictionContentQuery())
+      ->setViewer($viewer)
+      ->withDocumentPHIDs(array($document->getPHID()))
+      ->executeWithCursorPager($pager);
 
     $author_phids = mpull($history, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($author_phids);

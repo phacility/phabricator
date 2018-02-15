@@ -30,10 +30,7 @@ final class PhrictionContent
         'content' => 'text',
         'changeType' => 'uint32',
         'changeRef' => 'uint32?',
-
-        // T6203/NULLABILITY
-        // This should just be empty if not provided?
-        'description' => 'text?',
+        'description' => 'text',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'documentID' => array(

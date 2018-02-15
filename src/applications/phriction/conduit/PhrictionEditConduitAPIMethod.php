@@ -52,7 +52,7 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
       ->setActor($request->getUser())
       ->setContentSource($request->newContentSource())
       ->setContinueOnNoEffect(true)
-      ->setDescription($request->getValue('description'));
+      ->setDescription((string)$request->getValue('description'));
 
     try {
       $editor->applyTransactions($doc, $xactions);
