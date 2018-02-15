@@ -236,14 +236,15 @@ final class PhrictionDocument extends PhrictionDAO
 
     $this->openTransaction();
 
-      $this->delete();
-
-      $contents = id(new PhrictionContent())->loadAllWhere(
-        'documentID = %d',
-        $this->getID());
+      $contents = id(new PhrictionContentQuery())
+        ->setViewer($engine->getViewer())
+        ->withDocumentPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($contents as $content) {
-        $content->delete();
+        $engine->destroyObject($content);
       }
+
+      $this->delete();
 
     $this->saveTransaction();
   }

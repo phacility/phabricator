@@ -1,9 +1,11 @@
 <?php
 
 final class PhrictionContent
-  extends PhrictionDAO {
+  extends PhrictionDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
-  protected $id;
   protected $documentID;
   protected $version;
   protected $authorPHID;
@@ -15,6 +17,8 @@ final class PhrictionContent
 
   protected $changeType;
   protected $changeRef;
+
+  private $document = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -54,6 +58,52 @@ final class PhrictionContent
     return id(new PHUIRemarkupView($viewer, $this->getContent()))
       ->setRemarkupOption(PHUIRemarkupView::OPTION_GENERATE_TOC, true)
       ->setGenerateTableOfContents(true);
+  }
+
+  public function attachDocument(PhrictionDocument $document) {
+    $this->document = $document;
+    return $this;
+  }
+
+  public function getDocument() {
+    return $this->assertAttached($this->document);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::getMostOpenPolicy();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    return array(
+      array($this->getDocument(), PhabricatorPolicyCapability::CAN_VIEW),
+    );
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
   }
 
 }
