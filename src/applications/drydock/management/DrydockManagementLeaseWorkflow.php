@@ -163,7 +163,7 @@ final class DrydockManagementLeaseWorkflow
           $log_data = $log->getData();
 
           $type = $type_object->getLogTypeName();
-          $data = $type_object->renderLog($log_data);
+          $data = $type_object->renderLogForText($log_data);
         } else {
           $type = pht('Unknown ("%s")', $type_key);
           $data = null;
