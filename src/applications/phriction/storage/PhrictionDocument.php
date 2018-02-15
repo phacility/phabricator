@@ -31,7 +31,7 @@ final class PhrictionDocument extends PhrictionDAO
         'slug' => 'sort128',
         'depth' => 'uint32',
         'contentID' => 'id?',
-        'status' => 'uint32',
+        'status' => 'text32',
         'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(

@@ -196,7 +196,7 @@ final class PhrictionDocumentQuery
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'd.status IN (%Ld)',
+        'd.status IN (%Ls)',
         $this->statuses);
     }
 

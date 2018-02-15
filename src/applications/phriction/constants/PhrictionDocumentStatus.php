@@ -3,10 +3,10 @@
 final class PhrictionDocumentStatus
   extends PhabricatorObjectStatus {
 
-  const STATUS_EXISTS     = 0;
-  const STATUS_DELETED    = 1;
-  const STATUS_MOVED      = 2;
-  const STATUS_STUB       = 3;
+  const STATUS_EXISTS = 'active';
+  const STATUS_DELETED = 'deleted';
+  const STATUS_MOVED = 'moved';
+  const STATUS_STUB = 'stub';
 
   public static function getConduitConstant($const) {
     static $map = array(
