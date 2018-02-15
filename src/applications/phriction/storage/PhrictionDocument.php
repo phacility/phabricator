@@ -61,7 +61,7 @@ final class PhrictionDocument extends PhrictionDAO
     $document = new PhrictionDocument();
     $document->setSlug($slug);
 
-    $content  = new PhrictionContent();
+    $content = new PhrictionContent();
     $content->setSlug($slug);
 
     $default_title = PhabricatorSlug::getDefaultTitle($slug);

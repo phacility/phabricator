@@ -6,6 +6,7 @@ final class PhrictionContentQuery
   private $ids;
   private $phids;
   private $documentPHIDs;
+  private $versions;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class PhrictionContentQuery
 
   public function withDocumentPHIDs(array $phids) {
     $this->documentPHIDs = $phids;
+    return $this;
+  }
+
+  public function withVersions(array $versions) {
+    $this->versions = $versions;
     return $this;
   }
 
@@ -45,6 +51,13 @@ final class PhrictionContentQuery
         $conn,
         'c.phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->versions !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'version IN (%Ld)',
+        $this->versions);
     }
 
     if ($this->documentPHIDs !== null) {

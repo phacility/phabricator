@@ -28,10 +28,11 @@ final class PhrictionEditController
 
       $revert = $request->getInt('revert');
       if ($revert) {
-        $content = id(new PhrictionContent())->loadOneWhere(
-          'documentID = %d AND version = %d',
-          $document->getID(),
-          $revert);
+        $content = id(new PhrictionContentQuery())
+          ->setViewer($viewer)
+          ->withDocumentPHIDs(array($document->getPHID()))
+          ->withVersions(array($revert))
+          ->executeOne();
         if (!$content) {
           return new Aphront404Response();
         }

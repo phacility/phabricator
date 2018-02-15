@@ -145,9 +145,12 @@ final class PhrictionDocumentQuery
     }
 
     if ($this->needContent) {
-      $contents = id(new PhrictionContent())->loadAllWhere(
-        'id IN (%Ld)',
-        mpull($documents, 'getContentID'));
+      $contents = id(new PhrictionContentQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withIDs(mpull($documents, 'getContentID'))
+        ->execute();
+      $contents = mpull($contents, null, 'getID');
 
       foreach ($documents as $key => $document) {
         $content_id = $document->getContentID();
