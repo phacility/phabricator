@@ -3,7 +3,8 @@
 /**
  * @task markup Markup Interface
  */
-final class PhrictionContent extends PhrictionDAO
+final class PhrictionContent
+  extends PhrictionDAO
   implements PhabricatorMarkupInterface {
 
   const MARKUP_FIELD_BODY = 'markup:body';
@@ -33,6 +34,7 @@ final class PhrictionContent extends PhrictionDAO
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'version' => 'uint32',
         'title' => 'sort',
@@ -58,6 +60,10 @@ final class PhrictionContent extends PhrictionDAO
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getPHIDType() {
+    return PhrictionContentPHIDType::TYPECONST;
   }
 
 
