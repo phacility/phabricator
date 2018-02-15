@@ -12,7 +12,7 @@ final class PhrictionListController
 
     $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($querykey)
-      ->setSearchEngine(new PhrictionSearchEngine())
+      ->setSearchEngine(new PhrictionDocumentSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);

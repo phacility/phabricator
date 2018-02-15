@@ -12,12 +12,7 @@ final class PhrictionDocumentQuery
 
   private $needContent;
 
-  private $status       = 'status-any';
-  const STATUS_ANY      = 'status-any';
-  const STATUS_OPEN     = 'status-open';
-  const STATUS_NONSTUB  = 'status-nonstub';
-
-  const ORDER_HIERARCHY = 'order-hierarchy';
+  const ORDER_HIERARCHY = 'hierarchy';
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -46,11 +41,6 @@ final class PhrictionDocumentQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
-    return $this;
-  }
-
-  public function withStatus($status) {
-    $this->status = $status;
     return $this;
   }
 
@@ -224,42 +214,16 @@ final class PhrictionDocumentQuery
         $this->depths);
     }
 
-    switch ($this->status) {
-      case self::STATUS_OPEN:
-        $where[] = qsprintf(
-          $conn,
-          'd.status NOT IN (%Ld)',
-          array(
-            PhrictionDocumentStatus::STATUS_DELETED,
-            PhrictionDocumentStatus::STATUS_MOVED,
-            PhrictionDocumentStatus::STATUS_STUB,
-          ));
-        break;
-      case self::STATUS_NONSTUB:
-        $where[] = qsprintf(
-          $conn,
-          'd.status NOT IN (%Ld)',
-          array(
-            PhrictionDocumentStatus::STATUS_MOVED,
-            PhrictionDocumentStatus::STATUS_STUB,
-          ));
-        break;
-      case self::STATUS_ANY:
-        break;
-      default:
-        throw new Exception(pht("Unknown status '%s'!", $this->status));
-    }
-
     return $where;
   }
 
   public function getBuiltinOrders() {
-    return array(
+    return parent::getBuiltinOrders() + array(
       self::ORDER_HIERARCHY => array(
         'vector' => array('depth', 'title', 'updated'),
         'name' => pht('Hierarchy'),
       ),
-    ) + parent::getBuiltinOrders();
+    );
   }
 
   public function getOrderableColumns() {

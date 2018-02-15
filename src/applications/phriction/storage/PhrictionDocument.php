@@ -148,6 +148,29 @@ final class PhrictionDocument extends PhrictionDAO
     return $this;
   }
 
+/* -(  Status  )------------------------------------------------------------- */
+
+
+  public function getStatusObject() {
+    return PhrictionDocumentStatus::newStatusObject($this->getStatus());
+  }
+
+  public function getStatusIcon() {
+    return $this->getStatusObject()->getIcon();
+  }
+
+  public function getStatusColor() {
+    return $this->getStatusObject()->getColor();
+  }
+
+  public function getStatusDisplayName() {
+    return $this->getStatusObject()->getDisplayName();
+  }
+
+  public function isActive() {
+    return $this->getStatusObject()->isActive();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
