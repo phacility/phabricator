@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @task markup Markup Interface
- */
 final class PhrictionContent
-  extends PhrictionDAO
-  implements PhabricatorMarkupInterface {
-
-  const MARKUP_FIELD_BODY = 'markup:body';
+  extends PhrictionDAO {
 
   protected $id;
   protected $documentID;
@@ -21,16 +15,6 @@ final class PhrictionContent
 
   protected $changeType;
   protected $changeRef;
-
-  private $renderedTableOfContents;
-
-  public function renderContent(PhabricatorUser $viewer) {
-    return PhabricatorMarkupEngine::renderOneObject(
-      $this,
-      self::MARKUP_FIELD_BODY,
-      $viewer,
-      $this);
-  }
 
   protected function getConfiguration() {
     return array(
@@ -66,68 +50,10 @@ final class PhrictionContent
     return PhrictionContentPHIDType::TYPECONST;
   }
 
-
-/* -(  Markup Interface  )--------------------------------------------------- */
-
-
-  /**
-   * @task markup
-   */
-  public function getMarkupFieldKey($field) {
-    $content = $this->getMarkupText($field);
-    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
+  public function newRemarkupView(PhabricatorUser $viewer) {
+    return id(new PHUIRemarkupView($viewer, $this->getContent()))
+      ->setRemarkupOption(PHUIRemarkupView::OPTION_GENERATE_TOC, true)
+      ->setGenerateTableOfContents(true);
   }
-
-
-  /**
-   * @task markup
-   */
-  public function getMarkupText($field) {
-    return $this->getContent();
-  }
-
-
-  /**
-   * @task markup
-   */
-  public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newPhrictionMarkupEngine();
-  }
-
-
-  /**
-   * @task markup
-   */
-  public function didMarkupText(
-    $field,
-    $output,
-    PhutilMarkupEngine $engine) {
-
-    $this->renderedTableOfContents =
-      PhutilRemarkupHeaderBlockRule::renderTableOfContents($engine);
-
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-remarkup',
-      ),
-      $output);
-  }
-
-  /**
-   * @task markup
-   */
-  public function getRenderedTableOfContents() {
-    return $this->renderedTableOfContents;
-  }
-
-
-  /**
-   * @task markup
-   */
-  public function shouldUseMarkupCache($field) {
-    return (bool)$this->getID();
-  }
-
 
 }

@@ -97,8 +97,12 @@ final class PhrictionDocumentController
       if ($current_status == PhrictionChangeType::CHANGE_EDIT ||
         $current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
 
-        $core_content = $content->renderContent($viewer);
-        $toc = $this->getToc($content);
+        $remarkup_view = $content->newRemarkupView($viewer);
+
+        $core_content = $remarkup_view->render();
+
+        $toc = $remarkup_view->getTableOfContents();
+        $toc = $this->getToc($toc);
 
       } else if ($current_status == PhrictionChangeType::CHANGE_DELETE) {
         $notice = new PHUIInfoView();
@@ -474,8 +478,8 @@ final class PhrictionDocumentController
     return $this->slug;
   }
 
-  protected function getToc(PhrictionContent $content) {
-    $toc = $content->getRenderedTableOfContents();
+  protected function getToc($toc) {
+
     if ($toc) {
       $toc = phutil_tag_div('phui-document-toc-content', array(
         phutil_tag_div(
@@ -484,6 +488,7 @@ final class PhrictionDocumentController
         $toc,
       ));
     }
+
     return $toc;
   }
 

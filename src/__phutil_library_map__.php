@@ -10755,10 +10755,7 @@ phutil_register_library_map(array(
     'PhrictionChangeType' => 'PhrictionConstants',
     'PhrictionConduitAPIMethod' => 'ConduitAPIMethod',
     'PhrictionConstants' => 'Phobject',
-    'PhrictionContent' => array(
-      'PhrictionDAO',
-      'PhabricatorMarkupInterface',
-    ),
+    'PhrictionContent' => 'PhrictionDAO',
     'PhrictionContentPHIDType' => 'PhabricatorPHIDType',
     'PhrictionContentQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhrictionController' => 'PhabricatorController',
