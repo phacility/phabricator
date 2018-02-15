@@ -4,7 +4,8 @@ final class PhrictionContent
   extends PhrictionDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   protected $documentID;
   protected $version;
@@ -101,6 +102,39 @@ final class PhrictionContent
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
     $this->delete();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('documentPHID')
+        ->setType('phid')
+        ->setDescription(pht('Document this content is for.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('version')
+        ->setType('int')
+        ->setDescription(pht('Content version.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('Author of this version of the content.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'documentPHID' => $this->getDocument()->getPHID(),
+      'version' => (int)$this->getVersion(),
+      'authorPHID' => $this->getAuthorPHID(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
