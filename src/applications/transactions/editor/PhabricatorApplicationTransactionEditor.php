@@ -2880,11 +2880,13 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->setViewer($this->requireActor());
+    $body = id(new PhabricatorMetaMTAMailBody())
+      ->setViewer($this->requireActor())
+      ->setContextObject($object);
 
     $this->addHeadersAndCommentsToMailBody($body, $xactions);
     $this->addCustomFieldsToMailBody($body, $object, $xactions);
+
     return $body;
   }
 

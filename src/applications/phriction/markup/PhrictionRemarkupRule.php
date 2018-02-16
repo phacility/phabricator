@@ -28,17 +28,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
 
     // Handle relative links.
     if ((substr($link, 0, 2) === './') || (substr($link, 0, 3) === '../')) {
-      $base = null;
-      $context = $this->getEngine()->getConfig('contextObject');
-      if ($context !== null && $context instanceof PhrictionContent) {
-        // Handle content when it's being rendered in document view.
-        $base = $context->getSlug();
-      }
-      if ($context !== null && is_array($context) &&
-          idx($context, 'phriction.isPreview')) {
-        // Handle content when it's a preview for the Phriction editor.
-        $base = idx($context, 'phriction.slug');
-      }
+      $base = $this->getRelativeBaseURI();
       if ($base !== null) {
         $base_parts = explode('/', rtrim($base, '/'));
         $rel_parts = explode('/', rtrim($link, '/'));
@@ -194,5 +184,31 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       $this->getEngine()->overwriteStoredText($spec['token'], $text);
     }
   }
+
+  private function getRelativeBaseURI() {
+    $context = $this->getEngine()->getConfig('contextObject');
+
+    if (!$context) {
+      return null;
+    }
+
+    // Handle content when it's a preview for the Phriction editor.
+    if (is_array($context)) {
+      if (idx($context, 'phriction.isPreview')) {
+        return idx($context, 'phriction.slug');
+      }
+    }
+
+    if ($context instanceof PhrictionContent) {
+      return $context->getSlug();
+    }
+
+    if ($context instanceof PhrictionDocument) {
+      return $context->getSlug();
+    }
+
+    return null;
+  }
+
 
 }
