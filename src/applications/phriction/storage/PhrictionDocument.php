@@ -149,6 +149,10 @@ final class PhrictionDocument extends PhrictionDAO
     return $this;
   }
 
+  public function getURI() {
+    return self::getSlugURI($this->getSlug());
+  }
+
 /* -(  Status  )------------------------------------------------------------- */
 
 
