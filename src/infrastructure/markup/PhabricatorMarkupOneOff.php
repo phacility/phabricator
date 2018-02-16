@@ -12,6 +12,10 @@ final class PhabricatorMarkupOneOff
   private $engineRuleset;
   private $engine;
   private $disableCache;
+  private $contentCacheFragment;
+
+  private $generateTableOfContents;
+  private $tableOfContents;
 
   public function setEngineRuleset($engine_ruleset) {
     $this->engineRuleset = $engine_ruleset;
@@ -54,7 +58,34 @@ final class PhabricatorMarkupOneOff
     return $this->disableCache;
   }
 
+  public function setGenerateTableOfContents($generate) {
+    $this->generateTableOfContents = $generate;
+    return $this;
+  }
+
+  public function getGenerateTableOfContents() {
+    return $this->generateTableOfContents;
+  }
+
+  public function getTableOfContents() {
+    return $this->tableOfContents;
+  }
+
+  public function setContentCacheFragment($fragment) {
+    $this->contentCacheFragment = $fragment;
+    return $this;
+  }
+
+  public function getContentCacheFragment() {
+    return $this->contentCacheFragment;
+  }
+
   public function getMarkupFieldKey($field) {
+    $fragment = $this->getContentCacheFragment();
+    if ($fragment !== null) {
+      return $fragment;
+    }
+
     return PhabricatorHash::digestForIndex($this->getContent()).':oneoff';
   }
 
@@ -81,7 +112,13 @@ final class PhabricatorMarkupOneOff
     $output,
     PhutilMarkupEngine $engine) {
 
+    if ($this->getGenerateTableOfContents()) {
+      $toc = PhutilRemarkupHeaderBlockRule::renderTableOfContents($engine);
+      $this->tableOfContents = $toc;
+    }
+
     require_celerity_resource('phabricator-remarkup-css');
+
     return phutil_tag(
       'div',
       array(

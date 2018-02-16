@@ -43,6 +43,12 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     HarbormasterBuildTarget $build_target) {
 
     $viewer = PhabricatorUser::getOmnipotentUser();
+
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $this->logSilencedCall($build, $build_target, pht('HTTP Request'));
+      throw new HarbormasterBuildFailureException();
+    }
+
     $settings = $this->getSettings();
     $variables = $build_target->getVariables();
 

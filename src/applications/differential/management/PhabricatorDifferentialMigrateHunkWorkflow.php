@@ -32,8 +32,8 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
 
     $storage = $args->getArg('to');
     switch ($storage) {
-      case DifferentialModernHunk::DATATYPE_TEXT:
-      case DifferentialModernHunk::DATATYPE_FILE:
+      case DifferentialHunk::DATATYPE_TEXT:
+      case DifferentialHunk::DATATYPE_FILE:
         break;
       default:
         throw new PhutilArgumentUsageException(
@@ -44,13 +44,13 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
     $old_data = $hunk->getChanges();
 
     switch ($storage) {
-      case DifferentialModernHunk::DATATYPE_TEXT:
+      case DifferentialHunk::DATATYPE_TEXT:
         $hunk->saveAsText();
         $this->logOkay(
           pht('TEXT'),
           pht('Convereted hunk to text storage.'));
         break;
-      case DifferentialModernHunk::DATATYPE_FILE:
+      case DifferentialHunk::DATATYPE_FILE:
         $hunk->saveAsFile();
         $this->logOkay(
           pht('FILE'),
@@ -71,7 +71,7 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
   }
 
   private function loadHunk($id) {
-    $hunk = id(new DifferentialModernHunk())->load($id);
+    $hunk = id(new DifferentialHunk())->load($id);
     if (!$hunk) {
       throw new PhutilArgumentUsageException(
         pht(

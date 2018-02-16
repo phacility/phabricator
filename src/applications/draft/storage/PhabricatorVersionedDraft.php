@@ -80,20 +80,17 @@ final class PhabricatorVersionedDraft extends PhabricatorDraftDAO {
 
   public static function purgeDrafts(
     $object_phid,
-    $viewer_phid,
-    $version) {
+    $viewer_phid) {
 
     $draft = new PhabricatorVersionedDraft();
     $conn_w = $draft->establishConnection('w');
 
     queryfx(
       $conn_w,
-      'DELETE FROM %T WHERE objectPHID = %s AND authorPHID = %s
-        AND version <= %d',
+      'DELETE FROM %T WHERE objectPHID = %s AND authorPHID = %s',
       $draft->getTableName(),
       $object_phid,
-      $viewer_phid,
-      $version);
+      $viewer_phid);
   }
 
 }

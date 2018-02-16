@@ -12,7 +12,7 @@ final class PhrictionDocumentFerretEngine
   }
 
   public function newSearchEngine() {
-    return new PhrictionSearchEngine();
+    return new PhrictionDocumentSearchEngine();
   }
 
 }

@@ -15,53 +15,10 @@ final class HarbormasterBuildable extends HarbormasterDAO
   private $containerObject = self::ATTACHABLE;
   private $builds = self::ATTACHABLE;
 
-  const STATUS_BUILDING = 'building';
-  const STATUS_PASSED = 'passed';
-  const STATUS_FAILED = 'failed';
-
-  public static function getBuildableStatusName($status) {
-    $map = self::getBuildStatusMap();
-    return idx($map, $status, pht('Unknown ("%s")', $status));
-  }
-
-  public static function getBuildStatusMap() {
-    return array(
-      self::STATUS_BUILDING => pht('Building'),
-      self::STATUS_PASSED => pht('Passed'),
-      self::STATUS_FAILED => pht('Failed'),
-    );
-  }
-
-  public static function getBuildableStatusIcon($status) {
-    switch ($status) {
-      case self::STATUS_BUILDING:
-        return PHUIStatusItemView::ICON_RIGHT;
-      case self::STATUS_PASSED:
-        return PHUIStatusItemView::ICON_ACCEPT;
-      case self::STATUS_FAILED:
-        return PHUIStatusItemView::ICON_REJECT;
-      default:
-        return PHUIStatusItemView::ICON_QUESTION;
-    }
-  }
-
-  public static function getBuildableStatusColor($status) {
-    switch ($status) {
-      case self::STATUS_BUILDING:
-        return 'blue';
-      case self::STATUS_PASSED:
-        return 'green';
-      case self::STATUS_FAILED:
-        return 'red';
-      default:
-        return 'bluegrey';
-    }
-  }
-
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
       ->setIsManualBuildable(0)
-      ->setBuildableStatus(self::STATUS_BUILDING);
+      ->setBuildableStatus(HarbormasterBuildableStatus::STATUS_PREPARING);
   }
 
   public function getMonogram() {
@@ -247,6 +204,59 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public function getBuilds() {
     return $this->assertAttached($this->builds);
+  }
+
+
+/* -(  Status  )------------------------------------------------------------- */
+
+
+  public function getBuildableStatusObject() {
+    $status = $this->getBuildableStatus();
+    return HarbormasterBuildableStatus::newBuildableStatusObject($status);
+  }
+
+  public function getStatusIcon() {
+    return $this->getBuildableStatusObject()->getIcon();
+  }
+
+  public function getStatusDisplayName() {
+    return $this->getBuildableStatusObject()->getDisplayName();
+  }
+
+  public function getStatusColor() {
+    return $this->getBuildableStatusObject()->getColor();
+  }
+
+  public function isPreparing() {
+    return $this->getBuildableStatusObject()->isPreparing();
+  }
+
+
+/* -(  Messages  )----------------------------------------------------------- */
+
+
+  public function sendMessage(
+    PhabricatorUser $viewer,
+    $message_type,
+    $queue_update) {
+
+    $message = HarbormasterBuildMessage::initializeNewMessage($viewer)
+      ->setReceiverPHID($this->getPHID())
+      ->setType($message_type)
+      ->save();
+
+    if ($queue_update) {
+      PhabricatorWorker::scheduleTask(
+        'HarbormasterBuildWorker',
+        array(
+          'buildablePHID' => $this->getPHID(),
+        ),
+        array(
+          'objectPHID' => $this->getPHID(),
+        ));
+    }
+
+    return $message;
   }
 
 

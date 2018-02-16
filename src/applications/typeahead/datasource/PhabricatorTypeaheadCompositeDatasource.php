@@ -223,7 +223,16 @@ abstract class PhabricatorTypeaheadCompositeDatasource
 
   private function getUsableDatasources() {
     if ($this->usable === null) {
+      $viewer = $this->getViewer();
+
       $sources = $this->getComponentDatasources();
+
+      $extension_sources = id(new PhabricatorDatasourceEngine())
+        ->setViewer($viewer)
+        ->newDatasourcesForCompositeDatasource($this);
+      foreach ($extension_sources as $extension_source) {
+        $sources[] = $extension_source;
+      }
 
       $usable = array();
       foreach ($sources as $source) {
@@ -239,7 +248,7 @@ abstract class PhabricatorTypeaheadCompositeDatasource
           }
         }
 
-        $source->setViewer($this->getViewer());
+        $source->setViewer($viewer);
         $usable[] = $source;
       }
       $this->usable = $usable;

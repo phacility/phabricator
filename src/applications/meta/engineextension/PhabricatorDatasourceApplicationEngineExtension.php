@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorQuickSearchApplicationEngineExtension
-  extends PhabricatorQuickSearchEngineExtension {
+final class PhabricatorDatasourceApplicationEngineExtension
+  extends PhabricatorDatasourceEngineExtension {
 
   public function newQuickSearchDatasources() {
     return array(

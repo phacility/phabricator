@@ -22,10 +22,19 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->setHeaderIcon('fa-link');
+      ->setHeaderIcon('fa-link')
+      ->setStatus(
+        $lease->getStatusIcon(),
+        $lease->getStatusColor(),
+        $lease->getStatusDisplayName());
 
     if ($lease->isReleasing()) {
-      $header->setStatus('fa-exclamation-triangle', 'red', pht('Releasing'));
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setIcon('fa-exclamation-triangle')
+          ->setColor('red')
+          ->setName('Releasing'));
     }
 
     $curtain = $this->buildCurtain($lease);
@@ -117,10 +126,6 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $viewer = $this->getViewer();
 
     $view = new PHUIPropertyListView();
-
-    $view->addProperty(
-      pht('Status'),
-      DrydockLeaseStatus::getNameForStatus($lease->getStatus()));
 
     $view->addProperty(
       pht('Resource Type'),

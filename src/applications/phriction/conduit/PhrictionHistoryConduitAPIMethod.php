@@ -10,6 +10,16 @@ final class PhrictionHistoryConduitAPIMethod extends PhrictionConduitAPIMethod {
     return pht('Retrieve history about a Phriction document.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "phriction.content.search" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'slug' => 'required string',

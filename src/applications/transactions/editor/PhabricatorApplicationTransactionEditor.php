@@ -924,23 +924,13 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($object->getID()) {
         $this->buildOldRecipientLists($object, $xactions);
 
-        foreach ($xactions as $xaction) {
+        $object->openTransaction();
+        $transaction_open = true;
 
-          // If any of the transactions require a read lock, hold one and
-          // reload the object. We need to do this fairly early so that the
-          // call to `adjustTransactionValues()` (which populates old values)
-          // is based on the synchronized state of the object, which may differ
-          // from the state when it was originally loaded.
+        $object->beginReadLocking();
+        $read_locking = true;
 
-          if ($this->shouldReadLock($object, $xaction)) {
-            $object->openTransaction();
-            $object->beginReadLocking();
-            $transaction_open = true;
-            $read_locking = true;
-            $object->reload();
-            break;
-          }
-        }
+        $object->reload();
       }
 
       if ($this->shouldApplyInitialEffects($object, $xactions)) {
@@ -951,66 +941,57 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
-    if ($this->shouldApplyInitialEffects($object, $xactions)) {
-      $this->applyInitialEffects($object, $xactions);
-    }
-
-    foreach ($xactions as $xaction) {
-      $this->adjustTransactionValues($object, $xaction);
-    }
-
     try {
-      $xactions = $this->filterTransactions($object, $xactions);
-    } catch (Exception $ex) {
-      if ($read_locking) {
-        $object->endReadLocking();
+      if ($this->shouldApplyInitialEffects($object, $xactions)) {
+        $this->applyInitialEffects($object, $xactions);
       }
-      if ($transaction_open) {
-        $object->killTransaction();
-      }
-      throw $ex;
-    }
 
-    // TODO: Once everything is on EditEngine, just use getIsNewObject() to
-    // figure this out instead.
-    $mark_as_create = false;
-    $create_type = PhabricatorTransactions::TYPE_CREATE;
-    foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() == $create_type) {
-        $mark_as_create = true;
-      }
-    }
-
-    if ($mark_as_create) {
       foreach ($xactions as $xaction) {
-        $xaction->setIsCreateTransaction(true);
+        $this->adjustTransactionValues($object, $xaction);
       }
-    }
 
-    // Now that we've merged, filtered, and combined transactions, check for
-    // required capabilities.
-    foreach ($xactions as $xaction) {
-      $this->requireCapabilities($object, $xaction);
-    }
+      $xactions = $this->filterTransactions($object, $xactions);
 
-    $xactions = $this->sortTransactions($xactions);
-    $file_phids = $this->extractFilePHIDs($object, $xactions);
+      // TODO: Once everything is on EditEngine, just use getIsNewObject() to
+      // figure this out instead.
+      $mark_as_create = false;
+      $create_type = PhabricatorTransactions::TYPE_CREATE;
+      foreach ($xactions as $xaction) {
+        if ($xaction->getTransactionType() == $create_type) {
+          $mark_as_create = true;
+        }
+      }
 
-    if ($is_preview) {
-      $this->loadHandles($xactions);
-      return $xactions;
-    }
+      if ($mark_as_create) {
+        foreach ($xactions as $xaction) {
+          $xaction->setIsCreateTransaction(true);
+        }
+      }
 
-    $comment_editor = id(new PhabricatorApplicationTransactionCommentEditor())
-      ->setActor($actor)
-      ->setActingAsPHID($this->getActingAsPHID())
-      ->setContentSource($this->getContentSource());
+      // Now that we've merged, filtered, and combined transactions, check for
+      // required capabilities.
+      foreach ($xactions as $xaction) {
+        $this->requireCapabilities($object, $xaction);
+      }
 
-    if (!$transaction_open) {
-      $object->openTransaction();
-    }
+      $xactions = $this->sortTransactions($xactions);
+      $file_phids = $this->extractFilePHIDs($object, $xactions);
 
-    try {
+      if ($is_preview) {
+        $this->loadHandles($xactions);
+        return $xactions;
+      }
+
+      $comment_editor = id(new PhabricatorApplicationTransactionCommentEditor())
+        ->setActor($actor)
+        ->setActingAsPHID($this->getActingAsPHID())
+        ->setContentSource($this->getContentSource());
+
+      if (!$transaction_open) {
+        $object->openTransaction();
+        $transaction_open = true;
+      }
+
       foreach ($xactions as $xaction) {
         $this->applyInternalEffects($object, $xaction);
       }
@@ -1070,14 +1051,27 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       $xactions = $this->applyFinalEffects($object, $xactions);
+
       if ($read_locking) {
         $object->endReadLocking();
         $read_locking = false;
       }
 
-      $object->saveTransaction();
+      if ($transaction_open) {
+        $object->saveTransaction();
+        $transaction_open = false;
+      }
     } catch (Exception $ex) {
-      $object->killTransaction();
+      if ($read_locking) {
+        $object->endReadLocking();
+        $read_locking = false;
+      }
+
+      if ($transaction_open) {
+        $object->killTransaction();
+        $transaction_open = false;
+      }
+
       throw $ex;
     }
 
@@ -1317,46 +1311,6 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function didApplyTransactions($object, array $xactions) {
     // Hook for subclasses.
     return $xactions;
-  }
-
-
-  /**
-   * Determine if the editor should hold a read lock on the object while
-   * applying a transaction.
-   *
-   * If the editor does not hold a lock, two editors may read an object at the
-   * same time, then apply their changes without any synchronization. For most
-   * transactions, this does not matter much. However, it is important for some
-   * transactions. For example, if an object has a transaction count on it, both
-   * editors may read the object with `count = 23`, then independently update it
-   * and save the object with `count = 24` twice. This will produce the wrong
-   * state: the object really has 25 transactions, but the count is only 24.
-   *
-   * Generally, transactions fall into one of four buckets:
-   *
-   *   - Append operations: Actions like adding a comment to an object purely
-   *     add information to its state, and do not depend on the current object
-   *     state in any way. These transactions never need to hold locks.
-   *   - Overwrite operations: Actions like changing the title or description
-   *     of an object replace the current value with a new value, so the end
-   *     state is consistent without a lock. We currently do not lock these
-   *     transactions, although we may in the future.
-   *   - Edge operations: Edge and subscription operations have internal
-   *     synchronization which limits the damage race conditions can cause.
-   *     We do not currently lock these transactions, although we may in the
-   *     future.
-   *   - Update operations: Actions like incrementing a count on an object.
-   *     These operations generally should use locks, unless it is not
-   *     important that the state remain consistent in the presence of races.
-   *
-   * @param   PhabricatorLiskDAO  Object being updated.
-   * @param   PhabricatorApplicationTransaction Transaction being applied.
-   * @return  bool                True to synchronize the edit with a lock.
-   */
-  protected function shouldReadLock(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    return false;
   }
 
   private function loadHandles(array $xactions) {
@@ -2926,11 +2880,13 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->setViewer($this->requireActor());
+    $body = id(new PhabricatorMetaMTAMailBody())
+      ->setViewer($this->requireActor())
+      ->setContextObject($object);
 
     $this->addHeadersAndCommentsToMailBody($body, $xactions);
     $this->addCustomFieldsToMailBody($body, $object, $xactions);
+
     return $body;
   }
 
@@ -3308,10 +3264,32 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->setHeraldTranscript($xscript);
 
     if ($adapter instanceof HarbormasterBuildableAdapterInterface) {
+      $buildable_phid = $adapter->getHarbormasterBuildablePHID();
+
       HarbormasterBuildable::applyBuildPlans(
-        $adapter->getHarbormasterBuildablePHID(),
+        $buildable_phid,
         $adapter->getHarbormasterContainerPHID(),
         $adapter->getQueuedHarbormasterBuildRequests());
+
+      // Whether we queued any builds or not, any automatic buildable for this
+      // object is now done preparing builds and can transition into a
+      // completed status.
+      $buildables = id(new HarbormasterBuildableQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withManualBuildables(false)
+        ->withBuildablePHIDs(array($buildable_phid))
+        ->execute();
+      foreach ($buildables as $buildable) {
+        // If this buildable has already moved beyond preparation, we don't
+        // need to nudge it again.
+        if (!$buildable->isPreparing()) {
+          continue;
+        }
+        $buildable->sendMessage(
+          $this->getActor(),
+          HarbormasterMessageType::BUILDABLE_BUILD,
+          true);
+      }
     }
 
     $this->mustEncrypt = $adapter->getMustEncryptReasons();

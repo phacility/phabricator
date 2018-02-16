@@ -596,10 +596,13 @@ final class PhrictionTransactionEditor
       ->setAuthorPHID($this->getActor()->getPHID())
       ->setChangeType(PhrictionChangeType::CHANGE_EDIT)
       ->setTitle($this->getOldContent()->getTitle())
-      ->setContent($this->getOldContent()->getContent());
+      ->setContent($this->getOldContent()->getContent())
+      ->setDescription('');
+
     if (strlen($this->getDescription())) {
       $new_content->setDescription($this->getDescription());
     }
+
     $new_content->setVersion($this->getOldContent()->getVersion() + 1);
 
     return $new_content;

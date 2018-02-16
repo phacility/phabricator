@@ -14,6 +14,10 @@ final class HeraldCallWebhookAction extends HeraldAction {
   }
 
   public function supportsObject($object) {
+    if (!$this->getAdapter()->supportsWebhooks()) {
+      return false;
+    }
+
     return true;
   }
 

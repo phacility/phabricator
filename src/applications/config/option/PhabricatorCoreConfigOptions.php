@@ -37,6 +37,24 @@ final class PhabricatorCoreConfigOptions
     $proto_doc_name = pht('User Guide: Prototype Applications');
     $applications_app_href = '/applications/';
 
+    $silent_description = $this->deformat(pht(<<<EOREMARKUP
+This option allows you to stop Phabricator from sending data to most external
+services: it will disable email, SMS, repository mirroring, remote builds,
+Doorkeeper writes, and webhooks.
+
+This option is intended to allow a Phabricator instance to be exported, copied,
+imported, and run in a test environment without impacting users. For example,
+if you are migrating to new hardware, you could perform a test migration first
+with this flag set, make sure things work, and then do a production cutover
+later with higher confidence and less disruption.
+
+Without making use of this flag to silence the temporary test environment,
+users would receive duplicate email during the time the test instance and old
+production instance were both in operation.
+EOREMARKUP
+      ));
+
+
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
         ->setLocked(true)
@@ -232,21 +250,7 @@ final class PhabricatorCoreConfigOptions
             pht('Run Normally'),
           ))
         ->setSummary(pht('Stop Phabricator from sending any email, etc.'))
-        ->setDescription(
-          pht(
-            'This option allows you to stop Phabricator from sending '.
-            'any data to external services. Among other things, it will '.
-            'disable email, SMS, repository mirroring, and HTTP hooks.'.
-            "\n\n".
-            'This option is intended to allow a Phabricator instance to '.
-            'be exported, copied, imported, and run in a test environment '.
-            'without impacting users. For example, if you are migrating '.
-            'to new hardware, you could perform a test migration first, '.
-            'make sure things work, and then do a production cutover '.
-            'later with higher confidence and less disruption. Without '.
-            'this flag, users would receive duplicate email during the '.
-            'time the test instance and old production instance were '.
-            'both in operation.')),
+        ->setDescription($silent_description),
       );
 
   }

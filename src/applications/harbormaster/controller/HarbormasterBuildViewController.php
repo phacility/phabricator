@@ -65,9 +65,9 @@ final class HarbormasterBuildViewController
     if ($build_targets) {
       $messages = id(new HarbormasterBuildMessageQuery())
         ->setViewer($viewer)
-        ->withBuildTargetPHIDs(mpull($build_targets, 'getPHID'))
+        ->withReceiverPHIDs(mpull($build_targets, 'getPHID'))
         ->execute();
-      $messages = mgroup($messages, 'getBuildTargetPHID');
+      $messages = mgroup($messages, 'getReceiverPHID');
     } else {
       $messages = array();
     }

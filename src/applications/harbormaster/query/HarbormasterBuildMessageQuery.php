@@ -4,7 +4,7 @@ final class HarbormasterBuildMessageQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
-  private $buildTargetPHIDs;
+  private $receiverPHIDs;
   private $consumed;
 
   public function withIDs(array $ids) {
@@ -12,8 +12,8 @@ final class HarbormasterBuildMessageQuery
     return $this;
   }
 
-  public function withBuildTargetPHIDs(array $phids) {
-    $this->buildTargetPHIDs = $phids;
+  public function withReceiverPHIDs(array $phids) {
+    $this->receiverPHIDs = $phids;
     return $this;
   }
 
@@ -22,73 +22,67 @@ final class HarbormasterBuildMessageQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new HarbormasterBuildMessage();
+  }
+
   protected function loadPage() {
-    $table = new HarbormasterBuildMessage();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $page) {
-    $build_target_phids = array_filter(mpull($page, 'getBuildTargetPHID'));
-    if ($build_target_phids) {
-      $build_targets = id(new PhabricatorObjectQuery())
+    $receiver_phids = array_filter(mpull($page, 'getReceiverPHID'));
+    if ($receiver_phids) {
+      $receivers = id(new PhabricatorObjectQuery())
         ->setViewer($this->getViewer())
-        ->withPHIDs($build_target_phids)
+        ->withPHIDs($receiver_phids)
         ->setParentQuery($this)
         ->execute();
-      $build_targets = mpull($build_targets, null, 'getPHID');
+      $receivers = mpull($receivers, null, 'getPHID');
     } else {
-      $build_targets = array();
+      $receivers = array();
     }
 
     foreach ($page as $key => $message) {
-      $build_target_phid = $message->getBuildTargetPHID();
-      if (empty($build_targets[$build_target_phid])) {
+      $receiver_phid = $message->getReceiverPHID();
+
+      if (empty($receivers[$receiver_phid])) {
         unset($page[$key]);
+        $this->didRejectResult($message);
         continue;
       }
-      $message->attachBuildTarget($build_targets[$build_target_phid]);
+
+      $message->attachReceiver($receivers[$receiver_phid]);
     }
 
     return $page;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->buildTargetPHIDs) {
+    if ($this->receiverPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'buildTargetPHID IN (%Ls)',
-        $this->buildTargetPHIDs);
+        $conn,
+        'receiverPHID IN (%Ls)',
+        $this->receiverPHIDs);
     }
 
     if ($this->consumed !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'isConsumed = %d',
         (int)$this->consumed);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

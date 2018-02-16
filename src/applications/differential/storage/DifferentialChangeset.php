@@ -118,11 +118,11 @@ final class DifferentialChangeset
   public function delete() {
     $this->openTransaction();
 
-      $modern_hunks = id(new DifferentialModernHunk())->loadAllWhere(
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
         'changesetID = %d',
         $this->getID());
-      foreach ($modern_hunks as $modern_hunk) {
-        $modern_hunk->delete();
+      foreach ($hunks as $hunk) {
+        $hunk->delete();
       }
 
       $this->unsavedHunks = array();
@@ -292,7 +292,7 @@ final class DifferentialChangeset
     PhabricatorDestructionEngine $engine) {
     $this->openTransaction();
 
-      $hunks = id(new DifferentialModernHunk())->loadAllWhere(
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
         'changesetID = %d',
         $this->getID());
       foreach ($hunks as $hunk) {

@@ -87,4 +87,8 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
       $this->hookEngine->getRepository()->getProjectPHIDs());
   }
 
+  public function supportsWebhooks() {
+    return false;
+  }
+
 }

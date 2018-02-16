@@ -295,6 +295,18 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
       ->append($body);
   }
 
+  protected function logSilencedCall(
+    HarbormasterBuild $build,
+    HarbormasterBuildTarget $build_target,
+    $label) {
+
+    $build_target
+      ->newLog($label, 'silenced')
+      ->append(
+        pht(
+          'Declining to make service call because `phabricator.silent` is '.
+          'enabled in configuration.'));
+  }
 
 
 /* -(  Automatic Targets  )-------------------------------------------------- */

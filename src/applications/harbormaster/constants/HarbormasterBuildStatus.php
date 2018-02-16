@@ -2,50 +2,55 @@
 
 final class HarbormasterBuildStatus extends Phobject {
 
-  /**
-   * Not currently being built.
-   */
   const STATUS_INACTIVE = 'inactive';
-
-  /**
-   * Pending pick up by the Harbormaster daemon.
-   */
   const STATUS_PENDING = 'pending';
-
-  /**
-   * Current building the buildable.
-   */
   const STATUS_BUILDING = 'building';
-
-  /**
-   * The build has passed.
-   */
   const STATUS_PASSED = 'passed';
-
-  /**
-   * The build has failed.
-   */
   const STATUS_FAILED = 'failed';
-
-  /**
-   * The build has aborted.
-   */
   const STATUS_ABORTED = 'aborted';
-
-  /**
-   * The build encountered an unexpected error.
-   */
   const STATUS_ERROR = 'error';
-
-  /**
-   * The build has been paused.
-   */
   const STATUS_PAUSED = 'paused';
-
-  /**
-   * The build has been deadlocked.
-   */
   const STATUS_DEADLOCKED = 'deadlocked';
+
+  private $key;
+  private $properties;
+
+  public function __construct($key, array $properties) {
+    $this->key = $key;
+    $this->properties = $properties;
+  }
+
+  public static function newBuildStatusObject($status) {
+    $spec = self::getBuildStatusSpec($status);
+    return new self($status, $spec);
+  }
+
+  private function getProperty($key) {
+    if (!array_key_exists($key, $this->properties)) {
+      throw new Exception(
+        pht(
+          'Attempting to access unknown build status property ("%s").',
+          $key));
+    }
+
+    return $this->properties[$key];
+  }
+
+  public function isBuilding() {
+    return $this->getProperty('isBuilding');
+  }
+
+  public function isPaused() {
+    return ($this->key === self::STATUS_PAUSED);
+  }
+
+  public function isComplete() {
+    return $this->getProperty('isComplete');
+  }
+
+  public function isPassed() {
+    return ($this->key === self::STATUS_PASSED);
+  }
 
 
   /**
@@ -56,7 +61,7 @@ final class HarbormasterBuildStatus extends Phobject {
    */
   public static function getBuildStatusName($status) {
     $spec = self::getBuildStatusSpec($status);
-    return idx($spec, 'name', pht('Unknown ("%s")', $status));
+    return $spec['name'];
   }
 
   public static function getBuildStatusMap() {
@@ -66,17 +71,17 @@ final class HarbormasterBuildStatus extends Phobject {
 
   public static function getBuildStatusIcon($status) {
     $spec = self::getBuildStatusSpec($status);
-    return idx($spec, 'icon', 'fa-question-circle');
+    return $spec['icon'];
   }
 
   public static function getBuildStatusColor($status) {
     $spec = self::getBuildStatusSpec($status);
-    return idx($spec, 'color', 'bluegrey');
+    return $spec['color'];
   }
 
   public static function getBuildStatusANSIColor($status) {
     $spec = self::getBuildStatusSpec($status);
-    return idx($spec, 'color.ansi', 'magenta');
+    return $spec['color.ansi'];
   }
 
   public static function getWaitingStatusConstants() {
@@ -110,60 +115,90 @@ final class HarbormasterBuildStatus extends Phobject {
         'icon' => 'fa-circle-o',
         'color' => 'dark',
         'color.ansi' => 'yellow',
+        'isBuilding' => false,
+        'isComplete' => false,
       ),
       self::STATUS_PENDING => array(
         'name' => pht('Pending'),
         'icon' => 'fa-circle-o',
         'color' => 'blue',
         'color.ansi' => 'yellow',
+        'isBuilding' => true,
+        'isComplete' => false,
       ),
       self::STATUS_BUILDING => array(
         'name' => pht('Building'),
         'icon' => 'fa-chevron-circle-right',
         'color' => 'blue',
         'color.ansi' => 'yellow',
+        'isBuilding' => true,
+        'isComplete' => false,
       ),
       self::STATUS_PASSED => array(
         'name' => pht('Passed'),
         'icon' => 'fa-check-circle',
         'color' => 'green',
         'color.ansi' => 'green',
+        'isBuilding' => false,
+        'isComplete' => true,
       ),
       self::STATUS_FAILED => array(
         'name' => pht('Failed'),
         'icon' => 'fa-times-circle',
         'color' => 'red',
         'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => true,
       ),
       self::STATUS_ABORTED => array(
         'name' => pht('Aborted'),
         'icon' => 'fa-minus-circle',
         'color' => 'red',
         'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => true,
       ),
       self::STATUS_ERROR => array(
         'name' => pht('Unexpected Error'),
         'icon' => 'fa-minus-circle',
         'color' => 'red',
         'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => true,
       ),
       self::STATUS_PAUSED => array(
         'name' => pht('Paused'),
         'icon' => 'fa-minus-circle',
         'color' => 'dark',
         'color.ansi' => 'yellow',
+        'isBuilding' => false,
+        'isComplete' => false,
       ),
       self::STATUS_DEADLOCKED => array(
         'name' => pht('Deadlocked'),
         'icon' => 'fa-exclamation-circle',
         'color' => 'red',
         'color.ansi' => 'red',
+        'isBuilding' => false,
+        'isComplete' => true,
       ),
     );
   }
 
   private static function getBuildStatusSpec($status) {
-    return idx(self::getBuildStatusSpecMap(), $status, array());
+    $map = self::getBuildStatusSpecMap();
+    if (isset($map[$status])) {
+      return $map[$status];
+    }
+
+    return array(
+      'name' => pht('Unknown ("%s")', $status),
+      'icon' => 'fa-question-circle',
+      'color' => 'bluegrey',
+      'color.ansi' => 'magenta',
+      'isBuilding' => false,
+      'isComplete' => false,
+    );
   }
 
 }

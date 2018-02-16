@@ -57,8 +57,19 @@ final class DifferentialRevisionPlanChangesTransaction
 
   protected function validateAction($object, PhabricatorUser $viewer) {
     if ($object->isDraft()) {
-      throw new Exception(
-        pht('You can not plan changes to a draft revision.'));
+
+      // See PHI346. Until the "Draft" state fully unprototypes, allow drafts
+      // to be moved to "changes planned" via the API. This preserves the
+      // behavior of "arc diff --plan-changes". We still prevent this
+      // transition from the web UI.
+      // TODO: Remove this once drafts leave prototype.
+
+      $editor = $this->getEditor();
+      $type_web = PhabricatorWebContentSource::SOURCECONST;
+      if ($editor->getContentSource()->getSource() == $type_web) {
+        throw new Exception(
+          pht('You can not plan changes to a draft revision.'));
+      }
     }
 
     if ($object->isChangePlanned()) {

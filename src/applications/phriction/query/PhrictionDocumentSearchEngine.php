@@ -1,6 +1,6 @@
 <?php
 
-final class PhrictionSearchEngine
+final class PhrictionDocumentSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
@@ -13,15 +13,18 @@ final class PhrictionSearchEngine
 
   public function newQuery() {
     return id(new PhrictionDocumentQuery())
-      ->needContent(true)
-      ->withStatus(PhrictionDocumentQuery::STATUS_NONSTUB);
+      ->needContent(true);
   }
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
-    if ($map['status']) {
-      $query->withStatus($map['status']);
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
+    }
+
+    if ($map['paths']) {
+      $query->withSlugs($map['paths']);
     }
 
     return $query;
@@ -29,10 +32,14 @@ final class PhrictionSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchSelectField())
-        ->setKey('status')
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
         ->setLabel(pht('Status'))
-        ->setOptions($this->getStatusOptions()),
+        ->setOptions(PhrictionDocumentStatus::getStatusMap()),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('paths')
+        ->setIsHidden(true)
+        ->setLabel(pht('Paths')),
     );
   }
 
@@ -59,17 +66,13 @@ final class PhrictionSearchEngine
         return $query;
       case 'active':
         return $query->setParameter(
-          'status', PhrictionDocumentQuery::STATUS_OPEN);
+          'statuses',
+          array(
+            PhrictionDocumentStatus::STATUS_EXISTS,
+          ));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
-  }
-
-  private function getStatusOptions() {
-    return array(
-      PhrictionDocumentQuery::STATUS_OPEN => pht('Show Active Documents'),
-      PhrictionDocumentQuery::STATUS_NONSTUB => pht('Show All Documents'),
-    );
   }
 
   protected function getRequiredHandlePHIDsForResultList(
@@ -118,15 +121,14 @@ final class PhrictionSearchEngine
 
       $item->addAttribute($slug_uri);
 
-      switch ($document->getStatus()) {
-        case PhrictionDocumentStatus::STATUS_DELETED:
-          $item->setDisabled(true);
-          $item->addIcon('delete', pht('Deleted'));
-          break;
-        case PhrictionDocumentStatus::STATUS_MOVED:
-          $item->setDisabled(true);
-          $item->addIcon('arrow-right', pht('Moved Away'));
-          break;
+      $icon = $document->getStatusIcon();
+      $color = $document->getStatusColor();
+      $label = $document->getStatusDisplayName();
+
+      $item->setStatusIcon("{$icon} {$color}", $label);
+
+      if (!$document->isActive()) {
+        $item->setDisabled(true);
       }
 
       $list->addItem($item);

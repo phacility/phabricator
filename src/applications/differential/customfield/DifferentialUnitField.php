@@ -44,12 +44,12 @@ final class DifferentialUnitField
       ->executeOne();
     if ($buildable) {
       switch ($buildable->getBuildableStatus()) {
-        case HarbormasterBuildable::STATUS_BUILDING:
+        case HarbormasterBuildableStatus::STATUS_BUILDING:
           $warnings[] = pht(
             'These changes have not finished building yet and may have build '.
             'failures.');
           break;
-        case HarbormasterBuildable::STATUS_FAILED:
+        case HarbormasterBuildableStatus::STATUS_FAILED:
           $warnings[] = pht(
             'These changes have failed to build.');
           break;

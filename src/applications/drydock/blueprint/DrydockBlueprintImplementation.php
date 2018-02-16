@@ -396,16 +396,20 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     }
 
     // For reasonable limits, actually check for an available slot.
-    $locks = DrydockSlotLock::loadLocks($blueprint_phid);
-    $locks = mpull($locks, null, 'getLockKey');
-
     $slots = range(0, $limit - 1);
     shuffle($slots);
 
+    $lock_names = array();
     foreach ($slots as $slot) {
-      $slot_lock = "allocator({$blueprint_phid}).limit({$slot})";
-      if (empty($locks[$slot_lock])) {
-        return $slot_lock;
+      $lock_names[] = "allocator({$blueprint_phid}).limit({$slot})";
+    }
+
+    $locks = DrydockSlotLock::loadHeldLocks($lock_names);
+    $locks = mpull($locks, null, 'getLockKey');
+
+    foreach ($lock_names as $lock_name) {
+      if (empty($locks[$lock_name])) {
+        return $lock_name;
       }
     }
 
@@ -414,7 +418,8 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     // lock will be free by the time we try to take it, but usually we'll just
     // fail to grab the lock, throw an appropriate lock exception, and get back
     // on the right path to retry later.
-    return $slot_lock;
+
+    return $lock_name;
   }
 
 

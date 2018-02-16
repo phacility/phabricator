@@ -128,6 +128,9 @@ JX.install('DiffChangesetList', {
       this._redrawFocus();
       this._redrawSelection();
       this.resetHover();
+
+      this._bannerChangeset = null;
+      this._redrawBanner();
     },
 
     wake: function() {
@@ -135,6 +138,9 @@ JX.install('DiffChangesetList', {
 
       this._redrawFocus();
       this._redrawSelection();
+
+      this._bannerChangeset = null;
+      this._redrawBanner();
 
       if (this._initialized) {
         return;
@@ -1374,17 +1380,17 @@ JX.install('DiffChangesetList', {
       var node = this._getBannerNode();
       var changeset = this._getVisibleChangeset();
 
+      if (!changeset) {
+        JX.DOM.remove(node);
+        return;
+      }
+
       // Don't do anything if nothing has changed. This seems to avoid some
       // flickering issues in Safari, at least.
       if (this._bannerChangeset === changeset) {
         return;
       }
       this._bannerChangeset = changeset;
-
-      if (!changeset) {
-        JX.DOM.remove(node);
-        return;
-      }
 
       var inlines = this._getInlinesByType();
 

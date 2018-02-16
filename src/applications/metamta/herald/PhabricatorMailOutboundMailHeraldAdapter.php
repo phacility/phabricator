@@ -64,4 +64,8 @@ final class PhabricatorMailOutboundMailHeraldAdapter
     return pht('Mail %d', $this->getObject()->getID());
   }
 
+  public function supportsWebhooks() {
+    return false;
+  }
+
 }

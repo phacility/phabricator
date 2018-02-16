@@ -83,6 +83,11 @@ final class HarbormasterManagementBuildWorkflow
       ->setContainerPHID($buildable->getHarbormasterContainerPHID())
       ->save();
 
+    $buildable->sendMessage(
+      $viewer,
+      HarbormasterMessageType::BUILDABLE_BUILD,
+      false);
+
     $console->writeOut(
       "%s\n",
       pht(

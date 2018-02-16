@@ -1211,6 +1211,11 @@ abstract class HeraldAdapter extends Phobject {
 /* -(  Webhooks  )----------------------------------------------------------- */
 
 
+  public function supportsWebhooks() {
+    return true;
+  }
+
+
   final public function queueWebhook($webhook_phid, $rule_phid) {
     $this->webhookMap[$webhook_phid][] = $rule_phid;
     return $this;

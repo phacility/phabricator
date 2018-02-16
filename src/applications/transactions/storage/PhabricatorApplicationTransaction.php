@@ -512,9 +512,9 @@ abstract class PhabricatorApplicationTransaction
         break;
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_PASSED:
+          case HarbormasterBuildableStatus::STATUS_PASSED:
             return 'green';
-          case HarbormasterBuildable::STATUS_FAILED:
+          case HarbormasterBuildableStatus::STATUS_FAILED:
             return 'red';
         }
         break;
@@ -676,7 +676,7 @@ abstract class PhabricatorApplicationTransaction
         return true;
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_FAILED:
+          case HarbormasterBuildableStatus::STATUS_FAILED:
             // For now, only ever send mail when builds fail. We might let
             // you customize this later, but in most cases this is probably
             // completely uninteresting.
@@ -739,7 +739,7 @@ abstract class PhabricatorApplicationTransaction
         return true;
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_FAILED:
+          case HarbormasterBuildableStatus::STATUS_FAILED:
             // For now, don't notify on build passes either. These are pretty
             // high volume and annoying, with very little present value. We
             // might want to turn them back on in the specific case of
@@ -1024,19 +1024,19 @@ abstract class PhabricatorApplicationTransaction
 
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_BUILDING:
+          case HarbormasterBuildableStatus::STATUS_BUILDING:
             return pht(
               '%s started building %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink(
                 $this->getMetadataValue('harbormaster:buildablePHID')));
-          case HarbormasterBuildable::STATUS_PASSED:
+          case HarbormasterBuildableStatus::STATUS_PASSED:
             return pht(
               '%s completed building %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink(
                 $this->getMetadataValue('harbormaster:buildablePHID')));
-          case HarbormasterBuildable::STATUS_FAILED:
+          case HarbormasterBuildableStatus::STATUS_FAILED:
             return pht(
               '%s failed to build %s!',
               $this->renderHandleLink($author_phid),
@@ -1236,21 +1236,21 @@ abstract class PhabricatorApplicationTransaction
         }
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_BUILDING:
+          case HarbormasterBuildableStatus::STATUS_BUILDING:
             return pht(
               '%s started building %s for %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink(
                 $this->getMetadataValue('harbormaster:buildablePHID')),
               $this->renderHandleLink($object_phid));
-          case HarbormasterBuildable::STATUS_PASSED:
+          case HarbormasterBuildableStatus::STATUS_PASSED:
             return pht(
               '%s completed building %s for %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink(
                 $this->getMetadataValue('harbormaster:buildablePHID')),
               $this->renderHandleLink($object_phid));
-          case HarbormasterBuildable::STATUS_FAILED:
+          case HarbormasterBuildableStatus::STATUS_FAILED:
             return pht(
               '%s failed to build %s for %s.',
               $this->renderHandleLink($author_phid),
@@ -1418,9 +1418,9 @@ abstract class PhabricatorApplicationTransaction
         return pht('Changed Subscribers');
       case PhabricatorTransactions::TYPE_BUILDABLE:
         switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_PASSED:
+          case HarbormasterBuildableStatus::STATUS_PASSED:
             return pht('Build Passed');
-          case HarbormasterBuildable::STATUS_FAILED:
+          case HarbormasterBuildableStatus::STATUS_FAILED:
             return pht('Build Failed');
           default:
             return pht('Build Status');

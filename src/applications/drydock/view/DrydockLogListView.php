@@ -52,7 +52,8 @@ final class DrydockLogListView extends AphrontView {
 
           $type = $type_object->getLogTypeName();
           $icon = $type_object->getLogTypeIcon($log_data);
-          $data = $type_object->renderLog($log_data);
+          $data = $type_object->renderLogForHTML($log_data);
+          $data = phutil_escape_html_newlines($data);
         } else {
           $type = pht('<Unknown: %s>', $type_key);
           $data = null;
