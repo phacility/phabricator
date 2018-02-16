@@ -521,6 +521,18 @@ JX.install('PHUIXAutocomplete', {
         return;
       }
 
+      // Deactivate immediately if a user types a character that we are
+      // reasonably sure means they don't want to use the autocomplete. For
+      // example, "##" is almost certainly a header or monospaced text, not
+      // a project autocompletion.
+      var cancels = this._getCancelCharacters();
+      for (var ii = 0; ii < cancels.length; ii++) {
+        if (text.indexOf(cancels[ii]) !== -1) {
+          this._deactivate();
+          return;
+        }
+      }
+
       var trim = this._trim(text);
 
       // If this rule has a prefix pattern, like the "[[ document ]]" rule,
@@ -540,18 +552,6 @@ JX.install('PHUIXAutocomplete', {
       // Store the current value now that we've finished mutating the text.
       // This needs to match what we pass to the typeahead datasource.
       this._value = trim;
-
-      // Deactivate immediately if a user types a character that we are
-      // reasonably sure means they don't want to use the autocomplete. For
-      // example, "##" is almost certainly a header or monospaced text, not
-      // a project autocompletion.
-      var cancels = this._getCancelCharacters();
-      for (var ii = 0; ii < cancels.length; ii++) {
-        if (trim.indexOf(cancels[ii]) !== -1) {
-          this._deactivate();
-          return;
-        }
-      }
 
       // Deactivate immediately if the user types an ignored token like ":)",
       // the smiley face emoticon. Note that we test against "text", not
