@@ -54,6 +54,7 @@ final class PhrictionContent
 
   public function newRemarkupView(PhabricatorUser $viewer) {
     return id(new PHUIRemarkupView($viewer, $this->getContent()))
+      ->setContextObject($this)
       ->setRemarkupOption(PHUIRemarkupView::OPTION_GENERATE_TOC, true)
       ->setGenerateTableOfContents(true);
   }
