@@ -107,6 +107,12 @@ JX.install('PHUIXAutocomplete', {
         prior = '<start>';
       }
 
+      // If this is a repeating sequence and the previous character is the
+      // same as the one the user just typed, like "((", don't reactivate.
+      if (prior === String.fromCharCode(code)) {
+        return;
+      }
+
       switch (prior) {
         case '<start>':
         case ' ':

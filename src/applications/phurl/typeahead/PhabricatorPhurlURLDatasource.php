@@ -24,6 +24,7 @@ final class PhabricatorPhurlURLDatasource
         ->setDisplayName($url->getName())
         ->setName($url->getName()." ".$url->getAlias())
         ->setPHID($url->getPHID())
+        ->setAutocomplete('(('.$url->getAlias().'))')
         ->addAttribute($url->getLongURL());
 
       $results[] = $result;

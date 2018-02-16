@@ -73,6 +73,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         ));
 
     $phriction_datasource = new PhrictionDocumentDatasource();
+    $phurl_datasource = new PhabricatorPhurlURLDatasource();
 
     Javelin::initBehavior(
       'phabricator-remarkup-assist',
@@ -130,7 +131,17 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
               '|',
               ']',
             ),
-            'prefix' => '^\\[*',
+            'prefix' => '^\\[',
+          ),
+          40 => array( // "("
+            'datasourceURI' => $phurl_datasource->getDatasourceURI(),
+            'headerIcon' => 'fa-compress',
+            'headerText' => pht('Find Phurl:'),
+            'hintText' => $phurl_datasource->getPlaceholderText(),
+            'cancel' => array(
+              ')',
+            ),
+            'prefix' => '^\\(',
           ),
         ),
       ));
