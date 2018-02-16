@@ -68,6 +68,7 @@ final class PhrictionDocumentDatasource
       $title = $content->getTitle();
 
       $sprite = 'phabricator-search-icon phui-font-fa phui-icon-view fa-book';
+      $autocomplete = '[[ '.$slug.' ]]';
 
       $result = id(new PhabricatorTypeaheadResult())
         ->setName($title)
@@ -77,6 +78,7 @@ final class PhrictionDocumentDatasource
         ->setDisplayType($slug)
         ->setPriorityType('wiki')
         ->setImageSprite($sprite)
+        ->setAutocomplete($autocomplete)
         ->setClosed($closed);
 
       $results[] = $result;

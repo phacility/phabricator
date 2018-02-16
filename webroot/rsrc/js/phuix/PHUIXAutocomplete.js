@@ -335,7 +335,9 @@ JX.install('PHUIXAutocomplete', {
     _getCancelCharacters: function() {
       // The "." character does not cancel because of projects named
       // "node.js" or "blog.mycompany.com".
-      return ['#', '@', ',', '!', '?', '{', '}'];
+      var defaults = ['#', '@', ',', '!', '?', '{', '}'];
+
+      return this._map[this._active].cancel || defaults;
     },
 
     _getTerminators: function() {
@@ -498,8 +500,6 @@ JX.install('PHUIXAutocomplete', {
         this._cursorHead,
         this._cursorTail);
 
-      this._value = text;
-
       var pixels = JX.TextAreaUtils.getPixelDimensions(
         area,
         range.start,
@@ -516,6 +516,24 @@ JX.install('PHUIXAutocomplete', {
       }
 
       var trim = this._trim(text);
+
+      // If this rule has a prefix pattern, like the "[[ document ]]" rule,
+      // require it match and throw it away before we begin suggesting
+      // results. The autocomplete remains active, it's just dormant until
+      // the user gives us more to work with.
+      var prefix = this._map[this._active].prefix;
+      if (prefix) {
+        var pattern = new RegExp(prefix);
+        if (!trim.match(pattern)) {
+          return;
+        }
+        trim = trim.replace(pattern, '');
+        trim = trim.trim();
+      }
+
+      // Store the current value now that we've finished mutating the text.
+      // This needs to match what we pass to the typeahead datasource.
+      this._value = trim;
 
       // Deactivate immediately if a user types a character that we are
       // reasonably sure means they don't want to use the autocomplete. For
