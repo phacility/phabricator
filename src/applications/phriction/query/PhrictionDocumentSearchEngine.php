@@ -23,6 +23,10 @@ final class PhrictionDocumentSearchEngine
       $query->withStatuses($map['statuses']);
     }
 
+    if ($map['paths']) {
+      $query->withSlugs($map['paths']);
+    }
+
     return $query;
   }
 
@@ -32,6 +36,10 @@ final class PhrictionDocumentSearchEngine
         ->setKey('statuses')
         ->setLabel(pht('Status'))
         ->setOptions(PhrictionDocumentStatus::getStatusMap()),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('paths')
+        ->setIsHidden(true)
+        ->setLabel(pht('Paths')),
     );
   }
 
