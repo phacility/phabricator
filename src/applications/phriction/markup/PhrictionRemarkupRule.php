@@ -275,7 +275,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
     }
 
     if ($context instanceof PhrictionDocument) {
-      return $context->getSlug();
+      return $context->getContent()->getSlug();
     }
 
     return null;
