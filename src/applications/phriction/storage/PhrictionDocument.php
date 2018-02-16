@@ -10,7 +10,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
     PhabricatorProjectInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorConduitResultInterface {
 
   protected $slug;
   protected $depth;
@@ -288,4 +289,39 @@ final class PhrictionDocument extends PhrictionDAO
     return new PhrictionDocumentFerretEngine();
   }
 
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('path')
+        ->setType('string')
+        ->setDescription(pht('The path to the document.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Status information about the document.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $status = array(
+      'value' => $this->getStatus(),
+      'name' => $this->getStatusDisplayName(),
+    );
+
+    return array(
+      'path' => $this->getSlug(),
+      'status' => $status,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new PhrictionContentSearchEngineAttachment())
+        ->setAttachmentKey('content'),
+    );
+  }
 }

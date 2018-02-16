@@ -118,10 +118,6 @@ final class PhrictionContent
         ->setKey('version')
         ->setType('int')
         ->setDescription(pht('Content version.')),
-      id(new PhabricatorConduitSearchFieldSpecification())
-        ->setKey('authorPHID')
-        ->setType('phid')
-        ->setDescription(pht('Author of this version of the content.')),
     );
   }
 
@@ -129,12 +125,14 @@ final class PhrictionContent
     return array(
       'documentPHID' => $this->getDocument()->getPHID(),
       'version' => (int)$this->getVersion(),
-      'authorPHID' => $this->getAuthorPHID(),
     );
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new PhrictionContentSearchEngineAttachment())
+        ->setAttachmentKey('content'),
+    );
   }
 
 }
