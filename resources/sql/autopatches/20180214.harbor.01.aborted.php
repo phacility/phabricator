@@ -10,7 +10,8 @@ foreach (new LiskMigrationIterator($table) as $buildable) {
 
   $aborted = queryfx_one(
     $conn,
-    'SELECT * FROM %T WHERE buildablePHID = %s AND buildStatus = %s',
+    'SELECT * FROM %T WHERE buildablePHID = %s AND buildStatus = %s
+      LIMIT 1',
     id(new HarbormasterBuild())->getTableName(),
     $buildable->getPHID(),
     'aborted');
