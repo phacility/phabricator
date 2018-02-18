@@ -2,30 +2,37 @@
 
 abstract class PhabricatorFactEngine extends Phobject {
 
+  private $factMap;
+
   final public static function loadAllEngines() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
       ->execute();
   }
 
-  public function getFactSpecs(array $fact_types) {
-    return array();
-  }
+  abstract public function newFacts();
 
-  public function shouldComputeRawFactsForObject(PhabricatorLiskDAO $object) {
-    return false;
-  }
+  abstract public function supportsDatapointsForObject(
+    PhabricatorLiskDAO $object);
 
-  public function computeRawFactsForObject(PhabricatorLiskDAO $object) {
-    return array();
-  }
+  abstract public function newDatapointsForObject(PhabricatorLiskDAO $object);
 
-  public function shouldComputeAggregateFacts() {
-    return false;
-  }
+  final protected function getFact($key) {
+    if ($this->factMap === null) {
+      $facts = $this->newFacts();
+      $facts = mpull($facts, null, 'getKey');
+      $this->factMap = $facts;
+    }
 
-  public function computeAggregateFacts() {
-    return array();
+    if (!isset($this->factMap[$key])) {
+      throw new Exception(
+        pht(
+          'Unknown fact ("%s") for engine "%s".',
+          $key,
+          get_class($this)));
+    }
+
+    return $this->factMap[$key];
   }
 
 }
