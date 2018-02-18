@@ -45,6 +45,7 @@ final class PhabricatorCalendarICSURIImportEngine
         array(
           'href' => $uri,
           'target' => '_blank',
+          'rel' => 'noreferrer',
         ),
         $uri);
     }

@@ -154,25 +154,30 @@ final class PHUITagView extends AphrontTagView {
       $classes[] = 'phui-tag-'.$this->border;
     }
 
-    if ($this->phid) {
-      Javelin::initBehavior('phui-hovercards');
+    $attributes = array(
+      'href' => $this->href,
+      'class' => $classes,
+    );
 
-      $attributes = array(
-        'href'  => $this->href,
-        'sigil' => 'hovercard',
-        'meta'  => array(
-          'hoverPHID' => $this->phid,
-        ),
-        'target' => $this->external ? '_blank' : null,
-      );
-    } else {
-      $attributes = array(
-        'href'  => $this->href,
-        'target' => $this->external ? '_blank' : null,
+    if ($this->external) {
+      $attributes += array(
+        'target' => '_blank',
+        'rel' => 'noreferrer',
       );
     }
 
-    return $attributes + array('class' => $classes);
+    if ($this->phid) {
+      Javelin::initBehavior('phui-hovercards');
+
+      $attributes += array(
+        'sigil' => 'hovercard',
+        'meta' => array(
+          'hoverPHID' => $this->phid,
+        ),
+      );
+    }
+
+    return $attributes;
   }
 
   protected function getTagContent() {
