@@ -16,6 +16,9 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
 
     $key_id = id(new PhabricatorFactKeyDimension())
       ->newDimensionID($fact->getKey());
+    if (!$key_id) {
+      return new Aphront404Response();
+    }
 
     $table = $fact->newDatapoint();
     $conn_r = $table->establishConnection('r');

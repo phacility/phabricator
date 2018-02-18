@@ -2588,6 +2588,7 @@ phutil_register_library_map(array(
     'PhabricatorCoreCreateTransaction' => 'applications/transactions/xaction/PhabricatorCoreCreateTransaction.php',
     'PhabricatorCoreTransactionType' => 'applications/transactions/xaction/PhabricatorCoreTransactionType.php',
     'PhabricatorCoreVoidTransaction' => 'applications/transactions/xaction/PhabricatorCoreVoidTransaction.php',
+    'PhabricatorCountFact' => 'applications/fact/fact/PhabricatorCountFact.php',
     'PhabricatorCountdown' => 'applications/countdown/storage/PhabricatorCountdown.php',
     'PhabricatorCountdownApplication' => 'applications/countdown/application/PhabricatorCountdownApplication.php',
     'PhabricatorCountdownController' => 'applications/countdown/controller/PhabricatorCountdownController.php',
@@ -8078,6 +8079,7 @@ phutil_register_library_map(array(
     'PhabricatorCoreCreateTransaction' => 'PhabricatorCoreTransactionType',
     'PhabricatorCoreTransactionType' => 'PhabricatorModularTransactionType',
     'PhabricatorCoreVoidTransaction' => 'PhabricatorModularTransactionType',
+    'PhabricatorCountFact' => 'PhabricatorFact',
     'PhabricatorCountdown' => array(
       'PhabricatorCountdownDAO',
       'PhabricatorPolicyInterface',

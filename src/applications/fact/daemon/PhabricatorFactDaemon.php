@@ -70,20 +70,28 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
     $result = null;
 
     $datapoints = array();
+    $count = 0;
     foreach ($iterator as $key => $object) {
       $phid = $object->getPHID();
       $this->log(pht('Processing %s...', $phid));
-      $datapoints[$phid] = $this->newDatapoints($object);
-      if (count($datapoints) > 1024) {
+      $object_datapoints = $this->newDatapoints($object);
+      $count += count($object_datapoints);
+
+      $datapoints[$phid] = $object_datapoints;
+
+      if ($count > 1024) {
         $this->updateDatapoints($datapoints);
         $datapoints = array();
+        $count = 0;
       }
+
       $result = $key;
     }
 
-    if ($datapoints) {
+    if ($count) {
       $this->updateDatapoints($datapoints);
       $datapoints = array();
+      $count = 0;
     }
 
     return $result;
@@ -111,7 +119,6 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
       return;
     }
 
-
     $fact_keys = array();
     $objects = array();
     foreach ($map as $phid => $facts) {
@@ -129,9 +136,9 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
     }
 
     $key_map = id(new PhabricatorFactKeyDimension())
-      ->newDimensionMap(array_keys($fact_keys));
+      ->newDimensionMap(array_keys($fact_keys), true);
     $object_map = id(new PhabricatorFactObjectDimension())
-      ->newDimensionMap(array_keys($objects));
+      ->newDimensionMap(array_keys($objects), true);
 
     $table = new PhabricatorFactIntDatapoint();
     $conn = $table->establishConnection('w');

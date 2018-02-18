@@ -35,4 +35,8 @@ abstract class PhabricatorFactEngine extends Phobject {
     return $this->factMap[$key];
   }
 
+  final protected function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
 }

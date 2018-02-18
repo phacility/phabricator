@@ -6,10 +6,10 @@ abstract class PhabricatorFactDimension extends PhabricatorFactDAO {
 
   final public function newDimensionID($key) {
     $map = $this->newDimensionMap(array($key));
-    return $map[$key];
+    return idx($map, $key);
   }
 
-  final public function newDimensionMap(array $keys) {
+  final public function newDimensionMap(array $keys, $create = false) {
     if (!$keys) {
       return array();
     }
@@ -40,6 +40,10 @@ abstract class PhabricatorFactDimension extends PhabricatorFactDAO {
       return $map;
     }
 
+    if (!$create) {
+      return $map;
+    }
+
     $sql = array();
     foreach ($need as $key) {
       $sql[] = qsprintf(
@@ -66,7 +70,7 @@ abstract class PhabricatorFactDimension extends PhabricatorFactDAO {
       $need);
     $rows = ipull($rows, 'id', $column);
 
-    foreach ($keys as $key) {
+    foreach ($need as $key) {
       if (isset($rows[$key])) {
         $map[$key] = (int)$rows[$key];
       } else {
