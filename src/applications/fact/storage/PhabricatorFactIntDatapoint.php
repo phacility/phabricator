@@ -58,4 +58,30 @@ final class PhabricatorFactIntDatapoint extends PhabricatorFactDAO {
     return $this->dimensionPHID;
   }
 
+  public function newDatapointVector() {
+    return $this->formatVector(
+      array(
+        $this->key,
+        $this->objectPHID,
+        $this->dimensionPHID,
+        $this->value,
+        $this->epoch,
+      ));
+  }
+
+  public function newRawVector(array $spec) {
+    return $this->formatVector(
+      array(
+        $spec['key'],
+        $spec['objectPHID'],
+        $spec['dimensionPHID'],
+        $spec['value'],
+        $spec['epoch'],
+      ));
+  }
+
+  private function formatVector(array $vector) {
+    return implode(':', $vector);
+  }
+
 }
