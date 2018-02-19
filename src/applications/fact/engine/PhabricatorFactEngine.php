@@ -3,6 +3,7 @@
 abstract class PhabricatorFactEngine extends Phobject {
 
   private $factMap;
+  private $viewer;
 
   final public static function loadAllEngines() {
     return id(new PhutilClassMapQuery())
@@ -35,8 +36,17 @@ abstract class PhabricatorFactEngine extends Phobject {
     return $this->factMap[$key];
   }
 
-  final protected function getViewer() {
-    return PhabricatorUser::getOmnipotentUser();
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    if (!$this->viewer) {
+      throw new PhutilInvalidStateException('setViewer');
+    }
+
+    return $this->viewer;
   }
 
 }

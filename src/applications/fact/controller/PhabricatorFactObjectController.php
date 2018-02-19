@@ -17,6 +17,10 @@ final class PhabricatorFactObjectController
 
     $engines = PhabricatorFactEngine::loadAllEngines();
     foreach ($engines as $key => $engine) {
+      $engine = id(clone $engine)
+        ->setViewer($viewer);
+      $engines[$key] = $engine;
+
       if (!$engine->supportsDatapointsForObject($object)) {
         unset($engines[$key]);
       }
@@ -250,6 +254,58 @@ final class PhabricatorFactObjectController
         ->setTable($table);
 
       $content[] = $box;
+
+      if ($engine instanceof PhabricatorTransactionFactEngine) {
+        $groups = $engine->newTransactionGroupsForObject($object);
+        $groups = array_values($groups);
+
+        $xaction_phids = array();
+        foreach ($groups as $group_key => $xactions) {
+          foreach ($xactions as $xaction) {
+            $xaction_phids[] = $xaction->getAuthorPHID();
+          }
+        }
+        $xaction_handles = $viewer->loadHandles($xaction_phids);
+
+        $rows = array();
+        foreach ($groups as $group_key => $xactions) {
+          foreach ($xactions as $xaction) {
+            $rows[] = array(
+              $group_key,
+              $xaction->getTransactionType(),
+              $xaction_handles[$xaction->getAuthorPHID()]->renderLink(),
+              phabricator_datetime($xaction->getDateCreated(), $viewer),
+            );
+          }
+        }
+
+        $table = id(new AphrontTableView($rows))
+          ->setHeaders(
+            array(
+              pht('Group'),
+              pht('Type'),
+              pht('Author'),
+              pht('Date'),
+            ))
+          ->setColumnClasses(
+            array(
+              null,
+              'pri',
+              'wide',
+              'right',
+            ));
+
+        $header = pht(
+          '%s (Transactions)',
+          get_class($engine));
+
+        $xaction_box = id(new PHUIObjectBoxView())
+          ->setHeaderText($header)
+          ->setTable($table);
+
+        $content[] = $xaction_box;
+      }
+
     }
 
     $crumbs = $this->buildApplicationCrumbs()

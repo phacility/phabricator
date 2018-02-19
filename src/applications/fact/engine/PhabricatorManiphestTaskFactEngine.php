@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorFactManiphestTaskEngine
-  extends PhabricatorFactEngine {
+final class PhabricatorManiphestTaskFactEngine
+  extends PhabricatorTransactionFactEngine {
 
   public function newFacts() {
     return array(
@@ -73,7 +73,7 @@ final class PhabricatorFactManiphestTaskEngine
       id(new PhabricatorPointsFact())
         ->setKey('tasks.open-points.status.owner'),
       id(new PhabricatorPointsFact())
-        ->setKey('tasks.open-points.score.project'),
+        ->setKey('tasks.open-points.score.owner'),
       id(new PhabricatorPointsFact())
         ->setKey('tasks.open-points.assign.owner'),
     );
@@ -84,16 +84,7 @@ final class PhabricatorFactManiphestTaskEngine
   }
 
   public function newDatapointsForObject(PhabricatorLiskDAO $object) {
-    $viewer = $this->getViewer();
-
-    $xaction_query = PhabricatorApplicationTransactionQuery::newQueryForObject(
-      $object);
-    $xactions = $xaction_query
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($object->getPHID()))
-      ->execute();
-
-    $xactions = msortv($xactions, 'newChronologicalSortVector');
+    $xaction_groups = $this->newTransactionGroupsForObject($object);
 
     $old_open = false;
     $old_points = 0;
@@ -104,7 +95,7 @@ final class PhabricatorFactManiphestTaskEngine
 
     $specs = array();
     $datapoints = array();
-    foreach ($xactions as $xaction_group) {
+    foreach ($xaction_groups as $xaction_group) {
       $add_projects = array();
       $rem_projects = array();
 
@@ -112,8 +103,11 @@ final class PhabricatorFactManiphestTaskEngine
       $new_points = $old_points;
       $new_owner = $old_owner;
 
-      // TODO: Actually group concurrent transactions.
-      $xaction_group = array($xaction_group);
+      if ($is_create) {
+        // Assume tasks start open.
+        // TODO: This might be a questionable assumption?
+        $new_open = true;
+      }
 
       $group_epoch = last($xaction_group)->getDateCreated();
       foreach ($xaction_group as $xaction) {
@@ -167,15 +161,17 @@ final class PhabricatorFactManiphestTaskEngine
       if ($is_create) {
         $action = 'create';
         $action_points = $new_points;
+        $include_open = $new_open;
       } else {
         $action = 'assign';
         $action_points = $old_points;
+        $include_open = $old_open;
       }
 
       foreach ($project_sets as $project_set) {
         $scale = $project_set['scale'];
         foreach ($project_set['phids'] as $project_phid) {
-          if ($old_open) {
+          if ($include_open) {
             $specs[] = array(
               "tasks.open-count.{$action}.project",
               1 * $scale,
@@ -227,7 +223,9 @@ final class PhabricatorFactManiphestTaskEngine
             continue;
           }
 
-          if ($old_open) {
+          $scale = $owner_set['scale'];
+
+          if ($old_open != $new_open) {
             $specs[] = array(
               "tasks.open-count.{$action}.owner",
               1 * $scale,
@@ -247,14 +245,14 @@ final class PhabricatorFactManiphestTaskEngine
             $owner_phid,
           );
 
-          $specs[] = array(
-            "tasks.points.{$action}.owner",
-            $action_points * $scale,
-            $owner_phid,
-          );
+          if ($action_points) {
+            $specs[] = array(
+              "tasks.points.{$action}.owner",
+              $action_points * $scale,
+              $owner_phid,
+            );
+          }
         }
-
-        $old_owner = $new_owner;
       }
 
       if ($is_create) {
@@ -262,6 +260,7 @@ final class PhabricatorFactManiphestTaskEngine
           'tasks.count.create',
           1,
         );
+
         $specs[] = array(
           'tasks.points.create',
           $new_points,
@@ -316,11 +315,9 @@ final class PhabricatorFactManiphestTaskEngine
           $specs[] = array(
             'tasks.open-points.status.project',
             $action_points * $scale,
-            $new_owner,
+            $project_phid,
           );
         }
-
-        $old_open = $new_open;
       }
 
       // The "score" facts only apply to rescoring tasks which already
@@ -371,13 +368,22 @@ final class PhabricatorFactManiphestTaskEngine
             $delta,
           );
         }
-
-        $old_points = $new_points;
       }
+
+      $old_points = $new_points;
+      $old_open = $new_open;
+      $old_owner = $new_owner;
 
       foreach ($specs as $spec) {
         $spec_key = $spec[0];
         $spec_value = $spec[1];
+
+        // Don't write any facts with a value of 0. The "count" facts never
+        // have a value of 0, and the "points" facts aren't meaningful if
+        // they have a value of 0.
+        if ($spec_value == 0) {
+          continue;
+        }
 
         $datapoint = $this->getFact($spec_key)
           ->newDatapoint();
@@ -400,5 +406,6 @@ final class PhabricatorFactManiphestTaskEngine
 
     return $datapoints;
   }
+
 
 }
