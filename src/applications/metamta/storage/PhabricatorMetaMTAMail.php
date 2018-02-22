@@ -1302,6 +1302,11 @@ final class PhabricatorMetaMTAMail
       $headers[] = array('Thread-Topic', $related_phid);
     }
 
+    $headers[] = array('X-Phabricator-Mail-ID', $this->getID());
+
+    $unique = Filesystem::readRandomCharacters(16);
+    $headers[] = array('X-Phabricator-Send-Attempt', $unique);
+
     return $headers;
   }
 
@@ -1356,6 +1361,8 @@ final class PhabricatorMetaMTAMail
 
       'X-Phabricator-Sent-This-Message',
       'X-Phabricator-Must-Encrypt',
+      'X-Phabricator-Mail-ID',
+      'X-Phabricator-Send-Attempt',
     );
 
     // NOTE: The major header we want to drop is "X-Phabricator-Mail-Tags".
