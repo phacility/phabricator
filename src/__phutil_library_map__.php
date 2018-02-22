@@ -3046,6 +3046,7 @@ phutil_register_library_map(array(
     'PhabricatorFilesOnDiskBuiltinFile' => 'applications/files/builtin/PhabricatorFilesOnDiskBuiltinFile.php',
     'PhabricatorFilesOutboundRequestAction' => 'applications/files/action/PhabricatorFilesOutboundRequestAction.php',
     'PhabricatorFiletreeVisibleSetting' => 'applications/settings/setting/PhabricatorFiletreeVisibleSetting.php',
+    'PhabricatorFiletreeWidthSetting' => 'applications/settings/setting/PhabricatorFiletreeWidthSetting.php',
     'PhabricatorFlag' => 'applications/flag/storage/PhabricatorFlag.php',
     'PhabricatorFlagAddFlagHeraldAction' => 'applications/flag/herald/PhabricatorFlagAddFlagHeraldAction.php',
     'PhabricatorFlagColor' => 'applications/flag/constants/PhabricatorFlagColor.php',
@@ -8613,6 +8614,7 @@ phutil_register_library_map(array(
     'PhabricatorFilesOnDiskBuiltinFile' => 'PhabricatorFilesBuiltinFile',
     'PhabricatorFilesOutboundRequestAction' => 'PhabricatorSystemAction',
     'PhabricatorFiletreeVisibleSetting' => 'PhabricatorInternalSetting',
+    'PhabricatorFiletreeWidthSetting' => 'PhabricatorInternalSetting',
     'PhabricatorFlag' => array(
       'PhabricatorFlagDAO',
       'PhabricatorPolicyInterface',
