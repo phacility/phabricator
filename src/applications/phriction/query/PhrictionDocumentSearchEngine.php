@@ -27,6 +27,14 @@ final class PhrictionDocumentSearchEngine
       $query->withSlugs($map['paths']);
     }
 
+    if ($map['parentPaths']) {
+      $query->withParentPaths($map['parentPaths']);
+    }
+
+    if ($map['ancestorPaths']) {
+      $query->withAncestorPaths($map['ancestorPaths']);
+    }
+
     return $query;
   }
 
@@ -40,6 +48,14 @@ final class PhrictionDocumentSearchEngine
         ->setKey('paths')
         ->setIsHidden(true)
         ->setLabel(pht('Paths')),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('parentPaths')
+        ->setIsHidden(true)
+        ->setLabel(pht('Parent Paths')),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('ancestorPaths')
+        ->setIsHidden(true)
+        ->setLabel(pht('Ancestor Paths')),
     );
   }
 
