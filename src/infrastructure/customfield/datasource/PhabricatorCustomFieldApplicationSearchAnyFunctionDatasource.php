@@ -22,7 +22,7 @@ final class PhabricatorCustomFieldApplicationSearchAnyFunctionDatasource
         'summary' => pht('Find results with any value.'),
         'description' => pht(
           "This function includes results which have any value. Use a query ".
-          "like this to find results with any value:\n\n%s".
+          "like this to find results with any value:\n\n%s",
           '> any()'),
       ),
     );
