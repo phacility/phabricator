@@ -12,6 +12,7 @@ final class HarbormasterBuildLog
   protected $duration;
   protected $live;
   protected $filePHID;
+  protected $byteLength;
 
   private $buildTarget = self::ATTACHABLE;
   private $rope;
@@ -42,7 +43,8 @@ final class HarbormasterBuildLog
     return id(new HarbormasterBuildLog())
       ->setBuildTargetPHID($build_target->getPHID())
       ->setDuration(null)
-      ->setLive(1);
+      ->setLive(1)
+      ->setByteLength(0);
   }
 
   public function scheduleRebuild($force) {
@@ -70,6 +72,7 @@ final class HarbormasterBuildLog
 
         'live' => 'bool',
         'filePHID' => 'phid?',
+        'byteLength' => 'uint64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_buildtarget' => array(
@@ -341,22 +344,26 @@ final class HarbormasterBuildLog
       $append_data = $rope->getPrefixBytes($data_limit);
       $data_size = strlen($append_data);
 
-      if ($append_id) {
-        queryfx(
-          $conn_w,
-          'UPDATE %T SET chunk = CONCAT(chunk, %B), size = %d WHERE id = %d',
-          $chunk_table,
-          $append_data,
-          $prefix_size + $data_size,
-          $append_id);
-      } else {
-        $this->writeChunk($encoding_text, $data_size, $append_data);
-      }
+      $this->openTransaction();
+        if ($append_id) {
+          queryfx(
+            $conn_w,
+            'UPDATE %T SET chunk = CONCAT(chunk, %B), size = %d WHERE id = %d',
+            $chunk_table,
+            $append_data,
+            $prefix_size + $data_size,
+            $append_id);
+        } else {
+          $this->writeChunk($encoding_text, $data_size, $append_data);
+        }
+
+        $this->byteLength += $data_size;
+        $this->save();
+      $this->saveTransaction();
 
       $rope->removeBytesFromHead($data_size);
     }
   }
-
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

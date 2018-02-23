@@ -57,6 +57,19 @@ final class HarbormasterLogWorker extends HarbormasterWorker {
     $data = $this->getTaskData();
     $is_force = idx($data, 'force');
 
+    if (!$log->getByteLength() || $is_force) {
+      $iterator = $log->newChunkIterator()
+        ->setAsString(true);
+
+      $byte_length = 0;
+      foreach ($iterator as $block) {
+        $byte_length += strlen($block);
+      }
+      $log
+        ->setByteLength($byte_length)
+        ->save();
+    }
+
     if ($log->canCompressLog()) {
       $log->compressLog();
     }
