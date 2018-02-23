@@ -6511,6 +6511,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildLog' => array(
       'HarbormasterDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'HarbormasterBuildLogChunk' => 'HarbormasterDAO',
     'HarbormasterBuildLogChunkIterator' => 'PhutilBufferedIterator',

@@ -2,7 +2,9 @@
 
 final class HarbormasterBuildLog
   extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $buildTargetPHID;
   protected $logSource;
@@ -317,7 +319,55 @@ final class HarbormasterBuildLog
 
   public function describeAutomaticCapability($capability) {
     return pht(
-      "Users must be able to see a build target to view it's build log.");
+      'Users must be able to see a build target to view its build log.');
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->destroyFile($engine);
+    $this->destroyChunks();
+    $this->delete();
+  }
+
+  public function destroyFile(PhabricatorDestructionEngine $engine = null) {
+    if (!$engine) {
+      $engine = new PhabricatorDestructionEngine();
+    }
+
+    $file_phid = $this->getFilePHID();
+    if ($file_phid) {
+      $viewer = $engine->getViewer();
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($file_phid))
+        ->executeOne();
+      if ($file) {
+        $engine->destroyObject($file);
+      }
+    }
+
+    $this->setFilePHID(null);
+
+    return $this;
+  }
+
+  public function destroyChunks() {
+    $chunk = new HarbormasterBuildLogChunk();
+    $conn = $chunk->establishConnection('w');
+
+    // Just delete the chunks directly so we don't have to pull the data over
+    // the wire for large logs.
+    queryfx(
+      $conn,
+      'DELETE FROM %T WHERE logID = %d',
+      $chunk->getTableName(),
+      $this->getID());
+
+    return $this;
   }
 
 

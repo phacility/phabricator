@@ -62,20 +62,7 @@ final class HarbormasterLogWorker extends HarbormasterWorker {
     }
 
     if ($is_force) {
-      $file_phid = $log->getFilePHID();
-      if ($file_phid) {
-        $file = id(new PhabricatorFileQuery())
-          ->setViewer($viewer)
-          ->withPHIDs(array($file_phid))
-          ->executeOne();
-        if ($file) {
-          id(new PhabricatorDestructionEngine())
-            ->destroyObject($file);
-        }
-        $log
-          ->setFilePHID(null)
-          ->save();
-      }
+      $log->destroyFile();
     }
 
     if (!$log->getFilePHID()) {
