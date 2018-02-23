@@ -57,17 +57,18 @@ final class HarbormasterLogWorker extends HarbormasterWorker {
     $data = $this->getTaskData();
     $is_force = idx($data, 'force');
 
-    if (!$log->getByteLength() || $is_force) {
+    if (!$log->getByteLength() || !$log->getLineMap() || $is_force) {
       $iterator = $log->newDataIterator();
 
-      $byte_length = 0;
+      $log
+        ->setByteLength(0)
+        ->setLineMap(array());
+
       foreach ($iterator as $block) {
-        $byte_length += strlen($block);
+        $log->updateLineMap($block);
       }
 
-      $log
-        ->setByteLength($byte_length)
-        ->save();
+      $log->save();
     }
 
     $format_text = HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT;

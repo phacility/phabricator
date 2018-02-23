@@ -14,6 +14,7 @@ final class HarbormasterBuildLog
   protected $filePHID;
   protected $byteLength;
   protected $chunkFormat;
+  protected $lineMap = array();
 
   private $buildTarget = self::ATTACHABLE;
   private $rope;
@@ -64,6 +65,9 @@ final class HarbormasterBuildLog
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'lineMap' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         // T6203/NULLABILITY
         // It seems like these should be non-nullable? All logs should have a
@@ -369,12 +373,137 @@ final class HarbormasterBuildLog
           $this->writeChunk($encoding_text, $data_size, $append_data);
         }
 
-        $this->byteLength += $data_size;
+        $this->updateLineMap($append_data);
+
         $this->save();
       $this->saveTransaction();
 
       $rope->removeBytesFromHead($data_size);
     }
+  }
+
+  public function updateLineMap($append_data, $marker_distance = null) {
+    $this->byteLength += strlen($append_data);
+
+    if (!$marker_distance) {
+      $marker_distance = (self::CHUNK_BYTE_LIMIT / 2);
+    }
+
+    if (!$this->lineMap) {
+      $this->lineMap = array(
+        array(),
+        0,
+        0,
+        null,
+      );
+    }
+
+    list($map, $map_bytes, $line_count, $prefix) = $this->lineMap;
+
+    $buffer = $append_data;
+
+    if ($prefix) {
+      $prefix = base64_decode($prefix);
+      $buffer = $prefix.$buffer;
+    }
+
+    if ($map) {
+      list($last_marker, $last_count) = last($map);
+    } else {
+      $last_marker = 0;
+      $last_count = 0;
+    }
+
+    $max_utf8_width = 8;
+    $next_marker = $last_marker + $marker_distance;
+
+    $pos = 0;
+    $len = strlen($buffer);
+    while (true) {
+      // If we only have a few bytes left in the buffer, leave it as a prefix
+      // for next time.
+      if (($len - $pos) <= ($max_utf8_width * 2)) {
+        $prefix = substr($buffer, $pos);
+        break;
+      }
+
+      // The next slice we're going to look at is the smaller of:
+      //
+      //   - the number of bytes we need to make it to the next marker; or
+      //   - all the bytes we have left, minus one.
+
+      $slice_length = min(
+        ($marker_distance - $map_bytes),
+        ($len - $pos) - 1);
+
+      // We don't slice all the way to the end for two reasons.
+
+      // First, we want to avoid slicing immediately after a "\r" if we don't
+      // know what the next character is, because we want to make sure to
+      // count "\r\n" as a single newline, rather than counting the "\r" as
+      // a newline and then later counting the "\n" as another newline.
+
+      // Second, we don't want to slice in the middle of a UTF8 character if
+      // we can help it. We may not be able to avoid this, since the whole
+      // buffer may just be binary data, but in most cases we can backtrack
+      // a little bit and try to make it out of emoji or other legitimate
+      // multibyte UTF8 characters which appear in the log.
+
+      $min_width = max(1, $slice_length - $max_utf8_width);
+      while ($slice_length >= $min_width) {
+        $here = $buffer[$pos + ($slice_length - 1)];
+        $next = $buffer[$pos + ($slice_length - 1) + 1];
+
+        // If this is "\r" and the next character is "\n", extend the slice
+        // to include the "\n". Otherwise, we're fine to slice here since we
+        // know we're not in the middle of a UTF8 character.
+        if ($here === "\r") {
+          if ($next === "\n") {
+            $slice_length++;
+          }
+          break;
+        }
+
+        // If the next character is 0x7F or lower, or between 0xC2 and 0xF4,
+        // we're not slicing in the middle of a UTF8 character.
+        $ord = ord($next);
+        if ($ord <= 0x7F || ($ord >= 0xC2 && $ord <= 0xF4)) {
+          break;
+        }
+
+        $slice_length--;
+      }
+
+      $slice = substr($buffer, $pos, $slice_length);
+      $pos += $slice_length;
+
+      $map_bytes += $slice_length;
+      $line_count += count(preg_split("/\r\n|\r|\n/", $slice)) - 1;
+
+      if ($map_bytes >= ($marker_distance - $max_utf8_width)) {
+        $map[] = array(
+          $last_marker + $map_bytes,
+          $last_count + $line_count,
+        );
+
+        $last_count = $last_count + $line_count;
+        $line_count = 0;
+
+        $last_marker = $last_marker + $map_bytes;
+        $map_bytes = 0;
+
+        $next_marker = $last_marker + $marker_distance;
+      }
+    }
+
+    $this->lineMap = array(
+      $map,
+      $map_bytes,
+      $line_count,
+      base64_encode($prefix),
+    );
+
+    return $this;
   }
 
 
