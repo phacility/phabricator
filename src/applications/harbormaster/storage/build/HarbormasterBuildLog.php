@@ -52,17 +52,24 @@ final class HarbormasterBuildLog
       throw new Exception(pht('This build log is not open!'));
     }
 
-    if ($this->canCompressLog()) {
-      $this->compressLog();
-    }
-
     $start = $this->getDateCreated();
     $now = PhabricatorTime::getNow();
 
-    return $this
+    $this
       ->setDuration($now - $start)
       ->setLive(0)
       ->save();
+
+    PhabricatorWorker::scheduleTask(
+      'HarbormasterLogWorker',
+      array(
+        'logPHID' => $this->getPHID(),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+      ));
+
+    return $this;
   }
 
 
@@ -201,7 +208,7 @@ final class HarbormasterBuildLog
     return implode('', $full_text);
   }
 
-  private function canCompressLog() {
+  public function canCompressLog() {
     return function_exists('gzdeflate');
   }
 

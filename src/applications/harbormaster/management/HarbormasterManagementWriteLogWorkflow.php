@@ -39,7 +39,6 @@ final class HarbormasterManagementWriteLogWorkflow
           $target_id));
     }
 
-
     $log = HarbormasterBuildLog::initializeNewBuildLog($target);
     $log->openBuildLog();
 
@@ -49,6 +48,12 @@ final class HarbormasterManagementWriteLogWorkflow
 
     $content = file_get_contents('php://stdin');
     $log->append($content);
+
+    echo tsprintf(
+      "%s\n",
+      pht('Write completed. Closing log...'));
+
+    PhabricatorWorker::setRunAllTasksInProcess(true);
 
     $log->closeBuildLog();
 
