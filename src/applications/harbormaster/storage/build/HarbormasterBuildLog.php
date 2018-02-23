@@ -290,6 +290,11 @@ final class HarbormasterBuildLog
       ->save();
   }
 
+  public function getURI() {
+    $id = $this->getID();
+    return "/harbormaster/log/view/{$id}/";
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

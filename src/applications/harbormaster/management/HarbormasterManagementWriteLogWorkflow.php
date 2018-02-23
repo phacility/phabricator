@@ -45,8 +45,13 @@ final class HarbormasterManagementWriteLogWorkflow
     $log->openBuildLog();
 
     echo tsprintf(
+      "%s\n\n        __%s__\n\n",
+      pht('Opened a new build log:'),
+      PhabricatorEnv::getURI($log->getURI()));
+
+    echo tsprintf(
       "%s\n",
-      pht('Reading log from stdin...'));
+      pht('Reading log content from stdin...'));
 
     $content = file_get_contents('php://stdin');
     $log->append($content);

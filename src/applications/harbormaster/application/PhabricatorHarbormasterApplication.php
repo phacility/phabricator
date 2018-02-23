@@ -96,6 +96,10 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
           'circleci/' => 'HarbormasterCircleCIHookController',
           'buildkite/' => 'HarbormasterBuildkiteHookController',
         ),
+        'log/' => array(
+          'view/(?P<id>\d+)/' => 'HarbormasterBuildLogViewController',
+          'download/(?P<id>\d+)/' => 'HarbormasterBuildLogDownloadController',
+        ),
       ),
     );
   }
