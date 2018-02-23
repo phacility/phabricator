@@ -9,12 +9,13 @@ final class HarbormasterBuildLog
   protected $logType;
   protected $duration;
   protected $live;
+  protected $filePHID;
 
   private $buildTarget = self::ATTACHABLE;
   private $rope;
   private $isOpen;
 
-  const CHUNK_BYTE_LIMIT = 102400;
+  const CHUNK_BYTE_LIMIT = 1048576;
 
   public function __construct() {
     $this->rope = new PhutilRope();
@@ -60,18 +61,22 @@ final class HarbormasterBuildLog
       ->setLive(0)
       ->save();
 
-    PhabricatorWorker::scheduleTask(
-      'HarbormasterLogWorker',
-      array(
-        'logPHID' => $this->getPHID(),
-      ),
-      array(
-        'objectPHID' => $this->getPHID(),
-      ));
+    $this->scheduleRebuild(false);
 
     return $this;
   }
 
+  public function scheduleRebuild($force) {
+    PhabricatorWorker::scheduleTask(
+      'HarbormasterLogWorker',
+      array(
+        'logPHID' => $this->getPHID(),
+        'force' => $force,
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+      ));
+  }
 
   protected function getConfiguration() {
     return array(
@@ -85,6 +90,7 @@ final class HarbormasterBuildLog
         'duration' => 'uint32?',
 
         'live' => 'bool',
+        'filePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_buildtarget' => array(
@@ -180,7 +186,7 @@ final class HarbormasterBuildLog
 
   public function newChunkIterator() {
     return id(new HarbormasterBuildLogChunkIterator($this))
-      ->setPageSize(32);
+      ->setPageSize(8);
   }
 
   private function loadLastChunkInfo() {

@@ -7,14 +7,16 @@ final class HarbormasterManagementWriteLogWorkflow
     $this
       ->setName('write-log')
       ->setExamples('**write-log** --target __id__ [__options__]')
-      ->setSynopsis(pht('Write a new Harbormaster build log.'))
+      ->setSynopsis(
+        pht(
+          'Write a new Harbormaster build log. This is primarily intended '.
+          'to make development and testing easier.'))
       ->setArguments(
         array(
           array(
             'name' => 'target',
             'param' => 'id',
-            'help' => pht(
-              'Build Target ID to attach the log to.'),
+            'help' => pht('Build Target ID to attach the log to.'),
           ),
         ));
   }
