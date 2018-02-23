@@ -58,20 +58,23 @@ final class HarbormasterLogWorker extends HarbormasterWorker {
     $is_force = idx($data, 'force');
 
     if (!$log->getByteLength() || $is_force) {
-      $iterator = $log->newChunkIterator()
-        ->setAsString(true);
+      $iterator = $log->newDataIterator();
 
       $byte_length = 0;
       foreach ($iterator as $block) {
         $byte_length += strlen($block);
       }
+
       $log
         ->setByteLength($byte_length)
         ->save();
     }
 
-    if ($log->canCompressLog()) {
-      $log->compressLog();
+    $format_text = HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT;
+    if (($log->getChunkFormat() === $format_text) || $is_force) {
+      if ($log->canCompressLog()) {
+        $log->compressLog();
+      }
     }
 
     if ($is_force) {
@@ -79,8 +82,7 @@ final class HarbormasterLogWorker extends HarbormasterWorker {
     }
 
     if (!$log->getFilePHID()) {
-      $iterator = $log->newChunkIterator()
-        ->setAsString(true);
+      $iterator = $log->newDataIterator();
 
       $source = id(new PhabricatorIteratorFileUploadSource())
         ->setName('harbormaster-log-'.$log->getID().'.log')

@@ -13,6 +13,7 @@ final class HarbormasterBuildLog
   protected $live;
   protected $filePHID;
   protected $byteLength;
+  protected $chunkFormat;
 
   private $buildTarget = self::ATTACHABLE;
   private $rope;
@@ -44,7 +45,8 @@ final class HarbormasterBuildLog
       ->setBuildTargetPHID($build_target->getPHID())
       ->setDuration(null)
       ->setLive(1)
-      ->setByteLength(0);
+      ->setByteLength(0)
+      ->setChunkFormat(HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT);
   }
 
   public function scheduleRebuild($force) {
@@ -73,6 +75,7 @@ final class HarbormasterBuildLog
         'live' => 'bool',
         'filePHID' => 'phid?',
         'byteLength' => 'uint64',
+        'chunkFormat' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_buildtarget' => array(
@@ -103,6 +106,11 @@ final class HarbormasterBuildLog
   public function newChunkIterator() {
     return id(new HarbormasterBuildLogChunkIterator($this))
       ->setPageSize(8);
+  }
+
+  public function newDataIterator() {
+    return $this->newChunkIterator()
+      ->setAsString(true);
   }
 
   private function loadLastChunkInfo() {
@@ -187,6 +195,10 @@ final class HarbormasterBuildLog
     while ($rope->getByteLength()) {
       $this->writeEncodedChunk($rope, $byte_limit, $mode);
     }
+
+    $this
+      ->setChunkFormat($mode)
+      ->save();
 
     $this->saveTransaction();
   }
