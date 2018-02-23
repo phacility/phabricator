@@ -8,9 +8,18 @@ final class HarbormasterLogWorker extends HarbormasterWorker {
     $data = $this->getTaskData();
     $log_phid = idx($data, 'logPHID');
 
-    $phid_key = PhabricatorHash::digestToLength($log_phid, 14);
-    $lock_key = "build.log({$phid_key})";
-    $lock = PhabricatorGlobalLock::newLock($lock_key);
+    $log = id(new HarbormasterBuildLogQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($log_phid))
+      ->executeOne();
+    if (!$log) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht(
+          'Invalid build log PHID "%s".',
+          $log_phid));
+    }
+
+    $lock = $log->getLock();
 
     try {
       $lock->lock();
@@ -20,16 +29,7 @@ final class HarbormasterLogWorker extends HarbormasterWorker {
 
     $caught = null;
     try {
-      $log = id(new HarbormasterBuildLogQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($log_phid))
-        ->executeOne();
-      if (!$log) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          pht(
-            'Invalid build log PHID "%s".',
-            $log_phid));
-      }
+      $log->reload();
 
       if ($log->getLive()) {
         throw new PhabricatorWorkerPermanentFailureException(

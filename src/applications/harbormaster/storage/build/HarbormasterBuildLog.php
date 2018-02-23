@@ -16,6 +16,7 @@ final class HarbormasterBuildLog
   private $buildTarget = self::ATTACHABLE;
   private $rope;
   private $isOpen;
+  private $lock;
 
   const CHUNK_BYTE_LIMIT = 1048576;
 
@@ -27,6 +28,12 @@ final class HarbormasterBuildLog
     if ($this->isOpen) {
       $this->closeBuildLog();
     }
+
+    if ($this->lock) {
+      if ($this->lock->isLocked()) {
+        $this->lock->unlock();
+      }
+    }
   }
 
   public static function initializeNewBuildLog(
@@ -35,37 +42,7 @@ final class HarbormasterBuildLog
     return id(new HarbormasterBuildLog())
       ->setBuildTargetPHID($build_target->getPHID())
       ->setDuration(null)
-      ->setLive(0);
-  }
-
-  public function openBuildLog() {
-    if ($this->isOpen) {
-      throw new Exception(pht('This build log is already open!'));
-    }
-
-    $this->isOpen = true;
-
-    return $this
-      ->setLive(1)
-      ->save();
-  }
-
-  public function closeBuildLog() {
-    if (!$this->isOpen) {
-      throw new Exception(pht('This build log is not open!'));
-    }
-
-    $start = $this->getDateCreated();
-    $now = PhabricatorTime::getNow();
-
-    $this
-      ->setDuration($now - $start)
-      ->setLive(0)
-      ->save();
-
-    $this->scheduleRebuild(false);
-
-    return $this;
+      ->setLive(1);
   }
 
   public function scheduleRebuild($force) {
@@ -120,72 +97,6 @@ final class HarbormasterBuildLog
     return pht('Build Log');
   }
 
-  public function append($content) {
-    if (!$this->getLive()) {
-      throw new PhutilInvalidStateException('openBuildLog');
-    }
-
-    $content = (string)$content;
-
-    $this->rope->append($content);
-    $this->flush();
-
-    return $this;
-  }
-
-  private function flush() {
-
-    // TODO: Maybe don't flush more than a couple of times per second. If a
-    // caller writes a single character over and over again, we'll currently
-    // spend a lot of time flushing that.
-
-    $chunk_table = id(new HarbormasterBuildLogChunk())->getTableName();
-    $chunk_limit = self::CHUNK_BYTE_LIMIT;
-    $encoding_text = HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT;
-
-    $rope = $this->rope;
-
-    while (true) {
-      $length = $rope->getByteLength();
-      if (!$length) {
-        break;
-      }
-
-      $conn_w = $this->establishConnection('w');
-      $last = $this->loadLastChunkInfo();
-
-      $can_append =
-        ($last) &&
-        ($last['encoding'] == $encoding_text) &&
-        ($last['size'] < $chunk_limit);
-      if ($can_append) {
-        $append_id = $last['id'];
-        $prefix_size = $last['size'];
-      } else {
-        $append_id = null;
-        $prefix_size = 0;
-      }
-
-      $data_limit = ($chunk_limit - $prefix_size);
-      $append_data = $rope->getPrefixBytes($data_limit);
-      $data_size = strlen($append_data);
-
-      if ($append_id) {
-        queryfx(
-          $conn_w,
-          'UPDATE %T SET chunk = CONCAT(chunk, %B), size = %d WHERE id = %d',
-          $chunk_table,
-          $append_data,
-          $prefix_size + $data_size,
-          $append_id);
-      } else {
-        $this->writeChunk($encoding_text, $data_size, $append_data);
-      }
-
-      $rope->removeBytesFromHead($data_size);
-    }
-  }
-
   public function newChunkIterator() {
     return id(new HarbormasterBuildLogChunkIterator($this))
       ->setPageSize(8);
@@ -216,6 +127,16 @@ final class HarbormasterBuildLog
     return implode('', $full_text);
   }
 
+
+  public function getURI() {
+    $id = $this->getID();
+    return "/harbormaster/log/view/{$id}/";
+  }
+
+
+/* -(  Chunks  )------------------------------------------------------------- */
+
+
   public function canCompressLog() {
     return function_exists('gzdeflate');
   }
@@ -229,6 +150,13 @@ final class HarbormasterBuildLog
   }
 
   private function processLog($mode) {
+    if (!$this->getLock()->isLocked()) {
+      throw new Exception(
+        pht(
+          'You can not process build log chunks unless the log lock is '.
+          'held.'));
+    }
+
     $chunks = $this->newChunkIterator();
 
     // NOTE: Because we're going to insert new chunks, we need to stop the
@@ -292,10 +220,143 @@ final class HarbormasterBuildLog
       ->save();
   }
 
-  public function getURI() {
-    $id = $this->getID();
-    return "/harbormaster/log/view/{$id}/";
+
+/* -(  Writing  )------------------------------------------------------------ */
+
+
+  public function getLock() {
+    if (!$this->lock) {
+      $phid = $this->getPHID();
+      $phid_key = PhabricatorHash::digestToLength($phid, 14);
+      $lock_key = "build.log({$phid_key})";
+      $lock = PhabricatorGlobalLock::newLock($lock_key);
+      $this->lock = $lock;
+    }
+
+    return $this->lock;
   }
+
+
+  public function openBuildLog() {
+    if ($this->isOpen) {
+      throw new Exception(pht('This build log is already open!'));
+    }
+
+    $is_new = !$this->getID();
+    if ($is_new) {
+      $this->save();
+    }
+
+    $this->getLock()->lock();
+    $this->isOpen = true;
+
+    $this->reload();
+
+    if (!$this->getLive()) {
+      $this->setLive(1)->save();
+    }
+
+    return $this;
+  }
+
+  public function closeBuildLog($forever = true) {
+    if (!$this->isOpen) {
+      throw new Exception(
+        pht(
+          'You must openBuildLog() before you can closeBuildLog().'));
+    }
+
+    $this->flush();
+
+    if ($forever) {
+      $start = $this->getDateCreated();
+      $now = PhabricatorTime::getNow();
+
+      $this
+        ->setDuration($now - $start)
+        ->setLive(0)
+        ->save();
+    }
+
+    $this->getLock()->unlock();
+    $this->isOpen = false;
+
+    if ($forever) {
+      $this->scheduleRebuild(false);
+    }
+
+    return $this;
+  }
+
+  public function append($content) {
+    if (!$this->isOpen) {
+      throw new Exception(
+        pht(
+          'You must openBuildLog() before you can append() content to '.
+          'the log.'));
+    }
+
+    $content = (string)$content;
+
+    $this->rope->append($content);
+    $this->flush();
+
+    return $this;
+  }
+
+  private function flush() {
+
+    // TODO: Maybe don't flush more than a couple of times per second. If a
+    // caller writes a single character over and over again, we'll currently
+    // spend a lot of time flushing that.
+
+    $chunk_table = id(new HarbormasterBuildLogChunk())->getTableName();
+    $chunk_limit = self::CHUNK_BYTE_LIMIT;
+    $encoding_text = HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT;
+
+    $rope = $this->rope;
+
+    while (true) {
+      $length = $rope->getByteLength();
+      if (!$length) {
+        break;
+      }
+
+      $conn_w = $this->establishConnection('w');
+      $last = $this->loadLastChunkInfo();
+
+      $can_append =
+        ($last) &&
+        ($last['encoding'] == $encoding_text) &&
+        ($last['size'] < $chunk_limit);
+      if ($can_append) {
+        $append_id = $last['id'];
+        $prefix_size = $last['size'];
+      } else {
+        $append_id = null;
+        $prefix_size = 0;
+      }
+
+      $data_limit = ($chunk_limit - $prefix_size);
+      $append_data = $rope->getPrefixBytes($data_limit);
+      $data_size = strlen($append_data);
+
+      if ($append_id) {
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET chunk = CONCAT(chunk, %B), size = %d WHERE id = %d',
+          $chunk_table,
+          $append_data,
+          $prefix_size + $data_size,
+          $append_id);
+      } else {
+        $this->writeChunk($encoding_text, $data_size, $append_data);
+      }
+
+      $rope->removeBytesFromHead($data_size);
+    }
+  }
+
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
