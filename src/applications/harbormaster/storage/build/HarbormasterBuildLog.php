@@ -129,6 +129,30 @@ final class HarbormasterBuildLog
       $this->getID());
   }
 
+  public function loadData($offset, $length) {
+    return substr($this->getLogText(), $offset, $length);
+  }
+
+  public function getReadPosition($read_offset) {
+    $position = array(0, 0);
+
+    $map = $this->getLineMap();
+    if (!$map) {
+      throw new Exception(pht('No line map.'));
+    }
+
+    list($map) = $map;
+    foreach ($map as $marker) {
+      list($offset, $count) = $marker;
+      if ($offset > $read_offset) {
+        break;
+      }
+      $position = $marker;
+    }
+
+    return $position;
+  }
+
   public function getLogText() {
     // TODO: Remove this method since it won't scale for big logs.
 
@@ -146,6 +170,15 @@ final class HarbormasterBuildLog
   public function getURI() {
     $id = $this->getID();
     return "/harbormaster/log/view/{$id}/";
+  }
+
+  public function getRenderURI($lines) {
+    if (strlen($lines)) {
+      $lines = '$'.$lines;
+    }
+
+    $id = $this->getID();
+    return "/harbormaster/log/render/{$id}/{$lines}";
   }
 
 

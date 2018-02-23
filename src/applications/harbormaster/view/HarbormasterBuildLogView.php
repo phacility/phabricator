@@ -3,6 +3,7 @@
 final class HarbormasterBuildLogView extends AphrontView {
 
   private $log;
+  private $highlightedLineRange;
 
   public function setBuildLog(HarbormasterBuildLog $log) {
     $this->log = $log;
@@ -11,6 +12,15 @@ final class HarbormasterBuildLogView extends AphrontView {
 
   public function getBuildLog() {
     return $this->log;
+  }
+
+  public function setHighlightedLineRange($range) {
+    $this->highlightedLineRange = $range;
+    return $this;
+  }
+
+  public function getHighlightedLineRange() {
+    return $this->highlightedLineRange;
   }
 
   public function render() {
@@ -34,10 +44,28 @@ final class HarbormasterBuildLogView extends AphrontView {
 
     $header->addActionLink($download_button);
 
+    $content_id = celerity_generate_unique_node_id();
+    $content_div = javelin_tag(
+      'div',
+      array(
+        'id' => $content_id,
+        'class' => 'harbormaster-log-view-loading',
+      ),
+      pht('Loading...'));
+
+    require_celerity_resource('harbormaster-css');
+
+    Javelin::initBehavior(
+      'harbormaster-log',
+      array(
+        'contentNodeID' => $content_id,
+        'renderURI' => $log->getRenderURI($this->getHighlightedLineRange()),
+      ));
+
     $box_view = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setHeader($header)
-      ->appendChild('...');
+      ->appendChild($content_div);
 
     return $box_view;
   }

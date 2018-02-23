@@ -97,7 +97,10 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
           'buildkite/' => 'HarbormasterBuildkiteHookController',
         ),
         'log/' => array(
-          'view/(?P<id>\d+)/' => 'HarbormasterBuildLogViewController',
+          'view/(?P<id>\d+)/(?:\$(?P<lines>\d+(?:-\d+)?))?'
+            => 'HarbormasterBuildLogViewController',
+          'render/(?P<id>\d+)/(?:\$(?P<lines>\d+(?:-\d+)?))?'
+            => 'HarbormasterBuildLogRenderController',
           'download/(?P<id>\d+)/' => 'HarbormasterBuildLogDownloadController',
         ),
       ),

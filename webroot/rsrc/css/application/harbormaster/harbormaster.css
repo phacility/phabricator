@@ -30,3 +30,41 @@
   text-overflow: ellipsis;
   color: {$lightgreytext};
 }
+
+.harbormaster-log-view-loading {
+  padding: 8px;
+  text-align: center;
+  color: {$lightgreytext};
+}
+
+.harbormaster-log-table th {
+  background-color: {$paste.highlight};
+  border-right: 1px solid {$paste.border};
+
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.harbormaster-log-table th a {
+  display: block;
+  color: {$darkbluetext};
+  text-align: right;
+  padding: 2px 6px 1px 12px;
+}
+
+.harbormaster-log-table th a:hover {
+  background: {$paste.border};
+}
+
+.harbormaster-log-table td {
+  white-space: pre-wrap;
+  padding: 2px 8px 1px;
+  width: 100%;
+}
+
+.harbormaster-log-table tr.harbormaster-log-highlighted td {
+  background: {$paste.highlight};
+}

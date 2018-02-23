@@ -4,8 +4,7 @@ final class HarbormasterBuildLogViewController
   extends HarbormasterController {
 
   public function handleRequest(AphrontRequest $request) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $id = $request->getURIData('id');
 
@@ -21,7 +20,8 @@ final class HarbormasterBuildLogViewController
 
     $log_view = id(new HarbormasterBuildLogView())
       ->setViewer($viewer)
-      ->setBuildLog($log);
+      ->setBuildLog($log)
+      ->setHighlightedLineRange($request->getURIData('lines'));
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Build Logs'))
