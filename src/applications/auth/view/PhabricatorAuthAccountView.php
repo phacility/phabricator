@@ -77,6 +77,7 @@ final class PhabricatorAuthAccountView extends AphrontView {
           array(
             'href' => $account_uri,
             'target' => '_blank',
+            'rel' => 'noreferrer',
           ),
           $account_uri);
       }

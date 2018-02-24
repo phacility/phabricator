@@ -309,6 +309,8 @@ final class NuanceGitHubEventItemType
         'a',
         array(
           'href' => $event_uri,
+          'target' => '_blank',
+          'rel' => 'noreferrer',
         ),
         $event_uri);
     }

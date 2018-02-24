@@ -260,6 +260,11 @@ abstract class PhabricatorApplicationTransaction
     return $this->oldValueHasBeenSet;
   }
 
+  public function newChronologicalSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt((int)$this->getDateCreated())
+      ->addInt((int)$this->getID());
+  }
 
 /* -(  Rendering  )---------------------------------------------------------- */
 

@@ -19,9 +19,25 @@ final class PhabricatorTypeaheadFunctionHelpController
       return new Aphront404Response();
     }
 
-    $source = $sources[$class];
+    $raw_parameters = $request->getStr('parameters');
+    if ($raw_parameters) {
+      $parameters = phutil_json_decode($raw_parameters);
+    } else {
+      $parameters = array();
+    }
 
-    $application_class = $source->getDatasourceApplicationClass();
+    $source = id(clone $sources[$class])
+      ->setParameters($parameters);
+
+    // This can fail for some types of datasources (like the custom field proxy
+    // datasources) if the "parameters" are wrong. Just fail cleanly instead
+    // of fataling.
+    try {
+      $application_class = $source->getDatasourceApplicationClass();
+    } catch (Exception $ex) {
+      return new Aphront404Response();
+    }
+
     if ($application_class) {
       $result = id(new PhabricatorApplicationQuery())
         ->setViewer($this->getViewer())

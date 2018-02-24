@@ -342,6 +342,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $where[] = $this->buildSpacesWhereClause($conn);
     $where[] = $this->buildNgramsWhereClause($conn);
     $where[] = $this->buildFerretWhereClause($conn);
+    $where[] = $this->buildApplicationSearchWhereClause($conn);
     return $where;
   }
 
@@ -1158,12 +1159,29 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     PhabricatorCustomFieldIndexStorage $index,
     $value) {
 
+    $values = (array)$value;
+
+    $data_values = array();
+    $constraint_values = array();
+    foreach ($values as $value) {
+      if ($value instanceof PhabricatorQueryConstraint) {
+        $constraint_values[] = $value;
+      } else {
+        $data_values[] = $value;
+      }
+    }
+
+    $alias = 'appsearch_'.count($this->applicationSearchConstraints);
+
     $this->applicationSearchConstraints[] = array(
       'type'  => $index->getIndexValueType(),
       'cond'  => '=',
       'table' => $index->getTableName(),
       'index' => $index->getIndexKey(),
-      'value' => $value,
+      'alias' => $alias,
+      'value' => $values,
+      'data' => $data_values,
+      'constraints' => $constraint_values,
     );
 
     return $this;
@@ -1203,11 +1221,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'int'));
     }
 
+    $alias = 'appsearch_'.count($this->applicationSearchConstraints);
+
     $this->applicationSearchConstraints[] = array(
       'type' => $index->getIndexValueType(),
       'cond' => 'range',
       'table' => $index->getTableName(),
       'index' => $index->getIndexKey(),
+      'alias' => $alias,
       'value' => array($min, $max),
     );
 
@@ -1256,7 +1277,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           switch ($type) {
             case 'string':
             case 'int':
-              if (count((array)$value) > 1) {
+              if (count($value) > 1) {
                 return true;
               }
               break;
@@ -1309,49 +1330,39 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task appsearch
    */
   protected function buildApplicationSearchJoinClause(
-    AphrontDatabaseConnection $conn_r) {
+    AphrontDatabaseConnection $conn) {
 
     $joins = array();
     foreach ($this->applicationSearchConstraints as $key => $constraint) {
       $table = $constraint['table'];
-      $alias = 'appsearch_'.$key;
+      $alias = $constraint['alias'];
       $index = $constraint['index'];
       $cond = $constraint['cond'];
       $phid_column = $this->getApplicationSearchObjectPHIDColumn();
       switch ($cond) {
         case '=':
-          $type = $constraint['type'];
-          switch ($type) {
-            case 'string':
-              $constraint_clause = qsprintf(
-                $conn_r,
-                '%T.indexValue IN (%Ls)',
-                $alias,
-                (array)$constraint['value']);
+          // Figure out whether we need to do a LEFT JOIN or not. We need to
+          // LEFT JOIN if we're going to select "IS NULL" rows.
+          $join_type = 'JOIN';
+          foreach ($constraint['constraints'] as $query_constraint) {
+            $op = $query_constraint->getOperator();
+            if ($op === PhabricatorQueryConstraint::OPERATOR_NULL) {
+              $join_type = 'LEFT JOIN';
               break;
-            case 'int':
-              $constraint_clause = qsprintf(
-                $conn_r,
-                '%T.indexValue IN (%Ld)',
-                $alias,
-                (array)$constraint['value']);
-              break;
-            default:
-              throw new Exception(pht('Unknown index type "%s"!', $type));
+            }
           }
 
           $joins[] = qsprintf(
-            $conn_r,
-            'JOIN %T %T ON %T.objectPHID = %Q
-              AND %T.indexKey = %s
-              AND (%Q)',
+            $conn,
+            '%Q %T %T ON %T.objectPHID = %Q
+              AND %T.indexKey = %s',
+            $join_type,
             $table,
             $alias,
             $alias,
             $phid_column,
             $alias,
-            $index,
-            $constraint_clause);
+            $index);
           break;
         case 'range':
           list($min, $max) = $constraint['value'];
@@ -1362,19 +1373,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
           if ($min === null) {
             $constraint_clause = qsprintf(
-              $conn_r,
+              $conn,
               '%T.indexValue <= %d',
               $alias,
               $max);
           } else if ($max === null) {
             $constraint_clause = qsprintf(
-              $conn_r,
+              $conn,
               '%T.indexValue >= %d',
               $alias,
               $min);
           } else {
             $constraint_clause = qsprintf(
-              $conn_r,
+              $conn,
               '%T.indexValue BETWEEN %d AND %d',
               $alias,
               $min,
@@ -1382,7 +1393,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           }
 
           $joins[] = qsprintf(
-            $conn_r,
+            $conn,
             'JOIN %T %T ON %T.objectPHID = %Q
               AND %T.indexKey = %s
               AND (%Q)',
@@ -1414,7 +1425,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $key = $spec['customfield.index.key'];
 
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'LEFT JOIN %T %T ON %T.objectPHID = %Q
           AND %T.indexKey = %s',
         $table,
@@ -1426,6 +1437,88 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     return implode(' ', $joins);
+  }
+
+  /**
+   * Construct a WHERE clause appropriate for applying ApplicationSearch
+   * constraints.
+   *
+   * @param AphrontDatabaseConnection Connection executing the query.
+   * @return list<string> Where clause parts.
+   * @task appsearch
+   */
+  protected function buildApplicationSearchWhereClause(
+    AphrontDatabaseConnection $conn) {
+
+    $where = array();
+
+    foreach ($this->applicationSearchConstraints as $key => $constraint) {
+      $alias = $constraint['alias'];
+      $cond = $constraint['cond'];
+      $type = $constraint['type'];
+
+      $data_values = $constraint['data'];
+      $constraint_values = $constraint['constraints'];
+
+      $constraint_parts = array();
+      switch ($cond) {
+        case '=':
+          if ($data_values) {
+            switch ($type) {
+              case 'string':
+                $constraint_parts[] = qsprintf(
+                  $conn,
+                  '%T.indexValue IN (%Ls)',
+                  $alias,
+                  $data_values);
+                break;
+              case 'int':
+                $constraint_parts[] = qsprintf(
+                  $conn,
+                  '%T.indexValue IN (%Ld)',
+                  $alias,
+                  $data_values);
+                break;
+              default:
+                throw new Exception(pht('Unknown index type "%s"!', $type));
+            }
+          }
+
+          if ($constraint_values) {
+            foreach ($constraint_values as $value) {
+              $op = $value->getOperator();
+              switch ($op) {
+                case PhabricatorQueryConstraint::OPERATOR_NULL:
+                  $constraint_parts[] = qsprintf(
+                    $conn,
+                    '%T.indexValue IS NULL',
+                    $alias);
+                  break;
+                case PhabricatorQueryConstraint::OPERATOR_ANY:
+                  $constraint_parts[] = qsprintf(
+                    $conn,
+                    '%T.indexValue IS NOT NULL',
+                    $alias);
+                  break;
+                default:
+                  throw new Exception(
+                    pht(
+                      'No support for applying operator "%s" against '.
+                      'index of type "%s".',
+                      $op,
+                      $type));
+              }
+            }
+          }
+
+          if ($constraint_parts) {
+            $where[] = '('.implode(') OR (', $constraint_parts).')';
+          }
+          break;
+      }
+    }
+
+    return $where;
   }
 
 

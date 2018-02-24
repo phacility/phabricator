@@ -99,7 +99,8 @@ final class PhabricatorLinkProfileMenuItem
       ->setHref($href)
       ->setName($name)
       ->setIcon($icon_class)
-      ->setTooltip($tooltip);
+      ->setTooltip($tooltip)
+      ->setRel('noreferrer');
 
     return array(
       $item,

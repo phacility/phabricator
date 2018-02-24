@@ -64,6 +64,7 @@ final class PhabricatorPhurlLinkRemarkupRule extends PhutilRemarkupRule {
         array(
           'href' => $uri,
           'target' => '_blank',
+          'rel' => 'noreferrer',
         ),
         $name);
     }
