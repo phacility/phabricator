@@ -4,7 +4,7 @@ final class AphrontTableView extends AphrontView {
 
   protected $data;
   protected $headers;
-  protected $shortHeaders;
+  protected $shortHeaders = array();
   protected $rowClasses = array();
   protected $columnClasses = array();
   protected $cellClasses = array();
@@ -21,7 +21,7 @@ final class AphrontTableView extends AphrontView {
   protected $sortParam;
   protected $sortSelected;
   protected $sortReverse;
-  protected $sortValues;
+  protected $sortValues = array();
   private $deviceReadyTable;
 
   public function __construct(array $data) {
