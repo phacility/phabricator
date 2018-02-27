@@ -92,6 +92,8 @@ abstract class AphrontResponse extends Phobject {
       $headers[] = array('Content-Security-Policy', $csp);
     }
 
+    $headers[] = array('Referrer-Policy', 'no-referrer');
+
     return $headers;
   }
 

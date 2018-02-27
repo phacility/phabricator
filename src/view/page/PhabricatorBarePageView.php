@@ -119,7 +119,7 @@ class PhabricatorBarePageView extends AphrontPageView {
       'meta',
       array(
         'name' => 'referrer',
-        'content' => 'never',
+        'content' => 'no-referrer',
       ));
 
     $response = CelerityAPI::getStaticResourceResponse();
