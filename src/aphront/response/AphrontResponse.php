@@ -7,8 +7,10 @@ abstract class AphrontResponse extends Phobject {
   private $canCDN;
   private $responseCode = 200;
   private $lastModified = null;
-
+  private $contentSecurityPolicyURIs;
+  private $disableContentSecurityPolicy;
   protected $frameable;
+
 
   public function setRequest($request) {
     $this->request = $request;
@@ -17,6 +19,32 @@ abstract class AphrontResponse extends Phobject {
 
   public function getRequest() {
     return $this->request;
+  }
+
+  final public function addContentSecurityPolicyURI($kind, $uri) {
+    if ($this->contentSecurityPolicyURIs === null) {
+      $this->contentSecurityPolicyURIs = array(
+         'script' => array(),
+         'connect' => array(),
+         'frame' => array(),
+       );
+    }
+
+    if (!isset($this->contentSecurityPolicyURIs[$kind])) {
+      throw new Exception(
+        pht(
+          'Unknown Content-Security-Policy URI kind "%s".',
+          $kind));
+    }
+
+    $this->contentSecurityPolicyURIs[$kind][] = (string)$uri;
+
+    return $this;
+  }
+
+  final public function setDisableContentSecurityPolicy($disable) {
+    $this->disableContentSecurityPolicy = $disable;
+    return $this;
   }
 
 
@@ -59,7 +87,104 @@ abstract class AphrontResponse extends Phobject {
       );
     }
 
+    $csp = $this->newContentSecurityPolicyHeader();
+    if ($csp !== null) {
+      $headers[] = array('Content-Security-Policy', $csp);
+    }
+
     return $headers;
+  }
+
+  private function newContentSecurityPolicyHeader() {
+    if ($this->disableContentSecurityPolicy) {
+      return null;
+    }
+
+    $csp = array();
+
+    $cdn = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    if ($cdn) {
+      $default = $this->newContentSecurityPolicySource($cdn);
+    } else {
+      $default = "'self'";
+    }
+
+    $csp[] = "default-src {$default}";
+
+    // We use "data:" URIs to inline small images into CSS. This policy allows
+    // "data:" URIs to be used anywhere, but there doesn't appear to be a way
+    // to say that "data:" URIs are okay in CSS files but not in the document.
+    $csp[] = "img-src {$default} data:";
+
+    // We use inline style="..." attributes in various places, many of which
+    // are legitimate. We also currently use a <style> tag to implement the
+    // "Monospaced Font Preference" setting.
+    $csp[] = "style-src {$default} 'unsafe-inline'";
+
+    // On a small number of pages, including the Stripe workflow and the
+    // ReCAPTCHA challenge, we embed external Javascript directly.
+    $csp[] = $this->newContentSecurityPolicy('script', $default);
+
+    // We need to specify that we can connect to ourself in order for AJAX
+    // requests to work.
+    $csp[] = $this->newContentSecurityPolicy('connect', "'self'");
+
+    // DarkConsole and PHPAST both use frames to render some content.
+    $csp[] = $this->newContentSecurityPolicy('frame', "'self'");
+
+    // This is a more modern flavor of of "X-Frame-Options" and prevents
+    // clickjacking attacks where the page is included in a tiny iframe and
+    // the user is convinced to click a element on the page, which really
+    // clicks a dangerous button hidden under a picture of a cat.
+    if ($this->frameable) {
+      $csp[] = "frame-ancestors 'self'";
+    } else {
+      $csp[] = "frame-ancestors 'none'";
+    }
+
+    $csp = implode('; ', $csp);
+
+    return $csp;
+  }
+
+  private function newContentSecurityPolicy($type, $defaults) {
+    if ($defaults === null) {
+      $sources = array();
+    } else {
+      $sources = (array)$defaults;
+    }
+
+    $uris = $this->contentSecurityPolicyURIs;
+    if (isset($uris[$type])) {
+      foreach ($uris[$type] as $uri) {
+        $sources[] = $this->newContentSecurityPolicySource($uri);
+      }
+    }
+    $sources = array_unique($sources);
+
+    return "{$type}-src ".implode(' ', $sources);
+  }
+
+  private function newContentSecurityPolicySource($uri) {
+    // Some CSP URIs are ultimately user controlled (like notification server
+    // URIs and CDN URIs) so attempt to stop an attacker from injecting an
+    // unsafe source (like 'unsafe-eval') into the CSP header.
+
+    $uri = id(new PhutilURI($uri))
+      ->setPath(null)
+      ->setFragment(null)
+      ->setQueryParams(array());
+
+    $uri = (string)$uri;
+    if (preg_match('/[ ;\']/', $uri)) {
+      throw new Exception(
+        pht(
+          'Attempting to emit a response with an unsafe source ("%s") in the '.
+          'Content-Security-Policy header.',
+          $uri));
+    }
+
+    return $uri;
   }
 
   public function setCacheDurationInSeconds($duration) {

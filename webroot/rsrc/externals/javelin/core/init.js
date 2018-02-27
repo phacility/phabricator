@@ -46,25 +46,51 @@
   makeHoldingQueue('behavior');
   makeHoldingQueue('install-init');
 
-  window.__DEV__ = window.__DEV__ || 0;
-
   var loaded = false;
   var onload = [];
   var master_event_queue = [];
   var root = document.documentElement;
   var has_add_event_listener = !!root.addEventListener;
 
+  window.__DEV__ = !!root.getAttribute('data-developer-mode');
+
   JX.__rawEventQueue = function(what) {
     master_event_queue.push(what);
 
-    // Evade static analysis - JX.Stratcom
+    var ii;
     var Stratcom = JX['Stratcom'];
-    if (Stratcom && Stratcom.ready) {
-      //  Empty the queue now so that exceptions don't cause us to repeatedly
-      //  try to handle events.
+
+    if (!loaded && what.type == 'domready') {
+      var initializers = [];
+
+      var tags = JX.DOM.scry(document.body, 'data');
+      for (ii = 0; ii < tags.length; ii++) {
+
+        // Ignore tags which are not immediate children of the document
+        // body. If an attacker somehow injects arbitrary tags into the
+        // content of the document, that should not give them access to
+        // modify initialization behaviors.
+        if (tags[ii].parentNode !== document.body) {
+          continue;
+        }
+
+        var tag_kind = tags[ii].getAttribute('data-javelin-init-kind');
+        var tag_data = tags[ii].getAttribute('data-javelin-init-data');
+        tag_data = JX.JSON.parse(tag_data);
+
+        initializers.push({kind: tag_kind, data: tag_data});
+      }
+
+      Stratcom.initialize(initializers);
+      loaded = true;
+    }
+
+    if (loaded) {
+      // Empty the queue now so that exceptions don't cause us to repeatedly
+      // try to handle events.
       var local_queue = master_event_queue;
       master_event_queue = [];
-      for (var ii = 0; ii < local_queue.length; ++ii) {
+      for (ii = 0; ii < local_queue.length; ++ii) {
         var evt = local_queue[ii];
 
         // Sometimes IE gives us events which throw when ".type" is accessed;
@@ -72,11 +98,10 @@
         // figure out where these are coming from.
         try { var test = evt.type; } catch (x) { continue; }
 
-        if (!loaded && evt.type == 'domready') {
+        if (evt.type == 'domready') {
           // NOTE: Firefox interprets "document.body.id = null" as the string
           // literal "null".
           document.body && (document.body.id = '');
-          loaded = true;
           for (var jj = 0; jj < onload.length; jj++) {
             onload[jj]();
           }
