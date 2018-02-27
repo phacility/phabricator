@@ -61,6 +61,7 @@ final class HarbormasterBuildLogRenderController
         'offset' => $head_offset,
         'lines' => $head_lines,
         'direction' => 1,
+        'limit' => $tail_offset,
       );
     }
 
@@ -69,6 +70,7 @@ final class HarbormasterBuildLogRenderController
         'offset' => $tail_offset,
         'lines' => $tail_lines,
         'direction' => -1,
+        'limit' => $head_offset,
       );
     }
 
@@ -128,6 +130,10 @@ final class HarbormasterBuildLogRenderController
     foreach ($views as $view_key => $view) {
       $anchor_byte = $view['offset'];
 
+      if ($view['direction'] < 0) {
+        $anchor_byte = $anchor_byte - 1;
+      }
+
       $data_key = null;
       foreach ($reads as $read_key => $read) {
         $s = $read['fetchOffset'];
@@ -148,7 +154,8 @@ final class HarbormasterBuildLogRenderController
       foreach ($reads[$data_key]['lines'] as $line_key => $line) {
         $s = $line['offset'];
         $e = $s + $line['length'];
-        if (($s <= $anchor_byte) && ($e >= $anchor_byte)) {
+
+        if (($s <= $anchor_byte) && ($e > $anchor_byte)) {
           $anchor_key = $line_key;
           break;
         }
@@ -161,9 +168,9 @@ final class HarbormasterBuildLogRenderController
       }
 
       if ($direction > 0) {
-        $slice_offset = $line_key;
+        $slice_offset = $anchor_key;
       } else {
-        $slice_offset = max(0, $line_key - ($view['lines'] - 1));
+        $slice_offset = max(0, $anchor_key - ($view['lines'] - 1));
       }
       $slice_length = $view['lines'];
 
@@ -200,11 +207,22 @@ final class HarbormasterBuildLogRenderController
           $trim = ($view_offset - $data_offset);
           $view_length -= $trim;
         }
+
+        $limit = $view['limit'];
+        if ($limit < ($view_offset + $view_length)) {
+          $view_length = ($limit - $view_offset);
+        }
       } else {
         $view_offset = $data_offset;
         $view_length = $data_length;
         if ($data_offset + $data_length > $view['offset']) {
           $view_length -= (($data_offset + $data_length) - $view['offset']);
+        }
+
+        $limit = $view['limit'];
+        if ($limit > $view_offset) {
+          $view_length -= ($limit - $view_offset);
+          $view_offset = $limit;
         }
       }
 
@@ -232,12 +250,12 @@ final class HarbormasterBuildLogRenderController
         }
 
         $trim = ($view_offset - $line_offset);
-        $line_data = substr($line['data'], $trim);
-        if (!strlen($line_data)) {
+        if ($trim && ($trim >= strlen($line['data']))) {
           unset($lines[$line_key]);
           continue;
         }
 
+        $line_data = substr($line['data'], $trim);
         $lines[$line_key]['data'] = $line_data;
         $lines[$line_key]['length'] = strlen($line_data);
         $lines[$line_key]['offset'] += $trim;
@@ -248,16 +266,16 @@ final class HarbormasterBuildLogRenderController
       foreach ($lines as $line_key => $line) {
         $line_end = $line['offset'] + $line['length'];
         if ($line_end <= $view_end) {
-          break;
+          continue;
         }
 
         $trim = ($line_end - $view_end);
-        $line_data = substr($line['data'], -$trim);
-        if (!strlen($line_data)) {
+        if ($trim && ($trim >= strlen($line['data']))) {
           unset($lines[$line_key]);
           continue;
         }
 
+        $line_data = substr($line['data'], -$trim);
         $lines[$line_key]['data'] = $line_data;
         $lines[$line_key]['length'] = strlen($line_data);
       }
@@ -267,6 +285,17 @@ final class HarbormasterBuildLogRenderController
 
     $spacer = null;
     $render = array();
+
+    $head_view = head($views);
+    if ($head_view['viewOffset'] > $head_offset) {
+      $render[] = array(
+        'spacer' => true,
+        'head' => $head_offset,
+        'tail' => $head_view['viewOffset'],
+      );
+    }
+
+
     foreach ($views as $view) {
       if ($spacer) {
         $spacer['tail'] = $view['viewOffset'];
@@ -281,49 +310,22 @@ final class HarbormasterBuildLogRenderController
       );
     }
 
+    $tail_view = last($views);
+    if ($tail_view['viewOffset'] + $tail_view['viewLength'] < $tail_offset) {
+      $render[] = array(
+        'spacer' => true,
+        'head' => $tail_view['viewOffset'] + $tail_view['viewLength'],
+        'tail' => $tail_offset,
+      );
+    }
+
     $uri = $log->getURI();
     $highlight_range = $request->getURIData('lines');
 
     $rows = array();
     foreach ($render as $range) {
       if (isset($range['spacer'])) {
-        $rows[] = phutil_tag(
-          'tr',
-          array(),
-          array(
-            phutil_tag(
-              'th',
-              array(),
-              null),
-            phutil_tag(
-              'td',
-              array(),
-              array(
-                javelin_tag(
-                  'a',
-                  array(
-                    'sigil' => 'harbormaster-log-expand',
-                    'meta' => array(
-                      'headOffset' => $range['head'],
-                      'tailOffset' => $range['tail'],
-                      'head' => 4,
-                    ),
-                  ),
-                  'Show Up ^^^^'),
-                '... '.($range['tail'] - $range['head']).' bytes ...',
-                javelin_tag(
-                  'a',
-                  array(
-                    'sigil' => 'harbormaster-log-expand',
-                    'meta' => array(
-                      'headOffset' => $range['head'],
-                      'tailOffset' => $range['tail'],
-                      'tail' => 4,
-                    ),
-                  ),
-                  'Show Down VVVV'),
-              )),
-          ));
+        $rows[] = $this->renderExpandRow($range);
         continue;
       }
 
@@ -557,6 +559,110 @@ final class HarbormasterBuildLogRenderController
     }
 
     return $views;
+  }
+
+  private function renderExpandRow($range) {
+
+    $icon_up = id(new PHUIIconView())
+      ->setIcon('fa-chevron-up');
+
+    $icon_down = id(new PHUIIconView())
+      ->setIcon('fa-chevron-down');
+
+    $up_text = array(
+      pht('Show More Above'),
+      ' ',
+      $icon_up,
+    );
+
+    $expand_up = javelin_tag(
+      'a',
+      array(
+        'sigil' => 'harbormaster-log-expand',
+        'meta' => array(
+          'headOffset' => $range['head'],
+          'tailOffset' => $range['tail'],
+          'head' => 4,
+          'tail' => 0,
+        ),
+      ),
+      $up_text);
+
+    $mid_text = pht(
+      'Show More (%s bytes Hidden)',
+      new PhutilNumber($range['tail'] - $range['head']));
+
+    $expand_mid = javelin_tag(
+      'a',
+      array(
+        'sigil' => 'harbormaster-log-expand',
+        'meta' => array(
+          'headOffset' => $range['head'],
+          'tailOffset' => $range['tail'],
+          'head' => 2,
+          'tail' => 2,
+        ),
+      ),
+      $mid_text);
+
+    $down_text = array(
+      $icon_down,
+      ' ',
+      pht('Show More Below'),
+    );
+
+    $expand_down = javelin_tag(
+      'a',
+      array(
+        'sigil' => 'harbormaster-log-expand',
+        'meta' => array(
+          'headOffset' => $range['head'],
+          'tailOffset' => $range['tail'],
+          'head' => 0,
+          'tail' => 4,
+        ),
+      ),
+      $down_text);
+
+    $expand_cells = array(
+      phutil_tag(
+        'td',
+        array(
+          'class' => 'harbormaster-log-expand-up',
+        ),
+        $expand_up),
+      phutil_tag(
+        'td',
+        array(
+          'class' => 'harbormaster-log-expand-mid',
+        ),
+        $expand_mid),
+      phutil_tag(
+        'td',
+        array(
+          'class' => 'harbormaster-log-expand-down',
+        ),
+        $expand_down),
+    );
+    $expand_row = phutil_tag('tr', array(), $expand_cells);
+    $expand_table = phutil_tag(
+      'table',
+      array(
+        'class' => 'harbormaster-log-expand-table',
+      ),
+      $expand_row);
+
+    $cells = array(
+      phutil_tag('th', array()),
+      phutil_tag(
+        'td',
+        array(
+          'class' => 'harbormaster-log-expand-cell',
+        ),
+        $expand_table),
+    );
+
+    return phutil_tag('tr', array(), $cells);
   }
 
 }
