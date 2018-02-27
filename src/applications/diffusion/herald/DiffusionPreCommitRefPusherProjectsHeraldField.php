@@ -6,7 +6,7 @@ final class DiffusionPreCommitRefPusherProjectsHeraldField
   const FIELDCONST = 'diffusion.pre.ref.pusher.projects';
 
   public function getHeraldFieldName() {
-    return pht('Pusher projects');
+    return pht("Pusher's projects");
   }
 
   public function getHeraldFieldValue($object) {
