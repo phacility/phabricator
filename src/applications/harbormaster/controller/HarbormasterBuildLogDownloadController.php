@@ -44,19 +44,7 @@ final class HarbormasterBuildLogDownloadController
         ->addCancelButton($cancel_uri);
     }
 
-    $size = $file->getByteSize();
-
-    return $this->newDialog()
-      ->setTitle(pht('Download Build Log'))
-      ->appendParagraph(
-        pht(
-          'This log has a total size of %s. If you insist, you may '.
-          'download it.',
-          phutil_tag('strong', array(), phutil_format_bytes($size))))
-      ->setDisableWorkflowOnSubmit(true)
-      ->addSubmitButton(pht('Download Log'))
-      ->setSubmitURI($file->getDownloadURI())
-      ->addCancelButton($cancel_uri, pht('Done'));
+    return $file->newDownloadResponse();
   }
 
 }

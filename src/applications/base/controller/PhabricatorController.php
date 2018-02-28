@@ -298,6 +298,7 @@ abstract class PhabricatorController extends AphrontController {
           ->setContent(
             array(
               'redirect' => $response->getURI(),
+              'close' => $response->getCloseDialogBeforeRedirect(),
             ));
       }
     }

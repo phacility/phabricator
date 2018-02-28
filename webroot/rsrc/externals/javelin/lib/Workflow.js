@@ -276,6 +276,13 @@ JX.install('Workflow', {
       // It is permissible to send back a falsey redirect to force a page
       // reload, so we need to take this branch if the key is present.
       if (r && (typeof r.redirect != 'undefined')) {
+        // Before we redirect to file downloads, we close the dialog. These
+        // redirects aren't real navigation events so we end up stuck in the
+        // dialog otherwise.
+        if (r.close) {
+          this._pop();
+        }
+
         JX.$U(r.redirect).go();
       } else if (r && r.dialog) {
         this._push();

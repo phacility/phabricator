@@ -144,7 +144,7 @@ final class PhabricatorEmbedFileRemarkupRule
 
           $existing_xform = $file->getTransform($preview_key);
           if ($existing_xform) {
-            $xform_uri = $existing_xform->getCDNURI();
+            $xform_uri = $existing_xform->getCDNURI('data');
           } else {
             $xform_uri = $file->getURIForTransform($xform);
           }

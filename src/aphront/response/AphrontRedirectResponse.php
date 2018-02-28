@@ -8,6 +8,7 @@ class AphrontRedirectResponse extends AphrontResponse {
   private $uri;
   private $stackWhenCreated;
   private $isExternal;
+  private $closeDialogBeforeRedirect;
 
   public function setIsExternal($external) {
     $this->isExternal = $external;
@@ -35,6 +36,15 @@ class AphrontRedirectResponse extends AphrontResponse {
 
   public function shouldStopForDebugging() {
     return PhabricatorEnv::getEnvConfig('debug.stop-on-redirect');
+  }
+
+  public function setCloseDialogBeforeRedirect($close) {
+    $this->closeDialogBeforeRedirect = $close;
+    return $this;
+  }
+
+  public function getCloseDialogBeforeRedirect() {
+    return $this->closeDialogBeforeRedirect;
   }
 
   public function getHeaders() {

@@ -101,7 +101,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
 
   private function getResourceSubroutes() {
     return array(
-      'data/'.
+      '(?P<kind>data|download)/'.
         '(?:@(?P<instance>[^/]+)/)?'.
         '(?P<key>[^/]+)/'.
         '(?P<phid>[^/]+)/'.
@@ -132,7 +132,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
 
   public function getQuicksandURIPatternBlacklist() {
     return array(
-      '/file/data/.*',
+      '/file/(data|download)/.*',
     );
   }
 

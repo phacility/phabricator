@@ -34,12 +34,14 @@ final class HarbormasterBuildLogView extends AphrontView {
 
     $download_uri = "/harbormaster/log/download/{$id}/";
 
+    $can_download = (bool)$log->getFilePHID();
+
     $download_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref($download_uri)
       ->setIcon('fa-download')
-      ->setDisabled(!$log->getFilePHID())
-      ->setWorkflow(true)
+      ->setDisabled(!$can_download)
+      ->setWorkflow(!$can_download)
       ->setText(pht('Download Log'));
 
     $header->addActionLink($download_button);

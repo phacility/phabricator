@@ -147,6 +147,13 @@ abstract class AphrontResponse extends Phobject {
     // Block relics of the old world: Flash, Java applets, and so on.
     $csp[] = "object-src 'none'";
 
+    // Don't allow forms to submit offsite.
+
+    // This can result in some trickiness with file downloads if applications
+    // try to start downloads by submitting a dialog. Redirect to the file's
+    // download URI instead of submitting a form to it.
+    $csp[] = "form-action 'self'";
+
     $csp = implode('; ', $csp);
 
     return $csp;
