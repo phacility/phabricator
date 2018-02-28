@@ -167,7 +167,7 @@ final class HarbormasterBuildLogRenderController
             'Unable to find lines.'));
       }
 
-      if ($direction > 0) {
+      if ($view['direction'] > 0) {
         $slice_offset = $anchor_key;
       } else {
         $slice_offset = max(0, $anchor_key - ($view['lines'] - 1));
@@ -589,7 +589,7 @@ final class HarbormasterBuildLogRenderController
       $up_text);
 
     $mid_text = pht(
-      'Show More (%s bytes Hidden)',
+      'Show More (%s Bytes)',
       new PhutilNumber($range['tail'] - $range['head']));
 
     $expand_mid = javelin_tag(
