@@ -97,7 +97,6 @@
     'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-
 .harbormaster-log-expand-up {
   text-align: right;
   width: 50%;
@@ -105,6 +104,14 @@
 
 .harbormaster-log-expand-up .phui-icon-view {
   margin: 0 0 0px 4px;
+}
+
+.harbormaster-log-follow {
+  text-align: center;
+}
+
+.harbormaster-log-follow .phui-icon-view {
+  margin: 0 4px;
 }
 
 .harbormaster-log-expand-mid {

@@ -22,14 +22,14 @@ final class HarbormasterBuildLogRenderController
     if ($head_lines === null) {
       $head_lines = 8;
     }
-    $head_lines = min($head_lines, 100);
+    $head_lines = min($head_lines, 1024);
     $head_lines = max($head_lines, 0);
 
     $tail_lines = $request->getInt('tail');
     if ($tail_lines === null) {
       $tail_lines = 16;
     }
-    $tail_lines = min($tail_lines, 100);
+    $tail_lines = min($tail_lines, 1024);
     $tail_lines = max($tail_lines, 0);
 
     $head_offset = $request->getInt('headOffset');
@@ -301,7 +301,6 @@ final class HarbormasterBuildLogRenderController
       );
     }
 
-
     foreach ($views as $view) {
       if ($spacer) {
         $spacer['tail'] = $view['viewOffset'];
@@ -357,6 +356,22 @@ final class HarbormasterBuildLogRenderController
             $line_cell,
             $text_cell,
           ));
+      }
+    }
+
+    if ($log->getLive()) {
+      $last_view = last($views);
+      $last_line = last($last_view['viewData']);
+      if ($last_line) {
+        $last_offset = $last_line['offset'];
+      } else {
+        $last_offset = 0;
+      }
+
+      $last_tail = $last_view['viewOffset'] + $last_view['viewLength'];
+      $show_live = ($last_tail === $log_size);
+      if ($show_live) {
+        $rows[] = $this->renderLiveRow($last_offset);
       }
     }
 
@@ -650,25 +665,66 @@ final class HarbormasterBuildLogRenderController
         ),
         $expand_down),
     );
-    $expand_row = phutil_tag('tr', array(), $expand_cells);
-    $expand_table = phutil_tag(
+
+    return $this->renderActionTable($expand_cells);
+  }
+
+  private function renderLiveRow($log_size) {
+    $icon_down = id(new PHUIIconView())
+      ->setIcon('fa-chevron-down');
+
+    $follow = javelin_tag(
+      'a',
+      array(
+        'sigil' => 'harbormaster-log-expand harbormaster-log-live',
+        'meta' => array(
+          'headOffset' => $log_size,
+          'head' => 0,
+          'tail' => 1024,
+          'live' => true,
+        ),
+      ),
+      array(
+        $icon_down,
+        ' ',
+        pht('Follow Log'),
+        ' ',
+        $icon_down,
+      ));
+
+    $expand_cells = array(
+      phutil_tag(
+        'td',
+        array(
+          'class' => 'harbormaster-log-follow',
+        ),
+        $follow),
+    );
+
+    return $this->renderActionTable($expand_cells);
+  }
+
+  private function renderActionTable(array $action_cells) {
+    $action_row = phutil_tag('tr', array(), $action_cells);
+
+    $action_table = phutil_tag(
       'table',
       array(
         'class' => 'harbormaster-log-expand-table',
       ),
-      $expand_row);
+      $action_row);
 
-    $cells = array(
+    $format_cells = array(
       phutil_tag('th', array()),
       phutil_tag(
         'td',
         array(
           'class' => 'harbormaster-log-expand-cell',
         ),
-        $expand_table),
+        $action_table),
     );
 
-    return phutil_tag('tr', array(), $cells);
+    return phutil_tag('tr', array(), $format_cells);
   }
 
 }
