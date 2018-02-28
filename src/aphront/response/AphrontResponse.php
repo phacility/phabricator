@@ -144,6 +144,9 @@ abstract class AphrontResponse extends Phobject {
       $csp[] = "frame-ancestors 'none'";
     }
 
+    // Block relics of the old world: Flash, Java applets, and so on.
+    $csp[] = "object-src 'none'";
+
     $csp = implode('; ', $csp);
 
     return $csp;
