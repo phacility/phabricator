@@ -130,7 +130,85 @@ final class HarbormasterBuildLog
   }
 
   public function loadData($offset, $length) {
-    return substr($this->getLogText(), $offset, $length);
+    $end = ($offset + $length);
+
+    $chunks = id(new HarbormasterBuildLogChunk())->loadAllWhere(
+      'logID = %d AND headOffset < %d AND tailOffset >= %d
+        ORDER BY headOffset ASC',
+      $this->getID(),
+      $end,
+      $offset);
+
+    // Make sure that whatever we read out of the database is a single
+    // contiguous range which contains all of the requested bytes.
+    $ranges = array();
+    foreach ($chunks as $chunk) {
+      $ranges[] = array(
+        'head' => $chunk->getHeadOffset(),
+        'tail' => $chunk->getTailOffset(),
+      );
+    }
+
+    $ranges = isort($ranges, 'head');
+    $ranges = array_values($ranges);
+    $count = count($ranges);
+    for ($ii = 0; $ii < ($count - 1); $ii++) {
+      if ($ranges[$ii + 1]['head'] === $ranges[$ii]['tail']) {
+        $ranges[$ii + 1]['head'] = $ranges[$ii]['head'];
+        unset($ranges[$ii]);
+      }
+    }
+
+    if (count($ranges) !== 1) {
+      $display_ranges = array();
+      foreach ($ranges as $range) {
+        $display_ranges[] = pht(
+          '(%d - %d)',
+          $range['head'],
+          $range['tail']);
+      }
+
+      if (!$display_ranges) {
+        $display_ranges[] = pht('<null>');
+      }
+
+      throw new Exception(
+        pht(
+          'Attempt to load log bytes (%d - %d) failed: failed to '.
+          'load a single contiguous range. Actual ranges: %s.',
+          implode('; ', $display_ranges)));
+    }
+
+    $range = head($ranges);
+    if ($range['head'] > $offset || $range['tail'] < $end) {
+      throw new Exception(
+        pht(
+          'Attempt to load log bytes (%d - %d) failed: the loaded range '.
+          '(%d - %d) does not span the requested range.',
+          $offset,
+          $end,
+          $range['head'],
+          $range['tail']));
+    }
+
+    $parts = array();
+    foreach ($chunks as $chunk) {
+      $parts[] = $chunk->getChunkDisplayText();
+    }
+    $parts = implode('', $parts);
+
+    $chop_head = ($offset - $range['head']);
+    $chop_tail = ($range['tail'] - $end);
+
+    if ($chop_head) {
+      $parts = substr($parts, $chop_head);
+    }
+
+    if ($chop_tail) {
+      $parts = substr($parts, 0, -$chop_tail);
+    }
+
+    return $parts;
   }
 
   public function getReadPosition($read_offset) {
@@ -220,17 +298,18 @@ final class HarbormasterBuildLog
 
     $this->openTransaction();
 
+    $offset = 0;
     foreach ($chunks as $chunk) {
       $rope->append($chunk->getChunkDisplayText());
       $chunk->delete();
 
       while ($rope->getByteLength() > $byte_limit) {
-        $this->writeEncodedChunk($rope, $byte_limit, $mode);
+        $offset += $this->writeEncodedChunk($rope, $offset, $byte_limit, $mode);
       }
     }
 
     while ($rope->getByteLength()) {
-      $this->writeEncodedChunk($rope, $byte_limit, $mode);
+      $offset += $this->writeEncodedChunk($rope, $offset, $byte_limit, $mode);
     }
 
     $this
@@ -240,7 +319,12 @@ final class HarbormasterBuildLog
     $this->saveTransaction();
   }
 
-  private function writeEncodedChunk(PhutilRope $rope, $length, $mode) {
+  private function writeEncodedChunk(
+    PhutilRope $rope,
+    $offset,
+    $length,
+    $mode) {
+
     $data = $rope->getPrefixBytes($length);
     $size = strlen($data);
 
@@ -258,15 +342,22 @@ final class HarbormasterBuildLog
         throw new Exception(pht('Unknown chunk encoding "%s"!', $mode));
     }
 
-    $this->writeChunk($mode, $size, $data);
+    $this->writeChunk($mode, $offset, $size, $data);
 
     $rope->removeBytesFromHead($size);
+
+    return $size;
   }
 
-  private function writeChunk($encoding, $raw_size, $data) {
+  private function writeChunk($encoding, $offset, $raw_size, $data) {
+    $head_offset = $offset;
+    $tail_offset = $offset + $raw_size;
+
     return id(new HarbormasterBuildLogChunk())
       ->setLogID($this->getID())
       ->setEncoding($encoding)
+      ->setHeadOffset($head_offset)
+      ->setTailOffset($tail_offset)
       ->setSize($raw_size)
       ->setChunk($data)
       ->save();
@@ -397,13 +488,23 @@ final class HarbormasterBuildLog
         if ($append_id) {
           queryfx(
             $conn_w,
-            'UPDATE %T SET chunk = CONCAT(chunk, %B), size = %d WHERE id = %d',
+            'UPDATE %T SET
+                chunk = CONCAT(chunk, %B),
+                size = %d,
+                tailOffset = headOffset + %d,
+              WHERE
+                id = %d',
             $chunk_table,
             $append_data,
             $prefix_size + $data_size,
+            $prefix_size + $data_size,
             $append_id);
         } else {
-          $this->writeChunk($encoding_text, $data_size, $append_data);
+          $this->writeChunk(
+            $encoding_text,
+            $this->getByteLength(),
+            $data_size,
+            $append_data);
         }
 
         $this->updateLineMap($append_data);
