@@ -492,7 +492,7 @@ final class HarbormasterBuildLog
             'UPDATE %T SET
                 chunk = CONCAT(chunk, %B),
                 size = %d,
-                tailOffset = headOffset + %d,
+                tailOffset = headOffset + %d
               WHERE
                 id = %d',
             $chunk_table,

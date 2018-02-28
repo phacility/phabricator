@@ -18,6 +18,13 @@ final class HarbormasterManagementWriteLogWorkflow
             'param' => 'id',
             'help' => pht('Build Target ID to attach the log to.'),
           ),
+          array(
+            'name' => 'rate',
+            'param' => 'bytes',
+            'help' => pht(
+              'Limit the rate at which the log is written, to test '.
+              'live log streaming.'),
+          ),
         ));
   }
 
@@ -54,7 +61,37 @@ final class HarbormasterManagementWriteLogWorkflow
       pht('Reading log content from stdin...'));
 
     $content = file_get_contents('php://stdin');
-    $log->append($content);
+
+    $rate = $args->getArg('rate');
+    if ($rate) {
+      if ($rate <= 0) {
+        throw new Exception(
+          pht(
+            'Write rate must be more than 0 bytes/sec.'));
+      }
+
+      echo tsprintf(
+        "%s\n",
+        pht('Writing log, slowly...'));
+
+      $offset = 0;
+      $total = strlen($content);
+      $pieces = str_split($content, $rate);
+
+      $bar = id(new PhutilConsoleProgressBar())
+        ->setTotal($total);
+
+      foreach ($pieces as $piece) {
+        $log->append($piece);
+        $bar->update(strlen($piece));
+        sleep(1);
+      }
+
+      $bar->done();
+
+    } else {
+      $log->append($content);
+    }
 
     echo tsprintf(
       "%s\n",
