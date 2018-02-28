@@ -248,7 +248,7 @@ final class AphrontTableView extends AphrontView {
 
     foreach ($col_classes as $key => $value) {
 
-      if (($sort_values[$key] !== null) &&
+      if (isset($sort_values[$key]) &&
           ($sort_values[$key] == $this->sortSelected)) {
         $value = trim($value.' sorted-column');
       }

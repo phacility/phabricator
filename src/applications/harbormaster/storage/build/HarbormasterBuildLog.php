@@ -4,7 +4,8 @@ final class HarbormasterBuildLog
   extends HarbormasterDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   protected $buildTargetPHID;
   protected $logSource;
@@ -713,5 +714,37 @@ final class HarbormasterBuildLog
     return $this;
   }
 
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildTargetPHID')
+        ->setType('phid')
+        ->setDescription(pht('Build target this log is attached to.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('byteLength')
+        ->setType('int')
+        ->setDescription(pht('Length of the log in bytes.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('filePHID')
+        ->setType('phid?')
+        ->setDescription(pht('A file containing the log data.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'buildTargetPHID' => $this->getBuildTargetPHID(),
+      'byteLength' => (int)$this->getByteLength(),
+      'filePHID' => $this->getFilePHID(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
 
 }
