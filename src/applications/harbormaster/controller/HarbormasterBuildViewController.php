@@ -363,12 +363,19 @@ final class HarbormasterBuildViewController
       $log_view->setLines($lines);
       $log_view->setStart($start);
 
+      $prototype_view = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref($log->getURI())
+        ->setIcon('fa-file-text-o')
+        ->setText(pht('New View (Prototype)'));
+
       $header = id(new PHUIHeaderView())
         ->setHeader(pht(
           'Build Log %d (%s - %s)',
           $log->getID(),
           $log->getLogSource(),
           $log->getLogType()))
+        ->addActionLink($prototype_view)
         ->setSubheader($this->createLogHeader($build, $log))
         ->setUser($viewer);
 

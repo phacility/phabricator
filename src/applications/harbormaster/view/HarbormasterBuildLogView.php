@@ -44,28 +44,43 @@ final class HarbormasterBuildLogView extends AphrontView {
 
     $header->addActionLink($download_button);
 
-    $content_id = celerity_generate_unique_node_id();
-    $content_div = javelin_tag(
-      'div',
-      array(
-        'id' => $content_id,
-        'class' => 'harbormaster-log-view-loading',
-      ),
-      pht('Loading...'));
-
-    require_celerity_resource('harbormaster-css');
-
-    Javelin::initBehavior(
-      'harbormaster-log',
-      array(
-        'contentNodeID' => $content_id,
-        'renderURI' => $log->getRenderURI($this->getHighlightedLineRange()),
-      ));
-
     $box_view = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setHeader($header)
-      ->appendChild($content_div);
+      ->setHeader($header);
+
+    $has_linemap = $log->getLineMap();
+    if ($has_linemap) {
+      $content_id = celerity_generate_unique_node_id();
+      $content_div = javelin_tag(
+        'div',
+        array(
+          'id' => $content_id,
+          'class' => 'harbormaster-log-view-loading',
+        ),
+        pht('Loading...'));
+
+      require_celerity_resource('harbormaster-css');
+
+      Javelin::initBehavior(
+        'harbormaster-log',
+        array(
+          'contentNodeID' => $content_id,
+          'renderURI' => $log->getRenderURI($this->getHighlightedLineRange()),
+        ));
+
+      $box_view->appendChild($content_div);
+    } else {
+      $box_view->setFormErrors(
+        array(
+          pht(
+            'This older log is missing required rendering data. To rebuild '.
+            'rendering data, run: %s',
+            phutil_tag(
+              'tt',
+              array(),
+              '$ bin/harbormaster rebuild-log --force --id '.$log->getID())),
+        ));
+    }
 
     return $box_view;
   }

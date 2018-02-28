@@ -105,7 +105,13 @@ final class HarbormasterBuildLogRenderController
     $reads = $this->mergeOverlappingReads($reads);
 
     foreach ($reads as $key => $read) {
-      $data = $log->loadData($read['fetchOffset'], $read['fetchLength']);
+      $fetch_offset = $read['fetchOffset'];
+      $fetch_length = $read['fetchLength'];
+      if ($fetch_offset + $fetch_length > $log_size) {
+        $fetch_length = $log_size - $fetch_offset;
+      }
+
+      $data = $log->loadData($fetch_offset, $fetch_length);
 
       $offset = $read['fetchOffset'];
       $line = $read['fetchLine'];

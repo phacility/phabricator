@@ -16,6 +16,9 @@ final class HarbormasterBuildLogViewController
       return new Aphront404Response();
     }
 
+    $target = $log->getBuildTarget();
+    $build = $target->getBuild();
+
     $page_title = pht('Build Log %d', $log->getID());
 
     $log_view = id(new HarbormasterBuildLogView())
@@ -25,6 +28,9 @@ final class HarbormasterBuildLogViewController
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Build Logs'))
+      ->addTextCrumb(
+        pht('Build %d', $build->getID()),
+        $build->getURI())
       ->addTextCrumb($page_title)
       ->setBorder(true);
 
