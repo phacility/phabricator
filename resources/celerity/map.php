@@ -416,7 +416,7 @@ return array(
     'rsrc/js/application/drydock/drydock-live-operation-status.js' => '901935ef',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8499b6ab',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
-    'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => '796a8803',
+    'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => 'ab1173d1',
     'rsrc/js/application/herald/HeraldRuleEditor.js' => 'dca75c0e',
     'rsrc/js/application/herald/PathTypeahead.js' => 'f7fc67ec',
     'rsrc/js/application/herald/herald-rule-editor.js' => '7ebaeed3',
@@ -636,7 +636,7 @@ return array(
     'javelin-behavior-event-all-day' => 'b41537c9',
     'javelin-behavior-fancy-datepicker' => 'ecf4e799',
     'javelin-behavior-global-drag-and-drop' => '960f6a39',
-    'javelin-behavior-harbormaster-log' => '796a8803',
+    'javelin-behavior-harbormaster-log' => 'ab1173d1',
     'javelin-behavior-herald-rule-editor' => '7ebaeed3',
     'javelin-behavior-high-security-warning' => 'a464fe03',
     'javelin-behavior-history-install' => '7ee2b591',
@@ -1526,9 +1526,6 @@ return array(
       'javelin-behavior',
       'javelin-quicksand',
     ),
-    '796a8803' => array(
-      'javelin-behavior',
-    ),
     '7a68dda3' => array(
       'owners-path-editor',
       'javelin-behavior',
@@ -1767,6 +1764,9 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-prefab',
+    ),
+    'ab1173d1' => array(
+      'javelin-behavior',
     ),
     'ab2f381b' => array(
       'javelin-request',

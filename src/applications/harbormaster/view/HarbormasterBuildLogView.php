@@ -67,7 +67,8 @@ final class HarbormasterBuildLogView extends AphrontView {
         'harbormaster-log',
         array(
           'contentNodeID' => $content_id,
-          'renderURI' => $log->getRenderURI($this->getHighlightedLineRange()),
+          'initialURI' => $log->getRenderURI($this->getHighlightedLineRange()),
+          'renderURI' => $log->getRenderURI(null),
         ));
 
       $box_view->appendChild($content_div);

@@ -79,7 +79,7 @@ JX.behavior('harbormaster-log', function(config) {
     JX.DOM.setContent(contentNode, JX.$H(r.markup));
   }
 
-  var uri = new JX.URI(config.renderURI);
+  var uri = new JX.URI(config.initialURI);
 
   new JX.Request(uri, onresponse)
     .send();

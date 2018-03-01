@@ -212,6 +212,36 @@ final class HarbormasterBuildLog
     return $parts;
   }
 
+  public function getLineSpanningRange($min_line, $max_line) {
+    $map = $this->getLineMap();
+    if (!$map) {
+      throw new Exception(pht('No line map.'));
+    }
+
+    $min_pos = 0;
+    $min_line = 0;
+    $max_pos = $this->getByteLength();
+    list($map) = $map;
+    foreach ($map as $marker) {
+      list($offset, $count) = $marker;
+
+      if ($count < $min_line) {
+        if ($offset > $min_pos) {
+          $min_pos = $offset;
+          $min_line = $count;
+        }
+      }
+
+      if ($count > $max_line) {
+        $max_pos = min($max_pos, $offset);
+        break;
+      }
+    }
+
+    return array($min_pos, $max_pos, $min_line);
+  }
+
+
   public function getReadPosition($read_offset) {
     $position = array(0, 0);
 

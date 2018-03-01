@@ -16,6 +16,8 @@ final class HarbormasterBuildLogRenderController
       return new Aphront404Response();
     }
 
+    $highlight_range = $request->getURILineRange('lines', 1000);
+
     $log_size = $this->getTotalByteLength($log);
 
     $head_lines = $request->getInt('head');
@@ -65,6 +67,16 @@ final class HarbormasterBuildLogRenderController
       );
     }
 
+    if ($highlight_range) {
+      $highlight_views = $this->getHighlightViews(
+        $log,
+        $highlight_range,
+        $log_size);
+      foreach ($highlight_views as $highlight_view) {
+        $views[] = $highlight_view;
+      }
+    }
+
     if ($tail_lines > 0) {
       $views[] = array(
         'offset' => $tail_offset,
@@ -86,10 +98,11 @@ final class HarbormasterBuildLogRenderController
 
       $direction = $read['direction'];
       if ($direction < 0) {
-        $offset -= $read_length;
-        if ($offset < 0) {
+        if ($offset > $read_length) {
+          $offset -= $read_length;
+        } else {
+          $read_length = $offset;
           $offset = 0;
-          $read_length = $log_size;
         }
       }
 
@@ -215,8 +228,10 @@ final class HarbormasterBuildLogRenderController
         }
 
         $limit = $view['limit'];
-        if ($limit < ($view_offset + $view_length)) {
-          $view_length = ($limit - $view_offset);
+        if ($limit !== null) {
+          if ($limit < ($view_offset + $view_length)) {
+            $view_length = ($limit - $view_offset);
+          }
         }
       } else {
         $view_offset = $data_offset;
@@ -226,9 +241,11 @@ final class HarbormasterBuildLogRenderController
         }
 
         $limit = $view['limit'];
-        if ($limit > $view_offset) {
-          $view_length -= ($limit - $view_offset);
-          $view_offset = $limit;
+        if ($limit !== null) {
+          if ($limit > $view_offset) {
+            $view_length -= ($limit - $view_offset);
+            $view_offset = $limit;
+          }
         }
       }
 
@@ -325,7 +342,6 @@ final class HarbormasterBuildLogRenderController
     }
 
     $uri = $log->getURI();
-    $highlight_range = $request->getURIData('lines');
 
     $rows = array();
     foreach ($render as $range) {
@@ -339,6 +355,16 @@ final class HarbormasterBuildLogRenderController
         $display_line = ($line['line'] + 1);
         $display_text = ($line['data']);
 
+        $cell_attr = array();
+        if ($highlight_range) {
+          if (($display_line >= $highlight_range[0]) &&
+              ($display_line <= $highlight_range[1])) {
+            $cell_attr = array(
+              'class' => 'phabricator-source-highlight',
+            );
+          }
+        }
+
         $display_line = phutil_tag(
           'a',
           array(
@@ -347,7 +373,7 @@ final class HarbormasterBuildLogRenderController
           $display_line);
 
         $line_cell = phutil_tag('th', array(), $display_line);
-        $text_cell = phutil_tag('td', array(), $display_text);
+        $text_cell = phutil_tag('td', $cell_attr, $display_text);
 
         $rows[] = phutil_tag(
           'tr',
@@ -557,25 +583,43 @@ final class HarbormasterBuildLogRenderController
         $vs = $vview['viewOffset'];
         $ve = $vs + $vview['viewLength'];
 
+        // Don't merge if one of the slices starts at a byte offset
+        // significantly after the other ends.
+        if (($vs > $ue + $body_bytes) || ($us > $ve + $body_bytes)) {
+          continue;
+        }
+
         $uss = $uview['sliceOffset'];
         $use = $uss + $uview['sliceLength'];
 
         $vss = $vview['sliceOffset'];
         $vse = $vss + $vview['sliceLength'];
 
-        if ($ue <= $vs) {
-          if (($ue + $body_bytes) >= $vs) {
-            if (($use + $body_lines) >= $vss) {
-              $views[$ukey] = array(
-                'sliceLength' => ($vse - $uss),
-                'viewLength' => ($ve - $us),
-              ) + $views[$ukey];
-
-              unset($views[$vkey]);
-              continue;
-            }
-          }
+        // Don't merge if one of the slices starts at a line offset
+        // significantly after the other ends.
+        if ($uss > ($vse + $body_lines) || $vss > ($use + $body_lines)) {
+          continue;
         }
+
+        // These views are overlapping or nearly overlapping, so we merge
+        // them. We merge views even if they aren't exactly adjacent since
+        // it's silly to render an "expand more" which only expands a couple
+        // of lines.
+
+        $offset = min($us, $vs);
+        $length = max($ue, $ve) - $offset;
+
+        $slice_offset = min($uss, $vss);
+        $slice_length = max($use, $vse) - $slice_offset;
+
+        $views[$ukey] = array(
+          'viewOffset' => $offset,
+          'viewLength' => $length,
+          'sliceOffset' => $slice_offset,
+          'sliceLength' => $slice_length,
+        ) + $views[$ukey];
+
+        unset($views[$vkey]);
       }
     }
 
@@ -603,7 +647,7 @@ final class HarbormasterBuildLogRenderController
         'meta' => array(
           'headOffset' => $range['head'],
           'tailOffset' => $range['tail'],
-          'head' => 4,
+          'head' => 128,
           'tail' => 0,
         ),
       ),
@@ -620,8 +664,8 @@ final class HarbormasterBuildLogRenderController
         'meta' => array(
           'headOffset' => $range['head'],
           'tailOffset' => $range['tail'],
-          'head' => 2,
-          'tail' => 2,
+          'head' => 128,
+          'tail' => 128,
         ),
       ),
       $mid_text);
@@ -640,7 +684,7 @@ final class HarbormasterBuildLogRenderController
           'headOffset' => $range['head'],
           'tailOffset' => $range['tail'],
           'head' => 0,
-          'tail' => 4,
+          'tail' => 128,
         ),
       ),
       $down_text);
@@ -725,6 +769,100 @@ final class HarbormasterBuildLogRenderController
     );
 
     return phutil_tag('tr', array(), $format_cells);
+  }
+
+  private function getHighlightViews(
+    HarbormasterBuildLog $log,
+    array $range,
+    $log_size) {
+    // If we're highlighting a line range in the file, we first need to figure
+    // out the offsets for the lines we care about.
+    list($range_min, $range_max) = $range;
+
+    // Read the markers to find a range we can load which includes both lines.
+    $read_range = $log->getLineSpanningRange($range_min, $range_max);
+    list($min_pos, $max_pos, $min_line) = $read_range;
+
+    $length = ($max_pos - $min_pos);
+
+    // Reject to do the read if it requires us to examine a huge amount of
+    // data. For example, the user may request lines "$1-1000" of a file where
+    // each line has 100MB of text.
+    $limit = (1024 * 1024 * 16);
+    if ($length > $limit) {
+      return array();
+    }
+
+    $data = $log->loadData($min_pos, $length);
+
+    $offset = $min_pos;
+    $min_offset = null;
+    $max_offset = null;
+
+    $lines = $this->getLines($data);
+    $number = ($min_line + 1);
+
+    foreach ($lines as $line) {
+      if ($min_offset === null) {
+        if ($number === $range_min) {
+          $min_offset = $offset;
+        }
+      }
+
+      $offset += strlen($line);
+
+      if ($max_offset === null) {
+        if ($number === $range_max) {
+          $max_offset = $offset;
+          break;
+        }
+      }
+
+      $number += 1;
+    }
+
+    $context_lines = 8;
+
+    // Build views around the beginning and ends of the respective lines. We
+    // expect these views to overlap significantly in normal circumstances
+    // and be merged later.
+    $views = array();
+
+    if ($min_offset !== null) {
+      $views[] = array(
+        'offset' => $min_offset,
+        'lines' => $context_lines + ($range_max - $range_min) - 1,
+        'direction' => 1,
+        'limit' => null,
+      );
+      if ($min_offset > 0) {
+        $views[] = array(
+          'offset' => $min_offset,
+          'lines' => $context_lines,
+          'direction' => -1,
+          'limit' => null,
+        );
+      }
+    }
+
+    if ($max_offset !== null) {
+      $views[] = array(
+        'offset' => $max_offset,
+        'lines' => $context_lines + ($range_max - $range_min),
+        'direction' => -1,
+        'limit' => null,
+      );
+      if ($max_offset < $log_size) {
+        $views[] = array(
+          'offset' => $max_offset,
+          'lines' => $context_lines,
+          'direction' => 1,
+          'limit' => null,
+        );
+      }
+    }
+
+    return $views;
   }
 
 }
