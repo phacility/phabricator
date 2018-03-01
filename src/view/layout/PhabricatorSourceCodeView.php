@@ -73,6 +73,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
           pht('...')));
     }
 
+    $base_uri = (string)$this->uri;
     foreach ($lines as $line) {
 
       // NOTE: See phabricator-oncopy behavior.
@@ -84,17 +85,16 @@ final class PhabricatorSourceCodeView extends AphrontView {
       }
 
       if ($this->canClickHighlight) {
-        $line_uri = $this->uri.'$'.$line_number;
-        $line_href = (string)new PhutilURI($line_uri);
+        $line_href = $base_uri.'$'.$line_number;
 
-        $tag_number = javelin_tag(
+        $tag_number = phutil_tag(
           'a',
           array(
             'href' => $line_href,
           ),
           $line_number);
       } else {
-        $tag_number = javelin_tag(
+        $tag_number = phutil_tag(
           'span',
           array(),
           $line_number);
@@ -104,11 +104,10 @@ final class PhabricatorSourceCodeView extends AphrontView {
         'tr',
         $row_attributes,
         array(
-          javelin_tag(
+          phutil_tag(
             'th',
             array(
               'class' => 'phabricator-source-line',
-              'sigil' => 'phabricator-source-line',
             ),
             $tag_number),
           phutil_tag(
@@ -134,6 +133,9 @@ final class PhabricatorSourceCodeView extends AphrontView {
         array(
           'class' => implode(' ', $classes),
           'sigil' => 'phabricator-source',
+          'meta' => array(
+            'uri' => (string)$this->uri,
+          ),
         ),
         phutil_implode_html('', $rows)));
   }
