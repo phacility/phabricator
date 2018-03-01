@@ -154,6 +154,9 @@ abstract class AphrontResponse extends Phobject {
     // download URI instead of submitting a form to it.
     $csp[] = "form-action 'self'";
 
+    // Block use of "<base>" to change the origin of relative URIs on the page.
+    $csp[] = "base-uri 'none'";
+
     $csp = implode('; ', $csp);
 
     return $csp;
