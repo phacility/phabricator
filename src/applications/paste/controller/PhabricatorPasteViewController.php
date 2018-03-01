@@ -2,28 +2,8 @@
 
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
-  private $highlightMap;
-
   public function shouldAllowPublic() {
     return true;
-  }
-
-  public function willProcessRequest(array $data) {
-    $raw_lines = idx($data, 'lines');
-    $map = array();
-    if ($raw_lines) {
-      $lines = explode('-', $raw_lines);
-      $first = idx($lines, 0, 0);
-      $last = idx($lines, 1);
-      if ($last) {
-        $min = min($first, $last);
-        $max = max($first, $last);
-        $map = array_fuse(range($min, $max));
-      } else {
-        $map[$first] = $first;
-      }
-    }
-    $this->highlightMap = $map;
   }
 
   public function handleRequest(AphrontRequest $request) {
@@ -40,11 +20,18 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       return new Aphront404Response();
     }
 
+    $lines = $request->getURILineRange('lines', 1000);
+    if ($lines) {
+      $map = range($lines[0], $lines[1]);
+    } else {
+      $map = array();
+    }
+
     $header = $this->buildHeaderView($paste);
     $curtain = $this->buildCurtain($paste);
 
     $subheader = $this->buildSubheaderView($paste);
-    $source_code = $this->buildSourceCodeView($paste, $this->highlightMap);
+    $source_code = $this->buildSourceCodeView($paste, $map);
 
     require_celerity_resource('paste-css');
 
