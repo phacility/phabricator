@@ -279,35 +279,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         }
       }
 
-      $icon = id(new PHUIIconView())
-        ->setIcon('fa-download')
-        ->addClass('phui-icon-circle-icon');
-      $lightbox_id = celerity_generate_unique_node_id();
-      $download_form = phabricator_form(
-        $user,
-        array(
-          'action' => '#',
-          'method' => 'POST',
-          'class'  => 'lightbox-download-form',
-          'sigil'  => 'download lightbox-download-submit',
-          'id'     => 'lightbox-download-form',
-        ),
-        phutil_tag(
-          'a',
-          array(
-            'class' => 'lightbox-download phui-icon-circle hover-green',
-            'href' => '#',
-          ),
-          array(
-            $icon,
-          )));
-
-      Javelin::initBehavior(
-        'lightbox-attachments',
-        array(
-          'lightbox_id'     => $lightbox_id,
-          'downloadForm'    => $download_form,
-        ));
+      Javelin::initBehavior('lightbox-attachments');
     }
 
     Javelin::initBehavior('aphront-form-disable-on-submit');

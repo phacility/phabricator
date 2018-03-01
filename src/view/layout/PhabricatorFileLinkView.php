@@ -134,21 +134,13 @@ final class PhabricatorFileLinkView extends AphrontTagView {
     $dl_icon = id(new PHUIIconView())
       ->setIcon('fa-download');
 
-    $download_form = phabricator_form(
-      $this->getViewer(),
+    $download_link = phutil_tag(
+      'a',
       array(
-        'action' => $this->getFileDownloadURI(),
-        'method' => 'POST',
-        'class'  => 'embed-download-form',
-        'sigil'  => 'embed-download-form download',
+        'class' => 'phabricator-remarkup-embed-layout-download',
+        'href' => $this->getFileDownloadURI(),
       ),
-      phutil_tag(
-        'button',
-        array(
-          'class' => 'phabricator-remarkup-embed-layout-download',
-          'type' => 'submit',
-        ),
-        pht('Download')));
+      pht('Download'));
 
     $info = phutil_tag(
       'span',
@@ -177,7 +169,7 @@ final class PhabricatorFileLinkView extends AphrontTagView {
     return array(
       $icon,
       $inner,
-      $download_form,
+      $download_link,
     );
   }
 }
