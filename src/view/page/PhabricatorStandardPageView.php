@@ -584,7 +584,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
           ) + $this->buildAphlictListenConfigData());
 
         CelerityAPI::getStaticResourceResponse()
-          ->addContentSecurityPolicyURI('connect', $client_uri);
+          ->addContentSecurityPolicyURI('connect-src', $client_uri);
       }
     }
 

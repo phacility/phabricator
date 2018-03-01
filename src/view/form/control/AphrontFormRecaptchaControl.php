@@ -43,9 +43,9 @@ final class AphrontFormRecaptchaControl extends AphrontFormControl {
     $pubkey = PhabricatorEnv::getEnvConfig('recaptcha.public-key');
 
     CelerityAPI::getStaticResourceResponse()
-      ->addContentSecurityPolicyURI('script', $js)
-      ->addContentSecurityPolicyURI('script', 'https://www.gstatic.com/')
-      ->addContentSecurityPolicyURI('frame', 'https://www.google.com/');
+      ->addContentSecurityPolicyURI('script-src', $js)
+      ->addContentSecurityPolicyURI('script-src', 'https://www.gstatic.com/')
+      ->addContentSecurityPolicyURI('frame-src', 'https://www.google.com/');
 
     return array(
       phutil_tag(

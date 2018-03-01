@@ -285,8 +285,8 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
       ->addScript($src);
 
     CelerityAPI::getStaticResourceResponse()
-      ->addContentSecurityPolicyURI('script', $src)
-      ->addContentSecurityPolicyURI('frame', $src);
+      ->addContentSecurityPolicyURI('script-src', $src)
+      ->addContentSecurityPolicyURI('frame-src', $src);
 
     Javelin::initBehavior(
       'stripe-payment-form',

@@ -24,9 +24,10 @@ abstract class AphrontResponse extends Phobject {
   final public function addContentSecurityPolicyURI($kind, $uri) {
     if ($this->contentSecurityPolicyURIs === null) {
       $this->contentSecurityPolicyURIs = array(
-         'script' => array(),
-         'connect' => array(),
-         'frame' => array(),
+         'script-src' => array(),
+         'connect-src' => array(),
+         'frame-src' => array(),
+         'form-action' => array(),
        );
     }
 
@@ -125,14 +126,14 @@ abstract class AphrontResponse extends Phobject {
 
     // On a small number of pages, including the Stripe workflow and the
     // ReCAPTCHA challenge, we embed external Javascript directly.
-    $csp[] = $this->newContentSecurityPolicy('script', $default);
+    $csp[] = $this->newContentSecurityPolicy('script-src', $default);
 
     // We need to specify that we can connect to ourself in order for AJAX
     // requests to work.
-    $csp[] = $this->newContentSecurityPolicy('connect', "'self'");
+    $csp[] = $this->newContentSecurityPolicy('connect-src', "'self'");
 
     // DarkConsole and PHPAST both use frames to render some content.
-    $csp[] = $this->newContentSecurityPolicy('frame', "'self'");
+    $csp[] = $this->newContentSecurityPolicy('frame-src', "'self'");
 
     // This is a more modern flavor of of "X-Frame-Options" and prevents
     // clickjacking attacks where the page is included in a tiny iframe and
@@ -152,7 +153,7 @@ abstract class AphrontResponse extends Phobject {
     // This can result in some trickiness with file downloads if applications
     // try to start downloads by submitting a dialog. Redirect to the file's
     // download URI instead of submitting a form to it.
-    $csp[] = "form-action 'self'";
+    $csp[] = $this->newContentSecurityPolicy('form-action', "'self'");
 
     // Block use of "<base>" to change the origin of relative URIs on the page.
     $csp[] = "base-uri 'none'";
@@ -177,7 +178,7 @@ abstract class AphrontResponse extends Phobject {
     }
     $sources = array_unique($sources);
 
-    return "{$type}-src ".implode(' ', $sources);
+    return $type.' '.implode(' ', $sources);
   }
 
   private function newContentSecurityPolicySource($uri) {
