@@ -69,7 +69,11 @@
   padding: 4px 0;
 }
 
-.harbormaster-log-table tr.harbormaster-log-highlighted > td {
+.harbormaster-log-table tr.phabricator-source-highlight > th {
+  background: {$paste.border};
+}
+
+.harbormaster-log-table tr.phabricator-source-highlight > td {
   background: {$paste.highlight};
 }
 

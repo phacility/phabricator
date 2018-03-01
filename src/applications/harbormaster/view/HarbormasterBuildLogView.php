@@ -4,6 +4,7 @@ final class HarbormasterBuildLogView extends AphrontView {
 
   private $log;
   private $highlightedLineRange;
+  private $enableHighlighter;
 
   public function setBuildLog(HarbormasterBuildLog $log) {
     $this->log = $log;
@@ -21,6 +22,11 @@ final class HarbormasterBuildLogView extends AphrontView {
 
   public function getHighlightedLineRange() {
     return $this->highlightedLineRange;
+  }
+
+  public function setEnableHighlighter($enable) {
+    $this->enableHighlighter = $enable;
+    return $this;
   }
 
   public function render() {
@@ -49,6 +55,10 @@ final class HarbormasterBuildLogView extends AphrontView {
     $box_view = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setHeader($header);
+
+    if ($this->enableHighlighter) {
+      Javelin::initBehavior('phabricator-line-linker');
+    }
 
     $has_linemap = $log->getLineMap();
     if ($has_linemap) {

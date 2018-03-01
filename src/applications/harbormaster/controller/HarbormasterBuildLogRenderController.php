@@ -355,11 +355,11 @@ final class HarbormasterBuildLogRenderController
         $display_line = ($line['line'] + 1);
         $display_text = ($line['data']);
 
-        $cell_attr = array();
+        $row_attr = array();
         if ($highlight_range) {
           if (($display_line >= $highlight_range[0]) &&
               ($display_line <= $highlight_range[1])) {
-            $cell_attr = array(
+            $row_attr = array(
               'class' => 'phabricator-source-highlight',
             );
           }
@@ -373,11 +373,11 @@ final class HarbormasterBuildLogRenderController
           $display_line);
 
         $line_cell = phutil_tag('th', array(), $display_line);
-        $text_cell = phutil_tag('td', $cell_attr, $display_text);
+        $text_cell = phutil_tag('td', array(), $display_text);
 
         $rows[] = phutil_tag(
           'tr',
-          array(),
+          $row_attr,
           array(
             $line_cell,
             $text_cell,
@@ -401,10 +401,14 @@ final class HarbormasterBuildLogRenderController
       }
     }
 
-    $table = phutil_tag(
+    $table = javelin_tag(
       'table',
       array(
         'class' => 'harbormaster-log-table PhabricatorMonospaced',
+        'sigil' => 'phabricator-source',
+        'meta' => array(
+          'uri' => $log->getURI(),
+        ),
       ),
       $rows);
 

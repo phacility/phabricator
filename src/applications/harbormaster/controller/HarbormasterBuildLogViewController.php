@@ -24,7 +24,8 @@ final class HarbormasterBuildLogViewController
     $log_view = id(new HarbormasterBuildLogView())
       ->setViewer($viewer)
       ->setBuildLog($log)
-      ->setHighlightedLineRange($request->getURIData('lines'));
+      ->setHighlightedLineRange($request->getURIData('lines'))
+      ->setEnableHighlighter(true);
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Build Logs'))
