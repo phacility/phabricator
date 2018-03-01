@@ -21,6 +21,16 @@ JX.behavior('phabricator-line-linker', function() {
 
   function getRowNumber(tr) {
     var th = tr.firstChild;
+
+    // If the "<th />" tag contains an "<a />" with "data-n" that we're using
+    // to prevent copy/paste of line numbers, use that.
+    if (th.firstChild) {
+      var line = th.firstChild.getAttribute('data-n');
+      if (line) {
+        return line;
+      }
+    }
+
     return +(th.textContent || th.innerText);
   }
 

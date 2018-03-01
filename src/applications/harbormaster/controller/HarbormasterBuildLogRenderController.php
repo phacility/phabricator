@@ -369,8 +369,9 @@ final class HarbormasterBuildLogRenderController
           'a',
           array(
             'href' => $uri.'$'.$display_line,
+            'data-n' => $display_line,
           ),
-          $display_line);
+          '');
 
         $line_cell = phutil_tag('th', array(), $display_line);
         $text_cell = phutil_tag('td', array(), $display_text);

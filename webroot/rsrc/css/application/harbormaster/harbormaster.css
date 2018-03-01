@@ -48,6 +48,12 @@
   user-select: none;
 }
 
+.harbormaster-log-table > tbody > tr > th a::before {
+  /* Render the line numbers into the document using a pseudo-element so that
+     the text is not copied. */
+  content: attr(data-n);
+}
+
 .harbormaster-log-table > tbody > tr > th a {
   display: block;
   color: {$darkbluetext};
