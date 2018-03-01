@@ -5,7 +5,9 @@
 
 JX.behavior('harbormaster-log', function(config) {
   var contentNode = JX.$(config.contentNodeID);
+
   var following = false;
+  var autoscroll = false;
 
   JX.DOM.listen(contentNode, 'click', 'harbormaster-log-expand', function(e) {
     if (!e.isNormalClick()) {
@@ -14,20 +16,29 @@ JX.behavior('harbormaster-log', function(config) {
 
     e.kill();
 
-    expand(e.getTarget());
+    expand(e.getTarget(), true);
   });
 
-  function expand(node) {
+  function expand(node, is_action) {
     var row = JX.DOM.findAbove(node, 'tr');
     row = JX.DOM.findAbove(row, 'tr');
 
     var data = JX.Stratcom.getData(node);
 
+    if (data.stop) {
+      following = false;
+      autoscroll = false;
+      JX.DOM.alterClass(contentNode, 'harbormaster-log-following', false);
+      return;
+    }
+
     var uri = new JX.URI(config.renderURI)
       .addQueryParams(data);
 
-    if (data.live) {
+    if (data.live && is_action) {
       following = true;
+      autoscroll = true;
+      JX.DOM.alterClass(contentNode, 'harbormaster-log-following', true);
     }
 
     var request = new JX.Request(uri, function(r) {
@@ -46,17 +57,33 @@ JX.behavior('harbormaster-log', function(config) {
       if (data.live) {
         // If this was a live follow, scroll the new data into view. This is
         // probably intensely annoying in practice but seems cool for now.
-        var last_row = rows[rows.length - 1];
-        var tail_pos = JX.$V(last_row).y + JX.Vector.getDim(last_row).y;
-        var view_y = JX.Vector.getViewport().y;
-        JX.DOM.scrollToPosition(null, (tail_pos - view_y) + 32);
+        if (autoscroll) {
+          var last_row = rows[rows.length - 1];
+          var tail_pos = JX.$V(last_row).y + JX.Vector.getDim(last_row).y;
+          var view_y = JX.Vector.getViewport().y;
+          JX.DOM.scrollToPosition(null, (tail_pos - view_y) + 32);
 
-        setTimeout(follow, 500);
+          // This will fire a scroll event, but we want to keep autoscroll
+          // enabled until we see an explicit scroll event by the user.
+          setTimeout(function() { autoscroll = true; }, 0);
+        }
+
+        setTimeout(follow, 2000);
+
+        for (var ii = 1; ii < (rows.length - 1); ii++) {
+          JX.DOM.alterClass(rows[ii], 'harbormaster-log-appear', true);
+        }
       }
     });
 
     request.send();
   }
+
+  // If the user explicitly scrolls while following a log, keep live updating
+  // it but stop following it with the scrollbar.
+  JX.Stratcom.listen('scroll', null, function() {
+    autoscroll = false;
+  });
 
   function follow() {
     if (!following) {

@@ -720,12 +720,16 @@ final class HarbormasterBuildLogRenderController
 
   private function renderLiveRow($log_size) {
     $icon_down = id(new PHUIIconView())
-      ->setIcon('fa-chevron-down');
+      ->setIcon('fa-angle-double-down');
+
+    $icon_pause = id(new PHUIIconView())
+      ->setIcon('fa-pause');
 
     $follow = javelin_tag(
       'a',
       array(
         'sigil' => 'harbormaster-log-expand harbormaster-log-live',
+        'class' => 'harbormaster-log-follow-start',
         'meta' => array(
           'headOffset' => $log_size,
           'head' => 0,
@@ -737,8 +741,21 @@ final class HarbormasterBuildLogRenderController
         $icon_down,
         ' ',
         pht('Follow Log'),
+      ));
+
+    $stop_following = javelin_tag(
+      'a',
+      array(
+        'sigil' => 'harbormaster-log-expand',
+        'class' => 'harbormaster-log-follow-stop',
+        'meta' => array(
+          'stop' => true,
+        ),
+      ),
+      array(
+        $icon_pause,
         ' ',
-        $icon_down,
+        pht('Stop Following Log'),
       ));
 
     $expand_cells = array(
@@ -747,7 +764,10 @@ final class HarbormasterBuildLogRenderController
         array(
           'class' => 'harbormaster-log-follow',
         ),
-        $follow),
+        array(
+          $follow,
+          $stop_following,
+        )),
     );
 
     return $this->renderActionTable($expand_cells);

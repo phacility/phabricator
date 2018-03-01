@@ -139,3 +139,31 @@
 .harbormaster-log-expand-down .phui-icon-view {
   margin: 0 4px 0 0;
 }
+
+
+.harbormaster-log-following .harbormaster-log-table
+  .harbormaster-log-follow-start {
+  display: none;
+}
+
+.harbormaster-log-table .harbormaster-log-follow-stop {
+  display: none;
+}
+
+.harbormaster-log-following .harbormaster-log-table
+  .harbormaster-log-follow-stop {
+  display: block;
+}
+
+.harbormaster-log-appear > td {
+  animation: harbormaster-fade-in 1s linear;
+}
+
+@keyframes harbormaster-fade-in {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1.0;
+  }
+}

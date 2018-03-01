@@ -78,7 +78,7 @@ return array(
     'rsrc/css/application/feed/feed.css' => 'ecd4ec57',
     'rsrc/css/application/files/global-drag-and-drop.css' => 'b556a948',
     'rsrc/css/application/flag/flag.css' => 'bba8f811',
-    'rsrc/css/application/harbormaster/harbormaster.css' => 'cd73d427',
+    'rsrc/css/application/harbormaster/harbormaster.css' => '730a4a3c',
     'rsrc/css/application/herald/herald-test.css' => 'a52e323e',
     'rsrc/css/application/herald/herald.css' => 'cd8d0134',
     'rsrc/css/application/maniphest/report.css' => '9b9580b7',
@@ -416,7 +416,7 @@ return array(
     'rsrc/js/application/drydock/drydock-live-operation-status.js' => '901935ef',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8499b6ab',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
-    'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => 'ab1173d1',
+    'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => '191b4909',
     'rsrc/js/application/herald/HeraldRuleEditor.js' => 'dca75c0e',
     'rsrc/js/application/herald/PathTypeahead.js' => 'f7fc67ec',
     'rsrc/js/application/herald/herald-rule-editor.js' => '7ebaeed3',
@@ -579,7 +579,7 @@ return array(
     'font-fontawesome' => 'e838e088',
     'font-lato' => 'c7ccd872',
     'global-drag-and-drop-css' => 'b556a948',
-    'harbormaster-css' => 'cd73d427',
+    'harbormaster-css' => '730a4a3c',
     'herald-css' => 'cd8d0134',
     'herald-rule-editor' => 'dca75c0e',
     'herald-test-css' => 'a52e323e',
@@ -636,7 +636,7 @@ return array(
     'javelin-behavior-event-all-day' => 'b41537c9',
     'javelin-behavior-fancy-datepicker' => 'ecf4e799',
     'javelin-behavior-global-drag-and-drop' => '960f6a39',
-    'javelin-behavior-harbormaster-log' => 'ab1173d1',
+    'javelin-behavior-harbormaster-log' => '191b4909',
     'javelin-behavior-herald-rule-editor' => '7ebaeed3',
     'javelin-behavior-high-security-warning' => 'a464fe03',
     'javelin-behavior-history-install' => '7ee2b591',
@@ -1021,6 +1021,9 @@ return array(
     ),
     '185bbd53' => array(
       'javelin-install',
+    ),
+    '191b4909' => array(
+      'javelin-behavior',
     ),
     '1ad0a787' => array(
       'javelin-install',
@@ -1764,9 +1767,6 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-prefab',
-    ),
-    'ab1173d1' => array(
-      'javelin-behavior',
     ),
     'ab2f381b' => array(
       'javelin-request',
