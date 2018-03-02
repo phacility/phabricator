@@ -16,6 +16,8 @@ final class PhabricatorProjectColumn
   const ORDER_NATURAL = 'natural';
   const ORDER_PRIORITY = 'priority';
 
+  const RESOLVED_NAME = 'done';
+
   protected $name;
   protected $status;
   protected $projectPHID;
@@ -301,5 +303,13 @@ final class PhabricatorProjectColumn
     $this->delete();
     $this->saveTransaction();
   }
+
+	public function isClosed() {
+		$columnName = strtolower($this->getName());
+		if ($columnName == static::RESOLVED_NAME) {
+			return true;
+		}
+		return false;
+	}
 
 }

@@ -1108,6 +1108,7 @@ abstract class PhabricatorEditEngine
         ->setContinueOnNoEffect(true);
 
       try {
+        $xactions = $this->prepareXActions($object, $xactions);
         $xactions = $this->willApplyTransactions($object, $xactions);
 
         $editor->applyTransactions($object, $xactions);
@@ -1963,6 +1964,8 @@ abstract class PhabricatorEditEngine
             ->setContent($comment_text));
     }
 
+    $xactions = $this->prepareXActions($object, $xactions);
+
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)
       ->setContinueOnNoEffect($request->isContinueRequest())
@@ -2007,6 +2010,86 @@ abstract class PhabricatorEditEngine
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
     }
+  }
+
+  private function prepareXActions($object, $xactions) {
+
+  	$viewer = $this->getViewer();
+
+  	foreach ($xactions as $key => $xaction) {
+  		if ($xaction->getTransactionType() == PhabricatorTransactions::TYPE_COLUMNS) {
+  			$xcolumn = $xaction;
+  			$xcolumnValue = !is_array($xcolumn->getNewValue()) ? array($xcolumn->getNewValue()) : $xcolumn->getNewValue();
+  			unset($xactions[$key]);
+	    }
+
+	    if ($xaction->getTransactionType() == 'status') {
+		    $xstatus = $xaction;
+		    unset($xactions[$key]);
+	    }
+    }
+
+    if (isset($xcolumn)) {
+		if (!empty($xcolumnValue)) {
+			$columns = id(new PhabricatorProjectColumnQuery())
+				->setViewer($viewer)
+				->withPHIDs($xcolumnValue)
+				->execute();
+
+			$columns = mpull($columns, null, 'getPHID');
+			$column = idx($columns, current($xcolumnValue));
+
+			if ($column->isClosed()) {
+				if (isset($xstatus)) {
+					$xstatus->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_RESOLVED);
+				} else {
+					$xstatus = id(new ManiphestTransaction())
+						->setTransactionType('status')
+						->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_RESOLVED);
+				}
+				$xactions[] = $xstatus;
+				unset($xstatus);
+			}
+			$xactions[] = $xcolumn;
+		}
+	    unset($xcolumn);
+    }
+
+    if (isset($xstatus)) {
+	    $value = $xstatus->getNewValue();
+	    if ($value == ManiphestTaskStatus::STATUS_CLOSED_RESOLVED) {
+
+		    $phid = $object->getPHID();
+		    $board_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+			    $phid,
+			    PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+
+		    $layout_engine = id(new PhabricatorBoardLayoutEngine())
+			    ->setViewer($viewer)
+			    ->setBoardPHIDs($board_phids)
+			    ->setObjectPHIDs(array($phid))
+			    ->executeLayout();
+		    foreach ($board_phids as $board_phid) {
+			    $columns = $layout_engine->getColumns($board_phid);
+			    foreach ($columns as $column) {
+				    if ($column->isClosed()) {
+					    $xactions[] = id(new ManiphestTransaction())
+						    ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
+						    ->setNewValue(
+							    array(
+								    array(
+									    'columnPHID' => $column->getPHID(),
+								    ),
+							    ));
+					    break;
+				    }
+			    }
+		    }
+	    }
+	    $xactions[] = $xstatus;
+	    unset($xstatus);
+    }
+	return $xactions;
   }
 
   protected function newDraftEngine($object) {
