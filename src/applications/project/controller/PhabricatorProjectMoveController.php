@@ -86,6 +86,12 @@ final class PhabricatorProjectMoveController
           ) + $order_params,
         ));
 
+	  if ($column->isClosed()) {
+		  $xactions[] = id(new ManiphestTransaction())
+			  ->setTransactionType('status')
+			  ->setNewValue(ManiphestTaskStatus::STATUS_CLOSED_RESOLVED);
+	  }
+
     if ($order == PhabricatorProjectColumn::ORDER_PRIORITY) {
       $priority_xactions = $this->getPriorityTransactions(
         $object,
