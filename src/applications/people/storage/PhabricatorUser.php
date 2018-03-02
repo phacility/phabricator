@@ -267,6 +267,10 @@ final class PhabricatorUser
     return !($this->getPHID() === null);
   }
 
+  public function saveWithoutIndex() {
+    return parent::save();
+  }
+
   public function save() {
     if (!$this->getConduitCertificate()) {
       $this->setConduitCertificate($this->generateConduitCertificate());
@@ -276,7 +280,7 @@ final class PhabricatorUser
       $this->setAccountSecret(Filesystem::readRandomCharacters(64));
     }
 
-    $result = parent::save();
+    $result = $this->saveWithoutIndex();
 
     if ($this->profile) {
       $this->profile->save();

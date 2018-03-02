@@ -51,6 +51,7 @@ final class PhabricatorPeopleProfileImageWorkflow
     }
 
     $version = PhabricatorFilesComposeAvatarBuiltinFile::VERSION;
+    $generator = new PhabricatorFilesComposeAvatarBuiltinFile();
 
     foreach ($iterator as $user) {
       $username = $user->getUsername();
@@ -63,16 +64,13 @@ final class PhabricatorPeopleProfileImageWorkflow
       }
 
       if ($default_phid == null || $is_force || $generate) {
-        $file = id(new PhabricatorFilesComposeAvatarBuiltinFile())
-          ->getUserProfileImageFile($username);
-        $user->setDefaultProfileImagePHID($file->getPHID());
-        $user->setDefaultProfileImageVersion($version);
-        $user->save();
         $console->writeOut(
           "%s\n",
           pht(
             'Generating profile image for "%s".',
             $username));
+
+        $generator->updateUser($user);
       } else {
         $console->writeOut(
           "%s\n",
