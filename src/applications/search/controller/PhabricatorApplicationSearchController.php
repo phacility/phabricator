@@ -512,15 +512,7 @@ final class PhabricatorApplicationSearchController
             ->setURI($job->getMonitorURI());
         } else {
           $file = $export_engine->exportFile();
-
-          return $this->newDialog()
-            ->setTitle(pht('Download Results'))
-            ->appendParagraph(
-              pht('Click the download button to download the exported data.'))
-            ->addCancelButton($cancel_uri, pht('Done'))
-            ->setSubmitURI($file->getDownloadURI())
-            ->setDisableWorkflowOnSubmit(true)
-            ->addSubmitButton(pht('Download Data'));
+          return $file->newDownloadResponse();
         }
       }
     }
@@ -535,12 +527,18 @@ final class PhabricatorApplicationSearchController
           ->setValue($format_key)
           ->setOptions($format_options));
 
+    if ($is_large_export) {
+      $submit_button = pht('Continue');
+    } else {
+      $submit_button = pht('Download Data');
+    }
+
     return $this->newDialog()
       ->setTitle(pht('Export Results'))
       ->setErrors($errors)
       ->appendForm($export_form)
       ->addCancelButton($cancel_uri)
-      ->addSubmitButton(pht('Continue'));
+      ->addSubmitButton($submit_button);
   }
 
   private function processEditRequest() {

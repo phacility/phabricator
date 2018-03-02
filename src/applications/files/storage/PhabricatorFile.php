@@ -810,16 +810,24 @@ final class PhabricatorFile extends PhabricatorFileDAO
         pht('You must save a file before you can generate a view URI.'));
     }
 
-    return $this->getCDNURI();
+    return $this->getCDNURI('data');
   }
 
-  public function getCDNURI() {
+  public function getCDNURI($request_kind) {
+    if (($request_kind !== 'data') &&
+        ($request_kind !== 'download')) {
+      throw new Exception(
+        pht(
+          'Unknown file content request kind "%s".',
+          $request_kind));
+    }
+
     $name = self::normalizeFileName($this->getName());
     $name = phutil_escape_uri($name);
 
     $parts = array();
     $parts[] = 'file';
-    $parts[] = 'data';
+    $parts[] = $request_kind;
 
     // If this is an instanced install, add the instance identifier to the URI.
     // Instanced configurations behind a CDN may not be able to control the
@@ -861,9 +869,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function getDownloadURI() {
-    $uri = id(new PhutilURI($this->getViewURI()))
-      ->setQueryParam('download', true);
-    return (string)$uri;
+    return $this->getCDNURI('download');
   }
 
   public function getURIForTransform(PhabricatorFileTransform $transform) {
@@ -1467,6 +1473,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return id(new AphrontRedirectResponse())
       ->setIsExternal($is_external)
       ->setURI($uri);
+  }
+
+  public function newDownloadResponse() {
+    // We're cheating a little bit here and relying on the fact that
+    // getDownloadURI() always returns a fully qualified URI with a complete
+    // domain.
+    return id(new AphrontRedirectResponse())
+      ->setIsExternal(true)
+      ->setCloseDialogBeforeRedirect(true)
+      ->setURI($this->getDownloadURI());
   }
 
   public function attachTransforms(array $map) {

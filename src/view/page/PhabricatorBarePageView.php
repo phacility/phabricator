@@ -59,11 +59,6 @@ class PhabricatorBarePageView extends AphrontPageView {
   }
 
   protected function getHead() {
-    $framebust = null;
-    if (!$this->getFrameable()) {
-      $framebust = '(top == self) || top.location.replace(self.location.href);';
-    }
-
     $viewport_tag = null;
     if ($this->getDeviceReady()) {
       $viewport_tag = phutil_tag(
@@ -124,7 +119,7 @@ class PhabricatorBarePageView extends AphrontPageView {
       'meta',
       array(
         'name' => 'referrer',
-        'content' => 'never',
+        'content' => 'no-referrer',
       ));
 
     $response = CelerityAPI::getStaticResourceResponse();
@@ -140,9 +135,8 @@ class PhabricatorBarePageView extends AphrontPageView {
       }
     }
 
-    $developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
     return hsprintf(
-      '%s%s%s%s%s%s%s%s%s',
+      '%s%s%s%s%s%s%s%s',
       $viewport_tag,
       $mask_icon,
       $icon_tag_76,
@@ -150,8 +144,6 @@ class PhabricatorBarePageView extends AphrontPageView {
       $icon_tag_152,
       $favicon_tag,
       $referrer_tag,
-      CelerityStaticResourceResponse::renderInlineScript(
-        $framebust.jsprintf('window.__DEV__=%d;', ($developer ? 1 : 0))),
       $response->renderResourcesOfType('css'));
   }
 

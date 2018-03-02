@@ -517,6 +517,36 @@ JX.install('Stratcom', {
       return len ? this._execContext[len - 1].event : null;
     },
 
+    initialize: function(initializers) {
+      var frameable = false;
+
+      for (var ii = 0; ii < initializers.length; ii++) {
+        var kind = initializers[ii].kind;
+        var data = initializers[ii].data;
+        switch (kind) {
+          case 'behaviors':
+            JX.initBehaviors(data);
+            break;
+          case 'merge':
+            JX.Stratcom.mergeData(data.block, data.data);
+            JX.Stratcom.ready = true;
+            break;
+          case 'frameable':
+            frameable = !!data;
+            break;
+        }
+      }
+
+      // If the initializer tags did not explicitly allow framing, framebust.
+      // This protects us from clickjacking attacks on older versions of IE.
+      // The "X-Frame-Options" and "Content-Security-Policy" headers provide
+      // more modern variations of this protection.
+      if (!frameable) {
+        if (window.top != window.self) {
+          window.top.location.replace(window.self.location.href);
+        }
+      }
+    },
 
     /**
      * Merge metadata. You must call this (even if you have no metadata) to
@@ -542,7 +572,6 @@ JX.install('Stratcom', {
       } else {
         this._data[block] = data;
         if (block === 0) {
-          JX.Stratcom.ready = true;
           JX.flushHoldingQueue('install-init', function(fn) {
             fn();
           });

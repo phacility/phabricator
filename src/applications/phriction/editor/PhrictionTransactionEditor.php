@@ -273,7 +273,6 @@ final class PhrictionTransactionEditor
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
-      $object->getContent()->getAuthorPHID(),
       $this->getActingAsPHID(),
     );
   }

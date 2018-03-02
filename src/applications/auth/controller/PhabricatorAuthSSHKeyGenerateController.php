@@ -24,10 +24,12 @@ final class PhabricatorAuthSSHKeyGenerateController
       $keys = PhabricatorSSHKeyGenerator::generateKeypair();
       list($public_key, $private_key) = $keys;
 
+      $key_name = $default_name.'.key';
+
       $file = PhabricatorFile::newFromFileData(
         $private_key,
         array(
-          'name' => $default_name.'.key',
+          'name' => $key_name,
           'ttl.relative' => phutil_units('10 minutes in seconds'),
           'viewPolicy' => $viewer->getPHID(),
         ));
@@ -62,25 +64,33 @@ final class PhabricatorAuthSSHKeyGenerateController
         ->setContentSourceFromRequest($request)
         ->applyTransactions($key, $xactions);
 
-      // NOTE: We're disabling workflow on submit so the download works. We're
-      // disabling workflow on cancel so the page reloads, showing the new
-      // key.
+      $download_link = phutil_tag(
+        'a',
+        array(
+          'href' => $file->getDownloadURI(),
+        ),
+        array(
+          id(new PHUIIconView())->setIcon('fa-download'),
+          ' ',
+          pht('Download Private Key (%s)', $key_name),
+        ));
+      $download_link = phutil_tag('strong', array(), $download_link);
+
+      // NOTE: We're disabling workflow on cancel so the page reloads, showing
+      // the new key.
 
       return $this->newDialog()
         ->setTitle(pht('Download Private Key'))
-        ->setDisableWorkflowOnCancel(true)
-        ->setDisableWorkflowOnSubmit(true)
-        ->setSubmitURI($file->getDownloadURI())
         ->appendParagraph(
           pht(
             'A keypair has been generated, and the public key has been '.
-            'added as a recognized key. Use the button below to download '.
-            'the private key.'))
+            'added as a recognized key.'))
+        ->appendParagraph($download_link)
         ->appendParagraph(
           pht(
             'After you download the private key, it will be destroyed. '.
             'You will not be able to retrieve it if you lose your copy.'))
-        ->addSubmitButton(pht('Download Private Key'))
+        ->setDisableWorkflowOnCancel(true)
         ->addCancelButton($cancel_uri, pht('Done'));
     }
 

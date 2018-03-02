@@ -275,12 +275,18 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     AphrontRequest $request,
     array $errors) {
 
+    $src = 'https://js.stripe.com/v2/';
+
     $ccform = id(new PhortuneCreditCardForm())
       ->setSecurityAssurance(
         pht('Payments are processed securely by Stripe.'))
       ->setUser($request->getUser())
       ->setErrors($errors)
-      ->addScript('https://js.stripe.com/v2/');
+      ->addScript($src);
+
+    CelerityAPI::getStaticResourceResponse()
+      ->addContentSecurityPolicyURI('script-src', $src)
+      ->addContentSecurityPolicyURI('frame-src', $src);
 
     Javelin::initBehavior(
       'stripe-payment-form',

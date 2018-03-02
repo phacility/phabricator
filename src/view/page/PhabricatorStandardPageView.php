@@ -279,35 +279,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         }
       }
 
-      $icon = id(new PHUIIconView())
-        ->setIcon('fa-download')
-        ->addClass('phui-icon-circle-icon');
-      $lightbox_id = celerity_generate_unique_node_id();
-      $download_form = phabricator_form(
-        $user,
-        array(
-          'action' => '#',
-          'method' => 'POST',
-          'class'  => 'lightbox-download-form',
-          'sigil'  => 'download lightbox-download-submit',
-          'id'     => 'lightbox-download-form',
-        ),
-        phutil_tag(
-          'a',
-          array(
-            'class' => 'lightbox-download phui-icon-circle hover-green',
-            'href' => '#',
-          ),
-          array(
-            $icon,
-          )));
-
-      Javelin::initBehavior(
-        'lightbox-attachments',
-        array(
-          'lightbox_id'     => $lightbox_id,
-          'downloadForm'    => $download_form,
-        ));
+      Javelin::initBehavior('lightbox-attachments');
     }
 
     Javelin::initBehavior('aphront-form-disable-on-submit');
@@ -608,12 +580,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         Javelin::initBehavior(
           'aphlict-listen',
           array(
-            'websocketURI'  => (string)$client_uri,
+            'websocketURI' => (string)$client_uri,
           ) + $this->buildAphlictListenConfigData());
+
+        CelerityAPI::getStaticResourceResponse()
+          ->addContentSecurityPolicyURI('connect-src', $client_uri);
       }
     }
 
-    $tail[] = $response->renderHTMLFooter();
+    $tail[] = $response->renderHTMLFooter($this->getFrameable());
 
     return $tail;
   }
@@ -860,6 +835,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       $blacklist[] = $application->getQuicksandURIPatternBlacklist();
     }
 
+    // See T4340. Currently, Phortune and Auth both require pulling in external
+    // Javascript (for Stripe card management and Recaptcha, respectively).
+    // This can put us in a position where the user loads a page with a
+    // restrictive Content-Security-Policy, then uses Quicksand to navigate to
+    // a page which needs to load external scripts. For now, just blacklist
+    // these entire applications since we aren't giving up anything
+    // significant by doing so.
+
+    $blacklist[] = array(
+      '/phortune/.*',
+      '/auth/.*',
+    );
+
     return array_mergev($blacklist);
   }
 
@@ -903,9 +891,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         ->setContent($content);
     } else {
       $content = $this->render();
+
       $response = id(new AphrontWebpageResponse())
         ->setContent($content)
         ->setFrameable($this->getFrameable());
+
+      $static = CelerityAPI::getStaticResourceResponse();
+      foreach ($static->getContentSecurityPolicyURIMap() as $kind => $uris) {
+        foreach ($uris as $uri) {
+          $response->addContentSecurityPolicyURI($kind, $uri);
+        }
+      }
     }
 
     return $response;

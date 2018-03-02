@@ -333,8 +333,12 @@ final class PhabricatorImageTransformer extends Phobject {
       return null;
     }
 
+    // NOTE: Empirically, the highest compression level (9) seems to take
+    // up to twice as long as the default compression level (6) but produce
+    // only slightly smaller files (10% on avatars, 3% on screenshots).
+
     ob_start();
-    $result = imagepng($image, null, 9);
+    $result = imagepng($image, null, 6);
     $output = ob_get_clean();
 
     if (!$result) {

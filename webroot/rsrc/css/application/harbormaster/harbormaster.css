@@ -30,3 +30,140 @@
   text-overflow: ellipsis;
   color: {$lightgreytext};
 }
+
+.harbormaster-log-view-loading {
+  padding: 8px;
+  text-align: center;
+  color: {$lightgreytext};
+}
+
+.harbormaster-log-table > tbody > tr > th {
+  background-color: {$paste.highlight};
+  border-right: 1px solid {$paste.border};
+
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.harbormaster-log-table > tbody > tr > th a::before {
+  /* Render the line numbers into the document using a pseudo-element so that
+     the text is not copied. */
+  content: attr(data-n);
+}
+
+.harbormaster-log-table > tbody > tr > th a {
+  display: block;
+  color: {$darkbluetext};
+  text-align: right;
+  padding: 2px 6px 1px 12px;
+}
+
+.harbormaster-log-table > tbody > tr > th a:hover {
+  background: {$paste.border};
+}
+
+.harbormaster-log-table > tbody > tr > td {
+  white-space: pre-wrap;
+  padding: 2px 8px 1px;
+  width: 100%;
+}
+
+.harbormaster-log-table > tbody > tr > td.harbormaster-log-expand-cell {
+  padding: 4px 0;
+}
+
+.harbormaster-log-table tr.phabricator-source-highlight > th {
+  background: {$paste.border};
+}
+
+.harbormaster-log-table tr.phabricator-source-highlight > td {
+  background: {$paste.highlight};
+}
+
+.harbormaster-log-expand-table {
+  width: 100%;
+  background: {$paste.highlight};
+  border-top: 1px solid {$paste.border};
+  border-bottom: 1px solid {$paste.border};
+}
+
+.harbormaster-log-expand-table a {
+  display: block;
+  padding: 6px 16px;
+  color: {$darkbluetext};
+}
+
+.device-desktop .harbormaster-log-expand-table a:hover {
+  background: {$paste.border};
+  text-decoration: none;
+}
+
+.harbormaster-log-expand-table td {
+  vertical-align: middle;
+  font: 13px 'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Lato',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.harbormaster-log-expand-up {
+  text-align: right;
+  width: 50%;
+}
+
+.harbormaster-log-expand-up .phui-icon-view {
+  margin: 0 0 0px 4px;
+}
+
+.harbormaster-log-follow {
+  text-align: center;
+}
+
+.harbormaster-log-follow .phui-icon-view {
+  margin: 0 4px;
+}
+
+.harbormaster-log-expand-mid {
+  text-align: center;
+  white-space: nowrap;
+  border-left: 1px solid {$paste.border};
+  border-right: 1px solid {$paste.border};
+}
+
+.harbormaster-log-expand-down {
+  text-align: left;
+  width: 50%;
+}
+
+.harbormaster-log-expand-down .phui-icon-view {
+  margin: 0 4px 0 0;
+}
+
+
+.harbormaster-log-following .harbormaster-log-table
+  .harbormaster-log-follow-start {
+  display: none;
+}
+
+.harbormaster-log-table .harbormaster-log-follow-stop {
+  display: none;
+}
+
+.harbormaster-log-following .harbormaster-log-table
+  .harbormaster-log-follow-stop {
+  display: block;
+}
+
+.harbormaster-log-appear > td {
+  animation: harbormaster-fade-in 1s linear;
+}
+
+@keyframes harbormaster-fade-in {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1.0;
+  }
+}

@@ -137,11 +137,10 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setUser($viewer)
-          ->setRenderAsForm($can_download)
           ->setDownload($can_download)
           ->setName(pht('Download File'))
           ->setIcon('fa-download')
-          ->setHref($file->getViewURI())
+          ->setHref($file->getDownloadURI())
           ->setDisabled(!$can_download)
           ->setWorkflow(!$can_download));
     }

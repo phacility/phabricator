@@ -31,7 +31,6 @@
 .phabricator-source-line {
   background-color: {$paste.highlight};
   text-align: right;
-  padding: 2px 6px 1px 12px;
   border-right: 1px solid {$paste.border};
   color: {$sh-yellowtext};
 
@@ -48,15 +47,21 @@
 
 th.phabricator-source-line a {
   color: {$darkbluetext};
+  display: block;
+  padding: 2px 6px 1px 12px;
 }
 
-th.phabricator-source-line:hover {
+th.phabricator-source-line a:hover {
   background: {$paste.border};
-  cursor: pointer;
+  text-decoration: none;
 }
 
 .phabricator-source-highlight {
   background: {$paste.highlight};
+}
+
+.phabricator-source-highlight th.phabricator-source-line {
+  background: {$paste.border};
 }
 
 .phabricator-source-code-summary {
