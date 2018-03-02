@@ -156,11 +156,14 @@ final class PhabricatorProjectTransactionEditor
                   PhabricatorPolicyCapability::CAN_EDIT);
               }
             } else {
-              // You need CAN_EDIT to change members other than yourself.
-              PhabricatorPolicyFilter::requireCapability(
-                $this->requireActor(),
-                $object,
-                PhabricatorPolicyCapability::CAN_EDIT);
+              if (!$this->getIsNewObject()) {
+                // You need CAN_EDIT to change members other than yourself.
+                // (PHI193) Just skip this check if we're creating a project.
+                PhabricatorPolicyFilter::requireCapability(
+                  $this->requireActor(),
+                  $object,
+                  PhabricatorPolicyCapability::CAN_EDIT);
+              }
             }
             return;
         }
