@@ -16,7 +16,7 @@ final class DiffusionPreCommitRefRepositoryProjectsHeraldField
   }
 
   protected function getHeraldFieldStandardType() {
-    return HeraldField::STANDARD_PHID_LIST;
+    return self::STANDARD_PHID_LIST;
   }
 
   protected function getDatasource() {

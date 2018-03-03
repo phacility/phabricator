@@ -206,7 +206,7 @@ final class DrydockWorkingCopyBlueprintImplementation
     }
 
     // Destroy the lease on the host.
-    $lease->releaseOnDestruction();
+    $lease->setReleaseOnDestruction(true);
 
     if ($lease->isActive()) {
       // Destroy the working copy on disk.

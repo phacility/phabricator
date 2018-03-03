@@ -743,9 +743,10 @@ final class DifferentialRevision extends DifferentialDAO
   public function loadActiveBuilds(PhabricatorUser $viewer) {
     $diff = $this->getActiveDiff();
 
+    // NOTE: We can't use `withContainerPHIDs()` here because the container
+    // update in Harbormaster is not synchronous.
     $buildables = id(new HarbormasterBuildableQuery())
       ->setViewer($viewer)
-      ->withContainerPHIDs(array($this->getPHID()))
       ->withBuildablePHIDs(array($diff->getPHID()))
       ->withManualBuildables(false)
       ->execute();

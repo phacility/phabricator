@@ -5,7 +5,7 @@ final class HeraldProjectsField extends HeraldField {
   const FIELDCONST = 'projects';
 
   public function getHeraldFieldName() {
-    return pht('Projects');
+    return pht('Project tags');
   }
 
   public function getFieldGroupKey() {

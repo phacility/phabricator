@@ -32,6 +32,13 @@ final class HeraldWebhookWorker
           $status));
     }
 
+    // If we're in silent mode, permanently fail the webhook request and then
+    // return to complete this task.
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $this->failRequest($request, 'hook', 'silent');
+      return;
+    }
+
     $hook = $request->getWebhook();
 
     if ($hook->isDisabled()) {

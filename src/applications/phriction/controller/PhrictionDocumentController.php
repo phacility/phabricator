@@ -22,11 +22,6 @@ final class PhrictionDocumentController
 
     require_celerity_resource('phriction-document-css');
 
-    $document = id(new PhrictionDocumentQuery())
-      ->setViewer($viewer)
-      ->withSlugs(array($slug))
-      ->executeOne();
-
     $version_note = null;
     $core_content = '';
     $move_notice = '';
@@ -34,6 +29,11 @@ final class PhrictionDocumentController
     $content = null;
     $toc = null;
 
+    $document = id(new PhrictionDocumentQuery())
+      ->setViewer($viewer)
+      ->withSlugs(array($slug))
+      ->needContent(true)
+      ->executeOne();
     if (!$document) {
 
       $document = PhrictionDocument::initializeNewDocument($viewer, $slug);
@@ -69,25 +69,28 @@ final class PhrictionDocumentController
       $version = $request->getInt('v');
 
       if ($version) {
-        $content = id(new PhrictionContent())->loadOneWhere(
-          'documentID = %d AND version = %d',
-          $document->getID(),
-          $version);
+        $content = id(new PhrictionContentQuery())
+          ->setViewer($viewer)
+          ->withDocumentPHIDs(array($document->getPHID()))
+          ->withVersions(array($version))
+          ->executeOne();
         if (!$content) {
           return new Aphront404Response();
         }
 
         if ($content->getID() != $document->getContentID()) {
-          $vdate = phabricator_datetime($content->getDateCreated(), $viewer);
-          $version_note = new PHUIInfoView();
-          $version_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-          $version_note->appendChild(
-            pht('You are viewing an older version of this document, as it '.
-            'appeared on %s.', $vdate));
+          $version_note = id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+            ->appendChild(
+              pht(
+                'You are viewing an older version of this document, as it '.
+                'appeared on %s.',
+                phabricator_datetime($content->getDateCreated(), $viewer)));
         }
       } else {
-        $content = id(new PhrictionContent())->load($document->getContentID());
+        $content = $document->getContent();
       }
+
       $page_title = $content->getTitle();
       $properties = $this
         ->buildPropertyListView($document, $content, $slug);
@@ -97,8 +100,12 @@ final class PhrictionDocumentController
       if ($current_status == PhrictionChangeType::CHANGE_EDIT ||
         $current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
 
-        $core_content = $content->renderContent($viewer);
-        $toc = $this->getToc($content);
+        $remarkup_view = $content->newRemarkupView($viewer);
+
+        $core_content = $remarkup_view->render();
+
+        $toc = $remarkup_view->getTableOfContents();
+        $toc = $this->getToc($toc);
 
       } else if ($current_status == PhrictionChangeType::CHANGE_DELETE) {
         $notice = new PHUIInfoView();
@@ -474,8 +481,8 @@ final class PhrictionDocumentController
     return $this->slug;
   }
 
-  protected function getToc(PhrictionContent $content) {
-    $toc = $content->getRenderedTableOfContents();
+  protected function getToc($toc) {
+
     if ($toc) {
       $toc = phutil_tag_div('phui-document-toc-content', array(
         phutil_tag_div(
@@ -484,6 +491,7 @@ final class PhrictionDocumentController
         $toc,
       ));
     }
+
     return $toc;
   }
 

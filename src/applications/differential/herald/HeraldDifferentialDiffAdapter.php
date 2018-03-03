@@ -57,4 +57,8 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
     return pht('New Diff');
   }
 
+  public function supportsWebhooks() {
+    return false;
+  }
+
 }

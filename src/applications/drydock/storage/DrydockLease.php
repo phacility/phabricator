@@ -36,8 +36,8 @@ final class DrydockLease extends DrydockDAO
    * a lease, as you don't need to explicitly handle exceptions to properly
    * release the lease.
    */
-  public function releaseOnDestruction() {
-    $this->releaseOnDestruction = true;
+  public function setReleaseOnDestruction($release) {
+    $this->releaseOnDestruction = $release;
     return $this;
   }
 
@@ -175,57 +175,6 @@ final class DrydockLease extends DrydockDAO
     return $this;
   }
 
-  public function isActivating() {
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_PENDING:
-      case DrydockLeaseStatus::STATUS_ACQUIRED:
-        return true;
-    }
-
-    return false;
-  }
-
-  public function isActive() {
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_ACTIVE:
-        return true;
-    }
-
-    return false;
-  }
-
-  public function waitUntilActive() {
-    while (true) {
-      $lease = $this->reload();
-      if (!$lease) {
-        throw new Exception(pht('Failed to reload lease.'));
-      }
-
-      $status = $lease->getStatus();
-
-      switch ($status) {
-        case DrydockLeaseStatus::STATUS_ACTIVE:
-          return;
-        case DrydockLeaseStatus::STATUS_RELEASED:
-          throw new Exception(pht('Lease has already been released!'));
-        case DrydockLeaseStatus::STATUS_DESTROYED:
-          throw new Exception(pht('Lease has already been destroyed!'));
-        case DrydockLeaseStatus::STATUS_BROKEN:
-          throw new Exception(pht('Lease has been broken!'));
-        case DrydockLeaseStatus::STATUS_PENDING:
-        case DrydockLeaseStatus::STATUS_ACQUIRED:
-          break;
-        default:
-          throw new Exception(
-            pht(
-              'Lease has unknown status "%s".',
-              $status));
-      }
-
-      sleep(1);
-    }
-  }
-
   public function setActivateWhenAcquired($activate) {
     $this->activateWhenAcquired = true;
     return $this;
@@ -264,30 +213,75 @@ final class DrydockLease extends DrydockDAO
       }
     }
 
-    $this->openTransaction();
+    // Before we associate the lease with the resource, we lock the resource
+    // and reload it to make sure it is still pending or active. If we don't
+    // do this, the resource may have just been reclaimed. (Once we acquire
+    // the resource that stops it from being released, so we're nearly safe.)
+
+    $resource_phid = $resource->getPHID();
+    $hash = PhabricatorHash::digestForIndex($resource_phid);
+    $lock_key = 'drydock.resource:'.$hash;
+    $lock = PhabricatorGlobalLock::newLock($lock_key);
 
     try {
-      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
-      $this->slotLocks = array();
-    } catch (DrydockSlotLockException $ex) {
-      $this->killTransaction();
-
-      $this->logEvent(
-        DrydockSlotLockFailureLogType::LOGCONST,
-        array(
-          'locks' => $ex->getLockMap(),
-        ));
-
-      throw $ex;
+      $lock->lock(15);
+    } catch (Exception $ex) {
+      throw new DrydockResourceLockException(
+        pht(
+          'Failed to acquire lock for resource ("%s") while trying to '.
+          'acquire lease ("%s").',
+          $resource->getPHID(),
+          $this->getPHID()));
     }
 
-    $this
-      ->setResourcePHID($resource->getPHID())
-      ->attachResource($resource)
-      ->setStatus($new_status)
-      ->save();
+    $resource->reload();
 
-    $this->saveTransaction();
+    if (($resource->getStatus() !== DrydockResourceStatus::STATUS_ACTIVE) &&
+        ($resource->getStatus() !== DrydockResourceStatus::STATUS_PENDING)) {
+      throw new DrydockAcquiredBrokenResourceException(
+        pht(
+          'Trying to acquire lease ("%s") on a resource ("%s") in the '.
+          'wrong status ("%s").',
+          $this->getPHID(),
+          $resource->getPHID(),
+          $resource->getStatus()));
+    }
+
+    $caught = null;
+    try {
+      $this->openTransaction();
+
+      try {
+        DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+        $this->slotLocks = array();
+      } catch (DrydockSlotLockException $ex) {
+        $this->killTransaction();
+
+        $this->logEvent(
+          DrydockSlotLockFailureLogType::LOGCONST,
+          array(
+            'locks' => $ex->getLockMap(),
+          ));
+
+        throw $ex;
+      }
+
+      $this
+        ->setResourcePHID($resource->getPHID())
+        ->attachResource($resource)
+        ->setStatus($new_status)
+        ->save();
+
+      $this->saveTransaction();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $lock->unlock();
+
+    if ($caught) {
+      throw $caught;
+    }
 
     $this->isAcquired = true;
 
@@ -355,30 +349,6 @@ final class DrydockLease extends DrydockDAO
 
   public function isActivatedLease() {
     return $this->isActivated;
-  }
-
-  public function canRelease() {
-    if (!$this->getID()) {
-      return false;
-    }
-
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_RELEASED:
-      case DrydockLeaseStatus::STATUS_DESTROYED:
-        return false;
-      default:
-        return true;
-    }
-  }
-
-  public function canReceiveCommands() {
-    switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_RELEASED:
-      case DrydockLeaseStatus::STATUS_DESTROYED:
-        return false;
-      default:
-        return true;
-    }
   }
 
   public function scheduleUpdate($epoch = null) {
@@ -466,6 +436,51 @@ final class DrydockLease extends DrydockDAO
     }
 
     return $this;
+  }
+
+  public function getURI() {
+    $id = $this->getID();
+    return "/drydock/lease/{$id}/";
+  }
+
+
+/* -(  Status  )------------------------------------------------------------- */
+
+
+  public function getStatusObject() {
+    return DrydockLeaseStatus::newStatusObject($this->getStatus());
+  }
+
+  public function getStatusIcon() {
+    return $this->getStatusObject()->getIcon();
+  }
+
+  public function getStatusColor() {
+    return $this->getStatusObject()->getColor();
+  }
+
+  public function getStatusDisplayName() {
+    return $this->getStatusObject()->getDisplayName();
+  }
+
+  public function isActivating() {
+    return $this->getStatusObject()->isActivating();
+  }
+
+  public function isActive() {
+    return $this->getStatusObject()->isActive();
+  }
+
+  public function canRelease() {
+    if (!$this->getID()) {
+      return false;
+    }
+
+    return $this->getStatusObject()->canRelease();
+  }
+
+  public function canReceiveCommands() {
+    return $this->getStatusObject()->canReceiveCommands();
   }
 
 

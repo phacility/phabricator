@@ -17,6 +17,7 @@ final class CelerityStaticResourceResponse extends Phobject {
   private $behaviors = array();
   private $hasRendered = array();
   private $postprocessorKey;
+  private $contentSecurityPolicyURIs = array();
 
   public function __construct() {
     if (isset($_REQUEST['__metablock__'])) {
@@ -35,6 +36,15 @@ final class CelerityStaticResourceResponse extends Phobject {
     $id = count($this->metadata);
     $this->metadata[$id] = $metadata;
     return $this->metadataBlock.'_'.$id;
+  }
+
+  public function addContentSecurityPolicyURI($kind, $uri) {
+    $this->contentSecurityPolicyURIs[$kind][] = $uri;
+    return $this;
+  }
+
+  public function getContentSecurityPolicyURIMap() {
+    return $this->contentSecurityPolicyURIs;
   }
 
   public function getMetadataBlock() {
@@ -196,23 +206,16 @@ final class CelerityStaticResourceResponse extends Phobject {
         $type));
   }
 
-  public function renderHTMLFooter() {
+  public function renderHTMLFooter($is_frameable) {
     $this->metadataLocked = true;
 
-    $data = array();
-    if ($this->metadata) {
-      $json_metadata = AphrontResponse::encodeJSONForHTTPResponse(
-        $this->metadata);
-      $this->metadata = array();
-    } else {
-      $json_metadata = '{}';
-    }
-    // Even if there is no metadata on the page, Javelin uses the mergeData()
-    // call to start dispatching the event queue.
-    $data[] = 'JX.Stratcom.mergeData('.$this->metadataBlock.', '.
-                                       $json_metadata.');';
+    $merge_data = array(
+      'block' => $this->metadataBlock,
+      'data' => $this->metadata,
+    );
+    $this->metadata = array();
 
-    $onload = array();
+    $behavior_lists = array();
     if ($this->behaviors) {
       $behaviors = $this->behaviors;
       $this->behaviors = array();
@@ -241,24 +244,52 @@ final class CelerityStaticResourceResponse extends Phobject {
         if (!$group) {
           continue;
         }
-        $group_json = AphrontResponse::encodeJSONForHTTPResponse(
-          $group);
-        $onload[] = 'JX.initBehaviors('.$group_json.')';
+        $behavior_lists[] = $group;
       }
     }
 
-    if ($onload) {
-      foreach ($onload as $func) {
-        $data[] = 'JX.onload(function(){'.$func.'});';
-      }
+    $initializers = array();
+
+    // Even if there is no metadata on the page, Javelin uses the mergeData()
+    // call to start dispatching the event queue, so we always want to include
+    // this initializer.
+    $initializers[] = array(
+      'kind' => 'merge',
+      'data' => $merge_data,
+    );
+
+    foreach ($behavior_lists as $behavior_list) {
+      $initializers[] = array(
+        'kind' => 'behaviors',
+        'data' => $behavior_list,
+      );
     }
 
-    if ($data) {
-      $data = implode("\n", $data);
-      return self::renderInlineScript($data);
-    } else {
-      return '';
+    if ($is_frameable) {
+      $initializers[] = array(
+        'data' => 'frameable',
+        'kind' => (bool)$is_frameable,
+      );
     }
+
+    $tags = array();
+    foreach ($initializers as $initializer) {
+      $data = $initializer['data'];
+      if (is_array($data)) {
+        $json_data = AphrontResponse::encodeJSONForHTTPResponse($data);
+      } else {
+        $json_data = json_encode($data);
+      }
+
+      $tags[] = phutil_tag(
+        'data',
+        array(
+          'data-javelin-init-kind' => $initializer['kind'],
+          'data-javelin-init-data' => $json_data,
+        ));
+    }
+
+    return $tags;
   }
 
   public static function renderInlineScript($data) {

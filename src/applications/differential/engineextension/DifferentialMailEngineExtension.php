@@ -53,7 +53,7 @@ final class DifferentialMailEngineExtension
       } else {
         $reviewers[] = $reviewer_phid;
         if ($reviewer->isBlocking()) {
-          $reviewers[] = $blocking;
+          $blocking[] = $reviewer_phid;
         }
       }
     }

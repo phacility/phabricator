@@ -28,17 +28,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
 
     // Handle relative links.
     if ((substr($link, 0, 2) === './') || (substr($link, 0, 3) === '../')) {
-      $base = null;
-      $context = $this->getEngine()->getConfig('contextObject');
-      if ($context !== null && $context instanceof PhrictionContent) {
-        // Handle content when it's being rendered in document view.
-        $base = $context->getSlug();
-      }
-      if ($context !== null && is_array($context) &&
-          idx($context, 'phriction.isPreview')) {
-        // Handle content when it's a preview for the Phriction editor.
-        $base = idx($context, 'phriction.slug');
-      }
+      $base = $this->getRelativeBaseURI();
       if ($base !== null) {
         $base_parts = explode('/', rtrim($base, '/'));
         $rel_parts = explode('/', rtrim($link, '/'));
@@ -93,28 +83,97 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       return;
     }
 
+    $viewer = $engine->getConfig('viewer');
+
     $slugs = ipull($metadata, 'link');
-    foreach ($slugs as $key => $slug) {
-      $slugs[$key] = PhabricatorSlug::normalize($slug);
+
+    $load_map = array();
+    foreach ($slugs as $key => $raw_slug) {
+      $lookup = PhabricatorSlug::normalize($raw_slug);
+      $load_map[$lookup][] = $key;
+
+      // Also try to lookup the slug with URL decoding applied. The right
+      // way to link to a page titled "$cash" is to write "[[ $cash ]]" (and
+      // not the URL encoded form "[[ %24cash ]]"), but users may reasonably
+      // have copied URL encoded variations out of their browser location
+      // bar or be skeptical that "[[ $cash ]]" will actually work.
+
+      $lookup = phutil_unescape_uri_path_component($raw_slug);
+      $lookup = phutil_utf8ize($lookup);
+      $lookup = PhabricatorSlug::normalize($lookup);
+      $load_map[$lookup][] = $key;
     }
 
-    // We have to make two queries here to distinguish between
-    // documents the user can't see, and documents that don't
-    // exist.
     $visible_documents = id(new PhrictionDocumentQuery())
-      ->setViewer($engine->getConfig('viewer'))
-      ->withSlugs($slugs)
+      ->setViewer($viewer)
+      ->withSlugs(array_keys($load_map))
       ->needContent(true)
       ->execute();
-    $existant_documents = id(new PhrictionDocumentQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withSlugs($slugs)
-      ->execute();
-
     $visible_documents = mpull($visible_documents, null, 'getSlug');
-    $existant_documents = mpull($existant_documents, null, 'getSlug');
+    $document_map = array();
+    foreach ($load_map as $lookup => $keys) {
+      $visible = idx($visible_documents, $lookup);
+      if (!$visible) {
+        continue;
+      }
 
-    foreach ($metadata as $spec) {
+      foreach ($keys as $key) {
+        $document_map[$key] = array(
+          'visible' => true,
+          'document' => $visible,
+        );
+      }
+
+      unset($load_map[$lookup]);
+    }
+
+    // For each document we found, remove all remaining requests for it from
+    // the load map. If we remove all requests for a slug, remove the slug.
+    // This stops us from doing unnecessary lookups on alternate names for
+    // documents we already found.
+    foreach ($load_map as $lookup => $keys) {
+      foreach ($keys as $lookup_key => $key) {
+        if (isset($document_map[$key])) {
+          unset($keys[$lookup_key]);
+        }
+      }
+
+      if (!$keys) {
+        unset($load_map[$lookup]);
+        continue;
+      }
+
+      $load_map[$lookup] = $keys;
+    }
+
+
+    // If we still have links we haven't found a document for, do another
+    // query with the omnipotent viewer so we can distinguish between pages
+    // which do not exist and pages which exist but which the viewer does not
+    // have permission to see.
+    if ($load_map) {
+      $existent_documents = id(new PhrictionDocumentQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withSlugs(array_keys($load_map))
+        ->execute();
+      $existent_documents = mpull($existent_documents, null, 'getSlug');
+
+      foreach ($load_map as $lookup => $keys) {
+        $existent = idx($existent_documents, $lookup);
+        if (!$existent) {
+          continue;
+        }
+
+        foreach ($keys as $key) {
+          $document_map[$key] = array(
+            'visible' => false,
+            'document' => null,
+          );
+        }
+      }
+    }
+
+    foreach ($metadata as $key => $spec) {
       $link = $spec['link'];
       $slug = PhabricatorSlug::normalize($link);
       $name = $spec['explicitName'];
@@ -124,14 +183,16 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       // in text as: "Title" <link>. Otherwise, we'll just render: <link>.
       $is_interesting_name = (bool)strlen($name);
 
-      if (idx($existant_documents, $slug) === null) {
+      $target = idx($document_map, $key, null);
+
+      if ($target === null) {
         // The target document doesn't exist.
         if ($name === null) {
           $name = explode('/', trim($link, '/'));
           $name = end($name);
         }
         $class = 'phriction-link-missing';
-      } else if (idx($visible_documents, $slug) === null) {
+      } else if (!$target['visible']) {
         // The document exists, but the user can't see it.
         if ($name === null) {
           $name = explode('/', trim($link, '/'));
@@ -141,7 +202,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       } else {
         if ($name === null) {
           // Use the title of the document if no name is set.
-          $name = $visible_documents[$slug]
+          $name = $target['document']
             ->getContent()
             ->getTitle();
 
@@ -194,5 +255,31 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       $this->getEngine()->overwriteStoredText($spec['token'], $text);
     }
   }
+
+  private function getRelativeBaseURI() {
+    $context = $this->getEngine()->getConfig('contextObject');
+
+    if (!$context) {
+      return null;
+    }
+
+    // Handle content when it's a preview for the Phriction editor.
+    if (is_array($context)) {
+      if (idx($context, 'phriction.isPreview')) {
+        return idx($context, 'phriction.slug');
+      }
+    }
+
+    if ($context instanceof PhrictionContent) {
+      return $context->getSlug();
+    }
+
+    if ($context instanceof PhrictionDocument) {
+      return $context->getContent()->getSlug();
+    }
+
+    return null;
+  }
+
 
 }

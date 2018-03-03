@@ -7,7 +7,78 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
   private $color;
   private $border;
 
+  private $maps = array();
+
   const VERSION = 'v1';
+
+  public function updateUser(PhabricatorUser $user) {
+    $username = $user->getUsername();
+
+    $image_map = $this->getMap('image');
+    $initial = phutil_utf8_strtoupper(substr($username, 0, 1));
+    $pack = $this->pickMap('pack', $username);
+    $icon = "alphanumeric/{$pack}/{$initial}.png";
+    if (!isset($image_map[$icon])) {
+      $icon = "alphanumeric/{$pack}/_default.png";
+    }
+
+    $border = $this->pickMap('border', $username);
+    $color = $this->pickMap('color', $username);
+
+    $data = $this->composeImage($color, $icon, $border);
+    $name = $this->getImageDisplayName($color, $icon, $border);
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+      $file = PhabricatorFile::newFromFileData(
+        $data,
+        array(
+          'name' => $name,
+          'profile' => true,
+          'canCDN' => true,
+        ));
+
+      $user
+        ->setDefaultProfileImagePHID($file->getPHID())
+        ->setDefaultProfileImageVersion(self::VERSION)
+        ->saveWithoutIndex();
+
+    unset($unguarded);
+
+    return $file;
+  }
+
+  private function getMap($map_key) {
+    if (!isset($this->maps[$map_key])) {
+      switch ($map_key) {
+        case 'pack':
+          $map = $this->newPackMap();
+          break;
+        case 'image':
+          $map = $this->newImageMap();
+          break;
+        case 'color':
+          $map = $this->newColorMap();
+          break;
+        case 'border':
+          $map = $this->newBorderMap();
+          break;
+        default:
+          throw new Exception(pht('Unknown map "%s".', $map_key));
+      }
+      $this->maps[$map_key] = $map;
+    }
+
+    return $this->maps[$map_key];
+  }
+
+  private function pickMap($map_key, $username) {
+    $map = $this->getMap($map_key);
+    $seed = $username.'_'.$map_key;
+    $key = PhabricatorHash::digestToRange($seed, 0, count($map) - 1);
+    return $map[$key];
+  }
+
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -46,15 +117,22 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
   }
 
   public function getBuiltinDisplayName() {
-    $icon = $this->getIcon();
-    $color = $this->getColor();
-    $border = implode(',', $this->getBorder());
+    return $this->getImageDisplayName(
+      $this->getIcon(),
+      $this->getColor(),
+      $this->getBorder());
+  }
+
+  private function getImageDisplayName($icon, $color, $border) {
+    $border = implode(',', $border);
     return "{$icon}-{$color}-{$border}.png";
   }
 
   public function loadBuiltinFileData() {
     return $this->composeImage(
-      $this->getColor(), $this->getIcon(), $this->getBorder());
+      $this->getColor(),
+      $this->getIcon(),
+      $this->getBorder());
   }
 
   private function composeImage($color, $image, $border) {
@@ -68,7 +146,7 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
 
     $color_const = hexdec(trim($color, '#'));
     $true_border = self::rgba2gd($border);
-    $image_map = self::getImageMap();
+    $image_map = $this->getMap('image');
     $data = Filesystem::readFile($image_map[$image]);
 
     $img = imagecreatefromstring($data);
@@ -111,10 +189,10 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
     $b = $rgba[2];
     $a = $rgba[3];
     $a = (1 - $a) * 255;
-      return ($a << 24) | ($r << 16) | ($g << 8) | $b;
+    return ($a << 24) | ($r << 16) | ($g << 8) | $b;
   }
 
-  public static function getImageMap() {
+  private function newImageMap() {
     $root = dirname(phutil_get_library_root('phabricator'));
     $root = $root.'/resources/builtin/alphanumeric/';
 
@@ -131,64 +209,7 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
     return $map;
   }
 
-  public function getUniqueProfileImage($username) {
-    $pack_map = $this->getImagePackMap();
-    $image_map = $this->getImageMap();
-    $color_map = $this->getColorMap();
-    $border_map = $this->getBorderMap();
-    $file = phutil_utf8_strtoupper(substr($username, 0, 1));
-
-    $pack_count = count($pack_map);
-    $color_count = count($color_map);
-    $border_count = count($border_map);
-
-    $pack_seed = $username.'_pack';
-    $color_seed = $username.'_color';
-    $border_seed = $username.'_border';
-
-    $pack_key =
-      PhabricatorHash::digestToRange($pack_seed, 0, $pack_count - 1);
-    $color_key =
-      PhabricatorHash::digestToRange($color_seed, 0, $color_count - 1);
-    $border_key =
-      PhabricatorHash::digestToRange($border_seed, 0, $border_count - 1);
-
-    $pack = $pack_map[$pack_key];
-    $icon = 'alphanumeric/'.$pack.'/'.$file.'.png';
-    $color = $color_map[$color_key];
-    $border = $border_map[$border_key];
-
-    if (!isset($image_map[$icon])) {
-    $icon = 'alphanumeric/'.$pack.'/_default.png';
-    }
-
-    return array('color' => $color, 'icon' => $icon, 'border' => $border);
-  }
-
-  public function getUserProfileImageFile($username) {
-    $unique = $this->getUniqueProfileImage($username);
-
-    $composer = id(new self())
-      ->setIcon($unique['icon'])
-      ->setColor($unique['color'])
-      ->setBorder($unique['border']);
-
-    $data = $composer->loadBuiltinFileData();
-
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $file = PhabricatorFile::newFromFileData(
-      $data,
-      array(
-        'name' => $composer->getBuiltinDisplayName(),
-        'profile' => true,
-        'canCDN' => true,
-      ));
-    unset($unguarded);
-
-    return $file;
-  }
-
-  public static function getImagePackMap() {
+  private function newPackMap() {
     $root = dirname(phutil_get_library_root('phabricator'));
     $root = $root.'/resources/builtin/alphanumeric/';
 
@@ -196,28 +217,24 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       ->withType('d')
       ->withFollowSymlinks(false)
       ->find();
+    $map = array_values($map);
 
-    return array_values($map);
+    return $map;
   }
 
-  public static function getBorderMap() {
-
-    $map = array(
+  private function newBorderMap() {
+    return array(
       array(0, 0, 0, 0),
       array(0, 0, 0, 0.3),
       array(255, 255, 255, 0.4),
       array(255, 255, 255, 0.7),
     );
-
-    return $map;
   }
 
-  public static function getColorMap() {
-    //
-    // Generated Colors
-    // http://tools.medialab.sciences-po.fr/iwanthue/
-    //
-    $map = array(
+  private function newColorMap() {
+    // Via: http://tools.medialab.sciences-po.fr/iwanthue/
+
+    return array(
       '#335862',
       '#2d5192',
       '#3c5da0',
@@ -447,7 +464,6 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#335862',
       '#335862',
     );
-    return $map;
   }
 
 }

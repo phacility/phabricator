@@ -34,6 +34,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $actionIcon;
   private $actionIconHref;
   private $count;
+  private $rel;
 
   public function setOpenInNewWindow($open_in_new_window) {
     $this->openInNewWindow = $open_in_new_window;
@@ -44,7 +45,16 @@ final class PHUIListItemView extends AphrontTagView {
     return $this->openInNewWindow;
   }
 
-    public function setHideInApplicationMenu($hide) {
+  public function setRel($rel) {
+    $this->rel = $rel;
+    return $this;
+  }
+
+  public function getRel() {
+    return $this->rel;
+  }
+
+  public function setHideInApplicationMenu($hide) {
     $this->hideInApplicationMenu = $hide;
     return $this;
   }
@@ -363,6 +373,7 @@ final class PHUIListItemView extends AphrontTagView {
         'meta' => $meta,
         'sigil' => $sigil,
         'target' => $this->getOpenInNewWindow() ? '_blank' : null,
+        'rel' => $this->rel,
       ),
       array(
         $aural,

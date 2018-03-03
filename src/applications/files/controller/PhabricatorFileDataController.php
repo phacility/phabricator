@@ -26,6 +26,9 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $req_domain = $request->getHost();
     $main_domain = id(new PhutilURI($base_uri))->getDomain();
 
+    $request_kind = $request->getURIData('kind');
+    $is_download = ($request_kind === 'download');
+
     if (!strlen($alt) || $main_domain == $alt_domain) {
       // No alternate domain.
       $should_redirect = false;
@@ -50,7 +53,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     if ($should_redirect) {
       return id(new AphrontRedirectResponse())
         ->setIsExternal(true)
-        ->setURI($file->getCDNURI());
+        ->setURI($file->getCDNURI($request_kind));
     }
 
     $response = new AphrontFileResponse();
@@ -71,34 +74,30 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     }
 
     $is_viewable = $file->isViewableInBrowser();
-    $force_download = $request->getExists('download');
-
     $request_type = $request->getHTTPHeader('X-Phabricator-Request-Type');
     $is_lfs = ($request_type == 'git-lfs');
 
-    if ($is_viewable && !$force_download) {
+    if ($is_viewable && !$is_download) {
       $response->setMimeType($file->getViewableMimeType());
     } else {
-      $is_public = !$viewer->isLoggedIn();
       $is_post = $request->isHTTPPost();
 
-      // NOTE: Require POST to download files from the primary domain if the
-      // request includes credentials. The "Download File" links we generate
-      // in the web UI are forms which use POST to satisfy this requirement.
+      // NOTE: Require POST to download files from the primary domain. If the
+      // request is not a POST request but arrives on the primary domain, we
+      // render a confirmation dialog. For discussion, see T13094.
 
-      // The intent is to make attacks based on tags like "<iframe />" and
-      // "<script />" (which can issue GET requests, but can not easily issue
-      // POST requests) more difficult to execute.
-
-      // The best defense against these attacks is to use an alternate file
-      // domain, which is why we strongly recommend doing so.
-
-      $is_safe = ($is_alternate_domain || $is_lfs || $is_post || $is_public);
+      $is_safe = ($is_alternate_domain || $is_lfs || $is_post);
       if (!$is_safe) {
-        // This is marked as "external" because it is fully qualified.
-        return id(new AphrontRedirectResponse())
-          ->setIsExternal(true)
-          ->setURI(PhabricatorEnv::getProductionURI($file->getBestURI()));
+        return $this->newDialog()
+          ->setSubmitURI($file->getDownloadURI())
+          ->setTitle(pht('Download File'))
+          ->appendParagraph(
+            pht(
+              'Download file %s (%s)?',
+              phutil_tag('strong', array(), $file->getName()),
+              phutil_format_bytes($file->getByteSize())))
+          ->addCancelButton($file->getURI())
+          ->addSubmitButton(pht('Download File'));
       }
 
       $response->setMimeType($file->getMimeType());

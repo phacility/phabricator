@@ -39,12 +39,6 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     );
   }
 
-  public function getFactObjectsForAnalysis() {
-    return array(
-      new PhabricatorRepositoryCommit(),
-    );
-  }
-
   public function getRemarkupRules() {
     return array(
       new DiffusionCommitRemarkupRule(),

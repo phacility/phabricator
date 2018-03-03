@@ -365,21 +365,22 @@ final class DifferentialTransactionEditor
         $diff->setRevisionID($object->getID());
         $diff->save();
 
-        // Update Harbormaster to set the containerPHID correctly for any
-        // existing buildables. We may otherwise have buildables stuck with
-        // the old (`null`) container.
+        // If there are any outstanding buildables for this diff, tell
+        // Harbormaster that their containers need to be updated. This is
+        // common, because `arc` creates buildables so it can upload lint
+        // and unit results.
 
-        // TODO: This is a bit iffy, maybe we can find a cleaner approach?
-        // In particular, this could (rarely) be overwritten by Harbormaster
-        // workers.
-        $table = new HarbormasterBuildable();
-        $conn_w = $table->establishConnection('w');
-        queryfx(
-          $conn_w,
-          'UPDATE %T SET containerPHID = %s WHERE buildablePHID = %s',
-          $table->getTableName(),
-          $object->getPHID(),
-          $diff->getPHID());
+        $buildables = id(new HarbormasterBuildableQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withManualBuildables(false)
+          ->withBuildablePHIDs(array($diff->getPHID()))
+          ->execute();
+        foreach ($buildables as $buildable) {
+          $buildable->sendMessage(
+            $this->getActor(),
+            HarbormasterMessageType::BUILDABLE_CONTAINER,
+            true);
+        }
 
         return;
     }

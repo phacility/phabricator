@@ -10,7 +10,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
     PhabricatorProjectInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorConduitResultInterface {
 
   protected $slug;
   protected $depth;
@@ -31,7 +32,7 @@ final class PhrictionDocument extends PhrictionDAO
         'slug' => 'sort128',
         'depth' => 'uint32',
         'contentID' => 'id?',
-        'status' => 'uint32',
+        'status' => 'text32',
         'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -61,7 +62,7 @@ final class PhrictionDocument extends PhrictionDAO
     $document = new PhrictionDocument();
     $document->setSlug($slug);
 
-    $content  = new PhrictionContent();
+    $content = new PhrictionContent();
     $content->setSlug($slug);
 
     $default_title = PhabricatorSlug::getDefaultTitle($slug);
@@ -146,6 +147,33 @@ final class PhrictionDocument extends PhrictionDAO
   public function attachAncestor($slug, $ancestor) {
     $this->ancestors[$slug] = $ancestor;
     return $this;
+  }
+
+  public function getURI() {
+    return self::getSlugURI($this->getSlug());
+  }
+
+/* -(  Status  )------------------------------------------------------------- */
+
+
+  public function getStatusObject() {
+    return PhrictionDocumentStatus::newStatusObject($this->getStatus());
+  }
+
+  public function getStatusIcon() {
+    return $this->getStatusObject()->getIcon();
+  }
+
+  public function getStatusColor() {
+    return $this->getStatusObject()->getColor();
+  }
+
+  public function getStatusDisplayName() {
+    return $this->getStatusObject()->getDisplayName();
+  }
+
+  public function isActive() {
+    return $this->getStatusObject()->isActive();
   }
 
 
@@ -236,14 +264,15 @@ final class PhrictionDocument extends PhrictionDAO
 
     $this->openTransaction();
 
-      $this->delete();
-
-      $contents = id(new PhrictionContent())->loadAllWhere(
-        'documentID = %d',
-        $this->getID());
+      $contents = id(new PhrictionContentQuery())
+        ->setViewer($engine->getViewer())
+        ->withDocumentPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($contents as $content) {
-        $content->delete();
+        $engine->destroyObject($content);
       }
+
+      $this->delete();
 
     $this->saveTransaction();
   }
@@ -264,4 +293,39 @@ final class PhrictionDocument extends PhrictionDAO
     return new PhrictionDocumentFerretEngine();
   }
 
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('path')
+        ->setType('string')
+        ->setDescription(pht('The path to the document.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Status information about the document.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $status = array(
+      'value' => $this->getStatus(),
+      'name' => $this->getStatusDisplayName(),
+    );
+
+    return array(
+      'path' => $this->getSlug(),
+      'status' => $status,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new PhrictionContentSearchEngineAttachment())
+        ->setAttachmentKey('content'),
+    );
+  }
 }

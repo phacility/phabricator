@@ -473,10 +473,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $collapsed_key = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
       $collapsed_value = $viewer->getUserSetting($collapsed_key);
 
+      $width_key = PhabricatorFiletreeWidthSetting::SETTINGKEY;
+      $width_value = $viewer->getUserSetting($width_key);
+
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
         ->setTitle($monogram)
         ->setBaseURI(new PhutilURI($revision->getURI()))
         ->setCollapsed((bool)$collapsed_value)
+        ->setWidth((int)$width_value)
         ->build($changesets);
     }
 

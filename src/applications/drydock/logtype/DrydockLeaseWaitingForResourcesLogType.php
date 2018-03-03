@@ -13,13 +13,11 @@ final class DrydockLeaseWaitingForResourcesLogType extends DrydockLogType {
   }
 
   public function renderLog(array $data) {
-    $viewer = $this->getViewer();
-
     $blueprint_phids = idx($data, 'blueprintPHIDs', array());
 
     return pht(
       'Waiting for available resources from: %s.',
-      $viewer->renderHandleList($blueprint_phids)->render());
+      $this->renderHandleList($blueprint_phids));
   }
 
 }

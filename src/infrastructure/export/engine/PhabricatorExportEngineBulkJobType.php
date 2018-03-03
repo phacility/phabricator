@@ -36,7 +36,6 @@ final class PhabricatorExportEngineBulkJobType
           ->setName(pht('Temporary File Expired'));
       } else {
         $actions[] = id(new PhabricatorActionView())
-          ->setRenderAsForm(true)
           ->setHref($file->getDownloadURI())
           ->setIcon('fa-download')
           ->setName(pht('Download Data Export'));

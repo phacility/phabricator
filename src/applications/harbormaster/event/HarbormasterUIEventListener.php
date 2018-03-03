@@ -87,13 +87,9 @@ final class HarbormasterUIEventListener
 
     $status_view = new PHUIStatusListView();
 
-    $buildable_status = $buildable->getBuildableStatus();
-    $buildable_icon = HarbormasterBuildable::getBuildableStatusIcon(
-      $buildable_status);
-    $buildable_color = HarbormasterBuildable::getBuildableStatusColor(
-      $buildable_status);
-    $buildable_name = HarbormasterBuildable::getBuildableStatusName(
-      $buildable_status);
+    $buildable_icon = $buildable->getStatusIcon();
+    $buildable_color = $buildable->getStatusColor();
+    $buildable_name = $buildable->getStatusDisplayName();
 
     $target = phutil_tag(
       'a',

@@ -59,9 +59,15 @@ abstract class AphrontPageView extends AphrontView {
       ),
       array($body, $tail));
 
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+      $data_fragment = phutil_safe_html(' data-developer-mode="1"');
+    } else {
+      $data_fragment = null;
+    }
+
     $response = hsprintf(
       '<!DOCTYPE html>'.
-      '<html>'.
+      '<html%s>'.
         '<head>'.
           '<meta charset="UTF-8" />'.
           '<title>%s</title>'.
@@ -69,6 +75,7 @@ abstract class AphrontPageView extends AphrontView {
         '</head>'.
         '%s'.
       '</html>',
+      $data_fragment,
       $title,
       $head,
       $body);

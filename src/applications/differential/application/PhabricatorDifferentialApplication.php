@@ -35,12 +35,6 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     );
   }
 
-  public function getFactObjectsForAnalysis() {
-    return array(
-      new DifferentialRevision(),
-    );
-  }
-
   public function getTitleGlyph() {
     return "\xE2\x9A\x99";
   }

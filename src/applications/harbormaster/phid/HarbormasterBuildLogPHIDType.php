@@ -31,6 +31,10 @@ final class HarbormasterBuildLogPHIDType extends PhabricatorPHIDType {
 
     foreach ($handles as $phid => $handle) {
       $build_log = $objects[$phid];
+
+      $handle
+        ->setName(pht('Build Log %d', $build_log->getID()))
+        ->setURI($build_log->getURI());
     }
   }
 

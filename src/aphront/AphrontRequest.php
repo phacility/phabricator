@@ -49,6 +49,54 @@ final class AphrontRequest extends Phobject {
     return idx($this->uriData, $key, $default);
   }
 
+  /**
+   * Read line range parameter data from the request.
+   *
+   * Applications like Paste, Diffusion, and Harbormaster use "$12-14" in the
+   * URI to allow users to link to particular lines.
+   *
+   * @param string URI data key to pull line range information from.
+   * @param int|null Maximum length of the range.
+   * @return null|pair<int, int> Null, or beginning and end of the range.
+   */
+  public function getURILineRange($key, $limit) {
+    $range = $this->getURIData($key);
+    if (!strlen($range)) {
+      return null;
+    }
+
+    $range = explode('-', $range, 2);
+
+    foreach ($range as $key => $value) {
+      $value = (int)$value;
+      if (!$value) {
+        // If either value is "0", discard the range.
+        return null;
+      }
+      $range[$key] = $value;
+    }
+
+    // If the range is like "$10", treat it like "$10-10".
+    if (count($range) == 1) {
+      $range[] = head($range);
+    }
+
+    // If the range is "$7-5", treat it like "$5-7".
+    if ($range[1] < $range[0]) {
+      $range = array_reverse($range);
+    }
+
+    // If the user specified something like "$1-999999999" and we have a limit,
+    // clamp it to a more reasonable range.
+    if ($limit !== null) {
+      if ($range[1] - $range[0] > $limit) {
+        $range[1] = $range[0] + $limit;
+      }
+    }
+
+    return $range;
+  }
+
   public function setApplicationConfiguration(
     $application_configuration) {
     $this->applicationConfiguration = $application_configuration;

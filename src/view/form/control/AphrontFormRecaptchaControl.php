@@ -42,16 +42,24 @@ final class AphrontFormRecaptchaControl extends AphrontFormControl {
     $js = 'https://www.google.com/recaptcha/api.js';
     $pubkey = PhabricatorEnv::getEnvConfig('recaptcha.public-key');
 
-    return array(
-      phutil_tag('div', array(
-        'class'        => 'g-recaptcha',
-        'data-sitekey' => $pubkey,
-      )),
+    CelerityAPI::getStaticResourceResponse()
+      ->addContentSecurityPolicyURI('script-src', $js)
+      ->addContentSecurityPolicyURI('script-src', 'https://www.gstatic.com/')
+      ->addContentSecurityPolicyURI('frame-src', 'https://www.google.com/');
 
-      phutil_tag('script', array(
-        'type' => 'text/javascript',
-        'src'  => $js,
-      )),
+    return array(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'g-recaptcha',
+          'data-sitekey' => $pubkey,
+        )),
+      phutil_tag(
+        'script',
+        array(
+          'type' => 'text/javascript',
+          'src'  => $js,
+        )),
     );
   }
 }

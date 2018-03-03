@@ -18,7 +18,9 @@ final class PhabricatorEmailFormatSettingsPanel
   }
 
   public function isManagementPanel() {
-    if (!$this->isUserPanel()) {
+    return false;
+/*
+        if (!$this->isUserPanel()) {
       return false;
     }
 
@@ -27,6 +29,7 @@ final class PhabricatorEmailFormatSettingsPanel
     }
 
     return false;
+*/
   }
 
   public function isTemplatePanel() {

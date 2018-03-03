@@ -45,21 +45,10 @@ final class PhabricatorUserProfileImageCacheType
       $generate_users[] = $user;
     }
 
-    // Generate Files for anyone without a default
-    foreach ($generate_users as $generate_user) {
-      $generate_user_phid = $generate_user->getPHID();
-      $generate_username = $generate_user->getUsername();
-      $generate_version = PhabricatorFilesComposeAvatarBuiltinFile::VERSION;
-      $generate_file = id(new PhabricatorFilesComposeAvatarBuiltinFile())
-        ->getUserProfileImageFile($generate_username);
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $generate_user->setDefaultProfileImagePHID($generate_file->getPHID());
-      $generate_user->setDefaultProfileImageVersion($generate_version);
-      $generate_user->save();
-      unset($unguarded);
-
-      $file_phids[$generate_user_phid] = $generate_file->getPHID();
+    $generator = new PhabricatorFilesComposeAvatarBuiltinFile();
+    foreach ($generate_users as $user) {
+      $file = $generator->updateUser($user);
+      $file_phids[$user->getPHID()] = $file->getPHID();
     }
 
     if ($file_phids) {

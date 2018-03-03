@@ -6,6 +6,7 @@ final class DifferentialChangesetFileTreeSideNavBuilder extends Phobject {
   private $baseURI;
   private $anchorName;
   private $collapsed = false;
+  private $width;
 
   public function setAnchorName($anchor_name) {
     $this->anchorName = $anchor_name;
@@ -36,13 +37,19 @@ final class DifferentialChangesetFileTreeSideNavBuilder extends Phobject {
     return $this;
   }
 
+  public function setWidth($width) {
+    $this->width = $width;
+    return $this;
+  }
+
   public function build(array $changesets) {
     assert_instances_of($changesets, 'DifferentialChangeset');
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI($this->getBaseURI());
-    $nav->setFlexible(true);
-    $nav->setCollapsed($this->collapsed);
+    $nav = id(new AphrontSideNavFilterView())
+      ->setBaseURI($this->getBaseURI())
+      ->setFlexible(true)
+      ->setCollapsed($this->collapsed)
+      ->setWidth($this->width);
 
     $anchor = $this->getAnchorName();
 

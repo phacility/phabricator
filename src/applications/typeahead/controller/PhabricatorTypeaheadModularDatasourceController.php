@@ -226,6 +226,12 @@ final class PhabricatorTypeaheadModularDatasourceController
         if ($source->getAllDatasourceFunctions()) {
           $reference_uri = '/typeahead/help/'.get_class($source).'/';
 
+          $parameters = $source->getParameters();
+          if ($parameters) {
+            $reference_uri = (string)id(new PhutilURI($reference_uri))
+              ->setQueryParam('parameters', phutil_json_encode($parameters));
+          }
+
           $reference_link = phutil_tag(
             'a',
             array(

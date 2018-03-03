@@ -447,6 +447,13 @@ abstract class PhabricatorAuthProvider extends Phobject {
         ));
     }
 
+    $static_response = CelerityAPI::getStaticResourceResponse();
+    $static_response->addContentSecurityPolicyURI('form-action', (string)$uri);
+
+    foreach ($this->getContentSecurityPolicyFormActions() as $csp_uri) {
+      $static_response->addContentSecurityPolicyURI('form-action', $csp_uri);
+    }
+
     return phabricator_form(
       $viewer,
       array(
@@ -503,6 +510,10 @@ abstract class PhabricatorAuthProvider extends Phobject {
 
   public function getAutoLoginURI(AphrontRequest $request) {
     throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function getContentSecurityPolicyFormActions() {
+    return array();
   }
 
 }

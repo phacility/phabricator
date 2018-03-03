@@ -17,12 +17,21 @@ final class HarbormasterBuildWorker extends HarbormasterWorker {
 
   protected function doWork() {
     $viewer = $this->getViewer();
-    $build = $this->loadBuild();
 
-    id(new HarbormasterBuildEngine())
-      ->setViewer($viewer)
-      ->setBuild($build)
-      ->continueBuild();
+    $engine = id(new HarbormasterBuildEngine())
+      ->setViewer($viewer);
+
+    $data = $this->getTaskData();
+    $build_id = idx($data, 'buildID');
+
+    if ($build_id) {
+      $build = $this->loadBuild();
+      $engine->setBuild($build);
+      $engine->continueBuild();
+    } else {
+      $buildable = $this->loadBuildable();
+      $engine->updateBuildable($buildable);
+    }
   }
 
   private function loadBuild() {
@@ -40,6 +49,23 @@ final class HarbormasterBuildWorker extends HarbormasterWorker {
     }
 
     return $build;
+  }
+
+  private function loadBuildable() {
+    $data = $this->getTaskData();
+    $phid = idx($data, 'buildablePHID');
+
+    $viewer = $this->getViewer();
+    $buildable = id(new HarbormasterBuildableQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    if (!$buildable) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht('Invalid buildable PHID "%s".', $phid));
+    }
+
+    return $buildable;
   }
 
 }

@@ -20,7 +20,6 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
     $defaults = array(
       'uri' => null,
       'alt' => null,
-      'href' => null,
       'width' => null,
       'height' => null,
     );
@@ -45,10 +44,6 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
 
     $args += $defaults;
 
-    if ($args['href'] && !PhabricatorEnv::isValidURIForLink($args['href'])) {
-      $args['href'] = null;
-    }
-
     if ($args['uri']) {
       $src_uri = id(new PhutilURI('/file/imageproxy/'))
         ->setQueryParam('uri', (string)$args['uri']);
@@ -57,10 +52,9 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
         array(
           'src' => $src_uri,
           'alt' => $args['alt'],
-          'href' => $args['href'],
           'width' => $args['width'],
           'height' => $args['height'],
-          ));
+        ));
       return $this->getEngine()->storeText($img);
     } else {
       return $matches[0];
