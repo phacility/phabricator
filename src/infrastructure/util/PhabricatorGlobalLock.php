@@ -28,6 +28,7 @@
  */
 final class PhabricatorGlobalLock extends PhutilLock {
 
+  private $parameters;
   private $conn;
   private $isExternalConnection = false;
 
@@ -37,27 +38,42 @@ final class PhabricatorGlobalLock extends PhutilLock {
 /* -(  Constructing Locks  )------------------------------------------------- */
 
 
-  public static function newLock($name) {
+  public static function newLock($name, $parameters = array()) {
     $namespace = PhabricatorLiskDAO::getStorageNamespace();
     $namespace = PhabricatorHash::digestToLength($namespace, 20);
 
-    $full_name = 'ph:'.$namespace.':'.$name;
+    $parts = array();
+    ksort($parameters);
+    foreach ($parameters as $key => $parameter) {
+      if (!preg_match('/^[a-zA-Z0-9]+\z/', $key)) {
+        throw new Exception(
+          pht(
+            'Lock parameter key "%s" must be alphanumeric.',
+            $key));
+      }
 
-    $length_limit = 64;
-    if (strlen($full_name) > $length_limit) {
-      throw new Exception(
-        pht(
-          'Lock name "%s" is too long (full lock name is "%s"). The '.
-          'full lock name must not be longer than %s bytes.',
-          $name,
-          $full_name,
-          new PhutilNumber($length_limit)));
+      if (!is_scalar($parameter) && !is_null($parameter)) {
+        throw new Exception(
+          pht(
+            'Lock parameter for key "%s" must be a scalar.',
+            $key));
+      }
+
+      $value = phutil_json_encode($parameter);
+      $parts[] = "{$key}={$value}";
     }
+    $parts = implode(', ', $parts);
 
+    $local = "{$name}({$parts})";
+    $local = PhabricatorHash::digestToLength($local, 20);
+
+    $full_name = "ph:{$namespace}:{$local}";
     $lock = self::getLock($full_name);
     if (!$lock) {
       $lock = new PhabricatorGlobalLock($full_name);
       self::registerLock($lock);
+
+      $lock->parameters = $parameters;
     }
 
     return $lock;
