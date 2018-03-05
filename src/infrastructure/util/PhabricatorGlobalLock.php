@@ -31,6 +31,8 @@ final class PhabricatorGlobalLock extends PhutilLock {
   private $parameters;
   private $conn;
   private $isExternalConnection = false;
+  private $log;
+  private $disableLogging;
 
   private static $pool = array();
 
@@ -95,6 +97,11 @@ final class PhabricatorGlobalLock extends PhutilLock {
     return $this;
   }
 
+  public function setDisableLogging($disable) {
+    $this->disableLogging = $disable;
+    return $this;
+  }
+
 
 /* -(  Implementation  )----------------------------------------------------- */
 
@@ -143,6 +150,24 @@ final class PhabricatorGlobalLock extends PhutilLock {
     $conn->rememberLock($lock_name);
 
     $this->conn = $conn;
+
+    if ($this->shouldLogLock()) {
+      global $argv;
+
+      $lock_context = array(
+        'pid' => getmypid(),
+        'host' => php_uname('n'),
+        'argv' => $argv,
+      );
+
+      $log = id(new PhabricatorDaemonLockLog())
+        ->setLockName($lock_name)
+        ->setLockParameters($this->parameters)
+        ->setLockContext($lock_context)
+        ->save();
+
+      $this->log = $log;
+    }
   }
 
   protected function doUnlock() {
@@ -175,6 +200,32 @@ final class PhabricatorGlobalLock extends PhutilLock {
       $conn->close();
       self::$pool[] = $conn;
     }
+
+    if ($this->log) {
+      $log = $this->log;
+      $this->log = null;
+
+      $conn = $log->establishConnection('w');
+      queryfx(
+        $conn,
+        'UPDATE %T SET lockReleased = UNIX_TIMESTAMP() WHERE id = %d',
+        $log->getTableName(),
+        $log->getID());
+    }
+  }
+
+  private function shouldLogLock() {
+    if ($this->disableLogging) {
+      return false;
+    }
+
+    $policy = id(new PhabricatorDaemonLockLogGarbageCollector())
+      ->getRetentionPolicy();
+    if (!$policy) {
+      return false;
+    }
+
+    return true;
   }
 
 }
