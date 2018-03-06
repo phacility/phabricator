@@ -502,6 +502,7 @@ return array(
     'rsrc/js/core/behavior-phabricator-nav.js' => '836f966d',
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'acd29eee',
     'rsrc/js/core/behavior-read-only-warning.js' => 'ba158207',
+    'rsrc/js/core/behavior-redirect.js' => '0213259f',
     'rsrc/js/core/behavior-refresh-csrf.js' => 'ab2f381b',
     'rsrc/js/core/behavior-remarkup-preview.js' => '4b700e9e',
     'rsrc/js/core/behavior-reorder-applications.js' => '76b9fc3e',
@@ -686,6 +687,7 @@ return array(
     'javelin-behavior-project-create' => '065227cc',
     'javelin-behavior-quicksand-blacklist' => '7927a7d3',
     'javelin-behavior-read-only-warning' => 'ba158207',
+    'javelin-behavior-redirect' => '0213259f',
     'javelin-behavior-refresh-csrf' => 'ab2f381b',
     'javelin-behavior-releeph-preview-branch' => 'b2b4fbaf',
     'javelin-behavior-releeph-request-state-change' => 'a0b57eb8',
@@ -933,6 +935,10 @@ return array(
       'javelin-json',
       'javelin-dom',
       'phabricator-keyboard-shortcut',
+    ),
+    '0213259f' => array(
+      'javelin-behavior',
+      'javelin-uri',
     ),
     '04b2ae03' => array(
       'javelin-install',
