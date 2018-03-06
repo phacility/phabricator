@@ -75,7 +75,7 @@ foreach ($rows as $row) {
 
   if ($diff_id || $row['action'] == DifferentialAction::ACTION_UPDATE) {
     $xactions[] = array(
-      'type' => DifferentialTransaction::TYPE_UPDATE,
+      'type' => DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE,
       'old' => null,
       'new' => $diff_id,
     );

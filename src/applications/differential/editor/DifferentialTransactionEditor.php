@@ -33,7 +33,7 @@ final class DifferentialTransactionEditor
   }
 
   public function getDiffUpdateTransaction(array $xactions) {
-    $type_update = DifferentialTransaction::TYPE_UPDATE;
+    $type_update = DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE;
 
     foreach ($xactions as $xaction) {
       if ($xaction->getTransactionType() == $type_update) {
@@ -76,7 +76,6 @@ final class DifferentialTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_INLINESTATE;
 
     $types[] = DifferentialTransaction::TYPE_INLINE;
-    $types[] = DifferentialTransaction::TYPE_UPDATE;
 
     return $types;
   }
@@ -88,12 +87,6 @@ final class DifferentialTransactionEditor
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
         return null;
-      case DifferentialTransaction::TYPE_UPDATE:
-        if ($this->getIsNewObject()) {
-          return null;
-        } else {
-          return $object->getActiveDiff()->getPHID();
-        }
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -104,8 +97,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case DifferentialTransaction::TYPE_UPDATE:
-        return $xaction->getNewValue();
       case DifferentialTransaction::TYPE_INLINE:
         return null;
     }
@@ -119,29 +110,6 @@ final class DifferentialTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
-        return;
-      case DifferentialTransaction::TYPE_UPDATE:
-        if (!$this->getIsCloseByCommit()) {
-          if ($object->isNeedsRevision() ||
-              $object->isChangePlanned() ||
-              $object->isAbandoned()) {
-            $object->setModernRevisionStatus(
-              DifferentialRevisionStatus::NEEDS_REVIEW);
-          }
-        }
-
-        $diff = $this->requireDiff($xaction->getNewValue());
-
-        $this->updateRevisionLineCounts($object, $diff);
-
-        if ($this->repositoryPHIDOverride !== false) {
-          $object->setRepositoryPHID($this->repositoryPHIDOverride);
-        } else {
-          $object->setRepositoryPHID($diff->getRepositoryPHID());
-        }
-
-        $object->attachActiveDiff($diff);
-        $object->setActiveDiffPHID($diff->getPHID());
         return;
     }
 
@@ -196,7 +164,7 @@ final class DifferentialTransactionEditor
       // commit.
     } else {
       switch ($xaction->getTransactionType()) {
-        case DifferentialTransaction::TYPE_UPDATE:
+        case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
           $downgrade_rejects = true;
           if (!$is_sticky_accept) {
             // If "sticky accept" is disabled, also downgrade the accepts.
@@ -243,7 +211,7 @@ final class DifferentialTransactionEditor
 
     $is_commandeer = false;
     switch ($xaction->getTransactionType()) {
-      case DifferentialTransaction::TYPE_UPDATE:
+      case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
         if ($this->getIsCloseByCommit()) {
           // Don't bother with any of this if this update is a side effect of
           // commit detection.
@@ -293,7 +261,7 @@ final class DifferentialTransactionEditor
     if (!$this->didExpandInlineState) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_COMMENT:
-        case DifferentialTransaction::TYPE_UPDATE:
+        case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
         case DifferentialTransaction::TYPE_INLINE:
           $this->didExpandInlineState = true;
 
@@ -343,45 +311,6 @@ final class DifferentialTransactionEditor
         if ($reply && !$reply->getHasReplies()) {
           $reply->setHasReplies(1)->save();
         }
-        return;
-      case DifferentialTransaction::TYPE_UPDATE:
-        // Now that we're inside the transaction, do a final check.
-        $diff = $this->requireDiff($xaction->getNewValue());
-
-        // TODO: It would be slightly cleaner to just revalidate this
-        // transaction somehow using the same validation code, but that's
-        // not easy to do at the moment.
-
-        $revision_id = $diff->getRevisionID();
-        if ($revision_id && ($revision_id != $object->getID())) {
-          throw new Exception(
-            pht(
-              'Diff is already attached to another revision. You lost '.
-              'a race?'));
-        }
-
-        // TODO: This can race with diff updates, particularly those from
-        // Harbormaster. See discussion in T8650.
-        $diff->setRevisionID($object->getID());
-        $diff->save();
-
-        // If there are any outstanding buildables for this diff, tell
-        // Harbormaster that their containers need to be updated. This is
-        // common, because `arc` creates buildables so it can upload lint
-        // and unit results.
-
-        $buildables = id(new HarbormasterBuildableQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withManualBuildables(false)
-          ->withBuildablePHIDs(array($diff->getPHID()))
-          ->execute();
-        foreach ($buildables as $buildable) {
-          $buildable->sendMessage(
-            $this->getActor(),
-            HarbormasterMessageType::BUILDABLE_CONTAINER,
-            true);
-        }
-
         return;
     }
 
@@ -437,7 +366,7 @@ final class DifferentialTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case DifferentialTransaction::TYPE_UPDATE:
+        case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
           $diff = $this->requireDiff($xaction->getNewValue(), true);
 
           // Update these denormalized index tables when we attach a new
@@ -554,44 +483,6 @@ final class DifferentialTransactionEditor
     return $xactions;
   }
 
-
-  protected function validateTransaction(
-    PhabricatorLiskDAO $object,
-    $type,
-    array $xactions) {
-
-    $errors = parent::validateTransaction($object, $type, $xactions);
-
-    $config_self_accept_key = 'differential.allow-self-accept';
-    $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
-
-    foreach ($xactions as $xaction) {
-      switch ($type) {
-        case DifferentialTransaction::TYPE_UPDATE:
-          $diff = $this->loadDiff($xaction->getNewValue());
-          if (!$diff) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('The specified diff does not exist.'),
-              $xaction);
-          } else if (($diff->getRevisionID()) &&
-            ($diff->getRevisionID() != $object->getID())) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht(
-                'You can not update this revision to the specified diff, '.
-                'because the diff is already attached to another revision.'),
-              $xaction);
-          }
-          break;
-      }
-    }
-
-    return $errors;
-  }
-
   protected function sortTransactions(array $xactions) {
     $xactions = parent::sortTransactions($xactions);
 
@@ -674,7 +565,7 @@ final class DifferentialTransactionEditor
       $action = parent::getMailAction($object, $xactions);
 
       $strongest = $this->getStrongestAction($object, $xactions);
-      $type_update = DifferentialTransaction::TYPE_UPDATE;
+      $type_update = DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE;
       if ($strongest->getTransactionType() == $type_update) {
         $show_lines = true;
       }
@@ -772,7 +663,7 @@ final class DifferentialTransactionEditor
     $update_xaction = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case DifferentialTransaction::TYPE_UPDATE:
+        case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
           $update_xaction = $xaction;
           break;
       }
@@ -1053,7 +944,7 @@ final class DifferentialTransactionEditor
     return $query->executeOne();
   }
 
-  private function requireDiff($phid, $need_changesets = false) {
+  public function requireDiff($phid, $need_changesets = false) {
     $diff = $this->loadDiff($phid, $need_changesets);
     if (!$diff) {
       throw new Exception(pht('Diff "%s" does not exist!', $phid));
@@ -1274,7 +1165,7 @@ final class DifferentialTransactionEditor
     $has_update = false;
     $has_commit = false;
 
-    $type_update = DifferentialTransaction::TYPE_UPDATE;
+    $type_update = DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE;
     foreach ($xactions as $xaction) {
       if ($xaction->getTransactionType() != $type_update) {
         continue;
@@ -1719,27 +1610,6 @@ final class DifferentialTransactionEditor
     }
 
     return true;
-  }
-
-  private function updateRevisionLineCounts(
-    DifferentialRevision $revision,
-    DifferentialDiff $diff) {
-
-    $revision->setLineCount($diff->getLineCount());
-
-    $conn = $revision->establishConnection('r');
-
-    $row = queryfx_one(
-      $conn,
-      'SELECT SUM(addLines) A, SUM(delLines) D FROM %T
-        WHERE diffID = %d',
-      id(new DifferentialChangeset())->getTableName(),
-      $diff->getID());
-
-    if ($row) {
-      $revision->setAddedLineCount((int)$row['A']);
-      $revision->setRemovedLineCount((int)$row['D']);
-    }
   }
 
   private function requireReviewers(DifferentialRevision $revision) {
