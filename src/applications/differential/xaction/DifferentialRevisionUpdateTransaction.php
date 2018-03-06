@@ -182,4 +182,18 @@ final class DifferentialRevisionUpdateTransaction
     }
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'update';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    $commit_phids = $object->getMetadataValue('commitPHIDs', array());
+
+    return array(
+      'old' => $object->getOldValue(),
+      'new' => $object->getNewValue(),
+      'commitPHIDs' => $commit_phids,
+    );
+  }
+
 }
