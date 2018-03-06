@@ -490,7 +490,13 @@ abstract class HeraldAdapter extends Phobject {
           $result = @preg_match($condition_value.'S', $value);
           if ($result === false) {
             throw new HeraldInvalidConditionException(
-              pht('Regular expression is not valid!'));
+              pht(
+                'Regular expression "%s" in Herald rule "%s" is not valid, '.
+                'or exceeded backtracking or recursion limits while '.
+                'executing. Verify the expression and correct it or rewrite '.
+                'it with less backtracking.',
+                $condition_value,
+                $rule->getMonogram()));
           }
           if ($result) {
             return $result_if_match;
