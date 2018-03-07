@@ -279,7 +279,7 @@ final class PhabricatorOwnersDetailController
       $href = $repo->generateURI(
         array(
           'branch'   => $repo->getDefaultBranch(),
-          'path'     => $path->getPath(),
+          'path'     => $path->getPathDisplay(),
           'action'   => 'browse',
         ));
 
@@ -288,7 +288,7 @@ final class PhabricatorOwnersDetailController
         array(
           'href' => (string)$href,
         ),
-        $path->getPath());
+        $path->getPathDisplay());
 
       $rows[] = array(
         ($path->getExcluded() ? '-' : '+'),

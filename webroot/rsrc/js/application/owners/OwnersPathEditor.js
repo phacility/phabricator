@@ -115,7 +115,7 @@ JX.install('OwnersPathEditor', {
       JX.copy(
         path_input,
         {
-          value : path_ref.path || '',
+          value : path_ref.display || '',
           name : 'path[' + this._count + ']'
         });
 

@@ -49,6 +49,7 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
     return array(
       'repositoryPHID' => $this->getRepositoryPHID(),
       'path' => $this->getPath(),
+      'display' => $this->getPathDisplay(),
       'excluded' => (int)$this->getExcluded(),
     );
   }
