@@ -26,6 +26,9 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
           'columns' => array('packageID', 'repositoryPHID', 'pathIndex'),
           'unique' => true,
         ),
+        'key_repository' => array(
+          'columns' => array('repositoryPHID', 'pathIndex'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

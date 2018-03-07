@@ -218,15 +218,20 @@ final class PhabricatorOwnersPackage
     // and then merge results in PHP.
 
     $rows = array();
-    foreach (array_chunk(array_keys($fragments), 128) as $chunk) {
+    foreach (array_chunk(array_keys($fragments), 1024) as $chunk) {
+      $indexes = array();
+      foreach ($chunk as $fragment) {
+        $indexes[] = PhabricatorHash::digestForIndex($fragment);
+      }
+
       $rows[] = queryfx_all(
         $conn,
         'SELECT pkg.id, pkg.dominion, p.excluded, p.path
           FROM %T pkg JOIN %T p ON p.packageID = pkg.id
-          WHERE p.path IN (%Ls) AND pkg.status IN (%Ls) %Q',
+          WHERE p.pathIndex IN (%Ls) AND pkg.status IN (%Ls) %Q',
         $package->getTableName(),
         $path->getTableName(),
-        $chunk,
+        $indexes,
         array(
           self::STATUS_ACTIVE,
         ),
