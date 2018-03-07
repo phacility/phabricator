@@ -48,8 +48,9 @@ JX.behavior('lightbox-attachments', function() {
     }
 
     // If you click the "Download" link inside an embedded file element,
-    // don't lightbox the file.
-    if (e.getNode('tag:a')) {
+    // don't lightbox the file. But do lightbox when the user clicks an
+    // "<img />" inside an "<a />".
+    if (e.getNode('tag:a') && !e.getNode('tag:img')) {
       return;
     }
 
