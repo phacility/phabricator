@@ -33,8 +33,11 @@ final class PhabricatorOwnersPackage
 
   const AUTOREVIEW_NONE = 'none';
   const AUTOREVIEW_SUBSCRIBE = 'subscribe';
+  const AUTOREVIEW_SUBSCRIBE_ALWAYS = 'subscribe-always';
   const AUTOREVIEW_REVIEW = 'review';
+  const AUTOREVIEW_REVIEW_ALWAYS = 'review-always';
   const AUTOREVIEW_BLOCK = 'block';
+  const AUTOREVIEW_BLOCK_ALWAYS = 'block-always';
 
   const DOMINION_STRONG = 'strong';
   const DOMINION_WEAK = 'weak';
@@ -74,14 +77,26 @@ final class PhabricatorOwnersPackage
       self::AUTOREVIEW_NONE => array(
         'name' => pht('No Autoreview'),
       ),
-      self::AUTOREVIEW_SUBSCRIBE => array(
-        'name' => pht('Subscribe to Changes'),
-      ),
       self::AUTOREVIEW_REVIEW => array(
-        'name' => pht('Review Changes'),
+        'name' => pht('Review Changes With Non-Owner Author'),
+        'authority' => true,
       ),
       self::AUTOREVIEW_BLOCK => array(
-        'name' => pht('Review Changes (Blocking)'),
+        'name' => pht('Review Changes With Non-Owner Author (Blocking)'),
+        'authority' => true,
+      ),
+      self::AUTOREVIEW_SUBSCRIBE => array(
+        'name' => pht('Subscribe to Changes With Non-Owner Author'),
+        'authority' => true,
+      ),
+      self::AUTOREVIEW_REVIEW_ALWAYS => array(
+        'name' => pht('Review All Changes'),
+      ),
+      self::AUTOREVIEW_BLOCK_ALWAYS => array(
+        'name' => pht('Review All Changes (Blocking)'),
+      ),
+      self::AUTOREVIEW_SUBSCRIBE_ALWAYS => array(
+        'name' => pht('Subscribe to All Changes'),
       ),
     );
   }

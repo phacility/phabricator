@@ -982,25 +982,43 @@ final class DifferentialTransactionEditor
       return array();
     }
 
-    // Remove packages that the revision author is an owner of. If you own
-    // code, you don't need another owner to review it.
-    $authority = id(new PhabricatorOwnersPackageQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(mpull($packages, 'getPHID'))
-      ->withAuthorityPHIDs(array($object->getAuthorPHID()))
-      ->execute();
-    $authority = mpull($authority, null, 'getPHID');
+    // Identify the packages with "Non-Owner Author" review rules and remove
+    // them if the author has authority over the package.
 
-    foreach ($packages as $key => $package) {
-      $package_phid = $package->getPHID();
-      if (isset($authority[$package_phid])) {
-        unset($packages[$key]);
+    $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
+    $need_authority = array();
+    foreach ($packages as $package) {
+      $autoreview_setting = $package->getAutoReview();
+
+      $spec = idx($autoreview_map, $autoreview_setting);
+      if (!$spec) {
         continue;
+      }
+
+      if (idx($spec, 'authority')) {
+        $need_authority[$package->getPHID()] = $package->getPHID();
       }
     }
 
-    if (!$packages) {
-      return array();
+    if ($need_authority) {
+      $authority = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($need_authority)
+        ->withAuthorityPHIDs(array($object->getAuthorPHID()))
+        ->execute();
+      $authority = mpull($authority, null, 'getPHID');
+
+      foreach ($packages as $key => $package) {
+        $package_phid = $package->getPHID();
+        if (isset($authority[$package_phid])) {
+          unset($packages[$key]);
+          continue;
+        }
+      }
+
+      if (!$packages) {
+        return array();
+      }
     }
 
     $auto_subscribe = array();
@@ -1009,14 +1027,17 @@ final class DifferentialTransactionEditor
 
     foreach ($packages as $package) {
       switch ($package->getAutoReview()) {
-        case PhabricatorOwnersPackage::AUTOREVIEW_SUBSCRIBE:
-          $auto_subscribe[] = $package;
-          break;
         case PhabricatorOwnersPackage::AUTOREVIEW_REVIEW:
+        case PhabricatorOwnersPackage::AUTOREVIEW_REVIEW_ALWAYS:
           $auto_review[] = $package;
           break;
         case PhabricatorOwnersPackage::AUTOREVIEW_BLOCK:
+        case PhabricatorOwnersPackage::AUTOREVIEW_BLOCK_ALWAYS:
           $auto_block[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_SUBSCRIBE:
+        case PhabricatorOwnersPackage::AUTOREVIEW_SUBSCRIBE_ALWAYS:
+          $auto_subscribe[] = $package;
           break;
         case PhabricatorOwnersPackage::AUTOREVIEW_NONE:
         default:
