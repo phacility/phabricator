@@ -20,8 +20,9 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
         'excluded' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'packageID' => array(
-          'columns' => array('packageID'),
+        'key_path' => array(
+          'columns' => array('packageID', 'repositoryPHID', 'pathIndex'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
