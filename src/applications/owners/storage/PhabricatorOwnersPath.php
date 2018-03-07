@@ -6,6 +6,7 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
   protected $repositoryPHID;
   protected $pathIndex;
   protected $path;
+  protected $pathDisplay;
   protected $excluded;
 
   private $fragments;
@@ -15,7 +16,8 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'path' => 'text255',
+        'path' => 'text',
+        'pathDisplay' => 'text',
         'pathIndex' => 'bytes12',
         'excluded' => 'bool',
       ),
@@ -36,6 +38,7 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
 
     $path->pathIndex = PhabricatorHash::digestForIndex($raw_path);
     $path->path = $raw_path;
+    $path->pathDisplay = $raw_path;
 
     $path->excluded = $ref['excluded'];
 
