@@ -193,7 +193,6 @@ final class PhabricatorOAuthServerAuthController
 
         return $this->newDialog()
           ->setTitle(pht('Authenticate: %s', $name))
-          ->setRedirect(true)
           ->appendParagraph(
             pht(
               'Authorization for "%s" confirmed, redirecting...',
