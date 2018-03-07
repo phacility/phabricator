@@ -40,22 +40,6 @@ final class ManiphestTransaction
     return parent::shouldGenerateOldValue();
   }
 
-  public function shouldHideForFeed() {
-    // NOTE: Modular transactions don't currently support this, and it has
-    // very few callsites, and it's publish-time rather than display-time.
-    // This should probably become a supported, display-time behavior. For
-    // discussion, see T12787.
-
-    // Hide "alice created X, a task blocking Y." from feed because it
-    // will almost always appear adjacent to "alice created Y".
-    $is_new = $this->getMetadataValue('blocker.new');
-    if ($is_new) {
-      return true;
-    }
-
-    return parent::shouldHideForFeed();
-  }
-
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 
