@@ -4,6 +4,7 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
 
   protected $packageID;
   protected $repositoryPHID;
+  protected $pathIndex;
   protected $path;
   protected $excluded;
 
@@ -15,6 +16,7 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
         'path' => 'text255',
+        'pathIndex' => 'bytes12',
         'excluded' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -25,12 +27,17 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
     ) + parent::getConfiguration();
   }
 
-
   public static function newFromRef(array $ref) {
     $path = new PhabricatorOwnersPath();
     $path->repositoryPHID = $ref['repositoryPHID'];
-    $path->path = $ref['path'];
+
+    $raw_path = $ref['path'];
+
+    $path->pathIndex = PhabricatorHash::digestForIndex($raw_path);
+    $path->path = $raw_path;
+
     $path->excluded = $ref['excluded'];
+
     return $path;
   }
 
