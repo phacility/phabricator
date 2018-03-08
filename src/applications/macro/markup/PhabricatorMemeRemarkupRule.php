@@ -29,10 +29,14 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
     $parser = new PhutilSimpleOptions();
     $options = $parser->parse($matches[1]) + $options;
 
-    $uri = id(new PhutilURI('/macro/meme/'))
-      ->alter('macro', $options['src'])
-      ->alter('uppertext', $options['above'])
-      ->alter('lowertext', $options['below']);
+    $engine = id(new PhabricatorMemeEngine())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setTemplate($options['src'])
+      ->setAboveText($options['above'])
+      ->setBelowText($options['below']);
+
+    $asset = $engine->loadCachedFile();
+    $uri = $engine->getGenerateURI();
 
     if ($this->getEngine()->isHTMLMailMode()) {
       $uri = PhabricatorEnv::getProductionURI($uri);
@@ -50,10 +54,20 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
         $options['above'],
         $options['below']);
 
-      $img = id(new PHUIRemarkupImageView())
-        ->setURI($uri)
-        ->addClass('phabricator-remarkup-macro')
-        ->setAlt($alt_text);
+      if ($asset) {
+        $img = $this->newTag(
+          'img',
+          array(
+            'src' => $asset->getViewURI(),
+            'class' => 'phabricator-remarkup-macro',
+            'alt' => $alt_text,
+          ));
+      } else {
+        $img = id(new PHUIRemarkupImageView())
+          ->setURI($uri)
+          ->addClass('phabricator-remarkup-macro')
+          ->setAlt($alt_text);
+      }
     }
 
     return $this->getEngine()->storeText($img);
