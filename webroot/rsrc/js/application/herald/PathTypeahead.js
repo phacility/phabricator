@@ -17,12 +17,7 @@ JX.install('PathTypeahead', {
     this._completeURI = config.completeURI;
     this._validateURI = config.validateURI;
     this._errorDisplay = config.error_display;
-
-    /*
-     * Default values to preload the typeahead with, for extremely common
-     * cases.
-     */
-    this._textInputValues = config.repositoryDefaultPaths;
+    this._textInputValues = {};
 
     this._initializeDatasource();
     this._initializeTypeahead(this._input);

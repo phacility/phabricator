@@ -74,15 +74,6 @@ final class PhabricatorOwnersPathsController
       ->setViewer($viewer)
       ->execute();
 
-    $default_paths = array();
-    foreach ($repos as $repo) {
-      $default_path = $repo->getDetail('default-owners-path');
-      if ($default_path) {
-        $default_paths[$repo->getPHID()] = $default_path;
-      }
-    }
-
-
     $repo_map = array();
     foreach ($repos as $key => $repo) {
       $monogram = $repo->getMonogram();
@@ -106,8 +97,6 @@ final class PhabricatorOwnersPathsController
 
         'completeURI'         => '/diffusion/services/path/complete/',
         'validateURI'         => '/diffusion/services/path/validate/',
-
-        'repositoryDefaultPaths' => $default_paths,
       ));
 
     require_celerity_resource('owners-path-editor-css');

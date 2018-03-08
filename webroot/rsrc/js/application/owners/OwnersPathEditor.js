@@ -28,7 +28,6 @@ JX.install('OwnersPathEditor', {
 
     this._completeURI = config.completeURI;
     this._validateURI = config.validateURI;
-    this._repositoryDefaultPaths = config.repositoryDefaultPaths;
 
     this._initializePaths(config.pathRefs);
   },
@@ -66,8 +65,6 @@ JX.install('OwnersPathEditor', {
      * default for future rows.
      */
     _lastRepositoryChoice : null,
-
-    _repositoryDefaultPaths : null,
 
     /*
      * Initialize with 0 or more rows.
@@ -144,13 +141,13 @@ JX.install('OwnersPathEditor', {
         [exclude_cell, repo_cell, typeahead_cell, error_display_cell]);
 
       new JX.PathTypeahead({
-        repositoryDefaultPaths : this._repositoryDefaultPaths,
         repo_select : repo_select,
         path_input : path_input,
         hardpoint : hardpoint,
         error_display : error_display,
         completeURI : this._completeURI,
-        validateURI : this._validateURI}).start();
+        validateURI : this._validateURI
+      }).start();
 
       this._count++;
       return row;
