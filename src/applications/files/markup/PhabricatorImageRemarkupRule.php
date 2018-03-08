@@ -94,17 +94,69 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
       return;
     }
 
+    // Look for images we've already successfully fetched that aren't about
+    // to get eaten by the GC. For any we find, we can just emit a normal
+    // "<img />" tag pointing directly to the file.
+
+    // For files which we don't hit in the cache, we emit a placeholder
+    // instead and use AJAX to actually perform the fetch.
+
+    $digests = array();
+    foreach ($images as $image) {
+      $uri = $image['args']['uri'];
+      $digests[] = PhabricatorHash::digestForIndex($uri);
+    }
+
+    $caches = id(new PhabricatorFileExternalRequest())->loadAllWhere(
+      'uriIndex IN (%Ls) AND isSuccessful = 1 AND ttl > %d',
+      $digests,
+      PhabricatorTime::getNow() + phutil_units('1 hour in seconds'));
+
+    $file_phids = array();
+    foreach ($caches as $cache) {
+      $file_phids[$cache->getFilePHID()] = $cache->getURI();
+    }
+
+    $file_map = array();
+    if ($file_phids) {
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs(array_keys($file_phids))
+        ->execute();
+      foreach ($files as $file) {
+        $phid = $file->getPHID();
+
+        $file_remote_uri = $file_phids[$phid];
+        $file_view_uri = $file->getViewURI();
+
+        $file_map[$file_remote_uri] = $file_view_uri;
+      }
+    }
+
     foreach ($images as $image) {
       $args = $image['args'];
+      $uri = $args['uri'];
 
-      $src_uri = id(new PhutilURI('/file/imageproxy/'))
-        ->setQueryParam('uri', $args['uri']);
+      $direct_uri = idx($file_map, $uri);
+      if ($direct_uri) {
+        $img = phutil_tag(
+          'img',
+          array(
+            'src' => $direct_uri,
+            'alt' => $args['alt'],
+            'width' => $args['width'],
+            'height' => $args['height'],
+          ));
+      } else {
+        $src_uri = id(new PhutilURI('/file/imageproxy/'))
+          ->setQueryParam('uri', $uri);
 
-      $img = id(new PHUIRemarkupImageView())
-        ->setURI($src_uri)
-        ->setAlt($args['alt'])
-        ->setWidth($args['width'])
-        ->setHeight($args['height']);
+        $img = id(new PHUIRemarkupImageView())
+          ->setURI($src_uri)
+          ->setAlt($args['alt'])
+          ->setWidth($args['width'])
+          ->setHeight($args['height']);
+      }
 
       $engine->overwriteStoredText($image['token'], $img);
     }
