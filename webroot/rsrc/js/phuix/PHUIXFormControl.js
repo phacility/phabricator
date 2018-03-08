@@ -15,6 +15,7 @@ JX.install('PHUIXFormControl', {
     _valueSetCallback: null,
     _valueGetCallback: null,
     _rawInputNode: null,
+    _tokenizer: null,
 
     setLabel: function(label) {
       JX.DOM.setContent(this._getLabelNode(), label);
@@ -70,6 +71,7 @@ JX.install('PHUIXFormControl', {
       this._valueGetCallback = input.get;
       this._valueSetCallback = input.set;
       this._rawInputNode = input.node;
+      this._tokenizer = input.tokenizer || null;
 
       return this;
     },
@@ -85,6 +87,10 @@ JX.install('PHUIXFormControl', {
 
     getRawInputNode: function() {
       return this._rawInputNode;
+    },
+
+    getTokenizer: function() {
+      return this._tokenizer;
     },
 
     getNode: function() {
@@ -168,7 +174,8 @@ JX.install('PHUIXFormControl', {
       return {
         node: build.node,
         get: get_value,
-        set: set_value
+        set: set_value,
+        tokenizer: build.tokenizer
       };
     },
 

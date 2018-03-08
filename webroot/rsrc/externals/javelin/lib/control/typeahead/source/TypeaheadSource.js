@@ -9,8 +9,7 @@
 
 JX.install('TypeaheadSource', {
   construct : function() {
-    this._raw = {};
-    this._lookup = {};
+    this.resetResults();
     this.setNormalizer(JX.TypeaheadNormalizer.normalize);
     this._excludeIDs = {};
   },
@@ -359,6 +358,12 @@ JX.install('TypeaheadSource', {
       }
       return str.split(/\s+/g);
     },
+
+    resetResults: function() {
+      this._raw = {};
+      this._lookup = {};
+    },
+
     _defaultTransformer : function(object) {
       return {
         name : object[0],
