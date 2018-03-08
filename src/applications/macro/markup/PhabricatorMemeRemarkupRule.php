@@ -50,13 +50,10 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
         $options['above'],
         $options['below']);
 
-      $img = $this->newTag(
-        'img',
-        array(
-          'src' => $uri,
-          'alt' => $alt_text,
-          'class' => 'phabricator-remarkup-macro',
-        ));
+      $img = id(new PHUIRemarkupImageView())
+        ->setURI($uri)
+        ->addClass('phabricator-remarkup-macro')
+        ->setAlt($alt_text);
     }
 
     return $this->getEngine()->storeText($img);

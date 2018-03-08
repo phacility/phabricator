@@ -7,6 +7,7 @@ final class PHUIRemarkupImageView
   private $width;
   private $height;
   private $alt;
+  private $classes = array();
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -44,6 +45,11 @@ final class PHUIRemarkupImageView
     return $this->alt;
   }
 
+  public function addClass($class) {
+    $this->classes[] = $class;
+    return $this;
+  }
+
   public function render() {
     $id = celerity_generate_unique_node_id();
 
@@ -54,6 +60,11 @@ final class PHUIRemarkupImageView
         'imageID' => $id,
       ));
 
+    $classes = null;
+    if ($this->classes) {
+      $classes = implode(' ', $this->classes);
+    }
+
     return phutil_tag(
       'img',
       array(
@@ -61,6 +72,7 @@ final class PHUIRemarkupImageView
         'width' => $this->getWidth(),
         'height' => $this->getHeight(),
         'alt' => $this->getAlt(),
+        'class' => $classes,
       ));
   }
 
