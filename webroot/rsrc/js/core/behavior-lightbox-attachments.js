@@ -56,6 +56,10 @@ JX.behavior('lightbox-attachments', function() {
 
     e.kill();
 
+    activateLightbox(e.getNode('lightboxable'));
+  }
+
+  function activateLightbox(target) {
     var mainFrame = JX.$('main-page-frame');
     var links = JX.DOM.scry(mainFrame, '*', 'lightboxable');
     var phids = {};
@@ -68,7 +72,6 @@ JX.behavior('lightbox-attachments', function() {
     // Now that we have the big picture phid situation sorted out, figure
     // out how the actual node the user clicks fits into that big picture
     // and build some pretty UI to show the attachment.
-    var target      = e.getNode('lightboxable');
     var target_data = JX.Stratcom.getData(target);
     var total       = JX.keys(phids).length;
     var current     = 1;
@@ -324,7 +327,8 @@ JX.behavior('lightbox-attachments', function() {
     }
     e.prevent();
     closeLightBox(e);
-    el.click();
+
+    activateLightbox(el);
   }
 
   // Only look for lightboxable inside the main page, not other lightboxes.
