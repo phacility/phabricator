@@ -8,6 +8,7 @@ final class PhabricatorMemeEngine extends Phobject {
   private $belowText;
 
   private $templateFile;
+  private $metrics;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -68,11 +69,7 @@ final class PhabricatorMemeEngine extends Phobject {
 
     $hash = $this->newTransformHash();
 
-    $transformer = new PhabricatorImageTransformer();
-    $asset = $transformer->executeMemeTransform(
-      $template,
-      $this->getAboveText(),
-      $this->getBelowText());
+    $asset = $this->newAssetFile($template);
 
     $xfile = id(new PhabricatorTransformedFile())
       ->setOriginalPHID($template->getPHID())
@@ -159,5 +156,226 @@ final class PhabricatorMemeEngine extends Phobject {
 
     return $this->templateFile;
   }
+
+  private function newAssetFile(PhabricatorFile $template) {
+    $data = $this->newAssetData($template);
+    return PhabricatorFile::newFromFileData(
+      $data,
+      array(
+        'name' => 'meme-'.$template->getName(),
+        'ttl.relative' => phutil_units('24 hours in seconds'),
+        'canCDN' => true,
+      ));
+  }
+
+  private function newAssetData(PhabricatorFile $template) {
+    $template_data = $template->loadFileData();
+
+    $result = $this->newImagemagickAsset($template, $template_data);
+    if ($result) {
+      return $result;
+    }
+
+    return $this->newGDAsset($template, $template_data);
+  }
+
+  private function newImagemagickAsset(
+    PhabricatorFile $template,
+    $template_data) {
+
+    // We're only going to use Imagemagick on GIFs.
+    $mime_type = $template->getMimeType();
+    if ($mime_type != 'image/gif') {
+      return null;
+    }
+
+    // We're only going to use Imagemagick if it is actually available.
+    $available = PhabricatorEnv::getEnvConfig('files.enable-imagemagick');
+    if (!$available) {
+      return null;
+    }
+
+    // Test of the GIF is an animated GIF. If it's a flat GIF, we'll fall
+    // back to GD.
+    $input = new TempFile();
+    Filesystem::writeFile($input, $template_data);
+    list($err, $out) = exec_manual('convert %s info:', $input);
+    if ($err) {
+      return null;
+    }
+
+    $split = phutil_split_lines($out);
+    $frames = count($split);
+    if ($frames <= 1) {
+      return null;
+    }
+
+    // Split the frames apart, transform each frame, then merge them back
+    // together.
+    $output = new TempFile();
+
+    $future = new ExecFuture(
+      'convert %s -coalesce +adjoin %s_%s',
+      $input,
+      $input,
+      '%09d');
+    $future->setTimeout(10)->resolvex();
+
+    $output_files = array();
+    for ($ii = 0; $ii < $frames; $ii++) {
+      $frame_name = sprintf('%s_%09d', $input, $ii);
+      $output_name = sprintf('%s_%09d', $output, $ii);
+
+      $output_files[] = $output_name;
+
+      $frame_data = Filesystem::readFile($frame_name);
+      $memed_frame_data = $this->newGDAsset($template, $frame_data);
+      Filesystem::writeFile($output_name, $memed_frame_data);
+    }
+
+    $future = new ExecFuture('convert -loop 0 %Ls %s', $output_files, $output);
+    $future->setTimeout(10)->resolvex();
+
+    return Filesystem::readFile($output);
+  }
+
+  private function newGDAsset(PhabricatorFile $template, $data) {
+    $img = imagecreatefromstring($data);
+    if (!$img) {
+      throw new Exception(
+        pht('Failed to imagecreatefromstring() image template data.'));
+    }
+
+    $dx = imagesx($img);
+    $dy = imagesy($img);
+
+    $metrics = $this->getMetrics($dx, $dy);
+    $font = $this->getFont();
+    $size = $metrics['size'];
+
+    $above = $this->getAboveText();
+    if (strlen($above)) {
+      $x = (int)floor(($dx - $metrics['text']['above']['width']) / 2);
+      $y = $metrics['text']['above']['height'] + 12;
+
+      $this->drawText($img, $font, $metrics['size'], $x, $y, $above);
+    }
+
+    $below = $this->getBelowText();
+    if (strlen($below)) {
+      $x = (int)floor(($dx - $metrics['text']['below']['width']) / 2);
+      $y = $dy - 12 - $metrics['text']['below']['descend'];
+
+      $this->drawText($img, $font, $metrics['size'], $x, $y, $below);
+    }
+
+    return PhabricatorImageTransformer::saveImageDataInAnyFormat(
+      $img,
+      $template->getMimeType());
+  }
+
+  private function getFont() {
+    $phabricator_root = dirname(phutil_get_library_root('phabricator'));
+
+    $font_root = $phabricator_root.'/resources/font/';
+    if (Filesystem::pathExists($font_root.'impact.ttf')) {
+      $font_path = $font_root.'impact.ttf';
+    } else {
+      $font_path = $font_root.'tuffy.ttf';
+    }
+
+    return $font_path;
+  }
+
+  private function getMetrics($dim_x, $dim_y) {
+    if ($this->metrics === null) {
+      $font = $this->getFont();
+
+      $font_max = 72;
+      $font_min = 5;
+
+      $last = null;
+      $cursor = floor(($font_max + $font_min) / 2);
+      $min = $font_min;
+      $max = $font_max;
+
+      $texts = array(
+        'above' => $this->getAboveText(),
+        'below' => $this->getBelowText(),
+      );
+
+      $metrics = null;
+      $best = null;
+      while (true) {
+        $all_fit = true;
+        $text_metrics = array();
+        foreach ($texts as $key => $text) {
+          $box = imagettfbbox($cursor, 0, $font, $text);
+          $height = abs($box[3] - $box[5]);
+          $width = abs($box[0] - $box[2]);
+
+          // This is the number of pixels below the baseline that the
+          // text extends, for example if it has a "y".
+          $descend = $box[3];
+
+          if ($height > $dim_y) {
+            $all_fit = false;
+            break;
+          }
+
+          if ($width > $dim_x) {
+            $all_fit = false;
+            break;
+          }
+
+          $text_metrics[$key]['width'] = $width;
+          $text_metrics[$key]['height'] = $height;
+          $text_metrics[$key]['descend'] = $descend;
+        }
+
+        if ($all_fit || $best === null) {
+          $best = $cursor;
+          $metrics = $text_metrics;
+        }
+
+        if ($all_fit) {
+          $min = $cursor;
+        } else {
+          $max = $cursor;
+        }
+
+        $last = $cursor;
+        $cursor = floor(($max + $min) / 2);
+        if ($cursor === $last) {
+          break;
+        }
+      }
+
+      $this->metrics = array(
+        'size' => $best,
+        'text' => $metrics,
+      );
+    }
+
+    return $this->metrics;
+  }
+
+  private function drawText($img, $font, $size, $x, $y, $text) {
+    $text_color = imagecolorallocate($img, 255, 255, 255);
+    $border_color = imagecolorallocate($img, 0, 0, 0);
+
+    $border = 2;
+    for ($xx = ($x - $border); $xx <= ($x + $border); $xx += $border) {
+      for ($yy = ($y - $border); $yy <= ($y + $border); $yy += $border) {
+        if (($xx === $x) && ($yy === $y)) {
+          continue;
+        }
+        imagettftext($img, $size, 0, $xx, $yy, $border_color, $font, $text);
+      }
+    }
+
+    imagettftext($img, $size, 0, $x, $y, $text_color, $font, $text);
+  }
+
 
 }
