@@ -36,38 +36,65 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
       ->setBelowText($options['below']);
 
     $asset = $engine->loadCachedFile();
-    $uri = $engine->getGenerateURI();
 
-    if ($this->getEngine()->isHTMLMailMode()) {
-      $uri = PhabricatorEnv::getProductionURI($uri);
+    $is_html_mail = $this->getEngine()->isHTMLMailMode();
+    $is_text = $this->getEngine()->isTextMode();
+    $must_inline = ($is_html_mail || $is_text);
+
+    if ($must_inline) {
+      if (!$asset) {
+        try {
+          $asset = $engine->newAsset();
+        } catch (Exception $ex) {
+          return $matches[0];
+        }
+      }
     }
 
-    if ($this->getEngine()->isTextMode()) {
-      $img =
-        ($options['above'] != '' ? "\"{$options['above']}\"\n" : '').
-        $options['src'].' <'.PhabricatorEnv::getProductionURI($uri).'>'.
-        ($options['below'] != '' ? "\n\"{$options['below']}\"" : '');
+    if ($asset) {
+      $uri = $asset->getViewURI();
     } else {
-      $alt_text = pht(
-        'Macro %s: %s %s',
-        $options['src'],
-        $options['above'],
-        $options['below']);
+      $uri = $engine->getGenerateURI();
+    }
 
-      if ($asset) {
-        $img = $this->newTag(
-          'img',
-          array(
-            'src' => $asset->getViewURI(),
-            'class' => 'phabricator-remarkup-macro',
-            'alt' => $alt_text,
-          ));
-      } else {
-        $img = id(new PHUIRemarkupImageView())
-          ->setURI($uri)
-          ->addClass('phabricator-remarkup-macro')
-          ->setAlt($alt_text);
+    if ($is_text) {
+      $parts = array();
+
+      $above = $options['above'];
+      if (strlen($above)) {
+        $parts[] = pht('"%s"', $above);
       }
+
+      $parts[] = $options['src'].' <'.$uri.'>';
+
+      $below = $options['below'];
+      if (strlen($below)) {
+        $parts[] = pht('"%s"', $below);
+      }
+
+      $parts = implode("\n", $parts);
+      return $this->getEngine()->storeText($parts);
+    }
+
+    $alt_text = pht(
+      'Macro %s: %s %s',
+      $options['src'],
+      $options['above'],
+      $options['below']);
+
+    if ($asset) {
+      $img = $this->newTag(
+        'img',
+        array(
+          'src' => $uri,
+          'class' => 'phabricator-remarkup-macro',
+          'alt' => $alt_text,
+        ));
+    } else {
+      $img = id(new PHUIRemarkupImageView())
+        ->setURI($uri)
+        ->addClass('phabricator-remarkup-macro')
+        ->setAlt($alt_text);
     }
 
     return $this->getEngine()->storeText($img);

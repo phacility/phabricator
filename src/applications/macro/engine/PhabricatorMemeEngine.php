@@ -163,8 +163,11 @@ final class PhabricatorMemeEngine extends Phobject {
       $data,
       array(
         'name' => 'meme-'.$template->getName(),
-        'ttl.relative' => phutil_units('24 hours in seconds'),
         'canCDN' => true,
+
+        // In modern code these can end up linked directly in email, so let
+        // them stick around for a while.
+        'ttl.relative' => phutil_units('30 days in seconds'),
       ));
   }
 
