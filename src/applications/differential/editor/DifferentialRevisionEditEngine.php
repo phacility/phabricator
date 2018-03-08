@@ -71,6 +71,14 @@ final class DifferentialRevisionEditEngine
     return pht('Revision');
   }
 
+  protected function getCommentViewButtonText($object) {
+    if ($object->isDraft()) {
+      return pht('Submit Quietly');
+    }
+
+    return parent::getCommentViewButtonText();
+  }
+
   protected function getObjectViewURI($object) {
     return $object->getURI();
   }
