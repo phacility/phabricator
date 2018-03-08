@@ -8,15 +8,6 @@ final class PhabricatorFileImageProxyController
   }
 
   public function handleRequest(AphrontRequest $request) {
-
-    $show_prototypes = PhabricatorEnv::getEnvConfig(
-      'phabricator.show-prototypes');
-    if (!$show_prototypes) {
-      throw new Exception(
-        pht('Show prototypes is disabled.
-          Set `phabricator.show-prototypes` to `true` to use the image proxy'));
-    }
-
     $viewer = $request->getViewer();
     $img_uri = $request->getStr('uri');
 
@@ -24,9 +15,16 @@ final class PhabricatorFileImageProxyController
     PhabricatorEnv::requireValidRemoteURIForLink($img_uri);
     $uri = new PhutilURI($img_uri);
     $proto = $uri->getProtocol();
-    if (!in_array($proto, array('http', 'https'))) {
+
+    $allowed_protocols = array(
+      'http',
+      'https',
+    );
+    if (!in_array($proto, $allowed_protocols)) {
       throw new Exception(
-        pht('The provided image URI must be either http or https'));
+        pht(
+          'The provided image URI must use one of these protocols: %s.',
+          implode(', ', $allowed_protocols)));
     }
 
     // Check if we already have the specified image URI downloaded
@@ -43,9 +41,9 @@ final class PhabricatorFileImageProxyController
       ->setURI($img_uri)
       ->setTTL($ttl);
 
+    // Cache missed, so we'll need to validate and download the image.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     $save_request = false;
-    // Cache missed so we'll need to validate and download the image
     try {
       // Rate limit outbound fetches to make this mechanism less useful for
       // scanning networks and ports.
@@ -60,6 +58,7 @@ final class PhabricatorFileImageProxyController
           'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
           'canCDN' => true,
         ));
+
       if (!$file->isViewableImage()) {
         $mime_type = $file->getMimeType();
         $engine = new PhabricatorDestructionEngine();
@@ -67,14 +66,14 @@ final class PhabricatorFileImageProxyController
         $file = null;
         throw new Exception(
           pht(
-            'The URI "%s" does not correspond to a valid image file, got '.
-            'a file with MIME type "%s". You must specify the URI of a '.
+            'The URI "%s" does not correspond to a valid image file (got '.
+            'a file with MIME type "%s"). You must specify the URI of a '.
             'valid image file.',
             $uri,
             $mime_type));
-      } else {
-        $file->save();
       }
+
+      $file->save();
 
       $external_request
         ->setIsSuccessful(1)
@@ -84,8 +83,7 @@ final class PhabricatorFileImageProxyController
     } catch (HTTPFutureHTTPResponseStatus $status) {
       $external_request
         ->setIsSuccessful(0)
-        ->setResponseMessage($status->getMessage())
-        ->save();
+        ->setResponseMessage($status->getMessage());
 
       $save_request = true;
     } catch (Exception $ex) {
