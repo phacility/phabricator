@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => 'e68cf1fa',
     'conpherence.pkg.js' => '15191c65',
-    'core.pkg.css' => '2fa91e14',
+    'core.pkg.css' => 'c218ed53',
     'core.pkg.js' => '32bb68e9',
     'darkconsole.pkg.js' => '1f9a31bc',
     'differential.pkg.css' => '113e692c',
@@ -114,7 +114,7 @@ return array(
     'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => '62fa3ace',
-    'rsrc/css/core/remarkup.css' => 'cad18339',
+    'rsrc/css/core/remarkup.css' => '97dc3523',
     'rsrc/css/core/syntax.css' => 'cae95e89',
     'rsrc/css/core/z-index.css' => '9d8f7c4b',
     'rsrc/css/diviner/diviner-shared.css' => '896f1d43',
@@ -504,6 +504,7 @@ return array(
     'rsrc/js/core/behavior-read-only-warning.js' => 'ba158207',
     'rsrc/js/core/behavior-redirect.js' => '0213259f',
     'rsrc/js/core/behavior-refresh-csrf.js' => 'ab2f381b',
+    'rsrc/js/core/behavior-remarkup-load-image.js' => '040fce04',
     'rsrc/js/core/behavior-remarkup-preview.js' => '4b700e9e',
     'rsrc/js/core/behavior-reorder-applications.js' => '76b9fc3e',
     'rsrc/js/core/behavior-reveal-content.js' => '60821bc7',
@@ -692,6 +693,7 @@ return array(
     'javelin-behavior-releeph-preview-branch' => 'b2b4fbaf',
     'javelin-behavior-releeph-request-state-change' => 'a0b57eb8',
     'javelin-behavior-releeph-request-typeahead' => 'de2e896f',
+    'javelin-behavior-remarkup-load-image' => '040fce04',
     'javelin-behavior-remarkup-preview' => '4b700e9e',
     'javelin-behavior-reorder-applications' => '76b9fc3e',
     'javelin-behavior-reorder-columns' => 'e1d25dfb',
@@ -800,7 +802,7 @@ return array(
     'phabricator-object-selector-css' => '85ee8ce6',
     'phabricator-phtize' => 'd254d646',
     'phabricator-prefab' => '77b0ae28',
-    'phabricator-remarkup-css' => 'cad18339',
+    'phabricator-remarkup-css' => '97dc3523',
     'phabricator-search-results-css' => '505dd8cf',
     'phabricator-shaped-request' => '7cbe244b',
     'phabricator-slowvote-css' => 'a94b7230',
@@ -939,6 +941,10 @@ return array(
     '0213259f' => array(
       'javelin-behavior',
       'javelin-uri',
+    ),
+    '040fce04' => array(
+      'javelin-behavior',
+      'javelin-request',
     ),
     '04b2ae03' => array(
       'javelin-install',

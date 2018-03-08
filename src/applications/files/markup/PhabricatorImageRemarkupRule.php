@@ -100,14 +100,11 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
       $src_uri = id(new PhutilURI('/file/imageproxy/'))
         ->setQueryParam('uri', $args['uri']);
 
-      $img = $this->newTag(
-        'img',
-        array(
-          'src' => $src_uri,
-          'alt' => $args['alt'],
-          'width' => $args['width'],
-          'height' => $args['height'],
-        ));
+      $img = id(new PHUIRemarkupImageView())
+        ->setURI($src_uri)
+        ->setAlt($args['alt'])
+        ->setWidth($args['width'])
+        ->setHeight($args['height']);
 
       $engine->overwriteStoredText($image['token'], $img);
     }
