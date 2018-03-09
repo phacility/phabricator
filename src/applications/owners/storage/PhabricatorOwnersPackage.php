@@ -609,8 +609,8 @@ final class PhabricatorOwnersPackage
         ->setDescription(pht('Auto audit information.')),
       id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('dominion')
-        ->setType('string')
-        ->setDescription(pht('Dominion setting.')),
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Dominion setting information.')),
     );
   }
 
@@ -648,6 +648,22 @@ final class PhabricatorOwnersPackage
       'label' => $audit_label,
     );
 
+    $dominion_value = $this->getDominion();
+    $dominion_map = self::getDominionOptionsMap();
+    if (isset($dominion_map[$dominion_value])) {
+      $dominion_label = $dominion_map[$dominion_value]['name'];
+      $dominion_short = $dominion_map[$dominion_value]['short'];
+    } else {
+      $dominion_label = pht('Unknown ("%s")', $dominion_value);
+      $dominion_short = pht('Unknown ("%s")', $dominion_value);
+    }
+
+    $dominion = array(
+      'value' => $dominion_value,
+      'label' => $dominion_label,
+      'short' => $dominion_short,
+    );
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
@@ -655,7 +671,7 @@ final class PhabricatorOwnersPackage
       'owners' => $owner_list,
       'review' => $review,
       'audit' => $audit,
-      'dominion' => $this->getDominion(),
+      'dominion' => $dominion,
     );
   }
 
