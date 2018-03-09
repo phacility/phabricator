@@ -16,7 +16,6 @@ final class PhabricatorOwnersPackage
   protected $auditingEnabled;
   protected $autoReview;
   protected $description;
-  protected $primaryOwnerPHID;
   protected $mailKey;
   protected $status;
   protected $viewPolicy;
@@ -122,7 +121,6 @@ final class PhabricatorOwnersPackage
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort',
         'description' => 'text',
-        'primaryOwnerPHID' => 'phid?',
         'auditingEnabled' => 'bool',
         'mailKey' => 'bytes20',
         'status' => 'text32',
@@ -601,6 +599,18 @@ final class PhabricatorOwnersPackage
         ->setKey('owners')
         ->setType('list<map<string, wild>>')
         ->setDescription(pht('List of package owners.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('review')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Auto review information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('audit')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Auto audit information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dominion')
+        ->setType('string')
+        ->setDescription(pht('Dominion setting.')),
     );
   }
 
@@ -612,11 +622,40 @@ final class PhabricatorOwnersPackage
       );
     }
 
+    $review_map = self::getAutoreviewOptionsMap();
+    $review_value = $this->getAutoReview();
+    if (isset($review_map[$review_value])) {
+      $review_label = $review_map[$review_value]['name'];
+    } else {
+      $review_label = pht('Unknown ("%s")', $review_value);
+    }
+
+    $review = array(
+      'value' => $review_value,
+      'label' => $review_label,
+    );
+
+    if ($this->getAuditingEnabled()) {
+      $audit_value = 'audit';
+      $audit_label = pht('Auditing Enabled');
+    } else {
+      $audit_value = 'none';
+      $audit_label = pht('No Auditing');
+    }
+
+    $audit = array(
+      'value' => $audit_value,
+      'label' => $audit_label,
+    );
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
       'status' => $this->getStatus(),
       'owners' => $owner_list,
+      'review' => $review,
+      'audit' => $audit,
+      'dominion' => $this->getDominion(),
     );
   }
 
