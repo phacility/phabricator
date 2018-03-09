@@ -56,19 +56,18 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
     $lock_key,
     $lock_device_only) {
 
-    $lock_parts = array();
-    $lock_parts[] = $lock_key;
-    $lock_parts[] = $repository->getID();
+    $lock_parts = array(
+      'repositoryPHID' => $repository->getPHID(),
+    );
 
     if ($lock_device_only) {
       $device = AlmanacKeys::getLiveDevice();
       if ($device) {
-        $lock_parts[] = $device->getID();
+        $lock_parts['devicePHID'] = $device->getPHID();
       }
     }
 
-    $lock_name = implode(':', $lock_parts);
-    return PhabricatorGlobalLock::newLock($lock_name);
+    return PhabricatorGlobalLock::newLock($lock_key, $lock_parts);
   }
 
 

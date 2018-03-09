@@ -2092,7 +2092,7 @@ abstract class PhabricatorEditEngine
 
     return array(
       'object' => array(
-        'id' => $object->getID(),
+        'id' => (int)$object->getID(),
         'phid' => $object->getPHID(),
       ),
       'transactions' => $xactions_struct,

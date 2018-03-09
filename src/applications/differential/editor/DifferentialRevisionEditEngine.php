@@ -7,8 +7,6 @@ final class DifferentialRevisionEditEngine
 
   const ENGINECONST = 'differential.revision';
 
-  const KEY_UPDATE = 'update';
-
   const ACTIONGROUP_REVIEW = 'review';
   const ACTIONGROUP_REVISION = 'revision';
 
@@ -73,6 +71,14 @@ final class DifferentialRevisionEditEngine
     return pht('Revision');
   }
 
+  protected function getCommentViewButtonText($object) {
+    if ($object->isDraft()) {
+      return pht('Submit Quietly');
+    }
+
+    return parent::getCommentViewButtonText($object);
+  }
+
   protected function getObjectViewURI($object) {
     return $object->getURI();
   }
@@ -123,12 +129,13 @@ final class DifferentialRevisionEditEngine
     $fields = array();
 
     $fields[] = id(new PhabricatorHandlesEditField())
-      ->setKey(self::KEY_UPDATE)
+      ->setKey(DifferentialRevisionUpdateTransaction::EDITKEY)
       ->setLabel(pht('Update Diff'))
       ->setDescription(pht('New diff to create or update the revision with.'))
       ->setConduitDescription(pht('Create or update a revision with a diff.'))
       ->setConduitTypeDescription(pht('PHID of the diff.'))
-      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+      ->setTransactionType(
+        DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE)
       ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
       ->setSingleValue($diff_phid)
       ->setIsConduitOnly(!$diff)

@@ -100,8 +100,10 @@ abstract class PhabricatorGarbageCollector extends Phobject {
 
     // Hold a lock while performing collection to avoid racing other daemons
     // running the same collectors.
-    $lock_name = 'gc:'.$this->getCollectorConstant();
-    $lock = PhabricatorGlobalLock::newLock($lock_name);
+    $params = array(
+      'collector' => $this->getCollectorConstant(),
+    );
+    $lock = PhabricatorGlobalLock::newLock('gc', $params);
 
     try {
       $lock->lock(5);

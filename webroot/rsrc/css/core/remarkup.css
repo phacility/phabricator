@@ -472,6 +472,13 @@ video.phabricator-media {
   margin: .5em 1em 0;
 }
 
+.phabricator-remarkup-image-error {
+  border: 1px solid {$redborder};
+  background: {$sh-redbackground};
+  padding: 8px 12px;
+  color: {$darkgreytext};
+}
+
 .phabricator-remarkup-embed-image {
   display: inline-block;
   border: 3px solid white;

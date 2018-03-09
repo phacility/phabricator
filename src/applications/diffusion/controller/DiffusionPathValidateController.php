@@ -45,19 +45,6 @@ final class DiffusionPathValidateController extends DiffusionController {
       'valid' => (bool)$valid,
     );
 
-    if (!$valid) {
-      $branch = $drequest->getBranch();
-      if ($branch) {
-        $message = pht('Not found in %s', $branch);
-      } else {
-        $message = pht('Not found at %s', 'HEAD');
-      }
-    } else {
-      $message = pht('OK');
-    }
-
-    $output['message'] = $message;
-
     return id(new AphrontAjaxResponse())->setContent($output);
   }
 }

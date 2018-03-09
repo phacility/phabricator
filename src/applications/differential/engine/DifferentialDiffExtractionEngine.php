@@ -278,11 +278,14 @@ final class DifferentialDiffExtractionEngine extends Phobject {
         ->setNewValue($revision->getModernRevisionStatus());
     }
 
+    $type_update = DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE;
+
     $xactions[] = id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+      ->setTransactionType($type_update)
       ->setIgnoreOnNoEffect(true)
       ->setNewValue($new_diff->getPHID())
-      ->setMetadataValue('isCommitUpdate', true);
+      ->setMetadataValue('isCommitUpdate', true)
+      ->setMetadataValue('commitPHIDs', array($commit->getPHID()));
 
     foreach ($more_xactions as $more_xaction) {
       $xactions[] = $more_xaction;

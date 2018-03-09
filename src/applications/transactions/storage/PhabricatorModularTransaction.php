@@ -92,6 +92,14 @@ abstract class PhabricatorModularTransaction
     return parent::shouldHide();
   }
 
+  final public function shouldHideForFeed() {
+    if ($this->getTransactionImplementation()->shouldHideForFeed()) {
+      return true;
+    }
+
+    return parent::shouldHideForFeed();
+  }
+
   /* final */ public function getIcon() {
     $icon = $this->getTransactionImplementation()->getIcon();
     if ($icon !== null) {

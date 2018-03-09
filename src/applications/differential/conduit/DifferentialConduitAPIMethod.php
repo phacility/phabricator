@@ -58,7 +58,7 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
 
     $xactions = array();
     $xactions[] = array(
-      'type' => DifferentialRevisionEditEngine::KEY_UPDATE,
+      'type' => DifferentialRevisionUpdateTransaction::EDITKEY,
       'value' => $diff->getPHID(),
     );
 

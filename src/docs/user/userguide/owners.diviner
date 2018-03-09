@@ -84,21 +84,26 @@ You can configure **Auto Review** for packages. When a new code review is
 created in Differential which affects code in a package, the package can
 automatically be added as a subscriber or reviewer.
 
-The available settings are:
+The available settings allow you to take these actions:
 
-  - **No Autoreview**: This package will not be added to new reviews.
-  - **Subscribe to Changes**: This package will be added to reviews as a
-    subscriber. Owners will be notified of changes, but not required to act.
   - **Review Changes**: This package will be added to reviews as a reviewer.
     Reviews will appear on the dashboards of package owners.
-  - **Review Changes (Blocking)** This package will be added to reviews
-    as a blocking reviewer. A package owner will be required to accept changes
+  - **Review Changes (Blocking)** This package will be added to reviews as a
+    blocking reviewer. A package owner will be required to accept changes
     before they may land.
+  - **Subscribe to Changes**: This package will be added to reviews as a
+    subscriber. Owners will be notified of changes, but not required to act.
 
-NOTE: These rules **do not trigger** if the change author is a package owner.
-They only apply to changes made by users who aren't already owners.
+If you select the **With Non-Owner Author** option for these actions, the
+action will not trigger if the author of the revision is a package owner. This
+mode may be helpful if you are using Owners mostly to make sure that someone
+who is qualified is involved in each change to a piece of code.
 
-These rules also do not trigger if the package has been archived.
+If you select the **All** option for these actions, the action will always
+trigger even if the author is a package owner. This mode may be helpful if you
+are using Owners mostly to suggest reviewers.
+
+These rules do not trigger if the package has been archived.
 
 The intent of this feature is to make it easy to configure simple, reasonable
 behaviors. If you want more tailored or specific triggers, you can write more

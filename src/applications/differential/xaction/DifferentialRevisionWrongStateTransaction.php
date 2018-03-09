@@ -35,7 +35,8 @@ final class DifferentialRevisionWrongStateTransaction
       $this->renderValue($status->getDisplayName()));
   }
 
-  public function getTitleForFeed() {
-    return null;
+  public function shouldHideForFeed() {
+    return true;
   }
+
 }

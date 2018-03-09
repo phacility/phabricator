@@ -6,7 +6,6 @@ final class DifferentialTransaction
   private $isCommandeerSideEffect;
 
   const TYPE_INLINE  = 'differential:inline';
-  const TYPE_UPDATE  = 'differential:update';
   const TYPE_ACTION  = 'differential:action';
 
   const MAILTAG_REVIEWERS      = 'differential-reviewers';
@@ -75,18 +74,6 @@ final class DifferentialTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_UPDATE:
-        // Older versions of this transaction have an ID for the new value,
-        // and/or do not record the old value. Only hide the transaction if
-        // the new value is a PHID, indicating that this is a newer style
-        // transaction.
-        if ($old === null) {
-          if (phid_get_type($new) == DifferentialDiffPHIDType::TYPECONST) {
-            return true;
-          }
-        }
-        break;
-
       case DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE:
         // Don't hide the initial "X requested review: ..." transaction from
         // mail or feed even when it occurs during creation. We need this
@@ -139,11 +126,6 @@ final class DifferentialTransaction
           }
         }
         break;
-      case self::TYPE_UPDATE:
-        if ($new) {
-          $phids[] = $new;
-        }
-        break;
     }
 
     return $phids;
@@ -153,8 +135,6 @@ final class DifferentialTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_ACTION:
         return 3;
-      case self::TYPE_UPDATE:
-        return 2;
     }
 
     return parent::getActionStrength();
@@ -165,13 +145,6 @@ final class DifferentialTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
         return pht('Commented On');
-      case self::TYPE_UPDATE:
-        $old = $this->getOldValue();
-        if ($old === null) {
-          return pht('Request');
-        } else {
-          return pht('Updated');
-        }
       case self::TYPE_ACTION:
         $map = array(
           DifferentialAction::ACTION_ACCEPT => pht('Accepted'),
@@ -209,7 +182,7 @@ final class DifferentialTransaction
             break;
         }
         break;
-      case self::TYPE_UPDATE:
+      case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
         $old = $this->getOldValue();
         if ($old === null) {
           $tags[] = self::MAILTAG_REVIEW_REQUEST;
@@ -248,28 +221,6 @@ final class DifferentialTransaction
         return pht(
           '%s added inline comments.',
           $author_handle);
-      case self::TYPE_UPDATE:
-        if ($this->getMetadataValue('isCommitUpdate')) {
-          return pht(
-            'This revision was automatically updated to reflect the '.
-            'committed changes.');
-        } else if ($new) {
-          // TODO: Migrate to PHIDs and use handles here?
-          if (phid_get_type($new) == DifferentialDiffPHIDType::TYPECONST) {
-            return pht(
-              '%s updated this revision to %s.',
-              $author_handle,
-              $this->renderHandleLink($new));
-          } else {
-            return pht(
-              '%s updated this revision.',
-              $author_handle);
-          }
-        } else {
-          return pht(
-            '%s updated this revision.',
-            $author_handle);
-        }
       case self::TYPE_ACTION:
         switch ($new) {
           case DifferentialAction::ACTION_CLOSE:
@@ -345,11 +296,6 @@ final class DifferentialTransaction
       case self::TYPE_INLINE:
         return pht(
           '%s added inline comments to %s.',
-          $author_link,
-          $object_link);
-      case self::TYPE_UPDATE:
-        return pht(
-          '%s updated the diff for %s.',
           $author_link,
           $object_link);
       case self::TYPE_ACTION:
@@ -462,8 +408,6 @@ final class DifferentialTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
         return 'fa-comment';
-      case self::TYPE_UPDATE:
-        return 'fa-refresh';
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
@@ -526,8 +470,6 @@ final class DifferentialTransaction
 
   public function getColor() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_UPDATE:
-        return PhabricatorTransactions::COLOR_SKY;
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:

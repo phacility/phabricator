@@ -172,10 +172,10 @@ final class DifferentialRevisionStatus extends Phobject {
         'name' => pht('Draft'),
         // For legacy clients, treat this as though it is "Needs Review".
         'legacy' => 0,
-        'icon' => 'fa-file-text-o',
+        'icon' => 'fa-spinner',
         'closed' => false,
-        'color.icon' => 'grey',
-        'color.tag' => 'grey',
+        'color.icon' => 'pink',
+        'color.tag' => 'pink',
         'color.ansi' => null,
       ),
     );
