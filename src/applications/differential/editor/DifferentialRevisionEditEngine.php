@@ -76,7 +76,7 @@ final class DifferentialRevisionEditEngine
       return pht('Submit Quietly');
     }
 
-    return parent::getCommentViewButtonText();
+    return parent::getCommentViewButtonText($object);
   }
 
   protected function getObjectViewURI($object) {
