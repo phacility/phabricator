@@ -154,59 +154,41 @@ final class DifferentialTransactionEditor
 
     $edge_ref_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
 
-    $is_sticky_accept = PhabricatorEnv::getEnvConfig(
-      'differential.sticky-accept');
-
-    $downgrade_rejects = false;
-    $downgrade_accepts = false;
+    $want_downgrade = array();
+    $must_downgrade = array();
     if ($this->getIsCloseByCommit()) {
       // Never downgrade reviewers when we're closing a revision after a
       // commit.
     } else {
       switch ($xaction->getTransactionType()) {
         case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
-          $downgrade_rejects = true;
-          if (!$is_sticky_accept) {
-            // If "sticky accept" is disabled, also downgrade the accepts.
-            $downgrade_accepts = true;
-          }
+          $want_downgrade[] = DifferentialReviewerStatus::STATUS_ACCEPTED;
+          $want_downgrade[] = DifferentialReviewerStatus::STATUS_REJECTED;
           break;
         case DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE:
-          $downgrade_rejects = true;
-          if ((!$is_sticky_accept) ||
-              (!$object->isChangePlanned())) {
-            // If the old state isn't "changes planned", downgrade the accepts.
-            // This exception allows an accepted revision to go through
-            // "Plan Changes" -> "Request Review" and return to "accepted" if
-            // the author didn't update the revision, essentially undoing the
-            // "Plan Changes".
-            $downgrade_accepts = true;
+          if (!$object->isChangePlanned()) {
+            // If the old state isn't "Changes Planned", downgrade the accepts
+            // even if they're sticky.
+
+            // We don't downgrade for "Changes Planned" to allow an author to
+            // undo a "Plan Changes" by immediately following it up with a
+            // "Request Review".
+            $want_downgrade[] = DifferentialReviewerStatus::STATUS_ACCEPTED;
+            $must_downgrade[] = DifferentialReviewerStatus::STATUS_ACCEPTED;
           }
+          $want_downgrade[] = DifferentialReviewerStatus::STATUS_REJECTED;
           break;
       }
     }
 
-    $new_accept = DifferentialReviewerStatus::STATUS_ACCEPTED;
-    $new_reject = DifferentialReviewerStatus::STATUS_REJECTED;
-    $old_accept = DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER;
-    $old_reject = DifferentialReviewerStatus::STATUS_REJECTED_OLDER;
-
-    $downgrade = array();
-    if ($downgrade_accepts) {
-      $downgrade[] = DifferentialReviewerStatus::STATUS_ACCEPTED;
-    }
-
-    if ($downgrade_rejects) {
-      $downgrade[] = DifferentialReviewerStatus::STATUS_REJECTED;
-    }
-
-    if ($downgrade) {
+    if ($want_downgrade) {
       $void_type = DifferentialRevisionVoidTransaction::TRANSACTIONTYPE;
 
       $results[] = id(new DifferentialTransaction())
         ->setTransactionType($void_type)
         ->setIgnoreOnNoEffect(true)
-        ->setNewValue($downgrade);
+        ->setMetadataValue('void.force', $must_downgrade)
+        ->setNewValue($want_downgrade);
     }
 
     $is_commandeer = false;
