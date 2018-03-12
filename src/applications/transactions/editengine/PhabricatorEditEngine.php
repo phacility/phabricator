@@ -1968,6 +1968,7 @@ abstract class PhabricatorEditEngine
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContinueOnMissingFields(true)
       ->setContentSourceFromRequest($request)
+      ->setRaiseWarnings(!$request->getBool('editEngine.warnings'))
       ->setIsPreview($is_preview);
 
     try {
@@ -1978,6 +1979,10 @@ abstract class PhabricatorEditEngine
         ->setException($ex);
     } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
+        ->setCancelURI($view_uri)
+        ->setException($ex);
+    } catch (PhabricatorApplicationTransactionWarningException $ex) {
+      return id(new PhabricatorApplicationTransactionWarningResponse())
         ->setCancelURI($view_uri)
         ->setException($ex);
     }
