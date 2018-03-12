@@ -1152,7 +1152,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
       $params = array(
         'name' => $builtin->getBuiltinDisplayName(),
-        'ttl.relative' => phutil_units('7 days in seconds'),
         'canCDN' => true,
         'builtin' => $key,
       );
@@ -1648,7 +1647,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getFieldValuesForConduit() {
     return array(
       'name' => $this->getName(),
-      'dataURI' => $this->getCDNURI(),
+      'dataURI' => $this->getCDNURI('data'),
       'size' => (int)$this->getByteSize(),
     );
   }
