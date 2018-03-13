@@ -47,10 +47,14 @@ final class PhabricatorSubscriptionsSubscribersPolicyRule
 
     // Load the project PHIDs the user is a member of.
     if (!isset($this->sourcePHIDs[$viewer_phid])) {
-      $source_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-        $viewer_phid,
-        PhabricatorProjectMemberOfProjectEdgeType::EDGECONST);
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withMemberPHIDs(array($viewer_phid))
+        ->execute();
+
+      $source_phids = mpull($projects, 'getPHID');
       $source_phids[] = $viewer_phid;
+
       $this->sourcePHIDs[$viewer_phid] = $source_phids;
     }
 
