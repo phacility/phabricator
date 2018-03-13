@@ -236,7 +236,10 @@ final class PhabricatorMemeEngine extends Phobject {
       Filesystem::writeFile($output_name, $memed_frame_data);
     }
 
-    $future = new ExecFuture('convert -loop 0 %Ls %s', $output_files, $output);
+    $future = new ExecFuture(
+      'convert -dispose background -loop 0 %Ls %s',
+      $output_files,
+      $output);
     $future->setTimeout(10)->resolvex();
 
     return Filesystem::readFile($output);
@@ -297,6 +300,9 @@ final class PhabricatorMemeEngine extends Phobject {
       $font_max = 72;
       $font_min = 5;
 
+      $margin_x = 16;
+      $margin_y = 16;
+
       $last = null;
       $cursor = floor(($font_max + $font_min) / 2);
       $min = $font_min;
@@ -321,12 +327,12 @@ final class PhabricatorMemeEngine extends Phobject {
           // text extends, for example if it has a "y".
           $descend = $box[3];
 
-          if ($height > $dim_y) {
+          if (($height + $margin_y) > $dim_y) {
             $all_fit = false;
             break;
           }
 
-          if ($width > $dim_x) {
+          if (($width + $margin_x) > $dim_x) {
             $all_fit = false;
             break;
           }
