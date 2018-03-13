@@ -71,7 +71,8 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
         ),
         'build/' => array(
           $this->getQueryRoutePattern() => 'HarbormasterBuildListController',
-          '(?P<id>\d+)/' => 'HarbormasterBuildViewController',
+          '(?P<id>\d+)/(?:(?P<generation>\d+)/)?'
+            => 'HarbormasterBuildViewController',
           '(?P<action>pause|resume|restart|abort)/'.
             '(?P<id>\d+)/(?:(?P<via>[^/]+)/)?'
             => 'HarbormasterBuildActionController',
