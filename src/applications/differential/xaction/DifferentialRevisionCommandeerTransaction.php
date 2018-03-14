@@ -66,11 +66,6 @@ final class DifferentialRevisionCommandeerTransaction
           'been closed. You can only commandeer open revisions.'));
     }
 
-    if ($object->isDraft()) {
-      throw new Exception(
-        pht('You can not commandeer a draft revision.'));
-    }
-
     if ($this->isViewerRevisionAuthor($object, $viewer)) {
       throw new Exception(
         pht(
