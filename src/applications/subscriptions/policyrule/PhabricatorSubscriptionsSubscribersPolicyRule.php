@@ -45,10 +45,13 @@ final class PhabricatorSubscriptionsSubscribersPolicyRule
       $this->subscribed[$viewer_phid] = array();
     }
 
-    // Load the project PHIDs the user is a member of.
+    // Load the project PHIDs the user is a member of. We use the omnipotent
+    // user here because projects may themselves have "Subscribers" visibility
+    // policies and we don't want to get stuck in an infinite stack of
+    // recursive policy checks. See T13106.
     if (!isset($this->sourcePHIDs[$viewer_phid])) {
       $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($viewer)
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withMemberPHIDs(array($viewer_phid))
         ->execute();
 
