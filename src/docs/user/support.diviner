@@ -9,12 +9,21 @@ Overview
 
 This document describes available support resources.
 
-The upstream provides active, free support for a narrow range of problems
-(primarily, security issues and reproducible bugs).
+The upstream provides free support for a narrow range of problems (primarily,
+security issues and reproducible bugs) and paid support for virtually anything.
 
 The upstream does not provide free support for general problems with installing
 or configuring Phabricator. You may be able to get some help with these
 kinds of issues from the community.
+
+
+Paid Support
+============
+
+If you'd like upstream support, see ((pacts)).
+
+This is the only way to request features and the only way to get guaranteed
+answers from experts quickly.
 
 
 Reporting Security Vulnerabilities
@@ -31,8 +40,7 @@ Reporting Bugs
 
 The upstream will accept **reproducible** bug reports in modern, first-party
 production code running in reasonable environments.  Before submitting a bug
-report you **must update** to the latest version of Phabricator. This reduces
-support costs on the upstream, please be mindful.
+report you **must update** to the latest version of Phabricator.
 
 To report bugs, see @{article:Contributing Bug Reports}.
 
@@ -52,14 +60,10 @@ If you'd like to contribute to Phabricator, start with
 Installation and Setup Help
 ===========================
 
-Installation and setup help is available from the upstream at consulting rates.
-See [[ https://secure.phabricator.com/w/consulting/ | Consulting ]] for details.
-
-Helping individual installs navigate unique setup problems takes our time
-away from developing Phabricator, so we can not offer this service for free.
-
 You may be able to get free help with these issues from the
-[[ https://phurl.io/u/discourse | community ]]. See below for details.
+[[ https://phurl.io/u/discourse | community ]].
+
+You can also pay us for support. See ((pacts)).
 
 
 Hosting
@@ -67,8 +71,8 @@ Hosting
 
 The upstream offers Phabricator as a hosted service at
 [[ https://phacility.com | Phacility ]]. This simplifies setting up and
-operating a Phabricator instance, and gives you access to a broader range
-of upstream support services.
+operating a Phabricator instance, and automatically gives you access to a
+broader range of upstream support services.
 
 Running this service gives us a strong financial incentive to make installing
 and operating Phabricator as difficult as possible. Blinded by greed, we toil
@@ -79,9 +83,10 @@ ourselves can hope to navigate.
 Phabricator Community
 =====================
 
-We provide hosting for a
-[[ https://phurl.io/u/discourse | Discussion Forum ]]
-where admins and users help and answer questions from other community members.
-Upstream developers may occasionally participate, but this is mostly
-a user to user community. If you run into general problems, but are not
-interested in paid support, this is the main place to find help.
+We provide hosting for a [[ https://phurl.io/u/discourse | Discussion Forum ]]
+where admininstrators and users help and answer questions from other community
+members.
+
+Upstream developers occasionally participate, but this is mostly a user to user
+community. If you run into general problems, but are not interested in paid
+support, this is the main place to find help.
