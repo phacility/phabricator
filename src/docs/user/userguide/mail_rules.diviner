@@ -43,6 +43,27 @@ The most useful header for routing is generally `X-Phabricator-Stamps`. This
 is a list of attributes which describe the object the mail is about and the
 actions which the mail informs you about.
 
+Stamps and Gmail
+================
+
 If you use a client which can not perform header matching (like Gmail), you can
 change the {nav Settings > Email Format > Send Stamps} setting to include the
 stamps in the mail body and then match them with body rules.
+
+When writing filter rules against mail stamps in Gmail, you should quote any
+filters you want to apply. For example, specify rules like this, with quotes:
+
+> "author(@alice)"
+
+Note that Gmail will ignore some symbols when matching mail against filtering
+rules, so you can get false positives if the body of the message includes text
+like `author alice` (the same words in the same order, without the special
+symbols).
+
+You'll also get false positives if the message body includes the text of a
+mail stamp explicitly in a normal text field like a summary, description, or
+comment.
+
+There's no way to avoid these false positives other than using a different
+client with support for more powerful filtering rules, but these false
+positives should normally be uncommon.
