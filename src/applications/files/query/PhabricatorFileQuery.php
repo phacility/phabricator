@@ -165,6 +165,7 @@ final class PhabricatorFileQuery
     // However, in some special cases where we know files will always be
     // visible, we skip this. See T8478 and T13106.
     $need_objects = array();
+    $need_xforms = array();
     foreach ($files as $file) {
       $always_visible = false;
 
@@ -187,6 +188,7 @@ final class PhabricatorFileQuery
       }
 
       $need_objects[] = $file;
+      $need_xforms[] = $file;
     }
 
     $viewer = $this->getViewer();
@@ -226,15 +228,20 @@ final class PhabricatorFileQuery
     // If this file is a transform of another file, load that file too. If you
     // can see the original file, you can see the thumbnail.
 
-    // TODO: It might be nice to put this directly on PhabricatorFile and remove
-    // the PhabricatorTransformedFile table, which would be a little simpler.
+    // TODO: It might be nice to put this directly on PhabricatorFile and
+    // remove the PhabricatorTransformedFile table, which would be a little
+    // simpler.
 
-    $xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
-      'transformedPHID IN (%Ls)',
-      mpull($files, 'getPHID'));
-    $xform_phids = mpull($xforms, 'getOriginalPHID', 'getTransformedPHID');
-    foreach ($xform_phids as $derived_phid => $original_phid) {
-      $object_phids[$original_phid] = true;
+    if ($need_xforms) {
+      $xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
+        'transformedPHID IN (%Ls)',
+        mpull($need_xforms, 'getPHID'));
+      $xform_phids = mpull($xforms, 'getOriginalPHID', 'getTransformedPHID');
+      foreach ($xform_phids as $derived_phid => $original_phid) {
+        $object_phids[$original_phid] = true;
+      }
+    } else {
+      $xform_phids = array();
     }
 
     $object_phids = array_keys($object_phids);
