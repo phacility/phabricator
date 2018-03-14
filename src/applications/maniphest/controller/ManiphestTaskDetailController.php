@@ -284,9 +284,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $edit_config = $edit_engine->loadDefaultEditConfiguration($task);
     $can_create = (bool)$edit_config;
 
-    $can_reassign = $edit_engine->hasEditAccessToTransaction(
-      ManiphestTaskOwnerTransaction::TRANSACTIONTYPE);
-
     if ($can_create) {
       $form_key = $edit_config->getIdentifier();
       $edit_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
