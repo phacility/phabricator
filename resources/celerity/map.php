@@ -23,7 +23,7 @@ return array(
     'rsrc/audio/basic/tap.mp3' => 'fc2fd796',
     'rsrc/audio/basic/ting.mp3' => '17660001',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
-    'rsrc/css/aphront/dark-console.css' => 'f7b071f1',
+    'rsrc/css/aphront/dark-console.css' => '0e14e8f6',
     'rsrc/css/aphront/dialog-view.css' => '6bfc244b',
     'rsrc/css/aphront/list-filter-view.css' => '5d6f0526',
     'rsrc/css/aphront/multi-column.css' => '84cc6640',
@@ -518,7 +518,7 @@ return array(
   'symbols' => array(
     'almanac-css' => 'dbb9b3af',
     'aphront-bars' => '231ac33c',
-    'aphront-dark-console-css' => 'f7b071f1',
+    'aphront-dark-console-css' => '0e14e8f6',
     'aphront-dialog-view-css' => '6bfc244b',
     'aphront-list-filter-view-css' => '5d6f0526',
     'aphront-multi-column-view-css' => '84cc6640',

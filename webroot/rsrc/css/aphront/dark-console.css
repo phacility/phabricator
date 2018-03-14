@@ -104,6 +104,7 @@
   font-size: 11px;
   background: #333333;
   color: #ffffff;
+  border-bottom: 0px;
 }
 
 .dark-console .aphront-table-view td {
@@ -210,10 +211,10 @@
 }
 
 .dark-console-panel-request-log-separator {
-    background-color: #e8e8e8;
-    border-bottom: 1px solid #b7b7b7;
-    border-top: 1px solid #b7b7b7;
-    height: 2px;
+  background-color: #e8e8e8;
+  border-bottom: 1px solid #b7b7b7;
+  border-top: 1px solid #b7b7b7;
+  height: 2px;
 }
 
 .dark-console-panel-ErrorLog {
