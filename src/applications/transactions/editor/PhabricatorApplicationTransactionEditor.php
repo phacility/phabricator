@@ -48,6 +48,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mentionedPHIDs;
   private $continueOnNoEffect;
   private $continueOnMissingFields;
+  private $raiseWarnings;
   private $parentMessageID;
   private $heraldAdapter;
   private $heraldTranscript;
@@ -271,6 +272,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getApplicationEmail() {
     return $this->applicationEmail;
+  }
+
+  public function setRaiseWarnings($raise_warnings) {
+    $this->raiseWarnings = $raise_warnings;
+    return $this;
+  }
+
+  public function getRaiseWarnings() {
+    return $this->raiseWarnings;
   }
 
   public function getTransactionTypesForObject($object) {
@@ -917,6 +927,19 @@ abstract class PhabricatorApplicationTransactionEditor
 
       if ($errors) {
         throw new PhabricatorApplicationTransactionValidationException($errors);
+      }
+
+      if ($this->raiseWarnings) {
+        $warnings = array();
+        foreach ($xactions as $xaction) {
+          if ($this->hasWarnings($object, $xaction)) {
+            $warnings[] = $xaction;
+          }
+        }
+        if ($warnings) {
+          throw new PhabricatorApplicationTransactionWarningException(
+            $warnings);
+        }
       }
 
       $this->willApplyTransactions($object, $xactions);
@@ -4275,6 +4298,30 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $request->queueCall();
     }
+  }
+
+  private function hasWarnings($object, $xaction) {
+    // TODO: For the moment, this is a very un-modular hack to support
+    // exactly one type of warning (mentioning users on a draft revision)
+    // that we want to show. See PHI433.
+
+    if (!($object instanceof DifferentialRevision)) {
+      return false;
+    }
+
+    if (!$object->isDraft()) {
+      return false;
+    }
+
+    $type = $xaction->getTransactionType();
+    if ($type != PhabricatorTransactions::TYPE_SUBSCRIBERS) {
+      return false;
+    }
+
+    // NOTE: This will currently warn even if you're only removing
+    // subscribers.
+
+    return true;
   }
 
 }

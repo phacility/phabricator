@@ -330,9 +330,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       Javelin::initBehavior(
         'dark-console',
         $this->getConsoleConfig());
-
-      // Change this to initBehavior when there is some behavior to initialize
-      require_celerity_resource('javelin-behavior-error-log');
     }
 
     if ($user) {

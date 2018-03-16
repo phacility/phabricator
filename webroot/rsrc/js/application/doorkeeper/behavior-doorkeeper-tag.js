@@ -40,9 +40,19 @@ JX.behavior('doorkeeper-tag', function(config, statics) {
     };
 
     for (var ii = 0; ii < tags.length; ii++) {
-      var tag_key = tags[ii].ref.join('@');
+      var key_parts = [];
+
+      key_parts = key_parts.concat(tags[ii].ref);
+      key_parts.push(tags[ii].view);
+
+      var tag_key = key_parts.join(' ');
+
       if (tag_key in statics.cache) {
-        have.push({id: tags[ii].id, markup: statics.cache[tag_key]});
+        have.push(
+          {
+            id: tags[ii].id,
+            markup: statics.cache[tag_key]
+          });
       } else {
         need.push(tags[ii]);
         keys[tags[ii].id] = tag_key;
@@ -54,7 +64,11 @@ JX.behavior('doorkeeper-tag', function(config, statics) {
     }
 
     if (need.length) {
-      new JX.Workflow('/doorkeeper/tags/', {tags: JX.JSON.stringify(need)})
+      var data = {
+        tags: JX.JSON.stringify(need)
+      };
+
+      new JX.Workflow('/doorkeeper/tags/', data)
         .setHandler(function(r) { draw(r.tags); })
         .start();
     }

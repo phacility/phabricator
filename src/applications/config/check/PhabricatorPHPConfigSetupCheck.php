@@ -67,6 +67,51 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
         ->addPHPConfig('always_populate_raw_post_data');
     }
 
+    if (!extension_loaded('mysqli')) {
+      $summary = pht(
+        'Install the MySQLi extension to improve database behavior.');
+
+      $message = pht(
+        'PHP is currently using the very old "mysql" extension to interact '.
+        'with the database. You should install the newer "mysqli" extension '.
+        'to improve behaviors (like error handling and query timeouts).'.
+        "\n\n".
+        'Phabricator will work with the older extension, but upgrading to the '.
+        'newer extension is recommended.'.
+        "\n\n".
+        'You may be able to install the extension with a command like: %s',
+
+        // NOTE: We're intentionally telling you to install "mysqlnd" here; on
+        // Ubuntu, there's no separate "mysqli" package.
+        phutil_tag('tt', array(), 'sudo apt-get install php5-mysqlnd'));
+
+      $this->newIssue('php.mysqli')
+        ->setName(pht('MySQLi Extension Not Available'))
+        ->setSummary($summary)
+        ->setMessage($message);
+    } else if (!defined('MYSQLI_ASYNC')) {
+      $summary = pht(
+        'Configure the MySQL Native Driver to improve database behavior.');
+
+      $message = pht(
+        'PHP is currently using the older MySQL external driver instead of '.
+        'the newer MySQL native driver. The older driver lacks options and '.
+        'features (like support for query timeouts) which allow Phabricator '.
+        'to interact better with the database.'.
+        "\n\n".
+        'Phabricator will work with the older driver, but upgrading to the '.
+        'native driver is recommended.'.
+        "\n\n".
+        'You may be able to install the native driver with a command like: %s',
+        phutil_tag('tt', array(), 'sudo apt-get install php5-mysqlnd'));
+
+
+      $this->newIssue('php.myqlnd')
+        ->setName(pht('MySQL Native Driver Not Available'))
+        ->setSummary($summary)
+        ->setMessage($message);
+    }
+
   }
 
 }

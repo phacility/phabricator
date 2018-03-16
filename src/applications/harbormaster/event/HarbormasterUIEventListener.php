@@ -51,13 +51,22 @@ final class HarbormasterUIEventListener
       return;
     }
 
-    $buildable = id(new HarbormasterBuildableQuery())
-      ->setViewer($viewer)
-      ->withManualBuildables(false)
-      ->withBuildablePHIDs(array($buildable_phid))
-      ->needBuilds(true)
-      ->needTargets(true)
-      ->executeOne();
+    try {
+      $buildable = id(new HarbormasterBuildableQuery())
+        ->setViewer($viewer)
+        ->withManualBuildables(false)
+        ->withBuildablePHIDs(array($buildable_phid))
+        ->needBuilds(true)
+        ->needTargets(true)
+        ->executeOne();
+    } catch (PhabricatorPolicyException $ex) {
+      // TODO: See PHI430. When this query raises a policy exception, it
+      // fatals the whole page because it happens very late in execution,
+      // during final page rendering. If the viewer can't see the buildable or
+      // some of the builds, just hide this element for now.
+      return;
+    }
+
     if (!$buildable) {
       return;
     }

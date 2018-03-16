@@ -78,7 +78,7 @@ JX.behavior('aphlict-listen', function(config) {
     JX.Stratcom.invoke('notification-panel-update', null, {});
     var response = e.getData();
 
-    if (!response.showAnyNotification) {
+    if (!response.showAnyNotification && !response.showDesktopNotification) {
       return;
     }
 
@@ -86,6 +86,7 @@ JX.behavior('aphlict-listen', function(config) {
     new JX.Notification()
       .setContent(JX.$H(response.content))
       .setKey(response.primaryObjectPHID)
+      .setShowAsWebNotification(response.showAnyNotification)
       .setShowAsDesktopNotification(response.showDesktopNotification)
       .setTitle(response.title)
       .setBody(response.body)
