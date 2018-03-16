@@ -117,8 +117,8 @@ final class PHUITagView extends AphrontTagView {
     return $this;
   }
 
-  public function setSlimShady($mm) {
-    $this->slimShady = $mm;
+  public function setSlimShady($is_eminem) {
+    $this->slimShady = $is_eminem;
     return $this;
   }
 
