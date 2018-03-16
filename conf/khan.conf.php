@@ -94,14 +94,14 @@ return array(
   // Let people upload giant files.
   'storage.mysql-engine.max-size' => 0,
 
-  // pygments doesn't know .q files are sql or that jsx is javascript(-ish).
-  // We add that.  (The .arcconfig comes default.conf; I'm not sure if
-  // read_config does merging on sub-arrays properly, so I just repeat it to be
-  // safe.)
+  // pygments doesn't know .q files are sql or what jsx is.  We add
+  // that.  (The .arcconfig comes from default.conf; I'm not sure if
+  // read_config does merging on sub-arrays properly, so I repeat it
+  // just to be safe.)
   'syntax.filemap' => array(
     '@\.arcconfig$@' => 'js',
     '@\.q$@' => 'mysql',
-    '@\.jsx$@' => 'js',
+    '@\.jsx$@' => 'jsx',
   ),
 
   // We use phabricator as a mini-LDAP system.
