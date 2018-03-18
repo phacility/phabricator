@@ -279,7 +279,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
         $analysis,
       );
 
-      if ($row['trace']) {
+      if (isset($row['trace'])) {
         $rows[] = array(
           null,
           null,
