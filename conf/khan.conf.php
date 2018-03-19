@@ -95,13 +95,15 @@ return array(
   'storage.mysql-engine.max-size' => 0,
 
   // pygments doesn't know .q files are sql or what jsx is.  We add
-  // that.  (The .arcconfig comes from default.conf; I'm not sure if
+  // that.  We also tell it that our html files are actually jinja2
+  // files.  (The .arcconfig comes from default.conf; I'm not sure if
   // read_config does merging on sub-arrays properly, so I repeat it
   // just to be safe.)
   'syntax.filemap' => array(
     '@\.arcconfig$@' => 'js',
     '@\.q$@' => 'mysql',
     '@\.jsx$@' => 'jsx',
+    '@\\.html$@' => 'html+jinja',
   ),
 
   // We use phabricator as a mini-LDAP system.
