@@ -149,24 +149,6 @@ div.phui-property-list-stacked .phui-property-list-properties
 }
 
 
-.phui-property-list-image {
-  margin: auto;
-  max-width: 95%;
-}
-
-.phui-property-list-audio {
-  display: block;
-  margin: 16px auto;
-  width: 50%;
-  min-width: 240px;
-}
-
-.phui-property-list-video {
-  display: block;
-  margin: 0 auto;
-  max-width: 95%;
-}
-
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
 .phui-property-list-value .phui-tag-view {
@@ -219,4 +201,33 @@ div.phui-property-list-stacked .phui-property-list-properties
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};
+}
+
+
+.document-engine-image img {
+  margin: 20px auto;
+  background: url('/rsrc/image/checker_light.png');
+}
+
+.device-desktop .document-engine-image img:hover {
+  background: url('/rsrc/image/checker_dark.png');
+}
+
+.document-engine-video video {
+  margin: 20px auto;
+  display: block;
+  max-width: 95%;
+}
+
+.document-engine-audio audio {
+  display: block;
+  margin: 16px auto;
+  width: 50%;
+  min-width: 240px;
+}
+
+.document-engine-message {
+  margin: 20px auto;
+  text-align: center;
+  color: {$greytext};
 }
