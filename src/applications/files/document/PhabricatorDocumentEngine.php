@@ -59,4 +59,52 @@ abstract class PhabricatorDocumentEngine
     return 2000;
   }
 
+  abstract public function getViewAsLabel(PhabricatorDocumentRef $ref);
+
+  public function getViewAsIconIcon(PhabricatorDocumentRef $ref) {
+    return $this->getDocumentIconIcon($ref);
+  }
+
+  public function getRenderURI(PhabricatorDocumentRef $ref) {
+    $file = $ref->getFile();
+    if (!$file) {
+      throw new PhutilMethodNotImplementedException();
+    }
+
+    $engine_key = $this->getDocumentEngineKey();
+    $file_phid = $file->getPHID();
+
+    return "/file/document/{$engine_key}/{$file_phid}/";
+  }
+
+  final public static function getEnginesForRef(
+    PhabricatorUser $viewer,
+    PhabricatorDocumentRef $ref) {
+    $engines = self::getAllEngines();
+
+    foreach ($engines as $key => $engine) {
+      $engine = id(clone $engine)
+        ->setViewer($viewer);
+
+      if (!$engine->canRenderDocument($ref)) {
+        unset($engines[$key]);
+        continue;
+      }
+
+      $engines[$key] = $engine;
+    }
+
+    if (!$engines) {
+      throw new Exception(pht('No content engine can render this document.'));
+    }
+
+    $vectors = array();
+    foreach ($engines as $key => $usable_engine) {
+      $vectors[$key] = $usable_engine->newSortVector($ref);
+    }
+    $vectors = msortv($vectors, 'getSelf');
+
+    return array_select_keys($engines, array_keys($vectors));
+  }
+
 }

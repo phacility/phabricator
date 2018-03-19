@@ -5,6 +5,10 @@ final class PhabricatorAudioDocumentEngine
 
   const ENGINEKEY = 'audio';
 
+  public function getViewAsLabel(PhabricatorDocumentRef $ref) {
+    return pht('View as Audio');
+  }
+
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-file-sound-o';
   }

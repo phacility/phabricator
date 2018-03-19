@@ -404,50 +404,70 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
   private function newFileContent(PhabricatorFile $file) {
     $viewer = $this->getViewer();
-    $engines = PhabricatorDocumentEngine::getAllEngines();
 
     $ref = id(new PhabricatorDocumentRef())
       ->setFile($file);
 
-    foreach ($engines as $key => $engine) {
-      $engine = id(clone $engine)
-        ->setViewer($viewer);
-
-      if (!$engine->canRenderDocument($ref)) {
-        unset($engines[$key]);
-        continue;
-      }
-
-      $engines[$key] = $engine;
-    }
-
-    if (!$engines) {
-      throw new Exception(pht('No engine can render this document.'));
-    }
-
-    $vectors = array();
-    foreach ($engines as $key => $usable_engine) {
-      $vectors[$key] = $usable_engine->newSortVector($ref);
-    }
-    $vectors = msortv($vectors, 'getSelf');
-
-    $engine = $engines[head_key($vectors)];
+    $engines = PhabricatorDocumentEngine::getEnginesForRef($viewer, $ref);
+    $engine = head($engines);
 
     $content = $engine->newDocument($ref);
-    if (!$content) {
-      return null;
-    }
 
     $icon = $engine->newDocumentIcon($ref);
 
+    $views = array();
+    foreach ($engines as $candidate_engine) {
+      $label = $candidate_engine->getViewAsLabel($ref);
+      if ($label === null) {
+        continue;
+      }
+
+      $view_icon = $candidate_engine->getViewAsIconIcon($ref);
+
+      $views[] = array(
+        'viewKey' => $candidate_engine->getDocumentEngineKey(),
+        'icon' => $view_icon,
+        'name' => $label,
+        'engineURI' => $candidate_engine->getRenderURI($ref),
+      );
+    }
+
+    Javelin::initBehavior('document-engine');
+
+    $viewport_id = celerity_generate_unique_node_id();
+
+    $viewport = phutil_tag(
+      'div',
+      array(
+        'id' => $viewport_id,
+      ),
+      $content);
+
+    $meta = array(
+      'viewportID' => $viewport_id,
+      'viewKey' => $engine->getDocumentEngineKey(),
+      'views' => $views,
+      'standaloneURI' => $engine->getRenderURI($ref),
+    );
+
+    $view_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View Options'))
+      ->setIcon('fa-file-image-o')
+      ->setColor(PHUIButtonView::GREY)
+      ->setMetadata($meta)
+      ->setDropdown(true)
+      ->addSigil('document-engine-view-dropdown');
+
     $header = id(new PHUIHeaderView())
       ->setHeaderIcon($icon)
-      ->setHeader($ref->getName());
+      ->setHeader($ref->getName())
+      ->addActionLink($view_button);
 
     return id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setHeader($header)
-      ->appendChild($content);
+      ->appendChild($viewport);
   }
 
 }

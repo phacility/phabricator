@@ -231,3 +231,14 @@ div.phui-property-list-stacked .phui-property-list-properties
   text-align: center;
   color: {$greytext};
 }
+
+.document-engine-error {
+  margin: 20px auto;
+  text-align: center;
+  color: {$redtext};
+}
+
+.document-engine-hexdump {
+  margin: 20px;
+  white-space: pre;
+}

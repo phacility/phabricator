@@ -5,6 +5,10 @@ final class PhabricatorVoidDocumentEngine
 
   const ENGINEKEY = 'void';
 
+  public function getViewAsLabel(PhabricatorDocumentRef $ref) {
+    return null;
+  }
+
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-file';
   }

@@ -5,6 +5,10 @@ final class PhabricatorVideoDocumentEngine
 
   const ENGINEKEY = 'video';
 
+  public function getViewAsLabel(PhabricatorDocumentRef $ref) {
+    return pht('View as Video');
+  }
+
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-film';
   }

@@ -89,6 +89,8 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'iconset/(?P<key>[^/]+)/' => array(
           'select/' => 'PhabricatorFileIconSetSelectController',
         ),
+        'document/(?P<engineKey>[^/]+)/(?P<phid>[^/]+)/'
+          => 'PhabricatorFileDocumentController',
       ) + $this->getResourceSubroutes(),
     );
   }

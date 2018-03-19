@@ -68,6 +68,14 @@ final class PhabricatorDocumentRef
     return null;
   }
 
+  public function loadData() {
+    if ($this->file) {
+      return $this->file->loadFileData();
+    }
+
+    throw new PhutilMethodNotImplementedException();
+  }
+
   public function hasAnyMimeType(array $candidate_types) {
     $mime_full = $this->getMimeType();
     $mime_parts = explode(';', $mime_full);

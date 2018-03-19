@@ -5,6 +5,10 @@ final class PhabricatorImageDocumentEngine
 
   const ENGINEKEY = 'image';
 
+  public function getViewAsLabel(PhabricatorDocumentRef $ref) {
+    return pht('View as Image');
+  }
+
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-file-image-o';
   }
