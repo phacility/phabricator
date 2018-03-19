@@ -152,61 +152,96 @@ final class PhabricatorFileQuery
   }
 
   protected function loadPage() {
-    $files = $this->loadStandardPage(new PhabricatorFile());
+    $files = $this->loadStandardPage($this->newResultObject());
 
     if (!$files) {
       return $files;
     }
 
+    // Figure out which files we need to load attached objects for. In most
+    // cases, we need to load attached objects to perform policy checks for
+    // files.
+
+    // However, in some special cases where we know files will always be
+    // visible, we skip this. See T8478 and T13106.
+    $need_objects = array();
+    $need_xforms = array();
+    foreach ($files as $file) {
+      $always_visible = false;
+
+      if ($file->getIsProfileImage()) {
+        $always_visible = true;
+      }
+
+      if ($file->isBuiltin()) {
+        $always_visible = true;
+      }
+
+      if ($always_visible) {
+        // We just treat these files as though they aren't attached to
+        // anything. This saves a query in common cases when we're loading
+        // profile images or builtins. We could be slightly more nuanced
+        // about this and distinguish between "not attached to anything" and
+        // "might be attached but policy checks don't need to care".
+        $file->attachObjectPHIDs(array());
+        continue;
+      }
+
+      $need_objects[] = $file;
+      $need_xforms[] = $file;
+    }
+
     $viewer = $this->getViewer();
     $is_omnipotent = $viewer->isOmnipotent();
 
-    // We need to load attached objects to perform policy checks for files.
-    // First, load the edges.
-
-    $edge_type = PhabricatorFileHasObjectEdgeType::EDGECONST;
-    $file_phids = mpull($files, 'getPHID');
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($file_phids)
-      ->withEdgeTypes(array($edge_type))
-      ->execute();
-
+    // If we have any files left which do need objects, load the edges now.
     $object_phids = array();
-    foreach ($files as $file) {
-      $phids = array_keys($edges[$file->getPHID()][$edge_type]);
-      $file->attachObjectPHIDs($phids);
+    if ($need_objects) {
+      $edge_type = PhabricatorFileHasObjectEdgeType::EDGECONST;
+      $file_phids = mpull($need_objects, 'getPHID');
 
-      if ($file->getIsProfileImage()) {
-        // If this is a profile image, don't bother loading related files.
-        // It will always be visible, and we can get into trouble if we try
-        // to load objects and end up stuck in a cycle. See T8478.
-        continue;
-      }
+      $edges = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($file_phids)
+        ->withEdgeTypes(array($edge_type))
+        ->execute();
 
-      if ($is_omnipotent) {
-        // If the viewer is omnipotent, we don't need to load the associated
-        // objects either since they can certainly see the object. Skipping
-        // this can improve performance and prevent cycles.
-        continue;
-      }
+      foreach ($need_objects as $file) {
+        $phids = array_keys($edges[$file->getPHID()][$edge_type]);
+        $file->attachObjectPHIDs($phids);
 
-      foreach ($phids as $phid) {
-        $object_phids[$phid] = true;
+        if ($is_omnipotent) {
+          // If the viewer is omnipotent, we don't need to load the associated
+          // objects either since the viewer can certainly see the object.
+          // Skipping this can improve performance and prevent cycles. This
+          // could possibly become part of the profile/builtin code above which
+          // short circuits attacment policy checks in cases where we know them
+          // to be unnecessary.
+          continue;
+        }
+
+        foreach ($phids as $phid) {
+          $object_phids[$phid] = true;
+        }
       }
     }
 
     // If this file is a transform of another file, load that file too. If you
     // can see the original file, you can see the thumbnail.
 
-    // TODO: It might be nice to put this directly on PhabricatorFile and remove
-    // the PhabricatorTransformedFile table, which would be a little simpler.
+    // TODO: It might be nice to put this directly on PhabricatorFile and
+    // remove the PhabricatorTransformedFile table, which would be a little
+    // simpler.
 
-    $xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
-      'transformedPHID IN (%Ls)',
-      $file_phids);
-    $xform_phids = mpull($xforms, 'getOriginalPHID', 'getTransformedPHID');
-    foreach ($xform_phids as $derived_phid => $original_phid) {
-      $object_phids[$original_phid] = true;
+    if ($need_xforms) {
+      $xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
+        'transformedPHID IN (%Ls)',
+        mpull($need_xforms, 'getPHID'));
+      $xform_phids = mpull($xforms, 'getOriginalPHID', 'getTransformedPHID');
+      foreach ($xform_phids as $derived_phid => $original_phid) {
+        $object_phids[$original_phid] = true;
+      }
+    } else {
+      $xform_phids = array();
     }
 
     $object_phids = array_keys($object_phids);

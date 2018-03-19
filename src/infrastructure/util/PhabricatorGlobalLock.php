@@ -28,8 +28,11 @@
  */
 final class PhabricatorGlobalLock extends PhutilLock {
 
+  private $parameters;
   private $conn;
   private $isExternalConnection = false;
+  private $log;
+  private $disableLogging;
 
   private static $pool = array();
 
@@ -37,27 +40,42 @@ final class PhabricatorGlobalLock extends PhutilLock {
 /* -(  Constructing Locks  )------------------------------------------------- */
 
 
-  public static function newLock($name) {
+  public static function newLock($name, $parameters = array()) {
     $namespace = PhabricatorLiskDAO::getStorageNamespace();
     $namespace = PhabricatorHash::digestToLength($namespace, 20);
 
-    $full_name = 'ph:'.$namespace.':'.$name;
+    $parts = array();
+    ksort($parameters);
+    foreach ($parameters as $key => $parameter) {
+      if (!preg_match('/^[a-zA-Z0-9]+\z/', $key)) {
+        throw new Exception(
+          pht(
+            'Lock parameter key "%s" must be alphanumeric.',
+            $key));
+      }
 
-    $length_limit = 64;
-    if (strlen($full_name) > $length_limit) {
-      throw new Exception(
-        pht(
-          'Lock name "%s" is too long (full lock name is "%s"). The '.
-          'full lock name must not be longer than %s bytes.',
-          $name,
-          $full_name,
-          new PhutilNumber($length_limit)));
+      if (!is_scalar($parameter) && !is_null($parameter)) {
+        throw new Exception(
+          pht(
+            'Lock parameter for key "%s" must be a scalar.',
+            $key));
+      }
+
+      $value = phutil_json_encode($parameter);
+      $parts[] = "{$key}={$value}";
     }
+    $parts = implode(', ', $parts);
 
+    $local = "{$name}({$parts})";
+    $local = PhabricatorHash::digestToLength($local, 20);
+
+    $full_name = "ph:{$namespace}:{$local}";
     $lock = self::getLock($full_name);
     if (!$lock) {
       $lock = new PhabricatorGlobalLock($full_name);
       self::registerLock($lock);
+
+      $lock->parameters = $parameters;
     }
 
     return $lock;
@@ -76,6 +94,11 @@ final class PhabricatorGlobalLock extends PhutilLock {
   public function useSpecificConnection(AphrontDatabaseConnection $conn) {
     $this->conn = $conn;
     $this->isExternalConnection = true;
+    return $this;
+  }
+
+  public function setDisableLogging($disable) {
+    $this->disableLogging = $disable;
     return $this;
   }
 
@@ -127,6 +150,24 @@ final class PhabricatorGlobalLock extends PhutilLock {
     $conn->rememberLock($lock_name);
 
     $this->conn = $conn;
+
+    if ($this->shouldLogLock()) {
+      global $argv;
+
+      $lock_context = array(
+        'pid' => getmypid(),
+        'host' => php_uname('n'),
+        'argv' => $argv,
+      );
+
+      $log = id(new PhabricatorDaemonLockLog())
+        ->setLockName($lock_name)
+        ->setLockParameters($this->parameters)
+        ->setLockContext($lock_context)
+        ->save();
+
+      $this->log = $log;
+    }
   }
 
   protected function doUnlock() {
@@ -159,6 +200,32 @@ final class PhabricatorGlobalLock extends PhutilLock {
       $conn->close();
       self::$pool[] = $conn;
     }
+
+    if ($this->log) {
+      $log = $this->log;
+      $this->log = null;
+
+      $conn = $log->establishConnection('w');
+      queryfx(
+        $conn,
+        'UPDATE %T SET lockReleased = UNIX_TIMESTAMP() WHERE id = %d',
+        $log->getTableName(),
+        $log->getID());
+    }
+  }
+
+  private function shouldLogLock() {
+    if ($this->disableLogging) {
+      return false;
+    }
+
+    $policy = id(new PhabricatorDaemonLockLogGarbageCollector())
+      ->getRetentionPolicy();
+    if (!$policy) {
+      return false;
+    }
+
+    return true;
   }
 
 }

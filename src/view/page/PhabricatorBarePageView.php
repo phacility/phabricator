@@ -71,6 +71,14 @@ class PhabricatorBarePageView extends AphrontPageView {
         ));
     }
 
+    $referrer_tag = phutil_tag(
+      'meta',
+      array(
+        'name' => 'referrer',
+        'content' => 'no-referrer',
+      ));
+
+
     $mask_icon = phutil_tag(
       'link',
       array(
@@ -80,47 +88,7 @@ class PhabricatorBarePageView extends AphrontPageView {
           '/rsrc/favicons/mask-icon.svg'),
       ));
 
-    $icon_tag_76 = phutil_tag(
-      'link',
-      array(
-        'rel' => 'apple-touch-icon',
-        'href' => celerity_get_resource_uri(
-          '/rsrc/favicons/apple-touch-icon-76x76.png'),
-      ));
-
-    $icon_tag_120 = phutil_tag(
-      'link',
-      array(
-        'rel' => 'apple-touch-icon',
-        'sizes' => '120x120',
-        'href' => celerity_get_resource_uri(
-          '/rsrc/favicons/apple-touch-icon-120x120.png'),
-      ));
-
-    $icon_tag_152 = phutil_tag(
-      'link',
-      array(
-        'rel' => 'apple-touch-icon',
-        'sizes' => '152x152',
-        'href' => celerity_get_resource_uri(
-          '/rsrc/favicons/apple-touch-icon-152x152.png'),
-      ));
-
-    $favicon_tag = phutil_tag(
-      'link',
-      array(
-        'id' => 'favicon',
-        'rel' => 'shortcut icon',
-        'href' => celerity_get_resource_uri(
-          '/rsrc/favicons/favicon.ico'),
-      ));
-
-    $referrer_tag = phutil_tag(
-      'meta',
-      array(
-        'name' => 'referrer',
-        'content' => 'no-referrer',
-      ));
+    $favicon_links = $this->newFavicons();
 
     $response = CelerityAPI::getStaticResourceResponse();
 
@@ -136,13 +104,10 @@ class PhabricatorBarePageView extends AphrontPageView {
     }
 
     return hsprintf(
-      '%s%s%s%s%s%s%s%s',
+      '%s%s%s%s%s',
       $viewport_tag,
       $mask_icon,
-      $icon_tag_76,
-      $icon_tag_120,
-      $icon_tag_152,
-      $favicon_tag,
+      $favicon_links,
       $referrer_tag,
       $response->renderResourcesOfType('css'));
   }
@@ -154,6 +119,63 @@ class PhabricatorBarePageView extends AphrontPageView {
   protected function getTail() {
     $response = CelerityAPI::getStaticResourceResponse();
     return $response->renderResourcesOfType('js');
+  }
+
+  private function newFavicons() {
+    $favicon_refs = array(
+      array(
+        'rel' => 'apple-touch-icon',
+        'sizes' => '76x76',
+        'width' => 76,
+        'height' => 76,
+      ),
+      array(
+        'rel' => 'apple-touch-icon',
+        'sizes' => '120x120',
+        'width' => 120,
+        'height' => 120,
+      ),
+      array(
+        'rel' => 'apple-touch-icon',
+        'sizes' => '152x152',
+        'width' => 152,
+        'height' => 152,
+      ),
+      array(
+        'rel' => 'icon',
+        'id' => 'favicon',
+        'width' => 64,
+        'height' => 64,
+      ),
+    );
+
+    $fetch_refs = array();
+    foreach ($favicon_refs as $key => $spec) {
+      $ref = id(new PhabricatorFaviconRef())
+        ->setWidth($spec['width'])
+        ->setHeight($spec['height']);
+
+      $favicon_refs[$key]['ref'] = $ref;
+      $fetch_refs[] = $ref;
+    }
+
+    id(new PhabricatorFaviconRefQuery())
+      ->withRefs($fetch_refs)
+      ->execute();
+
+    $favicon_links = array();
+    foreach ($favicon_refs as $spec) {
+      $favicon_links[] = phutil_tag(
+        'link',
+        array(
+          'rel' => $spec['rel'],
+          'sizes' => idx($spec, 'sizes'),
+          'id' => idx($spec, 'id'),
+          'href' => $spec['ref']->getURI(),
+        ));
+    }
+
+    return $favicon_links;
   }
 
 }

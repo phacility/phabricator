@@ -104,7 +104,7 @@ final class PhabricatorFerretFulltextStorageEngine
     // Reorder the results so that the highest-ranking results come first,
     // no matter which object types they belong to.
 
-    $metadata = msort($metadata, 'getRelevanceSortVector');
+    $metadata = msortv($metadata, 'getRelevanceSortVector');
     $list = array_select_keys($list, array_keys($metadata)) + $list;
 
     $result_slice = array_slice($list, $offset, $limit, true);

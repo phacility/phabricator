@@ -224,8 +224,4 @@ return array(
     'javelin-behavior-maniphest-subpriority-editor',
     'javelin-behavior-maniphest-list-editor',
   ),
-  'darkconsole.pkg.js' => array(
-    'javelin-behavior-dark-console',
-    'javelin-behavior-error-log',
-  ),
 );

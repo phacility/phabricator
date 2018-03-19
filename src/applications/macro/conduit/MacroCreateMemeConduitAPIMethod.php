@@ -35,22 +35,15 @@ final class MacroCreateMemeConduitAPIMethod extends MacroConduitAPIMethod {
   protected function execute(ConduitAPIRequest $request) {
     $user = $request->getUser();
 
-    $macro_name = $request->getValue('macroName');
-    $upper_text = $request->getValue('upperText');
-    $lower_text = $request->getValue('lowerText');
-
-    $uri = PhabricatorMacroMemeController::generateMacro(
-      $user,
-      $macro_name,
-      $upper_text,
-      $lower_text);
-
-    if (!$uri) {
-      throw new ConduitException('ERR-NOT-FOUND');
-    }
+    $file = id(new PhabricatorMemeEngine())
+      ->setViewer($user)
+      ->setTemplate($request->getValue('macroName'))
+      ->setAboveText($request->getValue('upperText'))
+      ->setBelowText($request->getValue('lowerText'))
+      ->newAsset();
 
     return array(
-      'uri' => $uri,
+      'uri' => $file->getViewURI(),
     );
   }
 

@@ -27,6 +27,7 @@ JX.install('Notification', {
     _hideTimer : null,
     _duration : 12000,
     _asDesktop : false,
+    _asWeb : true,
     _key : null,
     _title : null,
     _body : null,
@@ -85,6 +86,11 @@ JX.install('Notification', {
 
     setContent : function(content) {
       JX.DOM.setContent(this._getContainer(), content);
+      return this;
+    },
+
+    setShowAsWebNotification: function(mode) {
+      this._asWeb = mode;
       return this;
     },
 
@@ -242,6 +248,13 @@ JX.install('Notification', {
 
       var notifications = [];
       for (var ii = 0; ii < self._active.length; ii++) {
+
+        // Don't render this notification if it's not configured to show as
+        // a web notification.
+        if (!self._active[ii]._asWeb) {
+          continue;
+        }
+
         notifications.push(self._active[ii]._getContainer());
         if (!(--limit)) {
           break;

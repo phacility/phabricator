@@ -37,9 +37,14 @@ final class DifferentialDraftField
     }
 
     // If the author has held this revision as a draft explicitly, don't
-    // show any misleading messages about it autosubmitting later.
+    // show any misleading messages about it autosubmitting later. We do show
+    // reminder text.
     if ($revision->getHoldAsDraft()) {
-      return array();
+      return array(
+        pht(
+          'This is a draft revision that has not yet been submitted for '.
+          'review.'),
+      );
     }
 
     $warnings = array();
@@ -91,6 +96,21 @@ final class DifferentialDraftField
     }
 
     return $warnings;
+  }
+
+  public function getWarningsForDetailView() {
+    $revision = $this->getObject();
+
+    if (!$revision->isDraft()) {
+      return array();
+    }
+
+    return array(
+      pht(
+        'This revision is currently a draft. You can leave comments, but '.
+        'no one will be notified until the revision is submitted for '.
+        'review.'),
+    );
   }
 
 }

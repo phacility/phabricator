@@ -64,6 +64,10 @@ EOJSON;
             "Phabricator logo in the site header.\n\n".
             "  - **Wordmark**: Choose new text to display next to the logo. ".
             "By default, the header displays //Phabricator//.\n\n")),
+      $this->newOption('ui.favicons', 'wild', array())
+        ->setSummary(pht('Customize favicons.'))
+        ->setDescription(pht('Customize favicons.'))
+        ->setLocked(true),
       $this->newOption('ui.footer-items', $footer_type, array())
         ->setSummary(
           pht(

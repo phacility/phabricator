@@ -8,15 +8,6 @@ final class PhabricatorFileImageProxyController
   }
 
   public function handleRequest(AphrontRequest $request) {
-
-    $show_prototypes = PhabricatorEnv::getEnvConfig(
-      'phabricator.show-prototypes');
-    if (!$show_prototypes) {
-      throw new Exception(
-        pht('Show prototypes is disabled.
-          Set `phabricator.show-prototypes` to `true` to use the image proxy'));
-    }
-
     $viewer = $request->getViewer();
     $img_uri = $request->getStr('uri');
 
@@ -24,9 +15,16 @@ final class PhabricatorFileImageProxyController
     PhabricatorEnv::requireValidRemoteURIForLink($img_uri);
     $uri = new PhutilURI($img_uri);
     $proto = $uri->getProtocol();
-    if (!in_array($proto, array('http', 'https'))) {
+
+    $allowed_protocols = array(
+      'http',
+      'https',
+    );
+    if (!in_array($proto, $allowed_protocols)) {
       throw new Exception(
-        pht('The provided image URI must be either http or https'));
+        pht(
+          'The provided image URI must use one of these protocols: %s.',
+          implode(', ', $allowed_protocols)));
     }
 
     // Check if we already have the specified image URI downloaded
@@ -43,8 +41,9 @@ final class PhabricatorFileImageProxyController
       ->setURI($img_uri)
       ->setTTL($ttl);
 
+    // Cache missed, so we'll need to validate and download the image.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-    // Cache missed so we'll need to validate and download the image
+    $save_request = false;
     try {
       // Rate limit outbound fetches to make this mechanism less useful for
       // scanning networks and ports.
@@ -59,6 +58,7 @@ final class PhabricatorFileImageProxyController
           'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
           'canCDN' => true,
         ));
+
       if (!$file->isViewableImage()) {
         $mime_type = $file->getMimeType();
         $engine = new PhabricatorDestructionEngine();
@@ -66,53 +66,82 @@ final class PhabricatorFileImageProxyController
         $file = null;
         throw new Exception(
           pht(
-            'The URI "%s" does not correspond to a valid image file, got '.
-            'a file with MIME type "%s". You must specify the URI of a '.
+            'The URI "%s" does not correspond to a valid image file (got '.
+            'a file with MIME type "%s"). You must specify the URI of a '.
             'valid image file.',
             $uri,
             $mime_type));
-      } else {
-        $file->save();
       }
 
-      $external_request->setIsSuccessful(true)
-        ->setFilePHID($file->getPHID())
-        ->save();
-      unset($unguarded);
-      return $this->getExternalResponse($external_request);
+      $file->save();
+
+      $external_request
+        ->setIsSuccessful(1)
+        ->setFilePHID($file->getPHID());
+
+      $save_request = true;
     } catch (HTTPFutureHTTPResponseStatus $status) {
-      $external_request->setIsSuccessful(false)
-        ->setResponseMessage($status->getMessage())
-        ->save();
-      return $this->getExternalResponse($external_request);
+      $external_request
+        ->setIsSuccessful(0)
+        ->setResponseMessage($status->getMessage());
+
+      $save_request = true;
     } catch (Exception $ex) {
       // Not actually saving the request in this case
       $external_request->setResponseMessage($ex->getMessage());
-      return $this->getExternalResponse($external_request);
     }
+
+    if ($save_request) {
+      try {
+        $external_request->save();
+      } catch (AphrontDuplicateKeyQueryException $ex) {
+        // We may have raced against another identical request. If we did,
+        // just throw our result away and use the winner's result.
+        $external_request = $external_request->loadOneWhere(
+          'uriIndex = %s',
+          PhabricatorHash::digestForIndex($img_uri));
+        if (!$external_request) {
+          throw new Exception(
+            pht(
+              'Hit duplicate key collision when saving proxied image, but '.
+              'failed to load duplicate row (for URI "%s").',
+              $img_uri));
+        }
+      }
+    }
+
+    unset($unguarded);
+
+
+    return $this->getExternalResponse($external_request);
   }
 
   private function getExternalResponse(
     PhabricatorFileExternalRequest $request) {
-    if ($request->getIsSuccessful()) {
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs(array($request->getFilePHID()))
-        ->executeOne();
-      if (!$file) {
-        throw new Exception(pht(
-          'The underlying file does not exist, but the cached request was '.
-          'successful. This likely means the file record was manually deleted '.
-          'by an administrator.'));
-      }
-      return id(new AphrontRedirectResponse())
-        ->setIsExternal(true)
-        ->setURI($file->getViewURI());
-    } else {
-      throw new Exception(pht(
-        "The request to get the external file from '%s' was unsuccessful:\n %s",
-        $request->getURI(),
-        $request->getResponseMessage()));
+    if (!$request->getIsSuccessful()) {
+      throw new Exception(
+        pht(
+          'Request to "%s" failed: %s',
+          $request->getURI(),
+          $request->getResponseMessage()));
     }
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($request->getFilePHID()))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'The underlying file does not exist, but the cached request was '.
+          'successful. This likely means the file record was manually '.
+          'deleted by an administrator.'));
+    }
+
+    return id(new AphrontAjaxResponse())
+      ->setContent(
+        array(
+          'imageURI' => $file->getViewURI(),
+        ));
   }
 }

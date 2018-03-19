@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_owners.owners_path
+  ADD pathDisplay LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT};

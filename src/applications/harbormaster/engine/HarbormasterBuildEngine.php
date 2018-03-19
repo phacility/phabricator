@@ -147,7 +147,7 @@ final class HarbormasterBuildEngine extends Phobject {
     // If it is different, they will automatically stop what they're doing
     // and abort.
 
-    // Previously we used to delete targets, logs and artifacts here.  Instead
+    // Previously we used to delete targets, logs and artifacts here. Instead,
     // leave them around so users can view previous generations of this build.
   }
 

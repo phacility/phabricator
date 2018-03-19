@@ -23,15 +23,29 @@ final class PhabricatorMainMenuView extends AphrontView {
     return $this->controller;
   }
 
-  private function getFaviconURI($type = null) {
-    switch ($type) {
-      case 'message':
-        return celerity_get_resource_uri('/rsrc/favicons/favicon-message.ico');
-      case 'mention':
-        return celerity_get_resource_uri('/rsrc/favicons/favicon-mention.ico');
-      default:
-        return celerity_get_resource_uri('/rsrc/favicons/favicon.ico');
-    }
+  private static function getFavicons() {
+    $refs = array();
+
+    $refs['favicon'] = id(new PhabricatorFaviconRef())
+      ->setWidth(64)
+      ->setHeight(64);
+
+    $refs['message_favicon'] = id(new PhabricatorFaviconRef())
+      ->setWidth(64)
+      ->setHeight(64)
+      ->setEmblems(
+        array(
+          'dot-pink',
+          null,
+          null,
+          null,
+        ));
+
+    id(new PhabricatorFaviconRefQuery())
+      ->withRefs($refs)
+      ->execute();
+
+    return mpull($refs, 'getURI');
   }
 
   public function render() {
@@ -428,10 +442,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'countType'   => $conpherence_data['countType'],
           'countNumber' => $message_count_number,
           'unreadClass' => 'message-unread',
-          'favicon'     => $this->getFaviconURI('default'),
-          'message_favicon' => $this->getFaviconURI('message'),
-          'mention_favicon' => $this->getFaviconURI('mention'),
-        ));
+        ) + self::getFavicons());
 
       $message_notification_dropdown = javelin_tag(
         'div',
@@ -509,10 +520,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'countType'   => $notification_data['countType'],
           'countNumber' => $count_number,
           'unreadClass' => 'alert-unread',
-          'favicon'     => $this->getFaviconURI('default'),
-          'message_favicon' => $this->getFaviconURI('message'),
-          'mention_favicon' => $this->getFaviconURI('mention'),
-        ));
+        ) + self::getFavicons());
 
       $notification_dropdown = javelin_tag(
         'div',
@@ -594,10 +602,7 @@ final class PhabricatorMainMenuView extends AphrontView {
             'countType'   => null,
             'countNumber' => null,
             'unreadClass' => 'setup-unread',
-            'favicon'     => $this->getFaviconURI('default'),
-            'message_favicon' => $this->getFaviconURI('message'),
-            'mention_favicon' => $this->getFaviconURI('mention'),
-          ));
+          ) + self::getFavicons());
 
         $setup_notification_dropdown = javelin_tag(
           'div',

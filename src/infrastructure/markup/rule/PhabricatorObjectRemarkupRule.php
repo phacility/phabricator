@@ -279,6 +279,15 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       return $matches[0];
     }
 
+    // If we're rendering a table of contents, just render the raw input.
+    // This could perhaps be handled more gracefully but it seems unusual to
+    // put something like "{P123}" in a header and it's not obvious what users
+    // expect? See T8845.
+    $engine = $this->getEngine();
+    if ($engine->getState('toc')) {
+      return $matches[0];
+    }
+
     return $this->markupObject(array(
       'type' => 'embed',
       'id' => $matches[1],
@@ -289,6 +298,12 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
 
   public function markupObjectReference(array $matches) {
     if (!$this->isFlatText($matches[0])) {
+      return $matches[0];
+    }
+
+    // If we're rendering a table of contents, just render the monogram.
+    $engine = $this->getEngine();
+    if ($engine->getState('toc')) {
       return $matches[0];
     }
 

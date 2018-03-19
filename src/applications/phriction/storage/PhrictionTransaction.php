@@ -54,18 +54,6 @@ final class PhrictionTransaction
     return parent::shouldHideForMail($xactions);
   }
 
-  public function shouldHideForFeed() {
-    switch ($this->getTransactionType()) {
-      case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-      case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
-        return true;
-      case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
-        return $this->getMetadataValue('stub:create:phid', false);
-    }
-    return parent::shouldHideForFeed();
-  }
-
-
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {

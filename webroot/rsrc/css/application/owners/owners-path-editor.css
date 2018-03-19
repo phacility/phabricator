@@ -3,7 +3,8 @@
  */
 
 .owners-path-editor-table {
-  margin: 10px;
+  margin: 10px 0;
+  width: 100%;
 }
 
 .owners-path-editor-table td {
@@ -11,27 +12,38 @@
   vertical-align: middle;
 }
 
-.owners-path-editor-table select.owners-repo {
-  width: 150px;
+.owners-path-editor-table td.owners-path-mode-control {
+  width: 180px;
 }
 
-.owners-path-editor-table input {
-  width: 400px;
+.owners-path-editor-table td.owners-path-mode-control select {
+  width: 100%;
 }
 
-.owners-path-editor-table div.error-display {
-  padding: 4px 12px 0;
+.owners-path-editor-table td.owners-path-repo-control {
+  width: 280px;
 }
 
-.owners-path-editor-table div.validating {
-  color: {$greytext};
+.owners-path-editor-table td.owners-path-path-control {
+  width: auto;
 }
 
-.owners-path-editor-table div.invalid {
-  color: #aa0000;
+.owners-path-editor-table td.owners-path-path-control input {
+  width: 100%;
 }
 
-.owners-path-editor-table div.valid {
-  color: #00aa00;
-  font-weight: bold;
+.owners-path-editor-table td.owners-path-path-control .jx-typeahead-results a {
+  padding: 4px;
+}
+
+.owners-path-editor-table td.owners-path-icon-control {
+  width: 18px;
+}
+
+.owners-path-editor-table td.remove-column {
+  width: 100px;
+}
+
+.owners-path-editor-table td.remove-column a {
+  display: block;
 }

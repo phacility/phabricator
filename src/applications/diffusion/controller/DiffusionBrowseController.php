@@ -593,6 +593,9 @@ final class DiffusionBrowseController extends DiffusionController {
       array(
         'class' => 'diffusion-source remarkup-code PhabricatorMonospaced',
         'sigil' => 'phabricator-source',
+        'meta' => array(
+          'uri' => $this->getLineNumberBaseURI(),
+        ),
       ),
       $rows);
 
@@ -1126,11 +1129,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     // NOTE: We're doing this manually because rendering is otherwise
     // dominated by URI generation for very large files.
-    $line_base = (string)$drequest->generateURI(
-      array(
-        'action'  => 'browse',
-        'stable'  => true,
-      ));
+    $line_base = $this->getLineNumberBaseURI();
 
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-oncopy');
@@ -2039,4 +2038,13 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setTable($history_table);
   }
 
+  private function getLineNumberBaseURI() {
+    $drequest = $this->getDiffusionRequest();
+
+    return (string)$drequest->generateURI(
+      array(
+        'action'  => 'browse',
+        'stable'  => true,
+      ));
+  }
 }

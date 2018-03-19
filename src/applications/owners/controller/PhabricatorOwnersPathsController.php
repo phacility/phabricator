@@ -27,7 +27,7 @@ final class PhabricatorOwnersPathsController
 
       $path_refs = array();
       foreach ($paths as $key => $path) {
-        if (!isset($repos[$key])) {
+        if (!isset($repos[$key]) || !strlen($repos[$key])) {
           throw new Exception(
             pht(
               'No repository PHID for path "%s"!',
@@ -70,26 +70,39 @@ final class PhabricatorOwnersPathsController
       $path_refs = mpull($paths, 'getRef');
     }
 
-    $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->execute();
+    $template = new AphrontTokenizerTemplateView();
 
-    $default_paths = array();
-    foreach ($repos as $repo) {
-      $default_path = $repo->getDetail('default-owners-path');
-      if ($default_path) {
-        $default_paths[$repo->getPHID()] = $default_path;
-      }
+    $datasource = id(new DiffusionRepositoryDatasource())
+      ->setViewer($viewer);
+
+    $tokenizer_spec = array(
+      'markup' => $template->render(),
+      'config' => array(
+        'src' => $datasource->getDatasourceURI(),
+        'browseURI' => $datasource->getBrowseURI(),
+        'placeholder' => $datasource->getPlaceholderText(),
+        'limit' => 1,
+      ),
+    );
+
+    foreach ($path_refs as $key => $path_ref) {
+      $path_refs[$key]['repositoryValue'] = $datasource->getWireTokens(
+        array(
+          $path_ref['repositoryPHID'],
+        ));
     }
 
+    $icon_test = id(new PHUIIconView())
+      ->setIcon('fa-spinner grey')
+      ->setTooltip(pht('Validating...'));
 
-    $repo_map = array();
-    foreach ($repos as $key => $repo) {
-      $monogram = $repo->getMonogram();
-      $name = $repo->getName();
-      $repo_map[$repo->getPHID()] = "{$monogram} {$name}";
-    }
-    asort($repos);
+    $icon_okay = id(new PHUIIconView())
+      ->setIcon('fa-check-circle green')
+      ->setTooltip(pht('Path Exists in Repository'));
+
+    $icon_fail = id(new PHUIIconView())
+      ->setIcon('fa-question-circle-o red')
+      ->setTooltip(pht('Path Not Found On Default Branch'));
 
     $template = new AphrontTypeaheadTemplateView();
     $template = $template->render();
@@ -97,17 +110,23 @@ final class PhabricatorOwnersPathsController
     Javelin::initBehavior(
       'owners-path-editor',
       array(
-        'root'                => 'path-editor',
-        'table'               => 'paths',
-        'add_button'          => 'addpath',
-        'repositories'        => $repo_map,
-        'input_template'      => $template,
-        'pathRefs'            => $path_refs,
-
-        'completeURI'         => '/diffusion/services/path/complete/',
-        'validateURI'         => '/diffusion/services/path/validate/',
-
-        'repositoryDefaultPaths' => $default_paths,
+        'root' => 'path-editor',
+        'table' => 'paths',
+        'add_button' => 'addpath',
+        'input_template' => $template,
+        'pathRefs' => $path_refs,
+        'completeURI' => '/diffusion/services/path/complete/',
+        'validateURI' => '/diffusion/services/path/validate/',
+        'repositoryTokenizerSpec' => $tokenizer_spec,
+        'icons' => array(
+          'test' => hsprintf('%s', $icon_test),
+          'okay' => hsprintf('%s', $icon_okay),
+          'fail' => hsprintf('%s', $icon_fail),
+        ),
+        'modeOptions' => array(
+          0 => pht('Include'),
+          1 => pht('Exclude'),
+        ),
       ));
 
     require_celerity_resource('owners-path-editor-css');

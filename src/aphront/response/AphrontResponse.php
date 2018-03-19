@@ -103,9 +103,20 @@ abstract class AphrontResponse extends Phobject {
       return null;
     }
 
-    $csp = array();
+    // NOTE: We may return a response during preflight checks (for example,
+    // if a user has a bad version of PHP).
 
-    $cdn = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    // In this case, setup isn't complete yet and we can't access environmental
+    // configuration. If we aren't able to read the environment, just decline
+    // to emit a Content-Security-Policy header.
+
+    try {
+      $cdn = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    $csp = array();
     if ($cdn) {
       $default = $this->newContentSecurityPolicySource($cdn);
     } else {

@@ -404,4 +404,24 @@ JX.behavior('dark-console', function(config, statics) {
 
   }
 
+  if (!statics.expand) {
+    statics.expand = true;
+
+    var current_details = null;
+    JX.Stratcom.listen('click', 'darkconsole-expand', function(e) {
+      e.kill();
+
+      if (current_details) {
+        current_details.style.display = 'none';
+        current_details = null;
+      }
+
+      var id = e.getNodeData('darkconsole-expand').expandID;
+      var node = JX.$(id);
+
+      node.style.display = 'block';
+      current_details = node;
+    });
+  }
+
 });

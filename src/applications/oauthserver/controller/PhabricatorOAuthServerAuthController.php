@@ -172,9 +172,32 @@ final class PhabricatorOAuthServerAuthController
         ));
 
       if ($client->getIsTrusted()) {
-        return id(new AphrontRedirectResponse())
-          ->setIsExternal(true)
-          ->setURI((string)$full_uri);
+        // NOTE: See T13099. We currently emit a "Content-Security-Policy"
+        // which includes a narrow "form-action". At the time of writing,
+        // Chrome applies "form-action" to redirects following form submission.
+
+        // This can lead to a situation where a user enters the OAuth workflow
+        // and is prompted for MFA. When they submit an MFA response, the form
+        // can redirect here, and Chrome will block the "Location" redirect.
+
+        // To avoid this, render an interstitial. We only actually need to do
+        // this in Chrome (but do it everywhere for consistency) and only need
+        // to do it if the request is a redirect after a form submission (but
+        // we can't tell if it is or not).
+
+        Javelin::initBehavior(
+          'redirect',
+          array(
+            'uri' => (string)$full_uri,
+          ));
+
+        return $this->newDialog()
+          ->setTitle(pht('Authenticate: %s', $name))
+          ->appendParagraph(
+            pht(
+              'Authorization for "%s" confirmed, redirecting...',
+              phutil_tag('strong', array(), $name)))
+          ->addCancelButton((string)$full_uri, pht('Continue'));
       }
 
       // TODO: It would be nice to give the user more options here, like

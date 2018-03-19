@@ -97,6 +97,7 @@ final class DoorkeeperBridgeJIRA extends DoorkeeperBridge {
 
       $ref->setAttribute('title', idx($fields, 'summary'));
       $ref->setAttribute('description', idx($result, 'description'));
+      $ref->setAttribute('shortname', $result['key']);
 
       $obj = $ref->getExternalObject();
       if ($obj->getID()) {

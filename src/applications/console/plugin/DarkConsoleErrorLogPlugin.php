@@ -39,10 +39,13 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
       $file = $row['file'];
       $line = $row['line'];
 
-      $tag = phutil_tag(
+      $tag = javelin_tag(
         'a',
         array(
-          'onclick' => jsprintf('show_details(%d)', $index),
+          'sigil' => 'darkconsole-expand',
+          'meta' => array(
+            'expandID' => 'row-details-'.$index,
+          ),
         ),
         $row['str'].' at ['.basename($file).':'.$line.']');
       $rows[] = array($tag);
