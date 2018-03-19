@@ -104,6 +104,8 @@ return array(
     '@\.q$@' => 'mysql',
     '@\.jsx$@' => 'jsx',
     '@\\.html$@' => 'html+jinja',
+    '@\\.md@' => 'markdown',
+    '@\\.kt@' => 'kotlin',
   ),
 
   // We use phabricator as a mini-LDAP system.
