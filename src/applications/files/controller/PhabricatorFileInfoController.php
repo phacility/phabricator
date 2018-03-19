@@ -423,10 +423,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       }
 
       $view_icon = $candidate_engine->getViewAsIconIcon($ref);
+      $view_color = $candidate_engine->getViewAsIconColor($ref);
 
       $views[] = array(
         'viewKey' => $candidate_engine->getDocumentEngineKey(),
         'icon' => $view_icon,
+        'color' => $view_color,
         'name' => $label,
         'engineURI' => $candidate_engine->getRenderURI($ref),
       );

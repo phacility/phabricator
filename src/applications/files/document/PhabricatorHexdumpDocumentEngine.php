@@ -13,7 +13,11 @@ final class PhabricatorHexdumpDocumentEngine
     return 'fa-microchip';
   }
 
-  protected function getContentScore() {
+  protected function getByteLengthLimit() {
+    return (1024 * 1024 * 1);
+  }
+
+  protected function getContentScore(PhabricatorDocumentRef $ref) {
     return 500;
   }
 
@@ -21,8 +25,23 @@ final class PhabricatorHexdumpDocumentEngine
     return true;
   }
 
+  protected function canRenderPartialDocument(PhabricatorDocumentRef $ref) {
+    return true;
+  }
+
   protected function newDocumentContent(PhabricatorDocumentRef $ref) {
-    $content = $ref->loadData();
+    $limit = $this->getByteLengthLimit();
+    $length = $ref->getByteLength();
+
+    $is_partial = false;
+    if ($limit) {
+      if ($length > $limit) {
+        $is_partial = true;
+        $length = $limit;
+      }
+    }
+
+    $content = $ref->loadData(null, $length);
 
     $output = array();
     $offset = 0;
@@ -48,7 +67,19 @@ final class PhabricatorHexdumpDocumentEngine
       ),
       $output);
 
-    return $container;
+    $message = null;
+    if ($is_partial) {
+      $message = $this->newMessage(
+        pht(
+          'This document is too large to be completely rendered inline. The '.
+          'first %s bytes are shown.',
+          new PhutilNumber($limit)));
+    }
+
+    return array(
+      $message,
+      $container,
+    );
   }
 
   private function renderHex($bytes) {

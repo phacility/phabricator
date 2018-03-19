@@ -13,6 +13,10 @@ final class PhabricatorImageDocumentEngine
     return 'fa-file-image-o';
   }
 
+  protected function getByteLengthLimit() {
+    return (1024 * 1024 * 64);
+  }
+
   protected function canRenderDocumentType(PhabricatorDocumentRef $ref) {
     $file = $ref->getFile();
     if ($file) {

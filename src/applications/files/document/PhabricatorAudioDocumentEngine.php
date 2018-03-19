@@ -13,6 +13,10 @@ final class PhabricatorAudioDocumentEngine
     return 'fa-file-sound-o';
   }
 
+  protected function getByteLengthLimit() {
+    return null;
+  }
+
   protected function canRenderDocumentType(PhabricatorDocumentRef $ref) {
     $file = $ref->getFile();
     if ($file) {

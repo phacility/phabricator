@@ -233,9 +233,11 @@ div.phui-property-list-stacked .phui-property-list-properties
 }
 
 .document-engine-error {
-  margin: 20px auto;
+  margin: 20px;
+  padding: 12px;
   text-align: center;
   color: {$redtext};
+  background: {$sh-redbackground};
 }
 
 .document-engine-hexdump {

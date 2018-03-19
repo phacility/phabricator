@@ -13,8 +13,12 @@ final class PhabricatorVoidDocumentEngine
     return 'fa-file';
   }
 
-  protected function getContentScore() {
+  protected function getContentScore(PhabricatorDocumentRef $ref) {
     return 1000;
+  }
+
+  protected function getByteLengthLimit() {
+    return null;
   }
 
   protected function canRenderDocumentType(PhabricatorDocumentRef $ref) {

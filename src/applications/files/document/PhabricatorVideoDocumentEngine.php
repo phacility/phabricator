@@ -9,6 +9,16 @@ final class PhabricatorVideoDocumentEngine
     return pht('View as Video');
   }
 
+  protected function getContentScore(PhabricatorDocumentRef $ref) {
+    // Some video documents can be rendered as either video or audio, but we
+    // want to prefer video.
+    return 2500;
+  }
+
+  protected function getByteLengthLimit() {
+    return null;
+  }
+
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-film';
   }

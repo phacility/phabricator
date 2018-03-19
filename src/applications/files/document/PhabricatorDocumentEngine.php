@@ -22,6 +22,18 @@ abstract class PhabricatorDocumentEngine
     PhabricatorDocumentRef $ref);
 
   final public function newDocument(PhabricatorDocumentRef $ref) {
+    $can_complete = $this->canRenderCompleteDocument($ref);
+    $can_partial = $this->canRenderPartialDocument($ref);
+
+    if (!$can_complete && !$can_partial) {
+      return $this->newMessage(
+        pht(
+          'This document is too large to be rendered inline. (The document '.
+          'is %s bytes, the limit for this engine is %s bytes.)',
+          new PhutilNumber($ref->getByteLength()),
+          new PhutilNumber($this->getByteLengthLimit())));
+    }
+
     return $this->newDocumentContent($ref);
   }
 
@@ -51,18 +63,47 @@ abstract class PhabricatorDocumentEngine
   final public function newSortVector(PhabricatorDocumentRef $ref) {
     $content_score = $this->getContentScore($ref);
 
+    // Prefer engines which can render the entire file over engines which
+    // can only render a header, and engines which can render a header over
+    // engines which can't render anything.
+    if ($this->canRenderCompleteDocument($ref)) {
+      $limit_score = 0;
+    } else if ($this->canRenderPartialDocument($ref)) {
+      $limit_score = 1;
+    } else {
+      $limit_score = 2;
+    }
+
     return id(new PhutilSortVector())
+      ->addInt($limit_score)
       ->addInt(-$content_score);
   }
 
-  protected function getContentScore() {
+  protected function getContentScore(PhabricatorDocumentRef $ref) {
     return 2000;
   }
 
   abstract public function getViewAsLabel(PhabricatorDocumentRef $ref);
 
   public function getViewAsIconIcon(PhabricatorDocumentRef $ref) {
+    $can_complete = $this->canRenderCompleteDocument($ref);
+    $can_partial = $this->canRenderPartialDocument($ref);
+
+    if (!$can_complete && !$can_partial) {
+      return 'fa-times';
+    }
+
     return $this->getDocumentIconIcon($ref);
+  }
+
+  public function getViewAsIconColor(PhabricatorDocumentRef $ref) {
+    $can_complete = $this->canRenderCompleteDocument($ref);
+
+    if (!$can_complete) {
+      return 'grey';
+    }
+
+    return null;
   }
 
   public function getRenderURI(PhabricatorDocumentRef $ref) {
@@ -105,6 +146,35 @@ abstract class PhabricatorDocumentEngine
     $vectors = msortv($vectors, 'getSelf');
 
     return array_select_keys($engines, array_keys($vectors));
+  }
+
+  protected function getByteLengthLimit() {
+    return (1024 * 1024 * 8);
+  }
+
+  protected function canRenderCompleteDocument(PhabricatorDocumentRef $ref) {
+    $limit = $this->getByteLengthLimit();
+    if ($limit) {
+      $length = $ref->getByteLength();
+      if ($length > $limit) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  protected function canRenderPartialDocument(PhabricatorDocumentRef $ref) {
+    return false;
+  }
+
+  protected function newMessage($message) {
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'document-engine-error',
+      ),
+      $message);
   }
 
 }

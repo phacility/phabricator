@@ -56,7 +56,7 @@ final class PhabricatorDocumentRef
     return $this;
   }
 
-  public function getLength() {
+  public function getByteLength() {
     if ($this->byteLength !== null) {
       return $this->byteLength;
     }
@@ -68,9 +68,15 @@ final class PhabricatorDocumentRef
     return null;
   }
 
-  public function loadData() {
+  public function loadData($begin = null, $end = null) {
     if ($this->file) {
-      return $this->file->loadFileData();
+      $iterator = $this->file->getFileDataIterator($begin, $end);
+
+      $result = '';
+      foreach ($iterator as $chunk) {
+        $result .= $chunk;
+      }
+      return $result;
     }
 
     throw new PhutilMethodNotImplementedException();

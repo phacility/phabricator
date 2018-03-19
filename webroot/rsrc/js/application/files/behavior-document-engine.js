@@ -27,6 +27,7 @@ JX.behavior('document-engine', function() {
       view = new JX.PHUIXActionView()
         .setName(spec.name)
         .setIcon(spec.icon)
+        .setIconColor(spec.color)
         .setHref(spec.engineURI);
 
       view.setHandler(JX.bind(null, function(spec, e) {
