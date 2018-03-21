@@ -151,6 +151,10 @@ JX.install('Workflow', {
         // NOTE: Don't remove the current dialog yet because additional
         // handlers may still want to access the nodes.
 
+        // Disable whatever button the user clicked to prevent duplicate
+        // submission mistakes when you accidentally . See T11145.
+        button.disabled = true;
+
         active
           .setURI(form.getAttribute('action') || active.getURI())
           .setDataWithListOfPairs(data)
