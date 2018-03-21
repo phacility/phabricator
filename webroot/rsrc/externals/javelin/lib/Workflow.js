@@ -59,12 +59,15 @@ JX.install('Workflow', {
 
       workflow.setDataWithListOfPairs(pairs);
       workflow.setMethod(form.getAttribute('method'));
-      workflow.listen('finally', function() {
-        // Re-enable form elements
-        for (var ii = 0; ii < inputs.length; ii++) {
-          inputs[ii] && (inputs[ii].disabled = false);
+
+      var onfinally = JX.bind(workflow, function() {
+        if (!this._keepControlsDisabled) {
+          for (var ii = 0; ii < inputs.length; ii++) {
+            inputs[ii] && (inputs[ii].disabled = false);
+          }
         }
       });
+      workflow.listen('finally', onfinally);
 
       return workflow;
     },
@@ -242,6 +245,7 @@ JX.install('Workflow', {
     _form: null,
     _paused: 0,
     _nextCallback: null,
+    _keepControlsDisabled: false,
 
     getSourceForm: function() {
       return this._form;
@@ -282,6 +286,9 @@ JX.install('Workflow', {
         if (r.close) {
           this._pop();
         }
+
+        // If we're redirecting, don't re-enable for controls.
+        this._keepControlsDisabled = true;
 
         JX.$U(r.redirect).go();
       } else if (r && r.dialog) {
