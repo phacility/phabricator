@@ -80,7 +80,7 @@ abstract class DifferentialRevisionActionTransaction
     DifferentialRevision $revision) {
     return array(
       array(),
-      null,
+      array(),
     );
   }
 
