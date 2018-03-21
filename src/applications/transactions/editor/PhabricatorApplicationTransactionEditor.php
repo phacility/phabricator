@@ -3199,6 +3199,11 @@ abstract class PhabricatorApplicationTransactionEditor
     $story_type = $this->getFeedStoryType();
     $story_data = $this->getFeedStoryData($object, $xactions);
 
+    $unexpandable_phids = $this->mailUnexpandablePHIDs;
+    if (!is_array($unexpandable_phids)) {
+      $unexpandable_phids = array();
+    }
+
     id(new PhabricatorFeedStoryPublisher())
       ->setStoryType($story_type)
       ->setStoryData($story_data)
@@ -3207,6 +3212,7 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setRelatedPHIDs($related_phids)
       ->setPrimaryObjectPHID($object->getPHID())
       ->setSubscribedPHIDs($subscribed_phids)
+      ->setUnexpandablePHIDs($unexpandable_phids)
       ->setMailRecipientPHIDs($mailed_phids)
       ->setMailTags($this->getMailTags($object, $xactions))
       ->publish();
