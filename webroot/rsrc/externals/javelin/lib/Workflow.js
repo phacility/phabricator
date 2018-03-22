@@ -152,7 +152,8 @@ JX.install('Workflow', {
         // handlers may still want to access the nodes.
 
         // Disable whatever button the user clicked to prevent duplicate
-        // submission mistakes when you accidentally . See T11145.
+        // submission mistakes when you accidentally click a button multiple
+        // times. See T11145.
         button.disabled = true;
 
         active
