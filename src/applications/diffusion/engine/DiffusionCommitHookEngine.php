@@ -12,6 +12,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   const ENV_REPOSITORY = 'PHABRICATOR_REPOSITORY';
   const ENV_USER = 'PHABRICATOR_USER';
+  const ENV_REQUEST = 'PHABRICATOR_REQUEST';
   const ENV_REMOTE_ADDRESS = 'PHABRICATOR_REMOTE_ADDRESS';
   const ENV_REMOTE_PROTOCOL = 'PHABRICATOR_REMOTE_PROTOCOL';
 
@@ -25,6 +26,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $subversionRepository;
   private $remoteAddress;
   private $remoteProtocol;
+  private $requestIdentifier;
   private $transactionKey;
   private $mercurialHook;
   private $mercurialCommits = array();
@@ -56,6 +58,15 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function getRemoteAddress() {
     return $this->remoteAddress;
+  }
+
+  public function setRequestIdentifier($request_identifier) {
+    $this->requestIdentifier = $request_identifier;
+    return $this;
+  }
+
+  public function getRequestIdentifier() {
+    return $this->requestIdentifier;
   }
 
   public function setSubversionTransactionInfo($transaction, $repository) {
@@ -620,6 +631,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $env = array(
       self::ENV_REPOSITORY => $this->getRepository()->getPHID(),
       self::ENV_USER => $this->getViewer()->getUsername(),
+      self::ENV_REQUEST => $this->getRequestIdentifier(),
       self::ENV_REMOTE_PROTOCOL => $this->getRemoteProtocol(),
       self::ENV_REMOTE_ADDRESS => $this->getRemoteAddress(),
     );
@@ -1081,16 +1093,24 @@ final class DiffusionCommitHookEngine extends Phobject {
       ->setDevicePHID($device_phid)
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->attachRepository($this->getRepository())
-      ->setEpoch(time());
+      ->setEpoch(PhabricatorTime::getNow());
   }
 
   private function newPushEvent() {
     $viewer = $this->getViewer();
-    return PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
+
+    $event = PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->setRemoteAddress($this->getRemoteAddress())
       ->setRemoteProtocol($this->getRemoteProtocol())
-      ->setEpoch(time());
+      ->setEpoch(PhabricatorTime::getNow());
+
+    $identifier = $this->getRequestIdentifier();
+    if (strlen($identifier)) {
+      $event->setRequestIdentifier($identifier);
+    }
+
+    return $event;
   }
 
   private function rejectEnormousChanges(array $content_updates) {

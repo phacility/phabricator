@@ -11,6 +11,7 @@ final class PhabricatorRepositoryPushEvent
   protected $repositoryPHID;
   protected $epoch;
   protected $pusherPHID;
+  protected $requestIdentifier;
   protected $remoteAddress;
   protected $remoteProtocol;
   protected $rejectCode;
@@ -29,6 +30,7 @@ final class PhabricatorRepositoryPushEvent
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
+        'requestIdentifier' => 'bytes12?',
         'remoteAddress' => 'ipaddress?',
         'remoteProtocol' => 'text32?',
         'rejectCode' => 'uint32',
@@ -37,6 +39,10 @@ final class PhabricatorRepositoryPushEvent
       self::CONFIG_KEY_SCHEMA => array(
         'key_repository' => array(
           'columns' => array('repositoryPHID'),
+        ),
+        'key_request' => array(
+          'columns' => array('requestIdentifier'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

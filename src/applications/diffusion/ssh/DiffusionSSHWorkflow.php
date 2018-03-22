@@ -30,6 +30,11 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
       DiffusionCommitHookEngine::ENV_REMOTE_PROTOCOL => 'ssh',
     );
 
+    $identifier = $this->getRequestIdentifier();
+    if ($identifier !== null) {
+      $env[DiffusionCommitHookEngine::ENV_REQUEST] = $identifier;
+    }
+
     $remote_address = $this->getSSHRemoteAddress();
     if ($remote_address !== null) {
       $env[DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS] = $remote_address;

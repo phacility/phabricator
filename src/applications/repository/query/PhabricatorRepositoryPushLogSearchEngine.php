@@ -102,6 +102,9 @@ final class PhabricatorRepositoryPushLogSearchEngine
         ->setKey('pushID')
         ->setLabel(pht('Push ID')),
       $fields[] = id(new PhabricatorStringExportField())
+        ->setKey('unique')
+        ->setLabel(pht('Unique')),
+      $fields[] = id(new PhabricatorStringExportField())
         ->setKey('protocol')
         ->setLabel(pht('Protocol')),
       $fields[] = id(new PhabricatorPHIDExportField())
@@ -209,6 +212,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
 
       $map = array(
         'pushID' => $event->getID(),
+        'unique' => $event->getRequestIdentifier(),
         'protocol' => $event->getRemoteProtocol(),
         'repositoryPHID' => $repository_phid,
         'repository' => $repository_name,
