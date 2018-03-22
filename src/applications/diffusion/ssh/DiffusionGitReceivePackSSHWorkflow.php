@@ -14,6 +14,8 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
   }
 
   protected function executeRepositoryOperations() {
+    $host_wait_start = microtime(true);
+
     $repository = $this->getRepository();
     $viewer = $this->getSSHUser();
     $device = AlmanacKeys::getLiveDevice();
@@ -71,6 +73,14 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
         PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
         PhabricatorRepositoryStatusMessage::CODE_OKAY);
       $this->waitForGitClient();
+
+      $host_wait_end = microtime(true);
+
+      $this->updatePushLogWithTimingInformation(
+        $this->getClusterEngineLogProperty('writeWait'),
+        $this->getClusterEngineLogProperty('readWait'),
+        ($host_wait_end - $host_wait_start));
+
     }
 
     return $err;
@@ -87,6 +97,39 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
       ->setIOChannel($this->getIOChannel())
       ->setCommandChannelFromExecFuture($future)
       ->execute();
+  }
+
+  private function updatePushLogWithTimingInformation(
+    $write_wait,
+    $read_wait,
+    $host_wait) {
+
+    if ($write_wait !== null) {
+      $write_wait = (int)(1000000 * $write_wait);
+    }
+
+    if ($read_wait !== null) {
+      $read_wait = (int)(1000000 * $read_wait);
+    }
+
+    if ($host_wait !== null) {
+      $host_wait = (int)(1000000 * $host_wait);
+    }
+
+    $identifier = $this->getRequestIdentifier();
+
+    $event = new PhabricatorRepositoryPushEvent();
+    $conn = $event->establishConnection('w');
+
+    queryfx(
+      $conn,
+      'UPDATE %T SET writeWait = %nd, readWait = %nd, hostWait = %nd
+        WHERE requestIdentifier = %s',
+      $event->getTableName(),
+      $write_wait,
+      $read_wait,
+      $host_wait,
+      $identifier);
   }
 
 }

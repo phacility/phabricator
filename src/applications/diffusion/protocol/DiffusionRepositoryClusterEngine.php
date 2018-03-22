@@ -315,12 +315,15 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
     $lock_wait = phutil_units('2 minutes in seconds');
     try {
+      $write_wait_start = microtime(true);
+
       $start = PhabricatorTime::getNow();
       $step_wait = 1;
 
       while (true) {
         try {
           $write_lock->lock((int)floor($step_wait));
+          $write_wait_end = microtime(true);
           break;
         } catch (PhutilLockException $ex) {
           $waited = (PhabricatorTime::getNow() - $start);
@@ -370,12 +373,14 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
           'documentation for instructions.'));
     }
 
+    $read_wait_start = microtime(true);
     try {
       $max_version = $this->synchronizeWorkingCopyBeforeRead();
     } catch (Exception $ex) {
       $write_lock->unlock();
       throw $ex;
     }
+    $read_wait_end = microtime(true);
 
     $pid = getmypid();
     $hash = Filesystem::readRandomCharacters(12);
@@ -394,6 +399,15 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
     $this->clusterWriteVersion = $max_version;
     $this->clusterWriteLock = $write_lock;
+
+    $write_wait = ($write_wait_end - $write_wait_start);
+    $read_wait = ($read_wait_end - $read_wait_start);
+
+    $log = $this->logger;
+    if ($log) {
+      $log->writeClusterEngineLogProperty('readWait', $read_wait);
+      $log->writeClusterEngineLogProperty('writeWait', $write_wait);
+    }
   }
 
 

@@ -16,6 +16,9 @@ final class PhabricatorRepositoryPushEvent
   protected $remoteProtocol;
   protected $rejectCode;
   protected $rejectDetails;
+  protected $writeWait;
+  protected $readWait;
+  protected $hostWait;
 
   private $repository = self::ATTACHABLE;
   private $logs = self::ATTACHABLE;
@@ -35,6 +38,9 @@ final class PhabricatorRepositoryPushEvent
         'remoteProtocol' => 'text32?',
         'rejectCode' => 'uint32',
         'rejectDetails' => 'text64?',
+        'writeWait' => 'uint64?',
+        'readWait' => 'uint64?',
+        'hostWait' => 'uint64?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_repository' => array(
