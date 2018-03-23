@@ -257,3 +257,50 @@ div.phui-property-list-stacked .phui-property-list-properties
 .document-engine-pdf .phabricator-remarkup-embed-layout-link {
   text-align: left;
 }
+
+.document-engine-jupyter {
+  overflow: hidden;
+  margin: 20px;
+}
+
+.jupyter-cell-raw {
+  white-space: pre-wrap;
+  background: {$lightgreybackground};
+  color: {$greytext};
+  padding: 8px;
+}
+
+.jupyter-cell-code {
+  white-space: pre-wrap;
+  background: {$lightgreybackground};
+  padding: 8px;
+  border: 1px solid {$lightgreyborder};
+  border-radius: 2px;
+}
+
+.jupyter-notebook > tbody > tr > th,
+.jupyter-notebook > tbody > tr > td {
+  padding: 8px;
+}
+
+.jupyter-notebook > tbody > tr > th {
+  white-space: nowrap;
+  text-align: right;
+  min-width: 48px;
+  font-weight: bold;
+}
+
+.jupyter-output {
+  margin: 4px 0;
+  padding: 8px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.jupyter-output-stderr {
+  background: {$sh-redbackground};
+}
+
+.jupyter-output-html {
+  background: {$sh-indigobackground};
+}

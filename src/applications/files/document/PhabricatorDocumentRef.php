@@ -110,6 +110,15 @@ final class PhabricatorDocumentRef
     return (strpos($snippet, "\0") === false);
   }
 
+  public function isProbablyJSON() {
+    if (!$this->isProbablyText()) {
+      return false;
+    }
+
+    $snippet = $this->getSnippet();
+    return phutil_is_utf8($snippet);
+  }
+
   public function getSnippet() {
     if ($this->snippet === null) {
       $this->snippet = $this->loadData(null, (1024 * 1024 * 1));
