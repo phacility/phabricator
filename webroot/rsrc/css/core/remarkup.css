@@ -405,8 +405,9 @@ video.phabricator-media {
   color: {$blacktext};
   min-width: 256px;
   position: relative;
-  /*height: 22px;*/
   line-height: 20px;
+  overflow: hidden;
+  min-height: 38px;
 }
 
 .phabricator-remarkup-embed-layout-icon {
@@ -426,6 +427,9 @@ video.phabricator-media {
 .phabricator-remarkup-embed-layout-link:hover {
   border-color: {$violet};
   cursor: pointer;
+}
+
+.device-desktop .phabricator-remarkup-embed-layout-link:hover {
   text-decoration: none;
 }
 

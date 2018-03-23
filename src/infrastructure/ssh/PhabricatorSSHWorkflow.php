@@ -13,6 +13,7 @@ abstract class PhabricatorSSHWorkflow
   private $errorChannel;
   private $isClusterRequest;
   private $originalArguments;
+  private $requestIdentifier;
 
   public function isExecutable() {
     return false;
@@ -87,6 +88,15 @@ abstract class PhabricatorSSHWorkflow
 
   public function getOriginalArguments() {
     return $this->originalArguments;
+  }
+
+  public function setRequestIdentifier($request_identifier) {
+    $this->requestIdentifier = $request_identifier;
+    return $this;
+  }
+
+  public function getRequestIdentifier() {
+    return $this->requestIdentifier;
   }
 
   public function getSSHRemoteAddress() {

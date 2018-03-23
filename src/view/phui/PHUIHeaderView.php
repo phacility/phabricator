@@ -307,9 +307,14 @@ final class PHUIHeaderView extends AphrontTagView {
 
     $icon = null;
     if ($this->headerIcon) {
-      $icon = id(new PHUIIconView())
-        ->setIcon($this->headerIcon)
-        ->addClass('phui-header-icon');
+      if ($this->headerIcon instanceof PHUIIconView) {
+        $icon = id(clone $this->headerIcon)
+          ->addClass('phui-header-icon');
+      } else {
+        $icon = id(new PHUIIconView())
+          ->setIcon($this->headerIcon)
+          ->addClass('phui-header-icon');
+      }
     }
 
     $header_content = $this->header;

@@ -85,7 +85,11 @@ final class PhabricatorSourceCodeView extends AphrontView {
       }
 
       if ($this->canClickHighlight) {
-        $line_href = $base_uri.'$'.$line_number;
+        if ($base_uri) {
+          $line_href = $base_uri.'$'.$line_number;
+        } else {
+          $line_href = null;
+        }
 
         $tag_number = phutil_tag(
           'a',

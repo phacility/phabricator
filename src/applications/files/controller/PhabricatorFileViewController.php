@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFileInfoController extends PhabricatorFileController {
+final class PhabricatorFileViewController extends PhabricatorFileController {
 
   public function shouldAllowPublic() {
     return true;
@@ -23,6 +23,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       }
       return id(new AphrontRedirectResponse())->setURI($file->getInfoURI());
     }
+
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
@@ -62,31 +63,34 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $timeline = $this->buildTransactionView($file);
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
-      'F'.$file->getID(),
-      $this->getApplicationURI("/info/{$phid}/"));
+      $file->getMonogram(),
+      $file->getInfoURI());
     $crumbs->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('File'))
+      ->setHeaderText(pht('File Metadata'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     $this->buildPropertyViews($object_box, $file);
     $title = $file->getName();
 
+    $file_content = $this->newFileContent($file);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $object_box,
-        $timeline,
-      ));
+      ->setMainColumn(
+        array(
+          $object_box,
+          $file_content,
+          $timeline,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($file->getPHID()))
       ->appendChild($view);
-
   }
 
   private function buildTransactionView(PhabricatorFile $file) {
@@ -325,61 +329,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         $viewer->renderHandleList($phids));
     }
 
-    if ($file->isViewableImage()) {
-      $image = phutil_tag(
-        'img',
-        array(
-          'src' => $file->getViewURI(),
-          'class' => 'phui-property-list-image',
-        ));
-
-      $linked_image = phutil_tag(
-        'a',
-        array(
-          'href' => $file->getViewURI(),
-        ),
-        $image);
-
-      $media = id(new PHUIPropertyListView())
-        ->addImageContent($linked_image);
-
-      $box->addPropertyList($media);
-    } else if ($file->isVideo()) {
-      $video = phutil_tag(
-        'video',
-        array(
-          'controls' => 'controls',
-          'class' => 'phui-property-list-video',
-        ),
-        phutil_tag(
-          'source',
-          array(
-            'src' => $file->getViewURI(),
-            'type' => $file->getMimeType(),
-          )));
-      $media = id(new PHUIPropertyListView())
-        ->addImageContent($video);
-
-      $box->addPropertyList($media);
-    } else if ($file->isAudio()) {
-      $audio = phutil_tag(
-        'audio',
-        array(
-          'controls' => 'controls',
-          'class' => 'phui-property-list-audio',
-        ),
-        phutil_tag(
-          'source',
-          array(
-            'src' => $file->getViewURI(),
-            'type' => $file->getMimeType(),
-          )));
-      $media = id(new PHUIPropertyListView())
-        ->addImageContent($audio);
-
-      $box->addPropertyList($media);
-    }
-
     $engine = $this->loadStorageEngine($file);
     if ($engine) {
       if ($engine->isChunkEngine()) {
@@ -453,5 +402,99 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     return $engine;
   }
 
+  private function newFileContent(PhabricatorFile $file) {
+    $viewer = $this->getViewer();
+    $request = $this->getRequest();
+
+    $ref = id(new PhabricatorDocumentRef())
+      ->setFile($file);
+
+    $engines = PhabricatorDocumentEngine::getEnginesForRef($viewer, $ref);
+
+    $engine_key = $request->getURIData('engineKey');
+    if (!isset($engines[$engine_key])) {
+      $engine_key = head_key($engines);
+    }
+    $engine = $engines[$engine_key];
+
+    $lines = $request->getURILineRange('lines', 1000);
+    if ($lines) {
+      $engine->setHighlightedLines(range($lines[0], $lines[1]));
+    }
+
+    $views = array();
+    foreach ($engines as $candidate_key => $candidate_engine) {
+      $label = $candidate_engine->getViewAsLabel($ref);
+      if ($label === null) {
+        continue;
+      }
+
+      $view_uri = '/file/view/'.$file->getID().'/'.$candidate_key.'/';
+
+      $view_icon = $candidate_engine->getViewAsIconIcon($ref);
+      $view_color = $candidate_engine->getViewAsIconColor($ref);
+      $loading = $candidate_engine->newLoadingContent($ref);
+
+      $views[] = array(
+        'viewKey' => $candidate_engine->getDocumentEngineKey(),
+        'icon' => $view_icon,
+        'color' => $view_color,
+        'name' => $label,
+        'engineURI' => $candidate_engine->getRenderURI($ref),
+        'viewURI' => $view_uri,
+        'loadingMarkup' => hsprintf('%s', $loading),
+      );
+    }
+
+    $viewport_id = celerity_generate_unique_node_id();
+    $control_id = celerity_generate_unique_node_id();
+    $icon = $engine->newDocumentIcon($ref);
+
+    if ($engine->shouldRenderAsync($ref)) {
+      $content = $engine->newLoadingContent($ref);
+      $config = array(
+        'renderControlID' => $control_id,
+      );
+    } else {
+      $content = $engine->newDocument($ref);
+      $config = array();
+    }
+
+    Javelin::initBehavior('document-engine', $config);
+
+    $viewport = phutil_tag(
+      'div',
+      array(
+        'id' => $viewport_id,
+      ),
+      $content);
+
+    $meta = array(
+      'viewportID' => $viewport_id,
+      'viewKey' => $engine->getDocumentEngineKey(),
+      'views' => $views,
+      'standaloneURI' => $engine->getRenderURI($ref),
+    );
+
+    $view_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View Options'))
+      ->setIcon('fa-file-image-o')
+      ->setColor(PHUIButtonView::GREY)
+      ->setID($control_id)
+      ->setMetadata($meta)
+      ->setDropdown(true)
+      ->addSigil('document-engine-view-dropdown');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeaderIcon($icon)
+      ->setHeader($ref->getName())
+      ->addActionLink($view_button);
+
+    return id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setHeader($header)
+      ->appendChild($viewport);
+  }
 
 }

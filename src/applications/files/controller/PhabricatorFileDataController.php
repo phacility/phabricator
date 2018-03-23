@@ -73,11 +73,14 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       list($begin, $end) = $response->parseHTTPRange($range);
     }
 
-    $is_viewable = $file->isViewableInBrowser();
+    if (!$file->isViewableInBrowser()) {
+      $is_download = true;
+    }
+
     $request_type = $request->getHTTPHeader('X-Phabricator-Request-Type');
     $is_lfs = ($request_type == 'git-lfs');
 
-    if ($is_viewable && !$is_download) {
+    if (!$is_download) {
       $response->setMimeType($file->getViewableMimeType());
     } else {
       $is_post = $request->isHTTPPost();
@@ -108,6 +111,19 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
 
     $response->setContentLength($file->getByteSize());
     $response->setContentIterator($iterator);
+
+    // In Chrome, we must permit this domain in "object-src" CSP when serving a
+    // PDF or the browser will refuse to render it.
+    if (!$is_download && $file->isPDF()) {
+      $request_uri = id(clone $request->getAbsoluteRequestURI())
+        ->setPath(null)
+        ->setFragment(null)
+        ->setQueryParams(array());
+
+      $response->addContentSecurityPolicyURI(
+        'object-src',
+        (string)$request_uri);
+    }
 
     return $response;
   }

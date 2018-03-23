@@ -98,54 +98,66 @@ final class PhabricatorRepositoryPushLogSearchEngine
     $viewer = $this->requireViewer();
 
     $fields = array(
-      $fields[] = id(new PhabricatorIDExportField())
+      id(new PhabricatorIDExportField())
         ->setKey('pushID')
         ->setLabel(pht('Push ID')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
+        ->setKey('unique')
+        ->setLabel(pht('Unique')),
+      id(new PhabricatorStringExportField())
         ->setKey('protocol')
         ->setLabel(pht('Protocol')),
-      $fields[] = id(new PhabricatorPHIDExportField())
+      id(new PhabricatorPHIDExportField())
         ->setKey('repositoryPHID')
         ->setLabel(pht('Repository PHID')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('repository')
         ->setLabel(pht('Repository')),
-      $fields[] = id(new PhabricatorPHIDExportField())
+      id(new PhabricatorPHIDExportField())
         ->setKey('pusherPHID')
         ->setLabel(pht('Pusher PHID')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('pusher')
         ->setLabel(pht('Pusher')),
-      $fields[] = id(new PhabricatorPHIDExportField())
+      id(new PhabricatorPHIDExportField())
         ->setKey('devicePHID')
         ->setLabel(pht('Device PHID')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('device')
         ->setLabel(pht('Device')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('type')
         ->setLabel(pht('Ref Type')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('name')
         ->setLabel(pht('Ref Name')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('old')
         ->setLabel(pht('Ref Old')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('new')
         ->setLabel(pht('Ref New')),
-      $fields[] = id(new PhabricatorIntExportField())
+      id(new PhabricatorIntExportField())
         ->setKey('flags')
         ->setLabel(pht('Flags')),
-      $fields[] = id(new PhabricatorStringListExportField())
+      id(new PhabricatorStringListExportField())
         ->setKey('flagNames')
         ->setLabel(pht('Flag Names')),
-      $fields[] = id(new PhabricatorIntExportField())
+      id(new PhabricatorIntExportField())
         ->setKey('result')
         ->setLabel(pht('Result')),
-      $fields[] = id(new PhabricatorStringExportField())
+      id(new PhabricatorStringExportField())
         ->setKey('resultName')
         ->setLabel(pht('Result Name')),
+      id(new PhabricatorIntExportField())
+        ->setKey('writeWait')
+        ->setLabel(pht('Write Wait (us)')),
+      id(new PhabricatorIntExportField())
+        ->setKey('readWait')
+        ->setLabel(pht('Read Wait (us)')),
+      id(new PhabricatorIntExportField())
+        ->setKey('hostWait')
+        ->setLabel(pht('Host Wait (us)')),
     );
 
     if ($viewer->getIsAdmin()) {
@@ -209,6 +221,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
 
       $map = array(
         'pushID' => $event->getID(),
+        'unique' => $event->getRequestIdentifier(),
         'protocol' => $event->getRemoteProtocol(),
         'repositoryPHID' => $repository_phid,
         'repository' => $repository_name,
@@ -224,6 +237,9 @@ final class PhabricatorRepositoryPushLogSearchEngine
         'flagNames' => $flag_names,
         'result' => $result,
         'resultName' => $result_name,
+        'writeWait' => $event->getWriteWait(),
+        'readWait' => $event->getReadWait(),
+        'hostWait' => $event->getHostWait(),
       );
 
       if ($viewer->getIsAdmin()) {

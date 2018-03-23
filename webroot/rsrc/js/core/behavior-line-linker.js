@@ -145,6 +145,10 @@ JX.behavior('phabricator-line-linker', function() {
       var t = getRowNumber(target);
       var uri = JX.Stratcom.getData(root).uri;
 
+      if (!uri) {
+        uri = ('' + window.location).split('$')[0];
+      }
+
       origin = null;
       target = null;
       root = null;
