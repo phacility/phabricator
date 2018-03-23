@@ -45,6 +45,8 @@ final class PhabricatorFilesConfigOptions
       'video/ogg' => 'video/ogg',
       'video/webm' => 'video/webm',
       'video/quicktime' => 'video/quicktime',
+
+      'application/pdf' => 'application/pdf',
     );
 
     $image_default = array(

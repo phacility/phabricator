@@ -248,3 +248,12 @@ div.phui-property-list-stacked .phui-property-list-properties
 .document-engine-remarkup {
   margin: 20px;
 }
+
+.document-engine-pdf {
+  margin: 20px;
+  text-align: center;
+}
+
+.document-engine-pdf .phabricator-remarkup-embed-layout-link {
+  text-align: left;
+}

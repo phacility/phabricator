@@ -930,6 +930,19 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return idx($mime_map, $mime_type);
   }
 
+  public function isPDF() {
+    if (!$this->isViewableInBrowser()) {
+      return false;
+    }
+
+    $mime_map = array(
+      'application/pdf' => 'application/pdf',
+    );
+
+    $mime_type = $this->getMimeType();
+    return idx($mime_map, $mime_type);
+  }
+
   public function isTransformableImage() {
     // NOTE: The way the 'gd' extension works in PHP is that you can install it
     // with support for only some file types, so it might be able to handle
