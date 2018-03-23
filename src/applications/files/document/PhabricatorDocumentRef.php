@@ -7,6 +7,7 @@ final class PhabricatorDocumentRef
   private $mimeType;
   private $file;
   private $byteLength;
+  private $snippet;
 
   public function setFile(PhabricatorFile $file) {
     $this->file = $file;
@@ -102,6 +103,19 @@ final class PhabricatorDocumentRef
     $mime_type = trim($mime_type);
     $mime_type = phutil_utf8_strtolower($mime_type);
     return $mime_type;
+  }
+
+  public function isProbablyText() {
+    $snippet = $this->getSnippet();
+    return (strpos($snippet, "\0") === false);
+  }
+
+  public function getSnippet() {
+    if ($this->snippet === null) {
+      $this->snippet = $this->loadData(null, (1024 * 1024 * 1));
+    }
+
+    return $this->snippet;
   }
 
 }
