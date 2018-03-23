@@ -258,6 +258,10 @@ div.phui-property-list-stacked .phui-property-list-properties
   text-align: left;
 }
 
+.document-engine-text .phabricator-source-code-container {
+  border: none;
+}
+
 .document-engine-jupyter {
   overflow: hidden;
   margin: 20px;
