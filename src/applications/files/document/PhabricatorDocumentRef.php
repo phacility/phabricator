@@ -116,6 +116,10 @@ final class PhabricatorDocumentRef
     }
 
     $snippet = $this->getSnippet();
+    if (!preg_match('/^\s*[{[]/', $snippet)) {
+      return false;
+    }
+
     return phutil_is_utf8($snippet);
   }
 
