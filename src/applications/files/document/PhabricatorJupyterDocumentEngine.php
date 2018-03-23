@@ -13,6 +13,14 @@ final class PhabricatorJupyterDocumentEngine
     return 'fa-sun-o';
   }
 
+  protected function getDocumentRenderingText(PhabricatorDocumentRef $ref) {
+    return pht('Rendering Jupyter Notebook...');
+  }
+
+  public function shouldRenderAsync(PhabricatorDocumentRef $ref) {
+    return true;
+  }
+
   protected function getContentScore(PhabricatorDocumentRef $ref) {
     $name = $ref->getName();
 

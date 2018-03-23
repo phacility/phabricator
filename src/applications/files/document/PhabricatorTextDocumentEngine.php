@@ -11,8 +11,8 @@ abstract class PhabricatorTextDocumentEngine
     $lines = phutil_split_lines($content);
 
     $view = id(new PhabricatorSourceCodeView())
-      ->setLines($lines)
-      ->disableHighlightOnClick();
+      ->setHighlights($this->getHighlightedLines())
+      ->setLines($lines);
 
     $container = phutil_tag(
       'div',

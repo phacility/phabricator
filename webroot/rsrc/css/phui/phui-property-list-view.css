@@ -267,6 +267,23 @@ div.phui-property-list-stacked .phui-property-list-properties
   margin: 20px;
 }
 
+.document-engine-in-flight {
+  opacity: 0.25;
+}
+
+.document-engine-loading {
+  margin: 20px;
+  text-align: center;
+  color: {$lightgreytext};
+}
+
+.document-engine-loading .phui-icon-view {
+  display: block;
+  font-size: 48px;
+  color: {$lightgreyborder};
+  padding: 8px;
+}
+
 .jupyter-cell-raw {
   white-space: pre-wrap;
   background: {$lightgreybackground};

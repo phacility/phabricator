@@ -4,6 +4,7 @@ abstract class PhabricatorDocumentEngine
   extends Phobject {
 
   private $viewer;
+  private $highlightedLines = array();
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -14,8 +15,21 @@ abstract class PhabricatorDocumentEngine
     return $this->viewer;
   }
 
+  final public function setHighlightedLines(array $highlighted_lines) {
+    $this->highlightedLines = $highlighted_lines;
+    return $this;
+  }
+
+  final public function getHighlightedLines() {
+    return $this->highlightedLines;
+  }
+
   final public function canRenderDocument(PhabricatorDocumentRef $ref) {
     return $this->canRenderDocumentType($ref);
+  }
+
+  public function shouldRenderAsync(PhabricatorDocumentRef $ref) {
+    return false;
   }
 
   abstract protected function canRenderDocumentType(
@@ -47,6 +61,10 @@ abstract class PhabricatorDocumentEngine
 
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-file-o';
+  }
+
+  protected function getDocumentRenderingText(PhabricatorDocumentRef $ref) {
+    return pht('Loading...');
   }
 
   final public function getDocumentEngineKey() {
@@ -175,6 +193,22 @@ abstract class PhabricatorDocumentEngine
         'class' => 'document-engine-error',
       ),
       $message);
+  }
+
+  final public function newLoadingContent(PhabricatorDocumentRef $ref) {
+    $spinner = id(new PHUIIconView())
+      ->setIcon('fa-gear')
+      ->addClass('ph-spin');
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'document-engine-loading',
+      ),
+      array(
+        $spinner,
+        $this->getDocumentRenderingText($ref),
+      ));
   }
 
 }

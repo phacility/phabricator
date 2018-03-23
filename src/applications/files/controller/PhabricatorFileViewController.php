@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFileInfoController extends PhabricatorFileController {
+final class PhabricatorFileViewController extends PhabricatorFileController {
 
   public function shouldAllowPublic() {
     return true;
@@ -404,26 +404,36 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
   private function newFileContent(PhabricatorFile $file) {
     $viewer = $this->getViewer();
+    $request = $this->getRequest();
 
     $ref = id(new PhabricatorDocumentRef())
       ->setFile($file);
 
     $engines = PhabricatorDocumentEngine::getEnginesForRef($viewer, $ref);
-    $engine = head($engines);
 
-    $content = $engine->newDocument($ref);
+    $engine_key = $request->getURIData('engineKey');
+    if (!isset($engines[$engine_key])) {
+      $engine_key = head_key($engines);
+    }
+    $engine = $engines[$engine_key];
 
-    $icon = $engine->newDocumentIcon($ref);
+    $lines = $request->getURILineRange('lines', 1000);
+    if ($lines) {
+      $engine->setHighlightedLines(range($lines[0], $lines[1]));
+    }
 
     $views = array();
-    foreach ($engines as $candidate_engine) {
+    foreach ($engines as $candidate_key => $candidate_engine) {
       $label = $candidate_engine->getViewAsLabel($ref);
       if ($label === null) {
         continue;
       }
 
+      $view_uri = '/file/view/'.$file->getID().'/'.$candidate_key.'/';
+
       $view_icon = $candidate_engine->getViewAsIconIcon($ref);
       $view_color = $candidate_engine->getViewAsIconColor($ref);
+      $loading = $candidate_engine->newLoadingContent($ref);
 
       $views[] = array(
         'viewKey' => $candidate_engine->getDocumentEngineKey(),
@@ -431,12 +441,26 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         'color' => $view_color,
         'name' => $label,
         'engineURI' => $candidate_engine->getRenderURI($ref),
+        'viewURI' => $view_uri,
+        'loadingMarkup' => hsprintf('%s', $loading),
       );
     }
 
-    Javelin::initBehavior('document-engine');
-
     $viewport_id = celerity_generate_unique_node_id();
+    $control_id = celerity_generate_unique_node_id();
+    $icon = $engine->newDocumentIcon($ref);
+
+    if ($engine->shouldRenderAsync($ref)) {
+      $content = $engine->newLoadingContent($ref);
+      $config = array(
+        'renderControlID' => $control_id,
+      );
+    } else {
+      $content = $engine->newDocument($ref);
+      $config = array();
+    }
+
+    Javelin::initBehavior('document-engine', $config);
 
     $viewport = phutil_tag(
       'div',
@@ -457,6 +481,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->setText(pht('View Options'))
       ->setIcon('fa-file-image-o')
       ->setColor(PHUIButtonView::GREY)
+      ->setID($control_id)
       ->setMetadata($meta)
       ->setDropdown(true)
       ->addSigil('document-engine-view-dropdown');

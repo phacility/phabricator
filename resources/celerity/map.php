@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => 'e68cf1fa',
     'conpherence.pkg.js' => '15191c65',
-    'core.pkg.css' => 'da541195',
+    'core.pkg.css' => '3fd3b7b8',
     'core.pkg.js' => 'b9b4a943',
     'differential.pkg.css' => '113e692c',
     'differential.pkg.js' => 'f6d809c0',
@@ -168,7 +168,7 @@ return array(
     'rsrc/css/phui/phui-object-box.css' => '9cff003c',
     'rsrc/css/phui/phui-pager.css' => 'edcbc226',
     'rsrc/css/phui/phui-pinboard-view.css' => '2495140e',
-    'rsrc/css/phui/phui-property-list-view.css' => '54c071ed',
+    'rsrc/css/phui/phui-property-list-view.css' => 'de4754d8',
     'rsrc/css/phui/phui-remarkup-preview.css' => '54a34863',
     'rsrc/css/phui/phui-segment-bar-view.css' => 'b1d1b892',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
@@ -392,7 +392,7 @@ return array(
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'f01586dc',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '1db13e70',
     'rsrc/js/application/drydock/drydock-live-operation-status.js' => '901935ef',
-    'rsrc/js/application/files/behavior-document-engine.js' => '396ef112',
+    'rsrc/js/application/files/behavior-document-engine.js' => 'd3f8623c',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8499b6ab',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
     'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => '191b4909',
@@ -473,7 +473,7 @@ return array(
     'rsrc/js/core/behavior-keyboard-pager.js' => 'a8da01f0',
     'rsrc/js/core/behavior-keyboard-shortcuts.js' => '01fca1f0',
     'rsrc/js/core/behavior-lightbox-attachments.js' => '6b31879a',
-    'rsrc/js/core/behavior-line-linker.js' => 'a9b946f8',
+    'rsrc/js/core/behavior-line-linker.js' => '13e39479',
     'rsrc/js/core/behavior-more.js' => 'a80d0378',
     'rsrc/js/core/behavior-object-selector.js' => '77c1f0b0',
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
@@ -607,7 +607,7 @@ return array(
     'javelin-behavior-diffusion-jump-to' => '73d09eef',
     'javelin-behavior-diffusion-locate-file' => '6d3e1947',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f01586dc',
-    'javelin-behavior-document-engine' => '396ef112',
+    'javelin-behavior-document-engine' => 'd3f8623c',
     'javelin-behavior-doorkeeper-tag' => '1db13e70',
     'javelin-behavior-drydock-live-operation-status' => '901935ef',
     'javelin-behavior-durable-column' => '2ae077e1',
@@ -638,7 +638,7 @@ return array(
     'javelin-behavior-phabricator-gesture-example' => '558829c2',
     'javelin-behavior-phabricator-keyboard-pager' => 'a8da01f0',
     'javelin-behavior-phabricator-keyboard-shortcuts' => '01fca1f0',
-    'javelin-behavior-phabricator-line-linker' => 'a9b946f8',
+    'javelin-behavior-phabricator-line-linker' => '13e39479',
     'javelin-behavior-phabricator-nav' => '836f966d',
     'javelin-behavior-phabricator-notification-example' => '8ce821c5',
     'javelin-behavior-phabricator-object-selector' => '77c1f0b0',
@@ -850,7 +850,7 @@ return array(
     'phui-oi-simple-ui-css' => 'a8beebea',
     'phui-pager-css' => 'edcbc226',
     'phui-pinboard-view-css' => '2495140e',
-    'phui-property-list-view-css' => '54c071ed',
+    'phui-property-list-view-css' => 'de4754d8',
     'phui-remarkup-preview-css' => '54a34863',
     'phui-segment-bar-view-css' => 'b1d1b892',
     'phui-spacing-css' => '042804d6',
@@ -963,6 +963,12 @@ return array(
     '0f764c35' => array(
       'javelin-install',
       'javelin-util',
+    ),
+    '13e39479' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-history',
     ),
     '15d5ff71' => array(
       'aphront-typeahead-control-css',
@@ -1102,11 +1108,6 @@ return array(
       'javelin-util',
       'javelin-dom',
       'javelin-vector',
-    ),
-    '396ef112' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
     ),
     '3ab51e2c' => array(
       'javelin-behavior',
@@ -1751,12 +1752,6 @@ return array(
       'javelin-uri',
       'phabricator-keyboard-shortcut',
     ),
-    'a9b946f8' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-history',
-    ),
     'a9f88de2' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -2006,6 +2001,11 @@ return array(
     ),
     'd254d646' => array(
       'javelin-util',
+    ),
+    'd3f8623c' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
     ),
     'd4505101' => array(
       'javelin-stratcom',
