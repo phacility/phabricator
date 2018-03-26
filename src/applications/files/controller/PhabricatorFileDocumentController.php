@@ -7,6 +7,10 @@ final class PhabricatorFileDocumentController
   private $engine;
   private $ref;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
