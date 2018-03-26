@@ -260,9 +260,8 @@ final class PhabricatorJupyterDocumentEngine
 
           $raw_data = $data[$image_format];
           if (!is_array($raw_data)) {
-            continue;
+            $raw_data = array($raw_data);
           }
-
           $raw_data = implode('', $raw_data);
 
           $content = phutil_tag(
