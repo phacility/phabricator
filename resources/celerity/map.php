@@ -392,7 +392,7 @@ return array(
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'f01586dc',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '1db13e70',
     'rsrc/js/application/drydock/drydock-live-operation-status.js' => '901935ef',
-    'rsrc/js/application/files/behavior-document-engine.js' => 'd3f8623c',
+    'rsrc/js/application/files/behavior-document-engine.js' => '194cbe53',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8499b6ab',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
     'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => '191b4909',
@@ -607,7 +607,7 @@ return array(
     'javelin-behavior-diffusion-jump-to' => '73d09eef',
     'javelin-behavior-diffusion-locate-file' => '6d3e1947',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f01586dc',
-    'javelin-behavior-document-engine' => 'd3f8623c',
+    'javelin-behavior-document-engine' => '194cbe53',
     'javelin-behavior-doorkeeper-tag' => '1db13e70',
     'javelin-behavior-drydock-live-operation-status' => '901935ef',
     'javelin-behavior-durable-column' => '2ae077e1',
@@ -982,6 +982,11 @@ return array(
     ),
     '191b4909' => array(
       'javelin-behavior',
+    ),
+    '194cbe53' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
     ),
     '1ad0a787' => array(
       'javelin-install',
@@ -2001,11 +2006,6 @@ return array(
     ),
     'd254d646' => array(
       'javelin-util',
-    ),
-    'd3f8623c' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
     ),
     'd4505101' => array(
       'javelin-stratcom',

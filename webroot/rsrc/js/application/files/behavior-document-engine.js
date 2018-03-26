@@ -73,7 +73,6 @@ JX.behavior('document-engine', function(config, statics) {
     var handler = JX.bind(null, onrender, data, data.sequence);
 
     data.viewKey = spec.viewKey;
-    JX.History.replace(spec.viewURI);
 
     new JX.Request(spec.engineURI, handler)
       .send();
@@ -91,6 +90,10 @@ JX.behavior('document-engine', function(config, statics) {
 
       var load = JX.bind(null, onloading, data, spec);
       data.loadTimer = setTimeout(load, 333);
+
+      // Replace the URI with the URI for the specific rendering the user
+      // has selected.
+      JX.History.replace(spec.viewURI);
     }
   }
 
@@ -128,7 +131,7 @@ JX.behavior('document-engine', function(config, statics) {
     statics.initialized = true;
   }
 
-  if (config.renderControlID) {
+  if (config && config.renderControlID) {
     var control = JX.$(config.renderControlID);
     var data = JX.Stratcom.getData(control);
 
