@@ -46,9 +46,8 @@ final class PhabricatorRepositoryPushEvent
         'key_repository' => array(
           'columns' => array('repositoryPHID'),
         ),
-        'key_request' => array(
+        'key_identifier' => array(
           'columns' => array('requestIdentifier'),
-          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
