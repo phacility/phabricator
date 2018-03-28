@@ -1120,6 +1120,11 @@ abstract class PhabricatorApplicationTransactionEditor
       // We are the Herald editor, so stop work here and return the updated
       // transactions.
       return $xactions;
+    } else if ($this->getIsInverseEdgeEditor()) {
+      // Do not run Herald if we're just recording that this object was
+      // mentioned elsewhere. This tends to create Herald side effects which
+      // feel arbitrary, and can really slow down edits which mention a large
+      // number of other objects. See T13114.
     } else if ($this->shouldApplyHeraldRules($object, $xactions)) {
       // We are not the Herald editor, so try to apply Herald rules.
       $herald_xactions = $this->applyHeraldRules($object, $xactions);
