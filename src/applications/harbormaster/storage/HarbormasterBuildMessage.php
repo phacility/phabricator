@@ -6,8 +6,11 @@
  * conditions where we receive a message before a build plan is ready to
  * accept it.
  */
-final class HarbormasterBuildMessage extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+final class HarbormasterBuildMessage
+  extends HarbormasterDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $authorPHID;
   protected $receiverPHID;
@@ -72,6 +75,15 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('Build messages have the same policies as their receivers.');
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
   }
 
 }

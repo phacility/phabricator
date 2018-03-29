@@ -1,7 +1,10 @@
 <?php
 
-final class HarbormasterBuildArtifact extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+final class HarbormasterBuildArtifact
+  extends HarbormasterDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $buildTargetPHID;
   protected $artifactType;
@@ -145,6 +148,21 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('Users must be able to see a buildable to see its artifacts.');
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $viewer = $this->getViewer();
+
+    $this->openTransaction();
+      $this->releaseArtifact($viewer);
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }
