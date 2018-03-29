@@ -137,7 +137,9 @@ final class DifferentialRevisionUpdateTransaction
         continue;
       }
 
-      $is_attached = ($diff->getRevisionID() == $object->getID());
+      $is_attached =
+        ($diff->getRevisionID()) &&
+        ($diff->getRevisionID() == $object->getID());
       if ($is_attached) {
         $is_active = ($diff_phid == $object->getActiveDiffPHID());
       } else {
