@@ -724,6 +724,11 @@ var.remarkup-assist-textarea {
   color: {$darkgreytext};
 }
 
+.phuix-autocomplete-list a.jx-result .tokenizer-result-closed {
+  color: {$lightgreytext};
+  text-decoration: line-through;
+}
+
 .phuix-autocomplete-list a.jx-result .phui-icon-view {
   margin-right: 4px;
   color: {$lightbluetext};
