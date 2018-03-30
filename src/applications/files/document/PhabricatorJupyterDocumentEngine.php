@@ -196,7 +196,7 @@ final class PhabricatorJupyterDocumentEngine
     $content = implode('', $content);
 
     $content = PhabricatorSyntaxHighlighter::highlightWithLanguage(
-      'python',
+      'py',
       $content);
 
     $outputs = array();
