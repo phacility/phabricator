@@ -9,6 +9,10 @@ final class PhabricatorSourceDocumentEngine
     return pht('View as Source');
   }
 
+  public function canConfigureHighlighting(PhabricatorDocumentRef $ref) {
+    return true;
+  }
+
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-code';
   }
@@ -20,9 +24,16 @@ final class PhabricatorSourceDocumentEngine
   protected function newDocumentContent(PhabricatorDocumentRef $ref) {
     $content = $this->loadTextData($ref);
 
-    $content = PhabricatorSyntaxHighlighter::highlightWithFilename(
-      $ref->getName(),
-      $content);
+    $highlighting = $this->getHighlightingConfiguration();
+    if ($highlighting !== null) {
+      $content = PhabricatorSyntaxHighlighter::highlightWithLanguage(
+        $highlighting,
+        $content);
+    } else {
+      $content = PhabricatorSyntaxHighlighter::highlightWithFilename(
+        $ref->getName(),
+        $content);
+    }
 
     return $this->newTextDocumentContent($content);
   }
