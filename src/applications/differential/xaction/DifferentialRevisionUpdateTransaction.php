@@ -137,7 +137,34 @@ final class DifferentialRevisionUpdateTransaction
         continue;
       }
 
-      if ($diff->getRevisionID()) {
+      $is_attached =
+        ($diff->getRevisionID()) &&
+        ($diff->getRevisionID() == $object->getID());
+      if ($is_attached) {
+        $is_active = ($diff_phid == $object->getActiveDiffPHID());
+      } else {
+        $is_active = false;
+      }
+
+      if ($is_attached) {
+        if ($is_active) {
+          // This is a no-op: we're reattaching the current active diff to the
+          // revision it is already attached to. This is valid and will just
+          // be dropped later on in the process.
+        } else {
+          // At least for now, there's no support for "undoing" a diff and
+          // reverting to an older proposed change without just creating a
+          // new diff from whole cloth.
+          $errors[] = $this->newInvalidError(
+            pht(
+              'You can not update this revision with the specified diff '.
+              '("%s") because this diff is already attached to the revision '.
+              'as an older version of the change.',
+              $diff_phid),
+            $xaction);
+          continue;
+        }
+      } else if ($diff->getRevisionID()) {
         $errors[] = $this->newInvalidError(
           pht(
             'You can not update this revision with the specified diff ("%s") '.

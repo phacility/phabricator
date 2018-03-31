@@ -5,6 +5,8 @@ abstract class PhabricatorDocumentEngine
 
   private $viewer;
   private $highlightedLines = array();
+  private $encodingConfiguration;
+  private $highlightingConfiguration;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -26,6 +28,32 @@ abstract class PhabricatorDocumentEngine
 
   final public function canRenderDocument(PhabricatorDocumentRef $ref) {
     return $this->canRenderDocumentType($ref);
+  }
+
+  public function canConfigureEncoding(PhabricatorDocumentRef $ref) {
+    return false;
+  }
+
+  public function canConfigureHighlighting(PhabricatorDocumentRef $ref) {
+    return false;
+  }
+
+  final public function setEncodingConfiguration($config) {
+    $this->encodingConfiguration = $config;
+    return $this;
+  }
+
+  final public function getEncodingConfiguration() {
+    return $this->encodingConfiguration;
+  }
+
+  final public function setHighlightingConfiguration($config) {
+    $this->highlightingConfiguration = $config;
+    return $this;
+  }
+
+  final public function getHighlightingConfiguration() {
+    return $this->highlightingConfiguration;
   }
 
   public function shouldRenderAsync(PhabricatorDocumentRef $ref) {

@@ -52,6 +52,61 @@ JX.behavior('document-engine', function(config, statics) {
       });
     }
 
+    list.addItem(
+      new JX.PHUIXActionView()
+        .setDivider(true));
+
+    var encode_item = new JX.PHUIXActionView()
+      .setName(data.encode.name)
+      .setIcon(data.encode.icon);
+
+    var onencode = JX.bind(null, function(data, e) {
+      e.prevent();
+
+      if (encode_item.getDisabled()) {
+        return;
+      }
+
+      new JX.Workflow(data.encode.uri, {encoding: data.encode.value})
+        .setHandler(function(r) {
+          data.encode.value = r.encoding;
+          onview(data);
+        })
+        .start();
+
+      menu.close();
+
+    }, data);
+
+    encode_item.setHandler(onencode);
+
+    list.addItem(encode_item);
+
+    var highlight_item = new JX.PHUIXActionView()
+      .setName(data.highlight.name)
+      .setIcon(data.highlight.icon);
+
+    var onhighlight = JX.bind(null, function(data, e) {
+      e.prevent();
+
+      if (highlight_item.getDisabled()) {
+        return;
+      }
+
+      new JX.Workflow(data.highlight.uri, {highlight: data.highlight.value})
+        .setHandler(function(r) {
+          data.highlight.value = r.highlight;
+          onview(data);
+        })
+        .start();
+
+      menu.close();
+    }, data);
+
+    highlight_item.setHandler(onhighlight);
+
+    list.addItem(highlight_item);
+
     menu.setContent(list.getNode());
 
     menu.listen('open', function() {
@@ -61,6 +116,11 @@ JX.behavior('document-engine', function(config, statics) {
         // Highlight the current rendering engine.
         var is_selected = (engine.spec.viewKey == data.viewKey);
         engine.view.setSelected(is_selected);
+
+        if (is_selected) {
+          encode_item.setDisabled(!engine.spec.canEncode);
+          highlight_item.setDisabled(!engine.spec.canHighlight);
+        }
       }
     });
 
@@ -68,14 +128,38 @@ JX.behavior('document-engine', function(config, statics) {
     menu.open();
   }
 
+  function add_params(uri, data) {
+    uri = JX.$U(uri);
+
+    if (data.highlight.value) {
+      uri.setQueryParam('highlight', data.highlight.value);
+    }
+
+    if (data.encode.value) {
+      uri.setQueryParam('encode', data.encode.value);
+    }
+
+    return uri.toString();
+  }
+
   function onview(data, spec, immediate) {
+    if (!spec) {
+      for (var ii = 0; ii < data.views.length; ii++) {
+        if (data.views[ii].viewKey == data.viewKey) {
+          spec = data.views[ii];
+          break;
+        }
+      }
+    }
+
     data.sequence = (data.sequence || 0) + 1;
     var handler = JX.bind(null, onrender, data, data.sequence);
 
     data.viewKey = spec.viewKey;
-    JX.History.replace(spec.viewURI);
 
-    new JX.Request(spec.engineURI, handler)
+    var uri = add_params(spec.engineURI, data);
+
+    new JX.Request(uri, handler)
       .send();
 
     if (data.loadingView) {
@@ -91,6 +175,12 @@ JX.behavior('document-engine', function(config, statics) {
 
       var load = JX.bind(null, onloading, data, spec);
       data.loadTimer = setTimeout(load, 333);
+
+      // Replace the URI with the URI for the specific rendering the user
+      // has selected.
+
+      var view_uri = add_params(spec.viewURI, data);
+      JX.History.replace(view_uri);
     }
   }
 
@@ -128,16 +218,10 @@ JX.behavior('document-engine', function(config, statics) {
     statics.initialized = true;
   }
 
-  if (config.renderControlID) {
+  if (config && config.renderControlID) {
     var control = JX.$(config.renderControlID);
     var data = JX.Stratcom.getData(control);
-
-    for (var ii = 0; ii < data.views.length; ii++) {
-      if (data.views[ii].viewKey == data.viewKey) {
-        onview(data, data.views[ii], true);
-        break;
-      }
-    }
+    onview(data, null, true);
   }
 
 });

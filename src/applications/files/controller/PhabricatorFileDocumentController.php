@@ -7,6 +7,10 @@ final class PhabricatorFileDocumentController
   private $engine;
   private $ref;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
@@ -38,6 +42,16 @@ final class PhabricatorFileDocumentController
     }
     $engine = $engines[$engine_key];
     $this->engine = $engine;
+
+    $encode_setting = $request->getStr('encode');
+    if (strlen($encode_setting)) {
+      $engine->setEncodingConfiguration($encode_setting);
+    }
+
+    $highlight_setting = $request->getStr('highlight');
+    if (strlen($highlight_setting)) {
+      $engine->setHighlightingConfiguration($highlight_setting);
+    }
 
     try {
       $content = $engine->newDocument($ref);

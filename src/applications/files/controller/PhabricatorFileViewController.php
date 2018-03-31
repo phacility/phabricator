@@ -422,6 +422,16 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
       $engine->setHighlightedLines(range($lines[0], $lines[1]));
     }
 
+    $encode_setting = $request->getStr('encode');
+    if (strlen($encode_setting)) {
+      $engine->setEncodingConfiguration($encode_setting);
+    }
+
+    $highlight_setting = $request->getStr('highlight');
+    if (strlen($highlight_setting)) {
+      $engine->setHighlightingConfiguration($highlight_setting);
+    }
+
     $views = array();
     foreach ($engines as $candidate_key => $candidate_engine) {
       $label = $candidate_engine->getViewAsLabel($ref);
@@ -443,6 +453,8 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
         'engineURI' => $candidate_engine->getRenderURI($ref),
         'viewURI' => $view_uri,
         'loadingMarkup' => hsprintf('%s', $loading),
+        'canEncode' => $candidate_engine->canConfigureEncoding($ref),
+        'canHighlight' => $candidate_engine->CanConfigureHighlighting($ref),
       );
     }
 
@@ -474,6 +486,18 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
       'viewKey' => $engine->getDocumentEngineKey(),
       'views' => $views,
       'standaloneURI' => $engine->getRenderURI($ref),
+      'encode' => array(
+        'icon' => 'fa-font',
+        'name' => pht('Change Text Encoding...'),
+        'uri' => '/services/encoding/',
+        'value' => $encode_setting,
+      ),
+      'highlight' => array(
+        'icon' => 'fa-lightbulb-o',
+        'name' => pht('Highlight As...'),
+        'uri' => '/services/highlight/',
+        'value' => $highlight_setting,
+      ),
     );
 
     $view_button = id(new PHUIButtonView())

@@ -143,4 +143,26 @@ abstract class PhabricatorStandardCustomFieldTokenizer
       ->setDatasource($datasource);
   }
 
+  protected function newCommentAction() {
+    $viewer = $this->getViewer();
+
+    $datasource = $this->getDatasource()
+      ->setViewer($viewer);
+
+    $action = id(new PhabricatorEditEngineTokenizerCommentAction())
+      ->setDatasource($datasource);
+
+    $limit = $this->getFieldConfigValue('limit');
+    if ($limit) {
+      $action->setLimit($limit);
+    }
+
+    $value = $this->getFieldValue();
+    if ($value !== null) {
+      $action->setInitialValue($value);
+    }
+
+    return $action;
+  }
+
 }

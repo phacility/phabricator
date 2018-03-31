@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
+final class PhabricatorFeedStoryData
+  extends PhabricatorFeedDAO
+  implements PhabricatorDestructibleInterface {
 
   protected $phid;
 
@@ -64,6 +66,32 @@ final class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
 
   public function getValue($key, $default = null) {
     return idx($this->storyData, $key, $default);
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $conn = $this->establishConnection('w');
+
+      queryfx(
+        $conn,
+        'DELETE FROM %T WHERE chronologicalKey = %s',
+        id(new PhabricatorFeedStoryNotification())->getTableName(),
+        $this->getChronologicalKey());
+
+      queryfx(
+        $conn,
+        'DELETE FROM %T WHERE chronologicalKey = %s',
+        id(new PhabricatorFeedStoryReference())->getTableName(),
+        $this->getChronologicalKey());
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

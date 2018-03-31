@@ -1,7 +1,10 @@
 <?php
 
-final class HarbormasterBuildTarget extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+final class HarbormasterBuildTarget
+  extends HarbormasterDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $buildPHID;
@@ -353,5 +356,60 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   public function describeAutomaticCapability($capability) {
     return pht('Users must be able to see a build to view its build targets.');
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $viewer = $engine->getViewer();
+
+    $this->openTransaction();
+
+      $lint_message = new HarbormasterBuildLintMessage();
+      $conn = $lint_message->establishConnection('w');
+      queryfx(
+        $conn,
+        'DELETE FROM %T WHERE buildTargetPHID = %s',
+        $lint_message->getTableName(),
+        $this->getPHID());
+
+      $unit_message = new HarbormasterBuildUnitMessage();
+      $conn = $unit_message->establishConnection('w');
+      queryfx(
+        $conn,
+        'DELETE FROM %T WHERE buildTargetPHID = %s',
+        $unit_message->getTableName(),
+        $this->getPHID());
+
+      $logs = id(new HarbormasterBuildLogQuery())
+        ->setViewer($viewer)
+        ->withBuildTargetPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($logs as $log) {
+        $engine->destroyObject($log);
+      }
+
+      $artifacts = id(new HarbormasterBuildArtifactQuery())
+        ->setViewer($viewer)
+        ->withBuildTargetPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($artifacts as $artifact) {
+        $engine->destroyObject($artifact);
+      }
+
+      $messages = id(new HarbormasterBuildMessageQuery())
+        ->setViewer($viewer)
+        ->withReceiverPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($messages as $message) {
+        $engine->destroyObject($message);
+      }
+
+      $this->delete();
+    $this->saveTransaction();
+  }
+
 
 }

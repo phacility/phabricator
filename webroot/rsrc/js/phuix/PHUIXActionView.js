@@ -34,6 +34,10 @@ JX.install('PHUIXActionView', {
       return this;
     },
 
+    getDisabled: function() {
+      return this._disabled;
+    },
+
     setLabel: function(label) {
       this._label = label;
       JX.DOM.alterClass(
