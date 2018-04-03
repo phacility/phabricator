@@ -549,6 +549,10 @@ final class PhabricatorRepositoryCommit
     );
   }
 
+  public function newBuildableEngine() {
+    return new DiffusionBuildableEngine();
+  }
+
 
 /* -(  HarbormasterCircleCIBuildableInterface  )----------------------------- */
 

@@ -800,6 +800,10 @@ final class DifferentialRevision extends DifferentialDAO
     return array();
   }
 
+  public function newBuildableEngine() {
+    return new DifferentialBuildableEngine();
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

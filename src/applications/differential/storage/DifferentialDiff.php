@@ -557,6 +557,10 @@ final class DifferentialDiff
     );
   }
 
+  public function newBuildableEngine() {
+    return new DifferentialBuildableEngine();
+  }
+
 
 /* -(  HarbormasterCircleCIBuildableInterface  )----------------------------- */
 

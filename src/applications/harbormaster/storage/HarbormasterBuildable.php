@@ -341,6 +341,10 @@ final class HarbormasterBuildable
     return array();
   }
 
+  public function newBuildableEngine() {
+    return $this->getBuildableObject()->newBuildableEngine();
+  }
+
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

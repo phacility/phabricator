@@ -36,4 +36,6 @@ interface HarbormasterBuildableInterface {
   public function getBuildVariables();
   public function getAvailableBuildVariables();
 
+  public function newBuildableEngine();
+
 }
