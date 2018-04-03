@@ -742,6 +742,50 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getProperty(self::PROPERTY_LINES_REMOVED);
   }
 
+  public function getRevisionScaleGlyphs() {
+    $add = $this->getAddedLineCount();
+    $rem = $this->getRemovedLineCount();
+    $all = ($add + $rem);
+
+    if (!$all) {
+      return '       ';
+    }
+
+    $map = array(
+      20 => 2,
+      50 => 3,
+      150 => 4,
+      375 => 5,
+      1000 => 6,
+      2500 => 7,
+    );
+
+    $n = 1;
+    foreach ($map as $size => $count) {
+      if ($size <= $all) {
+        $n = $count;
+      } else {
+        break;
+      }
+    }
+
+    $add_n = (int)ceil(($add / $all) * $n);
+    $rem_n = (int)ceil(($rem / $all) * $n);
+
+    while ($add_n + $rem_n > $n) {
+      if ($add_n > 1) {
+        $add_n--;
+      } else {
+        $rem_n--;
+      }
+    }
+
+    return
+      str_repeat('+', $add_n).
+      str_repeat('-', $rem_n).
+      str_repeat(' ', (7 - $n));
+  }
+
   public function getBuildableStatus($phid) {
     $buildables = $this->getProperty(self::PROPERTY_BUILDABLES);
     if (!is_array($buildables)) {

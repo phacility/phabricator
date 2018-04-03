@@ -568,7 +568,7 @@ final class DifferentialTransactionEditor
 
     if ($show_lines) {
       $count = new PhutilNumber($object->getLineCount());
-      $action = pht('%s, %s line(s)', $action, $count);
+      $action = pht('%s] [%s', $action, $object->getRevisionScaleGlyphs());
     }
 
     return $action;
