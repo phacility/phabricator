@@ -13,8 +13,14 @@ final class DifferentialRevisionUpdateTransaction
   public function applyInternalEffects($object, $value) {
     $should_review = $this->shouldRequestReviewAfterUpdate($object);
     if ($should_review) {
-      $object->setModernRevisionStatus(
-        DifferentialRevisionStatus::NEEDS_REVIEW);
+      // If we're updating a non-broadcasting revision, put it back in draft
+      // rather than moving it directly to "Needs Review".
+      if ($object->getShouldBroadcast()) {
+        $new_status = DifferentialRevisionStatus::NEEDS_REVIEW;
+      } else {
+        $new_status = DifferentialRevisionStatus::DRAFT;
+      }
+      $object->setModernRevisionStatus($new_status);
     }
 
     $editor = $this->getEditor();
