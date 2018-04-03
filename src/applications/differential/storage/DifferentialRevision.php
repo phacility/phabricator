@@ -59,7 +59,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   const PROPERTY_CLOSED_FROM_ACCEPTED = 'wasAcceptedBeforeClose';
   const PROPERTY_DRAFT_HOLD = 'draft.hold';
-  const PROPERTY_HAS_BROADCAST = 'draft.broadcast';
+  const PROPERTY_SHOULD_BROADCAST = 'draft.broadcast';
   const PROPERTY_LINES_ADDED = 'lines.added';
   const PROPERTY_LINES_REMOVED = 'lines.removed';
   const PROPERTY_BUILDABLES = 'buildables';
@@ -717,12 +717,14 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->setProperty(self::PROPERTY_DRAFT_HOLD, $hold);
   }
 
-  public function getHasBroadcast() {
-    return $this->getProperty(self::PROPERTY_HAS_BROADCAST, false);
+  public function getShouldBroadcast() {
+    return $this->getProperty(self::PROPERTY_SHOULD_BROADCAST, false);
   }
 
-  public function setHasBroadcast($has_broadcast) {
-    return $this->setProperty(self::PROPERTY_HAS_BROADCAST, $has_broadcast);
+  public function setShouldBroadcast($should_broadcast) {
+    return $this->setProperty(
+      self::PROPERTY_SHOULD_BROADCAST,
+      $should_broadcast);
   }
 
   public function setAddedLineCount($count) {

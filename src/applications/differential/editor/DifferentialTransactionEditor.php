@@ -1597,13 +1597,13 @@ final class DifferentialTransactionEditor
     $was_draft = $this->wasDraft;
 
     if (!$object->isDraft() && ($was_draft || $is_new)) {
-      if (!$object->getHasBroadcast()) {
+      if (!$object->getShouldBroadcast()) {
         // Mark this as the first broadcast we're sending about the revision
         // so mail can generate specially.
         $this->firstBroadcast = true;
 
         $object
-          ->setHasBroadcast(true)
+          ->setShouldBroadcast(true)
           ->save();
       }
     }
