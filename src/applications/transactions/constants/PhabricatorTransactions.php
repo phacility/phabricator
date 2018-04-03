@@ -9,7 +9,6 @@ final class PhabricatorTransactions extends Phobject {
   const TYPE_JOIN_POLICY  = 'core:join-policy';
   const TYPE_EDGE         = 'core:edge';
   const TYPE_CUSTOMFIELD  = 'core:customfield';
-  const TYPE_BUILDABLE    = 'harbormaster:buildable';
   const TYPE_TOKEN        = 'token:give';
   const TYPE_INLINESTATE  = 'core:inlinestate';
   const TYPE_SPACE = 'core:space';

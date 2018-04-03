@@ -233,6 +233,10 @@ final class HarbormasterBuildable
     return $this->getBuildableStatusObject()->isPreparing();
   }
 
+  public function isBuilding() {
+    return $this->getBuildableStatusObject()->isBuilding();
+  }
+
 
 /* -(  Messages  )----------------------------------------------------------- */
 

@@ -100,6 +100,14 @@ abstract class PhabricatorModularTransaction
     return parent::shouldHideForFeed();
   }
 
+  /* final */ public function shouldHideForMail(array $xactions) {
+    if ($this->getTransactionImplementation()->shouldHideForMail()) {
+      return true;
+    }
+
+    return parent::shouldHideForMail($xactions);
+  }
+
   /* final */ public function getIcon() {
     $icon = $this->getTransactionImplementation()->getIcon();
     if ($icon !== null) {

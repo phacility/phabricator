@@ -313,10 +313,6 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_CUSTOMFIELD;
     }
 
-    if ($this->object instanceof HarbormasterBuildableInterface) {
-      $types[] = PhabricatorTransactions::TYPE_BUILDABLE;
-    }
-
     if ($this->object instanceof PhabricatorTokenReceiverInterface) {
       $types[] = PhabricatorTransactions::TYPE_TOKEN;
     }
@@ -469,7 +465,6 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
@@ -610,7 +605,6 @@ abstract class PhabricatorApplicationTransactionEditor
         return $field->applyApplicationTransactionInternalEffects($xaction);
       case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
-      case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
@@ -673,7 +667,6 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:

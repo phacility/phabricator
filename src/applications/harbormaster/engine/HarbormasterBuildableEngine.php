@@ -45,7 +45,7 @@ abstract class HarbormasterBuildableEngine
     return $this->object;
   }
 
-  final public function publishBuildable(
+  public function publishBuildable(
     HarbormasterBuildable $old,
     HarbormasterBuildable $new) {
     return;
