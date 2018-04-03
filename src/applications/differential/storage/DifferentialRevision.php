@@ -62,6 +62,7 @@ final class DifferentialRevision extends DifferentialDAO
   const PROPERTY_HAS_BROADCAST = 'draft.broadcast';
   const PROPERTY_LINES_ADDED = 'lines.added';
   const PROPERTY_LINES_REMOVED = 'lines.removed';
+  const PROPERTY_BUILDABLES = 'buildables';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -740,6 +741,78 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getProperty(self::PROPERTY_LINES_REMOVED);
   }
 
+
+  public function getBuildableStatus($phid) {
+    $buildables = $this->getProperty(self::PROPERTY_BUILDABLES);
+    if (!is_array($buildables)) {
+      $buildables = array();
+    }
+
+    $buildable = idx($buildables, $phid);
+    if (!is_array($buildable)) {
+      $buildable = array();
+    }
+
+    return idx($buildable, 'status');
+  }
+
+  public function setBuildableStatus($phid, $status) {
+    $buildables = $this->getProperty(self::PROPERTY_BUILDABLES);
+    if (!is_array($buildables)) {
+      $buildables = array();
+    }
+
+    $buildable = idx($buildables, $phid);
+    if (!is_array($buildable)) {
+      $buildable = array();
+    }
+
+    $buildable['status'] = $status;
+
+    $buildables[$phid] = $buildable;
+
+    return $this->setProperty(self::PROPERTY_BUILDABLES, $buildables);
+  }
+
+  public function newBuildableStatus(PhabricatorUser $viewer, $phid) {
+    // For Differential, we're ignoring autobuilds (local lint and unit)
+    // when computing build status. Differential only cares about remote
+    // builds when making publishing and undrafting decisions.
+
+    $builds = id(new HarbormasterBuildQuery())
+      ->setViewer($viewer)
+      ->withBuildablePHIDs(array($phid))
+      ->withAutobuilds(false)
+      ->withBuildStatuses(
+        array(
+          HarbormasterBuildStatus::STATUS_INACTIVE,
+          HarbormasterBuildStatus::STATUS_PENDING,
+          HarbormasterBuildStatus::STATUS_BUILDING,
+          HarbormasterBuildStatus::STATUS_FAILED,
+          HarbormasterBuildStatus::STATUS_ABORTED,
+          HarbormasterBuildStatus::STATUS_ERROR,
+          HarbormasterBuildStatus::STATUS_PAUSED,
+          HarbormasterBuildStatus::STATUS_DEADLOCKED,
+        ))
+      ->execute();
+
+    // If we have nothing but passing builds, the buildable passes.
+    if (!$builds) {
+      return HarbormasterBuildableStatus::STATUS_PASSED;
+    }
+
+    // If we have any completed, non-passing builds, the buildable fails.
+    foreach ($builds as $build) {
+      $status = $build->getBuildStatusObject();
+      if ($status->isComplete()) {
+        return HarbormasterBuildableStatus::STATUS_FAILED;
+      }
+    }
+
+    // Otherwise, we're still waiting for the build to pass or fail.
+    return null;
+  }
+
   public function loadActiveBuilds(PhabricatorUser $viewer) {
     $diff = $this->getActiveDiff();
 
@@ -785,10 +858,6 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function getHarbormasterContainerPHID() {
-    return $this->getPHID();
-  }
-
-  public function getHarbormasterPublishablePHID() {
     return $this->getPHID();
   }
 

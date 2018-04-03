@@ -509,10 +509,6 @@ final class DifferentialDiff
     return null;
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getHarbormasterContainerPHID();
-  }
-
   public function getBuildVariables() {
     $results = array();
 

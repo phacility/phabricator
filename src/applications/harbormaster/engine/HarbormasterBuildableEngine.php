@@ -45,6 +45,10 @@ abstract class HarbormasterBuildableEngine
     return $this->object;
   }
 
+  protected function getPublishableObject() {
+    return $this->getObject();
+  }
+
   public function publishBuildable(
     HarbormasterBuildable $old,
     HarbormasterBuildable $new) {
@@ -60,7 +64,7 @@ abstract class HarbormasterBuildableEngine
   }
 
   final protected function newEditor() {
-    $publishable = $this->getObject();
+    $publishable = $this->getPublishableObject();
 
     $viewer = $this->getViewer();
 
@@ -83,13 +87,13 @@ abstract class HarbormasterBuildableEngine
   }
 
   final protected function newTransaction() {
-    $publishable = $this->getObject();
+    $publishable = $this->getPublishableObject();
 
     return $publishable->getApplicationTransactionTemplate();
   }
 
   final protected function applyTransactions(array $xactions) {
-    $publishable = $this->getObject();
+    $publishable = $this->getPublishableObject();
     $editor = $this->newEditor();
 
     $editor->applyTransactions(

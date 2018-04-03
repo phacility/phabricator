@@ -333,10 +333,6 @@ final class HarbormasterBuildable
     return $this->getContainerPHID();
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getBuildableObject()->getHarbormasterPublishablePHID();
-  }
-
   public function getBuildVariables() {
     return array();
   }
