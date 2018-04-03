@@ -399,8 +399,18 @@ final class DifferentialRevisionViewController extends DifferentialController {
           ->appendChild($other_view));
     }
 
+    $view_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Changeset List'))
+      ->setHref('/differential/diff/'.$target->getID().'/changesets/')
+      ->setIcon('fa-align-left');
+
+    $tab_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Revision Contents'))
+      ->addActionLink($view_button);
+
     $tab_view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Revision Contents'))
+      ->setHeader($tab_header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addTabGroup($tab_group);
 
