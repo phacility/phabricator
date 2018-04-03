@@ -1577,8 +1577,21 @@ final class DifferentialTransactionEditor
         // revision state. See T13027 for discussion.
         $this->queueTransaction($xaction);
       } else if ($is_failed) {
-        // TODO: Change to "Changes Planned + Draft", notify the author (only)
-        // of the build failure.
+        // When demoting a revision, we act as "Harbormaster" instead of
+        // the author since this feels a little more natural.
+        $harbormaster_phid = id(new PhabricatorHarbormasterApplication())
+          ->getPHID();
+
+        $xaction = $object->getApplicationTransactionTemplate()
+          ->setAuthorPHID($harbormaster_phid)
+          ->setMetadataValue('draft.demote', true)
+          ->setTransactionType(
+            DifferentialRevisionPlanChangesTransaction::TRANSACTIONTYPE)
+          ->setNewValue(true);
+
+        $this->queueTransaction($xaction);
+
+        // TODO: Notify the author (only) that we did this.
       }
     }
 
