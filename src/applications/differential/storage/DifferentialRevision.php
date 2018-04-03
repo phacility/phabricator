@@ -679,6 +679,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getStatusObject()->getIconColor();
   }
 
+  public function getStatusTagColor() {
+    return $this->getStatusObject()->getTagColor();
+  }
+
   public function getStatusObject() {
     $status = $this->getStatus();
     return DifferentialRevisionStatus::newForStatus($status);
@@ -704,14 +708,6 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
-  public function shouldBroadcast() {
-    if (!$this->isDraft()) {
-      return true;
-    }
-
-    return false;
-  }
-
   public function getHoldAsDraft() {
     return $this->getProperty(self::PROPERTY_DRAFT_HOLD, false);
   }
@@ -721,7 +717,7 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function getShouldBroadcast() {
-    return $this->getProperty(self::PROPERTY_SHOULD_BROADCAST, false);
+    return $this->getProperty(self::PROPERTY_SHOULD_BROADCAST, true);
   }
 
   public function setShouldBroadcast($should_broadcast) {
@@ -745,7 +741,6 @@ final class DifferentialRevision extends DifferentialDAO
   public function getRemovedLineCount() {
     return $this->getProperty(self::PROPERTY_LINES_REMOVED);
   }
-
 
   public function getBuildableStatus($phid) {
     $buildables = $this->getProperty(self::PROPERTY_BUILDABLES);

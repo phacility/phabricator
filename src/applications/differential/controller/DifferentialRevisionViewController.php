@@ -525,10 +525,26 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $status_tag = id(new PHUITagView())
       ->setName($revision->getStatusDisplayName())
       ->setIcon($revision->getStatusIcon())
-      ->setColor($revision->getStatusIconColor())
+      ->setColor($revision->getStatusTagColor())
       ->setType(PHUITagView::TYPE_SHADE);
 
     $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_tag);
+
+    // If the revision is in a status other than "Draft", but not broadcasting,
+    // add an additional "Draft" tag to the header to make it clear that this
+    // revision hasn't promoted yet.
+    if (!$revision->getShouldBroadcast() && !$revision->isDraft()) {
+      $draft_status = DifferentialRevisionStatus::newForStatus(
+        DifferentialRevisionStatus::DRAFT);
+
+      $draft_tag = id(new PHUITagView())
+        ->setName($draft_status->getDisplayName())
+        ->setIcon($draft_status->getIcon())
+        ->setColor($draft_status->getTagColor())
+        ->setType(PHUITagView::TYPE_SHADE);
+
+      $view->addTag($draft_tag);
+    }
 
     return $view;
   }

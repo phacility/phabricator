@@ -101,7 +101,7 @@ final class DifferentialDraftField
   public function getWarningsForDetailView() {
     $revision = $this->getObject();
 
-    if (!$revision->isDraft()) {
+    if ($revision->getShouldBroadcast()) {
       return array();
     }
 

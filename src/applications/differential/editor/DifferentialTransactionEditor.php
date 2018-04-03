@@ -487,7 +487,7 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    if (!$object->shouldBroadcast()) {
+    if (!$object->getShouldBroadcast()) {
       return false;
     }
 
@@ -498,7 +498,7 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    if (!$object->shouldBroadcast()) {
+    if (!$object->getShouldBroadcast()) {
       return false;
     }
 
@@ -1152,7 +1152,7 @@ final class DifferentialTransactionEditor
 
     // If the object is still a draft, prevent "Send me an email" and other
     // similar rules from acting yet.
-    if (!$object->shouldBroadcast()) {
+    if (!$object->getShouldBroadcast()) {
       $adapter->setForbiddenAction(
         HeraldMailableState::STATECONST,
         DifferentialHeraldStateReasons::REASON_DRAFT);
