@@ -6,7 +6,6 @@
 final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions = array();
-  private $handles;
   private $header;
   private $noDataString;
   private $noBox;
@@ -48,32 +47,43 @@ final class DifferentialRevisionListView extends AphrontView {
     return $this;
   }
 
-  public function getRequiredHandlePHIDs() {
-    $phids = array();
-    foreach ($this->revisions as $revision) {
-      $phids[] = array($revision->getAuthorPHID());
-      $phids[] = $revision->getReviewerPHIDs();
-    }
-    return array_mergev($phids);
-  }
-
-  public function setHandles(array $handles) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-    $this->handles = $handles;
-    return $this;
-  }
-
   public function render() {
     $viewer = $this->getViewer();
 
     $this->initBehavior('phabricator-tooltips', array());
     $this->requireResource('aphront-tooltip-css');
 
-    $list = new PHUIObjectItemListView();
+    $reviewer_limit = 7;
 
-    foreach ($this->revisions as $revision) {
+    $reviewer_phids = array();
+    $reviewer_more = array();
+    $handle_phids = array();
+    foreach ($this->revisions as $key => $revision) {
+      $reviewers = $revision->getReviewers();
+      if (count($reviewers) > $reviewer_limit) {
+        $reviewers = array_slice($reviewers, 0, $reviewer_limit);
+        $reviewer_more[$key] = true;
+      } else {
+        $reviewer_more[$key] = false;
+      }
+
+      $phids = mpull($reviewers, 'getReviewerPHID');
+
+      $reviewer_phids[$key] = $phids;
+      foreach ($phids as $phid) {
+        $handle_phids[$phid] = $phid;
+      }
+
+      $author_phid = $revision->getAuthorPHID();
+      $handle_phids[$author_phid] = $author_phid;
+    }
+
+    $handles = $viewer->loadHandles($handle_phids);
+
+    $list = new PHUIObjectItemListView();
+    foreach ($this->revisions as $key => $revision) {
       $item = id(new PHUIObjectItemView())
-        ->setUser($viewer);
+        ->setViewer($viewer);
 
       $icons = array();
 
@@ -89,21 +99,17 @@ final class DifferentialRevisionListView extends AphrontView {
           '');
       }
 
-      if ($revision->getHasDraft($viewer)) {
-        $icons['draft'] = true;
-      }
-
       $modified = $revision->getDateModified();
 
       if (isset($icons['flag'])) {
         $item->addHeadIcon($icons['flag']);
       }
 
-      $item->setObjectName('D'.$revision->getID());
+      $item->setObjectName($revision->getMonogram());
       $item->setHeader($revision->getTitle());
-      $item->setHref('/D'.$revision->getID());
+      $item->setHref($revision->getURI());
 
-      if (isset($icons['draft'])) {
+      if ($revision->getHasDraft($viewer)) {
         $draft = id(new PHUIIconView())
           ->setIcon('fa-comment yellow')
           ->addSigil('has-tooltip')
@@ -114,8 +120,7 @@ final class DifferentialRevisionListView extends AphrontView {
         $item->addAttribute($draft);
       }
 
-      // Author
-      $author_handle = $this->handles[$revision->getAuthorPHID()];
+      $author_handle = $handles[$revision->getAuthorPHID()];
       $item->addByline(pht('Author: %s', $author_handle->renderLink()));
 
       $unlanded = idx($this->unlandedDependencies, $phid);
@@ -128,17 +133,26 @@ final class DifferentialRevisionListView extends AphrontView {
           ));
       }
 
-      $reviewers = array();
-      foreach ($revision->getReviewerPHIDs() as $reviewer) {
-        $reviewers[] = $this->handles[$reviewer]->renderLink();
-      }
-      if (!$reviewers) {
-        $reviewers = phutil_tag('em', array(), pht('None'));
+      $more = null;
+      if ($reviewer_more[$key]) {
+        $more = pht(', ...');
       } else {
-        $reviewers = phutil_implode_html(', ', $reviewers);
+        $more = null;
       }
 
-      $item->addAttribute(pht('Reviewers: %s', $reviewers));
+      if ($reviewer_phids[$key]) {
+        $item->addAttribute(
+          array(
+            pht('Reviewers:'),
+            ' ',
+            $viewer->renderHandleList($reviewer_phids[$key])
+              ->setAsInline(true),
+            $more,
+          ));
+      } else {
+        $item->addAttribute(phutil_tag('em', array(), pht('No Reviewers')));
+      }
+
       $item->setEpoch($revision->getDateModified());
 
       if ($revision->isClosed()) {

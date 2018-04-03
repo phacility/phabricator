@@ -869,17 +869,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Recent Similar Revisions'));
 
-    $view = id(new DifferentialRevisionListView())
+    return id(new DifferentialRevisionListView())
+      ->setViewer($viewer)
       ->setRevisions($revisions)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setNoBox(true)
-      ->setUser($viewer);
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
-
-    return $view;
+      ->setNoBox(true);
   }
 
 

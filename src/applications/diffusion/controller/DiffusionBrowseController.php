@@ -1754,13 +1754,9 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setHeader(pht('Recently Open Revisions'));
 
     $list = id(new DifferentialRevisionListView())
+      ->setViewer($viewer)
       ->setRevisions($revisions)
-      ->setUser($viewer)
       ->setNoBox(true);
-
-    $phids = $list->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $list->setHandles($handles);
 
     $view = id(new PHUIObjectBoxView())
       ->setHeader($header)
