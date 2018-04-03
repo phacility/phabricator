@@ -37,7 +37,9 @@ final class DifferentialRevisionRequestReviewTransaction
 
   public function applyInternalEffects($object, $value) {
     $status_review = DifferentialRevisionStatus::NEEDS_REVIEW;
-    $object->setModernRevisionStatus($status_review);
+    $object
+      ->setModernRevisionStatus($status_review)
+      ->setShouldBroadcast(true);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

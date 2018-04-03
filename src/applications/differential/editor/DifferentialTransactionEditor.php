@@ -10,7 +10,7 @@ final class DifferentialTransactionEditor
   private $hasReviewTransaction = false;
   private $affectedPaths;
   private $firstBroadcast = false;
-  private $wasDraft = false;
+  private $wasBroadcasting;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -137,7 +137,7 @@ final class DifferentialTransactionEditor
       }
     }
 
-    $this->wasDraft = $object->isDraft();
+    $this->wasBroadcasting = $object->getShouldBroadcast();
 
     return parent::expandTransactions($object, $xactions);
   }
@@ -1594,17 +1594,13 @@ final class DifferentialTransactionEditor
     // email so the mail gets enriched with "SUMMARY" and "TEST PLAN".
 
     $is_new = $this->getIsNewObject();
-    $was_draft = $this->wasDraft;
+    $was_broadcasting = $this->wasBroadcasting;
 
-    if (!$object->isDraft() && ($was_draft || $is_new)) {
-      if (!$object->getShouldBroadcast()) {
+    if ($object->getShouldBroadcast()) {
+      if (!$was_broadcasting || $is_new) {
         // Mark this as the first broadcast we're sending about the revision
         // so mail can generate specially.
         $this->firstBroadcast = true;
-
-        $object
-          ->setShouldBroadcast(true)
-          ->save();
       }
     }
 

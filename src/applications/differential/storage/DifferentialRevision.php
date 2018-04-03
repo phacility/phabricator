@@ -75,8 +75,10 @@ final class DifferentialRevision extends DifferentialDAO
 
     if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
       $initial_state = DifferentialRevisionStatus::DRAFT;
+      $should_broadcast = false;
     } else {
       $initial_state = DifferentialRevisionStatus::NEEDS_REVIEW;
+      $should_broadcast = true;
     }
 
     return id(new DifferentialRevision())
@@ -85,7 +87,8 @@ final class DifferentialRevision extends DifferentialDAO
       ->attachRepository(null)
       ->attachActiveDiff(null)
       ->attachReviewers(array())
-      ->setModernRevisionStatus($initial_state);
+      ->setModernRevisionStatus($initial_state)
+      ->setShouldBroadcast($should_broadcast);
   }
 
   protected function getConfiguration() {
