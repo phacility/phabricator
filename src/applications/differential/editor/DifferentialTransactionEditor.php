@@ -11,6 +11,7 @@ final class DifferentialTransactionEditor
   private $affectedPaths;
   private $firstBroadcast = false;
   private $wasBroadcasting;
+  private $isDraftDemotion;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -133,6 +134,11 @@ final class DifferentialTransactionEditor
           // If we have a review transaction, we'll skip marking the user
           // as "Commented" later. This should get cleaner after T10967.
           $this->hasReviewTransaction = true;
+          break;
+        case DifferentialRevisionPlanChangesTransaction::TRANSACTIONTYPE:
+          if ($xaction->getMetadataValue('draft.demote')) {
+            $this->isDraftDemotion = true;
+          }
           break;
       }
     }
@@ -497,27 +503,42 @@ final class DifferentialTransactionEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    if (!$object->getShouldBroadcast()) {
-      return false;
-    }
-
     return true;
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    $this->requireReviewers($object);
+    if ($object->getShouldBroadcast()) {
+      $this->requireReviewers($object);
 
-    $phids = array();
-    $phids[] = $object->getAuthorPHID();
-    foreach ($object->getReviewers() as $reviewer) {
-      if ($reviewer->isResigned()) {
-        continue;
+      $phids = array();
+      $phids[] = $object->getAuthorPHID();
+      foreach ($object->getReviewers() as $reviewer) {
+        if ($reviewer->isResigned()) {
+          continue;
+        }
+
+        $phids[] = $reviewer->getReviewerPHID();
       }
-
-      $phids[] = $reviewer->getReviewerPHID();
+      return $phids;
     }
-    return $phids;
+
+    // If we're demoting a draft after a build failure, just notify the author.
+    if ($this->isDraftDemotion) {
+      $author_phid = $object->getAuthorPHID();
+      return array(
+        $author_phid,
+      );
+    }
+
+    return array();
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    if (!$object->getShouldBroadcast()) {
+      return array();
+    }
+
+    return parent::getMailCC($object);
   }
 
   protected function newMailUnexpandablePHIDs(PhabricatorLiskDAO $object) {
@@ -1408,12 +1429,14 @@ final class DifferentialTransactionEditor
     return array(
       'changedPriorToCommitURI' => $this->changedPriorToCommitURI,
       'firstBroadcast' => $this->firstBroadcast,
+      'isDraftDemotion' => $this->isDraftDemotion,
     );
   }
 
   protected function loadCustomWorkerState(array $state) {
     $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
     $this->firstBroadcast = idx($state, 'firstBroadcast');
+    $this->isDraftDemotion = idx($state, 'isDraftDemotion');
     return $this;
   }
 
