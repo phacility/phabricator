@@ -7,7 +7,6 @@ final class DifferentialTransactionEditor
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
   private $didExpandInlineState = false;
-  private $hasReviewTransaction = false;
   private $affectedPaths;
   private $firstBroadcast = false;
   private $wasBroadcasting;
@@ -127,13 +126,6 @@ final class DifferentialTransactionEditor
           // If we have an "Inline State" transaction already, the caller
           // built it for us so we don't need to expand it again.
           $this->didExpandInlineState = true;
-          break;
-        case DifferentialRevisionAcceptTransaction::TRANSACTIONTYPE:
-        case DifferentialRevisionRejectTransaction::TRANSACTIONTYPE:
-        case DifferentialRevisionResignTransaction::TRANSACTIONTYPE:
-          // If we have a review transaction, we'll skip marking the user
-          // as "Commented" later. This should get cleaner after T10967.
-          $this->hasReviewTransaction = true;
           break;
         case DifferentialRevisionPlanChangesTransaction::TRANSACTIONTYPE:
           if ($xaction->getMetadataValue('draft.demote')) {
