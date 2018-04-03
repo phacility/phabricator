@@ -779,23 +779,14 @@ final class DifferentialRevision extends DifferentialDAO
     // when computing build status. Differential only cares about remote
     // builds when making publishing and undrafting decisions.
 
-    $builds = id(new HarbormasterBuildQuery())
-      ->setViewer($viewer)
-      ->withBuildablePHIDs(array($phid))
-      ->withAutobuilds(false)
-      ->withBuildStatuses(
-        array(
-          HarbormasterBuildStatus::STATUS_INACTIVE,
-          HarbormasterBuildStatus::STATUS_PENDING,
-          HarbormasterBuildStatus::STATUS_BUILDING,
-          HarbormasterBuildStatus::STATUS_FAILED,
-          HarbormasterBuildStatus::STATUS_ABORTED,
-          HarbormasterBuildStatus::STATUS_ERROR,
-          HarbormasterBuildStatus::STATUS_PAUSED,
-          HarbormasterBuildStatus::STATUS_DEADLOCKED,
-        ))
-      ->execute();
+    $builds = $this->loadImpactfulBuildsForBuildablePHIDs(
+      $viewer,
+      array($phid));
 
+    return $this->newBuildableStatusForBuilds($builds);
+  }
+
+  public function newBuildableStatusForBuilds(array $builds) {
     // If we have nothing but passing builds, the buildable passes.
     if (!$builds) {
       return HarbormasterBuildableStatus::STATUS_PASSED;
@@ -803,8 +794,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     // If we have any completed, non-passing builds, the buildable fails.
     foreach ($builds as $build) {
-      $status = $build->getBuildStatusObject();
-      if ($status->isComplete()) {
+      if ($build->isComplete()) {
         return HarbormasterBuildableStatus::STATUS_FAILED;
       }
     }
@@ -813,7 +803,7 @@ final class DifferentialRevision extends DifferentialDAO
     return null;
   }
 
-  public function loadActiveBuilds(PhabricatorUser $viewer) {
+  public function loadImpactfulBuilds(PhabricatorUser $viewer) {
     $diff = $this->getActiveDiff();
 
     // NOTE: We can't use `withContainerPHIDs()` here because the container
@@ -827,9 +817,18 @@ final class DifferentialRevision extends DifferentialDAO
       return array();
     }
 
+    return $this->loadImpactfulBuildsForBuildablePHIDs(
+      $viewer,
+      mpull($buildables, 'getPHID'));
+  }
+
+  private function loadImpactfulBuildsForBuildablePHIDs(
+    PhabricatorUser $viewer,
+    array $phids) {
+
     return id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
-      ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
+      ->withBuildablePHIDs($phids)
       ->withAutobuilds(false)
       ->withBuildStatuses(
         array(

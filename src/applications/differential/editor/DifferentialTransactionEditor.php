@@ -1539,8 +1539,12 @@ final class DifferentialTransactionEditor
     }
 
     if ($object->isDraft() && $auto_undraft) {
-      $active_builds = $this->hasActiveBuilds($object);
-      if (!$active_builds) {
+      $status = $this->loadCompletedBuildableStatus($object);
+
+      $is_passed = ($status === HarbormasterBuildableStatus::STATUS_PASSED);
+      $is_failed = ($status === HarbormasterBuildableStatus::STATUS_FAILED);
+
+      if ($is_passed) {
         // When Harbormaster moves a revision out of the draft state, we
         // attribute the action to the revision author since this is more
         // natural and more useful.
@@ -1572,6 +1576,9 @@ final class DifferentialTransactionEditor
         // batch of transactions finishes so that Herald can fire on the new
         // revision state. See T13027 for discussion.
         $this->queueTransaction($xaction);
+      } else if ($is_failed) {
+        // TODO: Change to "Changes Planned + Draft", notify the author (only)
+        // of the build failure.
       }
     }
 
@@ -1604,15 +1611,11 @@ final class DifferentialTransactionEditor
     return $xactions;
   }
 
-  private function hasActiveBuilds($object) {
+  private function loadCompletedBuildableStatus(
+    DifferentialRevision $revision) {
     $viewer = $this->requireActor();
-
-    $builds = $object->loadActiveBuilds($viewer);
-    if (!$builds) {
-      return false;
-    }
-
-    return true;
+    $builds = $revision->loadImpactfulBuilds($viewer);
+    return $revision->newBuildableStatusForBuilds($builds);
   }
 
   private function requireReviewers(DifferentialRevision $revision) {
