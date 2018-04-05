@@ -126,6 +126,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function execute() {
     $ref_updates = $this->findRefUpdates();
+    $all_updates = $ref_updates;
 
     $caught = null;
     try {
