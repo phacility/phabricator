@@ -158,7 +158,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if (count($changesets) > $limit && !$large) {
       $count = count($changesets);
       $warning = new PHUIInfoView();
-      $warning->setTitle(pht('Very Large Diff'));
+      $warning->setTitle(pht('Large Diff'));
       $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $warning->appendChild(hsprintf(
         '%s <strong>%s</strong>',

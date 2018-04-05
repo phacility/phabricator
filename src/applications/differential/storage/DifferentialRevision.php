@@ -742,6 +742,12 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getProperty(self::PROPERTY_LINES_REMOVED);
   }
 
+  public function hasLineCounts() {
+    // This data was not populated on older revisions, so it may not be
+    // present on all revisions.
+    return isset($this->properties[self::PROPERTY_LINES_ADDED]);
+  }
+
   public function getRevisionScaleGlyphs() {
     $add = $this->getAddedLineCount();
     $rem = $this->getRemovedLineCount();

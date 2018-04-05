@@ -109,7 +109,10 @@ final class DifferentialRevisionListView extends AphrontView {
       $item->setHeader($revision->getTitle());
       $item->setHref($revision->getURI());
 
-      $item->addAttribute($this->renderRevisionSize($revision));
+      $size = $this->renderRevisionSize($revision);
+      if ($size !== null) {
+        $item->addAttribute($size);
+      }
 
       if ($revision->getHasDraft($viewer)) {
         $draft = id(new PHUIIconView())
@@ -193,6 +196,10 @@ final class DifferentialRevisionListView extends AphrontView {
   }
 
   private function renderRevisionSize(DifferentialRevision $revision) {
+    if (!$revision->hasLineCounts()) {
+      return null;
+    }
+
     $size = array();
 
     $glyphs = $revision->getRevisionScaleGlyphs();
