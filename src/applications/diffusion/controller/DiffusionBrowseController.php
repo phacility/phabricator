@@ -111,40 +111,17 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $path = $drequest->getPath();
 
-    $blame_key = PhabricatorDiffusionBlameSetting::SETTINGKEY;
-    $show_blame = $request->getBool(
-      'blame',
-      $viewer->getUserSetting($blame_key));
-
-    $view = $request->getStr('view');
-    if ($request->isFormPost() && $view != 'raw' && $viewer->isLoggedIn()) {
-      $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
-
-      $editor = id(new PhabricatorUserPreferencesEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true);
-
-      $xactions = array();
-      $xactions[] = $preferences->newTransaction($blame_key, $show_blame);
-      $editor->applyTransactions($preferences, $xactions);
-
-      $uri = $request->getRequestURI()
-        ->alter('blame', null);
-
-      return id(new AphrontRedirectResponse())->setURI($uri);
-    }
-
     // We need the blame information if blame is on and this is an Ajax request.
     // If blame is on and this is a colorized request, we don't show blame at
     // first (we ajax it in afterward) so we don't need to query for it.
-    $needs_blame = ($show_blame && $request->isAjax());
+    $needs_blame = $request->isAjax();
 
     $params = array(
       'commit' => $drequest->getCommit(),
       'path' => $drequest->getPath(),
     );
+
+    $view = $request->getStr('view');
 
     $byte_limit = null;
     if ($view !== 'raw') {
@@ -225,7 +202,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
         // Build the content of the file.
         $corpus = $this->buildCorpus(
-          $show_blame,
           $data,
           $needs_blame,
           $drequest,
@@ -240,8 +216,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     require_celerity_resource('diffusion-source-css');
 
-    // Render the page.
-    $bar = $this->buildButtonBar($drequest, $show_blame, $show_editor);
+    $bar = $this->buildButtonBar($drequest, $show_editor);
     $header = $this->buildHeaderView($drequest);
     $header->setHeaderIcon('fa-file-code-o');
 
@@ -540,7 +515,6 @@ final class DiffusionBrowseController extends DiffusionController {
   }
 
   private function buildCorpus(
-    $show_blame,
     $file_corpus,
     $needs_blame,
     DiffusionRequest $drequest,
@@ -585,8 +559,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $rows = $this->buildDisplayRows(
       $lines,
       $blame_list,
-      $blame_commits,
-      $show_blame);
+      $blame_commits);
 
     $corpus_table = javelin_tag(
       'table',
@@ -677,7 +650,7 @@ final class DiffusionBrowseController extends DiffusionController {
         phutil_format_bytes($highlight_limit));
     }
 
-    if ($show_blame && !$can_blame) {
+    if (!$can_blame) {
       $messages[] = pht(
         'This file is larger than %s, so blame is disabled.',
         phutil_format_bytes($blame_limit));
@@ -701,7 +674,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function buildButtonBar(
     DiffusionRequest $drequest,
-    $show_blame,
     $show_editor) {
 
     $viewer = $this->getViewer();
@@ -727,38 +699,6 @@ final class DiffusionBrowseController extends DiffusionController {
               'action' => 'change',
             )))
         ->setIcon('fa-backward');
-
-    if ($show_blame) {
-      $blame_text = pht('Disable Blame');
-      $blame_icon = 'fa-exclamation-circle lightgreytext';
-      $blame_value = 0;
-    } else {
-      $blame_text = pht('Enable Blame');
-      $blame_icon = 'fa-exclamation-circle';
-      $blame_value = 1;
-    }
-
-    $blame = id(new PHUIButtonView())
-      ->setText($blame_text)
-      ->setIcon($blame_icon)
-      ->setUser($viewer)
-      ->setSelected(!$blame_value)
-      ->setColor(PHUIButtonView::GREY);
-
-    if ($viewer->isLoggedIn()) {
-      $blame = phabricator_form(
-        $viewer,
-        array(
-          'action' => $base_uri->alter('blame', $blame_value),
-          'method' => 'POST',
-          'style' => 'display: inline-block;',
-        ),
-        $blame);
-    } else {
-      $blame->setTag('a');
-      $blame->setHref($base_uri->alter('blame', $blame_value));
-    }
-    $buttons[] = $blame;
 
     if ($editor_link) {
       $buttons[] =
@@ -931,8 +871,7 @@ final class DiffusionBrowseController extends DiffusionController {
   private function buildDisplayRows(
     array $lines,
     array $blame_list,
-    array $blame_commits,
-    $show_blame) {
+    array $blame_commits) {
 
     $request = $this->getRequest();
     $viewer = $this->getViewer();
@@ -1123,7 +1062,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $rows = $this->renderInlines(
       idx($inlines, 0, array()),
-      $show_blame,
       (bool)$this->coverage,
       $engine);
 
@@ -1157,7 +1095,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $skip_text = pht('Skip Past This Commit');
     $skip_icon = id(new PHUIIconView())
-      ->setIcon('fa-caret-square-o-left');
+      ->setIcon('fa-backward');
 
     foreach ($display as $line_index => $line) {
       $row = array();
@@ -1191,7 +1129,7 @@ final class DiffusionBrowseController extends DiffusionController {
           }
         }
 
-        $skip_href = $line_href.'?before='.$identifier.'&view=blame';
+        $skip_href = $line_href.'?before='.$identifier;
         $before_link = javelin_tag(
           'a',
           array(
@@ -1206,29 +1144,27 @@ final class DiffusionBrowseController extends DiffusionController {
           $skip_icon);
       }
 
-      if ($show_blame) {
-        $row[] = phutil_tag(
-          'th',
-          array(
-            'class' => 'diffusion-blame-link',
-          ),
-          $before_link);
+      $row[] = phutil_tag(
+        'th',
+        array(
+          'class' => 'diffusion-blame-link',
+        ),
+        $before_link);
 
-        $object_links = array();
-        $object_links[] = $author_link;
-        $object_links[] = $commit_link;
-        if ($revision_link) {
-          $object_links[] = phutil_tag('span', array(), '/');
-          $object_links[] = $revision_link;
-        }
-
-        $row[] = phutil_tag(
-          'th',
-          array(
-            'class' => 'diffusion-rev-link',
-          ),
-          $object_links);
+      $object_links = array();
+      $object_links[] = $author_link;
+      $object_links[] = $commit_link;
+      if ($revision_link) {
+        $object_links[] = phutil_tag('span', array(), '/');
+        $object_links[] = $revision_link;
       }
+
+      $row[] = phutil_tag(
+        'th',
+        array(
+          'class' => 'diffusion-rev-link',
+        ),
+        $object_links);
 
       $line_link = phutil_tag(
         'a',
@@ -1305,7 +1241,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $cur_inlines = $this->renderInlines(
         idx($inlines, $line_number, array()),
-        $show_blame,
         $this->coverage,
         $engine);
       foreach ($cur_inlines as $cur_inline) {
@@ -1318,7 +1253,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function renderInlines(
     array $inlines,
-    $show_blame,
     $has_coverage,
     $engine) {
 
@@ -1333,7 +1267,7 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setInlineComment($inline)
         ->render();
 
-      $row = array_fill(0, ($show_blame ? 3 : 1), phutil_tag('th'));
+      $row = array_fill(0, 3, phutil_tag('th'));
 
       $row[] = phutil_tag('td', array(), $inline_view);
 
