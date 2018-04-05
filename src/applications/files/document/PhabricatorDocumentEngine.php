@@ -152,18 +152,6 @@ abstract class PhabricatorDocumentEngine
     return null;
   }
 
-  public function getRenderURI(PhabricatorDocumentRef $ref) {
-    $file = $ref->getFile();
-    if (!$file) {
-      throw new PhutilMethodNotImplementedException();
-    }
-
-    $engine_key = $this->getDocumentEngineKey();
-    $file_phid = $file->getPHID();
-
-    return "/file/document/{$engine_key}/{$file_phid}/";
-  }
-
   final public static function getEnginesForRef(
     PhabricatorUser $viewer,
     PhabricatorDocumentRef $ref) {
