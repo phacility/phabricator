@@ -6,6 +6,7 @@ abstract class PhabricatorDocumentRenderingEngine
   private $request;
   private $controller;
   private $activeEngine;
+  private $ref;
 
   final public function setRequest(AphrontRequest $request) {
     $this->request = $request;
@@ -34,11 +35,11 @@ abstract class PhabricatorDocumentRenderingEngine
   }
 
   final protected function getActiveEngine() {
-    if (!$this->activeEngine) {
-      throw new PhutilInvalidStateException('setActiveEngine');
-    }
-
     return $this->activeEngine;
+  }
+
+  final protected function getRef() {
+    return $this->ref;
   }
 
   final public function newDocumentView(PhabricatorDocumentRef $ref) {
@@ -173,10 +174,9 @@ abstract class PhabricatorDocumentRenderingEngine
     $viewer = $request->getViewer();
 
     $engines = PhabricatorDocumentEngine::getEnginesForRef($viewer, $ref);
-    $engine_key = $request->getURIData('engineKey');
+    $engine_key = $this->getSelectedDocumentEngineKey();
     if (!isset($engines[$engine_key])) {
       return $this->newErrorResponse(
-        $ref,
         pht(
           'The engine ("%s") is unknown, or unable to render this document.',
           $engine_key));
@@ -198,16 +198,13 @@ abstract class PhabricatorDocumentRenderingEngine
     try {
       $content = $engine->newDocument($ref);
     } catch (Exception $ex) {
-      return $this->newErrorResponse($ref, $ex->getMessage());
+      return $this->newErrorResponse($ex->getMessage());
     }
 
-    return $this->newContentResponse($ref, $content);
+    return $this->newContentResponse($content);
   }
 
-  private function newErrorResponse(
-    PhabricatorDocumentRef $ref,
-    $message) {
-
+  public function newErrorResponse($message) {
     $container = phutil_tag(
       'div',
       array(
@@ -220,13 +217,10 @@ abstract class PhabricatorDocumentRenderingEngine
         $message,
       ));
 
-    return $this->newContentResponse($ref, $container);
+    return $this->newContentResponse($container);
   }
 
-  private function newContentResponse(
-    PhabricatorDocumentRef $ref,
-    $content) {
-
+  private function newContentResponse($content) {
     $request = $this->getRequest();
     $viewer = $request->getViewer();
     $controller = $this->getController();
@@ -239,10 +233,8 @@ abstract class PhabricatorDocumentRenderingEngine
           ));
     }
 
-    $crumbs = $this->newCrumbs($ref);
-    if ($crumbs) {
-      $crumbs->setBorder(true);
-    }
+    $crumbs = $this->newCrumbs();
+    $crumbs->setBorder(true);
 
     $content_frame = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
@@ -251,34 +243,46 @@ abstract class PhabricatorDocumentRenderingEngine
     $page_frame = id(new PHUITwoColumnView())
       ->setFooter($content_frame);
 
+    $title = array();
+    $ref = $this->getRef();
+    if ($ref) {
+      $title = array(
+        $ref->getName(),
+        pht('Standalone'),
+      );
+    } else {
+      $title = pht('Document');
+    }
+
     return $controller->newPage()
       ->setCrumbs($crumbs)
-      ->setTitle(
-        array(
-          $ref->getName(),
-          pht('Standalone'),
-        ))
+      ->setTitle($title)
       ->appendChild($page_frame);
   }
 
-  protected function newCrumbs(PhabricatorDocumentRef $ref) {
+  protected function newCrumbs() {
+    $engine = $this->getActiveEngine();
     $controller = $this->getController();
+
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
-    $this->addApplicationCrumbs($ref, $crumbs);
+    $ref = $this->getRef();
 
-    $engine = $this->getActiveEngine();
-    $label = $engine->getViewAsLabel($ref);
-    if ($label) {
-      $crumbs->addTextCrumb($label);
+    $this->addApplicationCrumbs($crumbs, $ref);
+
+    if ($ref) {
+      $label = $engine->getViewAsLabel($ref);
+      if ($label) {
+        $crumbs->addTextCrumb($label);
+      }
     }
 
     return $crumbs;
   }
 
   protected function addApplicationCrumbs(
-    PhabricatorDocumentRef $ref,
-    PHUICrumbsView $crumbs) {
+    PHUICrumbsView $crumbs,
+    PhabricatorDocumentRef $ref = null) {
     return;
   }
 

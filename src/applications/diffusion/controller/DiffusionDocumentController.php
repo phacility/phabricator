@@ -1,20 +1,29 @@
 <?php
 
-final class PhabricatorFileDocumentController
-  extends PhabricatorFileController {
+final class DiffusionDocumentController extends DiffusionController {
 
   public function shouldAllowPublic() {
     return true;
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $engine = id(new PhabricatorFileDocumentRenderingEngine())
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
+    $drequest = $this->getDiffusionRequest();
+
+    $engine = id(new DiffusionDocumentRenderingEngine())
       ->setRequest($request)
+      ->setDiffusionRequest($drequest)
       ->setController($this);
 
-    $viewer = $request->getViewer();
+    $viewer = $this->getViewer();
+    $request = $this->getRequest();
+    $repository = $drequest->getRepository();
 
-    $file_phid = $request->getURIData('phid');
+    $file_phid = $request->getStr('filePHID');
 
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)

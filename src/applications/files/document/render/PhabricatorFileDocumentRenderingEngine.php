@@ -34,12 +34,14 @@ final class PhabricatorFileDocumentRenderingEngine
   }
 
   protected function addApplicationCrumbs(
-    PhabricatorDocumentRef $ref,
-    PHUICrumbsView $crumbs) {
+    PHUICrumbsView $crumbs,
+    PhabricatorDocumentRef $ref = null) {
 
-    $file = $ref->getFile();
-    if ($file) {
-      $crumbs->addTextCrumb($file->getMonogram(), $file->getInfoURI());
+    if ($ref) {
+      $file = $ref->getFile();
+      if ($file) {
+        $crumbs->addTextCrumb($file->getMonogram(), $file->getInfoURI());
+      }
     }
 
   }
