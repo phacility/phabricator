@@ -9,6 +9,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
   private $truncatedFirstBytes = false;
   private $truncatedFirstLines = false;
   private $symbolMetadata;
+  private $blameMap;
 
   public function setLines(array $lines) {
     $this->lines = $lines;
@@ -49,7 +50,19 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this->symbolMetadata;
   }
 
+  public function setBlameMap(array $map) {
+    $this->blameMap = $map;
+    return $this;
+  }
+
+  public function getBlameMap() {
+    return $this->blameMap;
+  }
+
   public function render() {
+    $blame_map = $this->getBlameMap();
+    $has_blame = ($blame_map !== null);
+
     require_celerity_resource('phabricator-source-code-view-css');
     require_celerity_resource('syntax-highlighting-css');
 
@@ -85,7 +98,6 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
     $base_uri = (string)$this->uri;
     foreach ($lines as $line) {
-
       // NOTE: See phabricator-oncopy behavior.
       $content_line = hsprintf("\xE2\x80\x8B%s", $line);
 
@@ -114,10 +126,40 @@ final class PhabricatorSourceCodeView extends AphrontView {
           $line_number);
       }
 
+      if ($has_blame) {
+        $lines = idx($blame_map, $line_number);
+
+        if ($lines) {
+          $skip_blame = 'skip;'.$lines;
+          $info_blame = 'info;'.$lines;
+        } else {
+          $skip_blame = null;
+          $info_blame = null;
+        }
+
+        $blame_cells = array(
+          phutil_tag(
+            'th',
+            array(
+              'class' => 'phabricator-source-blame-skip',
+              'data-blame' => $skip_blame,
+            )),
+          phutil_tag(
+            'th',
+            array(
+              'class' => 'phabricator-source-blame-info',
+              'data-blame' => $info_blame,
+            )),
+        );
+      } else {
+        $blame_cells = null;
+      }
+
       $rows[] = phutil_tag(
         'tr',
         $row_attributes,
         array(
+          $blame_cells,
           phutil_tag(
             'th',
             array(

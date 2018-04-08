@@ -91,7 +91,8 @@ abstract class PhabricatorDocumentRenderingEngine
         'viewURI' => $view_uri,
         'loadingMarkup' => hsprintf('%s', $loading),
         'canEncode' => $candidate_engine->canConfigureEncoding($ref),
-        'canHighlight' => $candidate_engine->CanConfigureHighlighting($ref),
+        'canHighlight' => $candidate_engine->canConfigureHighlighting($ref),
+        'canBlame' => $candidate_engine->canBlame($ref),
       );
     }
 
@@ -99,15 +100,20 @@ abstract class PhabricatorDocumentRenderingEngine
     $control_id = celerity_generate_unique_node_id();
     $icon = $engine->newDocumentIcon($ref);
 
+    $config = array(
+      'controlID' => $control_id,
+    );
+
     if ($engine->shouldRenderAsync($ref)) {
       $content = $engine->newLoadingContent($ref);
-      $config = array(
-        'renderControlID' => $control_id,
-      );
+      $config['next'] = 'render';
     } else {
       $this->willRenderRef($ref);
       $content = $engine->newDocument($ref);
-      $config = array();
+
+      if ($engine->canBlame($ref)) {
+        $config['next'] = 'blame';
+      }
     }
 
     Javelin::initBehavior('document-engine', $config);
@@ -134,6 +140,10 @@ abstract class PhabricatorDocumentRenderingEngine
         'name' => pht('Highlight As...'),
         'uri' => '/services/highlight/',
         'value' => $highlight_setting,
+      ),
+      'blame' => array(
+        'uri' => $ref->getBlameURI(),
+        'value' => null,
       ),
     );
 

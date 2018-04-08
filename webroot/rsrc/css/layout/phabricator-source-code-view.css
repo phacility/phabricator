@@ -68,3 +68,46 @@ th.phabricator-source-line a:hover {
 .phabricator-source-code-summary .phabricator-source-code {
   white-space: nowrap;
 }
+
+
+.phabricator-source-blame-skip,
+.phabricator-source-blame-info {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.phabricator-source-blame-skip {
+  min-width: 28px;
+  border-right: 1px solid {$thinblueborder};
+}
+
+.phabricator-source-blame-info {
+  color: {$lightgreytext};
+  white-space: nowrap;
+  min-width: 130px;
+  border-right: 1px solid {$paste.border};
+  padding-right: 8px;
+}
+
+.phabricator-source-blame-skip a {
+  /* Give the user a larger click target. */
+  display: block;
+  padding: 2px 8px;
+}
+
+.device-desktop .phabricator-source-blame-skip a:hover {
+  background: {$bluebackground};
+}
+
+.phabricator-source-blame-author {
+  display: inline-block;
+  padding: 0;
+  margin: 2px 6px -4px 8px;
+  width: 16px;
+  height: 16px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}

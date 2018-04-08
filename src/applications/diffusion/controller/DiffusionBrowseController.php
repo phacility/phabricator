@@ -110,12 +110,6 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     $path = $drequest->getPath();
-
-    // We need the blame information if blame is on and this is an Ajax request.
-    // If blame is on and this is a colorized request, we don't show blame at
-    // first (we ajax it in afterward) so we don't need to query for it.
-    $needs_blame = $request->isAjax();
-
     $params = array(
       'commit' => $drequest->getCommit(),
       'path' => $drequest->getPath(),
@@ -184,11 +178,10 @@ final class DiffusionBrowseController extends DiffusionController {
           $file->setName($basename);
 
           return $file->getRedirectResponse();
-        } else {
-          $corpus = $this->buildGitLFSCorpus($lfs_ref);
         }
+
+        $corpus = $this->buildGitLFSCorpus($lfs_ref);
       } else {
-        $this->loadLintMessages();
         $this->coverage = $drequest->loadCoverage();
         $show_editor = true;
 
@@ -204,12 +197,6 @@ final class DiffusionBrowseController extends DiffusionController {
         $this->corpusButtons[] = $this->renderFileButton();
       }
     }
-
-    if ($request->isAjax()) {
-      return id(new AphrontAjaxResponse())->setContent($corpus);
-    }
-
-    require_celerity_resource('diffusion-source-css');
 
     $bar = $this->buildButtonBar($drequest, $show_editor);
     $header = $this->buildHeaderView($drequest);
@@ -480,35 +467,6 @@ final class DiffusionBrowseController extends DiffusionController {
     return $view;
   }
 
-  private function loadLintMessages() {
-    $drequest = $this->getDiffusionRequest();
-    $branch = $drequest->loadBranch();
-
-    if (!$branch || !$branch->getLintCommit()) {
-      return;
-    }
-
-    $this->lintCommit = $branch->getLintCommit();
-
-    $conn = id(new PhabricatorRepository())->establishConnection('r');
-
-    $where = '';
-    if ($drequest->getLint()) {
-      $where = qsprintf(
-        $conn,
-        'AND code = %s',
-        $drequest->getLint());
-    }
-
-    $this->lintMessages = queryfx_all(
-      $conn,
-      'SELECT * FROM %T WHERE branchID = %d %Q AND path = %s',
-      PhabricatorRepository::TABLE_LINTMESSAGE,
-      $branch->getID(),
-      $where,
-      '/'.$drequest->getPath());
-  }
-
   private function buildButtonBar(
     DiffusionRequest $drequest,
     $show_editor) {
@@ -547,33 +505,6 @@ final class DiffusionBrowseController extends DiffusionController {
           ->setID('editor_link')
           ->setMetadata(array('link_template' => $template))
           ->setDisabled(!$editor_link)
-          ->setColor(PHUIButtonView::GREY);
-    }
-
-    $href = null;
-    $show_lint = true;
-    if ($this->getRequest()->getStr('lint') !== null) {
-      $lint_text = pht('Hide Lint');
-      $href = $base_uri->alter('lint', null);
-
-    } else if ($this->lintCommit === null) {
-      $show_lint = false;
-    } else {
-      $lint_text = pht('Show Lint');
-      $href = $this->getDiffusionRequest()->generateURI(array(
-        'action' => 'browse',
-        'commit' => $this->lintCommit,
-      ))->alter('lint', '');
-    }
-
-    if ($show_lint) {
-      $buttons[] =
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setText($lint_text)
-          ->setHref($href)
-          ->setIcon('fa-exclamation-triangle')
-          ->setDisabled(!$href)
           ->setColor(PHUIButtonView::GREY);
     }
 
@@ -703,40 +634,6 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setHref($href)
       ->setIcon($icon)
       ->setColor(PHUIButtonView::GREY);
-  }
-
-  private function renderInlines(
-    array $inlines,
-    $has_coverage,
-    $engine) {
-
-    $rows = array();
-    foreach ($inlines as $inline) {
-
-      // TODO: This should use modern scaffolding code.
-
-      $inline_view = id(new PHUIDiffInlineCommentDetailView())
-        ->setUser($this->getViewer())
-        ->setMarkupEngine($engine)
-        ->setInlineComment($inline)
-        ->render();
-
-      $row = array_fill(0, 3, phutil_tag('th'));
-
-      $row[] = phutil_tag('td', array(), $inline_view);
-
-      if ($has_coverage) {
-        $row[] = phutil_tag(
-          'td',
-          array(
-            'class' => 'cov cov-I',
-          ));
-      }
-
-      $rows[] = phutil_tag('tr', array('class' => 'inline'), $row);
-    }
-
-    return $rows;
   }
 
   private function buildErrorCorpus($message) {
@@ -896,33 +793,6 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
 
     return head($parents);
-  }
-
-  private function renderRevisionTooltip(
-    DifferentialRevision $revision,
-    $handles) {
-    $viewer = $this->getRequest()->getUser();
-
-    $date = phabricator_date($revision->getDateModified(), $viewer);
-    $id = $revision->getID();
-    $title = $revision->getTitle();
-    $header = "D{$id} {$title}";
-
-    $author = $handles[$revision->getAuthorPHID()]->getName();
-
-    return "{$header}\n{$date} \xC2\xB7 {$author}";
-  }
-
-  private function renderCommitTooltip(
-    PhabricatorRepositoryCommit $commit,
-    $author) {
-
-    $viewer = $this->getRequest()->getUser();
-
-    $date = phabricator_date($commit->getEpoch(), $viewer);
-    $summary = trim($commit->getSummary());
-
-    return "{$summary}\n{$date} \xC2\xB7 {$author}";
   }
 
   protected function markupText($text) {
@@ -1108,127 +978,6 @@ final class DiffusionBrowseController extends DiffusionController {
     return $view;
   }
 
-  private function loadBlame($path, $commit, $timeout) {
-    $blame = $this->callConduitWithDiffusionRequest(
-      'diffusion.blame',
-      array(
-        'commit' => $commit,
-        'paths' => array($path),
-        'timeout' => $timeout,
-      ));
-
-    $identifiers = idx($blame, $path, null);
-
-    if ($identifiers) {
-      $viewer = $this->getViewer();
-      $drequest = $this->getDiffusionRequest();
-      $repository = $drequest->getRepository();
-
-      $commits = id(new DiffusionCommitQuery())
-        ->setViewer($viewer)
-        ->withRepository($repository)
-        ->withIdentifiers($identifiers)
-        // TODO: We only fetch this to improve author display behavior, but
-        // shouldn't really need to?
-        ->needCommitData(true)
-        ->execute();
-      $commits = mpull($commits, null, 'getCommitIdentifier');
-    } else {
-      $commits = array();
-    }
-
-    return array($identifiers, $commits);
-  }
-
-  private function renderAuthorLinks(array $authors, $handles) {
-    $links = array();
-
-    foreach ($authors as $phid) {
-      if (!strlen($phid)) {
-        // This means we couldn't identify an author for the commit or the
-        // revision. We just render a blank for alignment.
-        $style = null;
-        $href = null;
-        $sigil = null;
-        $meta = null;
-      } else {
-        $src = $handles[$phid]->getImageURI();
-        $style = 'background-image: url('.$src.');';
-        $href = $handles[$phid]->getURI();
-        $sigil = 'has-tooltip';
-        $meta = array(
-          'tip' => $handles[$phid]->getName(),
-          'align' => 'E',
-        );
-      }
-
-      $links[$phid] = javelin_tag(
-        $href ? 'a' : 'span',
-        array(
-          'class' => 'diffusion-author-link',
-          'style' => $style,
-          'href' => $href,
-          'sigil' => $sigil,
-          'meta' => $meta,
-        ));
-    }
-
-    return $links;
-  }
-
-  private function renderCommitLinks(array $commits, $handles) {
-    $links = array();
-    foreach ($commits as $identifier => $commit) {
-      $tooltip = $this->renderCommitTooltip(
-        $commit,
-        $commit->renderAuthorShortName($handles));
-
-      $commit_link = javelin_tag(
-        'a',
-        array(
-          'href' => $commit->getURI(),
-          'sigil' => 'has-tooltip',
-          'meta'  => array(
-            'tip'   => $tooltip,
-            'align' => 'E',
-            'size'  => 600,
-          ),
-        ),
-        $commit->getLocalName());
-
-      $links[$identifier] = $commit_link;
-    }
-
-    return $links;
-  }
-
-  private function renderRevisionLinks(array $revisions, $handles) {
-    $links = array();
-
-    foreach ($revisions as $revision) {
-      $revision_id = $revision->getID();
-
-      $tooltip = $this->renderRevisionTooltip($revision, $handles);
-
-      $revision_link = javelin_tag(
-        'a',
-        array(
-          'href' => '/'.$revision->getMonogram(),
-          'sigil' => 'has-tooltip',
-          'meta'  => array(
-            'tip'   => $tooltip,
-            'align' => 'E',
-            'size'  => 600,
-          ),
-        ),
-        $revision->getMonogram());
-
-      $links[$revision_id] = $revision_link;
-    }
-
-    return $links;
-  }
-
   private function getGitLFSRef(PhabricatorRepository $repository, $data) {
     if (!$repository->canUseGitLFS()) {
       return null;
@@ -1375,13 +1124,4 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setTable($history_table);
   }
 
-  private function getLineNumberBaseURI() {
-    $drequest = $this->getDiffusionRequest();
-
-    return (string)$drequest->generateURI(
-      array(
-        'action'  => 'browse',
-        'stable'  => true,
-      ));
-  }
 }

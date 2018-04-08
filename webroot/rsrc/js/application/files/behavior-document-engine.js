@@ -7,8 +7,6 @@
 
 JX.behavior('document-engine', function(config, statics) {
 
-
-
   function onmenu(e) {
     var node = e.getNode('document-engine-view-dropdown');
     var data = JX.Stratcom.getData(node);
@@ -213,15 +211,91 @@ JX.behavior('document-engine', function(config, statics) {
     JX.DOM.setContent(viewport, JX.$H(r.markup));
   }
 
+  function blame(data) {
+    if (!data.blame.uri) {
+      return;
+    }
+
+    if (!data.blame.value) {
+      new JX.Request(data.blame.uri, JX.bind(null, onblame, data))
+        .send();
+      return;
+    }
+
+    var viewport = JX.$(data.viewportID);
+
+    var cells = JX.DOM.scry(viewport, 'th');
+
+    for (var ii = 0; ii < cells.length; ii++) {
+      var cell = cells[ii];
+
+      var spec = cell.getAttribute('data-blame');
+      if (!spec) {
+        continue;
+      }
+
+      spec = spec.split(';');
+      var type = spec[0];
+      var lines = spec[1];
+
+      var content = null;
+      switch (type) {
+        case 'skip':
+          content = renderSkip(data.blame.value, lines);
+          break;
+        case 'info':
+          content = renderInfo(data.blame.value, lines);
+          break;
+      }
+
+      JX.DOM.setContent(cell, content);
+    }
+  }
+
+  function onblame(data, r) {
+    data.blame.value = r;
+    blame(data);
+  }
+
+  function renderSkip(blame, lines) {
+    var commit = blame.blame[lines - 1];
+    if (!commit) {
+      return null;
+    }
+
+    var spec = blame.map[commit];
+
+    return JX.$H(spec.skip);
+  }
+
+  function renderInfo(blame, lines) {
+    var commit = blame.blame[lines - 1];
+    if (!commit) {
+      return null;
+    }
+
+    var spec = blame.map[commit];
+
+    return JX.$H(spec.info);
+  }
+
   if (!statics.initialized) {
     JX.Stratcom.listen('click', 'document-engine-view-dropdown', onmenu);
     statics.initialized = true;
   }
 
-  if (config && config.renderControlID) {
-    var control = JX.$(config.renderControlID);
+  if (config && config.controlID) {
+    var control = JX.$(config.controlID);
     var data = JX.Stratcom.getData(control);
-    onview(data, null, true);
+
+    switch (config.next) {
+      case 'render':
+        onview(data, null, true);
+        break;
+      case 'blame':
+        blame(data);
+        break;
+    }
   }
 
 });

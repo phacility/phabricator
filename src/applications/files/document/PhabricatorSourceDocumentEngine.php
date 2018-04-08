@@ -13,6 +13,10 @@ final class PhabricatorSourceDocumentEngine
     return true;
   }
 
+  public function canBlame(PhabricatorDocumentRef $ref) {
+    return true;
+  }
+
   protected function getDocumentIconIcon(PhabricatorDocumentRef $ref) {
     return 'fa-code';
   }
@@ -45,9 +49,17 @@ final class PhabricatorSourceDocumentEngine
       }
     }
 
+    $options = array();
+    if ($ref->getBlameURI()) {
+      $content = phutil_split_lines($content);
+      $blame = range(1, count($content));
+      $blame = array_fuse($blame);
+      $options['blame'] = $blame;
+    }
+
     return array(
       $messages,
-      $this->newTextDocumentContent($ref, $content),
+      $this->newTextDocumentContent($ref, $content, $options),
     );
   }
 

@@ -55,6 +55,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         'browse/(?P<dblob>.*)' => 'DiffusionBrowseController',
         'document/(?P<dblob>.*)'
           => 'DiffusionDocumentController',
+        'blame/(?P<dblob>.*)'
+          => 'DiffusionBlameController',
         'lastmodified/(?P<dblob>.*)' => 'DiffusionLastModifiedController',
         'diff/' => 'DiffusionDiffController',
         'tags/(?P<dblob>.*)' => 'DiffusionTagListController',

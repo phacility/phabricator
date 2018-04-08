@@ -70,7 +70,17 @@ final class DiffusionDocumentRenderingEngine
   }
 
   protected function willRenderRef(PhabricatorDocumentRef $ref) {
-    $ref->setSymbolMetadata($this->getSymbolMetadata());
+    $drequest = $this->getDiffusionRequest();
+
+    $blame_uri = (string)$drequest->generateURI(
+      array(
+        'action' => 'blame',
+        'stable' => true,
+      ));
+
+    $ref
+      ->setSymbolMetadata($this->getSymbolMetadata())
+      ->setBlameURI($blame_uri);
   }
 
   private function getSymbolMetadata() {

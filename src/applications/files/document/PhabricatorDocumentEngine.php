@@ -38,6 +38,10 @@ abstract class PhabricatorDocumentEngine
     return false;
   }
 
+  public function canBlame(PhabricatorDocumentRef $ref) {
+    return false;
+  }
+
   final public function setEncodingConfiguration($config) {
     $this->encodingConfiguration = $config;
     return $this;
