@@ -14,10 +14,6 @@ final class DiffusionDocumentRenderingEngine
     return $this->diffusionRequest;
   }
 
-  protected function getSelectedDocumentEngineKey() {
-    return $this->getRequest()->getStr('as');
-  }
-
   protected function newRefViewURI(
     PhabricatorDocumentRef $ref,
     PhabricatorDocumentEngine $engine) {
@@ -56,6 +52,15 @@ final class DiffusionDocumentRenderingEngine
           'filePHID' => $file_phid,
         ),
       ));
+  }
+
+  protected function getSelectedDocumentEngineKey() {
+    return $this->getRequest()->getStr('as');
+  }
+
+  protected function getSelectedLineRange() {
+    $range = $this->getDiffusionRequest()->getLine();
+    return AphrontRequest::parseURILineRange($range, 1000);
   }
 
   protected function addApplicationCrumbs(

@@ -144,9 +144,14 @@ JX.behavior('phabricator-line-linker', function() {
       var o = getRowNumber(origin);
       var t = getRowNumber(target);
       var uri = JX.Stratcom.getData(root).uri;
+      var path;
 
       if (!uri) {
-        uri = ('' + window.location).split('$')[0];
+        uri = JX.$U(window.location);
+        path = uri.getPath();
+        path = path.replace(/\$[\d-]+$/, '');
+        uri.setPath(path);
+        uri = uri.toString();
       }
 
       origin = null;
@@ -154,7 +159,11 @@ JX.behavior('phabricator-line-linker', function() {
       root = null;
 
       var lines = (o == t ? o : Math.min(o, t) + '-' + Math.max(o, t));
-      uri = uri + '$' + lines;
+
+      uri = JX.$U(uri);
+      path = uri.getPath();
+      path = path + '$' + lines;
+      uri = uri.setPath(path).toString();
 
       JX.History.replace(uri);
 

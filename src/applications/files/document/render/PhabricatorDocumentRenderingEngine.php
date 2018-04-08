@@ -54,7 +54,7 @@ abstract class PhabricatorDocumentRenderingEngine
     }
     $engine = $engines[$engine_key];
 
-    $lines = $request->getURILineRange('lines', 1000);
+    $lines = $this->getSelectedLineRange();
     if ($lines) {
       $engine->setHighlightedLines(range($lines[0], $lines[1]));
     }
@@ -155,18 +155,6 @@ abstract class PhabricatorDocumentRenderingEngine
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setHeader($header)
       ->appendChild($viewport);
-  }
-
-  abstract protected function newRefViewURI(
-    PhabricatorDocumentRef $ref,
-    PhabricatorDocumentEngine $engine);
-
-  abstract protected function newRefRenderURI(
-    PhabricatorDocumentRef $ref,
-    PhabricatorDocumentEngine $engine);
-
-  protected function getSelectedDocumentEngineKey() {
-    return $this->getRequest()->getURIData('engineKey');
   }
 
   final public function newRenderResponse(PhabricatorDocumentRef $ref) {
@@ -278,6 +266,22 @@ abstract class PhabricatorDocumentRenderingEngine
     }
 
     return $crumbs;
+  }
+
+  abstract protected function newRefViewURI(
+    PhabricatorDocumentRef $ref,
+    PhabricatorDocumentEngine $engine);
+
+  abstract protected function newRefRenderURI(
+    PhabricatorDocumentRef $ref,
+    PhabricatorDocumentEngine $engine);
+
+  protected function getSelectedDocumentEngineKey() {
+    return $this->getRequest()->getURIData('engineKey');
+  }
+
+  protected function getSelectedLineRange() {
+    return $this->getRequest()->getURILineRange('lines', 1000);
   }
 
   protected function addApplicationCrumbs(
