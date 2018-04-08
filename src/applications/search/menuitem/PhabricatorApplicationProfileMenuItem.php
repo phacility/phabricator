@@ -31,7 +31,7 @@ final class PhabricatorApplicationProfileMenuItem
       return $name;
     }
 
-    return $application->getMenuName();
+    return $application->getName();
   }
 
   public function buildEditEngineFields(

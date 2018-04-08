@@ -57,10 +57,6 @@ abstract class PhabricatorApplication
 
   abstract public function getName();
 
-  public function getMenuName() {
-    return $this->getName();
-  }
-
   public function getShortDescription() {
     return pht('%s Application', $this->getName());
   }
