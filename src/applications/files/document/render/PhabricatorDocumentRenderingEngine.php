@@ -105,6 +105,7 @@ abstract class PhabricatorDocumentRenderingEngine
         'renderControlID' => $control_id,
       );
     } else {
+      $this->willRenderRef($ref);
       $content = $engine->newDocument($ref);
       $config = array();
     }
@@ -158,6 +159,8 @@ abstract class PhabricatorDocumentRenderingEngine
   }
 
   final public function newRenderResponse(PhabricatorDocumentRef $ref) {
+    $this->willRenderRef($ref);
+
     $request = $this->getRequest();
     $viewer = $request->getViewer();
 
@@ -287,6 +290,10 @@ abstract class PhabricatorDocumentRenderingEngine
   protected function addApplicationCrumbs(
     PHUICrumbsView $crumbs,
     PhabricatorDocumentRef $ref = null) {
+    return;
+  }
+
+  protected function willRenderRef(PhabricatorDocumentRef $ref) {
     return;
   }
 

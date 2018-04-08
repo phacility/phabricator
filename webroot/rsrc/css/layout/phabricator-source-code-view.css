@@ -7,7 +7,6 @@
   overflow-y: hidden;
   border: 1px solid {$paste.border};
   border-radius: 3px;
-  background-color: {$paste.content};
 }
 
 .phui-oi .phabricator-source-code-container {

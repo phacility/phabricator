@@ -11,12 +11,29 @@ JX.behavior('repository-crossreference', function(config, statics) {
   var highlighted;
   var linked = [];
 
-  var isMac = navigator.platform.indexOf('Mac') > -1;
-  var signalKey = isMac ? 91 /*COMMAND*/ : 17 /*CTRL*/;
-  function isSignalkey(event) {
-    return isMac ?
-      event.getRawEvent().metaKey :
-      event.getRawEvent().ctrlKey;
+  function isMacOS() {
+    return (navigator.platform.indexOf('Mac') > -1);
+  }
+
+  function isHighlightModifierKey(e) {
+    var signal_key;
+    if (isMacOS()) {
+      // On macOS, use the "Command" key.
+      signal_key = 91;
+    } else {
+      // On other platforms, use the "Control" key.
+      signal_key = 17;
+    }
+
+    return (e.getRawEvent().keyCode === signal_key);
+  }
+
+  function hasHighlightModifierKey(e) {
+    if (isMacOS()) {
+      return e.getRawEvent().metaKey;
+    } else {
+      return e.getRawEvent().ctrlKey;
+    }
   }
 
   var classHighlight = 'crossreference-item';
@@ -43,7 +60,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
           unhighlight();
           return;
         }
-        if (!isSignalkey(e)) {
+        if (!hasHighlightModifierKey(e)) {
           return;
         }
 
@@ -76,7 +93,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
             target = target.parentNode;
           }
         } else if (e.getType() === 'click') {
-          openSearch(target, lang);
+          openSearch(target, {lang: lang});
         }
       });
   }
@@ -85,13 +102,24 @@ JX.behavior('repository-crossreference', function(config, statics) {
     highlighted = null;
   }
 
-  function openSearch(target, lang) {
+  function openSearch(target, context) {
     var symbol = target.textContent || target.innerText;
-    var query = {
-      lang : lang,
-      repositories : config.repositories.join(','),
-      jump : true
-    };
+
+    context = context || {};
+    context.lang = context.lang || null;
+    context.repositories =
+      context.repositories ||
+      (config && config.repositories) ||
+      [];
+
+    var query = JX.copy({}, context);
+    if (query.repositories.length) {
+      query.repositories = query.repositories.join(',');
+    } else {
+      delete query.repositories;
+    }
+    query.jump = true;
+
     var c = target.className;
     c = c.replace(classHighlight, '').trim();
 
@@ -112,9 +140,11 @@ JX.behavior('repository-crossreference', function(config, statics) {
       query.line = line;
     }
 
-    var path = getPath(target);
-    if (path !== null) {
-      query.path = path;
+    if (!query.hasOwnProperty('path')) {
+      var path = getPath(target);
+      if (path !== null) {
+        query.path = path;
+      }
     }
 
     var char = getChar(target);
@@ -124,7 +154,8 @@ JX.behavior('repository-crossreference', function(config, statics) {
 
     var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
     uri.addQueryParams(query);
-    window.open(uri);
+
+    window.open(uri.toString());
   }
 
   function linkAll() {
@@ -188,16 +219,6 @@ JX.behavior('repository-crossreference', function(config, statics) {
       // Ignore.
     }
 
-    // This method works in Diffusion, when viewing the content of a file at
-    // a particular commit.
-    var file;
-    try {
-      file = JX.DOM.findAbove(target, 'div', 'diffusion-file-content-view');
-      return JX.Stratcom.getData(file).path;
-    } catch (ex) {
-      // Ignore.
-    }
-
     return null;
   }
 
@@ -227,12 +248,6 @@ JX.behavior('repository-crossreference', function(config, statics) {
     return null;
   }
 
-  if (config.container) {
-    link(JX.$(config.container), config.lang);
-  } else if (config.section) {
-    linkAll(JX.$(config.section));
-  }
-
   JX.Stratcom.listen(
     'differential-preview-update',
     null,
@@ -245,9 +260,10 @@ JX.behavior('repository-crossreference', function(config, statics) {
     ['keydown', 'keyup'],
     null,
     function(e) {
-      if (e.getRawEvent().keyCode !== signalKey) {
+      if (!isHighlightModifierKey(e)) {
         return;
       }
+
       setCursorMode(e.getType() === 'keydown');
 
       if (!statics.active) {
@@ -272,4 +288,68 @@ JX.behavior('repository-crossreference', function(config, statics) {
       JX.DOM.alterClass(element, classMouseCursor, statics.active);
     });
   }
+
+
+  if (config && config.container) {
+    link(JX.$(config.container), config.lang);
+  }
+
+  JX.Stratcom.listen(
+    ['mouseover', 'mouseout', 'click'],
+    ['has-symbols', 'tag:span'],
+    function(e) {
+      var type = e.getType();
+
+      if (type === 'mouseout') {
+        unhighlight();
+        return;
+      }
+
+      if (!hasHighlightModifierKey(e)) {
+        return;
+      }
+
+      var target = e.getTarget();
+
+      try {
+        // If we're in an inline comment, don't link symbols.
+        if (JX.DOM.findAbove(target, 'div', 'differential-inline-comment')) {
+          return;
+        }
+      } catch (ex) {
+        // Continue if we're not inside an inline comment.
+      }
+
+      // If only part of the symbol was edited, the symbol name itself will
+      // have another "<span />" inside of it which highlights only the
+      // edited part. Skip over it.
+      if (JX.DOM.isNode(target, 'span') && (target.className === 'bright')) {
+        target = target.parentNode;
+      }
+
+      if (type === 'click') {
+        openSearch(target, e.getNodeData('has-symbols').symbols);
+        e.kill();
+        return;
+      }
+
+      if (e.getType() === 'mouseover') {
+        while (target && target !== document.body) {
+          if (!JX.DOM.isNode(target, 'span')) {
+            target = target.parentNode;
+            continue;
+          }
+
+          if (!class_map.hasOwnProperty(target.className)) {
+            target = target.parentNode;
+            continue;
+          }
+
+          highlighted = target;
+          JX.DOM.alterClass(highlighted, classHighlight, true);
+          break;
+        }
+      }
+    });
+
 });

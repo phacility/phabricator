@@ -8,6 +8,7 @@ final class PhabricatorDocumentRef
   private $file;
   private $byteLength;
   private $snippet;
+  private $symbolMetadata = array();
 
   public function setFile(PhabricatorFile $file) {
     $this->file = $file;
@@ -130,5 +131,16 @@ final class PhabricatorDocumentRef
 
     return $this->snippet;
   }
+
+  public function setSymbolMetadata(array $metadata) {
+    $this->symbolMetadata = $metadata;
+    return $this;
+  }
+
+  public function getSymbolMetadata() {
+    return $this->symbolMetadata;
+  }
+
+
 
 }

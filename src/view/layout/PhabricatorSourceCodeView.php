@@ -8,6 +8,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
   private $canClickHighlight = true;
   private $truncatedFirstBytes = false;
   private $truncatedFirstLines = false;
+  private $symbolMetadata;
 
   public function setLines(array $lines) {
     $this->lines = $lines;
@@ -37,6 +38,15 @@ final class PhabricatorSourceCodeView extends AphrontView {
   public function setTruncatedFirstLines($truncated_first_lines) {
     $this->truncatedFirstLines = $truncated_first_lines;
     return $this;
+  }
+
+  public function setSymbolMetadata(array $symbol_metadata) {
+    $this->symbolMetadata = $symbol_metadata;
+    return $this;
+  }
+
+  public function getSymbolMetadata() {
+    return $this->symbolMetadata;
   }
 
   public function render() {
@@ -130,15 +140,24 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $classes[] = 'remarkup-code';
     $classes[] = 'PhabricatorMonospaced';
 
+    $symbol_metadata = $this->getSymbolMetadata();
+
+    $sigils = array();
+    $sigils[] = 'phabricator-source';
+    $sigils[] = 'has-symbols';
+
+    Javelin::initBehavior('repository-crossreference');
+
     return phutil_tag_div(
       'phabricator-source-code-container',
       javelin_tag(
         'table',
         array(
           'class' => implode(' ', $classes),
-          'sigil' => 'phabricator-source',
+          'sigil' => implode(' ', $sigils),
           'meta' => array(
             'uri' => (string)$this->uri,
+            'symbols' => $symbol_metadata,
           ),
         ),
         phutil_implode_html('', $rows)));

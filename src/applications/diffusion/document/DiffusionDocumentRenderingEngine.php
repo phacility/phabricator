@@ -69,4 +69,24 @@ final class DiffusionDocumentRenderingEngine
     return;
   }
 
+  protected function willRenderRef(PhabricatorDocumentRef $ref) {
+    $ref->setSymbolMetadata($this->getSymbolMetadata());
+  }
+
+  private function getSymbolMetadata() {
+    $drequest = $this->getDiffusionRequest();
+
+    $repo = $drequest->getRepository();
+    $symbol_repos = nonempty($repo->getSymbolSources(), array());
+    $symbol_repos[] = $repo->getPHID();
+
+    $lang = last(explode('.', $drequest->getPath()));
+
+    return array(
+      'repositories' => $symbol_repos,
+      'lang' => $lang,
+      'path' => $drequest->getPath(),
+    );
+  }
+
 }

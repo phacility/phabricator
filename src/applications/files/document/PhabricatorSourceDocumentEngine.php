@@ -47,7 +47,7 @@ final class PhabricatorSourceDocumentEngine
 
     return array(
       $messages,
-      $this->newTextDocumentContent($content),
+      $this->newTextDocumentContent($ref, $content),
     );
   }
 

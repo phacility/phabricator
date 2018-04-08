@@ -13,12 +13,15 @@ abstract class PhabricatorTextDocumentEngine
     return true;
   }
 
-  protected function newTextDocumentContent($content) {
+  protected function newTextDocumentContent(
+    PhabricatorDocumentRef $ref,
+    $content) {
     $lines = phutil_split_lines($content);
 
     $view = id(new PhabricatorSourceCodeView())
       ->setHighlights($this->getHighlightedLines())
-      ->setLines($lines);
+      ->setLines($lines)
+      ->setSymbolMetadata($ref->getSymbolMetadata());
 
     $message = null;
     if ($this->encodingMessage !== null) {
