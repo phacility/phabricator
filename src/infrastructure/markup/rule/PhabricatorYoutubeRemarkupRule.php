@@ -52,4 +52,9 @@ final class PhabricatorYoutubeRemarkupRule extends PhutilRemarkupRule {
     return $this->getEngine()->storeText($iframe);
   }
 
+  public function didMarkupText() {
+    CelerityAPI::getStaticResourceResponse()
+      ->addContentSecurityPolicyURI('frame-src', 'https://www.youtube.com/');
+  }
+
 }

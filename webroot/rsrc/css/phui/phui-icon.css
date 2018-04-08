@@ -49,6 +49,10 @@ img.phui-image-disabled {
   color: {$bluetext};
 }
 
+.phui-icon-view.invisible {
+  visibility: hidden;
+}
+
 /* - Icon in a Circle ------------------------------------------------------- */
 
 .phui-icon-circle {

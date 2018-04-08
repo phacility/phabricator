@@ -48,8 +48,12 @@ final class DifferentialRevisionReclaimTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $status_review = DifferentialRevisionStatus::NEEDS_REVIEW;
-    $object->setModernRevisionStatus($status_review);
+    if ($object->getShouldBroadcast()) {
+      $new_status = DifferentialRevisionStatus::NEEDS_REVIEW;
+    } else {
+      $new_status = DifferentialRevisionStatus::DRAFT;
+    }
+    $object->setModernRevisionStatus($new_status);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

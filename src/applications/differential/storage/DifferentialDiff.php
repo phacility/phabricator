@@ -509,10 +509,6 @@ final class DifferentialDiff
     return null;
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getHarbormasterContainerPHID();
-  }
-
   public function getBuildVariables() {
     $results = array();
 
@@ -555,6 +551,10 @@ final class DifferentialDiff
       'repository.staging.ref' =>
         pht('The ref name for this change in the staging repository.'),
     );
+  }
+
+  public function newBuildableEngine() {
+    return new DifferentialBuildableEngine();
   }
 
 

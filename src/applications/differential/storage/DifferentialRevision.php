@@ -59,9 +59,10 @@ final class DifferentialRevision extends DifferentialDAO
 
   const PROPERTY_CLOSED_FROM_ACCEPTED = 'wasAcceptedBeforeClose';
   const PROPERTY_DRAFT_HOLD = 'draft.hold';
-  const PROPERTY_HAS_BROADCAST = 'draft.broadcast';
+  const PROPERTY_SHOULD_BROADCAST = 'draft.broadcast';
   const PROPERTY_LINES_ADDED = 'lines.added';
   const PROPERTY_LINES_REMOVED = 'lines.removed';
+  const PROPERTY_BUILDABLES = 'buildables';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -74,8 +75,10 @@ final class DifferentialRevision extends DifferentialDAO
 
     if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
       $initial_state = DifferentialRevisionStatus::DRAFT;
+      $should_broadcast = false;
     } else {
       $initial_state = DifferentialRevisionStatus::NEEDS_REVIEW;
+      $should_broadcast = true;
     }
 
     return id(new DifferentialRevision())
@@ -84,7 +87,8 @@ final class DifferentialRevision extends DifferentialDAO
       ->attachRepository(null)
       ->attachActiveDiff(null)
       ->attachReviewers(array())
-      ->setModernRevisionStatus($initial_state);
+      ->setModernRevisionStatus($initial_state)
+      ->setShouldBroadcast($should_broadcast);
   }
 
   protected function getConfiguration() {
@@ -675,6 +679,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getStatusObject()->getIconColor();
   }
 
+  public function getStatusTagColor() {
+    return $this->getStatusObject()->getTagColor();
+  }
+
   public function getStatusObject() {
     $status = $this->getStatus();
     return DifferentialRevisionStatus::newForStatus($status);
@@ -700,14 +708,6 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
-  public function shouldBroadcast() {
-    if (!$this->isDraft()) {
-      return true;
-    }
-
-    return false;
-  }
-
   public function getHoldAsDraft() {
     return $this->getProperty(self::PROPERTY_DRAFT_HOLD, false);
   }
@@ -716,12 +716,14 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->setProperty(self::PROPERTY_DRAFT_HOLD, $hold);
   }
 
-  public function getHasBroadcast() {
-    return $this->getProperty(self::PROPERTY_HAS_BROADCAST, false);
+  public function getShouldBroadcast() {
+    return $this->getProperty(self::PROPERTY_SHOULD_BROADCAST, true);
   }
 
-  public function setHasBroadcast($has_broadcast) {
-    return $this->setProperty(self::PROPERTY_HAS_BROADCAST, $has_broadcast);
+  public function setShouldBroadcast($should_broadcast) {
+    return $this->setProperty(
+      self::PROPERTY_SHOULD_BROADCAST,
+      $should_broadcast);
   }
 
   public function setAddedLineCount($count) {
@@ -740,7 +742,118 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getProperty(self::PROPERTY_LINES_REMOVED);
   }
 
-  public function loadActiveBuilds(PhabricatorUser $viewer) {
+  public function hasLineCounts() {
+    // This data was not populated on older revisions, so it may not be
+    // present on all revisions.
+    return isset($this->properties[self::PROPERTY_LINES_ADDED]);
+  }
+
+  public function getRevisionScaleGlyphs() {
+    $add = $this->getAddedLineCount();
+    $rem = $this->getRemovedLineCount();
+    $all = ($add + $rem);
+
+    if (!$all) {
+      return '       ';
+    }
+
+    $map = array(
+      20 => 2,
+      50 => 3,
+      150 => 4,
+      375 => 5,
+      1000 => 6,
+      2500 => 7,
+    );
+
+    $n = 1;
+    foreach ($map as $size => $count) {
+      if ($size <= $all) {
+        $n = $count;
+      } else {
+        break;
+      }
+    }
+
+    $add_n = (int)ceil(($add / $all) * $n);
+    $rem_n = (int)ceil(($rem / $all) * $n);
+
+    while ($add_n + $rem_n > $n) {
+      if ($add_n > 1) {
+        $add_n--;
+      } else {
+        $rem_n--;
+      }
+    }
+
+    return
+      str_repeat('+', $add_n).
+      str_repeat('-', $rem_n).
+      str_repeat(' ', (7 - $n));
+  }
+
+  public function getBuildableStatus($phid) {
+    $buildables = $this->getProperty(self::PROPERTY_BUILDABLES);
+    if (!is_array($buildables)) {
+      $buildables = array();
+    }
+
+    $buildable = idx($buildables, $phid);
+    if (!is_array($buildable)) {
+      $buildable = array();
+    }
+
+    return idx($buildable, 'status');
+  }
+
+  public function setBuildableStatus($phid, $status) {
+    $buildables = $this->getProperty(self::PROPERTY_BUILDABLES);
+    if (!is_array($buildables)) {
+      $buildables = array();
+    }
+
+    $buildable = idx($buildables, $phid);
+    if (!is_array($buildable)) {
+      $buildable = array();
+    }
+
+    $buildable['status'] = $status;
+
+    $buildables[$phid] = $buildable;
+
+    return $this->setProperty(self::PROPERTY_BUILDABLES, $buildables);
+  }
+
+  public function newBuildableStatus(PhabricatorUser $viewer, $phid) {
+    // For Differential, we're ignoring autobuilds (local lint and unit)
+    // when computing build status. Differential only cares about remote
+    // builds when making publishing and undrafting decisions.
+
+    $builds = $this->loadImpactfulBuildsForBuildablePHIDs(
+      $viewer,
+      array($phid));
+
+    return $this->newBuildableStatusForBuilds($builds);
+  }
+
+  public function newBuildableStatusForBuilds(array $builds) {
+    // If we have nothing but passing builds, the buildable passes.
+    if (!$builds) {
+      return HarbormasterBuildableStatus::STATUS_PASSED;
+    }
+
+    // If we have any completed, non-passing builds, the buildable fails.
+    foreach ($builds as $build) {
+      if ($build->isComplete()) {
+        return HarbormasterBuildableStatus::STATUS_FAILED;
+      }
+    }
+
+    // Otherwise, we're still waiting for the build to pass or fail.
+    return null;
+  }
+
+  public function loadImpactfulBuilds(PhabricatorUser $viewer) {
     $diff = $this->getActiveDiff();
 
     // NOTE: We can't use `withContainerPHIDs()` here because the container
@@ -754,9 +867,18 @@ final class DifferentialRevision extends DifferentialDAO
       return array();
     }
 
+    return $this->loadImpactfulBuildsForBuildablePHIDs(
+      $viewer,
+      mpull($buildables, 'getPHID'));
+  }
+
+  private function loadImpactfulBuildsForBuildablePHIDs(
+    PhabricatorUser $viewer,
+    array $phids) {
+
     return id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
-      ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
+      ->withBuildablePHIDs($phids)
       ->withAutobuilds(false)
       ->withBuildStatuses(
         array(
@@ -788,16 +910,16 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getPHID();
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getPHID();
-  }
-
   public function getBuildVariables() {
     return array();
   }
 
   public function getAvailableBuildVariables() {
     return array();
+  }
+
+  public function newBuildableEngine() {
+    return new DifferentialBuildableEngine();
   }
 
 

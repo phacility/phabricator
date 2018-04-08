@@ -56,10 +56,7 @@ final class DifferentialCreateRawDiffConduitAPIMethod
       throw new Exception(
         pht(
           'The raw diff you have submitted is too large to parse (it affects '.
-          'more than %s paths and hunks). Differential should only be used '.
-          'for changes which are small enough to receive detailed human '.
-          'review. See "Differential User Guide: Large Changes" in the '.
-          'documentation for more information.',
+          'more than %s paths and hunks).',
           new PhutilNumber($raw_limit)));
     }
 

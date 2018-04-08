@@ -233,6 +233,10 @@ final class HarbormasterBuildable
     return $this->getBuildableStatusObject()->isPreparing();
   }
 
+  public function isBuilding() {
+    return $this->getBuildableStatusObject()->isBuilding();
+  }
+
 
 /* -(  Messages  )----------------------------------------------------------- */
 
@@ -329,16 +333,16 @@ final class HarbormasterBuildable
     return $this->getContainerPHID();
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getBuildableObject()->getHarbormasterPublishablePHID();
-  }
-
   public function getBuildVariables() {
     return array();
   }
 
   public function getAvailableBuildVariables() {
     return array();
+  }
+
+  public function newBuildableEngine() {
+    return $this->getBuildableObject()->newBuildableEngine();
   }
 
 

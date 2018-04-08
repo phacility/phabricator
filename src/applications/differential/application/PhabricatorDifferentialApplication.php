@@ -52,7 +52,13 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'DifferentialRevisionListController',
         'diff/' => array(
-          '(?P<id>[1-9]\d*)/' => 'DifferentialDiffViewController',
+          '(?P<id>[1-9]\d*)/' => array(
+            '' => 'DifferentialDiffViewController',
+            'changesets/' => array(
+              $this->getQueryRoutePattern()
+                => 'DifferentialChangesetListController',
+            ),
+          ),
           'create/' => 'DifferentialDiffCreateController',
         ),
         'changeset/' => 'DifferentialChangesetViewController',

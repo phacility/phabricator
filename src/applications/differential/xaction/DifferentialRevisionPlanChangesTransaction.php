@@ -96,9 +96,16 @@ final class DifferentialRevisionPlanChangesTransaction
   }
 
   public function getTitle() {
-    return pht(
-      '%s planned changes to this revision.',
-      $this->renderAuthor());
+    if ($this->isDraftDemotion()) {
+      return pht(
+        '%s returned this revision to the author for changes because remote '.
+        'builds failed.',
+        $this->renderAuthor());
+    } else {
+      return pht(
+        '%s planned changes to this revision.',
+        $this->renderAuthor());
+    }
   }
 
   public function getTitleForFeed() {
@@ -106,6 +113,10 @@ final class DifferentialRevisionPlanChangesTransaction
       '%s planned changes to %s.',
       $this->renderAuthor(),
       $this->renderObject());
+  }
+
+  private function isDraftDemotion() {
+    return (bool)$this->getMetadataValue('draft.demote');
   }
 
 }
