@@ -24,18 +24,31 @@ final class PhabricatorSourceDocumentEngine
   protected function newDocumentContent(PhabricatorDocumentRef $ref) {
     $content = $this->loadTextData($ref);
 
+    $messages = array();
+
     $highlighting = $this->getHighlightingConfiguration();
     if ($highlighting !== null) {
       $content = PhabricatorSyntaxHighlighter::highlightWithLanguage(
         $highlighting,
         $content);
     } else {
-      $content = PhabricatorSyntaxHighlighter::highlightWithFilename(
-        $ref->getName(),
-        $content);
+      $highlight_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
+      if (strlen($content) > $highlight_limit) {
+        $messages[] = $this->newMessage(
+          pht(
+            'This file is larger than %s, so syntax highlighting was skipped.',
+            phutil_format_bytes($highlight_limit)));
+      } else {
+        $content = PhabricatorSyntaxHighlighter::highlightWithFilename(
+          $ref->getName(),
+          $content);
+      }
     }
 
-    return $this->newTextDocumentContent($content);
+    return array(
+      $messages,
+      $this->newTextDocumentContent($content),
+    );
   }
 
 }
