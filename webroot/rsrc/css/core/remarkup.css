@@ -31,7 +31,7 @@
   font-size: 13px;
   font-weight: bold;
   background: rgba({$alphablue},0.08);
-  display: inline-block;
+  display: table-cell;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
   overflow: hidden;
