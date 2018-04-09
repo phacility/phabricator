@@ -41,6 +41,37 @@ final class AlmanacServiceEditEngine
     return AlmanacService::initializeNewService($service_type);
   }
 
+  protected function newEditableObjectFromConduit(array $raw_xactions) {
+    $type = null;
+    foreach ($raw_xactions as $raw_xaction) {
+      if ($raw_xaction['type'] !== 'type') {
+        continue;
+      }
+
+      $type = $raw_xaction['value'];
+    }
+
+    if ($type === null) {
+      throw new Exception(
+        pht(
+          'When creating a new Almanac service via the Conduit API, you '.
+          'must provide a "type" transaction to select a type.'));
+    }
+
+    $map = AlmanacServiceType::getAllServiceTypes();
+    if (!isset($map[$type])) {
+      throw new Exception(
+        pht(
+          'Service type "%s" is unrecognized. Valid types are: %s.',
+          $type,
+          implode(', ', array_keys($map))));
+    }
+
+    $this->setServiceType($type);
+
+    return $this->newEditableObject();
+  }
+
   protected function newEditableObjectForDocumentation() {
     $service_type = new AlmanacCustomServiceType();
     $this->setServiceType($service_type->getServiceTypeConstant());
@@ -101,6 +132,16 @@ final class AlmanacServiceEditEngine
         ->setTransactionType(AlmanacServiceNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
+      id(new PhabricatorTextEditField())
+        ->setKey('type')
+        ->setLabel(pht('Type'))
+        ->setIsConduitOnly(true)
+        ->setTransactionType(
+          AlmanacServiceTypeTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('When creating a service, set the type.'))
+        ->setConduitDescription(pht('Set the service type.'))
+        ->setConduitTypeDescription(pht('Service type.'))
+        ->setValue($object->getServiceType()),
     );
   }
 

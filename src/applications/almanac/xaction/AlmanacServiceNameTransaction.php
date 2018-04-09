@@ -16,7 +16,7 @@ final class AlmanacServiceNameTransaction
   public function getTitle() {
     return pht(
       '%s renamed this service from %s to %s.',
-      $this->renderAuthorLink(),
+      $this->renderAuthor(),
       $this->renderOldValue(),
       $this->renderNewValue());
   }
@@ -24,7 +24,7 @@ final class AlmanacServiceNameTransaction
   public function getTitleForFeed() {
     return pht(
       '%s renamed %s from %s to %s.',
-      $this->renderAuthorLink(),
+      $this->renderAuthor(),
       $this->renderObject(),
       $this->renderOldValue(),
       $this->renderNewValue());
