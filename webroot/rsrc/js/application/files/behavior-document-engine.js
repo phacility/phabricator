@@ -151,7 +151,7 @@ JX.behavior('document-engine', function(config, statics) {
     }
 
     data.sequence = (data.sequence || 0) + 1;
-    var handler = JX.bind(null, onrender, data, data.sequence);
+    var handler = JX.bind(null, onrender, data, data.sequence, spec);
 
     data.viewKey = spec.viewKey;
 
@@ -190,7 +190,7 @@ JX.behavior('document-engine', function(config, statics) {
     JX.DOM.setContent(viewport, JX.$H(spec.loadingMarkup));
   }
 
-  function onrender(data, sequence, r) {
+  function onrender(data, sequence, spec, r) {
     // If this isn't the most recent request we sent, throw it away. This can
     // happen if the user makes multiple selections from the menu while we are
     // still rendering the first view.
@@ -209,19 +209,34 @@ JX.behavior('document-engine', function(config, statics) {
     data.loadingView = false;
 
     JX.DOM.setContent(viewport, JX.$H(r.markup));
+
+    // If this engine supports rendering blame, populate or draw it.
+    if (spec.canBlame) {
+      blame(data);
+    }
   }
 
   function blame(data) {
+    // If the rendering engine can't handle blame, bail.
     if (!data.blame.uri) {
       return;
     }
 
-    if (!data.blame.value) {
-      new JX.Request(data.blame.uri, JX.bind(null, onblame, data))
-        .send();
+    // If we already have an outstanding request for blame data, bail.
+    if (data.blame.request) {
       return;
     }
 
+    // If we don't have blame data yet, request it and then try rendering
+    // again later.
+    if (!data.blame.value) {
+      var req = new JX.Request(data.blame.uri, JX.bind(null, onblame, data));
+      data.blame.request = req;
+      req.send();
+      return;
+    }
+
+    // We're ready to render.
     var viewport = JX.$(data.viewportID);
 
     var cells = JX.DOM.scry(viewport, 'th');
@@ -253,6 +268,7 @@ JX.behavior('document-engine', function(config, statics) {
   }
 
   function onblame(data, r) {
+    data.blame.request = null;
     data.blame.value = r;
     blame(data);
   }
