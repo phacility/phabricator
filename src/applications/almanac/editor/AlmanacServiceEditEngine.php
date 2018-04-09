@@ -98,7 +98,7 @@ final class AlmanacServiceEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the service.'))
-        ->setTransactionType(AlmanacServiceTransaction::TYPE_NAME)
+        ->setTransactionType(AlmanacServiceNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );
