@@ -390,7 +390,7 @@ return array(
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'f01586dc',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '1db13e70',
     'rsrc/js/application/drydock/drydock-live-operation-status.js' => '901935ef',
-    'rsrc/js/application/files/behavior-document-engine.js' => 'ed539253',
+    'rsrc/js/application/files/behavior-document-engine.js' => '6760beb4',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8499b6ab',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
     'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => '191b4909',
@@ -604,7 +604,7 @@ return array(
     'javelin-behavior-diffusion-jump-to' => '73d09eef',
     'javelin-behavior-diffusion-locate-file' => '6d3e1947',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f01586dc',
-    'javelin-behavior-document-engine' => 'ed539253',
+    'javelin-behavior-document-engine' => '6760beb4',
     'javelin-behavior-doorkeeper-tag' => '1db13e70',
     'javelin-behavior-drydock-live-operation-status' => '901935ef',
     'javelin-behavior-durable-column' => '2ae077e1',
@@ -1398,6 +1398,11 @@ return array(
       'javelin-json',
       'phuix-form-control-view',
     ),
+    '6760beb4' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+    ),
     '680ea2c8' => array(
       'javelin-install',
       'javelin-dom',
@@ -2115,11 +2120,6 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-vector',
-    ),
-    'ed539253' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
     ),
     'edf8a145' => array(
       'javelin-behavior',

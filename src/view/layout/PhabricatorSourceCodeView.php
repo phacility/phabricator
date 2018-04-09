@@ -130,8 +130,8 @@ final class PhabricatorSourceCodeView extends AphrontView {
         $lines = idx($blame_map, $line_number);
 
         if ($lines) {
-          $skip_blame = 'skip;'.$lines;
-          $info_blame = 'info;'.$lines;
+          $skip_blame = 'skip';
+          $info_blame = 'info';
         } else {
           $skip_blame = null;
           $info_blame = null;
@@ -149,6 +149,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
             array(
               'class' => 'phabricator-source-blame-info',
               'data-blame' => $info_blame,
+              'data-blame-lines' => $lines,
             )),
         );
       } else {

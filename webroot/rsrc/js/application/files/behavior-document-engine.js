@@ -239,31 +239,48 @@ JX.behavior('document-engine', function(config, statics) {
     // We're ready to render.
     var viewport = JX.$(data.viewportID);
 
-    var cells = JX.DOM.scry(viewport, 'th');
+    var row_nodes = JX.DOM.scry(viewport, 'tr');
+    var row_list = [];
+    var ii;
 
-    for (var ii = 0; ii < cells.length; ii++) {
-      var cell = cells[ii];
+    for (ii = 0; ii < row_nodes.length; ii++) {
+      var row = {};
+      var keep = false;
+      var node = row_nodes[ii];
 
-      var spec = cell.getAttribute('data-blame');
-      if (!spec) {
-        continue;
+      for (var jj = 0; jj < node.childNodes.length; jj++) {
+        var child = node.childNodes[jj];
+
+        if (!JX.DOM.isType(child, 'th')) {
+          continue;
+        }
+
+        var spec = child.getAttribute('data-blame');
+        if (spec) {
+          row[spec] = child;
+          keep = true;
+        }
+
+        if (spec === 'info') {
+          row.lines = child.getAttribute('data-blame-lines');
+        }
       }
 
-      spec = spec.split(';');
-      var type = spec[0];
-      var lines = spec[1];
-
-      var content = null;
-      switch (type) {
-        case 'skip':
-          content = renderSkip(data.blame.value, lines);
-          break;
-        case 'info':
-          content = renderInfo(data.blame.value, lines);
-          break;
+      if (keep) {
+        row_list.push(row);
       }
+    }
 
-      JX.DOM.setContent(cell, content);
+    var last = null;
+    for (ii = 0; ii < row_list.length; ii++) {
+      var commit = data.blame.value.blame[row_list[ii].lines - 1];
+      row_list[ii].commit = commit;
+      row_list[ii].last = last;
+      last = commit;
+    }
+
+    for (ii = 0; ii < row_list.length; ii++) {
+      renderBlame(row_list[ii], data.blame.value);
     }
   }
 
@@ -273,26 +290,25 @@ JX.behavior('document-engine', function(config, statics) {
     blame(data);
   }
 
-  function renderSkip(blame, lines) {
-    var commit = blame.blame[lines - 1];
-    if (!commit) {
-      return null;
+  function renderBlame(row, blame) {
+    var spec = blame.map[row.commit];
+
+
+    var info = null;
+    var skip = null;
+
+    if (spec && (row.commit != row.last)) {
+      skip = JX.$H(spec.skip);
+      info = JX.$H(spec.info);
     }
 
-    var spec = blame.map[commit];
-
-    return JX.$H(spec.skip);
-  }
-
-  function renderInfo(blame, lines) {
-    var commit = blame.blame[lines - 1];
-    if (!commit) {
-      return null;
+    if (row.skip) {
+      JX.DOM.setContent(row.skip, skip);
     }
 
-    var spec = blame.map[commit];
-
-    return JX.$H(spec.info);
+    if (row.info) {
+      JX.DOM.setContent(row.info, info);
+    }
   }
 
   if (!statics.initialized) {
