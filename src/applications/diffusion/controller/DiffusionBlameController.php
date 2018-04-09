@@ -145,9 +145,9 @@ final class DiffusionBlameController extends DiffusionController {
           'href' => $commit->getURI(),
           'sigil' => 'has-tooltip',
           'meta'  => array(
-            'tip'   => $this->renderCommitTooltip($commit, $handles),
+            'tip' => $this->renderCommitTooltip($commit, $handles),
             'align' => 'E',
-            'size'  => 600,
+            'size' => 600,
           ),
         ),
         $commit->getLocalName());
@@ -158,19 +158,18 @@ final class DiffusionBlameController extends DiffusionController {
       );
 
       if ($revision) {
-        $revision_link = phutil_tag(
+        $revision_link = javelin_tag(
           'a',
           array(
             'href' => $revision->getURI(),
             'sigil' => 'has-tooltip',
             'meta'  => array(
-              'tip'   => $this->renderRevisionTooltip($revision, $handles),
+              'tip' => $this->renderRevisionTooltip($revision, $handles),
               'align' => 'E',
-              'size'  => 600,
+              'size' => 600,
             ),
           ),
           $revision->getMonogram());
-
 
         $info = array(
           $info,
