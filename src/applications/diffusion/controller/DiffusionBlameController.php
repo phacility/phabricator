@@ -80,7 +80,9 @@ final class DiffusionBlameController extends DiffusionController {
 
     $handles = $viewer->loadHandles($handle_phids);
 
+
     $map = array();
+    $epochs = array();
     foreach ($identifiers as $identifier) {
       $revision_id = idx($revision_map, $identifier);
       if ($revision_id) {
@@ -173,23 +175,34 @@ final class DiffusionBlameController extends DiffusionController {
 
         $info = array(
           $info,
-          ' / ',
+          " \xC2\xB7 ",
           $revision_link,
         );
       }
 
+      $epoch = $commit->getEpoch();
+      $epochs[] = $epoch;
+
       $data = array(
         'skip' => $skip_link,
         'info' => hsprintf('%s', $info),
+        'epoch' => $epoch,
       );
 
       $map[$identifier] = $data;
     }
 
+    $epoch_min = min($epochs);
+    $epoch_max = max($epochs);
+
     return id(new AphrontAjaxResponse())->setContent(
       array(
         'blame' => $blame,
         'map' => $map,
+        'epoch' => array(
+          'min' => $epoch_min,
+          'max' => $epoch_max,
+        ),
       ));
   }
 

@@ -293,7 +293,6 @@ JX.behavior('document-engine', function(config, statics) {
   function renderBlame(row, blame) {
     var spec = blame.map[row.commit];
 
-
     var info = null;
     var skip = null;
 
@@ -309,6 +308,53 @@ JX.behavior('document-engine', function(config, statics) {
     if (row.info) {
       JX.DOM.setContent(row.info, info);
     }
+
+    var epoch_range = (blame.epoch.max - blame.epoch.min);
+
+    var epoch_value;
+    if (!epoch_range) {
+      epoch_value = 1;
+    } else {
+      epoch_value = (spec.epoch - blame.epoch.min) / epoch_range;
+    }
+
+    var h_min = 0.04;
+    var h_max = 0.44;
+    var h = h_min + ((h_max - h_min) * epoch_value);
+
+    var s = 0.44;
+
+    var v_min = 0.92;
+    var v_max = 1.00;
+    var v = v_min + ((v_max - v_min) * epoch_value);
+
+    row.info.style.background = getHSV(h, s, v);
+  }
+
+  function getHSV(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+
+    switch (i % 6) {
+      case 0: r = v, g = t, b = p; break;
+      case 1: r = q, g = v, b = p; break;
+      case 2: r = p, g = v, b = t; break;
+      case 3: r = p, g = q, b = v; break;
+      case 4: r = t, g = p, b = v; break;
+      case 5: r = v, g = p, b = q; break;
+    }
+
+    r = Math.round(r * 255);
+    g = Math.round(g * 255);
+    b = Math.round(b * 255);
+
+
+    return 'rgb(' + r + ', ' + g + ', ' + b + ')';
   }
 
   if (!statics.initialized) {

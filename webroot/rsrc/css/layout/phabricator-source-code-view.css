@@ -85,11 +85,18 @@ th.phabricator-source-line a:hover {
 }
 
 .phabricator-source-blame-info {
-  color: {$lightgreytext};
   white-space: nowrap;
   min-width: 130px;
   border-right: 1px solid {$paste.border};
   padding-right: 8px;
+
+  vertical-align: middle;
+  color: #ffffff;
+}
+
+.phabricator-source-blame-info a {
+  color: {$darkbluetext};
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.111);
 }
 
 .phabricator-source-blame-skip a {
@@ -98,14 +105,19 @@ th.phabricator-source-line a:hover {
   padding: 2px 8px;
 }
 
+.phabricator-source-blame-skip a .phui-icon-view {
+  color: {$darkbluetext};
+}
+
 .device-desktop .phabricator-source-blame-skip a:hover {
   background: {$bluebackground};
 }
 
 .phabricator-source-blame-author {
   display: inline-block;
+  vertical-align: middle;
   padding: 0;
-  margin: 2px 6px -4px 8px;
+  margin: 0 6px 0 8px;
   width: 16px;
   height: 16px;
   background-size: 100% 100%;
