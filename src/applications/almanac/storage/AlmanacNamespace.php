@@ -8,7 +8,8 @@ final class AlmanacNamespace
     PhabricatorProjectInterface,
     AlmanacPropertyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorNgramsInterface {
+    PhabricatorNgramsInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $nameIndex;
@@ -223,5 +224,29 @@ final class AlmanacNamespace
         ->setValue($this->getName()),
     );
   }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the namespace.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
 
 }
