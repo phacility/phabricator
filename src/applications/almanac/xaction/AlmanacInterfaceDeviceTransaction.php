@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacInterfaceDeviceTransaction
-  extends AlmanacNetworkTransactionType {
+  extends AlmanacInterfaceTransactionType {
 
   const TRANSACTIONTYPE = 'almanac:interface:device';
 
@@ -24,7 +24,8 @@ final class AlmanacInterfaceDeviceTransaction
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
-    if ($this->isEmptyTextTransaction($object->getAddress(), $xactions)) {
+    $device_phid = $object->getDevicePHID();
+    if ($this->isEmptyTextTransaction($device_phid, $xactions)) {
       $errors[] = $this->newRequiredError(
         pht('Interfaces must have a device.'));
     }
@@ -50,6 +51,19 @@ final class AlmanacInterfaceDeviceTransaction
             'You can not attach an interface to a nonexistent or restricted '.
             'device.'),
           $xaction);
+        continue;
+      }
+
+      $device = head($devices);
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $this->getActor(),
+        $device,
+        PhabricatorPolicyCapability::CAN_EDIT);
+      if (!$can_edit) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'You can not attach an interface to a device which you do not '.
+            'have permission to edit.'));
         continue;
       }
     }

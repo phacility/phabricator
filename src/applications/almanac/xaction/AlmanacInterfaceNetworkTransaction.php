@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacInterfaceNetworkTransaction
-  extends AlmanacNetworkTransactionType {
+  extends AlmanacInterfaceTransactionType {
 
   const TRANSACTIONTYPE = 'almanac:interface:network';
 

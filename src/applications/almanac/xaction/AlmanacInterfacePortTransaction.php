@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacInterfacePortTransaction
-  extends AlmanacNetworkTransactionType {
+  extends AlmanacInterfaceTransactionType {
 
   const TRANSACTIONTYPE = 'almanac:interface:port';
 
@@ -30,7 +30,7 @@ final class AlmanacInterfacePortTransaction
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
-    if ($this->isEmptyTextTransaction($object->getName(), $xactions)) {
+    if ($this->isEmptyTextTransaction($object->getPort(), $xactions)) {
       $errors[] = $this->newRequiredError(
         pht('Interfaces must have a port number.'));
     }
