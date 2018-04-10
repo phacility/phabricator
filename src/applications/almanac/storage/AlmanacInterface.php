@@ -5,7 +5,8 @@ final class AlmanacInterface
   implements
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorExtendedPolicyInterface {
+    PhabricatorExtendedPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $devicePHID;
   protected $networkPHID;
@@ -152,6 +153,28 @@ final class AlmanacInterface
     }
 
     $this->delete();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new AlmanacInterfaceEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new AlmanacInterfaceTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }
