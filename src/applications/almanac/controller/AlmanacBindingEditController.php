@@ -58,7 +58,7 @@ final class AlmanacBindingEditController
     if ($request->isFormPost()) {
       $v_interface = $request->getArr('interfacePHIDs');
 
-      $type_interface = AlmanacBindingTransaction::TYPE_INTERFACE;
+      $type_interface = AlmanacBindingInterfaceTransaction::TRANSACTIONTYPE;
 
       $xactions = array();
 

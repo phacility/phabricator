@@ -40,7 +40,7 @@ final class AlmanacBindingDisableController
 
 
     if ($request->isFormPost()) {
-      $type_disable = AlmanacBindingTransaction::TYPE_DISABLE;
+      $type_disable = AlmanacBindingDisableTransaction::TRANSACTIONTYPE;
 
       $xactions = array();
 
