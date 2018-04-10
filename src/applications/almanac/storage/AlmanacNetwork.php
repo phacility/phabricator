@@ -6,7 +6,8 @@ final class AlmanacNetwork
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorNgramsInterface {
+    PhabricatorNgramsInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $mailKey;
@@ -120,6 +121,29 @@ final class AlmanacNetwork
       id(new AlmanacNetworkNameNgrams())
         ->setValue($this->getName()),
     );
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the network.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
