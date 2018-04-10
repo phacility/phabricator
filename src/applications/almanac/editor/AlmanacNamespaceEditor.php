@@ -1,11 +1,7 @@
 <?php
 
 final class AlmanacNamespaceEditor
-  extends PhabricatorApplicationTransactionEditor {
-
-  public function getEditorApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
-  }
+  extends AlmanacEditor {
 
   public function getEditorObjectsDescription() {
     return pht('Almanac Namespace');

@@ -150,6 +150,14 @@ final class AlmanacNamespace
     throw new PhutilMethodNotImplementedException();
   }
 
+  public function getAlmanacPropertySetTransactionType() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function getAlmanacPropertyDeleteTransactionType() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

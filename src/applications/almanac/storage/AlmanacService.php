@@ -160,6 +160,14 @@ final class AlmanacService
     return new AlmanacServicePropertyEditEngine();
   }
 
+  public function getAlmanacPropertySetTransactionType() {
+    return AlmanacServiceSetPropertyTransaction::TRANSACTIONTYPE;
+  }
+
+  public function getAlmanacPropertyDeleteTransactionType() {
+    return AlmanacServiceDeletePropertyTransaction::TRANSACTIONTYPE;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

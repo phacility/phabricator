@@ -1,18 +1,10 @@
 <?php
 
 final class AlmanacInterfaceTransaction
-  extends PhabricatorModularTransaction {
-
-  public function getApplicationName() {
-    return 'almanac';
-  }
+  extends AlmanacModularTransaction {
 
   public function getApplicationTransactionType() {
     return AlmanacInterfacePHIDType::TYPECONST;
-  }
-
-  public function getApplicationTransactionCommentObject() {
-    return null;
   }
 
   public function getBaseTransactionClass() {

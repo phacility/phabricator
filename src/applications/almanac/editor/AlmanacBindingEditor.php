@@ -15,4 +15,8 @@ final class AlmanacBindingEditor
     return pht('%s created %s.', $author, $object);
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

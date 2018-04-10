@@ -134,6 +134,14 @@ final class AlmanacBinding
     return new AlmanacBindingPropertyEditEngine();
   }
 
+  public function getAlmanacPropertySetTransactionType() {
+    return AlmanacBindingSetPropertyTransaction::TRANSACTIONTYPE;
+  }
+
+  public function getAlmanacPropertyDeleteTransactionType() {
+    return AlmanacBindingDeletePropertyTransaction::TRANSACTIONTYPE;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

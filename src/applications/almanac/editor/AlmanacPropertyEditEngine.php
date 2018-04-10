@@ -64,7 +64,7 @@ abstract class AlmanacPropertyEditEngine
 
   protected function buildCustomEditFields($object) {
     $property_key = $this->getPropertyKey();
-    $xaction_type = AlmanacTransaction::TYPE_PROPERTY_UPDATE;
+    $xaction_type = $object->getAlmanacPropertySetTransactionType();
 
     return array(
       id(new PhabricatorTextEditField())

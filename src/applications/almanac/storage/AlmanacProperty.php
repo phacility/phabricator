@@ -54,7 +54,7 @@ final class AlmanacProperty
       }
 
       $xactions[] = id(clone $template)
-        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_UPDATE)
+        ->setTransactionType($object->getAlmanacPropertySetTransactionType())
         ->setMetadataValue('almanac.property', $name)
         ->setNewValue($property);
     }
@@ -71,7 +71,7 @@ final class AlmanacProperty
     $xactions = array();
     foreach ($properties as $property) {
       $xactions[] = id(clone $template)
-        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_REMOVE)
+        ->setTransactionType($object->getAlmanacPropertyDeleteTransactionType())
         ->setMetadataValue('almanac.property', $property)
         ->setNewValue(null);
     }

@@ -1,18 +1,10 @@
 <?php
 
 final class AlmanacNetworkEditor
-  extends PhabricatorApplicationTransactionEditor {
-
-  public function getEditorApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
-  }
+  extends AlmanacEditor {
 
   public function getEditorObjectsDescription() {
     return pht('Almanac Network');
-  }
-
-  protected function supportsSearch() {
-    return true;
   }
 
   public function getCreateObjectTitle($author, $object) {
@@ -21,6 +13,10 @@ final class AlmanacNetworkEditor
 
   public function getCreateObjectTitleForFeed($author, $object) {
     return pht('%s created %s.', $author, $object);
+  }
+
+  protected function supportsSearch() {
+    return true;
   }
 
   public function getTransactionTypes() {

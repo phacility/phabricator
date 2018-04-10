@@ -7,6 +7,18 @@ final class AlmanacDeviceEditor
     return pht('Almanac Device');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this device.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
