@@ -9,7 +9,6 @@
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
-    'AlamancServiceEditConduitAPIMethod' => 'applications/almanac/conduit/AlamancServiceEditConduitAPIMethod.php',
     'AlmanacAddress' => 'applications/almanac/util/AlmanacAddress.php',
     'AlmanacBinding' => 'applications/almanac/storage/AlmanacBinding.php',
     'AlmanacBindingDeletePropertyTransaction' => 'applications/almanac/xaction/AlmanacBindingDeletePropertyTransaction.php',
@@ -135,6 +134,7 @@ phutil_register_library_map(array(
     'AlmanacServiceController' => 'applications/almanac/controller/AlmanacServiceController.php',
     'AlmanacServiceDatasource' => 'applications/almanac/typeahead/AlmanacServiceDatasource.php',
     'AlmanacServiceDeletePropertyTransaction' => 'applications/almanac/xaction/AlmanacServiceDeletePropertyTransaction.php',
+    'AlmanacServiceEditConduitAPIMethod' => 'applications/almanac/conduit/AlmanacServiceEditConduitAPIMethod.php',
     'AlmanacServiceEditController' => 'applications/almanac/controller/AlmanacServiceEditController.php',
     'AlmanacServiceEditEngine' => 'applications/almanac/editor/AlmanacServiceEditEngine.php',
     'AlmanacServiceEditor' => 'applications/almanac/editor/AlmanacServiceEditor.php',
@@ -5192,7 +5192,6 @@ phutil_register_library_map(array(
     'require_celerity_resource' => 'applications/celerity/api.php',
   ),
   'xmap' => array(
-    'AlamancServiceEditConduitAPIMethod' => 'PhabricatorEditEngineAPIMethod',
     'AlmanacAddress' => 'Phobject',
     'AlmanacBinding' => array(
       'AlmanacDAO',
@@ -5369,6 +5368,7 @@ phutil_register_library_map(array(
     'AlmanacServiceController' => 'AlmanacController',
     'AlmanacServiceDatasource' => 'PhabricatorTypeaheadDatasource',
     'AlmanacServiceDeletePropertyTransaction' => 'AlmanacServiceTransactionType',
+    'AlmanacServiceEditConduitAPIMethod' => 'PhabricatorEditEngineAPIMethod',
     'AlmanacServiceEditController' => 'AlmanacServiceController',
     'AlmanacServiceEditEngine' => 'PhabricatorEditEngine',
     'AlmanacServiceEditor' => 'AlmanacEditor',
