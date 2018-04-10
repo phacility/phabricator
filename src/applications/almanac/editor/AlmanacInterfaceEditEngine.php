@@ -50,6 +50,50 @@ final class AlmanacInterfaceEditEngine
     return $interface;
   }
 
+  protected function newEditableObjectForDocumentation() {
+    $this->setDevice(new AlmanacDevice());
+    return $this->newEditableObject();
+  }
+
+  protected function newEditableObjectFromConduit(array $raw_xactions) {
+    $device_phid = null;
+    foreach ($raw_xactions as $raw_xaction) {
+      if ($raw_xaction['type'] !== 'device') {
+        continue;
+      }
+
+      $device_phid = $raw_xaction['value'];
+    }
+
+    if ($device_phid === null) {
+      throw new Exception(
+        pht(
+          'When creating a new Almanac interface via the Conduit API, you '.
+          'must provide a "device" transaction to select a device.'));
+    }
+
+    $device = id(new AlmanacDeviceQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(array($device_phid))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$device) {
+      throw new Exception(
+        pht(
+          'Device "%s" is unrecognized, restricted, or you do not have '.
+          'permission to edit it.',
+          $device_phid));
+    }
+
+    $this->setDevice($device);
+
+    return $this->newEditableObject();
+  }
+
   protected function newObjectQuery() {
     return new AlmanacInterfaceQuery();
   }
@@ -126,7 +170,7 @@ final class AlmanacInterfaceEditEngine
           AlmanacInterfaceAddressTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getAddress()),
-      id(new PhabricatorTextEditField())
+      id(new PhabricatorIntEditField())
         ->setKey('port')
         ->setLabel(pht('Port'))
         ->setDescription(pht('Port of the service.'))

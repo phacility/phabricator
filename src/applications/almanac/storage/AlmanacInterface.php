@@ -6,7 +6,8 @@ final class AlmanacInterface
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface,
     PhabricatorExtendedPolicyInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorConduitResultInterface {
 
   protected $devicePHID;
   protected $networkPHID;
@@ -175,6 +176,44 @@ final class AlmanacInterface
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('devicePHID')
+        ->setType('phid')
+        ->setDescription(pht('The device the interface is on.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('networkPHID')
+        ->setType('phid')
+        ->setDescription(pht('The network the interface is part of.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('address')
+        ->setType('string')
+        ->setDescription(pht('The address of the interface.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('port')
+        ->setType('int')
+        ->setDescription(pht('The port number of the interface.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'devicePHID' => $this->getDevicePHID(),
+      'networkPHID' => $this->getNetworkPHID(),
+      'address' => (string)$this->getAddress(),
+      'port' => (int)$this->getPort(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
