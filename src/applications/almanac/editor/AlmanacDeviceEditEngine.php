@@ -80,7 +80,7 @@ final class AlmanacDeviceEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the device.'))
-        ->setTransactionType(AlmanacDeviceTransaction::TYPE_NAME)
+        ->setTransactionType(AlmanacDeviceNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );
