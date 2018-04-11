@@ -30,7 +30,8 @@ final class AlmanacDeviceEditEngine
   }
 
   protected function newObjectQuery() {
-    return new AlmanacDeviceQuery();
+    return id(new AlmanacDeviceQuery())
+      ->needProperties(true);
   }
 
   protected function getObjectCreateTitleText($object) {

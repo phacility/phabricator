@@ -91,7 +91,8 @@ final class AlmanacBindingEditEngine
   }
 
   protected function newObjectQuery() {
-    return new AlmanacBindingQuery();
+    return id(new AlmanacBindingQuery())
+      ->needProperties(true);
   }
 
   protected function getObjectCreateTitleText($object) {

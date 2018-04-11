@@ -79,7 +79,8 @@ final class AlmanacServiceEditEngine
   }
 
   protected function newObjectQuery() {
-    return new AlmanacServiceQuery();
+    return id(new AlmanacServiceQuery())
+      ->needProperties(true);
   }
 
   protected function getObjectCreateTitleText($object) {
