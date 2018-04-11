@@ -25,16 +25,11 @@
   text-align: right;
   border-right: 1px solid {$paste.border};
   color: {$sh-yellowtext};
+}
 
-  /* When the user selects rows of source, don't visibly select the line
-     numbers beside them. We use JS to strip the line numbers out when the user
-     copies the text. */
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  white-space: nowrap;
+.phabricator-source-line > a::before {
+  /* Render the line numbers as a pseudo-element so they don't get copied. */
+  content: attr(data-n);
 }
 
 th.phabricator-source-line a,

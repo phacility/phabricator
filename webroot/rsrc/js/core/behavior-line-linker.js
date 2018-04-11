@@ -29,7 +29,7 @@ JX.behavior('phabricator-line-linker', function() {
       }
     }
 
-    return +(th.textContent || th.innerText);
+    return null;
   }
 
   JX.Stratcom.listen(

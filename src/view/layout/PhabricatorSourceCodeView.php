@@ -66,7 +66,6 @@ final class PhabricatorSourceCodeView extends AphrontView {
     require_celerity_resource('phabricator-source-code-view-css');
     require_celerity_resource('syntax-highlighting-css');
 
-    Javelin::initBehavior('phabricator-oncopy', array());
     if ($this->canClickHighlight) {
       Javelin::initBehavior('phabricator-line-linker');
     }
@@ -78,11 +77,11 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $lines = $this->lines;
     if ($this->truncatedFirstLines) {
       $lines[] = phutil_tag(
-          'span',
-          array(
-            'class' => 'c',
-          ),
-          pht('...'));
+        'span',
+        array(
+          'class' => 'c',
+        ),
+        pht('...'));
     } else if ($this->truncatedFirstBytes) {
       $last_key = last_key($lines);
       $lines[$last_key] = hsprintf(
@@ -98,9 +97,6 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
     $base_uri = (string)$this->uri;
     foreach ($lines as $line) {
-      // NOTE: See phabricator-oncopy behavior.
-      $content_line = hsprintf("\xE2\x80\x8B%s", $line);
-
       $row_attributes = array();
       if (isset($this->highlights[$line_number])) {
         $row_attributes['class'] = 'phabricator-source-highlight';
@@ -117,8 +113,8 @@ final class PhabricatorSourceCodeView extends AphrontView {
           'a',
           array(
             'href' => $line_href,
-          ),
-          $line_number);
+            'data-n' => $line_number,
+          ));
       } else {
         $tag_number = phutil_tag(
           'span',
@@ -172,7 +168,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
             array(
               'class' => 'phabricator-source-code',
             ),
-            $content_line),
+            $line),
           ));
 
       $line_number++;
