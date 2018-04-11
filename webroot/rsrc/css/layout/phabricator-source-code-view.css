@@ -17,6 +17,7 @@
   white-space: pre-wrap;
   padding: 2px 8px 1px;
   width: 100%;
+  background: #ffffff;
 }
 
 .phabricator-source-line {
