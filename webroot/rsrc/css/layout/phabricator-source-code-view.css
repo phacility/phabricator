@@ -52,8 +52,12 @@ th.phabricator-source-line a:hover {
   text-decoration: none;
 }
 
-.phabricator-source-highlight {
+.phabricator-source-highlight .phabricator-source-code {
   background: {$paste.highlight};
+}
+
+.phabricator-source-highlight .phabricator-source-line {
+  background: {$paste.border};
 }
 
 .phabricator-source-code-summary {
