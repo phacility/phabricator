@@ -66,8 +66,15 @@ abstract class AlmanacPropertyEditEngine
     $property_key = $this->getPropertyKey();
     $xaction_type = $object->getAlmanacPropertySetTransactionType();
 
+    $specs = $object->getAlmanacPropertyFieldSpecifications();
+    if (isset($specs[$property_key])) {
+      $field_template = clone $specs[$property_key];
+    } else {
+      $field_template = new PhabricatorTextEditField();
+    }
+
     return array(
-      id(new PhabricatorTextEditField())
+      $field_template
         ->setKey('value')
         ->setMetadataValue('almanac.property', $property_key)
         ->setLabel($property_key)

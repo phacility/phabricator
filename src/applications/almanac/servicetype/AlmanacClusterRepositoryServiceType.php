@@ -24,4 +24,36 @@ final class AlmanacClusterRepositoryServiceType
     );
   }
 
+  public function getBindingFieldSpecifications(AlmanacBinding $binding) {
+    $protocols = array(
+      array(
+        'value' => 'http',
+        'port' => 80,
+      ),
+      array(
+        'value' => 'https',
+        'port' => 443,
+      ),
+      array(
+        'value' => 'ssh',
+        'port' => 22,
+      ),
+    );
+
+    $default_value = 'http';
+    if ($binding->hasInterface()) {
+      $interface = $binding->getInterface();
+      $port = $interface->getPort();
+
+      $default_ports = ipull($protocols, 'value', 'port');
+      $default_value = idx($default_ports, $port, $default_value);
+    }
+
+    return array(
+      'protocol' => id(new PhabricatorSelectEditField())
+        ->setOptions(ipull($protocols, 'value', 'value'))
+        ->setValue($default_value),
+    );
+  }
+
 }

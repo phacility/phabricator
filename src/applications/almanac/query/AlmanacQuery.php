@@ -34,10 +34,12 @@ abstract class AlmanacQuery
         $specs = $object->getAlmanacPropertyFieldSpecifications();
         foreach ($specs as $key => $spec) {
           if (empty($object_properties[$key])) {
+            $default_value = $spec->getValueForTransaction();
+
             $object_properties[$key] = id(new AlmanacProperty())
               ->setObjectPHID($object->getPHID())
               ->setFieldName($key)
-              ->setFieldValue($spec->getValueForTransaction());
+              ->setFieldValue($default_value);
           }
         }
 

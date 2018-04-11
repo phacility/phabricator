@@ -88,6 +88,10 @@ final class AlmanacBinding
     return $this;
   }
 
+  public function hasInterface() {
+    return ($this->interface !== self::ATTACHABLE);
+  }
+
   public function getInterface() {
     return $this->assertAttached($this->interface);
   }
@@ -129,7 +133,7 @@ final class AlmanacBinding
   }
 
   public function getAlmanacPropertyFieldSpecifications() {
-    return array();
+    return $this->getService()->getBindingFieldSpecifications($this);
   }
 
   public function newAlmanacPropertyEditEngine() {
