@@ -14,7 +14,7 @@ final class PhabricatorApplicationPolicyChangeTransaction
     return $application->getPolicy($capability);
   }
 
-  public function applyInternalEffects($object, $value) {
+  public function applyExternalEffects($object, $value) {
     $application = $object;
     $user = $this->getActor();
 
