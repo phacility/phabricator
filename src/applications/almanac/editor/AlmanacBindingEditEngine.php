@@ -152,6 +152,19 @@ final class AlmanacBindingEditEngine
         ->setConduitDescription(pht('Set the interface to bind.'))
         ->setConduitTypeDescription(pht('Interface PHID.'))
         ->setValue($object->getInterfacePHID()),
+      id(new PhabricatorBoolEditField())
+        ->setKey('disabled')
+        ->setLabel(pht('Disabled'))
+        ->setIsConduitOnly(true)
+        ->setTransactionType(
+          AlmanacBindingDisableTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('Disable or enable the binding.'))
+        ->setConduitDescription(pht('Disable or enable the binding.'))
+        ->setConduitTypeDescription(pht('True to disable the binding.'))
+        ->setValue($object->getIsDisabled())
+        ->setOptions(
+          pht('Enable Binding'),
+          pht('Disable Binding')),
     );
   }
 

@@ -244,6 +244,10 @@ final class AlmanacBinding
         ->setKey('interfacePHID')
         ->setType('phid')
         ->setDescription(pht('The interface the service is bound to.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('disabled')
+        ->setType('bool')
+        ->setDescription(pht('Interface status.')),
     );
   }
 
@@ -252,11 +256,15 @@ final class AlmanacBinding
       'servicePHID' => $this->getServicePHID(),
       'devicePHID' => $this->getDevicePHID(),
       'interfacePHID' => $this->getInterfacePHID(),
+      'disabled' => (bool)$this->getIsDisabled(),
     );
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new AlmanacPropertiesSearchEngineAttachment())
+        ->setAttachmentKey('properties'),
+    );
   }
 
 }
