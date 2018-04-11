@@ -41,6 +41,12 @@ final class AlmanacServiceEditEngine
     return AlmanacService::initializeNewService($service_type);
   }
 
+  protected function newEditableObjectForDocumentation() {
+    $service_type = new AlmanacCustomServiceType();
+    $this->setServiceType($service_type->getServiceTypeConstant());
+    return $this->newEditableObject();
+  }
+
   protected function newObjectQuery() {
     return new AlmanacServiceQuery();
   }

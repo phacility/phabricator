@@ -1,10 +1,12 @@
 <?php
 
-final class HarbormasterBuildable extends HarbormasterDAO
+final class HarbormasterBuildable
+  extends HarbormasterDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    HarbormasterBuildableInterface {
+    HarbormasterBuildableInterface,
+    PhabricatorDestructibleInterface {
 
   protected $buildablePHID;
   protected $containerPHID;
@@ -231,6 +233,10 @@ final class HarbormasterBuildable extends HarbormasterDAO
     return $this->getBuildableStatusObject()->isPreparing();
   }
 
+  public function isBuilding() {
+    return $this->getBuildableStatusObject()->isBuilding();
+  }
+
 
 /* -(  Messages  )----------------------------------------------------------- */
 
@@ -327,10 +333,6 @@ final class HarbormasterBuildable extends HarbormasterDAO
     return $this->getContainerPHID();
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getBuildableObject()->getHarbormasterPublishablePHID();
-  }
-
   public function getBuildVariables() {
     return array();
   }
@@ -339,5 +341,37 @@ final class HarbormasterBuildable extends HarbormasterDAO
     return array();
   }
 
+  public function newBuildableEngine() {
+    return $this->getBuildableObject()->newBuildableEngine();
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $viewer = $engine->getViewer();
+
+    $this->openTransaction();
+      $builds = id(new HarbormasterBuildQuery())
+        ->setViewer($viewer)
+        ->withBuildablePHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($builds as $build) {
+        $engine->destroyObject($build);
+      }
+
+      $messages = id(new HarbormasterBuildMessageQuery())
+        ->setViewer($viewer)
+        ->withReceiverPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($messages as $message) {
+        $engine->destroyObject($message);
+      }
+
+      $this->delete();
+    $this->saveTransaction();
+  }
 
 }

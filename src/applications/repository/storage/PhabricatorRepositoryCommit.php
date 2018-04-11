@@ -416,28 +416,6 @@ final class PhabricatorRepositoryCommit
     return $repository->formatCommitName($identifier, $local = true);
   }
 
-  public function renderAuthorLink($handles) {
-    $author_phid = $this->getAuthorPHID();
-    if ($author_phid && isset($handles[$author_phid])) {
-      return $handles[$author_phid]->renderLink();
-    }
-
-    return $this->renderAuthorShortName($handles);
-  }
-
-  public function renderAuthorShortName($handles) {
-    $author_phid = $this->getAuthorPHID();
-    if ($author_phid && isset($handles[$author_phid])) {
-      return $handles[$author_phid]->getName();
-    }
-
-    $data = $this->getCommitData();
-    $name = $data->getAuthorName();
-
-    $parsed = new PhutilEmailAddress($name);
-    return nonempty($parsed->getDisplayName(), $parsed->getAddress());
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -517,10 +495,6 @@ final class PhabricatorRepositoryCommit
     return $this->getRepository()->getPHID();
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getPHID();
-  }
-
   public function getBuildVariables() {
     $results = array();
 
@@ -547,6 +521,10 @@ final class PhabricatorRepositoryCommit
       'repository.uri' =>
         pht('The URI to clone or checkout the repository from.'),
     );
+  }
+
+  public function newBuildableEngine() {
+    return new DiffusionBuildableEngine();
   }
 
 

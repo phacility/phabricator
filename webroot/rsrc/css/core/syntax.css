@@ -6,11 +6,6 @@
   color: #aa0066;
 }
 
-.remarkup-code .over-the-line {
-  color: #aa0066;
-  margin-right: 1px;
-}
-
 .remarkup-code td > span {
   display: inline;
   word-break: break-all;
@@ -24,11 +19,9 @@
 .remarkup-code .rbw_i { color: indigo; }
 .remarkup-code .rbw_v { color: violet; }
 
-.repository-crossreference .remarkup-code .crossreference-item {
-  background: lightyellow;
-  border-bottom: 1px dotted #bbddbb;
-}
-.crossreference-cursor {
+span.crossreference-item {
+  background: {$lightyellow};
+  border-bottom: 1px solid {$yellow};
   cursor: help;
 }
 

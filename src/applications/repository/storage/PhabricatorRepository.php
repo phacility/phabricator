@@ -703,7 +703,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'history':
       case 'graph':
       case 'clone':
+      case 'blame':
       case 'browse':
+      case 'document':
       case 'change':
       case 'lastmodified':
       case 'tags':
@@ -781,7 +783,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'change':
       case 'history':
       case 'graph':
+      case 'blame':
       case 'browse':
+      case 'document':
       case 'lastmodified':
       case 'tags':
       case 'branches':

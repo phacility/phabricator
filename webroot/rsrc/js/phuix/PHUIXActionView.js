@@ -12,6 +12,7 @@ JX.install('PHUIXActionView', {
     _node: null,
     _name: null,
     _icon: 'none',
+    _iconColor: null,
     _disabled: false,
     _label: false,
     _handler: null,
@@ -31,6 +32,10 @@ JX.install('PHUIXActionView', {
       this._buildIconNode(true);
 
       return this;
+    },
+
+    getDisabled: function() {
+      return this._disabled;
     },
 
     setLabel: function(label) {
@@ -75,6 +80,12 @@ JX.install('PHUIXActionView', {
 
     setIcon: function(icon) {
       this._icon = icon;
+      this._buildIconNode(true);
+      return this;
+    },
+
+    setIconColor: function(color) {
+      this._iconColor = color;
       this._buildIconNode(true);
       return this;
     },
@@ -127,6 +138,10 @@ JX.install('PHUIXActionView', {
         var icon_class = this._icon;
         if (this._disabled) {
           icon_class = icon_class + ' grey';
+        }
+
+        if (this._iconColor) {
+          icon_class = icon_class + ' ' + this._iconColor;
         }
 
         JX.DOM.alterClass(node, icon_class, true);

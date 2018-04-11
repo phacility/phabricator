@@ -8,6 +8,8 @@ final class PhabricatorSourceCodeView extends AphrontView {
   private $canClickHighlight = true;
   private $truncatedFirstBytes = false;
   private $truncatedFirstLines = false;
+  private $symbolMetadata;
+  private $blameMap;
 
   public function setLines(array $lines) {
     $this->lines = $lines;
@@ -39,7 +41,28 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this;
   }
 
+  public function setSymbolMetadata(array $symbol_metadata) {
+    $this->symbolMetadata = $symbol_metadata;
+    return $this;
+  }
+
+  public function getSymbolMetadata() {
+    return $this->symbolMetadata;
+  }
+
+  public function setBlameMap(array $map) {
+    $this->blameMap = $map;
+    return $this;
+  }
+
+  public function getBlameMap() {
+    return $this->blameMap;
+  }
+
   public function render() {
+    $blame_map = $this->getBlameMap();
+    $has_blame = ($blame_map !== null);
+
     require_celerity_resource('phabricator-source-code-view-css');
     require_celerity_resource('syntax-highlighting-css');
 
@@ -75,7 +98,6 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
     $base_uri = (string)$this->uri;
     foreach ($lines as $line) {
-
       // NOTE: See phabricator-oncopy behavior.
       $content_line = hsprintf("\xE2\x80\x8B%s", $line);
 
@@ -85,7 +107,11 @@ final class PhabricatorSourceCodeView extends AphrontView {
       }
 
       if ($this->canClickHighlight) {
-        $line_href = $base_uri.'$'.$line_number;
+        if ($base_uri) {
+          $line_href = $base_uri.'$'.$line_number;
+        } else {
+          $line_href = null;
+        }
 
         $tag_number = phutil_tag(
           'a',
@@ -100,10 +126,41 @@ final class PhabricatorSourceCodeView extends AphrontView {
           $line_number);
       }
 
+      if ($has_blame) {
+        $lines = idx($blame_map, $line_number);
+
+        if ($lines) {
+          $skip_blame = 'skip';
+          $info_blame = 'info';
+        } else {
+          $skip_blame = null;
+          $info_blame = null;
+        }
+
+        $blame_cells = array(
+          phutil_tag(
+            'th',
+            array(
+              'class' => 'phabricator-source-blame-skip',
+              'data-blame' => $skip_blame,
+            )),
+          phutil_tag(
+            'th',
+            array(
+              'class' => 'phabricator-source-blame-info',
+              'data-blame' => $info_blame,
+              'data-blame-lines' => $lines,
+            )),
+        );
+      } else {
+        $blame_cells = null;
+      }
+
       $rows[] = phutil_tag(
         'tr',
         $row_attributes,
         array(
+          $blame_cells,
           phutil_tag(
             'th',
             array(
@@ -126,15 +183,24 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $classes[] = 'remarkup-code';
     $classes[] = 'PhabricatorMonospaced';
 
+    $symbol_metadata = $this->getSymbolMetadata();
+
+    $sigils = array();
+    $sigils[] = 'phabricator-source';
+    $sigils[] = 'has-symbols';
+
+    Javelin::initBehavior('repository-crossreference');
+
     return phutil_tag_div(
       'phabricator-source-code-container',
       javelin_tag(
         'table',
         array(
           'class' => implode(' ', $classes),
-          'sigil' => 'phabricator-source',
+          'sigil' => implode(' ', $sigils),
           'meta' => array(
             'uri' => (string)$this->uri,
+            'symbols' => $symbol_metadata,
           ),
         ),
         phutil_implode_html('', $rows)));

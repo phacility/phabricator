@@ -58,7 +58,7 @@ final class DifferentialDraftField
     );
     $blocking_map = array_fuse($blocking_map);
 
-    $builds = $revision->loadActiveBuilds($viewer);
+    $builds = $revision->loadImpactfulBuilds($viewer);
 
     $waiting = array();
     $blocking = array();
@@ -101,7 +101,7 @@ final class DifferentialDraftField
   public function getWarningsForDetailView() {
     $revision = $this->getObject();
 
-    if (!$revision->isDraft()) {
+    if ($revision->getShouldBroadcast()) {
       return array();
     }
 

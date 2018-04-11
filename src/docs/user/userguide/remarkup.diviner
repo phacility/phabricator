@@ -530,7 +530,7 @@ This renders: {icon camera color=blue}
 
 For a list of available icons and colors, check the UIExamples application.
 (The icons are sourced from
-[[ http://fortawesome.github.io/Font-Awesome/ | FontAwesome ]], so you can also
+[[ https://fontawesome.com/v4.7.0/icons/ | FontAwesome ]], so you can also
 browse the collection there.)
 
 You can add `spin` to make the icon spin:

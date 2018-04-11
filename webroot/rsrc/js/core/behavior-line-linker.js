@@ -20,7 +20,22 @@ JX.behavior('phabricator-line-linker', function() {
   }
 
   function getRowNumber(tr) {
-    var th = tr.firstChild;
+    // Starting from the left, find the rightmost "<th />" tag among all
+    // "<th />" tags at the start of the row. Our goal here is to skip over
+    // blame information in Diffusion. This could probably be significantly
+    // more graceful.
+    var th = null;
+    for (var ii = 0; ii < tr.childNodes.length; ii++) {
+      if (JX.DOM.isType(tr.childNodes[ii], 'th')) {
+        th = tr.childNodes[ii];
+        continue;
+      }
+      break;
+    }
+
+    if (!th) {
+      return null;
+    }
 
     // If the "<th />" tag contains an "<a />" with "data-n" that we're using
     // to prevent copy/paste of line numbers, use that.
@@ -144,13 +159,26 @@ JX.behavior('phabricator-line-linker', function() {
       var o = getRowNumber(origin);
       var t = getRowNumber(target);
       var uri = JX.Stratcom.getData(root).uri;
+      var path;
+
+      if (!uri) {
+        uri = JX.$U(window.location);
+        path = uri.getPath();
+        path = path.replace(/\$[\d-]+$/, '');
+        uri.setPath(path);
+        uri = uri.toString();
+      }
 
       origin = null;
       target = null;
       root = null;
 
       var lines = (o == t ? o : Math.min(o, t) + '-' + Math.max(o, t));
-      uri = uri + '$' + lines;
+
+      uri = JX.$U(uri);
+      path = uri.getPath();
+      path = path + '$' + lines;
+      uri = uri.setPath(path).toString();
 
       JX.History.replace(uri);
 

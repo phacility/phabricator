@@ -687,3 +687,32 @@ ul.phui-oi-list-view .phui-oi-selectable
   .phui-oi-frame {
   border-color: {$blueborder};
 }
+
+.differential-revision-size {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: {$lightgreybackground};
+  cursor: pointer;
+}
+
+.differential-revision-size .phui-icon-view {
+  margin: 0 1px 0 1px;
+  font-size: smaller;
+  color: {$blueborder};
+}
+
+.differential-revision-large {
+  background: {$sh-redbackground};
+}
+
+.differential-revision-large .phui-icon-view {
+  color: {$red};
+}
+
+.differential-revision-small {
+  background: {$sh-greenbackground};
+}
+
+.differential-revision-small .phui-icon-view {
+  color: {$green};
+}

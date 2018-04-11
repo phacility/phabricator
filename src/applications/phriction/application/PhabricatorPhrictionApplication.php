@@ -6,10 +6,6 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
     return pht('Phriction');
   }
 
-  public function getMenuName() {
-    return pht('Wiki');
-  }
-
   public function getShortDescription() {
     return pht('Wiki Documents');
   }

@@ -185,7 +185,10 @@ JX.install('PHUIXAutocomplete', {
           .getNode();
       }
 
-      map.display = [icon, map.displayName];
+      var display = JX.$N('span', {}, [icon, map.displayName]);
+      JX.DOM.alterClass(display, 'tokenizer-result-closed', !!map.closed);
+
+      map.display = display;
 
       return map;
     },

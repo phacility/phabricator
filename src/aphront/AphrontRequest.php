@@ -61,6 +61,10 @@ final class AphrontRequest extends Phobject {
    */
   public function getURILineRange($key, $limit) {
     $range = $this->getURIData($key);
+    return self::parseURILineRange($range, $limit);
+  }
+
+  public static function parseURILineRange($range, $limit) {
     if (!strlen($range)) {
       return null;
     }

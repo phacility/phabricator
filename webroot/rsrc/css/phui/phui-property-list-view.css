@@ -149,24 +149,6 @@ div.phui-property-list-stacked .phui-property-list-properties
 }
 
 
-.phui-property-list-image {
-  margin: auto;
-  max-width: 95%;
-}
-
-.phui-property-list-audio {
-  display: block;
-  margin: 16px auto;
-  width: 50%;
-  min-width: 240px;
-}
-
-.phui-property-list-video {
-  display: block;
-  margin: 0 auto;
-  max-width: 95%;
-}
-
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
 .phui-property-list-value .phui-tag-view {
@@ -219,4 +201,127 @@ div.phui-property-list-stacked .phui-property-list-properties
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};
+}
+
+
+.document-engine-image img {
+  margin: 20px auto;
+  background: url('/rsrc/image/checker_light.png');
+}
+
+.device-desktop .document-engine-image img:hover {
+  background: url('/rsrc/image/checker_dark.png');
+}
+
+.document-engine-video video {
+  margin: 20px auto;
+  display: block;
+  max-width: 95%;
+}
+
+.document-engine-audio audio {
+  display: block;
+  margin: 16px auto;
+  width: 50%;
+  min-width: 240px;
+}
+
+.document-engine-message {
+  margin: 20px auto;
+  text-align: center;
+  color: {$greytext};
+}
+
+.document-engine-error {
+  margin: 20px;
+  padding: 12px;
+  text-align: center;
+  color: {$redtext};
+  background: {$sh-redbackground};
+}
+
+.document-engine-hexdump {
+  margin: 20px;
+  white-space: pre;
+}
+
+.document-engine-remarkup {
+  margin: 20px;
+}
+
+.document-engine-pdf {
+  margin: 20px;
+  text-align: center;
+}
+
+.document-engine-pdf .phabricator-remarkup-embed-layout-link {
+  text-align: left;
+}
+
+.document-engine-text .phabricator-source-code-container {
+  border: none;
+}
+
+.document-engine-jupyter {
+  overflow: hidden;
+  margin: 20px;
+}
+
+.document-engine-in-flight {
+  opacity: 0.25;
+}
+
+.document-engine-loading {
+  margin: 20px;
+  text-align: center;
+  color: {$lightgreytext};
+}
+
+.document-engine-loading .phui-icon-view {
+  display: block;
+  font-size: 48px;
+  color: {$lightgreyborder};
+  padding: 8px;
+}
+
+.jupyter-cell-raw {
+  white-space: pre-wrap;
+  background: {$lightgreybackground};
+  color: {$greytext};
+  padding: 8px;
+}
+
+.jupyter-cell-code {
+  white-space: pre-wrap;
+  background: {$lightgreybackground};
+  padding: 8px;
+  border: 1px solid {$lightgreyborder};
+  border-radius: 2px;
+}
+
+.jupyter-notebook > tbody > tr > th,
+.jupyter-notebook > tbody > tr > td {
+  padding: 8px;
+}
+
+.jupyter-notebook > tbody > tr > th {
+  white-space: nowrap;
+  text-align: right;
+  min-width: 48px;
+  font-weight: bold;
+}
+
+.jupyter-output {
+  margin: 4px 0;
+  padding: 8px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.jupyter-output-stderr {
+  background: {$sh-redbackground};
+}
+
+.jupyter-output-html {
+  background: {$sh-indigobackground};
 }

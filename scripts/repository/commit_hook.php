@@ -187,6 +187,11 @@ if (strlen($remote_protocol)) {
   $engine->setRemoteProtocol($remote_protocol);
 }
 
+$request_identifier = getenv(DiffusionCommitHookEngine::ENV_REQUEST);
+if (strlen($request_identifier)) {
+  $engine->setRequestIdentifier($request_identifier);
+}
+
 try {
   $err = $engine->execute();
 } catch (DiffusionCommitHookRejectException $ex) {

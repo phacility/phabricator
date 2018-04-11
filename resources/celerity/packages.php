@@ -199,7 +199,6 @@ return array(
     'javelin-behavior-aphront-drag-and-drop-textarea',
     'javelin-behavior-phabricator-object-selector',
     'javelin-behavior-repository-crossreference',
-    'javelin-behavior-load-blame',
 
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',

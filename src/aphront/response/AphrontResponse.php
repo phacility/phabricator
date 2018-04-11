@@ -28,6 +28,7 @@ abstract class AphrontResponse extends Phobject {
          'connect-src' => array(),
          'frame-src' => array(),
          'form-action' => array(),
+         'object-src' => array(),
        );
     }
 
@@ -163,8 +164,10 @@ abstract class AphrontResponse extends Phobject {
       $csp[] = "frame-ancestors 'none'";
     }
 
-    // Block relics of the old world: Flash, Java applets, and so on.
-    $csp[] = "object-src 'none'";
+    // Block relics of the old world: Flash, Java applets, and so on. Note
+    // that Chrome prevents the user from viewing PDF documents if they are
+    // served with a policy which excludes the domain they are served from.
+    $csp[] = $this->newContentSecurityPolicy('object-src', "'none'");
 
     // Don't allow forms to submit offsite.
 

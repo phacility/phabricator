@@ -4,7 +4,8 @@ final class HarbormasterBuild extends HarbormasterDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorDestructibleInterface {
 
   protected $buildablePHID;
   protected $buildPlanPHID;
@@ -454,5 +455,34 @@ final class HarbormasterBuild extends HarbormasterDAO
         ->setAttachmentKey('querybuilds'),
     );
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $viewer = $engine->getViewer();
+
+    $this->openTransaction();
+      $targets = id(new HarbormasterBuildTargetQuery())
+        ->setViewer($viewer)
+        ->withBuildPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($targets as $target) {
+        $engine->destroyObject($target);
+      }
+
+      $messages = id(new HarbormasterBuildMessageQuery())
+        ->setViewer($viewer)
+        ->withReceiverPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($messages as $message) {
+        $engine->destroyObject($message);
+      }
+
+      $this->delete();
+    $this->saveTransaction();
+  }
+
 
 }

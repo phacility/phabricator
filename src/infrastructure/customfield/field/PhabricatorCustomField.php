@@ -1127,6 +1127,16 @@ abstract class PhabricatorCustomField extends Phobject {
       $field->setCustomFieldBulkParameterType($bulk_type);
     }
 
+    $comment_action = $this->getCommentAction();
+    if ($comment_action) {
+      $field
+        ->setCustomFieldCommentAction($comment_action)
+        ->setCommentActionLabel(
+          pht(
+            'Change %s',
+            $this->getFieldName()));
+    }
+
     return $field;
   }
 
@@ -1455,6 +1465,17 @@ abstract class PhabricatorCustomField extends Phobject {
   protected function newConduitEditParameterType() {
     if ($this->proxy) {
       return $this->proxy->newConduitEditParameterType();
+    }
+    return null;
+  }
+
+  public function getCommentAction() {
+    return $this->newCommentAction();
+  }
+
+  protected function newCommentAction() {
+    if ($this->proxy) {
+      return $this->proxy->newCommentAction();
     }
     return null;
   }

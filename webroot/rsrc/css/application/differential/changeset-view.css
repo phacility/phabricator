@@ -165,10 +165,6 @@
   padding: 0;
 }
 
-.diffusion-source td.cov {
-  padding: 0 8px;
-}
-
 td.cov-U {
   background: #dd8866;
 }

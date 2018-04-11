@@ -313,10 +313,6 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_CUSTOMFIELD;
     }
 
-    if ($this->object instanceof HarbormasterBuildableInterface) {
-      $types[] = PhabricatorTransactions::TYPE_BUILDABLE;
-    }
-
     if ($this->object instanceof PhabricatorTokenReceiverInterface) {
       $types[] = PhabricatorTransactions::TYPE_TOKEN;
     }
@@ -469,7 +465,6 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
@@ -610,7 +605,6 @@ abstract class PhabricatorApplicationTransactionEditor
         return $field->applyApplicationTransactionInternalEffects($xaction);
       case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
-      case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
@@ -673,7 +667,6 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
@@ -1120,6 +1113,11 @@ abstract class PhabricatorApplicationTransactionEditor
       // We are the Herald editor, so stop work here and return the updated
       // transactions.
       return $xactions;
+    } else if ($this->getIsInverseEdgeEditor()) {
+      // Do not run Herald if we're just recording that this object was
+      // mentioned elsewhere. This tends to create Herald side effects which
+      // feel arbitrary, and can really slow down edits which mention a large
+      // number of other objects. See T13114.
     } else if ($this->shouldApplyHeraldRules($object, $xactions)) {
       // We are not the Herald editor, so try to apply Herald rules.
       $herald_xactions = $this->applyHeraldRules($object, $xactions);
@@ -3199,6 +3197,11 @@ abstract class PhabricatorApplicationTransactionEditor
     $story_type = $this->getFeedStoryType();
     $story_data = $this->getFeedStoryData($object, $xactions);
 
+    $unexpandable_phids = $this->mailUnexpandablePHIDs;
+    if (!is_array($unexpandable_phids)) {
+      $unexpandable_phids = array();
+    }
+
     id(new PhabricatorFeedStoryPublisher())
       ->setStoryType($story_type)
       ->setStoryData($story_data)
@@ -3207,6 +3210,7 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setRelatedPHIDs($related_phids)
       ->setPrimaryObjectPHID($object->getPHID())
       ->setSubscribedPHIDs($subscribed_phids)
+      ->setUnexpandablePHIDs($unexpandable_phids)
       ->setMailRecipientPHIDs($mailed_phids)
       ->setMailTags($this->getMailTags($object, $xactions))
       ->publish();

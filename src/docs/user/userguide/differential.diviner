@@ -66,8 +66,6 @@ Continue by:
   - diving into the details of inline comments in
     @{article:Differential User Guide: Inline Comments}; or
   - reading the FAQ at @{article:Differential User Guide: FAQ}; or
-  - learning about handling large changesets in
-    @{article:Differential User Guide: Large Changes}; or
   - learning about test plans in
     @{article:Differential User Guide: Test Plans}; or
   - learning more about Herald in @{article:Herald User Guide}.

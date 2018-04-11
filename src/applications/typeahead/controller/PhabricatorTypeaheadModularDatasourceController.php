@@ -276,10 +276,20 @@ final class PhabricatorTypeaheadModularDatasourceController
     // format to make it easier to debug typeahead output.
 
     foreach ($sources as $key => $source) {
+      // See T13119. Exclude proxy datasources from the dropdown since they
+      // fatal if built like this without actually being configured with an
+      // underlying datasource. This is a bit hacky but this is just a
+      // debugging/development UI anyway.
+      if ($source instanceof PhabricatorTypeaheadProxyDatasource) {
+        unset($sources[$key]);
+        continue;
+      }
+
       // This can happen with composite or generic sources.
       if (!$source->getDatasourceApplicationClass()) {
         continue;
       }
+
       if (!PhabricatorApplication::isClassInstalledForViewer(
         $source->getDatasourceApplicationClass(),
         $viewer)) {
