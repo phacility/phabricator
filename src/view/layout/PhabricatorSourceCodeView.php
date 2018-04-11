@@ -96,10 +96,15 @@ final class PhabricatorSourceCodeView extends AphrontView {
     }
 
     $base_uri = (string)$this->uri;
+    $wrote_anchor = false;
     foreach ($lines as $line) {
       $row_attributes = array();
       if (isset($this->highlights[$line_number])) {
         $row_attributes['class'] = 'phabricator-source-highlight';
+        if (!$wrote_anchor) {
+          $row_attributes['id'] = 'phabricator-line-linker-anchor';
+          $wrote_anchor = true;
+        }
       }
 
       if ($this->canClickHighlight) {

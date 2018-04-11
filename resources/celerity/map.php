@@ -385,7 +385,6 @@ return array(
     'rsrc/js/application/diffusion/behavior-commit-branches.js' => 'bdaf4d04',
     'rsrc/js/application/diffusion/behavior-commit-graph.js' => '75b83cbb',
     'rsrc/js/application/diffusion/behavior-diffusion-browse-file.js' => '054a0f0b',
-    'rsrc/js/application/diffusion/behavior-jump-to.js' => '73d09eef',
     'rsrc/js/application/diffusion/behavior-locate-file.js' => '6d3e1947',
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'f01586dc',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '1db13e70',
@@ -471,7 +470,7 @@ return array(
     'rsrc/js/core/behavior-keyboard-pager.js' => 'a8da01f0',
     'rsrc/js/core/behavior-keyboard-shortcuts.js' => '01fca1f0',
     'rsrc/js/core/behavior-lightbox-attachments.js' => '6b31879a',
-    'rsrc/js/core/behavior-line-linker.js' => '36165eb1',
+    'rsrc/js/core/behavior-line-linker.js' => '66a62306',
     'rsrc/js/core/behavior-more.js' => 'a80d0378',
     'rsrc/js/core/behavior-object-selector.js' => '77c1f0b0',
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
@@ -601,7 +600,6 @@ return array(
     'javelin-behavior-diffusion-browse-file' => '054a0f0b',
     'javelin-behavior-diffusion-commit-branches' => 'bdaf4d04',
     'javelin-behavior-diffusion-commit-graph' => '75b83cbb',
-    'javelin-behavior-diffusion-jump-to' => '73d09eef',
     'javelin-behavior-diffusion-locate-file' => '6d3e1947',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f01586dc',
     'javelin-behavior-document-engine' => '0333c0b6',
@@ -634,7 +632,7 @@ return array(
     'javelin-behavior-phabricator-gesture-example' => '558829c2',
     'javelin-behavior-phabricator-keyboard-pager' => 'a8da01f0',
     'javelin-behavior-phabricator-keyboard-shortcuts' => '01fca1f0',
-    'javelin-behavior-phabricator-line-linker' => '36165eb1',
+    'javelin-behavior-phabricator-line-linker' => '66a62306',
     'javelin-behavior-phabricator-nav' => '94b7c320',
     'javelin-behavior-phabricator-notification-example' => '8ce821c5',
     'javelin-behavior-phabricator-object-selector' => '77c1f0b0',
@@ -1098,12 +1096,6 @@ return array(
       'javelin-dom',
       'javelin-vector',
     ),
-    '36165eb1' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-history',
-    ),
     '3ab51e2c' => array(
       'javelin-behavior',
       'javelin-behavior-device',
@@ -1395,6 +1387,12 @@ return array(
       'phabricator-darklog',
       'phabricator-darkmessage',
     ),
+    '66a62306' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-history',
+    ),
     '66a6def1' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1469,11 +1467,6 @@ return array(
     ),
     '7319e029' => array(
       'javelin-behavior',
-      'javelin-dom',
-    ),
-    '73d09eef' => array(
-      'javelin-behavior',
-      'javelin-vector',
       'javelin-dom',
     ),
     '758b4758' => array(

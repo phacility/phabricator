@@ -176,4 +176,16 @@ JX.behavior('phabricator-line-linker', function() {
       }
     });
 
+
+  // Try to jump to the highlighted lines if we don't have an explicit anchor
+  // in the URI.
+  if (!window.location.hash.length) {
+    try {
+      var anchor = JX.$('phabricator-line-linker-anchor');
+      JX.DOM.scrollToPosition(0, JX.$V(anchor).y - 60);
+    } catch (ex) {
+      // If we didn't hit an element on the page, just move on.
+    }
+  }
+
 });
