@@ -20,7 +20,11 @@ final class AlmanacClusterRepositoryServiceType
 
   public function getFieldSpecifications() {
     return array(
-      'closed' => id(new PhabricatorTextEditField()),
+      'closed' => id(new PhabricatorBoolEditField())
+        ->setOptions(
+          pht('Allow New Repositories'),
+          pht('Prevent New Repositories'))
+        ->setValue(false),
     );
   }
 
