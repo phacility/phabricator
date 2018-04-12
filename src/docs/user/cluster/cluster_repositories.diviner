@@ -221,13 +221,33 @@ synchronized.
 Contracting a Cluster
 =====================
 
-To reduce the size of an existing cluster, follow these general steps:
+If you want to remove working devices from a cluster (for example, to take
+hosts down for maintenance), first do this for each device:
 
-  - Disable the bindings from the service to the dead device in Almanac.
+  - Change the `writable` property on the bindings to "Prevent Writes".
+  - Wait a few moments until the cluster synchronizes (see
+    "Monitoring Services" below).
+
+This will ensure that the device you're about to remove is not the only cluster
+leader, even if the cluster is receiving a high write volume. You can skip this
+step if the device isn't working property to start with.
+
+Once you've stopped writes and waited for synchronization (or if the hosts are
+not working in the first place) do this for each device:
+
+  - Disable the bindings from the service to the device in Almanac.
 
 If you are removing a device because it failed abruptly (or removing several
-devices at once) it is possible that some repositories will have lost all their
-leaders. See "Loss of Leaders" below to understand and resolve this.
+devices at once; or you skip the "Prevent Writes" step), it is possible that
+some repositories will have lost all their leaders. See "Loss of Leaders" below
+to understand and resolve this.
+
+If you want to put the hosts back in service later:
+
+  - Enable the bindings again.
+  - Change `writable` back to "Allow Writes".
+
+This will restore the cluster to the original state.
 
 
 Monitoring Services

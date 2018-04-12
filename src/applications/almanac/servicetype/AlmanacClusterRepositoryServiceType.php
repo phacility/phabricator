@@ -57,6 +57,11 @@ final class AlmanacClusterRepositoryServiceType
       'protocol' => id(new PhabricatorSelectEditField())
         ->setOptions(ipull($protocols, 'value', 'value'))
         ->setValue($default_value),
+      'writable' => id(new PhabricatorBoolEditField())
+        ->setOptions(
+          pht('Prevent Writes'),
+          pht('Allow Writes'))
+        ->setValue(true),
     );
   }
 

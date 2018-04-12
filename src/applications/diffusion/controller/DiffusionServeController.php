@@ -437,6 +437,7 @@ final class DiffusionServeController extends DiffusionController {
           'http',
           'https',
         ),
+        'writable' => !$this->isReadOnlyRequest($repository),
       ));
     if ($uri) {
       $future = $this->getRequest()->newClusterProxyFuture($uri);
