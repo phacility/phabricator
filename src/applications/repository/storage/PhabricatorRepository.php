@@ -1897,14 +1897,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * services, returning raw URIs.
    *
    * @param PhabricatorUser Viewing user.
-   * @param bool `true` to throw if a remote URI would be returned.
-   * @param list<string> List of allowable protocols.
+   * @param map<string, wild> Constraints on selectable services.
    * @return string|null URI, or `null` for local repositories.
    */
   public function getAlmanacServiceURI(
     PhabricatorUser $viewer,
-    $never_proxy,
-    array $protocols) {
+    array $options) {
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'neverProxy' => 'bool',
+        'protocols' => 'list<string>',
+      ));
+
+    $never_proxy = $options['neverProxy'];
+    $protocols = $options['protocols'];
 
     $cache_key = $this->getAlmanacServiceCacheKey();
     if (!$cache_key) {
@@ -2077,10 +2085,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $uri = $this->getAlmanacServiceURI(
       $viewer,
-      $never_proxy,
       array(
-        'http',
-        'https',
+        'neverProxy' => $never_proxy,
+        'protocols' => array(
+          'http',
+          'https',
+        ),
       ));
     if ($uri === null) {
       return null;

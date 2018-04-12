@@ -151,9 +151,11 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     $is_cluster_request = $this->getIsClusterRequest();
     $uri = $repository->getAlmanacServiceURI(
       $viewer,
-      $is_cluster_request,
       array(
-        'ssh',
+        'neverProxy' => $is_cluster_request,
+        'protocols' => array(
+          'ssh',
+        ),
       ));
 
     if ($uri) {
