@@ -22,7 +22,9 @@ final class DifferentialRevisionHoldDraftTransaction
     // TODO: This can probably be removed once Draft is the universal default.
     if ($this->isNewObject()) {
       if ($object->isNeedsReview()) {
-        $object->setModernRevisionStatus(DifferentialRevisionStatus::DRAFT);
+        $object
+          ->setModernRevisionStatus(DifferentialRevisionStatus::DRAFT)
+          ->setShouldBroadcast(false);
       }
     }
   }
