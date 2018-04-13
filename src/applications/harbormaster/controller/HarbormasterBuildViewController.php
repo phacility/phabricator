@@ -77,7 +77,6 @@ final class HarbormasterBuildViewController
           pht('View Current Build')));
     }
 
-
     $curtain = $this->buildCurtainView($build);
     $properties = $this->buildPropertyList($build);
     $history = $this->buildHistoryTable(
@@ -292,7 +291,7 @@ final class HarbormasterBuildViewController
 
       $targets[] = $target_box;
 
-      $targets[] = $this->buildLog($build, $build_target);
+      $targets[] = $this->buildLog($build, $build_target, $generation);
     }
 
     $timeline = $this->buildTransactionTimeline(
@@ -371,7 +370,8 @@ final class HarbormasterBuildViewController
 
   private function buildLog(
     HarbormasterBuild $build,
-    HarbormasterBuildTarget $build_target) {
+    HarbormasterBuildTarget $build_target,
+    $generation) {
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -410,6 +410,8 @@ final class HarbormasterBuildViewController
       $log_view->setLines($lines);
       $log_view->setStart($start);
 
+      $subheader = $this->createLogHeader($build, $log, $limit, $generation);
+
       $prototype_view = id(new PHUIButtonView())
         ->setTag('a')
         ->setHref($log->getURI())
@@ -423,7 +425,7 @@ final class HarbormasterBuildViewController
           $log->getLogSource(),
           $log->getLogType()))
         ->addActionLink($prototype_view)
-        ->setSubheader($this->createLogHeader($build, $log))
+        ->setSubheader($subheader)
         ->setUser($viewer);
 
       $log_box = id(new PHUIObjectBoxView())
@@ -479,43 +481,53 @@ final class HarbormasterBuildViewController
     return $log_boxes;
   }
 
-  private function createLogHeader($build, $log) {
-    $request = $this->getRequest();
-    $limit = $request->getInt('l', 25);
+  private function createLogHeader($build, $log, $limit, $generation) {
+    $options = array(
+      array(
+        'n' => 25,
+      ),
+      array(
+        'n' => 50,
+      ),
+      array(
+        'n' => 100,
+      ),
+      array(
+        'n' => 0,
+        'label' => pht('Unlimited'),
+      ),
+    );
 
-    $lines_25 = $this->getApplicationURI('/build/'.$build->getID().'/?l=25');
-    $lines_50 = $this->getApplicationURI('/build/'.$build->getID().'/?l=50');
-    $lines_100 =
-      $this->getApplicationURI('/build/'.$build->getID().'/?l=100');
-    $lines_0 = $this->getApplicationURI('/build/'.$build->getID().'/?l=0');
+    $base_uri = id(new PhutilURI($build->getURI().$generation.'/'));
 
-    $link_25 = phutil_tag('a', array('href' => $lines_25), pht('25'));
-    $link_50 = phutil_tag('a', array('href' => $lines_50), pht('50'));
-    $link_100 = phutil_tag('a', array('href' => $lines_100), pht('100'));
-    $link_0 = phutil_tag('a', array('href' => $lines_0), pht('Unlimited'));
+    $links = array();
+    foreach ($options as $option) {
+      $n = $option['n'];
+      $label = idx($option, 'label', $n);
 
-    if ($limit === 25) {
-      $link_25 = phutil_tag('strong', array(), $link_25);
-    } else if ($limit === 50) {
-      $link_50 = phutil_tag('strong', array(), $link_50);
-    } else if ($limit === 100) {
-      $link_100 = phutil_tag('strong', array(), $link_100);
-    } else if ($limit === 0) {
-      $link_0 = phutil_tag('strong', array(), $link_0);
+      $is_selected = ($limit == $n);
+      if ($is_selected) {
+        $links[] = phutil_tag(
+          'strong',
+          array(),
+          $label);
+      } else {
+        $links[] = phutil_tag(
+          'a',
+          array(
+            'href' => (string)$base_uri->alter('l', $n),
+          ),
+          $label);
+      }
     }
 
     return phutil_tag(
       'span',
       array(),
       array(
-        $link_25,
-        ' - ',
-        $link_50,
-        ' - ',
-        $link_100,
-        ' - ',
-        $link_0,
-        ' Lines',
+        phutil_implode_html(' -  ', $links),
+        ' ',
+        pht('Lines'),
       ));
   }
 
