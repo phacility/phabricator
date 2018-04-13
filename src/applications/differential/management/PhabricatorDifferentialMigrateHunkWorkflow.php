@@ -48,13 +48,13 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
         $hunk->saveAsText();
         $this->logOkay(
           pht('TEXT'),
-          pht('Convereted hunk to text storage.'));
+          pht('Converted hunk to text storage.'));
         break;
       case DifferentialHunk::DATATYPE_FILE:
         $hunk->saveAsFile();
         $this->logOkay(
           pht('FILE'),
-          pht('Convereted hunk to file storage.'));
+          pht('Converted hunk to file storage.'));
         break;
     }
 
