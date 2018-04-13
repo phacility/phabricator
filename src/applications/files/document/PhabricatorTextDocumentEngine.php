@@ -13,12 +13,32 @@ abstract class PhabricatorTextDocumentEngine
     return true;
   }
 
-  protected function newTextDocumentContent($content) {
-    $lines = phutil_split_lines($content);
+  protected function newTextDocumentContent(
+    PhabricatorDocumentRef $ref,
+    $content,
+    array $options = array()) {
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'blame' => 'optional wild',
+      ));
+
+    if (is_array($content)) {
+      $lines = $content;
+    } else {
+      $lines = phutil_split_lines($content);
+    }
 
     $view = id(new PhabricatorSourceCodeView())
       ->setHighlights($this->getHighlightedLines())
-      ->setLines($lines);
+      ->setLines($lines)
+      ->setSymbolMetadata($ref->getSymbolMetadata());
+
+    $blame = idx($options, 'blame');
+    if ($blame !== null) {
+      $view->setBlameMap($blame);
+    }
 
     $message = null;
     if ($this->encodingMessage !== null) {

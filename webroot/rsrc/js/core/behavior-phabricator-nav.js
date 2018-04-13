@@ -49,7 +49,7 @@ JX.behavior('phabricator-nav', function(config) {
       {
         element: drag,
         parameter: 'left',
-        start: JX.$V(drag).x
+        start: get_width()
       },
       {
         element: content,
@@ -102,15 +102,24 @@ JX.behavior('phabricator-nav', function(config) {
       .setData(
         {
           key: 'filetree.width',
-          value: JX.$V(drag).x
+          value: get_width()
         })
       .send();
   });
 
+  function get_width() {
+    // See PHI568. If the document has scrolled horizontally, the "x" position
+    // of the bar will be the actual width of the menu plus the horizontal
+    // scroll position (because the element is "position: fixed"). Subtract the
+    // document scroll position when saving the element width so that scrolling
+    // to the right and then toggling the filetree UI does not make it grow
+    // any wider.
+    return (JX.$V(drag).x - JX.Vector.getScroll().x);
+  }
 
   var saved_width = config.width;
   function savedrag() {
-    saved_width = JX.$V(drag).x;
+    saved_width = get_width();
 
     local.style.width = '';
     drag.style.left = '';

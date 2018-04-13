@@ -52,7 +52,7 @@ final class PhabricatorJSONDocumentEngine
 
     return array(
       $message,
-      $this->newTextDocumentContent($content),
+      $this->newTextDocumentContent($ref, $content),
     );
   }
 

@@ -81,7 +81,7 @@ final class AlmanacNetworkEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the network.'))
-        ->setTransactionType(AlmanacNetworkTransaction::TYPE_NAME)
+        ->setTransactionType(AlmanacNetworkNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );

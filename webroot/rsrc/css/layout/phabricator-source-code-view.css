@@ -7,7 +7,6 @@
   overflow-y: hidden;
   border: 1px solid {$paste.border};
   border-radius: 3px;
-  background-color: {$paste.content};
 }
 
 .phui-oi .phabricator-source-code-container {
@@ -18,6 +17,7 @@
   white-space: pre-wrap;
   padding: 2px 8px 1px;
   width: 100%;
+  background: #ffffff;
 }
 
 .phabricator-source-line {
@@ -25,16 +25,11 @@
   text-align: right;
   border-right: 1px solid {$paste.border};
   color: {$sh-yellowtext};
+}
 
-  /* When the user selects rows of source, don't visibly select the line
-     numbers beside them. We use JS to strip the line numbers out when the user
-     copies the text. */
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  white-space: nowrap;
+.phabricator-source-line > a::before {
+  /* Render the line numbers as a pseudo-element so they don't get copied. */
+  content: attr(data-n);
 }
 
 th.phabricator-source-line a,
@@ -52,8 +47,12 @@ th.phabricator-source-line a:hover {
   text-decoration: none;
 }
 
-.phabricator-source-highlight {
+.phabricator-source-highlight .phabricator-source-code {
   background: {$paste.highlight};
+}
+
+.phabricator-source-highlight .phabricator-source-line {
+  background: {$paste.border};
 }
 
 .phabricator-source-code-summary {
@@ -68,4 +67,59 @@ th.phabricator-source-line a:hover {
 
 .phabricator-source-code-summary .phabricator-source-code {
   white-space: nowrap;
+}
+
+
+.phabricator-source-blame-skip,
+.phabricator-source-blame-info {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.phabricator-source-blame-skip {
+  min-width: 28px;
+  border-right: 1px solid {$thinblueborder};
+}
+
+.phabricator-source-blame-info {
+  white-space: nowrap;
+  min-width: 130px;
+  border-right: 1px solid {$paste.border};
+  padding-right: 8px;
+
+  vertical-align: middle;
+  color: #ffffff;
+}
+
+.phabricator-source-blame-info a {
+  color: {$darkbluetext};
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.111);
+}
+
+.phabricator-source-blame-skip a {
+  /* Give the user a larger click target. */
+  display: block;
+  padding: 2px 8px;
+}
+
+.phabricator-source-blame-skip a .phui-icon-view {
+  color: {$darkbluetext};
+}
+
+.device-desktop .phabricator-source-blame-skip a:hover {
+  background: {$bluebackground};
+}
+
+.phabricator-source-blame-author {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0;
+  margin: 0 6px 0 8px;
+  width: 16px;
+  height: 16px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }

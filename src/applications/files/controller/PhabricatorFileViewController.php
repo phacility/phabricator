@@ -403,122 +403,15 @@ final class PhabricatorFileViewController extends PhabricatorFileController {
   }
 
   private function newFileContent(PhabricatorFile $file) {
-    $viewer = $this->getViewer();
     $request = $this->getRequest();
 
     $ref = id(new PhabricatorDocumentRef())
       ->setFile($file);
 
-    $engines = PhabricatorDocumentEngine::getEnginesForRef($viewer, $ref);
+    $engine = id(new PhabricatorFileDocumentRenderingEngine())
+      ->setRequest($request);
 
-    $engine_key = $request->getURIData('engineKey');
-    if (!isset($engines[$engine_key])) {
-      $engine_key = head_key($engines);
-    }
-    $engine = $engines[$engine_key];
-
-    $lines = $request->getURILineRange('lines', 1000);
-    if ($lines) {
-      $engine->setHighlightedLines(range($lines[0], $lines[1]));
-    }
-
-    $encode_setting = $request->getStr('encode');
-    if (strlen($encode_setting)) {
-      $engine->setEncodingConfiguration($encode_setting);
-    }
-
-    $highlight_setting = $request->getStr('highlight');
-    if (strlen($highlight_setting)) {
-      $engine->setHighlightingConfiguration($highlight_setting);
-    }
-
-    $views = array();
-    foreach ($engines as $candidate_key => $candidate_engine) {
-      $label = $candidate_engine->getViewAsLabel($ref);
-      if ($label === null) {
-        continue;
-      }
-
-      $view_uri = '/file/view/'.$file->getID().'/'.$candidate_key.'/';
-
-      $view_icon = $candidate_engine->getViewAsIconIcon($ref);
-      $view_color = $candidate_engine->getViewAsIconColor($ref);
-      $loading = $candidate_engine->newLoadingContent($ref);
-
-      $views[] = array(
-        'viewKey' => $candidate_engine->getDocumentEngineKey(),
-        'icon' => $view_icon,
-        'color' => $view_color,
-        'name' => $label,
-        'engineURI' => $candidate_engine->getRenderURI($ref),
-        'viewURI' => $view_uri,
-        'loadingMarkup' => hsprintf('%s', $loading),
-        'canEncode' => $candidate_engine->canConfigureEncoding($ref),
-        'canHighlight' => $candidate_engine->CanConfigureHighlighting($ref),
-      );
-    }
-
-    $viewport_id = celerity_generate_unique_node_id();
-    $control_id = celerity_generate_unique_node_id();
-    $icon = $engine->newDocumentIcon($ref);
-
-    if ($engine->shouldRenderAsync($ref)) {
-      $content = $engine->newLoadingContent($ref);
-      $config = array(
-        'renderControlID' => $control_id,
-      );
-    } else {
-      $content = $engine->newDocument($ref);
-      $config = array();
-    }
-
-    Javelin::initBehavior('document-engine', $config);
-
-    $viewport = phutil_tag(
-      'div',
-      array(
-        'id' => $viewport_id,
-      ),
-      $content);
-
-    $meta = array(
-      'viewportID' => $viewport_id,
-      'viewKey' => $engine->getDocumentEngineKey(),
-      'views' => $views,
-      'standaloneURI' => $engine->getRenderURI($ref),
-      'encode' => array(
-        'icon' => 'fa-font',
-        'name' => pht('Change Text Encoding...'),
-        'uri' => '/services/encoding/',
-        'value' => $encode_setting,
-      ),
-      'highlight' => array(
-        'icon' => 'fa-lightbulb-o',
-        'name' => pht('Highlight As...'),
-        'uri' => '/services/highlight/',
-        'value' => $highlight_setting,
-      ),
-    );
-
-    $view_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('View Options'))
-      ->setIcon('fa-file-image-o')
-      ->setColor(PHUIButtonView::GREY)
-      ->setID($control_id)
-      ->setMetadata($meta)
-      ->setDropdown(true)
-      ->addSigil('document-engine-view-dropdown');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeaderIcon($icon)
-      ->setHeader($ref->getName())
-      ->addActionLink($view_button);
-
-    return id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setHeader($header)
-      ->appendChild($viewport);
+    return $engine->newDocumentView($ref);
   }
 
 }

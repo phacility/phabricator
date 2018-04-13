@@ -8,6 +8,8 @@ final class PhabricatorDocumentRef
   private $file;
   private $byteLength;
   private $snippet;
+  private $symbolMetadata = array();
+  private $blameURI;
 
   public function setFile(PhabricatorFile $file) {
     $this->file = $file;
@@ -129,6 +131,24 @@ final class PhabricatorDocumentRef
     }
 
     return $this->snippet;
+  }
+
+  public function setSymbolMetadata(array $metadata) {
+    $this->symbolMetadata = $metadata;
+    return $this;
+  }
+
+  public function getSymbolMetadata() {
+    return $this->symbolMetadata;
+  }
+
+  public function setBlameURI($blame_uri) {
+    $this->blameURI = $blame_uri;
+    return $this;
+  }
+
+  public function getBlameURI() {
+    return $this->blameURI;
   }
 
 }

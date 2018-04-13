@@ -45,7 +45,10 @@ final class DiffusionMercurialServeSSHWorkflow
     }
 
     if ($this->shouldProxy()) {
-      $command = $this->getProxyCommand();
+      // NOTE: For now, we're always requesting a writable node. The request
+      // may not actually need one, but we can't currently determine whether
+      // it is read-only or not at this phase of evaluation.
+      $command = $this->getProxyCommand(true);
     } else {
       $command = csprintf(
         'hg -R %s serve --stdio',

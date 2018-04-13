@@ -703,7 +703,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'history':
       case 'graph':
       case 'clone':
+      case 'blame':
       case 'browse':
+      case 'document':
       case 'change':
       case 'lastmodified':
       case 'tags':
@@ -781,7 +783,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'change':
       case 'history':
       case 'graph':
+      case 'blame':
       case 'browse':
+      case 'document':
       case 'lastmodified':
       case 'tags':
       case 'branches':
@@ -1893,14 +1897,24 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * services, returning raw URIs.
    *
    * @param PhabricatorUser Viewing user.
-   * @param bool `true` to throw if a remote URI would be returned.
-   * @param list<string> List of allowable protocols.
+   * @param map<string, wild> Constraints on selectable services.
    * @return string|null URI, or `null` for local repositories.
    */
   public function getAlmanacServiceURI(
     PhabricatorUser $viewer,
-    $never_proxy,
-    array $protocols) {
+    array $options) {
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'neverProxy' => 'bool',
+        'protocols' => 'list<string>',
+        'writable' => 'optional bool',
+      ));
+
+    $never_proxy = $options['neverProxy'];
+    $protocols = $options['protocols'];
+    $writable = idx($options, 'writable', false);
 
     $cache_key = $this->getAlmanacServiceCacheKey();
     if (!$cache_key) {
@@ -1946,7 +1960,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
 
       if (isset($protocol_map[$uri['protocol']])) {
-        $results[] = new PhutilURI($uri['uri']);
+        $results[] = $uri;
       }
     }
 
@@ -1977,8 +1991,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
     }
 
+    // If we require a writable device, remove URIs which aren't writable.
+    if ($writable) {
+      foreach ($results as $key => $uri) {
+        if (!$uri['writable']) {
+          unset($results[$key]);
+        }
+      }
+
+      if (!$results) {
+        throw new Exception(
+          pht(
+            'This repository ("%s") is not writable with the given '.
+            'protocols (%s). The Almanac service for this repository has no '.
+            'writable bindings that support these protocols.',
+            $this->getDisplayName(),
+            implode(', ', $protocols)));
+      }
+    }
+
     shuffle($results);
-    return head($results);
+
+    $result = head($results);
+    return $result['uri'];
   }
 
   public function supportsSynchronization() {
@@ -1997,7 +2032,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $repository_phid = $this->getPHID();
-    return "diffusion.repository({$repository_phid}).service({$service_phid})";
+
+    $parts = array(
+      "repo({$repository_phid})",
+      "serv({$service_phid})",
+      'v2',
+    );
+
+    return implode('.', $parts);
   }
 
   private function buildAlmanacServiceURIs() {
@@ -2026,6 +2068,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'protocol' => $protocol,
         'uri' => (string)$uri,
         'device' => $device_name,
+        'writable' => (bool)$binding->getAlmanacPropertyValue('writable'),
       );
     }
 
@@ -2073,10 +2116,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $uri = $this->getAlmanacServiceURI(
       $viewer,
-      $never_proxy,
       array(
-        'http',
-        'https',
+        'neverProxy' => $never_proxy,
+        'protocols' => array(
+          'http',
+          'https',
+        ),
+
+        // At least today, no Conduit call can ever write to a repository,
+        // so it's fine to send anything to a read-only node.
+        'writable' => false,
       ));
     if ($uri === null) {
       return null;

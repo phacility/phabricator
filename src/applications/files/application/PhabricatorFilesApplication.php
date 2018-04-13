@@ -73,7 +73,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         => 'PhabricatorFileViewController',
       '/file/' => array(
         '(query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorFileListController',
-        'view/(?P<id>[^/]+)/'.
+        'view/(?P<id>[1-9]\d*)/'.
           '(?:(?P<engineKey>[^/]+)/)?'.
           '(?:\$(?P<lines>\d+(?:-\d+)?))?'
           => 'PhabricatorFileViewController',

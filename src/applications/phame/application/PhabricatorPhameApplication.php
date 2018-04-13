@@ -6,10 +6,6 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return pht('Phame');
   }
 
-  public function getMenuName() {
-    return pht('Blogs');
-  }
-
   public function getBaseURI() {
     return '/phame/';
   }

@@ -19,9 +19,7 @@ JX.behavior('phabricator-line-linker', function() {
     // Ignore.
   }
 
-  function getRowNumber(tr) {
-    var th = tr.firstChild;
-
+  function getRowNumber(th) {
     // If the "<th />" tag contains an "<a />" with "data-n" that we're using
     // to prevent copy/paste of line numbers, use that.
     if (th.firstChild) {
@@ -31,12 +29,12 @@ JX.behavior('phabricator-line-linker', function() {
       }
     }
 
-    return +(th.textContent || th.innerText);
+    return null;
   }
 
   JX.Stratcom.listen(
     ['click', 'mousedown'],
-    ['phabricator-source', 'tag:tr', 'tag:th', 'tag:a'],
+    ['phabricator-source', 'tag:th', 'tag:a'],
     function(e) {
       if (!e.isNormalMouseEvent()) {
         return;
@@ -47,13 +45,13 @@ JX.behavior('phabricator-line-linker', function() {
       // table. The row's immediate ancestor table needs to be the table with
       // the "phabricator-source" sigil.
 
-      var row = e.getNode('tag:tr');
+      var cell = e.getNode('tag:th');
       var table = e.getNode('phabricator-source');
-      if (JX.DOM.findAbove(row, 'table') !== table) {
+      if (JX.DOM.findAbove(cell, 'table') !== table) {
         return;
       }
 
-      var number = getRowNumber(row);
+      var number = getRowNumber(cell);
       if (!number) {
         return;
       }
@@ -66,7 +64,7 @@ JX.behavior('phabricator-line-linker', function() {
         return;
       }
 
-      origin = row;
+      origin = cell;
       target = origin;
 
       root = table;
@@ -80,7 +78,7 @@ JX.behavior('phabricator-line-linker', function() {
     if (e.getNode('phabricator-source') !== root) {
       return;
     }
-    target = e.getNode('tag:tr');
+    target = e.getNode('tag:th');
 
     var min;
     var max;
@@ -115,6 +113,9 @@ JX.behavior('phabricator-line-linker', function() {
     highlighted = [];
 
     // Highlight the newly selected rows.
+    min = JX.DOM.findAbove(min, 'tr');
+    max = JX.DOM.findAbove(max, 'tr');
+
     var cursor = min;
     while (true) {
       JX.DOM.alterClass(cursor, 'phabricator-source-highlight', true);
@@ -144,9 +145,14 @@ JX.behavior('phabricator-line-linker', function() {
       var o = getRowNumber(origin);
       var t = getRowNumber(target);
       var uri = JX.Stratcom.getData(root).uri;
+      var path;
 
       if (!uri) {
-        uri = ('' + window.location).split('$')[0];
+        uri = JX.$U(window.location);
+        path = uri.getPath();
+        path = path.replace(/\$[\d-]+$/, '');
+        uri.setPath(path);
+        uri = uri.toString();
       }
 
       origin = null;
@@ -154,7 +160,11 @@ JX.behavior('phabricator-line-linker', function() {
       root = null;
 
       var lines = (o == t ? o : Math.min(o, t) + '-' + Math.max(o, t));
-      uri = uri + '$' + lines;
+
+      uri = JX.$U(uri);
+      path = uri.getPath();
+      path = path + '$' + lines;
+      uri = uri.setPath(path).toString();
 
       JX.History.replace(uri);
 
@@ -165,5 +175,17 @@ JX.behavior('phabricator-line-linker', function() {
         }
       }
     });
+
+
+  // Try to jump to the highlighted lines if we don't have an explicit anchor
+  // in the URI.
+  if (!window.location.hash.length) {
+    try {
+      var anchor = JX.$('phabricator-line-linker-anchor');
+      JX.DOM.scrollToPosition(0, JX.$V(anchor).y - 60);
+    } catch (ex) {
+      // If we didn't hit an element on the page, just move on.
+    }
+  }
 
 });

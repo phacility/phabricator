@@ -7,8 +7,6 @@
 
 JX.behavior('document-engine', function(config, statics) {
 
-
-
   function onmenu(e) {
     var node = e.getNode('document-engine-view-dropdown');
     var data = JX.Stratcom.getData(node);
@@ -153,7 +151,7 @@ JX.behavior('document-engine', function(config, statics) {
     }
 
     data.sequence = (data.sequence || 0) + 1;
-    var handler = JX.bind(null, onrender, data, data.sequence);
+    var handler = JX.bind(null, onrender, data, data.sequence, spec);
 
     data.viewKey = spec.viewKey;
 
@@ -192,7 +190,7 @@ JX.behavior('document-engine', function(config, statics) {
     JX.DOM.setContent(viewport, JX.$H(spec.loadingMarkup));
   }
 
-  function onrender(data, sequence, r) {
+  function onrender(data, sequence, spec, r) {
     // If this isn't the most recent request we sent, throw it away. This can
     // happen if the user makes multiple selections from the menu while we are
     // still rendering the first view.
@@ -211,6 +209,152 @@ JX.behavior('document-engine', function(config, statics) {
     data.loadingView = false;
 
     JX.DOM.setContent(viewport, JX.$H(r.markup));
+
+    // If this engine supports rendering blame, populate or draw it.
+    if (spec.canBlame) {
+      blame(data);
+    }
+  }
+
+  function blame(data) {
+    // If the rendering engine can't handle blame, bail.
+    if (!data.blame.uri) {
+      return;
+    }
+
+    // If we already have an outstanding request for blame data, bail.
+    if (data.blame.request) {
+      return;
+    }
+
+    // If we don't have blame data yet, request it and then try rendering
+    // again later.
+    if (!data.blame.value) {
+      var req = new JX.Request(data.blame.uri, JX.bind(null, onblame, data));
+      data.blame.request = req;
+      req.send();
+      return;
+    }
+
+    // We're ready to render.
+    var viewport = JX.$(data.viewportID);
+
+    var row_nodes = JX.DOM.scry(viewport, 'tr');
+    var row_list = [];
+    var ii;
+
+    for (ii = 0; ii < row_nodes.length; ii++) {
+      var row = {};
+      var keep = false;
+      var node = row_nodes[ii];
+
+      for (var jj = 0; jj < node.childNodes.length; jj++) {
+        var child = node.childNodes[jj];
+
+        if (!JX.DOM.isType(child, 'th')) {
+          continue;
+        }
+
+        var spec = child.getAttribute('data-blame');
+        if (spec) {
+          row[spec] = child;
+          keep = true;
+        }
+
+        if (spec === 'info') {
+          row.lines = child.getAttribute('data-blame-lines');
+        }
+      }
+
+      if (keep) {
+        row_list.push(row);
+      }
+    }
+
+    var last = null;
+    for (ii = 0; ii < row_list.length; ii++) {
+      var commit = data.blame.value.blame[row_list[ii].lines - 1];
+      row_list[ii].commit = commit;
+      row_list[ii].last = last;
+      last = commit;
+    }
+
+    for (ii = 0; ii < row_list.length; ii++) {
+      renderBlame(row_list[ii], data.blame.value);
+    }
+  }
+
+  function onblame(data, r) {
+    data.blame.request = null;
+    data.blame.value = r;
+    blame(data);
+  }
+
+  function renderBlame(row, blame) {
+    var spec = blame.map[row.commit];
+
+    var info = null;
+    var skip = null;
+
+    if (spec && (row.commit != row.last)) {
+      skip = JX.$H(spec.skip);
+      info = JX.$H(spec.info);
+    }
+
+    if (row.skip) {
+      JX.DOM.setContent(row.skip, skip);
+    }
+
+    if (row.info) {
+      JX.DOM.setContent(row.info, info);
+    }
+
+    var epoch_range = (blame.epoch.max - blame.epoch.min);
+
+    var epoch_value;
+    if (!epoch_range) {
+      epoch_value = 1;
+    } else {
+      epoch_value = (spec.epoch - blame.epoch.min) / epoch_range;
+    }
+
+    var h_min = 0.04;
+    var h_max = 0.44;
+    var h = h_min + ((h_max - h_min) * epoch_value);
+
+    var s = 0.44;
+
+    var v_min = 0.92;
+    var v_max = 1.00;
+    var v = v_min + ((v_max - v_min) * epoch_value);
+
+    row.info.style.background = getHSV(h, s, v);
+  }
+
+  function getHSV(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+
+    switch (i % 6) {
+      case 0: r = v, g = t, b = p; break;
+      case 1: r = q, g = v, b = p; break;
+      case 2: r = p, g = v, b = t; break;
+      case 3: r = p, g = q, b = v; break;
+      case 4: r = t, g = p, b = v; break;
+      case 5: r = v, g = p, b = q; break;
+    }
+
+    r = Math.round(r * 255);
+    g = Math.round(g * 255);
+    b = Math.round(b * 255);
+
+
+    return 'rgb(' + r + ', ' + g + ', ' + b + ')';
   }
 
   if (!statics.initialized) {
@@ -218,10 +362,18 @@ JX.behavior('document-engine', function(config, statics) {
     statics.initialized = true;
   }
 
-  if (config && config.renderControlID) {
-    var control = JX.$(config.renderControlID);
+  if (config && config.controlID) {
+    var control = JX.$(config.controlID);
     var data = JX.Stratcom.getData(control);
-    onview(data, null, true);
+
+    switch (config.next) {
+      case 'render':
+        onview(data, null, true);
+        break;
+      case 'blame':
+        blame(data);
+        break;
+    }
   }
 
 });
