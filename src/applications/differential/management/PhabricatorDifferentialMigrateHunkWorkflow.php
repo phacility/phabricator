@@ -6,7 +6,9 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
   protected function didConstruct() {
     $this
       ->setName('migrate-hunk')
-      ->setExamples('**migrate-hunk** --id __hunk__ --to __storage__')
+      ->setExamples(
+        "**migrate-hunk** --id __hunk__ --to __storage__\n".
+        "**migrate-hunk** --all")
       ->setSynopsis(pht('Migrate storage engines for a hunk.'))
       ->setArguments(
         array(
@@ -20,14 +22,27 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
             'param' => 'storage',
             'help' => pht('Storage engine to migrate to.'),
           ),
+          array(
+            'name' => 'all',
+            'help' => pht('Migrate all hunks.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $id = $args->getArg('id');
-    if (!$id) {
+    $is_all = $args->getArg('all');
+
+    if ($is_all && $id) {
       throw new PhutilArgumentUsageException(
-        pht('Specify a hunk to migrate with --id.'));
+        pht(
+          'Options "--all" (to migrate all hunks) and "--id" (to migrate a '.
+          'specific hunk) are mutually exclusive.'));
+    } else if (!$is_all && !$id) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify a hunk to migrate with "--id", or migrate all hunks '.
+          'with "--all".'));
     }
 
     $storage = $args->getArg('to');
@@ -40,31 +55,30 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
           pht('Specify a hunk storage engine with --to.'));
     }
 
-    $hunk = $this->loadHunk($id);
-    $old_data = $hunk->getChanges();
-
-    switch ($storage) {
-      case DifferentialHunk::DATATYPE_TEXT:
-        $hunk->saveAsText();
-        $this->logOkay(
-          pht('TEXT'),
-          pht('Converted hunk to text storage.'));
-        break;
-      case DifferentialHunk::DATATYPE_FILE:
-        $hunk->saveAsFile();
-        $this->logOkay(
-          pht('FILE'),
-          pht('Converted hunk to file storage.'));
-        break;
+    if ($id) {
+      $hunk = $this->loadHunk($id);
+      $hunks = array($hunk);
+    } else {
+      $hunks = new LiskMigrationIterator(new DifferentialHunk());
     }
 
-    $hunk = $this->loadHunk($id);
-    $new_data = $hunk->getChanges();
+    foreach ($hunks as $hunk) {
+      try {
+        $this->migrateHunk($hunk, $storage);
+      } catch (Exception $ex) {
+        // If we're migrating a single hunk, just throw the exception. If
+        // we're migrating multiple hunks, warn but continue.
+        if ($id) {
+          throw $ex;
+        }
 
-    if ($old_data !== $new_data) {
-      throw new Exception(
-        pht(
-          'Integrity check failed: new file data differs fom old data!'));
+        $this->logWarn(
+          pht('WARN'),
+          pht(
+            'Failed to migrate hunk %d: %s',
+            $hunk->getID(),
+            $ex->getMessage()));
+      }
     }
 
     return 0;
@@ -80,6 +94,34 @@ final class PhabricatorDifferentialMigrateHunkWorkflow
     }
 
     return $hunk;
+  }
+
+  private function migrateHunk(DifferentialHunk $hunk, $format) {
+    $old_data = $hunk->getChanges();
+
+    switch ($format) {
+      case DifferentialHunk::DATATYPE_TEXT:
+        $hunk->saveAsText();
+        $this->logOkay(
+          pht('TEXT'),
+          pht('Converted hunk to text storage.'));
+        break;
+      case DifferentialHunk::DATATYPE_FILE:
+        $hunk->saveAsFile();
+        $this->logOkay(
+          pht('FILE'),
+          pht('Converted hunk to file storage.'));
+        break;
+    }
+
+    $hunk = $this->loadHunk($hunk->getID());
+    $new_data = $hunk->getChanges();
+
+    if ($old_data !== $new_data) {
+      throw new Exception(
+        pht(
+          'Integrity check failed: new file data differs fom old data!'));
+    }
   }
 
 
