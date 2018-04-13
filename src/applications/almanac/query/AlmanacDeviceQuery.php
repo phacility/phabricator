@@ -8,6 +8,7 @@ final class AlmanacDeviceQuery
   private $names;
   private $namePrefix;
   private $nameSuffix;
+  private $isClusterDevice;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -38,6 +39,11 @@ final class AlmanacDeviceQuery
     return $this->withNgramsConstraint(
       new AlmanacDeviceNameNgrams(),
       $ngrams);
+  }
+
+  public function withIsClusterDevice($is_cluster_device) {
+    $this->isClusterDevice = $is_cluster_device;
+    return $this;
   }
 
   public function newResultObject() {
@@ -88,6 +94,13 @@ final class AlmanacDeviceQuery
         $conn,
         'device.name LIKE %<',
         $this->nameSuffix);
+    }
+
+    if ($this->isClusterDevice !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'device.isBoundToClusterService = %d',
+        (int)$this->isClusterDevice);
     }
 
     return $where;
