@@ -356,6 +356,35 @@ final class HarbormasterBuild extends HarbormasterDAO
     }
   }
 
+  public function sendMessage(PhabricatorUser $viewer, $command) {
+    // TODO: This should not be an editor transaction, but there are plans to
+    // merge BuildCommand into BuildMessage which should moot this. As this
+    // exists today, it can race against BuildEngine.
+
+    // This is a bogus content source, but this whole flow should be obsolete
+    // soon.
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorConsoleContentSource::SOURCECONST);
+
+    $editor = id(new HarbormasterBuildTransactionEditor())
+      ->setActor($viewer)
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $viewer_phid = $viewer->getPHID();
+    if (!$viewer_phid) {
+      $acting_phid = id(new PhabricatorHarbormasterApplication())->getPHID();
+      $editor->setActingAsPHID($acting_phid);
+    }
+
+    $xaction = id(new HarbormasterBuildTransaction())
+      ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
+      ->setNewValue($command);
+
+    $editor->applyTransactions($this, array($xaction));
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

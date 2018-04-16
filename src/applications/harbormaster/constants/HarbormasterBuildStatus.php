@@ -98,6 +98,19 @@ final class HarbormasterBuildStatus extends Phobject {
     );
   }
 
+  public static function getIncompleteStatusConstants() {
+    $map = self::getBuildStatusSpecMap();
+
+    $constants = array();
+    foreach ($map as $constant => $spec) {
+      if (!$spec['isComplete']) {
+        $constants[] = $constant;
+      }
+    }
+
+    return $constants;
+  }
+
   public static function getCompletedStatusConstants() {
     return array(
       self::STATUS_PASSED,
