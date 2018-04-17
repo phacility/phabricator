@@ -384,7 +384,6 @@ return array(
     'rsrc/js/application/diffusion/behavior-audit-preview.js' => 'd835b03a',
     'rsrc/js/application/diffusion/behavior-commit-branches.js' => 'bdaf4d04',
     'rsrc/js/application/diffusion/behavior-commit-graph.js' => '75b83cbb',
-    'rsrc/js/application/diffusion/behavior-diffusion-browse-file.js' => '054a0f0b',
     'rsrc/js/application/diffusion/behavior-locate-file.js' => '6d3e1947',
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'f01586dc',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '1db13e70',
@@ -597,7 +596,6 @@ return array(
     'javelin-behavior-differential-feedback-preview' => '51c5ad07',
     'javelin-behavior-differential-populate' => '419998ab',
     'javelin-behavior-differential-user-select' => 'a8d8459d',
-    'javelin-behavior-diffusion-browse-file' => '054a0f0b',
     'javelin-behavior-diffusion-commit-branches' => 'bdaf4d04',
     'javelin-behavior-diffusion-commit-graph' => '75b83cbb',
     'javelin-behavior-diffusion-locate-file' => '6d3e1947',
@@ -931,12 +929,6 @@ return array(
     '05270951' => array(
       'javelin-util',
       'javelin-magical-init',
-    ),
-    '054a0f0b' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-util',
-      'phabricator-tooltip',
     ),
     '065227cc' => array(
       'javelin-behavior',
