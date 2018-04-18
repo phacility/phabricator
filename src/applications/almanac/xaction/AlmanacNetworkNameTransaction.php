@@ -38,6 +38,37 @@ final class AlmanacNetworkNameTransaction
         pht('Network name is required.'));
     }
 
+    foreach ($xactions as $xaction) {
+      $name = $xaction->getNewValue();
+
+      $message = null;
+      try {
+        AlmanacNames::validateName($name);
+      } catch (Exception $ex) {
+        $message = $ex->getMessage();
+      }
+
+      if ($message !== null) {
+        $errors[] = $this->newInvalidError($message, $xaction);
+        continue;
+      }
+
+      if ($name === $object->getName()) {
+        continue;
+      }
+
+      $other = id(new AlmanacNetworkQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withNames(array($name))
+        ->executeOne();
+      if ($other && ($other->getID() != $object->getID())) {
+        $errors[] = $this->newInvalidError(
+          pht('Almanac networks must have unique names.'),
+          $xaction);
+        continue;
+      }
+    }
+
     return $errors;
   }
 
