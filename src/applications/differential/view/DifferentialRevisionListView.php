@@ -229,13 +229,20 @@ final class DifferentialRevisionListView extends AphrontView {
     $classes = array();
     $classes[] = 'differential-revision-size';
 
+    $tip = array();
+    $tip[] = pht('%s Lines', new PhutilNumber($n));
+
     if ($plus_count <= 1) {
       $classes[] = 'differential-revision-small';
+      $tip[] = pht('Smaller Change');
     }
 
     if ($plus_count >= 4) {
       $classes[] = 'differential-revision-large';
+      $tip[] = pht('Larger Change');
     }
+
+    $tip = phutil_implode_html(" \xC2\xB7 ", $tip);
 
     return javelin_tag(
       'span',
@@ -243,8 +250,9 @@ final class DifferentialRevisionListView extends AphrontView {
         'class' => implode(' ', $classes),
         'sigil' => 'has-tooltip',
         'meta' => array(
-          'tip' => pht('%s Lines', new PhutilNumber($n)),
+          'tip' => $tip,
           'align' => 'E',
+          'size' => 400,
         ),
       ),
       $size);
