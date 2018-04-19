@@ -716,6 +716,10 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getFieldValuesForConduit() {
+
+    // NOTE: This data should be similar to the information returned about
+    // commmits by "differential.diff.search" with the "commits" attachment.
+
     return array(
       'identifier' => $this->getCommitIdentifier(),
     );
