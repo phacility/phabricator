@@ -68,6 +68,10 @@
   color: {$lightgreytext};
 }
 
+.phabricator-notification-warning {
+  background: {$sh-yellowbackground};
+}
+
 .phabricator-notification-list .phabricator-notification-unread,
 .phabricator-notification-menu .phabricator-notification-unread {
   background: {$hoverblue};
@@ -95,7 +99,7 @@
 .phabricator-notification-unread .phabricator-notification-foot
   .phabricator-notification-status {
     font-size: 7px;
-    color: {$lightgreytext};
+    color: {$lightbluetext};
     position: absolute;
     display: inline-block;
     top: 6px;
