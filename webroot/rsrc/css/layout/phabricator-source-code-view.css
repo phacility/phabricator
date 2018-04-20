@@ -24,6 +24,7 @@
   text-align: right;
   border-right: 1px solid {$paste.border};
   color: {$sh-yellowtext};
+  white-space: nowrap;
 }
 
 .phabricator-source-line > a::before {
