@@ -80,7 +80,6 @@ final class DiffusionBlameController extends DiffusionController {
 
     $handles = $viewer->loadHandles($handle_phids);
 
-
     $map = array();
     $epochs = array();
     foreach ($identifiers as $identifier) {
@@ -106,9 +105,21 @@ final class DiffusionBlameController extends DiffusionController {
         ),
         $skip_icon);
 
-      $commit = $commits[$identifier];
+      // We may not have a commit object for a given identifier if the commit
+      // has not imported yet.
 
-      $author_phid = $commit->getAuthorPHID();
+      // At time of writing, this can also happen if a line was part of the
+      // initial import: blame produces a "^abc123" identifier in Git, which
+      // doesn't correspond to a real commit.
+
+      $commit = idx($commits, $identifier);
+
+      $author_phid = null;
+
+      if ($commit) {
+        $author_phid = $commit->getAuthorPHID();
+      }
+
       if (!$author_phid && $revision) {
         $author_phid = $revision->getAuthorPHID();
       }
@@ -141,18 +152,22 @@ final class DiffusionBlameController extends DiffusionController {
           'meta' => $author_meta,
         ));
 
-      $commit_link = javelin_tag(
-        'a',
-        array(
-          'href' => $commit->getURI(),
-          'sigil' => 'has-tooltip',
-          'meta'  => array(
-            'tip' => $this->renderCommitTooltip($commit, $handles),
-            'align' => 'E',
-            'size' => 600,
+      if ($commit) {
+        $commit_link = javelin_tag(
+          'a',
+          array(
+            'href' => $commit->getURI(),
+            'sigil' => 'has-tooltip',
+            'meta'  => array(
+              'tip' => $this->renderCommitTooltip($commit, $handles),
+              'align' => 'E',
+              'size' => 600,
+            ),
           ),
-        ),
-        $commit->getLocalName());
+          $commit->getLocalName());
+      } else {
+        $commit_link = null;
+      }
 
       $info = array(
         $author_link,
@@ -180,7 +195,12 @@ final class DiffusionBlameController extends DiffusionController {
         );
       }
 
-      $epoch = $commit->getEpoch();
+      if ($commit) {
+        $epoch = $commit->getEpoch();
+      } else {
+        $epoch = 0;
+      }
+
       $epochs[] = $epoch;
 
       $data = array(
