@@ -51,18 +51,7 @@ final class HarbormasterBuildActionController
     }
 
     if ($request->isDialogFormPost() && $can_issue) {
-      $editor = id(new HarbormasterBuildTransactionEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true);
-
-      $xaction = id(new HarbormasterBuildTransaction())
-        ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-        ->setNewValue($action);
-
-      $editor->applyTransactions($build, array($xaction));
-
+      $build->sendMessage($viewer, $action);
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 

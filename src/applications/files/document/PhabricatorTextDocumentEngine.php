@@ -22,6 +22,7 @@ abstract class PhabricatorTextDocumentEngine
       $options,
       array(
         'blame' => 'optional wild',
+        'coverage' => 'optional list<wild>',
       ));
 
     if (is_array($content)) {
@@ -38,6 +39,11 @@ abstract class PhabricatorTextDocumentEngine
     $blame = idx($options, 'blame');
     if ($blame !== null) {
       $view->setBlameMap($blame);
+    }
+
+    $coverage = idx($options, 'coverage');
+    if ($coverage !== null) {
+      $view->setCoverage($coverage);
     }
 
     $message = null;

@@ -308,6 +308,15 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
           'enabled in configuration.'));
   }
 
+  public function willStartBuild(
+    PhabricatorUser $viewer,
+    HarbormasterBuildable $buildable,
+    HarbormasterBuild $build,
+    HarbormasterBuildPlan $plan,
+    HarbormasterBuildStep $step) {
+    return;
+  }
+
 
 /* -(  Automatic Targets  )-------------------------------------------------- */
 

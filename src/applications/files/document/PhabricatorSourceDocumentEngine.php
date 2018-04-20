@@ -57,6 +57,10 @@ final class PhabricatorSourceDocumentEngine
       $options['blame'] = $blame;
     }
 
+    if ($ref->getCoverage()) {
+      $options['coverage'] = $ref->getCoverage();
+    }
+
     return array(
       $messages,
       $this->newTextDocumentContent($ref, $content, $options),

@@ -83,6 +83,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $webhookMap = array();
 
   private $transactionQueue = array();
+  private $sendHistory = false;
 
   const STORAGE_ENCODING_BINARY = 'binary';
 
@@ -300,6 +301,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $types = array();
 
     $types[] = PhabricatorTransactions::TYPE_CREATE;
+    $types[] = PhabricatorTransactions::TYPE_HISTORY;
 
     if ($this->object instanceof PhabricatorEditEngineSubtypeInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBTYPE;
@@ -377,6 +379,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     switch ($type) {
       case PhabricatorTransactions::TYPE_CREATE:
+      case PhabricatorTransactions::TYPE_HISTORY:
         return null;
       case PhabricatorTransactions::TYPE_SUBTYPE:
         return $object->getEditEngineSubtype();
@@ -468,6 +471,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SUBTYPE:
+      case PhabricatorTransactions::TYPE_HISTORY:
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_SPACE:
         $space_phid = $xaction->getNewValue();
@@ -520,6 +524,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_CREATE:
+      case PhabricatorTransactions::TYPE_HISTORY:
         return true;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
@@ -604,6 +609,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
       case PhabricatorTransactions::TYPE_CREATE:
+      case PhabricatorTransactions::TYPE_HISTORY:
       case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -665,6 +671,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
       case PhabricatorTransactions::TYPE_CREATE:
+      case PhabricatorTransactions::TYPE_HISTORY:
       case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_TOKEN:
@@ -799,6 +806,9 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_SPACE:
         $this->scrambleFileSecrets($object);
+        break;
+      case PhabricatorTransactions::TYPE_HISTORY:
+        $this->sendHistory = true;
         break;
     }
   }
@@ -1315,6 +1325,13 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       $this->publishFeedStory($object, $xactions, $mailed);
+    }
+
+    if ($this->sendHistory) {
+      $history_mail = $this->buildHistoryMail($object);
+      if ($history_mail) {
+        $messages[] = $history_mail;
+      }
     }
 
     // NOTE: This actually sends the mail. We do this last to reduce the chance
@@ -2557,6 +2574,25 @@ abstract class PhabricatorApplicationTransactionEditor
       $unexpandable = array();
     }
 
+    $messages = $this->buildMailWithRecipients(
+      $object,
+      $xactions,
+      $email_to,
+      $email_cc,
+      $unexpandable);
+
+    $this->runHeraldMailRules($messages);
+
+    return $messages;
+  }
+
+  private function buildMailWithRecipients(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    array $email_to,
+    array $email_cc,
+    array $unexpandable) {
+
     $targets = $this->buildReplyHandler($object)
       ->setUnexpandablePHIDs($unexpandable)
       ->getMailTargets($email_to, $email_cc);
@@ -2602,8 +2638,6 @@ abstract class PhabricatorApplicationTransactionEditor
         $messages[] = $mail;
       }
     }
-
-    $this->runHeraldMailRules($messages);
 
     return $messages;
   }
@@ -2935,33 +2969,61 @@ abstract class PhabricatorApplicationTransactionEditor
     $object_label = null,
     $object_href = null) {
 
+    // First, remove transactions which shouldn't be rendered in mail.
+    foreach ($xactions as $key => $xaction) {
+      if ($xaction->shouldHideForMail($xactions)) {
+        unset($xactions[$key]);
+      }
+    }
+
     $headers = array();
     $headers_html = array();
     $comments = array();
     $details = array();
 
+    $seen_comment = false;
     foreach ($xactions as $xaction) {
-      if ($xaction->shouldHideForMail($xactions)) {
-        continue;
-      }
 
-      $header = $xaction->getTitleForMail();
-      if ($header !== null) {
-        $headers[] = $header;
-      }
+      // Most mail has zero or one comments. In these cases, we render the
+      // "alice added a comment." transaction in the header, like a normal
+      // transaction.
 
-      $header_html = $xaction->getTitleForHTMLMail();
-      if ($header_html !== null) {
-        $headers_html[] = $header_html;
-      }
+      // Some mail, like Differential undraft mail or "!history" mail, may
+      // have two or more comments. In these cases, we'll put the first
+      // "alice added a comment." transaction in the header normally, but
+      // move the other transactions down so they provide context above the
+      // actual comment.
 
       $comment = $xaction->getBodyForMail();
       if ($comment !== null) {
-        $comments[] = $comment;
+        $is_comment = true;
+        $comments[] = array(
+          'xaction' => $xaction,
+          'comment' => $comment,
+          'initial' => !$seen_comment,
+        );
+      } else {
+        $is_comment = false;
+      }
+
+      if (!$is_comment || !$seen_comment) {
+        $header = $xaction->getTitleForMail();
+        if ($header !== null) {
+          $headers[] = $header;
+        }
+
+        $header_html = $xaction->getTitleForHTMLMail();
+        if ($header_html !== null) {
+          $headers_html[] = $header_html;
+        }
       }
 
       if ($xaction->hasChangeDetailsForMail()) {
         $details[] = $xaction;
+      }
+
+      if ($is_comment) {
+        $seen_comment = true;
       }
     }
 
@@ -2995,8 +3057,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $object_label);
     }
 
-    $xactions_style = array(
-    );
+    $xactions_style = array();
 
     $header_action = phutil_tag(
       'td',
@@ -3023,7 +3084,25 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $body->addRawHTMLSection($headers_html);
 
-    foreach ($comments as $comment) {
+    foreach ($comments as $spec) {
+      $xaction = $spec['xaction'];
+      $comment = $spec['comment'];
+      $is_initial = $spec['initial'];
+
+      // If this is not the first comment in the mail, add the header showing
+      // who wrote the comment immediately above the comment.
+      if (!$is_initial) {
+        $header = $xaction->getTitleForMail();
+        if ($header !== null) {
+          $body->addRawPlaintextSection($header);
+        }
+
+        $header_html = $xaction->getTitleForHTMLMail();
+        if ($header_html !== null) {
+          $body->addRawHTMLSection($header_html);
+        }
+      }
+
       $body->addRemarkupSection(null, $comment);
     }
 
@@ -3671,6 +3750,7 @@ abstract class PhabricatorApplicationTransactionEditor
       'mailMutedPHIDs',
       'webhookMap',
       'silent',
+      'sendHistory',
     );
   }
 
@@ -4326,6 +4406,34 @@ abstract class PhabricatorApplicationTransactionEditor
     // subscribers.
 
     return true;
+  }
+
+  private function buildHistoryMail(PhabricatorLiskDAO $object) {
+    $viewer = $this->requireActor();
+    $recipient_phid = $this->getActingAsPHID();
+
+    // Load every transaction so we can build a mail message with a complete
+    // history for the object.
+    $query = PhabricatorApplicationTransactionQuery::newQueryForObject($object);
+    $xactions = $query
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->execute();
+    $xactions = array_reverse($xactions);
+
+    $mail_messages = $this->buildMailWithRecipients(
+      $object,
+      $xactions,
+      array($recipient_phid),
+      array(),
+      array());
+    $mail = head($mail_messages);
+
+    // Since the user explicitly requested "!history", force delivery of this
+    // message regardless of their other mail settings.
+    $mail->setForceDelivery(true);
+
+    return $mail;
   }
 
 }

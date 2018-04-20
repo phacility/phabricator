@@ -815,7 +815,10 @@ final class DifferentialDiff
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new DifferentialCommitsSearchEngineAttachment())
+        ->setAttachmentKey('commits'),
+    );
   }
 
 

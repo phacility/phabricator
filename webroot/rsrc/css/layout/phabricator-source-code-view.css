@@ -6,7 +6,6 @@
   overflow-x: auto;
   overflow-y: hidden;
   border: 1px solid {$paste.border};
-  border-radius: 3px;
 }
 
 .phui-oi .phabricator-source-code-container {
@@ -25,6 +24,7 @@
   text-align: right;
   border-right: 1px solid {$paste.border};
   color: {$sh-yellowtext};
+  white-space: nowrap;
 }
 
 .phabricator-source-line > a::before {
@@ -47,10 +47,12 @@ th.phabricator-source-line a:hover {
   text-decoration: none;
 }
 
+.phabricator-source-coverage-highlight .phabricator-source-code,
 .phabricator-source-highlight .phabricator-source-code {
   background: {$paste.highlight};
 }
 
+.phabricator-source-coverage-highlight .phabricator-source-line,
 .phabricator-source-highlight .phabricator-source-line {
   background: {$paste.border};
 }
@@ -96,7 +98,7 @@ th.phabricator-source-line a:hover {
 
 .phabricator-source-blame-info a {
   color: {$darkbluetext};
-  text-shadow: 1px 1px rgba(0, 0, 0, 0.111);
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 .phabricator-source-blame-skip a {
@@ -122,4 +124,11 @@ th.phabricator-source-line a:hover {
   height: 16px;
   background-size: 100% 100%;
   background-repeat: no-repeat;
+}
+
+th.phabricator-source-coverage {
+  padding: 0 8px;
+  border-left: 1px solid {$thinblueborder};
+  background: {$lightgreybackground};
+  cursor: w-resize;
 }

@@ -76,31 +76,31 @@ final class PhabricatorNotificationQuery
     return $stories;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'notif.userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
     if ($this->unread !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'notif.hasViewed = %d',
         (int)!$this->unread);
     }
 
     if ($this->keys) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'notif.chronologicalKey IN (%Ls)',
         $this->keys);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function getResultCursor($item) {

@@ -545,11 +545,18 @@ abstract class PhabricatorApplicationTransaction
       return false;
     }
 
+    $xaction_type = $this->getTransactionType();
+
+    // Always hide requests for object history.
+    if ($xaction_type === PhabricatorTransactions::TYPE_HISTORY) {
+      return true;
+    }
+
     // Hide creation transactions if the old value is empty. These are
-    // transactions like "alice set the task tile to: ...", which are
+    // transactions like "alice set the task title to: ...", which are
     // essentially never interesting.
     if ($this->getIsCreateTransaction()) {
-      switch ($this->getTransactionType()) {
+      switch ($xaction_type) {
         case PhabricatorTransactions::TYPE_CREATE:
         case PhabricatorTransactions::TYPE_VIEW_POLICY:
         case PhabricatorTransactions::TYPE_EDIT_POLICY:

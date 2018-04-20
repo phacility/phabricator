@@ -10,6 +10,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
   private $truncatedFirstLines = false;
   private $symbolMetadata;
   private $blameMap;
+  private $coverage = array();
 
   public function setLines(array $lines) {
     $this->lines = $lines;
@@ -59,6 +60,15 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this->blameMap;
   }
 
+  public function setCoverage(array $coverage) {
+    $this->coverage = $coverage;
+    return $this;
+  }
+
+  public function getCoverage() {
+    return $this->coverage;
+  }
+
   public function render() {
     $blame_map = $this->getBlameMap();
     $has_blame = ($blame_map !== null);
@@ -97,6 +107,19 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
     $base_uri = (string)$this->uri;
     $wrote_anchor = false;
+
+    $coverage = $this->getCoverage();
+    $coverage_count = count($coverage);
+    $coverage_data = ipull($coverage, 'data');
+
+    // TODO: Modularize this properly, see T13125.
+    $coverage_map = array(
+      'C' => 'background: #66bbff;',
+      'U' => 'background: #dd8866;',
+      'N' => 'background: #ddeeff;',
+      'X' => 'background: #aa00aa;',
+    );
+
     foreach ($lines as $line) {
       $row_attributes = array();
       if (isset($this->highlights[$line_number])) {
@@ -157,6 +180,25 @@ final class PhabricatorSourceCodeView extends AphrontView {
         $blame_cells = null;
       }
 
+      $coverage_cells = array();
+      foreach ($coverage as $coverage_idx => $coverage_spec) {
+        if (isset($coverage_spec['data'][$line_number - 1])) {
+          $coverage_char = $coverage_spec['data'][$line_number - 1];
+        } else {
+          $coverage_char = null;
+        }
+
+        $coverage_style = idx($coverage_map, $coverage_char, null);
+
+        $coverage_cells[] = phutil_tag(
+          'th',
+          array(
+            'class' => 'phabricator-source-coverage',
+            'style' => $coverage_style,
+            'data-coverage' => $coverage_idx.'/'.$coverage_char,
+          ));
+      }
+
       $rows[] = phutil_tag(
         'tr',
         $row_attributes,
@@ -174,7 +216,8 @@ final class PhabricatorSourceCodeView extends AphrontView {
               'class' => 'phabricator-source-code',
             ),
             $line),
-          ));
+          $coverage_cells,
+        ));
 
       $line_number++;
     }

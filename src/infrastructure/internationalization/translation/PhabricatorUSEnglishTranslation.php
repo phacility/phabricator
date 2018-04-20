@@ -1651,6 +1651,14 @@ final class PhabricatorUSEnglishTranslation
         'Destroyed %s credentials of type "%s".',
       ),
 
+      '%s notification(s) about objects which no longer exist or which '.
+      'you can no longer see were discarded.' => array(
+        'One notification about an object which no longer exists or which '.
+        'you can no longer see was discarded.',
+        '%s notifications about objects which no longer exist or which '.
+        'you can no longer see were discarded.',
+      ),
+
     );
   }
 

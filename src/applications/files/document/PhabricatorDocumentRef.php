@@ -10,6 +10,7 @@ final class PhabricatorDocumentRef
   private $snippet;
   private $symbolMetadata = array();
   private $blameURI;
+  private $coverage = array();
 
   public function setFile(PhabricatorFile $file) {
     $this->file = $file;
@@ -149,6 +150,17 @@ final class PhabricatorDocumentRef
 
   public function getBlameURI() {
     return $this->blameURI;
+  }
+
+  public function addCoverage($coverage) {
+    $this->coverage[] = array(
+      'data' => $coverage,
+    );
+    return $this;
+  }
+
+  public function getCoverage() {
+    return $this->coverage;
   }
 
 }

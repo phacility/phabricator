@@ -35,6 +35,10 @@ final class AlmanacInterface
         'key_device' => array(
           'columns' => array('devicePHID'),
         ),
+        'key_unique' => array(
+          'columns' => array('devicePHID', 'networkPHID', 'address', 'port'),
+          'unique' => true,
+        ),
       ),
     ) + parent::getConfiguration();
   }
