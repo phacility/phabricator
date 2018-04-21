@@ -162,7 +162,7 @@ final class DifferentialRevisionAcceptTransaction
           'closed. Only open revisions can be accepted.'));
     }
 
-    if ($object->isDraft()) {
+    if ($object->isDraft() || !$object->getShouldBroadcast()) {
       throw new Exception(
         pht('You can not accept a draft revision.'));
     }

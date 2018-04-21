@@ -1659,6 +1659,14 @@ final class PhabricatorUSEnglishTranslation
         'you can no longer see were discarded.',
       ),
 
+      'This draft revision will be sent for review once %s '.
+      'build(s) pass: %s.' => array(
+        'This draft revision will be sent for review once this build '.
+        'passes: %2$s.',
+        'This draft revision will be sent for review once these builds '.
+        'pass: %2$s.',
+      ),
+
     );
   }
 
