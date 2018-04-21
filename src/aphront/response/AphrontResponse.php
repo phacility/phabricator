@@ -113,6 +113,7 @@ abstract class AphrontResponse extends Phobject {
 
     try {
       $cdn = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+      $base_uri = PhabricatorEnv::getURI('/');
     } catch (Exception $ex) {
       return null;
     }
@@ -124,8 +125,6 @@ abstract class AphrontResponse extends Phobject {
       // If an alternate file domain is not configured and the user is viewing
       // a Phame blog on a custom domain or some other custom site, we'll still
       // serve resources from the main site. Include the main site explicitly.
-
-      $base_uri = PhabricatorEnv::getURI('/');
       $base_uri = $this->newContentSecurityPolicySource($base_uri);
 
       $default = "'self' {$base_uri}";
