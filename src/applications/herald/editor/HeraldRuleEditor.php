@@ -87,4 +87,54 @@ final class HeraldRuleEditor
     return;
   }
 
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return id(new HeraldRuleAdapter())
+      ->setRule($object);
+  }
+
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    $phids[] = $this->getActingAsPHID();
+
+    if ($object->isPersonalRule()) {
+      $phids[] = $object->getAuthorPHID();
+    }
+
+    return $phids;
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new HeraldRuleReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $monogram = $object->getMonogram();
+    $name = $object->getName();
+
+    $subject = pht('%s: %s', $monogram, $name);
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject($subject);
+  }
+
+  protected function getMailSubjectPrefix() {
+    return pht('[Herald]');
+  }
+
 }
