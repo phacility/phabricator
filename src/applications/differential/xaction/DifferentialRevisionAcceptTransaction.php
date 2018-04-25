@@ -7,7 +7,7 @@ final class DifferentialRevisionAcceptTransaction
   const ACTIONKEY = 'accept';
 
   protected function getRevisionActionLabel() {
-    return pht("Accept Revision \xE2\x9C\x94");
+    return pht('Accept Revision');
   }
 
   protected function getRevisionActionDescription(
