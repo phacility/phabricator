@@ -11,7 +11,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorFerretInterface,
     PhabricatorProjectInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorPolicyCodexInterface {
 
   protected $slug;
   protected $depth;
@@ -200,22 +201,6 @@ final class PhrictionDocument extends PhrictionDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-        return pht(
-          'To view a wiki document, you must also be able to view all '.
-          'of its parents.');
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return pht(
-          'To edit a wiki document, you must also be able to view all '.
-          'of its parents.');
-    }
-
-    return null;
-  }
-
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 
@@ -328,4 +313,13 @@ final class PhrictionDocument extends PhrictionDAO
         ->setAttachmentKey('content'),
     );
   }
+
+/* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
+
+
+    public function newPolicyCodex() {
+      return new PhrictionDocumentPolicyCodex();
+    }
+
+
 }

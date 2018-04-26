@@ -169,25 +169,47 @@ final class PhabricatorPolicyExplainController
     $capability) {
     $viewer = $this->getViewer();
 
-    $default_policy = PhabricatorPolicyQuery::getDefaultPolicyForObject(
-      $viewer,
-      $object,
-      $capability);
-    if (!$default_policy) {
+
+    $strength = null;
+    if ($object instanceof PhabricatorPolicyCodexInterface) {
+      $codex = id(PhabricatorPolicyCodex::newFromObject($object, $viewer))
+        ->setCapability($capability);
+      $strength = $codex->compareToDefaultPolicy($policy);
+      $default_policy = $codex->getDefaultPolicy();
+    } else {
+      $default_policy = PhabricatorPolicyQuery::getDefaultPolicyForObject(
+        $viewer,
+        $object,
+        $capability);
+
+      if ($default_policy) {
+        if ($default_policy->getPHID() == $policy->getPHID()) {
+          return;
+        }
+
+        if ($default_policy->getPHID() != $policy->getPHID()) {
+          if ($default_policy->isStrongerThan($policy)) {
+            $strength = PhabricatorPolicyStrengthConstants::WEAKER;
+          } else if ($policy->isStrongerThan($default_policy)) {
+            $strength = PhabricatorPolicyStrengthConstants::STRONGER;
+          } else {
+            $strength = PhabricatorPolicyStrengthConstants::ADJUSTED;
+          }
+        }
+      }
+    }
+
+    if (!$strength) {
       return;
     }
 
-    if ($default_policy->getPHID() == $policy->getPHID()) {
-      return;
-    }
-
-    if ($default_policy->isStrongerThan($policy)) {
+    if ($strength == PhabricatorPolicyStrengthConstants::WEAKER) {
       $info = pht(
         'This object has a less restrictive policy ("%s") than the default '.
         'policy for similar objects (which is "%s").',
         $policy->getShortName(),
         $default_policy->getShortName());
-    } else if ($policy->isStrongerThan($default_policy)) {
+    } else if ($strength == PhabricatorPolicyStrengthConstants::STRONGER) {
       $info = pht(
         'This object has a more restrictive policy ("%s") than the default '.
         'policy for similar objects (which is "%s").',

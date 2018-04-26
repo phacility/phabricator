@@ -434,11 +434,12 @@ final class PhabricatorPolicy
     $capability,
     $active_only) {
 
+    $exceptions = array();
     if ($object instanceof PhabricatorPolicyCodexInterface) {
-      $codex = PhabricatorPolicyCodex::newFromObject($object, $viewer);
+      $codex = id(PhabricatorPolicyCodex::newFromObject($object, $viewer))
+        ->setCapability($capability);
       $rules = $codex->getPolicySpecialRuleDescriptions();
 
-      $exceptions = array();
       foreach ($rules as $rule) {
         $is_active = $rule->getIsActive();
         if ($is_active) {
@@ -467,11 +468,13 @@ final class PhabricatorPolicy
 
         $exceptions[] = $description;
       }
-    } else if (method_exists($object, 'describeAutomaticCapability')) {
-      $exceptions = (array)$object->describeAutomaticCapability($capability);
-      $exceptions = array_filter($exceptions);
-    } else {
-      $exceptions = array();
+    }
+
+    if (!$exceptions) {
+      if (method_exists($object, 'describeAutomaticCapability')) {
+        $exceptions = (array)$object->describeAutomaticCapability($capability);
+        $exceptions = array_filter($exceptions);
+      }
     }
 
     return $exceptions;
