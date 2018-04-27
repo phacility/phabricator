@@ -38,8 +38,10 @@ final class HeraldTestConsoleController extends HeraldController {
 
     $object = $this->getTestObject();
     $adapter = $this->getTestAdapter();
+    $source = $this->newContentSource($object);
 
     $adapter
+      ->setContentSource($source)
       ->setIsNewObject(false)
       ->setActingAsPHID($viewer->getPHID())
       ->setViewer($viewer);
@@ -216,6 +218,31 @@ final class HeraldTestConsoleController extends HeraldController {
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild($view);
+  }
+
+  private function newContentSource($object) {
+    $viewer = $this->getViewer();
+
+    // Try using the content source associated with the most recent transaction
+    // on the object.
+
+    $query = PhabricatorApplicationTransactionQuery::newQueryForObject($object);
+
+    $xaction = $query
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->setLimit(1)
+      ->setOrder('newest')
+      ->executeOne();
+    if ($xaction) {
+      return $xaction->getContentSource();
+    }
+
+    // If we couldn't find a transaction (which should be rare), fall back to
+    // building a new content source from the test console request itself.
+
+    $request = $this->getRequest();
+    return PhabricatorContentSource::newFromRequest($request);
   }
 
 }

@@ -247,7 +247,14 @@ final class PhabricatorFaviconRef extends Phobject {
     $src_w = $template['width'];
     $src_h = $template['height'];
 
-    $template_data = $template['file']->loadFileData();
+    try {
+      $template_data = $template['file']->loadFileData();
+    } catch (Exception $ex) {
+      // In rare cases, we can end up with a corrupted or inaccessible file.
+      // If we do, just give up: otherwise, it's impossible to get pages to
+      // generate and not obvious how to fix it.
+      return null;
+    }
 
     if (!function_exists('imagecreatefromstring')) {
       return $template_data;

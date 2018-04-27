@@ -124,7 +124,8 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
       $check_phid = $sender->getPHID();
     }
 
-    $expect_hash = self::computeMailHash($object->getMailKey(), $check_phid);
+    $mail_key = PhabricatorMetaMTAMailProperties::loadMailKey($object);
+    $expect_hash = self::computeMailHash($mail_key, $check_phid);
 
     if (!phutil_hashes_are_identical($expect_hash, $parts['hash'])) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(

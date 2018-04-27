@@ -136,8 +136,11 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
     // We compute a hash using the object's own PHID to prevent an attacker
     // from blindly interacting with objects that they haven't ever received
     // mail about by just sending to D1@, D2@, etc...
+
+    $mail_key = PhabricatorMetaMTAMailProperties::loadMailKey($receiver);
+
     $hash = PhabricatorObjectMailReceiver::computeMailHash(
-      $receiver->getMailKey(),
+      $mail_key,
       $receiver->getPHID());
 
     $address = "{$prefix}{$receiver_id}+public+{$hash}@{$domain}";
@@ -159,8 +162,11 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();
     $user_id = $user->getID();
+
+    $mail_key = PhabricatorMetaMTAMailProperties::loadMailKey($receiver);
+
     $hash = PhabricatorObjectMailReceiver::computeMailHash(
-      $receiver->getMailKey(),
+      $mail_key,
       $user->getPHID());
     $domain = $this->getReplyHandlerDomain();
 

@@ -98,8 +98,11 @@ final class PhabricatorObjectMailReceiverTestCase
     if ($is_bad_hash) {
       $hash = PhabricatorObjectMailReceiver::computeMailHash('x', 'y');
     } else {
+
+      $mail_key = PhabricatorMetaMTAMailProperties::loadMailKey($task);
+
       $hash = PhabricatorObjectMailReceiver::computeMailHash(
-        $task->getMailKey(),
+        $mail_key,
         $is_public ? $task->getPHID() : $user->getPHID());
     }
 

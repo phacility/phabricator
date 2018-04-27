@@ -16,7 +16,7 @@ JX.behavior('harbormaster-log', function(config) {
 
     e.kill();
 
-    expand(e.getTarget(), true);
+    expand(e.getNode('harbormaster-log-expand'), true);
   });
 
   function expand(node, is_action) {

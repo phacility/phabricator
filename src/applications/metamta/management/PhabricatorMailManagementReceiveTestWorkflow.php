@@ -139,8 +139,10 @@ final class PhabricatorMailManagementReceiveTestWorkflow
         throw new Exception(pht("No such object '%s'!", $to));
       }
 
+      $mail_key = PhabricatorMetaMTAMailProperties::loadMailKey($object);
+
       $hash = PhabricatorObjectMailReceiver::computeMailHash(
-        $object->getMailKey(),
+        $mail_key,
         $user->getPHID());
 
       $header_content['to'] = $to.'+'.$user->getID().'+'.$hash.'@test.com';
