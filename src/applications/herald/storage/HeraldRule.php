@@ -254,6 +254,10 @@ final class HeraldRule extends HeraldDAO
     return 'H'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
 
 /* -(  Repetition Policies  )------------------------------------------------ */
 
