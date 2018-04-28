@@ -7,6 +7,7 @@ abstract class PhabricatorDocumentEngine
   private $highlightedLines = array();
   private $encodingConfiguration;
   private $highlightingConfiguration;
+  private $blameConfiguration = true;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -58,6 +59,19 @@ abstract class PhabricatorDocumentEngine
 
   final public function getHighlightingConfiguration() {
     return $this->highlightingConfiguration;
+  }
+
+  final public function setBlameConfiguration($blame_configuration) {
+    $this->blameConfiguration = $blame_configuration;
+    return $this;
+  }
+
+  final public function getBlameConfiguration() {
+    return $this->blameConfiguration;
+  }
+
+  final protected function getBlameEnabled() {
+    return $this->blameConfiguration;
   }
 
   public function shouldRenderAsync(PhabricatorDocumentRef $ref) {
