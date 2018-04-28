@@ -22,7 +22,7 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
     $is_proxy = $this->shouldProxy();
 
     if ($is_proxy) {
-      $command = $this->getProxyCommand();
+      $command = $this->getProxyCommand(false);
 
       if ($device) {
         $this->writeClusterEngineLogMessage(

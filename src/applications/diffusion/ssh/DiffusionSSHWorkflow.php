@@ -5,7 +5,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   private $args;
   private $repository;
   private $hasWriteAccess;
-  private $proxyURI;
+  private $shouldProxy;
   private $baseRequestPath;
 
   public function getRepository() {
@@ -69,18 +69,34 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return php_uname('n');
   }
 
-  protected function getTargetDeviceName() {
-    // TODO: This should use the correct device identity.
-    $uri = new PhutilURI($this->proxyURI);
-    return $uri->getDomain();
-  }
-
   protected function shouldProxy() {
-    return (bool)$this->proxyURI;
+    return $this->shouldProxy;
   }
 
-  protected function getProxyCommand() {
-    $uri = new PhutilURI($this->proxyURI);
+  protected function getProxyCommand($for_write) {
+    $viewer = $this->getSSHUser();
+    $repository = $this->getRepository();
+
+    $is_cluster_request = $this->getIsClusterRequest();
+
+    $uri = $repository->getAlmanacServiceURI(
+      $viewer,
+      array(
+        'neverProxy' => $is_cluster_request,
+        'protocols' => array(
+          'ssh',
+        ),
+        'writable' => $for_write,
+      ));
+
+    if (!$uri) {
+      throw new Exception(
+        pht(
+          'Failed to generate an intracluster proxy URI even though this '.
+          'request was routed as a proxy request.'));
+    }
+
+    $uri = new PhutilURI($uri);
 
     $username = AlmanacKeys::getClusterSSHUser();
     if ($username === null) {
@@ -148,17 +164,25 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     $repository = $this->identifyRepository();
     $this->setRepository($repository);
 
+    // NOTE: Here, we're just figuring out if this is a proxyable request to
+    // a clusterized repository or not. We don't (and can't) use the URI we get
+    // back directly.
+
+    // For example, we may get a read-only URI here but be handling a write
+    // request. We only care if we get back `null` (which means we should
+    // handle the request locally) or anything else (which means we should
+    // proxy it to an appropriate device).
+
     $is_cluster_request = $this->getIsClusterRequest();
     $uri = $repository->getAlmanacServiceURI(
       $viewer,
-      $is_cluster_request,
       array(
-        'ssh',
+        'neverProxy' => $is_cluster_request,
+        'protocols' => array(
+          'ssh',
+        ),
       ));
-
-    if ($uri) {
-      $this->proxyURI = $uri;
-    }
+    $this->shouldProxy = (bool)$uri;
 
     try {
       return $this->executeRepositoryOperations();

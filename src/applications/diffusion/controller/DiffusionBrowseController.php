@@ -4,7 +4,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private $lintCommit;
   private $lintMessages;
-  private $coverage;
   private $corpusButtons = array();
 
   public function shouldAllowPublic() {
@@ -182,7 +181,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
         $corpus = $this->buildGitLFSCorpus($lfs_ref);
       } else {
-        $this->coverage = $drequest->loadCoverage();
         $show_editor = true;
 
         $ref = id(new PhabricatorDocumentRef())

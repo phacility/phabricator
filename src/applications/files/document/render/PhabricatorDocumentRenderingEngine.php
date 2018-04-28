@@ -145,6 +145,17 @@ abstract class PhabricatorDocumentRenderingEngine
         'uri' => $ref->getBlameURI(),
         'value' => null,
       ),
+      'coverage' => array(
+        'labels' => array(
+          // TODO: Modularize this properly, see T13125.
+          array(
+            'C' => pht('Covered'),
+            'U' => pht('Not Covered'),
+            'N' => pht('Not Executable'),
+            'X' => pht('Not Reachable'),
+          ),
+        ),
+      ),
     );
 
     $view_button = id(new PHUIButtonView())

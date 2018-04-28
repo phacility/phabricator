@@ -697,22 +697,26 @@ ul.phui-oi-list-view .phui-oi-selectable
 
 .differential-revision-size .phui-icon-view {
   margin: 0 1px 0 1px;
-  font-size: smaller;
-  color: {$blueborder};
+  font-size: 7px;
+  position: relative;
+  top: -2px;
+  color: {$lightbluetext};
 }
 
 .differential-revision-large {
-  background: {$sh-redbackground};
+  background: {$sh-orangebackground};
 }
 
+/* NOTE: These are intentionally using nonstandard colors, see T13127. */
+
 .differential-revision-large .phui-icon-view {
-  color: {$red};
+  color: #e5ae7e;
 }
 
 .differential-revision-small {
-  background: {$sh-greenbackground};
+  background: #f2f7ff;
 }
 
 .differential-revision-small .phui-icon-view {
-  color: {$green};
+  color: #6699ba;
 }

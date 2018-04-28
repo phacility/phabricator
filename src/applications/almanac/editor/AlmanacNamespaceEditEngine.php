@@ -81,7 +81,7 @@ final class AlmanacNamespaceEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the namespace.'))
-        ->setTransactionType(AlmanacNamespaceTransaction::TYPE_NAME)
+        ->setTransactionType(AlmanacNamespaceNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );

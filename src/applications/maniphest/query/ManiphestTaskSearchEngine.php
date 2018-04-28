@@ -86,6 +86,10 @@ final class ManiphestTaskSearchEngine
           pht('Search for tasks with given subtypes.'))
         ->setDatasource(new ManiphestTaskSubtypeDatasource())
         ->setIsHidden($hide_subtypes),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Columns'))
+        ->setKey('columnPHIDs')
+        ->setAliases(array('column', 'columnPHID', 'columns')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Open Parents'))
         ->setKey('hasParents')
@@ -244,6 +248,10 @@ final class ManiphestTaskSearchEngine
 
     if ($map['subtaskIDs']) {
       $query->withSubtaskIDs($map['subtaskIDs']);
+    }
+
+    if ($map['columnPHIDs']) {
+      $query->withColumnPHIDs($map['columnPHIDs']);
     }
 
     $group = idx($map, 'group');

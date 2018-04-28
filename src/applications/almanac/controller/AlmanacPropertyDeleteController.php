@@ -39,8 +39,10 @@ final class AlmanacPropertyDeleteController
 
     $validation_exception = null;
     if ($request->isFormPost()) {
+      $xaction_type = $object->getAlmanacPropertyDeleteTransactionType();
+
       $xaction = $object->getApplicationTransactionTemplate()
-        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_REMOVE)
+        ->setTransactionType($xaction_type)
         ->setMetadataValue('almanac.property', $key);
 
       $editor = $object->getApplicationTransactionEditor()

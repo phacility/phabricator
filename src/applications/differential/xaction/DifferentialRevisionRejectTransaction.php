@@ -7,7 +7,7 @@ final class DifferentialRevisionRejectTransaction
   const ACTIONKEY = 'reject';
 
   protected function getRevisionActionLabel() {
-    return pht("Request Changes \xE2\x9C\x98");
+    return pht('Request Changes');
   }
 
   protected function getRevisionActionDescription(
@@ -73,7 +73,7 @@ final class DifferentialRevisionRejectTransaction
           'not own.'));
     }
 
-    if ($object->isDraft()) {
+    if ($object->isDraft() || !$object->getShouldBroadcast()) {
       throw new Exception(
         pht('You can not request changes to a draft revision.'));
     }

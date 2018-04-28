@@ -83,7 +83,10 @@
 .device-desktop .phui-navigation-shell .has-drag-nav .phabricator-nav-local {
   width: 310px;
   padding: 0;
-  background: transparent;
+
+  /* See PHI568. If we don't paint the background explicitly, the content can
+     render underneath it when scrolled horizontally. */
+  background: {$page.background};
 }
 
 .device-phone .phabricator-side-menu-home .phabricator-nav-content {

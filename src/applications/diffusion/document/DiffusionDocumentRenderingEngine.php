@@ -81,6 +81,11 @@ final class DiffusionDocumentRenderingEngine
     $ref
       ->setSymbolMetadata($this->getSymbolMetadata())
       ->setBlameURI($blame_uri);
+
+    $coverage = $drequest->loadCoverage();
+    if (strlen($coverage)) {
+      $ref->addCoverage($coverage);
+    }
   }
 
   private function getSymbolMetadata() {

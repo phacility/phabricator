@@ -36,7 +36,8 @@ final class PhabricatorProjectBoardViewController
 
     if ($request->isFormPost()
       && !$request->getBool('initialize')
-      && !$request->getStr('move')) {
+      && !$request->getStr('move')
+      && !$request->getStr('queryColumnID')) {
       $saved = $search_engine->buildSavedQueryFromRequest($request);
       $search_engine->saveQuery($saved);
       $filter_form = id(new AphrontFormView())
@@ -186,6 +187,46 @@ final class PhabricatorProjectBoardViewController
         ->setNavigation($nav)
         ->setCrumbs($crumbs)
         ->appendChild($content);
+    }
+
+    // If the user wants to turn a particular column into a query, build an
+    // apropriate filter and redirect them to the query results page.
+    $query_column_id = $request->getInt('queryColumnID');
+    if ($query_column_id) {
+      $column_id_map = mpull($columns, null, 'getID');
+      $query_column = idx($column_id_map, $query_column_id);
+      if (!$query_column) {
+        return new Aphront404Response();
+      }
+
+      // Create a saved query to combine the active filter on the workboard
+      // with the column filter. If the user currently has constraints on the
+      // board, we want to add a new column or project constraint, not
+      // completely replace the constraints.
+      $saved_query = clone $saved;
+
+      if ($query_column->getProxyPHID()) {
+        $project_phids = $saved_query->getParameter('projectPHIDs');
+        if (!$project_phids) {
+          $project_phids = array();
+        }
+        $project_phids[] = $query_column->getProxyPHID();
+        $saved_query->setParameter('projectPHIDs', $project_phids);
+      } else {
+        $saved_query->setParameter(
+          'columnPHIDs',
+          array($query_column->getPHID()));
+      }
+
+      $search_engine = id(new ManiphestTaskSearchEngine())
+        ->setViewer($viewer);
+      $search_engine->saveQuery($saved_query);
+
+      $query_key = $saved_query->getQueryKey();
+      $query_uri = new PhutilURI("/maniphest/query/{$query_key}/#R");
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($query_uri);
     }
 
     $task_can_edit_map = id(new PhabricatorPolicyFilter())
@@ -1069,8 +1110,14 @@ final class PhabricatorProjectBoardViewController
       ->setHref($batch_move_uri)
       ->setWorkflow(true);
 
-    // Column Related Actions Below
-    //
+    $query_uri = $request->getRequestURI();
+    $query_uri->setQueryParam('queryColumnID', $column->getID());
+
+    $column_items[] = id(new PhabricatorActionView())
+      ->setName(pht('View as Query'))
+      ->setIcon('fa-search')
+      ->setHref($query_uri);
+
     $edit_uri = 'board/'.$this->id.'/edit/'.$column->getID().'/';
     $column_items[] = id(new PhabricatorActionView())
       ->setName(pht('Edit Column'))

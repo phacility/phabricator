@@ -10,6 +10,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
   private $truncatedFirstLines = false;
   private $symbolMetadata;
   private $blameMap;
+  private $coverage = array();
 
   public function setLines(array $lines) {
     $this->lines = $lines;
@@ -59,6 +60,15 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this->blameMap;
   }
 
+  public function setCoverage(array $coverage) {
+    $this->coverage = $coverage;
+    return $this;
+  }
+
+  public function getCoverage() {
+    return $this->coverage;
+  }
+
   public function render() {
     $blame_map = $this->getBlameMap();
     $has_blame = ($blame_map !== null);
@@ -66,7 +76,6 @@ final class PhabricatorSourceCodeView extends AphrontView {
     require_celerity_resource('phabricator-source-code-view-css');
     require_celerity_resource('syntax-highlighting-css');
 
-    Javelin::initBehavior('phabricator-oncopy', array());
     if ($this->canClickHighlight) {
       Javelin::initBehavior('phabricator-line-linker');
     }
@@ -78,11 +87,11 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $lines = $this->lines;
     if ($this->truncatedFirstLines) {
       $lines[] = phutil_tag(
-          'span',
-          array(
-            'class' => 'c',
-          ),
-          pht('...'));
+        'span',
+        array(
+          'class' => 'c',
+        ),
+        pht('...'));
     } else if ($this->truncatedFirstBytes) {
       $last_key = last_key($lines);
       $lines[$last_key] = hsprintf(
@@ -97,13 +106,28 @@ final class PhabricatorSourceCodeView extends AphrontView {
     }
 
     $base_uri = (string)$this->uri;
-    foreach ($lines as $line) {
-      // NOTE: See phabricator-oncopy behavior.
-      $content_line = hsprintf("\xE2\x80\x8B%s", $line);
+    $wrote_anchor = false;
 
+    $coverage = $this->getCoverage();
+    $coverage_count = count($coverage);
+    $coverage_data = ipull($coverage, 'data');
+
+    // TODO: Modularize this properly, see T13125.
+    $coverage_map = array(
+      'C' => 'background: #66bbff;',
+      'U' => 'background: #dd8866;',
+      'N' => 'background: #ddeeff;',
+      'X' => 'background: #aa00aa;',
+    );
+
+    foreach ($lines as $line) {
       $row_attributes = array();
       if (isset($this->highlights[$line_number])) {
         $row_attributes['class'] = 'phabricator-source-highlight';
+        if (!$wrote_anchor) {
+          $row_attributes['id'] = 'phabricator-line-linker-anchor';
+          $wrote_anchor = true;
+        }
       }
 
       if ($this->canClickHighlight) {
@@ -117,8 +141,8 @@ final class PhabricatorSourceCodeView extends AphrontView {
           'a',
           array(
             'href' => $line_href,
-          ),
-          $line_number);
+            'data-n' => $line_number,
+          ));
       } else {
         $tag_number = phutil_tag(
           'span',
@@ -156,6 +180,25 @@ final class PhabricatorSourceCodeView extends AphrontView {
         $blame_cells = null;
       }
 
+      $coverage_cells = array();
+      foreach ($coverage as $coverage_idx => $coverage_spec) {
+        if (isset($coverage_spec['data'][$line_number - 1])) {
+          $coverage_char = $coverage_spec['data'][$line_number - 1];
+        } else {
+          $coverage_char = null;
+        }
+
+        $coverage_style = idx($coverage_map, $coverage_char, null);
+
+        $coverage_cells[] = phutil_tag(
+          'th',
+          array(
+            'class' => 'phabricator-source-coverage',
+            'style' => $coverage_style,
+            'data-coverage' => $coverage_idx.'/'.$coverage_char,
+          ));
+      }
+
       $rows[] = phutil_tag(
         'tr',
         $row_attributes,
@@ -172,8 +215,9 @@ final class PhabricatorSourceCodeView extends AphrontView {
             array(
               'class' => 'phabricator-source-code',
             ),
-            $content_line),
-          ));
+            $line),
+          $coverage_cells,
+        ));
 
       $line_number++;
     }

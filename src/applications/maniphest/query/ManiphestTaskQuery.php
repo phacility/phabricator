@@ -26,6 +26,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $closedEpochMin;
   private $closedEpochMax;
   private $closerPHIDs;
+  private $columnPHIDs;
 
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
@@ -210,6 +211,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withSubtypes(array $subtypes) {
     $this->subtypes = $subtypes;
+    return $this;
+  }
+
+  public function withColumnPHIDs(array $column_phids) {
+    $this->columnPHIDs = $column_phids;
     return $this;
   }
 
@@ -440,6 +446,91 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn,
         'task.subtype IN (%Ls)',
         $this->subtypes);
+    }
+
+
+    if ($this->columnPHIDs !== null) {
+      $viewer = $this->getViewer();
+
+      $columns = id(new PhabricatorProjectColumnQuery())
+        ->setParentQuery($this)
+        ->setViewer($viewer)
+        ->withPHIDs($this->columnPHIDs)
+        ->execute();
+      if (!$columns) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      // We must do board layout before we move forward because the column
+      // positions may not yet exist otherwise. An example is that newly
+      // created tasks may not yet be positioned in the backlog column.
+
+      $projects = mpull($columns, 'getProject');
+      $projects = mpull($projects, null, 'getPHID');
+
+      // The board layout engine needs to know about every object that it's
+      // going to be asked to do layout for. For now, we're just doing layout
+      // on every object on the boards. In the future, we could do layout on a
+      // smaller set of objects by using the constraints on this Query. For
+      // example, if the caller is only asking for open tasks, we only need
+      // to do layout on open tasks.
+
+      // This fetches too many objects (every type of object tagged with the
+      // project, not just tasks). We could narrow it by querying the edge
+      // table on the Maniphest side, but there's currently no way to build
+      // that query with EdgeQuery.
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array_keys($projects))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectProjectHasObjectEdgeType::EDGECONST,
+          ));
+
+      $edge_query->execute();
+      $all_phids = $edge_query->getDestinationPHIDs();
+
+      // Since we overfetched PHIDs, filter out any non-tasks we got back.
+      foreach ($all_phids as $key => $phid) {
+        if (phid_get_type($phid) !== ManiphestTaskPHIDType::TYPECONST) {
+          unset($all_phids[$key]);
+        }
+      }
+
+      // If there are no tasks on the relevant boards, this query can't
+      // possibly hit anything so we're all done.
+      $task_phids = array_fuse($all_phids);
+      if (!$task_phids) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      // We know everything we need to know, so perform board layout.
+      $engine = id(new PhabricatorBoardLayoutEngine())
+        ->setViewer($viewer)
+        ->setFetchAllBoards(true)
+        ->setBoardPHIDs(array_keys($projects))
+        ->setObjectPHIDs($task_phids)
+        ->executeLayout();
+
+      // Find the tasks that are in the constraint columns after board layout
+      // completes.
+      $select_phids = array();
+      foreach ($columns as $column) {
+        $in_column = $engine->getColumnObjectPHIDs(
+          $column->getProjectPHID(),
+          $column->getPHID());
+        foreach ($in_column as $phid) {
+          $select_phids[$phid] = $phid;
+        }
+      }
+
+      if (!$select_phids) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $where[] = qsprintf(
+        $conn,
+        'task.phid IN (%Ls)',
+        $select_phids);
     }
 
     return $where;

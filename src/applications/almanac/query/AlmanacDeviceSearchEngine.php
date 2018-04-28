@@ -25,6 +25,13 @@ final class AlmanacDeviceSearchEngine
         ->setLabel(pht('Exact Names'))
         ->setKey('names')
         ->setDescription(pht('Search for devices with specific names.')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Cluster Device'))
+        ->setKey('isClusterDevice')
+        ->setOptions(
+          pht('Both Cluster and Non-cluster Devices'),
+          pht('Cluster Devices Only'),
+          pht('Non-cluster Devices Only')),
     );
   }
 
@@ -37,6 +44,10 @@ final class AlmanacDeviceSearchEngine
 
     if ($map['names']) {
       $query->withNames($map['names']);
+    }
+
+    if ($map['isClusterDevice'] !== null) {
+      $query->withIsClusterDevice($map['isClusterDevice']);
     }
 
     return $query;

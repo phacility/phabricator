@@ -5,9 +5,22 @@ confirm() {
   read -e ignored
 }
 
-GIT='git'
+INSTALL_URI="   https://phurl.io/u/install"
 
-LTS="Ubuntu 10.04"
+failed() {
+  echo
+  echo
+  echo "Installation has failed."
+  echo "Text above this message might be useful to understanding what exactly failed."
+  echo
+  echo "Please follow this guide to manually complete installation:"
+  echo
+  echo $INSTALL_URI
+  echo
+  echo "We apologize for the inconvenience."
+  exit 3
+}
+
 ISSUE=`cat /etc/issue`
 if [[ $ISSUE != Ubuntu* ]]
 then
@@ -15,19 +28,12 @@ then
   echo "to be something else. Your results may vary.";
   echo
   confirm
-elif [[ `expr match "$ISSUE" "$LTS"` -eq ${#LTS} ]]
-then
-  GIT='git-core'
 fi
 
 echo "PHABRICATOR UBUNTU INSTALL SCRIPT";
-echo "This script will install Phabricator and all of its core dependencies.";
+echo "This script will install Apache, Phabricator and its core dependencies.";
 echo "Run it from the directory you want to install into.";
 echo
-
-ROOT=`pwd`
-echo "Phabricator will be installed to: ${ROOT}.";
-confirm
 
 echo "Testing sudo..."
 sudo true
@@ -37,31 +43,56 @@ then
   exit 1;
 fi;
 
-echo "Installing dependencies: git, apache, mysql, php...";
-echo
+echo 'Testing Ubuntu version...'
 
-set +x
+VERSION=`lsb_release -rs`
+MAJOR=`expr match "$VERSION" '\([0-9]*\)'`
 
-sudo apt-get -qq update
-sudo apt-get install \
-  $GIT mysql-server apache2 dpkg-dev \
-  php5 php5-mysqlnd php5-gd php5-dev php5-curl php-apc php5-cli php5-json
-
-# Enable mod_rewrite
-sudo a2enmod rewrite
-
-HAVEPCNTL=`php -r "echo extension_loaded('pcntl');"`
-if [ $HAVEPCNTL != "1" ]
+if [ "$MAJOR" -lt 16 ]
 then
-  echo "Installing pcntl...";
+  echo 'This script is intented to install on modern operating systems; Your '
+  echo 'operating system is too old for this script.'
+  echo 'You can still install Phabricator manually - please consult the installation'
+  echo 'guide to see how:'
   echo
-  apt-get source php5
-  PHP5=`ls -1F | grep '^php5-.*/$'`
-  (cd $PHP5/ext/pcntl && phpize && ./configure && make && sudo make install)
-else
-  echo "pcntl already installed";
+  echo $INSTALL_URI
+  echo
+  exit 2
 fi
 
+# Ubuntu 16.04 LTS only has php 7.0 in their repos, so they need this extra ppa.
+# Ubuntu 17.4 and up have official 7.2 builds.
+if [ "$MAJOR" -eq 16 ]
+then
+  echo 'This version of Ubuntu requires additional resources in order to install'
+  echo 'and run Phabricator.'
+  echo 'We will now add a the following package repository to your system:'
+  echo '  https://launchpad.net/~ondrej/+archive/ubuntu/php'
+  echo
+  echo 'This repository is generally considered safe to use.'
+  confirm
+
+  sudo add-apt-repository -y ppa:ondrej/php  || failed
+fi
+
+ROOT=`pwd`
+echo "Phabricator will be installed to: ${ROOT}.";
+confirm
+
+echo "Installing dependencies: git, apache, mysql, php...";
+echo
+sudo apt-get -qq update
+sudo apt-get install \
+  git mysql-server apache2 libapache2-mod-php \
+  php php-mysql php-gd php-curl php-apcu php-cli php-json php-mbstring \
+  || failed
+
+echo "Enabling mod_rewrite in Apache..."
+echo
+sudo a2enmod rewrite  || failed
+
+echo "Downloading Phabricator and dependencies..."
+echo
 if [ ! -e libphutil ]
 then
   git clone https://github.com/phacility/libphutil.git
@@ -89,4 +120,4 @@ echo "Install probably worked mostly correctly. Continue with the 'Configuration
 echo
 echo "    https://secure.phabricator.com/book/phabricator/article/configuration_guide/";
 echo
-echo "You can delete any php5-* stuff that's left over in this directory if you want.";
+echo 'Next step is "Configuring Apache webserver".'

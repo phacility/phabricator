@@ -29,7 +29,7 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
       ->setLog($this);
 
     if ($this->shouldProxy()) {
-      $command = $this->getProxyCommand();
+      $command = $this->getProxyCommand(true);
       $did_synchronize = false;
 
       if ($device) {

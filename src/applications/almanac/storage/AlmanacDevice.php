@@ -143,6 +143,14 @@ final class AlmanacDevice
     return new AlmanacDevicePropertyEditEngine();
   }
 
+  public function getAlmanacPropertySetTransactionType() {
+    return AlmanacDeviceSetPropertyTransaction::TRANSACTIONTYPE;
+  }
+
+  public function getAlmanacPropertyDeleteTransactionType() {
+    return AlmanacDeviceDeletePropertyTransaction::TRANSACTIONTYPE;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

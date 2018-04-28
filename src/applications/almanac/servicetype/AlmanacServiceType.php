@@ -60,6 +60,10 @@ abstract class AlmanacServiceType extends Phobject {
     return array();
   }
 
+  public function getBindingFieldSpecifications(AlmanacBinding $binding) {
+    return array();
+  }
+
   /**
    * List all available service type implementations.
    *

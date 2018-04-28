@@ -46,7 +46,13 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     $build = $target->getBuild();
     $viewer = $this->getViewer();
 
-    $target->setDateStarted(time());
+    // If this is the first time we're starting work on this target, mark the
+    // current time as the start time. If the target yields or waits, we may
+    // end up here again later, so we don't want to overwrite the start time if
+    // we already have a value.
+    if (!$target->getDateStarted()) {
+      $target->setDateStarted(PhabricatorTime::getNow());
+    }
 
     try {
       if ($target->getBuildGeneration() !== $build->getBuildGeneration()) {

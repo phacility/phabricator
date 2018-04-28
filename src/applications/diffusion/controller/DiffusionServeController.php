@@ -431,10 +431,13 @@ final class DiffusionServeController extends DiffusionController {
 
     $uri = $repository->getAlmanacServiceURI(
       $viewer,
-      $is_cluster_request,
       array(
-        'http',
-        'https',
+        'neverProxy' => $is_cluster_request,
+        'protocols' => array(
+          'http',
+          'https',
+        ),
+        'writable' => !$this->isReadOnlyRequest($repository),
       ));
     if ($uri) {
       $future = $this->getRequest()->newClusterProxyFuture($uri);

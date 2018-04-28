@@ -141,6 +141,15 @@ final class HarbormasterBuildable
 
     $build->save();
 
+    $steps = id(new HarbormasterBuildStepQuery())
+      ->setViewer($viewer)
+      ->withBuildPlanPHIDs(array($plan->getPHID()))
+      ->execute();
+
+    foreach ($steps as $step) {
+      $step->willStartBuild($viewer, $this, $build, $plan);
+    }
+
     PhabricatorWorker::scheduleTask(
       'HarbormasterBuildWorker',
       array(

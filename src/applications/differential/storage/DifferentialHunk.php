@@ -290,13 +290,23 @@ final class DifferentialHunk
     return array(self::DATAFORMAT_RAW, $data);
   }
 
+  public function getAutomaticDataFormat() {
+    // If the hunk is already stored deflated, just keep it deflated. This is
+    // mostly a performance improvement for "bin/differential migrate-hunk" so
+    // that we don't have to recompress all the stored hunks when looking for
+    // stray uncompressed hunks.
+    if ($this->dataFormat === self::DATAFORMAT_DEFLATED) {
+      return self::DATAFORMAT_DEFLATED;
+    }
+
+    list($format) = $this->formatDataForStorage($this->getRawData());
+
+    return $format;
+  }
+
   public function saveAsText() {
     $old_type = $this->getDataType();
     $old_data = $this->getData();
-
-    if ($old_type == self::DATATYPE_TEXT) {
-      return $this;
-    }
 
     $raw_data = $this->getRawData();
 
@@ -316,10 +326,6 @@ final class DifferentialHunk
   public function saveAsFile() {
     $old_type = $this->getDataType();
     $old_data = $this->getData();
-
-    if ($old_type == self::DATATYPE_FILE) {
-      return $this;
-    }
 
     $raw_data = $this->getRawData();
 
