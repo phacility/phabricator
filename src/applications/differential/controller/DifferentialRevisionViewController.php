@@ -153,9 +153,17 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $request_uri = $request->getRequestURI();
 
+    // Revisions with more than 100 files are "large".
+    // Revisions with more than 1000 files are "very large".
     $limit = 100;
     $large = $request->getStr('large');
-    if (count($changesets) > $limit && !$large) {
+
+    $large_warning =
+      (!$this->isVeryLargeDiff()) &&
+      (count($changesets) > $limit) &&
+      (!$large);
+
+    if ($large_warning) {
       $count = count($changesets);
       $warning = new PHUIInfoView();
       $warning->setTitle(pht('Large Diff'));
