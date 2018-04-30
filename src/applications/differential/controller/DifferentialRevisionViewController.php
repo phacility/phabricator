@@ -1,20 +1,41 @@
 <?php
 
-final class DifferentialRevisionViewController extends DifferentialController {
+final class DifferentialRevisionViewController
+  extends DifferentialController {
 
   private $revisionID;
-  private $veryLargeDiff;
+  private $changesetCount;
 
   public function shouldAllowPublic() {
     return true;
   }
 
+  public function isLargeDiff() {
+    return ($this->getChangesetCount() > $this->getLargeDiffLimit());
+  }
+
   public function isVeryLargeDiff() {
-    return $this->veryLargeDiff;
+    return ($this->getChangesetCount() > $this->getVeryLargeDiffLimit());
+  }
+
+  public function getLargeDiffLimit() {
+    return 100;
   }
 
   public function getVeryLargeDiffLimit() {
     return 1000;
+  }
+
+  public function getChangesetCount() {
+    if ($this->changesetCount === null) {
+      throw new PhutilInvalidStateException('setChangesetCount');
+    }
+    return $this->changesetCount;
+  }
+
+  public function setChangesetCount($count) {
+    $this->changesetCount = $count;
+    return $this;
   }
 
   public function handleRequest(AphrontRequest $request) {
@@ -82,9 +103,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         idx($diffs, $diff_vs),
         $repository);
 
-    if (count($rendering_references) > $this->getVeryLargeDiffLimit()) {
-      $this->veryLargeDiff = true;
-    }
+    $this->setChangesetCount(count($rendering_references));
 
     if ($request->getExists('download')) {
       return $this->buildRawDiffResponse(
@@ -153,18 +172,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $request_uri = $request->getRequestURI();
 
-    // Revisions with more than 100 files are "large".
-    // Revisions with more than 1000 files are "very large".
-    $limit = 100;
     $large = $request->getStr('large');
 
     $large_warning =
+      ($this->isLargeDiff()) &&
       (!$this->isVeryLargeDiff()) &&
-      (count($changesets) > $limit) &&
       (!$large);
 
     if ($large_warning) {
-      $count = count($changesets);
+      $count = $this->getChangesetCount();
+
       $warning = new PHUIInfoView();
       $warning->setTitle(pht('Large Diff'));
       $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
@@ -365,23 +382,33 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $other_view = $this->renderOtherRevisions($other_revisions);
     }
 
-    $this->buildPackageMaps($changesets);
-
     if ($this->isVeryLargeDiff()) {
       $toc_view = null;
+
+      // When rendering a "very large" diff, we skip computation of owners
+      // that own no files because it is significantly expensive and not very
+      // valuable.
+      foreach ($revision->getReviewers() as $reviewer) {
+        // Give each reviewer a dummy nonempty value so the UI does not render
+        // the "(Owns No Changed Paths)" note. If that behavior becomes more
+        // sophisticated in the future, this behavior might also need to.
+        $reviewer->attachChangesets($changesets);
+      }
     } else {
+      $this->buildPackageMaps($changesets);
+
       $toc_view = $this->buildTableOfContents(
         $changesets,
         $visible_changesets,
         $target->loadCoverageMap($viewer));
-    }
 
-    // Attach changesets to each reviewer so we can show which Owners package
-    // reviewers own no files.
-    foreach ($revision->getReviewers() as $reviewer) {
-      $reviewer_phid = $reviewer->getReviewerPHID();
-      $reviewer_changesets = $this->getPackageChangesets($reviewer_phid);
-      $reviewer->attachChangesets($reviewer_changesets);
+      // Attach changesets to each reviewer so we can show which Owners package
+      // reviewers own no files.
+      foreach ($revision->getReviewers() as $reviewer) {
+        $reviewer_phid = $reviewer->getReviewerPHID();
+        $reviewer_changesets = $this->getPackageChangesets($reviewer_phid);
+        $reviewer->attachChangesets($reviewer_changesets);
+      }
     }
 
     $tab_group = id(new PHUITabGroupView());
