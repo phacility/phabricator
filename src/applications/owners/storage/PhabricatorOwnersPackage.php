@@ -16,7 +16,6 @@ final class PhabricatorOwnersPackage
   protected $auditingEnabled;
   protected $autoReview;
   protected $description;
-  protected $mailKey;
   protected $status;
   protected $viewPolicy;
   protected $editPolicy;
@@ -122,7 +121,6 @@ final class PhabricatorOwnersPackage
         'name' => 'sort',
         'description' => 'text',
         'auditingEnabled' => 'bool',
-        'mailKey' => 'bytes20',
         'status' => 'text32',
         'autoReview' => 'text32',
         'dominion' => 'text32',
@@ -130,17 +128,8 @@ final class PhabricatorOwnersPackage
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorOwnersPackagePHIDType::TYPECONST);
-  }
-
-  public function save() {
-    if (!$this->getMailKey()) {
-      $this->setMailKey(Filesystem::readRandomCharacters(20));
-    }
-
-    return parent::save();
+  public function getPHIDType() {
+    return PhabricatorOwnersPackagePHIDType::TYPECONST;
   }
 
   public function isArchived() {
