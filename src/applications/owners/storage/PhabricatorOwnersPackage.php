@@ -20,6 +20,7 @@ final class PhabricatorOwnersPackage
   protected $viewPolicy;
   protected $editPolicy;
   protected $dominion;
+  protected $properties = array();
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -39,6 +40,8 @@ final class PhabricatorOwnersPackage
 
   const DOMINION_STRONG = 'strong';
   const DOMINION_WEAK = 'weak';
+
+  const PROPERTY_IGNORED = 'ignored';
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -117,6 +120,9 @@ final class PhabricatorOwnersPackage
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort',
         'description' => 'text',
@@ -137,8 +143,25 @@ final class PhabricatorOwnersPackage
   }
 
   public function getMustMatchUngeneratedPaths() {
-    // TODO: For now, there's no way to actually configure this.
-    return false;
+    $ignore_attributes = $this->getIgnoredPathAttributes();
+    return !empty($ignore_attributes['generated']);
+  }
+
+  public function getPackageProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setPackageProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getIgnoredPathAttributes() {
+    return $this->getPackageProperty(self::PROPERTY_IGNORED, array());
+  }
+
+  public function setIgnoredPathAttributes(array $attributes) {
+    return $this->setPackageProperty(self::PROPERTY_IGNORED, $attributes);
   }
 
   public function loadOwners() {
@@ -679,6 +702,10 @@ final class PhabricatorOwnersPackage
         ->setKey('dominion')
         ->setType('map<string, wild>')
         ->setDescription(pht('Dominion setting information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('ignored')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Ignored attribute information.')),
     );
   }
 
@@ -732,6 +759,13 @@ final class PhabricatorOwnersPackage
       'short' => $dominion_short,
     );
 
+    // Force this to always emit as a JSON object even if empty, never as
+    // a JSON list.
+    $ignored = $this->getIgnoredPathAttributes();
+    if (!$ignored) {
+      $ignored = (object)array();
+    }
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
@@ -740,6 +774,7 @@ final class PhabricatorOwnersPackage
       'review' => $review,
       'audit' => $audit,
       'dominion' => $dominion,
+      'ignored' => $ignored,
     );
   }
 
