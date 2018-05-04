@@ -827,16 +827,18 @@ final class DifferentialDiff
     DifferentialChangeset $changeset) {
 
     $is_generated_trusted = self::isTrustedGeneratedCode($changeset);
-
-    $changeset->setTrustedChangesetAttribute(
-      DifferentialChangeset::ATTRIBUTE_GENERATED,
-      $is_generated_trusted);
+    if ($is_generated_trusted) {
+      $changeset->setTrustedChangesetAttribute(
+        DifferentialChangeset::ATTRIBUTE_GENERATED,
+        $is_generated_trusted);
+    }
 
     $is_generated_untrusted = self::isUntrustedGeneratedCode($changeset);
-
-    $changeset->setUntrustedChangesetAttribute(
-      DifferentialChangeset::ATTRIBUTE_GENERATED,
-      $is_generated_untrusted);
+    if ($is_generated_untrusted) {
+      $changeset->setUntrustedChangesetAttribute(
+        DifferentialChangeset::ATTRIBUTE_GENERATED,
+        $is_generated_untrusted);
+    }
   }
 
   private static function isTrustedGeneratedCode(

@@ -147,9 +147,9 @@ final class PhabricatorOwnersPackage
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
-  public function setName($name) {
-    $this->name = $name;
-    return $this;
+  public function getMustMatchUngeneratedPaths() {
+    // TODO: For now, there's no way to actually configure this.
+    return false;
   }
 
   public function loadOwners() {
@@ -179,6 +179,82 @@ final class PhabricatorOwnersPackage
     }
 
     return self::loadPackagesForPaths($repository, $paths);
+  }
+
+  public static function loadAffectedPackagesForChangesets(
+    PhabricatorRepository $repository,
+    DifferentialDiff $diff,
+    array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
+
+    $paths_all = array();
+    $paths_ungenerated = array();
+
+    foreach ($changesets as $changeset) {
+      $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+
+      $paths_all[] = $path;
+
+      if (!$changeset->isGeneratedChangeset()) {
+        $paths_ungenerated[] = $path;
+      }
+    }
+
+    if (!$paths_all) {
+      return array();
+    }
+
+    $packages_all = self::loadAffectedPackages(
+      $repository,
+      $paths_all);
+
+    // If there are no generated changesets, we can't possibly need to throw
+    // away any packages for matching only generated paths. Just return the
+    // full set of packages.
+    if ($paths_ungenerated === $paths_all) {
+      return $packages_all;
+    }
+
+    $must_match_ungenerated = array();
+    foreach ($packages_all as $package) {
+      if ($package->getMustMatchUngeneratedPaths()) {
+        $must_match_ungenerated[] = $package;
+      }
+    }
+
+    // If no affected packages have the "Ignore Generated Paths" flag set, we
+    // can't possibly need to throw any away.
+    if (!$must_match_ungenerated) {
+      return $packages_all;
+    }
+
+    if ($paths_ungenerated) {
+      $packages_ungenerated = self::loadAffectedPackages(
+        $repository,
+        $paths_ungenerated);
+    } else {
+      $packages_ungenerated = array();
+    }
+
+    // We have some generated paths, and some packages that ignore generated
+    // paths. Take all the packages which:
+    //
+    //   - ignore generated paths; and
+    //   - didn't match any ungenerated paths
+    //
+    // ...and remove them from the list.
+
+    $must_match_ungenerated = mpull($must_match_ungenerated, null, 'getID');
+    $packages_ungenerated = mpull($packages_ungenerated, null, 'getID');
+    $packages_all = mpull($packages_all, null, 'getID');
+
+    foreach ($must_match_ungenerated as $package_id => $package) {
+      if (!isset($packages_ungenerated[$package_id])) {
+        unset($packages_all[$package_id]);
+      }
+    }
+
+    return $packages_all;
   }
 
   public static function loadOwningPackages($repository, $path) {
