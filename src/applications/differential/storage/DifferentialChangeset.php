@@ -12,7 +12,7 @@ final class DifferentialChangeset
   protected $awayPaths;
   protected $changeType;
   protected $fileType;
-  protected $metadata;
+  protected $metadata = array();
   protected $oldProperties;
   protected $newProperties;
   protected $addLines;
@@ -23,6 +23,11 @@ final class DifferentialChangeset
   private $diff = self::ATTACHABLE;
 
   const TABLE_CACHE = 'differential_changeset_parse_cache';
+
+  const METADATA_TRUSTED_ATTRIBUTES = 'attributes.trusted';
+  const METADATA_UNTRUSTED_ATTRIBUTES = 'attributes.untrusted';
+
+  const ATTRIBUTE_GENERATED = 'generated';
 
   protected function getConfiguration() {
     return array(
@@ -264,6 +269,90 @@ final class DifferentialChangeset
     }
 
     return null;
+  }
+
+  public function setChangesetMetadata($key, $value) {
+    if (!is_array($this->metadata)) {
+      $this->metadata = array();
+    }
+
+    $this->metadata[$key] = $value;
+
+    return $this;
+  }
+
+  public function getChangesetMetadata($key, $default = null) {
+    if (!is_array($this->metadata)) {
+      return $default;
+    }
+
+    return idx($this->metadata, $key, $default);
+  }
+
+  private function setInternalChangesetAttribute($trusted, $key, $value) {
+    if ($trusted) {
+      $meta_key = self::METADATA_TRUSTED_ATTRIBUTES;
+    } else {
+      $meta_key = self::METADATA_UNTRUSTED_ATTRIBUTES;
+    }
+
+    $attributes = $this->getChangesetMetadata($meta_key, array());
+    $attributes[$key] = $value;
+    $this->setChangesetMetadata($meta_key, $attributes);
+
+    return $this;
+  }
+
+  private function getInternalChangesetAttributes($trusted) {
+    if ($trusted) {
+      $meta_key = self::METADATA_TRUSTED_ATTRIBUTES;
+    } else {
+      $meta_key = self::METADATA_UNTRUSTED_ATTRIBUTES;
+    }
+
+    return $this->getChangesetMetadata($meta_key, array());
+  }
+
+  public function setTrustedChangesetAttribute($key, $value) {
+    return $this->setInternalChangesetAttribute(true, $key, $value);
+  }
+
+  public function getTrustedChangesetAttributes() {
+    return $this->getInternalChangesetAttributes(true);
+  }
+
+  public function getTrustedChangesetAttribute($key, $default = null) {
+    $map = $this->getTrustedChangesetAttributes();
+    return idx($map, $key, $default);
+  }
+
+  public function setUntrustedChangesetAttribute($key, $value) {
+    return $this->setInternalChangesetAttribute(false, $key, $value);
+  }
+
+  public function getUntrustedChangesetAttributes() {
+    return $this->getInternalChangesetAttributes(false);
+  }
+
+  public function getUntrustedChangesetAttribute($key, $default = null) {
+    $map = $this->getUntrustedChangesetAttributes();
+    return idx($map, $key, $default);
+  }
+
+  public function getChangesetAttributes() {
+    // Prefer trusted values over untrusted values when both exist.
+    return
+      $this->getTrustedChangesetAttributes() +
+      $this->getUntrustedChangesetAttributes();
+  }
+
+  public function getChangesetAttribute($key, $default = null) {
+    $map = $this->getChangesetAttributes();
+    return idx($map, $key, $default);
+  }
+
+  public function isGeneratedChangeset() {
+    return $this->getChangesetAttribute(self::ATTRIBUTE_GENERATED);
   }
 
 
