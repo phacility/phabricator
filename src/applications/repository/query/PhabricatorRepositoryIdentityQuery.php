@@ -6,6 +6,7 @@ final class PhabricatorRepositoryIdentityQuery
   private $ids;
   private $phids;
   private $identityNames;
+  private $hasEffectivePHID;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -22,9 +23,18 @@ final class PhabricatorRepositoryIdentityQuery
     return $this;
   }
 
+  public function withHasEffectivePHID($has_effective_phid) {
+    $this->hasEffectivePHID = $has_effective_phid;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorRepositoryIdentity();
   }
+
+  protected function getPrimaryTableAlias() {
+     return 'repository_identity';
+   }
 
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
@@ -36,15 +46,28 @@ final class PhabricatorRepositoryIdentityQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'repository_identity.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'repository_identity.phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->hasEffectivePHID !== null) {
+
+      if ($this->hasEffectivePHID) {
+        $where[] = qsprintf(
+          $conn,
+          'repository_identity.currentEffectiveUserPHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'repository_identity.currentEffectiveUserPHID IS NULL');
+      }
     }
 
     if ($this->identityNames !== null) {
@@ -55,7 +78,7 @@ final class PhabricatorRepositoryIdentityQuery
 
       $where[] = qsprintf(
         $conn,
-        'identityNameHash IN (%Ls)',
+        'repository_identity.identityNameHash IN (%Ls)',
         $name_hashes);
     }
 

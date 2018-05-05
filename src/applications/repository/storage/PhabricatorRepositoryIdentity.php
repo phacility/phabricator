@@ -1,12 +1,15 @@
 <?php
 
 final class PhabricatorRepositoryIdentity
-  extends PhabricatorRepositoryDAO {
+  extends PhabricatorRepositoryDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
+  protected $authorPHID;
   protected $identityNameHash;
   protected $identityNameRaw;
   protected $identityNameEncoding;
-
   protected $automaticGuessedUserPHID;
   protected $manuallySetUserPHID;
   protected $currentEffectiveUserPHID;
@@ -35,6 +38,81 @@ final class PhabricatorRepositoryIdentity
 
   public function getPHIDType() {
     return PhabricatorRepositoryIdentityPHIDType::TYPECONST;
+  }
+
+  public function setIdentityName($name_raw) {
+    $this->setIdentityNameRaw($name_raw);
+    $this->setIdentityNameHash(PhabricatorHash::digestForIndex($name_raw));
+    $this->setIdentityNameEncoding($this->detectEncodingForStorage($name_raw));
+
+    return $this;
+  }
+
+  public function getIdentityName() {
+    return $this->getUTF8StringFromStorage(
+      $this->getIdentityNameRaw(),
+      $this->getIdentityNameEncoding());
+  }
+
+  public function getIdentityShortName() {
+    // TODO
+    return $this->getIdentityName();
+  }
+
+  public function getURI() {
+    return '/diffusion/identity/view/'.$this->getID().'/';
+  }
+
+  public function save() {
+    if ($this->manuallySetUserPHID) {
+      $this->currentEffectiveUserPHID = $this->manuallySetUserPHID;
+    } else {
+      $this->currentEffectiveUserPHID = $this->automaticGuessedUserPHID;
+    }
+
+    return parent::save();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::getMostOpenPolicy();
+  }
+
+  public function hasAutomaticCapability(
+    $capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new DiffusionRepositoryIdentityEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorRepositoryIdentityTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 }

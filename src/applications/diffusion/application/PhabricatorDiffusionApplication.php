@@ -124,6 +124,15 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         '(?P<repositoryCallsign>[A-Z]+)' => $repository_routes,
         '(?P<repositoryID>[1-9]\d*)' => $repository_routes,
 
+        'identity/' => array(
+          $this->getQueryRoutePattern() =>
+            'DiffusionIdentityListController',
+          $this->getEditRoutePattern('edit/') =>
+            'DiffusionIdentityEditController',
+          'view/(?P<id>[^/]+)/' =>
+            'DiffusionIdentityViewController',
+        ),
+
         'inline/' => array(
           'edit/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
           'preview/(?P<phid>[^/]+)/'

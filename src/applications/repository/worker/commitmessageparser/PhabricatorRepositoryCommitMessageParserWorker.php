@@ -66,6 +66,34 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $committer = $ref->getCommitter();
     $hashes = $ref->getHashes();
 
+    $author_identity = id(new PhabricatorRepositoryIdentityQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIdentityNames(array($author))
+      ->executeOne();
+
+    if (!$author_identity) {
+      $author_identity = id(new PhabricatorRepositoryIdentity())
+        ->setAuthorPHID($commit->getPHID())
+        ->setIdentityName($author)
+        ->setAutomaticGuessedUserPHID(
+          $this->resolveUserPHID($commit, $author))
+        ->save();
+    }
+
+    $committer_identity = id(new PhabricatorRepositoryIdentityQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIdentityNames(array($committer))
+      ->executeOne();
+
+    if (!$committer_identity) {
+      $committer_identity = id(new PhabricatorRepositoryIdentity())
+        ->setAuthorPHID($commit->getPHID())
+        ->setIdentityName($committer)
+        ->setAutomaticGuessedUserPHID(
+          $this->resolveUserPHID($commit, $committer))
+        ->save();
+    }
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
