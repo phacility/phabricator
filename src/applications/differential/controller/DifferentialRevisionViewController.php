@@ -182,25 +182,31 @@ final class DifferentialRevisionViewController
     if ($large_warning) {
       $count = $this->getChangesetCount();
 
-      $warning = new PHUIInfoView();
-      $warning->setTitle(pht('Large Diff'));
-      $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
-      $warning->appendChild(hsprintf(
-        '%s <strong>%s</strong>',
+      $expand_uri = $request_uri
+        ->alter('large', 'true')
+        ->setFragment('toc');
+
+      $message = array(
         pht(
-          'This diff is large and affects %s files. '.
-          'You may load each file individually or ',
+          'This large diff affects %s files. Files without inline '.
+          'comments have been collapsed.',
           new PhutilNumber($count)),
+        ' ',
         phutil_tag(
-          'a',
-          array(
-            'class' => 'button button-grey',
-            'href' => $request_uri
-              ->alter('large', 'true')
-              ->setFragment('toc'),
-          ),
-          pht('Show All Files Inline'))));
-      $warning = $warning->render();
+          'strong',
+          array(),
+          phutil_tag(
+            'a',
+            array(
+              'href' => $expand_uri,
+            ),
+            pht('Expand All Files'))),
+      );
+
+      $warning = id(new PHUIInfoView())
+        ->setTitle(pht('Large Diff'))
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->appendChild($message);
 
       $old = array_select_keys($changesets, $old_ids);
       $new = array_select_keys($changesets, $new_ids);
