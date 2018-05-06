@@ -106,6 +106,14 @@ EOTEXT
       ),
       'meta_data' => array(
         'buildTargetPHID' => $build_target->getPHID(),
+
+        // See PHI611. These are undocumented secret magic.
+        'phabricator:build:id' => (int)$build->getID(),
+        'phabricator:build:url' =>
+          PhabricatorEnv::getProductionURI($build->getURI()),
+        'phabricator:buildable:id' => (int)$buildable->getID(),
+        'phabricator:buildable:url' =>
+          PhabricatorEnv::getProductionURI($buildable->getURI()),
       ),
     );
 

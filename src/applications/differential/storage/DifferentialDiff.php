@@ -226,6 +226,8 @@ final class DifferentialDiff
       $changeset->setAddLines($add_lines);
       $changeset->setDelLines($del_lines);
 
+      self::detectGeneratedCode($changeset);
+
       $diff->addUnsavedChangeset($changeset);
     }
     $diff->setLineCount($lines);
@@ -821,5 +823,50 @@ final class DifferentialDiff
     );
   }
 
+  private static function detectGeneratedCode(
+    DifferentialChangeset $changeset) {
+
+    $is_generated_trusted = self::isTrustedGeneratedCode($changeset);
+    if ($is_generated_trusted) {
+      $changeset->setTrustedChangesetAttribute(
+        DifferentialChangeset::ATTRIBUTE_GENERATED,
+        $is_generated_trusted);
+    }
+
+    $is_generated_untrusted = self::isUntrustedGeneratedCode($changeset);
+    if ($is_generated_untrusted) {
+      $changeset->setUntrustedChangesetAttribute(
+        DifferentialChangeset::ATTRIBUTE_GENERATED,
+        $is_generated_untrusted);
+    }
+  }
+
+  private static function isTrustedGeneratedCode(
+    DifferentialChangeset $changeset) {
+
+    $filename = $changeset->getFilename();
+
+    $paths = PhabricatorEnv::getEnvConfig('differential.generated-paths');
+    foreach ($paths as $regexp) {
+      if (preg_match($regexp, $filename)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private static function isUntrustedGeneratedCode(
+    DifferentialChangeset $changeset) {
+
+    if ($changeset->getHunks()) {
+      $new_data = $changeset->makeNewFile();
+      if (strpos($new_data, '@'.'generated') !== false) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
 }

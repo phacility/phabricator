@@ -585,7 +585,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         'task.ownerPHID IS NOT NULL');
     }
 
-    if ($this->ownerPHIDs) {
+    if ($this->ownerPHIDs !== null) {
       $subclause[] = qsprintf(
         $conn,
         'task.ownerPHID IN (%Ls)',

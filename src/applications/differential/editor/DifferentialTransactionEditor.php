@@ -7,10 +7,12 @@ final class DifferentialTransactionEditor
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
   private $didExpandInlineState = false;
-  private $affectedPaths;
   private $firstBroadcast = false;
   private $wasBroadcasting;
   private $isDraftDemotion;
+
+  private $ownersDiff;
+  private $ownersChangesets;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -968,13 +970,20 @@ final class DifferentialTransactionEditor
       return array();
     }
 
-    if (!$this->affectedPaths) {
+    $diff = $this->ownersDiff;
+    $changesets = $this->ownersChangesets;
+
+    $this->ownersDiff = null;
+    $this->ownersChangesets = null;
+
+    if (!$changesets) {
       return array();
     }
 
-    $packages = PhabricatorOwnersPackage::loadAffectedPackages(
+    $packages = PhabricatorOwnersPackage::loadAffectedPackagesForChangesets(
       $repository,
-      $this->affectedPaths);
+      $diff,
+      $changesets);
     if (!$packages) {
       return array();
     }
@@ -1255,9 +1264,12 @@ final class DifferentialTransactionEditor
       $paths[] = $path_prefix.'/'.$changeset->getFilename();
     }
 
-    // Save the affected paths; we'll use them later to query Owners. This
-    // uses the un-expanded paths.
-    $this->affectedPaths = $paths;
+    // If this change affected paths, save the changesets so we can apply
+    // Owners rules to them later.
+    if ($paths) {
+      $this->ownersDiff = $diff;
+      $this->ownersChangesets = $changesets;
+    }
 
     // Mark this as also touching all parent paths, so you can see all pending
     // changes to any file within a directory.

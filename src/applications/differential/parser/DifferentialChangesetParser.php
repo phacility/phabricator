@@ -542,6 +542,12 @@ final class DifferentialChangesetParser extends Phobject {
     PhutilEventEngine::dispatchEvent($event);
 
     $generated = $event->getValue('is_generated');
+
+    $attribute = $this->changeset->isGeneratedChangeset();
+    if ($attribute) {
+      $generated = true;
+    }
+
     $this->specialAttributes[self::ATTR_GENERATED] = $generated;
   }
 

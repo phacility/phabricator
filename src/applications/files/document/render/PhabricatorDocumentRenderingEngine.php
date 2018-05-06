@@ -69,6 +69,9 @@ abstract class PhabricatorDocumentRenderingEngine
       $engine->setHighlightingConfiguration($highlight_setting);
     }
 
+    $blame_setting = ($request->getStr('blame') !== 'off');
+    $engine->setBlameConfiguration($blame_setting);
+
     $views = array();
     foreach ($engines as $candidate_key => $candidate_engine) {
       $label = $candidate_engine->getViewAsLabel($ref);
@@ -103,6 +106,8 @@ abstract class PhabricatorDocumentRenderingEngine
     $config = array(
       'controlID' => $control_id,
     );
+
+    $this->willStageRef($ref);
 
     if ($engine->shouldRenderAsync($ref)) {
       $content = $engine->newLoadingContent($ref);
@@ -142,7 +147,11 @@ abstract class PhabricatorDocumentRenderingEngine
         'value' => $highlight_setting,
       ),
       'blame' => array(
+        'icon' => 'fa-backward',
+        'hide' => pht('Hide Blame'),
+        'show' => pht('Show Blame'),
         'uri' => $ref->getBlameURI(),
+        'enabled' => $blame_setting,
         'value' => null,
       ),
       'coverage' => array(
@@ -180,6 +189,7 @@ abstract class PhabricatorDocumentRenderingEngine
   }
 
   final public function newRenderResponse(PhabricatorDocumentRef $ref) {
+    $this->willStageRef($ref);
     $this->willRenderRef($ref);
 
     $request = $this->getRequest();
@@ -206,6 +216,9 @@ abstract class PhabricatorDocumentRenderingEngine
     if (strlen($highlight_setting)) {
       $engine->setHighlightingConfiguration($highlight_setting);
     }
+
+    $blame_setting = ($request->getStr('blame') !== 'off');
+    $engine->setBlameConfiguration($blame_setting);
 
     try {
       $content = $engine->newDocument($ref);
@@ -311,6 +324,10 @@ abstract class PhabricatorDocumentRenderingEngine
   protected function addApplicationCrumbs(
     PHUICrumbsView $crumbs,
     PhabricatorDocumentRef $ref = null) {
+    return;
+  }
+
+  protected function willStageRef(PhabricatorDocumentRef $ref) {
     return;
   }
 
