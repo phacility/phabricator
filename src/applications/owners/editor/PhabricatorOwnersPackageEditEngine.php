@@ -162,13 +162,17 @@ EOTEXT
         ->setIsConduitOnly(true)
         ->setValue($object->getStatus())
         ->setOptions($object->getStatusNameMap()),
-      id(new PhabricatorStringListEditField())
+      id(new PhabricatorCheckboxesEditField())
         ->setKey('ignored')
         ->setLabel(pht('Ignored Attributes'))
         ->setDescription(pht('Ignore paths with any of these attributes.'))
         ->setTransactionType(
           PhabricatorOwnersPackageIgnoredTransaction::TRANSACTIONTYPE)
-        ->setValue(array_keys($object->getIgnoredPathAttributes())),
+        ->setValue(array_keys($object->getIgnoredPathAttributes()))
+        ->setOptions(
+          array(
+            'generated' => pht('Ignore generated files (review only).'),
+          )),
       id(new PhabricatorConduitEditField())
         ->setKey('paths.set')
         ->setLabel(pht('Paths'))
