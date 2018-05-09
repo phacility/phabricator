@@ -38,4 +38,20 @@ final class PhabricatorPasteLanguageTransaction
       $this->renderLanguageValue($this->getNewValue()));
   }
 
+  public function validateTransactions($object, array $xactions) {
+    $errors = array();
+
+    foreach ($xactions as $xaction) {
+      $new = $xaction->getNewValue();
+
+      if ($new !== null && !strlen($new)) {
+        $errors[] = $this->newInvalidError(
+          pht('Paste language must be null or a nonempty string.'),
+          $xaction);
+      }
+    }
+
+    return $errors;
+  }
+
 }
