@@ -6,6 +6,9 @@ final class PhabricatorRepositoryIdentityQuery
   private $ids;
   private $phids;
   private $identityNames;
+  private $emailAddress;
+  private $assigneePHIDs;
+  private $identityNameLike;
   private $hasEffectivePHID;
 
   public function withIDs(array $ids) {
@@ -20,6 +23,21 @@ final class PhabricatorRepositoryIdentityQuery
 
   public function withIdentityNames(array $names) {
     $this->identityNames = $names;
+    return $this;
+  }
+
+  public function withIdentityNameLike($name_like) {
+    $this->identityNameLike = $name_like;
+    return $this;
+  }
+
+  public function withEmailAddress($address) {
+    $this->emailAddress = $address;
+    return $this;
+  }
+
+  public function withAssigneePHIDs(array $assignees) {
+    $this->assigneePHIDs = $assignees;
     return $this;
   }
 
@@ -57,8 +75,14 @@ final class PhabricatorRepositoryIdentityQuery
         $this->phids);
     }
 
-    if ($this->hasEffectivePHID !== null) {
+    if ($this->assigneePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'repository_identity.currentEffectiveUserPHID IN (%Ls)',
+        $this->assigneePHIDs);
+    }
 
+    if ($this->hasEffectivePHID !== null) {
       if ($this->hasEffectivePHID) {
         $where[] = qsprintf(
           $conn,
@@ -80,6 +104,21 @@ final class PhabricatorRepositoryIdentityQuery
         $conn,
         'repository_identity.identityNameHash IN (%Ls)',
         $name_hashes);
+    }
+
+    if ($this->emailAddress !== null) {
+      $identity_style = "<{$this->emailAddress}>";
+      $where[] = qsprintf(
+        $conn,
+        'repository_identity.identityNameRaw LIKE %<',
+        $identity_style);
+    }
+
+    if ($this->identityNameLike != null) {
+      $where[] = qsprintf(
+        $conn,
+        'repository_identity.identityNameRaw LIKE %~',
+        $this->identityNameLike);
     }
 
     return $where;

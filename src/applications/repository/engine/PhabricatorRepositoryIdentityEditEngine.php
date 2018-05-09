@@ -75,7 +75,7 @@ final class PhabricatorRepositoryIdentityEditEngine
 
   protected function buildCustomEditFields($object) {
     return array(
-      id(new PhabricatorUsersEditField())
+      id(new DiffusionIdentityAssigneeEditField())
         ->setKey('manuallySetUserPHID')
         ->setLabel(pht('Assigned To'))
         ->setDescription(pht('Override this identity\'s assignment.'))

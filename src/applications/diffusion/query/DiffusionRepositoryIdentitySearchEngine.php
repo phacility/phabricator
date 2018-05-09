@@ -17,6 +17,14 @@ final class DiffusionRepositoryIdentitySearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new DiffusionIdentityAssigneeSearchField())
+        ->setLabel(pht('Assigned To'))
+        ->setKey('assignee')
+        ->setDescription(pht('Search for identities by assignee.')),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Identity Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for identities by substring.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Is Assigned'))
         ->setKey('hasEffectivePHID')
@@ -32,6 +40,14 @@ final class DiffusionRepositoryIdentitySearchEngine
 
     if ($map['hasEffectivePHID'] !== null) {
       $query->withHasEffectivePHID($map['hasEffectivePHID']);
+    }
+
+    if ($map['match'] !== null) {
+      $query->withIdentityNameLike($map['match']);
+    }
+
+    if ($map['assignee']) {
+      $query->withAssigneePHIDs($map['assignee']);
     }
 
     return $query;

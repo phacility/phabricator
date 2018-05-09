@@ -104,13 +104,13 @@ final class DiffusionIdentityViewController
     }
     $properties->addProperty(
       pht('Effective User'),
-      $viewer->renderHandle($effective_phid));
+      $this->buildPropertyValue($effective_phid));
     $properties->addProperty(
       pht('Automatically Detected User'),
-      $viewer->renderHandle($automatic_phid));
+      $this->buildPropertyValue($automatic_phid));
     $properties->addProperty(
       pht('Manually Set User'),
-      $viewer->renderHandle($manual_phid));
+      $this->buildPropertyValue($manual_phid));
 
     $header = id(new PHUIHeaderView())
       ->setHeader(array(pht('Identity Assignments'), $tag));
@@ -119,5 +119,17 @@ final class DiffusionIdentityViewController
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
+  }
+
+  private function buildPropertyValue($value) {
+    $viewer = $this->getViewer();
+
+    if ($value == DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN) {
+      return phutil_tag('em', array(), pht('Explicitly Unassigned'));
+    } else if (!$value) {
+      return null;
+    } else {
+      return $viewer->renderHandle($value);
+    }
   }
 }

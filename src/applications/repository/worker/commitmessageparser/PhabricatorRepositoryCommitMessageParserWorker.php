@@ -110,6 +110,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $data->setCommitDetail('authorEmail', $ref->getAuthorEmail());
 
     $data->setCommitDetail(
+      'authorIdentityPHID', $author_identity->getPHID());
+    $data->setCommitDetail(
       'authorPHID',
       $this->resolveUserPHID($commit, $author));
 
@@ -124,6 +126,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $data->setCommitDetail(
         'committerPHID',
         $this->resolveUserPHID($commit, $committer));
+      $data->setCommitDetail(
+        'committerIdentityPHID', $committer_identity->getPHID());
     }
 
     $repository = $this->repository;
@@ -160,6 +164,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     if ($author_phid != $commit->getAuthorPHID()) {
       $commit->setAuthorPHID($author_phid);
     }
+
+    $commit->setAuthorIdentityPHID($author_identity->getPHID());
+    $commit->setCommitterIdentityPHID($committer_identity->getPHID());
 
     $commit->setSummary($data->getSummary());
     $commit->save();

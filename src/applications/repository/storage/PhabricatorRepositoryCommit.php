@@ -21,6 +21,8 @@ final class PhabricatorRepositoryCommit
 
   protected $repositoryID;
   protected $phid;
+  protected $authorIdentityPHID;
+  protected $committerIdentityPHID;
   protected $commitIdentifier;
   protected $epoch;
   protected $mailKey;
@@ -113,6 +115,8 @@ final class PhabricatorRepositoryCommit
         'commitIdentifier' => 'text40',
         'mailKey' => 'bytes20',
         'authorPHID' => 'phid?',
+        'authorIdentityPHID' => 'phid?',
+        'committerIdentityPHID' => 'phid?',
         'auditStatus' => 'uint32',
         'summary' => 'text255',
         'importStatus' => 'uint32',

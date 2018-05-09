@@ -21,23 +21,33 @@ final class PhabricatorRepositoryIdentityAssignTransaction
       return pht(
         '%s assigned this identity to %s.',
         $this->renderAuthor(),
-        $this->renderHandle($new));
+        $this->renderIdentityHandle($new));
     } else if (!$new) {
       return pht(
         '%s removed %s as the assignee of this identity.',
         $this->renderAuthor(),
-        $this->renderHandle($old));
+        $this->renderIdentityHandle($old));
     } else {
       return pht(
         '%s changed the assigned user for this identity from %s to %s.',
         $this->renderAuthor(),
-        $this->renderHandle($old),
-        $this->renderHandle($new));
+        $this->renderIdentityHandle($old),
+        $this->renderIdentityHandle($new));
+    }
+  }
+
+  private function renderIdentityHandle($handle) {
+    $unassigned_token = DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN;
+    if ($handle === $unassigned_token) {
+      return phutil_tag('em', array(), pht('Explicitly Unassigned'));
+    } else {
+      return $this->renderHandle($handle);
     }
   }
 
   public function validateTransactions($object, array $xactions) {
     $errors = array();
+    $unassigned_token = DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN;
 
     foreach ($xactions as $xaction) {
       $old = $xaction->getOldValue();
@@ -47,6 +57,10 @@ final class PhabricatorRepositoryIdentityAssignTransaction
       }
 
       if ($new === $old) {
+        continue;
+      }
+
+      if ($new === $unassigned_token) {
         continue;
       }
 
