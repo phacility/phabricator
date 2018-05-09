@@ -8,6 +8,7 @@ final class PHUICrumbView extends AphrontView {
   private $isLastCrumb;
   private $workflow;
   private $aural;
+  private $alwaysVisible;
 
   public function setAural($aural) {
     $this->aural = $aural;
@@ -16,6 +17,22 @@ final class PHUICrumbView extends AphrontView {
 
   public function getAural() {
     return $this->aural;
+  }
+
+  /**
+   * Make this crumb always visible, even on devices where it would normally
+   * be hidden.
+   *
+   * @param bool True to make the crumb always visible.
+   * @return this
+   */
+  public function setAlwaysVisible($always_visible) {
+    $this->alwaysVisible = $always_visible;
+    return $this;
+  }
+
+  public function getAlwaysVisible() {
+    return $this->alwaysVisible;
   }
 
   public function setWorkflow($workflow) {
@@ -96,6 +113,10 @@ final class PHUICrumbView extends AphrontView {
         ->addClass('phui-crumb-view');
     } else {
       $classes[] = 'phabricator-last-crumb';
+    }
+
+    if ($this->getAlwaysVisible()) {
+      $classes[] = 'phui-crumb-always-visible';
     }
 
     $tag = javelin_tag(
