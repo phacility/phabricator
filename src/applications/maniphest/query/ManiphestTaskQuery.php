@@ -73,6 +73,10 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   public function withOwners(array $owners) {
+    if ($owners === array()) {
+      throw new Exception(pht('Empty withOwners() constraint is not valid.'));
+    }
+
     $no_owner = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
     $any_owner = PhabricatorPeopleAnyOwnerDatasource::FUNCTION_TOKEN;
 
@@ -88,7 +92,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         break;
       }
     }
-    $this->ownerPHIDs = $owners;
+
+    if ($owners) {
+      $this->ownerPHIDs = $owners;
+    }
+
     return $this;
   }
 
