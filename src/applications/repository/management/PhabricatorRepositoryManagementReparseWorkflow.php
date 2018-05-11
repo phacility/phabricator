@@ -6,7 +6,7 @@ final class PhabricatorRepositoryManagementReparseWorkflow
   protected function didConstruct() {
     $this
       ->setName('reparse')
-      ->setExamples('**reparse** [options] __repository__')
+      ->setExamples('**reparse** [options] __commit__')
       ->setSynopsis(
         pht(
           '**reparse** __what__ __which_parts__ [--trace] [--force]'."\n\n".
