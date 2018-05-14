@@ -516,7 +516,7 @@ final class ManiphestTaskSearchEngine
     );
 
     if (ManiphestTaskPoints::getIsEnabled()) {
-      $fields[] = id(new PhabricatorIntExportField())
+      $fields[] = id(new PhabricatorDoubleExportField())
         ->setKey('points')
         ->setLabel('Points');
     }

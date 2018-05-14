@@ -22,9 +22,13 @@ final class DiffusionCommitQuery
   private $epochMin;
   private $epochMax;
   private $importing;
+  private $ancestorsOf;
 
   private $needCommitData;
   private $needDrafts;
+
+  private $mustFilterRefs = false;
+  private $refRepository;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -92,7 +96,7 @@ final class DiffusionCommitQuery
   }
 
   public function withRepositoryIDs(array $repository_ids) {
-    $this->repositoryIDs = $repository_ids;
+    $this->repositoryIDs = array_unique($repository_ids);
     return $this;
   }
 
@@ -149,6 +153,11 @@ final class DiffusionCommitQuery
 
   public function withImporting($importing) {
     $this->importing = $importing;
+    return $this;
+  }
+
+  public function withAncestorsOf(array $refs) {
+    $this->ancestorsOf = $refs;
     return $this;
   }
 
@@ -307,6 +316,54 @@ final class DiffusionCommitQuery
   protected function didFilterPage(array $commits) {
     $viewer = $this->getViewer();
 
+    if ($this->mustFilterRefs) {
+      // If this flag is set, the query has an "Ancestors Of" constraint and
+      // at least one of the constraining refs had too many ancestors for us
+      // to apply the constraint with a big "commitIdentifier IN (%Ls)" clause.
+      // We're going to filter each page and hope we get a full result set
+      // before the query overheats.
+
+      $ancestor_list = mpull($commits, 'getCommitIdentifier');
+      $ancestor_list = array_values($ancestor_list);
+
+      foreach ($this->ancestorsOf as $ref) {
+        try {
+          $ancestor_list = DiffusionQuery::callConduitWithDiffusionRequest(
+            $viewer,
+            DiffusionRequest::newFromDictionary(
+              array(
+                'repository' => $this->refRepository,
+                'user' => $viewer,
+              )),
+            'diffusion.internal.ancestors',
+            array(
+              'ref' => $ref,
+              'commits' => $ancestor_list,
+            ));
+        } catch (ConduitClientException $ex) {
+          throw new PhabricatorSearchConstraintException(
+            $ex->getMessage());
+        }
+
+        if (!$ancestor_list) {
+          break;
+        }
+      }
+
+      $ancestor_list = array_fuse($ancestor_list);
+      foreach ($commits as $key => $commit) {
+        $identifier = $commit->getCommitIdentifier();
+        if (!isset($ancestor_list[$identifier])) {
+          $this->didRejectResult($commit);
+          unset($commits[$key]);
+        }
+      }
+
+      if (!$commits) {
+        return $commits;
+      }
+    }
+
     if ($this->needCommitData) {
       $data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
         'commitID in (%Ld)',
@@ -362,6 +419,95 @@ final class DiffusionCommitQuery
         $repository_ids = array_merge($repository_ids, $this->repositoryIDs);
       }
       $this->withRepositoryIDs($repository_ids);
+    }
+
+    if ($this->ancestorsOf !== null) {
+      if (count($this->repositoryIDs) !== 1) {
+        throw new PhabricatorSearchConstraintException(
+          pht(
+            'To search for commits which are ancestors of particular refs, '.
+            'you must constrain the search to exactly one repository.'));
+      }
+
+      $repository_id = head($this->repositoryIDs);
+      $history_limit = $this->getRawResultLimit() * 32;
+      $viewer = $this->getViewer();
+
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($repository_id))
+        ->executeOne();
+
+      if (!$repository) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      if ($repository->isSVN()) {
+        throw new PhabricatorSearchConstraintException(
+          pht(
+            'Subversion does not support searching for ancestors of '.
+            'a particular ref. This operation is not meaningful in '.
+            'Subversion.'));
+      }
+
+      if ($repository->isHg()) {
+        throw new PhabricatorSearchConstraintException(
+          pht(
+            'Mercurial does not currently support searching for ancestors of '.
+            'a particular ref.'));
+      }
+
+      $can_constrain = true;
+      $history_identifiers = array();
+      foreach ($this->ancestorsOf as $key => $ref) {
+        try {
+          $raw_history = DiffusionQuery::callConduitWithDiffusionRequest(
+            $viewer,
+            DiffusionRequest::newFromDictionary(
+              array(
+                'repository' => $repository,
+                'user' => $viewer,
+              )),
+            'diffusion.historyquery',
+            array(
+              'commit' => $ref,
+              'limit' => $history_limit,
+            ));
+        } catch (ConduitClientException $ex) {
+          throw new PhabricatorSearchConstraintException(
+            $ex->getMessage());
+        }
+
+        $ref_identifiers = array();
+        foreach ($raw_history['pathChanges'] as $change) {
+          $ref_identifiers[] = $change['commitIdentifier'];
+        }
+
+        // If this ref had fewer total commits than the limit, we're safe to
+        // apply the constraint as a large `IN (...)` query for a list of
+        // commit identifiers. This is efficient.
+        if ($history_limit) {
+          if (count($ref_identifiers) >= $history_limit) {
+            $can_constrain = false;
+            break;
+          }
+        }
+
+        $history_identifiers += array_fuse($ref_identifiers);
+      }
+
+      // If all refs had a small number of ancestors, we can just put the
+      // constraint into the query here and we're done. Otherwise, we need
+      // to filter each page after it comes out of the MySQL layer.
+      if ($can_constrain) {
+        $where[] = qsprintf(
+          $conn,
+          'commit.commitIdentifier IN (%Ls)',
+          $history_identifiers);
+      } else {
+        $this->mustFilterRefs = true;
+        $this->refRepository = $repository;
+      }
     }
 
     if ($this->ids !== null) {

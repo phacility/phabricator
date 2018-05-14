@@ -364,7 +364,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     if (!strlen($name)) {
       $name = $this->getName();
       $name = phutil_utf8_strtolower($name);
-      $name = preg_replace('@[/ -:<>]+@', '-', $name);
+      $name = preg_replace('@[ -/:->]+@', '-', $name);
       $name = trim($name, '-');
       if (!strlen($name)) {
         $name = $this->getCallsign();

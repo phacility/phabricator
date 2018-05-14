@@ -132,6 +132,21 @@ behavior. If you want more powerful auditing behavior, you can use Herald to
 write more sophisticated rules.
 
 
+Ignored Attributes
+==================
+
+You can automatically exclude certain types of files, like generated files,
+with **Ignored Attributes**.
+
+When a package is marked as ignoring files with a particular attribute, and
+a file in a particular change has that attribute, the file will be ignored when
+computing ownership.
+
+(This feature is currently rough, only works for Differential revisions, and
+may not always compute the correct set of owning packages in some complex
+cases where it interacts with dominion rules.)
+
+
 Files in Multiple Packages
 ==========================
 

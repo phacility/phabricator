@@ -34,6 +34,20 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
     return 'aphront-form-control-checkbox';
   }
 
+  public function setOptions(array $options) {
+    $boxes = array();
+    foreach ($options as $key => $value) {
+      $boxes[] = array(
+        'value' => $key,
+        'label' => $value,
+      );
+    }
+
+    $this->boxes = $boxes;
+
+    return $this;
+  }
+
   protected function renderInput() {
     $rows = array();
     foreach ($this->boxes as $box) {
@@ -41,14 +55,28 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
       if ($id === null) {
         $id = celerity_generate_unique_node_id();
       }
+
+      $name = idx($box, 'name');
+      if ($name === null) {
+        $name = $this->getName().'[]';
+      }
+
+      $value = $box['value'];
+
+      if (array_key_exists('checked', $box)) {
+        $checked = $box['checked'];
+      } else {
+        $checked = in_array($value, $this->getValue());
+      }
+
       $checkbox = phutil_tag(
         'input',
         array(
           'id' => $id,
           'type' => 'checkbox',
-          'name' => $box['name'],
+          'name' => $name,
           'value' => $box['value'],
-          'checked' => $box['checked'] ? 'checked' : null,
+          'checked' => $checked ? 'checked' : null,
           'disabled' => $this->getDisabled() ? 'disabled' : null,
         ));
       $label = phutil_tag(
