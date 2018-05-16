@@ -7,6 +7,7 @@ final class DifferentialChangesetEngine extends Phobject {
 
     foreach ($changesets as $changeset) {
       $this->detectGeneratedCode($changeset);
+      $this->computeHashes($changeset);
     }
 
     $this->detectCopiedCode($changesets);
@@ -56,6 +57,30 @@ final class DifferentialChangesetEngine extends Phobject {
     }
 
     return false;
+  }
+
+
+/* -(  Content Hashes  )----------------------------------------------------- */
+
+
+  private function computeHashes(DifferentialChangeset $changeset) {
+
+    $effect_key = DifferentialChangeset::METADATA_EFFECT_HASH;
+
+    $effect_hash = $this->newEffectHash($changeset);
+    if ($effect_hash !== null) {
+      $changeset->setChangesetMetadata($effect_key, $effect_hash);
+    }
+  }
+
+  private function newEffectHash(DifferentialChangeset $changeset) {
+
+    if ($changeset->getHunks()) {
+      $new_data = $changeset->makeNewFile();
+      return PhabricatorHash::digestForIndex($new_data);
+    }
+
+    return null;
   }
 
 

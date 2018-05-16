@@ -82,6 +82,10 @@ final class PhabricatorDifferentialRebuildChangesetsWorkflow
       id(new DifferentialChangesetEngine())
         ->rebuildChangesets($changesets);
 
+      foreach ($changesets as $changeset) {
+        $changeset->save();
+      }
+
       echo tsprintf(
         "%s\n",
         pht('Done.'));
