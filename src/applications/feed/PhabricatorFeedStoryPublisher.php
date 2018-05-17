@@ -12,6 +12,7 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
   private $mailRecipientPHIDs = array();
   private $notifyAuthor;
   private $mailTags = array();
+  private $unexpandablePHIDs = array();
 
   public function setMailTags(array $mail_tags) {
     $this->mailTags = $mail_tags;
@@ -44,6 +45,15 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
   public function setPrimaryObjectPHID($phid) {
     $this->primaryObjectPHID = $phid;
     return $this;
+  }
+
+  public function setUnexpandablePHIDs(array $unexpandable_phids) {
+    $this->unexpandablePHIDs = $unexpandable_phids;
+    return $this;
+  }
+
+  public function getUnexpandablePHIDs() {
+    return $this->unexpandablePHIDs;
   }
 
   public function setStoryType($story_type) {
@@ -254,10 +264,36 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
   }
 
   private function expandRecipients(array $phids) {
-    return id(new PhabricatorMetaMTAMemberQuery())
+    $expanded_phids = id(new PhabricatorMetaMTAMemberQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs($phids)
       ->executeExpansion();
+
+    // Filter out unexpandable PHIDs from the results. The typical case for
+    // this is that resigned reviewers should not be notified just because
+    // they are a member of some project or package reviewer.
+
+    $original_map = array_fuse($phids);
+    $unexpandable_map = array_fuse($this->unexpandablePHIDs);
+
+    foreach ($expanded_phids as $key => $phid) {
+      // We can keep this expanded PHID if it was present originally.
+      if (isset($original_map[$phid])) {
+        continue;
+      }
+
+      // We can also keep it if it isn't marked as unexpandable.
+      if (!isset($unexpandable_map[$phid])) {
+        continue;
+      }
+
+      // If it's unexpandable and we produced it by expanding recipients,
+      // throw it away.
+      unset($expanded_phids[$key]);
+    }
+    $expanded_phids = array_values($expanded_phids);
+
+    return $expanded_phids;
   }
 
   /**

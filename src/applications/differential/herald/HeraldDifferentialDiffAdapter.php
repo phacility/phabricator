@@ -53,14 +53,12 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
     }
   }
 
-  public function getRepetitionOptions() {
-    return array(
-      HeraldRepetitionPolicyConfig::FIRST,
-    );
-  }
-
   public function getHeraldName() {
     return pht('New Diff');
+  }
+
+  public function supportsWebhooks() {
+    return false;
   }
 
 }

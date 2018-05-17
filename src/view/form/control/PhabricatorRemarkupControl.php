@@ -72,6 +72,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'autocomplete' => 1,
         ));
 
+    $phriction_datasource = new PhrictionDocumentDatasource();
+    $phurl_datasource = new PhabricatorPhurlURLDatasource();
+
     Javelin::initBehavior(
       'phabricator-remarkup-assist',
       array(
@@ -117,6 +120,28 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
               '-',
               '/',
             ),
+          ),
+          91 => array( // "["
+            'datasourceURI' => $phriction_datasource->getDatasourceURI(),
+            'headerIcon' => 'fa-book',
+            'headerText' => pht('Find Document:'),
+            'hintText' => $phriction_datasource->getPlaceholderText(),
+            'cancel' => array(
+              ':', // Cancel on "http:" and similar.
+              '|',
+              ']',
+            ),
+            'prefix' => '^\\[',
+          ),
+          40 => array( // "("
+            'datasourceURI' => $phurl_datasource->getDatasourceURI(),
+            'headerIcon' => 'fa-compress',
+            'headerText' => pht('Find Phurl:'),
+            'hintText' => $phurl_datasource->getPlaceholderText(),
+            'cancel' => array(
+              ')',
+            ),
+            'prefix' => '^\\(',
           ),
         ),
       ));

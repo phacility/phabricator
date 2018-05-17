@@ -57,10 +57,6 @@ abstract class PhabricatorApplication
 
   abstract public function getName();
 
-  public function getMenuName() {
-    return $this->getName();
-  }
-
   public function getShortDescription() {
     return pht('%s Application', $this->getName());
   }
@@ -618,8 +614,12 @@ abstract class PhabricatorApplication
       ')?';
   }
 
-  protected function getQueryRoutePattern($base = null) {
+  protected function getBulkRoutePattern($base = null) {
     return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
+  }
+
+  protected function getQueryRoutePattern($base = null) {
+    return $base.'(?:query/(?P<queryKey>[^/]+)/(?:(?P<queryAction>[^/]+)/)?)?';
   }
 
   protected function getProfileMenuRouting($controller) {

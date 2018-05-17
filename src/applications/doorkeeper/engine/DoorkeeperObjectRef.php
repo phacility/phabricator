@@ -107,6 +107,13 @@ final class DoorkeeperObjectRef extends Phobject {
       pht('External Object'));
   }
 
+  public function getShortName() {
+    return coalesce(
+      $this->getAttribute('shortname'),
+      $this->getAttribute('name'),
+      pht('External Object'));
+  }
+
   public function getObjectKey() {
     if (!$this->objectKey) {
       $this->objectKey = PhabricatorHash::digestForIndex(

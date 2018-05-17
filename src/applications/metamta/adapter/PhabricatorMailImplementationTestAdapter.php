@@ -7,10 +7,26 @@
 final class PhabricatorMailImplementationTestAdapter
   extends PhabricatorMailImplementationAdapter {
 
-  private $guts = array();
-  private $config;
+  const ADAPTERTYPE = 'test';
 
-  public function __construct(array $config = array()) {
+  private $guts = array();
+  private $config = array();
+
+  protected function validateOptions(array $options) {
+    PhutilTypeSpec::checkMap(
+      $options,
+      array());
+  }
+
+  public function newDefaultOptions() {
+    return array();
+  }
+
+  public function newLegacyOptions() {
+    return array();
+  }
+
+  public function prepareForSend(array $config = array()) {
     $this->config = $config;
   }
 

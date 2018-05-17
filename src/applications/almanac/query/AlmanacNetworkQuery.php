@@ -5,6 +5,7 @@ final class AlmanacNetworkQuery
 
   private $ids;
   private $phids;
+  private $names;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -18,6 +19,11 @@ final class AlmanacNetworkQuery
 
   public function newResultObject() {
     return new AlmanacNetwork();
+  }
+
+  public function withNames(array $names) {
+    $this->names = $names;
+    return $this;
   }
 
   public function withNameNgrams($ngrams) {
@@ -45,6 +51,13 @@ final class AlmanacNetworkQuery
         $conn,
         'network.phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->names !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'network.name IN (%Ls)',
+        $this->names);
     }
 
     return $where;

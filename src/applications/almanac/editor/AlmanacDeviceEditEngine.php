@@ -30,7 +30,8 @@ final class AlmanacDeviceEditEngine
   }
 
   protected function newObjectQuery() {
-    return new AlmanacDeviceQuery();
+    return id(new AlmanacDeviceQuery())
+      ->needProperties(true);
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -80,7 +81,7 @@ final class AlmanacDeviceEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the device.'))
-        ->setTransactionType(AlmanacDeviceTransaction::TYPE_NAME)
+        ->setTransactionType(AlmanacDeviceNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );

@@ -99,24 +99,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return pht('%s created this room.', $author);
   }
 
-  /**
-   * We really only need a read lock if we have a comment. In that case, we
-   * must update the messagesCount field on the conpherence and
-   * seenMessagesCount(s) for the participant(s).
-   */
-  protected function shouldReadLock(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $lock = false;
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-        $lock =  true;
-        break;
-    }
-
-    return $lock;
-  }
 
   protected function applyBuiltinInternalTransaction(
     PhabricatorLiskDAO $object,
@@ -227,11 +209,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         '%s sent you a message.',
         $this->getActor()->getUserName());
     }
-    $phid = $object->getPHID();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("Z{$id}: {$title}")
-      ->addHeader('Thread-Topic', "Z{$id}: {$phid}");
+      ->setSubject("Z{$id}: {$title}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {

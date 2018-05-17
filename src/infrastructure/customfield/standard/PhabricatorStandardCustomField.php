@@ -496,5 +496,8 @@ abstract class PhabricatorStandardCustomField
     return $this->getFieldValue();
   }
 
+  public function newExportData() {
+    return $this->getFieldValue();
+  }
 
 }

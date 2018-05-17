@@ -5,6 +5,7 @@
  *           javelin-dom
  *           javelin-util
  *           phabricator-prefab
+ *           phuix-form-control-view
  * @provides owners-path-editor
  * @javelin
  */
@@ -23,12 +24,13 @@ JX.install('OwnersPathEditor', {
       JX.bind(this, this._onaddpath));
 
     this._count = 0;
-    this._repositories = config.repositories;
     this._inputTemplate = config.input_template;
+    this._repositoryTokenizerSpec = config.repositoryTokenizerSpec;
 
     this._completeURI = config.completeURI;
     this._validateURI = config.validateURI;
-    this._repositoryDefaultPaths = config.repositoryDefaultPaths;
+    this._icons = config.icons;
+    this._modeOptions = config.modeOptions;
 
     this._initializePaths(config.pathRefs);
   },
@@ -37,12 +39,6 @@ JX.install('OwnersPathEditor', {
      * MultirowRowManager for controlling add/remove behavior
      */
     _rowManager : null,
-
-    /*
-     * Array of objects with 'name' and 'repo_id' keys for
-     * selecting the repository of a path.
-     */
-    _repositories : null,
 
     /*
      * How many rows have been created, for form name generation.
@@ -66,8 +62,8 @@ JX.install('OwnersPathEditor', {
      * default for future rows.
      */
     _lastRepositoryChoice : null,
-
-    _repositoryDefaultPaths : null,
+    _icons: null,
+    _modeOptions: null,
 
     /*
      * Initialize with 0 or more rows.
@@ -88,69 +84,35 @@ JX.install('OwnersPathEditor', {
     addPath : function(path_ref) {
       // Smart default repository. See _lastRepositoryChoice.
       if (path_ref) {
-        this._lastRepositoryChoice = path_ref.repositoryPHID;
+        this._lastRepositoryChoice = path_ref.repositoryValue;
+      } else {
+        path_ref = {
+          repositoryValue: this._lastRepositoryChoice || {}
+        };
       }
-      path_ref = path_ref || {};
 
-      var selected_repository = path_ref.repositoryPHID ||
-        this._lastRepositoryChoice;
-      var options = this._buildRepositoryOptions(selected_repository);
-      var attrs = {
-        name : 'repo[' + this._count + ']',
-        className : 'owners-repo'
-      };
-      var repo_select = JX.$N('select', attrs, options);
-
-      JX.DOM.listen(repo_select, 'change', null, JX.bind(this, function() {
-        this._lastRepositoryChoice = repo_select.value;
-      }));
-
-      var repo_cell = JX.$N('td', {}, repo_select);
-      var typeahead_cell = JX.$N(
-        'td',
-        JX.$H(this._inputTemplate));
-
-      // Text input for path.
-      var path_input = JX.DOM.find(typeahead_cell, 'input');
-      JX.copy(
-        path_input,
-        {
-          value : path_ref.path || '',
-          name : 'path[' + this._count + ']'
-        });
-
-      // The Typeahead requires a display div called hardpoint.
-      var hardpoint = JX.DOM.find(
-        typeahead_cell,
-        'div',
-        'typeahead-hardpoint');
-
-      var error_display = JX.$N(
-        'div',
-        {
-          className : 'error-display validating'
-        },
-        'Validating...');
-
-      var error_display_cell = JX.$N('td', {}, error_display);
-
-      var exclude = JX.Prefab.renderSelect(
-        {'0' : 'Include', '1' : 'Exclude'},
-        path_ref.excluded,
-        {name : 'exclude[' + this._count + ']'});
-      var exclude_cell = JX.$N('td', {}, exclude);
+      var repo = this._newRepoCell(path_ref.repositoryValue);
+      var path = this._newPathCell(path_ref.display);
+      var icon = this._newIconCell();
+      var mode_cell = this._newModeCell(path_ref.excluded);
 
       var row = this._rowManager.addRow(
-        [exclude_cell, repo_cell, typeahead_cell, error_display_cell]);
+        [
+          mode_cell,
+          repo.cell,
+          path.cell,
+          icon.cell
+        ]);
 
       new JX.PathTypeahead({
-        repositoryDefaultPaths : this._repositoryDefaultPaths,
-        repo_select : repo_select,
-        path_input : path_input,
-        hardpoint : hardpoint,
-        error_display : error_display,
+        repositoryTokenizer: repo.tokenizer,
+        path_input : path.input,
+        hardpoint : path.hardpoint,
+        error_display : icon.cell,
         completeURI : this._completeURI,
-        validateURI : this._validateURI}).start();
+        validateURI : this._validateURI,
+        icons: this._icons
+      }).start();
 
       this._count++;
       return row;
@@ -161,20 +123,109 @@ JX.install('OwnersPathEditor', {
       this.addPath();
     },
 
-    /**
-     * Helper to build the options for the repository choice dropdown.
-     */
-    _buildRepositoryOptions : function(selected) {
-      var repos = this._repositories;
-      var result = [];
-      for (var k in repos) {
-        var attr = {
-          value : k,
-          selected : (selected == k)
-        };
-        result.push(JX.$N('option', attr, repos[k]));
+    _newModeCell: function(value) {
+      var options = this._modeOptions;
+
+      var name = 'exclude[' + this._count + ']';
+
+      var control = JX.Prefab.renderSelect(options, value, {name: name});
+
+      return JX.$N(
+        'td',
+        {
+          className: 'owners-path-mode-control'
+        },
+        control);
+    },
+
+    _newRepoCell: function(value) {
+      var repo_control = new JX.PHUIXFormControl()
+        .setControl('tokenizer', this._repositoryTokenizerSpec)
+        .setValue(value);
+
+      var repo_tokenizer = repo_control.getTokenizer();
+      var name = 'repo[' + this._count + ']';
+
+      function get_phid() {
+        var phids = repo_control.getValue();
+        if (!phids.length) {
+          return null;
+        }
+
+        return phids[0];
       }
-      return result;
+
+      var input = JX.$N(
+        'input',
+        {
+          type: 'hidden',
+          name: name,
+          value: get_phid()
+        });
+
+      repo_tokenizer.listen('change', JX.bind(this, function() {
+        this._lastRepositoryChoice = repo_tokenizer.getTokens();
+
+        input.value = get_phid();
+      }));
+
+      var cell = JX.$N(
+        'td',
+        {
+          className: 'owners-path-repo-control'
+        },
+        [
+          repo_control.getRawInputNode(),
+          input
+        ]);
+
+      return {
+        cell: cell,
+        tokenizer: repo_tokenizer
+      };
+    },
+
+    _newPathCell: function(value) {
+      var path_cell = JX.$N(
+        'td',
+        {
+          className: 'owners-path-path-control'
+        },
+        JX.$H(this._inputTemplate));
+
+      var path_input = JX.DOM.find(path_cell, 'input');
+
+      JX.copy(
+        path_input,
+        {
+          value: value || '',
+          name: 'path[' + this._count + ']'
+        });
+
+      var hardpoint = JX.DOM.find(
+        path_cell,
+        'div',
+        'typeahead-hardpoint');
+
+      return {
+        cell: path_cell,
+        input: path_input,
+        hardpoint: hardpoint
+      };
+    },
+
+    _newIconCell: function() {
+      var cell = JX.$N(
+        'td',
+        {
+          className: 'owners-path-icon-control'
+        });
+
+      return {
+        cell: cell
+      };
     }
+
   }
+
 });

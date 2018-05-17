@@ -59,4 +59,8 @@ final class PhrictionDocumentMoveAwayTransaction
     return 'fa-arrows';
   }
 
+  public function shouldHideForFeed() {
+    return true;
+  }
+
 }

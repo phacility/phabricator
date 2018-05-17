@@ -6,6 +6,8 @@
 class PhabricatorApplicationTransactionFeedStory
   extends PhabricatorFeedStory {
 
+  private $primaryTransactionPHID;
+
   public function getPrimaryObjectPHID() {
     return $this->getValue('objectPHID');
   }
@@ -27,7 +29,36 @@ class PhabricatorApplicationTransactionFeedStory
   }
 
   protected function getPrimaryTransactionPHID() {
-    return head($this->getValue('transactionPHIDs'));
+    if ($this->primaryTransactionPHID === null) {
+      // Transactions are filtered and sorted before they're stored, but the
+      // rendering logic can change between the time an edit occurs and when
+      // we actually render the story. Recalculate the filtering at display
+      // time because it's cheap and gets us better results when things change
+      // by letting the changes apply retroactively.
+
+      $xaction_phids = $this->getValue('transactionPHIDs');
+
+      $xactions = array();
+      foreach ($xaction_phids as $xaction_phid) {
+        $xactions[] = $this->getObject($xaction_phid);
+      }
+
+      foreach ($xactions as $key => $xaction) {
+        if ($xaction->shouldHideForFeed()) {
+          unset($xactions[$key]);
+        }
+      }
+
+      if ($xactions) {
+        $primary_phid = head($xactions)->getPHID();
+      } else {
+        $primary_phid = head($xaction_phids);
+      }
+
+      $this->primaryTransactionPHID = $primary_phid;
+    }
+
+    return $this->primaryTransactionPHID;
   }
 
   public function getPrimaryTransaction() {

@@ -34,26 +34,21 @@ final class AlmanacInterfaceDeleteController
     }
 
     if ($request->isFormPost()) {
-      $type_interface = AlmanacDeviceTransaction::TYPE_INTERFACE;
+      $type_destroy = AlmanacInterfaceDestroyTransaction::TRANSACTIONTYPE;
 
       $xactions = array();
 
-      $v_old = array(
-        'id' => $interface->getID(),
-      ) + $interface->toAddress()->toDictionary();
+      $xactions[] = $interface->getApplicationTransactionTemplate()
+        ->setTransactionType($type_destroy)
+        ->setNewValue(true);
 
-      $xactions[] = id(new AlmanacDeviceTransaction())
-        ->setTransactionType($type_interface)
-        ->setOldValue($v_old)
-        ->setNewValue(null);
-
-      $editor = id(new AlmanacDeviceEditor())
+      $editor = id(new AlmanacInterfaceEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true);
 
-      $editor->applyTransactions($device, $xactions);
+      $editor->applyTransactions($interface, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($device_uri);
     }

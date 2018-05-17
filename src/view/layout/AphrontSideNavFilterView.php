@@ -30,6 +30,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $mainID;
   private $isProfileMenu;
   private $footer = array();
+  private $width;
 
   public function setMenuID($menu_id) {
     $this->menuID = $menu_id;
@@ -79,6 +80,11 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function setCollapsed($collapsed) {
     $this->collapsed = $collapsed;
+    return $this;
+  }
+
+  public function setWidth($width) {
+    $this->width = $width;
     return $this;
   }
 
@@ -216,6 +222,24 @@ final class AphrontSideNavFilterView extends AphrontView {
     $local_menu = null;
     $main_id = $this->getMainID();
 
+    $width = $this->width;
+    if ($width) {
+      $width = min($width, 600);
+      $width = max($width, 150);
+    } else {
+      $width = null;
+    }
+
+    if ($width && !$this->collapsed) {
+      $width_drag_style = 'left: '.$width.'px';
+      $width_panel_style = 'width: '.$width.'px';
+      $width_margin_style = 'margin-left: '.($width + 7).'px';
+    } else {
+      $width_drag_style = null;
+      $width_panel_style = null;
+      $width_margin_style = null;
+    }
+
     if ($this->flexible) {
       $drag_id = celerity_generate_unique_node_id();
       $flex_bar = phutil_tag(
@@ -223,6 +247,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         array(
           'class' => 'phabricator-nav-drag',
           'id' => $drag_id,
+          'style' => $width_drag_style,
         ),
         '');
     } else {
@@ -238,14 +263,14 @@ final class AphrontSideNavFilterView extends AphrontView {
         $nav_classes[] = 'has-local-nav';
       }
 
-      $local_menu =
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'phabricator-nav-local phabricator-side-menu',
-            'id'    => $local_id,
-          ),
-          $this->menu->setID($this->getMenuID()));
+      $local_menu = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-nav-local phabricator-side-menu',
+          'id' => $local_id,
+          'style' => $width_panel_style,
+        ),
+        $this->menu->setID($this->getMenuID()));
     }
 
     $crumbs = null;
@@ -264,12 +289,13 @@ final class AphrontSideNavFilterView extends AphrontView {
       Javelin::initBehavior(
         'phabricator-nav',
         array(
-          'mainID'        => $main_id,
-          'localID'       => $local_id,
-          'dragID'        => $drag_id,
-          'contentID'     => $content_id,
-          'backgroundID'  => $background_id,
-          'collapsed'     => $this->collapsed,
+          'mainID' => $main_id,
+          'localID' => $local_id,
+          'dragID' => $drag_id,
+          'contentID' => $content_id,
+          'backgroundID' => $background_id,
+          'collapsed' => $this->collapsed,
+          'width' => $width,
         ));
 
       if ($this->active) {
@@ -297,6 +323,7 @@ final class AphrontSideNavFilterView extends AphrontView {
           array(
             'class' => 'phabricator-nav-content plb',
             'id' => $content_id,
+            'style' => $width_margin_style,
           ),
           array(
             $crumbs,

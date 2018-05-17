@@ -183,6 +183,10 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->audits);
   }
 
+  public function hasAttachedAudits() {
+    return ($this->audits !== self::ATTACHABLE);
+  }
+
   public function loadAndAttachAuditAuthority(
     PhabricatorUser $viewer,
     $actor_phid = null) {
@@ -412,28 +416,6 @@ final class PhabricatorRepositoryCommit
     return $repository->formatCommitName($identifier, $local = true);
   }
 
-  public function renderAuthorLink($handles) {
-    $author_phid = $this->getAuthorPHID();
-    if ($author_phid && isset($handles[$author_phid])) {
-      return $handles[$author_phid]->renderLink();
-    }
-
-    return $this->renderAuthorShortName($handles);
-  }
-
-  public function renderAuthorShortName($handles) {
-    $author_phid = $this->getAuthorPHID();
-    if ($author_phid && isset($handles[$author_phid])) {
-      return $handles[$author_phid]->getName();
-    }
-
-    $data = $this->getCommitData();
-    $name = $data->getAuthorName();
-
-    $parsed = new PhutilEmailAddress($name);
-    return nonempty($parsed->getDisplayName(), $parsed->getAddress());
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -513,10 +495,6 @@ final class PhabricatorRepositoryCommit
     return $this->getRepository()->getPHID();
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getPHID();
-  }
-
   public function getBuildVariables() {
     $results = array();
 
@@ -543,6 +521,10 @@ final class PhabricatorRepositoryCommit
       'repository.uri' =>
         pht('The URI to clone or checkout the repository from.'),
     );
+  }
+
+  public function newBuildableEngine() {
+    return new DiffusionBuildableEngine();
   }
 
 
@@ -657,7 +639,8 @@ final class PhabricatorRepositoryCommit
   public function isAutomaticallySubscribed($phid) {
 
     // TODO: This should also list auditors, but handling that is a bit messy
-    // right now because we are not guaranteed to have the data.
+    // right now because we are not guaranteed to have the data. (It should not
+    // include resigned auditors.)
 
     return ($phid == $this->getAuthorPHID());
   }
@@ -733,6 +716,10 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getFieldValuesForConduit() {
+
+    // NOTE: This data should be similar to the information returned about
+    // commmits by "differential.diff.search" with the "commits" attachment.
+
     return array(
       'identifier' => $this->getCommitIdentifier(),
     );

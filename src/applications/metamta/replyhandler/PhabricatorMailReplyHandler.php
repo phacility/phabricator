@@ -6,6 +6,7 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
   private $applicationEmail;
   private $actor;
   private $excludePHIDs = array();
+  private $unexpandablePHIDs = array();
 
   final public function setMailReceiver($mail_receiver) {
     $this->validateMailReceiver($mail_receiver);
@@ -43,6 +44,15 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
 
   final public function getExcludeMailRecipientPHIDs() {
     return $this->excludePHIDs;
+  }
+
+  public function setUnexpandablePHIDs(array $phids) {
+    $this->unexpandablePHIDs = $phids;
+    return $this;
+  }
+
+  public function getUnexpandablePHIDs() {
+    return $this->unexpandablePHIDs;
   }
 
   abstract public function validateMailReceiver($mail_receiver);
@@ -126,8 +136,11 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
     // We compute a hash using the object's own PHID to prevent an attacker
     // from blindly interacting with objects that they haven't ever received
     // mail about by just sending to D1@, D2@, etc...
+
+    $mail_key = PhabricatorMetaMTAMailProperties::loadMailKey($receiver);
+
     $hash = PhabricatorObjectMailReceiver::computeMailHash(
-      $receiver->getMailKey(),
+      $mail_key,
       $receiver->getPHID());
 
     $address = "{$prefix}{$receiver_id}+public+{$hash}@{$domain}";
@@ -149,8 +162,11 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();
     $user_id = $user->getID();
+
+    $mail_key = PhabricatorMetaMTAMailProperties::loadMailKey($receiver);
+
     $hash = PhabricatorObjectMailReceiver::computeMailHash(
-      $receiver->getMailKey(),
+      $mail_key,
       $user->getPHID());
     $domain = $this->getReplyHandlerDomain();
 
@@ -297,6 +313,16 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
     $to_result = array();
     $cc_result = array();
 
+    // "Unexpandable" users have disengaged from an object (for example,
+    // by resigning from a revision).
+
+    // If such a user is still a direct recipient (for example, they're still
+    // on the Subscribers list) they're fair game, but group targets (like
+    // projects) will no longer include them when expanded.
+
+    $unexpandable = $this->getUnexpandablePHIDs();
+    $unexpandable = array_fuse($unexpandable);
+
     $all_phids = array_merge($to, $cc);
     if ($all_phids) {
       $map = id(new PhabricatorMetaMTAMemberQuery())
@@ -305,11 +331,21 @@ abstract class PhabricatorMailReplyHandler extends Phobject {
         ->execute();
       foreach ($to as $phid) {
         foreach ($map[$phid] as $expanded) {
+          if ($expanded !== $phid) {
+            if (isset($unexpandable[$expanded])) {
+              continue;
+            }
+          }
           $to_result[$expanded] = $expanded;
         }
       }
       foreach ($cc as $phid) {
         foreach ($map[$phid] as $expanded) {
+          if ($expanded !== $phid) {
+            if (isset($unexpandable[$expanded])) {
+              continue;
+            }
+          }
           $cc_result[$expanded] = $expanded;
         }
       }

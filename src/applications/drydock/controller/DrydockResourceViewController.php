@@ -24,10 +24,19 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->setUser($viewer)
       ->setPolicyObject($resource)
       ->setHeader($title)
-      ->setHeaderIcon('fa-map');
+      ->setHeaderIcon('fa-map')
+      ->setStatus(
+        $resource->getStatusIcon(),
+        $resource->getStatusColor(),
+        $resource->getStatusDisplayName());
 
     if ($resource->isReleasing()) {
-      $header->setStatus('fa-exclamation-triangle', 'red', pht('Releasing'));
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setIcon('fa-exclamation-triangle')
+          ->setColor('red')
+          ->setName('Releasing'));
     }
 
     $curtain = $this->buildCurtain($resource);
@@ -127,12 +136,6 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $viewer = $this->getViewer();
 
     $view = new PHUIPropertyListView();
-    $status = $resource->getStatus();
-    $status = DrydockResourceStatus::getNameForStatus($status);
-
-    $view->addProperty(
-      pht('Status'),
-      $status);
 
     $until = $resource->getUntil();
     if ($until) {

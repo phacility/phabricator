@@ -199,7 +199,6 @@ return array(
     'javelin-behavior-aphront-drag-and-drop-textarea',
     'javelin-behavior-phabricator-object-selector',
     'javelin-behavior-repository-crossreference',
-    'javelin-behavior-load-blame',
 
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
@@ -223,9 +222,5 @@ return array(
     'javelin-behavior-maniphest-batch-selector',
     'javelin-behavior-maniphest-subpriority-editor',
     'javelin-behavior-maniphest-list-editor',
-  ),
-  'darkconsole.pkg.js' => array(
-    'javelin-behavior-dark-console',
-    'javelin-behavior-error-log',
   ),
 );

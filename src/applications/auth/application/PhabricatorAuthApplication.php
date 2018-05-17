@@ -80,10 +80,11 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           'generate/' => 'PhabricatorAuthSSHKeyGenerateController',
           'upload/' => 'PhabricatorAuthSSHKeyEditController',
           'edit/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyEditController',
-          'deactivate/(?P<id>\d+)/'
-            => 'PhabricatorAuthSSHKeyDeactivateController',
+          'revoke/(?P<id>\d+)/'
+            => 'PhabricatorAuthSSHKeyRevokeController',
           'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
         ),
+        'password/' => 'PhabricatorAuthSetPasswordController',
       ),
 
       '/oauth/(?P<provider>\w+)/login/'

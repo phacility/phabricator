@@ -11,4 +11,8 @@ final class PhabricatorRemarkupEditField
     return new ConduitStringParameterType();
   }
 
+  protected function newBulkParameterType() {
+    return new BulkRemarkupParameterType();
+  }
+
 }

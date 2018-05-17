@@ -18,7 +18,6 @@ JX.behavior('phabricator-nav', function(config) {
   var main = JX.$(config.mainID);
   var drag = JX.$(config.dragID);
 
-
 // - Flexible Navigation Column ------------------------------------------------
 
 
@@ -28,6 +27,10 @@ JX.behavior('phabricator-nav', function(config) {
   JX.enableDispatch(document.body, 'mousemove');
 
   JX.DOM.listen(drag, 'mousedown', null, function(e) {
+    if (!e.isNormalMouseEvent()) {
+      return;
+    }
+
     dragging = JX.$V(e);
 
     // Show the "col-resize" cursor on the whole document while we're
@@ -46,7 +49,7 @@ JX.behavior('phabricator-nav', function(config) {
       {
         element: drag,
         parameter: 'left',
-        start: JX.$V(drag).x
+        start: get_width()
       },
       {
         element: content,
@@ -94,22 +97,61 @@ JX.behavior('phabricator-nav', function(config) {
     }
     JX.DOM.alterClass(document.body, 'jx-drag-col', false);
     dragging = false;
+
+    new JX.Request('/settings/adjust/', JX.bag)
+      .setData(
+        {
+          key: 'filetree.width',
+          value: get_width()
+        })
+      .send();
   });
 
+  function get_width() {
+    // See PHI568. If the document has scrolled horizontally, the "x" position
+    // of the bar will be the actual width of the menu plus the horizontal
+    // scroll position (because the element is "position: fixed"). Subtract the
+    // document scroll position when saving the element width so that scrolling
+    // to the right and then toggling the filetree UI does not make it grow
+    // any wider.
+    return (JX.$V(drag).x - JX.Vector.getScroll().x);
+  }
 
-  function resetdrag() {
+  var saved_width = config.width;
+  function savedrag() {
+    saved_width = get_width();
+
     local.style.width = '';
     drag.style.left = '';
     content.style.marginLeft = '';
   }
 
+  function restoredrag() {
+    if (!saved_width) {
+      return;
+    }
+
+    local.style.width = saved_width + 'px';
+    drag.style.left = saved_width + 'px';
+    content.style.marginLeft = (saved_width + JX.Vector.getDim(drag).x) + 'px';
+  }
+
   var collapsed = config.collapsed;
   JX.Stratcom.listen('differential-filetree-toggle', null, function() {
     collapsed = !collapsed;
+
+    if (collapsed) {
+      savedrag();
+    }
+
     JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
     JX.DOM.alterClass(main, 'has-drag-nav', !collapsed);
     JX.DOM.alterClass(main, 'has-closed-nav', collapsed);
-    resetdrag();
+
+    if (!collapsed) {
+      restoredrag();
+    }
+
     new JX.Request('/settings/adjust/', JX.bag)
       .setData({ key : 'nav-collapsed', value : (collapsed ? 1 : 0) })
       .send();

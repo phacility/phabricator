@@ -357,29 +357,69 @@ final class PhabricatorProjectQuery
   }
 
   protected function didFilterPage(array $projects) {
+    $viewer = $this->getViewer();
+
     if ($this->needImages) {
-      $file_phids = mpull($projects, 'getProfileImagePHID');
-      $file_phids = array_filter($file_phids);
+      $need_images = $projects;
+
+      // First, try to load custom profile images for any projects with custom
+      // images.
+      $file_phids = array();
+      foreach ($need_images as $key => $project) {
+        $image_phid = $project->getProfileImagePHID();
+        if ($image_phid) {
+          $file_phids[$key] = $image_phid;
+        }
+      }
+
       if ($file_phids) {
         $files = id(new PhabricatorFileQuery())
           ->setParentQuery($this)
-          ->setViewer($this->getViewer())
+          ->setViewer($viewer)
           ->withPHIDs($file_phids)
           ->execute();
         $files = mpull($files, null, 'getPHID');
-      } else {
-        $files = array();
+
+        foreach ($file_phids as $key => $image_phid) {
+          $file = idx($files, $image_phid);
+          if (!$file) {
+            continue;
+          }
+
+          $need_images[$key]->attachProfileImageFile($file);
+          unset($need_images[$key]);
+        }
       }
 
-      foreach ($projects as $project) {
-        $file = idx($files, $project->getProfileImagePHID());
-        if (!$file) {
-          $builtin = PhabricatorProjectIconSet::getIconImage(
-            $project->getIcon());
-          $file = PhabricatorFile::loadBuiltin($this->getViewer(),
-            'projects/'.$builtin);
+      // For projects with default images, or projects where the custom image
+      // failed to load, load a builtin image.
+      if ($need_images) {
+        $builtin_map = array();
+        $builtins = array();
+        foreach ($need_images as $key => $project) {
+          $icon = $project->getIcon();
+
+          $builtin_name = PhabricatorProjectIconSet::getIconImage($icon);
+          $builtin_name = 'projects/'.$builtin_name;
+
+          $builtin = id(new PhabricatorFilesOnDiskBuiltinFile())
+            ->setName($builtin_name);
+
+          $builtin_key = $builtin->getBuiltinFileKey();
+
+          $builtins[] = $builtin;
+          $builtin_map[$key] = $builtin_key;
         }
-        $project->attachProfileImageFile($file);
+
+        $builtin_files = PhabricatorFile::loadBuiltins(
+          $viewer,
+          $builtins);
+
+        foreach ($need_images as $key => $project) {
+          $builtin_key = $builtin_map[$key];
+          $builtin_file = $builtin_files[$builtin_key];
+          $project->attachProfileImageFile($builtin_file);
+        }
       }
     }
 

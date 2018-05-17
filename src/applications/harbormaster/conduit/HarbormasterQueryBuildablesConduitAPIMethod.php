@@ -65,7 +65,7 @@ final class HarbormasterQueryBuildablesConduitAPIMethod
       $monogram = $buildable->getMonogram();
 
       $status = $buildable->getBuildableStatus();
-      $status_name = HarbormasterBuildable::getBuildableStatusName($status);
+      $status_name = $buildable->getStatusDisplayName();
 
       $data[] = array(
         'id' => $buildable->getID(),

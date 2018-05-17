@@ -15,14 +15,14 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
   protected function executeRepositoryOperations() {
     $repository = $this->getRepository();
-    $viewer = $this->getUser();
+    $viewer = $this->getSSHUser();
     $device = AlmanacKeys::getLiveDevice();
 
     $skip_sync = $this->shouldSkipReadSynchronization();
     $is_proxy = $this->shouldProxy();
 
     if ($is_proxy) {
-      $command = $this->getProxyCommand();
+      $command = $this->getProxyCommand(false);
 
       if ($device) {
         $this->writeClusterEngineLogMessage(
@@ -61,11 +61,11 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
     if ($err) {
       $pull_event
-        ->setResultType('error')
+        ->setResultType(PhabricatorRepositoryPullEvent::RESULT_ERROR)
         ->setResultCode($err);
     } else {
       $pull_event
-        ->setResultType('pull')
+        ->setResultType(PhabricatorRepositoryPullEvent::RESULT_PULL)
         ->setResultCode(0);
     }
 

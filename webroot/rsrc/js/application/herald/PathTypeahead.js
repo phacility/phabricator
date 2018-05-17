@@ -11,27 +11,22 @@
 
 JX.install('PathTypeahead', {
   construct : function(config) {
-    this._repositorySelect = config.repo_select;
+    this._repositoryTokenizer = config.repositoryTokenizer;
     this._hardpoint = config.hardpoint;
     this._input = config.path_input;
     this._completeURI = config.completeURI;
     this._validateURI = config.validateURI;
     this._errorDisplay = config.error_display;
+    this._textInputValues = {};
 
-    /*
-     * Default values to preload the typeahead with, for extremely common
-     * cases.
-     */
-    this._textInputValues = config.repositoryDefaultPaths;
+    this._icons = config.icons;
 
     this._initializeDatasource();
     this._initializeTypeahead(this._input);
   },
   members : {
-    /*
-     * DOM <select> elem for choosing the repository of a path.
-     */
-    _repositorySelect : null,
+    _repositoryTokenizer : null,
+
     /*
      * DOM parent div "hardpoint" to be passed to the JX.Typeahead.
      */
@@ -84,31 +79,28 @@ JX.install('PathTypeahead', {
      */
     start : function() {
       if (this._typeahead.getValue()) {
-        this._textInputValues[this._repositorySelect.value] =
-          this._typeahead.getValue();
+        var phid = this._getRepositoryPHID();
+        if (phid) {
+          this._textInputValues[phid] = this._typeahead.getValue();
+        }
       }
 
       this._typeahead.listen(
         'change',
         JX.bind(this, function(value) {
-          this._textInputValues[this._repositorySelect.value] = value;
-          this._validate();
-        }));
+          var phid = this._getRepositoryPHID();
+          if (phid) {
+            this._textInputValues[phid] = value;
+          }
 
-      this._typeahead.listen(
-        'choose',
-        JX.bind(this, function() {
-          setTimeout(JX.bind(this._typeahead, this._typeahead.refresh), 0);
+          this._validate();
         }));
 
       var repo_set_input = JX.bind(this, this._onrepochange);
 
       this._typeahead.listen('start', repo_set_input);
-      JX.DOM.listen(
-        this._repositorySelect,
-        'change',
-        null,
-        repo_set_input);
+
+      this._repositoryTokenizer.listen('change', repo_set_input);
 
       this._typeahead.start();
       this._validate();
@@ -120,13 +112,18 @@ JX.install('PathTypeahead', {
         this._textInputValues);
 
       this._datasource.setAuxiliaryData(
-        {repositoryPHID : this._repositorySelect.value}
-      );
+        {
+          repositoryPHID: this._getRepositoryPHID()
+        });
+
+      // Since we've changed the repository, reset the results.
+      this._datasource.resetResults();
     },
 
     _setPathInputBasedOnRepository : function(typeahead, lookup) {
-      if (lookup[this._repositorySelect.value]) {
-        typeahead.setValue(lookup[this._repositorySelect.value]);
+      var phid = this._getRepositoryPHID();
+      if (phid && lookup[phid]) {
+        typeahead.setValue(lookup[phid]);
       } else {
         typeahead.setValue('/');
       }
@@ -152,9 +149,24 @@ JX.install('PathTypeahead', {
       return ('' + str).replace(/[\/]+/g, '\/');
     },
 
+    _getRepositoryPHID: function() {
+      var tokens = this._repositoryTokenizer.getTokens();
+      var keys = JX.keys(tokens);
+
+      if (keys.length) {
+        return keys[0];
+      }
+
+      return null;
+    },
+
     _validate : function() {
+      var repo_phid = this._getRepositoryPHID();
+      if (!repo_phid) {
+        return;
+      }
+
       var input = this._input;
-      var repo_id = this._repositorySelect.value;
       var input_value = input.value;
       var error_display = this._errorDisplay;
 
@@ -170,33 +182,32 @@ JX.install('PathTypeahead', {
 
       var validation_request = new JX.Request(
         this._validateURI,
-        function(payload) {
+        JX.bind(this, function(payload) {
           // Don't change validation display state if the input has been
           // changed since we started validation
-          if (input.value === input_value) {
-            if (payload.valid) {
-              JX.DOM.alterClass(error_display, 'invalid', false);
-              JX.DOM.alterClass(error_display, 'valid', true);
-            } else {
-              JX.DOM.alterClass(error_display, 'invalid', true);
-              JX.DOM.alterClass(error_display, 'valid', false);
-            }
-            JX.DOM.setContent(error_display, payload.message);
+          if (input.value !== input_value) {
+            return;
           }
-        });
+
+          if (payload.valid) {
+            JX.DOM.setContent(error_display, JX.$H(this._icons.okay));
+          } else {
+            JX.DOM.setContent(error_display, JX.$H(this._icons.fail));
+          }
+        }));
 
       validation_request.listen('finally', function() {
-        JX.DOM.alterClass(error_display, 'validating', false);
         this._validationInflight = null;
       });
 
       validation_request.setData(
         {
-          repositoryPHID : repo_id,
+          repositoryPHID : repo_phid,
           path : input_value
         });
 
       this._validationInflight = validation_request;
+      JX.DOM.setContent(error_display, JX.$H(this._icons.test));
 
       validation_request.setTimeout(750);
       validation_request.send();

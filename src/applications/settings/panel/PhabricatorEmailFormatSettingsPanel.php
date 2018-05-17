@@ -14,11 +14,13 @@ final class PhabricatorEmailFormatSettingsPanel
   }
 
   public function isUserPanel() {
-    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
+    return PhabricatorMetaMTAMail::shouldMailEachRecipient();
   }
 
   public function isManagementPanel() {
-    if (!$this->isUserPanel()) {
+    return false;
+/*
+        if (!$this->isUserPanel()) {
       return false;
     }
 
@@ -27,6 +29,7 @@ final class PhabricatorEmailFormatSettingsPanel
     }
 
     return false;
+*/
   }
 
   public function isTemplatePanel() {

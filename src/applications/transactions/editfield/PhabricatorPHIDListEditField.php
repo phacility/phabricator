@@ -5,6 +5,7 @@ abstract class PhabricatorPHIDListEditField
 
   private $useEdgeTransactions;
   private $isSingleValue;
+  private $isNullable;
 
   public function setUseEdgeTransactions($use_edge_transactions) {
     $this->useEdgeTransactions = $use_edge_transactions;
@@ -30,13 +31,23 @@ abstract class PhabricatorPHIDListEditField
     return $this->isSingleValue;
   }
 
+  public function setIsNullable($is_nullable) {
+    $this->isNullable = $is_nullable;
+    return $this;
+  }
+
+  public function getIsNullable() {
+    return $this->isNullable;
+  }
+
   protected function newHTTPParameterType() {
     return new AphrontPHIDListHTTPParameterType();
   }
 
   protected function newConduitParameterType() {
     if ($this->getIsSingleValue()) {
-      return new ConduitPHIDParameterType();
+      return id(new ConduitPHIDParameterType())
+        ->setIsNullable($this->getIsNullable());
     } else {
       return new ConduitPHIDListParameterType();
     }
@@ -98,10 +109,13 @@ abstract class PhabricatorPHIDListEditField
       return new PhabricatorEdgeEditType();
     }
 
-    $type = new PhabricatorDatasourceEditType();
-    $type->setIsSingleValue($this->getIsSingleValue());
-    $type->setConduitParameterType($this->newConduitParameterType());
-    return $type;
+    return id(new PhabricatorDatasourceEditType())
+      ->setIsSingleValue($this->getIsSingleValue())
+      ->setIsNullable($this->getIsNullable());
+  }
+
+  protected function newBulkEditTypes() {
+    return $this->newConduitEditTypes();
   }
 
   protected function newConduitEditTypes() {

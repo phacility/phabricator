@@ -53,6 +53,10 @@ final class PhabricatorCommitSearchEngine
       $query->withUnreachable($map['unreachable']);
     }
 
+    if ($map['ancestorsOf']) {
+      $query->withAncestorsOf($map['ancestorsOf']);
+    }
+
     return $query;
   }
 
@@ -103,6 +107,13 @@ final class PhabricatorCommitSearchEngine
           pht(
             'Find or exclude unreachable commits which are not ancestors of '.
             'any branch, tag, or ref.')),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Ancestors Of'))
+        ->setKey('ancestorsOf')
+        ->setDescription(
+          pht(
+            'Find commits which are ancestors of a particular ref, '.
+            'like "master".')),
     );
   }
 

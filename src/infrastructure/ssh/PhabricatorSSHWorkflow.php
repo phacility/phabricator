@@ -1,12 +1,19 @@
 <?php
 
-abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
+abstract class PhabricatorSSHWorkflow
+  extends PhutilArgumentWorkflow {
 
-  private $user;
+  // NOTE: We are explicitly extending "PhutilArgumentWorkflow", not
+  // "PhabricatorManagementWorkflow". We want to avoid inheriting "getViewer()"
+  // and other methods which assume workflows are administrative commands
+  // like `bin/storage`.
+
+  private $sshUser;
   private $iochannel;
   private $errorChannel;
   private $isClusterRequest;
   private $originalArguments;
+  private $requestIdentifier;
 
   public function isExecutable() {
     return false;
@@ -21,13 +28,13 @@ abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
     return $this->errorChannel;
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
+  public function setSSHUser(PhabricatorUser $ssh_user) {
+    $this->sshUser = $ssh_user;
     return $this;
   }
 
-  public function getUser() {
-    return $this->user;
+  public function getSSHUser() {
+    return $this->sshUser;
   }
 
   public function setIOChannel(PhutilChannel $channel) {
@@ -81,6 +88,15 @@ abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
 
   public function getOriginalArguments() {
     return $this->originalArguments;
+  }
+
+  public function setRequestIdentifier($request_identifier) {
+    $this->requestIdentifier = $request_identifier;
+    return $this;
+  }
+
+  public function getRequestIdentifier() {
+    return $this->requestIdentifier;
   }
 
   public function getSSHRemoteAddress() {

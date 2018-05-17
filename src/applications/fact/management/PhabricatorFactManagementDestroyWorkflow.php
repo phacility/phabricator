@@ -23,8 +23,13 @@ final class PhabricatorFactManagementDestroyWorkflow
     }
 
     $tables = array();
-    $tables[] = new PhabricatorFactRaw();
-    $tables[] = new PhabricatorFactAggregate();
+    $tables[] = new PhabricatorFactCursor();
+
+    $tables[] = new PhabricatorFactIntDatapoint();
+
+    $tables[] = new PhabricatorFactObjectDimension();
+    $tables[] = new PhabricatorFactKeyDimension();
+
     foreach ($tables as $table) {
       $conn = $table->establishConnection('w');
       $name = $table->getTableName();

@@ -21,6 +21,7 @@ final class PhabricatorWorkerBulkJob
   protected $status;
   protected $parameters = array();
   protected $size;
+  protected $isSilent;
 
   private $jobImplementation = self::ATTACHABLE;
 
@@ -34,6 +35,7 @@ final class PhabricatorWorkerBulkJob
         'jobTypeKey' => 'text32',
         'status' => 'text32',
         'size' => 'uint32',
+        'isSilent' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_type' => array(
@@ -58,7 +60,8 @@ final class PhabricatorWorkerBulkJob
       ->setAuthorPHID($actor->getPHID())
       ->setJobTypeKey($type->getBulkJobTypeKey())
       ->setParameters($parameters)
-      ->attachJobImplementation($type);
+      ->attachJobImplementation($type)
+      ->setIsSilent(0);
 
     $job->setSize($job->computeSize());
 
@@ -175,6 +178,10 @@ final class PhabricatorWorkerBulkJob
 
   public function getJobName() {
     return $this->getJobImplementation()->getJobName($this);
+  }
+
+  public function getCurtainActions(PhabricatorUser $viewer) {
+    return $this->getJobImplementation()->getCurtainActions($viewer, $this);
   }
 
 

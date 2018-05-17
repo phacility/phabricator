@@ -74,9 +74,6 @@ often well-correlated with complexity.
 We generally follow these practices in Phabricator. The median change size for
 Phabricator is 35 lines.
 
-See @{article:Differential User Guide: Large Changes} for information about
-reviewing big checkins.
-
 = Write Sensible Commit Messages =
 
 There are lots of resources for this on the internet. All of them say pretty

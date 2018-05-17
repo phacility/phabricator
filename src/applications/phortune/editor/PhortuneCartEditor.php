@@ -123,8 +123,7 @@ final class PhortuneCartEditor
     $name = $object->getName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject(pht('Order %d: %s', $id, $name))
-      ->addHeader('Thread-Topic', pht('Order %s', $id));
+      ->setSubject(pht('Order %d: %s', $id, $name));
   }
 
   protected function buildMailBody(

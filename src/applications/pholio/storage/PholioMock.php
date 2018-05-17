@@ -25,7 +25,6 @@ final class PholioMock extends PholioDAO
   protected $editPolicy;
 
   protected $name;
-  protected $originalName;
   protected $description;
   protected $coverPHID;
   protected $mailKey;
@@ -65,7 +64,6 @@ final class PholioMock extends PholioDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'description' => 'text',
-        'originalName' => 'text128',
         'mailKey' => 'bytes20',
         'status' => 'text12',
       ),

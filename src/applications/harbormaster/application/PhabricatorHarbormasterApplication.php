@@ -71,7 +71,8 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
         ),
         'build/' => array(
           $this->getQueryRoutePattern() => 'HarbormasterBuildListController',
-          '(?P<id>\d+)/' => 'HarbormasterBuildViewController',
+          '(?P<id>\d+)/(?:(?P<generation>\d+)/)?'
+            => 'HarbormasterBuildViewController',
           '(?P<action>pause|resume|restart|abort)/'.
             '(?P<id>\d+)/(?:(?P<via>[^/]+)/)?'
             => 'HarbormasterBuildActionController',
@@ -95,6 +96,13 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
         'hook/' => array(
           'circleci/' => 'HarbormasterCircleCIHookController',
           'buildkite/' => 'HarbormasterBuildkiteHookController',
+        ),
+        'log/' => array(
+          'view/(?P<id>\d+)/(?:\$(?P<lines>\d+(?:-\d+)?))?'
+            => 'HarbormasterBuildLogViewController',
+          'render/(?P<id>\d+)/(?:\$(?P<lines>\d+(?:-\d+)?))?'
+            => 'HarbormasterBuildLogRenderController',
+          'download/(?P<id>\d+)/' => 'HarbormasterBuildLogDownloadController',
         ),
       ),
     );

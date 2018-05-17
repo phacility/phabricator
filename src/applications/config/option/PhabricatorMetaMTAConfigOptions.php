@@ -66,7 +66,9 @@ of each approach are:
       received a similar message, but can not prevent all stray email arising
       from "Reply All".
     - Not supported with a private reply-to address.
-    - Mails are sent in the server default translation.
+    - Mail messages are sent in the server default translation.
+    - Mail that must be delivered over secure channels will leak the recipient
+      list in the "To" and "Cc" headers.
   - One mail to each user:
     - Policy controls work correctly and are enforced per-user.
     - Recipients need to look in the mail body to see To/Cc.
@@ -77,7 +79,7 @@ of each approach are:
     - "Reply All" will never send extra mail to other users involved in the
       thread.
     - Required if private reply-to addresses are configured.
-    - Mails are sent in the language of user preference.
+    - Mail messages are sent in the language of user preference.
 
 EODOC
 ));
@@ -138,24 +140,19 @@ EODOC
   ,
   'metamta.public-replies'));
 
-    $adapter_doc_href = PhabricatorEnv::getDoclink(
-      'Configuring Outbound Email');
-    $adapter_doc_name = pht('Configuring Outbound Email');
     $adapter_description = $this->deformat(pht(<<<EODOC
 Adapter class to use to transmit mail to the MTA. The default uses
 PHPMailerLite, which will invoke "sendmail". This is appropriate if sendmail
 actually works on your host, but if you haven't configured mail it may not be so
 great. A number of other mailers are available (e.g., SES, SendGrid, SMTP,
-custom mailers) - consult [[ %s | %s ]] for details.
+custom mailers). This option is deprecated in favor of 'cluster.mailers'.
 EODOC
-  ,
-  $adapter_doc_href,
-  $adapter_doc_name));
+));
 
     $placeholder_description = $this->deformat(pht(<<<EODOC
-When sending a message that has no To recipient (i.e. all recipients are CC'd,
-for example when multiplexing mail), set the To field to the following value. If
-no value is set, messages with no To will have their CCs upgraded to To.
+When sending a message that has no To recipient (i.e. all recipients are CC'd),
+set the To field to the following value. If no value is set, messages with no
+To will have their CCs upgraded to To.
 EODOC
 ));
 
@@ -197,7 +194,18 @@ The default is `full`.
 EODOC
 ));
 
+    $mailers_description = $this->deformat(pht(<<<EODOC
+Define one or more mail transmission services. For help with configuring
+mailers, see **[[ %s | %s ]]** in the documentation.
+EODOC
+      ,
+      PhabricatorEnv::getDoclink('Configuring Outbound Email'),
+      pht('Configuring Outbound Email')));
+
     return array(
+      $this->newOption('cluster.mailers', 'cluster.mailers', null)
+        ->setHidden(true)
+        ->setDescription($mailers_description),
       $this->newOption(
         'metamta.default-address',
         'string',

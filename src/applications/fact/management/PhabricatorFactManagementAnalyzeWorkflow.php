@@ -58,10 +58,6 @@ final class PhabricatorFactManagementAnalyzeWorkflow
       }
     }
 
-    if (!$args->getArg('skip-aggregates')) {
-      $daemon->processAggregates();
-    }
-
     return 0;
   }
 

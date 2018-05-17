@@ -31,7 +31,11 @@ final class PhabricatorStandardCustomFieldLink
 
     return phutil_tag(
       'a',
-      array('href' => $value, 'target' => '_blank'),
+      array(
+        'href' => $value,
+        'target' => '_blank',
+        'rel' => 'noreferrer',
+      ),
       $value);
   }
 

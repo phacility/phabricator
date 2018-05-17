@@ -3,40 +3,79 @@
 final class PhabricatorMailImplementationPHPMailerAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  const ADAPTERTYPE = 'smtp';
+
   private $mailer;
+
+  protected function validateOptions(array $options) {
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'host' => 'string|null',
+        'port' => 'int',
+        'user' => 'string|null',
+        'password' => 'string|null',
+        'protocol' => 'string|null',
+        'encoding' => 'string',
+        'mailer' => 'string',
+      ));
+  }
+
+  public function newDefaultOptions() {
+    return array(
+      'host' => null,
+      'port' => 25,
+      'user' => null,
+      'password' => null,
+      'protocol' => null,
+      'encoding' => 'base64',
+      'mailer' => 'smtp',
+    );
+  }
+
+  public function newLegacyOptions() {
+    return array(
+      'host' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-host'),
+      'port' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-port'),
+      'user' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-user'),
+      'password' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-password'),
+      'protocol' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-protocol'),
+      'encoding' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding'),
+      'mailer' => PhabricatorEnv::getEnvConfig('phpmailer.mailer'),
+    );
+  }
 
   /**
    * @phutil-external-symbol class PHPMailer
    */
-  public function __construct() {
+  public function prepareForSend() {
     $root = phutil_get_library_root('phabricator');
     $root = dirname($root);
     require_once $root.'/externals/phpmailer/class.phpmailer.php';
     $this->mailer = new PHPMailer($use_exceptions = true);
     $this->mailer->CharSet = 'utf-8';
 
-    $encoding = PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding');
+    $encoding = $this->getOption('encoding');
     $this->mailer->Encoding = $encoding;
 
     // By default, PHPMailer sends one mail per recipient. We handle
-    // multiplexing higher in the stack, so tell it to send mail exactly
-    // like we ask.
+    // combining or separating To and Cc higher in the stack, so tell it to
+    // send mail exactly like we ask.
     $this->mailer->SingleTo = false;
 
-    $mailer = PhabricatorEnv::getEnvConfig('phpmailer.mailer');
+    $mailer = $this->getOption('mailer');
     if ($mailer == 'smtp') {
       $this->mailer->IsSMTP();
-      $this->mailer->Host = PhabricatorEnv::getEnvConfig('phpmailer.smtp-host');
-      $this->mailer->Port = PhabricatorEnv::getEnvConfig('phpmailer.smtp-port');
-      $user = PhabricatorEnv::getEnvConfig('phpmailer.smtp-user');
+      $this->mailer->Host = $this->getOption('host');
+      $this->mailer->Port = $this->getOption('port');
+      $user = $this->getOption('user');
       if ($user) {
         $this->mailer->SMTPAuth = true;
         $this->mailer->Username = $user;
-        $this->mailer->Password =
-          PhabricatorEnv::getEnvConfig('phpmailer.smtp-password');
+        $this->mailer->Password = $this->getOption('password');
       }
 
-      $protocol = PhabricatorEnv::getEnvConfig('phpmailer.smtp-protocol');
+      $protocol = $this->getOption('protocol');
       if ($protocol) {
         $protocol = phutil_utf8_strtolower($protocol);
         $this->mailer->SMTPSecure = $protocol;

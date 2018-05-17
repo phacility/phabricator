@@ -16,12 +16,11 @@ final class PhabricatorOwnersPackage
   protected $auditingEnabled;
   protected $autoReview;
   protected $description;
-  protected $primaryOwnerPHID;
-  protected $mailKey;
   protected $status;
   protected $viewPolicy;
   protected $editPolicy;
   protected $dominion;
+  protected $properties = array();
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -33,11 +32,16 @@ final class PhabricatorOwnersPackage
 
   const AUTOREVIEW_NONE = 'none';
   const AUTOREVIEW_SUBSCRIBE = 'subscribe';
+  const AUTOREVIEW_SUBSCRIBE_ALWAYS = 'subscribe-always';
   const AUTOREVIEW_REVIEW = 'review';
+  const AUTOREVIEW_REVIEW_ALWAYS = 'review-always';
   const AUTOREVIEW_BLOCK = 'block';
+  const AUTOREVIEW_BLOCK_ALWAYS = 'block-always';
 
   const DOMINION_STRONG = 'strong';
   const DOMINION_WEAK = 'weak';
+
+  const PROPERTY_IGNORED = 'ignored';
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -74,14 +78,26 @@ final class PhabricatorOwnersPackage
       self::AUTOREVIEW_NONE => array(
         'name' => pht('No Autoreview'),
       ),
-      self::AUTOREVIEW_SUBSCRIBE => array(
-        'name' => pht('Subscribe to Changes'),
-      ),
       self::AUTOREVIEW_REVIEW => array(
-        'name' => pht('Review Changes'),
+        'name' => pht('Review Changes With Non-Owner Author'),
+        'authority' => true,
       ),
       self::AUTOREVIEW_BLOCK => array(
-        'name' => pht('Review Changes (Blocking)'),
+        'name' => pht('Review Changes With Non-Owner Author (Blocking)'),
+        'authority' => true,
+      ),
+      self::AUTOREVIEW_SUBSCRIBE => array(
+        'name' => pht('Subscribe to Changes With Non-Owner Author'),
+        'authority' => true,
+      ),
+      self::AUTOREVIEW_REVIEW_ALWAYS => array(
+        'name' => pht('Review All Changes'),
+      ),
+      self::AUTOREVIEW_BLOCK_ALWAYS => array(
+        'name' => pht('Review All Changes (Blocking)'),
+      ),
+      self::AUTOREVIEW_SUBSCRIBE_ALWAYS => array(
+        'name' => pht('Subscribe to All Changes'),
       ),
     );
   }
@@ -104,12 +120,13 @@ final class PhabricatorOwnersPackage
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort',
         'description' => 'text',
-        'primaryOwnerPHID' => 'phid?',
         'auditingEnabled' => 'bool',
-        'mailKey' => 'bytes20',
         'status' => 'text32',
         'autoReview' => 'text32',
         'dominion' => 'text32',
@@ -117,26 +134,34 @@ final class PhabricatorOwnersPackage
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorOwnersPackagePHIDType::TYPECONST);
-  }
-
-  public function save() {
-    if (!$this->getMailKey()) {
-      $this->setMailKey(Filesystem::readRandomCharacters(20));
-    }
-
-    return parent::save();
+  public function getPHIDType() {
+    return PhabricatorOwnersPackagePHIDType::TYPECONST;
   }
 
   public function isArchived() {
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
-  public function setName($name) {
-    $this->name = $name;
+  public function getMustMatchUngeneratedPaths() {
+    $ignore_attributes = $this->getIgnoredPathAttributes();
+    return !empty($ignore_attributes['generated']);
+  }
+
+  public function getPackageProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setPackageProperty($key, $value) {
+    $this->properties[$key] = $value;
     return $this;
+  }
+
+  public function getIgnoredPathAttributes() {
+    return $this->getPackageProperty(self::PROPERTY_IGNORED, array());
+  }
+
+  public function setIgnoredPathAttributes(array $attributes) {
+    return $this->setPackageProperty(self::PROPERTY_IGNORED, $attributes);
   }
 
   public function loadOwners() {
@@ -166,6 +191,82 @@ final class PhabricatorOwnersPackage
     }
 
     return self::loadPackagesForPaths($repository, $paths);
+  }
+
+  public static function loadAffectedPackagesForChangesets(
+    PhabricatorRepository $repository,
+    DifferentialDiff $diff,
+    array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
+
+    $paths_all = array();
+    $paths_ungenerated = array();
+
+    foreach ($changesets as $changeset) {
+      $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+
+      $paths_all[] = $path;
+
+      if (!$changeset->isGeneratedChangeset()) {
+        $paths_ungenerated[] = $path;
+      }
+    }
+
+    if (!$paths_all) {
+      return array();
+    }
+
+    $packages_all = self::loadAffectedPackages(
+      $repository,
+      $paths_all);
+
+    // If there are no generated changesets, we can't possibly need to throw
+    // away any packages for matching only generated paths. Just return the
+    // full set of packages.
+    if ($paths_ungenerated === $paths_all) {
+      return $packages_all;
+    }
+
+    $must_match_ungenerated = array();
+    foreach ($packages_all as $package) {
+      if ($package->getMustMatchUngeneratedPaths()) {
+        $must_match_ungenerated[] = $package;
+      }
+    }
+
+    // If no affected packages have the "Ignore Generated Paths" flag set, we
+    // can't possibly need to throw any away.
+    if (!$must_match_ungenerated) {
+      return $packages_all;
+    }
+
+    if ($paths_ungenerated) {
+      $packages_ungenerated = self::loadAffectedPackages(
+        $repository,
+        $paths_ungenerated);
+    } else {
+      $packages_ungenerated = array();
+    }
+
+    // We have some generated paths, and some packages that ignore generated
+    // paths. Take all the packages which:
+    //
+    //   - ignore generated paths; and
+    //   - didn't match any ungenerated paths
+    //
+    // ...and remove them from the list.
+
+    $must_match_ungenerated = mpull($must_match_ungenerated, null, 'getID');
+    $packages_ungenerated = mpull($packages_ungenerated, null, 'getID');
+    $packages_all = mpull($packages_all, null, 'getID');
+
+    foreach ($must_match_ungenerated as $package_id => $package) {
+      if (!isset($packages_ungenerated[$package_id])) {
+        unset($packages_all[$package_id]);
+      }
+    }
+
+    return $packages_all;
   }
 
   public static function loadOwningPackages($repository, $path) {
@@ -203,15 +304,20 @@ final class PhabricatorOwnersPackage
     // and then merge results in PHP.
 
     $rows = array();
-    foreach (array_chunk(array_keys($fragments), 128) as $chunk) {
+    foreach (array_chunk(array_keys($fragments), 1024) as $chunk) {
+      $indexes = array();
+      foreach ($chunk as $fragment) {
+        $indexes[] = PhabricatorHash::digestForIndex($fragment);
+      }
+
       $rows[] = queryfx_all(
         $conn,
         'SELECT pkg.id, pkg.dominion, p.excluded, p.path
           FROM %T pkg JOIN %T p ON p.packageID = pkg.id
-          WHERE p.path IN (%Ls) AND pkg.status IN (%Ls) %Q',
+          WHERE p.pathIndex IN (%Ls) AND pkg.status IN (%Ls) %Q',
         $package->getTableName(),
         $path->getTableName(),
-        $chunk,
+        $indexes,
         array(
           self::STATUS_ACTIVE,
         ),
@@ -375,19 +481,22 @@ final class PhabricatorOwnersPackage
   }
 
   public static function splitPath($path) {
-    $trailing_slash = preg_match('@/$@', $path) ? '/' : '';
-    $path = trim($path, '/');
+    $result = array(
+      '/',
+    );
+
     $parts = explode('/', $path);
+    $buffer = '/';
+    foreach ($parts as $part) {
+      if (!strlen($part)) {
+        continue;
+      }
 
-    $result = array();
-    while (count($parts)) {
-      $result[] = '/'.implode('/', $parts).$trailing_slash;
-      $trailing_slash = '/';
-      array_pop($parts);
+      $buffer = $buffer.$part.'/';
+      $result[] = $buffer;
     }
-    $result[] = '/';
 
-    return array_reverse($result);
+    return $result;
   }
 
   public function attachPaths(array $paths) {
@@ -581,6 +690,22 @@ final class PhabricatorOwnersPackage
         ->setKey('owners')
         ->setType('list<map<string, wild>>')
         ->setDescription(pht('List of package owners.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('review')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Auto review information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('audit')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Auto audit information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dominion')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Dominion setting information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('ignored')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Ignored attribute information.')),
     );
   }
 
@@ -592,11 +717,64 @@ final class PhabricatorOwnersPackage
       );
     }
 
+    $review_map = self::getAutoreviewOptionsMap();
+    $review_value = $this->getAutoReview();
+    if (isset($review_map[$review_value])) {
+      $review_label = $review_map[$review_value]['name'];
+    } else {
+      $review_label = pht('Unknown ("%s")', $review_value);
+    }
+
+    $review = array(
+      'value' => $review_value,
+      'label' => $review_label,
+    );
+
+    if ($this->getAuditingEnabled()) {
+      $audit_value = 'audit';
+      $audit_label = pht('Auditing Enabled');
+    } else {
+      $audit_value = 'none';
+      $audit_label = pht('No Auditing');
+    }
+
+    $audit = array(
+      'value' => $audit_value,
+      'label' => $audit_label,
+    );
+
+    $dominion_value = $this->getDominion();
+    $dominion_map = self::getDominionOptionsMap();
+    if (isset($dominion_map[$dominion_value])) {
+      $dominion_label = $dominion_map[$dominion_value]['name'];
+      $dominion_short = $dominion_map[$dominion_value]['short'];
+    } else {
+      $dominion_label = pht('Unknown ("%s")', $dominion_value);
+      $dominion_short = pht('Unknown ("%s")', $dominion_value);
+    }
+
+    $dominion = array(
+      'value' => $dominion_value,
+      'label' => $dominion_label,
+      'short' => $dominion_short,
+    );
+
+    // Force this to always emit as a JSON object even if empty, never as
+    // a JSON list.
+    $ignored = $this->getIgnoredPathAttributes();
+    if (!$ignored) {
+      $ignored = (object)array();
+    }
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
       'status' => $this->getStatus(),
       'owners' => $owner_list,
+      'review' => $review,
+      'audit' => $audit,
+      'dominion' => $dominion,
+      'ignored' => $ignored,
     );
   }
 

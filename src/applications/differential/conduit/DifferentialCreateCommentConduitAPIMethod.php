@@ -106,9 +106,11 @@ final class DifferentialCreateCommentConduitAPIMethod
       }
     }
 
+    // NOTE: The legacy "silent" flag is now ignored and has no effect. See
+    // T13042.
+
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)
-      ->setDisableEmail($request->getValue('silent'))
       ->setContentSource($request->newContentSource())
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);

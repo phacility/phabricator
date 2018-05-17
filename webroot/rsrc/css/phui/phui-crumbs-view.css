@@ -55,6 +55,8 @@
 }
 
 .device-phone .phui-crumb-view.phabricator-last-crumb .phui-crumb-name,
+.device-phone .phui-crumb-view.phui-crumb-always-visible .phui-crumb-name,
+.device-phone .phui-crumb-view.phui-crumb-always-visible + .phui-crumb-divider,
 .device-phone .phui-crumb-view.phui-crumb-has-icon,
 .device-phone .phui-crumb-has-icon + .phui-crumb-divider {
   display: inline-block;

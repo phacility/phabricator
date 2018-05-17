@@ -45,6 +45,7 @@ final class PhabricatorOwnersPackagePHIDType extends PhabricatorPHIDType {
         ->setName($monogram)
         ->setFullName("{$monogram}: {$name}")
         ->setCommandLineObjectName("{$monogram} {$name}")
+        ->setMailStampName($monogram)
         ->setURI($uri);
 
       if ($package->isArchived()) {

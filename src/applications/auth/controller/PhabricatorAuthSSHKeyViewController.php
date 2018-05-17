@@ -35,7 +35,7 @@ final class PhabricatorAuthSSHKeyViewController
     if ($ssh_key->getIsActive()) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('fa-ban', 'dark', pht('Deactivated'));
+      $header->setStatus('fa-ban', 'dark', pht('Revoked'));
     }
 
     $header->addActionLink(
@@ -80,7 +80,7 @@ final class PhabricatorAuthSSHKeyViewController
     $id = $ssh_key->getID();
 
     $edit_uri = $this->getApplicationURI("sshkey/edit/{$id}/");
-    $deactivate_uri = $this->getApplicationURI("sshkey/deactivate/{$id}/");
+    $revoke_uri = $this->getApplicationURI("sshkey/revoke/{$id}/");
 
     $curtain = $this->newCurtainView($ssh_key);
 
@@ -95,8 +95,8 @@ final class PhabricatorAuthSSHKeyViewController
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-times')
-        ->setName(pht('Deactivate SSH Key'))
-        ->setHref($deactivate_uri)
+        ->setName(pht('Revoke SSH Key'))
+        ->setHref($revoke_uri)
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 

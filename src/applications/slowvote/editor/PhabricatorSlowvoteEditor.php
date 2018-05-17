@@ -48,8 +48,7 @@ final class PhabricatorSlowvoteEditor
     $name = $object->getQuestion();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("{$monogram}: {$name}")
-      ->addHeader('Thread-Topic', $monogram);
+      ->setSubject("{$monogram}: {$name}");
   }
 
   protected function buildMailBody(

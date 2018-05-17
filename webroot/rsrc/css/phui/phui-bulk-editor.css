@@ -1,0 +1,27 @@
+/**
+ * @provides phui-bulk-editor-css
+ */
+
+.bulk-edit-table {
+  width: 100%;
+  margin: 12px 0;
+}
+
+.bulk-edit-table td {
+  padding: 4px 8px;
+  vertical-align: middle;
+}
+
+.bulk-edit-input {
+  width: 100%;
+  text-align: left;
+}
+
+.bulk-edit-input input {
+  width: 100%;
+}
+
+.bulk-edit-input textarea {
+  width: 100%;
+  height: 8em;
+}

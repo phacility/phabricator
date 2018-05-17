@@ -217,8 +217,8 @@ final class DifferentialDiffExtractionEngine extends Phobject {
         //   -echo "test";
         //   -(empty line)
 
-        $hunk = id(new DifferentialModernHunk())->setChanges($context);
-        $vs_hunk = id(new DifferentialModernHunk())->setChanges($vs_context);
+        $hunk = id(new DifferentialHunk())->setChanges($context);
+        $vs_hunk = id(new DifferentialHunk())->setChanges($vs_context);
         if ($hunk->makeOldFile() != $vs_hunk->makeOldFile() ||
             $hunk->makeNewFile() != $vs_hunk->makeNewFile()) {
           return true;
@@ -278,11 +278,14 @@ final class DifferentialDiffExtractionEngine extends Phobject {
         ->setNewValue($revision->getModernRevisionStatus());
     }
 
+    $type_update = DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE;
+
     $xactions[] = id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+      ->setTransactionType($type_update)
       ->setIgnoreOnNoEffect(true)
       ->setNewValue($new_diff->getPHID())
-      ->setMetadataValue('isCommitUpdate', true);
+      ->setMetadataValue('isCommitUpdate', true)
+      ->setMetadataValue('commitPHIDs', array($commit->getPHID()));
 
     foreach ($more_xactions as $more_xaction) {
       $xactions[] = $more_xaction;

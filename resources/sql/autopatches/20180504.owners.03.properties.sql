@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_owners.owners_package
+  ADD properties LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT};

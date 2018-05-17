@@ -5,6 +5,8 @@ final class HarbormasterBuildLogChunk
 
   protected $logID;
   protected $encoding;
+  protected $headOffset;
+  protected $tailOffset;
   protected $size;
   protected $chunk;
 
@@ -20,6 +22,8 @@ final class HarbormasterBuildLogChunk
       self::CONFIG_COLUMN_SCHEMA => array(
         'logID' => 'id',
         'encoding' => 'text32',
+        'headOffset' => 'uint64',
+        'tailOffset' => 'uint64',
 
         // T6203/NULLABILITY
         // Both the type and nullability of this column are crazily wrong.
@@ -28,8 +32,8 @@ final class HarbormasterBuildLogChunk
         'chunk' => 'bytes',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_log' => array(
-          'columns' => array('logID'),
+        'key_offset' => array(
+          'columns' => array('logID', 'headOffset', 'tailOffset'),
         ),
       ),
     ) + parent::getConfiguration();

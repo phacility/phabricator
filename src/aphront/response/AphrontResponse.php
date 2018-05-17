@@ -7,8 +7,10 @@ abstract class AphrontResponse extends Phobject {
   private $canCDN;
   private $responseCode = 200;
   private $lastModified = null;
-
+  private $contentSecurityPolicyURIs;
+  private $disableContentSecurityPolicy;
   protected $frameable;
+
 
   public function setRequest($request) {
     $this->request = $request;
@@ -17,6 +19,34 @@ abstract class AphrontResponse extends Phobject {
 
   public function getRequest() {
     return $this->request;
+  }
+
+  final public function addContentSecurityPolicyURI($kind, $uri) {
+    if ($this->contentSecurityPolicyURIs === null) {
+      $this->contentSecurityPolicyURIs = array(
+         'script-src' => array(),
+         'connect-src' => array(),
+         'frame-src' => array(),
+         'form-action' => array(),
+         'object-src' => array(),
+       );
+    }
+
+    if (!isset($this->contentSecurityPolicyURIs[$kind])) {
+      throw new Exception(
+        pht(
+          'Unknown Content-Security-Policy URI kind "%s".',
+          $kind));
+    }
+
+    $this->contentSecurityPolicyURIs[$kind][] = (string)$uri;
+
+    return $this;
+  }
+
+  final public function setDisableContentSecurityPolicy($disable) {
+    $this->disableContentSecurityPolicy = $disable;
+    return $this;
   }
 
 
@@ -59,7 +89,138 @@ abstract class AphrontResponse extends Phobject {
       );
     }
 
+    $csp = $this->newContentSecurityPolicyHeader();
+    if ($csp !== null) {
+      $headers[] = array('Content-Security-Policy', $csp);
+    }
+
+    $headers[] = array('Referrer-Policy', 'no-referrer');
+
     return $headers;
+  }
+
+  private function newContentSecurityPolicyHeader() {
+    if ($this->disableContentSecurityPolicy) {
+      return null;
+    }
+
+    // NOTE: We may return a response during preflight checks (for example,
+    // if a user has a bad version of PHP).
+
+    // In this case, setup isn't complete yet and we can't access environmental
+    // configuration. If we aren't able to read the environment, just decline
+    // to emit a Content-Security-Policy header.
+
+    try {
+      $cdn = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+      $base_uri = PhabricatorEnv::getURI('/');
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    $csp = array();
+    if ($cdn) {
+      $default = $this->newContentSecurityPolicySource($cdn);
+    } else {
+      // If an alternate file domain is not configured and the user is viewing
+      // a Phame blog on a custom domain or some other custom site, we'll still
+      // serve resources from the main site. Include the main site explicitly.
+      $base_uri = $this->newContentSecurityPolicySource($base_uri);
+
+      $default = "'self' {$base_uri}";
+    }
+
+    $csp[] = "default-src {$default}";
+
+    // We use "data:" URIs to inline small images into CSS. This policy allows
+    // "data:" URIs to be used anywhere, but there doesn't appear to be a way
+    // to say that "data:" URIs are okay in CSS files but not in the document.
+    $csp[] = "img-src {$default} data:";
+
+    // We use inline style="..." attributes in various places, many of which
+    // are legitimate. We also currently use a <style> tag to implement the
+    // "Monospaced Font Preference" setting.
+    $csp[] = "style-src {$default} 'unsafe-inline'";
+
+    // On a small number of pages, including the Stripe workflow and the
+    // ReCAPTCHA challenge, we embed external Javascript directly.
+    $csp[] = $this->newContentSecurityPolicy('script-src', $default);
+
+    // We need to specify that we can connect to ourself in order for AJAX
+    // requests to work.
+    $csp[] = $this->newContentSecurityPolicy('connect-src', "'self'");
+
+    // DarkConsole and PHPAST both use frames to render some content.
+    $csp[] = $this->newContentSecurityPolicy('frame-src', "'self'");
+
+    // This is a more modern flavor of of "X-Frame-Options" and prevents
+    // clickjacking attacks where the page is included in a tiny iframe and
+    // the user is convinced to click a element on the page, which really
+    // clicks a dangerous button hidden under a picture of a cat.
+    if ($this->frameable) {
+      $csp[] = "frame-ancestors 'self'";
+    } else {
+      $csp[] = "frame-ancestors 'none'";
+    }
+
+    // Block relics of the old world: Flash, Java applets, and so on. Note
+    // that Chrome prevents the user from viewing PDF documents if they are
+    // served with a policy which excludes the domain they are served from.
+    $csp[] = $this->newContentSecurityPolicy('object-src', "'none'");
+
+    // Don't allow forms to submit offsite.
+
+    // This can result in some trickiness with file downloads if applications
+    // try to start downloads by submitting a dialog. Redirect to the file's
+    // download URI instead of submitting a form to it.
+    $csp[] = $this->newContentSecurityPolicy('form-action', "'self'");
+
+    // Block use of "<base>" to change the origin of relative URIs on the page.
+    $csp[] = "base-uri 'none'";
+
+    $csp = implode('; ', $csp);
+
+    return $csp;
+  }
+
+  private function newContentSecurityPolicy($type, $defaults) {
+    if ($defaults === null) {
+      $sources = array();
+    } else {
+      $sources = (array)$defaults;
+    }
+
+    $uris = $this->contentSecurityPolicyURIs;
+    if (isset($uris[$type])) {
+      foreach ($uris[$type] as $uri) {
+        $sources[] = $this->newContentSecurityPolicySource($uri);
+      }
+    }
+    $sources = array_unique($sources);
+
+    return $type.' '.implode(' ', $sources);
+  }
+
+  private function newContentSecurityPolicySource($uri) {
+    // Some CSP URIs are ultimately user controlled (like notification server
+    // URIs and CDN URIs) so attempt to stop an attacker from injecting an
+    // unsafe source (like 'unsafe-eval') into the CSP header.
+
+    $uri = id(new PhutilURI($uri))
+      ->setPath(null)
+      ->setFragment(null)
+      ->setQueryParams(array());
+
+    $uri = (string)$uri;
+    if (preg_match('/[ ;\']/', $uri)) {
+      throw new Exception(
+        pht(
+          'Attempting to emit a response with an unsafe source ("%s") in the '.
+          'Content-Security-Policy header.',
+          $uri));
+    }
+
+    return $uri;
   }
 
   public function setCacheDurationInSeconds($duration) {

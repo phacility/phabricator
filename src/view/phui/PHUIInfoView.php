@@ -10,7 +10,7 @@ final class PHUIInfoView extends AphrontTagView {
   const SEVERITY_PLAIN = 'plain';
 
   private $title;
-  private $errors;
+  private $errors = array();
   private $severity = null;
   private $id;
   private $buttons = array();

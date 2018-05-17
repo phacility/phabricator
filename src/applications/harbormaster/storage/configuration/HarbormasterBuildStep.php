@@ -100,6 +100,19 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     return ($this->getStepAutoKey() !== null);
   }
 
+  public function willStartBuild(
+    PhabricatorUser $viewer,
+    HarbormasterBuildable $buildable,
+    HarbormasterBuild $build,
+    HarbormasterBuildPlan $plan) {
+    return $this->getStepImplementation()->willStartBuild(
+      $viewer,
+      $buildable,
+      $build,
+      $plan,
+      $this);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

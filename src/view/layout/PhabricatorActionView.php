@@ -255,8 +255,10 @@ final class PhabricatorActionView extends AphrontView {
       } else {
         if ($this->getOpenInNewWindow()) {
           $target = '_blank';
+          $rel = 'noreferrer';
         } else {
           $target = null;
+          $rel = null;
         }
 
         if ($this->submenu) {
@@ -277,6 +279,7 @@ final class PhabricatorActionView extends AphrontView {
             'href'  => $this->getHref(),
             'class' => 'phabricator-action-view-item',
             'target' => $target,
+            'rel' => $rel,
             'sigil' => $sigils,
             'meta' => $this->metadata,
           ),

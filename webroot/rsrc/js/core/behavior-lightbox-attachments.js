@@ -9,19 +9,18 @@
  *           phabricator-busy
  */
 
-JX.behavior('lightbox-attachments', function (config) {
+JX.behavior('lightbox-attachments', function() {
 
-  var lightbox     = null;
+  var lightbox = null;
+
   var prev         = null;
   var next         = null;
   var shown        = false;
-  var downloadForm = JX.$H(config.downloadForm).getFragment().firstChild;
-  var lightbox_id  = config.lightbox_id;
 
   function _toggleComment(e) {
     e.kill();
     shown = !shown;
-    JX.DOM.alterClass(JX.$(lightbox_id), 'comment-panel-open', shown);
+    JX.DOM.alterClass(lightbox, 'comment-panel-open', shown);
   }
 
   function markCommentsLoading(loading) {
@@ -48,8 +47,19 @@ JX.behavior('lightbox-attachments', function (config) {
       return;
     }
 
+    // If you click the "Download" link inside an embedded file element,
+    // don't lightbox the file. But do lightbox when the user clicks an
+    // "<img />" inside an "<a />".
+    if (e.getNode('tag:a') && !e.getNode('tag:img')) {
+      return;
+    }
+
     e.kill();
 
+    activateLightbox(e.getNode('lightboxable'));
+  }
+
+  function activateLightbox(target) {
     var mainFrame = JX.$('main-page-frame');
     var links = JX.DOM.scry(mainFrame, '*', 'lightboxable');
     var phids = {};
@@ -62,7 +72,6 @@ JX.behavior('lightbox-attachments', function (config) {
     // Now that we have the big picture phid situation sorted out, figure
     // out how the actual node the user clicks fits into that big picture
     // and build some pretty UI to show the attachment.
-    var target      = e.getNode('lightboxable');
     var target_data = JX.Stratcom.getData(target);
     var total       = JX.keys(phids).length;
     var current     = 1;
@@ -82,8 +91,7 @@ JX.behavior('lightbox-attachments', function (config) {
     var img_uri = '';
     var img = '';
     var extra_status = '';
-    // for now, this conditional is always true
-    // revisit if / when we decide to add non-images to lightbox view
+
     if (target_data.viewable) {
       img_uri = target_data.uri;
       var alt_name = '';
@@ -114,7 +122,7 @@ JX.behavior('lightbox-attachments', function (config) {
           {
             className : 'lightbox-icon-frame',
             sigil : 'lightbox-download-submit',
-            href : '#',
+            href : target_data.dUri,
           },
           [ imgIcon, nameElement ]
         );
@@ -138,12 +146,12 @@ JX.behavior('lightbox-attachments', function (config) {
       );
 
     var commentClass = (shown) ? 'comment-panel-open' : '';
+
     lightbox =
       JX.$N('div',
         {
           className : 'lightbox-attachment ' + commentClass,
-          sigil : 'lightbox-attachment',
-          id : lightbox_id
+          sigil : 'lightbox-attachment'
         },
         [imgFrame, commentFrame]
       );
@@ -161,12 +169,17 @@ JX.behavior('lightbox-attachments', function (config) {
         ]
       );
 
-    var downloadSpan =
-      JX.$N('span',
-        {
-          className : 'lightbox-download'
-        }
-      );
+    var download_icon = new JX.PHUIXIconView()
+      .setIcon('fa-download phui-icon-circle-icon')
+      .getNode();
+
+    var download_button = JX.$N(
+      'a',
+      {
+        className: 'lightbox-download phui-icon-circle hover-sky',
+        href: target_data.dUri
+      },
+      download_icon);
 
     var commentIcon = new JX.PHUIXIconView()
       .setIcon('fa-comments phui-icon-circle-icon')
@@ -180,6 +193,7 @@ JX.behavior('lightbox-attachments', function (config) {
         },
         commentIcon
       );
+
     var closeIcon = new JX.PHUIXIconView()
       .setIcon('fa-times phui-icon-circle-icon')
       .getNode();
@@ -190,12 +204,13 @@ JX.behavior('lightbox-attachments', function (config) {
           href : '#'
         },
         closeIcon);
+
     var statusHTML =
       JX.$N('div',
         {
           className : 'lightbox-status'
         },
-       [statusSpan, closeButton, commentButton, downloadSpan]
+       [statusSpan, closeButton, commentButton, download_button]
       );
     JX.DOM.appendContent(lightbox, statusHTML);
     JX.DOM.listen(closeButton, 'click', null, closeLightBox);
@@ -245,9 +260,6 @@ JX.behavior('lightbox-attachments', function (config) {
 
     JX.DOM.alterClass(document.body, 'lightbox-attached', true);
     JX.Mask.show('jx-dark-mask');
-
-    downloadForm.action = target_data.dUri;
-    downloadSpan.appendChild(downloadForm);
 
     document.body.appendChild(lightbox);
 
@@ -315,7 +327,8 @@ JX.behavior('lightbox-attachments', function (config) {
     }
     e.prevent();
     closeLightBox(e);
-    el.click();
+
+    activateLightbox(el);
   }
 
   // Only look for lightboxable inside the main page, not other lightboxes.
@@ -365,22 +378,11 @@ JX.behavior('lightbox-attachments', function (config) {
     'lightbox-comment-form',
     _sendMessage);
 
-  var _startDownload = function(e) {
-    e.kill();
-    var form = JX.$('lightbox-download-form');
-    form.submit();
-  };
-
   var _startPageDownload = function(e) {
     e.kill();
     var form = e.getNode('tag:form');
     form.submit();
   };
-
-  JX.Stratcom.listen(
-    'click',
-    'lightbox-download-submit',
-    _startDownload);
 
   JX.Stratcom.listen(
     'click',

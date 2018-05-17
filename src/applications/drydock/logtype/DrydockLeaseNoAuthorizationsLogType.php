@@ -13,14 +13,13 @@ final class DrydockLeaseNoAuthorizationsLogType extends DrydockLogType {
   }
 
   public function renderLog(array $data) {
-    $viewer = $this->getViewer();
     $authorizing_phid = idx($data, 'authorizingPHID');
 
     return pht(
       'The object which authorized this lease (%s) is not authorized to use '.
       'any of the blueprints the lease lists. Approve the authorizations '.
       'before using the lease.',
-      $viewer->renderHandle($authorizing_phid)->render());
+      $this->renderHandle($authorizing_phid));
   }
 
 }

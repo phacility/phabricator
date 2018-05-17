@@ -5,6 +5,7 @@ final class DifferentialRawDiffRenderer extends Phobject {
   private $changesets;
   private $format = 'unified';
   private $viewer;
+  private $byteLimit;
 
   public function setFormat($format) {
     $this->format = $format;
@@ -35,6 +36,15 @@ final class DifferentialRawDiffRenderer extends Phobject {
     return $this->viewer;
   }
 
+  public function setByteLimit($byte_limit) {
+    $this->byteLimit = $byte_limit;
+    return $this;
+  }
+
+  public function getByteLimit() {
+    return $this->byteLimit;
+  }
+
   public function buildPatch() {
     $diff = new DifferentialDiff();
     $diff->attachChangesets($this->getChangesets());
@@ -52,15 +62,18 @@ final class DifferentialRawDiffRenderer extends Phobject {
     $bundle = ArcanistBundle::newFromChanges($changes);
     $bundle->setLoadFileDataCallback(array($loader, 'loadFileData'));
 
+    $byte_limit = $this->getByteLimit();
+    if ($byte_limit) {
+      $bundle->setByteLimit($byte_limit);
+    }
+
     $format = $this->getFormat();
     switch ($format) {
       case 'git':
         return $bundle->toGitPatch();
-        break;
       case 'unified':
       default:
         return $bundle->toUnifiedDiff();
-        break;
     }
   }
 }

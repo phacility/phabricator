@@ -22,13 +22,13 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
     $revision->setTestPlan($this->generateDescription());
 
     $diff = $this->generateDiff($author);
+    $type_update = DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE;
 
     $xactions = array();
 
     $xactions[] = id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+      ->setTransactionType($type_update)
       ->setNewValue($diff->getPHID());
-
 
     id(new DifferentialTransactionEditor())
       ->setActor($author)

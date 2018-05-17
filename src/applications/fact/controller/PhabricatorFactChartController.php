@@ -5,27 +5,35 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $table = new PhabricatorFactRaw();
+    $series = $request->getStr('y1');
+
+    $facts = PhabricatorFact::getAllFacts();
+    $fact = idx($facts, $series);
+
+    if (!$fact) {
+      return new Aphront404Response();
+    }
+
+    $key_id = id(new PhabricatorFactKeyDimension())
+      ->newDimensionID($fact->getKey());
+    if (!$key_id) {
+      return new Aphront404Response();
+    }
+
+    $table = $fact->newDatapoint();
     $conn_r = $table->establishConnection('r');
     $table_name = $table->getTableName();
 
-    $series = $request->getStr('y1');
-
-    $specs = PhabricatorFactSpec::newSpecsForFactTypes(
-      PhabricatorFactEngine::loadAllEngines(),
-      array($series));
-    $spec = idx($specs, $series);
-
     $data = queryfx_all(
       $conn_r,
-      'SELECT valueX, epoch FROM %T WHERE factType = %s ORDER BY epoch ASC',
+      'SELECT value, epoch FROM %T WHERE keyID = %d ORDER BY epoch ASC',
       $table_name,
-      $series);
+      $key_id);
 
     $points = array();
     $sum = 0;
     foreach ($data as $key => $row) {
-      $sum += (int)$row['valueX'];
+      $sum += (int)$row['value'];
       $points[(int)$row['epoch']] = $sum;
     }
 
@@ -71,7 +79,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     ));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Count of %s', $spec->getName()))
+      ->setHeaderText(pht('Count of %s', $fact->getName()))
       ->appendChild($chart);
 
     $crumbs = $this->buildApplicationCrumbs();

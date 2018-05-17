@@ -272,8 +272,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file->setByteSize($length);
 
     // NOTE: Once we receive the first chunk, we'll detect its MIME type and
-    // update the parent file. This matters for large media files like video.
-    $file->setMimeType('application/octet-stream');
+    // update the parent file if a MIME type hasn't been provided. This matters
+    // for large media files like video.
+    $mime_type = idx($params, 'mime-type');
+    if (!strlen($mime_type)) {
+      $file->setMimeType('application/octet-stream');
+    }
 
     $chunked_hash = idx($params, 'chunkedHash');
 
@@ -644,10 +648,17 @@ final class PhabricatorFile extends PhabricatorFileDAO
           // just bail out.
           throw $status;
         } else {
-          // This is HTTP 2XX, so use the response body to save the
-          // file data.
+          // This is HTTP 2XX, so use the response body to save the file data.
+          // Provide a default name based on the URI, truncating it if the URI
+          // is exceptionally long.
+
+          $default_name = basename($uri);
+          $default_name = id(new PhutilUTF8StringTruncator())
+            ->setMaximumBytes(64)
+            ->truncateString($default_name);
+
           $params = $params + array(
-            'name' => basename($uri),
+            'name' => $default_name,
           );
 
           return self::newFromFileData($body, $params);
@@ -806,16 +817,24 @@ final class PhabricatorFile extends PhabricatorFileDAO
         pht('You must save a file before you can generate a view URI.'));
     }
 
-    return $this->getCDNURI();
+    return $this->getCDNURI('data');
   }
 
-  public function getCDNURI() {
+  public function getCDNURI($request_kind) {
+    if (($request_kind !== 'data') &&
+        ($request_kind !== 'download')) {
+      throw new Exception(
+        pht(
+          'Unknown file content request kind "%s".',
+          $request_kind));
+    }
+
     $name = self::normalizeFileName($this->getName());
     $name = phutil_escape_uri($name);
 
     $parts = array();
     $parts[] = 'file';
-    $parts[] = 'data';
+    $parts[] = $request_kind;
 
     // If this is an instanced install, add the instance identifier to the URI.
     // Instanced configurations behind a CDN may not be able to control the
@@ -857,9 +876,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function getDownloadURI() {
-    $uri = id(new PhutilURI($this->getViewURI()))
-      ->setQueryParam('download', true);
-    return (string)$uri;
+    return $this->getCDNURI('download');
   }
 
   public function getURIForTransform(PhabricatorFileTransform $transform) {
@@ -916,6 +933,19 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
 
     $mime_map = PhabricatorEnv::getEnvConfig('files.video-mime-types');
+    $mime_type = $this->getMimeType();
+    return idx($mime_map, $mime_type);
+  }
+
+  public function isPDF() {
+    if (!$this->isViewableInBrowser()) {
+      return false;
+    }
+
+    $mime_map = array(
+      'application/pdf' => 'application/pdf',
+    );
+
     $mime_type = $this->getMimeType();
     return idx($mime_map, $mime_type);
   }
@@ -1142,7 +1172,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
       $params = array(
         'name' => $builtin->getBuiltinDisplayName(),
-        'ttl.relative' => phutil_units('7 days in seconds'),
         'canCDN' => true,
         'builtin' => $key,
       );
@@ -1465,6 +1494,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
       ->setURI($uri);
   }
 
+  public function newDownloadResponse() {
+    // We're cheating a little bit here and relying on the fact that
+    // getDownloadURI() always returns a fully qualified URI with a complete
+    // domain.
+    return id(new AphrontRedirectResponse())
+      ->setIsExternal(true)
+      ->setCloseDialogBeforeRedirect(true)
+      ->setURI($this->getDownloadURI());
+  }
+
   public function attachTransforms(array $map) {
     $this->transforms = $map;
     return $this;
@@ -1628,7 +1667,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getFieldValuesForConduit() {
     return array(
       'name' => $this->getName(),
-      'dataURI' => $this->getCDNURI(),
+      'dataURI' => $this->getCDNURI('data'),
       'size' => (int)$this->getByteSize(),
     );
   }

@@ -28,7 +28,7 @@ final class DiffusionPreCommitContentRevisionReviewersHeraldField
   }
 
   protected function getDatasource() {
-    return new PhabricatorProjectOrUserDatasource();
+    return new DifferentialReviewerDatasource();
   }
 
 }

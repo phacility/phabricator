@@ -189,7 +189,7 @@ final class DifferentialDiff
       $hunks = $change->getHunks();
       if ($hunks) {
         foreach ($hunks as $hunk) {
-          $dhunk = new DifferentialModernHunk();
+          $dhunk = new DifferentialHunk();
           $dhunk->setOldOffset($hunk->getOldOffset());
           $dhunk->setOldLen($hunk->getOldLength());
           $dhunk->setNewOffset($hunk->getNewOffset());
@@ -230,16 +230,13 @@ final class DifferentialDiff
     }
     $diff->setLineCount($lines);
 
-    $parser = new DifferentialChangesetParser();
-    $changesets = $parser->detectCopiedCode(
-      $diff->getChangesets(),
-      $min_width = 30,
-      $min_lines = 3);
-    $diff->attachChangesets($changesets);
+    $changesets = $diff->getChangesets();
+
+    id(new DifferentialChangesetEngine())
+      ->rebuildChangesets($changesets);
 
     return $diff;
   }
-
 
   public function getDiffDict() {
     $dict = array(
@@ -509,10 +506,6 @@ final class DifferentialDiff
     return null;
   }
 
-  public function getHarbormasterPublishablePHID() {
-    return $this->getHarbormasterContainerPHID();
-  }
-
   public function getBuildVariables() {
     $results = array();
 
@@ -555,6 +548,10 @@ final class DifferentialDiff
       'repository.staging.ref' =>
         pht('The ref name for this change in the staging repository.'),
     );
+  }
+
+  public function newBuildableEngine() {
+    return new DifferentialBuildableEngine();
   }
 
 
@@ -815,8 +812,10 @@ final class DifferentialDiff
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new DifferentialCommitsSearchEngineAttachment())
+        ->setAttachmentKey('commits'),
+    );
   }
-
 
 }

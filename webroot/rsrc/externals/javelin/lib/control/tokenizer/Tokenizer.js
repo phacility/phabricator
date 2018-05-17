@@ -395,8 +395,12 @@ JX.install('Tokenizer', {
           break;
         case 'delete':
           if (!this._focus.value.length) {
+            // In unusual cases, it's possible for us to end up with a token
+            // that has the empty string ("") as a value. Support removal of
+            // this unusual token.
+
             var tok;
-            while ((tok = this._tokens.pop())) {
+            while ((tok = this._tokens.pop()) !== null) {
               if (this._remove(tok, true)) {
                 break;
               }

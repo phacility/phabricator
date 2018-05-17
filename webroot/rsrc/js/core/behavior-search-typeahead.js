@@ -70,6 +70,7 @@ JX.behavior('phabricator-search-typeahead', function(config) {
       'proj',
       'user',
       'repo',
+      'wiki',
       'symb',
       'misc'
     ];

@@ -57,8 +57,8 @@ final class DrydockManagementCommandWorkflow
       array($interface, 'execx'),
       array('%Ls', $argv));
 
-    fprintf(STDOUT, $stdout);
-    fprintf(STDERR, $stderr);
+    fwrite(STDOUT, $stdout);
+    fwrite(STDERR, $stderr);
 
     return 0;
   }

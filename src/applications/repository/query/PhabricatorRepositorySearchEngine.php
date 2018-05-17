@@ -24,6 +24,9 @@ final class PhabricatorRepositorySearchEngine
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Callsigns'))
         ->setKey('callsigns'),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Short Names'))
+        ->setKey('shortNames'),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Status'))
         ->setKey('status')
@@ -49,6 +52,10 @@ final class PhabricatorRepositorySearchEngine
 
     if ($map['callsigns']) {
       $query->withCallsigns($map['callsigns']);
+    }
+
+    if ($map['shortNames']) {
+      $query->withSlugs($map['shortNames']);
     }
 
     if ($map['status']) {

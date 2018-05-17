@@ -31,9 +31,10 @@
   font-size: 13px;
   font-weight: bold;
   background: rgba({$alphablue},0.08);
-  display: inline-block;
+  display: table-cell;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
+  overflow: hidden;
 }
 
 .phabricator-remarkup .code-block-counterexample .remarkup-code-header {
@@ -405,8 +406,9 @@ video.phabricator-media {
   color: {$blacktext};
   min-width: 256px;
   position: relative;
-  /*height: 22px;*/
   line-height: 20px;
+  overflow: hidden;
+  min-height: 38px;
 }
 
 .phabricator-remarkup-embed-layout-icon {
@@ -426,6 +428,9 @@ video.phabricator-media {
 .phabricator-remarkup-embed-layout-link:hover {
   border-color: {$violet};
   cursor: pointer;
+}
+
+.device-desktop .phabricator-remarkup-embed-layout-link:hover {
   text-decoration: none;
 }
 
@@ -470,6 +475,13 @@ video.phabricator-media {
 .phabricator-remarkup-embed-float-left {
   float: left;
   margin: .5em 1em 0;
+}
+
+.phabricator-remarkup-image-error {
+  border: 1px solid {$redborder};
+  background: {$sh-redbackground};
+  padding: 8px 12px;
+  color: {$darkgreytext};
 }
 
 .phabricator-remarkup-embed-image {
@@ -711,6 +723,11 @@ var.remarkup-assist-textarea {
   border-top: 1px solid {$thinblueborder};
   font-weight: bold;
   color: {$darkgreytext};
+}
+
+.phuix-autocomplete-list a.jx-result .tokenizer-result-closed {
+  color: {$lightgreytext};
+  text-decoration: line-through;
 }
 
 .phuix-autocomplete-list a.jx-result .phui-icon-view {

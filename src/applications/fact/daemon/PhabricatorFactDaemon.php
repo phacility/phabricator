@@ -4,8 +4,6 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
 
   private $engines;
 
-  const RAW_FACT_BUFFER_LIMIT = 128;
-
   protected function run() {
     $this->setEngines(PhabricatorFactEngine::loadAllEngines());
     while (!$this->shouldExit()) {
@@ -15,7 +13,6 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
       foreach ($iterators as $iterator_name => $iterator) {
         $this->processIteratorWithCursor($iterator_name, $iterator);
       }
-      $this->processAggregates();
 
       $this->log(pht('Zzz...'));
       $this->sleep(60 * 5);
@@ -65,6 +62,11 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
   public function setEngines(array $engines) {
     assert_instances_of($engines, 'PhabricatorFactEngine');
 
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    foreach ($engines as $engine) {
+      $engine->setViewer($viewer);
+    }
+
     $this->engines = $engines;
     return $this;
   }
@@ -72,59 +74,49 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
   public function processIterator($iterator) {
     $result = null;
 
-    $raw_facts = array();
+    $datapoints = array();
+    $count = 0;
     foreach ($iterator as $key => $object) {
       $phid = $object->getPHID();
       $this->log(pht('Processing %s...', $phid));
-      $raw_facts[$phid] = $this->computeRawFacts($object);
-      if (count($raw_facts) > self::RAW_FACT_BUFFER_LIMIT) {
-        $this->updateRawFacts($raw_facts);
-        $raw_facts = array();
+      $object_datapoints = $this->newDatapoints($object);
+      $count += count($object_datapoints);
+
+      $datapoints[$phid] = $object_datapoints;
+
+      if ($count > 1024) {
+        $this->updateDatapoints($datapoints);
+        $datapoints = array();
+        $count = 0;
       }
+
       $result = $key;
     }
 
-    if ($raw_facts) {
-      $this->updateRawFacts($raw_facts);
-      $raw_facts = array();
+    if ($count) {
+      $this->updateDatapoints($datapoints);
+      $datapoints = array();
+      $count = 0;
     }
 
     return $result;
   }
 
-  public function processAggregates() {
-    $this->log(pht('Processing aggregates.'));
-
-    $facts = $this->computeAggregateFacts();
-    $this->updateAggregateFacts($facts);
-  }
-
-  private function computeAggregateFacts() {
+  private function newDatapoints(PhabricatorLiskDAO $object) {
     $facts = array();
     foreach ($this->engines as $engine) {
-      if (!$engine->shouldComputeAggregateFacts()) {
+      if (!$engine->supportsDatapointsForObject($object)) {
         continue;
       }
-      $facts[] = $engine->computeAggregateFacts();
-    }
-    return array_mergev($facts);
-  }
-
-  private function computeRawFacts(PhabricatorLiskDAO $object) {
-    $facts = array();
-    foreach ($this->engines as $engine) {
-      if (!$engine->shouldComputeRawFactsForObject($object)) {
-        continue;
-      }
-      $facts[] = $engine->computeRawFactsForObject($object);
+      $facts[] = $engine->newDatapointsForObject($object);
     }
 
     return array_mergev($facts);
   }
 
-  private function updateRawFacts(array $map) {
+  private function updateDatapoints(array $map) {
     foreach ($map as $phid => $facts) {
-      assert_instances_of($facts, 'PhabricatorFactRaw');
+      assert_instances_of($facts, 'PhabricatorFactIntDatapoint');
     }
 
     $phids = array_keys($map);
@@ -132,76 +124,78 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
       return;
     }
 
-    $table = new PhabricatorFactRaw();
+    $fact_keys = array();
+    $objects = array();
+    foreach ($map as $phid => $facts) {
+      foreach ($facts as $fact) {
+        $fact_keys[$fact->getKey()] = true;
+
+        $object_phid = $fact->getObjectPHID();
+        $objects[$object_phid] = $object_phid;
+
+        $dimension_phid = $fact->getDimensionPHID();
+        if ($dimension_phid !== null) {
+          $objects[$dimension_phid] = $dimension_phid;
+        }
+      }
+    }
+
+    $key_map = id(new PhabricatorFactKeyDimension())
+      ->newDimensionMap(array_keys($fact_keys), true);
+    $object_map = id(new PhabricatorFactObjectDimension())
+      ->newDimensionMap(array_keys($objects), true);
+
+    $table = new PhabricatorFactIntDatapoint();
     $conn = $table->establishConnection('w');
     $table_name = $table->getTableName();
 
     $sql = array();
     foreach ($map as $phid => $facts) {
       foreach ($facts as $fact) {
+        $key_id = $key_map[$fact->getKey()];
+        $object_id = $object_map[$fact->getObjectPHID()];
+
+        $dimension_phid = $fact->getDimensionPHID();
+        if ($dimension_phid !== null) {
+          $dimension_id = $object_map[$dimension_phid];
+        } else {
+          $dimension_id = null;
+        }
+
         $sql[] = qsprintf(
           $conn,
-          '(%s, %s, %s, %d, %d, %d)',
-          $fact->getFactType(),
-          $fact->getObjectPHID(),
-          $fact->getObjectA(),
-          $fact->getValueX(),
-          $fact->getValueY(),
+          '(%d, %d, %nd, %d, %d)',
+          $key_id,
+          $object_id,
+          $dimension_id,
+          $fact->getValue(),
           $fact->getEpoch());
       }
     }
+
+    $rebuilt_ids = array_select_keys($object_map, $phids);
 
     $table->openTransaction();
 
       queryfx(
         $conn,
-        'DELETE FROM %T WHERE objectPHID IN (%Ls)',
+        'DELETE FROM %T WHERE objectID IN (%Ld)',
         $table_name,
-        $phids);
+        $rebuilt_ids);
 
       if ($sql) {
-        foreach (array_chunk($sql, 256) as $chunk) {
+        foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
           queryfx(
             $conn,
             'INSERT INTO %T
-              (factType, objectPHID, objectA, valueX, valueY, epoch)
+              (keyID, objectID, dimensionID, value, epoch)
               VALUES %Q',
             $table_name,
-            implode(', ', $chunk));
+            $chunk);
         }
       }
 
     $table->saveTransaction();
-  }
-
-  private function updateAggregateFacts(array $facts) {
-    if (!$facts) {
-      return;
-    }
-
-    $table = new PhabricatorFactAggregate();
-    $conn = $table->establishConnection('w');
-    $table_name = $table->getTableName();
-
-    $sql = array();
-    foreach ($facts as $fact) {
-      $sql[] = qsprintf(
-        $conn,
-        '(%s, %s, %d)',
-        $fact->getFactType(),
-        $fact->getObjectPHID(),
-        $fact->getValueX());
-    }
-
-    foreach (array_chunk($sql, 256) as $chunk) {
-      queryfx(
-        $conn,
-        'INSERT INTO %T (factType, objectPHID, valueX) VALUES %Q
-          ON DUPLICATE KEY UPDATE valueX = VALUES(valueX)',
-        $table_name,
-        implode(', ', $chunk));
-    }
-
   }
 
 }

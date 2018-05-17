@@ -13,6 +13,7 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
   private $attachments = array();
 
   private $viewer;
+  private $contextObject;
 
   public function getViewer() {
     return $this->viewer;
@@ -22,6 +23,16 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
     $this->viewer = $viewer;
     return $this;
   }
+
+  public function setContextObject($context_object) {
+    $this->contextObject = $context_object;
+    return $this;
+  }
+
+  public function getContextObject() {
+    return $this->contextObject;
+  }
+
 
 /* -(  Composition  )-------------------------------------------------------- */
 
@@ -45,9 +56,9 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
 
   public function addRemarkupSection($header, $text) {
     try {
-      $engine = PhabricatorMarkupEngine::newMarkupEngine(array());
-      $engine->setConfig('viewer', $this->getViewer());
-      $engine->setMode(PhutilRemarkupEngine::MODE_TEXT);
+      $engine = $this->newMarkupEngine()
+        ->setMode(PhutilRemarkupEngine::MODE_TEXT);
+
       $styled_text = $engine->markupText($text);
       $this->addPlaintextSection($header, $styled_text);
     } catch (Exception $ex) {
@@ -56,12 +67,9 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
     }
 
     try {
-      $mail_engine = PhabricatorMarkupEngine::newMarkupEngine(array());
-      $mail_engine->setConfig('viewer', $this->getViewer());
-      $mail_engine->setMode(PhutilRemarkupEngine::MODE_HTML_MAIL);
-      $mail_engine->setConfig(
-        'uri.base',
-        PhabricatorEnv::getProductionURI('/'));
+      $mail_engine = $this->newMarkupEngine()
+        ->setMode(PhutilRemarkupEngine::MODE_HTML_MAIL);
+
       $html = $mail_engine->markupText($text);
       $this->addHTMLSection($header, $html);
     } catch (Exception $ex) {
@@ -215,4 +223,19 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
   private function indent($text) {
     return rtrim("  ".str_replace("\n", "\n  ", $text));
   }
+
+
+  private function newMarkupEngine() {
+    $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
+      ->setConfig('viewer', $this->getViewer())
+      ->setConfig('uri.base', PhabricatorEnv::getProductionURI('/'));
+
+    $context = $this->getContextObject();
+    if ($context) {
+      $engine->setConfig('contextObject', $context);
+    }
+
+    return $engine;
+  }
+
 }

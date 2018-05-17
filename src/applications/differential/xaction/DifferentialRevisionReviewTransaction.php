@@ -164,7 +164,14 @@ abstract class DifferentialRevisionReviewTransaction
     DifferentialRevision $revision,
     PhabricatorUser $viewer,
     $value,
-    $status) {
+    $status,
+    array $reviewer_options = array()) {
+
+    PhutilTypeSpec::checkMap(
+      $reviewer_options,
+      array(
+        'sticky' => 'optional bool',
+      ));
 
     $map = array();
 
@@ -252,6 +259,8 @@ abstract class DifferentialRevisionReviewTransaction
         // by the author using "Request Review" when a reviewer has already
         // accepted.
         $reviewer->setVoidedPHID(null);
+
+        $reviewer->setOption('sticky', idx($reviewer_options, 'sticky'));
 
         try {
           $reviewer->save();

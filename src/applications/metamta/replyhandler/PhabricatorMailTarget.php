@@ -58,23 +58,55 @@ final class PhabricatorMailTarget extends Phobject {
   public function willSendMail(PhabricatorMetaMTAMail $mail) {
     $viewer = $this->getViewer();
 
+    $show_stamps = $mail->shouldRenderMailStampsInBody($viewer);
+
+    $body = $mail->getBody();
+    $html_body = $mail->getHTMLBody();
+    $has_html = (strlen($html_body) > 0);
+
+    if ($show_stamps) {
+      $stamps = $mail->getMailStamps();
+      if ($stamps) {
+        $body .= "\n";
+        $body .= pht('STAMPS');
+        $body .= "\n";
+        $body .= implode(' ', $stamps);
+        $body .= "\n";
+
+        if ($has_html) {
+          $html = array();
+          $html[] = phutil_tag('strong', array(), pht('STAMPS'));
+          $html[] = phutil_tag('br');
+          $html[] = phutil_tag(
+            'span',
+            array(
+              'style' => 'font-size: smaller; color: #92969D',
+            ),
+            phutil_implode_html(' ', $stamps));
+          $html[] = phutil_tag('br');
+          $html[] = phutil_tag('br');
+          $html = phutil_tag('div', array(), $html);
+          $html_body .= hsprintf('%s', $html);
+        }
+      }
+    }
+
     $mail->addPHIDHeaders('X-Phabricator-To', $this->rawToPHIDs);
     $mail->addPHIDHeaders('X-Phabricator-Cc', $this->rawCCPHIDs);
 
     $to_handles = $viewer->loadHandles($this->rawToPHIDs);
     $cc_handles = $viewer->loadHandles($this->rawCCPHIDs);
 
-    $body = $mail->getBody();
     $body .= "\n";
     $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
-    $mail->setBody($body);
 
-    $html_body = $mail->getHTMLBody();
-    if (strlen($html_body)) {
+    if ($has_html) {
       $html_body .= hsprintf(
         '%s',
         $this->getRecipientsSummaryHTML($to_handles, $cc_handles));
     }
+
+    $mail->setBody($body);
     $mail->setHTMLBody($html_body);
 
     $reply_to = $this->getReplyTo();

@@ -28,10 +28,11 @@ final class PhrictionEditController
 
       $revert = $request->getInt('revert');
       if ($revert) {
-        $content = id(new PhrictionContent())->loadOneWhere(
-          'documentID = %d AND version = %d',
-          $document->getID(),
-          $revert);
+        $content = id(new PhrictionContentQuery())
+          ->setViewer($viewer)
+          ->withDocumentPHIDs(array($document->getPHID()))
+          ->withVersions(array($revert))
+          ->executeOne();
         if (!$content) {
           return new Aphront404Response();
         }
@@ -218,6 +219,13 @@ final class PhrictionEditController
       ->execute();
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     $edit_capability = PhabricatorPolicyCapability::CAN_EDIT;
+    $codex = id(PhabricatorPolicyCodex::newFromObject($document, $viewer))
+      ->setCapability($view_capability);
+
+    $view_capability_description = $codex->getPolicySpecialRuleForCapability(
+      PhabricatorPolicyCapability::CAN_VIEW)->getDescription();
+    $edit_capability_description = $codex->getPolicySpecialRuleForCapability(
+      PhabricatorPolicyCapability::CAN_EDIT)->getDescription();
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -263,16 +271,14 @@ final class PhrictionEditController
           ->setPolicyObject($document)
           ->setCapability($view_capability)
           ->setPolicies($policies)
-          ->setCaption(
-            $document->describeAutomaticCapability($view_capability)))
+          ->setCaption($view_capability_description))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('editPolicy')
           ->setPolicyObject($document)
           ->setCapability($edit_capability)
           ->setPolicies($policies)
-          ->setCaption(
-            $document->describeAutomaticCapability($edit_capability)))
+          ->setCaption($edit_capability_description))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Edit Notes'))

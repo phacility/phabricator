@@ -8,6 +8,12 @@ require_once $root.'/scripts/__init_script__.php';
 
 $ssh_log = PhabricatorSSHLog::getLog();
 
+$request_identifier = Filesystem::readRandomCharacters(12);
+$ssh_log->setData(
+  array(
+    'Q' => $request_identifier,
+  ));
+
 $args = new PhutilArgumentParser($argv);
 $args->setTagline(pht('execute SSH requests'));
 $args->setSynopsis(<<<EOSYNOPSIS
@@ -245,9 +251,10 @@ try {
   }
 
   $workflow = $parsed_args->parseWorkflows($workflows);
-  $workflow->setUser($user);
+  $workflow->setSSHUser($user);
   $workflow->setOriginalArguments($original_argv);
   $workflow->setIsClusterRequest($is_cluster_request);
+  $workflow->setRequestIdentifier($request_identifier);
 
   $sock_stdin = fopen('php://stdin', 'r');
   if (!$sock_stdin) {

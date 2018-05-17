@@ -88,7 +88,7 @@ abstract class DiffusionFileFutureQuery
   }
 
   final protected function executeQuery() {
-    $future = $this->newQueryFuture();
+    $future = $this->newConfiguredQueryFuture();
 
     $drequest = $this->getRequest();
 
@@ -105,6 +105,11 @@ abstract class DiffusionFileFutureQuery
         ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
         ->setExecFuture($future);
 
+      $byte_limit = $this->getByteLimit();
+      if ($byte_limit) {
+        $source->setByteLimit($byte_limit);
+      }
+
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $file = $source->uploadFile();
       unset($unguarded);
@@ -116,18 +121,8 @@ abstract class DiffusionFileFutureQuery
 
       $this->didHitTimeLimit = true;
       $file = null;
-    }
-
-    $byte_limit = $this->getByteLimit();
-
-    if ($byte_limit && ($file->getByteSize() > $byte_limit)) {
+    } catch (PhabricatorFileUploadSourceByteLimitException $ex) {
       $this->didHitByteLimit = true;
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        id(new PhabricatorDestructionEngine())
-          ->destroyObject($file);
-      unset($unguarded);
-
       $file = null;
     }
 
@@ -139,11 +134,6 @@ abstract class DiffusionFileFutureQuery
 
     if ($this->getTimeout()) {
       $future->setTimeout($this->getTimeout());
-    }
-
-    $byte_limit = $this->getByteLimit();
-    if ($byte_limit) {
-      $future->setStdoutSizeLimit($byte_limit + 1);
     }
 
     return $future;

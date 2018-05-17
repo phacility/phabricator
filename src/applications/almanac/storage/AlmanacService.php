@@ -156,8 +156,21 @@ final class AlmanacService
     return $this->getServiceImplementation()->getFieldSpecifications();
   }
 
+  public function getBindingFieldSpecifications(AlmanacBinding $binding) {
+    $impl = $this->getServiceImplementation();
+    return $impl->getBindingFieldSpecifications($binding);
+  }
+
   public function newAlmanacPropertyEditEngine() {
     return new AlmanacServicePropertyEditEngine();
+  }
+
+  public function getAlmanacPropertySetTransactionType() {
+    return AlmanacServiceSetPropertyTransaction::TRANSACTIONTYPE;
+  }
+
+  public function getAlmanacPropertyDeleteTransactionType() {
+    return AlmanacServiceDeletePropertyTransaction::TRANSACTIONTYPE;
   }
 
 

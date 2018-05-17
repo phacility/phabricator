@@ -123,7 +123,7 @@ Otherwise, here's a general description of what you need to install:
   - MySQL Server (usually "mysqld" or "mysql-server")
   - PHP (usually "php")
   - Required PHP extensions: mbstring, iconv, mysql (or mysqli), curl, pcntl
-    (these might be something like "php-mysql" or "php5-mysql")
+    (these might be something like "php-mysql" or "php5-mysqlnd")
   - Optional PHP extensions: gd, apc (special instructions for APC are available
     below if you have difficulty installing it), xhprof (instructions below,
     you only need this if you are developing Phabricator)

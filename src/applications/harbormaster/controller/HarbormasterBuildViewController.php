@@ -8,7 +8,6 @@ final class HarbormasterBuildViewController
     $viewer = $request->getUser();
 
     $id = $request->getURIData('id');
-    $generation = $request->getInt('g');
 
     $build = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
@@ -21,6 +20,7 @@ final class HarbormasterBuildViewController
     require_celerity_resource('harbormaster-css');
 
     $title = pht('Build %d', $id);
+    $warnings = array();
 
     $page_header = id(new PHUIHeaderView())
       ->setHeader($title)
@@ -28,7 +28,9 @@ final class HarbormasterBuildViewController
       ->setPolicyObject($build)
       ->setHeaderIcon('fa-cubes');
 
-    if ($build->isRestarting()) {
+    $is_restarting = $build->isRestarting();
+
+    if ($is_restarting) {
       $page_header->setStatus(
         'fa-exclamation-triangle', 'red', pht('Restarting'));
     } else if ($build->isPausing()) {
@@ -42,18 +44,51 @@ final class HarbormasterBuildViewController
         'fa-exclamation-triangle', 'red', pht('Aborting'));
     }
 
+    $max_generation = (int)$build->getBuildGeneration();
+    if ($max_generation === 0) {
+      $min_generation = 0;
+    } else {
+      $min_generation = 1;
+    }
+
+    if ($is_restarting) {
+      $max_generation = $max_generation + 1;
+    }
+
+    $generation = $request->getURIData('generation');
+    if ($generation === null) {
+      $generation = $max_generation;
+    } else {
+      $generation = (int)$generation;
+    }
+
+    if ($generation < $min_generation || $generation > $max_generation) {
+      return new Aphront404Response();
+    }
+
+    if ($generation < $max_generation) {
+      $warnings[] = pht(
+        'You are viewing an older run of this build. %s',
+        phutil_tag(
+          'a',
+          array(
+            'href' => $build->getURI(),
+          ),
+          pht('View Current Build')));
+    }
+
     $curtain = $this->buildCurtainView($build);
     $properties = $this->buildPropertyList($build);
+    $history = $this->buildHistoryTable(
+      $build,
+      $generation,
+      $min_generation,
+      $max_generation);
 
     $crumbs = $this->buildApplicationCrumbs();
     $this->addBuildableCrumb($crumbs, $build->getBuildable());
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
-
-    if ($generation === null || $generation > $build->getBuildGeneration() ||
-      $generation < 0) {
-      $generation = $build->getBuildGeneration();
-    }
 
     $build_targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($viewer)
@@ -65,9 +100,9 @@ final class HarbormasterBuildViewController
     if ($build_targets) {
       $messages = id(new HarbormasterBuildMessageQuery())
         ->setViewer($viewer)
-        ->withBuildTargetPHIDs(mpull($build_targets, 'getPHID'))
+        ->withReceiverPHIDs(mpull($build_targets, 'getPHID'))
         ->execute();
-      $messages = mgroup($messages, 'getBuildTargetPHID');
+      $messages = mgroup($messages, 'getReceiverPHID');
     } else {
       $messages = array();
     }
@@ -256,7 +291,7 @@ final class HarbormasterBuildViewController
 
       $targets[] = $target_box;
 
-      $targets[] = $this->buildLog($build, $build_target);
+      $targets[] = $this->buildLog($build, $build_target, $generation);
     }
 
     $timeline = $this->buildTransactionTimeline(
@@ -264,14 +299,25 @@ final class HarbormasterBuildViewController
       new HarbormasterBuildTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    if ($warnings) {
+      $warnings = id(new PHUIInfoView())
+        ->setErrors($warnings)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING);
+    } else {
+      $warnings = null;
+    }
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($page_header)
       ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $properties,
-        $targets,
-        $timeline,
-      ));
+      ->setMainColumn(
+        array(
+          $warnings,
+          $properties,
+          $history,
+          $targets,
+          $timeline,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -324,7 +370,8 @@ final class HarbormasterBuildViewController
 
   private function buildLog(
     HarbormasterBuild $build,
-    HarbormasterBuildTarget $build_target) {
+    HarbormasterBuildTarget $build_target,
+    $generation) {
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -363,13 +410,22 @@ final class HarbormasterBuildViewController
       $log_view->setLines($lines);
       $log_view->setStart($start);
 
+      $subheader = $this->createLogHeader($build, $log, $limit, $generation);
+
+      $prototype_view = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref($log->getURI())
+        ->setIcon('fa-file-text-o')
+        ->setText(pht('New View (Prototype)'));
+
       $header = id(new PHUIHeaderView())
         ->setHeader(pht(
           'Build Log %d (%s - %s)',
           $log->getID(),
           $log->getLogSource(),
           $log->getLogType()))
-        ->setSubheader($this->createLogHeader($build, $log))
+        ->addActionLink($prototype_view)
+        ->setSubheader($subheader)
         ->setUser($viewer);
 
       $log_box = id(new PHUIObjectBoxView())
@@ -425,43 +481,53 @@ final class HarbormasterBuildViewController
     return $log_boxes;
   }
 
-  private function createLogHeader($build, $log) {
-    $request = $this->getRequest();
-    $limit = $request->getInt('l', 25);
+  private function createLogHeader($build, $log, $limit, $generation) {
+    $options = array(
+      array(
+        'n' => 25,
+      ),
+      array(
+        'n' => 50,
+      ),
+      array(
+        'n' => 100,
+      ),
+      array(
+        'n' => 0,
+        'label' => pht('Unlimited'),
+      ),
+    );
 
-    $lines_25 = $this->getApplicationURI('/build/'.$build->getID().'/?l=25');
-    $lines_50 = $this->getApplicationURI('/build/'.$build->getID().'/?l=50');
-    $lines_100 =
-      $this->getApplicationURI('/build/'.$build->getID().'/?l=100');
-    $lines_0 = $this->getApplicationURI('/build/'.$build->getID().'/?l=0');
+    $base_uri = id(new PhutilURI($build->getURI().$generation.'/'));
 
-    $link_25 = phutil_tag('a', array('href' => $lines_25), pht('25'));
-    $link_50 = phutil_tag('a', array('href' => $lines_50), pht('50'));
-    $link_100 = phutil_tag('a', array('href' => $lines_100), pht('100'));
-    $link_0 = phutil_tag('a', array('href' => $lines_0), pht('Unlimited'));
+    $links = array();
+    foreach ($options as $option) {
+      $n = $option['n'];
+      $label = idx($option, 'label', $n);
 
-    if ($limit === 25) {
-      $link_25 = phutil_tag('strong', array(), $link_25);
-    } else if ($limit === 50) {
-      $link_50 = phutil_tag('strong', array(), $link_50);
-    } else if ($limit === 100) {
-      $link_100 = phutil_tag('strong', array(), $link_100);
-    } else if ($limit === 0) {
-      $link_0 = phutil_tag('strong', array(), $link_0);
+      $is_selected = ($limit == $n);
+      if ($is_selected) {
+        $links[] = phutil_tag(
+          'strong',
+          array(),
+          $label);
+      } else {
+        $links[] = phutil_tag(
+          'a',
+          array(
+            'href' => (string)$base_uri->alter('l', $n),
+          ),
+          $label);
+      }
     }
 
     return phutil_tag(
       'span',
       array(),
       array(
-        $link_25,
-        ' - ',
-        $link_50,
-        ' - ',
-        $link_100,
-        ' - ',
-        $link_0,
-        ' Lines',
+        phutil_implode_html(' -  ', $links),
+        ' ',
+        pht('Lines'),
       ));
   }
 
@@ -555,10 +621,6 @@ final class HarbormasterBuildViewController
       $handles[$build->getBuildPlanPHID()]->renderLink());
 
     $properties->addProperty(
-      pht('Restarts'),
-      $build->getBuildGeneration());
-
-    $properties->addProperty(
       pht('Status'),
       $this->getStatus($build));
 
@@ -568,6 +630,53 @@ final class HarbormasterBuildViewController
       ->appendChild($properties);
 
   }
+
+  private function buildHistoryTable(
+    HarbormasterBuild $build,
+    $generation,
+    $min_generation,
+    $max_generation) {
+
+    if ($max_generation === $min_generation) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    $uri = $build->getURI();
+
+    $rows = array();
+    $rowc = array();
+    for ($ii = $max_generation; $ii >= $min_generation; $ii--) {
+      if ($generation == $ii) {
+        $rowc[] = 'highlighted';
+      } else {
+        $rowc[] = null;
+      }
+
+      $rows[] = array(
+        phutil_tag(
+          'a',
+          array(
+            'href' => $uri.$ii.'/',
+          ),
+          pht('Run %d', $ii)),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setColumnClasses(
+        array(
+          'pri wide',
+        ))
+      ->setRowClasses($rowc);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('History'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($table);
+  }
+
 
   private function getStatus(HarbormasterBuild $build) {
     $status_view = new PHUIStatusListView();

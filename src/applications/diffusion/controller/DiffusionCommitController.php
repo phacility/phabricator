@@ -277,9 +277,9 @@ final class DiffusionCommitController extends DiffusionController {
           'This commit is empty and does not affect any paths.'));
     } else if ($was_limited) {
       $info_panel = $this->renderStatusMessage(
-        pht('Enormous Commit'),
+        pht('Very Large Commit'),
         pht(
-          'This commit is enormous, and affects more than %d files. '.
+          'This commit is very large, and affects more than %d files. '.
           'Changes are not shown.',
           $hard_limit));
     } else if (!$this->getCommitExists()) {
@@ -415,17 +415,21 @@ final class DiffusionCommitController extends DiffusionController {
       PhabricatorShowFiletreeSetting::SETTINGKEY,
       PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
 
-    $pref_collapse = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
-    $collapsed = $viewer->getUserSetting($pref_collapse);
-
     $nav = null;
     if ($show_changesets && $filetree_on) {
+      $pref_collapse = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
+      $collapsed = $viewer->getUserSetting($pref_collapse);
+
+      $pref_width = PhabricatorFiletreeWidthSetting::SETTINGKEY;
+      $width = $viewer->getUserSetting($pref_width);
+
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
         ->setTitle($commit->getDisplayName())
         ->setBaseURI(new PhutilURI($commit->getURI()))
         ->build($changesets)
         ->setCrumbs($crumbs)
-        ->setCollapsed((bool)$collapsed);
+        ->setCollapsed((bool)$collapsed)
+        ->setWidth((int)$width);
     }
 
     $view = id(new PHUITwoColumnView())

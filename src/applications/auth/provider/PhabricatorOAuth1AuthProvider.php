@@ -208,6 +208,9 @@ abstract class PhabricatorOAuth1AuthProvider
     parent::willRenderLinkedAccount($viewer, $item, $account);
   }
 
+  protected function getContentSecurityPolicyFormActions() {
+    return $this->getAdapter()->getContentSecurityPolicyFormActions();
+  }
 
 /* -(  Temporary Secrets  )-------------------------------------------------- */
 

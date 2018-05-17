@@ -4,6 +4,8 @@ abstract class DiffusionGitSSHWorkflow
   extends DiffusionSSHWorkflow
   implements DiffusionRepositoryClusterEngineLogInterface {
 
+  private $engineLogProperties = array();
+
   protected function writeError($message) {
     // Git assumes we'll add our own newlines.
     return parent::writeError($message."\n");
@@ -12,6 +14,14 @@ abstract class DiffusionGitSSHWorkflow
   public function writeClusterEngineLogMessage($message) {
     parent::writeError($message);
     $this->getErrorChannel()->update();
+  }
+
+  public function writeClusterEngineLogProperty($key, $value) {
+    $this->engineLogProperties[$key] = $value;
+  }
+
+  protected function getClusterEngineLogProperty($key, $default = null) {
+    return idx($this->engineLogProperties, $key, $default);
   }
 
   protected function identifyRepository() {

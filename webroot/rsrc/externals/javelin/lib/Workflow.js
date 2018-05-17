@@ -59,12 +59,15 @@ JX.install('Workflow', {
 
       workflow.setDataWithListOfPairs(pairs);
       workflow.setMethod(form.getAttribute('method'));
-      workflow.listen('finally', function() {
-        // Re-enable form elements
-        for (var ii = 0; ii < inputs.length; ii++) {
-          inputs[ii] && (inputs[ii].disabled = false);
+
+      var onfinally = JX.bind(workflow, function() {
+        if (!this._keepControlsDisabled) {
+          for (var ii = 0; ii < inputs.length; ii++) {
+            inputs[ii] && (inputs[ii].disabled = false);
+          }
         }
       });
+      workflow.listen('finally', onfinally);
 
       return workflow;
     },
@@ -147,6 +150,11 @@ JX.install('Workflow', {
       if (!e.getStopped()) {
         // NOTE: Don't remove the current dialog yet because additional
         // handlers may still want to access the nodes.
+
+        // Disable whatever button the user clicked to prevent duplicate
+        // submission mistakes when you accidentally click a button multiple
+        // times. See T11145.
+        button.disabled = true;
 
         active
           .setURI(form.getAttribute('action') || active.getURI())
@@ -242,6 +250,7 @@ JX.install('Workflow', {
     _form: null,
     _paused: 0,
     _nextCallback: null,
+    _keepControlsDisabled: false,
 
     getSourceForm: function() {
       return this._form;
@@ -276,6 +285,16 @@ JX.install('Workflow', {
       // It is permissible to send back a falsey redirect to force a page
       // reload, so we need to take this branch if the key is present.
       if (r && (typeof r.redirect != 'undefined')) {
+        // Before we redirect to file downloads, we close the dialog. These
+        // redirects aren't real navigation events so we end up stuck in the
+        // dialog otherwise.
+        if (r.close) {
+          this._pop();
+        }
+
+        // If we're redirecting, don't re-enable for controls.
+        this._keepControlsDisabled = true;
+
         JX.$U(r.redirect).go();
       } else if (r && r.dialog) {
         this._push();

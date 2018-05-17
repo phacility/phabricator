@@ -455,6 +455,10 @@ ul.phui-oi-list-view .phui-oi-selected
   border-color: {$sh-blueborder};
 }
 
+.phui-oi-forbidden {
+  background: {$sh-redbackground};
+}
+
 
 /* - Handle Icons --------------------------------------------------------------
 
@@ -663,4 +667,56 @@ ul.phui-oi-list-view .phui-oi-selected
 .device-phone .phui-oi-col2.phui-oi-side-column {
   padding: 0 8px 8px;
   text-align: left;
+}
+
+.phui-oi-col0.phui-oi-checkbox {
+  width: 28px;
+  text-align: center;
+}
+
+.phui-oi-selectable {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* When the list selection state can be toggled on the client (as in the bulk
+  editor), keep the border color consistent to make the interaction feel more
+  robust. */
+ul.phui-oi-list-view .phui-oi-selectable
+  .phui-oi-frame {
+  border-color: {$blueborder};
+}
+
+.differential-revision-size {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: {$lightgreybackground};
+  cursor: pointer;
+}
+
+.differential-revision-size .phui-icon-view {
+  margin: 0 1px 0 1px;
+  font-size: 7px;
+  position: relative;
+  top: -2px;
+  color: {$lightbluetext};
+}
+
+.differential-revision-large {
+  background: {$sh-orangebackground};
+}
+
+/* NOTE: These are intentionally using nonstandard colors, see T13127. */
+
+.differential-revision-large .phui-icon-view {
+  color: #e5ae7e;
+}
+
+.differential-revision-small {
+  background: #f2f7ff;
+}
+
+.differential-revision-small .phui-icon-view {
+  color: #6699ba;
 }

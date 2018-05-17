@@ -54,7 +54,6 @@ abstract class PhabricatorApplicationTransaction
 
   public function shouldGenerateOldValue() {
     switch ($this->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
       case PhabricatorTransactions::TYPE_INLINESTATE:
@@ -158,6 +157,14 @@ abstract class PhabricatorApplicationTransaction
     return (bool)$this->getMetadataValue('core.default', false);
   }
 
+  public function setIsSilentTransaction($silent) {
+    return $this->setMetadataValue('core.silent', $silent);
+  }
+
+  public function getIsSilentTransaction() {
+    return (bool)$this->getMetadataValue('core.silent', false);
+  }
+
   public function attachComment(
     PhabricatorApplicationTransactionComment $comment) {
     $this->comment = $comment;
@@ -252,6 +259,11 @@ abstract class PhabricatorApplicationTransaction
     return $this->oldValueHasBeenSet;
   }
 
+  public function newChronologicalSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt((int)$this->getDateCreated())
+      ->addInt((int)$this->getID());
+  }
 
 /* -(  Rendering  )---------------------------------------------------------- */
 
@@ -294,8 +306,8 @@ abstract class PhabricatorApplicationTransaction
         $phids[] = $new;
         break;
       case PhabricatorTransactions::TYPE_EDGE:
-        $phids[] = ipull($old, 'dst');
-        $phids[] = ipull($new, 'dst');
+        $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+        $phids[] = $record->getChangedPHIDs();
         break;
       case PhabricatorTransactions::TYPE_COLUMNS:
         foreach ($new as $move) {
@@ -325,12 +337,6 @@ abstract class PhabricatorApplicationTransaction
         }
         break;
       case PhabricatorTransactions::TYPE_TOKEN:
-        break;
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        $phid = $this->getMetadataValue('harbormaster:buildablePHID');
-        if ($phid) {
-          $phids[] = array($phid);
-        }
         break;
     }
 
@@ -450,9 +456,13 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return 'fa-lock';
       case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case DiffusionCommitRevertedByCommitEdgeType::EDGECONST:
+            return 'fa-undo';
+          case DiffusionCommitRevertsCommitEdgeType::EDGECONST:
+            return 'fa-ambulance';
+        }
         return 'fa-link';
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        return 'fa-wrench';
       case PhabricatorTransactions::TYPE_TOKEN:
         return 'fa-trophy';
       case PhabricatorTransactions::TYPE_SPACE:
@@ -488,12 +498,12 @@ abstract class PhabricatorApplicationTransaction
           return 'black';
         }
         break;
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_PASSED:
-            return 'green';
-          case HarbormasterBuildable::STATUS_FAILED:
-            return 'red';
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case DiffusionCommitRevertedByCommitEdgeType::EDGECONST:
+            return 'pink';
+          case DiffusionCommitRevertsCommitEdgeType::EDGECONST:
+            return 'sky';
         }
         break;
     }
@@ -535,11 +545,18 @@ abstract class PhabricatorApplicationTransaction
       return false;
     }
 
+    $xaction_type = $this->getTransactionType();
+
+    // Always hide requests for object history.
+    if ($xaction_type === PhabricatorTransactions::TYPE_HISTORY) {
+      return true;
+    }
+
     // Hide creation transactions if the old value is empty. These are
-    // transactions like "alice set the task tile to: ...", which are
+    // transactions like "alice set the task title to: ...", which are
     // essentially never interesting.
     if ($this->getIsCreateTransaction()) {
-      switch ($this->getTransactionType()) {
+      switch ($xaction_type) {
         case PhabricatorTransactions::TYPE_CREATE:
         case PhabricatorTransactions::TYPE_VIEW_POLICY:
         case PhabricatorTransactions::TYPE_EDIT_POLICY:
@@ -621,12 +638,13 @@ abstract class PhabricatorApplicationTransaction
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
           case ManiphestTaskHasDuplicateTaskEdgeType::EDGECONST:
           case ManiphestTaskIsDuplicateOfTaskEdgeType::EDGECONST:
+          case PhabricatorMutedEdgeType::EDGECONST:
+          case PhabricatorMutedByEdgeType::EDGECONST:
             return true;
             break;
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
-            $new = ipull($this->getNewValue(), 'dst');
-            $old = ipull($this->getOldValue(), 'dst');
-            $add = array_diff($new, $old);
+            $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+            $add = $record->getAddedPHIDs();
             $add_value = reset($add);
             $add_handle = $this->getHandle($add_value);
             if ($add_handle->getPolicyFiltered()) {
@@ -650,15 +668,6 @@ abstract class PhabricatorApplicationTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
-        return true;
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_FAILED:
-            // For now, only ever send mail when builds fail. We might let
-            // you customize this later, but in most cases this is probably
-            // completely uninteresting.
-            return false;
-        }
         return true;
      case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
@@ -713,16 +722,6 @@ abstract class PhabricatorApplicationTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
-        return true;
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_FAILED:
-            // For now, don't notify on build passes either. These are pretty
-            // high volume and annoying, with very little present value. We
-            // might want to turn them back on in the specific case of
-            // build successes on the current document?
-            return false;
-        }
         return true;
      case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
@@ -925,10 +924,10 @@ abstract class PhabricatorApplicationTransaction
         }
         break;
       case PhabricatorTransactions::TYPE_EDGE:
-        $new = ipull($new, 'dst');
-        $old = ipull($old, 'dst');
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
+        $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+        $add = $record->getAddedPHIDs();
+        $rem = $record->getRemovedPHIDs();
+
         $type = $this->getMetadata('edge:type');
         $type = head($type);
 
@@ -997,30 +996,6 @@ abstract class PhabricatorApplicationTransaction
           return pht(
             '%s awarded a token.',
             $this->renderHandleLink($author_phid));
-        }
-
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_BUILDING:
-            return pht(
-              '%s started building %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink(
-                $this->getMetadataValue('harbormaster:buildablePHID')));
-          case HarbormasterBuildable::STATUS_PASSED:
-            return pht(
-              '%s completed building %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink(
-                $this->getMetadataValue('harbormaster:buildablePHID')));
-          case HarbormasterBuildable::STATUS_FAILED:
-            return pht(
-              '%s failed to build %s!',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink(
-                $this->getMetadataValue('harbormaster:buildablePHID')));
-          default:
-            return null;
         }
 
       case PhabricatorTransactions::TYPE_INLINESTATE:
@@ -1164,10 +1139,10 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($new));
         }
       case PhabricatorTransactions::TYPE_EDGE:
-        $new = ipull($new, 'dst');
-        $old = ipull($old, 'dst');
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
+        $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
+        $add = $record->getAddedPHIDs();
+        $rem = $record->getRemovedPHIDs();
+
         $type = $this->getMetadata('edge:type');
         $type = head($type);
 
@@ -1210,32 +1185,6 @@ abstract class PhabricatorApplicationTransaction
             '%s edited a custom field on %s.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
-        }
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_BUILDING:
-            return pht(
-              '%s started building %s for %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink(
-                $this->getMetadataValue('harbormaster:buildablePHID')),
-              $this->renderHandleLink($object_phid));
-          case HarbormasterBuildable::STATUS_PASSED:
-            return pht(
-              '%s completed building %s for %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink(
-                $this->getMetadataValue('harbormaster:buildablePHID')),
-              $this->renderHandleLink($object_phid));
-          case HarbormasterBuildable::STATUS_FAILED:
-            return pht(
-              '%s failed to build %s for %s.',
-              $this->renderHandleLink($author_phid),
-              $this->renderHandleLink(
-                $this->getMetadataValue('harbormaster:buildablePHID')),
-              $this->renderHandleLink($object_phid));
-          default:
-            return null;
         }
 
       case PhabricatorTransactions::TYPE_COLUMNS:
@@ -1393,15 +1342,6 @@ abstract class PhabricatorApplicationTransaction
         return pht('Changed Policy');
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht('Changed Subscribers');
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-        switch ($this->getNewValue()) {
-          case HarbormasterBuildable::STATUS_PASSED:
-            return pht('Build Passed');
-          case HarbormasterBuildable::STATUS_FAILED:
-            return pht('Build Failed');
-          default:
-            return pht('Build Status');
-        }
       default:
         return pht('Updated');
     }
@@ -1513,6 +1453,12 @@ abstract class PhabricatorApplicationTransaction
       // Don't group transactions which happened more than 2 minutes apart.
       $apart = abs($xaction->getDateCreated() - $this->getDateCreated());
       if ($apart > (60 * 2)) {
+        return false;
+      }
+
+      // Don't group silent and nonsilent transactions together.
+      $is_silent = $this->getIsSilentTransaction();
+      if ($is_silent != $xaction->getIsSilentTransaction()) {
         return false;
       }
     }

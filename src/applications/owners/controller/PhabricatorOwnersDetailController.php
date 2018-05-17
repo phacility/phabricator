@@ -201,6 +201,16 @@ final class PhabricatorOwnersDetailController
     }
     $view->addProperty(pht('Auditing'), $auditing);
 
+    $ignored = $package->getIgnoredPathAttributes();
+    $ignored = array_keys($ignored);
+    if ($ignored) {
+      $ignored = implode(', ', $ignored);
+    } else {
+      $ignored = phutil_tag('em', array(), pht('None'));
+    }
+
+    $view->addProperty(pht('Ignored Attributes'), $ignored);
+
     $description = $package->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
@@ -279,7 +289,7 @@ final class PhabricatorOwnersDetailController
       $href = $repo->generateURI(
         array(
           'branch'   => $repo->getDefaultBranch(),
-          'path'     => $path->getPath(),
+          'path'     => $path->getPathDisplay(),
           'action'   => 'browse',
         ));
 
@@ -288,7 +298,7 @@ final class PhabricatorOwnersDetailController
         array(
           'href' => (string)$href,
         ),
-        $path->getPath());
+        $path->getPathDisplay());
 
       $rows[] = array(
         ($path->getExcluded() ? '-' : '+'),

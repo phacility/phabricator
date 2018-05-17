@@ -273,7 +273,6 @@ final class PhrictionTransactionEditor
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
-      $object->getContent()->getAuthorPHID(),
       $this->getActingAsPHID(),
     );
   }
@@ -299,12 +298,10 @@ final class PhrictionTransactionEditor
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $id = $object->getID();
     $title = $object->getContent()->getTitle();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject($title)
-      ->addHeader('Thread-Topic', $object->getPHID());
+      ->setSubject($title);
   }
 
   protected function buildMailBody(
@@ -598,10 +595,13 @@ final class PhrictionTransactionEditor
       ->setAuthorPHID($this->getActor()->getPHID())
       ->setChangeType(PhrictionChangeType::CHANGE_EDIT)
       ->setTitle($this->getOldContent()->getTitle())
-      ->setContent($this->getOldContent()->getContent());
+      ->setContent($this->getOldContent()->getContent())
+      ->setDescription('');
+
     if (strlen($this->getDescription())) {
       $new_content->setDescription($this->getDescription());
     }
+
     $new_content->setVersion($this->getOldContent()->getVersion() + 1);
 
     return $new_content;

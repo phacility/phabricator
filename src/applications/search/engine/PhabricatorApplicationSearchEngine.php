@@ -413,6 +413,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $this->getURI('');
   }
 
+  public function getExportURI($query_key) {
+    return $this->getURI('query/'.$query_key.'/export/');
+  }
+
 
   /**
    * Return the URI to a path within the application. Used to construct default
@@ -1439,6 +1443,157 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   public function newUseResultsActions(PhabricatorSavedQuery $saved) {
     return array();
+  }
+
+
+/* -(  Export  )------------------------------------------------------------- */
+
+
+  public function canExport() {
+    $fields = $this->newExportFields();
+    return (bool)$fields;
+  }
+
+  final public function newExportFieldList() {
+    $object = $this->newResultObject();
+
+    $builtin_fields = array(
+      id(new PhabricatorIDExportField())
+        ->setKey('id')
+        ->setLabel(pht('ID')),
+    );
+
+    if ($object->getConfigOption(LiskDAO::CONFIG_AUX_PHID)) {
+      $builtin_fields[] = id(new PhabricatorPHIDExportField())
+        ->setKey('phid')
+        ->setLabel(pht('PHID'));
+    }
+
+    $fields = mpull($builtin_fields, null, 'getKey');
+
+    $export_fields = $this->newExportFields();
+    foreach ($export_fields as $export_field) {
+      $key = $export_field->getKey();
+
+      if (isset($fields[$key])) {
+        throw new Exception(
+          pht(
+            'Search engine ("%s") defines an export field with a key ("%s") '.
+            'that collides with another field. Each field must have a '.
+            'unique key.',
+            get_class($this),
+            $key));
+      }
+
+      $fields[$key] = $export_field;
+    }
+
+    $extensions = $this->newExportExtensions();
+    foreach ($extensions as $extension) {
+      $extension_fields = $extension->newExportFields();
+      foreach ($extension_fields as $extension_field) {
+        $key = $extension_field->getKey();
+
+        if (isset($fields[$key])) {
+          throw new Exception(
+            pht(
+              'Export engine extension ("%s") defines an export field with '.
+              'a key ("%s") that collides with another field. Each field '.
+              'must have a unique key.',
+              get_class($extension_field),
+              $key));
+        }
+
+        $fields[$key] = $extension_field;
+      }
+    }
+
+    return $fields;
+  }
+
+  final public function newExport(array $objects) {
+    $object = $this->newResultObject();
+    $has_phid = $object->getConfigOption(LiskDAO::CONFIG_AUX_PHID);
+
+    $objects = array_values($objects);
+    $n = count($objects);
+
+    $maps = array();
+    foreach ($objects as $object) {
+      $map = array(
+        'id' => $object->getID(),
+      );
+
+      if ($has_phid) {
+        $map['phid'] = $object->getPHID();
+      }
+
+      $maps[] = $map;
+    }
+
+    $export_data = $this->newExportData($objects);
+    $export_data = array_values($export_data);
+    if (count($export_data) !== count($objects)) {
+      throw new Exception(
+        pht(
+          'Search engine ("%s") exported the wrong number of objects, '.
+          'expected %s but got %s.',
+          get_class($this),
+          phutil_count($objects),
+          phutil_count($export_data)));
+    }
+
+    for ($ii = 0; $ii < $n; $ii++) {
+      $maps[$ii] += $export_data[$ii];
+    }
+
+    $extensions = $this->newExportExtensions();
+    foreach ($extensions as $extension) {
+      $extension_data = $extension->newExportData($objects);
+      $extension_data = array_values($extension_data);
+      if (count($export_data) !== count($objects)) {
+        throw new Exception(
+          pht(
+            'Export engine extension ("%s") exported the wrong number of '.
+            'objects, expected %s but got %s.',
+            get_class($extension),
+            phutil_count($objects),
+            phutil_count($export_data)));
+      }
+
+      for ($ii = 0; $ii < $n; $ii++) {
+        $maps[$ii] += $extension_data[$ii];
+      }
+    }
+
+    return $maps;
+  }
+
+  protected function newExportFields() {
+    return array();
+  }
+
+  protected function newExportData(array $objects) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  private function newExportExtensions() {
+    $object = $this->newResultObject();
+    $viewer = $this->requireViewer();
+
+    $extensions = PhabricatorExportEngineExtension::getAllExtensions();
+
+    $supported = array();
+    foreach ($extensions as $extension) {
+      $extension = clone $extension;
+      $extension->setViewer($viewer);
+
+      if ($extension->supportsObject($object)) {
+        $supported[] = $extension;
+      }
+    }
+
+    return $supported;
   }
 
 }

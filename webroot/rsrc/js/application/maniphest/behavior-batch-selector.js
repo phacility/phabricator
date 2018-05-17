@@ -157,12 +157,15 @@ JX.behavior('maniphest-batch-selector', function(config) {
     'submit',
     null,
     function() {
-      var inputs = [];
+      var ids = [];
       for (var k in selected) {
-        inputs.push(
-          JX.$N('input', {type: 'hidden', name: 'batch[]', value: k}));
+        ids.push(k);
       }
-      JX.DOM.setContent(JX.$(config.idContainer), inputs);
+      ids = ids.join(',');
+
+      var input = JX.$N('input', {type: 'hidden', name: 'ids', value: ids});
+
+      JX.DOM.setContent(JX.$(config.idContainer), input);
     });
 
   update();

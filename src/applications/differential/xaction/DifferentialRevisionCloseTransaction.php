@@ -136,4 +136,23 @@ final class DifferentialRevisionCloseTransaction
       $this->renderObject());
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'close';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    $commit_phid = $object->getMetadataValue('commitPHID');
+
+    if ($commit_phid) {
+      $commit_phids = array($commit_phid);
+    } else {
+      $commit_phids = array();
+    }
+
+    return array(
+      'commitPHIDs' => $commit_phids,
+    );
+  }
+
+
 }

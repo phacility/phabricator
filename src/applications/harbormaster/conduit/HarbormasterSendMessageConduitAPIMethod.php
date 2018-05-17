@@ -245,7 +245,7 @@ final class HarbormasterSendMessageConduitAPIMethod
     }
 
     $save[] = HarbormasterBuildMessage::initializeNewMessage($viewer)
-      ->setBuildTargetPHID($build_target->getPHID())
+      ->setReceiverPHID($build_target->getPHID())
       ->setType($message_type);
 
     $build_target->openTransaction();

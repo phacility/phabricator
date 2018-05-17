@@ -13,7 +13,7 @@ abstract class PhrictionController extends PhabricatorController {
       $nav->addFilter('/phriction/', pht('Index'));
     }
 
-    id(new PhrictionSearchEngine())
+    id(new PhrictionDocumentSearchEngine())
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
 

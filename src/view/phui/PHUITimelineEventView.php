@@ -29,6 +29,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $authorPHID;
   private $badges = array();
   private $pinboardItems = array();
+  private $isSilent;
 
   public function setAuthorPHID($author_phid) {
     $this->authorPHID = $author_phid;
@@ -177,6 +178,15 @@ final class PHUITimelineEventView extends AphrontView {
     return $this;
   }
 
+  public function setIsSilent($is_silent) {
+    $this->isSilent = $is_silent;
+    return $this;
+  }
+
+  public function getIsSilent() {
+    return $this->isSilent;
+  }
+
   public function setReallyMajorEvent($me) {
     $this->reallyMajorEvent = $me;
     return $this;
@@ -291,18 +301,14 @@ final class PHUITimelineEventView extends AphrontView {
 
     $menu = null;
     $items = array();
-    $has_menu = false;
     if (!$this->getIsPreview() && !$this->getHideCommentOptions()) {
       foreach ($this->getEventGroup() as $event) {
         $items[] = $event->getMenuItems($this->anchor);
-        if ($event->hasChildren()) {
-          $has_menu = true;
-        }
       }
       $items = array_mergev($items);
     }
 
-    if ($items || $has_menu) {
+    if ($items) {
       $icon = id(new PHUIIconView())
         ->setIcon('fa-caret-down');
       $aural = javelin_tag(
@@ -341,6 +347,8 @@ final class PHUITimelineEventView extends AphrontView {
         ));
 
       $has_menu = true;
+    } else {
+      $has_menu = false;
     }
 
     // Render "extra" information (timestamp, etc).
@@ -573,6 +581,14 @@ final class PHUITimelineEventView extends AphrontView {
           );
         }
         $extra[] = $date;
+      }
+
+      // If this edit was applied silently, give user a hint that they should
+      // not expect to have received any mail or notifications.
+      if ($this->getIsSilent()) {
+        $extra[] = id(new PHUIIconView())
+          ->setIcon('fa-bell-slash', 'red')
+          ->setTooltip(pht('Silent Edit'));
       }
     }
 

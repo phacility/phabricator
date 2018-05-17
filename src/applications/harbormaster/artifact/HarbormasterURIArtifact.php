@@ -81,6 +81,7 @@ final class HarbormasterURIArtifact extends HarbormasterArtifact {
       array(
         'href' => $uri,
         'target' => '_blank',
+        'rel' => 'noreferrer',
       ),
       $name);
   }

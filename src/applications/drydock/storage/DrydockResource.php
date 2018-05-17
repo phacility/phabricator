@@ -235,16 +235,6 @@ final class DrydockResource extends DrydockDAO
     return $this->isActivated;
   }
 
-  public function canRelease() {
-    switch ($this->getStatus()) {
-      case DrydockResourceStatus::STATUS_RELEASED:
-      case DrydockResourceStatus::STATUS_DESTROYED:
-        return false;
-      default:
-        return true;
-    }
-  }
-
   public function scheduleUpdate($epoch = null) {
     PhabricatorWorker::scheduleTask(
       'DrydockResourceUpdateWorker',
@@ -282,26 +272,6 @@ final class DrydockResource extends DrydockDAO
     }
   }
 
-  public function canReceiveCommands() {
-    switch ($this->getStatus()) {
-      case DrydockResourceStatus::STATUS_RELEASED:
-      case DrydockResourceStatus::STATUS_BROKEN:
-      case DrydockResourceStatus::STATUS_DESTROYED:
-        return false;
-      default:
-        return true;
-    }
-  }
-
-  public function isActive() {
-    switch ($this->getStatus()) {
-      case DrydockResourceStatus::STATUS_ACTIVE:
-        return true;
-    }
-
-    return false;
-  }
-
   public function logEvent($type, array $data = array()) {
     $log = id(new DrydockLog())
       ->setEpoch(PhabricatorTime::getNow())
@@ -312,6 +282,38 @@ final class DrydockResource extends DrydockDAO
     $log->setBlueprintPHID($this->getBlueprintPHID());
 
     return $log->save();
+  }
+
+
+/* -(  Status  )------------------------------------------------------------- */
+
+
+  public function getStatusObject() {
+    return DrydockResourceStatus::newStatusObject($this->getStatus());
+  }
+
+  public function getStatusIcon() {
+    return $this->getStatusObject()->getIcon();
+  }
+
+  public function getStatusColor() {
+    return $this->getStatusObject()->getColor();
+  }
+
+  public function getStatusDisplayName() {
+    return $this->getStatusObject()->getDisplayName();
+  }
+
+  public function canRelease() {
+    return $this->getStatusObject()->canRelease();
+  }
+
+  public function canReceiveCommands() {
+    return $this->getStatusObject()->canReceiveCommands();
+  }
+
+  public function isActive() {
+    return $this->getStatusObject()->isActive();
   }
 
 

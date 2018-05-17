@@ -49,12 +49,6 @@ final class PhabricatorMailOutboundMailHeraldAdapter
     return true;
   }
 
-  public function getRepetitionOptions() {
-    return array(
-      HeraldRepetitionPolicyConfig::FIRST,
-    );
-  }
-
   public function supportsRuleType($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
@@ -68,6 +62,10 @@ final class PhabricatorMailOutboundMailHeraldAdapter
 
   public function getHeraldName() {
     return pht('Mail %d', $this->getObject()->getID());
+  }
+
+  public function supportsWebhooks() {
+    return false;
   }
 
 }

@@ -43,11 +43,11 @@ final class PhabricatorAuthSSHKeyTransaction
       case self::TYPE_DEACTIVATE:
         if ($new) {
           return pht(
-            '%s deactivated this key.',
+            '%s revoked this key.',
             $this->renderHandleLink($author_phid));
         } else {
           return pht(
-            '%s activated this key.',
+            '%s reinstated this key.',
             $this->renderHandleLink($author_phid));
         }
 

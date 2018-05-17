@@ -7,6 +7,10 @@ final class PhabricatorMailSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
+    if (PhabricatorEnv::getEnvConfig('cluster.mailers')) {
+      return;
+    }
+
     $adapter = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
 
     switch ($adapter) {

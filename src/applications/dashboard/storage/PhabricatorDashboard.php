@@ -74,7 +74,15 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
 
   public function setLayoutConfigFromObject(
     PhabricatorDashboardLayoutConfig $object) {
+
     $this->setLayoutConfig($object->toDictionary());
+
+    // See PHI385. Dashboard panel mutations rely on changes to the Dashboard
+    // object persisting when transactions are applied, but this assumption is
+    // no longer valid after T13054. For now, just save the dashboard
+    // explicitly.
+    $this->save();
+
     return $this;
   }
 

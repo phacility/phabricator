@@ -18,12 +18,6 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     return 'fa-university';
   }
 
-  public function getFactObjectsForAnalysis() {
-    return array(
-      new PonderQuestion(),
-    );
-  }
-
   public function getTitleGlyph() {
     return "\xE2\x97\xB3";
   }

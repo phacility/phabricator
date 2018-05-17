@@ -10,6 +10,8 @@ final class DiffusionCommitBranchesHeraldField
   }
 
   public function getHeraldFieldValue($object) {
+    $viewer = $this->getAdapter()->getViewer();
+
     $commit = $object;
     $repository = $object->getRepository();
 
@@ -19,7 +21,7 @@ final class DiffusionCommitBranchesHeraldField
     );
 
     $result = id(new ConduitCall('diffusion.branchquery', $params))
-      ->setUser(PhabricatorUser::getOmnipotentUser())
+      ->setUser($viewer)
       ->execute();
 
     $refs = DiffusionRepositoryRef::loadAllFromDictionaries($result);

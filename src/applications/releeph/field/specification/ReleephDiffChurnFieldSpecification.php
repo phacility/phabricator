@@ -37,7 +37,7 @@ final class ReleephDiffChurnFieldSpecification
         case PhabricatorTransactions::TYPE_COMMENT:
           $comments++;
           break;
-        case DifferentialTransaction::TYPE_UPDATE:
+        case DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE:
           $updates++;
           break;
         case DifferentialTransaction::TYPE_ACTION:

@@ -44,7 +44,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 205px;
+  left: 310px;
   width: 7px;
 
   cursor: col-resize;
@@ -66,7 +66,7 @@
 
 .device-desktop .phabricator-standard-page-body .has-drag-nav
   .phabricator-nav-content {
-  margin-left: 212px;
+  margin-left: 317px;
 }
 
 .device-desktop .phabricator-standard-page-body .has-drag-nav
@@ -81,9 +81,12 @@
 }
 
 .device-desktop .phui-navigation-shell .has-drag-nav .phabricator-nav-local {
-  width: 205px;
+  width: 310px;
   padding: 0;
-  background: transparent;
+
+  /* See PHI568. If we don't paint the background explicitly, the content can
+     render underneath it when scrolled horizontally. */
+  background: {$page.background};
 }
 
 .device-phone .phabricator-side-menu-home .phabricator-nav-content {

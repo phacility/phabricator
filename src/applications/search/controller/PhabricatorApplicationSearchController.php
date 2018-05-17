@@ -7,6 +7,7 @@ final class PhabricatorApplicationSearchController
   private $navigation;
   private $queryKey;
   private $preface;
+  private $activeQuery;
 
   public function setPreface($preface) {
     $this->preface = $preface;
@@ -45,6 +46,14 @@ final class PhabricatorApplicationSearchController
     return $this->searchEngine;
   }
 
+  protected function getActiveQuery() {
+    if (!$this->activeQuery) {
+      throw new Exception(pht('There is no active query yet.'));
+    }
+
+    return $this->activeQuery;
+  }
+
   protected function validateDelegatingController() {
     $parent = $this->getDelegatingController();
 
@@ -65,6 +74,11 @@ final class PhabricatorApplicationSearchController
 
   public function processRequest() {
     $this->validateDelegatingController();
+
+    $query_action = $this->getRequest()->getURIData('queryAction');
+    if ($query_action == 'export') {
+      return $this->processExportRequest();
+    }
 
     $key = $this->getQueryKey();
     if ($key == 'edit') {
@@ -149,9 +163,11 @@ final class PhabricatorApplicationSearchController
       $saved_query = $engine->buildSavedQueryFromRequest($request);
 
       // Save the query to generate a query key, so "Save Custom Query..." and
-      // other features like Maniphest's "Export..." work correctly.
+      // other features like "Bulk Edit" and "Export Data" work correctly.
       $engine->saveQuery($saved_query);
     }
+
+    $this->activeQuery = $saved_query;
 
     $nav->selectFilter(
       'query/'.$saved_query->getQueryKey(),
@@ -372,6 +388,157 @@ final class PhabricatorApplicationSearchController
       ->setNavigation($nav)
       ->addClass('application-search-view')
       ->appendChild($body);
+  }
+
+  private function processExportRequest() {
+    $viewer = $this->getViewer();
+    $engine = $this->getSearchEngine();
+    $request = $this->getRequest();
+
+    if (!$this->canExport()) {
+      return new Aphront404Response();
+    }
+
+    $query_key = $this->getQueryKey();
+    if ($engine->isBuiltinQuery($query_key)) {
+      $saved_query = $engine->buildSavedQueryFromBuiltin($query_key);
+    } else if ($query_key) {
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($viewer)
+        ->withQueryKeys(array($query_key))
+        ->executeOne();
+    } else {
+      $saved_query = null;
+    }
+
+    if (!$saved_query) {
+      return new Aphront404Response();
+    }
+
+    $cancel_uri = $engine->getQueryResultsPageURI($query_key);
+
+    $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
+
+    if ($named_query) {
+      $filename = $named_query->getQueryName();
+      $sheet_title = $named_query->getQueryName();
+    } else {
+      $filename = $engine->getResultTypeDescription();
+      $sheet_title = $engine->getResultTypeDescription();
+    }
+    $filename = phutil_utf8_strtolower($filename);
+    $filename = PhabricatorFile::normalizeFileName($filename);
+
+    $all_formats = PhabricatorExportFormat::getAllExportFormats();
+
+    $available_options = array();
+    $unavailable_options = array();
+    $formats = array();
+    $unavailable_formats = array();
+    foreach ($all_formats as $key => $format) {
+      if ($format->isExportFormatEnabled()) {
+        $available_options[$key] = $format->getExportFormatName();
+        $formats[$key] = $format;
+      } else {
+        $unavailable_options[$key] = pht(
+          '%s (Not Available)',
+          $format->getExportFormatName());
+        $unavailable_formats[$key] = $format;
+      }
+    }
+    $format_options = $available_options + $unavailable_options;
+
+    // Try to default to the format the user used last time. If you just
+    // exported to Excel, you probably want to export to Excel again.
+    $format_key = $this->readExportFormatPreference();
+    if (!isset($formats[$format_key])) {
+      $format_key = head_key($format_options);
+    }
+
+    // Check if this is a large result set or not. If we're exporting a
+    // large amount of data, we'll build the actual export file in the daemons.
+
+    $threshold = 1000;
+    $query = $engine->buildQueryFromSavedQuery($saved_query);
+    $pager = $engine->newPagerForSavedQuery($saved_query);
+    $pager->setPageSize($threshold + 1);
+    $objects = $engine->executeQuery($query, $pager);
+    $object_count = count($objects);
+    $is_large_export = ($object_count > $threshold);
+
+    $errors = array();
+
+    $e_format = null;
+    if ($request->isFormPost()) {
+      $format_key = $request->getStr('format');
+
+      if (isset($unavailable_formats[$format_key])) {
+        $unavailable = $unavailable_formats[$format_key];
+        $instructions = $unavailable->getInstallInstructions();
+
+        $markup = id(new PHUIRemarkupView($viewer, $instructions))
+          ->setRemarkupOption(
+            PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS,
+            false);
+
+        return $this->newDialog()
+          ->setTitle(pht('Export Format Not Available'))
+          ->appendChild($markup)
+          ->addCancelButton($cancel_uri, pht('Done'));
+      }
+
+      $format = idx($formats, $format_key);
+
+      if (!$format) {
+        $e_format = pht('Invalid');
+        $errors[] = pht('Choose a valid export format.');
+      }
+
+      if (!$errors) {
+        $this->writeExportFormatPreference($format_key);
+
+        $export_engine = id(new PhabricatorExportEngine())
+          ->setViewer($viewer)
+          ->setSearchEngine($engine)
+          ->setSavedQuery($saved_query)
+          ->setTitle($sheet_title)
+          ->setFilename($filename)
+          ->setExportFormat($format);
+
+        if ($is_large_export) {
+          $job = $export_engine->newBulkJob($request);
+
+          return id(new AphrontRedirectResponse())
+            ->setURI($job->getMonitorURI());
+        } else {
+          $file = $export_engine->exportFile();
+          return $file->newDownloadResponse();
+        }
+      }
+    }
+
+    $export_form = id(new AphrontFormView())
+      ->setViewer($viewer)
+      ->appendControl(
+        id(new AphrontFormSelectControl())
+          ->setName('format')
+          ->setLabel(pht('Format'))
+          ->setError($e_format)
+          ->setValue($format_key)
+          ->setOptions($format_options));
+
+    if ($is_large_export) {
+      $submit_button = pht('Continue');
+    } else {
+      $submit_button = pht('Download Data');
+    }
+
+    return $this->newDialog()
+      ->setTitle(pht('Export Results'))
+      ->setErrors($errors)
+      ->appendForm($export_form)
+      ->addCancelButton($cancel_uri)
+      ->addSubmitButton($submit_button);
   }
 
   private function processEditRequest() {
@@ -709,10 +876,8 @@ final class PhabricatorApplicationSearchController
 
     $engine = $this->getSearchEngine();
     $engine_class = get_class($engine);
-    $query_key = $this->getQueryKey();
-    if (!$query_key) {
-      $query_key = $engine->getDefaultQueryKey();
-    }
+
+    $query_key = $this->getActiveQuery()->getQueryKey();
 
     $can_use = $engine->canUseInPanelContext();
     $is_installed = PhabricatorApplication::isClassInstalledForViewer(
@@ -720,12 +885,20 @@ final class PhabricatorApplicationSearchController
       $viewer);
 
     if ($can_use && $is_installed) {
-      $dashboard_uri = '/dashboard/install/';
       $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-dashboard')
         ->setName(pht('Add to Dashboard'))
         ->setWorkflow(true)
         ->setHref("/dashboard/panel/install/{$engine_class}/{$query_key}/");
+    }
+
+    if ($this->canExport()) {
+      $export_uri = $engine->getExportURI($query_key);
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-download')
+        ->setName(pht('Export Data'))
+        ->setWorkflow(true)
+        ->setHref($export_uri);
     }
 
     if ($is_dev) {
@@ -751,6 +924,52 @@ final class PhabricatorApplicationSearchController
     }
 
     return $actions;
+  }
+
+  private function canExport() {
+    $engine = $this->getSearchEngine();
+    if (!$engine->canExport()) {
+      return false;
+    }
+
+    // Don't allow logged-out users to perform exports. There's no technical
+    // or policy reason they can't, but we don't normally give them access
+    // to write files or jobs. For now, just err on the side of caution.
+
+    $viewer = $this->getViewer();
+    if (!$viewer->getPHID()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private function readExportFormatPreference() {
+    $viewer = $this->getViewer();
+    $export_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+    return $viewer->getUserSetting($export_key);
+  }
+
+  private function writeExportFormatPreference($value) {
+    $viewer = $this->getViewer();
+    $request = $this->getRequest();
+
+    if (!$viewer->isLoggedIn()) {
+      return;
+    }
+
+    $export_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+    $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
+
+    $editor = id(new PhabricatorUserPreferencesEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+    $xactions[] = $preferences->newTransaction($export_key, $value);
+    $editor->applyTransactions($preferences, $xactions);
   }
 
 }

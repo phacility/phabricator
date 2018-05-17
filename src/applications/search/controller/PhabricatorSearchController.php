@@ -11,13 +11,15 @@ final class PhabricatorSearchController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
+    $query = $request->getStr('query');
 
-    if ($request->getStr('jump') != 'no') {
-      $response = PhabricatorJumpNavHandler::getJumpResponse(
-        $viewer,
-        $request->getStr('query'));
-      if ($response) {
-        return $response;
+    if ($request->getStr('jump') != 'no' && strlen($query)) {
+      $jump_uri = id(new PhabricatorDatasourceEngine())
+        ->setViewer($viewer)
+        ->newJumpURI($query);
+
+      if ($jump_uri !== null) {
+        return id(new AphrontRedirectResponse())->setURI($jump_uri);
       }
     }
 
@@ -29,7 +31,7 @@ final class PhabricatorSearchController
     if ($request->getBool('search:primary')) {
 
       // If there's no query, just take the user to advanced search.
-      if (!strlen($request->getStr('query'))) {
+      if (!strlen($query)) {
         $advanced_uri = '/search/query/advanced/';
         return id(new AphrontRedirectResponse())->setURI($advanced_uri);
       }
@@ -71,7 +73,7 @@ final class PhabricatorSearchController
 
       // Add the user's query, then save this as a new saved query and send
       // the user to the results page.
-      $saved->setParameter('query', $request->getStr('query'));
+      $saved->setParameter('query', $query);
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         try {

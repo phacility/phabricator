@@ -148,13 +148,16 @@ final class DiffusionSubversionServeSSHWorkflow
     }
 
     if ($this->shouldProxy()) {
-      $command = $this->getProxyCommand();
+      // NOTE: We're always requesting a writable device here. The request
+      // might be read-only, but we can't currently tell, and SVN requests
+      // can mix reads and writes.
+      $command = $this->getProxyCommand(true);
       $this->isProxying = true;
       $cwd = null;
     } else {
       $command = csprintf(
         'svnserve -t --tunnel-user=%s',
-        $this->getUser()->getUsername());
+        $this->getSSHUser()->getUsername());
       $cwd = PhabricatorEnv::getEmptyCWD();
     }
 

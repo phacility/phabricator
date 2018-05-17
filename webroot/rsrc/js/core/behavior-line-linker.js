@@ -10,6 +10,7 @@ JX.behavior('phabricator-line-linker', function() {
   var origin = null;
   var target = null;
   var root = null;
+  var highlighted = null;
 
   var editor_link = null;
   try {
@@ -18,49 +19,113 @@ JX.behavior('phabricator-line-linker', function() {
     // Ignore.
   }
 
-  function getRowNumber(tr) {
-    var th = JX.DOM.find(tr, 'th', 'phabricator-source-line');
-    return +(th.textContent || th.innerText);
+  function getRowNumber(th) {
+    // If the "<th />" tag contains an "<a />" with "data-n" that we're using
+    // to prevent copy/paste of line numbers, use that.
+    if (th.firstChild) {
+      var line = th.firstChild.getAttribute('data-n');
+      if (line) {
+        return line;
+      }
+    }
+
+    return null;
   }
 
   JX.Stratcom.listen(
-    'mousedown',
-    'phabricator-source-line',
+    ['click', 'mousedown'],
+    ['phabricator-source', 'tag:th', 'tag:a'],
     function(e) {
       if (!e.isNormalMouseEvent()) {
         return;
       }
-      origin = e.getNode('tag:tr');
-      target = origin;
-      root = e.getNode('phabricator-source');
-      e.kill();
-    });
 
-  JX.Stratcom.listen(
-    'click',
-    'phabricator-source-line',
-    function(e) {
+      // Make sure the link we clicked is actually a line number in a source
+      // table, not some kind of link in some element embedded inside the
+      // table. The row's immediate ancestor table needs to be the table with
+      // the "phabricator-source" sigil.
+
+      var cell = e.getNode('tag:th');
+      var table = e.getNode('phabricator-source');
+      if (JX.DOM.findAbove(cell, 'table') !== table) {
+        return;
+      }
+
+      var number = getRowNumber(cell);
+      if (!number) {
+        return;
+      }
+
       e.kill();
+
+      // If this is a click event, kill it. We handle mousedown and mouseup
+      // instead.
+      if (e.getType() === 'click') {
+        return;
+      }
+
+      origin = cell;
+      target = origin;
+
+      root = table;
     });
 
   var highlight = function(e) {
-    if (!origin || e.getNode('phabricator-source') !== root) {
+    if (!origin) {
       return;
     }
-    target = e.getNode('tag:tr');
 
-    var highlighting = false;
-    var source = null;
-    var trs = JX.DOM.scry(root, 'tr');
-    for (var i = 0; i < trs.length; i++) {
-      if (!highlighting && (trs[i] === origin || trs[i] === target)) {
-        highlighting = true;
-        source = trs[i];
+    if (e.getNode('phabricator-source') !== root) {
+      return;
+    }
+    target = e.getNode('tag:th');
+
+    var min;
+    var max;
+
+    // NOTE: We're using position to figure out which order these rows are in,
+    // not row numbers. We do this because Harbormaster build logs may have
+    // multiple rows with the same row number.
+
+    if (JX.$V(origin).y <= JX.$V(target).y) {
+      min = origin;
+      max = target;
+    } else {
+      min = target;
+      max = origin;
+    }
+
+    // If we haven't changed highlighting, we don't have a list of highlighted
+    // nodes yet. Assume every row is highlighted.
+    var ii;
+    if (highlighted === null) {
+      highlighted = [];
+      var rows = JX.DOM.scry(root, 'tr');
+      for (ii = 0; ii < rows.length; ii++) {
+        highlighted.push(rows[ii]);
       }
-      JX.DOM.alterClass(trs[i], 'phabricator-source-highlight', highlighting);
-      if (trs[i] === (source === origin ? target : origin)) {
-        highlighting = false;
+    }
+
+    // Unhighlight any existing highlighted rows.
+    for (ii = 0; ii < highlighted.length; ii++) {
+      JX.DOM.alterClass(highlighted[ii], 'phabricator-source-highlight', false);
+    }
+    highlighted = [];
+
+    // Highlight the newly selected rows.
+    min = JX.DOM.findAbove(min, 'tr');
+    max = JX.DOM.findAbove(max, 'tr');
+
+    var cursor = min;
+    while (true) {
+      JX.DOM.alterClass(cursor, 'phabricator-source-highlight', true);
+      highlighted.push(cursor);
+
+      if (cursor === max) {
+        break;
       }
+
+      cursor = cursor.nextSibling;
     }
   };
 
@@ -75,21 +140,52 @@ JX.behavior('phabricator-line-linker', function() {
       }
 
       highlight(e);
+      e.kill();
 
       var o = getRowNumber(origin);
       var t = getRowNumber(target);
-      var lines = (o == t ? o : Math.min(o, t) + '-' + Math.max(o, t));
-      var th = JX.DOM.find(origin, 'th', 'phabricator-source-line');
-      var uri = JX.DOM.find(th, 'a').href;
-      uri = uri.replace(/(.*\$)\d+/, '$1' + lines);
+      var uri = JX.Stratcom.getData(root).uri;
+      var path;
+
+      if (!uri) {
+        uri = JX.$U(window.location);
+        path = uri.getPath();
+        path = path.replace(/\$[\d-]+$/, '');
+        uri.setPath(path);
+        uri = uri.toString();
+      }
+
       origin = null;
       target = null;
-      e.kill();
+      root = null;
+
+      var lines = (o == t ? o : Math.min(o, t) + '-' + Math.max(o, t));
+
+      uri = JX.$U(uri);
+      path = uri.getPath();
+      path = path + '$' + lines;
+      uri = uri.setPath(path).toString();
+
       JX.History.replace(uri);
-      if (editor_link.href) {
-        var editdata = JX.Stratcom.getData(editor_link);
-        editor_link.href = editdata.link_template.replace('%25l', o);
+
+      if (editor_link) {
+        if (editor_link.href) {
+          var editdata = JX.Stratcom.getData(editor_link);
+          editor_link.href = editdata.link_template.replace('%25l', o);
+        }
       }
     });
+
+
+  // Try to jump to the highlighted lines if we don't have an explicit anchor
+  // in the URI.
+  if (!window.location.hash.length) {
+    try {
+      var anchor = JX.$('phabricator-line-linker-anchor');
+      JX.DOM.scrollToPosition(0, JX.$V(anchor).y - 60);
+    } catch (ex) {
+      // If we didn't hit an element on the page, just move on.
+    }
+  }
 
 });

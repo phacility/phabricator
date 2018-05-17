@@ -18,6 +18,11 @@ final class PhabricatorProjectManageProfileMenuItem
     return false;
   }
 
+  public function canMakeDefault(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return true;
+  }
+
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
     $name = $config->getMenuItemProperty('name');

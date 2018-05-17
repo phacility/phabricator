@@ -309,6 +309,19 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Allow or prevent dangerous changes.'))
         ->setConduitTypeDescription(pht('New protection setting.'))
         ->setValue($object->shouldAllowDangerousChanges()),
+      id(new PhabricatorBoolEditField())
+        ->setKey('allowEnormousChanges')
+        ->setLabel(pht('Allow Enormous Changes'))
+        ->setIsCopyable(true)
+        ->setIsConduitOnly(true)
+        ->setOptions(
+          pht('Prevent Enormous Changes'),
+          pht('Allow Enormous Changes'))
+        ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_ENORMOUS)
+        ->setDescription(pht('Permit enormous changes to be made.'))
+        ->setConduitDescription(pht('Allow or prevent enormous changes.'))
+        ->setConduitTypeDescription(pht('New protection setting.'))
+        ->setValue($object->shouldAllowEnormousChanges()),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))

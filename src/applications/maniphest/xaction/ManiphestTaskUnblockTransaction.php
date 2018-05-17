@@ -112,5 +112,15 @@ final class ManiphestTaskUnblockTransaction
     return 'fa-shield';
   }
 
+  public function shouldHideForFeed() {
+    // Hide "alice created X, a task blocking Y." from feed because it
+    // will almost always appear adjacent to "alice created Y".
+    $is_new = $this->getMetadataValue('blocker.new');
+    if ($is_new) {
+      return true;
+    }
+
+    return parent::shouldHideForFeed();
+  }
 
 }

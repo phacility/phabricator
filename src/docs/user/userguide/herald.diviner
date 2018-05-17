@@ -20,7 +20,7 @@ For example, you can write a personal rule like this which triggers on tasks:
 
 > When [ all of ] these conditions are met:
 > [ Title ][ contains ][ quasar ]
-> Take these actions [ every time ] this rule matches:
+> Take these actions [ every time this rule matches: ]
 > [ Add me as a subscriber ]
 
 This rule will automatically subscribe you to any newly created or updated
@@ -104,6 +104,44 @@ Enter an object name (like `D123`, `rXYZabcdef`, or `T456`) and Herald will
 execute a dry run against that object, showing you which rules //would// match
 had it actually been updated. Dry runs executed via the test console don't take
 any actions.
+
+
+Action Repetition Settings
+==========================
+
+Rules can be configured to act in different ways:
+
+**Every time the rule matches:** The rule will take actions every time the
+object is updated if the rule's conditions match the current object state.
+
+**Only the first time the rule matches:** The rule will take actions only once
+per object, regardless of how many times the object is updated. After the rule
+acts once, it won't run on the same object again.
+
+**If this rule did not match the last time:** This rule will take actions the
+first time it matches for an object. After that, it won't act unless the object
+just changed from not matching to matching.
+
+For example, suppose you have a rule like this:
+
+> When:
+> [ Title ][ contains ][ duck ]
+> Take actions [ if this rule did not match the last time: ]
+> [ Add comment ][ "Please prefer the term 'budget goose'." ]
+
+If you set this rule to act "every time", it will leave a comment on the task
+for every single update until the title is edited. This is usually pretty noisy.
+
+If you set this rule to act "only the first time", it will only leave one
+comment. This fixes the noise problem, but creates a new problem: if someone
+edits the title, then a later change breaks it again, the rule won't leave
+another reminder comment.
+
+If you set this rule to act "if it did not match the last time", it will leave
+one comment on matching tasks. If the task is fixed (by replacing the term
+"duck" with the term "budget goose", so the object no longer matches the rule)
+and then later changed to violate the rule again (by putting the term
+"duck" back in the title), the rule will act again.
 
 
 Advanced Herald

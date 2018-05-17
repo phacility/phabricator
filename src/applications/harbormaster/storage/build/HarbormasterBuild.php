@@ -4,7 +4,8 @@ final class HarbormasterBuild extends HarbormasterDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorDestructibleInterface {
 
   protected $buildablePHID;
   protected $buildPlanPHID;
@@ -108,9 +109,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function isBuilding() {
-    return
-      $this->getBuildStatus() === HarbormasterBuildStatus::STATUS_PENDING ||
-      $this->getBuildStatus() === HarbormasterBuildStatus::STATUS_BUILDING;
+    return $this->getBuildStatusObject()->isBuilding();
   }
 
   public function isAutobuild() {
@@ -173,18 +172,25 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function isComplete() {
-    return in_array(
-      $this->getBuildStatus(),
-      HarbormasterBuildStatus::getCompletedStatusConstants());
+    return $this->getBuildStatusObject()->isComplete();
   }
 
   public function isPaused() {
-    return ($this->getBuildStatus() == HarbormasterBuildStatus::STATUS_PAUSED);
+    return $this->getBuildStatusObject()->isPaused();
+  }
+
+  public function isPassed() {
+    return $this->getBuildStatusObject()->isPassed();
   }
 
   public function getURI() {
     $id = $this->getID();
     return "/harbormaster/build/{$id}/";
+  }
+
+  protected function getBuildStatusObject() {
+    $status_key = $this->getBuildStatus();
+    return HarbormasterBuildStatus::newBuildStatusObject($status_key);
   }
 
 
@@ -350,6 +356,35 @@ final class HarbormasterBuild extends HarbormasterDAO
     }
   }
 
+  public function sendMessage(PhabricatorUser $viewer, $command) {
+    // TODO: This should not be an editor transaction, but there are plans to
+    // merge BuildCommand into BuildMessage which should moot this. As this
+    // exists today, it can race against BuildEngine.
+
+    // This is a bogus content source, but this whole flow should be obsolete
+    // soon.
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorConsoleContentSource::SOURCECONST);
+
+    $editor = id(new HarbormasterBuildTransactionEditor())
+      ->setActor($viewer)
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $viewer_phid = $viewer->getPHID();
+    if (!$viewer_phid) {
+      $acting_phid = id(new PhabricatorHarbormasterApplication())->getPHID();
+      $editor->setActingAsPHID($acting_phid);
+    }
+
+    $xaction = id(new HarbormasterBuildTransaction())
+      ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
+      ->setNewValue($command);
+
+    $editor->applyTransactions($this, array($xaction));
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -435,6 +470,8 @@ final class HarbormasterBuild extends HarbormasterDAO
       'buildStatus' => array(
         'value' => $status,
         'name' => HarbormasterBuildStatus::getBuildStatusName($status),
+        'color.ansi' =>
+          HarbormasterBuildStatus::getBuildStatusANSIColor($status),
       ),
       'initiatorPHID' => nonempty($this->getInitiatorPHID(), null),
       'name' => $this->getName(),
@@ -447,5 +484,34 @@ final class HarbormasterBuild extends HarbormasterDAO
         ->setAttachmentKey('querybuilds'),
     );
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $viewer = $engine->getViewer();
+
+    $this->openTransaction();
+      $targets = id(new HarbormasterBuildTargetQuery())
+        ->setViewer($viewer)
+        ->withBuildPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($targets as $target) {
+        $engine->destroyObject($target);
+      }
+
+      $messages = id(new HarbormasterBuildMessageQuery())
+        ->setViewer($viewer)
+        ->withReceiverPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($messages as $message) {
+        $engine->destroyObject($message);
+      }
+
+      $this->delete();
+    $this->saveTransaction();
+  }
+
 
 }

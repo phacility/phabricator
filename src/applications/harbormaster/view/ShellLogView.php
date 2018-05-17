@@ -65,7 +65,6 @@ final class ShellLogView extends AphrontView {
         'th',
         array(
           'class' => 'phabricator-source-line',
-          'style' => 'background-color: #fff;',
         ),
         $content_number);
 
@@ -95,13 +94,11 @@ final class ShellLogView extends AphrontView {
       'div',
       array(
         'class' => 'phabricator-source-code-container',
-        'style' => 'background-color: black; color: white;',
       ),
       phutil_tag(
         'table',
         array(
           'class' => implode(' ', $classes),
-          'style' => 'background-color: black',
         ),
         phutil_implode_html('', $rows)));
   }

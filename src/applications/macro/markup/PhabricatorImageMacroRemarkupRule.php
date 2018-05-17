@@ -8,7 +8,7 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
 
   public function apply($text) {
     return preg_replace_callback(
-      '@^\s*([a-zA-Z0-9:_\-]+)$@m',
+      '@^\s*([a-zA-Z0-9:_\x7f-\xff-]+)$@m',
       array($this, 'markupImageMacro'),
       $text);
   }

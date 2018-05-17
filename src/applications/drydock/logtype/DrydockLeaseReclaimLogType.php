@@ -13,13 +13,11 @@ final class DrydockLeaseReclaimLogType extends DrydockLogType {
   }
 
   public function renderLog(array $data) {
-    $viewer = $this->getViewer();
-
     $resource_phids = idx($data, 'resourcePHIDs', array());
 
     return pht(
       'Reclaimed resource %s.',
-      $viewer->renderHandleList($resource_phids)->render());
+      $this->renderHandleList($resource_phids));
   }
 
 }

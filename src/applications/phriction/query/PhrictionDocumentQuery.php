@@ -10,14 +10,12 @@ final class PhrictionDocumentQuery
   private $slugPrefix;
   private $statuses;
 
+  private $parentPaths;
+  private $ancestorPaths;
+
   private $needContent;
 
-  private $status       = 'status-any';
-  const STATUS_ANY      = 'status-any';
-  const STATUS_OPEN     = 'status-open';
-  const STATUS_NONSTUB  = 'status-nonstub';
-
-  const ORDER_HIERARCHY = 'order-hierarchy';
+  const ORDER_HIERARCHY = 'hierarchy';
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -39,7 +37,7 @@ final class PhrictionDocumentQuery
     return $this;
   }
 
-  public function  withSlugPrefix($slug_prefix) {
+  public function withSlugPrefix($slug_prefix) {
     $this->slugPrefix = $slug_prefix;
     return $this;
   }
@@ -49,8 +47,13 @@ final class PhrictionDocumentQuery
     return $this;
   }
 
-  public function withStatus($status) {
-    $this->status = $status;
+  public function withParentPaths(array $paths) {
+    $this->parentPaths = $paths;
+    return $this;
+  }
+
+  public function withAncestorPaths(array $paths) {
+    $this->ancestorPaths = $paths;
     return $this;
   }
 
@@ -145,9 +148,12 @@ final class PhrictionDocumentQuery
     }
 
     if ($this->needContent) {
-      $contents = id(new PhrictionContent())->loadAllWhere(
-        'id IN (%Ld)',
-        mpull($documents, 'getContentID'));
+      $contents = id(new PhrictionContentQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withIDs(mpull($documents, 'getContentID'))
+        ->execute();
+      $contents = mpull($contents, null, 'getID');
 
       foreach ($documents as $key => $document) {
         $content_id = $document->getContentID();
@@ -203,7 +209,7 @@ final class PhrictionDocumentQuery
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'd.status IN (%Ld)',
+        'd.status IN (%Ls)',
         $this->statuses);
     }
 
@@ -221,42 +227,104 @@ final class PhrictionDocumentQuery
         $this->depths);
     }
 
-    switch ($this->status) {
-      case self::STATUS_OPEN:
-        $where[] = qsprintf(
-          $conn,
-          'd.status NOT IN (%Ld)',
-          array(
-            PhrictionDocumentStatus::STATUS_DELETED,
-            PhrictionDocumentStatus::STATUS_MOVED,
-            PhrictionDocumentStatus::STATUS_STUB,
-          ));
-        break;
-      case self::STATUS_NONSTUB:
-        $where[] = qsprintf(
-          $conn,
-          'd.status NOT IN (%Ld)',
-          array(
-            PhrictionDocumentStatus::STATUS_MOVED,
-            PhrictionDocumentStatus::STATUS_STUB,
-          ));
-        break;
-      case self::STATUS_ANY:
-        break;
-      default:
-        throw new Exception(pht("Unknown status '%s'!", $this->status));
+    if ($this->parentPaths !== null || $this->ancestorPaths !== null) {
+      $sets = array(
+        array(
+          'paths' => $this->parentPaths,
+          'parents' => true,
+        ),
+        array(
+          'paths' => $this->ancestorPaths,
+          'parents' => false,
+        ),
+      );
+
+      $paths = array();
+      foreach ($sets as $set) {
+        $set_paths = $set['paths'];
+        if ($set_paths === null) {
+          continue;
+        }
+
+        if (!$set_paths) {
+          throw new PhabricatorEmptyQueryException(
+            pht('No parent/ancestor paths specified.'));
+        }
+
+        $is_parents = $set['parents'];
+        foreach ($set_paths as $path) {
+          $path_normal = PhabricatorSlug::normalize($path);
+          if ($path !== $path_normal) {
+            throw new Exception(
+              pht(
+                'Document path "%s" is not a valid path. The normalized '.
+                'form of this path is "%s".',
+                $path,
+                $path_normal));
+          }
+
+          $depth = PhabricatorSlug::getDepth($path_normal);
+          if ($is_parents) {
+            $min_depth = $depth + 1;
+            $max_depth = $depth + 1;
+          } else {
+            $min_depth = $depth + 1;
+            $max_depth = null;
+          }
+
+          $paths[] = array(
+            $path_normal,
+            $min_depth,
+            $max_depth,
+          );
+        }
+      }
+
+      $path_clauses = array();
+      foreach ($paths as $path) {
+        $parts = array();
+        list($prefix, $min, $max) = $path;
+
+        // If we're getting children or ancestors of the root document, they
+        // aren't actually stored with the leading "/" in the database, so
+        // just skip this part of the clause.
+        if ($prefix !== '/') {
+          $parts[] = qsprintf(
+            $conn,
+            'd.slug LIKE %>',
+            $prefix);
+        }
+
+        if ($min !== null) {
+          $parts[] = qsprintf(
+            $conn,
+            'd.depth >= %d',
+            $min);
+        }
+
+        if ($max !== null) {
+          $parts[] = qsprintf(
+            $conn,
+            'd.depth <= %d',
+            $max);
+        }
+
+        $path_clauses[] = '('.implode(') AND (', $parts).')';
+      }
+
+      $where[] = '('.implode(') OR (', $path_clauses).')';
     }
 
     return $where;
   }
 
   public function getBuiltinOrders() {
-    return array(
+    return parent::getBuiltinOrders() + array(
       self::ORDER_HIERARCHY => array(
         'vector' => array('depth', 'title', 'updated'),
         'name' => pht('Hierarchy'),
       ),
-    ) + parent::getBuiltinOrders();
+    );
   }
 
   public function getOrderableColumns() {

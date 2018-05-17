@@ -29,34 +29,72 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
     $parser = new PhutilSimpleOptions();
     $options = $parser->parse($matches[1]) + $options;
 
-    $uri = id(new PhutilURI('/macro/meme/'))
-      ->alter('macro', $options['src'])
-      ->alter('uppertext', $options['above'])
-      ->alter('lowertext', $options['below']);
+    $engine = id(new PhabricatorMemeEngine())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setTemplate($options['src'])
+      ->setAboveText($options['above'])
+      ->setBelowText($options['below']);
 
-    if ($this->getEngine()->isHTMLMailMode()) {
-      $uri = PhabricatorEnv::getProductionURI($uri);
+    $asset = $engine->loadCachedFile();
+
+    $is_html_mail = $this->getEngine()->isHTMLMailMode();
+    $is_text = $this->getEngine()->isTextMode();
+    $must_inline = ($is_html_mail || $is_text);
+
+    if ($must_inline) {
+      if (!$asset) {
+        try {
+          $asset = $engine->newAsset();
+        } catch (Exception $ex) {
+          return $matches[0];
+        }
+      }
     }
 
-    if ($this->getEngine()->isTextMode()) {
-      $img =
-        ($options['above'] != '' ? "\"{$options['above']}\"\n" : '').
-        $options['src'].' <'.PhabricatorEnv::getProductionURI($uri).'>'.
-        ($options['below'] != '' ? "\n\"{$options['below']}\"" : '');
+    if ($asset) {
+      $uri = $asset->getViewURI();
     } else {
-      $alt_text = pht(
-        'Macro %s: %s %s',
-        $options['src'],
-        $options['above'],
-        $options['below']);
+      $uri = $engine->getGenerateURI();
+    }
 
+    if ($is_text) {
+      $parts = array();
+
+      $above = $options['above'];
+      if (strlen($above)) {
+        $parts[] = pht('"%s"', $above);
+      }
+
+      $parts[] = $options['src'].' <'.$uri.'>';
+
+      $below = $options['below'];
+      if (strlen($below)) {
+        $parts[] = pht('"%s"', $below);
+      }
+
+      $parts = implode("\n", $parts);
+      return $this->getEngine()->storeText($parts);
+    }
+
+    $alt_text = pht(
+      'Macro %s: %s %s',
+      $options['src'],
+      $options['above'],
+      $options['below']);
+
+    if ($asset) {
       $img = $this->newTag(
         'img',
         array(
           'src' => $uri,
-          'alt' => $alt_text,
           'class' => 'phabricator-remarkup-macro',
+          'alt' => $alt_text,
         ));
+    } else {
+      $img = id(new PHUIRemarkupImageView())
+        ->setURI($uri)
+        ->addClass('phabricator-remarkup-macro')
+        ->setAlt($alt_text);
     }
 
     return $this->getEngine()->storeText($img);

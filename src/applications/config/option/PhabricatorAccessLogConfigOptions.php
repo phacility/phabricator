@@ -47,6 +47,10 @@ final class PhabricatorAccessLogConfigOptions
       's' => pht('The system user.'),
       'S' => pht('The system sudo user.'),
       'k' => pht('ID of the SSH key used to authenticate the request.'),
+
+      // TODO: This is a reasonable thing to support in the HTTP access
+      // log, too.
+      'Q' => pht('A random, unique string which identifies the request.'),
     );
 
     $http_desc = pht(

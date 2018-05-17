@@ -12,6 +12,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   const ENV_REPOSITORY = 'PHABRICATOR_REPOSITORY';
   const ENV_USER = 'PHABRICATOR_USER';
+  const ENV_REQUEST = 'PHABRICATOR_REQUEST';
   const ENV_REMOTE_ADDRESS = 'PHABRICATOR_REMOTE_ADDRESS';
   const ENV_REMOTE_PROTOCOL = 'PHABRICATOR_REMOTE_PROTOCOL';
 
@@ -25,6 +26,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $subversionRepository;
   private $remoteAddress;
   private $remoteProtocol;
+  private $requestIdentifier;
   private $transactionKey;
   private $mercurialHook;
   private $mercurialCommits = array();
@@ -34,6 +36,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $rejectCode = PhabricatorRepositoryPushLog::REJECT_BROKEN;
   private $rejectDetails;
   private $emailPHIDs = array();
+  private $changesets = array();
 
 
 /* -(  Config  )------------------------------------------------------------- */
@@ -55,6 +58,15 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function getRemoteAddress() {
     return $this->remoteAddress;
+  }
+
+  public function setRequestIdentifier($request_identifier) {
+    $this->requestIdentifier = $request_identifier;
+    return $this;
+  }
+
+  public function getRequestIdentifier() {
+    return $this->requestIdentifier;
   }
 
   public function setSubversionTransactionInfo($transaction, $repository) {
@@ -128,12 +140,32 @@ final class DiffusionCommitHookEngine extends Phobject {
         throw $ex;
       }
 
-      $this->applyHeraldRefRules($ref_updates, $all_updates);
-
       $content_updates = $this->findContentUpdates($ref_updates);
-      $all_updates = array_merge($all_updates, $content_updates);
+      $all_updates = array_merge($ref_updates, $content_updates);
 
-      $this->applyHeraldContentRules($content_updates, $all_updates);
+      // If this is an "initial import" (a sizable push to a previously empty
+      // repository) we'll allow enormous changes and disable Herald rules.
+      // These rulesets can consume a large amount of time and memory and are
+      // generally not relevant when importing repository history.
+      $is_initial_import = $this->isInitialImport($all_updates);
+
+      if (!$is_initial_import) {
+        $this->applyHeraldRefRules($ref_updates);
+      }
+
+      try {
+        if (!$is_initial_import) {
+          $this->rejectEnormousChanges($content_updates);
+        }
+      } catch (DiffusionCommitHookRejectException $ex) {
+        // If we're rejecting enormous changes, flag everything.
+        $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_ENORMOUS;
+        throw $ex;
+      }
+
+      if (!$is_initial_import) {
+        $this->applyHeraldContentRules($content_updates);
+      }
 
       // Run custom scripts in `hook.d/` directories.
       $this->applyCustomHooks($all_updates);
@@ -165,12 +197,10 @@ final class DiffusionCommitHookEngine extends Phobject {
       throw $caught;
     }
 
-    // If this went through cleanly, detect pushes which are actually imports
-    // of an existing repository rather than an addition of new commits. If
-    // this push is importing a bunch of stuff, set the importing flag on
-    // the repository. It will be cleared once we fully process everything.
+    // If this went through cleanly and was an import, set the importing flag
+    // on the repository. It will be cleared once we fully process everything.
 
-    if ($this->isInitialImport($all_updates)) {
+    if ($is_initial_import) {
       $repository = $this->getRepository();
       $repository->markImporting();
     }
@@ -260,34 +290,31 @@ final class DiffusionCommitHookEngine extends Phobject {
 
 /* -(  Herald  )------------------------------------------------------------- */
 
-  private function applyHeraldRefRules(
-    array $ref_updates,
-    array $all_updates) {
+  private function applyHeraldRefRules(array $ref_updates) {
     $this->applyHeraldRules(
       $ref_updates,
-      new HeraldPreCommitRefAdapter(),
-      $all_updates);
+      new HeraldPreCommitRefAdapter());
   }
 
-  private function applyHeraldContentRules(
-    array $content_updates,
-    array $all_updates) {
+  private function applyHeraldContentRules(array $content_updates) {
     $this->applyHeraldRules(
       $content_updates,
-      new HeraldPreCommitContentAdapter(),
-      $all_updates);
+      new HeraldPreCommitContentAdapter());
   }
 
   private function applyHeraldRules(
     array $updates,
-    HeraldAdapter $adapter_template,
-    array $all_updates) {
+    HeraldAdapter $adapter_template) {
 
     if (!$updates) {
       return;
     }
 
-    $adapter_template->setHookEngine($this);
+    $viewer = $this->getViewer();
+
+    $adapter_template
+      ->setHookEngine($this)
+      ->setActingAsPHID($viewer->getPHID());
 
     $engine = new HeraldEngine();
     $rules = null;
@@ -606,6 +633,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $env = array(
       self::ENV_REPOSITORY => $this->getRepository()->getPHID(),
       self::ENV_USER => $this->getViewer()->getUsername(),
+      self::ENV_REQUEST => $this->getRequestIdentifier(),
       self::ENV_REMOTE_PROTOCOL => $this->getRemoteProtocol(),
       self::ENV_REMOTE_ADDRESS => $this->getRemoteAddress(),
     );
@@ -1067,19 +1095,57 @@ final class DiffusionCommitHookEngine extends Phobject {
       ->setDevicePHID($device_phid)
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->attachRepository($this->getRepository())
-      ->setEpoch(time());
+      ->setEpoch(PhabricatorTime::getNow());
   }
 
   private function newPushEvent() {
     $viewer = $this->getViewer();
-    return PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
+
+    $event = PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->setRemoteAddress($this->getRemoteAddress())
       ->setRemoteProtocol($this->getRemoteProtocol())
-      ->setEpoch(time());
+      ->setEpoch(PhabricatorTime::getNow());
+
+    $identifier = $this->getRequestIdentifier();
+    if (strlen($identifier)) {
+      $event->setRequestIdentifier($identifier);
+    }
+
+    return $event;
   }
 
-  public function loadChangesetsForCommit($identifier) {
+  private function rejectEnormousChanges(array $content_updates) {
+    $repository = $this->getRepository();
+    if ($repository->shouldAllowEnormousChanges()) {
+      return;
+    }
+
+    foreach ($content_updates as $update) {
+      $identifier = $update->getRefNew();
+      try {
+        $changesets = $this->loadChangesetsForCommit($identifier);
+        $this->changesets[$identifier] = $changesets;
+      } catch (Exception $ex) {
+        $this->changesets[$identifier] = $ex;
+
+        $message = pht(
+          'ENORMOUS CHANGE'.
+          "\n".
+          'Enormous change protection is enabled for this repository, but '.
+          'you are pushing an enormous change ("%s"). Edit the repository '.
+          'configuration before making enormous changes.'.
+          "\n\n".
+          "Content Exception: %s",
+          $identifier,
+          $ex->getMessage());
+
+        throw new DiffusionCommitHookRejectException($message);
+      }
+    }
+  }
+
+  private function loadChangesetsForCommit($identifier) {
     $byte_limit = HeraldCommitAdapter::getEnormousByteLimit();
     $time_limit = HeraldCommitAdapter::getEnormousTimeLimit();
 
@@ -1126,9 +1192,10 @@ final class DiffusionCommitHookEngine extends Phobject {
     if (strlen($raw_diff) >= $byte_limit) {
       throw new Exception(
         pht(
-          'The raw text of this change is enormous (larger than %d '.
-          'bytes). Herald can not process it.',
-          $byte_limit));
+          'The raw text of this change ("%s") is enormous (larger than %s '.
+          'bytes).',
+          $identifier,
+          new PhutilNumber($byte_limit)));
     }
 
     if (!strlen($raw_diff)) {
@@ -1141,6 +1208,20 @@ final class DiffusionCommitHookEngine extends Phobject {
     $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $changes);
     return $diff->getChangesets();
+  }
+
+  public function getChangesetsForCommit($identifier) {
+    if (isset($this->changesets[$identifier])) {
+      $cached = $this->changesets[$identifier];
+
+      if ($cached instanceof Exception) {
+        throw $cached;
+      }
+
+      return $cached;
+    }
+
+    return $this->loadChangesetsForCommit($identifier);
   }
 
   public function loadCommitRefForCommit($identifier) {

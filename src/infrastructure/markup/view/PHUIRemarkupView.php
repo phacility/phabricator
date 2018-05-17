@@ -14,11 +14,14 @@ final class PHUIRemarkupView extends AphrontView {
   private $corpus;
   private $contextObject;
   private $options;
+  private $oneoff;
+  private $generateTableOfContents;
 
   // TODO: In the long run, rules themselves should define available options.
   // For now, just define constants here so we can more easily replace things
   // later once this is cleaned up.
   const OPTION_PRESERVE_LINEBREAKS = 'preserve-linebreaks';
+  const OPTION_GENERATE_TOC = 'header.generate-toc';
 
   public function __construct(PhabricatorUser $viewer, $corpus) {
     $this->setUser($viewer);
@@ -46,6 +49,19 @@ final class PHUIRemarkupView extends AphrontView {
     return $this;
   }
 
+  public function setGenerateTableOfContents($generate) {
+    $this->generateTableOfContents = $generate;
+    return $this;
+  }
+
+  public function getGenerateTableOfContents() {
+    return $this->generateTableOfContents;
+  }
+
+  public function getTableOfContents() {
+    return $this->oneoff->getTableOfContents();
+  }
+
   public function render() {
     $viewer = $this->getViewer();
     $corpus = $this->corpus;
@@ -54,13 +70,18 @@ final class PHUIRemarkupView extends AphrontView {
     $options = $this->options;
 
     $oneoff = id(new PhabricatorMarkupOneOff())
-      ->setContent($corpus);
+      ->setContent($corpus)
+      ->setContentCacheFragment($this->getContentCacheFragment());
 
     if ($options) {
       $oneoff->setEngine($this->getEngine());
     } else {
       $oneoff->setPreserveLinebreaks(true);
     }
+
+    $generate_toc = $this->getGenerateTableOfContents();
+    $oneoff->setGenerateTableOfContents($generate_toc);
+    $this->oneoff = $oneoff;
 
     $content = PhabricatorMarkupEngine::renderOneObject(
       $oneoff,
@@ -76,10 +97,7 @@ final class PHUIRemarkupView extends AphrontView {
     $viewer = $this->getViewer();
 
     $viewer_key = $viewer->getCacheFragment();
-
-    ksort($options);
-    $engine_key = serialize($options);
-    $engine_key = PhabricatorHash::digestForIndex($engine_key);
+    $engine_key = $this->getEngineCacheFragment();
 
     $cache = PhabricatorCaches::getRequestCache();
     $cache_key = "remarkup.engine({$viewer_key}, {$engine_key})";
@@ -91,6 +109,30 @@ final class PHUIRemarkupView extends AphrontView {
     }
 
     return $engine;
+  }
+
+  private function getEngineCacheFragment() {
+    $options = $this->options;
+
+    ksort($options);
+
+    $engine_key = serialize($options);
+    $engine_key = PhabricatorHash::digestForIndex($engine_key);
+
+    return $engine_key;
+  }
+
+  private function getContentCacheFragment() {
+    $corpus = $this->corpus;
+
+    $content_fragment = PhabricatorHash::digestForIndex($corpus);
+    $options_fragment = array(
+      'toc' => $this->getGenerateTableOfContents(),
+    );
+    $options_fragment = serialize($options_fragment);
+    $options_fragment = PhabricatorHash::digestForIndex($options_fragment);
+
+    return "remarkup({$content_fragment}, {$options_fragment})";
   }
 
 }

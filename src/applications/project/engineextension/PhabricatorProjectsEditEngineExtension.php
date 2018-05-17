@@ -46,6 +46,8 @@ final class PhabricatorProjectsEditEngineExtension
       $project_phids = array();
     }
 
+    $viewer = $engine->getViewer();
+
     $projects_field = id(new PhabricatorProjectsEditField())
       ->setKey('projectPHIDs')
       ->setLabel(pht('Tags'))
@@ -58,9 +60,11 @@ final class PhabricatorProjectsEditEngineExtension
       ->setDescription(pht('Select project tags for the object.'))
       ->setTransactionType($edge_type)
       ->setMetadataValue('edge:type', $project_edge_type)
-      ->setValue($project_phids);
+      ->setValue($project_phids)
+      ->setViewer($viewer);
 
-    $projects_field->setViewer($engine->getViewer());
+    $projects_datasource = id(new PhabricatorProjectDatasource())
+      ->setViewer($viewer);
 
     $edit_add = $projects_field->getConduitEditType(self::EDITKEY_ADD)
       ->setConduitDescription(pht('Add project tags.'));
@@ -71,6 +75,18 @@ final class PhabricatorProjectsEditEngineExtension
 
     $edit_rem = $projects_field->getConduitEditType(self::EDITKEY_REMOVE)
       ->setConduitDescription(pht('Remove project tags.'));
+
+    $projects_field->getBulkEditType(self::EDITKEY_ADD)
+      ->setBulkEditLabel(pht('Add project tags'))
+      ->setDatasource($projects_datasource);
+
+    $projects_field->getBulkEditType(self::EDITKEY_SET)
+      ->setBulkEditLabel(pht('Set project tags to'))
+      ->setDatasource($projects_datasource);
+
+    $projects_field->getBulkEditType(self::EDITKEY_REMOVE)
+      ->setBulkEditLabel(pht('Remove project tags'))
+      ->setDatasource($projects_datasource);
 
     return array(
       $projects_field,

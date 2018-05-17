@@ -29,10 +29,11 @@ final class PhrictionDiffController extends PhrictionController {
       list($l, $r) = explode(',', $ref);
     }
 
-    $content = id(new PhrictionContent())->loadAllWhere(
-      'documentID = %d AND version IN (%Ld)',
-      $document->getID(),
-      array($l, $r));
+    $content = id(new PhrictionContentQuery())
+      ->setViewer($viewer)
+      ->withDocumentPHIDs(array($document->getPHID()))
+      ->withVersions(array($l, $r))
+      ->execute();
     $content = mpull($content, null, 'getVersion');
 
     $content_l = idx($content, $l, null);

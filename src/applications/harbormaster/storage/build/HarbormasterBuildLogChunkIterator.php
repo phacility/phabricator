@@ -5,6 +5,7 @@ final class HarbormasterBuildLogChunkIterator
 
   private $log;
   private $cursor;
+  private $asString;
 
   private $min = 0;
   private $max = PHP_INT_MAX;
@@ -27,6 +28,11 @@ final class HarbormasterBuildLogChunkIterator
     return $this;
   }
 
+  public function setAsString($as_string) {
+    $this->asString = $as_string;
+    return $this;
+  }
+
   protected function loadPage() {
     if ($this->cursor > $this->max) {
       return array();
@@ -43,7 +49,11 @@ final class HarbormasterBuildLogChunkIterator
       $this->cursor = last($results)->getID() + 1;
     }
 
-    return $results;
+    if ($this->asString) {
+      return mpull($results, 'getChunkDisplayText');
+    } else {
+      return $results;
+    }
   }
 
 }

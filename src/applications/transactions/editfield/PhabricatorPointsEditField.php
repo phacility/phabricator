@@ -14,4 +14,9 @@ final class PhabricatorPointsEditField
   protected function newCommentAction() {
     return id(new PhabricatorEditEnginePointsCommentAction());
   }
+
+  protected function newBulkParameterType() {
+    return new BulkPointsParameterType();
+  }
+
 }

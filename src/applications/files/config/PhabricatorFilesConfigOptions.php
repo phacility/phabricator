@@ -45,6 +45,8 @@ final class PhabricatorFilesConfigOptions
       'video/ogg' => 'video/ogg',
       'video/webm' => 'video/webm',
       'video/quicktime' => 'video/quicktime',
+
+      'application/pdf' => 'application/pdf',
     );
 
     $image_default = array(
@@ -134,7 +136,7 @@ final class PhabricatorFilesConfigOptions
             "Configure which uploaded file types may be viewed directly ".
             "in the browser. Other file types will be downloaded instead ".
             "of displayed. This is mainly a usability consideration, since ".
-            "browsers tend to freak out when viewing enormous binary files.".
+            "browsers tend to freak out when viewing very large binary files.".
             "\n\n".
             "The keys in this map are viewable MIME types; the values are ".
             "the MIME types they are delivered as when they are viewed in ".

@@ -181,6 +181,11 @@ abstract class PhabricatorEditEngine
         $field
           ->setViewer($viewer)
           ->setObject($object);
+
+        $group_key = $field->getBulkEditGroupKey();
+        if ($group_key === null) {
+          $field->setBulkEditGroupKey('extension');
+        }
       }
 
       $extension_fields = mpull($extension_fields, null, 'getKey');
@@ -628,6 +633,17 @@ abstract class PhabricatorEditEngine
    */
   final public function getIsCreate() {
     return $this->isCreate;
+  }
+
+  /**
+   * Initialize a new object for object creation via Conduit.
+   *
+   * @return object Newly initialized object.
+   * @param list<wild> Raw transactions.
+   * @task load
+   */
+  protected function newEditableObjectFromConduit(array $raw_xactions) {
+    return $this->newEditableObject();
   }
 
   /**
@@ -1382,59 +1398,6 @@ abstract class PhabricatorEditEngine
   }
 
 
-  /**
-   * Test if the viewer could apply a certain type of change by using the
-   * normal "Edit" form.
-   *
-   * This method returns `true` if the user has access to an edit form and
-   * that edit form has a field which applied the specified transaction type,
-   * and that field is visible and editable for the user.
-   *
-   * For example, you can use it to test if a user is able to reassign tasks
-   * or not, prior to rendering dedicated UI for task reassignment.
-   *
-   * Note that this method does NOT test if the user can actually edit the
-   * current object, just if they have access to the related field.
-   *
-   * @param const Transaction type to test for.
-   * @return bool True if the user could "Edit" to apply the transaction type.
-   */
-  final public function hasEditAccessToTransaction($xaction_type) {
-    $viewer = $this->getViewer();
-
-    $object = $this->getTargetObject();
-    if (!$object) {
-      $object = $this->newEditableObject();
-    }
-
-    $config = $this->loadDefaultEditConfiguration($object);
-    if (!$config) {
-      return false;
-    }
-
-    $fields = $this->buildEditFields($object);
-
-    $field = null;
-    foreach ($fields as $form_field) {
-      $field_xaction_type = $form_field->getTransactionType();
-      if ($field_xaction_type === $xaction_type) {
-        $field = $form_field;
-        break;
-      }
-    }
-
-    if (!$field) {
-      return false;
-    }
-
-    if (!$field->shouldReadValueFromSubmit()) {
-      return false;
-    }
-
-    return true;
-  }
-
-
   public function newNUXButton($text) {
     $specs = $this->newCreateActionSpecifications(array());
     $head = head($specs);
@@ -1952,6 +1915,7 @@ abstract class PhabricatorEditEngine
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContinueOnMissingFields(true)
       ->setContentSourceFromRequest($request)
+      ->setRaiseWarnings(!$request->getBool('editEngine.warnings'))
       ->setIsPreview($is_preview);
 
     try {
@@ -1964,13 +1928,16 @@ abstract class PhabricatorEditEngine
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
         ->setCancelURI($view_uri)
         ->setException($ex);
+    } catch (PhabricatorApplicationTransactionWarningException $ex) {
+      return id(new PhabricatorApplicationTransactionWarningResponse())
+        ->setCancelURI($view_uri)
+        ->setException($ex);
     }
 
     if (!$is_preview) {
       PhabricatorVersionedDraft::purgeDrafts(
         $object->getPHID(),
-        $viewer->getPHID(),
-        $this->loadDraftVersion($object));
+        $viewer->getPHID());
 
       $draft_engine = $this->newDraftEngine($object);
       if ($draft_engine) {
@@ -2031,6 +1998,8 @@ abstract class PhabricatorEditEngine
           get_class($this)));
     }
 
+    $raw_xactions = $this->getRawConduitTransactions($request);
+
     $identifier = $request->getValue('objectIdentifier');
     if ($identifier) {
       $this->setIsCreate(false);
@@ -2039,7 +2008,7 @@ abstract class PhabricatorEditEngine
       $this->requireCreateCapability();
 
       $this->setIsCreate(true);
-      $object = $this->newEditableObject();
+      $object = $this->newEditableObjectFromConduit($raw_xactions);
     }
 
     $this->validateObject($object);
@@ -2049,7 +2018,11 @@ abstract class PhabricatorEditEngine
     $types = $this->getConduitEditTypesFromFields($fields);
     $template = $object->getApplicationTransactionTemplate();
 
-    $xactions = $this->getConduitTransactions($request, $types, $template);
+    $xactions = $this->getConduitTransactions(
+      $request,
+      $raw_xactions,
+      $types,
+      $template);
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)
@@ -2071,30 +2044,14 @@ abstract class PhabricatorEditEngine
 
     return array(
       'object' => array(
-        'id' => $object->getID(),
+        'id' => (int)$object->getID(),
         'phid' => $object->getPHID(),
       ),
       'transactions' => $xactions_struct,
     );
   }
 
-
-  /**
-   * Generate transactions which can be applied from edit actions in a Conduit
-   * request.
-   *
-   * @param ConduitAPIRequest The request.
-   * @param list<PhabricatorEditType> Supported edit types.
-   * @param PhabricatorApplicationTransaction Template transaction.
-   * @return list<PhabricatorApplicationTransaction> Generated transactions.
-   * @task conduit
-   */
-  private function getConduitTransactions(
-    ConduitAPIRequest $request,
-    array $types,
-    PhabricatorApplicationTransaction $template) {
-
-    $viewer = $request->getUser();
+  private function getRawConduitTransactions(ConduitAPIRequest $request) {
     $transactions_key = 'transactions';
 
     $xactions = $request->getValue($transactions_key);
@@ -2124,7 +2081,33 @@ abstract class PhabricatorEditEngine
             $transactions_key,
             $key));
       }
+    }
 
+    return $xactions;
+  }
+
+
+  /**
+   * Generate transactions which can be applied from edit actions in a Conduit
+   * request.
+   *
+   * @param ConduitAPIRequest The request.
+   * @param list<wild> Raw conduit transactions.
+   * @param list<PhabricatorEditType> Supported edit types.
+   * @param PhabricatorApplicationTransaction Template transaction.
+   * @return list<PhabricatorApplicationTransaction> Generated transactions.
+   * @task conduit
+   */
+  private function getConduitTransactions(
+    ConduitAPIRequest $request,
+    array $xactions,
+    array $types,
+    PhabricatorApplicationTransaction $template) {
+
+    $viewer = $request->getUser();
+    $results = array();
+
+    foreach ($xactions as $key => $xaction) {
       $type = $xaction['type'];
       if (empty($types[$type])) {
         throw new Exception(
@@ -2137,12 +2120,12 @@ abstract class PhabricatorEditEngine
       }
     }
 
-    $results = array();
-
     if ($this->getIsCreate()) {
       $results[] = id(clone $template)
         ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
     }
+
+    $is_strict = $request->getIsStrictlyTyped();
 
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
@@ -2154,10 +2137,10 @@ abstract class PhabricatorEditEngine
       $parameter_type->setViewer($viewer);
 
       try {
-        $xaction['value'] = $parameter_type->getValue(
-          $xaction,
-          'value',
-          $request->getIsStrictlyTyped());
+        $value = $xaction['value'];
+        $value = $parameter_type->getValue($xaction, 'value', $is_strict);
+        $value = $type->getTransactionValueFromConduit($value);
+        $xaction['value'] = $value;
       } catch (Exception $ex) {
         throw new PhutilProxyException(
           pht(
@@ -2194,7 +2177,6 @@ abstract class PhabricatorEditEngine
       }
 
       foreach ($field_types as $field_type) {
-        $field_type->setField($field);
         $types[$field_type->getEditType()] = $field_type;
       }
     }
@@ -2393,6 +2375,204 @@ abstract class PhabricatorEditEngine
 
   protected function didApplyTransactions($object, array $xactions) {
     return;
+  }
+
+
+/* -(  Bulk Edits  )--------------------------------------------------------- */
+
+  final public function newBulkEditGroupMap() {
+    $groups = $this->newBulkEditGroups();
+
+    $map = array();
+    foreach ($groups as $group) {
+      $key = $group->getKey();
+
+      if (isset($map[$key])) {
+        throw new Exception(
+          pht(
+            'Two bulk edit groups have the same key ("%s"). Each bulk edit '.
+            'group must have a unique key.',
+            $key));
+      }
+
+      $map[$key] = $group;
+    }
+
+    if ($this->isEngineExtensible()) {
+      $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    } else {
+      $extensions = array();
+    }
+
+    foreach ($extensions as $extension) {
+      $extension_groups = $extension->newBulkEditGroups($this);
+      foreach ($extension_groups as $group) {
+        $key = $group->getKey();
+
+        if (isset($map[$key])) {
+          throw new Exception(
+            pht(
+              'Extension "%s" defines a bulk edit group with the same key '.
+              '("%s") as the main editor or another extension. Each bulk '.
+              'edit group must have a unique key.'));
+        }
+
+        $map[$key] = $group;
+      }
+    }
+
+    return $map;
+  }
+
+  protected function newBulkEditGroups() {
+    return array(
+      id(new PhabricatorBulkEditGroup())
+        ->setKey('default')
+        ->setLabel(pht('Primary Fields')),
+      id(new PhabricatorBulkEditGroup())
+        ->setKey('extension')
+        ->setLabel(pht('Support Applications')),
+    );
+  }
+
+  final public function newBulkEditMap() {
+    $config = $this->loadDefaultConfiguration();
+    if (!$config) {
+      throw new Exception(
+        pht('No default edit engine configuration for bulk edit.'));
+    }
+
+    $object = $this->newEditableObject();
+    $fields = $this->buildEditFields($object);
+    $groups = $this->newBulkEditGroupMap();
+
+    $edit_types = $this->getBulkEditTypesFromFields($fields);
+
+    $map = array();
+    foreach ($edit_types as $key => $type) {
+      $bulk_type = $type->getBulkParameterType();
+      if ($bulk_type === null) {
+        continue;
+      }
+
+      $bulk_label = $type->getBulkEditLabel();
+      if ($bulk_label === null) {
+        continue;
+      }
+
+      $group_key = $type->getBulkEditGroupKey();
+      if (!$group_key) {
+        $group_key = 'default';
+      }
+
+      if (!isset($groups[$group_key])) {
+        throw new Exception(
+          pht(
+            'Field "%s" has a bulk edit group key ("%s") with no '.
+            'corresponding bulk edit group.',
+            $key,
+            $group_key));
+      }
+
+      $map[] = array(
+        'label' => $bulk_label,
+        'xaction' => $key,
+        'group' => $group_key,
+        'control' => array(
+          'type' => $bulk_type->getPHUIXControlType(),
+          'spec' => (object)$bulk_type->getPHUIXControlSpecification(),
+        ),
+      );
+    }
+
+    return $map;
+  }
+
+
+  final public function newRawBulkTransactions(array $xactions) {
+    $config = $this->loadDefaultConfiguration();
+    if (!$config) {
+      throw new Exception(
+        pht('No default edit engine configuration for bulk edit.'));
+    }
+
+    $object = $this->newEditableObject();
+    $fields = $this->buildEditFields($object);
+
+    $edit_types = $this->getBulkEditTypesFromFields($fields);
+    $template = $object->getApplicationTransactionTemplate();
+
+    $raw_xactions = array();
+    foreach ($xactions as $key => $xaction) {
+      PhutilTypeSpec::checkMap(
+        $xaction,
+        array(
+          'type' => 'string',
+          'value' => 'optional wild',
+        ));
+
+      $type = $xaction['type'];
+      if (!isset($edit_types[$type])) {
+        throw new Exception(
+          pht(
+            'Unsupported bulk edit type "%s".',
+            $type));
+      }
+
+      $edit_type = $edit_types[$type];
+
+      // Replace the edit type with the underlying transaction type. Usually
+      // these are 1:1 and the transaction type just has more internal noise,
+      // but it's possible that this isn't the case.
+      $xaction['type'] = $edit_type->getTransactionType();
+
+      $value = $xaction['value'];
+      $value = $edit_type->getTransactionValueFromBulkEdit($value);
+      $xaction['value'] = $value;
+
+      $xaction_objects = $edit_type->generateTransactions(
+        clone $template,
+        $xaction);
+
+      foreach ($xaction_objects as $xaction_object) {
+        $raw_xaction = array(
+          'type' => $xaction_object->getTransactionType(),
+          'metadata' => $xaction_object->getMetadata(),
+          'new' => $xaction_object->getNewValue(),
+        );
+
+        if ($xaction_object->hasOldValue()) {
+          $raw_xaction['old'] = $xaction_object->getOldValue();
+        }
+
+        if ($xaction_object->hasComment()) {
+          $comment = $xaction_object->getComment();
+          $raw_xaction['comment'] = $comment->getContent();
+        }
+
+        $raw_xactions[] = $raw_xaction;
+      }
+    }
+
+    return $raw_xactions;
+  }
+
+  private function getBulkEditTypesFromFields(array $fields) {
+    $types = array();
+
+    foreach ($fields as $field) {
+      $field_types = $field->getBulkEditTypes();
+
+      if ($field_types === null) {
+        continue;
+      }
+
+      foreach ($field_types as $field_type) {
+        $types[$field_type->getEditType()] = $field_type;
+      }
+    }
+
+    return $types;
   }
 
 

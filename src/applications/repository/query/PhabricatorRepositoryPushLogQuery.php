@@ -10,6 +10,8 @@ final class PhabricatorRepositoryPushLogQuery
   private $refTypes;
   private $newRefs;
   private $pushEventPHIDs;
+  private $epochMin;
+  private $epochMax;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -46,19 +48,18 @@ final class PhabricatorRepositoryPushLogQuery
     return $this;
   }
 
+  public function withEpochBetween($min, $max) {
+    $this->epochMin = $min;
+    $this->epochMax = $max;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new PhabricatorRepositoryPushLog();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorRepositoryPushLog();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $logs) {
@@ -82,61 +83,73 @@ final class PhabricatorRepositoryPushLogQuery
     return $logs;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->repositoryPHIDs) {
+    if ($this->repositoryPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
-    if ($this->pusherPHIDs) {
+    if ($this->pusherPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'pusherPHID in (%Ls)',
         $this->pusherPHIDs);
     }
 
-    if ($this->pushEventPHIDs) {
+    if ($this->pushEventPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'pushEventPHID in (%Ls)',
         $this->pushEventPHIDs);
     }
 
-    if ($this->refTypes) {
+    if ($this->refTypes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'refType IN (%Ls)',
         $this->refTypes);
     }
 
-    if ($this->newRefs) {
+    if ($this->newRefs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'refNew IN (%Ls)',
         $this->newRefs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->epochMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'epoch >= %d',
+        $this->epochMin);
+    }
 
-    return $this->formatWhereClause($where);
+    if ($this->epochMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'epoch <= %d',
+        $this->epochMax);
+    }
+
+    return $where;
   }
 
   public function getQueryApplicationClass() {

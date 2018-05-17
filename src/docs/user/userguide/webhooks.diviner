@@ -1,0 +1,212 @@
+@title User Guide: Webhooks
+@group userguide
+
+Guide to configuring webhooks.
+
+
+Overview
+========
+
+If you'd like to react to events in Phabricator or publish them into external
+systems, you can configure webhooks.
+
+Configure webhooks in {nav Herald > Webhooks}. Users must have the
+"Can Create Webhooks" permission to create new webhooks.
+
+
+Triggering Hooks
+================
+
+Webhooks can be triggered in two ways:
+
+  - Set the hook mode to **Firehose**. In this mode, your hook will be called
+    for every event.
+  - Set the hook mode to **Enabled**, then write Herald rules which use the
+    **Call webhooks** action to choose when the hook is called. This allows
+    you to choose a narrower range of events to be notified about.
+
+
+Testing Hooks
+=============
+
+To test a webhook, use {nav New Test Request} from the web interface.
+
+You can also use the command-line tool, which supports a few additional
+options:
+
+```
+phabricator/ $ ./bin/webhook call --id 42 --object D123
+```
+
+You can use a tool like [[ https://requestb.in | RequestBin ]] to inspect
+the headers and payload for calls to hooks.
+
+
+Verifying Requests
+==================
+
+When your webhook callback URI receives a request, it didn't necessarily come
+from Phabricator. An attacker or mischievous user can normally call your hook
+directly and pretend to be notifying you of an event.
+
+To verify that the request is authentic, first retrieve the webhook key from
+the web UI with {nav View HMAC Key}. This is a shared secret which will let you
+verify that Phabricator originated a request.
+
+When you receive a request, compute the SHA256 HMAC value of the request body
+using the HMAC key as the key. The value should match the value in the
+`X-Phabricator-Webhook-Signature` field.
+
+To compute the SHA256 HMAC of a string in PHP, do this:
+
+```lang=php
+$signature = hash_hmac('sha256', $request_body, $hmac_key);
+```
+
+To compute the SHA256 HMAC of a string in Python, do this:
+
+```lang=python
+from subprocess import check_output
+
+signature = check_output(
+  [
+    "php",
+    "-r",
+    "echo hash_hmac('sha256', $argv[1], $argv[2]);",
+    "--",
+    request_body,
+    hmac_key
+  ])
+```
+
+Other languages often provide similar support.
+
+If you somehow disclose the key by accident, use {nav Regenerate HMAC Key} to
+throw it away and generate a new one.
+
+
+Request Format
+==============
+
+Webhook callbacks are POST requests with a JSON payload in the body. The
+payload looks like this:
+
+```lang=json
+{
+  "object": {
+    "type": "TASK",
+    "phid": "PHID-TASK-abcd..."
+  },
+  "triggers": [
+    {
+      "phid": "PHID-HRUL-abcd..."
+    }
+  ],
+  "action": {
+    "test": false,
+    "silent": false,
+    "secure": false,
+    "epoch": 12345
+  },
+  "transactions": [
+    {
+      "phid": "PHID-XACT-TASK-abcd..."
+    }
+  ]
+}
+```
+
+The **object** map describes the object which was edited.
+
+The **triggers** are a list of reasons why the hook was called. When the hook
+is triggered by Herald rules, the specific rules which triggered the call will
+be listed. For firehose rules, the rule itself will be listed as the trigger.
+For test calls, the user making the request will be listed as a trigger.
+
+The **action** map has metadata about the action:
+
+  - `test` This was a test call from the web UI or console.
+  - `silent` This is a silent edit which won't send mail or notifications in
+    Phabricator. If your hook is doing something like copying events into
+    a chatroom, it may want to respect this flag.
+  - `secure` Details about this object should only be transmitted over
+    secure channels. Your hook may want to respect this flag.
+  - `epoch` The epoch timestamp when the callback was queued.
+
+The **transactions** list contains information about the actual changes which
+triggered the callback.
+
+
+Responding to Requests
+======================
+
+Although trivial hooks may not need any more information than this to act, the
+information conveyed in the hook body is a minimum set of pointers to relevant
+data and likely insufficient for more complex hooks.
+
+Complex hooks should expect to react to receiving a request by making API
+calls to Conduit to retrieve additional information about the object and
+transactions.
+
+Hooks that are interested in reading object state should generally make a call
+to a method like `maniphest.search` or `differential.revision.search` using
+the PHID from the `object` field to retrieve full details about the object
+state.
+
+Hooks that are interested in changes should generally make a call to
+`transaction.search`, passing the transaction PHIDs as a constraint to retrieve
+details about the transactions.
+
+The `phid.query` method can also be used to retrieve generic information about
+a list of objects.
+
+
+Retries and Rate Limiting
+=========================
+
+Test requests are never retried: they execute exactly once.
+
+Live requests are automatically retried. If your endpoint does not return a
+HTTP 2XX response, the request will be retried regularly until it suceeds.
+
+Retries will continue until the request succeeds or is garbage collected. By
+default, this is after 7 days.
+
+If a webhook is disabled, outstanding queued requests will be failed
+permanently. Activity which occurs while it is disabled will never be sent to
+the callback URI. (Disabling a hook does not "pause" it so that it can be
+"resumed" later and pick back up where it left off in the event stream.)
+
+If a webhook encounters a significant number of errors in a short period of
+time, the webhook will be paused for a few minutes before additional requests
+are made. The web UI shows a warning indicator when a hook is paused because of
+errors.
+
+Hook requests time out after 10 seconds. Consider offloading response handling
+to some kind of worker queue if you expect to routinely require more than 10
+seconds to respond to requests.
+
+Hook callbacks are single-threaded: you will never receive more than one
+simultaneous call to the same webhook from Phabricator. If you have a firehose
+hook on an active install, it may be important to respond to requests quickly
+to avoid accumulating a backlog.
+
+Callbacks may be invoked out-of-order. You should not assume that the order
+you receive requests in is chronological order. If your hook is order-dependent,
+you can ignore the transactions in the callback and use `transaction.search` to
+retrieve a consistent list of ordered changes to the object.
+
+Callbacks may be delayed for an arbitrarily long amount of time, up to the
+garbage collection limit. You should not assume that calls are real time. If
+your hook is doing something time-sensitive, you can measure the delivery delay
+by comparing the current time to the `epoch` value in the `action` field and
+ignoring old actions or handling them in some special way.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - learning more about Herald with @{article:Herald User Guide}; or
+  - interacting with the Conduit API with @{article:Conduit API Overview}.
