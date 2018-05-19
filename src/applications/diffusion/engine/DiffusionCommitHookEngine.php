@@ -37,6 +37,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $rejectDetails;
   private $emailPHIDs = array();
   private $changesets = array();
+  private $changesetsSize = 0;
 
 
 /* -(  Config  )------------------------------------------------------------- */
@@ -1121,11 +1122,22 @@ final class DiffusionCommitHookEngine extends Phobject {
       return;
     }
 
+    // See T13142. Don't cache more than 64MB of changesets. For normal small
+    // pushes, caching everything here can let us hit the cache from Herald if
+    // we need to run content rules, which speeds things up a bit. For large
+    // pushes, we may not be able to hold everything in memory.
+    $cache_limit = 1024 * 1024 * 64;
+
     foreach ($content_updates as $update) {
       $identifier = $update->getRefNew();
       try {
-        $changesets = $this->loadChangesetsForCommit($identifier);
-        $this->changesets[$identifier] = $changesets;
+        $info = $this->loadChangesetsForCommit($identifier);
+        list($changesets, $size) = $info;
+
+        if ($this->changesetsSize + $size <= $cache_limit) {
+          $this->changesets[$identifier] = $changesets;
+          $this->changesetsSize += $size;
+        }
       } catch (Exception $ex) {
         $this->changesets[$identifier] = $ex;
 
@@ -1207,7 +1219,11 @@ final class DiffusionCommitHookEngine extends Phobject {
     $changes = $parser->parseDiff($raw_diff);
     $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $changes);
-    return $diff->getChangesets();
+
+    $changesets = $diff->getChangesets();
+    $size = strlen($raw_diff);
+
+    return array($changesets, $size);
   }
 
   public function getChangesetsForCommit($identifier) {
@@ -1221,7 +1237,9 @@ final class DiffusionCommitHookEngine extends Phobject {
       return $cached;
     }
 
-    return $this->loadChangesetsForCommit($identifier);
+    $info = $this->loadChangesetsForCommit($identifier);
+    list($changesets, $size) = $info;
+    return $changesets;
   }
 
   public function loadCommitRefForCommit($identifier) {

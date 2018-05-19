@@ -26,6 +26,7 @@ final class DifferentialChangeset
 
   const METADATA_TRUSTED_ATTRIBUTES = 'attributes.trusted';
   const METADATA_UNTRUSTED_ATTRIBUTES = 'attributes.untrusted';
+  const METADATA_EFFECT_HASH = 'hash.effect';
 
   const ATTRIBUTE_GENERATED = 'generated';
 
@@ -141,6 +142,48 @@ final class DifferentialChangeset
       $ret = parent::delete();
     $this->saveTransaction();
     return $ret;
+  }
+
+  /**
+   * Test if this changeset and some other changeset put the affected file in
+   * the same state.
+   *
+   * @param DifferentialChangeset Changeset to compare against.
+   * @return bool True if the two changesets have the same effect.
+   */
+  public function hasSameEffectAs(DifferentialChangeset $other) {
+    if ($this->getFilename() !== $other->getFilename()) {
+      return false;
+    }
+
+    $hash_key = self::METADATA_EFFECT_HASH;
+
+    $u_hash = $this->getChangesetMetadata($hash_key);
+    if ($u_hash === null) {
+      return false;
+    }
+
+    $v_hash = $other->getChangesetMetadata($hash_key);
+    if ($v_hash === null) {
+      return false;
+    }
+
+    if ($u_hash !== $v_hash) {
+      return false;
+    }
+
+    // Make sure the final states for the file properties (like the "+x"
+    // executable bit) match one another.
+    $u_props = $this->getNewProperties();
+    $v_props = $other->getNewProperties();
+    ksort($u_props);
+    ksort($v_props);
+
+    if ($u_props !== $v_props) {
+      return false;
+    }
+
+    return true;
   }
 
   public function getSortKey() {

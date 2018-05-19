@@ -44,13 +44,16 @@ abstract class PhabricatorDashboardProfileController
   }
 
   protected function buildApplicationCrumbs() {
-    $dashboard = $this->getDashboard();
-    $id = $dashboard->getID();
-    $dashboard_uri = $this->getApplicationURI("/view/{$id}/");
-
     $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->addTextCrumb($dashboard->getName(), $dashboard_uri);
     $crumbs->setBorder(true);
+
+    $dashboard = $this->getDashboard();
+    if ($dashboard) {
+      $id = $dashboard->getID();
+      $dashboard_uri = $this->getApplicationURI("/view/{$id}/");
+      $crumbs->addTextCrumb($dashboard->getName(), $dashboard_uri);
+    }
+
     return $crumbs;
   }
 

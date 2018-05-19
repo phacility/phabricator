@@ -7,6 +7,11 @@ final class PhabricatorPeopleNewController
     $type = $request->getURIData('type');
     $admin = $request->getUser();
 
+    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $admin,
+      $request,
+      $this->getApplicationURI());
+
     $is_bot = false;
     $is_list = false;
     switch ($type) {
