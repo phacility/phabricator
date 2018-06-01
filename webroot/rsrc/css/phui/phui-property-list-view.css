@@ -207,6 +207,7 @@ div.phui-property-list-stacked .phui-property-list-properties
 .document-engine-image img {
   margin: 20px auto;
   background: url('/rsrc/image/checker_light.png');
+  max-width: 100%;
 }
 
 .device-desktop .document-engine-image img:hover {
