@@ -3,6 +3,10 @@
 final class HarbormasterBuildableViewController
   extends HarbormasterController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
@@ -349,7 +353,5 @@ final class HarbormasterBuildableViewController
 
     return array($lint, $unit);
   }
-
-
 
 }
