@@ -7,10 +7,12 @@ final class DifferentialTransactionEditor
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
   private $didExpandInlineState = false;
-  private $affectedPaths;
   private $firstBroadcast = false;
   private $wasBroadcasting;
   private $isDraftDemotion;
+
+  private $ownersDiff;
+  private $ownersChangesets;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -680,8 +682,13 @@ final class DifferentialTransactionEditor
       if ($config_inline || $config_attach) {
         $body_limit = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
 
-        $patch = $this->buildPatchForMail($diff);
-        if ($config_inline) {
+        try {
+          $patch = $this->buildPatchForMail($diff, $body_limit);
+        } catch (ArcanistDiffByteSizeException $ex) {
+          $patch = null;
+        }
+
+        if (($patch !== null) && $config_inline) {
           $lines = substr_count($patch, "\n");
           $bytes = strlen($patch);
 
@@ -704,7 +711,7 @@ final class DifferentialTransactionEditor
           }
         }
 
-        if ($config_attach) {
+        if (($patch !== null) && $config_attach) {
           // See T12033, T11767, and PHI55. This is a crude fix to stop the
           // major concrete problems that lackluster email size limits cause.
           if (strlen($patch) < $body_limit) {
@@ -968,13 +975,20 @@ final class DifferentialTransactionEditor
       return array();
     }
 
-    if (!$this->affectedPaths) {
+    $diff = $this->ownersDiff;
+    $changesets = $this->ownersChangesets;
+
+    $this->ownersDiff = null;
+    $this->ownersChangesets = null;
+
+    if (!$changesets) {
       return array();
     }
 
-    $packages = PhabricatorOwnersPackage::loadAffectedPackages(
+    $packages = PhabricatorOwnersPackage::loadAffectedPackagesForChangesets(
       $repository,
-      $this->affectedPaths);
+      $diff,
+      $changesets);
     if (!$packages) {
       return array();
     }
@@ -1255,9 +1269,12 @@ final class DifferentialTransactionEditor
       $paths[] = $path_prefix.'/'.$changeset->getFilename();
     }
 
-    // Save the affected paths; we'll use them later to query Owners. This
-    // uses the un-expanded paths.
-    $this->affectedPaths = $paths;
+    // If this change affected paths, save the changesets so we can apply
+    // Owners rules to them later.
+    if ($paths) {
+      $this->ownersDiff = $diff;
+      $this->ownersChangesets = $changesets;
+    }
 
     // Mark this as also touching all parent paths, so you can see all pending
     // changes to any file within a directory.
@@ -1399,13 +1416,14 @@ final class DifferentialTransactionEditor
       array('style' => 'font-family: monospace;'), $patch);
   }
 
-  private function buildPatchForMail(DifferentialDiff $diff) {
+  private function buildPatchForMail(DifferentialDiff $diff, $byte_limit) {
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
 
     return id(new DifferentialRawDiffRenderer())
       ->setViewer($this->getActor())
       ->setFormat($format)
       ->setChangesets($diff->getChangesets())
+      ->setByteLimit($byte_limit)
       ->buildPatch();
   }
 

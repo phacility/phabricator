@@ -155,8 +155,12 @@ EOHELP
     return $this->sheet;
   }
 
+
+  /**
+   * @phutil-external-symbol class PHPExcel_Cell
+   */
   private function getCellName($col, $row = null) {
-    $col_name = chr(ord('A') + $col);
+    $col_name = PHPExcel_Cell::stringFromColumnIndex($col);
 
     if ($row === null) {
       return $col_name;

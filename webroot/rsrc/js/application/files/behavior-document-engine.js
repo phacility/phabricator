@@ -105,6 +105,29 @@ JX.behavior('document-engine', function(config, statics) {
 
     list.addItem(highlight_item);
 
+    var blame_item;
+    if (data.blame.uri) {
+      blame_item = new JX.PHUIXActionView()
+        .setIcon(data.blame.icon);
+
+      var onblame = JX.bind(null, function(data, e) {
+        e.prevent();
+
+        if (blame_item.getDisabled()) {
+          return;
+        }
+
+        data.blame.enabled = !data.blame.enabled;
+        onview(data);
+
+        menu.close();
+      }, data);
+
+      blame_item.setHandler(onblame);
+
+      list.addItem(blame_item);
+    }
+
     menu.setContent(list.getNode());
 
     menu.listen('open', function() {
@@ -118,7 +141,21 @@ JX.behavior('document-engine', function(config, statics) {
         if (is_selected) {
           encode_item.setDisabled(!engine.spec.canEncode);
           highlight_item.setDisabled(!engine.spec.canHighlight);
+          if (blame_item) {
+            blame_item.setDisabled(!engine.spec.canBlame);
+          }
         }
+      }
+
+      if (blame_item) {
+        var blame_label;
+        if (data.blame.enabled) {
+          blame_label = data.blame.hide;
+        } else {
+          blame_label = data.blame.show;
+        }
+
+        blame_item.setName(blame_label);
       }
     });
 
@@ -135,6 +172,12 @@ JX.behavior('document-engine', function(config, statics) {
 
     if (data.encode.value) {
       uri.setQueryParam('encode', data.encode.value);
+    }
+
+    if (data.blame.enabled) {
+      uri.setQueryParam('blame', null);
+    } else {
+      uri.setQueryParam('blame', 'off');
     }
 
     return uri.toString();
@@ -211,7 +254,7 @@ JX.behavior('document-engine', function(config, statics) {
     JX.DOM.setContent(viewport, JX.$H(r.markup));
 
     // If this engine supports rendering blame, populate or draw it.
-    if (spec.canBlame) {
+    if (spec.canBlame && data.blame.enabled) {
       blame(data);
     }
   }

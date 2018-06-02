@@ -16,11 +16,11 @@ final class PhabricatorOwnersPackage
   protected $auditingEnabled;
   protected $autoReview;
   protected $description;
-  protected $mailKey;
   protected $status;
   protected $viewPolicy;
   protected $editPolicy;
   protected $dominion;
+  protected $properties = array();
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -40,6 +40,8 @@ final class PhabricatorOwnersPackage
 
   const DOMINION_STRONG = 'strong';
   const DOMINION_WEAK = 'weak';
+
+  const PROPERTY_IGNORED = 'ignored';
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -118,11 +120,13 @@ final class PhabricatorOwnersPackage
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort',
         'description' => 'text',
         'auditingEnabled' => 'bool',
-        'mailKey' => 'bytes20',
         'status' => 'text32',
         'autoReview' => 'text32',
         'dominion' => 'text32',
@@ -130,26 +134,34 @@ final class PhabricatorOwnersPackage
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorOwnersPackagePHIDType::TYPECONST);
-  }
-
-  public function save() {
-    if (!$this->getMailKey()) {
-      $this->setMailKey(Filesystem::readRandomCharacters(20));
-    }
-
-    return parent::save();
+  public function getPHIDType() {
+    return PhabricatorOwnersPackagePHIDType::TYPECONST;
   }
 
   public function isArchived() {
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
-  public function setName($name) {
-    $this->name = $name;
+  public function getMustMatchUngeneratedPaths() {
+    $ignore_attributes = $this->getIgnoredPathAttributes();
+    return !empty($ignore_attributes['generated']);
+  }
+
+  public function getPackageProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setPackageProperty($key, $value) {
+    $this->properties[$key] = $value;
     return $this;
+  }
+
+  public function getIgnoredPathAttributes() {
+    return $this->getPackageProperty(self::PROPERTY_IGNORED, array());
+  }
+
+  public function setIgnoredPathAttributes(array $attributes) {
+    return $this->setPackageProperty(self::PROPERTY_IGNORED, $attributes);
   }
 
   public function loadOwners() {
@@ -179,6 +191,82 @@ final class PhabricatorOwnersPackage
     }
 
     return self::loadPackagesForPaths($repository, $paths);
+  }
+
+  public static function loadAffectedPackagesForChangesets(
+    PhabricatorRepository $repository,
+    DifferentialDiff $diff,
+    array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
+
+    $paths_all = array();
+    $paths_ungenerated = array();
+
+    foreach ($changesets as $changeset) {
+      $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+
+      $paths_all[] = $path;
+
+      if (!$changeset->isGeneratedChangeset()) {
+        $paths_ungenerated[] = $path;
+      }
+    }
+
+    if (!$paths_all) {
+      return array();
+    }
+
+    $packages_all = self::loadAffectedPackages(
+      $repository,
+      $paths_all);
+
+    // If there are no generated changesets, we can't possibly need to throw
+    // away any packages for matching only generated paths. Just return the
+    // full set of packages.
+    if ($paths_ungenerated === $paths_all) {
+      return $packages_all;
+    }
+
+    $must_match_ungenerated = array();
+    foreach ($packages_all as $package) {
+      if ($package->getMustMatchUngeneratedPaths()) {
+        $must_match_ungenerated[] = $package;
+      }
+    }
+
+    // If no affected packages have the "Ignore Generated Paths" flag set, we
+    // can't possibly need to throw any away.
+    if (!$must_match_ungenerated) {
+      return $packages_all;
+    }
+
+    if ($paths_ungenerated) {
+      $packages_ungenerated = self::loadAffectedPackages(
+        $repository,
+        $paths_ungenerated);
+    } else {
+      $packages_ungenerated = array();
+    }
+
+    // We have some generated paths, and some packages that ignore generated
+    // paths. Take all the packages which:
+    //
+    //   - ignore generated paths; and
+    //   - didn't match any ungenerated paths
+    //
+    // ...and remove them from the list.
+
+    $must_match_ungenerated = mpull($must_match_ungenerated, null, 'getID');
+    $packages_ungenerated = mpull($packages_ungenerated, null, 'getID');
+    $packages_all = mpull($packages_all, null, 'getID');
+
+    foreach ($must_match_ungenerated as $package_id => $package) {
+      if (!isset($packages_ungenerated[$package_id])) {
+        unset($packages_all[$package_id]);
+      }
+    }
+
+    return $packages_all;
   }
 
   public static function loadOwningPackages($repository, $path) {
@@ -614,6 +702,10 @@ final class PhabricatorOwnersPackage
         ->setKey('dominion')
         ->setType('map<string, wild>')
         ->setDescription(pht('Dominion setting information.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('ignored')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Ignored attribute information.')),
     );
   }
 
@@ -667,6 +759,13 @@ final class PhabricatorOwnersPackage
       'short' => $dominion_short,
     );
 
+    // Force this to always emit as a JSON object even if empty, never as
+    // a JSON list.
+    $ignored = $this->getIgnoredPathAttributes();
+    if (!$ignored) {
+      $ignored = (object)array();
+    }
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
@@ -675,6 +774,7 @@ final class PhabricatorOwnersPackage
       'review' => $review,
       'audit' => $audit,
       'dominion' => $dominion,
+      'ignored' => $ignored,
     );
   }
 

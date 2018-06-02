@@ -137,4 +137,18 @@ final class HeraldRuleEditor
     return pht('[Herald]');
   }
 
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addLinkSection(
+      pht('RULE DETAIL'),
+      PhabricatorEnv::getProductionURI($object->getURI()));
+
+    return $body;
+  }
+
 }

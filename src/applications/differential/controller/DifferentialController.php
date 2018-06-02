@@ -76,6 +76,16 @@ abstract class DifferentialController extends PhabricatorController {
         $repository_phid,
         $changeset_path);
 
+      // If this particular changeset is generated code and the package does
+      // not match generated code, remove it from the list.
+      if ($changeset->isGeneratedChangeset()) {
+        foreach ($packages as $key => $package) {
+          if ($package->getMustMatchUngeneratedPaths()) {
+            unset($packages[$key]);
+          }
+        }
+      }
+
       $this->pathPackageMap[$changeset_path] = $packages;
       foreach ($packages as $package) {
         $this->packageChangesetMap[$package->getPHID()][] = $changeset;

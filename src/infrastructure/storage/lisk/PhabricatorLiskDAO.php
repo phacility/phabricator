@@ -80,6 +80,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     $master = PhabricatorDatabaseRef::getMasterDatabaseRefForApplication(
       $application);
 
+    $master_exception = null;
+
     if ($master && !$master->isSevered()) {
       $connection = $master->newApplicationConnection($database);
       if ($master->isReachable($connection)) {
@@ -91,6 +93,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
         PhabricatorEnv::setReadOnly(
           true,
           PhabricatorEnv::READONLY_UNREACHABLE);
+
+        $master_exception = $master->getConnectionException();
       }
     }
 
@@ -108,7 +112,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $this->raiseUnconfigured($database);
     }
 
-    $this->raiseUnreachable($database);
+    $this->raiseUnreachable($database, $master_exception);
   }
 
   private function raiseImproperWrite($database) {
@@ -136,13 +140,22 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
         $database));
   }
 
-  private function raiseUnreachable($database) {
-    throw new PhabricatorClusterStrandedException(
-      pht(
-        'Unable to establish a connection to any database host '.
-        '(while trying "%s"). All masters and replicas are completely '.
-        'unreachable.',
-        $database));
+  private function raiseUnreachable($database, Exception $proxy = null) {
+    $message = pht(
+      'Unable to establish a connection to any database host '.
+      '(while trying "%s"). All masters and replicas are completely '.
+      'unreachable.',
+      $database);
+
+    if ($proxy) {
+      $proxy_message = pht(
+        '%s: %s',
+        get_class($proxy),
+        $proxy->getMessage());
+      $message = $message."\n\n".$proxy_message;
+    }
+
+    throw new PhabricatorClusterStrandedException($message);
   }
 
 

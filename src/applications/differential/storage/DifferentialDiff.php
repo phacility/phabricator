@@ -230,16 +230,13 @@ final class DifferentialDiff
     }
     $diff->setLineCount($lines);
 
-    $parser = new DifferentialChangesetParser();
-    $changesets = $parser->detectCopiedCode(
-      $diff->getChangesets(),
-      $min_width = 30,
-      $min_lines = 3);
-    $diff->attachChangesets($changesets);
+    $changesets = $diff->getChangesets();
+
+    id(new DifferentialChangesetEngine())
+      ->rebuildChangesets($changesets);
 
     return $diff;
   }
-
 
   public function getDiffDict() {
     $dict = array(
@@ -820,6 +817,5 @@ final class DifferentialDiff
         ->setAttachmentKey('commits'),
     );
   }
-
 
 }

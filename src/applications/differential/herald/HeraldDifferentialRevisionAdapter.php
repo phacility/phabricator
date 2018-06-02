@@ -120,9 +120,10 @@ final class HeraldDifferentialRevisionAdapter
 
       $repository = $this->loadRepository();
       if ($repository) {
-        $packages = PhabricatorOwnersPackage::loadAffectedPackages(
+        $packages = PhabricatorOwnersPackage::loadAffectedPackagesForChangesets(
           $repository,
-          $this->loadAffectedPaths());
+          $this->getDiff(),
+          $this->loadChangesets());
         $this->affectedPackages = $packages;
       }
     }

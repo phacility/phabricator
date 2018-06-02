@@ -1,0 +1,14 @@
+CREATE TABLE {$NAMESPACE}_repository.repository_identity (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  automaticGuessedUserPHID VARBINARY(64) DEFAULT NULL,
+  manuallySetUserPHID VARBINARY(64) DEFAULT NULL,
+  currentEffectiveUserPHID VARBINARY(64) DEFAULT NULL,
+  identityNameHash BINARY(12) NOT NULL,
+  identityNameRaw LONGBLOB NOT NULL,
+  identityNameEncoding VARCHAR(16) DEFAULT NULL COLLATE {$COLLATE_TEXT},
+  UNIQUE KEY `key_phid` (phid),
+  UNIQUE KEY `key_identity` (identityNameHash)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};

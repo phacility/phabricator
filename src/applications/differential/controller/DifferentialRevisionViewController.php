@@ -1,20 +1,42 @@
 <?php
 
-final class DifferentialRevisionViewController extends DifferentialController {
+final class DifferentialRevisionViewController
+  extends DifferentialController {
 
   private $revisionID;
-  private $veryLargeDiff;
+  private $changesetCount;
+  private $hiddenChangesets;
 
   public function shouldAllowPublic() {
     return true;
   }
 
+  public function isLargeDiff() {
+    return ($this->getChangesetCount() > $this->getLargeDiffLimit());
+  }
+
   public function isVeryLargeDiff() {
-    return $this->veryLargeDiff;
+    return ($this->getChangesetCount() > $this->getVeryLargeDiffLimit());
+  }
+
+  public function getLargeDiffLimit() {
+    return 100;
   }
 
   public function getVeryLargeDiffLimit() {
     return 1000;
+  }
+
+  public function getChangesetCount() {
+    if ($this->changesetCount === null) {
+      throw new PhutilInvalidStateException('setChangesetCount');
+    }
+    return $this->changesetCount;
+  }
+
+  public function setChangesetCount($count) {
+    $this->changesetCount = $count;
+    return $this;
   }
 
   public function handleRequest(AphrontRequest $request) {
@@ -82,9 +104,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         idx($diffs, $diff_vs),
         $repository);
 
-    if (count($rendering_references) > $this->getVeryLargeDiffLimit()) {
-      $this->veryLargeDiff = true;
-    }
+    $this->setChangesetCount(count($rendering_references));
 
     if ($request->getExists('download')) {
       return $this->buildRawDiffResponse(
@@ -150,33 +170,54 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $handles = $this->loadViewerHandles($object_phids);
+    $warnings = array();
 
     $request_uri = $request->getRequestURI();
 
-    $limit = 100;
     $large = $request->getStr('large');
-    if (count($changesets) > $limit && !$large) {
-      $count = count($changesets);
-      $warning = new PHUIInfoView();
-      $warning->setTitle(pht('Large Diff'));
-      $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
-      $warning->appendChild(hsprintf(
-        '%s <strong>%s</strong>',
-        pht(
-          'This diff is large and affects %s files. '.
-          'You may load each file individually or ',
-          new PhutilNumber($count)),
-        phutil_tag(
-          'a',
-          array(
-            'class' => 'button button-grey',
-            'href' => $request_uri
-              ->alter('large', 'true')
-              ->setFragment('toc'),
-          ),
-          pht('Show All Files Inline'))));
-      $warning = $warning->render();
 
+    $large_warning =
+      ($this->isLargeDiff()) &&
+      (!$this->isVeryLargeDiff()) &&
+      (!$large);
+
+    if ($large_warning) {
+      $count = $this->getChangesetCount();
+
+      $expand_uri = $request_uri
+        ->alter('large', 'true')
+        ->setFragment('toc');
+
+      $message = array(
+        pht(
+          'This large diff affects %s files. Files without inline '.
+          'comments have been collapsed.',
+          new PhutilNumber($count)),
+        ' ',
+        phutil_tag(
+          'strong',
+          array(),
+          phutil_tag(
+            'a',
+            array(
+              'href' => $expand_uri,
+            ),
+            pht('Expand All Files'))),
+      );
+
+      $warnings[] = id(new PHUIInfoView())
+        ->setTitle(pht('Large Diff'))
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->appendChild($message);
+
+      $folded_changesets = $changesets;
+    } else {
+      $folded_changesets = array();
+    }
+
+    // Don't hide or fold changesets which have inline comments.
+    $hidden_changesets = $this->hiddenChangesets;
+    if ($hidden_changesets || $folded_changesets) {
       $old = array_select_keys($changesets, $old_ids);
       $new = array_select_keys($changesets, $new_ids);
 
@@ -191,16 +232,47 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $new,
         $revision);
 
-      $visible_changesets = array();
       foreach ($inlines as $inline) {
         $changeset_id = $inline->getChangesetID();
-        if (isset($changesets[$changeset_id])) {
-          $visible_changesets[$changeset_id] = $changesets[$changeset_id];
+        if (!isset($changesets[$changeset_id])) {
+          continue;
         }
+
+        unset($hidden_changesets[$changeset_id]);
+        unset($folded_changesets[$changeset_id]);
       }
-    } else {
-      $warning = null;
-      $visible_changesets = $changesets;
+    }
+
+    // If we would hide only one changeset, don't hide anything. The notice
+    // we'd render about it is about the same size as the changeset.
+    if (count($hidden_changesets) < 2) {
+      $hidden_changesets = array();
+    }
+
+    // Update the set of hidden changesets, since we may have just un-hidden
+    // some of them.
+    if ($hidden_changesets) {
+      $warnings[] = id(new PHUIInfoView())
+        ->setTitle(pht('Showing Only Differences'))
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(
+          pht(
+            'This revision modifies %s more files that are hidden because '.
+            'they were not modified between selected diffs and they have no '.
+            'inline comments.',
+            phutil_count($hidden_changesets)));
+    }
+
+    // Compute the unfolded changesets. By default, everything is unfolded.
+    $unfolded_changesets = $changesets;
+    foreach ($folded_changesets as $changeset_id => $changeset) {
+      unset($unfolded_changesets[$changeset_id]);
+    }
+
+    // Throw away any hidden changesets.
+    foreach ($hidden_changesets as $changeset_id => $changeset) {
+      unset($changesets[$changeset_id]);
+      unset($unfolded_changesets[$changeset_id]);
     }
 
     $commit_hashes = mpull($diffs, 'getSourceControlBaseRevision');
@@ -236,7 +308,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if ($repository) {
       $symbol_indexes = $this->buildSymbolIndexes(
         $repository,
-        $visible_changesets);
+        $unfolded_changesets);
     } else {
       $symbol_indexes = array();
     }
@@ -297,7 +369,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     } else {
       $changeset_view = id(new DifferentialChangesetListView())
         ->setChangesets($changesets)
-        ->setVisibleChangesets($visible_changesets)
+        ->setVisibleChangesets($unfolded_changesets)
         ->setStandaloneURI('/differential/changeset/')
         ->setRawFileURIs(
           '/differential/changeset/?view=old',
@@ -357,23 +429,33 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $other_view = $this->renderOtherRevisions($other_revisions);
     }
 
-    $this->buildPackageMaps($changesets);
-
     if ($this->isVeryLargeDiff()) {
       $toc_view = null;
+
+      // When rendering a "very large" diff, we skip computation of owners
+      // that own no files because it is significantly expensive and not very
+      // valuable.
+      foreach ($revision->getReviewers() as $reviewer) {
+        // Give each reviewer a dummy nonempty value so the UI does not render
+        // the "(Owns No Changed Paths)" note. If that behavior becomes more
+        // sophisticated in the future, this behavior might also need to.
+        $reviewer->attachChangesets($changesets);
+      }
     } else {
+      $this->buildPackageMaps($changesets);
+
       $toc_view = $this->buildTableOfContents(
         $changesets,
-        $visible_changesets,
+        $unfolded_changesets,
         $target->loadCoverageMap($viewer));
-    }
 
-    // Attach changesets to each reviewer so we can show which Owners package
-    // reviewers own no files.
-    foreach ($revision->getReviewers() as $reviewer) {
-      $reviewer_phid = $reviewer->getReviewerPHID();
-      $reviewer_changesets = $this->getPackageChangesets($reviewer_phid);
-      $reviewer->attachChangesets($reviewer_changesets);
+      // Attach changesets to each reviewer so we can show which Owners package
+      // reviewers own no files.
+      foreach ($revision->getReviewers() as $reviewer) {
+        $reviewer_phid = $reviewer->getReviewerPHID();
+        $reviewer_changesets = $this->getPackageChangesets($reviewer_phid);
+        $reviewer->attachChangesets($reviewer_changesets);
+      }
     }
 
     $tab_group = id(new PHUITabGroupView());
@@ -479,7 +561,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $footer[] = array(
         $anchor,
-        $warning,
+        $warnings,
         $tab_view,
         $changeset_view,
       );
@@ -766,6 +848,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     DifferentialDiff $target,
     DifferentialDiff $diff_vs = null,
     PhabricatorRepository $repository = null) {
+    $viewer = $this->getViewer();
 
     $load_diffs = array($target);
     if ($diff_vs) {
@@ -773,7 +856,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $raw_changesets = id(new DifferentialChangesetQuery())
-      ->setViewer($this->getRequest()->getUser())
+      ->setViewer($viewer)
       ->withDiffs($load_diffs)
       ->execute();
     $changeset_groups = mgroup($raw_changesets, 'getDiffID');
@@ -781,17 +864,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $changesets = idx($changeset_groups, $target->getID(), array());
     $changesets = mpull($changesets, null, 'getID');
 
-    $refs          = array();
-    $vs_map        = array();
+    $refs = array();
+    $vs_map = array();
     $vs_changesets = array();
+    $must_compare = array();
     if ($diff_vs) {
-      $vs_id                  = $diff_vs->getID();
+      $vs_id = $diff_vs->getID();
       $vs_changesets_path_map = array();
       foreach (idx($changeset_groups, $vs_id, array()) as $changeset) {
         $path = $changeset->getAbsoluteRepositoryPath($repository, $diff_vs);
         $vs_changesets_path_map[$path] = $changeset;
         $vs_changesets[$changeset->getID()] = $changeset;
       }
+
       foreach ($changesets as $key => $changeset) {
         $path = $changeset->getAbsoluteRepositoryPath($repository, $target);
         if (isset($vs_changesets_path_map[$path])) {
@@ -800,15 +885,20 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $refs[$changeset->getID()] =
             $changeset->getID().'/'.$vs_changesets_path_map[$path]->getID();
           unset($vs_changesets_path_map[$path]);
+
+          $must_compare[] = $changeset->getID();
+
         } else {
           $refs[$changeset->getID()] = $changeset->getID();
         }
       }
+
       foreach ($vs_changesets_path_map as $path => $changeset) {
         $changesets[$changeset->getID()] = $changeset;
-        $vs_map[$changeset->getID()]     = -1;
-        $refs[$changeset->getID()]       = $changeset->getID().'/-1';
+        $vs_map[$changeset->getID()] = -1;
+        $refs[$changeset->getID()] = $changeset->getID().'/-1';
       }
+
     } else {
       foreach ($changesets as $changeset) {
         $refs[$changeset->getID()] = $changeset->getID();
@@ -817,13 +907,25 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $changesets = msort($changesets, 'getSortKey');
 
+    // See T13137. When displaying the diff between two updates, hide any
+    // changesets which haven't actually changed.
+    $this->hiddenChangesets = array();
+    foreach ($must_compare as $changeset_id) {
+      $changeset = $changesets[$changeset_id];
+      $vs_changeset = $vs_changesets[$vs_map[$changeset_id]];
+
+      if ($changeset->hasSameEffectAs($vs_changeset)) {
+        $this->hiddenChangesets[$changeset_id] = $changesets[$changeset_id];
+      }
+    }
+
     return array($changesets, $vs_map, $vs_changesets, $refs);
   }
 
   private function buildSymbolIndexes(
     PhabricatorRepository $repository,
-    array $visible_changesets) {
-    assert_instances_of($visible_changesets, 'DifferentialChangeset');
+    array $unfolded_changesets) {
+    assert_instances_of($unfolded_changesets, 'DifferentialChangeset');
 
     $engine = PhabricatorSyntaxHighlighter::newEngine();
 
@@ -848,7 +950,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $sources);
 
     $indexed_langs = array_fill_keys($langs, true);
-    foreach ($visible_changesets as $key => $changeset) {
+    foreach ($unfolded_changesets as $key => $changeset) {
       $lang = $engine->getLanguageFromFilename($changeset->getFilename());
       if (empty($indexed_langs) || isset($indexed_langs[$lang])) {
         $symbol_indexes[$key] = array(

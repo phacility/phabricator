@@ -108,19 +108,23 @@ final class PhabricatorOwnersPackagePathsTransaction
     // paths now.
 
     $display_map = array();
+    $seen_map = array();
     foreach ($new as $key => $spec) {
       $display_path = $spec['path'];
       $raw_path = rtrim($display_path, '/').'/';
 
-      // If the user entered two paths which normalize to the same value
-      // (like "src/main.c" and "src/main.c/"), discard the duplicates.
-      if (isset($display_map[$raw_path])) {
+      // If the user entered two paths in the same repository which normalize
+      // to the same value (like "src/main.c" and "src/main.c/"), discard the
+      // duplicates.
+      $repository_phid = $spec['repositoryPHID'];
+      if (isset($seen_map[$repository_phid][$raw_path])) {
         unset($new[$key]);
         continue;
       }
 
       $new[$key]['path'] = $raw_path;
       $display_map[$raw_path] = $display_path;
+      $seen_map[$repository_phid][$raw_path] = true;
     }
 
     $diffs = PhabricatorOwnersPath::getTransactionValueChanges($old, $new);

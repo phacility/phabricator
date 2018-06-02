@@ -302,6 +302,14 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   public function getPreviewPanel() {
+    if ($this->getIsHidden()) {
+      return null;
+    }
+
+    if ($this->getIsLocked()) {
+      return null;
+    }
+
     return $this->previewPanel;
   }
 

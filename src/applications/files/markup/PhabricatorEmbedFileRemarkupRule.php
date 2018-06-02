@@ -260,6 +260,18 @@ final class PhabricatorEmbedFileRemarkupRule
       $autoplay = null;
     }
 
+    if ($is_video) {
+      // See T13135. Chrome refuses to play videos with type "video/quicktime",
+      // even though it may actually be able to play them. The least awful fix
+      // based on available information is to simply omit the "type" attribute
+      // from `<source />` tags. This causes Chrome to try to play the video
+      // and realize it can, and does not appear to produce any bad behavior in
+      // any other browser.
+      $mime_type = null;
+    } else {
+      $mime_type = $file->getMimeType();
+    }
+
     return $this->newTag(
       $tag,
       array(
@@ -274,7 +286,7 @@ final class PhabricatorEmbedFileRemarkupRule
         'source',
         array(
           'src' => $file->getBestURI(),
-          'type' => $file->getMimeType(),
+          'type' => $mime_type,
         )));
   }
 

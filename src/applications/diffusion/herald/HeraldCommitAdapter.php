@@ -207,7 +207,7 @@ final class HeraldCommitAdapter
   }
 
   public static function getEnormousByteLimit() {
-    return 1024 * 1024 * 1024; // 1GB
+    return 256 * 1024 * 1024; // 256MB. See T13142 and T13143.
   }
 
   public static function getEnormousTimeLimit() {
