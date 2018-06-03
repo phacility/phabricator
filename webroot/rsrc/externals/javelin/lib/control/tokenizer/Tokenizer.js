@@ -400,7 +400,8 @@ JX.install('Tokenizer', {
             // this unusual token.
 
             var tok;
-            while ((tok = this._tokens.pop()) !== null) {
+            while (this._tokens.length) {
+              tok = this._tokens.pop();
               if (this._remove(tok, true)) {
                 break;
               }

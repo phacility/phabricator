@@ -420,6 +420,12 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $user->endWriteLocking();
     $user->saveTransaction();
 
+    // Try and match this new address against unclaimed `RepositoryIdentity`s
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorRepositoryIdentityChangeWorker',
+      array('userPHID' => $user->getPHID()),
+      array('objectPHID' => $user->getPHID()));
+
     return $this;
   }
 
