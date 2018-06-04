@@ -217,6 +217,7 @@ abstract class PhabricatorAphlictManagementWorkflow
             'index "%s"). You should manually create this directory or '.
             'choose a different logfile location. %s',
             $dir,
+            $index,
             $ex->getMessage()));
       }
     }
