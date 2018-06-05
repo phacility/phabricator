@@ -80,18 +80,22 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         ->save();
     }
 
-    $committer_identity = id(new PhabricatorRepositoryIdentityQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIdentityNames(array($committer))
-      ->executeOne();
+    $committer_identity = null;
 
-    if (!$committer_identity) {
-      $committer_identity = id(new PhabricatorRepositoryIdentity())
-        ->setAuthorPHID($commit->getPHID())
-        ->setIdentityName($committer)
-        ->setAutomaticGuessedUserPHID(
-          $this->resolveUserPHID($commit, $committer))
-        ->save();
+    if ($committer) {
+      $committer_identity = id(new PhabricatorRepositoryIdentityQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withIdentityNames(array($committer))
+        ->executeOne();
+
+      if (!$committer_identity) {
+        $committer_identity = id(new PhabricatorRepositoryIdentity())
+          ->setAuthorPHID($commit->getPHID())
+          ->setIdentityName($committer)
+          ->setAutomaticGuessedUserPHID(
+            $this->resolveUserPHID($commit, $committer))
+          ->save();
+      }
     }
 
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
@@ -128,6 +132,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $this->resolveUserPHID($commit, $committer));
       $data->setCommitDetail(
         'committerIdentityPHID', $committer_identity->getPHID());
+
+      $commit->setCommitterIdentityPHID($committer_identity->getPHID());
     }
 
     $repository = $this->repository;
@@ -166,7 +172,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $commit->setAuthorIdentityPHID($author_identity->getPHID());
-    $commit->setCommitterIdentityPHID($committer_identity->getPHID());
 
     $commit->setSummary($data->getSummary());
     $commit->save();
