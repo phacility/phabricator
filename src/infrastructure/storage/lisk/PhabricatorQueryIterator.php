@@ -29,7 +29,7 @@ final class PhabricatorQueryIterator extends PhutilBufferedIterator {
 
     // If we got less than a full page of results, this was the last set of
     // results. Throw away the pager so we end iteration.
-    if (count($results) < $pager->getPageSize()) {
+    if (!$pager->getHasMoreResults()) {
       $this->pager = null;
     } else {
       $this->pager->setAfterID($pager->getNextPageID());
