@@ -18,6 +18,7 @@ final class PHUIHandleView
   private $useShortName;
   private $showHovercard;
   private $showStateIcon;
+  private $glyphLimit;
 
   public function setHandleList(PhabricatorHandleList $list) {
     $this->handleList = $list;
@@ -58,6 +59,15 @@ final class PHUIHandleView
     return $this->showStateIcon;
   }
 
+  public function setGlyphLimit($glyph_limit) {
+    $this->glyphLimit = $glyph_limit;
+    return $this;
+  }
+
+  public function getGlyphLimit() {
+    return $this->glyphLimit;
+  }
+
   public function render() {
     $handle = $this->handleList[$this->handlePHID];
 
@@ -78,7 +88,14 @@ final class PHUIHandleView
     if ($this->useShortName) {
       $name = $handle->getName();
     } else {
-      $name = null;
+      $name = $handle->getLinkName();
+    }
+
+    $glyph_limit = $this->getGlyphLimit();
+    if ($glyph_limit) {
+      $name = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs($glyph_limit)
+        ->truncateString($name);
     }
 
     if ($this->showHovercard) {

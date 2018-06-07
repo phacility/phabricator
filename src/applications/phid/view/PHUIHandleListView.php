@@ -14,6 +14,7 @@ final class PHUIHandleListView
   private $asInline;
   private $asText;
   private $showStateIcons;
+  private $glyphLimit;
 
   public function setHandleList(PhabricatorHandleList $list) {
     $this->handleList = $list;
@@ -47,6 +48,15 @@ final class PHUIHandleListView
     return $this->showStateIcons;
   }
 
+  public function setGlyphLimit($glyph_limit) {
+    $this->glyphLimit = $glyph_limit;
+    return $this;
+  }
+
+  public function getGlyphLimit() {
+    return $this->glyphLimit;
+  }
+
   protected function getTagName() {
     if ($this->getAsText()) {
       return null;
@@ -61,6 +71,7 @@ final class PHUIHandleListView
     $list = $this->handleList;
 
     $show_state_icons = $this->getShowStateIcons();
+    $glyph_limit = $this->getGlyphLimit();
 
     $items = array();
     foreach ($list as $handle) {
@@ -70,6 +81,10 @@ final class PHUIHandleListView
 
       if ($show_state_icons) {
         $view->setShowStateIcon(true);
+      }
+
+      if ($glyph_limit) {
+        $view->setGlyphLimit($glyph_limit);
       }
 
       $items[] = $view;
