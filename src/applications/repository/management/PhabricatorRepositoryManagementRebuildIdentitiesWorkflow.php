@@ -44,27 +44,51 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
 
     $iterator = new PhabricatorQueryIterator($query);
     foreach ($iterator as $commit) {
+      $needs_update = false;
+
       $data = $commit->getCommitData();
       $author_name = $data->getAuthorName();
+
       $author_identity = $this->getIdentityForCommit(
-        $commit, $author_name);
+        $commit,
+        $author_name);
 
-      $commit->setAuthorIdentityPHID($author_identity->getPHID());
-      $data->setCommitDetail(
-        'authorIdentityPHID', $author_identity->getPHID());
-
-      $committer_name = $data->getCommitDetail('committer', null);
-      if ($committer_name) {
-        $committer_identity = $this->getIdentityForCommit(
-          $commit, $committer_name);
-
-        $commit->setCommitterIdentityPHID($committer_identity->getPHID());
-        $data->setCommitDetail(
-          'committerIdentityPHID', $committer_identity->getPHID());
+      $author_phid = $commit->getAuthorIdentityPHID();
+      $identity_phid = $author_identity->getPHID();
+      if ($author_phid !== $identity_phid) {
+        $commit->setAuthorIdentityPHID($identity_phid);
+        $data->setCommitDetail('authorIdentityPHID', $identity_phid);
+        $needs_update = true;
       }
 
-      $commit->save();
-      $data->save();
+      $committer_name = $data->getCommitDetail('committer', null);
+      $committer_phid = $commit->getCommitterIdentityPHID();
+      if (strlen($committer_name)) {
+        $committer_identity = $this->getIdentityForCommit(
+          $commit,
+          $committer_name);
+        $identity_phid = $committer_identity->getPHID();
+      } else {
+        $identity_phid = null;
+      }
+
+      if ($committer_phid !== $identity_phid) {
+        $commit->setCommitterIdentityPHID($identity_phid);
+        $data->setCommitDetail('committerIdentityPHID', $identity_phid);
+        $needs_update = true;
+      }
+
+      if ($needs_update) {
+        $commit->save();
+        $data->save();
+        echo tsprintf(
+          "Rebuilt identities for %s.\n",
+          $commit->getDisplayName());
+      } else {
+        echo tsprintf(
+          "No changes for %s.\n",
+          $commit->getDisplayName());
+      }
     }
 
   }
