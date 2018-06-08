@@ -72,7 +72,7 @@ final class PhabricatorDaemonBulkJobMonitorController
           ->appendParagraph(
             pht(
               'This job is waiting for confirmation before work begins.'))
-          ->addCancelButotn($job->getManageURI(), pht('Details'));
+          ->addCancelButton($job->getManageURI(), pht('Details'));
       }
     }
 
