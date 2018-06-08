@@ -68,7 +68,11 @@ final class DifferentialChangesetOneUpRenderer
           $cells = array();
           if ($is_old) {
             if ($p['htype']) {
-              $class = 'left old';
+              if (empty($p['oline'])) {
+                $class = 'left old old-full';
+              } else {
+                $class = 'left old';
+              }
               $aural = $aural_minus;
             } else {
               $class = 'left';
@@ -106,7 +110,11 @@ final class DifferentialChangesetOneUpRenderer
             $cells[] = $no_coverage;
           } else {
             if ($p['htype']) {
-              $class = 'right new';
+              if (empty($p['oline'])) {
+                $class = 'right new new-full';
+              } else {
+                $class = 'right new';
+              }
               $cells[] = phutil_tag('th', array('class' => $class));
               $aural = $aural_plus;
             } else {
