@@ -131,8 +131,10 @@ final class PhabricatorRepositoryIdentityQuery
       return $identities;
     }
 
-    $users = id(new PhabricatorUser())->loadAllWhere(
-      'phid IN (%Ls)', $user_ids);
+    $users = id(new PhabricatorPeopleQuery())
+      ->withPHIDs($user_ids)
+      ->setViewer($this->getViewer())
+      ->execute();
     $users = mpull($users, null, 'getPHID');
 
     foreach ($identities as $identity) {

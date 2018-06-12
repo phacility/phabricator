@@ -26,6 +26,7 @@ final class DiffusionCommitQuery
 
   private $needCommitData;
   private $needDrafts;
+  private $needIdentities;
 
   private $mustFilterRefs = false;
   private $refRepository;
@@ -107,6 +108,11 @@ final class DiffusionCommitQuery
 
   public function needDrafts($need) {
     $this->needDrafts = $need;
+    return $this;
+  }
+
+  public function needIdentities($need) {
+    $this->needIdentities = $need;
     return $this;
   }
 
@@ -390,6 +396,24 @@ final class DiffusionCommitQuery
         foreach ($audit_requests as $audit_request) {
           $audit_request->attachCommit($commit);
         }
+      }
+    }
+
+    if ($this->needIdentities) {
+      $identity_phids = array_merge(
+        mpull($commits, 'getAuthorIdentityPHID'),
+        mpull($commits, 'getCommitterIdentityPHID'));
+
+      $data = id(new PhabricatorRepositoryIdentityQuery())
+        ->withPHIDs($identity_phids)
+        ->setViewer($this->getViewer())
+        ->execute();
+      $data = mpull($data, null, 'getPHID');
+
+      foreach ($commits as $commit) {
+        $author_identity = idx($data, $commit->getAuthorIdentityPHID());
+        $committer_identity = idx($data, $commit->getCommitterIdentityPHID());
+        $commit->attachIdentities($author_identity, $committer_identity);
       }
     }
 
