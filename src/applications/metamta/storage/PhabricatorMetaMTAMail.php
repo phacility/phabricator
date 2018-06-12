@@ -291,17 +291,31 @@ final class PhabricatorMetaMTAMail
   }
 
   public function setMustEncrypt($bool) {
-    $this->setParam('mustEncrypt', $bool);
-    return $this;
+    return $this->setParam('mustEncrypt', $bool);
   }
 
   public function getMustEncrypt() {
     return $this->getParam('mustEncrypt', false);
   }
 
+  public function setMustEncryptURI($uri) {
+    return $this->setParam('mustEncrypt.uri', $uri);
+  }
+
+  public function getMustEncryptURI() {
+    return $this->getParam('mustEncrypt.uri');
+  }
+
+  public function setMustEncryptSubject($subject) {
+    return $this->setParam('mustEncrypt.subject', $subject);
+  }
+
+  public function getMustEncryptSubject() {
+    return $this->getParam('mustEncrypt.subject');
+  }
+
   public function setMustEncryptReasons(array $reasons) {
-    $this->setParam('mustEncryptReasons', $reasons);
-    return $this;
+    return $this->setParam('mustEncryptReasons', $reasons);
   }
 
   public function getMustEncryptReasons() {
@@ -787,7 +801,11 @@ final class PhabricatorMetaMTAMail
           // If mail content must be encrypted, we replace the subject with
           // a generic one.
           if ($must_encrypt) {
-            $subject[] = pht('Object Updated');
+            $encrypt_subject = $this->getMustEncryptSubject();
+            if (!strlen($encrypt_subject)) {
+              $encrypt_subject = pht('Object Updated');
+            }
+            $subject[] = $encrypt_subject;
           } else {
             $vary_prefix = idx($params, 'vary-subject-prefix');
             if ($vary_prefix != '') {
@@ -845,6 +863,23 @@ final class PhabricatorMetaMTAMail
     $body = $raw_body;
     if ($must_encrypt) {
       $parts = array();
+
+      $encrypt_uri = $this->getMustEncryptURI();
+      if (!strlen($encrypt_uri)) {
+        $encrypt_phid = $this->getRelatedPHID();
+        if ($encrypt_phid) {
+          $encrypt_uri = urisprintf(
+            '/object/%s/',
+            $encrypt_phid);
+        }
+      }
+
+      if (strlen($encrypt_uri)) {
+        $parts[] = pht(
+          'This secure message is notifying you of a change to this object:');
+        $parts[] = PhabricatorEnv::getProductionURI($encrypt_uri);
+      }
+
       $parts[] = pht(
         'The content for this message can only be transmitted over a '.
         'secure channel. To view the message content, follow this '.

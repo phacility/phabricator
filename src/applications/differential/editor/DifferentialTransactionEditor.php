@@ -592,12 +592,13 @@ final class DifferentialTransactionEditor
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $id = $object->getID();
+    $monogram = $object->getMonogram();
     $title = $object->getTitle();
-    $subject = "D{$id}: {$title}";
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject($subject);
+      ->setSubject(pht('%s: %s', $monogram, $title))
+      ->setMustEncryptSubject(pht('%s: Revision Updated', $monogram))
+      ->setMustEncryptURI($object->getURI());
   }
 
   protected function getTransactionsForMail(
