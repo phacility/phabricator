@@ -47,6 +47,11 @@ final class PhabricatorSubtypeEditEngineExtension
       ->setValue($object->getEditEngineSubtype())
       ->setOptions($options);
 
+    // If subtypes are configured, enable changing them from the bulk editor.
+    if (count($map) > 1) {
+      $subtype_field->setBulkEditLabel(pht('Change subtype to'));
+    }
+
     return array(
       $subtype_field,
     );
