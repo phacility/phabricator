@@ -331,4 +331,84 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $this->assertEqual(null, $mail->getMailerKey());
   }
 
+  public function testMailSizeLimits() {
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('metamta.email-body-limit', 1024 * 512);
+
+    $user = $this->generateNewTestUser();
+    $phid = $user->getPHID();
+
+    $string_1kb = str_repeat('x', 1024);
+    $html_1kb = str_repeat('y', 1024);
+    $string_1mb = str_repeat('x', 1024 * 1024);
+    $html_1mb = str_repeat('y', 1024 * 1024);
+
+    // First, send a mail with a small text body and a small HTML body to make
+    // sure the basics work properly.
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($phid))
+      ->setBody($string_1kb)
+      ->setHTMLBody($html_1kb);
+
+    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mail->sendWithMailers(array($mailer));
+    $this->assertEqual(
+      PhabricatorMailOutboundStatus::STATUS_SENT,
+      $mail->getStatus());
+
+    $text_body = $mailer->getBody();
+    $html_body = $mailer->getHTMLBody();
+
+    $this->assertEqual($string_1kb, $text_body);
+    $this->assertEqual($html_1kb, $html_body);
+
+
+    // Now, send a mail with a large text body and a large HTML body. We expect
+    // the text body to be truncated and the HTML body to be dropped.
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($phid))
+      ->setBody($string_1mb)
+      ->setHTMLBody($html_1mb);
+
+    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mail->sendWithMailers(array($mailer));
+    $this->assertEqual(
+      PhabricatorMailOutboundStatus::STATUS_SENT,
+      $mail->getStatus());
+
+    $text_body = $mailer->getBody();
+    $html_body = $mailer->getHTMLBody();
+
+    // We expect the body was truncated, because it exceeded the body limit.
+    $this->assertTrue(
+      (strlen($text_body) < strlen($string_1mb)),
+      pht('Text Body Truncated'));
+
+    // We expect the HTML body was dropped completely after the text body was
+    // truncated.
+    $this->assertTrue(
+      !strlen($html_body),
+      pht('HTML Body Removed'));
+
+
+    // Next send a mail with a small text body and a large HTML body. We expect
+    // the text body to be intact and the HTML body to be dropped.
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($phid))
+      ->setBody($string_1kb)
+      ->setHTMLBody($html_1mb);
+
+    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mail->sendWithMailers(array($mailer));
+    $this->assertEqual(
+      PhabricatorMailOutboundStatus::STATUS_SENT,
+      $mail->getStatus());
+
+    $text_body = $mailer->getBody();
+    $html_body = $mailer->getHTMLBody();
+
+    $this->assertEqual($string_1kb, $text_body);
+    $this->assertTrue(!strlen($html_body));
+  }
+
 }

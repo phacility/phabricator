@@ -123,4 +123,12 @@ final class PhabricatorMailImplementationTestAdapter
     return $this;
   }
 
+  public function getBody() {
+    return idx($this->guts, 'body');
+  }
+
+  public function getHTMLBody() {
+    return idx($this->guts, 'html-body');
+  }
+
 }

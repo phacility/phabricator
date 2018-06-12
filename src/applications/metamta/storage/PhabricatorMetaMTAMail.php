@@ -892,15 +892,16 @@ final class PhabricatorMetaMTAMail
       $body = $raw_body;
     }
 
-    $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
-    if (strlen($body) > $max) {
+    $body_limit = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
+    if (strlen($body) > $body_limit) {
       $body = id(new PhutilUTF8StringTruncator())
-        ->setMaximumBytes($max)
+        ->setMaximumBytes($body_limit)
         ->truncateString($body);
       $body .= "\n";
-      $body .= pht('(This email was truncated at %d bytes.)', $max);
+      $body .= pht('(This email was truncated at %d bytes.)', $body_limit);
     }
     $mailer->setBody($body);
+    $body_limit -= strlen($body);
 
     // If we sent a different message body than we were asked to, record
     // what we actually sent to make debugging and diagnostics easier.
@@ -914,8 +915,16 @@ final class PhabricatorMetaMTAMail
       $send_html = $this->shouldSendHTML($preferences);
     }
 
-    if ($send_html && isset($params['html-body'])) {
-      $mailer->setHTMLBody($params['html-body']);
+    if ($send_html) {
+      $html_body = idx($params, 'html-body');
+
+      // NOTE: We just drop the entire HTML body if it won't fit. Safely
+      // truncating HTML is hard, and we already have the text body to fall
+      // back to.
+      if (strlen($html_body) <= $body_limit) {
+        $mailer->setHTMLBody($html_body);
+        $body_limit -= strlen($html_body);
+      }
     }
 
     // Pass the headers to the mailer, then save the state so we can show
