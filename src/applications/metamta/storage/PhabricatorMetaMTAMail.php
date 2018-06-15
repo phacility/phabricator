@@ -917,13 +917,14 @@ final class PhabricatorMetaMTAMail
 
     if ($send_html) {
       $html_body = idx($params, 'html-body');
-
-      // NOTE: We just drop the entire HTML body if it won't fit. Safely
-      // truncating HTML is hard, and we already have the text body to fall
-      // back to.
-      if (strlen($html_body) <= $body_limit) {
-        $mailer->setHTMLBody($html_body);
-        $body_limit -= strlen($html_body);
+      if (strlen($html_body)) {
+        // NOTE: We just drop the entire HTML body if it won't fit. Safely
+        // truncating HTML is hard, and we already have the text body to fall
+        // back to.
+        if (strlen($html_body) <= $body_limit) {
+          $mailer->setHTMLBody($html_body);
+          $body_limit -= strlen($html_body);
+        }
       }
     }
 
