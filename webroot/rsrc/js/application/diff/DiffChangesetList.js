@@ -1381,6 +1381,7 @@ JX.install('DiffChangesetList', {
       var changeset = this._getVisibleChangeset();
 
       if (!changeset) {
+        this._bannerChangeset = null;
         JX.DOM.remove(node);
         return;
       }

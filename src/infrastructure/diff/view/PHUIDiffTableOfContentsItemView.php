@@ -294,7 +294,8 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     $viewer = $this->getUser();
     $package_phids = mpull($packages, 'getPHID');
 
-    return $viewer->renderHandleList($package_phids);
+    return $viewer->renderHandleList($package_phids)
+      ->setGlyphLimit(48);
   }
 
   private function renderRename($self, $other, $arrow) {

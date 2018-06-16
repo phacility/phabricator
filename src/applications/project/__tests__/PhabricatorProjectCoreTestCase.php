@@ -1177,6 +1177,100 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertTrue($can_edit);
   }
 
+  public function testProjectPolicyRules() {
+    $author = $this->generateNewTestUser();
+
+    $proj_a = PhabricatorProject::initializeNewProject($author)
+      ->setName('Policy A')
+      ->save();
+    $proj_b = PhabricatorProject::initializeNewProject($author)
+      ->setName('Policy B')
+      ->save();
+
+    $user_none = $this->generateNewTestUser();
+    $user_any = $this->generateNewTestUser();
+    $user_all = $this->generateNewTestUser();
+
+    $this->joinProject($proj_a, $user_any);
+    $this->joinProject($proj_a, $user_all);
+    $this->joinProject($proj_b, $user_all);
+
+    $any_policy = id(new PhabricatorPolicy())
+      ->setRules(
+        array(
+          array(
+            'action' => PhabricatorPolicy::ACTION_ALLOW,
+            'rule' => 'PhabricatorProjectsPolicyRule',
+            'value' => array(
+              $proj_a->getPHID(),
+              $proj_b->getPHID(),
+            ),
+          ),
+        ))
+      ->save();
+
+    $all_policy = id(new PhabricatorPolicy())
+      ->setRules(
+        array(
+          array(
+            'action' => PhabricatorPolicy::ACTION_ALLOW,
+            'rule' => 'PhabricatorProjectsAllPolicyRule',
+            'value' => array(
+              $proj_a->getPHID(),
+              $proj_b->getPHID(),
+            ),
+          ),
+        ))
+      ->save();
+
+    $any_task = ManiphestTask::initializeNewTask($author)
+      ->setViewPolicy($any_policy->getPHID())
+      ->save();
+
+    $all_task = ManiphestTask::initializeNewTask($author)
+      ->setViewPolicy($all_policy->getPHID())
+      ->save();
+
+    $map = array(
+      array(
+        pht('Project policy rule; user in no projects'),
+        $user_none,
+        false,
+        false,
+      ),
+      array(
+        pht('Project policy rule; user in some projects'),
+        $user_any,
+        true,
+        false,
+      ),
+      array(
+        pht('Project policy rule; user in all projects'),
+        $user_all,
+        true,
+        true,
+      ),
+    );
+
+    foreach ($map as $test_case) {
+      list($label, $user, $expect_any, $expect_all) = $test_case;
+
+      $can_any = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $any_task,
+        PhabricatorPolicyCapability::CAN_VIEW);
+
+      $can_all = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $all_task,
+        PhabricatorPolicyCapability::CAN_VIEW);
+
+      $this->assertEqual($expect_any, $can_any, pht('%s / Any', $label));
+      $this->assertEqual($expect_all, $can_all, pht('%s / All', $label));
+    }
+  }
+
+
   private function moveToColumn(
     PhabricatorUser $viewer,
     PhabricatorProject $board,

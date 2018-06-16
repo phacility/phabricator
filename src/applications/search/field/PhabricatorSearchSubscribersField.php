@@ -10,6 +10,7 @@ final class PhabricatorSearchSubscribersField
   protected function getValueFromRequest(AphrontRequest $request, $key) {
     $allow_types = array(
       PhabricatorProjectProjectPHIDType::TYPECONST,
+      PhabricatorOwnersPackagePHIDType::TYPECONST,
     );
     return $this->getUsersFromRequest($request, $key, $allow_types);
   }

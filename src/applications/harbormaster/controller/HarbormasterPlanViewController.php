@@ -2,6 +2,10 @@
 
 final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
