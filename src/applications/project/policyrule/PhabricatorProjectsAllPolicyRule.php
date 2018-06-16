@@ -1,10 +1,10 @@
 <?php
 
-final class PhabricatorProjectsPolicyRule
+final class PhabricatorProjectsAllPolicyRule
   extends PhabricatorProjectsBasePolicyRule {
 
   public function getRuleDescription() {
-    return pht('members of any project');
+    return pht('members of all projects');
   }
 
   public function applyRule(
@@ -14,16 +14,16 @@ final class PhabricatorProjectsPolicyRule
 
     $memberships = $this->getMemberships($viewer->getPHID());
     foreach ($value as $project_phid) {
-      if (isset($memberships[$project_phid])) {
-        return true;
+      if (empty($memberships[$project_phid])) {
+        return false;
       }
     }
 
-    return false;
+    return true;
   }
 
   public function getRuleOrder() {
-    return 200;
+    return 205;
   }
 
 }
