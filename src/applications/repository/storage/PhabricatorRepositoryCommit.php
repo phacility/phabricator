@@ -195,8 +195,9 @@ final class PhabricatorRepositoryCommit
   }
 
   public function attachIdentities(
-    PhabricatorRepositoryIdentity $author,
-    $committer = null) {
+    PhabricatorRepositoryIdentity $author = null,
+    PhabricatorRepositoryIdentity $committer = null) {
+
     $this->authorIdentity = $author;
     $this->committerIdentity = $committer;
   }
