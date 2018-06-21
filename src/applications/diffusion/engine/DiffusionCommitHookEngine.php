@@ -1212,7 +1212,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     if (!strlen($raw_diff)) {
       // If the commit is actually empty, just return no changesets.
-      return array();
+      return array(array(), 0);
     }
 
     $parser = new ArcanistDiffParser();
