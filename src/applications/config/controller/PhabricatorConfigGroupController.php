@@ -30,7 +30,7 @@ final class PhabricatorConfigGroupController
     $view = $this->buildConfigBoxView($box_header, $list);
 
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($group_name, $this->getApplicationURI($group_uri))
+      ->addTextCrumb($group_name, $group_uri)
       ->addTextCrumb($options->getName())
       ->setBorder(true);
 
