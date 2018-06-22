@@ -15,6 +15,7 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
       ),
       array(
         'priority' => parent::PRIORITY_IMPORT,
+        'objectPHID' => $phid,
       ));
   }
 
