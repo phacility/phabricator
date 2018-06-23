@@ -205,6 +205,9 @@ final class TransactionSearchConduitAPIMethod
           case PhabricatorTransactions::TYPE_COMMENT:
             $type = 'comment';
             break;
+          case PhabricatorTransactions::TYPE_CREATE:
+            $type = 'create';
+            break;
         }
       }
 

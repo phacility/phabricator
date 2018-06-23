@@ -28,6 +28,18 @@ final class PhabricatorRepositoryIdentityPHIDType
   public function loadHandles(
     PhabricatorHandleQuery $query,
     array $handles,
-    array $objects) {}
+    array $objects) {
+
+    foreach ($handles as $phid => $handle) {
+      $identity = $objects[$phid];
+
+      $id = $identity->getID();
+      $name = $identity->getIdentityNameRaw();
+
+      $handle->setObjectName(pht('Identity %d', $id));
+      $handle->setName($name);
+      $handle->setURI($identity->getURI());
+    }
+  }
 
 }
