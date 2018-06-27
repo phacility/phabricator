@@ -38,9 +38,6 @@ options:
 phabricator/ $ ./bin/webhook call --id 42 --object D123
 ```
 
-You can use a tool like [[ https://requestb.in | RequestBin ]] to inspect
-the headers and payload for calls to hooks.
-
 
 Verifying Requests
 ==================
@@ -156,6 +153,20 @@ state.
 Hooks that are interested in changes should generally make a call to
 `transaction.search`, passing the transaction PHIDs as a constraint to retrieve
 details about the transactions.
+
+For example, your call to `transaction.search` may look something like this:
+
+```lang=json
+{
+  "objectIdentifier": "PHID-XXXX-abcdef",
+  "constraints": {
+    "phids": [
+      "PHID-XACT-XXXX-11111111",
+      "PHID-XACT-XXXX-22222222"
+    ]
+  }
+}
+```
 
 The `phid.query` method can also be used to retrieve generic information about
 a list of objects.
