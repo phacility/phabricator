@@ -20,13 +20,22 @@ final class PhabricatorDashboardPanelDatasource
     return $this->filterResultsAgainstTokens($results);
   }
 
-
   protected function renderSpecialTokens(array $values) {
     return $this->renderTokensFromResults($this->buildResults(), $values);
   }
 
   public function buildResults() {
-    $query = id(new PhabricatorDashboardPanelQuery());
+    $query = new PhabricatorDashboardPanelQuery();
+
+    $raw_query = $this->getRawQuery();
+    if (preg_match('/^[wW]\d+\z/', $raw_query)) {
+      $id = trim($raw_query, 'wW');
+      $id = (int)$id;
+      $query->withIDs(array($id));
+    } else {
+      $query->withNameNgrams($raw_query);
+    }
+
     $panels = $this->executeQuery($query);
 
     $results = array();
