@@ -72,4 +72,12 @@ final class DifferentialRevisionReopenTransaction
       $this->renderObject());
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'reopen';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array();
+  }
+
 }

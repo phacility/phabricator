@@ -99,4 +99,12 @@ final class DifferentialRevisionRejectTransaction
       $this->renderObject());
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'request-changes';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array();
+  }
+
 }
