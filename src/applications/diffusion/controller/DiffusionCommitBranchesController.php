@@ -22,6 +22,7 @@ final class DiffusionCommitBranchesController extends DiffusionController {
         array(
           'contains' => $drequest->getCommit(),
           'limit' => $branch_limit + 1,
+          'branch' => null,
         )));
 
     $has_more_branches = (count($branches) > $branch_limit);

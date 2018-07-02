@@ -119,4 +119,12 @@ final class DifferentialRevisionPlanChangesTransaction
     return (bool)$this->getMetadataValue('draft.demote');
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'plan-changes';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array();
+  }
+
 }

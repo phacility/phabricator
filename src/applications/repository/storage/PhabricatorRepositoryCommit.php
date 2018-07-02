@@ -44,6 +44,9 @@ final class PhabricatorRepositoryCommit
   private $audits = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $authorIdentity = self::ATTACHABLE;
+  private $committerIdentity = self::ATTACHABLE;
+
   private $drafts = array();
   private $auditAuthorityPHIDs = array();
 
@@ -189,6 +192,22 @@ final class PhabricatorRepositoryCommit
 
   public function hasAttachedAudits() {
     return ($this->audits !== self::ATTACHABLE);
+  }
+
+  public function attachIdentities(
+    PhabricatorRepositoryIdentity $author = null,
+    PhabricatorRepositoryIdentity $committer = null) {
+
+    $this->authorIdentity = $author;
+    $this->committerIdentity = $committer;
+  }
+
+  public function getAuthorIdentity() {
+    return $this->assertAttached($this->authorIdentity);
+  }
+
+  public function getCommiterIdentity() {
+    return $this->assertAttached($this->committerIdentity);
   }
 
   public function loadAndAttachAuditAuthority(

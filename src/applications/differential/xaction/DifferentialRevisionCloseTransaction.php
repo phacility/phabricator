@@ -154,5 +154,4 @@ final class DifferentialRevisionCloseTransaction
     );
   }
 
-
 }

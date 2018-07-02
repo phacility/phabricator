@@ -15,6 +15,7 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
       ),
       array(
         'priority' => parent::PRIORITY_IMPORT,
+        'objectPHID' => $phid,
       ));
   }
 
@@ -37,7 +38,15 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
     $key = "index.{$object_phid}";
     $lock = PhabricatorGlobalLock::newLock($key);
 
-    $lock->lock(1);
+    try {
+      $lock->lock(1);
+    } catch (PhutilLockException $ex) {
+      // If we fail to acquire the lock, just yield. It's expected that we may
+      // contend on this lock occasionally if a large object receives many
+      // updates in a short period of time, and it's appropriate to just retry
+      // rebuilding the index later.
+      throw new PhabricatorWorkerYieldException(15);
+    }
 
     try {
       // Reload the object now that we have a lock, to make sure we have the

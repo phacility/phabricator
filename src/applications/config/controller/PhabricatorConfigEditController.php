@@ -231,7 +231,6 @@ final class PhabricatorConfigEditController
     $box_header[] = $key;
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Config'), $this->getApplicationURI());
     if ($group) {
       $crumbs->addTextCrumb($group->getName(), $group_uri);
     }
