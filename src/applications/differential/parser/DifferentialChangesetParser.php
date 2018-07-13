@@ -956,8 +956,13 @@ final class DifferentialChangesetParser extends Phobject {
           pht('This file was changed only by adding or removing whitespace.'),
           'whitespace');
       } else if ($this->isDeleted()) {
-        $shield = $renderer->renderShield(
-          pht('This file was completely deleted.'));
+         if ($this->changeset->getChangeType() == DifferentialChangeType::TYPE_MODIFIED) {
+            $shield = $renderer->renderShield(
+              pht('This file was completely emptied.'));
+        } else {
+            $shield = $renderer->renderShield(
+              pht('This file was completely deleted.'));
+        }
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
         $shield = $renderer->renderShield(
           pht(
