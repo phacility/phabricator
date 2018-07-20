@@ -15,7 +15,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
   }
 
   public function getTitleGlyph() {
-    return "\xE2\x98\xBA";
+    return "\xE2\x9C\xA8";
   }
 
   public function getApplicationGroup() {
