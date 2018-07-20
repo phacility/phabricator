@@ -1148,6 +1148,10 @@ final class DifferentialRevision extends DifferentialDAO
         ->setKey('summary')
         ->setType('string')
         ->setDescription(pht('Revision summary.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('testPlan')
+        ->setType('string')
+        ->setDescription(pht('Revision test plan.')),
     );
   }
 
@@ -1167,6 +1171,7 @@ final class DifferentialRevision extends DifferentialDAO
       'repositoryPHID' => $this->getRepositoryPHID(),
       'diffPHID' => $this->getActiveDiffPHID(),
       'summary' => $this->getSummary(),
+      'testPlan' => $this->getTestPlan(),
     );
   }
 
