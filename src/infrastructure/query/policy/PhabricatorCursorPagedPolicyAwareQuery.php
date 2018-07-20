@@ -1918,6 +1918,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $op_sub = PhutilSearchQueryCompiler::OPERATOR_SUBSTRING;
     $op_not = PhutilSearchQueryCompiler::OPERATOR_NOT;
+    $op_exact = PhutilSearchQueryCompiler::OPERATOR_EXACT;
 
     $where = array();
     $current_function = 'all';
@@ -1939,6 +1940,25 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $is_substring = true;
       } else {
         $is_substring = false;
+      }
+
+      // If we're doing exact search, just test the raw corpus.
+      $is_exact = ($raw_token->getOperator() == $op_exact);
+      if ($is_exact) {
+        if ($is_not) {
+          $where[] = qsprintf(
+            $conn,
+            '(%T.rawCorpus != %s)',
+            $table_alias,
+            $value);
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            '(%T.rawCorpus = %s)',
+            $table_alias,
+            $value);
+        }
+        continue;
       }
 
       // If we're doing substring search, we just match against the raw corpus
