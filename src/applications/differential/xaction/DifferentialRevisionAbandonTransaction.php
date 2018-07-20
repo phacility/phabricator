@@ -86,4 +86,12 @@ final class DifferentialRevisionAbandonTransaction
       $this->renderObject());
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'abandon';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array();
+  }
+
 }

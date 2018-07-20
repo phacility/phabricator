@@ -103,10 +103,9 @@ for (ii = 0; ii < config.servers.length; ii++) {
 
   if (spec['ssl.cert']){
     spec['ssl.cert'] = fs.readFileSync(spec['ssl.cert']);
-  }
-
-  if (spec['ssl.chain']){
-    spec['ssl.chain'] = fs.readFileSync(spec['ssl.chain']);
+    if (spec['ssl.chain']){
+      spec['ssl.cert'] += "\n" + fs.readFileSync(spec['ssl.chain']);
+    }
   }
 
   servers.push(spec);
@@ -139,10 +138,6 @@ for (ii = 0; ii < servers.length; ii++) {
       key: server['ssl.key'],
       cert: server['ssl.cert'],
     };
-
-    if (server['ssl.chain']) {
-      https_config.ca = server['ssl.chain'];
-    }
 
     http_server = https.createServer(https_config);
   } else {

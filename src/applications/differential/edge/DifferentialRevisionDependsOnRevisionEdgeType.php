@@ -36,7 +36,7 @@ final class DifferentialRevisionDependsOnRevisionEdgeType
     $add_edges) {
 
     return pht(
-      '%s added %s dependencie(s): %s.',
+      '%s added %s parent revision(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -48,7 +48,7 @@ final class DifferentialRevisionDependsOnRevisionEdgeType
     $rem_edges) {
 
     return pht(
-      '%s removed %s dependencie(s): %s.',
+      '%s removed %s parent revision(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -63,7 +63,7 @@ final class DifferentialRevisionDependsOnRevisionEdgeType
     $rem_edges) {
 
     return pht(
-      '%s edited dependencie(s), added %s: %s; removed %s: %s.',
+      '%s edited parent revision(s), added %s: %s; removed %s: %s.',
       $actor,
       $add_count,
       $add_edges,
@@ -78,7 +78,7 @@ final class DifferentialRevisionDependsOnRevisionEdgeType
     $add_edges) {
 
     return pht(
-      '%s added %s dependencie(s) for %s: %s.',
+      '%s added %s parent revision(s) for %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -92,7 +92,7 @@ final class DifferentialRevisionDependsOnRevisionEdgeType
     $rem_edges) {
 
     return pht(
-      '%s removed %s dependencie(s) for %s: %s.',
+      '%s removed %s parent revision(s) for %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -109,7 +109,7 @@ final class DifferentialRevisionDependsOnRevisionEdgeType
     $rem_edges) {
 
     return pht(
-      '%s edited dependencie(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited parent revision(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $object,
       $add_count,
