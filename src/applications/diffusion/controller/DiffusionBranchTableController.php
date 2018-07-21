@@ -22,6 +22,7 @@ final class DiffusionBranchTableController extends DiffusionController {
     $params = array(
       'offset' => $pager->getOffset(),
       'limit' => $pager->getPageSize() + 1,
+      'branch' => null,
     );
 
     $contains = $drequest->getSymbolicCommit();
