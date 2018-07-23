@@ -22,9 +22,11 @@ final class PhabricatorPasteTestDataGenerator
       PhabricatorPasteTitleTransaction::TRANSACTIONTYPE,
       $name);
 
-    $xactions[] = $this->newTransaction(
-      PhabricatorPasteLanguageTransaction::TRANSACTIONTYPE,
-      $language);
+    if (strlen($language) > 0) {
+        $xactions[] = $this->newTransaction(
+            PhabricatorPasteLanguageTransaction::TRANSACTIONTYPE,
+            $language);
+    }
 
     $xactions[] = $this->newTransaction(
       PhabricatorPasteContentTransaction::TRANSACTIONTYPE,
@@ -43,17 +45,29 @@ final class PhabricatorPasteTestDataGenerator
     return new PhabricatorPasteTransaction();
   }
 
-  private function newPasteContent() {
-    $languages = array(
-      'txt' => array(),
-      'php' => array(
-        'content' => 'PhutilPHPCodeSnippetContextFreeGrammar',
-      ),
-      'java' => array(
-        'content' => 'PhutilJavaCodeSnippetContextFreeGrammar',
-      ),
-    );
+  public function getSupportedLanguages() {
+      return array(
+          'php' => array(
+              'content' => 'PhutilPHPCodeSnippetContextFreeGrammar',
+          ),
+          'java' => array(
+              'content' => 'PhutilJavaCodeSnippetContextFreeGrammar',
+          ),
+      );
+  }
 
+  public function generateContent($spec) {
+      $content_generator = idx($spec, 'content');
+      if (!$content_generator) {
+          $content_generator = 'PhutilLipsumContextFreeGrammar';
+      }
+
+      return newv($content_generator, array())
+          ->generateSeveral($this->roll(4, 12, 10));
+  }
+
+  private function newPasteContent() {
+    $languages = $this->getSupportedLanguages();
     $language = array_rand($languages);
     $spec = $languages[$language];
 
@@ -62,16 +76,10 @@ final class PhabricatorPasteTestDataGenerator
       $title_generator = 'PhabricatorPasteFilenameContextFreeGrammar';
     }
 
-    $content_generator = idx($spec, 'content');
-    if (!$content_generator) {
-      $content_generator = 'PhutilLipsumContextFreeGrammar';
-    }
-
     $title = newv($title_generator, array())
       ->generate();
 
-    $content = newv($content_generator, array())
-      ->generateSeveral($this->roll(4, 12, 10));
+    $content = $this->generateContent($spec);
 
     // Usually add the language as a suffix.
     if ($this->roll(1, 20) > 2) {
