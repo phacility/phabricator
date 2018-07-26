@@ -43,7 +43,10 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/D(?P<id>[1-9]\d*)' => 'DifferentialRevisionViewController',
+      '/D(?P<id>[1-9]\d*)' => array(
+        '' => 'DifferentialRevisionViewController',
+        '/(?P<filter>new)/' => 'DifferentialRevisionViewController',
+      ),
       '/differential/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'DifferentialRevisionListController',
