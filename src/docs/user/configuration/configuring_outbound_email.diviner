@@ -82,6 +82,10 @@ The supported keys for each mailer are:
   - `priority`: Optional string. Advanced option which controls load balancing
     and failover behavior. See below for details.
   - `options`: Optional map. Additional options for the mailer type.
+  - `inbound`: Optional bool. Use `false` to prevent this mailer from being
+    used to receive inbound mail.
+  - `outbound`: Optional bool. Use `false` to prevent this mailer from being
+    used to send outbound mail.
 
 The `type` field can be used to select these third-party mailers:
 

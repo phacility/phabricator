@@ -12,9 +12,12 @@ final class PhabricatorMetaMTAPostmarkReceiveController
    */
   public function handleRequest(AphrontRequest $request) {
     // Don't process requests if we don't have a configured Postmark adapter.
-    $mailers = PhabricatorMetaMTAMail::newMailersWithTypes(
+    $mailers = PhabricatorMetaMTAMail::newMailers(
       array(
-        PhabricatorMailImplementationPostmarkAdapter::ADAPTERTYPE,
+        'inbound' => true,
+        'types' => array(
+          PhabricatorMailImplementationPostmarkAdapter::ADAPTERTYPE,
+        ),
       ));
     if (!$mailers) {
       return new Aphront404Response();

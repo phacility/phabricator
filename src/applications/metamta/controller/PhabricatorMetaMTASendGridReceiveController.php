@@ -11,9 +11,12 @@ final class PhabricatorMetaMTASendGridReceiveController
     // SendGrid doesn't sign payloads so we can't be sure that SendGrid
     // actually sent this request, but require a configured SendGrid mailer
     // before we activate this endpoint.
-    $mailers = PhabricatorMetaMTAMail::newMailersWithTypes(
+    $mailers = PhabricatorMetaMTAMail::newMailers(
       array(
-        PhabricatorMailImplementationSendGridAdapter::ADAPTERTYPE,
+        'inbound' => true,
+        'types' => array(
+          PhabricatorMailImplementationSendGridAdapter::ADAPTERTYPE,
+        ),
       ));
     if (!$mailers) {
       return new Aphront404Response();
