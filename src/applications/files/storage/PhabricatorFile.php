@@ -492,12 +492,13 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $this->setStorageFormat($format->getStorageFormatKey());
     $this->setStorageProperties($properties);
 
-    list($identifier, $new_handle) = $this->writeToEngine(
+    list($identifier, $new_handle, $integrity_hash) = $this->writeToEngine(
       $engine,
       $data,
       $params);
 
     $this->setStorageHandle($new_handle);
+    $this->setIntegrityHash($integrity_hash);
     $this->save();
 
     $this->deleteFileDataIfUnused(

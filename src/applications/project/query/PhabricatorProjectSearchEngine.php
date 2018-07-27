@@ -22,7 +22,13 @@ final class PhabricatorProjectSearchEngine
     return array(
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Name'))
-        ->setKey('name'),
+        ->setKey('name')
+        ->setDescription(
+          pht(
+            '(Deprecated.) Search for projects with a given name or '.
+            'hashtag using tokenizer/datasource query matching rules. This '.
+            'is deprecated in favor of the more powerful "query" '.
+            'constraint.')),
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Slugs'))
         ->setIsHidden(true)

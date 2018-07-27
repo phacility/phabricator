@@ -24,21 +24,33 @@ final class PhabricatorStorageManagementDestroyWorkflow
     $console = PhutilConsole::getConsole();
 
     if (!$this->isDryRun() && !$this->isForce()) {
-      $console->writeOut(
-        phutil_console_wrap(
-          pht(
-            'Are you completely sure you really want to permanently destroy '.
-            'all storage for Phabricator data? This operation can not be '.
-            'undone and your data will not be recoverable if you proceed.')));
+      if ($args->getArg('unittest-fixtures')) {
+        $console->writeOut(
+          phutil_console_wrap(
+            pht(
+              'Are you completely sure you really want to destroy all unit '.
+              'test fixure data? This operation can not be undone.')));
+        if (!phutil_console_confirm(pht('Destroy all unit test data?'))) {
+          $console->writeOut("%s\n", pht('Cancelled.'));
+          exit(1);
+        }
+      } else {
+        $console->writeOut(
+          phutil_console_wrap(
+            pht(
+              'Are you completely sure you really want to permanently destroy '.
+              'all storage for Phabricator data? This operation can not be '.
+              'undone and your data will not be recoverable if you proceed.')));
 
-      if (!phutil_console_confirm(pht('Permanently destroy all data?'))) {
-        $console->writeOut("%s\n", pht('Cancelled.'));
-        exit(1);
-      }
+        if (!phutil_console_confirm(pht('Permanently destroy all data?'))) {
+          $console->writeOut("%s\n", pht('Cancelled.'));
+          exit(1);
+        }
 
-      if (!phutil_console_confirm(pht('Really destroy all data forever?'))) {
-        $console->writeOut("%s\n", pht('Cancelled.'));
-        exit(1);
+        if (!phutil_console_confirm(pht('Really destroy all data forever?'))) {
+          $console->writeOut("%s\n", pht('Cancelled.'));
+          exit(1);
+        }
       }
     }
 

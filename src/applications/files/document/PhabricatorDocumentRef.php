@@ -119,11 +119,23 @@ final class PhabricatorDocumentRef
     }
 
     $snippet = $this->getSnippet();
-    if (!preg_match('/^\s*[{[]/', $snippet)) {
+
+    // If the file is longer than the snippet, we don't detect the content
+    // as JSON. We could use some kind of heuristic here if we wanted, but
+    // see PHI749 for a false positive.
+    if (strlen($snippet) < $this->getByteLength()) {
       return false;
     }
 
-    return phutil_is_utf8($snippet);
+    // If the snippet is the whole file, just check if the snippet is valid
+    // JSON. Note that `phutil_json_decode()` only accepts arrays and objects
+    // as JSON, so this won't misfire on files with content like "3".
+    try {
+      phutil_json_decode($snippet);
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
   }
 
   public function getSnippet() {

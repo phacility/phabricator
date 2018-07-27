@@ -104,8 +104,8 @@ final class PhabricatorMemeEngine extends Phobject {
   private function newTransformHash() {
     $properties = array(
       'kind' => 'meme',
-      'above' => phutil_utf8_strtoupper($this->getAboveText()),
-      'below' => phutil_utf8_strtoupper($this->getBelowText()),
+      'above' => $this->getAboveText(),
+      'below' => $this->getBelowText(),
     );
 
     $properties = phutil_json_encode($properties);

@@ -138,6 +138,7 @@ some special syntax. These features are supported:
   - Field search with `title:platypus`.
   - Filtering out matches with `-platypus`.
   - Quoted terms with `"platypus attorney"`.
+  - Matching entire fields with `=platypus`.
   - Combining features with `title:~"platypus attorney"`.
 
 See below for more detail.
@@ -173,3 +174,11 @@ or `title:"platypus attorney"`. These scopes are also supported:
 **Filtering Matches**: You can remove documents which match certain terms from
 the result set with `-`. For example: `platypus -mammal`. Documents which match
 negated terms will be filtered out of the result set.
+
+**Matching Entire Fields**: If you know the exact name of an object and want
+to find only that object, you can use the `=` operator. A query like
+`title:"warp drive"` will find a document titled "Warp Drive", but will also
+find documents with longer titles, like "Not a Warp Drive". The `=` operator
+requires that the entire field match the query exactly, so //only// documents
+exactly titled "Warp Drive" will be matched by the query (but note that the
+query is still case insensitive).
