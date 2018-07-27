@@ -643,7 +643,13 @@ final class HarbormasterBuildLog
       $pos += $slice_length;
 
       $map_bytes += $slice_length;
-      $line_count += count(preg_split("/\r\n|\r|\n/", $slice)) - 1;
+
+      // Count newlines in the slice. This goofy approach is meaningfully
+      // faster than "preg_match_all()" or "preg_split()". See PHI766.
+      $n_rn = substr_count($slice, "\r\n");
+      $n_r = substr_count($slice, "\r");
+      $n_n = substr_count($slice, "\n");
+      $line_count += ($n_rn) + ($n_r - $n_rn) + ($n_n - $n_rn);
 
       if ($map_bytes >= ($marker_distance - $max_utf8_width)) {
         $map[] = array(
