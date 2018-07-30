@@ -11,7 +11,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorColumnProxyInterface {
+    PhabricatorColumnProxyInterface,
+    PhabricatorSpacesInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -38,6 +39,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $projectPathKey;
 
   protected $properties = array();
+  protected $spacePHID;
 
   private $memberPHIDs = self::ATTACHABLE;
   private $watcherPHIDs = self::ATTACHABLE;
@@ -82,6 +84,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setJoinPolicy($join_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID())
       ->setIsMembershipLocked(0)
       ->attachMemberPHIDs(array())
       ->attachSlugs(array())
@@ -694,6 +697,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     AphrontRequest $request) {
 
     return $timeline;
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 
