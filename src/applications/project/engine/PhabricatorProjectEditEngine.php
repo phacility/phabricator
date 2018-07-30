@@ -51,7 +51,11 @@ final class PhabricatorProjectEditEngine
   }
 
   protected function newEditableObject() {
-    return PhabricatorProject::initializeNewProject($this->getViewer());
+    $parent = nonempty($this->parentProject, $this->milestoneProject);
+
+    return PhabricatorProject::initializeNewProject(
+      $this->getViewer(),
+      $parent);
   }
 
   protected function newObjectQuery() {
@@ -112,6 +116,7 @@ final class PhabricatorProjectEditEngine
       PhabricatorTransactions::TYPE_VIEW_POLICY,
       PhabricatorTransactions::TYPE_EDIT_POLICY,
       PhabricatorTransactions::TYPE_JOIN_POLICY,
+      PhabricatorTransactions::TYPE_SPACE,
       PhabricatorProjectIconTransaction::TRANSACTIONTYPE,
       PhabricatorProjectColorTransaction::TRANSACTIONTYPE,
     );
