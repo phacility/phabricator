@@ -294,7 +294,8 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .spaces-name .phui-handle,
-.spaces-name a.phui-handle {
+.spaces-name a.phui-handle,
+.phui-profile-header.phui-header-shell .spaces-name .phui-handle {
   color: {$sh-redtext};
 }
 
