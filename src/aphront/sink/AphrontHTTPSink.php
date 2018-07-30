@@ -112,6 +112,23 @@ abstract class AphrontHTTPSink extends Phobject {
       $response->getHTTPResponseMessage());
     $this->writeHeaders($all_headers);
 
+    // Allow clients an unlimited amount of time to download the response.
+
+    // This allows clients to perform a "slow loris" attack, where they
+    // download a large response very slowly to tie up process slots. However,
+    // concurrent connection limits and "RequestReadTimeout" already prevent
+    // this attack. We could add our own minimum download rate here if we want
+    // to make this easier to configure eventually.
+
+    // For normal page responses, we've fully rendered the page into a string
+    // already so all that's left is writing it to the client.
+
+    // For unusual responses (like large file downloads) we may still be doing
+    // some meaningful work, but in theory that work is intrinsic to streaming
+    // the response.
+
+    set_time_limit(0);
+
     $abort = false;
     foreach ($data as $block) {
       if (!$this->isWritable()) {
