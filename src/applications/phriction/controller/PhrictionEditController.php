@@ -121,6 +121,8 @@ final class PhrictionEditController
       $v_projects = array_reverse($v_projects);
     }
 
+    $v_space = $document->getSpacePHID();
+
     if ($request->isFormPost()) {
 
       $title = $request->getStr('title');
@@ -131,6 +133,7 @@ final class PhrictionEditController
       $v_edit = $request->getStr('editPolicy');
       $v_cc = $request->getArr('cc');
       $v_projects = $request->getArr('projects');
+      $v_space = $request->getStr('spacePHID');
 
       $xactions = array();
       $xactions[] = id(new PhrictionTransaction())
@@ -146,6 +149,9 @@ final class PhrictionEditController
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
         ->setNewValue($v_edit);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
+        ->setNewValue($v_space);
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
         ->setNewValue(array('=' => $v_cc));
@@ -192,6 +198,7 @@ final class PhrictionEditController
 
         $document->setViewPolicy($v_view);
         $document->setEditPolicy($v_edit);
+        $document->setSpacePHID($v_space);
       }
     }
 
@@ -267,7 +274,9 @@ final class PhrictionEditController
           ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
+          ->setViewer($viewer)
           ->setName('viewPolicy')
+          ->setSpacePHID($v_space)
           ->setPolicyObject($document)
           ->setCapability($view_capability)
           ->setPolicies($policies)
