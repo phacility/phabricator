@@ -57,6 +57,7 @@ final class PhabricatorProjectListView extends AphrontView {
       $icon_name = $project->getDisplayIconName();
 
       $item = id(new PHUIObjectItemView())
+        ->setObject($project)
         ->setHeader($project->getName())
         ->setHref("/project/view/{$id}/")
         ->setImageURI($project->getProfileImageURI())
