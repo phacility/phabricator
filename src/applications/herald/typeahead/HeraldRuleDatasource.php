@@ -19,10 +19,18 @@ final class HeraldRuleDatasource
     $viewer = $this->getViewer();
     $raw_query = $this->getRawQuery();
 
-    $rules = id(new HeraldRuleQuery())
-      ->setViewer($viewer)
-      ->withDatasourceQuery($raw_query)
-      ->execute();
+    $query = id(new HeraldRuleQuery())
+      ->setViewer($viewer);
+
+    if (preg_match('/^[hH]\d+\z/', $raw_query)) {
+      $id = trim($raw_query, 'hH');
+      $id = (int)$id;
+      $query->withIDs(array($id));
+    } else {
+      $query->withDatasourceQuery($raw_query);
+    }
+
+    $rules = $query->execute();
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
