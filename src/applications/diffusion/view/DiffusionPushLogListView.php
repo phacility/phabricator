@@ -14,6 +14,8 @@ final class DiffusionPushLogListView extends AphrontView {
     $logs = $this->logs;
     $viewer = $this->getViewer();
 
+    $reject_herald = PhabricatorRepositoryPushLog::REJECT_HERALD;
+
     $handle_phids = array();
     foreach ($logs as $log) {
       $handle_phids[] = $log->getPusherPHID();
@@ -21,9 +23,13 @@ final class DiffusionPushLogListView extends AphrontView {
       if ($device_phid) {
         $handle_phids[] = $device_phid;
       }
+
+      if ($log->getPushEvent()->getRejectCode() == $reject_herald) {
+        $handle_phids[] = $log->getPushEvent()->getRejectDetails();
+      }
     }
 
-    $handles = $viewer->loadHandles($handle_phids);
+    $viewer->loadHandles($handle_phids);
 
     // Only administrators can view remote addresses.
     $remotes_visible = $viewer->getIsAdmin();
@@ -74,10 +80,17 @@ final class DiffusionPushLogListView extends AphrontView {
         $flag_names);
 
       $reject_code = $log->getPushEvent()->getRejectCode();
-      $reject_label = idx(
-        $reject_map,
-        $reject_code,
-        pht('Unknown ("%s")', $reject_code));
+
+      if ($reject_code == $reject_herald) {
+        $rule_phid = $log->getPushEvent()->getRejectDetails();
+        $handle = $viewer->renderHandle($rule_phid);
+        $reject_label = pht('Blocked: %s', $handle);
+      } else {
+        $reject_label = idx(
+          $reject_map,
+          $reject_code,
+          pht('Unknown ("%s")', $reject_code));
+      }
 
       $rows[] = array(
         phutil_tag(

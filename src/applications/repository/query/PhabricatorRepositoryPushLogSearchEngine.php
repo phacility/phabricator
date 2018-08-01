@@ -149,6 +149,9 @@ final class PhabricatorRepositoryPushLogSearchEngine
       id(new PhabricatorStringExportField())
         ->setKey('resultName')
         ->setLabel(pht('Result Name')),
+      id(new PhabricatorStringExportField())
+        ->setKey('resultDetails')
+        ->setLabel(pht('Result Details')),
       id(new PhabricatorIntExportField())
         ->setKey('writeWait')
         ->setLabel(pht('Write Wait (us)')),
@@ -237,6 +240,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
         'flagNames' => $flag_names,
         'result' => $result,
         'resultName' => $result_name,
+        'resultDetails' => $event->getRejectDetails(),
         'writeWait' => $event->getWriteWait(),
         'readWait' => $event->getReadWait(),
         'hostWait' => $event->getHostWait(),
