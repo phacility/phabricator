@@ -32,6 +32,10 @@ final class PhabricatorRepositoryPushLogSearchEngine
         $map['createdEnd']);
     }
 
+    if ($map['blockingHeraldRulePHIDs']) {
+      $query->withBlockingHeraldRulePHIDs($map['blockingHeraldRulePHIDs']);
+    }
+
     return $query;
   }
 
@@ -43,13 +47,19 @@ final class PhabricatorRepositoryPushLogSearchEngine
         ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
         ->setLabel(pht('Repositories'))
         ->setDescription(
-          pht('Search for pull logs for specific repositories.')),
+          pht('Search for push logs for specific repositories.')),
       id(new PhabricatorUsersSearchField())
         ->setKey('pusherPHIDs')
         ->setAliases(array('pusher', 'pushers', 'pusherPHID'))
         ->setLabel(pht('Pushers'))
         ->setDescription(
-          pht('Search for pull logs by specific users.')),
+          pht('Search for push logs by specific users.')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setDatasource(new HeraldRuleDatasource())
+        ->setKey('blockingHeraldRulePHIDs')
+        ->setLabel(pht('Blocked By'))
+        ->setDescription(
+          pht('Search for pushes blocked by particular Herald rules.')),
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Created After'))
         ->setKey('createdStart'),

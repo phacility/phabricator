@@ -49,6 +49,9 @@ final class PhabricatorRepositoryPushEvent
         'key_identifier' => array(
           'columns' => array('requestIdentifier'),
         ),
+        'key_reject' => array(
+          'columns' => array('rejectCode', 'rejectDetails'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
