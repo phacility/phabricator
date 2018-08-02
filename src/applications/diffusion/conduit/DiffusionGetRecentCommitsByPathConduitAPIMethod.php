@@ -9,6 +9,14 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
     return 'diffusion.getrecentcommitsbypath';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsoleted by "diffusion.historyquery".');
+  }
+
   public function getMethodDescription() {
     return pht(
       'Get commit identifiers for recent commits affecting a given path.');
