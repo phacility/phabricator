@@ -23,6 +23,12 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
     );
   }
 
+  protected function defineErrorTypes() {
+    return array(
+      'ERR_NOT_FOUND' => pht('Repository was not found.'),
+    );
+  }
+
   protected function defineReturnType() {
     return 'nonempty list<string>';
   }
@@ -35,6 +41,10 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
         'path' => $request->getValue('path'),
         'branch' => $request->getValue('branch'),
       ));
+
+    if ($drequest === null) {
+        throw new ConduitException('ERR_NOT_FOUND');
+    }
 
     $limit = nonempty(
       $request->getValue('limit'),
