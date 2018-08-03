@@ -254,7 +254,8 @@ final class PhrictionDocumentController
     PhrictionContent $content,
     $slug) {
 
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
+
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($document);
@@ -262,6 +263,10 @@ final class PhrictionDocumentController
     $view->addProperty(
       pht('Last Author'),
       $viewer->renderHandle($content->getAuthorPHID()));
+
+    $view->addProperty(
+      pht('Last Edited'),
+      phabricator_datetime($content->getDateCreated(), $viewer));
 
     return $view;
   }
