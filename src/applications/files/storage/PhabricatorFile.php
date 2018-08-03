@@ -159,8 +159,20 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function saveAndIndex() {
     $this->save();
-    PhabricatorSearchWorker::queueDocumentForIndexing($this->getPHID());
+
+    if ($this->isIndexableFile()) {
+      PhabricatorSearchWorker::queueDocumentForIndexing($this->getPHID());
+    }
+
     return $this;
+  }
+
+  private function isIndexableFile() {
+    if ($this->getIsChunk()) {
+      return false;
+    }
+
+    return true;
   }
 
   public function getMonogram() {
