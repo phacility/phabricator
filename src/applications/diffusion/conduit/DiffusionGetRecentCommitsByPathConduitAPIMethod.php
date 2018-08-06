@@ -9,6 +9,14 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
     return 'diffusion.getrecentcommitsbypath';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsoleted by "diffusion.historyquery".');
+  }
+
   public function getMethodDescription() {
     return pht(
       'Get commit identifiers for recent commits affecting a given path.');
@@ -20,6 +28,12 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
       'path' => 'required string',
       'branch' => 'optional string',
       'limit' => 'optional int',
+    );
+  }
+
+  protected function defineErrorTypes() {
+    return array(
+      'ERR_NOT_FOUND' => pht('Repository was not found.'),
     );
   }
 
@@ -35,6 +49,10 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
         'path' => $request->getValue('path'),
         'branch' => $request->getValue('branch'),
       ));
+
+    if ($drequest === null) {
+        throw new ConduitException('ERR_NOT_FOUND');
+    }
 
     $limit = nonempty(
       $request->getValue('limit'),

@@ -168,7 +168,8 @@ final class PhabricatorMailManagementSendTestWorkflow
 
     $mailer_key = $args->getArg('mailer');
     if ($mailer_key !== null) {
-      $mailers = PhabricatorMetaMTAMail::newMailers();
+      $mailers = PhabricatorMetaMTAMail::newMailers(array());
+
       $mailers = mpull($mailers, null, 'getKey');
       if (!isset($mailers[$mailer_key])) {
         throw new PhutilArgumentUsageException(
@@ -176,6 +177,13 @@ final class PhabricatorMailManagementSendTestWorkflow
             'Mailer key ("%s") is not configured. Available keys are: %s.',
             $mailer_key,
             implode(', ', array_keys($mailers))));
+      }
+
+      if (!$mailers[$mailer_key]->getSupportsOutbound()) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Mailer ("%s") is not configured to support outbound mail.',
+            $mailer_key));
       }
 
       $mail->setTryMailers(array($mailer_key));

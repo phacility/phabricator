@@ -11,7 +11,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorColumnProxyInterface {
+    PhabricatorColumnProxyInterface,
+    PhabricatorSpacesInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -38,6 +39,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $projectPathKey;
 
   protected $properties = array();
+  protected $spacePHID;
 
   private $memberPHIDs = self::ATTACHABLE;
   private $watcherPHIDs = self::ATTACHABLE;
@@ -59,7 +61,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   const ITEM_MILESTONES = 'project.milestones';
   const ITEM_SUBPROJECTS = 'project.subprojects';
 
-  public static function initializeNewProject(PhabricatorUser $actor) {
+  public static function initializeNewProject(
+    PhabricatorUser $actor,
+    PhabricatorProject $parent = null) {
+
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withClasses(array('PhabricatorProjectApplication'))
@@ -72,6 +77,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $join_policy = $app->getPolicy(
       ProjectDefaultJoinCapability::CAPABILITY);
 
+    // If this is the child of some other project, default the Space to the
+    // Space of the parent.
+    if ($parent) {
+      $space_phid = $parent->getSpacePHID();
+    } else {
+      $space_phid = $actor->getDefaultSpacePHID();
+    }
+
     $default_icon = PhabricatorProjectIconSet::getDefaultIconKey();
     $default_color = PhabricatorProjectIconSet::getDefaultColorKey();
 
@@ -82,6 +95,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setJoinPolicy($join_policy)
+      ->setSpacePHID($space_phid)
       ->setIsMembershipLocked(0)
       ->attachMemberPHIDs(array())
       ->attachSlugs(array())
@@ -694,6 +708,17 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     AphrontRequest $request) {
 
     return $timeline;
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    if ($this->isMilestone()) {
+      return $this->getParentProject()->getSpacePHID();
+    }
+    return $this->spacePHID;
   }
 
 

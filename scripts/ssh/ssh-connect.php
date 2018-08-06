@@ -27,7 +27,15 @@ $args->parsePartial(
       'param' => pht('port'),
       'help' => pht('Port number to connect to.'),
     ),
+    array(
+      'name' => 'options',
+      'short' => 'o',
+      'param' => pht('options'),
+      'repeat' => true,
+      'help' => pht('SSH options.'),
+    ),
   ));
+
 $unconsumed_argv = $args->getUnconsumedArgumentVector();
 
 if (function_exists('pcntl_signal')) {
@@ -111,6 +119,25 @@ if (!$port) {
 if ($port) {
   $pattern[] = '-p %d';
   $arguments[] = $port;
+}
+
+$options = $args->getArg('options');
+$allowed_ssh_options = array('SendEnv=GIT_PROTOCOL');
+
+if (!empty($options)) {
+  foreach ($options as $option) {
+    if (array_search($option, $allowed_ssh_options) !== false) {
+      $pattern[] = '-o %s';
+      $arguments[] = $option;
+    } else {
+      throw new Exception(
+        pht(
+          'Disallowed ssh option "%s" given with "-o". '.
+          'Allowed options are: %s.',
+          $option,
+          implode(', ', $allowed_ssh_options)));
+    }
+  }
 }
 
 $pattern[] = '--';

@@ -12,7 +12,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorProjectInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorPolicyCodexInterface {
+    PhabricatorPolicyCodexInterface,
+    PhabricatorSpacesInterface {
 
   protected $slug;
   protected $depth;
@@ -21,6 +22,7 @@ final class PhrictionDocument extends PhrictionDAO
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $spacePHID;
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
@@ -81,12 +83,16 @@ final class PhrictionDocument extends PhrictionDAO
     }
 
     if ($parent_doc) {
-      $document->setViewPolicy($parent_doc->getViewPolicy());
-      $document->setEditPolicy($parent_doc->getEditPolicy());
+      $document
+        ->setViewPolicy($parent_doc->getViewPolicy())
+        ->setEditPolicy($parent_doc->getEditPolicy())
+        ->setSpacePHID($parent_doc->getSpacePHID());
     } else {
       $default_view_policy = PhabricatorPolicies::getMostOpenPolicy();
-      $document->setViewPolicy($default_view_policy);
-      $document->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+      $document
+        ->setViewPolicy($default_view_policy)
+        ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+        ->setSpacePHID($actor->getDefaultSpacePHID());
     }
 
     return $document;
@@ -200,6 +206,15 @@ final class PhrictionDocument extends PhrictionDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
     return false;
   }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
+  }
+
 
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */

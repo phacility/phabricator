@@ -43,6 +43,8 @@ final class PhabricatorClusterMailersConfigType
             'type' => 'string',
             'priority' => 'optional int',
             'options' => 'optional wild',
+            'inbound' => 'optional bool',
+            'outbound' => 'optional bool',
           ));
       } catch (Exception $ex) {
         throw $this->newException(

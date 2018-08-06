@@ -118,11 +118,80 @@ final class PhabricatorMailConfigTestCase
     $this->assertTrue($saw_a1 && $saw_a2);
   }
 
-  private function newMailersWithConfig(array $config) {
+  public function testMailerConstraints() {
+    $config = array(
+      array(
+        'key' => 'X1',
+        'type' => 'test',
+      ),
+      array(
+        'key' => 'X1-in',
+        'type' => 'test',
+        'outbound' => false,
+      ),
+      array(
+        'key' => 'X1-out',
+        'type' => 'test',
+        'inbound' => false,
+      ),
+      array(
+        'key' => 'X1-void',
+        'type' => 'test',
+        'inbound' => false,
+        'outbound' => false,
+      ),
+    );
+
+    $mailers = $this->newMailersWithConfig(
+      $config,
+      array());
+    $this->assertEqual(4, count($mailers));
+
+    $mailers = $this->newMailersWithConfig(
+      $config,
+      array(
+        'inbound' => true,
+      ));
+    $this->assertEqual(2, count($mailers));
+
+    $mailers = $this->newMailersWithConfig(
+      $config,
+      array(
+        'outbound' => true,
+      ));
+    $this->assertEqual(2, count($mailers));
+
+    $mailers = $this->newMailersWithConfig(
+      $config,
+      array(
+        'inbound' => true,
+        'outbound' => true,
+      ));
+    $this->assertEqual(1, count($mailers));
+
+    $mailers = $this->newMailersWithConfig(
+      $config,
+      array(
+        'types' => array('test'),
+      ));
+    $this->assertEqual(4, count($mailers));
+
+    $mailers = $this->newMailersWithConfig(
+      $config,
+      array(
+        'types' => array('duck'),
+      ));
+    $this->assertEqual(0, count($mailers));
+  }
+
+  private function newMailersWithConfig(
+    array $config,
+    array $constraints = array()) {
+
     $env = PhabricatorEnv::beginScopedEnv();
     $env->overrideEnvConfig('cluster.mailers', $config);
 
-    $mailers = PhabricatorMetaMTAMail::newMailers();
+    $mailers = PhabricatorMetaMTAMail::newMailers($constraints);
 
     unset($env);
     return $mailers;

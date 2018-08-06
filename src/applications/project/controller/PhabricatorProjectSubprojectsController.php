@@ -106,8 +106,8 @@ final class PhabricatorProjectSubprojectsController
       ->addClass('project-view-people-home')
       ->setMainColumn(array(
           $info_view,
-          $milestone_list,
           $subproject_list,
+          $milestone_list,
       ));
 
     return $this->newPage()
@@ -132,27 +132,10 @@ final class PhabricatorProjectSubprojectsController
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $allows_milestones = $project->supportsMilestones();
     $allows_subprojects = $project->supportsSubprojects();
+    $allows_milestones = $project->supportsMilestones();
 
     $curtain = $this->newCurtainView();
-
-    if ($allows_milestones && $milestones) {
-      $milestone_text = pht('Create Next Milestone');
-    } else {
-      $milestone_text = pht('Create Milestone');
-    }
-
-    $can_milestone = ($can_create && $can_edit && $allows_milestones);
-    $milestone_href = "/project/edit/?milestone={$id}";
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName($milestone_text)
-        ->setIcon('fa-plus')
-        ->setHref($milestone_href)
-        ->setDisabled(!$can_milestone)
-        ->setWorkflow(!$can_milestone));
 
     $can_subproject = ($can_create && $can_edit && $allows_subprojects);
 
@@ -176,22 +159,22 @@ final class PhabricatorProjectSubprojectsController
         ->setDisabled($subproject_disabled)
         ->setWorkflow($subproject_workflow));
 
-
-    if (!$project->supportsMilestones()) {
-      $note = pht(
-        'This project is already a milestone, and milestones may not '.
-        'have their own milestones.');
+    if ($allows_milestones && $milestones) {
+      $milestone_text = pht('Create Next Milestone');
     } else {
-      if (!$milestones) {
-        $note = pht('Milestones can be created for this project.');
-      } else {
-        $note = pht('This project has milestones.');
-      }
+      $milestone_text = pht('Create Milestone');
     }
 
-    $curtain->newPanel()
-      ->setHeaderText(pht('Milestones'))
-      ->appendChild($note);
+    $can_milestone = ($can_create && $can_edit && $allows_milestones);
+    $milestone_href = "/project/edit/?milestone={$id}";
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName($milestone_text)
+        ->setIcon('fa-plus')
+        ->setHref($milestone_href)
+        ->setDisabled(!$can_milestone)
+        ->setWorkflow(!$can_milestone));
 
     if (!$project->supportsSubprojects()) {
       $note = pht(
@@ -207,6 +190,22 @@ final class PhabricatorProjectSubprojectsController
 
     $curtain->newPanel()
       ->setHeaderText(pht('Subprojects'))
+      ->appendChild($note);
+
+    if (!$project->supportsSubprojects()) {
+      $note = pht(
+        'This project is already a milestone, and milestones may not '.
+        'have their own milestones.');
+    } else {
+      if (!$milestones) {
+        $note = pht('Milestones can be created for this project.');
+      } else {
+        $note = pht('This project has milestones.');
+      }
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Milestones'))
       ->appendChild($note);
 
     return $curtain;

@@ -494,7 +494,10 @@ final class PhabricatorMetaMTAMail
       throw new Exception(pht('Trying to send an already-sent mail!'));
     }
 
-    $mailers = self::newMailers();
+    $mailers = self::newMailers(
+      array(
+        'outbound' => true,
+      ));
 
     $try_mailers = $this->getParam('mailers.try');
     if ($try_mailers) {
@@ -505,21 +508,15 @@ final class PhabricatorMetaMTAMail
     return $this->sendWithMailers($mailers);
   }
 
-  public static function newMailersWithTypes(array $types) {
-    $mailers = self::newMailers();
-    $types = array_fuse($types);
+  public static function newMailers(array $constraints) {
+    PhutilTypeSpec::checkMap(
+      $constraints,
+      array(
+        'types' => 'optional list<string>',
+        'inbound' => 'optional bool',
+        'outbound' => 'optional bool',
+      ));
 
-    foreach ($mailers as $key => $mailer) {
-      $mailer_type = $mailer->getAdapterType();
-      if (!isset($types[$mailer_type])) {
-        unset($mailers[$key]);
-      }
-    }
-
-    return array_values($mailers);
-  }
-
-  public static function newMailers() {
     $mailers = array();
 
     $config = PhabricatorEnv::getEnvConfig('cluster.mailers');
@@ -565,7 +562,42 @@ final class PhabricatorMetaMTAMail
         $options = idx($spec, 'options', array()) + $defaults;
         $mailer->setOptions($options);
 
+        $mailer->setSupportsInbound(idx($spec, 'inbound', true));
+        $mailer->setSupportsOutbound(idx($spec, 'outbound', true));
+
         $mailers[] = $mailer;
+      }
+    }
+
+    // Remove mailers with the wrong types.
+    if (isset($constraints['types'])) {
+      $types = $constraints['types'];
+      $types = array_fuse($types);
+      foreach ($mailers as $key => $mailer) {
+        $mailer_type = $mailer->getAdapterType();
+        if (!isset($types[$mailer_type])) {
+          unset($mailers[$key]);
+        }
+      }
+    }
+
+    // If we're only looking for inbound mailers, remove mailers with inbound
+    // support disabled.
+    if (!empty($constraints['inbound'])) {
+      foreach ($mailers as $key => $mailer) {
+        if (!$mailer->getSupportsInbound()) {
+          unset($mailers[$key]);
+        }
+      }
+    }
+
+    // If we're only looking for outbound mailers, remove mailers with outbound
+    // support disabled.
+    if (!empty($constraints['outbound'])) {
+      foreach ($mailers as $key => $mailer) {
+        if (!$mailer->getSupportsOutbound()) {
+          unset($mailers[$key]);
+        }
       }
     }
 
@@ -589,9 +621,24 @@ final class PhabricatorMetaMTAMail
 
   public function sendWithMailers(array $mailers) {
     if (!$mailers) {
+      $any_mailers = self::newMailers();
+
+      // NOTE: We can end up here with some custom list of "$mailers", like
+      // from a unit test. In that case, this message could be misleading. We
+      // can't really tell if the caller made up the list, so just assume they
+      // aren't tricking us.
+
+      if ($any_mailers) {
+        $void_message = pht(
+          'No configured mailers support sending outbound mail.');
+      } else {
+        $void_message = pht(
+          'No mailers are configured.');
+      }
+
       return $this
         ->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID)
-        ->setMessage(pht('No mailers are configured.'))
+        ->setMessage($void_message)
         ->save();
     }
 

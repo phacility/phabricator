@@ -12,6 +12,7 @@ final class PhabricatorRepositoryPushLogQuery
   private $pushEventPHIDs;
   private $epochMin;
   private $epochMax;
+  private $blockingHeraldRulePHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -54,6 +55,11 @@ final class PhabricatorRepositoryPushLogQuery
     return $this;
   }
 
+  public function withBlockingHeraldRulePHIDs(array $phids) {
+    $this->blockingHeraldRulePHIDs = $phids;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorRepositoryPushLog();
   }
@@ -89,71 +95,105 @@ final class PhabricatorRepositoryPushLogQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'log.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'log.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->repositoryPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'repositoryPHID IN (%Ls)',
+        'log.repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
     if ($this->pusherPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'pusherPHID in (%Ls)',
+        'log.pusherPHID in (%Ls)',
         $this->pusherPHIDs);
     }
 
     if ($this->pushEventPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'pushEventPHID in (%Ls)',
+        'log.pushEventPHID in (%Ls)',
         $this->pushEventPHIDs);
     }
 
     if ($this->refTypes !== null) {
       $where[] = qsprintf(
         $conn,
-        'refType IN (%Ls)',
+        'log.refType IN (%Ls)',
         $this->refTypes);
     }
 
     if ($this->newRefs !== null) {
       $where[] = qsprintf(
         $conn,
-        'refNew IN (%Ls)',
+        'log.refNew IN (%Ls)',
         $this->newRefs);
     }
 
     if ($this->epochMin !== null) {
       $where[] = qsprintf(
         $conn,
-        'epoch >= %d',
+        'log.epoch >= %d',
         $this->epochMin);
     }
 
     if ($this->epochMax !== null) {
       $where[] = qsprintf(
         $conn,
-        'epoch <= %d',
+        'log.epoch <= %d',
         $this->epochMax);
+    }
+
+    if ($this->blockingHeraldRulePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        '(event.rejectCode = %d AND event.rejectDetails IN (%Ls))',
+        PhabricatorRepositoryPushLog::REJECT_HERALD,
+        $this->blockingHeraldRulePHIDs);
     }
 
     return $where;
   }
 
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->shouldJoinPushEventTable()) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T event ON event.phid = log.pushEventPHID',
+        id(new PhabricatorRepositoryPushEvent())->getTableName());
+    }
+
+    return $joins;
+  }
+
+  private function shouldJoinPushEventTable() {
+    if ($this->blockingHeraldRulePHIDs !== null) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function getQueryApplicationClass() {
     return 'PhabricatorDiffusionApplication';
   }
+
+  protected function getPrimaryTableAlias() {
+    return 'log';
+  }
+
 
 }
