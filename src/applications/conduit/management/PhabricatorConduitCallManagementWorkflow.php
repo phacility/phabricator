@@ -21,6 +21,13 @@ final class PhabricatorConduitCallManagementWorkflow
               'File to read parameters from, or "-" to read from '.
               'stdin.'),
           ),
+          array(
+            'name' => 'as',
+            'param' => 'username',
+            'help' => pht(
+              'Execute the call as the given user. (If omitted, the call will '.
+              'be executed as an omnipotent user.)'),
+          ),
         ));
   }
 
@@ -39,6 +46,22 @@ final class PhabricatorConduitCallManagementWorkflow
         pht('Specify a file to read parameters from with "--input".'));
     }
 
+    $as = $args->getArg('as');
+    if (strlen($as)) {
+      $actor = id(new PhabricatorPeopleQuery())
+        ->setViewer($viewer)
+        ->withUsernames(array($as))
+        ->executeOne();
+      if (!$actor) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'No such user "%s" exists.',
+            $as));
+      }
+    } else {
+      $actor = $viewer;
+    }
+
     if ($input === '-') {
       fprintf(STDERR, tsprintf("%s\n", pht('Reading input from stdin...')));
       $input_json = file_get_contents('php://stdin');
@@ -49,7 +72,7 @@ final class PhabricatorConduitCallManagementWorkflow
     $params = phutil_json_decode($input_json);
 
     $result = id(new ConduitCall($method, $params))
-      ->setUser($viewer)
+      ->setUser($actor)
       ->execute();
 
     $output = array(
