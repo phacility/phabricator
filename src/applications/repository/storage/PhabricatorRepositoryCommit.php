@@ -206,7 +206,7 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->authorIdentity);
   }
 
-  public function getCommiterIdentity() {
+  public function getCommitterIdentity() {
     return $this->assertAttached($this->committerIdentity);
   }
 
