@@ -3,7 +3,7 @@
 final class PhabricatorAuthSSHKeyQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  const AUTHFILE_CACHEKEY = 'ssh.authfile';
+  const AUTHSTRUCT_CACHEKEY = 'ssh.authstruct';
 
   private $ids;
   private $phids;
@@ -13,7 +13,7 @@ final class PhabricatorAuthSSHKeyQuery
 
   public static function deleteSSHKeyCache() {
     $cache = PhabricatorCaches::getMutableCache();
-    $authfile_key = self::AUTHFILE_CACHEKEY;
+    $authfile_key = self::AUTHSTRUCT_CACHEKEY;
     $cache->deleteKey($authfile_key);
   }
 
