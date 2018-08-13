@@ -9,6 +9,14 @@ final class PhabricatorUserIconField
     return 'user:icon';
   }
 
+  public function getModernFieldKey() {
+    return 'icon';
+  }
+
+  public function getFieldKeyForConduit() {
+    return $this->getModernFieldKey();
+  }
+
   public function getFieldName() {
     return pht('Icon');
   }
@@ -50,12 +58,25 @@ final class PhabricatorUserIconField
     $this->value = $request->getStr($this->getFieldKey());
   }
 
+  public function setValueFromStorage($value) {
+    $this->value = $value;
+    return $this;
+  }
+
   public function renderEditControl(array $handles) {
     return id(new PHUIFormIconSetControl())
       ->setName($this->getFieldKey())
       ->setValue($this->value)
       ->setLabel($this->getFieldName())
       ->setIconSet(new PhabricatorPeopleIconSet());
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
   }
 
 }

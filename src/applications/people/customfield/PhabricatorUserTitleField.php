@@ -9,6 +9,14 @@ final class PhabricatorUserTitleField
     return 'user:title';
   }
 
+  public function getModernFieldKey() {
+    return 'title';
+  }
+
+  public function getFieldKeyForConduit() {
+    return $this->getModernFieldKey();
+  }
+
   public function getFieldName() {
     return pht('Title');
   }
@@ -50,11 +58,24 @@ final class PhabricatorUserTitleField
     $this->value = $request->getStr($this->getFieldKey());
   }
 
+  public function setValueFromStorage($value) {
+    $this->value = $value;
+    return $this;
+  }
+
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setValue($this->value)
       ->setLabel($this->getFieldName());
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
   }
 
 }
