@@ -276,6 +276,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ->setDiff($diff)
       ->setTitle(pht('Standalone View'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setIsStandalone(true)
       ->setParser($parser);
 
     if ($revision_id) {
