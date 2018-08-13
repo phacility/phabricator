@@ -64,7 +64,18 @@ final class PhabricatorUserEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    return array();
+    return array(
+      id(new PhabricatorBoolEditField())
+        ->setKey('disabled')
+        ->setOptions(pht('Active'), pht('Disabled'))
+        ->setLabel(pht('Disabled'))
+        ->setDescription(pht('Disable the user.'))
+        ->setTransactionType(PhabricatorUserDisableTransaction::TRANSACTIONTYPE)
+        ->setIsConduitOnly(true)
+        ->setConduitDescription(pht('Disable or enable the user.'))
+        ->setConduitTypeDescription(pht('True to disable the user.'))
+        ->setValue($object->getIsDisabled()),
+    );
   }
 
 }
