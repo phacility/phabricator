@@ -18,11 +18,41 @@ final class DrydockRepositoryOperationSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['repositoryPHIDs']) {
+      $query->withRepositoryPHIDs($map['repositoryPHIDs']);
+    }
+
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    if ($map['states']) {
+      $query->withOperationStates($map['states']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Repositories'))
+        ->setKey('repositoryPHIDs')
+        ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
+        ->setDatasource(new DiffusionRepositoryFunctionDatasource()),
+
+      // NOTE: Repository operations aren't necessarily created by a real
+      // user, but for now they normally are. Just use a user typeahead until
+      // more use cases arise.
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Authors'))
+        ->setKey('authorPHIDs')
+        ->setAliases(array('author', 'authors', 'authorPHID')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('States'))
+        ->setKey('states')
+        ->setAliases(array('state'))
+        ->setOptions(DrydockRepositoryOperation::getOperationStateNameMap()),
     );
   }
 
@@ -71,6 +101,10 @@ final class DrydockRepositoryOperationSearchEngine
       $name = DrydockRepositoryOperation::getOperationStateName($state);
 
       $item->setStatusIcon($icon, $name);
+
+
+      $created = phabricator_datetime($operation->getDateCreated(), $viewer);
+      $item->addIcon(null, $created);
 
       $item->addByline(
         array(
