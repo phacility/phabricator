@@ -127,6 +127,9 @@ final class AlmanacInterfaceEditEngine
   }
 
   protected function getObjectCreateCancelURI($object) {
+    if ($this->getDevice()) {
+      return $this->getDevice()->getURI();
+    }
     return '/almanac/interface/';
   }
 
