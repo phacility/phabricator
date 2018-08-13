@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorUserTransaction
-  extends PhabricatorApplicationTransaction {
+  extends PhabricatorModularTransaction {
 
   public function getApplicationName() {
     return 'user';
@@ -13,6 +13,10 @@ final class PhabricatorUserTransaction
 
   public function getApplicationTransactionCommentObject() {
     return null;
+  }
+
+  public function getBaseTransactionClass() {
+    return 'PhabricatorUserTransactionType';
   }
 
 }
