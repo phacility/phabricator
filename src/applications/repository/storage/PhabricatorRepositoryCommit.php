@@ -446,7 +446,7 @@ final class PhabricatorRepositoryCommit
    * the migration to using identities, update this method to remove the
    * fallback. See T12164 for details.
    */
-  public function renderAnyCommitter(PhabricatorUser $viewer, array $handles) {
+  public function renderAnyCommitter(PhabricatorUser $viewer, $handles) {
     $committer = $this->renderCommitter($viewer, $handles);
     if ($committer) {
       return $committer;
@@ -455,7 +455,7 @@ final class PhabricatorRepositoryCommit
     return $this->renderAuthor($viewer, $handles);
   }
 
-  public function renderCommitter(PhabricatorUser $viewer, array $handles) {
+  public function renderCommitter(PhabricatorUser $viewer, $handles) {
     $committer_phid = $this->getCommitterDisplayPHID();
     if ($committer_phid) {
       return $handles[$committer_phid]->renderLink();
@@ -470,7 +470,7 @@ final class PhabricatorRepositoryCommit
     return null;
   }
 
-  public function renderAuthor(PhabricatorUser $viewer, array $handles) {
+  public function renderAuthor(PhabricatorUser $viewer, $handles) {
     $author_phid = $this->getAuthorDisplayPHID();
     if ($author_phid) {
       return $handles[$author_phid]->renderLink();

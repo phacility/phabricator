@@ -58,7 +58,7 @@ final class SubscriptionListDialogBuilder extends Phobject {
       ->addCancelButton($object_handle->getURI(), pht('Close'));
   }
 
-  private function buildBody(PhabricatorUser $viewer, array $handles) {
+  private function buildBody(PhabricatorUser $viewer, $handles) {
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
