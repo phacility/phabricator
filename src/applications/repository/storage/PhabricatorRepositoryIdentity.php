@@ -78,6 +78,14 @@ final class PhabricatorRepositoryIdentity
     return ($this->currentEffectiveUserPHID != null);
   }
 
+  public function getIdentityDisplayPHID() {
+    if ($this->hasEffectiveUser()) {
+      return $this->getCurrentEffectiveUserPHID();
+    } else {
+      return $this->getPHID();
+    }
+  }
+
   public function save() {
     if ($this->manuallySetUserPHID) {
       $this->currentEffectiveUserPHID = $this->manuallySetUserPHID;
