@@ -516,58 +516,6 @@ final class PhrictionTransactionEditor
     }
     return $error;
   }
-  protected function requireCapabilities(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    /*
-     * New objects have a special case. If a user can't see
-     *   x/y
-     * then definitely don't let them make some
-     *   x/y/z
-     * We need to load the direct parent to handle this case.
-     */
-    if ($this->getIsNewObject()) {
-      $actor = $this->requireActor();
-      $parent_doc = null;
-      $ancestral_slugs = PhabricatorSlug::getAncestry($object->getSlug());
-      // No ancestral slugs is "/"; the first person gets to play with "/".
-      if ($ancestral_slugs) {
-        $parent = end($ancestral_slugs);
-        $parent_doc = id(new PhrictionDocumentQuery())
-          ->setViewer($actor)
-          ->withSlugs(array($parent))
-          ->executeOne();
-        // If the $actor can't see the $parent_doc then they can't create
-        // the child $object; throw a policy exception.
-        if (!$parent_doc) {
-          id(new PhabricatorPolicyFilter())
-            ->setViewer($actor)
-            ->raisePolicyExceptions(true)
-            ->rejectObject(
-              $object,
-              $object->getEditPolicy(),
-              PhabricatorPolicyCapability::CAN_EDIT);
-        }
-
-        // If the $actor can't edit the $parent_doc then they can't create
-        // the child $object; throw a policy exception.
-        if (!PhabricatorPolicyFilter::hasCapability(
-          $actor,
-          $parent_doc,
-          PhabricatorPolicyCapability::CAN_EDIT)) {
-          id(new PhabricatorPolicyFilter())
-            ->setViewer($actor)
-            ->raisePolicyExceptions(true)
-            ->rejectObject(
-              $object,
-              $object->getEditPolicy(),
-              PhabricatorPolicyCapability::CAN_EDIT);
-        }
-      }
-    }
-    return parent::requireCapabilities($object, $xaction);
-  }
 
   protected function supportsSearch() {
     return true;
