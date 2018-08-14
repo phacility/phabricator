@@ -75,10 +75,21 @@ final class PhabricatorPeopleProfileManageController
   private function buildCurtain(PhabricatorUser $user) {
     $viewer = $this->getViewer();
 
+    $is_self = ($user->getPHID() === $viewer->getPHID());
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $user,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $is_admin = $viewer->getIsAdmin();
+    $can_admin = ($is_admin && !$is_self);
+
+    $has_disable = $this->hasApplicationCapability(
+      PeopleDisableUsersCapability::CAPABILITY);
+    $can_disable = ($has_disable && !$is_self);
+
+    $can_welcome = ($is_admin && $user->canEstablishWebSessions());
 
     $curtain = $this->newCurtainView($user);
 
@@ -114,10 +125,6 @@ final class PhabricatorPeopleProfileManageController
       $empower_name = pht('Make Administrator');
     }
 
-    $is_admin = $viewer->getIsAdmin();
-    $is_self = ($user->getPHID() === $viewer->getPHID());
-    $can_admin = ($is_admin && !$is_self);
-
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon($empower_icon)
@@ -146,7 +153,7 @@ final class PhabricatorPeopleProfileManageController
       id(new PhabricatorActionView())
         ->setIcon($disable_icon)
         ->setName($disable_name)
-        ->setDisabled(!$can_admin)
+        ->setDisabled(!$can_disable)
         ->setWorkflow(true)
         ->setHref($this->getApplicationURI('disable/'.$user->getID().'/')));
 
@@ -157,8 +164,6 @@ final class PhabricatorPeopleProfileManageController
         ->setDisabled(!$can_admin)
         ->setWorkflow(true)
         ->setHref($this->getApplicationURI('delete/'.$user->getID().'/')));
-
-    $can_welcome = ($is_admin && $user->canEstablishWebSessions());
 
     $curtain->addAction(
       id(new PhabricatorActionView())
