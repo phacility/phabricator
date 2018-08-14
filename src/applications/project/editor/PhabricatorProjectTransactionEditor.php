@@ -120,12 +120,6 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectLockTransaction::TRANSACTIONTYPE:
-        PhabricatorPolicyFilter::requireCapability(
-          $this->requireActor(),
-          newv($this->getEditorApplicationClass(), array()),
-          ProjectCanLockProjectsCapability::CAPABILITY);
-        return;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($xaction->getMetadataValue('edge:type')) {
           case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
