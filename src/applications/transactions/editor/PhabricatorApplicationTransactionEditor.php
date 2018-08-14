@@ -976,6 +976,27 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->adjustTransactionValues($object, $xaction);
       }
 
+      // Now that we've merged and combined transactions, check for required
+      // capabilities. Note that we're doing this before filtering
+      // transactions: if you try to apply an edit which you do not have
+      // permission to apply, we want to give you a permissions error even
+      // if the edit would have no effect.
+      $this->applyCapabilityChecks($object, $xactions);
+
+      // See T13186. Fatal hard if this object has an older
+      // "requireCapabilities()" method. The code may rely on this method being
+      // called to apply policy checks, so err on the side of safety and fatal.
+      // TODO: Remove this check after some time has passed.
+      if (method_exists($this, 'requireCapabilities')) {
+        throw new Exception(
+          pht(
+            'Editor (of class "%s") implements obsolete policy method '.
+            'requireCapabilities(). The implementation for this Editor '.
+            'MUST be updated. See <%s> for discussion.',
+            get_class($this),
+            'https://secure.phabricator.com/T13186'));
+      }
+
       $xactions = $this->filterTransactions($object, $xactions);
 
       // TODO: Once everything is on EditEngine, just use getIsNewObject() to
@@ -992,12 +1013,6 @@ abstract class PhabricatorApplicationTransactionEditor
         foreach ($xactions as $xaction) {
           $xaction->setIsCreateTransaction(true);
         }
-      }
-
-      // Now that we've merged, filtered, and combined transactions, check for
-      // required capabilities.
-      foreach ($xactions as $xaction) {
-        $this->requireCapabilities($object, $xaction);
       }
 
       $xactions = $this->sortTransactions($xactions);
@@ -1459,33 +1474,150 @@ abstract class PhabricatorApplicationTransactionEditor
     }
   }
 
-  protected function requireCapabilities(
+  private function applyCapabilityChecks(
     PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
+    array $xactions) {
+    assert_instances_of($xactions, 'PhabricatorApplicationTransaction');
+
+    $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
 
     if ($this->getIsNewObject()) {
-      return;
+      // If we're creating a new object, we don't need any special capabilities
+      // on the object. The actor has already made it through creation checks,
+      // and objects which haven't been created yet often can not be
+      // meaningfully tested for capabilities anyway.
+      $required_capabilities = array();
+    } else {
+      if (!$xactions && !$this->xactions) {
+        // If we aren't doing anything, require CAN_EDIT to improve consistency.
+        $required_capabilities = array($can_edit);
+      } else {
+        $required_capabilities = array();
+
+        foreach ($xactions as $xaction) {
+          $type = $xaction->getTransactionType();
+
+          $xtype = $this->getModularTransactionType($type);
+          if (!$xtype) {
+            $capabilities = $this->getLegacyRequiredCapabilities($xaction);
+          } else {
+            $capabilities = $xtype->getRequiredCapabilities($object, $xaction);
+          }
+
+          // For convenience, we allow flexibility in the return types because
+          // it's very unusual that a transaction actually requires multiple
+          // capability checks.
+          if ($capabilities === null) {
+            $capabilities = array();
+          } else {
+            $capabilities = (array)$capabilities;
+          }
+
+          foreach ($capabilities as $capability) {
+            $required_capabilities[$capability] = $capability;
+          }
+        }
+      }
     }
 
-    $actor = $this->requireActor();
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $object,
-          PhabricatorPolicyCapability::CAN_VIEW);
-        break;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case PhabricatorTransactions::TYPE_SPACE:
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        break;
+    $required_capabilities = array_fuse($required_capabilities);
+    $actor = $this->getActor();
+
+    if ($required_capabilities) {
+      id(new PhabricatorPolicyFilter())
+        ->setViewer($actor)
+        ->requireCapabilities($required_capabilities)
+        ->raisePolicyExceptions(true)
+        ->apply(array($object));
     }
   }
+
+  private function getLegacyRequiredCapabilities(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $type = $xaction->getTransactionType();
+    switch ($type) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        // TODO: Comments technically require CAN_INTERACT, but this is
+        // currently somewhat special and handled through EditEngine. For now,
+        // don't enforce it here.
+        return null;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        // TODO: Removing subscribers other than yourself should probably
+        // require CAN_EDIT permission. You can do this via the API but
+        // generally can not via the web interface.
+        return null;
+      case PhabricatorTransactions::TYPE_TOKEN:
+        // TODO: This technically requires CAN_INTERACT, like comments.
+        return null;
+      case PhabricatorTransactions::TYPE_HISTORY:
+        // This is a special magic transaction which sends you history via
+        // email and is only partially supported in the upstream. You don't
+        // need any capabilities to apply it.
+        return null;
+      case PhabricatorTransactions::TYPE_EDGE:
+        return $this->getLegacyRequiredEdgeCapabilities($xaction);
+      default:
+        // For other older (non-modular) transactions, always require exactly
+        // CAN_EDIT. Transactions which do not need CAN_EDIT or need additional
+        // capabilities must move to ModularTransactions.
+        return PhabricatorPolicyCapability::CAN_EDIT;
+    }
+  }
+
+  private function getLegacyRequiredEdgeCapabilities(
+    PhabricatorApplicationTransaction $xaction) {
+
+    // You don't need to have edit permission on an object to mention it or
+    // otherwise add a relationship pointing toward it.
+    if ($this->getIsInverseEdgeEditor()) {
+      return null;
+    }
+
+    $edge_type = $xaction->getMetadataValue('edge:type');
+    switch ($edge_type) {
+      case PhabricatorMutedByEdgeType::EDGECONST:
+        // At time of writing, you can only write this edge for yourself, so
+        // you don't need permissions. If you can eventually mute an object
+        // for other users, this would need to be revisited.
+        return null;
+      case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
+        return null;
+      case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+
+        $add = array_keys(array_diff_key($new, $old));
+        $rem = array_keys(array_diff_key($old, $new));
+
+        $actor_phid = $this->requireActor()->getPHID();
+
+        $is_join = (($add === array($actor_phid)) && !$rem);
+        $is_leave = (($rem === array($actor_phid)) && !$add);
+
+        if ($is_join) {
+          // You need CAN_JOIN to join a project.
+          return PhabricatorPolicyCapability::CAN_JOIN;
+        }
+
+        if ($is_leave) {
+          $object = $this->object;
+          // You usually don't need any capabilities to leave a project...
+          if ($object->getIsMembershipLocked()) {
+            // ...you must be able to edit to leave locked projects, though.
+            return PhabricatorPolicyCapability::CAN_EDIT;
+          } else {
+            return null;
+          }
+        }
+
+        // You need CAN_EDIT to change members other than yourself.
+        return PhabricatorPolicyCapability::CAN_EDIT;
+      default:
+        return PhabricatorPolicyCapability::CAN_EDIT;
+    }
+  }
+
 
   private function buildSubscribeTransaction(
     PhabricatorLiskDAO $object,
