@@ -39,6 +39,10 @@ $data = array();
 $futures = array();
 
 foreach (explode("\n", trim($input)) as $file) {
+  if (!strlen($file)) {
+    continue;
+  }
+
   $file = Filesystem::readablePath($file);
   $futures[$file] = ctags_get_parser_future($file);
 }

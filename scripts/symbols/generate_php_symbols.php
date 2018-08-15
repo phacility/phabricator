@@ -27,6 +27,10 @@ $data = array();
 $futures = array();
 
 foreach (explode("\n", trim($input)) as $file) {
+  if (!strlen($file)) {
+    continue;
+  }
+
   $file = Filesystem::readablePath($file);
   $data[$file] = Filesystem::readFile($file);
   $futures[$file] = PhutilXHPASTBinary::getParserFuture($data[$file]);
