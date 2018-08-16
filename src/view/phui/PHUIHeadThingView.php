@@ -55,7 +55,7 @@ final class PHUIHeadThingView extends AphrontTagView {
     $image = phutil_tag(
       'a',
       array(
-        'class' => 'phui-head-thing-image',
+        'class' => 'phui-head-thing-image visual-only',
         'style' => 'background-image: url('.$this->image.');',
         'href' => $this->imageHref,
       ));

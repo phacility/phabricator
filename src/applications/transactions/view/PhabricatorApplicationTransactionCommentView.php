@@ -230,7 +230,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       'div',
       array(
         'style' => 'background-image: url('.$image_uri.')',
-        'class' => 'phui-comment-image',
+        'class' => 'phui-comment-image visual-only',
       ));
     $wedge = phutil_tag(
       'div',

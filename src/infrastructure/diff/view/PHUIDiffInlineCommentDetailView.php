@@ -233,7 +233,8 @@ final class PHUIDiffInlineCommentDetailView
         ->setIcon('fa-reply')
         ->setTooltip(pht('Reply'))
         ->addSigil('differential-inline-reply')
-        ->setMustCapture(true);
+        ->setMustCapture(true)
+        ->setAuralLabel(pht('Reply'));
     }
 
     if ($this->editable && !$this->preview) {
@@ -242,14 +243,16 @@ final class PHUIDiffInlineCommentDetailView
         ->setIcon('fa-pencil')
         ->setTooltip(pht('Edit'))
         ->addSigil('differential-inline-edit')
-        ->setMustCapture(true);
+        ->setMustCapture(true)
+        ->setAuralLabel(pht('Edit'));
 
       $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setIcon('fa-trash-o')
         ->setTooltip(pht('Delete'))
         ->addSigil('differential-inline-delete')
-        ->setMustCapture(true);
+        ->setMustCapture(true)
+        ->setAuralLabel(pht('Delete'));
 
     } else if ($this->preview) {
       $links[] = javelin_tag(
@@ -268,7 +271,8 @@ final class PHUIDiffInlineCommentDetailView
         ->setTooltip(pht('Delete'))
         ->setIcon('fa-trash-o')
         ->addSigil('differential-inline-delete')
-        ->setMustCapture(true);
+        ->setMustCapture(true)
+        ->setAuralLabel(pht('Delete'));
     }
 
     if (!$this->preview && $this->canHide()) {
@@ -277,7 +281,8 @@ final class PHUIDiffInlineCommentDetailView
         ->setTooltip(pht('Collapse'))
         ->setIcon('fa-times')
         ->addSigil('hide-inline')
-        ->setMustCapture(true);
+        ->setMustCapture(true)
+        ->setAuralLabel(pht('Collapse'));
     }
 
     $done_button = null;

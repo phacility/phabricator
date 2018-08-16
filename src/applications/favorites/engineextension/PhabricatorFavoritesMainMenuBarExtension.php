@@ -30,7 +30,8 @@ final class PhabricatorFavoritesMainMenuBarExtension
       ->addClass('phabricator-core-user-menu')
       ->setNoCSS(true)
       ->setDropdown(true)
-      ->setDropdownMenu($dropdown);
+      ->setDropdownMenu($dropdown)
+      ->setAuralLabel(pht('Favorites Menu'));
 
     return array(
       $favorites_menu,

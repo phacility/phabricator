@@ -31,6 +31,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $noCSS;
   private $hasCaret;
   private $buttonType = self::BUTTONTYPE_DEFAULT;
+  private $auralLabel;
 
   public function setName($name) {
     $this->name = $name;
@@ -121,6 +122,15 @@ final class PHUIButtonView extends AphrontTagView {
 
   public function getButtonType() {
     return $this->buttonType;
+  }
+
+  public function setAuralLabel($aural_label) {
+    $this->auralLabel = $aural_label;
+    return $this;
+  }
+
+  public function getAuralLabel() {
+    return $this->auralLabel;
   }
 
   public function setIcon($icon, $first = true) {
@@ -265,10 +275,21 @@ final class PHUIButtonView extends AphrontTagView {
       $caret = phutil_tag('span', array('class' => 'caret'), '');
     }
 
+    $aural = null;
+    if ($this->auralLabel !== null) {
+      $aural = phutil_tag(
+        'span',
+        array(
+          'class' => 'aural-only',
+        ),
+        $this->auralLabel);
+    }
+
+
     if ($this->iconFirst == true) {
-      return array($icon, $text, $caret);
+      return array($aural, $icon, $text, $caret);
     } else {
-      return array($text, $icon, $caret);
+      return array($aural, $text, $icon, $caret);
     }
   }
 }
