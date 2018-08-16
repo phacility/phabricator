@@ -84,8 +84,6 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         $issue->addPhabricatorConfig($key);
       }
     }
-
-    $this->executeManiphestFieldChecks();
   }
 
   /**
