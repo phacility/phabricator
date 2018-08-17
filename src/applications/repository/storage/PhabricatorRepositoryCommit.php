@@ -464,7 +464,7 @@ final class PhabricatorRepositoryCommit
     $data = $this->getCommitData();
     $committer_name = $data->getCommitDetail('committer');
     if (strlen($committer_name)) {
-      return $committer_name;
+      return DiffusionView::renderName($committer_name);
     }
 
     return null;
@@ -479,7 +479,7 @@ final class PhabricatorRepositoryCommit
     $data = $this->getCommitData();
     $author_name = $data->getAuthorName();
     if (strlen($author_name)) {
-      return $author_name;
+      return DiffusionView::renderName($author_name);
     }
 
     return null;
