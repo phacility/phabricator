@@ -13,6 +13,7 @@ JX.install('PHUIXButtonView', {
   members: {
     _node: null,
     _textNode: null,
+    _auralNode: null,
 
     _iconView: null,
     _color: null,
@@ -69,6 +70,12 @@ JX.install('PHUIXButtonView', {
       return this;
     },
 
+    setAuralLabel: function(label) {
+      JX.DOM.setContent(this._getAuralNode(), label);
+      this._redraw();
+      return this;
+    },
+
     getNode: function() {
       if (!this._node) {
         var attrs = {
@@ -95,13 +102,31 @@ JX.install('PHUIXButtonView', {
       return this._textNode;
     },
 
+    _getAuralNode: function() {
+      if (!this._auralNode) {
+        var attrs = {
+          className: 'aural-only'
+        };
+
+        this._auralNode = JX.$N('span', attrs);
+      }
+
+      return this._auralNode;
+    },
+
     _redraw: function() {
       var node = this.getNode();
 
+      var aural = this._auralNode;
       var icon = this._iconView;
       var text = this._textNode;
 
       var content = [];
+
+      if (aural) {
+        content.push(aural);
+      }
+
       if (icon) {
         content.push(icon.getNode());
       }

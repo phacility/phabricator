@@ -309,6 +309,7 @@ final class DifferentialChangesetListView extends AphrontView {
         'Show All Inlines' => pht('Show All Inlines'),
 
         'List Inline Comments' => pht('List Inline Comments'),
+        'Display Options' => pht('Display Options'),
 
         'Hide or show all inline comments.' =>
           pht('Hide or show all inline comments.'),

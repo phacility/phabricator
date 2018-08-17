@@ -1662,9 +1662,12 @@ JX.install('DiffChangesetList', {
 
     _getMenuButton: function() {
       if (!this._menuButton) {
+        var pht = this.getTranslations();
+
         var button = new JX.PHUIXButtonView()
           .setIcon('fa-bars')
-          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE)
+          .setAuralLabel(pht('Display Options'));
 
         var dropdown = new JX.PHUIXDropdownMenu(button.getNode());
         this._menuItems = {};
@@ -1702,8 +1705,6 @@ JX.install('DiffChangesetList', {
         }
 
         dropdown.listen('open', JX.bind(this, this._ondropdown));
-
-        var pht = this.getTranslations();
 
         if (this.getInlineListURI()) {
           list.addItem(
