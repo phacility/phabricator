@@ -163,9 +163,12 @@ JX.behavior('comment-actions', function(config) {
 
     option.disabled = true;
 
+    var aural = JX.$N('span', {className: 'aural-only'}, action.auralLabel);
+
     var icon = new JX.PHUIXIconView()
       .setIcon('fa-times-circle');
-    var remove = JX.$N('a', {href: '#'}, icon.getNode());
+
+    var remove = JX.$N('a', {href: '#'}, [aural, icon.getNode()]);
 
     var control = new JX.PHUIXFormControl()
       .setLabel(action.label)

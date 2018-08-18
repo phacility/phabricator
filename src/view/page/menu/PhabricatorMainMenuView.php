@@ -232,7 +232,8 @@ final class PhabricatorMainMenuView extends AphrontView {
       ->addClass('phabricator-core-user-menu')
       ->addClass('phabricator-core-user-mobile-menu')
       ->setNoCSS(true)
-      ->setDropdownMenu($dropdown);
+      ->setDropdownMenu($dropdown)
+      ->setAuralLabel(pht('Page Menu'));
   }
 
   private function renderApplicationMenu() {

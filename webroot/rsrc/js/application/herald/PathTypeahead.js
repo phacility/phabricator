@@ -208,8 +208,6 @@ JX.install('PathTypeahead', {
 
       this._validationInflight = validation_request;
       JX.DOM.setContent(error_display, JX.$H(this._icons.test));
-
-      validation_request.setTimeout(750);
       validation_request.send();
     }
   }

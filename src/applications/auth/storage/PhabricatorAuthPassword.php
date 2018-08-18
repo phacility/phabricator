@@ -178,6 +178,7 @@ final class PhabricatorAuthPassword
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -195,7 +196,7 @@ final class PhabricatorAuthPassword
 
   public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
     return array(
-      array($this->getObject(), PhabricatorPolicyCapability::CAN_VIEW),
+      array($this->getObject(), $capability),
     );
   }
 

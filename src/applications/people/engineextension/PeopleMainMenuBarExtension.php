@@ -43,7 +43,8 @@ final class PeopleMainMenuBarExtension
       ->setIcon($profile_image)
       ->addClass('phabricator-core-user-menu')
       ->setHasCaret(true)
-      ->setNoCSS(true);
+      ->setNoCSS(true)
+      ->setAuralLabel(pht('Account Menu'));
 
     return array(
       $user_menu,

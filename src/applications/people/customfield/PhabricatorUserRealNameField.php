@@ -9,6 +9,14 @@ final class PhabricatorUserRealNameField
     return 'user:realname';
   }
 
+  public function getModernFieldKey() {
+    return 'realName';
+  }
+
+  public function getFieldKeyForConduit() {
+    return $this->getModernFieldKey();
+  }
+
   public function getFieldName() {
     return pht('Real Name');
   }
@@ -53,6 +61,11 @@ final class PhabricatorUserRealNameField
     $this->value = $request->getStr($this->getFieldKey());
   }
 
+  public function setValueFromStorage($value) {
+    $this->value = $value;
+    return $this;
+  }
+
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
@@ -63,6 +76,14 @@ final class PhabricatorUserRealNameField
 
   private function isEditable() {
     return PhabricatorEnv::getEnvConfig('account.editable');
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
   }
 
 }

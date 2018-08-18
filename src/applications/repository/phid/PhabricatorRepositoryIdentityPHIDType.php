@@ -39,6 +39,7 @@ final class PhabricatorRepositoryIdentityPHIDType
       $handle->setObjectName(pht('Identity %d', $id));
       $handle->setName($name);
       $handle->setURI($identity->getURI());
+      $handle->setIcon('fa-user');
     }
   }
 

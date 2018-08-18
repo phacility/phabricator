@@ -1362,7 +1362,7 @@ final class PhabricatorUser
 
 
   public function getApplicationTransactionEditor() {
-    return new PhabricatorUserProfileEditor();
+    return new PhabricatorUserTransactionEditor();
   }
 
   public function getApplicationTransactionObject() {

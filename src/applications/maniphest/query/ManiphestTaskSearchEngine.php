@@ -369,11 +369,7 @@ final class ManiphestTaskSearchEngine
       $can_edit_priority = false;
       $can_bulk_edit = false;
     } else {
-      $can_edit_priority = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $this->getApplication(),
-        ManiphestEditPriorityCapability::CAPABILITY);
-
+      $can_edit_priority = true;
       $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $this->getApplication(),

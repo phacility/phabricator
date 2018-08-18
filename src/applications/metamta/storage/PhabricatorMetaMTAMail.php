@@ -621,7 +621,7 @@ final class PhabricatorMetaMTAMail
 
   public function sendWithMailers(array $mailers) {
     if (!$mailers) {
-      $any_mailers = self::newMailers();
+      $any_mailers = self::newMailers(array());
 
       // NOTE: We can end up here with some custom list of "$mailers", like
       // from a unit test. In that case, this message could be misleading. We

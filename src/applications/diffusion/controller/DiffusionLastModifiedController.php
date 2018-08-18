@@ -35,6 +35,7 @@ final class DiffusionLastModifiedController extends DiffusionController {
         ->withRepository($drequest->getRepository())
         ->withIdentifiers(array_values($modified_map))
         ->needCommitData(true)
+        ->needIdentities(true)
         ->execute();
       $commit_map = mpull($commit_map, null, 'getCommitIdentifier');
     } else {
@@ -54,9 +55,8 @@ final class DiffusionLastModifiedController extends DiffusionController {
 
     $phids = array();
     foreach ($commits as $commit) {
-      $data = $commit->getCommitData();
-      $phids[] = $data->getCommitDetail('authorPHID');
-      $phids[] = $data->getCommitDetail('committerPHID');
+      $phids[] = $commit->getCommitterDisplayPHID();
+      $phids[] = $commit->getAuthorDisplayPHID();
     }
     $phids = array_filter($phids);
     $handles = $this->loadViewerHandles($phids);
@@ -110,37 +110,20 @@ final class DiffusionLastModifiedController extends DiffusionController {
       $date = '';
     }
 
-    $data = $commit->getCommitData();
-    if ($data) {
-      $author_phid = $data->getCommitDetail('authorPHID');
-      if ($author_phid && isset($handles[$author_phid])) {
-        $author = $handles[$author_phid]->renderLink();
-      } else {
-        $author = DiffusionView::renderName($data->getAuthorName());
-      }
+    $author = $commit->renderAuthor($viewer, $handles);
+    $committer = $commit->renderCommitter($viewer, $handles);
 
-      $committer = $data->getCommitDetail('committer');
-      if ($committer) {
-        $committer_phid = $data->getCommitDetail('committerPHID');
-        if ($committer_phid && isset($handles[$committer_phid])) {
-          $committer = $handles[$committer_phid]->renderLink();
-        } else {
-          $committer = DiffusionView::renderName($committer);
-        }
-        if ($author != $committer) {
-          $author = hsprintf('%s/%s', $author, $committer);
-        }
-      }
-
-      $details = DiffusionView::linkDetail(
-        $drequest->getRepository(),
-        $commit->getCommitIdentifier(),
-        $data->getSummary());
-      $details = AphrontTableView::renderSingleDisplayLine($details);
-    } else {
-      $author = '';
-      $details = '';
+    if ($author != $committer) {
+      $author = hsprintf('%s/%s', $author, $committer);
     }
+
+    $data = $commit->getCommitData();
+    $details = DiffusionView::linkDetail(
+      $drequest->getRepository(),
+      $commit->getCommitIdentifier(),
+      $data->getSummary());
+    $details = AphrontTableView::renderSingleDisplayLine($details);
+
 
     $return = array(
       'commit'    => $modified,

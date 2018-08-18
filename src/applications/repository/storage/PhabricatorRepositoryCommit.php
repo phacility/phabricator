@@ -439,6 +439,77 @@ final class PhabricatorRepositoryCommit
     return $repository->formatCommitName($identifier, $local = true);
   }
 
+  /**
+   * Make a strong effort to find a way to render this commit's committer.
+   * This currently attempts to use @{PhabricatorRepositoryIdentity}, and
+   * falls back to examining the commit detail information. After we force
+   * the migration to using identities, update this method to remove the
+   * fallback. See T12164 for details.
+   */
+  public function renderAnyCommitter(PhabricatorUser $viewer, $handles) {
+    $committer = $this->renderCommitter($viewer, $handles);
+    if ($committer) {
+      return $committer;
+    }
+
+    return $this->renderAuthor($viewer, $handles);
+  }
+
+  public function renderCommitter(PhabricatorUser $viewer, $handles) {
+    $committer_phid = $this->getCommitterDisplayPHID();
+    if ($committer_phid) {
+      return $handles[$committer_phid]->renderLink();
+    }
+
+    $data = $this->getCommitData();
+    $committer_name = $data->getCommitDetail('committer');
+    if (strlen($committer_name)) {
+      return DiffusionView::renderName($committer_name);
+    }
+
+    return null;
+  }
+
+  public function renderAuthor(PhabricatorUser $viewer, $handles) {
+    $author_phid = $this->getAuthorDisplayPHID();
+    if ($author_phid) {
+      return $handles[$author_phid]->renderLink();
+    }
+
+    $data = $this->getCommitData();
+    $author_name = $data->getAuthorName();
+    if (strlen($author_name)) {
+      return DiffusionView::renderName($author_name);
+    }
+
+    return null;
+  }
+
+  public function hasCommitterIdentity() {
+    return ($this->getCommitterIdentity() !== null);
+  }
+
+  public function hasAuthorIdentity() {
+    return ($this->getAuthorIdentity() !== null);
+  }
+
+  public function getCommitterDisplayPHID() {
+    if ($this->hasCommitterIdentity()) {
+      return $this->getCommitterIdentity()->getIdentityDisplayPHID();
+    }
+
+    $data = $this->getCommitData();
+    return $data->getCommitDetail('committerPHID');
+  }
+
+  public function getAuthorDisplayPHID() {
+    if ($this->hasAuthorIdentity()) {
+      return $this->getAuthorIdentity()->getIdentityDisplayPHID();
+    }
+
+    $data = $this->getCommitData();
+    return $data->getCommitDetail('authorPHID');
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

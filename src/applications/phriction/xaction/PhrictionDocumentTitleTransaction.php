@@ -91,6 +91,29 @@ final class PhrictionDocumentTitleTransaction
         pht('Documents must have a title.'));
     }
 
+    if ($this->isNewObject()) {
+      // No ancestral slugs is "/". No ancestry checks apply when creating the
+      // root document.
+      $ancestral_slugs = PhabricatorSlug::getAncestry($object->getSlug());
+      if ($ancestral_slugs) {
+        // You must be able to view and edit the parent document to create a new
+        // child.
+        $parent_document = id(new PhrictionDocumentQuery())
+          ->setViewer($this->getActor())
+          ->withSlugs(array(last($ancestral_slugs)))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->executeOne();
+        if (!$parent_document) {
+          $errors[] = $this->newInvalidError(
+            pht('You can not create a document which does not have a parent.'));
+        }
+      }
+    }
+
     return $errors;
   }
 

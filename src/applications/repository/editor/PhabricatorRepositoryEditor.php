@@ -236,40 +236,6 @@ final class PhabricatorRepositoryEditor
 
   }
 
-  protected function requireCapabilities(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
-      case PhabricatorRepositoryTransaction::TYPE_NAME:
-      case PhabricatorRepositoryTransaction::TYPE_DESCRIPTION:
-      case PhabricatorRepositoryTransaction::TYPE_ENCODING:
-      case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
-      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
-      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
-      case PhabricatorRepositoryTransaction::TYPE_UUID:
-      case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
-      case PhabricatorRepositoryTransaction::TYPE_VCS:
-      case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
-      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
-      case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
-      case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
-      case PhabricatorRepositoryTransaction::TYPE_ENORMOUS:
-      case PhabricatorRepositoryTransaction::TYPE_SLUG:
-      case PhabricatorRepositoryTransaction::TYPE_SERVICE:
-      case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
-      case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE:
-      case PhabricatorRepositoryTransaction::TYPE_STAGING_URI:
-      case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
-        PhabricatorPolicyFilter::requireCapability(
-          $this->requireActor(),
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        break;
-    }
-  }
-
   protected function validateTransaction(
     PhabricatorLiskDAO $object,
     $type,

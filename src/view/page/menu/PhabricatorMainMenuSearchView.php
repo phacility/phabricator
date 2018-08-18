@@ -94,21 +94,24 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         'action' => '/search/',
         'method' => 'POST',
       ),
-      phutil_tag_div('phabricator-main-menu-search-container', array(
-        $input,
-        phutil_tag(
-          'button',
-          array(
-            'id' => $button_id,
-            'class' => 'phui-icon-view phui-font-fa fa-search',
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-main-menu-search-container',
+        ),
+        array(
+          $input,
+          phutil_tag(
+            'button',
+            array(
+              'id' => $button_id,
+              'class' => 'phui-icon-view phui-font-fa fa-search',
             ),
-          array(
-            $selector,
-            $search_text,
-          )),
-        $primary_input,
-        $target,
-      )));
+            $search_text),
+          $selector,
+          $primary_input,
+          $target,
+        )));
 
     return $form;
   }
@@ -207,6 +210,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         id(new PHUIIconView())
           ->addSigil('global-search-dropdown-icon')
           ->setIcon($current_icon))
+      ->setAuralLabel(pht('Configure Global Search'))
       ->setDropdown(true);
 
     $input = javelin_tag(
