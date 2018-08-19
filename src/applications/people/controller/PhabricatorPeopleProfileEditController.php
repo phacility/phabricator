@@ -38,10 +38,9 @@ final class PhabricatorPeopleProfileEditController
         new PhabricatorUserTransaction(),
         $request);
 
-      $editor = id(new PhabricatorUserProfileEditor())
+      $editor = id(new PhabricatorUserTransactionEditor())
         ->setActor($viewer)
-        ->setContentSource(
-          PhabricatorContentSource::newFromRequest($request))
+        ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true);
 
       try {

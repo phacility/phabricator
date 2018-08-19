@@ -6,6 +6,7 @@ final class DifferentialRevisionViewController
   private $revisionID;
   private $changesetCount;
   private $hiddenChangesets;
+  private $warnings = array();
 
   public function shouldAllowPublic() {
     return true;
@@ -68,9 +69,17 @@ final class DifferentialRevisionViewController
 
     $revision->attachActiveDiff(last($diffs));
 
-    $diff_vs = $request->getInt('vs');
-    $target_id = $request->getInt('id');
-    $target = idx($diffs, $target_id, end($diffs));
+    $diff_vs = $this->getOldDiffID($revision, $diffs);
+    if ($diff_vs instanceof AphrontResponse) {
+      return $diff_vs;
+    }
+
+    $target_id = $this->getNewDiffID($revision, $diffs);
+    if ($target_id instanceof AphrontResponse) {
+      return $target_id;
+    }
+
+    $target = $diffs[$target_id];
 
     $target_manual = $target;
     if (!$target_id) {
@@ -79,10 +88,6 @@ final class DifferentialRevisionViewController
           $target_manual = $diff;
         }
       }
-    }
-
-    if (empty($diffs[$diff_vs])) {
-      $diff_vs = null;
     }
 
     $repository = null;
@@ -170,7 +175,7 @@ final class DifferentialRevisionViewController
     }
 
     $handles = $this->loadViewerHandles($object_phids);
-    $warnings = array();
+    $warnings = $this->warnings;
 
     $request_uri = $request->getRequestURI();
 
@@ -1310,6 +1315,135 @@ final class DifferentialRevisionViewController
       ->setUnitMessages($diff->getUnitMessages())
       ->setLimit(5)
       ->setShowViewAll(true);
+  }
+
+  private function getOldDiffID(DifferentialRevision $revision, array $diffs) {
+    assert_instances_of($diffs, 'DifferentialDiff');
+    $request = $this->getRequest();
+
+    $diffs = mpull($diffs, null, 'getID');
+
+    $is_new = ($request->getURIData('filter') === 'new');
+    $old_id = $request->getInt('vs');
+
+    // This is ambiguous, so just 404 rather than trying to figure out what
+    // the user expects.
+    if ($is_new && $old_id) {
+      return new Aphront404Response();
+    }
+
+    if ($is_new) {
+      $viewer = $this->getViewer();
+
+      $xactions = id(new DifferentialTransactionQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(array($revision->getPHID()))
+        ->withAuthorPHIDs(array($viewer->getPHID()))
+        ->setOrder('newest')
+        ->setLimit(1)
+        ->execute();
+
+      if (!$xactions) {
+        $this->warnings[] = id(new PHUIInfoView())
+          ->setTitle(pht('No Actions'))
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+          ->appendChild(
+            pht(
+              'Showing all changes because you have never taken an '.
+              'action on this revision.'));
+      } else {
+        $xaction = head($xactions);
+
+        // Find the transactions which updated this revision. We want to
+        // figure out which diff was active when you last took an action.
+        $updates = id(new DifferentialTransactionQuery())
+          ->setViewer($viewer)
+          ->withObjectPHIDs(array($revision->getPHID()))
+          ->withTransactionTypes(
+            array(
+              DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE,
+            ))
+          ->setOrder('oldest')
+          ->execute();
+
+        // Sort the diffs into two buckets: those older than your last action
+        // and those newer than your last action.
+        $older = array();
+        $newer = array();
+        foreach ($updates as $update) {
+          // If you updated the revision with "arc diff", try to count that
+          // update as "before your last action".
+          if ($update->getDateCreated() <= $xaction->getDateCreated()) {
+            $older[] = $update->getNewValue();
+          } else {
+            $newer[] = $update->getNewValue();
+          }
+        }
+
+        if (!$newer) {
+          $this->warnings[] = id(new PHUIInfoView())
+            ->setTitle(pht('No Recent Updates'))
+            ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+            ->appendChild(
+              pht(
+                'Showing all changes because the diff for this revision '.
+                'has not been updated since your last action.'));
+        } else {
+          $older = array_fuse($older);
+
+          // Find the most recent diff from before the last action.
+          $old = null;
+          foreach ($diffs as $diff) {
+            if (!isset($older[$diff->getPHID()])) {
+              break;
+            }
+
+            $old = $diff;
+          }
+
+          // It's possible we may not find such a diff: transactions may have
+          // been removed from the database, for example. If we miss, just
+          // fail into some reasonable state since 404'ing would be perplexing.
+          if ($old) {
+            $this->warnings[] = id(new PHUIInfoView())
+              ->setTitle(pht('New Changes Shown'))
+              ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+              ->appendChild(
+                pht(
+                  'Showing changes since the last action you took on this '.
+                  'revision.'));
+
+            $old_id = $old->getID();
+          }
+        }
+      }
+    }
+
+    if (isset($diffs[$old_id])) {
+      return $old_id;
+    }
+
+    return null;
+  }
+
+  private function getNewDiffID(DifferentialRevision $revision, array $diffs) {
+    assert_instances_of($diffs, 'DifferentialDiff');
+    $request = $this->getRequest();
+
+    $diffs = mpull($diffs, null, 'getID');
+
+    $is_new = ($request->getURIData('filter') === 'new');
+    $new_id = $request->getInt('id');
+
+    if ($is_new && $new_id) {
+      return new Aphront404Response();
+    }
+
+    if (isset($diffs[$new_id])) {
+      return $new_id;
+    }
+
+    return (int)last_key($diffs);
   }
 
 }

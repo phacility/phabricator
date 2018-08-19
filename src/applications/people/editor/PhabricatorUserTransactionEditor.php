@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorUserProfileEditor
+final class PhabricatorUserTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
   public function getEditorApplicationClass() {
@@ -8,8 +8,7 @@ final class PhabricatorUserProfileEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('User Profiles');
+    return pht('Users');
   }
-
 
 }

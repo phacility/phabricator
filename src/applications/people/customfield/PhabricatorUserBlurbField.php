@@ -9,6 +9,14 @@ final class PhabricatorUserBlurbField
     return 'user:blurb';
   }
 
+  public function getModernFieldKey() {
+    return 'blurb';
+  }
+
+  public function getFieldKeyForConduit() {
+    return $this->getModernFieldKey();
+  }
+
   public function getFieldName() {
     return pht('Blurb');
   }
@@ -50,6 +58,11 @@ final class PhabricatorUserBlurbField
     $this->value = $request->getStr($this->getFieldKey());
   }
 
+  public function setValueFromStorage($value) {
+    $this->value = $value;
+    return $this;
+  }
+
   public function renderEditControl(array $handles) {
     return id(new PhabricatorRemarkupControl())
       ->setUser($this->getViewer())
@@ -83,6 +96,14 @@ final class PhabricatorUserBlurbField
 
   public function getStyleForPropertyView() {
     return 'block';
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
   }
 
 }

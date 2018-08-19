@@ -56,8 +56,18 @@ final class PhabricatorStorageManagementProbeWorkflow
       ->setShowHeader(false)
       ->setPadding(2)
       ->addColumn('name', array('title' => pht('Database / Table')))
-      ->addColumn('size', array('title' => pht('Size')))
-      ->addColumn('percentage', array('title' => pht('Percentage')));
+      ->addColumn(
+        'size',
+        array(
+          'title' => pht('Size'),
+          'align' => PhutilConsoleTable::ALIGN_RIGHT,
+        ))
+      ->addColumn(
+        'percentage',
+        array(
+          'title' => pht('Percentage'),
+          'align' => PhutilConsoleTable::ALIGN_RIGHT,
+        ));
 
     foreach ($totals as $db => $size) {
       list($database_size, $database_percentage) = $this->formatSize(
@@ -98,7 +108,7 @@ final class PhabricatorStorageManagementProbeWorkflow
 
   private function formatSize($n, $o) {
     return array(
-      sprintf('%8.8s MB', number_format($n / (1024 * 1024), 1)),
+      pht('%s MB', new PhutilNumber($n / (1024 * 1024), 1)),
       sprintf('%3.1f%%', 100 * ($n / $o)),
     );
   }

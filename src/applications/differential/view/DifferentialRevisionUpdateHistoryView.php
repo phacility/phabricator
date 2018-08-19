@@ -307,7 +307,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     $content = phabricator_form(
       $this->getUser(),
       array(
-        'action' => '#toc',
+        'action' => '/D'.$revision_id.'#toc',
       ),
       array(
         $table,

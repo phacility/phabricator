@@ -221,6 +221,10 @@ final class PhabricatorEnv extends Phobject {
 
     foreach ($site_sources as $site_source) {
       $stack->pushSource($site_source);
+
+      // If the site source did anything which reads config, throw it away
+      // to make sure any additional site sources get clean reads.
+      self::dropConfigCache();
     }
 
     $masters = PhabricatorDatabaseRef::getMasterDatabaseRefs();
@@ -259,6 +263,10 @@ final class PhabricatorEnv extends Phobject {
         throw $ex;
       }
     }
+
+    // Drop the config cache one final time to make sure we're getting clean
+    // reads now that we've finished building the stack.
+    self::dropConfigCache();
   }
 
   public static function repairConfig($key, $value) {

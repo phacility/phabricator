@@ -137,22 +137,4 @@ final class PhabricatorProjectColumnTransactionEditor
     return $errors;
   }
 
-
-  protected function requireCapabilities(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorProjectColumnTransaction::TYPE_NAME:
-      case PhabricatorProjectColumnTransaction::TYPE_STATUS:
-        PhabricatorPolicyFilter::requireCapability(
-          $this->requireActor(),
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        return;
-    }
-
-    return parent::requireCapabilities($object, $xaction);
-  }
-
 }

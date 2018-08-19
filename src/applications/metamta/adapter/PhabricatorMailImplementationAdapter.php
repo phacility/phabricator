@@ -6,6 +6,9 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
   private $priority;
   private $options = array();
 
+  private $supportsInbound = true;
+  private $supportsOutbound = true;
+
   final public function getAdapterType() {
     return $this->getPhobjectClassConstant('ADAPTERTYPE');
   }
@@ -65,6 +68,24 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
 
   final public function getPriority() {
     return $this->priority;
+  }
+
+  final public function setSupportsInbound($supports_inbound) {
+    $this->supportsInbound = $supports_inbound;
+    return $this;
+  }
+
+  final public function getSupportsInbound() {
+    return $this->supportsInbound;
+  }
+
+  final public function setSupportsOutbound($supports_outbound) {
+    $this->supportsOutbound = $supports_outbound;
+    return $this;
+  }
+
+  final public function getSupportsOutbound() {
+    return $this->supportsOutbound;
   }
 
   final public function getOption($key) {

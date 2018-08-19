@@ -85,6 +85,32 @@ final class PhabricatorFilesManagementMigrateWorkflow
     foreach ($iterator as $file) {
       $monogram = $file->getMonogram();
 
+      // See T7148. When we export data for an instance, we copy all the data
+      // for Files from S3 into the database dump so that the database dump is
+      // a complete, standalone archive of all the data. In the general case,
+      // installs may have a similar process using "--copy" to create a more
+      // complete backup.
+
+      // When doing this, we may run into temporary files which have been
+      // deleted between the time we took the original dump and the current
+      // timestamp. These files can't be copied since the data no longer
+      // exists: the daemons on the live install already deleted it.
+
+      // Simply avoid this whole mess by declining to migrate expired temporary
+      // files. They're as good as dead anyway.
+
+      $ttl = $file->getTTL();
+      if ($ttl) {
+        if ($ttl < PhabricatorTime::getNow()) {
+          echo tsprintf(
+            "%s\n",
+            pht(
+              '%s: Skipping expired temporary file.',
+              $monogram));
+          continue;
+        }
+      }
+
       $engine_key = $file->getStorageEngine();
       $engine = idx($engines, $engine_key);
 

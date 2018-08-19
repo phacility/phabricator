@@ -54,7 +54,16 @@ abstract class AphrontResponse extends Phobject {
 
 
   public function getContentIterator() {
-    return array($this->buildResponseString());
+    // By default, make sure responses are truly returning a string, not some
+    // kind of object that behaves like a string.
+
+    // We're going to remove the execution time limit before dumping the
+    // response into the sink, and want any rendering that's going to occur
+    // to happen BEFORE we release the limit.
+
+    return array(
+      (string)$this->buildResponseString(),
+    );
   }
 
   public function buildResponseString() {

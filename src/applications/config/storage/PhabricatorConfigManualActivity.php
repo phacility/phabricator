@@ -7,6 +7,8 @@ final class PhabricatorConfigManualActivity
   protected $parameters = array();
 
   const TYPE_REINDEX = 'reindex';
+  const TYPE_IDENTITIES = 'identities';
+
 
   protected function getConfiguration() {
     return array(

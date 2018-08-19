@@ -106,8 +106,21 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
       $cache = $info['cache_list'];
       $state = array();
       foreach ($cache as $item) {
-        $info = idx($item, 'info', '<unknown-key>');
-        $key = self::getKeyPattern($info);
+        // Some older versions of APCu report the cachekey as "key", while
+        // newer APCu and APC report it as "info". Just check both indexes
+        // for commpatibility. See T13164 for details.
+
+        $info = idx($item, 'info');
+        if ($info === null) {
+          $info = idx($item, 'key');
+        }
+
+        if ($info === null) {
+          $key = '<unknown-key>';
+        } else {
+          $key = self::getKeyPattern($info);
+        }
+
         if (empty($state[$key])) {
           $state[$key] = array(
             'max' => 0,

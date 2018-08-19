@@ -24,6 +24,7 @@ final class DiffusionBlameController extends DiffusionController {
         ->setViewer($viewer)
         ->withRepository($repository)
         ->withIdentifiers($identifiers)
+        ->needIdentities(true)
         ->execute();
       $commits = mpull($commits, null, 'getCommitIdentifier');
     } else {
@@ -68,10 +69,7 @@ final class DiffusionBlameController extends DiffusionController {
 
     $handle_phids = array();
     foreach ($commits as $commit) {
-      $author_phid = $commit->getAuthorPHID();
-      if ($author_phid) {
-        $handle_phids[] = $author_phid;
-      }
+      $handle_phids[] = $commit->getAuthorDisplayPHID();
     }
 
     foreach ($revisions as $revision) {
@@ -117,7 +115,7 @@ final class DiffusionBlameController extends DiffusionController {
       $author_phid = null;
 
       if ($commit) {
-        $author_phid = $commit->getAuthorPHID();
+        $author_phid = $commit->getAuthorDisplayPHID();
       }
 
       if (!$author_phid && $revision) {

@@ -84,6 +84,7 @@ final class PhabricatorSearchResultView extends AphrontView {
 
       switch ($operator) {
         case PhutilSearchQueryCompiler::OPERATOR_SUBSTRING:
+        case PhutilSearchQueryCompiler::OPERATOR_EXACT:
           $patterns[] = '(('.preg_quote($value).'))ui';
           break;
         case PhutilSearchQueryCompiler::OPERATOR_AND:

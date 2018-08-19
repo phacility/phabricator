@@ -85,11 +85,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         'template' => ManiphestTaskPHIDType::TYPECONST,
         'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
-      ManiphestEditStatusCapability::CAPABILITY => array(),
-      ManiphestEditAssignCapability::CAPABILITY => array(),
-      ManiphestEditPoliciesCapability::CAPABILITY => array(),
-      ManiphestEditPriorityCapability::CAPABILITY => array(),
-      ManiphestEditProjectsCapability::CAPABILITY => array(),
       ManiphestBulkEditCapability::CAPABILITY => array(),
     );
   }

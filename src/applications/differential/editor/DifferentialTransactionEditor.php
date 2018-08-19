@@ -624,7 +624,9 @@ final class DifferentialTransactionEditor
     $body = new PhabricatorMetaMTAMailBody();
     $body->setViewer($this->requireActor());
 
-    $revision_uri = PhabricatorEnv::getProductionURI('/D'.$object->getID());
+    $revision_uri = $object->getURI();
+    $revision_uri = PhabricatorEnv::getProductionURI($revision_uri);
+    $new_uri = $revision_uri.'/new/';
 
     $this->addHeadersAndCommentsToMailBody(
       $body,
@@ -645,19 +647,6 @@ final class DifferentialTransactionEditor
       $this->appendInlineCommentsForMail($object, $inlines, $body);
     }
 
-    $changed_uri = $this->getChangedPriorToCommitURI();
-    if ($changed_uri) {
-      $body->addLinkSection(
-        pht('CHANGED PRIOR TO COMMIT'),
-        $changed_uri);
-    }
-
-    $this->addCustomFieldsToMailBody($body, $object, $xactions);
-
-    $body->addLinkSection(
-      pht('REVISION DETAIL'),
-      $revision_uri);
-
     $update_xaction = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
@@ -669,7 +658,28 @@ final class DifferentialTransactionEditor
 
     if ($update_xaction) {
       $diff = $this->requireDiff($update_xaction->getNewValue(), true);
+    } else {
+      $diff = null;
+    }
 
+    $changed_uri = $this->getChangedPriorToCommitURI();
+    if ($changed_uri) {
+      $body->addLinkSection(
+        pht('CHANGED PRIOR TO COMMIT'),
+        $changed_uri);
+    }
+
+    $this->addCustomFieldsToMailBody($body, $object, $xactions);
+
+    if (!$this->getIsNewObject()) {
+      $body->addLinkSection(pht('CHANGES SINCE LAST ACTION'), $new_uri);
+    }
+
+    $body->addLinkSection(
+      pht('REVISION DETAIL'),
+      $revision_uri);
+
+    if ($update_xaction) {
       $body->addTextSection(
         pht('AFFECTED FILES'),
         $this->renderAffectedFilesForMail($diff));

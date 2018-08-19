@@ -445,7 +445,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
         'p',
         array(),
         pht(
-          'You can find more information about configuring OPCache in '.
+          'You can find more information about configuring OPcache in '.
           'the %s.',
           phutil_tag(
             'a',
@@ -453,7 +453,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
               'href' => 'http://php.net/manual/opcache.configuration.php',
               'target' => '_blank',
             ),
-            pht('PHP OPCache Documentation'))));
+            pht('PHP OPcache Documentation'))));
     }
 
     $info[] = phutil_tag(

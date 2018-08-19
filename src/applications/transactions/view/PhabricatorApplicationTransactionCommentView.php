@@ -230,7 +230,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       'div',
       array(
         'style' => 'background-image: url('.$image_uri.')',
-        'class' => 'phui-comment-image',
+        'class' => 'phui-comment-image visual-only',
       ));
     $wedge = phutil_tag(
       'div',
@@ -319,14 +319,18 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
       foreach ($comment_actions as $key => $comment_action) {
         $key = $comment_action->getKey();
+        $label = $comment_action->getLabel();
+
+
         $action_map[$key] = array(
           'key' => $key,
-          'label' => $comment_action->getLabel(),
+          'label' => $label,
           'type' => $comment_action->getPHUIXControlType(),
           'spec' => $comment_action->getPHUIXControlSpecification(),
           'initialValue' => $comment_action->getInitialValue(),
           'groupKey' => $comment_action->getGroupKey(),
           'conflictKey' => $comment_action->getConflictKey(),
+          'auralLabel' => pht('Remove Action: %s', $label),
         );
 
         $type_map[$key] = $comment_action;

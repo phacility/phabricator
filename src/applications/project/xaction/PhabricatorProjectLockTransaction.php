@@ -53,4 +53,12 @@ final class PhabricatorProjectLockTransaction
     }
   }
 
+  public function validateTransactions($object, array $xactions) {
+    if ($xactions) {
+      $this->requireApplicationCapability(
+        ProjectCanLockProjectsCapability::CAPABILITY);
+    }
+    return array();
+  }
+
 }

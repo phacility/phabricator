@@ -143,7 +143,7 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
         $this
           ->newIssue('extension.opcache.devmode')
           ->setShortName(pht('OPcache Config'))
-          ->setName(pht('OPCache Not Configured for Development'))
+          ->setName(pht('OPcache Not Configured for Development'))
           ->setSummary($summary)
           ->setMessage($message)
           ->addPHPConfig('opcache.validate_timestamps')

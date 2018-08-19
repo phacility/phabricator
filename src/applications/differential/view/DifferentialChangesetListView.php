@@ -10,6 +10,7 @@ final class DifferentialChangesetListView extends AphrontView {
   private $whitespace;
   private $background;
   private $header;
+  private $isStandalone;
 
   private $standaloneURI;
   private $leftRawFileURI;
@@ -124,6 +125,15 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
+  public function setIsStandalone($is_standalone) {
+    $this->isStandalone = $is_standalone;
+    return $this;
+  }
+
+  public function getIsStandalone() {
+    return $this->isStandalone;
+  }
+
   public function setBackground($background) {
     $this->background = $background;
     return $this;
@@ -219,6 +229,7 @@ final class DifferentialChangesetListView extends AphrontView {
       'changesetViewIDs' => $ids,
       'inlineURI' => $this->inlineURI,
       'inlineListURI' => $this->inlineListURI,
+      'isStandalone' => $this->getIsStandalone(),
       'pht' => array(
         'Open in Editor' => pht('Open in Editor'),
         'Show All Context' => pht('Show All Context'),
@@ -298,6 +309,7 @@ final class DifferentialChangesetListView extends AphrontView {
         'Show All Inlines' => pht('Show All Inlines'),
 
         'List Inline Comments' => pht('List Inline Comments'),
+        'Display Options' => pht('Display Options'),
 
         'Hide or show all inline comments.' =>
           pht('Hide or show all inline comments.'),

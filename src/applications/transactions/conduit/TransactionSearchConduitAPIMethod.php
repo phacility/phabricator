@@ -79,6 +79,14 @@ final class TransactionSearchConduitAPIMethod
       ));
 
     $with_phids = idx($constraints, 'phids');
+
+    if ($with_phids === array()) {
+      throw new Exception(
+        pht(
+          'Constraint "phids" to "transaction.search" requires nonempty list, '.
+          'empty list provided.'));
+    }
+
     if ($with_phids) {
       $xaction_query->withPHIDs($with_phids);
     }

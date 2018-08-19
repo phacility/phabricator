@@ -57,7 +57,10 @@ final class PhabricatorFerretSearchEngineExtension
     $fields[] = id(new PhabricatorSearchTextField())
       ->setKey('query')
       ->setLabel(pht('Query'))
-      ->setDescription(pht('Fulltext search.'));
+      ->setDescription(
+        pht(
+          'Find objects matching a fulltext search query. See '.
+          '"Search User Guide" in the documentation for details.'));
 
     return $fields;
   }

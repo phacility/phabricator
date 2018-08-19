@@ -99,6 +99,15 @@ final class DrydockRepositoryOperation extends DrydockDAO
     return $this;
   }
 
+  public static function getOperationStateNameMap() {
+    return array(
+      self::STATE_WAIT => pht('Waiting'),
+      self::STATE_WORK => pht('Working'),
+      self::STATE_DONE => pht('Done'),
+      self::STATE_FAIL => pht('Failed'),
+    );
+  }
+
   public static function getOperationStateIcon($state) {
     $map = array(
       self::STATE_WAIT => 'fa-clock-o',
@@ -111,13 +120,7 @@ final class DrydockRepositoryOperation extends DrydockDAO
   }
 
   public static function getOperationStateName($state) {
-    $map = array(
-      self::STATE_WAIT => pht('Waiting'),
-      self::STATE_WORK => pht('Working'),
-      self::STATE_DONE => pht('Done'),
-      self::STATE_FAIL => pht('Failed'),
-    );
-
+    $map = self::getOperationStateNameMap();
     return idx($map, $state, pht('<Unknown: %s>', $state));
   }
 

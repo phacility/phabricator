@@ -595,68 +595,78 @@ final class PhabricatorUSEnglishTranslation
         '%s changed files, attached: %3$s; detached: %5$s.',
 
 
-      '%s added %s dependencie(s): %s.' => array(
+      '%s added %s parent revision(s): %s.' => array(
         array(
-          '%s added a dependency: %3$s.',
-          '%s added dependencies: %3$s.',
+          '%s added a parent revision: %3$s.',
+          '%s added parent revisions: %3$s.',
         ),
       ),
 
-      '%s added %s dependencie(s) for %s: %s.' => array(
+      '%s added %s parent revision(s) for %s: %s.' => array(
         array(
-          '%s added a dependency for %3$s: %4$s.',
-          '%s added dependencies for %3$s: %4$s.',
+          '%s added a parent revision for %3$s: %4$s.',
+          '%s added parent revisions for %3$s: %4$s.',
         ),
       ),
 
-      '%s removed %s dependencie(s): %s.' => array(
+      '%s removed %s parent revision(s): %s.' => array(
         array(
-          '%s removed a dependency: %3$s.',
-          '%s removed dependencies: %3$s.',
+          '%s removed a parent revision: %3$s.',
+          '%s removed parent revisions: %3$s.',
         ),
       ),
 
-      '%s removed %s dependencie(s) for %s: %s.' => array(
+      '%s removed %s parent revision(s) for %s: %s.' => array(
         array(
-          '%s removed a dependency for %3$s: %4$s.',
-          '%s removed dependencies for %3$s: %4$s.',
+          '%s removed a parent revision for %3$s: %4$s.',
+          '%s removed parent revisions for %3$s: %4$s.',
         ),
       ),
 
-      '%s edited dependencie(s), added %s: %s; removed %s: %s.' => array(
-        '%s edited dependencies, added: %3$s; removed: %5$s.',
+      '%s edited parent revision(s), added %s: %s; removed %s: %s.' => array(
+        '%s edited parent revisions, added: %3$s; removed: %5$s.',
       ),
 
-      '%s edited dependencie(s) for %s, added %s: %s; removed %s: %s.' => array(
-        '%s edited dependencies for %s, added: %3$s; removed: %5$s.',
+      '%s edited parent revision(s) for %s, '.
+      'added %s: %s; removed %s: %s.' => array(
+        '%s edited parent revisions for %s, added: %3$s; removed: %5$s.',
       ),
 
-      '%s added %s dependent revision(s): %s.' => array(
+      '%s added %s child revision(s): %s.' => array(
         array(
-          '%s added a dependent revision: %3$s.',
-          '%s added dependent revisions: %3$s.',
+          '%s added a child revision: %3$s.',
+          '%s added child revisions: %3$s.',
         ),
       ),
 
-      '%s added %s dependent revision(s) for %s: %s.' => array(
+      '%s added %s child revision(s) for %s: %s.' => array(
         array(
-          '%s added a dependent revision for %3$s: %4$s.',
-          '%s added dependent revisions for %3$s: %4$s.',
+          '%s added a child revision for %3$s: %4$s.',
+          '%s added child revisions for %3$s: %4$s.',
         ),
       ),
 
-      '%s removed %s dependent revision(s): %s.' => array(
+      '%s removed %s child revision(s): %s.' => array(
         array(
-          '%s removed a dependent revision: %3$s.',
-          '%s removed dependent revisions: %3$s.',
+          '%s removed a child revision: %3$s.',
+          '%s removed child revisions: %3$s.',
         ),
       ),
 
-      '%s removed %s dependent revision(s) for %s: %s.' => array(
+      '%s removed %s child revision(s) for %s: %s.' => array(
         array(
-          '%s removed a dependent revision for %3$s: %4$s.',
-          '%s removed dependent revisions for %3$s: %4$s.',
+          '%s removed a child revision for %3$s: %4$s.',
+          '%s removed child revisions for %3$s: %4$s.',
         ),
+      ),
+
+      '%s edited child revision(s), added %s: %s; removed %s: %s.' => array(
+        '%s edited child revisions, added: %3$s; removed: %5$s.',
+      ),
+
+      '%s edited child revision(s) for %s, '.
+      'added %s: %s; removed %s: %s.' => array(
+        '%s edited child revisions for %s, added: %3$s; removed: %5$s.',
       ),
 
       '%s added %s commit(s): %s.' => array(

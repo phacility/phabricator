@@ -89,7 +89,8 @@ JX.install('DiffChangesetList', {
   properties: {
     translations: null,
     inlineURI: null,
-    inlineListURI: null
+    inlineListURI: null,
+    isStandalone: false
   },
 
   members: {
@@ -149,6 +150,12 @@ JX.install('DiffChangesetList', {
       this._initialized = true;
       var pht = this.getTranslations();
 
+      // We may be viewing the normal "/D123" view (with all the changesets)
+      // or the standalone view (with just one changeset). In the standalone
+      // view, some options (like jumping to next or previous file) do not
+      // make sense and do not function.
+      var standalone = this.getIsStandalone();
+
       var label;
 
       label = pht('Jump to next change.');
@@ -157,11 +164,13 @@ JX.install('DiffChangesetList', {
       label = pht('Jump to previous change.');
       this._installJumpKey('k', label, -1);
 
-      label = pht('Jump to next file.');
-      this._installJumpKey('J', label, 1, 'file');
+      if (!standalone) {
+        label = pht('Jump to next file.');
+        this._installJumpKey('J', label, 1, 'file');
 
-      label = pht('Jump to previous file.');
-      this._installJumpKey('K', label, -1, 'file');
+        label = pht('Jump to previous file.');
+        this._installJumpKey('K', label, -1, 'file');
+      }
 
       label = pht('Jump to next inline comment.');
       this._installJumpKey('n', label, 1, 'comment');
@@ -176,11 +185,13 @@ JX.install('DiffChangesetList', {
         'Jump to previous inline comment, including collapsed comments.');
       this._installJumpKey('P', label, -1, 'comment', true);
 
-      label = pht('Hide or show the current file.');
-      this._installKey('h', label, this._onkeytogglefile);
+      if (!standalone) {
+        label = pht('Hide or show the current file.');
+        this._installKey('h', label, this._onkeytogglefile);
 
-      label = pht('Jump to the table of contents.');
-      this._installKey('t', label, this._ontoc);
+        label = pht('Jump to the table of contents.');
+        this._installKey('t', label, this._ontoc);
+      }
 
       label = pht('Reply to selected inline comment or change.');
       this._installKey('r', label, JX.bind(this, this._onkeyreply, false));
@@ -1651,9 +1662,12 @@ JX.install('DiffChangesetList', {
 
     _getMenuButton: function() {
       if (!this._menuButton) {
+        var pht = this.getTranslations();
+
         var button = new JX.PHUIXButtonView()
           .setIcon('fa-bars')
-          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE);
+          .setButtonType(JX.PHUIXButtonView.BUTTONTYPE_SIMPLE)
+          .setAuralLabel(pht('Display Options'));
 
         var dropdown = new JX.PHUIXDropdownMenu(button.getNode());
         this._menuItems = {};
@@ -1691,8 +1705,6 @@ JX.install('DiffChangesetList', {
         }
 
         dropdown.listen('open', JX.bind(this, this._ondropdown));
-
-        var pht = this.getTranslations();
 
         if (this.getInlineListURI()) {
           list.addItem(

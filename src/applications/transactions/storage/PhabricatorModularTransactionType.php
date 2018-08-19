@@ -356,4 +356,14 @@ abstract class PhabricatorModularTransactionType
     return array();
   }
 
+  protected function requireApplicationCapability($capability) {
+    $application_class = $this->getEditor()->getEditorApplicationClass();
+    $application = newv($application_class, array());
+
+    PhabricatorPolicyFilter::requireCapability(
+      $this->getActor(),
+      $application,
+      $capability);
+  }
+
 }

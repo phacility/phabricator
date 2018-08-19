@@ -3599,6 +3599,7 @@ abstract class PhabricatorApplicationTransactionEditor
         ->setContinueOnMissingFields(true)
         ->setParentMessageID($this->getParentMessageID())
         ->setIsInverseEdgeEditor(true)
+        ->setIsSilent($this->getIsSilent())
         ->setActor($this->requireActor())
         ->setActingAsPHID($this->getActingAsPHID())
         ->setContentSource($this->getContentSource());
