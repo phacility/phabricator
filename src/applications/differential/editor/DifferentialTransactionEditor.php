@@ -671,7 +671,7 @@ final class DifferentialTransactionEditor
 
     $this->addCustomFieldsToMailBody($body, $object, $xactions);
 
-    if (!$this->getIsNewObject()) {
+    if (!$this->isFirstBroadcast()) {
       $body->addLinkSection(pht('CHANGES SINCE LAST ACTION'), $new_uri);
     }
 
