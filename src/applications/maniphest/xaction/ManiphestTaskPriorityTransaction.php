@@ -172,4 +172,33 @@ final class ManiphestTaskPriorityTransaction
     return $errors;
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'priority';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    $old = $xaction->getOldValue();
+    if ($old !== null) {
+      $old = (int)$old;
+      $old_name = ManiphestTaskPriority::getTaskPriorityName($old);
+    } else {
+      $old_name = null;
+    }
+
+    $new = $xaction->getNewValue();
+    $new = (int)$new;
+    $new_name = ManiphestTaskPriority::getTaskPriorityName($new);
+
+    return array(
+      'old' => array(
+        'value' => $old,
+        'name' => $old_name,
+      ),
+      'new' => array(
+        'value' => $new,
+        'name' => $new_name,
+      ),
+    );
+  }
+
 }
