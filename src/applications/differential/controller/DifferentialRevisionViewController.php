@@ -463,7 +463,7 @@ final class DifferentialRevisionViewController
       }
     }
 
-    $tab_group = id(new PHUITabGroupView());
+    $tab_group = new PHUITabGroupView();
 
     if ($toc_view) {
       $tab_group->addTab(
@@ -473,17 +473,30 @@ final class DifferentialRevisionViewController
           ->appendChild($toc_view));
     }
 
-    $tab_group
-      ->addTab(
-        id(new PHUITabView())
-          ->setName(pht('History'))
-          ->setKey('history')
-          ->appendChild($history))
-      ->addTab(
-        id(new PHUITabView())
-          ->setName(pht('Commits'))
-          ->setKey('commits')
-          ->appendChild($local_table));
+    $tab_group->addTab(
+      id(new PHUITabView())
+        ->setName(pht('History'))
+        ->setKey('history')
+        ->appendChild($history));
+
+    $filetree_on = $viewer->compareUserSetting(
+      PhabricatorShowFiletreeSetting::SETTINGKEY,
+      PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
+
+    $collapsed_key = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
+    $filetree_collapsed = (bool)$viewer->getUserSetting($collapsed_key);
+
+    // See PHI811. If the viewer has the file tree on, the files tab with the
+    // table of contents is redundant, so default to the "History" tab instead.
+    if ($filetree_on && !$filetree_collapsed) {
+      $tab_group->selectTab('history');
+    }
+
+    $tab_group->addTab(
+      id(new PHUITabView())
+        ->setName(pht('Commits'))
+        ->setKey('commits')
+        ->appendChild($local_table));
 
     $stack_graph = id(new DifferentialRevisionGraph())
       ->setViewer($viewer)
@@ -601,22 +614,15 @@ final class DifferentialRevisionViewController
     $crumbs->addTextCrumb($monogram);
     $crumbs->setBorder(true);
 
-    $filetree_on = $viewer->compareUserSetting(
-      PhabricatorShowFiletreeSetting::SETTINGKEY,
-      PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
-
     $nav = null;
     if ($filetree_on && !$this->isVeryLargeDiff()) {
-      $collapsed_key = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
-      $collapsed_value = $viewer->getUserSetting($collapsed_key);
-
       $width_key = PhabricatorFiletreeWidthSetting::SETTINGKEY;
       $width_value = $viewer->getUserSetting($width_key);
 
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
         ->setTitle($monogram)
         ->setBaseURI(new PhutilURI($revision->getURI()))
-        ->setCollapsed((bool)$collapsed_value)
+        ->setCollapsed($filetree_collapsed)
         ->setWidth((int)$width_value)
         ->build($changesets);
     }
