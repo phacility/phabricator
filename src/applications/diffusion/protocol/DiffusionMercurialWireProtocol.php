@@ -23,12 +23,16 @@ final class DiffusionMercurialWireProtocol extends Phobject {
       'listkeys' => array('namespace'),
       'lookup' => array('key'),
       'pushkey' => array('namespace', 'key', 'old', 'new'),
+      'protocaps' => array('caps'),
       'stream_out' => array(''),
       'unbundle' => array('heads'),
     );
 
     if (!isset($commands[$command])) {
-      throw new Exception(pht("Unknown Mercurial command '%s!", $command));
+      throw new Exception(
+        pht(
+          'Unknown Mercurial command "%s"!',
+          $command));
     }
 
     return $commands[$command];
@@ -49,6 +53,7 @@ final class DiffusionMercurialWireProtocol extends Phobject {
       'known' => true,
       'listkeys' => true,
       'lookup' => true,
+      'protocaps' => true,
       'stream_out' => true,
     );
 

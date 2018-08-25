@@ -546,7 +546,8 @@ properly, and submit values. */
 }
 
 .phui-form-static-action {
-  padding: 4px;
+  height: 28px;
+  line-height: 28px;
   color: {$bluetext};
 }
 
