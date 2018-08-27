@@ -163,6 +163,30 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     }
     $view->addProperty(pht('Expires'), $until_display);
 
+    $acquired_epoch = $lease->getAcquiredEpoch();
+    $activated_epoch = $lease->getActivatedEpoch();
+
+    if ($acquired_epoch) {
+      $acquired_display = phabricator_datetime($acquired_epoch, $viewer);
+    } else {
+      if ($activated_epoch) {
+        $acquired_display = phutil_tag(
+          'em',
+          array(),
+          pht('Activated on Acquisition'));
+      } else {
+        $acquired_display = phutil_tag('em', array(), pht('Not Acquired'));
+      }
+    }
+    $view->addProperty(pht('Acquired'), $acquired_display);
+
+    if ($activated_epoch) {
+      $activated_display = phabricator_datetime($activated_epoch, $viewer);
+    } else {
+      $activated_display = phutil_tag('em', array(), pht('Not Activated'));
+    }
+    $view->addProperty(pht('Activated'), $activated_display);
+
     $attributes = $lease->getAttributes();
     if ($attributes) {
       $view->addSectionHeader(
