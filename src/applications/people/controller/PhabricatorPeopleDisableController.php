@@ -39,9 +39,18 @@ final class PhabricatorPeopleDisableController
     }
 
     if ($request->isFormPost()) {
-      id(new PhabricatorUserEditor())
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorUserTransaction())
+        ->setTransactionType(PhabricatorUserDisableTransaction::TRANSACTIONTYPE)
+        ->setNewValue($should_disable);
+
+      id(new PhabricatorUserTransactionEditor())
         ->setActor($viewer)
-        ->disableUser($user, $should_disable);
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
+        ->applyTransactions($user, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
