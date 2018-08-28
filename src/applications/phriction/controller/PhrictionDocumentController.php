@@ -203,7 +203,7 @@ final class PhrictionDocumentController
 
     $curtain = null;
     if ($document->getID()) {
-      $curtain = $this->buildCurtain($document);
+      $curtain = $this->buildCurtain($document, $content);
     }
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -230,11 +230,11 @@ final class PhrictionDocumentController
     $prop_list = phutil_tag_div('phui-document-view-pro-box', $prop_list);
 
     $page_content = id(new PHUIDocumentView())
+      ->setBanner($version_note)
       ->setHeader($header)
       ->setToc($toc)
       ->appendChild(
         array(
-          $version_note,
           $move_notice,
           $core_content,
         ));
@@ -277,7 +277,9 @@ final class PhrictionDocumentController
     return $view;
   }
 
-  private function buildCurtain(PhrictionDocument $document) {
+  private function buildCurtain(
+    PhrictionDocument $document,
+    PhrictionContent $content) {
     $viewer = $this->getViewer();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -286,6 +288,7 @@ final class PhrictionDocumentController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $slug = PhabricatorSlug::normalize($this->slug);
+    $id = $document->getID();
 
     $curtain = $this->newCurtainView($document);
 
@@ -295,6 +298,26 @@ final class PhrictionDocumentController
         ->setDisabled(!$can_edit)
         ->setIcon('fa-pencil')
         ->setHref('/phriction/edit/'.$document->getID().'/'));
+
+    $is_current = false;
+    $content_id = null;
+    if ($content) {
+      if ($content->getPHID() == $document->getContentPHID()) {
+        $is_current = true;
+      }
+      $content_id = $content->getID();
+    }
+    $can_publish = ($can_edit && $content && !$is_current);
+
+    $publish_uri = "/phriction/publish/{$id}/{$content_id}/";
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+      ->setName(pht('Publish'))
+      ->setIcon('fa-upload')
+      ->setDisabled(!$can_publish)
+      ->setWorkflow(true)
+      ->setHref($publish_uri));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
       $curtain->addAction(

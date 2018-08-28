@@ -9,6 +9,7 @@ final class PHUIDocumentView extends AphrontTagView {
   private $toc;
   private $foot;
   private $curtain;
+  private $banner;
 
   public function setHeader(PHUIHeaderView $header) {
     $header->setTall(true);
@@ -44,6 +45,15 @@ final class PHUIDocumentView extends AphrontTagView {
 
   public function getCurtain() {
     return $this->curtain;
+  }
+
+  public function setBanner($banner) {
+    $this->banner = $banner;
+    return $this;
+  }
+
+  public function getBanner() {
+    return $this->banner;
   }
 
   protected function getTagAttributes() {
@@ -160,6 +170,7 @@ final class PHUIDocumentView extends AphrontTagView {
       array(
         $table_of_contents,
         $this->header,
+        $this->banner,
         array(
           $curtain,
           $main_content,
