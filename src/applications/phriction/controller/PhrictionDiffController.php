@@ -65,8 +65,8 @@ final class PhrictionDiffController extends PhrictionController {
 
     $slug = $document->getSlug();
 
-    $revert_l = $this->renderRevertButton($content_l, $current);
-    $revert_r = $this->renderRevertButton($content_r, $current);
+    $revert_l = $this->renderRevertButton($document, $content_l, $current);
+    $revert_r = $this->renderRevertButton($document, $content_r, $current);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumb_views = $this->renderBreadcrumbs($slug);
@@ -179,10 +179,11 @@ final class PhrictionDiffController extends PhrictionController {
   }
 
   private function renderRevertButton(
+    PhrictionDocument $document,
     PhrictionContent $content,
     PhrictionContent $current) {
 
-    $document_id = $content->getDocumentID();
+    $document_id = $document->getID();
     $version = $content->getVersion();
 
     $hidden_statuses = array(

@@ -17,12 +17,13 @@ final class PhrictionDocument extends PhrictionDAO
 
   protected $slug;
   protected $depth;
-  protected $contentID;
+  protected $contentPHID;
   protected $status;
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
   protected $spacePHID;
+  protected $editedEpoch;
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
@@ -34,16 +35,11 @@ final class PhrictionDocument extends PhrictionDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'slug' => 'sort128',
         'depth' => 'uint32',
-        'contentID' => 'id?',
         'status' => 'text32',
         'mailKey' => 'bytes20',
+        'editedEpoch' => 'epoch',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'slug' => array(
           'columns' => array('slug'),
           'unique' => true,
@@ -56,17 +52,16 @@ final class PhrictionDocument extends PhrictionDAO
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhrictionDocumentPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhrictionDocumentPHIDType::TYPECONST;
   }
 
   public static function initializeNewDocument(PhabricatorUser $actor, $slug) {
-    $document = new PhrictionDocument();
-    $document->setSlug($slug);
+    $document = id(new self())
+      ->setSlug($slug);
 
-    $content = new PhrictionContent();
-    $content->setSlug($slug);
+    $content = id(new PhrictionContent())
+      ->setSlug($slug);
 
     $default_title = PhabricatorSlug::getDefaultTitle($slug);
     $content->setTitle($default_title);
@@ -94,6 +89,8 @@ final class PhrictionDocument extends PhrictionDAO
         ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
         ->setSpacePHID($actor->getDefaultSpacePHID());
     }
+
+    $document->setEditedEpoch(PhabricatorTime::getNow());
 
     return $document;
   }

@@ -78,7 +78,7 @@ final class PhrictionDocumentController
           return new Aphront404Response();
         }
 
-        if ($content->getID() != $document->getContentID()) {
+        if ($content->getPHID() != $document->getContentPHID()) {
           $version_note = id(new PHUIInfoView())
             ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
             ->appendChild(

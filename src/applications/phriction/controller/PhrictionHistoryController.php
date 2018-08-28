@@ -52,7 +52,7 @@ final class PhrictionHistoryController
       }
 
       $vs_head = null;
-      if ($content->getID() != $document->getContentID()) {
+      if ($content->getPHID() != $document->getContentPHID()) {
         $vs_head = $diff_uri
           ->alter('l', $content->getVersion())
           ->alter('r', $current->getVersion());

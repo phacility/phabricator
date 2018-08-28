@@ -1,7 +1,7 @@
 <?php
 
 final class PhrictionDocumentContentTransaction
-  extends PhrictionDocumentTransactionType {
+  extends PhrictionDocumentVersionTransaction {
 
   const TRANSACTIONTYPE = 'content';
 
@@ -18,10 +18,9 @@ final class PhrictionDocumentContentTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
-  }
 
-  public function applyExternalEffects($object, $value) {
-    $this->getEditor()->getNewContent()->setContent($value);
+    $content = $this->getNewDocumentContent($object);
+    $content->setContent($value);
   }
 
   public function shouldHide() {
