@@ -142,7 +142,7 @@ final class PhabricatorTypeaheadFunctionHelpController
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
-    $document = id(new PHUIDocumentViewPro())
+    $document = id(new PHUIDocumentView())
       ->setHeader($header)
       ->appendChild($content_box);
 

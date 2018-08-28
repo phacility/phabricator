@@ -206,7 +206,7 @@ final class PhabricatorGuideQuickStartModule extends PhabricatorGuideModule {
       'these features at your own pace.');
 
     $intro = new PHUIRemarkupView($viewer, $intro);
-    $intro = id(new PHUIDocumentViewPro())
+    $intro = id(new PHUIDocumentView())
       ->appendChild($intro);
 
     return array($intro, $guide_items);

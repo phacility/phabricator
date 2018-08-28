@@ -85,7 +85,7 @@ final class PhameBlogViewController extends PhameLiveController {
       }
     }
 
-    $page = id(new PHUIDocumentViewPro())
+    $page = id(new PHUIDocumentView())
       ->setHeader($header)
       ->appendChild($post_list);
 

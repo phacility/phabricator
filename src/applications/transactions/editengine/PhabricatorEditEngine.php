@@ -1679,7 +1679,7 @@ abstract class PhabricatorEditEngine
       ->setUser($viewer)
       ->setFields($fields);
 
-    $document = id(new PHUIDocumentViewPro())
+    $document = id(new PHUIDocumentView())
       ->setUser($viewer)
       ->setHeader($header)
       ->appendChild($help_view);

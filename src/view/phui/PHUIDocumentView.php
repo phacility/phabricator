@@ -1,6 +1,6 @@
 <?php
 
-final class PHUIDocumentViewPro extends AphrontTagView {
+final class PHUIDocumentView extends AphrontTagView {
 
   private $header;
   private $bookname;

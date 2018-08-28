@@ -227,7 +227,7 @@ final class PhrictionDocumentController
     }
     $prop_list = phutil_tag_div('phui-document-view-pro-box', $prop_list);
 
-    $page_content = id(new PHUIDocumentViewPro())
+    $page_content = id(new PHUIDocumentView())
       ->setHeader($header)
       ->setToc($toc)
       ->appendChild(
@@ -241,11 +241,12 @@ final class PhrictionDocumentController
       ->setTitle($page_title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($document->getPHID()))
-      ->appendChild(array(
-        $page_content,
-        $prop_list,
-        $children,
-      ));
+      ->appendChild(
+        array(
+          $page_content,
+          $prop_list,
+          $children,
+        ));
 
   }
 
