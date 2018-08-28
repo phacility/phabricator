@@ -279,7 +279,6 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         ->setIcon($icon);
     }
 
-
     if ($this->templatePHIDType) {
       $context_path = 'template/'.$this->templatePHIDType.'/';
     } else {
@@ -345,15 +344,6 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
               )),
           )),
         $input,
-      ));
-
-    return AphrontFormSelectControl::renderSelectTag(
-      $this->getValue(),
-      $this->getOptions(),
-      array(
-        'name'      => $this->getName(),
-        'disabled'  => $this->getDisabled() ? 'disabled' : null,
-        'id'        => $this->getID(),
       ));
   }
 
