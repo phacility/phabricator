@@ -201,7 +201,10 @@ final class PhrictionDocumentController
 
     $children = $this->renderDocumentChildren($slug);
 
-    $actions = $this->buildActionView($viewer, $document);
+    $curtain = null;
+    if ($document->getID()) {
+      $curtain = $this->buildCurtain($document);
+    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
@@ -213,8 +216,7 @@ final class PhrictionDocumentController
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($document)
-      ->setHeader($page_title)
-      ->setActionList($actions);
+      ->setHeader($page_title);
 
     if ($content) {
       $header->setEpoch($content->getDateCreated());
@@ -237,6 +239,10 @@ final class PhrictionDocumentController
           $core_content,
         ));
 
+    if ($curtain) {
+      $page_content->setCurtain($curtain);
+    }
+
     return $this->newPage()
       ->setTitle($page_title)
       ->setCrumbs($crumbs)
@@ -258,8 +264,7 @@ final class PhrictionDocumentController
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($document);
+      ->setUser($viewer);
 
     $view->addProperty(
       pht('Last Author'),
@@ -272,9 +277,9 @@ final class PhrictionDocumentController
     return $view;
   }
 
-  private function buildActionView(
-    PhabricatorUser $viewer,
-    PhrictionDocument $document) {
+  private function buildCurtain(PhrictionDocument $document) {
+    $viewer = $this->getViewer();
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $document,
@@ -282,19 +287,9 @@ final class PhrictionDocumentController
 
     $slug = PhabricatorSlug::normalize($this->slug);
 
-    $action_view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($document);
+    $curtain = $this->newCurtainView($document);
 
-    if (!$document->getID()) {
-      return $action_view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Create This Document'))
-          ->setIcon('fa-plus-square')
-          ->setHref('/phriction/edit/?slug='.$slug));
-    }
-
-    $action_view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Document'))
         ->setDisabled(!$can_edit)
@@ -302,7 +297,7 @@ final class PhrictionDocumentController
         ->setHref('/phriction/edit/'.$document->getID().'/'));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
-      $action_view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Move Document'))
           ->setDisabled(!$can_edit)
@@ -310,7 +305,7 @@ final class PhrictionDocumentController
           ->setHref('/phriction/move/'.$document->getID().'/')
           ->setWorkflow(true));
 
-      $action_view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Document'))
           ->setDisabled(!$can_edit)
@@ -319,7 +314,7 @@ final class PhrictionDocumentController
           ->setWorkflow(true));
     }
 
-    $action_view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
       ->setName(pht('View History'))
       ->setIcon('fa-list')
@@ -327,15 +322,14 @@ final class PhrictionDocumentController
 
     $print_uri = PhrictionDocument::getSlugURI($slug).'?__print__=1';
 
-    $action_view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
       ->setName(pht('Printable Page'))
       ->setIcon('fa-print')
       ->setOpenInNewWindow(true)
       ->setHref($print_uri));
 
-    return $action_view;
-
+    return $curtain;
   }
 
   private function renderDocumentChildren($slug) {

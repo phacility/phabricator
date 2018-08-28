@@ -8,6 +8,7 @@ final class PHUIDocumentView extends AphrontTagView {
   private $fluid;
   private $toc;
   private $foot;
+  private $curtain;
 
   public function setHeader(PHUIHeaderView $header) {
     $header->setTall(true);
@@ -36,6 +37,15 @@ final class PHUIDocumentView extends AphrontTagView {
     return $this;
   }
 
+  public function setCurtain(PHUICurtainView $curtain) {
+    $this->curtain = $curtain;
+    return $this;
+  }
+
+  public function getCurtain() {
+    return $this->curtain;
+  }
+
   protected function getTagAttributes() {
     $classes = array();
 
@@ -60,6 +70,17 @@ final class PHUIDocumentView extends AphrontTagView {
     $classes = array();
     $classes[] = 'phui-document-view';
     $classes[] = 'phui-document-view-pro';
+
+    if ($this->curtain) {
+      $classes[] = 'has-curtain';
+    } else {
+      $classes[] = 'has-no-curtain';
+    }
+
+    if ($this->curtain) {
+      $action_list = $this->curtain->getActionList();
+      $this->header->setActionListID($action_list->getID());
+    }
 
     $book = null;
     if ($this->bookname) {
@@ -114,32 +135,51 @@ final class PHUIDocumentView extends AphrontTagView {
         $this->foot);
     }
 
-    $content_inner = phutil_tag(
+    $curtain = null;
+    if ($this->curtain) {
+      $curtain = phutil_tag(
         'div',
         array(
-          'class' => 'phui-document-inner',
+          'class' => 'phui-document-curtain',
         ),
+        $this->curtain);
+    }
+
+    $main_content = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-document-content-view',
+      ),
+      $main_content);
+
+    $content_inner = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-document-inner',
+      ),
+      array(
+        $table_of_contents,
+        $this->header,
         array(
-          $table_of_contents,
-          $this->header,
+          $curtain,
           $main_content,
-          $foot_content,
-        ));
+        ),
+        $foot_content,
+      ));
 
     $content = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-document-content',
-        ),
-        $content_inner);
+      'div',
+      array(
+        'class' => 'phui-document-content',
+      ),
+      $content_inner);
 
-  return phutil_tag(
-    'div',
-    array(
-      'class' => implode(' ', $classes),
-    ),
-    $content);
-
+    return phutil_tag(
+      'div',
+      array(
+        'class' => implode(' ', $classes),
+      ),
+      $content);
   }
 
 }
