@@ -1315,7 +1315,7 @@ final class DifferentialRevisionViewController
     }
 
     return id(new HarbormasterUnitSummaryView())
-      ->setUser($viewer)
+      ->setViewer($viewer)
       ->setExcuse($excuse)
       ->setBuildable($diff->getBuildable())
       ->setUnitMessages($diff->getUnitMessages())
