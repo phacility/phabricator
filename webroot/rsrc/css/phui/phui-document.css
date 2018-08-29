@@ -100,3 +100,9 @@
   .remarkup-code {
   font: 13px/18px "Menlo", "Consolas", "Monaco", monospace;
 }
+
+.phui-document-version-navigation {
+  text-align: center;
+  padding: 8px;
+  background-color: {$lightgreybackground};
+}
