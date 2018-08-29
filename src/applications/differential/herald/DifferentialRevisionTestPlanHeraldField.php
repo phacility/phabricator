@@ -1,16 +1,16 @@
 <?php
 
-final class DifferentialRevisionSummaryHeraldField
+final class DifferentialRevisionTestPlanHeraldField
   extends DifferentialRevisionHeraldField {
 
-  const FIELDCONST = 'differential.revision.summary';
+  const FIELDCONST = 'differential.revision.test-plan';
 
   public function getHeraldFieldName() {
-    return pht('Revision summary');
+    return pht('Revision test plan');
   }
 
   public function getHeraldFieldValue($object) {
-    return $object->getSummary();
+    return $object->getTestPlan();
   }
 
   protected function getHeraldFieldStandardType() {
