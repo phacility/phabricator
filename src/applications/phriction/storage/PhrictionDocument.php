@@ -19,7 +19,6 @@ final class PhrictionDocument extends PhrictionDAO
   protected $depth;
   protected $contentPHID;
   protected $status;
-  protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
   protected $spacePHID;
@@ -36,7 +35,6 @@ final class PhrictionDocument extends PhrictionDAO
         'slug' => 'sort128',
         'depth' => 'uint32',
         'status' => 'text32',
-        'mailKey' => 'bytes20',
         'editedEpoch' => 'epoch',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -93,13 +91,6 @@ final class PhrictionDocument extends PhrictionDAO
     $document->setEditedEpoch(PhabricatorTime::getNow());
 
     return $document;
-  }
-
-  public function save() {
-    if (!$this->getMailKey()) {
-      $this->setMailKey(Filesystem::readRandomCharacters(20));
-    }
-    return parent::save();
   }
 
   public static function getSlugURI($slug, $type = 'document') {
@@ -329,9 +320,9 @@ final class PhrictionDocument extends PhrictionDAO
 /* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
 
 
-    public function newPolicyCodex() {
-      return new PhrictionDocumentPolicyCodex();
-    }
+  public function newPolicyCodex() {
+    return new PhrictionDocumentPolicyCodex();
+  }
 
 
 }
