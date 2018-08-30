@@ -66,12 +66,7 @@ final class PhrictionDocumentController
         ->addAction($create_button);
 
     } else {
-      $draft_content = id(new PhrictionContentQuery())
-        ->setViewer($viewer)
-        ->withDocumentPHIDs(array($document->getPHID()))
-        ->setLimit(1)
-        ->executeOne();
-      $max_version = (int)$draft_content->getVersion();
+      $max_version = (int)$document->getMaxVersion();
 
       $version = $request->getInt('v');
       if ($version) {

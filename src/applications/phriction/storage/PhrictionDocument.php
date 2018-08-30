@@ -23,6 +23,7 @@ final class PhrictionDocument extends PhrictionDAO
   protected $editPolicy;
   protected $spacePHID;
   protected $editedEpoch;
+  protected $maxVersion;
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
@@ -36,6 +37,7 @@ final class PhrictionDocument extends PhrictionDAO
         'depth' => 'uint32',
         'status' => 'text32',
         'editedEpoch' => 'epoch',
+        'maxVersion' => 'uint32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'slug' => array(
@@ -89,6 +91,7 @@ final class PhrictionDocument extends PhrictionDAO
     }
 
     $document->setEditedEpoch(PhabricatorTime::getNow());
+    $document->setMaxVersion(0);
 
     return $document;
   }

@@ -7,7 +7,7 @@ final class PhrictionEditController
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
-    $current_version = null;
+    $max_version = null;
     if ($id) {
       $is_new = false;
       $document = id(new PhrictionDocumentQuery())
@@ -24,7 +24,7 @@ final class PhrictionEditController
         return new Aphront404Response();
       }
 
-      $current_version = $document->getContent()->getVersion();
+      $max_version = $document->getMaxVersion();
 
       $revert = $request->getInt('revert');
       if ($revert) {
@@ -37,9 +37,12 @@ final class PhrictionEditController
           return new Aphront404Response();
         }
       } else {
-        $content = $document->getContent();
+        $content = id(new PhrictionContentQuery())
+          ->setViewer($viewer)
+          ->withDocumentPHIDs(array($document->getPHID()))
+          ->setLimit(1)
+          ->executeOne();
       }
-
     } else {
       $slug = $request->getStr('slug');
       $slug = PhabricatorSlug::normalize($slug);
@@ -54,8 +57,13 @@ final class PhrictionEditController
         ->executeOne();
 
       if ($document) {
-        $content = $document->getContent();
-        $current_version = $content->getVersion();
+        $content = id(new PhrictionContentQuery())
+          ->setViewer($viewer)
+          ->withDocumentPHIDs(array($document->getPHID()))
+          ->setLimit(1)
+          ->executeOne();
+
+        $max_version = $document->getMaxVersion();
         $is_new = false;
       } else {
         $document = PhrictionDocument::initializeNewDocument($viewer, $slug);
@@ -128,7 +136,7 @@ final class PhrictionEditController
       $title = $request->getStr('title');
       $content_text = $request->getStr('content');
       $notes = $request->getStr('description');
-      $current_version = $request->getInt('contentVersion');
+      $max_version = $request->getInt('contentVersion');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
       $v_cc = $request->getArr('cc');
@@ -168,7 +176,7 @@ final class PhrictionEditController
         ->setContinueOnNoEffect(true)
         ->setDescription($notes)
         ->setProcessContentVersionError(!$request->getBool('overwrite'))
-        ->setContentVersion($current_version);
+        ->setContentVersion($max_version);
 
       try {
         $editor->applyTransactions($document, $xactions);
@@ -232,7 +240,7 @@ final class PhrictionEditController
       ->setUser($viewer)
       ->addHiddenInput('slug', $document->getSlug())
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
-      ->addHiddenInput('contentVersion', $current_version)
+      ->addHiddenInput('contentVersion', $max_version)
       ->addHiddenInput('overwrite', $overwrite)
       ->appendChild(
         id(new AphrontFormTextControl())

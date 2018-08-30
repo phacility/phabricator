@@ -468,7 +468,7 @@ final class PhrictionTransactionEditor
 
     $error = null;
     if ($this->getContentVersion() &&
-       ($object->getContent()->getVersion() != $this->getContentVersion())) {
+       ($object->getMaxVersion() != $this->getContentVersion())) {
       $error = new PhabricatorApplicationTransactionValidationError(
         $type,
         pht('Edit Conflict'),
@@ -519,6 +519,7 @@ final class PhrictionTransactionEditor
       $document->setContentPHID($content_phid);
       $document->attachContent($content);
       $document->setEditedEpoch(PhabricatorTime::getNow());
+      $document->setMaxVersion($content->getVersion());
 
       $this->newContent = $content;
     }
@@ -539,7 +540,7 @@ final class PhrictionTransactionEditor
       $content->setDescription($this->getDescription());
     }
 
-    $content->setVersion($this->getOldContent()->getVersion() + 1);
+    $content->setVersion($document->getMaxVersion() + 1);
 
     return $content;
   }
