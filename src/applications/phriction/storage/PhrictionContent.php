@@ -34,7 +34,7 @@ final class PhrictionContent
         'description' => 'text',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'documentID' => array(
+        'key_version' => array(
           'columns' => array('documentPHID', 'version'),
           'unique' => true,
         ),
