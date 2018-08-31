@@ -432,13 +432,17 @@ final class PhrictionDocumentController
 
     $publish_uri = "/phriction/publish/{$id}/{$content_id}/";
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-      ->setName($publish_name)
-      ->setIcon('fa-upload')
-      ->setDisabled(!$can_publish)
-      ->setWorkflow(true)
-      ->setHref($publish_uri));
+    if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+      $publish_name = pht('Publish (Prototype!)');
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+        ->setName($publish_name)
+        ->setIcon('fa-upload')
+        ->setDisabled(!$can_publish)
+        ->setWorkflow(true)
+        ->setHref($publish_uri));
+    }
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
       $curtain->addAction(
