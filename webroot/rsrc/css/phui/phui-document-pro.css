@@ -8,6 +8,35 @@
   margin: 0 auto;
 }
 
+.phui-document-view.phui-document-view-pro.has-curtain {
+  max-width: 1132px;
+}
+
+.printable .phui-document-view.phui-document-view-pro.has-curtain {
+  max-width: none;
+}
+
+.device-desktop .phui-document-inner {
+  overflow: hidden;
+}
+
+.device-desktop .has-curtain .phui-document-content-view {
+  padding-right: 332px;
+}
+
+.printable .phui-document-content-view {
+  padding-right: 0;
+}
+
+.device-desktop .phui-document-curtain {
+  float: right;
+  width: 300px;
+}
+
+.printable .phui-document-curtain {
+  display: none;
+}
+
 .phui-document-container {
   background-color: {$page.content};
   position: relative;

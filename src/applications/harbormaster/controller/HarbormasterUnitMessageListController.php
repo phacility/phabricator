@@ -39,6 +39,7 @@ final class HarbormasterUnitMessageListController
     }
 
     $unit = id(new HarbormasterUnitSummaryView())
+      ->setViewer($viewer)
       ->setBuildable($buildable)
       ->setUnitMessages($unit_data);
 

@@ -56,6 +56,8 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
 
         'edit/(?:(?P<id>[1-9]\d*)/)?' => 'PhrictionEditController',
         'delete/(?P<id>[1-9]\d*)/'    => 'PhrictionDeleteController',
+        'publish/(?P<documentID>[1-9]\d*)/(?P<contentID>[1-9]\d*)/'
+          => 'PhrictionPublishController',
         'new/'                        => 'PhrictionNewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhrictionMoveController',
 

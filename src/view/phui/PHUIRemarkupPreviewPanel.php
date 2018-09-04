@@ -105,7 +105,7 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
       $header = id(new PHUIHeaderView())
         ->setHeader(pht('%s (Preview)', $this->header));
 
-      $content = id(new PHUIDocumentViewPro())
+      $content = id(new PHUIDocumentView())
         ->setHeader($header)
         ->appendChild($preview);
     }

@@ -101,5 +101,8 @@ abstract class HarbormasterBuildableEngine
       $xactions);
   }
 
+  public function getAuthorIdentity() {
+    return null;
+  }
 
 }

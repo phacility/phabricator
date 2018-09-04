@@ -1679,7 +1679,7 @@ abstract class PhabricatorEditEngine
       ->setUser($viewer)
       ->setFields($fields);
 
-    $document = id(new PHUIDocumentViewPro())
+    $document = id(new PHUIDocumentView())
       ->setUser($viewer)
       ->setHeader($header)
       ->appendChild($help_view);
@@ -2003,7 +2003,19 @@ abstract class PhabricatorEditEngine
     $identifier = $request->getValue('objectIdentifier');
     if ($identifier) {
       $this->setIsCreate(false);
-      $object = $this->newObjectFromIdentifier($identifier);
+
+      // After T13186, each transaction can individually weaken or replace the
+      // capabilities required to apply it, so we no longer need CAN_EDIT to
+      // attempt to apply transactions to objects. In practice, almost all
+      // transactions require CAN_EDIT so we won't get very far if we don't
+      // have it.
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+      );
+
+      $object = $this->newObjectFromIdentifier(
+        $identifier,
+        $capabilities);
     } else {
       $this->requireCreateCapability();
 

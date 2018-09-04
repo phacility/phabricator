@@ -200,6 +200,8 @@ final class PhabricatorRepositoryCommit
 
     $this->authorIdentity = $author;
     $this->committerIdentity = $committer;
+
+    return $this;
   }
 
   public function getAuthorIdentity() {
@@ -483,6 +485,23 @@ final class PhabricatorRepositoryCommit
     }
 
     return null;
+  }
+
+  public function loadIdentities(PhabricatorUser $viewer) {
+    if ($this->authorIdentity !== self::ATTACHABLE) {
+      return $this;
+    }
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->getID()))
+      ->needIdentities(true)
+      ->executeOne();
+
+    $author_identity = $commit->getAuthorIdentity();
+    $committer_identity = $commit->getCommitterIdentity();
+
+    return $this->attachIdentities($author_identity, $committer_identity);
   }
 
   public function hasCommitterIdentity() {

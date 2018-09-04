@@ -296,45 +296,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
   /**
    * @task role
    */
-  public function disableUser(PhabricatorUser $user, $disable) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    $user->openTransaction();
-      $user->beginWriteLocking();
-
-        $user->reload();
-        if ($user->getIsDisabled() == $disable) {
-          $user->endWriteLocking();
-          $user->killTransaction();
-          return $this;
-        }
-
-        $log = PhabricatorUserLog::initializeNewLog(
-          $actor,
-          $user->getPHID(),
-          PhabricatorUserLog::ACTION_DISABLE);
-        $log->setOldValue($user->getIsDisabled());
-        $log->setNewValue($disable);
-
-        $user->setIsDisabled((int)$disable);
-        $user->save();
-
-        $log->save();
-
-      $user->endWriteLocking();
-    $user->saveTransaction();
-
-    return $this;
-  }
-
-
-  /**
-   * @task role
-   */
   public function approveUser(PhabricatorUser $user, $approve) {
     $actor = $this->requireActor();
 

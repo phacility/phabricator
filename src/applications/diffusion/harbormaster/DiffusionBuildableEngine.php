@@ -34,4 +34,10 @@ final class DiffusionBuildableEngine
     $this->applyTransactions(array($xaction));
   }
 
+  public function getAuthorIdentity() {
+    return $this->getObject()
+      ->loadIdentities($this->getViewer())
+      ->getAuthorIdentity();
+  }
+
 }

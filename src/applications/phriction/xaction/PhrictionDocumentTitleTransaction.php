@@ -1,7 +1,7 @@
 <?php
 
 final class PhrictionDocumentTitleTransaction
-  extends PhrictionDocumentTransactionType {
+  extends PhrictionDocumentVersionTransaction {
 
   const TRANSACTIONTYPE = 'title';
 
@@ -14,10 +14,10 @@ final class PhrictionDocumentTitleTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
-  }
 
-  public function applyExternalEffects($object, $value) {
-    $this->getEditor()->getNewContent()->setTitle($value);
+    $content = $this->getNewDocumentContent($object);
+
+    $content->setTitle($value);
   }
 
   public function getActionStrength() {

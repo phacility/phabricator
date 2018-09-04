@@ -1,7 +1,7 @@
 <?php
 
 final class PhrictionDocumentMoveAwayTransaction
-  extends PhrictionDocumentTransactionType {
+  extends PhrictionDocumentVersionTransaction {
 
   const TRANSACTIONTYPE = 'move-away';
 
@@ -22,14 +22,12 @@ final class PhrictionDocumentMoveAwayTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
-  }
 
-  public function applyExternalEffects($object, $value) {
-    $dict = $value;
-    $this->getEditor()->getNewContent()->setContent('');
-    $this->getEditor()->getNewContent()->setChangeType(
-      PhrictionChangeType::CHANGE_MOVE_AWAY);
-    $this->getEditor()->getNewContent()->setChangeRef($dict['id']);
+    $content = $this->getNewDocumentContent($object);
+
+    $content->setContent('');
+    $content->setChangeType(PhrictionChangeType::CHANGE_MOVE_AWAY);
+    $content->setChangeRef($value['id']);
   }
 
   public function getActionName() {

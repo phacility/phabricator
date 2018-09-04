@@ -34,9 +34,8 @@ final class HarbormasterUnitPropertyView extends AphrontView {
     return $this;
   }
 
-
   public function render() {
-    require_celerity_resource('harbormaster-css');
+    $viewer = $this->getViewer();
 
     $messages = $this->unitMessages;
     $messages = msort($messages, 'getSortKey');
@@ -84,13 +83,10 @@ final class HarbormasterUnitPropertyView extends AphrontView {
           $name);
       }
 
-      $details = $message->getUnitMessageDetails();
-      if (strlen($details)) {
-        $name = array(
-          $name,
-          $this->renderUnitTestDetails($details),
-        );
-      }
+      $name = array(
+        $name,
+        $message->newUnitMessageDetailsView($viewer, true),
+      );
 
       $rows[] = array(
         $result_icon,
@@ -156,27 +152,6 @@ final class HarbormasterUnitPropertyView extends AphrontView {
     }
 
     return $table;
-  }
-
-  private function renderUnitTestDetails($full_details) {
-    $details = id(new PhutilUTF8StringTruncator())
-      ->setMaximumBytes(2048)
-      ->truncateString($full_details);
-    $details = phutil_split_lines($details);
-
-    $limit = 3;
-    if (count($details) > $limit) {
-      $details = array_slice($details, 0, $limit);
-    }
-
-    $details = implode('', $details);
-
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'PhabricatorMonospaced harbormaster-unit-details',
-      ),
-      $details);
   }
 
 }

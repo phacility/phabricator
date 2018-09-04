@@ -318,7 +318,7 @@ final class HarbormasterBuildableViewController
 
     if ($lint_data) {
       $lint_table = id(new HarbormasterLintPropertyView())
-        ->setUser($viewer)
+        ->setViewer($viewer)
         ->setLimit(10)
         ->setLintMessages($lint_data);
 
@@ -343,6 +343,7 @@ final class HarbormasterBuildableViewController
 
     if ($unit_data) {
       $unit = id(new HarbormasterUnitSummaryView())
+        ->setViewer($viewer)
         ->setBuildable($buildable)
         ->setUnitMessages($unit_data)
         ->setShowViewAll(true)

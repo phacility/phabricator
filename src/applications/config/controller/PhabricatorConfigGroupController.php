@@ -60,17 +60,10 @@ final class PhabricatorConfigGroupController
       $db_values = mpull($db_values, null, 'getConfigKey');
     }
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($this->getRequest()->getUser());
-    foreach ($options as $option) {
-      $engine->addObject($option, 'summary');
-    }
-    $engine->process();
-
     $list = new PHUIObjectItemListView();
     $list->setBig(true);
     foreach ($options as $option) {
-      $summary = $engine->getOutput($option, 'summary');
+      $summary = $option->getSummary();
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($option->getKey())

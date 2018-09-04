@@ -31,32 +31,18 @@ final class PhrictionHistoryController
       ->executeWithCursorPager($pager);
 
     $author_phids = mpull($history, 'getAuthorPHID');
-    $handles = $this->loadViewerHandles($author_phids);
+    $handles = $viewer->loadHandles($author_phids);
+
+    $max_version = (int)$document->getMaxVersion();
+    $current_version = $document->getContent()->getVersion();
 
     $list = new PHUIObjectItemListView();
     $list->setFlush(true);
-
     foreach ($history as $content) {
-
-      $author = $handles[$content->getAuthorPHID()]->renderLink();
       $slug_uri = PhrictionDocument::getSlugURI($document->getSlug());
       $version = $content->getVersion();
 
-      $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
-
-      $vs_previous = null;
-      if ($content->getVersion() != 1) {
-        $vs_previous = $diff_uri
-          ->alter('l', $content->getVersion() - 1)
-          ->alter('r', $content->getVersion());
-      }
-
-      $vs_head = null;
-      if ($content->getID() != $document->getContentID()) {
-        $vs_head = $diff_uri
-          ->alter('l', $content->getVersion())
-          ->alter('r', $current->getVersion());
-      }
+      $base_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
 
       $change_type = PhrictionChangeType::getChangeTypeLabel(
         $content->getChangeType());
@@ -68,62 +54,89 @@ final class PhrictionHistoryController
           $color = 'lightbluetext';
           break;
         case PhrictionChangeType::CHANGE_MOVE_HERE:
-            $color = 'yellow';
+          $color = 'yellow';
           break;
         case PhrictionChangeType::CHANGE_MOVE_AWAY:
-            $color = 'orange';
+          $color = 'orange';
           break;
         case PhrictionChangeType::CHANGE_STUB:
           $color = 'green';
           break;
         default:
-          throw new Exception(pht('Unknown change type!'));
+          $color = 'indigo';
           break;
       }
 
+      $version_uri = $slug_uri.'?v='.$version;
+
       $item = id(new PHUIObjectItemView())
-        ->setHeader(pht('%s by %s', $change_type, $author))
-        ->setStatusIcon('fa-file '.$color)
-        ->addAttribute(
-          phutil_tag(
-            'a',
-            array(
-              'href' => $slug_uri.'?v='.$version,
-            ),
-            pht('Version %s', $version)))
-        ->addAttribute(pht('%s %s',
-          phabricator_date($content->getDateCreated(), $viewer),
-          phabricator_time($content->getDateCreated(), $viewer)));
+        ->setHref($version_uri);
 
-      if ($content->getDescription()) {
-        $item->addAttribute($content->getDescription());
-      }
-
-      if ($vs_previous) {
-        $item->addIcon(
-          'fa-reply',
-          pht('Show Change'),
-          array(
-            'href' => $vs_previous,
-          ));
+      if ($version > $current_version) {
+        $icon = 'fa-spinner';
+        $color = 'pink';
+        $header = pht('Draft %d', $version);
       } else {
-        $item->addIcon(
-          'fa-reply grey',
-          phutil_tag('em', array(), pht('No previous change')));
+        $icon = 'fa-file-o';
+        $header = pht('Version %d', $version);
       }
 
-      if ($vs_head) {
-        $item->addIcon(
-          'fa-reply-all',
-          pht('Show Later Changes'),
-          array(
-            'href' => $vs_head,
-          ));
-      } else {
-        $item->addIcon(
-          'fa-reply-all grey',
-          phutil_tag('em', array(), pht('No later changes')));
+      if ($version == $current_version) {
+        $item->setEffect('selected');
       }
+
+      $item
+        ->setHeader($header)
+        ->setStatusIcon($icon.' '.$color);
+
+      $description = $content->getDescription();
+      if (strlen($description)) {
+        $item->addAttribute($description);
+      }
+
+      $item->addIcon(
+        null,
+        phabricator_datetime($content->getDateCreated(), $viewer));
+
+      $author_phid = $content->getAuthorPHID();
+      $item->addByline($viewer->renderHandle($author_phid));
+
+      $diff_uri = null;
+      if ($version > 1) {
+        $diff_uri = $base_uri
+          ->alter('l', $version - 1)
+          ->alter('r', $version);
+      } else {
+        $diff_uri = null;
+      }
+
+      if ($content->getVersion() != $max_version) {
+        $compare_uri = $base_uri
+          ->alter('l', $version)
+          ->alter('r', $max_version);
+      } else {
+        $compare_uri = null;
+      }
+
+      $button_bar = id(new PHUIButtonBarView())
+        ->addButton(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setColor('grey')
+            ->setIcon('fa-chevron-down')
+            ->setDisabled(!$diff_uri)
+            ->setHref($diff_uri)
+            ->setText(pht('Diff')))
+        ->addButton(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setColor('grey')
+            ->setIcon('fa-chevron-circle-up')
+           ->setDisabled(!$compare_uri)
+           ->setHref($compare_uri)
+            ->setText(pht('Compare')));
+
+      $item->setSideColumn($button_bar);
 
       $list->addItem($item);
     }

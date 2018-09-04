@@ -7,7 +7,7 @@ final class PhrictionContent
     PhabricatorDestructibleInterface,
     PhabricatorConduitResultInterface {
 
-  protected $documentID;
+  protected $documentPHID;
   protected $version;
   protected $authorPHID;
 
@@ -34,8 +34,8 @@ final class PhrictionContent
         'description' => 'text',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'documentID' => array(
-          'columns' => array('documentID', 'version'),
+        'key_version' => array(
+          'columns' => array('documentPHID', 'version'),
           'unique' => true,
         ),
         'authorPHID' => array(

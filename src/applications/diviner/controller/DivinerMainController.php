@@ -27,7 +27,7 @@ final class DivinerMainController extends DivinerController {
       ->setHeader(pht('Documentation Books'))
       ->addActionLink($query_button);
 
-    $document = new PHUIDocumentViewPro();
+    $document = new PHUIDocumentView();
     $document->setHeader($header);
     $document->addClass('diviner-view');
 

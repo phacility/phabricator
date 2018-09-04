@@ -93,29 +93,13 @@ final class PhrictionTransactionEditor
     return $types;
   }
 
-  protected function shouldApplyInitialEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
-          return true;
-      }
-    }
-    return parent::shouldApplyInitialEffects($object, $xactions);
-  }
-
-  protected function applyInitialEffects(
+  protected function expandTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
     $this->setOldContent($object->getContent());
-    $this->setNewContent($this->buildNewContentTemplate($object));
+
+    return parent::expandTransactions($object, $xactions);
   }
 
   protected function expandTransaction(
@@ -148,7 +132,6 @@ final class PhrictionTransactionEditor
         break;
       default:
         break;
-
     }
 
     return $xactions;
@@ -158,29 +141,12 @@ final class PhrictionTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $save_content = false;
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PhrictionDocumentTitleTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentMoveToTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentMoveAwayTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentDeleteTransaction::TRANSACTIONTYPE:
-        case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
-          $save_content = true;
-          break;
-        default:
-          break;
-      }
-    }
+    if ($this->hasNewDocumentContent()) {
+      $content = $this->getNewDocumentContent($object);
 
-    if ($save_content) {
-      $content = $this->getNewContent();
-      $content->setDocumentID($object->getID());
-      $content->save();
-
-      $object->setContentID($content->getID());
-      $object->save();
-      $object->attachContent($content);
+      $content
+        ->setDocumentPHID($object->getPHID())
+        ->save();
     }
 
     if ($this->getIsNewObject() && !$this->getSkipAncestorCheck()) {
@@ -502,7 +468,7 @@ final class PhrictionTransactionEditor
 
     $error = null;
     if ($this->getContentVersion() &&
-       ($object->getContent()->getVersion() != $this->getContentVersion())) {
+       ($object->getMaxVersion() != $this->getContentVersion())) {
       $error = new PhabricatorApplicationTransactionValidationError(
         $type,
         pht('Edit Conflict'),
@@ -535,24 +501,48 @@ final class PhrictionTransactionEditor
       ->setDocument($object);
   }
 
-  private function buildNewContentTemplate(
-    PhrictionDocument $document) {
+  private function hasNewDocumentContent() {
+    return (bool)$this->newContent;
+  }
 
-    $new_content = id(new PhrictionContent())
+  public function getNewDocumentContent(PhrictionDocument $document) {
+    if (!$this->hasNewDocumentContent()) {
+      $content = $this->newDocumentContent($document);
+
+      // Generate a PHID now so we can populate "contentPHID" before saving
+      // the document to the database: the column is not nullable so we need
+      // a value.
+      $content_phid = $content->generatePHID();
+
+      $content->setPHID($content_phid);
+
+      $document->setContentPHID($content_phid);
+      $document->attachContent($content);
+      $document->setEditedEpoch(PhabricatorTime::getNow());
+      $document->setMaxVersion($content->getVersion());
+
+      $this->newContent = $content;
+    }
+
+    return $this->newContent;
+  }
+
+  private function newDocumentContent(PhrictionDocument $document) {
+    $content = id(new PhrictionContent())
       ->setSlug($document->getSlug())
-      ->setAuthorPHID($this->getActor()->getPHID())
+      ->setAuthorPHID($this->getActingAsPHID())
       ->setChangeType(PhrictionChangeType::CHANGE_EDIT)
       ->setTitle($this->getOldContent()->getTitle())
       ->setContent($this->getOldContent()->getContent())
       ->setDescription('');
 
     if (strlen($this->getDescription())) {
-      $new_content->setDescription($this->getDescription());
+      $content->setDescription($this->getDescription());
     }
 
-    $new_content->setVersion($this->getOldContent()->getVersion() + 1);
+    $content->setVersion($document->getMaxVersion() + 1);
 
-    return $new_content;
+    return $content;
   }
 
   protected function getCustomWorkerState() {

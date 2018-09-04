@@ -17,12 +17,13 @@ final class PhrictionDocument extends PhrictionDAO
 
   protected $slug;
   protected $depth;
-  protected $contentID;
+  protected $contentPHID;
   protected $status;
-  protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
   protected $spacePHID;
+  protected $editedEpoch;
+  protected $maxVersion;
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
@@ -34,16 +35,11 @@ final class PhrictionDocument extends PhrictionDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'slug' => 'sort128',
         'depth' => 'uint32',
-        'contentID' => 'id?',
         'status' => 'text32',
-        'mailKey' => 'bytes20',
+        'editedEpoch' => 'epoch',
+        'maxVersion' => 'uint32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'slug' => array(
           'columns' => array('slug'),
           'unique' => true,
@@ -56,17 +52,16 @@ final class PhrictionDocument extends PhrictionDAO
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhrictionDocumentPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhrictionDocumentPHIDType::TYPECONST;
   }
 
   public static function initializeNewDocument(PhabricatorUser $actor, $slug) {
-    $document = new PhrictionDocument();
-    $document->setSlug($slug);
+    $document = id(new self())
+      ->setSlug($slug);
 
-    $content = new PhrictionContent();
-    $content->setSlug($slug);
+    $content = id(new PhrictionContent())
+      ->setSlug($slug);
 
     $default_title = PhabricatorSlug::getDefaultTitle($slug);
     $content->setTitle($default_title);
@@ -95,14 +90,10 @@ final class PhrictionDocument extends PhrictionDAO
         ->setSpacePHID($actor->getDefaultSpacePHID());
     }
 
-    return $document;
-  }
+    $document->setEditedEpoch(PhabricatorTime::getNow());
+    $document->setMaxVersion(0);
 
-  public function save() {
-    if (!$this->getMailKey()) {
-      $this->setMailKey(Filesystem::readRandomCharacters(20));
-    }
-    return parent::save();
+    return $document;
   }
 
   public static function getSlugURI($slug, $type = 'document') {
@@ -332,9 +323,9 @@ final class PhrictionDocument extends PhrictionDAO
 /* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
 
 
-    public function newPolicyCodex() {
-      return new PhrictionDocumentPolicyCodex();
-    }
+  public function newPolicyCodex() {
+    return new PhrictionDocumentPolicyCodex();
+  }
 
 
 }

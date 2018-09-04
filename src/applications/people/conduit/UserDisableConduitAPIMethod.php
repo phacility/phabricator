@@ -10,6 +10,14 @@ final class UserDisableConduitAPIMethod extends UserConduitAPIMethod {
     return pht('Permanently disable specified users (admin only).');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsoleted by method "user.edit".');
+  }
+
   protected function defineParamTypes() {
     return array(
       'phids' => 'required list<phid>',
@@ -43,11 +51,23 @@ final class UserDisableConduitAPIMethod extends UserConduitAPIMethod {
       throw new ConduitException('ERR-BAD-PHID');
     }
 
-    foreach ($users as $user) {
-      id(new PhabricatorUserEditor())
-        ->setActor($actor)
-        ->disableUser($user, true);
+    foreach ($phids as $phid) {
+      $params = array(
+        'transactions' => array(
+          array(
+            'type' => 'disabled',
+            'value' => true,
+          ),
+        ),
+        'objectIdentifier' => $phid,
+      );
+
+      id(new ConduitCall('user.edit', $params))
+        ->setUser($actor)
+        ->execute();
     }
+
+    return null;
   }
 
 }
