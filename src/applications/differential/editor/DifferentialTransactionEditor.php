@@ -892,6 +892,17 @@ final class DifferentialTransactionEditor
     array $inlines,
     PhabricatorMetaMTAMailBody $body) {
 
+    $limit = 100;
+    $limit_note = null;
+    if (count($inlines) > $limit) {
+      $limit_note = pht(
+        '(Showing first %s of %s inlines.)',
+        new PhutilNumber($limit),
+        phutil_count($inlines));
+
+      $inlines = array_slice($inlines, 0, $limit, true);
+    }
+
     $section = id(new DifferentialInlineCommentMailView())
       ->setViewer($this->getActor())
       ->setInlines($inlines)
@@ -900,6 +911,9 @@ final class DifferentialTransactionEditor
     $header = pht('INLINE COMMENTS');
 
     $section_text = "\n".$section->getPlaintext();
+    if ($limit_note) {
+      $section_text = $limit_note."\n".$section_text;
+    }
 
     $style = array(
       'margin: 6px 0 12px 0;',
@@ -911,6 +925,16 @@ final class DifferentialTransactionEditor
         'style' => implode(' ', $style),
       ),
       $section->getHTML());
+
+    if ($limit_note) {
+      $section_html = array(
+        phutil_tag(
+          'em',
+          array(),
+          $limit_note),
+        $section_html,
+      );
+    }
 
     $body->addPlaintextSection($header, $section_text, false);
     $body->addHTMLSection($header, $section_html);
