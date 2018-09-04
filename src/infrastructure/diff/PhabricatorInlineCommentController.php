@@ -231,6 +231,15 @@ abstract class PhabricatorInlineCommentController
           $inline->setReplyToCommentPHID($this->getReplyToCommentPHID());
         }
 
+        // If you own this object, mark your own inlines as "Done" by default.
+        $owner_phid = $this->loadObjectOwnerPHID($inline);
+        if ($owner_phid) {
+          if ($viewer->getPHID() == $owner_phid) {
+            $fixed_state = PhabricatorInlineCommentInterface::STATE_DRAFT;
+            $inline->setFixedState($fixed_state);
+          }
+        }
+
         $this->saveComment($inline);
 
         return $this->buildRenderedCommentResponse(
