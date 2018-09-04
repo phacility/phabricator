@@ -77,19 +77,17 @@ final class DifferentialInlineCommentEditController
   }
 
   protected function loadCommentForEdit($id) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
 
     $inline = $this->loadComment($id);
-    if (!$this->canEditInlineComment($user, $inline)) {
+    if (!$this->canEditInlineComment($viewer, $inline)) {
       throw new Exception(pht('That comment is not editable!'));
     }
     return $inline;
   }
 
   protected function loadCommentForDone($id) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $inline = $this->loadComment($id);
     if (!$inline) {
@@ -128,11 +126,11 @@ final class DifferentialInlineCommentEditController
   }
 
   private function canEditInlineComment(
-    PhabricatorUser $user,
+    PhabricatorUser $viewer,
     DifferentialInlineComment $inline) {
 
     // Only the author may edit a comment.
-    if ($inline->getAuthorPHID() != $user->getPHID()) {
+    if ($inline->getAuthorPHID() != $viewer->getPHID()) {
       return false;
     }
 
