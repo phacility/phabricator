@@ -258,18 +258,30 @@ final class PhabricatorAuditEditor
           $this->didExpandInlineState = true;
 
           $actor_phid = $this->getActingAsPHID();
-          $actor_is_author = ($object->getAuthorPHID() == $actor_phid);
-          if (!$actor_is_author) {
-            break;
-          }
+          $author_phid = $object->getAuthorPHID();
+          $actor_is_author = ($actor_phid == $author_phid);
 
           $state_map = PhabricatorTransactions::getInlineStateMap();
 
-          $inlines = id(new DiffusionDiffInlineCommentQuery())
+          $query = id(new DiffusionDiffInlineCommentQuery())
             ->setViewer($this->getActor())
             ->withCommitPHIDs(array($object->getPHID()))
-            ->withFixedStates(array_keys($state_map))
+            ->withFixedStates(array_keys($state_map));
+
+          $inlines = array();
+
+          $inlines[] = id(clone $query)
+            ->withAuthorPHIDs(array($actor_phid))
+            ->withHasTransaction(false)
             ->execute();
+
+          if ($actor_is_author) {
+            $inlines[] = id(clone $query)
+              ->withHasTransaciton(true)
+              ->execute();
+          }
+
+          $inlines = array_mergev($inlines);
 
           if (!$inlines) {
             break;

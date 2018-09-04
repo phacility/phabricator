@@ -248,18 +248,33 @@ final class DifferentialTransactionEditor
           $this->didExpandInlineState = true;
 
           $actor_phid = $this->getActingAsPHID();
-          $actor_is_author = ($object->getAuthorPHID() == $actor_phid);
-          if (!$actor_is_author) {
-            break;
-          }
+          $author_phid = $object->getAuthorPHID();
+          $actor_is_author = ($actor_phid == $author_phid);
 
           $state_map = PhabricatorTransactions::getInlineStateMap();
 
-          $inlines = id(new DifferentialDiffInlineCommentQuery())
+          $query = id(new DifferentialDiffInlineCommentQuery())
             ->setViewer($this->getActor())
             ->withRevisionPHIDs(array($object->getPHID()))
-            ->withFixedStates(array_keys($state_map))
+            ->withFixedStates(array_keys($state_map));
+
+          $inlines = array();
+
+          // We're going to undraft any "done" marks on your own inlines.
+          $inlines[] = id(clone $query)
+            ->withAuthorPHIDs(array($actor_phid))
+            ->withHasTransaction(false)
             ->execute();
+
+          // If you're the author, we also undraft any "done" marks on other
+          // inlines.
+          if ($actor_is_author) {
+            $inlines[] = id(clone $query)
+              ->withHasTransaction(true)
+              ->execute();
+          }
+
+          $inlines = array_mergev($inlines);
 
           if (!$inlines) {
             break;
