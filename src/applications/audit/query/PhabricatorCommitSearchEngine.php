@@ -67,35 +67,48 @@ final class PhabricatorCommitSearchEngine
         ->setKey('responsiblePHIDs')
         ->setConduitKey('responsible')
         ->setAliases(array('responsible', 'responsibles', 'responsiblePHID'))
-        ->setDatasource(new DifferentialResponsibleDatasource()),
+        ->setDatasource(new DifferentialResponsibleDatasource())
+        ->setDescription(
+          pht(
+            'Find commits where given users, projects, or packages are '.
+            'responsible for the next steps in the audit workflow.')),
       id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
         ->setConduitKey('authors')
-        ->setAliases(array('author', 'authors', 'authorPHID')),
+        ->setAliases(array('author', 'authors', 'authorPHID'))
+        ->setDescription(pht('Find commits authored by particular users.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Auditors'))
         ->setKey('auditorPHIDs')
         ->setConduitKey('auditors')
         ->setAliases(array('auditor', 'auditors', 'auditorPHID'))
-        ->setDatasource(new DiffusionAuditorFunctionDatasource()),
+        ->setDatasource(new DiffusionAuditorFunctionDatasource())
+        ->setDescription(
+          pht(
+            'Find commits where given users, projects, or packages are '.
+            'auditors.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setLabel(pht('Audit Status'))
         ->setKey('statuses')
         ->setAliases(array('status'))
-        ->setOptions(PhabricatorAuditCommitStatusConstants::getStatusNameMap()),
+        ->setOptions(PhabricatorAuditCommitStatusConstants::getStatusNameMap())
+        ->setDescription(pht('Find commits with given audit statuses.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
         ->setConduitKey('repositories')
         ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
-        ->setDatasource(new DiffusionRepositoryFunctionDatasource()),
+        ->setDatasource(new DiffusionRepositoryFunctionDatasource())
+        ->setDescription(pht('Find commits in particular repositories.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Packages'))
         ->setKey('packagePHIDs')
         ->setConduitKey('packages')
         ->setAliases(array('package', 'packages', 'packagePHID'))
-        ->setDatasource(new PhabricatorOwnersPackageDatasource()),
+        ->setDatasource(new PhabricatorOwnersPackageDatasource())
+        ->setDescription(
+          pht('Find commits which affect given packages.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Unreachable'))
         ->setKey('unreachable')

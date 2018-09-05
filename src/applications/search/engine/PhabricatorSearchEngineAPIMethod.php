@@ -161,7 +161,9 @@ If you specify both a `queryKey` and `constraints`, the builtin or saved query
 will be applied first as a starting point, then any additional values in
 `constraints` will be applied, overwriting the defaults from the original query.
 
-Specify constraints like this:
+Different endpoints support different constraints. The constraints this method
+supports are detailed below. As an example, you might specify constraints like
+this:
 
 ```lang=json, name="Example Custom Constraints"
 {
