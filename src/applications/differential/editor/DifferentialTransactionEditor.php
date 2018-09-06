@@ -896,7 +896,7 @@ final class DifferentialTransactionEditor
     $limit_note = null;
     if (count($inlines) > $limit) {
       $limit_note = pht(
-        '(Showing first %s of %s inlines.)',
+        '(Showing first %s of %s inline comments.)',
         new PhutilNumber($limit),
         phutil_count($inlines));
 
