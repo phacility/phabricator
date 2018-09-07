@@ -1152,6 +1152,20 @@ final class DifferentialRevision extends DifferentialDAO
         ->setKey('testPlan')
         ->setType('string')
         ->setDescription(pht('Revision test plan.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isDraft')
+        ->setType('bool')
+        ->setDescription(
+          pht(
+            'True if this revision is in any draft state, and thus not '.
+            'notifying reviewers and subscribers about changes.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('holdAsDraft')
+        ->setType('bool')
+        ->setDescription(
+          pht(
+            'True if this revision is being held as a draft. It will not be '.
+            'automatically submitted for review even if tests pass.')),
     );
   }
 
@@ -1172,6 +1186,8 @@ final class DifferentialRevision extends DifferentialDAO
       'diffPHID' => $this->getActiveDiffPHID(),
       'summary' => $this->getSummary(),
       'testPlan' => $this->getTestPlan(),
+      'isDraft' => !$this->getShouldBroadcast(),
+      'holdAsDraft' => (bool)$this->getHoldAsDraft(),
     );
   }
 
