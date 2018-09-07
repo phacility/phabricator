@@ -4,7 +4,7 @@
 
 .phui-document-view.phui-document-view-pro {
   max-width: 800px;
-  padding: 16px 16px 64px 16px;
+  padding: 16px 16px 32px 16px;
   margin: 0 auto;
 }
 
@@ -21,15 +21,25 @@
 }
 
 .device-desktop .has-curtain .phui-document-content-view {
-  padding-right: 332px;
+  display: table-cell;
 }
 
 .printable .phui-document-content-view {
   padding-right: 0;
 }
 
+.device-desktop .phui-document-content-outer {
+  display: table;
+  width: 100%;
+  layout: fixed;
+}
+
+.device-desktop .phui-document-content-inner {
+  display: table-row;
+}
+
 .device-desktop .phui-document-curtain {
-  float: right;
+  display: table-cell;
   width: 300px;
 }
 

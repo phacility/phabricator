@@ -171,10 +171,20 @@ final class PHUIDocumentView extends AphrontTagView {
         $table_of_contents,
         $this->header,
         $this->banner,
-        array(
-          $curtain,
-          $main_content,
-        ),
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-document-content-outer',
+          ),
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'phui-document-content-inner',
+            ),
+            array(
+              $main_content,
+              $curtain,
+            ))),
         $foot_content,
       ));
 
