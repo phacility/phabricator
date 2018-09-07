@@ -114,10 +114,10 @@ final class DiffusionHistoryTableView extends DiffusionHistoryView {
           'type' => $history->getFileType(),
         ));
 
-      $status = $commit->getAuditStatus();
-      $icon = PhabricatorAuditCommitStatusConstants::getStatusIcon($status);
-      $color = PhabricatorAuditCommitStatusConstants::getStatusColor($status);
-      $name = PhabricatorAuditCommitStatusConstants::getStatusName($status);
+      $status = $commit->getAuditStatusObject();
+      $icon = $status->getIcon();
+      $color = $status->getColor();
+      $name = $status->getName();
 
       $audit_view = id(new PHUIIconView())
         ->setIcon($icon, $color)

@@ -30,11 +30,11 @@ final class PhabricatorAuditSynchronizeManagementWorkflow
           continue;
         }
 
-        $old_status = $commit->getAuditStatus();
+        $old_status = $commit->getAuditStatusObject();
         $commit->updateAuditStatus($commit->getAudits());
-        $new_status = $commit->getAuditStatus();
+        $new_status = $commit->getAuditStatusObject();
 
-        if ($old_status == $new_status) {
+        if ($old_status->getKey() == $new_status->getKey()) {
           echo tsprintf(
             "%s\n",
             pht(
@@ -46,10 +46,8 @@ final class PhabricatorAuditSynchronizeManagementWorkflow
             pht(
               'Updating "%s": "%s" -> "%s".',
               $commit->getDisplayName(),
-              PhabricatorAuditCommitStatusConstants::getStatusName(
-                $old_status),
-              PhabricatorAuditCommitStatusConstants::getStatusName(
-                $new_status)));
+              $old_status->getName(),
+              $new_status->getName()));
 
           $commit->save();
         }

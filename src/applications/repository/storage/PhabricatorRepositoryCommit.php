@@ -530,6 +530,11 @@ final class PhabricatorRepositoryCommit
     return $data->getCommitDetail('authorPHID');
   }
 
+  public function getAuditStatusObject() {
+    $status = $this->getAuditStatus();
+    return PhabricatorAuditCommitStatusConstants::newForLegacyStatus($status);
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
   public function getCapabilities() {
