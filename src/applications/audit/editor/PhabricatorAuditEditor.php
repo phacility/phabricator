@@ -206,12 +206,10 @@ final class PhabricatorAuditEditor
       $object->writeImportStatusFlag($import_status_flag);
     }
 
-    $partial_status = PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED;
-
     // If the commit has changed state after this edit, add an informational
     // transaction about the state change.
     if ($old_status != $new_status) {
-      if ($new_status == $partial_status) {
+      if ($object->isAuditStatusPartiallyAudited()) {
         // This state isn't interesting enough to get a transaction. The
         // best way we could lead the user forward is something like "This
         // commit still requires additional audits." but that's redundant and

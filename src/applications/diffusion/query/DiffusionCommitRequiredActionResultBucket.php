@@ -69,14 +69,12 @@ final class DiffusionCommitRequiredActionResultBucket
     $results = array();
     $objects = $this->objects;
 
-    $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
-
     foreach ($objects as $key => $object) {
       if (empty($phids[$object->getAuthorPHID()])) {
         continue;
       }
 
-      if ($object->getAuditStatus() != $status_concern) {
+      if (!$object->isAuditStatusConcernRaised()) {
         continue;
       }
 
@@ -91,7 +89,6 @@ final class DiffusionCommitRequiredActionResultBucket
     $results = array();
     $objects = $this->objects;
 
-    $status_verify = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
     $has_concern = array(
       PhabricatorAuditStatusConstants::CONCERNED,
     );
@@ -102,7 +99,7 @@ final class DiffusionCommitRequiredActionResultBucket
         continue;
       }
 
-      if ($object->getAuditStatus() != $status_verify) {
+      if (!$object->isAuditStatusNeedsVerification()) {
         continue;
       }
 
@@ -147,10 +144,8 @@ final class DiffusionCommitRequiredActionResultBucket
     $results = array();
     $objects = $this->objects;
 
-    $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
-
     foreach ($objects as $key => $object) {
-      if ($object->getAuditStatus() != $status_concern) {
+      if (!$object->isAuditStatusConcernRaised()) {
         continue;
       }
 

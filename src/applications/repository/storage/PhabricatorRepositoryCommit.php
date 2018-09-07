@@ -535,6 +535,26 @@ final class PhabricatorRepositoryCommit
     return PhabricatorAuditCommitStatusConstants::newForLegacyStatus($status);
   }
 
+  public function isAuditStatusNoAudit() {
+    return $this->getAuditStatusObject()->isNoAudit();
+  }
+
+  public function isAuditStatusConcernRaised() {
+    return $this->getAuditStatusObject()->isConcernRaised();
+  }
+
+  public function isAuditStatusNeedsVerification() {
+    return $this->getAuditStatusObject()->isNeedsVerification();
+  }
+
+  public function isAuditStatusPartiallyAudited() {
+    return $this->getAuditStatusObject()->isPartiallyAudited();
+  }
+
+  public function isAuditStatusAudited() {
+    return $this->getAuditStatusObject()->isAudited();
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
   public function getCapabilities() {

@@ -48,8 +48,7 @@ final class DiffusionCommitVerifyTransaction
           'are not the author.'));
     }
 
-    $status = $object->getAuditStatus();
-    if ($status != PhabricatorAuditCommitStatusConstants::CONCERN_RAISED) {
+    if (!$object->isAuditStatusConcernRaised()) {
       throw new Exception(
         pht(
           'You can not request verification of this commit because no '.

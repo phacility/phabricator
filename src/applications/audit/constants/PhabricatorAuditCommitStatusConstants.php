@@ -60,6 +60,30 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return idx($this->spec, 'name', pht('Unknown ("%s")', $this->key));
   }
 
+  public function isNoAudit() {
+    return ($this->key == self::MODERN_NONE);
+  }
+
+  public function isConcernRaised() {
+    return ($this->key == self::MODERN_CONCERN_RAISED);
+  }
+
+  public function isNeedsVerification() {
+    return ($this->key == self::MODERN_NEEDS_VERIFICATION);
+  }
+
+  public function isPartiallyAudited() {
+    return ($this->key == self::MODERN_PARTIALLY_AUDITED);
+  }
+
+  public function isAudited() {
+    return ($this->key == self::MODERN_AUDITED);
+  }
+
+  public function getIsClosed() {
+    return idx($this->spec, 'closed');
+  }
+
   public static function getStatusNameMap() {
     $map = self::getMap();
     return ipull($map, 'name', 'legacy');
