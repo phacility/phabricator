@@ -88,7 +88,7 @@ abstract class PhabricatorInlineCommentController
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
 
     $this->readRequestParameters();
 
@@ -221,7 +221,7 @@ abstract class PhabricatorInlineCommentController
 
         $inline = $this->createComment()
           ->setChangesetID($this->getChangesetID())
-          ->setAuthorPHID($user->getPHID())
+          ->setAuthorPHID($viewer->getPHID())
           ->setLineNumber($this->getLineNumber())
           ->setLineLength($this->getLineLength())
           ->setIsNewFile($this->getIsNewFile())
@@ -229,6 +229,15 @@ abstract class PhabricatorInlineCommentController
 
         if ($this->getReplyToCommentPHID()) {
           $inline->setReplyToCommentPHID($this->getReplyToCommentPHID());
+        }
+
+        // If you own this object, mark your own inlines as "Done" by default.
+        $owner_phid = $this->loadObjectOwnerPHID($inline);
+        if ($owner_phid) {
+          if ($viewer->getPHID() == $owner_phid) {
+            $fixed_state = PhabricatorInlineCommentInterface::STATE_DRAFT;
+            $inline->setFixedState($fixed_state);
+          }
         }
 
         $this->saveComment($inline);
@@ -313,10 +322,10 @@ abstract class PhabricatorInlineCommentController
 
   private function buildEditDialog() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
 
     $edit_dialog = id(new PHUIDiffInlineCommentEditView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setSubmitURI($request->getRequestURI())
       ->setIsOnRight($this->getIsOnRight())
       ->setIsNewFile($this->getIsNewFile())
@@ -342,22 +351,22 @@ abstract class PhabricatorInlineCommentController
     $on_right) {
 
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
 
     $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($user);
+    $engine->setViewer($viewer);
     $engine->addObject(
       $inline,
       PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
     $engine->process();
 
-    $phids = array($user->getPHID());
+    $phids = array($viewer->getPHID());
 
     $handles = $this->loadViewerHandles($phids);
     $object_owner_phid = $this->loadObjectOwnerPHID($inline);
 
     $view = id(new PHUIDiffInlineCommentDetailView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setInlineComment($inline)
       ->setIsOnRight($on_right)
       ->setMarkupEngine($engine)
@@ -378,7 +387,7 @@ abstract class PhabricatorInlineCommentController
 
   private function renderTextArea($text) {
     return id(new PhabricatorRemarkupControl())
-      ->setUser($this->getRequest()->getUser())
+      ->setViewer($this->getViewer())
       ->setSigil('differential-inline-comment-edit-textarea')
       ->setName('text')
       ->setValue($text)

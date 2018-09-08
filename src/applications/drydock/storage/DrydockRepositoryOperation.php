@@ -137,9 +137,9 @@ final class DrydockRepositoryOperation extends DrydockDAO
   }
 
   public function applyOperation(DrydockInterface $interface) {
-    return $this->getImplementation()->applyOperation(
-      $this,
-      $interface);
+    $impl = $this->getImplementation();
+    $impl->setInterface($interface);
+    return $impl->applyOperation($this, $interface);
   }
 
   public function getOperationDescription(PhabricatorUser $viewer) {

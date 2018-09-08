@@ -3,6 +3,8 @@
 abstract class DrydockRepositoryOperationType extends Phobject {
 
   private $viewer;
+  private $operation;
+  private $interface;
 
   abstract public function applyOperation(
     DrydockRepositoryOperation $operation,
@@ -27,6 +29,27 @@ abstract class DrydockRepositoryOperationType extends Phobject {
 
   final public function getViewer() {
     return $this->viewer;
+  }
+
+  final public function setOperation(DrydockRepositoryOperation $operation) {
+    $this->operation = $operation;
+    return $this;
+  }
+
+  final public function getOperation() {
+    return $this->operation;
+  }
+
+  final public function setInterface(DrydockInterface $interface) {
+    $this->interface = $interface;
+    return $this;
+  }
+
+  final public function getInterface() {
+    if (!$this->interface) {
+      throw new PhutilInvalidStateException('setInterface');
+    }
+    return $this->interface;
   }
 
   final public function getOperationConstant() {

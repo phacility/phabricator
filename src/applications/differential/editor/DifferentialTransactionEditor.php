@@ -248,18 +248,33 @@ final class DifferentialTransactionEditor
           $this->didExpandInlineState = true;
 
           $actor_phid = $this->getActingAsPHID();
-          $actor_is_author = ($object->getAuthorPHID() == $actor_phid);
-          if (!$actor_is_author) {
-            break;
-          }
+          $author_phid = $object->getAuthorPHID();
+          $actor_is_author = ($actor_phid == $author_phid);
 
           $state_map = PhabricatorTransactions::getInlineStateMap();
 
-          $inlines = id(new DifferentialDiffInlineCommentQuery())
+          $query = id(new DifferentialDiffInlineCommentQuery())
             ->setViewer($this->getActor())
             ->withRevisionPHIDs(array($object->getPHID()))
-            ->withFixedStates(array_keys($state_map))
+            ->withFixedStates(array_keys($state_map));
+
+          $inlines = array();
+
+          // We're going to undraft any "done" marks on your own inlines.
+          $inlines[] = id(clone $query)
+            ->withAuthorPHIDs(array($actor_phid))
+            ->withHasTransaction(false)
             ->execute();
+
+          // If you're the author, we also undraft any "done" marks on other
+          // inlines.
+          if ($actor_is_author) {
+            $inlines[] = id(clone $query)
+              ->withHasTransaction(true)
+              ->execute();
+          }
+
+          $inlines = array_mergev($inlines);
 
           if (!$inlines) {
             break;
@@ -892,6 +907,17 @@ final class DifferentialTransactionEditor
     array $inlines,
     PhabricatorMetaMTAMailBody $body) {
 
+    $limit = 100;
+    $limit_note = null;
+    if (count($inlines) > $limit) {
+      $limit_note = pht(
+        '(Showing first %s of %s inline comments.)',
+        new PhutilNumber($limit),
+        phutil_count($inlines));
+
+      $inlines = array_slice($inlines, 0, $limit, true);
+    }
+
     $section = id(new DifferentialInlineCommentMailView())
       ->setViewer($this->getActor())
       ->setInlines($inlines)
@@ -900,6 +926,9 @@ final class DifferentialTransactionEditor
     $header = pht('INLINE COMMENTS');
 
     $section_text = "\n".$section->getPlaintext();
+    if ($limit_note) {
+      $section_text = $limit_note."\n".$section_text;
+    }
 
     $style = array(
       'margin: 6px 0 12px 0;',
@@ -911,6 +940,16 @@ final class DifferentialTransactionEditor
         'style' => implode(' ', $style),
       ),
       $section->getHTML());
+
+    if ($limit_note) {
+      $section_html = array(
+        phutil_tag(
+          'em',
+          array(),
+          $limit_note),
+        $section_html,
+      );
+    }
 
     $body->addPlaintextSection($header, $section_text, false);
     $body->addHTMLSection($header, $section_html);

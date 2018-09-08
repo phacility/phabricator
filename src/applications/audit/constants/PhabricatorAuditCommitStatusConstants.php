@@ -2,6 +2,9 @@
 
 final class PhabricatorAuditCommitStatusConstants extends Phobject {
 
+  private $key;
+  private $spec = array();
+
   const NONE                = 0;
   const NEEDS_AUDIT         = 1;
   const CONCERN_RAISED      = 2;
@@ -9,17 +12,57 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
   const FULLY_AUDITED       = 4;
   const NEEDS_VERIFICATION = 5;
 
-  public static function getStatusNameMap() {
-    $map = array(
-      self::NONE                => pht('No Audits'),
-      self::NEEDS_AUDIT         => pht('Audit Required'),
-      self::CONCERN_RAISED      => pht('Concern Raised'),
-      self::NEEDS_VERIFICATION => pht('Needs Verification'),
-      self::PARTIALLY_AUDITED   => pht('Partially Audited'),
-      self::FULLY_AUDITED       => pht('Audited'),
-    );
+  const MODERN_NONE = 'none';
+  const MODERN_NEEDS_AUDIT = 'needs-audit';
+  const MODERN_CONCERN_RAISED = 'concern-raised';
+  const MODERN_PARTIALLY_AUDITED = 'partially-audited';
+  const MODERN_AUDITED = 'audited';
+  const MODERN_NEEDS_VERIFICATION = 'needs-verification';
 
-    return $map;
+  public static function newForLegacyStatus($status) {
+    $map = self::getMap();
+
+    foreach ($map as $key => $spec) {
+      if (idx($spec, 'legacy') == $status) {
+        return self::newForStatus($key);
+      }
+    }
+
+    return self::newForStatus($status);
+  }
+
+  public static function newForStatus($status) {
+    $result = new self();
+
+    $result->key = $status;
+
+    $map = self::getMap();
+    if (isset($map[$status])) {
+      $result->spec = $map[$status];
+    }
+
+    return $result;
+  }
+
+  public function getKey() {
+    return $this->key;
+  }
+
+  public function getIcon() {
+    return idx($this->spec, 'icon');
+  }
+
+  public function getColor() {
+    return idx($this->spec, 'color');
+  }
+
+  public function getName() {
+    return idx($this->spec, 'name', pht('Unknown ("%s")', $this->key));
+  }
+
+  public static function getStatusNameMap() {
+    $map = self::getMap();
+    return ipull($map, 'name', 'legacy');
   }
 
   public static function getStatusName($code) {
@@ -27,66 +70,71 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
   }
 
   public static function getOpenStatusConstants() {
-    return array(
-      self::CONCERN_RAISED,
-      self::NEEDS_AUDIT,
-      self::NEEDS_VERIFICATION,
-      self::PARTIALLY_AUDITED,
-    );
+    $constants = array();
+    foreach (self::getMap() as $map) {
+      if (!$map['closed']) {
+        $constants[] = $map['legacy'];
+      }
+    }
+    return $constants;
   }
 
   public static function getStatusColor($code) {
-    switch ($code) {
-      case self::CONCERN_RAISED:
-        $color = 'red';
-        break;
-      case self::NEEDS_AUDIT:
-        $color = 'orange';
-        break;
-      case self::PARTIALLY_AUDITED:
-        $color = 'yellow';
-        break;
-      case self::FULLY_AUDITED:
-        $color = 'green';
-        break;
-      case self::NONE:
-        $color = 'bluegrey';
-        break;
-      case self::NEEDS_VERIFICATION:
-        $color = 'indigo';
-        break;
-      default:
-        $color = null;
-        break;
-    }
-    return $color;
+    $map = self::getMap();
+    $map = ipull($map, 'color', 'legacy');
+    return idx($map, $code);
   }
 
   public static function getStatusIcon($code) {
-    switch ($code) {
-      case self::CONCERN_RAISED:
-        $icon = 'fa-times-circle';
-        break;
-      case self::NEEDS_AUDIT:
-        $icon = 'fa-exclamation-circle';
-        break;
-      case self::PARTIALLY_AUDITED:
-        $icon = 'fa-check-circle-o';
-        break;
-      case self::FULLY_AUDITED:
-        $icon = 'fa-check-circle';
-        break;
-      case self::NONE:
-        $icon = 'fa-check';
-        break;
-      case self::NEEDS_VERIFICATION:
-        $icon = 'fa-refresh';
-        break;
-      default:
-        $icon = null;
-        break;
-    }
-    return $icon;
+    $map = self::getMap();
+    $map = ipull($map, 'icon', 'legacy');
+    return idx($map, $code);
   }
 
+  private static function getMap() {
+    return array(
+      self::MODERN_NONE => array(
+        'name' => pht('No Audits'),
+        'legacy' => self::NONE,
+        'icon' => 'fa-check',
+        'color' => 'bluegrey',
+        'closed' => true,
+      ),
+      self::MODERN_NEEDS_AUDIT => array(
+        'name' => pht('Audit Required'),
+        'legacy' => self::NEEDS_AUDIT,
+        'icon' => 'fa-exclamation-circle',
+        'color' => 'orange',
+        'closed' => false,
+      ),
+      self::MODERN_CONCERN_RAISED => array(
+        'name' => pht('Concern Raised'),
+        'legacy' => self::CONCERN_RAISED,
+        'icon' => 'fa-times-circle',
+        'color' => 'red',
+        'closed' => false,
+      ),
+      self::MODERN_PARTIALLY_AUDITED => array(
+        'name' => pht('Partially Audited'),
+        'legacy' => self::PARTIALLY_AUDITED,
+        'icon' => 'fa-check-circle-o',
+        'color' => 'yellow',
+        'closed' => false,
+      ),
+      self::MODERN_AUDITED => array(
+        'name' => pht('Audited'),
+        'legacy' => self::FULLY_AUDITED,
+        'icon' => 'fa-check-circle',
+        'color' => 'green',
+        'closed' => true,
+      ),
+      self::MODERN_NEEDS_VERIFICATION => array(
+        'name' => pht('Needs Verification'),
+        'legacy' => self::NEEDS_VERIFICATION,
+        'icon' => 'fa-refresh',
+        'color' => 'indigo',
+        'closed' => false,
+      ),
+    );
+  }
 }

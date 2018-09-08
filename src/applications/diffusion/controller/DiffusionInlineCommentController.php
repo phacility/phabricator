@@ -50,19 +50,17 @@ final class DiffusionInlineCommentController
   }
 
   protected function loadCommentForEdit($id) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
 
     $inline = $this->loadComment($id);
-    if (!$this->canEditInlineComment($user, $inline)) {
+    if (!$this->canEditInlineComment($viewer, $inline)) {
       throw new Exception(pht('That comment is not editable!'));
     }
     return $inline;
   }
 
   protected function loadCommentForDone($id) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $inline = $this->loadComment($id);
     if (!$inline) {
@@ -77,20 +75,32 @@ final class DiffusionInlineCommentController
       throw new Exception(pht('Failed to load commit.'));
     }
 
-    if ((!$commit->getAuthorPHID()) ||
-        ($commit->getAuthorPHID() != $viewer->getPHID())) {
-      throw new Exception(pht('You can not mark this comment as complete.'));
+    $owner_phid = $commit->getAuthorPHID();
+    $viewer_phid = $viewer->getPHID();
+    $viewer_is_owner = ($owner_phid && ($owner_phid == $viewer_phid));
+    $viewer_is_author = ($viewer_phid == $inline->getAuthorPHID());
+    $is_draft = $inline->isDraft();
+
+    if ($viewer_is_owner) {
+      // You can mark inlines on your own commits as "Done".
+    } else if ($viewer_is_author && $is_draft) {
+      // You can mark your own unsubmitted inlines as "Done".
+    } else {
+      throw new Exception(
+        pht(
+          'You can not mark this comment as complete: you did not author '.
+          'the commit and the comment is not a draft you wrote.'));
     }
 
     return $inline;
   }
 
   private function canEditInlineComment(
-    PhabricatorUser $user,
+    PhabricatorUser $viewer,
     PhabricatorAuditInlineComment $inline) {
 
     // Only the author may edit a comment.
-    if ($inline->getAuthorPHID() != $user->getPHID()) {
+    if ($inline->getAuthorPHID() != $viewer->getPHID()) {
       return false;
     }
 

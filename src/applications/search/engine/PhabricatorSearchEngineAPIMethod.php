@@ -161,7 +161,9 @@ If you specify both a `queryKey` and `constraints`, the builtin or saved query
 will be applied first as a starting point, then any additional values in
 `constraints` will be applied, overwriting the defaults from the original query.
 
-Specify constraints like this:
+Different endpoints support different constraints. The constraints this method
+supports are detailed below. As an example, you might specify constraints like
+this:
 
 ```lang=json, name="Example Custom Constraints"
 {
@@ -188,15 +190,26 @@ EOTEXT
       $fields,
       array('ids', 'phids')) + $fields;
 
+    $constant_lists = array();
+
     $rows = array();
     foreach ($fields as $field) {
       $key = $field->getConduitKey();
       $label = $field->getLabel();
 
+      $constants = $field->newConduitConstants();
+
       $type_object = $field->getConduitParameterType();
       if ($type_object) {
         $type = $type_object->getTypeName();
         $description = $field->getDescription();
+        if ($constants) {
+          $description = array(
+            $description,
+            ' ',
+            phutil_tag('em', array(), pht('(See table below.)')),
+          );
+        }
       } else {
         $type = null;
         $description = phutil_tag('em', array(), pht('Not supported.'));
@@ -208,6 +221,35 @@ EOTEXT
         $type,
         $description,
       );
+
+      if ($constants) {
+        $constant_lists[] = $this->buildRemarkup(
+          pht(
+            'Constants supported by the `%s` constraint:',
+            'statuses'));
+
+        $constants_rows = array();
+        foreach ($constants as $constant) {
+          $constants_rows[] = array(
+            $constant->getKey(),
+            $constant->getValue(),
+          );
+        }
+
+        $constants_table = id(new AphrontTableView($constants_rows))
+          ->setHeaders(
+            array(
+              pht('Key'),
+              pht('Value'),
+            ))
+          ->setColumnClasses(
+            array(
+              'pre',
+              'wide',
+            ));
+
+        $constant_lists[] = $constants_table;
+      }
     }
 
     $table = id(new AphrontTableView($rows))
@@ -231,7 +273,8 @@ EOTEXT
       ->setCollapsed(true)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($this->buildRemarkup($info))
-      ->appendChild($table);
+      ->appendChild($table)
+      ->appendChild($constant_lists);
   }
 
   private function buildOrderBox(
