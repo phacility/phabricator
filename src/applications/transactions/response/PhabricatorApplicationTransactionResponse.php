@@ -83,7 +83,15 @@ final class PhabricatorApplicationTransactionResponse
       $xactions[$key] = hsprintf('%s', $xaction);
     }
 
+    $aural = phutil_tag(
+      'h3',
+      array(
+        'class' => 'aural-only',
+      ),
+      pht('Comment Preview'));
+
     $content = array(
+      'header' => hsprintf('%s', $aural),
       'xactions' => $xactions,
       'spacer' => PHUITimelineView::renderSpacer(),
       'previewContent' => hsprintf('%s', $this->getPreviewContent()),

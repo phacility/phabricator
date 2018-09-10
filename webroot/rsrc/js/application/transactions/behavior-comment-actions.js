@@ -105,6 +105,7 @@ JX.behavior('comment-actions', function(config) {
       JX.DOM.setContent(
         preview_root,
         [
+          JX.$H(response.header),
           JX.$H(response.xactions.join('')),
           JX.$H(response.previewContent)
         ]);
