@@ -164,15 +164,13 @@ final class DiffusionCommitRequiredActionResultBucket
     $results = array();
     $objects = $this->objects;
 
-    $status_waiting = array(
-      PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT,
-      PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION,
-      PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED,
-    );
-    $status_waiting = array_fuse($status_waiting);
-
     foreach ($objects as $key => $object) {
-      if (empty($status_waiting[$object->getAuditStatus()])) {
+      $any_waiting =
+        $object->isAuditStatusNeedsAudit() ||
+        $object->isAuditStatusNeedsVerification() ||
+        $object->isAuditStatusPartiallyAudited();
+
+      if (!$any_waiting) {
         continue;
       }
 

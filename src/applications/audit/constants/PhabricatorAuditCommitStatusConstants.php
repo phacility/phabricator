@@ -22,9 +22,11 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
   public static function newForLegacyStatus($status) {
     $map = self::getMap();
 
-    foreach ($map as $key => $spec) {
-      if (idx($spec, 'legacy') == $status) {
-        return self::newForStatus($key);
+    if (is_int($status) || ctype_digit($status)) {
+      foreach ($map as $key => $spec) {
+        if ((int)idx($spec, 'legacy') === (int)$status) {
+          return self::newForStatus($key);
+        }
       }
     }
 
@@ -56,12 +58,20 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return idx($this->spec, 'color');
   }
 
+  public function getLegacyKey() {
+    return idx($this->spec, 'legacy');
+  }
+
   public function getName() {
     return idx($this->spec, 'name', pht('Unknown ("%s")', $this->key));
   }
 
   public function isNoAudit() {
     return ($this->key == self::MODERN_NONE);
+  }
+
+  public function isNeedsAudit() {
+    return ($this->key == self::MODERN_NEEDS_AUDIT);
   }
 
   public function isConcernRaised() {

@@ -381,14 +381,11 @@ final class PhabricatorRepositoryCommit
       }
     }
 
-    $current_status = $this->getAuditStatus();
-    $status_verify = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
-
     if ($any_concern) {
-      if ($current_status == $status_verify) {
+      if ($this->isAuditStatusNeedsVerification()) {
         // If the change is in "Needs Verification", we keep it there as
         // long as any auditors still have concerns.
-        $status = $status_verify;
+        $status = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
       } else {
         $status = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
       }
@@ -537,6 +534,10 @@ final class PhabricatorRepositoryCommit
 
   public function isAuditStatusNoAudit() {
     return $this->getAuditStatusObject()->isNoAudit();
+  }
+
+  public function isAuditStatusNeedsAudit() {
+    return $this->getAuditStatusObject()->isNeedsAudit();
   }
 
   public function isAuditStatusConcernRaised() {
