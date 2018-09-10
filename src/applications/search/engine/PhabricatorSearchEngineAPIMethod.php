@@ -230,9 +230,20 @@ EOTEXT
 
         $constants_rows = array();
         foreach ($constants as $constant) {
+          if ($constant->getIsDeprecated()) {
+            $icon = id(new PHUIIconView())
+              ->setIcon('fa-exclamation-triangle', 'red');
+          } else {
+            $icon = null;
+          }
+
           $constants_rows[] = array(
             $constant->getKey(),
-            $constant->getValue(),
+            array(
+              $icon,
+              ' ',
+              $constant->getValue(),
+            ),
           );
         }
 
@@ -244,7 +255,7 @@ EOTEXT
             ))
           ->setColumnClasses(
             array(
-              'pre',
+              'mono',
               'wide',
             ));
 

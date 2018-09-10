@@ -92,7 +92,9 @@ final class PhabricatorCommitSearchEngine
         ->setLabel(pht('Audit Status'))
         ->setKey('statuses')
         ->setAliases(array('status'))
-        ->setOptions(PhabricatorAuditCommitStatusConstants::getStatusNameMap())
+        ->setOptions(PhabricatorAuditCommitStatusConstants::newOptions())
+        ->setDeprecatedOptions(
+          PhabricatorAuditCommitStatusConstants::newDeprecatedOptions())
         ->setDescription(pht('Find commits with given audit statuses.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))

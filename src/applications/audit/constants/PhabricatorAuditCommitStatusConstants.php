@@ -94,15 +94,6 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return idx($this->spec, 'closed');
   }
 
-  public static function getStatusNameMap() {
-    $map = self::getMap();
-    return ipull($map, 'name', 'legacy');
-  }
-
-  public static function getStatusName($code) {
-    return idx(self::getStatusNameMap(), $code, pht('Unknown'));
-  }
-
   public static function getOpenStatusConstants() {
     $constants = array();
     foreach (self::getMap() as $map) {
@@ -113,16 +104,22 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return $constants;
   }
 
-  public static function getStatusColor($code) {
+  public static function newOptions() {
     $map = self::getMap();
-    $map = ipull($map, 'color', 'legacy');
-    return idx($map, $code);
+    return ipull($map, 'name');
   }
 
-  public static function getStatusIcon($code) {
+  public static function newDeprecatedOptions() {
     $map = self::getMap();
-    $map = ipull($map, 'icon', 'legacy');
-    return idx($map, $code);
+
+    $results = array();
+    foreach ($map as $key => $spec) {
+      if (isset($spec['legacy'])) {
+        $results[$spec['legacy']] = $key;
+      }
+    }
+
+    return $results;
   }
 
   private static function getMap() {

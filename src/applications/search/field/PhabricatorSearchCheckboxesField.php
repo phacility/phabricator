@@ -4,6 +4,7 @@ final class PhabricatorSearchCheckboxesField
   extends PhabricatorSearchField {
 
   private $options;
+  private $deprecatedOptions = array();
 
   public function setOptions(array $options) {
     $this->options = $options;
@@ -12,6 +13,15 @@ final class PhabricatorSearchCheckboxesField
 
   public function getOptions() {
     return $this->options;
+  }
+
+  public function setDeprecatedOptions(array $deprecated_options) {
+    $this->deprecatedOptions = $deprecated_options;
+    return $this;
+  }
+
+  public function getDeprecatedOptions() {
+    return $this->deprecatedOptions;
   }
 
   protected function getDefaultValue() {
@@ -23,11 +33,12 @@ final class PhabricatorSearchCheckboxesField
       return array();
     }
 
-    return $value;
+    return $this->getCanonicalValue($value);
   }
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {
-    return $this->getListFromRequest($request, $key);
+    $value = $this->getListFromRequest($request, $key);
+    return $this->getCanonicalValue($value);
   }
 
   protected function newControl() {
@@ -58,7 +69,29 @@ final class PhabricatorSearchCheckboxesField
         ->setValue($option);
     }
 
+    foreach ($this->getDeprecatedOptions() as $key => $value) {
+      $list[] = id(new ConduitConstantDescription())
+        ->setKey($key)
+        ->setIsDeprecated(true)
+        ->setValue(pht('Deprecated alias for "%s".', $value));
+    }
+
     return $list;
+  }
+
+  private function getCanonicalValue(array $values) {
+    // Always map the current normal options to themselves.
+    $normal_options = array_fuse(array_keys($this->getOptions()));
+
+    // Map deprecated values to their new values.
+    $deprecated_options = $this->getDeprecatedOptions();
+
+    $map = $normal_options + $deprecated_options;
+    foreach ($values as $key => $value) {
+      $values[$key] = idx($map, $value, $value);
+    }
+
+    return $values;
   }
 
 }
