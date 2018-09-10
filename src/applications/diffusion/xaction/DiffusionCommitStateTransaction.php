@@ -13,7 +13,7 @@ final class DiffusionCommitStateTransaction
 
   private function getAuditStatusObject() {
     $new = $this->getNewValue();
-    return PhabricatorAuditCommitStatusConstants::newForLegacyStatus($new);
+    return PhabricatorAuditCommitStatusConstants::newForStatus($new);
   }
 
   public function getIcon() {

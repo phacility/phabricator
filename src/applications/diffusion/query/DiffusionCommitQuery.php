@@ -714,16 +714,12 @@ final class DiffusionCommitQuery
     }
 
     if ($this->statuses !== null) {
-      $statuses = array();
-      foreach ($this->statuses as $status) {
-        $object = PhabricatorAuditCommitStatusConstants::newForLegacyStatus(
-          $status);
-        $statuses[] = $object->getLegacyKey();
-      }
+      $statuses = PhabricatorAuditCommitStatusConstants::newModernKeys(
+        $this->statuses);
 
       $where[] = qsprintf(
         $conn,
-        'commit.auditStatus IN (%Ld)',
+        'commit.auditStatus IN (%Ls)',
         $statuses);
     }
 

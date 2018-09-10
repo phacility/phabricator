@@ -27,7 +27,7 @@ final class PhabricatorRepositoryCommit
   protected $epoch;
   protected $mailKey;
   protected $authorPHID;
-  protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
+  protected $auditStatus = PhabricatorAuditCommitStatusConstants::MODERN_NONE;
   protected $summary = '';
   protected $importStatus = 0;
 
@@ -120,7 +120,7 @@ final class PhabricatorRepositoryCommit
         'authorPHID' => 'phid?',
         'authorIdentityPHID' => 'phid?',
         'committerIdentityPHID' => 'phid?',
-        'auditStatus' => 'uint32',
+        'auditStatus' => 'text32',
         'summary' => 'text255',
         'importStatus' => 'uint32',
       ),
@@ -385,20 +385,22 @@ final class PhabricatorRepositoryCommit
       if ($this->isAuditStatusNeedsVerification()) {
         // If the change is in "Needs Verification", we keep it there as
         // long as any auditors still have concerns.
-        $status = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
+        $status =
+          PhabricatorAuditCommitStatusConstants::MODERN_NEEDS_VERIFICATION;
       } else {
-        $status = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+        $status = PhabricatorAuditCommitStatusConstants::MODERN_CONCERN_RAISED;
       }
     } else if ($any_accept) {
       if ($any_need) {
-        $status = PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED;
+        $status =
+          PhabricatorAuditCommitStatusConstants::MODERN_PARTIALLY_AUDITED;
       } else {
-        $status = PhabricatorAuditCommitStatusConstants::FULLY_AUDITED;
+        $status = PhabricatorAuditCommitStatusConstants::MODERN_AUDITED;
       }
     } else if ($any_need) {
-      $status = PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT;
+      $status = PhabricatorAuditCommitStatusConstants::MODERN_NEEDS_AUDIT;
     } else {
-      $status = PhabricatorAuditCommitStatusConstants::NONE;
+      $status = PhabricatorAuditCommitStatusConstants::MODERN_NONE;
     }
 
     return $this->setAuditStatus($status);
@@ -529,7 +531,7 @@ final class PhabricatorRepositoryCommit
 
   public function getAuditStatusObject() {
     $status = $this->getAuditStatus();
-    return PhabricatorAuditCommitStatusConstants::newForLegacyStatus($status);
+    return PhabricatorAuditCommitStatusConstants::newForStatus($status);
   }
 
   public function isAuditStatusNoAudit() {

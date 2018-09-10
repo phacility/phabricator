@@ -34,7 +34,7 @@ final class DiffusionCommitConcernTransaction
     // NOTE: We force the commit directly into "Concern Raised" so that we
     // override a possible "Needs Verification" state.
     $object->setAuditStatus(
-      PhabricatorAuditCommitStatusConstants::CONCERN_RAISED);
+      PhabricatorAuditCommitStatusConstants::MODERN_CONCERN_RAISED);
   }
 
   public function applyExternalEffects($object, $value) {

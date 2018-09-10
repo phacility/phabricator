@@ -19,18 +19,21 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
   const MODERN_AUDITED = 'audited';
   const MODERN_NEEDS_VERIFICATION = 'needs-verification';
 
-  public static function newForLegacyStatus($status) {
+  public static function newModernKeys(array $values) {
     $map = self::getMap();
 
-    if (is_int($status) || ctype_digit($status)) {
-      foreach ($map as $key => $spec) {
-        if ((int)idx($spec, 'legacy') === (int)$status) {
-          return self::newForStatus($key);
-        }
+    $modern = array();
+    foreach ($map as $key => $spec) {
+      if (isset($spec['legacy'])) {
+        $modern[$spec['legacy']] = $key;
       }
     }
 
-    return self::newForStatus($status);
+    foreach ($values as $key => $value) {
+      $values[$key] = idx($modern, $value, $value);
+    }
+
+    return $values;
   }
 
   public static function newForStatus($status) {
@@ -56,10 +59,6 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
 
   public function getColor() {
     return idx($this->spec, 'color');
-  }
-
-  public function getLegacyKey() {
-    return idx($this->spec, 'legacy');
   }
 
   public function getName() {
@@ -96,9 +95,9 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
 
   public static function getOpenStatusConstants() {
     $constants = array();
-    foreach (self::getMap() as $map) {
+    foreach (self::getMap() as $key => $map) {
       if (!$map['closed']) {
-        $constants[] = $map['legacy'];
+        $constants[] = $key;
       }
     }
     return $constants;
