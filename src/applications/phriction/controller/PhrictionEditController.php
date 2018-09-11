@@ -95,8 +95,10 @@ final class PhrictionEditController
     $v_space = $document->getSpacePHID();
 
     $content_text = $content->getContent();
+    $is_draft_mode = ($document->getContent()->getVersion() != $max_version);
 
     if ($request->isFormPost()) {
+      $save_as_draft = ($is_draft_mode || $request->getExists('draft'));
 
       $title = $request->getStr('title');
       $content_text = $request->getStr('content');
@@ -108,13 +110,18 @@ final class PhrictionEditController
       $v_projects = $request->getArr('projects');
       $v_space = $request->getStr('spacePHID');
 
+      if ($save_as_draft) {
+        $edit_type = PhrictionDocumentDraftTransaction::TRANSACTIONTYPE;
+      } else {
+        $edit_type = PhrictionDocumentContentTransaction::TRANSACTIONTYPE;
+      }
+
       $xactions = array();
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
       $xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(
-          PhrictionDocumentContentTransaction::TRANSACTIONTYPE)
+        ->setTransactionType($edit_type)
         ->setNewValue($content_text);
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -147,6 +154,14 @@ final class PhrictionEditController
         $editor->applyTransactions($document, $xactions);
 
         $uri = PhrictionDocument::getSlugURI($document->getSlug());
+        $uri = new PhutilURI($uri);
+
+        // If the user clicked "Save as Draft", take them to the draft, not
+        // to the current published page.
+        if ($save_as_draft) {
+          $uri = $uri->alter('v', $document->getMaxVersion());
+        }
+
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
@@ -176,7 +191,7 @@ final class PhrictionEditController
       if ($overwrite) {
         $submit_button = pht('Overwrite Changes');
       } else {
-        $submit_button = pht('Save Changes');
+        $submit_button = pht('Save and Publish');
       }
     } else {
       $submit_button = pht('Create Document');
@@ -195,7 +210,6 @@ final class PhrictionEditController
       ->execute();
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     $edit_capability = PhabricatorPolicyCapability::CAN_EDIT;
-
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -253,11 +267,26 @@ final class PhrictionEditController
           ->setLabel(pht('Edit Notes'))
           ->setValue($notes)
           ->setError(null)
-          ->setName('description'))
-      ->appendChild(
+          ->setName('description'));
+
+    if ($is_draft_mode) {
+      $form->appendControl(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
+          ->setValue(pht('Save Draft')));
+    } else {
+      $draft_button = id(new PHUIButtonView())
+        ->setTag('input')
+        ->setName('draft')
+        ->setText(pht('Save as Draft'))
+        ->setColor(PHUIButtonView::GREEN);
+
+      $form->appendControl(
+        id(new AphrontFormSubmitControl())
+          ->addButton($draft_button)
+          ->addCancelButton($cancel_uri)
           ->setValue($submit_button));
+    }
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)

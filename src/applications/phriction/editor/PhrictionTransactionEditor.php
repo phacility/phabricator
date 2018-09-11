@@ -74,6 +74,21 @@ final class PhrictionTransactionEditor
     return $this;
   }
 
+  public function setShouldPublishContent(
+    PhrictionDocument $object,
+    $publish) {
+
+    if ($publish) {
+      $content_phid = $this->getNewContent()->getPHID();
+    } else {
+      $content_phid = $this->getOldContent()->getPHID();
+    }
+
+    $object->setContentPHID($content_phid);
+
+    return $this;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorPhrictionApplication';
   }

@@ -450,19 +450,28 @@ final class PhrictionDocumentController
       $publish_name = pht('Publish Revert');
     }
 
+    // If you're looking at the current version; and it's an unpublished
+    // draft; and you can publish it, add a UI hint that this might be an
+    // interesting action to take.
+    $hint_publish = false;
+    if ($is_draft) {
+      if ($can_publish) {
+        if ($document->getMaxVersion() == $content->getVersion()) {
+          $hint_publish = true;
+        }
+      }
+    }
+
     $publish_uri = "/phriction/publish/{$id}/{$content_id}/";
 
-    if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
-      $publish_name = pht('Publish (Prototype!)');
-
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-        ->setName($publish_name)
-        ->setIcon('fa-upload')
-        ->setDisabled(!$can_publish)
-        ->setWorkflow(true)
-        ->setHref($publish_uri));
-    }
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+      ->setName($publish_name)
+      ->setIcon('fa-upload')
+      ->setSelected($hint_publish)
+      ->setDisabled(!$can_publish)
+      ->setWorkflow(true)
+      ->setHref($publish_uri));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
       $curtain->addAction(
