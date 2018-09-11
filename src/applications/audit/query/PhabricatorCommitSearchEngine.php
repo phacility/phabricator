@@ -15,6 +15,7 @@ final class PhabricatorCommitSearchEngine
     return id(new DiffusionCommitQuery())
       ->needAuditRequests(true)
       ->needCommitData(true)
+      ->needIdentities(true)
       ->needDrafts(true);
   }
 

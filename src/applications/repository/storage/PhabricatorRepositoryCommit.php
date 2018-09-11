@@ -851,16 +851,110 @@ final class PhabricatorRepositoryCommit
         ->setKey('identifier')
         ->setType('string')
         ->setDescription(pht('The commit identifier.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('repositoryPHID')
+        ->setType('phid')
+        ->setDescription(pht('The repository this commit belongs to.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('author')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the commit author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('committer')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the committer.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isImported')
+        ->setType('bool')
+        ->setDescription(pht('True if the commit is fully imported.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isUnreachable')
+        ->setType('bool')
+        ->setDescription(
+          pht(
+            'True if the commit is not the ancestor of any tag, branch, or '.
+            'ref.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('auditStatus')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the current audit status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('message')
+        ->setType('string')
+        ->setDescription(pht('The commit message.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $data = $this->getCommitData();
 
-    // NOTE: This data should be similar to the information returned about
-    // commmits by "differential.diff.search" with the "commits" attachment.
+    $author_identity = $this->getAuthorIdentity();
+    if ($author_identity) {
+      $author_name = $author_identity->getIdentityDisplayName();
+      $author_email = $author_identity->getIdentityEmailAddress();
+      $author_raw = $author_identity->getIdentityName();
+      $author_identity_phid = $author_identity->getPHID();
+      $author_user_phid = $author_identity->getCurrentEffectiveUserPHID();
+    } else {
+      $author_name = null;
+      $author_email = null;
+      $author_raw = null;
+      $author_identity_phid = null;
+      $author_user_phid = null;
+    }
+
+    $committer_identity = $this->getCommitterIdentity();
+    if ($committer_identity) {
+      $committer_name = $committer_identity->getIdentityDisplayName();
+      $committer_email = $committer_identity->getIdentityEmailAddress();
+      $committer_raw = $committer_identity->getIdentityName();
+      $committer_identity_phid = $committer_identity->getPHID();
+      $committer_user_phid = $committer_identity->getCurrentEffectiveUserPHID();
+    } else {
+      $committer_name = null;
+      $committer_email = null;
+      $committer_raw = null;
+      $committer_identity_phid = null;
+      $committer_user_phid = null;
+    }
+
+    $author_epoch = $data->getCommitDetail('authorEpoch');
+    if ($author_epoch) {
+      $author_epoch = (int)$author_epoch;
+    } else {
+      $author_epoch = null;
+    }
+
+    $audit_status = $this->getAuditStatusObject();
 
     return array(
       'identifier' => $this->getCommitIdentifier(),
+      'repositoryPHID' => $this->getRepository()->getPHID(),
+      'author' => array(
+        'name' => $author_name,
+        'email' => $author_email,
+        'raw' => $author_raw,
+        'epoch' => $author_epoch,
+        'identityPHID' => $author_identity_phid,
+        'userPHID' => $author_user_phid,
+      ),
+      'committer' => array(
+        'name' => $committer_name,
+        'email' => $committer_email,
+        'raw' => $committer_raw,
+        'epoch' => (int)$this->getEpoch(),
+        'identityPHID' => $committer_identity_phid,
+        'userPHID' => $committer_user_phid,
+      ),
+      'isUnreachable' => (bool)$this->isUnreachable(),
+      'isImported' => (bool)$this->isImported(),
+      'auditStatus' => array(
+        'value' => $audit_status->getKey(),
+        'name' => $audit_status->getName(),
+        'closed' => (bool)$audit_status->getIsClosed(),
+        'color.ansi' => $audit_status->getAnsiColor(),
+      ),
+      'message' => $data->getCommitMessage(),
     );
   }
 

@@ -54,6 +54,10 @@ final class DiffusionCommitAuditStatus extends Phobject {
     return idx($this->spec, 'color');
   }
 
+  public function getAnsiColor() {
+    return idx($this->spec, 'color.ansi');
+  }
+
   public function getName() {
     return idx($this->spec, 'name', pht('Unknown ("%s")', $this->key));
   }
@@ -122,6 +126,7 @@ final class DiffusionCommitAuditStatus extends Phobject {
         'icon' => 'fa-check',
         'color' => 'bluegrey',
         'closed' => true,
+        'color.ansi' => null,
       ),
       self::NEEDS_AUDIT => array(
         'name' => pht('Audit Required'),
@@ -129,6 +134,7 @@ final class DiffusionCommitAuditStatus extends Phobject {
         'icon' => 'fa-exclamation-circle',
         'color' => 'orange',
         'closed' => false,
+        'color.ansi' => 'magenta',
       ),
       self::CONCERN_RAISED => array(
         'name' => pht('Concern Raised'),
@@ -136,6 +142,7 @@ final class DiffusionCommitAuditStatus extends Phobject {
         'icon' => 'fa-times-circle',
         'color' => 'red',
         'closed' => false,
+        'color.ansi' => 'red',
       ),
       self::PARTIALLY_AUDITED => array(
         'name' => pht('Partially Audited'),
@@ -143,6 +150,7 @@ final class DiffusionCommitAuditStatus extends Phobject {
         'icon' => 'fa-check-circle-o',
         'color' => 'yellow',
         'closed' => false,
+        'color.ansi' => 'yellow',
       ),
       self::AUDITED => array(
         'name' => pht('Audited'),
@@ -150,6 +158,7 @@ final class DiffusionCommitAuditStatus extends Phobject {
         'icon' => 'fa-check-circle',
         'color' => 'green',
         'closed' => true,
+        'color.ansi' => 'green',
       ),
       self::NEEDS_VERIFICATION => array(
         'name' => pht('Needs Verification'),
@@ -157,6 +166,7 @@ final class DiffusionCommitAuditStatus extends Phobject {
         'icon' => 'fa-refresh',
         'color' => 'indigo',
         'closed' => false,
+        'color.ansi' => 'magenta',
       ),
     );
   }
