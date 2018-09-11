@@ -36,8 +36,7 @@ final class DiffusionCommitVerifyTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setAuditStatus(
-      PhabricatorAuditCommitStatusConstants::MODERN_NEEDS_VERIFICATION);
+    $object->setAuditStatus(DiffusionCommitAuditStatus::NEEDS_VERIFICATION);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

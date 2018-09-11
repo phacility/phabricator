@@ -1,16 +1,16 @@
 <?php
 
-final class PhabricatorAuditCommitStatusConstants extends Phobject {
+final class DiffusionCommitAuditStatus extends Phobject {
 
   private $key;
   private $spec = array();
 
-  const MODERN_NONE = 'none';
-  const MODERN_NEEDS_AUDIT = 'needs-audit';
-  const MODERN_CONCERN_RAISED = 'concern-raised';
-  const MODERN_PARTIALLY_AUDITED = 'partially-audited';
-  const MODERN_AUDITED = 'audited';
-  const MODERN_NEEDS_VERIFICATION = 'needs-verification';
+  const NONE = 'none';
+  const NEEDS_AUDIT = 'needs-audit';
+  const CONCERN_RAISED = 'concern-raised';
+  const PARTIALLY_AUDITED = 'partially-audited';
+  const AUDITED = 'audited';
+  const NEEDS_VERIFICATION = 'needs-verification';
 
   public static function newModernKeys(array $values) {
     $map = self::getMap();
@@ -59,27 +59,27 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
   }
 
   public function isNoAudit() {
-    return ($this->key == self::MODERN_NONE);
+    return ($this->key == self::NONE);
   }
 
   public function isNeedsAudit() {
-    return ($this->key == self::MODERN_NEEDS_AUDIT);
+    return ($this->key == self::NEEDS_AUDIT);
   }
 
   public function isConcernRaised() {
-    return ($this->key == self::MODERN_CONCERN_RAISED);
+    return ($this->key == self::CONCERN_RAISED);
   }
 
   public function isNeedsVerification() {
-    return ($this->key == self::MODERN_NEEDS_VERIFICATION);
+    return ($this->key == self::NEEDS_VERIFICATION);
   }
 
   public function isPartiallyAudited() {
-    return ($this->key == self::MODERN_PARTIALLY_AUDITED);
+    return ($this->key == self::PARTIALLY_AUDITED);
   }
 
   public function isAudited() {
-    return ($this->key == self::MODERN_AUDITED);
+    return ($this->key == self::AUDITED);
   }
 
   public function getIsClosed() {
@@ -116,42 +116,42 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
 
   private static function getMap() {
     return array(
-      self::MODERN_NONE => array(
+      self::NONE => array(
         'name' => pht('No Audits'),
         'legacy' => 0,
         'icon' => 'fa-check',
         'color' => 'bluegrey',
         'closed' => true,
       ),
-      self::MODERN_NEEDS_AUDIT => array(
+      self::NEEDS_AUDIT => array(
         'name' => pht('Audit Required'),
         'legacy' => 1,
         'icon' => 'fa-exclamation-circle',
         'color' => 'orange',
         'closed' => false,
       ),
-      self::MODERN_CONCERN_RAISED => array(
+      self::CONCERN_RAISED => array(
         'name' => pht('Concern Raised'),
         'legacy' => 2,
         'icon' => 'fa-times-circle',
         'color' => 'red',
         'closed' => false,
       ),
-      self::MODERN_PARTIALLY_AUDITED => array(
+      self::PARTIALLY_AUDITED => array(
         'name' => pht('Partially Audited'),
         'legacy' => 3,
         'icon' => 'fa-check-circle-o',
         'color' => 'yellow',
         'closed' => false,
       ),
-      self::MODERN_AUDITED => array(
+      self::AUDITED => array(
         'name' => pht('Audited'),
         'legacy' => 4,
         'icon' => 'fa-check-circle',
         'color' => 'green',
         'closed' => true,
       ),
-      self::MODERN_NEEDS_VERIFICATION => array(
+      self::NEEDS_VERIFICATION => array(
         'name' => pht('Needs Verification'),
         'legacy' => 5,
         'icon' => 'fa-refresh',

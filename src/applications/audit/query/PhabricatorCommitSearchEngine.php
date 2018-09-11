@@ -92,9 +92,9 @@ final class PhabricatorCommitSearchEngine
         ->setLabel(pht('Audit Status'))
         ->setKey('statuses')
         ->setAliases(array('status'))
-        ->setOptions(PhabricatorAuditCommitStatusConstants::newOptions())
+        ->setOptions(DiffusionCommitAuditStatus::newOptions())
         ->setDeprecatedOptions(
-          PhabricatorAuditCommitStatusConstants::newDeprecatedOptions())
+          DiffusionCommitAuditStatus::newDeprecatedOptions())
         ->setDescription(pht('Find commits with given audit statuses.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
@@ -162,7 +162,7 @@ final class PhabricatorCommitSearchEngine
       case 'active':
         $bucket_key = DiffusionCommitRequiredActionResultBucket::BUCKETKEY;
 
-        $open = PhabricatorAuditCommitStatusConstants::getOpenStatusConstants();
+        $open = DiffusionCommitAuditStatus::getOpenStatusConstants();
 
         $query
           ->setParameter('responsiblePHIDs', array($viewer_phid))

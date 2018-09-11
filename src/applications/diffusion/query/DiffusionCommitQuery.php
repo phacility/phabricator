@@ -714,7 +714,7 @@ final class DiffusionCommitQuery
     }
 
     if ($this->statuses !== null) {
-      $statuses = PhabricatorAuditCommitStatusConstants::newModernKeys(
+      $statuses = DiffusionCommitAuditStatus::newModernKeys(
         $this->statuses);
 
       $where[] = qsprintf(

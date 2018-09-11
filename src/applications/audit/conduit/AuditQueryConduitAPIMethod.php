@@ -68,17 +68,17 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
 
     $status_map = array(
       self::AUDIT_LEGACYSTATUS_OPEN => array(
-        PhabricatorAuditCommitStatusConstants::MODERN_NEEDS_AUDIT,
-        PhabricatorAuditCommitStatusConstants::MODERN_CONCERN_RAISED,
+        DiffusionCommitAuditStatus::NEEDS_AUDIT,
+        DiffusionCommitAuditStatus::CONCERN_RAISED,
       ),
       self::AUDIT_LEGACYSTATUS_CONCERN => array(
-        PhabricatorAuditCommitStatusConstants::MODERN_CONCERN_RAISED,
+        DiffusionCommitAuditStatus::CONCERN_RAISED,
       ),
       self::AUDIT_LEGACYSTATUS_ACCEPTED => array(
-        PhabricatorAuditCommitStatusConstants::MODERN_AUDITED,
+        DiffusionCommitAuditStatus::AUDITED,
       ),
       self::AUDIT_LEGACYSTATUS_PARTIAL => array(
-        PhabricatorAuditCommitStatusConstants::MODERN_PARTIALLY_AUDITED,
+        DiffusionCommitAuditStatus::PARTIALLY_AUDITED,
       ),
     );
 

@@ -27,7 +27,7 @@ final class PhabricatorRepositoryCommit
   protected $epoch;
   protected $mailKey;
   protected $authorPHID;
-  protected $auditStatus = PhabricatorAuditCommitStatusConstants::MODERN_NONE;
+  protected $auditStatus = DiffusionCommitAuditStatus::NONE;
   protected $summary = '';
   protected $importStatus = 0;
 
@@ -385,22 +385,20 @@ final class PhabricatorRepositoryCommit
       if ($this->isAuditStatusNeedsVerification()) {
         // If the change is in "Needs Verification", we keep it there as
         // long as any auditors still have concerns.
-        $status =
-          PhabricatorAuditCommitStatusConstants::MODERN_NEEDS_VERIFICATION;
+        $status = DiffusionCommitAuditStatus::NEEDS_VERIFICATION;
       } else {
-        $status = PhabricatorAuditCommitStatusConstants::MODERN_CONCERN_RAISED;
+        $status = DiffusionCommitAuditStatus::CONCERN_RAISED;
       }
     } else if ($any_accept) {
       if ($any_need) {
-        $status =
-          PhabricatorAuditCommitStatusConstants::MODERN_PARTIALLY_AUDITED;
+        $status = DiffusionCommitAuditStatus::PARTIALLY_AUDITED;
       } else {
-        $status = PhabricatorAuditCommitStatusConstants::MODERN_AUDITED;
+        $status = DiffusionCommitAuditStatus::AUDITED;
       }
     } else if ($any_need) {
-      $status = PhabricatorAuditCommitStatusConstants::MODERN_NEEDS_AUDIT;
+      $status = DiffusionCommitAuditStatus::NEEDS_AUDIT;
     } else {
-      $status = PhabricatorAuditCommitStatusConstants::MODERN_NONE;
+      $status = DiffusionCommitAuditStatus::NONE;
     }
 
     return $this->setAuditStatus($status);
@@ -531,7 +529,7 @@ final class PhabricatorRepositoryCommit
 
   public function getAuditStatusObject() {
     $status = $this->getAuditStatus();
-    return PhabricatorAuditCommitStatusConstants::newForStatus($status);
+    return DiffusionCommitAuditStatus::newForStatus($status);
   }
 
   public function isAuditStatusNoAudit() {
