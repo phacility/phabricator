@@ -79,17 +79,4 @@ abstract class PhrictionDocumentEditTransaction
     return $changes;
   }
 
-  public function validateTransactions($object, array $xactions) {
-    $errors = array();
-
-    $content = $object->getContent()->getContent();
-    if ($this->isEmptyTextTransaction($content, $xactions)) {
-      $errors[] = $this->newRequiredError(
-        pht('Documents must have content.'));
-    }
-
-    return $errors;
-  }
-
-
 }

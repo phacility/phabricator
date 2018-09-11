@@ -98,7 +98,11 @@ final class PhrictionEditController
     $is_draft_mode = ($document->getContent()->getVersion() != $max_version);
 
     if ($request->isFormPost()) {
-      $save_as_draft = ($is_draft_mode || $request->getExists('draft'));
+      if ($is_new) {
+        $save_as_draft = false;
+      } else {
+        $save_as_draft = ($is_draft_mode || $request->getExists('draft'));
+      }
 
       $title = $request->getStr('title');
       $content_text = $request->getStr('content');
@@ -117,6 +121,7 @@ final class PhrictionEditController
       }
 
       $xactions = array();
+
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
@@ -275,17 +280,22 @@ final class PhrictionEditController
           ->addCancelButton($cancel_uri)
           ->setValue(pht('Save Draft')));
     } else {
-      $draft_button = id(new PHUIButtonView())
-        ->setTag('input')
-        ->setName('draft')
-        ->setText(pht('Save as Draft'))
-        ->setColor(PHUIButtonView::GREEN);
+      $submit = id(new AphrontFormSubmitControl());
 
-      $form->appendControl(
-        id(new AphrontFormSubmitControl())
-          ->addButton($draft_button)
-          ->addCancelButton($cancel_uri)
-          ->setValue($submit_button));
+      if (!$is_new) {
+        $draft_button = id(new PHUIButtonView())
+          ->setTag('input')
+          ->setName('draft')
+          ->setText(pht('Save as Draft'))
+          ->setColor(PHUIButtonView::GREEN);
+        $submit->addButton($draft_button);
+      }
+
+      $submit
+        ->addCancelButton($cancel_uri)
+        ->setValue($submit_button);
+
+      $form->appendControl($submit);
     }
 
     $form_box = id(new PHUIObjectBoxView())

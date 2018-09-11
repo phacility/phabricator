@@ -186,6 +186,35 @@ final class PhrictionDocumentController
         );
       } else {
         $content = $document->getContent();
+
+        if ($content->getVersion() < $document->getMaxVersion()) {
+          $can_edit = PhabricatorPolicyFilter::hasCapability(
+            $viewer,
+            $document,
+            PhabricatorPolicyCapability::CAN_EDIT);
+          if ($can_edit) {
+            $document_uri = new PhutilURI($document->getURI());
+            $draft_uri = $document_uri->alter('v', $document->getMaxVersion());
+
+            $draft_link = phutil_tag(
+              'a',
+              array(
+                'href' => $draft_uri,
+              ),
+              pht('View Draft Version'));
+
+            $draft_link = phutil_tag('strong', array(), $draft_link);
+
+            $version_note = id(new PHUIInfoView())
+              ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+              ->appendChild(
+                array(
+                  pht('This document has unpublished draft changes.'),
+                  ' ',
+                  $draft_link,
+                ));
+          }
+        }
       }
 
       $page_title = $content->getTitle();
