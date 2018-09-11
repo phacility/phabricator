@@ -72,43 +72,6 @@ final class PhrictionEditController
       }
     }
 
-    if ($request->getBool('nodraft')) {
-      $draft = null;
-      $draft_key = null;
-    } else {
-      if ($document->getPHID()) {
-        $draft_key = $document->getPHID().':'.$content->getVersion();
-      } else {
-        $draft_key = 'phriction:'.$content->getSlug();
-      }
-      $draft = id(new PhabricatorDraft())->loadOneWhere(
-        'authorPHID = %s AND draftKey = %s',
-        $viewer->getPHID(),
-        $draft_key);
-    }
-
-    if ($draft &&
-      strlen($draft->getDraft()) &&
-      ($draft->getDraft() != $content->getContent())) {
-      $content_text = $draft->getDraft();
-
-      $discard = phutil_tag(
-        'a',
-        array(
-          'href' => $request->getRequestURI()->alter('nodraft', true),
-        ),
-        pht('discard this draft'));
-
-      $draft_note = new PHUIInfoView();
-      $draft_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-      $draft_note->setTitle(pht('Recovered Draft'));
-      $draft_note->appendChild(
-        pht('Showing a saved draft of your edits, you can %s.', $discard));
-    } else {
-      $content_text = $content->getContent();
-      $draft_note = null;
-    }
-
     require_celerity_resource('phriction-document-css');
 
     $e_title = true;
@@ -130,6 +93,8 @@ final class PhrictionEditController
     }
 
     $v_space = $document->getSpacePHID();
+
+    $content_text = $content->getContent();
 
     if ($request->isFormPost()) {
 
@@ -180,10 +145,6 @@ final class PhrictionEditController
 
       try {
         $editor->applyTransactions($document, $xactions);
-
-        if ($draft) {
-          $draft->delete();
-        }
 
         $uri = PhrictionDocument::getSlugURI($document->getSlug());
         return id(new AphrontRedirectResponse())->setURI($uri);
@@ -239,7 +200,6 @@ final class PhrictionEditController
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('slug', $document->getSlug())
-      ->addHiddenInput('nodraft', $request->getBool('nodraft'))
       ->addHiddenInput('contentVersion', $max_version)
       ->addHiddenInput('overwrite', $overwrite)
       ->appendChild(
@@ -325,7 +285,6 @@ final class PhrictionEditController
     $view = id(new PHUITwoColumnView())
       ->setFooter(
         array(
-          $draft_note,
           $form_box,
           $preview,
         ));
