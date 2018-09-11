@@ -850,6 +850,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $xaction->setIsSilentTransaction(true);
     }
 
+    if ($actor->hasHighSecuritySession()) {
+      $xaction->setIsMFATransaction(true);
+    }
+
     return $xaction;
   }
 

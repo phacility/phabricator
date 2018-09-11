@@ -74,6 +74,22 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
     }
   }
 
+  public function isHighSecuritySession() {
+    $until = $this->getHighSecurityUntil();
+
+    if (!$until) {
+      return false;
+    }
+
+    $now = PhabricatorTime::getNow();
+    if ($until < $now) {
+      return false;
+    }
+
+    return true;
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
