@@ -348,6 +348,10 @@ final class PhrictionDocumentController
       $page_content->setCurtain($curtain);
     }
 
+    $timeline = $this->buildTransactionTimeline(
+      $document,
+      new PhrictionTransactionQuery());
+
     return $this->newPage()
       ->setTitle($page_title)
       ->setCrumbs($crumbs)
@@ -356,7 +360,15 @@ final class PhrictionDocumentController
         array(
           $page_content,
           $prop_list,
-          $children,
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'phui-document-view-pro-box',
+            ),
+            array(
+              $children,
+              $timeline,
+            )),
         ));
 
   }
@@ -600,7 +612,7 @@ final class PhrictionDocumentController
           ),
           $list)));
 
-     return phutil_tag_div('phui-document-view-pro-box', $box);
+    return $box;
   }
 
   private function renderChildDocumentLink(array $info) {
