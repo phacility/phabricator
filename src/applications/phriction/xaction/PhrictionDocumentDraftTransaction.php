@@ -11,6 +11,10 @@ final class PhrictionDocumentDraftTransaction
     $this->getEditor()->setShouldPublishContent($object, false);
   }
 
+  public function shouldHideForFeed() {
+    return true;
+  }
+
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
