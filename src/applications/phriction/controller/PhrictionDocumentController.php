@@ -352,6 +352,13 @@ final class PhrictionDocumentController
       $document,
       new PhrictionTransactionQuery());
 
+    $edit_engine = id(new PhrictionDocumentEditEngine())
+      ->setViewer($viewer)
+      ->setTargetObject($document);
+
+    $comment_view = $edit_engine
+      ->buildEditEngineCommentView($document);
+
     return $this->newPage()
       ->setTitle($page_title)
       ->setCrumbs($crumbs)
@@ -368,6 +375,7 @@ final class PhrictionDocumentController
             array(
               $children,
               $timeline,
+              $comment_view,
             )),
         ));
 

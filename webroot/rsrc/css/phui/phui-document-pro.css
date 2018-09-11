@@ -241,10 +241,13 @@ body.printable {
   }
 }
 
+.phui-document-view-pro-box {
+  margin-bottom: 24px;
+}
+
 .phui-document-view-pro-box .phui-timeline-view {
   padding: 16px 0 0 0;
   background: none;
-  border-top: 1px solid rgba({$alphablue}, 0.20);
 }
 
 .phui-document-view-pro-box .phui-timeline-wedge {
