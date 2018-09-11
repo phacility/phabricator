@@ -5,13 +5,6 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
   private $key;
   private $spec = array();
 
-  const NONE                = 0;
-  const NEEDS_AUDIT         = 1;
-  const CONCERN_RAISED      = 2;
-  const PARTIALLY_AUDITED   = 3;
-  const FULLY_AUDITED       = 4;
-  const NEEDS_VERIFICATION = 5;
-
   const MODERN_NONE = 'none';
   const MODERN_NEEDS_AUDIT = 'needs-audit';
   const MODERN_CONCERN_RAISED = 'concern-raised';
@@ -125,42 +118,42 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return array(
       self::MODERN_NONE => array(
         'name' => pht('No Audits'),
-        'legacy' => self::NONE,
+        'legacy' => 0,
         'icon' => 'fa-check',
         'color' => 'bluegrey',
         'closed' => true,
       ),
       self::MODERN_NEEDS_AUDIT => array(
         'name' => pht('Audit Required'),
-        'legacy' => self::NEEDS_AUDIT,
+        'legacy' => 1,
         'icon' => 'fa-exclamation-circle',
         'color' => 'orange',
         'closed' => false,
       ),
       self::MODERN_CONCERN_RAISED => array(
         'name' => pht('Concern Raised'),
-        'legacy' => self::CONCERN_RAISED,
+        'legacy' => 2,
         'icon' => 'fa-times-circle',
         'color' => 'red',
         'closed' => false,
       ),
       self::MODERN_PARTIALLY_AUDITED => array(
         'name' => pht('Partially Audited'),
-        'legacy' => self::PARTIALLY_AUDITED,
+        'legacy' => 3,
         'icon' => 'fa-check-circle-o',
         'color' => 'yellow',
         'closed' => false,
       ),
       self::MODERN_AUDITED => array(
         'name' => pht('Audited'),
-        'legacy' => self::FULLY_AUDITED,
+        'legacy' => 4,
         'icon' => 'fa-check-circle',
         'color' => 'green',
         'closed' => true,
       ),
       self::MODERN_NEEDS_VERIFICATION => array(
         'name' => pht('Needs Verification'),
-        'legacy' => self::NEEDS_VERIFICATION,
+        'legacy' => 5,
         'icon' => 'fa-refresh',
         'color' => 'indigo',
         'closed' => false,
