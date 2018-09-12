@@ -277,7 +277,7 @@ final class PhabricatorAuditEditor
 
           if ($actor_is_author) {
             $inlines[] = id(clone $query)
-              ->withHasTransaciton(true)
+              ->withHasTransaction(true)
               ->execute();
           }
 
