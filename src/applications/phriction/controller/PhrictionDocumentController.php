@@ -476,7 +476,7 @@ final class PhrictionDocumentController
     if ($is_draft) {
       $publish_name = pht('Publish Draft');
     } else {
-      $publish_name = pht('Publish Revert');
+      $publish_name = pht('Publish Older Version');
     }
 
     // If you're looking at the current version; and it's an unpublished
