@@ -25,7 +25,6 @@ final class PhabricatorRepositoryCommit
   protected $committerIdentityPHID;
   protected $commitIdentifier;
   protected $epoch;
-  protected $mailKey;
   protected $authorPHID;
   protected $auditStatus = DiffusionCommitAuditStatus::NONE;
   protected $summary = '';
@@ -116,7 +115,6 @@ final class PhabricatorRepositoryCommit
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
         'commitIdentifier' => 'text40',
-        'mailKey' => 'bytes20',
         'authorPHID' => 'phid?',
         'authorIdentityPHID' => 'phid?',
         'committerIdentityPHID' => 'phid?',
@@ -319,13 +317,6 @@ final class PhabricatorRepositoryCommit
   public function getAuditorPHIDsForEdit() {
     $audits = $this->getAudits();
     return mpull($audits, 'getAuditorPHID');
-  }
-
-  public function save() {
-    if (!$this->mailKey) {
-      $this->mailKey = Filesystem::readRandomCharacters(20);
-    }
-    return parent::save();
   }
 
   public function delete() {
@@ -605,7 +596,6 @@ final class PhabricatorRepositoryCommit
       'phid' =>  $this->getPHID(),
       'commitIdentifier' =>  $this->getCommitIdentifier(),
       'epoch' => $this->getEpoch(),
-      'mailKey' => $this->getMailKey(),
       'authorPHID' => $this->getAuthorPHID(),
       'auditStatus' => $this->getAuditStatus(),
       'summary' => $this->getSummary(),
