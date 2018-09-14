@@ -79,7 +79,7 @@ abstract class DrydockController extends PhabricatorController {
       ->addRawContent($table);
   }
 
-  protected function buildLogBox(DrydockLogQuery $query, $all_uri) {
+  protected function buildLogTable(DrydockLogQuery $query) {
     $viewer = $this->getViewer();
 
     $logs = $query
@@ -89,9 +89,12 @@ abstract class DrydockController extends PhabricatorController {
 
     $log_table = id(new DrydockLogListView())
       ->setUser($viewer)
-      ->setLogs($logs)
-      ->render();
+      ->setLogs($logs);
 
+    return $log_table;
+  }
+
+  protected function buildLogBox(DrydockLogListView $log_table, $all_uri) {
     $log_header = id(new PHUIHeaderView())
       ->setHeader(pht('Logs'))
       ->addActionLink(

@@ -1168,6 +1168,7 @@ phutil_register_library_map(array(
     'DrydockManagementUpdateResourceWorkflow' => 'applications/drydock/management/DrydockManagementUpdateResourceWorkflow.php',
     'DrydockManagementWorkflow' => 'applications/drydock/management/DrydockManagementWorkflow.php',
     'DrydockObjectAuthorizationView' => 'applications/drydock/view/DrydockObjectAuthorizationView.php',
+    'DrydockOperationWorkLogType' => 'applications/drydock/logtype/DrydockOperationWorkLogType.php',
     'DrydockQuery' => 'applications/drydock/query/DrydockQuery.php',
     'DrydockRepositoryOperation' => 'applications/drydock/storage/DrydockRepositoryOperation.php',
     'DrydockRepositoryOperationController' => 'applications/drydock/controller/DrydockRepositoryOperationController.php',
@@ -6575,6 +6576,7 @@ phutil_register_library_map(array(
     'DrydockManagementUpdateResourceWorkflow' => 'DrydockManagementWorkflow',
     'DrydockManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'DrydockObjectAuthorizationView' => 'AphrontView',
+    'DrydockOperationWorkLogType' => 'DrydockLogType',
     'DrydockQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DrydockRepositoryOperation' => array(
       'DrydockDAO',

@@ -43,8 +43,11 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $log_query = id(new DrydockLogQuery())
       ->withLeasePHIDs(array($lease->getPHID()));
 
+    $log_table = $this->buildLogTable($log_query)
+      ->setHideLeases(true);
+
     $logs = $this->buildLogBox(
-      $log_query,
+      $log_table,
       $this->getApplicationURI("lease/{$id}/logs/query/all/"));
 
     $crumbs = $this->buildApplicationCrumbs();

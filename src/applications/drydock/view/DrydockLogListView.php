@@ -3,6 +3,46 @@
 final class DrydockLogListView extends AphrontView {
 
   private $logs;
+  private $hideBlueprints;
+  private $hideResources;
+  private $hideLeases;
+  private $hideOperations;
+
+  public function setHideBlueprints($hide_blueprints) {
+    $this->hideBlueprints = $hide_blueprints;
+    return $this;
+  }
+
+  public function getHideBlueprints() {
+    return $this->hideBlueprints;
+  }
+
+  public function setHideResources($hide_resources) {
+    $this->hideResources = $hide_resources;
+    return $this;
+  }
+
+  public function getHideResources() {
+    return $this->hideResources;
+  }
+
+  public function setHideLeases($hide_leases) {
+    $this->hideLeases = $hide_leases;
+    return $this;
+  }
+
+  public function getHideLeases() {
+    return $this->hideLeases;
+  }
+
+  public function setHideOperations($hide_operations) {
+    $this->hideOperations = $hide_operations;
+    return $this;
+  }
+
+  public function getHideOperations() {
+    return $this->hideOperations;
+  }
 
   public function setLogs(array $logs) {
     assert_instances_of($logs, 'DrydockLog');
@@ -41,6 +81,13 @@ final class DrydockLogListView extends AphrontView {
         $lease = null;
       }
 
+      $operation_phid = $log->getOperationPHID();
+      if ($operation_phid) {
+        $operation = $viewer->renderHandle($operation_phid);
+      } else {
+        $operation = null;
+      }
+
       if ($log->isComplete()) {
         $type_key = $log->getType();
         if (isset($types[$type_key])) {
@@ -72,6 +119,7 @@ final class DrydockLogListView extends AphrontView {
         $blueprint,
         $resource,
         $lease,
+        $operation,
         id(new PHUIIconView())->setIcon($icon),
         $type,
         $data,
@@ -86,13 +134,22 @@ final class DrydockLogListView extends AphrontView {
           pht('Blueprint'),
           pht('Resource'),
           pht('Lease'),
+          pht('Operation'),
           null,
           pht('Type'),
           pht('Data'),
           pht('Date'),
         ))
+      ->setColumnVisibility(
+        array(
+          !$this->getHideBlueprints(),
+          !$this->getHideResources(),
+          !$this->getHideLeases(),
+          !$this->getHideOperations(),
+        ))
       ->setColumnClasses(
         array(
+          '',
           '',
           '',
           '',

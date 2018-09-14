@@ -50,8 +50,11 @@ final class DrydockRepositoryOperationViewController
     $log_query = id(new DrydockLogQuery())
       ->withOperationPHIDs(array($operation->getPHID()));
 
+    $log_table = $this->buildLogTable($log_query)
+      ->setHideOperations(true);
+
     $logs = $this->buildLogBox(
-      $log_query,
+      $log_table,
       $this->getApplicationURI("operation/{$id}/logs/query/all/"));
 
     $view = id(new PHUITwoColumnView())
