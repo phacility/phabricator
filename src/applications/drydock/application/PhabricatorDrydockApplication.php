@@ -93,6 +93,8 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
             '' => 'DrydockRepositoryOperationViewController',
             'status/' => 'DrydockRepositoryOperationStatusController',
             'dismiss/' => 'DrydockRepositoryOperationDismissController',
+            'logs/(?:query/(?P<queryKey>[^/]+)/)?' =>
+              'DrydockLogListController',
           ),
         ),
       ),
