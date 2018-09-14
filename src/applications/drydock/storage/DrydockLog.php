@@ -6,6 +6,7 @@ final class DrydockLog extends DrydockDAO
   protected $blueprintPHID;
   protected $resourcePHID;
   protected $leasePHID;
+  protected $operationPHID;
   protected $epoch;
   protected $type;
   protected $data = array();
@@ -13,6 +14,7 @@ final class DrydockLog extends DrydockDAO
   private $blueprint = self::ATTACHABLE;
   private $resource = self::ATTACHABLE;
   private $lease = self::ATTACHABLE;
+  private $operation = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -24,6 +26,7 @@ final class DrydockLog extends DrydockDAO
         'blueprintPHID' => 'phid?',
         'resourcePHID' => 'phid?',
         'leasePHID' => 'phid?',
+        'operationPHID' => 'phid?',
         'type' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -35,6 +38,9 @@ final class DrydockLog extends DrydockDAO
         ),
         'key_lease' => array(
           'columns' => array('leasePHID', 'type'),
+        ),
+        'key_operation' => array(
+          'columns' => array('operationPHID', 'type'),
         ),
         'epoch' => array(
           'columns' => array('epoch'),
@@ -70,6 +76,16 @@ final class DrydockLog extends DrydockDAO
     return $this->assertAttached($this->lease);
   }
 
+  public function attachOperation(
+    DrydockRepositoryOperation $operation = null) {
+    $this->operation = $operation;
+    return $this;
+  }
+
+  public function getOperation() {
+    return $this->assertAttached($this->operation);
+  }
+
   public function isComplete() {
     if ($this->getBlueprintPHID() && !$this->getBlueprint()) {
       return false;
@@ -80,6 +96,10 @@ final class DrydockLog extends DrydockDAO
     }
 
     if ($this->getLeasePHID() && !$this->getLease()) {
+      return false;
+    }
+
+    if ($this->getOperationPHID() && !$this->getOperation()) {
       return false;
     }
 
@@ -108,8 +128,8 @@ final class DrydockLog extends DrydockDAO
 
   public function describeAutomaticCapability($capability) {
     return pht(
-      'To view log details, you must be able to view the associated '.
-      'blueprint, resource and lease.');
+      'To view log details, you must be able to view all associated '.
+      'blueprints, resources, leases, and repository operations.');
   }
 
 }
