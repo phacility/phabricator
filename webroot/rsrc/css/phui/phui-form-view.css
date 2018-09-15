@@ -133,17 +133,10 @@
 }
 
 .aphront-form-control-submit button,
-.aphront-form-control-submit a.button {
+.aphront-form-control-submit a.button,
+.aphront-form-control-submit input[type="submit"] {
   float: right;
   margin: 4px 0 0 8px;
-}
-
-.phui-form-control-multi-submit input,
-.phui-form-control-multi-submit button,
-.phui-form-control-multi-submit a {
-  float: right;
-  margin: 4px 0 0 8px;
-  width: auto;
 }
 
 .aphront-form-control-textarea textarea.aphront-textarea-very-short {

@@ -83,7 +83,15 @@ final class PHUITimelineView extends AphrontView {
         'class' => 'phui-timeline-view',
         'id' => $this->id,
       ),
-      $events);
+      array(
+        phutil_tag(
+          'h3',
+          array(
+            'class' => 'aural-only',
+          ),
+          pht('Event Timeline')),
+        $events,
+      ));
   }
 
   public function buildEvents() {

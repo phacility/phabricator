@@ -243,8 +243,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
+      ->setNoBorder(true)
       ->addClass('phui-comment-form-view')
       ->addSigil('phui-comment-form')
+      ->appendChild(
+        phutil_tag(
+          'h3',
+          array(
+            'class' => 'aural-only',
+          ),
+          pht('Add Comment')))
       ->appendChild($image)
       ->appendChild($badge_view)
       ->appendChild($wedge)

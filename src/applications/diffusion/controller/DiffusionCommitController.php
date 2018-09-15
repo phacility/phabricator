@@ -171,13 +171,12 @@ final class DiffusionCommitController extends DiffusionController {
         ->setHeaderIcon('fa-code-fork')
         ->addTag($commit_tag);
 
-      if ($commit->getAuditStatus()) {
-        $icon = PhabricatorAuditCommitStatusConstants::getStatusIcon(
-          $commit->getAuditStatus());
-        $color = PhabricatorAuditCommitStatusConstants::getStatusColor(
-          $commit->getAuditStatus());
-        $status = PhabricatorAuditCommitStatusConstants::getStatusName(
-          $commit->getAuditStatus());
+      if (!$commit->isAuditStatusNoAudit()) {
+        $status = $commit->getAuditStatusObject();
+
+        $icon = $status->getIcon();
+        $color = $status->getColor();
+        $status = $status->getName();
 
         $header->setStatus($icon, $color, $status);
       }

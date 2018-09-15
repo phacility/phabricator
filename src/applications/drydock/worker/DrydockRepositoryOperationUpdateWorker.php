@@ -59,6 +59,10 @@ final class DrydockRepositoryOperationUpdateWorker
       // No matter what happens here, destroy the lease away once we're done.
       $lease->setReleaseOnDestruction(true);
 
+      $operation->attachWorkingCopyLease($lease);
+
+      $operation->logEvent(DrydockOperationWorkLogType::LOGCONST);
+
       $operation->applyOperation($interface);
 
     } catch (PhabricatorWorkerYieldException $ex) {

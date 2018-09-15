@@ -490,8 +490,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     PhabricatorAuthSession $session,
     $force = false) {
 
-    $until = $session->getHighSecurityUntil();
-    if ($until > time() || $force) {
+    if ($session->isHighSecuritySession() || $force) {
       return new PhabricatorAuthHighSecurityToken();
     }
 

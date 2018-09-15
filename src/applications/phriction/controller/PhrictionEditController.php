@@ -72,43 +72,6 @@ final class PhrictionEditController
       }
     }
 
-    if ($request->getBool('nodraft')) {
-      $draft = null;
-      $draft_key = null;
-    } else {
-      if ($document->getPHID()) {
-        $draft_key = $document->getPHID().':'.$content->getVersion();
-      } else {
-        $draft_key = 'phriction:'.$content->getSlug();
-      }
-      $draft = id(new PhabricatorDraft())->loadOneWhere(
-        'authorPHID = %s AND draftKey = %s',
-        $viewer->getPHID(),
-        $draft_key);
-    }
-
-    if ($draft &&
-      strlen($draft->getDraft()) &&
-      ($draft->getDraft() != $content->getContent())) {
-      $content_text = $draft->getDraft();
-
-      $discard = phutil_tag(
-        'a',
-        array(
-          'href' => $request->getRequestURI()->alter('nodraft', true),
-        ),
-        pht('discard this draft'));
-
-      $draft_note = new PHUIInfoView();
-      $draft_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-      $draft_note->setTitle(pht('Recovered Draft'));
-      $draft_note->appendChild(
-        pht('Showing a saved draft of your edits, you can %s.', $discard));
-    } else {
-      $content_text = $content->getContent();
-      $draft_note = null;
-    }
-
     require_celerity_resource('phriction-document-css');
 
     $e_title = true;
@@ -131,7 +94,15 @@ final class PhrictionEditController
 
     $v_space = $document->getSpacePHID();
 
+    $content_text = $content->getContent();
+    $is_draft_mode = ($document->getContent()->getVersion() != $max_version);
+
     if ($request->isFormPost()) {
+      if ($is_new) {
+        $save_as_draft = false;
+      } else {
+        $save_as_draft = ($is_draft_mode || $request->getExists('draft'));
+      }
 
       $title = $request->getStr('title');
       $content_text = $request->getStr('content');
@@ -143,13 +114,19 @@ final class PhrictionEditController
       $v_projects = $request->getArr('projects');
       $v_space = $request->getStr('spacePHID');
 
+      if ($save_as_draft) {
+        $edit_type = PhrictionDocumentDraftTransaction::TRANSACTIONTYPE;
+      } else {
+        $edit_type = PhrictionDocumentContentTransaction::TRANSACTIONTYPE;
+      }
+
       $xactions = array();
+
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
       $xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(
-          PhrictionDocumentContentTransaction::TRANSACTIONTYPE)
+        ->setTransactionType($edit_type)
         ->setNewValue($content_text);
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -181,11 +158,15 @@ final class PhrictionEditController
       try {
         $editor->applyTransactions($document, $xactions);
 
-        if ($draft) {
-          $draft->delete();
+        $uri = PhrictionDocument::getSlugURI($document->getSlug());
+        $uri = new PhutilURI($uri);
+
+        // If the user clicked "Save as Draft", take them to the draft, not
+        // to the current published page.
+        if ($save_as_draft) {
+          $uri = $uri->alter('v', $document->getMaxVersion());
         }
 
-        $uri = PhrictionDocument::getSlugURI($document->getSlug());
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
@@ -215,7 +196,7 @@ final class PhrictionEditController
       if ($overwrite) {
         $submit_button = pht('Overwrite Changes');
       } else {
-        $submit_button = pht('Save Changes');
+        $submit_button = pht('Save and Publish');
       }
     } else {
       $submit_button = pht('Create Document');
@@ -235,11 +216,9 @@ final class PhrictionEditController
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     $edit_capability = PhabricatorPolicyCapability::CAN_EDIT;
 
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('slug', $document->getSlug())
-      ->addHiddenInput('nodraft', $request->getBool('nodraft'))
       ->addHiddenInput('contentVersion', $max_version)
       ->addHiddenInput('overwrite', $overwrite)
       ->appendChild(
@@ -293,11 +272,31 @@ final class PhrictionEditController
           ->setLabel(pht('Edit Notes'))
           ->setValue($notes)
           ->setError(null)
-          ->setName('description'))
-      ->appendChild(
+          ->setName('description'));
+
+    if ($is_draft_mode) {
+      $form->appendControl(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
-          ->setValue($submit_button));
+          ->setValue(pht('Save Draft')));
+    } else {
+      $submit = id(new AphrontFormSubmitControl());
+
+      if (!$is_new) {
+        $draft_button = id(new PHUIButtonView())
+          ->setTag('input')
+          ->setName('draft')
+          ->setText(pht('Save as Draft'))
+          ->setColor(PHUIButtonView::GREEN);
+        $submit->addButton($draft_button);
+      }
+
+      $submit
+        ->addCancelButton($cancel_uri)
+        ->setValue($submit_button);
+
+      $form->appendControl($submit);
+    }
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
@@ -325,7 +324,6 @@ final class PhrictionEditController
     $view = id(new PHUITwoColumnView())
       ->setFooter(
         array(
-          $draft_note,
           $form_box,
           $preview,
         ));

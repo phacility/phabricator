@@ -25,6 +25,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $showHideHref;
   private $showHideContent;
   private $showHideOpen;
+  private $noBorder;
 
   private $propertyLists = array();
 
@@ -147,6 +148,11 @@ final class PHUIObjectBoxView extends AphrontTagView {
     return $this;
   }
 
+  public function setNoBorder($no_border) {
+    $this->noBorder = $no_border;
+    return $this;
+  }
+
   public function setValidationException(
     PhabricatorApplicationTransactionValidationException $ex = null) {
     $this->validationException = $ex;
@@ -156,7 +162,9 @@ final class PHUIObjectBoxView extends AphrontTagView {
   protected function getTagAttributes() {
     $classes = array();
     $classes[] = 'phui-box';
-    $classes[] = 'phui-box-border';
+    if (!$this->noBorder) {
+      $classes[] = 'phui-box-border';
+    }
     $classes[] = 'phui-object-box';
     $classes[] = 'mlt mll mlr';
 

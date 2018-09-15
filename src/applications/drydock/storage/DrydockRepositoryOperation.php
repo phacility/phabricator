@@ -25,6 +25,7 @@ final class DrydockRepositoryOperation extends DrydockDAO
   private $repository = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
   private $implementation = self::ATTACHABLE;
+  private $workingCopyLease = self::ATTACHABLE;
 
   public static function initializeNewOperation(
     DrydockRepositoryOperationType $op) {
@@ -88,6 +89,19 @@ final class DrydockRepositoryOperation extends DrydockDAO
 
   public function getImplementation() {
     return $this->implementation;
+  }
+
+  public function getWorkingCopyLease() {
+    return $this->assertAttached($this->workingCopyLease);
+  }
+
+  public function attachWorkingCopyLease(DrydockLease $lease) {
+    $this->workingCopyLease = $lease;
+    return $this;
+  }
+
+  public function hasWorkingCopyLease() {
+    return ($this->workingCopyLease !== self::ATTACHABLE);
   }
 
   public function getProperty($key, $default = null) {
@@ -189,6 +203,37 @@ final class DrydockRepositoryOperation extends DrydockDAO
     return $this->getProperty('exec.workingcopy.error');
   }
 
+  public function logText($text) {
+    return $this->logEvent(
+      DrydockTextLogType::LOGCONST,
+      array(
+        'text' => $text,
+      ));
+  }
+
+  public function logEvent($type, array $data = array()) {
+    $log = id(new DrydockLog())
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setType($type)
+      ->setData($data);
+
+    $log->setOperationPHID($this->getPHID());
+
+    if ($this->hasWorkingCopyLease()) {
+      $lease = $this->getWorkingCopyLease();
+      $log->setLeasePHID($lease->getPHID());
+
+      $resource_phid = $lease->getResourcePHID();
+      if ($resource_phid) {
+        $resource = $lease->getResource();
+
+        $log->setResourcePHID($resource->getPHID());
+        $log->setBlueprintPHID($resource->getBlueprintPHID());
+      }
+    }
+
+    return $log->save();
+  }
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

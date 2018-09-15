@@ -48,8 +48,11 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $log_query = id(new DrydockLogQuery())
       ->withResourcePHIDs(array($resource->getPHID()));
 
-    $log_box = $this->buildLogBox(
-      $log_query,
+    $log_table = $this->buildLogTable($log_query)
+      ->setHideResources(true);
+
+    $logs = $this->buildLogBox(
+      $log_table,
       $this->getApplicationURI("resource/{$id}/logs/query/all/"));
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -86,11 +89,12 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $object_box,
-        $lease_box,
-        $log_box,
-      ));
+      ->setMainColumn(
+        array(
+          $object_box,
+          $lease_box,
+          $logs,
+        ));
 
     return $this->newPage()
       ->setTitle($title)

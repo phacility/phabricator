@@ -63,7 +63,7 @@ final class PhrictionPublishController
     }
 
     if ($content->getVersion() < $document->getContent()->getVersion()) {
-      $title = pht('Revert Document?');
+      $title = pht('Publish Older Version?');
       $body = pht(
         'Revert the published version of this document to an older '.
         'version?');

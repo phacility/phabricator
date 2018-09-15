@@ -233,14 +233,15 @@ final class PHUIButtonView extends AphrontTagView {
       $classes = array();
     }
 
-    // See PHI823. If we aren't rendering a "<button>" tag, give the tag we
-    // are rendering a "button" role as a hint to screen readers.
+    // See PHI823. If we aren't rendering a "<button>" or "<input>" tag,
+    // give the tag we are rendering a "button" role as a hint to screen
+    // readers.
     $role = null;
-    if ($this->tag !== 'button') {
+    if ($this->tag !== 'button' && $this->tag !== 'input') {
       $role = 'button';
     }
 
-    return array(
+    $attrs = array(
       'class'  => $classes,
       'href'   => $this->href,
       'name'   => $this->name,
@@ -249,9 +250,19 @@ final class PHUIButtonView extends AphrontTagView {
       'meta'   => $meta,
       'role' => $role,
     );
+
+    if ($this->tag == 'input') {
+      $attrs['type'] = 'submit';
+      $attrs['value'] = $this->text;
+    }
+
+    return $attrs;
   }
 
   protected function getTagContent() {
+    if ($this->tag === 'input') {
+      return null;
+    }
 
     $icon = $this->icon;
     $text = null;

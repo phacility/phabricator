@@ -4,7 +4,8 @@
 
 
 button,
-a.button {
+a.button,
+input[type="submit"] {
   font: {$basefont};
   -webkit-font-smoothing: antialiased;
   -webkit-user-select: none;
@@ -72,7 +73,8 @@ a.icon:visited {
 
 button.button-green,
 a.button-green.button,
-a.button-green.button:visited {
+a.button-green.button:visited,
+input[type="submit"].button-green {
   background-color: {$green.button.color};
   border-color: {$green.button.color};
   background-image: {$green.button.gradient};
@@ -80,16 +82,17 @@ a.button-green.button:visited {
 
 button.button-red,
 a.button-red.button,
-a.button-red.button:visited {
+a.button-red.button:visited,
+input[type="submit"].button-red {
   background-color: {$red.button.color};
   border-color: {$red.button.color};
   background-image: {$red.button.gradient};
 }
 
 button.button-grey,
-input[type="submit"].button-grey,
 a.button-grey,
-a.button-grey:visited {
+a.button-grey:visited,
+input[type="submit"].button-grey {
   background-color: {$grey.button.color};
   background-image: {$grey.button.gradient};
   border: 1px solid rgba({$alphablue}, 0.3);

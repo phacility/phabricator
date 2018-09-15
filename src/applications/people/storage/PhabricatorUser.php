@@ -306,6 +306,14 @@ final class PhabricatorUser
     return ($this->session !== self::ATTACHABLE);
   }
 
+  public function hasHighSecuritySession() {
+    if (!$this->hasSession()) {
+      return false;
+    }
+
+    return $this->getSession()->isHighSecuritySession();
+  }
+
   private function generateConduitCertificate() {
     return Filesystem::readRandomCharacters(255);
   }

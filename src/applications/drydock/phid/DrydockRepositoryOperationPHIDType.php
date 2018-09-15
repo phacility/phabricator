@@ -5,7 +5,7 @@ final class DrydockRepositoryOperationPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'DRYO';
 
   public function getTypeName() {
-    return pht('Drydock Repository Operation');
+    return pht('Repository Operation');
   }
 
   public function newObject() {
@@ -33,7 +33,7 @@ final class DrydockRepositoryOperationPHIDType extends PhabricatorPHIDType {
       $operation = $objects[$phid];
       $id = $operation->getID();
 
-      $handle->setName(pht('Drydock Repository Operation %d', $id));
+      $handle->setName(pht('Repository Operation %d', $id));
       $handle->setURI("/drydock/operation/{$id}/");
     }
   }
