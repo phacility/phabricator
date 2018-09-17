@@ -38,19 +38,19 @@ final class PhrictionDocumentMoveAwayTransaction
     $new = $this->getNewValue();
 
     return pht(
-      '%s moved this document to %s',
+      '%s moved this document to %s.',
       $this->renderAuthor(),
-      $this->renderHandleLink($new['phid']));
+      $this->renderObject($new['phid']));
   }
 
   public function getTitleForFeed() {
     $new = $this->getNewValue();
 
     return pht(
-      '%s moved %s to %s',
+      '%s moved %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
-      $this->renderHandleLink($new['phid']));
+      $this->renderObject($new['phid']));
   }
 
   public function getIcon() {
