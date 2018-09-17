@@ -377,16 +377,21 @@ final class PhrictionDocumentController
       $page_content->setCurtain($curtain);
     }
 
-    $timeline = $this->buildTransactionTimeline(
-      $document,
-      new PhrictionTransactionQuery());
+    if ($document->getPHID()) {
+      $timeline = $this->buildTransactionTimeline(
+        $document,
+        new PhrictionTransactionQuery());
 
-    $edit_engine = id(new PhrictionDocumentEditEngine())
-      ->setViewer($viewer)
-      ->setTargetObject($document);
+      $edit_engine = id(new PhrictionDocumentEditEngine())
+        ->setViewer($viewer)
+        ->setTargetObject($document);
 
-    $comment_view = $edit_engine
-      ->buildEditEngineCommentView($document);
+      $comment_view = $edit_engine
+        ->buildEditEngineCommentView($document);
+    } else {
+      $timeline = null;
+      $comment_view = null;
+    }
 
     return $this->newPage()
       ->setTitle($page_title)
