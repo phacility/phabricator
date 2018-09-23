@@ -402,7 +402,7 @@ final class PHUITimelineEventView extends AphrontView {
     $wedge = phutil_tag(
       'div',
       array(
-        'class' => 'phui-timeline-wedge phui-timeline-border',
+        'class' => 'phui-timeline-wedge',
         'style' => (nonempty($image_uri)) ? '' : 'display: none;',
       ),
       '');
@@ -461,7 +461,7 @@ final class PHUITimelineEventView extends AphrontView {
     $content = phutil_tag(
       'div',
       array(
-        'class' => 'phui-timeline-group phui-timeline-border',
+        'class' => 'phui-timeline-group',
       ),
       $content);
 
