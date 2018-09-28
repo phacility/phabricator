@@ -208,7 +208,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
           $this->synchronizeWorkingCopyFromDevices($fetchable);
         } else {
-          $this->synchornizeWorkingCopyFromRemote();
+          $this->synchronizeWorkingCopyFromRemote();
         }
 
         PhabricatorRepositoryWorkingCopyVersion::updateVersion(
@@ -609,7 +609,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
   /**
    * @task internal
    */
-  private function synchornizeWorkingCopyFromRemote() {
+  private function synchronizeWorkingCopyFromRemote() {
     $repository = $this->getRepository();
     $device = AlmanacKeys::getLiveDevice();
 
