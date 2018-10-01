@@ -144,7 +144,8 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
     $ok = head($result);
     if (!$ok) {
-      throw new PhutilLockException($lock_name);
+      throw id(new PhutilLockException($lock_name))
+        ->setHint($this->newHint($lock_name, $wait));
     }
 
     $conn->rememberLock($lock_name);
@@ -152,13 +153,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
     $this->conn = $conn;
 
     if ($this->shouldLogLock()) {
-      global $argv;
-
-      $lock_context = array(
-        'pid' => getmypid(),
-        'host' => php_uname('n'),
-        'argv' => $argv,
-      );
+      $lock_context = $this->newLockContext();
 
       $log = id(new PhabricatorDaemonLockLog())
         ->setLockName($lock_name)
@@ -226,6 +221,155 @@ final class PhabricatorGlobalLock extends PhutilLock {
     }
 
     return true;
+  }
+
+  private function newLockContext() {
+    $context = array(
+      'pid' => getmypid(),
+      'host' => php_uname('n'),
+      'sapi' => php_sapi_name(),
+    );
+
+    global $argv;
+    if ($argv) {
+      $context['argv'] = $argv;
+    }
+
+    $access_log = null;
+
+    // TODO: There's currently no cohesive way to get the parameterized access
+    // log for the current request across different request types. Web requests
+    // have an "AccessLog", SSH requests have an "SSHLog", and other processes
+    // (like scripts) have no log. But there's no method to say "give me any
+    // log you've got". For now, just test if we have a web request and use the
+    // "AccessLog" if we do, since that's the only one we actually read any
+    // parameters from.
+
+    // NOTE: "PhabricatorStartup" is only available from web requests, not
+    // from CLI scripts.
+    if (class_exists('PhabricatorStartup', false)) {
+      $access_log = PhabricatorAccessLog::getLog();
+    }
+
+    if ($access_log) {
+      $controller = $access_log->getData('C');
+      if ($controller) {
+        $context['controller'] = $controller;
+      }
+
+      $method = $access_log->getData('m');
+      if ($method) {
+        $context['method'] = $method;
+      }
+    }
+
+    return $context;
+  }
+
+  private function newHint($lock_name, $wait) {
+    if (!$this->shouldLogLock()) {
+      return pht(
+        'Enable the lock log for more detailed information about '.
+        'which process is holding this lock.');
+    }
+
+    $now = PhabricatorTime::getNow();
+
+    // First, look for recent logs. If other processes have been acquiring and
+    // releasing this lock while we've been waiting, this is more likely to be
+    // a contention/throughput issue than an issue with something hung while
+    // holding the lock.
+    $limit = 100;
+    $logs = id(new PhabricatorDaemonLockLog())->loadAllWhere(
+      'lockName = %s AND dateCreated >= %d ORDER BY id ASC LIMIT %d',
+      $lock_name,
+      ($now - $wait),
+      $limit);
+
+    if ($logs) {
+      if (count($logs) === $limit) {
+        return pht(
+          'During the last %s second(s) spent waiting for the lock, more '.
+          'than %s other process(es) acquired it, so this is likely a '.
+          'bottleneck. Use "bin/lock log --name %s" to review log activity.',
+          new PhutilNumber($wait),
+          new PhutilNumber($limit),
+          $lock_name);
+      } else {
+        return pht(
+          'During the last %s second(s) spent waiting for the lock, %s '.
+          'other process(es) acquired it, so this is likely a '.
+          'bottleneck. Use "bin/lock log --name %s" to review log activity.',
+          new PhutilNumber($wait),
+          phutil_count($logs),
+          $lock_name);
+      }
+    }
+
+    $last_log = id(new PhabricatorDaemonLockLog())->loadOneWhere(
+      'lockName = %s ORDER BY id DESC LIMIT 1',
+      $lock_name);
+
+    if ($last_log) {
+      $info = array();
+
+      $acquired = $last_log->getDateCreated();
+      $context = $last_log->getLockContext();
+
+      $process_info = array();
+
+      $pid = idx($context, 'pid');
+      if ($pid) {
+        $process_info[] = 'pid='.$pid;
+      }
+
+      $host = idx($context, 'host');
+      if ($host) {
+        $process_info[] = 'host='.$host;
+      }
+
+      $sapi = idx($context, 'sapi');
+      if ($sapi) {
+        $process_info[] = 'sapi='.$sapi;
+      }
+
+      $argv = idx($context, 'argv');
+      if ($argv) {
+        $process_info[] = 'argv='.(string)csprintf('%LR', $argv);
+      }
+
+      $controller = idx($context, 'controller');
+      if ($controller) {
+        $process_info[] = 'controller='.$controller;
+      }
+
+      $method = idx($context, 'method');
+      if ($method) {
+        $process_info[] = 'method='.$method;
+      }
+
+      $process_info = implode(', ', $process_info);
+
+      $info[] = pht(
+        'This lock was most recently acquired by a process (%s) '.
+        '%s second(s) ago.',
+        $process_info,
+        new PhutilNumber($now - $acquired));
+
+      $released = $last_log->getLockReleased();
+      if ($released) {
+        $info[] = pht(
+          'This lock was released %s second(s) ago.',
+          new PhutilNumber($now - $released));
+      } else {
+        $info[] = pht('There is no record of this lock being released.');
+      }
+
+      return implode(' ', $info);
+    }
+
+    return pht(
+      'Found no records of processes acquiring or releasing this lock.');
   }
 
 }
