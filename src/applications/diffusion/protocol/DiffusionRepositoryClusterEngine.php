@@ -688,6 +688,9 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
           'fetchable.'));
     }
 
+    // If we can synchronize from multiple sources, choose one at random.
+    shuffle($fetchable);
+
     $caught = null;
     foreach ($fetchable as $binding) {
       try {
