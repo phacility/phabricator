@@ -58,6 +58,10 @@ final class PholioMock extends PholioDAO
     return 'M'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
