@@ -53,4 +53,13 @@ final class PholioTransaction extends PhabricatorModularTransaction {
     return $tags;
   }
 
+  public function isInlineCommentTransaction() {
+    switch ($this->getTransactionType()) {
+      case PholioMockInlineTransaction::TRANSACTIONTYPE:
+        return true;
+    }
+
+    return parent::isInlineCommentTransaction();
+  }
+
 }

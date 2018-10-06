@@ -128,57 +128,81 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $body = new PhabricatorMetaMTAMailBody();
-    $headers = array();
-    $comments = array();
-    $inline_comments = array();
+    $viewer = $this->requireActor();
 
+    $body = id(new PhabricatorMetaMTAMailBody())
+      ->setViewer($viewer);
+
+    $mock_uri = $object->getURI();
+    $mock_uri = PhabricatorEnv::getProductionURI($mock_uri);
+
+    $this->addHeadersAndCommentsToMailBody(
+      $body,
+      $xactions,
+      pht('View Mock'),
+      $mock_uri);
+
+    $type_inline = PholioMockInlineTransaction::TRANSACTIONTYPE;
+
+    $inlines = array();
     foreach ($xactions as $xaction) {
-      if ($xaction->shouldHide()) {
-        continue;
-      }
-      $comment = $xaction->getComment();
-      switch ($xaction->getTransactionType()) {
-        case PholioMockInlineTransaction::TRANSACTIONTYPE:
-          if ($comment && strlen($comment->getContent())) {
-            $inline_comments[] = $comment;
-          }
-          break;
-        case PhabricatorTransactions::TYPE_COMMENT:
-          if ($comment && strlen($comment->getContent())) {
-            $comments[] = $comment->getContent();
-          }
-        // fallthrough
-        default:
-          $headers[] = id(clone $xaction)
-            ->setRenderingTarget('text')
-            ->getTitle();
-          break;
+      if ($xaction->getTransactionType() == $type_inline) {
+        $inlines[] = $xaction;
       }
     }
 
-    $body->addRawSection(implode("\n", $headers));
-
-    foreach ($comments as $comment) {
-      $body->addRawSection($comment);
-    }
-
-    if ($inline_comments) {
-      $body->addRawSection(pht('INLINE COMMENTS'));
-      foreach ($inline_comments as $comment) {
-        $text = pht(
-          'Image %d: %s',
-          $comment->getImageID(),
-          $comment->getContent());
-        $body->addRawSection($text);
-      }
-    }
+    $this->appendInlineCommentsForMail($object, $inlines, $body);
 
     $body->addLinkSection(
       pht('MOCK DETAIL'),
       PhabricatorEnv::getProductionURI('/M'.$object->getID()));
 
     return $body;
+  }
+
+  private function appendInlineCommentsForMail(
+    $object,
+    array $inlines,
+    PhabricatorMetaMTAMailBody $body) {
+
+    if (!$inlines) {
+      return;
+    }
+
+    $viewer = $this->requireActor();
+
+    $header = pht('INLINE COMMENTS');
+    $body->addRawPlaintextSection($header);
+    $body->addRawHTMLSection(phutil_tag('strong', array(), $header));
+
+    $image_ids = array();
+    foreach ($inlines as $inline) {
+      $comment = $inline->getComment();
+      $image_id = $comment->getImageID();
+      $image_ids[$image_id] = $image_id;
+    }
+
+    $images = id(new PholioImageQuery())
+      ->setViewer($viewer)
+      ->withIDs($image_ids)
+      ->execute();
+    $images = mpull($images, null, 'getID');
+
+    foreach ($inlines as $inline) {
+      $comment = $inline->getComment();
+      $content = $comment->getContent();
+      $image_id = $comment->getImageID();
+      $image = idx($images, $image_id);
+      if ($image) {
+        $image_name = $image->getName();
+      } else {
+        $image_name = pht('Unknown (ID %d)', $image_id);
+      }
+
+      $body->addRemarkupSection(
+        pht('Image "%s":', $image_name),
+        $content);
+    }
   }
 
   protected function getMailSubjectPrefix() {

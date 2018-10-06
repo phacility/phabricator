@@ -636,8 +636,8 @@ final class DifferentialTransactionEditor
 
     $viewer = $this->requireActor();
 
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->setViewer($this->requireActor());
+    $body = id(new PhabricatorMetaMTAMailBody())
+      ->setViewer($viewer);
 
     $revision_uri = $object->getURI();
     $revision_uri = PhabricatorEnv::getProductionURI($revision_uri);
