@@ -6,5 +6,78 @@ Construct a detailed written history of your civilization.
 Overview
 ========
 
-Phriction is a simple wiki. You can edit pages, and the text you write will stay
+Phriction is a wiki. You can edit pages, and the text you write will stay
 there. Other people can see it later.
+
+Phriction documents are arranged in a hierarchy, like a filesystem. This can
+make it easier to keep things organized and to apply policy controls to
+groups of documents.
+
+
+Policies
+========
+
+Documents and policies in Phriction are hierarchical, similar to a filesystem.
+For example, a document called "Zebra Information" may be located
+at `/zoo/animals/zebra/`.
+
+To view a document in Phrction, you must first be able to view all of its
+ancestors. So a user can only see {nav Zoo > Animals > Zebra Information} if
+they can see the pages {nav Zoo} and {nav Zoo > Animals}.
+
+This allows sections of the wiki to be restricted by applying a restrictive
+policy to the parent (or grandparent) document. For example, if you apply a
+restrictive view policy to the {nav Zoo} page, it will implicitly apply to
+all sub-pages, including {nav Zoo > Animals > Zebra Information}.
+
+
+Versions and Drafts
+===================
+
+Document content is tracked with linear version numbers: version 1, version 2,
+version 3, and so on. Each time a page is edited, a new version of the page is
+created.
+
+You can {nav View History} to review older versions of a page and see how it
+has changed over time (and who has changed it).
+
+When you visit a particular document, you are normally shown the most recent
+version of that document. For example, if there are 17 versions, you'll see
+version 17.
+
+Likewise, when you edit a document using {nav Edit Document > Save and Publish},
+your changes are published immediately. If there were previously 17 versions,
+your new changes will become version 18 and visitors to the document will begin
+seeing version 18.
+
+If you want to edit a document without publishing the changes right away, you
+can use {nav Edit Document > Save as Draft} instead. This will still create a
+new version 18, but it won't change which version users see when they visit the
+document: they'll still see version 17 (the last published version).
+
+You (and other users) can continue editing the draft by using
+{nav Edit Document}. (Once a document has an unpublished draft, editing will
+stay in draft mode.)
+
+Once you're satisfied with your changes, use {nav Publish Draft} to make your
+changes the current visible version of the document that users see by default
+when they visit it.
+
+If you made a mistake and published something you didn't intend to, you can
+navigate back to an older version of the document and use
+{nav Publish Older Version} to change the current visible version of the
+document to some older version.
+
+Note that draft versions are still normal versions of the document: they are
+not private, they can not be deleted, other users can see them if they can see
+the document, and they will eventually become a standard part of the document
+history. The only private parts of drafts are: editing a draft does not
+generate a feed story; and users won't see draft content by default when
+viewing a document.
+
+Drafts may be a good fit if you are:
+
+  - working on changes over time; or
+  - starting with a rough change and refining it in several iterations; or
+  - collaborating with others on a change; or
+  - sharing changes before they're published to get feedback.

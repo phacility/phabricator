@@ -44,8 +44,6 @@ final class PhabricatorSubscriptionsMuteController
         );
       }
 
-      $muted_type = PhabricatorMutedByEdgeType::EDGECONST;
-
       $xaction = id($object->getApplicationTransactionTemplate())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue('edge:type', $muted_type)

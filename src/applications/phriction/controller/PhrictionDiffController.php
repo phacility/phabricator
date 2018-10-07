@@ -65,8 +65,8 @@ final class PhrictionDiffController extends PhrictionController {
 
     $slug = $document->getSlug();
 
-    $revert_l = $this->renderRevertButton($content_l, $current);
-    $revert_r = $this->renderRevertButton($content_r, $current);
+    $revert_l = $this->renderRevertButton($document, $content_l, $current);
+    $revert_r = $this->renderRevertButton($document, $content_r, $current);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumb_views = $this->renderBreadcrumbs($slug);
@@ -95,7 +95,7 @@ final class PhrictionDiffController extends PhrictionController {
     $navigation_table = null;
     if ($l + 1 == $r) {
       $nav_l = ($l > 1);
-      $nav_r = ($r != $current->getVersion());
+      $nav_r = ($r != $document->getMaxVersion());
 
       $uri = $request->getRequestURI();
 
@@ -179,10 +179,11 @@ final class PhrictionDiffController extends PhrictionController {
   }
 
   private function renderRevertButton(
+    PhrictionDocument $document,
     PhrictionContent $content,
     PhrictionContent $current) {
 
-    $document_id = $content->getDocumentID();
+    $document_id = $document->getID();
     $version = $content->getVersion();
 
     $hidden_statuses = array(
@@ -190,22 +191,20 @@ final class PhrictionDiffController extends PhrictionController {
       PhrictionChangeType::CHANGE_MOVE_AWAY => true, // Plain silly
       PhrictionChangeType::CHANGE_STUB      => true, // Utterly silly
     );
+
     if (isset($hidden_statuses[$content->getChangeType()])) {
       // Don't show an edit/revert button for changes which deleted, moved or
       // stubbed the content since it's silly.
       return null;
     }
 
-    if ($content->getID() == $current->getID()) {
-      return phutil_tag(
-        'a',
-        array(
-          'href'  => '/phriction/edit/'.$document_id.'/',
-          'class' => 'button button-grey',
-        ),
-        pht('Edit Current Version'));
+    if ($version == $current->getVersion()) {
+      $label = pht('Edit Current Version %s...', new PhutilNumber($version));
+    } else if ($version < $current->getVersion()) {
+      $label = pht('Edit Older Version %s...', new PhutilNumber($version));
+    } else {
+      $label = pht('Edit Draft Version %s...', new PhutilNumber($version));
     }
-
 
     return phutil_tag(
       'a',
@@ -213,7 +212,7 @@ final class PhrictionDiffController extends PhrictionController {
         'href'  => '/phriction/edit/'.$document_id.'/?revert='.$version,
         'class' => 'button button-grey',
       ),
-      pht('Revert to Version %s...', $version));
+      $label);
   }
 
   private function renderComparisonTable(array $content) {

@@ -153,30 +153,16 @@ final class PhabricatorConfigEditController
         $e_value);
     }
 
-    $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($viewer);
-    $engine->addObject($option, 'description');
-    $engine->process();
-    $description = phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-remarkup',
-      ),
-      $engine->getOutput($option, 'description'));
-
     $form
       ->setUser($viewer)
       ->addHiddenInput('issue', $request->getStr('issue'));
 
-    $description = $option->getDescription();
-    if (strlen($description)) {
-      $description_view = new PHUIRemarkupView($viewer, $description);
-
-      $form
-        ->appendChild(
-          id(new AphrontFormMarkupControl())
-            ->setLabel(pht('Description'))
-            ->setValue($description_view));
+    $description = $option->newDescriptionRemarkupView($viewer);
+    if ($description) {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Description'))
+          ->setValue($description));
     }
 
     if ($group) {

@@ -77,19 +77,17 @@ final class DifferentialInlineCommentEditController
   }
 
   protected function loadCommentForEdit($id) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
 
     $inline = $this->loadComment($id);
-    if (!$this->canEditInlineComment($user, $inline)) {
+    if (!$this->canEditInlineComment($viewer, $inline)) {
       throw new Exception(pht('That comment is not editable!'));
     }
     return $inline;
   }
 
   protected function loadCommentForDone($id) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $inline = $this->loadComment($id);
     if (!$inline) {
@@ -120,19 +118,32 @@ final class DifferentialInlineCommentEditController
       throw new Exception(pht('Unable to load revision.'));
     }
 
-    if ($revision->getAuthorPHID() !== $viewer->getPHID()) {
-      throw new Exception(pht('You are not the revision owner.'));
+    $viewer_phid = $viewer->getPHID();
+    $is_owner = ($viewer_phid == $revision->getAuthorPHID());
+    $is_author = ($viewer_phid == $inline->getAuthorPHID());
+    $is_draft = ($inline->isDraft());
+
+    if ($is_owner) {
+      // You own the revision, so you can mark the comment as "Done".
+    } else if ($is_author && $is_draft) {
+      // You made this comment and it's still a draft, so you can mark
+      // it as "Done".
+    } else {
+      throw new Exception(
+        pht(
+          'You are not the revision owner, and this is not a draft comment '.
+          'you authored.'));
     }
 
     return $inline;
   }
 
   private function canEditInlineComment(
-    PhabricatorUser $user,
+    PhabricatorUser $viewer,
     DifferentialInlineComment $inline) {
 
     // Only the author may edit a comment.
-    if ($inline->getAuthorPHID() != $user->getPHID()) {
+    if ($inline->getAuthorPHID() != $viewer->getPHID()) {
       return false;
     }
 

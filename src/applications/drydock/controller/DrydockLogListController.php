@@ -46,6 +46,17 @@ final class DrydockLogListController extends DrydockLogController {
         $engine->setLease($lease);
         $this->setLease($lease);
         break;
+      case 'operation':
+        $operation = id(new DrydockRepositoryOperationQuery())
+          ->setViewer($viewer)
+          ->withIDs(array($id))
+          ->executeOne();
+        if (!$operation) {
+          return new Aphront404Response();
+        }
+        $engine->setOperation($operation);
+        $this->setOperation($operation);
+        break;
       default:
         return new Aphront404Response();
     }

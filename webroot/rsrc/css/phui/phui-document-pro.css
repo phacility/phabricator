@@ -4,8 +4,53 @@
 
 .phui-document-view.phui-document-view-pro {
   max-width: 800px;
-  padding: 16px 16px 64px 16px;
+  padding: 16px 16px 32px 16px;
   margin: 0 auto;
+}
+
+.phui-document-view.phui-document-view-pro.has-curtain {
+  max-width: 1132px;
+}
+
+.printable .phui-document-view.phui-document-view-pro.has-curtain {
+  max-width: none;
+}
+
+.device-desktop .phui-document-inner {
+  overflow: hidden;
+}
+
+.device-desktop .has-curtain .phui-document-content-view {
+  display: table-cell;
+}
+
+.printable .phui-document-content-view {
+  padding-right: 0;
+}
+
+.device-desktop .phui-document-content-outer {
+  display: table;
+  width: 100%;
+  layout: fixed;
+}
+
+/* Force very wide content, like tables with many columns, to scroll inside
+   the frame. See T13202. */
+.phui-document-content-view {
+  max-width: 800px;
+}
+
+.device-desktop .phui-document-content-inner {
+  display: table-row;
+}
+
+.device-desktop .phui-document-curtain {
+  display: table-cell;
+  width: 300px;
+}
+
+.printable .phui-document-curtain {
+  display: none;
 }
 
 .phui-document-container {
@@ -202,10 +247,13 @@ body.printable {
   }
 }
 
+.phui-document-view-pro-box {
+  margin-bottom: 24px;
+}
+
 .phui-document-view-pro-box .phui-timeline-view {
   padding: 16px 0 0 0;
   background: none;
-  border-top: 1px solid rgba({$alphablue}, 0.20);
 }
 
 .phui-document-view-pro-box .phui-timeline-wedge {

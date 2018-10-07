@@ -151,17 +151,17 @@ final class PhrictionDocumentQuery
       $contents = id(new PhrictionContentQuery())
         ->setViewer($this->getViewer())
         ->setParentQuery($this)
-        ->withIDs(mpull($documents, 'getContentID'))
+        ->withPHIDs(mpull($documents, 'getContentPHID'))
         ->execute();
-      $contents = mpull($contents, null, 'getID');
+      $contents = mpull($contents, null, 'getPHID');
 
       foreach ($documents as $key => $document) {
-        $content_id = $document->getContentID();
-        if (empty($contents[$content_id])) {
+        $content_phid = $document->getContentPHID();
+        if (empty($contents[$content_phid])) {
           unset($documents[$key]);
           continue;
         }
-        $document->attachContent($contents[$content_id]);
+        $document->attachContent($contents[$content_phid]);
       }
     }
 
@@ -175,7 +175,7 @@ final class PhrictionDocumentQuery
       $content_dao = new PhrictionContent();
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T c ON d.contentID = c.id',
+        'JOIN %T c ON d.contentPHID = c.phid',
         $content_dao->getTableName());
     }
 
@@ -321,7 +321,7 @@ final class PhrictionDocumentQuery
   public function getBuiltinOrders() {
     return parent::getBuiltinOrders() + array(
       self::ORDER_HIERARCHY => array(
-        'vector' => array('depth', 'title', 'updated'),
+        'vector' => array('depth', 'title', 'updated', 'id'),
         'name' => pht('Hierarchy'),
       ),
     );
@@ -343,9 +343,9 @@ final class PhrictionDocumentQuery
       ),
       'updated' => array(
         'table' => 'd',
-        'column' => 'contentID',
+        'column' => 'editedEpoch',
         'type' => 'int',
-        'unique' => true,
+        'unique' => false,
       ),
     );
   }
@@ -356,7 +356,7 @@ final class PhrictionDocumentQuery
     $map = array(
       'id' => $document->getID(),
       'depth' => $document->getDepth(),
-      'updated' => $document->getContentID(),
+      'updated' => $document->getEditedEpoch(),
     );
 
     foreach ($keys as $key) {

@@ -60,6 +60,10 @@ final class PhabricatorUserDisableTransaction
         continue;
       }
 
+      // You must have the "Can Disable Users" permission to disable a user.
+      $this->requireApplicationCapability(
+        PeopleDisableUsersCapability::CAPABILITY);
+
       if ($this->getActingAsPHID() === $object->getPHID()) {
         $errors[] = $this->newInvalidError(
           pht('You can not enable or disable your own account.'));
@@ -69,4 +73,14 @@ final class PhabricatorUserDisableTransaction
     return $errors;
   }
 
+  public function getRequiredCapabilities(
+    $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    // You do not need to be able to edit users to disable them. Instead, this
+    // requirement is replaced with a requirement that you have the "Can
+    // Disable Users" permission.
+
+    return null;
+  }
 }

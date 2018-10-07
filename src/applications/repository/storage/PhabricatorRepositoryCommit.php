@@ -25,9 +25,8 @@ final class PhabricatorRepositoryCommit
   protected $committerIdentityPHID;
   protected $commitIdentifier;
   protected $epoch;
-  protected $mailKey;
   protected $authorPHID;
-  protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
+  protected $auditStatus = DiffusionCommitAuditStatus::NONE;
   protected $summary = '';
   protected $importStatus = 0;
 
@@ -116,11 +115,10 @@ final class PhabricatorRepositoryCommit
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
         'commitIdentifier' => 'text40',
-        'mailKey' => 'bytes20',
         'authorPHID' => 'phid?',
         'authorIdentityPHID' => 'phid?',
         'committerIdentityPHID' => 'phid?',
-        'auditStatus' => 'uint32',
+        'auditStatus' => 'text32',
         'summary' => 'text255',
         'importStatus' => 'uint32',
       ),
@@ -200,6 +198,8 @@ final class PhabricatorRepositoryCommit
 
     $this->authorIdentity = $author;
     $this->committerIdentity = $committer;
+
+    return $this;
   }
 
   public function getAuthorIdentity() {
@@ -319,13 +319,6 @@ final class PhabricatorRepositoryCommit
     return mpull($audits, 'getAuditorPHID');
   }
 
-  public function save() {
-    if (!$this->mailKey) {
-      $this->mailKey = Filesystem::readRandomCharacters(20);
-    }
-    return parent::save();
-  }
-
   public function delete() {
     $data = $this->loadCommitData();
     $audits = id(new PhabricatorRepositoryAuditRequest())
@@ -379,27 +372,24 @@ final class PhabricatorRepositoryCommit
       }
     }
 
-    $current_status = $this->getAuditStatus();
-    $status_verify = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
-
     if ($any_concern) {
-      if ($current_status == $status_verify) {
+      if ($this->isAuditStatusNeedsVerification()) {
         // If the change is in "Needs Verification", we keep it there as
         // long as any auditors still have concerns.
-        $status = $status_verify;
+        $status = DiffusionCommitAuditStatus::NEEDS_VERIFICATION;
       } else {
-        $status = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+        $status = DiffusionCommitAuditStatus::CONCERN_RAISED;
       }
     } else if ($any_accept) {
       if ($any_need) {
-        $status = PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED;
+        $status = DiffusionCommitAuditStatus::PARTIALLY_AUDITED;
       } else {
-        $status = PhabricatorAuditCommitStatusConstants::FULLY_AUDITED;
+        $status = DiffusionCommitAuditStatus::AUDITED;
       }
     } else if ($any_need) {
-      $status = PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT;
+      $status = DiffusionCommitAuditStatus::NEEDS_AUDIT;
     } else {
-      $status = PhabricatorAuditCommitStatusConstants::NONE;
+      $status = DiffusionCommitAuditStatus::NONE;
     }
 
     return $this->setAuditStatus($status);
@@ -485,6 +475,23 @@ final class PhabricatorRepositoryCommit
     return null;
   }
 
+  public function loadIdentities(PhabricatorUser $viewer) {
+    if ($this->authorIdentity !== self::ATTACHABLE) {
+      return $this;
+    }
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->getID()))
+      ->needIdentities(true)
+      ->executeOne();
+
+    $author_identity = $commit->getAuthorIdentity();
+    $committer_identity = $commit->getCommitterIdentity();
+
+    return $this->attachIdentities($author_identity, $committer_identity);
+  }
+
   public function hasCommitterIdentity() {
     return ($this->getCommitterIdentity() !== null);
   }
@@ -509,6 +516,35 @@ final class PhabricatorRepositoryCommit
 
     $data = $this->getCommitData();
     return $data->getCommitDetail('authorPHID');
+  }
+
+  public function getAuditStatusObject() {
+    $status = $this->getAuditStatus();
+    return DiffusionCommitAuditStatus::newForStatus($status);
+  }
+
+  public function isAuditStatusNoAudit() {
+    return $this->getAuditStatusObject()->isNoAudit();
+  }
+
+  public function isAuditStatusNeedsAudit() {
+    return $this->getAuditStatusObject()->isNeedsAudit();
+  }
+
+  public function isAuditStatusConcernRaised() {
+    return $this->getAuditStatusObject()->isConcernRaised();
+  }
+
+  public function isAuditStatusNeedsVerification() {
+    return $this->getAuditStatusObject()->isNeedsVerification();
+  }
+
+  public function isAuditStatusPartiallyAudited() {
+    return $this->getAuditStatusObject()->isPartiallyAudited();
+  }
+
+  public function isAuditStatusAudited() {
+    return $this->getAuditStatusObject()->isAudited();
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
@@ -560,7 +596,6 @@ final class PhabricatorRepositoryCommit
       'phid' =>  $this->getPHID(),
       'commitIdentifier' =>  $this->getCommitIdentifier(),
       'epoch' => $this->getEpoch(),
-      'mailKey' => $this->getMailKey(),
       'authorPHID' => $this->getAuthorPHID(),
       'auditStatus' => $this->getAuditStatus(),
       'summary' => $this->getSummary(),
@@ -806,16 +841,110 @@ final class PhabricatorRepositoryCommit
         ->setKey('identifier')
         ->setType('string')
         ->setDescription(pht('The commit identifier.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('repositoryPHID')
+        ->setType('phid')
+        ->setDescription(pht('The repository this commit belongs to.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('author')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the commit author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('committer')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the committer.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isImported')
+        ->setType('bool')
+        ->setDescription(pht('True if the commit is fully imported.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isUnreachable')
+        ->setType('bool')
+        ->setDescription(
+          pht(
+            'True if the commit is not the ancestor of any tag, branch, or '.
+            'ref.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('auditStatus')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the current audit status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('message')
+        ->setType('string')
+        ->setDescription(pht('The commit message.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $data = $this->getCommitData();
 
-    // NOTE: This data should be similar to the information returned about
-    // commmits by "differential.diff.search" with the "commits" attachment.
+    $author_identity = $this->getAuthorIdentity();
+    if ($author_identity) {
+      $author_name = $author_identity->getIdentityDisplayName();
+      $author_email = $author_identity->getIdentityEmailAddress();
+      $author_raw = $author_identity->getIdentityName();
+      $author_identity_phid = $author_identity->getPHID();
+      $author_user_phid = $author_identity->getCurrentEffectiveUserPHID();
+    } else {
+      $author_name = null;
+      $author_email = null;
+      $author_raw = null;
+      $author_identity_phid = null;
+      $author_user_phid = null;
+    }
+
+    $committer_identity = $this->getCommitterIdentity();
+    if ($committer_identity) {
+      $committer_name = $committer_identity->getIdentityDisplayName();
+      $committer_email = $committer_identity->getIdentityEmailAddress();
+      $committer_raw = $committer_identity->getIdentityName();
+      $committer_identity_phid = $committer_identity->getPHID();
+      $committer_user_phid = $committer_identity->getCurrentEffectiveUserPHID();
+    } else {
+      $committer_name = null;
+      $committer_email = null;
+      $committer_raw = null;
+      $committer_identity_phid = null;
+      $committer_user_phid = null;
+    }
+
+    $author_epoch = $data->getCommitDetail('authorEpoch');
+    if ($author_epoch) {
+      $author_epoch = (int)$author_epoch;
+    } else {
+      $author_epoch = null;
+    }
+
+    $audit_status = $this->getAuditStatusObject();
 
     return array(
       'identifier' => $this->getCommitIdentifier(),
+      'repositoryPHID' => $this->getRepository()->getPHID(),
+      'author' => array(
+        'name' => $author_name,
+        'email' => $author_email,
+        'raw' => $author_raw,
+        'epoch' => $author_epoch,
+        'identityPHID' => $author_identity_phid,
+        'userPHID' => $author_user_phid,
+      ),
+      'committer' => array(
+        'name' => $committer_name,
+        'email' => $committer_email,
+        'raw' => $committer_raw,
+        'epoch' => (int)$this->getEpoch(),
+        'identityPHID' => $committer_identity_phid,
+        'userPHID' => $committer_user_phid,
+      ),
+      'isUnreachable' => (bool)$this->isUnreachable(),
+      'isImported' => (bool)$this->isImported(),
+      'auditStatus' => array(
+        'value' => $audit_status->getKey(),
+        'name' => $audit_status->getName(),
+        'closed' => (bool)$audit_status->getIsClosed(),
+        'color.ansi' => $audit_status->getAnsiColor(),
+      ),
+      'message' => $data->getCommitMessage(),
     );
   }
 

@@ -47,13 +47,25 @@ final class DrydockRepositoryOperationViewController
       ->setUser($viewer)
       ->setOperation($operation);
 
+    $log_query = id(new DrydockLogQuery())
+      ->withOperationPHIDs(array($operation->getPHID()));
+
+    $log_table = $this->buildLogTable($log_query)
+      ->setHideOperations(true);
+
+    $logs = $this->buildLogBox(
+      $log_table,
+      $this->getApplicationURI("operation/{$id}/logs/query/all/"));
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
       ->addPropertySection(pht('Properties'), $properties)
-      ->setMainColumn(array(
-        $status_view,
-      ));
+      ->setMainColumn(
+        array(
+          $status_view,
+          $logs,
+        ));
 
     return $this->newPage()
       ->setTitle($title)

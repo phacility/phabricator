@@ -16,6 +16,13 @@ final class PhabricatorPeopleApproveController
 
     $done_uri = $this->getApplicationURI('query/approval/');
 
+    if ($user->getIsApproved()) {
+      return $this->newDialog()
+        ->setTitle(pht('Already Approved'))
+        ->appendChild(pht('This user has already been approved.'))
+        ->addCancelButton($done_uri);
+    }
+
     if ($request->isFormPost()) {
       id(new PhabricatorUserEditor())
         ->setActor($viewer)

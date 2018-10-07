@@ -13,6 +13,9 @@ final class HarbormasterBuildUnitMessage
 
   private $buildTarget = self::ATTACHABLE;
 
+  const FORMAT_TEXT = 'text';
+  const FORMAT_REMARKUP = 'remarkup';
+
   public static function initializeNewUnitMessage(
     HarbormasterBuildTarget $build_target) {
     return id(new HarbormasterBuildUnitMessage())
@@ -66,6 +69,13 @@ final class HarbormasterBuildUnitMessage
         'description' => pht(
           'Additional human-readable information about the failure.'),
       ),
+      'format' => array(
+        'type' => 'optional string',
+        'description' => pht(
+          'Format for the text provided in "details". Valid values are '.
+          '"text" (default) or "remarkup". This controls how test details '.
+          'are rendered when shown to users.'),
+      ),
     );
   }
 
@@ -102,6 +112,11 @@ final class HarbormasterBuildUnitMessage
     $details = idx($dict, 'details');
     if ($details) {
       $obj->setProperty('details', $details);
+    }
+
+    $format = idx($dict, 'format');
+    if ($format) {
+      $obj->setProperty('format', $format);
     }
 
     return $obj;
@@ -147,6 +162,66 @@ final class HarbormasterBuildUnitMessage
 
   public function getUnitMessageDetails() {
     return $this->getProperty('details', '');
+  }
+
+  public function getUnitMessageDetailsFormat() {
+    return $this->getProperty('format', self::FORMAT_TEXT);
+  }
+
+  public function newUnitMessageDetailsView(
+    PhabricatorUser $viewer,
+    $summarize = false) {
+
+    $format = $this->getUnitMessageDetailsFormat();
+
+    $is_text = ($format !== self::FORMAT_REMARKUP);
+    $is_remarkup = ($format === self::FORMAT_REMARKUP);
+
+    $full_details = $this->getUnitMessageDetails();
+
+    if (!strlen($full_details)) {
+      if ($summarize) {
+        return null;
+      }
+      $details = phutil_tag('em', array(), pht('No details provided.'));
+    } else if ($summarize) {
+      if ($is_text) {
+        $details = id(new PhutilUTF8StringTruncator())
+          ->setMaximumBytes(2048)
+          ->truncateString($full_details);
+        $details = phutil_split_lines($details);
+
+        $limit = 3;
+        if (count($details) > $limit) {
+          $details = array_slice($details, 0, $limit);
+        }
+
+        $details = implode('', $details);
+      } else {
+        $details = $full_details;
+      }
+    } else {
+      $details = $full_details;
+    }
+
+    require_celerity_resource('harbormaster-css');
+
+    $classes = array();
+    $classes[] = 'harbormaster-unit-details';
+
+    if ($is_remarkup) {
+      $details = new PHUIRemarkupView($viewer, $details);
+    } else {
+      $classes[] = 'harbormaster-unit-details-text';
+      $classes[] = 'PhabricatorMonospaced';
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => implode(' ', $classes),
+      ),
+      $details);
   }
 
   public function getUnitMessageDisplayName() {

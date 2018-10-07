@@ -1,7 +1,7 @@
 <?php
 
 final class PhrictionDocumentMoveAwayTransaction
-  extends PhrictionDocumentTransactionType {
+  extends PhrictionDocumentVersionTransaction {
 
   const TRANSACTIONTYPE = 'move-away';
 
@@ -22,14 +22,12 @@ final class PhrictionDocumentMoveAwayTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
-  }
 
-  public function applyExternalEffects($object, $value) {
-    $dict = $value;
-    $this->getEditor()->getNewContent()->setContent('');
-    $this->getEditor()->getNewContent()->setChangeType(
-      PhrictionChangeType::CHANGE_MOVE_AWAY);
-    $this->getEditor()->getNewContent()->setChangeRef($dict['id']);
+    $content = $this->getNewDocumentContent($object);
+
+    $content->setContent('');
+    $content->setChangeType(PhrictionChangeType::CHANGE_MOVE_AWAY);
+    $content->setChangeRef($value['id']);
   }
 
   public function getActionName() {
@@ -40,19 +38,19 @@ final class PhrictionDocumentMoveAwayTransaction
     $new = $this->getNewValue();
 
     return pht(
-      '%s moved this document to %s',
+      '%s moved this document to %s.',
       $this->renderAuthor(),
-      $this->renderHandleLink($new['phid']));
+      $this->renderObject($new['phid']));
   }
 
   public function getTitleForFeed() {
     $new = $this->getNewValue();
 
     return pht(
-      '%s moved %s to %s',
+      '%s moved %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
-      $this->renderHandleLink($new['phid']));
+      $this->renderObject($new['phid']));
   }
 
   public function getIcon() {

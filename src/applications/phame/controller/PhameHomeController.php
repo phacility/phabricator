@@ -84,7 +84,7 @@ final class PhameHomeController extends PhamePostController {
       pht('Recent Posts'),
       $this->getApplicationURI('post/'));
 
-    $page = id(new PHUIDocumentViewPro())
+    $page = id(new PHUIDocumentView())
       ->setHeader($header)
       ->appendChild($post_list);
 

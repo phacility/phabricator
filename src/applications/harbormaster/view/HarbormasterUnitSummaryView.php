@@ -77,6 +77,7 @@ final class HarbormasterUnitSummaryView extends AphrontView {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     $table = id(new HarbormasterUnitPropertyView())
+      ->setViewer($this->getViewer())
       ->setUnitMessages($messages);
 
     if ($this->showViewAll) {

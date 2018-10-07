@@ -94,7 +94,7 @@ final class DiffusionReadmeView extends DiffusionView {
     }
 
     $readme_content = phutil_tag_div($class, $readme_content);
-    $document = id(new PHUIDocumentViewPro())
+    $document = id(new PHUIDocumentView())
       ->setFluid(true)
       ->appendChild($readme_content);
 

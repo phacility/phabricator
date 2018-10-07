@@ -5,6 +5,7 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
   private $blueprint;
   private $resource;
   private $lease;
+  private $operation;
 
   public function setBlueprint(DrydockBlueprint $blueprint) {
     $this->blueprint = $blueprint;
@@ -31,6 +32,15 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
 
   public function getLease() {
     return $this->lease;
+  }
+
+  public function setOperation(DrydockRepositoryOperation $operation) {
+    $this->operation = $operation;
+    return $this;
+  }
+
+  public function getOperation() {
+    return $this->operation;
   }
 
   public function canUseInPanelContext() {
@@ -65,6 +75,11 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
       $query->withLeasePHIDs(array($lease->getPHID()));
     }
 
+    $operation = $this->getOperation();
+    if ($operation) {
+      $query->withOperationPHIDs(array($operation->getPHID()));
+    }
+
     return $query;
   }
 
@@ -97,9 +112,15 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
       return "/drydock/lease/{$id}/logs/{$path}";
     }
 
+    $operation = $this->getOperation();
+    if ($operation) {
+      $id = $operation->getID();
+      return "/drydock/operation/{$id}/logs/{$path}";
+    }
+
     throw new Exception(
       pht(
-        'Search engine has no blueprint, resource, or lease.'));
+        'Search engine has no blueprint, resource, lease, or operation.'));
   }
 
   protected function getBuiltinQueryNames() {

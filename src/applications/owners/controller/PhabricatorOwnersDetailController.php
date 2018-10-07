@@ -71,7 +71,7 @@ final class PhabricatorOwnersDetailController
           'package' => $package->getPHID(),
         ));
 
-    $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+    $status_concern = DiffusionCommitAuditStatus::CONCERN_RAISED;
 
     $attention_commits = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())

@@ -117,6 +117,20 @@ EOTEXT
       ),
     );
 
+    $engine = HarbormasterBuildableEngine::newForObject(
+      $object,
+      $viewer);
+
+    $author_identity = $engine->getAuthorIdentity();
+    if ($author_identity) {
+      $data_structure += array(
+        'author' => array(
+          'name' => $author_identity->getIdentityDisplayName(),
+          'email' => $author_identity->getIdentityEmailAddress(),
+        ),
+      );
+    }
+
     $json_data = phutil_json_encode($data_structure);
 
     $credential_phid = $this->getSetting('token');

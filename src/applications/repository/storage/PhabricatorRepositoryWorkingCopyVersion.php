@@ -76,18 +76,20 @@ final class PhabricatorRepositoryWorkingCopyVersion
 
 
   public static function getReadLock($repository_phid, $device_phid) {
-    $repository_hash = PhabricatorHash::digestForIndex($repository_phid);
-    $device_hash = PhabricatorHash::digestForIndex($device_phid);
-    $lock_key = "repo.read({$repository_hash}, {$device_hash})";
+    $parameters = array(
+      'repositoryPHID' => $repository_phid,
+      'devicePHID' => $device_phid,
+    );
 
-    return PhabricatorGlobalLock::newLock($lock_key);
+    return PhabricatorGlobalLock::newLock('repo.read', $parameters);
   }
 
   public static function getWriteLock($repository_phid) {
-    $repository_hash = PhabricatorHash::digestForIndex($repository_phid);
-    $lock_key = "repo.write({$repository_hash})";
+    $parameters = array(
+      'repositoryPHID' => $repository_phid,
+    );
 
-    return PhabricatorGlobalLock::newLock($lock_key);
+    return PhabricatorGlobalLock::newLock('repo.write', $parameters);
   }
 
 

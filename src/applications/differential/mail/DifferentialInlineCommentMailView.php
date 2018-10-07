@@ -345,7 +345,13 @@ final class DifferentialInlineCommentMailView
       $offset_mode = 'old';
     }
 
+    // See PHI894. Use the parse cache since we can end up with a large
+    // rendering cost otherwise when users or bots leave hundreds of inline
+    // comments on diffs with long recipient lists.
+    $cache_key = $changeset->getID();
+
     $parser = id(new DifferentialChangesetParser())
+      ->setRenderCacheKey($cache_key)
       ->setUser($viewer)
       ->setChangeset($changeset)
       ->setOffsetMode($offset_mode)

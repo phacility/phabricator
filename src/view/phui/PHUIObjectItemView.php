@@ -709,8 +709,9 @@ final class PHUIObjectItemView extends AphrontTagView {
     }
 
     /* Fixed width, right column container. */
+    $column3 = null;
     if ($this->sideColumn) {
-      $column2 = phutil_tag(
+      $column3 = phutil_tag(
         'div',
         array(
           'class' => 'phui-oi-col2 phui-oi-side-column',
@@ -731,6 +732,7 @@ final class PHUIObjectItemView extends AphrontTagView {
           $column0,
           $column1,
           $column2,
+          $column3,
         )));
 
     $box = phutil_tag(

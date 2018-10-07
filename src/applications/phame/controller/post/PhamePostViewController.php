@@ -30,7 +30,7 @@ final class PhamePostViewController
       $header->setActionList($actions);
     }
 
-    $document = id(new PHUIDocumentViewPro())
+    $document = id(new PHUIDocumentView())
       ->setHeader($header);
 
     if ($moved) {

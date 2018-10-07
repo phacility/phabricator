@@ -20,14 +20,14 @@ final class PhrictionDocumentController
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    require_celerity_resource('phriction-document-css');
-
     $version_note = null;
     $core_content = '';
     $move_notice = '';
     $properties = null;
     $content = null;
     $toc = null;
+
+    $is_draft = false;
 
     $document = id(new PhrictionDocumentQuery())
       ->setViewer($viewer)
@@ -66,8 +66,9 @@ final class PhrictionDocumentController
         ->addAction($create_button);
 
     } else {
-      $version = $request->getInt('v');
+      $max_version = (int)$document->getMaxVersion();
 
+      $version = $request->getInt('v');
       if ($version) {
         $content = id(new PhrictionContentQuery())
           ->setViewer($viewer)
@@ -78,17 +79,142 @@ final class PhrictionDocumentController
           return new Aphront404Response();
         }
 
-        if ($content->getID() != $document->getContentID()) {
-          $version_note = id(new PHUIInfoView())
-            ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-            ->appendChild(
-              pht(
-                'You are viewing an older version of this document, as it '.
-                'appeared on %s.',
-                phabricator_datetime($content->getDateCreated(), $viewer)));
+        // When the "v" parameter exists, the user is in history mode so we
+        // show this header even if they're looking at the current version
+        // of the document. This keeps the next/previous links working.
+
+        $view_version = (int)$content->getVersion();
+        $published_version = (int)$document->getContent()->getVersion();
+
+        if ($view_version < $published_version) {
+          $version_note = pht(
+            'You are viewing an older version of this document, as it '.
+            'appeared on %s.',
+            phabricator_datetime($content->getDateCreated(), $viewer));
+        } else if ($view_version > $published_version) {
+          $is_draft = true;
+          $version_note = pht(
+            'You are viewing an unpublished draft of this document.');
+        } else {
+          $version_note = pht(
+            'You are viewing the current published version of this document.');
         }
+
+        $version_note = array(
+          phutil_tag(
+            'strong',
+            array(),
+            pht('Version %d of %d: ', $view_version, $max_version)),
+          ' ',
+          $version_note,
+        );
+
+        $version_note = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+          ->appendChild($version_note);
+
+        $document_uri = new PhutilURI($document->getURI());
+
+        if ($view_version > 1) {
+          $previous_uri = $document_uri->alter('v', ($view_version - 1));
+        } else {
+          $previous_uri = null;
+        }
+
+        if ($view_version !== $published_version) {
+          $current_uri = $document_uri->alter('v', $published_version);
+        } else {
+          $current_uri = null;
+        }
+
+        if ($view_version < $max_version) {
+          $next_uri = $document_uri->alter('v', ($view_version + 1));
+        } else {
+          $next_uri = null;
+        }
+
+        if ($view_version !== $max_version) {
+          $draft_uri = $document_uri->alter('v', $max_version);
+        } else {
+          $draft_uri = null;
+        }
+
+        $button_bar = id(new PHUIButtonBarView())
+          ->addButton(
+            id(new PHUIButtonView())
+              ->setTag('a')
+              ->setColor('grey')
+              ->setIcon('fa-backward')
+              ->setDisabled(!$previous_uri)
+              ->setHref($previous_uri)
+              ->setText(pht('Previous')))
+          ->addButton(
+            id(new PHUIButtonView())
+              ->setTag('a')
+              ->setColor('grey')
+              ->setIcon('fa-file-o')
+              ->setDisabled(!$current_uri)
+              ->setHref($current_uri)
+              ->setText(pht('Published')))
+          ->addButton(
+            id(new PHUIButtonView())
+              ->setTag('a')
+              ->setColor('grey')
+              ->setIcon('fa-forward', false)
+              ->setDisabled(!$next_uri)
+              ->setHref($next_uri)
+              ->setText(pht('Next')))
+          ->addButton(
+            id(new PHUIButtonView())
+              ->setTag('a')
+              ->setColor('grey')
+              ->setIcon('fa-fast-forward', false)
+              ->setDisabled(!$draft_uri)
+              ->setHref($draft_uri)
+              ->setText(pht('Draft')));
+
+        require_celerity_resource('phui-document-view-css');
+
+        $version_note = array(
+          $version_note,
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'phui-document-version-navigation',
+            ),
+            $button_bar),
+        );
       } else {
         $content = $document->getContent();
+
+        if ($content->getVersion() < $document->getMaxVersion()) {
+          $can_edit = PhabricatorPolicyFilter::hasCapability(
+            $viewer,
+            $document,
+            PhabricatorPolicyCapability::CAN_EDIT);
+          if ($can_edit) {
+            $document_uri = new PhutilURI($document->getURI());
+            $draft_uri = $document_uri->alter('v', $document->getMaxVersion());
+
+            $draft_link = phutil_tag(
+              'a',
+              array(
+                'href' => $draft_uri,
+              ),
+              pht('View Draft Version'));
+
+            $draft_link = phutil_tag('strong', array(), $draft_link);
+
+            $version_note = id(new PHUIInfoView())
+              ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+              ->appendChild(
+                array(
+                  pht('This document has unpublished draft changes.'),
+                  ' ',
+                  $draft_link,
+                ));
+          }
+        }
       }
 
       $page_title = $content->getTitle();
@@ -201,7 +327,10 @@ final class PhrictionDocumentController
 
     $children = $this->renderDocumentChildren($slug);
 
-    $actions = $this->buildActionView($viewer, $document);
+    $curtain = null;
+    if ($document->getID()) {
+      $curtain = $this->buildCurtain($document, $content);
+    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
@@ -213,10 +342,17 @@ final class PhrictionDocumentController
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($document)
-      ->setHeader($page_title)
-      ->setActionList($actions);
+      ->setHeader($page_title);
 
-    if ($content) {
+    if ($is_draft) {
+      $draft_tag = id(new PHUITagView())
+        ->setName(pht('Draft'))
+        ->setIcon('fa-spinner')
+        ->setColor('pink')
+        ->setType(PHUITagView::TYPE_SHADE);
+
+      $header->addTag($draft_tag);
+    } else if ($content) {
       $header->setEpoch($content->getDateCreated());
     }
 
@@ -227,25 +363,55 @@ final class PhrictionDocumentController
     }
     $prop_list = phutil_tag_div('phui-document-view-pro-box', $prop_list);
 
-    $page_content = id(new PHUIDocumentViewPro())
+    $page_content = id(new PHUIDocumentView())
+      ->setBanner($version_note)
       ->setHeader($header)
       ->setToc($toc)
       ->appendChild(
         array(
-          $version_note,
           $move_notice,
           $core_content,
         ));
+
+    if ($curtain) {
+      $page_content->setCurtain($curtain);
+    }
+
+    if ($document->getPHID()) {
+      $timeline = $this->buildTransactionTimeline(
+        $document,
+        new PhrictionTransactionQuery());
+
+      $edit_engine = id(new PhrictionDocumentEditEngine())
+        ->setViewer($viewer)
+        ->setTargetObject($document);
+
+      $comment_view = $edit_engine
+        ->buildEditEngineCommentView($document);
+    } else {
+      $timeline = null;
+      $comment_view = null;
+    }
 
     return $this->newPage()
       ->setTitle($page_title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($document->getPHID()))
-      ->appendChild(array(
-        $page_content,
-        $prop_list,
-        $children,
-      ));
+      ->appendChild(
+        array(
+          $page_content,
+          $prop_list,
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'phui-document-view-pro-box',
+            ),
+            array(
+              $children,
+              $timeline,
+              $comment_view,
+            )),
+        ));
 
   }
 
@@ -257,8 +423,7 @@ final class PhrictionDocumentController
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($document);
+      ->setUser($viewer);
 
     $view->addProperty(
       pht('Last Author'),
@@ -271,37 +436,79 @@ final class PhrictionDocumentController
     return $view;
   }
 
-  private function buildActionView(
-    PhabricatorUser $viewer,
-    PhrictionDocument $document) {
+  private function buildCurtain(
+    PhrictionDocument $document,
+    PhrictionContent $content) {
+    $viewer = $this->getViewer();
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $document,
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $slug = PhabricatorSlug::normalize($this->slug);
+    $id = $document->getID();
 
-    $action_view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($document);
+    $curtain = $this->newCurtainView($document);
 
-    if (!$document->getID()) {
-      return $action_view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Create This Document'))
-          ->setIcon('fa-plus-square')
-          ->setHref('/phriction/edit/?slug='.$slug));
-    }
-
-    $action_view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Document'))
         ->setDisabled(!$can_edit)
         ->setIcon('fa-pencil')
         ->setHref('/phriction/edit/'.$document->getID().'/'));
 
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+      ->setName(pht('View History'))
+      ->setIcon('fa-history')
+      ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
+
+    $is_current = false;
+    $content_id = null;
+    $is_draft = false;
+    if ($content) {
+      if ($content->getPHID() == $document->getContentPHID()) {
+        $is_current = true;
+      }
+      $content_id = $content->getID();
+
+      $current_version = $document->getContent()->getVersion();
+      $is_draft = ($content->getVersion() >= $current_version);
+    }
+    $can_publish = ($can_edit && $content && !$is_current);
+
+    if ($is_draft) {
+      $publish_name = pht('Publish Draft');
+    } else {
+      $publish_name = pht('Publish Older Version');
+    }
+
+    // If you're looking at the current version; and it's an unpublished
+    // draft; and you can publish it, add a UI hint that this might be an
+    // interesting action to take.
+    $hint_publish = false;
+    if ($is_draft) {
+      if ($can_publish) {
+        if ($document->getMaxVersion() == $content->getVersion()) {
+          $hint_publish = true;
+        }
+      }
+    }
+
+    $publish_uri = "/phriction/publish/{$id}/{$content_id}/";
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+      ->setName($publish_name)
+      ->setIcon('fa-upload')
+      ->setSelected($hint_publish)
+      ->setDisabled(!$can_publish)
+      ->setWorkflow(true)
+      ->setHref($publish_uri));
+
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
-      $action_view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Move Document'))
           ->setDisabled(!$can_edit)
@@ -309,7 +516,7 @@ final class PhrictionDocumentController
           ->setHref('/phriction/move/'.$document->getID().'/')
           ->setWorkflow(true));
 
-      $action_view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Document'))
           ->setDisabled(!$can_edit)
@@ -318,23 +525,16 @@ final class PhrictionDocumentController
           ->setWorkflow(true));
     }
 
-    $action_view->addAction(
-      id(new PhabricatorActionView())
-      ->setName(pht('View History'))
-      ->setIcon('fa-list')
-      ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
-
     $print_uri = PhrictionDocument::getSlugURI($slug).'?__print__=1';
 
-    $action_view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
       ->setName(pht('Printable Page'))
       ->setIcon('fa-print')
       ->setOpenInNewWindow(true)
       ->setHref($print_uri));
 
-    return $action_view;
-
+    return $curtain;
   }
 
   private function renderDocumentChildren($slug) {
@@ -463,7 +663,7 @@ final class PhrictionDocumentController
           ),
           $list)));
 
-     return phutil_tag_div('phui-document-view-pro-box', $box);
+    return $box;
   }
 
   private function renderChildDocumentLink(array $info) {

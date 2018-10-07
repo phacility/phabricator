@@ -88,23 +88,7 @@ final class HarbormasterUnitMessageViewController
       pht('Run At'),
       phabricator_datetime($message->getDateCreated(), $viewer));
 
-    $details = $message->getUnitMessageDetails();
-    if (strlen($details)) {
-      // TODO: Use the log view here, once it gets cleaned up.
-      // Shenanigans below.
-      $details = phutil_tag(
-        'div',
-        array(
-          'class' => 'PhabricatorMonospaced',
-          'style' =>
-            'white-space: pre-wrap; '.
-            'color: #666666; '.
-            'overflow-x: auto;',
-        ),
-        $details);
-    } else {
-      $details = phutil_tag('em', array(), pht('No details provided.'));
-    }
+    $details = $message->newUnitMessageDetailsView($viewer);
 
     $view->addSectionHeader(
       pht('Details'),

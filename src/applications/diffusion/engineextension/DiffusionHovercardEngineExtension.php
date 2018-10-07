@@ -41,12 +41,12 @@ final class DiffusionHovercardEngineExtension
     $hovercard->addField(pht('Date'),
       phabricator_date($commit->getEpoch(), $viewer));
 
-    if ($commit->getAuditStatus() !=
-      PhabricatorAuditCommitStatusConstants::NONE) {
+    if (!$commit->isAuditStatusNoAudit()) {
+      $status = $commit->getAuditStatusObject();
 
-      $hovercard->addField(pht('Audit Status'),
-        PhabricatorAuditCommitStatusConstants::getStatusName(
-          $commit->getAuditStatus()));
+      $hovercard->addField(
+        pht('Audit Status'),
+        $status->getName());
     }
   }
 

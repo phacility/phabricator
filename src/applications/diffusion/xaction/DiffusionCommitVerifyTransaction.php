@@ -36,8 +36,7 @@ final class DiffusionCommitVerifyTransaction
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setAuditStatus(
-      PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION);
+    $object->setAuditStatus(DiffusionCommitAuditStatus::NEEDS_VERIFICATION);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
@@ -48,8 +47,7 @@ final class DiffusionCommitVerifyTransaction
           'are not the author.'));
     }
 
-    $status = $object->getAuditStatus();
-    if ($status != PhabricatorAuditCommitStatusConstants::CONCERN_RAISED) {
+    if (!$object->isAuditStatusConcernRaised()) {
       throw new Exception(
         pht(
           'You can not request verification of this commit because no '.

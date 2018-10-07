@@ -45,6 +45,12 @@ final class DifferentialRevisionSearchEngine
       $query->withStatuses($map['statuses']);
     }
 
+    if ($map['createdStart'] || $map['createdEnd']) {
+      $query->withCreatedEpochBetween(
+        $map['createdStart'],
+        $map['createdEnd']);
+    }
+
     return $query;
   }
 
@@ -84,6 +90,16 @@ final class DifferentialRevisionSearchEngine
         ->setDatasource(new DifferentialRevisionStatusFunctionDatasource())
         ->setDescription(
           pht('Find revisions with particular statuses.')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created After'))
+        ->setKey('createdStart')
+        ->setDescription(
+          pht('Find revisions created at or after a particular time.')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created Before'))
+        ->setKey('createdEnd')
+        ->setDescription(
+          pht('Find revisions created at or before a particular time.')),
     );
   }
 

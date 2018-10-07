@@ -287,15 +287,24 @@ final class PHUIDiffInlineCommentDetailView
 
     $done_button = null;
 
+    $mark_done = $this->getCanMarkDone();
+
+    // Allow users to mark their own draft inlines as "Done".
+    if ($viewer_phid == $inline->getAuthorPHID()) {
+      if ($inline->isDraft()) {
+        $mark_done = true;
+      }
+    }
+
     if (!$is_synthetic) {
       $draft_state = false;
       switch ($inline->getFixedState()) {
         case PhabricatorInlineCommentInterface::STATE_DRAFT:
-          $is_done = ($this->getCanMarkDone());
+          $is_done = $mark_done;
           $draft_state = true;
           break;
         case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
-          $is_done = !($this->getCanMarkDone());
+          $is_done = !$mark_done;
           $draft_state = true;
           break;
         case PhabricatorInlineCommentInterface::STATE_DONE:
@@ -309,7 +318,7 @@ final class PHUIDiffInlineCommentDetailView
 
       // If you don't have permission to mark the comment as "Done", you also
       // can not see the draft state.
-      if (!$this->getCanMarkDone()) {
+      if (!$mark_done) {
         $draft_state = false;
       }
 
@@ -321,21 +330,19 @@ final class PHUIDiffInlineCommentDetailView
         $classes[] = 'inline-state-is-draft';
       }
 
-      if ($this->getCanMarkDone()) {
+      if ($mark_done && !$this->preview) {
         $done_input = javelin_tag(
           'input',
           array(
             'type' => 'checkbox',
             'checked' => ($is_done ? 'checked' : null),
-            'disabled' => ($this->getCanMarkDone() ? null : 'disabled'),
             'class' => 'differential-inline-done',
             'sigil' => 'differential-inline-done',
           ));
         $done_button = phutil_tag(
           'label',
           array(
-            'class' => 'differential-inline-done-label '.
-                        ($this->getCanMarkDone() ? null : 'done-is-disabled'),
+            'class' => 'differential-inline-done-label ',
           ),
           array(
             $done_input,

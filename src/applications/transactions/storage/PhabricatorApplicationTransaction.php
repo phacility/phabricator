@@ -165,6 +165,14 @@ abstract class PhabricatorApplicationTransaction
     return (bool)$this->getMetadataValue('core.silent', false);
   }
 
+  public function setIsMFATransaction($mfa) {
+    return $this->setMetadataValue('core.mfa', $mfa);
+  }
+
+  public function getIsMFATransaction() {
+    return (bool)$this->getMetadataValue('core.mfa', false);
+  }
+
   public function attachComment(
     PhabricatorApplicationTransactionComment $comment) {
     $this->comment = $comment;
@@ -1459,6 +1467,12 @@ abstract class PhabricatorApplicationTransaction
       // Don't group silent and nonsilent transactions together.
       $is_silent = $this->getIsSilentTransaction();
       if ($is_silent != $xaction->getIsSilentTransaction()) {
+        return false;
+      }
+
+      // Don't group MFA and non-MFA transactions together.
+      $is_mfa = $this->getIsMFATransaction();
+      if ($is_mfa != $xaction->getIsMFATransaction()) {
         return false;
       }
     }

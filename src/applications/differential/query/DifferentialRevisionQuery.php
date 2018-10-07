@@ -25,6 +25,8 @@ final class DifferentialRevisionQuery
   private $updatedEpochMax;
   private $statuses;
   private $isOpen;
+  private $createdEpochMin;
+  private $createdEpochMax;
 
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
@@ -203,6 +205,12 @@ final class DifferentialRevisionQuery
   public function withUpdatedEpochBetween($min, $max) {
     $this->updatedEpochMin = $min;
     $this->updatedEpochMax = $max;
+    return $this;
+  }
+
+  public function withCreatedEpochBetween($min, $max) {
+    $this->createdEpochMin = $min;
+    $this->createdEpochMax = $max;
     return $this;
   }
 
@@ -685,6 +693,20 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.dateModified <= %d',
         $this->updatedEpochMax);
+    }
+
+    if ($this->createdEpochMin !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.dateCreated >= %d',
+        $this->createdEpochMin);
+    }
+
+    if ($this->createdEpochMax !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.dateCreated <= %d',
+        $this->createdEpochMax);
     }
 
     if ($this->statuses !== null) {

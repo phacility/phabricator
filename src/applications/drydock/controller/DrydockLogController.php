@@ -6,6 +6,7 @@ abstract class DrydockLogController
   private $blueprint;
   private $resource;
   private $lease;
+  private $operation;
 
   public function setBlueprint(DrydockBlueprint $blueprint) {
     $this->blueprint = $blueprint;
@@ -34,6 +35,15 @@ abstract class DrydockLogController
     return $this->lease;
   }
 
+  public function setOperation(DrydockRepositoryOperation $operation) {
+    $this->operation = $operation;
+    return $this;
+  }
+
+  public function getOperation() {
+    return $this->operation;
+  }
+
   public function buildSideNavView() {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
@@ -56,6 +66,11 @@ abstract class DrydockLogController
       $engine->setLease($lease);
     }
 
+    $operation = $this->getOperation();
+    if ($operation) {
+      $engine->setOperation($operation);
+    }
+
     $engine->addNavigationItems($nav->getMenu());
 
     $nav->selectFilter(null);
@@ -66,9 +81,12 @@ abstract class DrydockLogController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
+    $viewer = $this->getViewer();
+
     $blueprint = $this->getBlueprint();
     $resource = $this->getResource();
     $lease = $this->getLease();
+    $operation = $this->getOperation();
     if ($blueprint) {
       $id = $blueprint->getID();
 
@@ -111,6 +129,20 @@ abstract class DrydockLogController
       $crumbs->addTextCrumb(
         pht('Logs'),
         $this->getApplicationURI("lease/{$id}/logs/"));
+    } else if ($operation) {
+      $id = $operation->getID();
+
+      $crumbs->addTextCrumb(
+        pht('Operations'),
+        $this->getApplicationURI('operation/'));
+
+      $crumbs->addTextCrumb(
+        pht('Repository Operation %d', $id),
+        $this->getApplicationURI("operation/{$id}/"));
+
+      $crumbs->addTextCrumb(
+        pht('Logs'),
+        $this->getApplicationURI("operation/{$id}/logs/"));
     }
 
     return $crumbs;

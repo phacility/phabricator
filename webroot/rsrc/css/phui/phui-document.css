@@ -63,16 +63,13 @@
   font-size: 14px;
 }
 
-.phui-document-view .phui-header-action-links .phui-mobile-menu {
+.phui-document-view.has-no-curtain
+  .phui-header-action-links .phui-mobile-menu {
   display: block;
 }
 
 .device-phone .phui-document-content .phabricator-remarkup {
   padding: 8px;
-}
-
-.device-desktop .phui-document-content .phabricator-action-list-view {
-  display: none;
 }
 
 .phui-document-content .phabricator-remarkup .remarkup-code-block {
@@ -102,4 +99,10 @@
 .platform-windows .phui-document-view .phabricator-remarkup .remarkup-code-block
   .remarkup-code {
   font: 13px/18px "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.phui-document-version-navigation {
+  text-align: center;
+  padding: 8px;
+  background-color: {$lightgreybackground};
 }

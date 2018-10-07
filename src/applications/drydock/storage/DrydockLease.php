@@ -10,6 +10,8 @@ final class DrydockLease extends DrydockDAO
   protected $authorizingPHID;
   protected $attributes = array();
   protected $status = DrydockLeaseStatus::STATUS_PENDING;
+  protected $acquiredEpoch;
+  protected $activatedEpoch;
 
   private $resource = self::ATTACHABLE;
   private $unconsumedCommands = self::ATTACHABLE;
@@ -62,6 +64,22 @@ final class DrydockLease extends DrydockDAO
     $this->scheduleUpdate();
   }
 
+  public function setStatus($status) {
+    if ($status == DrydockLeaseStatus::STATUS_ACQUIRED) {
+      if (!$this->getAcquiredEpoch()) {
+        $this->setAcquiredEpoch(PhabricatorTime::getNow());
+      }
+    }
+
+    if ($status == DrydockLeaseStatus::STATUS_ACTIVE) {
+      if (!$this->getActivatedEpoch()) {
+        $this->setActivatedEpoch(PhabricatorTime::getNow());
+      }
+    }
+
+    return parent::setStatus($status);
+  }
+
   public function getLeaseName() {
     return pht('Lease %d', $this->getID());
   }
@@ -78,6 +96,8 @@ final class DrydockLease extends DrydockDAO
         'resourceType' => 'text128',
         'ownerPHID' => 'phid?',
         'resourcePHID' => 'phid?',
+        'acquiredEpoch' => 'epoch?',
+        'activatedEpoch' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_resource' => array(

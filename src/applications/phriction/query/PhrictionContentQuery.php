@@ -76,7 +76,7 @@ final class PhrictionContentQuery
     if ($this->shouldJoinDocumentTable()) {
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T d ON d.id = c.documentID',
+        'JOIN %T d ON d.phid = c.documentPHID',
         id(new PhrictionDocument())->getTableName());
     }
 
@@ -84,19 +84,19 @@ final class PhrictionContentQuery
   }
 
   protected function willFilterPage(array $contents) {
-    $document_ids = mpull($contents, 'getDocumentID');
+    $document_phids = mpull($contents, 'getDocumentPHID');
 
     $documents = id(new PhrictionDocumentQuery())
       ->setViewer($this->getViewer())
       ->setParentQuery($this)
-      ->withIDs($document_ids)
+      ->withPHIDs($document_phids)
       ->execute();
-    $documents = mpull($documents, null, 'getID');
+    $documents = mpull($documents, null, 'getPHID');
 
     foreach ($contents as $key => $content) {
-      $document_id = $content->getDocumentID();
+      $document_phid = $content->getDocumentPHID();
 
-      $document = idx($documents, $document_id);
+      $document = idx($documents, $document_phid);
       if (!$document) {
         unset($contents[$key]);
         $this->didRejectResult($content);

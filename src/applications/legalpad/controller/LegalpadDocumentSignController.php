@@ -272,7 +272,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
       $preamble_box->addPropertyList($preamble);
     }
 
-    $content = id(new PHUIDocumentViewPro())
+    $content = id(new PHUIDocumentView())
       ->addClass('legalpad')
       ->setHeader($header)
       ->appendChild(

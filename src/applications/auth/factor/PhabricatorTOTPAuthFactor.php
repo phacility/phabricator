@@ -154,6 +154,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       id(new PHUIFormNumberControl())
         ->setName($this->getParameterName($config, 'totpcode'))
         ->setLabel(pht('App Code'))
+        ->setDisableAutocomplete(true)
         ->setCaption(pht('Factor Name: %s', $config->getFactorName()))
         ->setValue(idx($validation_result, 'value'))
         ->setError(idx($validation_result, 'error', true)));

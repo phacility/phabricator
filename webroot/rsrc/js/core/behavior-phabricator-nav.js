@@ -20,9 +20,12 @@ JX.behavior('phabricator-nav', function(config) {
 
 // - Flexible Navigation Column ------------------------------------------------
 
-
   var dragging;
   var track;
+
+  var collapsed = config.collapsed;
+  var narrowed;
+  var visible = null;
 
   JX.enableDispatch(document.body, 'mousemove');
 
@@ -95,6 +98,7 @@ JX.behavior('phabricator-nav', function(config) {
     if (!dragging) {
       return;
     }
+
     JX.DOM.alterClass(document.body, 'jx-drag-col', false);
     dragging = false;
 
@@ -117,6 +121,29 @@ JX.behavior('phabricator-nav', function(config) {
     return (JX.$V(drag).x - JX.Vector.getScroll().x);
   }
 
+  function repaint() {
+    narrowed = !JX.Device.isDesktop();
+
+    var was_visible = visible;
+    visible = (!collapsed && !narrowed);
+
+    if (was_visible === visible) {
+      return;
+    }
+
+    if (!visible) {
+      savedrag();
+    }
+
+    JX.DOM.alterClass(main, 'has-local-nav', visible);
+    JX.DOM.alterClass(main, 'has-drag-nav', visible);
+    JX.DOM.alterClass(main, 'has-closed-nav', !visible);
+
+    if (visible) {
+      restoredrag();
+    }
+  }
+
   var saved_width = config.width;
   function savedrag() {
     saved_width = get_width();
@@ -136,21 +163,10 @@ JX.behavior('phabricator-nav', function(config) {
     content.style.marginLeft = (saved_width + JX.Vector.getDim(drag).x) + 'px';
   }
 
-  var collapsed = config.collapsed;
   JX.Stratcom.listen('differential-filetree-toggle', null, function() {
     collapsed = !collapsed;
 
-    if (collapsed) {
-      savedrag();
-    }
-
-    JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
-    JX.DOM.alterClass(main, 'has-drag-nav', !collapsed);
-    JX.DOM.alterClass(main, 'has-closed-nav', collapsed);
-
-    if (!collapsed) {
-      restoredrag();
-    }
+    repaint();
 
     new JX.Request('/settings/adjust/', JX.bag)
       .setData({ key : 'nav-collapsed', value : (collapsed ? 1 : 0) })
@@ -168,7 +184,9 @@ JX.behavior('phabricator-nav', function(config) {
   // of the navigation bar.
 
   function onresize() {
-    if (JX.Device.getDevice() != 'desktop') {
+    repaint();
+
+    if (!visible) {
       return;
     }
 
@@ -193,14 +211,13 @@ JX.behavior('phabricator-nav', function(config) {
   local.style.left = 0;
 
   JX.Stratcom.listen(['scroll', 'resize'], null, onresize);
-  onresize();
 
+  repaint();
 
 // - Navigation Reset ----------------------------------------------------------
 
   JX.Stratcom.listen('phabricator-device-change', null, function() {
-    resetdrag();
-    onresize();
+    repaint();
   });
 
 });

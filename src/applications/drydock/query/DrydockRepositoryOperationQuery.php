@@ -62,6 +62,8 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
   protected function willFilterPage(array $operations) {
     $implementations = DrydockRepositoryOperationType::getAllOperationTypes();
 
+    $viewer = $this->getViewer();
+
     foreach ($operations as $key => $operation) {
       $impl = idx($implementations, $operation->getOperationType());
       if (!$impl) {
@@ -69,7 +71,10 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
         unset($operations[$key]);
         continue;
       }
-      $impl = clone $impl;
+      $impl = id(clone $impl)
+        ->setViewer($viewer)
+        ->setOperation($operation);
+
       $operation->attachImplementation($impl);
     }
 

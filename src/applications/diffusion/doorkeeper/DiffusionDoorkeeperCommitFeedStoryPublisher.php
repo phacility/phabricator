@@ -31,8 +31,6 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
     // After ApplicationTransactions, we could annotate feed stories more
     // explicitly.
 
-    $fully_audited = PhabricatorAuditCommitStatusConstants::FULLY_AUDITED;
-
     $story = $this->getFeedStory();
     $xaction = $story->getPrimaryTransaction();
     switch ($xaction->getTransactionType()) {
@@ -41,7 +39,7 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
           case PhabricatorAuditActionConstants::CLOSE:
             return true;
           case PhabricatorAuditActionConstants::ACCEPT:
-            if ($object->getAuditStatus() == $fully_audited) {
+            if ($object->isAuditStatusAudited()) {
               return true;
             }
             break;
@@ -165,14 +163,7 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
   }
 
   public function isObjectClosed($object) {
-    switch ($object->getAuditStatus()) {
-      case PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT:
-      case PhabricatorAuditCommitStatusConstants::CONCERN_RAISED:
-      case PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED:
-        return false;
-      default:
-        return true;
-    }
+    return $object->getAuditStatusObject()->getIsClosed();
   }
 
   public function getResponsibilityTitle($object) {

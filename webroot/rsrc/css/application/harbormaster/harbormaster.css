@@ -26,9 +26,12 @@
 .harbormaster-unit-details {
   margin: 8px 0 4px;
   overflow: hidden;
-  white-space: pre;
-  text-overflow: ellipsis;
   color: {$lightgreytext};
+}
+
+.harbormaster-unit-details-text {
+  white-space: pre-wrap;
+  text-overflow: ellipsis;
 }
 
 .harbormaster-log-view-loading {

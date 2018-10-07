@@ -118,10 +118,6 @@ final class DiffusionBlameController extends DiffusionController {
         $author_phid = $commit->getAuthorDisplayPHID();
       }
 
-      if (!$author_phid && $revision) {
-        $author_phid = $revision->getAuthorPHID();
-      }
-
       if (!$author_phid) {
         // This means we couldn't identify an author for the commit or the
         // revision. We just render a blank for alignment.
@@ -137,6 +133,7 @@ final class DiffusionBlameController extends DiffusionController {
         $author_meta = array(
           'tip' => $handles[$author_phid]->getName(),
           'align' => 'E',
+          'size'  => 'auto',
         );
       }
 

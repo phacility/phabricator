@@ -114,4 +114,34 @@ final class ConpherenceThreadParticipantsTransaction
     return $errors;
   }
 
+  public function getRequiredCapabilities(
+    $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $old_map = array_fuse($xaction->getOldValue());
+    $new_map = array_fuse($xaction->getNewValue());
+
+    $add = array_keys(array_diff_key($new_map, $old_map));
+    $rem = array_keys(array_diff_key($old_map, $new_map));
+
+    $actor_phid = $this->getActingAsPHID();
+
+    $is_join = (($add === array($actor_phid)) && !$rem);
+    $is_leave = (($rem === array($actor_phid)) && !$add);
+
+    if ($is_join) {
+      // Anyone can join a thread they can see.
+      return null;
+    }
+
+    if ($is_leave) {
+      // Anyone can leave a thread.
+      return null;
+    }
+
+    // You need CAN_EDIT to add or remove participants. For additional
+    // discussion, see D17696 and T4411.
+    return PhabricatorPolicyCapability::CAN_EDIT;
+  }
+
 }

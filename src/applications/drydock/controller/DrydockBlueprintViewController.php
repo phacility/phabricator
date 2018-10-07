@@ -58,8 +58,11 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
     $log_query = id(new DrydockLogQuery())
       ->withBlueprintPHIDs(array($blueprint->getPHID()));
 
+    $log_table = $this->buildLogTable($log_query)
+      ->setHideBlueprints(true);
+
     $logs = $this->buildLogBox(
-      $log_query,
+      $log_table,
       $this->getApplicationURI("blueprint/{$id}/logs/query/all/"));
 
     $view = id(new PHUITwoColumnView())

@@ -714,10 +714,13 @@ final class DiffusionCommitQuery
     }
 
     if ($this->statuses !== null) {
+      $statuses = DiffusionCommitAuditStatus::newModernKeys(
+        $this->statuses);
+
       $where[] = qsprintf(
         $conn,
-        'commit.auditStatus IN (%Ld)',
-        $this->statuses);
+        'commit.auditStatus IN (%Ls)',
+        $statuses);
     }
 
     if ($this->packagePHIDs !== null) {
