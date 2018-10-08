@@ -125,7 +125,7 @@ final class PhabricatorExportEngine
     $field_list = mpull($field_list, null, 'getKey');
     $format->addHeaders($field_list);
 
-    // Iterate over the query results in large page so we don't have to hold
+    // Iterate over the query results in large pages so we don't have to hold
     // too much stuff in memory.
     $page_size = 1000;
     $page_cursor = null;
