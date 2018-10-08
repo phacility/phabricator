@@ -114,6 +114,10 @@ final class PhabricatorBulkManagementExportWorkflow
     $iterator = $file->getFileDataIterator();
 
     if (strlen($output_path)) {
+      // Empty the file before we start writing to it. Otherwise, "--overwrite"
+      // will really mean "--append".
+      Filesystem::writeFile($output_path, '');
+
       foreach ($iterator as $chunk) {
         Filesystem::appendFile($output_path, $chunk);
       }
