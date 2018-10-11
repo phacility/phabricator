@@ -78,8 +78,8 @@ final class PhabricatorFeedQuery
 
       $where[] = qsprintf(
         $conn,
-        'ref.chronologicalKey IN (%Q)',
-        implode(', ', $keys));
+        'ref.chronologicalKey IN (%LQ)',
+        $keys);
     }
 
     // NOTE: We may not have 64-bit PHP, so do the shifts in MySQL instead.

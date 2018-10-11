@@ -1652,6 +1652,11 @@ abstract class LiskDAO extends Phobject
 
     $now = PhabricatorTime::getNow();
     foreach ($connections as $key => $connection) {
+      // If the connection is not idle, never consider it inactive.
+      if (!$connection->isIdle()) {
+        continue;
+      }
+
       $last_active = $connection->getLastActiveEpoch();
 
       $idle_duration = ($now - $last_active);
@@ -1668,6 +1673,18 @@ abstract class LiskDAO extends Phobject
     $connections = self::$connections;
 
     foreach ($connections as $key => $connection) {
+      self::closeConnection($key);
+    }
+  }
+
+  public static function closeIdleConnections() {
+    $connections = self::$connections;
+
+    foreach ($connections as $key => $connection) {
+      if (!$connection->isIdle()) {
+        continue;
+      }
+
       self::closeConnection($key);
     }
   }

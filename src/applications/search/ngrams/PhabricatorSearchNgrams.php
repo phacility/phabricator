@@ -102,9 +102,9 @@ abstract class PhabricatorSearchNgrams
     if ($sql) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (objectID, ngram) VALUES %Q',
+        'INSERT INTO %T (objectID, ngram) VALUES %LQ',
         $this->getTableName(),
-        implode(', ', $sql));
+        $sql);
     }
 
     return $this;
