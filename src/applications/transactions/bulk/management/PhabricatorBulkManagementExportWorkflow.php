@@ -77,14 +77,27 @@ final class PhabricatorBulkManagementExportWorkflow
     $is_overwrite = $args->getArg('overwrite');
     $output_path = $args->getArg('output');
 
-    if (!strlen($output_path) && $is_overwrite) {
+    if (!strlen($output_path)) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Flag "--overwrite" has no effect without "--output".'));
+          'Use "--output <path>" to specify an output file, or "--output -" '.
+          'to print to stdout.'));
+    }
+
+    if ($output_path === '-') {
+      $is_stdout = true;
+    } else {
+      $is_stdout = false;
+    }
+
+    if ($is_stdout && $is_overwrite) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Flag "--overwrite" has no effect when outputting to stdout.'));
     }
 
     if (!$is_overwrite) {
-      if (Filesystem::pathExists($output_path)) {
+      if (!$is_stdout && Filesystem::pathExists($output_path)) {
         throw new PhutilArgumentUsageException(
           pht(
             'Output path already exists. Use "--overwrite" to overwrite '.
@@ -113,7 +126,7 @@ final class PhabricatorBulkManagementExportWorkflow
 
     $iterator = $file->getFileDataIterator();
 
-    if (strlen($output_path)) {
+    if (!$is_stdout) {
       // Empty the file before we start writing to it. Otherwise, "--overwrite"
       // will really mean "--append".
       Filesystem::writeFile($output_path, '');
@@ -121,6 +134,12 @@ final class PhabricatorBulkManagementExportWorkflow
       foreach ($iterator as $chunk) {
         Filesystem::appendFile($output_path, $chunk);
       }
+
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Exported data to "%s".',
+          Filesystem::readablePath($output_path)));
     } else {
       foreach ($iterator as $chunk) {
         echo $chunk;
