@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorDifferentialApplication extends PhabricatorApplication {
+final class PhabricatorDifferentialApplication
+  extends PhabricatorApplication {
 
   public function getBaseURI() {
     return '/differential/';
@@ -48,8 +49,7 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
         '/(?P<filter>new)/' => 'DifferentialRevisionViewController',
       ),
       '/differential/' => array(
-        '(?:query/(?P<queryKey>[^/]+)/)?'
-          => 'DifferentialRevisionListController',
+        $this->getQueryRoutePattern() => 'DifferentialRevisionListController',
         'diff/' => array(
           '(?P<id>[1-9]\d*)/' => array(
             '' => 'DifferentialDiffViewController',
