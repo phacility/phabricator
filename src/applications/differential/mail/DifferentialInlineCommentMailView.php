@@ -446,7 +446,18 @@ final class DifferentialInlineCommentMailView
             'style' => implode(' ', $link_style),
             'href' => $link_href,
           ),
-          pht('View Inline'));
+          array(
+            pht('View Inline'),
+
+            // See PHI920. Add a space after the link so we render this into
+            // the document:
+            //
+            //   View Inline filename.txt
+            //
+            // Otherwise, we render "Inlinefilename.txt" and double-clicking
+            // the file name selects the word "Inline" as well.
+            ' ',
+          ));
       } else {
         $link = null;
       }
