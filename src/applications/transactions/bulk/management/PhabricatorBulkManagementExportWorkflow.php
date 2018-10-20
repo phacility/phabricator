@@ -26,7 +26,8 @@ final class PhabricatorBulkManagementExportWorkflow
             'name' => 'query',
             'param' => 'key',
             'help' => pht(
-              'Export the data selected by this query.'),
+              'Export the data selected by one or more queries.'),
+            'repeat' => true,
           ),
           array(
             'name' => 'output',
@@ -47,56 +48,7 @@ final class PhabricatorBulkManagementExportWorkflow
   public function execute(PhutilArgumentParser $args) {
     $viewer = $this->getViewer();
 
-    $class = $args->getArg('class');
-
-    if (!strlen($class)) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Specify a search engine class to export data from with '.
-          '"--class".'));
-    }
-
-    if (!is_subclass_of($class, 'PhabricatorApplicationSearchEngine')) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'SearchEngine class ("%s") is unknown.',
-          $class));
-    }
-
-    $engine = newv($class, array())
-      ->setViewer($viewer);
-
-    if (!$engine->canExport()) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'SearchEngine class ("%s") does not support data export.',
-          $class));
-    }
-
-    $query_key = $args->getArg('query');
-    if (!strlen($query_key)) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Specify a query to export with "--query".'));
-    }
-
-    if ($engine->isBuiltinQuery($query_key)) {
-      $saved_query = $engine->buildSavedQueryFromBuiltin($query_key);
-    } else if ($query_key) {
-      $saved_query = id(new PhabricatorSavedQueryQuery())
-        ->setViewer($viewer)
-        ->withQueryKeys(array($query_key))
-        ->executeOne();
-    } else {
-      $saved_query = null;
-    }
-
-    if (!$saved_query) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Failed to load saved query ("%s").',
-          $query_key));
-    }
+    list($engine, $queries) = $this->newQueries($args);
 
     $format_key = $args->getArg('format');
     if (!strlen($format_key)) {
@@ -125,19 +77,41 @@ final class PhabricatorBulkManagementExportWorkflow
     $is_overwrite = $args->getArg('overwrite');
     $output_path = $args->getArg('output');
 
-    if (!strlen($output_path) && $is_overwrite) {
+    if (!strlen($output_path)) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Flag "--overwrite" has no effect without "--output".'));
+          'Use "--output <path>" to specify an output file, or "--output -" '.
+          'to print to stdout.'));
+    }
+
+    if ($output_path === '-') {
+      $is_stdout = true;
+    } else {
+      $is_stdout = false;
+    }
+
+    if ($is_stdout && $is_overwrite) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Flag "--overwrite" has no effect when outputting to stdout.'));
     }
 
     if (!$is_overwrite) {
-      if (Filesystem::pathExists($output_path)) {
+      if (!$is_stdout && Filesystem::pathExists($output_path)) {
         throw new PhutilArgumentUsageException(
           pht(
             'Output path already exists. Use "--overwrite" to overwrite '.
             'it.'));
       }
+    }
+
+    // If we have more than one query, execute the queries to figure out which
+    // results they hit, then build a synthetic query for all those results
+    // using the IDs.
+    if (count($queries) > 1) {
+      $saved_query = $this->newUnionQuery($engine, $queries);
+    } else {
+      $saved_query = head($queries);
     }
 
     $export_engine = id(new PhabricatorExportEngine())
@@ -152,10 +126,20 @@ final class PhabricatorBulkManagementExportWorkflow
 
     $iterator = $file->getFileDataIterator();
 
-    if (strlen($output_path)) {
+    if (!$is_stdout) {
+      // Empty the file before we start writing to it. Otherwise, "--overwrite"
+      // will really mean "--append".
+      Filesystem::writeFile($output_path, '');
+
       foreach ($iterator as $chunk) {
         Filesystem::appendFile($output_path, $chunk);
       }
+
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Exported data to "%s".',
+          Filesystem::readablePath($output_path)));
     } else {
       foreach ($iterator as $chunk) {
         echo $chunk;
@@ -163,6 +147,181 @@ final class PhabricatorBulkManagementExportWorkflow
     }
 
     return 0;
+  }
+
+  private function newQueries(PhutilArgumentParser $args) {
+    $viewer = $this->getViewer();
+
+    $query_keys = $args->getArg('query');
+    if (!$query_keys) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify one or more queries to export with "--query".'));
+    }
+
+    $engine_classes = id(new PhutilClassMapQuery())
+      ->setAncestorClass('PhabricatorApplicationSearchEngine')
+      ->execute();
+
+    $class = $args->getArg('class');
+    if (strlen($class)) {
+
+      $class_list = array();
+      foreach ($engine_classes as $class_name => $engine_object) {
+        $can_export = id(clone $engine_object)
+          ->setViewer($viewer)
+          ->canExport();
+        if ($can_export) {
+          $class_list[] = $class_name;
+        }
+      }
+
+      sort($class_list);
+      $class_list = implode(', ', $class_list);
+
+      $matches = array();
+      foreach ($engine_classes as $class_name => $engine_object) {
+        if (stripos($class_name, $class) !== false) {
+          if (strtolower($class_name) == strtolower($class)) {
+            $matches = array($class_name);
+            break;
+          } else {
+            $matches[] = $class_name;
+          }
+        }
+      }
+
+      if (!$matches) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'No search engines match "%s". Available engines which support '.
+            'data export are: %s.',
+            $class,
+            $class_list));
+      } else if (count($matches) > 1) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Multiple search engines match "%s": %s.',
+            $class,
+            implode(', ', $matches)));
+      } else {
+        $class = head($matches);
+      }
+
+      $engine = newv($class, array())
+        ->setViewer($viewer);
+    } else {
+      $engine = null;
+    }
+
+    $queries = array();
+    foreach ($query_keys as $query_key) {
+      if ($engine) {
+        if ($engine->isBuiltinQuery($query_key)) {
+          $queries[$query_key] = $engine->buildSavedQueryFromBuiltin(
+            $query_key);
+          continue;
+        }
+      }
+
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($viewer)
+        ->withQueryKeys(array($query_key))
+        ->executeOne();
+      if (!$saved_query) {
+        if (!$engine) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Query "%s" is unknown. To run a builtin query like "all" or '.
+              '"active", also specify the search engine with "--class".',
+              $query_key));
+        } else {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Query "%s" is not a recognized query for class "%s".',
+              $query_key,
+              get_class($engine)));
+        }
+      }
+
+      $queries[$query_key] = $saved_query;
+    }
+
+    // If we don't have an engine from "--class", fill it in by looking at the
+    // class of the first query.
+    if (!$engine) {
+      foreach ($queries as $query) {
+        $engine = newv($query->getEngineClassName(), array())
+          ->setViewer($viewer);
+        break;
+      }
+    }
+
+    $engine_class = get_class($engine);
+
+    foreach ($queries as $query) {
+      $query_class = $query->getEngineClassName();
+      if ($query_class !== $engine_class) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Specified queries use different engines: query "%s" uses '.
+            'engine "%s", not "%s". All queries must run on the same '.
+            'engine.',
+            $query->getQueryKey(),
+            $query_class,
+            $engine_class));
+      }
+    }
+
+    if (!$engine->canExport()) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'SearchEngine class ("%s") does not support data export.',
+          $engine_class));
+    }
+
+    return array($engine, $queries);
+  }
+
+  private function newUnionQuery(
+    PhabricatorApplicationSearchEngine $engine,
+    array $queries) {
+
+    assert_instances_of($queries, 'PhabricatorSavedQuery');
+
+    $engine = clone $engine;
+
+    $ids = array();
+    foreach ($queries as $saved_query) {
+      $page_size = 1000;
+      $page_cursor = null;
+      do {
+        $query = $engine->buildQueryFromSavedQuery($saved_query);
+        $pager = $engine->newPagerForSavedQuery($saved_query);
+        $pager->setPageSize($page_size);
+
+        if ($page_cursor !== null) {
+          $pager->setAfterID($page_cursor);
+        }
+
+        $objects = $engine->executeQuery($query, $pager);
+        $page_cursor = $pager->getNextPageID();
+
+        foreach ($objects as $object) {
+          $ids[] = $object->getID();
+        }
+      } while ($pager->getHasMoreResults());
+    }
+
+    // When we're merging multiple different queries, override any query order
+    // and just put the combined result list in ID order. At time of writing,
+    // we can't merge the result sets together while retaining the overall sort
+    // order even if they all used the same order, and it's meaningless to try
+    // to retain orders if the queries had different orders in the first place.
+    rsort($ids);
+
+    return id($engine->newSavedQuery())
+      ->setParameter('ids', $ids);
   }
 
 }

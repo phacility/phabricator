@@ -27,7 +27,7 @@ final class PhabricatorOwnersPackageOwnerDatasource
       'packages' => array(
         'name' => pht('Packages: ...'),
         'arguments' => pht('owner'),
-        'summary' => pht("Find results in any of an owner's projects."),
+        'summary' => pht("Find results in any of an owner's packages."),
         'description' => pht(
           "This function allows you to find results associated with any ".
           "of the packages a specified user or project is an owner of. ".
@@ -61,18 +61,21 @@ final class PhabricatorOwnersPackageOwnerDatasource
 
     $phids = $this->resolvePHIDs($phids);
 
-    $user_phids = array();
+    $owner_phids = array();
     foreach ($phids as $key => $phid) {
-      if (phid_get_type($phid) == PhabricatorPeopleUserPHIDType::TYPECONST) {
-        $user_phids[] = $phid;
-        unset($phids[$key]);
+      switch (phid_get_type($phid)) {
+        case PhabricatorPeopleUserPHIDType::TYPECONST:
+        case PhabricatorProjectProjectPHIDType::TYPECONST:
+          $owner_phids[] = $phid;
+          unset($phids[$key]);
+          break;
       }
     }
 
-    if ($user_phids) {
+    if ($owner_phids) {
       $packages = id(new PhabricatorOwnersPackageQuery())
         ->setViewer($this->getViewer())
-        ->withOwnerPHIDs($user_phids)
+        ->withOwnerPHIDs($owner_phids)
         ->execute();
       foreach ($packages as $package) {
         $phids[] = $package->getPHID();
@@ -116,8 +119,13 @@ final class PhabricatorOwnersPackageOwnerDatasource
 
     $usernames = array();
     foreach ($phids as $key => $phid) {
-      if (phid_get_type($phid) != PhabricatorPeopleUserPHIDType::TYPECONST) {
-        $usernames[$key] = $phid;
+      switch (phid_get_type($phid)) {
+        case PhabricatorPeopleUserPHIDType::TYPECONST:
+        case PhabricatorProjectProjectPHIDType::TYPECONST:
+          break;
+        default:
+          $usernames[$key] = $phid;
+          break;
       }
     }
 

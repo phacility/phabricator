@@ -2010,10 +2010,70 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
     }
 
-    shuffle($results);
+    if ($writable) {
+      $results = $this->sortWritableAlmanacServiceURIs($results);
+    } else {
+      shuffle($results);
+    }
 
     $result = head($results);
     return $result['uri'];
+  }
+
+  private function sortWritableAlmanacServiceURIs(array $results) {
+    // See T13109 for discussion of how this method routes requests.
+
+    // In the absence of other rules, we'll send traffic to devices randomly.
+    // We also want to select randomly among nodes which are equally good
+    // candidates to receive the write, and accomplish that by shuffling the
+    // list up front.
+    shuffle($results);
+
+    $order = array();
+
+    // If some device is currently holding the write lock, send all requests
+    // to that device. We're trying to queue writes on a single device so they
+    // do not need to wait for read synchronization after earlier writes
+    // complete.
+    $writer = PhabricatorRepositoryWorkingCopyVersion::loadWriter(
+      $this->getPHID());
+    if ($writer) {
+      $device_phid = $writer->getWriteProperty('devicePHID');
+      foreach ($results as $key => $result) {
+        if ($result['devicePHID'] === $device_phid) {
+          $order[] = $key;
+        }
+      }
+    }
+
+    // If no device is currently holding the write lock, try to send requests
+    // to a device which is already up to date and will not need to synchronize
+    // before it can accept the write.
+    $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
+      $this->getPHID());
+    if ($versions) {
+      $max_version = (int)max(mpull($versions, 'getRepositoryVersion'));
+
+      $max_devices = array();
+      foreach ($versions as $version) {
+        if ($version->getRepositoryVersion() == $max_version) {
+          $max_devices[] = $version->getDevicePHID();
+        }
+      }
+      $max_devices = array_fuse($max_devices);
+
+      foreach ($results as $key => $result) {
+        if (isset($max_devices[$result['devicePHID']])) {
+          $order[] = $key;
+        }
+      }
+    }
+
+    // Reorder the results, putting any we've selected as preferred targets for
+    // the write at the head of the list.
+    $results = array_select_keys($results, $order) + $results;
+
+    return $results;
   }
 
   public function supportsSynchronization() {
@@ -2036,7 +2096,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $parts = array(
       "repo({$repository_phid})",
       "serv({$service_phid})",
-      'v2',
+      'v3',
     );
 
     return implode('.', $parts);
@@ -2063,12 +2123,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $uri = $this->getClusterRepositoryURIFromBinding($binding);
       $protocol = $uri->getProtocol();
       $device_name = $iface->getDevice()->getName();
+      $device_phid = $iface->getDevice()->getPHID();
 
       $uris[] = array(
         'protocol' => $protocol,
         'uri' => (string)$uri,
         'device' => $device_name,
         'writable' => (bool)$binding->getAlmanacPropertyValue('writable'),
+        'devicePHID' => $device_phid,
       );
     }
 

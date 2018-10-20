@@ -23,6 +23,7 @@ final class PhabricatorMetaMTAMailableFunctionDatasource
       new PhabricatorProjectMembersDatasource(),
       new PhabricatorProjectDatasource(),
       new PhabricatorOwnersPackageDatasource(),
+      new PhabricatorOwnersPackageOwnerDatasource(),
     );
   }
 
