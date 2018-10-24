@@ -11,6 +11,7 @@ final class DrydockCommand
   protected $targetPHID;
   protected $command;
   protected $isConsumed;
+  protected $properties = array();
 
   private $commandTarget = self::ATTACHABLE;
 
@@ -22,6 +23,9 @@ final class DrydockCommand
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'command' => 'text32',
         'isConsumed' => 'bool',
@@ -43,6 +47,14 @@ final class DrydockCommand
     return $this->assertAttached($this->commandTarget);
   }
 
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

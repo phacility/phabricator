@@ -241,10 +241,15 @@ abstract class DrydockWorker extends PhabricatorWorker {
     DrydockLease $lease) {
     $viewer = $this->getViewer();
 
+    // When the resource releases, we we want to reawaken this task since it
+    // should be able to start building a new resource right away.
+    $worker_task_id = $this->getCurrentWorkerTaskID();
+
     $command = DrydockCommand::initializeNewCommand($viewer)
       ->setTargetPHID($resource->getPHID())
       ->setAuthorPHID($lease->getPHID())
       ->setCommand(DrydockCommand::COMMAND_RECLAIM)
+      ->setProperty('awakenTaskIDs', array($worker_task_id))
       ->save();
 
     $resource->scheduleUpdate();
