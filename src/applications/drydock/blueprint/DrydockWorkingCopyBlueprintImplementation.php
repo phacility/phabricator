@@ -256,8 +256,9 @@ final class DrydockWorkingCopyBlueprintImplementation
       $ref = idx($spec, 'ref');
 
       // Reset things first, in case previous builds left anything staged or
-      // dirty.
-      $cmd[] = 'git reset --hard HEAD';
+      // dirty. Note that we don't reset to "HEAD" because that does not work
+      // in empty repositories.
+      $cmd[] = 'git reset --hard';
 
       if ($commit !== null) {
         $cmd[] = 'git checkout %s --';
