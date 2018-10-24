@@ -599,6 +599,13 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
         'DrydockResourceUpdateWorker',
         array(
           'resourcePHID' => $resource->getPHID(),
+
+          // This task will generally yield while the resource activates, so
+          // wake it back up once the resource comes online. Most of the time,
+          // we'll be able to lease the newly activated resource.
+          'awakenOnActivation' => array(
+            $this->getCurrentWorkerTaskID(),
+          ),
         ),
         array(
           'objectPHID' => $resource->getPHID(),
