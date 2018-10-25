@@ -7,7 +7,7 @@ final class DiffusionCommitConcernTransaction
   const ACTIONKEY = 'concern';
 
   protected function getCommitActionLabel() {
-    return pht("Raise Concern \xE2\x9C\x98");
+    return pht('Raise Concern');
   }
 
   protected function getCommitActionDescription() {
