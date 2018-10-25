@@ -1146,6 +1146,7 @@ phutil_register_library_map(array(
     'DrydockLeaseReclaimLogType' => 'applications/drydock/logtype/DrydockLeaseReclaimLogType.php',
     'DrydockLeaseReleaseController' => 'applications/drydock/controller/DrydockLeaseReleaseController.php',
     'DrydockLeaseReleasedLogType' => 'applications/drydock/logtype/DrydockLeaseReleasedLogType.php',
+    'DrydockLeaseSearchConduitAPIMethod' => 'applications/drydock/conduit/DrydockLeaseSearchConduitAPIMethod.php',
     'DrydockLeaseSearchEngine' => 'applications/drydock/query/DrydockLeaseSearchEngine.php',
     'DrydockLeaseStatus' => 'applications/drydock/constants/DrydockLeaseStatus.php',
     'DrydockLeaseUpdateWorker' => 'applications/drydock/worker/DrydockLeaseUpdateWorker.php',
@@ -6532,6 +6533,7 @@ phutil_register_library_map(array(
     'DrydockLease' => array(
       'DrydockDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorConduitResultInterface',
     ),
     'DrydockLeaseAcquiredLogType' => 'DrydockLogType',
     'DrydockLeaseActivatedLogType' => 'DrydockLogType',
@@ -6552,6 +6554,7 @@ phutil_register_library_map(array(
     'DrydockLeaseReclaimLogType' => 'DrydockLogType',
     'DrydockLeaseReleaseController' => 'DrydockLeaseController',
     'DrydockLeaseReleasedLogType' => 'DrydockLogType',
+    'DrydockLeaseSearchConduitAPIMethod' => 'PhabricatorSearchEngineAPIMethod',
     'DrydockLeaseSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockLeaseStatus' => 'PhabricatorObjectStatus',
     'DrydockLeaseUpdateWorker' => 'DrydockWorker',
