@@ -45,6 +45,16 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     return true;
   }
 
+  public function shouldAllocateSupplementalResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    // We want to use every host in an Almanac service, since the amount of
+    // hardware is fixed and there's normally no value in packing leases onto a
+    // subset of it. Always build a new supplemental resource if we can.
+    return true;
+  }
+
   public function canAllocateResourceForLease(
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {

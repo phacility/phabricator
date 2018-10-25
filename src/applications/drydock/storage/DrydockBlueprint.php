@@ -278,6 +278,15 @@ final class DrydockBlueprint extends DrydockDAO
     return $interface;
   }
 
+  public function shouldAllocateSupplementalResource(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return $this->getImplementation()->shouldAllocateSupplementalResource(
+      $this,
+      $resource,
+      $lease);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
