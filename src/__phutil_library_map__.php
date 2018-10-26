@@ -7131,7 +7131,10 @@ phutil_register_library_map(array(
     'LegalpadTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'LegalpadTransactionView' => 'PhabricatorApplicationTransactionView',
     'LiskChunkTestCase' => 'PhabricatorTestCase',
-    'LiskDAO' => 'Phobject',
+    'LiskDAO' => array(
+      'Phobject',
+      'AphrontDatabaseTableRefInterface',
+    ),
     'LiskDAOSet' => 'Phobject',
     'LiskDAOTestCase' => 'PhabricatorTestCase',
     'LiskEphemeralObjectException' => 'Exception',

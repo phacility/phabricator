@@ -162,7 +162,8 @@
  * @task   xaction Managing Transactions
  * @task   isolate Isolation for Unit Testing
  */
-abstract class LiskDAO extends Phobject {
+abstract class LiskDAO extends Phobject
+  implements AphrontDatabaseTableRefInterface {
 
   const CONFIG_IDS                  = 'id-mechanism';
   const CONFIG_TIMESTAMPS           = 'timestamps';
@@ -235,8 +236,11 @@ abstract class LiskDAO extends Phobject {
    * @return string Connection namespace for cache
    * @task conn
    */
-  abstract protected function getConnectionNamespace();
+  protected function getConnectionNamespace() {
+    return $this->getDatabaseName();
+  }
 
+  abstract protected function getDatabaseName();
 
   /**
    * Get an existing, cached connection for this object.
@@ -525,8 +529,8 @@ abstract class LiskDAO extends Phobject {
     $args = func_get_args();
     $args = array_slice($args, 1);
 
-    $pattern = 'SELECT * FROM %T WHERE '.$pattern.' %Q';
-    array_unshift($args, $this->getTableName());
+    $pattern = 'SELECT * FROM %R WHERE '.$pattern.' %Q';
+    array_unshift($args, $this);
     array_push($args, $lock_clause);
     array_unshift($args, $pattern);
 
@@ -1150,8 +1154,8 @@ abstract class LiskDAO extends Phobject {
 
     $id = $this->getID();
     $conn->query(
-      'UPDATE %T SET %Q WHERE %C = '.(is_int($id) ? '%d' : '%s'),
-      $this->getTableName(),
+      'UPDATE %R SET %Q WHERE %C = '.(is_int($id) ? '%d' : '%s'),
+      $this,
       $map,
       $this->getIDKeyForUse(),
       $id);
@@ -1178,8 +1182,8 @@ abstract class LiskDAO extends Phobject {
 
     $conn = $this->establishConnection('w');
     $conn->query(
-      'DELETE FROM %T WHERE %C = %d',
-      $this->getTableName(),
+      'DELETE FROM %R WHERE %C = %d',
+      $this,
       $this->getIDKeyForUse(),
       $this->getID());
 
@@ -1255,9 +1259,9 @@ abstract class LiskDAO extends Phobject {
     $data = implode(', ', $data);
 
     $conn->query(
-      '%Q INTO %T (%LC) VALUES (%Q)',
+      '%Q INTO %R (%LC) VALUES (%Q)',
       $mode,
-      $this->getTableName(),
+      $this,
       $columns,
       $data);
 
@@ -2018,5 +2022,18 @@ abstract class LiskDAO extends Phobject {
     return id(new PhabricatorStorageSchemaSpec())
       ->getMaximumByteLengthForDataType($data_type);
   }
+
+
+/* -(  AphrontDatabaseTableRefInterface  )----------------------------------- */
+
+
+  public function getAphrontRefDatabaseName() {
+    return $this->getDatabaseName();
+  }
+
+  public function getAphrontRefTableName() {
+    return $this->getTableName();
+  }
+
 
 }

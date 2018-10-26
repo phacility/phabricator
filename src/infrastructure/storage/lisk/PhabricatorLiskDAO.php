@@ -187,10 +187,9 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
    */
   abstract public function getApplicationName();
 
-  protected function getConnectionNamespace() {
+  protected function getDatabaseName() {
     return self::getStorageNamespace().'_'.$this->getApplicationName();
   }
-
 
   /**
    * Break a list of escaped SQL statement fragments (e.g., VALUES lists for
