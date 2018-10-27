@@ -7,7 +7,7 @@ final class DiffusionCommitConcernTransaction
   const ACTIONKEY = 'concern';
 
   protected function getCommitActionLabel() {
-    return pht("Raise Concern \xE2\x9C\x98");
+    return pht('Raise Concern');
   }
 
   protected function getCommitActionDescription() {
@@ -74,6 +74,14 @@ final class DiffusionCommitConcernTransaction
       '%s raised a concern with %s.',
       $this->renderAuthor(),
       $this->renderObject());
+  }
+
+  public function getTransactionTypeForConduit($xaction) {
+    return 'concern';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array();
   }
 
 }

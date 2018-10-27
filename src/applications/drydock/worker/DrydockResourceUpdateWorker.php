@@ -150,6 +150,13 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
         $this->releaseResource($resource, $reclaimer_phid);
         break;
     }
+
+    // If the command specifies that other worker tasks should be awakened
+    // after it executes, awaken them now.
+    $awaken_ids = $command->getProperty('awakenTaskIDs');
+    if (is_array($awaken_ids) && $awaken_ids) {
+      PhabricatorWorker::awakenTaskIDs($awaken_ids);
+    }
   }
 
 
@@ -163,6 +170,11 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
     $blueprint = $resource->getBlueprint();
     $blueprint->activateResource($resource);
     $this->validateActivatedResource($blueprint, $resource);
+
+    $awaken_ids = $this->getTaskDataValue('awakenOnActivation');
+    if (is_array($awaken_ids) && $awaken_ids) {
+      PhabricatorWorker::awakenTaskIDs($awaken_ids);
+    }
   }
 
 

@@ -63,4 +63,12 @@ final class DiffusionCommitResignTransaction
       $this->renderObject());
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'resign';
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
+    return array();
+  }
+
 }

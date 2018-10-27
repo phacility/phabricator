@@ -599,6 +599,13 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
         'DrydockResourceUpdateWorker',
         array(
           'resourcePHID' => $resource->getPHID(),
+
+          // This task will generally yield while the resource activates, so
+          // wake it back up once the resource comes online. Most of the time,
+          // we'll be able to lease the newly activated resource.
+          'awakenOnActivation' => array(
+            $this->getCurrentWorkerTaskID(),
+          ),
         ),
         array(
           'objectPHID' => $resource->getPHID(),
@@ -665,6 +672,26 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
     $viewer = $this->getViewer();
+
+    // If this lease is marked as already in the process of reclaiming a
+    // resource, don't let it reclaim another one until the first reclaim
+    // completes. This stops one lease from reclaiming a large number of
+    // resources if the reclaims take a while to complete.
+    $reclaiming_phid = $lease->getAttribute('drydock.reclaimingPHID');
+    if ($reclaiming_phid) {
+      $reclaiming_resource = id(new DrydockResourceQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($reclaiming_phid))
+        ->withStatuses(
+          array(
+            DrydockResourceStatus::STATUS_ACTIVE,
+            DrydockResourceStatus::STATUS_RELEASED,
+          ))
+        ->executeOne();
+      if ($reclaiming_resource) {
+        return null;
+      }
+    }
 
     $resources = id(new DrydockResourceQuery())
       ->setViewer($viewer)

@@ -113,6 +113,14 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
+
+    // Require the binding to a given host be active before we'll hand out more
+    // leases on the corresponding resource.
+    $binding = $this->loadBindingForResource($resource);
+    if ($binding->getIsDisabled()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -154,24 +162,10 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     DrydockLease $lease,
     $type) {
 
-    $viewer = PhabricatorUser::getOmnipotentUser();
-
     switch ($type) {
       case DrydockCommandInterface::INTERFACE_TYPE:
         $credential_phid = $blueprint->getFieldValue('credentialPHID');
-        $binding_phid = $resource->getAttribute('almanacBindingPHID');
-
-        $binding = id(new AlmanacBindingQuery())
-          ->setViewer($viewer)
-          ->withPHIDs(array($binding_phid))
-          ->executeOne();
-        if (!$binding) {
-          throw new Exception(
-            pht(
-              'Unable to load binding "%s" to create command interface.',
-              $binding_phid));
-        }
-
+        $binding = $this->loadBindingForResource($resource);
         $interface = $binding->getInterface();
 
         return id(new DrydockSSHCommandInterface())
@@ -213,7 +207,7 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
             $blueprint->getBlueprintName()));
       }
 
-      $viewer = PhabricatorUser::getOmnipotentUser();
+      $viewer = $this->getViewer();
       $services = id(new AlmanacServiceQuery())
         ->setViewer($viewer)
         ->withPHIDs($service_phids)
@@ -246,7 +240,7 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
 
   private function loadFreeBindings(DrydockBlueprint $blueprint) {
     if ($this->freeBindings === null) {
-      $viewer = PhabricatorUser::getOmnipotentUser();
+      $viewer = $this->getViewer();
 
       $pool = id(new DrydockResourceQuery())
         ->setViewer($viewer)
@@ -293,5 +287,31 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     );
   }
 
+  private function loadBindingForResource(DrydockResource $resource) {
+    $binding_phid = $resource->getAttribute('almanacBindingPHID');
+    if (!$binding_phid) {
+      throw new Exception(
+        pht(
+          'Drydock resource ("%s") has no Almanac binding PHID, so its '.
+          'binding can not be loaded.',
+          $resource->getPHID()));
+    }
+
+    $viewer = $this->getViewer();
+
+    $binding = id(new AlmanacBindingQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($binding_phid))
+      ->executeOne();
+    if (!$binding) {
+      throw new Exception(
+        pht(
+          'Unable to load Almanac binding ("%s") for resource ("%s").',
+          $binding_phid,
+          $resource->getPHID()));
+    }
+
+    return $binding;
+  }
 
 }

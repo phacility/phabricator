@@ -40,15 +40,20 @@ final class PhabricatorDaemonManagementLogWorkflow
       $query->withIDs($ids);
     }
     $daemons = $query->execute();
+    $daemons = mpull($daemons, null, 'getID');
 
-    if (!$daemons) {
-      if ($ids) {
-        throw new PhutilArgumentUsageException(
-          pht('No daemon(s) with id(s) "%s" exist!', implode(', ', $ids)));
-      } else {
-        throw new PhutilArgumentUsageException(
-          pht('No daemons are running.'));
+    if ($ids) {
+      foreach ($ids as $id) {
+        if (!isset($daemons[$id])) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'No log record exists for a daemon with ID "%s".',
+              $id));
+        }
       }
+    } else if (!$daemons) {
+      throw new PhutilArgumentUsageException(
+        pht('No log records exist for any daemons.'));
     }
 
     $console = PhutilConsole::getConsole();
