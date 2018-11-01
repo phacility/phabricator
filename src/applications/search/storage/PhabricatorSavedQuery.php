@@ -63,6 +63,13 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
     return $this->assertAttachedKey($this->parameterMap, $key);
   }
 
+  public function newCopy() {
+    return id(new self())
+      ->setParameters($this->getParameters())
+      ->setQueryKey(null)
+      ->setEngineClassName($this->getEngineClassName());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -203,7 +203,7 @@ final class PhabricatorProjectBoardViewController
       // with the column filter. If the user currently has constraints on the
       // board, we want to add a new column or project constraint, not
       // completely replace the constraints.
-      $saved_query = clone $saved;
+      $saved_query = $saved->newCopy();
 
       if ($query_column->getProxyPHID()) {
         $project_phids = $saved_query->getParameter('projectPHIDs');
