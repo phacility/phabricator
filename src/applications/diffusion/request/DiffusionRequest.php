@@ -489,7 +489,7 @@ abstract class DiffusionRequest extends Phobject {
     // Consume the back part of the URI, up to the first "$". Use a negative
     // lookbehind to prevent matching '$$'. We double the '$' symbol when
     // encoding so that files with names like "money/$100" will survive.
-    $pattern = '@(?:(?:^|[^$])(?:[$][$])*)[$]([\d-,]+)$@';
+    $pattern = '@(?:(?:^|[^$])(?:[$][$])*)[$]([\d,-]+)$@';
     if (preg_match($pattern, $blob, $matches)) {
       $result['line'] = $matches[1];
       $blob = substr($blob, 0, -(strlen($matches[1]) + 1));
