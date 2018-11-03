@@ -9,6 +9,7 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorNgramsInterface,
+    PhabricatorConduitResultInterface,
     PhabricatorProjectInterface {
 
   protected $name;
@@ -205,6 +206,36 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
       id(new HarbormasterBuildPlanNameNgrams())
         ->setValue($this->getName()),
     );
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of this build plan.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('The current status of this build plan.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'status' => array(
+        'value' => $this->getPlanStatus(),
+      ),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }

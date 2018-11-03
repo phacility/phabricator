@@ -306,6 +306,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $allocated = false;
     foreach ($resources as $resource) {
       try {
+        $resource = $this->newResourceForAcquisition($resource, $lease);
         $this->acquireLease($resource, $lease);
         $allocated = true;
         break;
@@ -318,6 +319,10 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
         // If a resource was reclaimed or destroyed by the time we actually
         // got around to acquiring it, we just got unlucky. We can yield and
         // try again later.
+        $yields[] = $ex;
+      } catch (PhabricatorWorkerYieldException $ex) {
+        // We can be told to yield, particularly by the supplemental allocator
+        // trying to give us a supplemental resource.
         $yields[] = $ex;
       } catch (Exception $ex) {
         $exceptions[] = $ex;
@@ -789,6 +794,73 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
           $blueprint->getClassName(),
           'acquireLease()'));
     }
+  }
+
+  private function newResourceForAcquisition(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+
+    // If the resource has no leases against it, never build a new one. This is
+    // likely already a new resource that just activated.
+    $viewer = $this->getViewer();
+
+    $statuses = array(
+      DrydockLeaseStatus::STATUS_PENDING,
+      DrydockLeaseStatus::STATUS_ACQUIRED,
+      DrydockLeaseStatus::STATUS_ACTIVE,
+    );
+
+    $leases = id(new DrydockLeaseQuery())
+      ->setViewer($viewer)
+      ->withResourcePHIDs(array($resource->getPHID()))
+      ->withStatuses($statuses)
+      ->setLimit(1)
+      ->execute();
+    if (!$leases) {
+      return $resource;
+    }
+
+    // If we're about to get a lease on a resource, check if the blueprint
+    // wants to allocate a supplemental resource. If it does, try to perform a
+    // new allocation instead.
+    $blueprint = $resource->getBlueprint();
+    if (!$blueprint->shouldAllocateSupplementalResource($resource, $lease)) {
+      return $resource;
+    }
+
+    // If the blueprint is already overallocated, we can't allocate a new
+    // resource. Just return the existing resource.
+    $remaining = $this->removeOverallocatedBlueprints(
+      array($blueprint),
+      $lease);
+    if (!$remaining) {
+      return $resource;
+    }
+
+    // Try to build a new resource.
+    try {
+      $new_resource = $this->allocateResource($blueprint, $lease);
+    } catch (Exception $ex) {
+      $blueprint->logEvent(
+        DrydockResourceAllocationFailureLogType::LOGCONST,
+        array(
+          'class' => get_class($ex),
+          'message' => $ex->getMessage(),
+        ));
+
+      return $resource;
+    }
+
+    // If we can't actually acquire the new resource yet, just yield.
+    // (We could try to move forward with the original resource instead.)
+    $acquirable = $this->removeUnacquirableResources(
+      array($new_resource),
+      $lease);
+    if (!$acquirable) {
+      throw new PhabricatorWorkerYieldException(15);
+    }
+
+    return $new_resource;
   }
 
 

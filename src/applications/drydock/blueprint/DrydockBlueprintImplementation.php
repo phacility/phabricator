@@ -139,6 +139,38 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockResource $resource,
     DrydockLease $lease);
 
+  /**
+   * Return true to try to allocate a new resource and expand the resource
+   * pool instead of permitting an otherwise valid acquisition on an existing
+   * resource.
+   *
+   * This allows the blueprint to provide a soft hint about when the resource
+   * pool should grow.
+   *
+   * Returning "true" in all cases generally makes sense when a blueprint
+   * controls a fixed pool of resources, like a particular number of physical
+   * hosts: you want to put all the hosts in service, so whenever it is
+   * possible to allocate a new host you want to do this.
+   *
+   * Returning "false" in all cases generally make sense when a blueprint
+   * has a flexible pool of expensive resources and you want to pack leases
+   * onto them as tightly as possible.
+   *
+   * @param DrydockBlueprint The blueprint for an existing resource being
+   *   acquired.
+   * @param DrydockResource The resource being acquired, which we may want to
+   *   build a supplemental resource for.
+   * @param DrydockLease The current lease performing acquisition.
+   * @return bool True to prefer allocating a supplemental resource.
+   *
+   * @task lease
+   */
+  public function shouldAllocateSupplementalResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return false;
+  }
 
 /* -(  Resource Allocation  )------------------------------------------------ */
 
