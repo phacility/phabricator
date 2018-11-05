@@ -25,44 +25,6 @@ final class PhabricatorSlowvoteVoteController
 
     $old_votes = mpull($viewer_choices, null, 'getOptionID');
 
-    if ($request->isAjax()) {
-      $vote = $request->getInt('vote');
-      $votes = array_keys($old_votes);
-      $votes = array_fuse($votes);
-
-      if ($poll->getMethod() == PhabricatorSlowvotePoll::METHOD_PLURALITY) {
-        if (idx($votes, $vote, false)) {
-          $votes = array();
-        } else {
-          $votes = array($vote);
-        }
-      } else {
-        if (idx($votes, $vote, false)) {
-          unset($votes[$vote]);
-        } else {
-          $votes[$vote] = $vote;
-        }
-      }
-
-      $this->updateVotes($viewer, $poll, $old_votes, $votes);
-
-      $updated_choices = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
-        'pollID = %d AND authorPHID = %s',
-        $poll->getID(),
-        $viewer->getPHID());
-
-      $embed = id(new SlowvoteEmbedView())
-        ->setPoll($poll)
-        ->setOptions($options)
-        ->setViewerChoices($updated_choices);
-
-      return id(new AphrontAjaxResponse())
-        ->setContent(array(
-          'pollID' => $poll->getID(),
-          'contentHTML' => $embed->render(),
-        ));
-    }
-
     if (!$request->isFormPost()) {
       return id(new Aphront404Response());
     }

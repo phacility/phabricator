@@ -422,7 +422,6 @@ return array(
     'rsrc/js/application/repository/repository-crossreference.js' => '9a860428',
     'rsrc/js/application/search/behavior-reorder-profile-menu-items.js' => 'e2e0a072',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
-    'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => '887ad43f',
     'rsrc/js/application/transactions/behavior-comment-actions.js' => '038bf27f',
     'rsrc/js/application/transactions/behavior-reorder-configs.js' => 'd7a74243',
     'rsrc/js/application/transactions/behavior-reorder-fields.js' => 'b59e1e96',
@@ -674,7 +673,6 @@ return array(
     'javelin-behavior-select-content' => 'bf5374ef',
     'javelin-behavior-select-on-click' => '4e3e79a6',
     'javelin-behavior-setup-check-https' => '491416b3',
-    'javelin-behavior-slowvote-embed' => '887ad43f',
     'javelin-behavior-stripe-payment-form' => 'a6b98425',
     'javelin-behavior-test-payment-form' => 'fc91ab6c',
     'javelin-behavior-time-typeahead' => '522431f7',
@@ -1549,12 +1547,6 @@ return array(
       'javelin-behavior',
       'phabricator-keyboard-shortcut',
       'javelin-stratcom',
-    ),
-    '887ad43f' => array(
-      'javelin-behavior',
-      'javelin-request',
-      'javelin-stratcom',
-      'javelin-dom',
     ),
     '8935deef' => array(
       'javelin-install',
