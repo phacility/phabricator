@@ -17,6 +17,8 @@
 // subclasses of PhabricatorConfigSiteSource to read it and build an instance
 // environment.
 
+$hook_start = microtime(true);
+
 if ($argc > 1) {
   $context = $argv[1];
   $context = explode(':', $context, 2);
@@ -35,7 +37,8 @@ if ($argc < 2) {
   throw new Exception(pht('usage: commit-hook <repository>'));
 }
 
-$engine = new DiffusionCommitHookEngine();
+$engine = id(new DiffusionCommitHookEngine())
+  ->setStartTime($hook_start);
 
 $repository = id(new PhabricatorRepositoryQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
