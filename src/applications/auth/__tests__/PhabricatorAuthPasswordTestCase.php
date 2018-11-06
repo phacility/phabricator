@@ -99,6 +99,82 @@ final class PhabricatorAuthPasswordTestCase extends PhabricatorTestCase {
     $this->assertTrue($account_engine->isUniquePassword($password2));
   }
 
+  public function testPasswordBlocklisting() {
+    $user = $this->generateNewTestUser();
+
+    $user
+      ->setUsername('iasimov')
+      ->setRealName('Isaac Asimov')
+      ->save();
+
+    $test_type = PhabricatorAuthPassword::PASSWORD_TYPE_TEST;
+    $content_source = $this->newContentSource();
+
+    $engine = id(new PhabricatorAuthPasswordEngine())
+      ->setViewer($user)
+      ->setContentSource($content_source)
+      ->setPasswordType($test_type)
+      ->setObject($user);
+
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('account.minimum-password-length', 4);
+
+    $passwords = array(
+      'a23li432m9mdf' => true,
+
+      // Empty.
+      '' => false,
+
+      // Password length tests.
+      'xh3' => false,
+      'xh32' => true,
+
+      // In common password blocklist.
+      'password1' => false,
+
+      // Tests for the account identifier blocklist.
+      'isaac' => false,
+      'iasimov' => false,
+      'iasimov1' => false,
+      'asimov' => false,
+      'iSaAc' => false,
+      '32IASIMOV' => false,
+      'i-am-iasimov-this-is-my-long-strong-password' => false,
+      'iasimo' => false,
+
+      // These are okay: although they're visually similar, they aren't mutual
+      // substrings of any identifier.
+      'iasimo1' => true,
+      'isa1mov' => true,
+    );
+
+    foreach ($passwords as $password => $expect) {
+      $this->assertBlocklistedPassword($engine, $password, $expect);
+    }
+  }
+
+  private function assertBlocklistedPassword(
+    PhabricatorAuthPasswordEngine $engine,
+    $raw_password,
+    $expect_valid) {
+
+    $envelope_1 = new PhutilOpaqueEnvelope($raw_password);
+    $envelope_2 = new PhutilOpaqueEnvelope($raw_password);
+
+    $caught = null;
+    try {
+      $engine->checkNewPassword($envelope_1, $envelope_2);
+    } catch (PhabricatorAuthPasswordException $exception) {
+      $caught = $exception;
+    }
+
+    $this->assertEqual(
+      $expect_valid,
+      !($caught instanceof PhabricatorAuthPasswordException),
+      pht('Validity of password "%s".', $raw_password));
+  }
+
+
   public function testPasswordUpgrade() {
     $weak_hasher = new PhabricatorIteratedMD5PasswordHasher();
 
