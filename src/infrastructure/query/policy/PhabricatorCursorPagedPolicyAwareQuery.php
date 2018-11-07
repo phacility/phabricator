@@ -277,7 +277,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildSelectClause(AphrontDatabaseConnection $conn) {
     $parts = $this->buildSelectClauseParts($conn);
-    return $this->formatSelectClause($parts);
+    return $this->formatSelectClause($conn, $parts);
   }
 
 
@@ -291,7 +291,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if ($alias) {
       $select[] = qsprintf($conn, '%T.*', $alias);
     } else {
-      $select[] = '*';
+      $select[] = qsprintf($conn, '*');
     }
 
     $select[] = $this->buildEdgeLogicSelectClause($conn);

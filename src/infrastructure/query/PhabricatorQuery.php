@@ -41,25 +41,16 @@ abstract class PhabricatorQuery extends Phobject {
   /**
    * @task format
    */
-  protected function formatSelectClause(array $parts) {
+  protected function formatSelectClause(
+    AphrontDatabaseConnection $conn,
+    array $parts) {
+
     $parts = $this->flattenSubclause($parts);
     if (!$parts) {
-      throw new Exception(pht('Can not build empty select clause!'));
+      throw new Exception(pht('Can not build empty SELECT clause!'));
     }
 
-    return 'SELECT '.$this->formatSelectSubclause($parts);
-  }
-
-
-  /**
-   * @task format
-   */
-  protected function formatSelectSubclause(array $parts) {
-    $parts = $this->flattenSubclause($parts);
-    if (!$parts) {
-      return null;
-    }
-    return implode(', ', $parts);
+    return qsprintf($conn, 'SELECT %LQ', $parts);
   }
 
 

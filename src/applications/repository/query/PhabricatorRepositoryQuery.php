@@ -491,10 +491,10 @@ final class PhabricatorRepositoryQuery
   protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
     $parts = parent::buildSelectClauseParts($conn);
 
-    $parts[] = 'r.*';
+    $parts[] = qsprintf($conn, 'r.*');
 
     if ($this->shouldJoinSummaryTable()) {
-      $parts[] = 's.*';
+      $parts[] = qsprintf($conn, 's.*');
     }
 
     return $parts;
