@@ -531,7 +531,7 @@ final class ManiphestTransactionEditor
     foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
       queryfx(
         $conn,
-        'INSERT INTO %T (id, %Q, subpriority) VALUES %Q
+        'INSERT INTO %T (id, %Q, subpriority) VALUES %LQ
           ON DUPLICATE KEY UPDATE subpriority = VALUES(subpriority)',
         $task->getTableName(),
         implode(', ', array_keys($extra_columns)),

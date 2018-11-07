@@ -101,11 +101,11 @@ final class DivinerLivePublisher extends DivinerPublisher {
       $strings[] = qsprintf($conn_w, '%s', $hash);
     }
 
-    foreach (PhabricatorLiskDAO::chunkSQL($strings, ', ') as $chunk) {
+    foreach (PhabricatorLiskDAO::chunkSQL($strings) as $chunk) {
       queryfx(
         $conn_w,
         'UPDATE %T SET graphHash = NULL, nodeHash = NULL
-          WHERE graphHash IN (%Q)',
+          WHERE graphHash IN (%LQ)',
         $symbol_table->getTableName(),
         $chunk);
     }

@@ -245,7 +245,7 @@ final class PhabricatorCalendarNotificationEngine
         $conn,
         'INSERT IGNORE INTO %T
           (eventPHID, targetPHID, utcInitialEpoch, didNotifyEpoch)
-          VALUES %Q',
+          VALUES %LQ',
         $table->getTableName(),
         $chunk);
     }

@@ -15,13 +15,15 @@ final class LiskChunkTestCase extends PhabricatorTestCase {
 
     $this->assertEqual(
       array(
-        'aa',
-        'bb',
-        'ccc',
-        'dd',
-        'e',
+        array('a'),
+        array('a'),
+        array('b'),
+        array('b'),
+        array('ccc'),
+        array('dd'),
+        array('e'),
       ),
-      PhabricatorLiskDAO::chunkSQL($fragments, '', 2));
+      PhabricatorLiskDAO::chunkSQL($fragments, 2));
 
 
     $fragments = array(
@@ -37,11 +39,11 @@ final class LiskChunkTestCase extends PhabricatorTestCase {
 
     $this->assertEqual(
       array(
-        'a, a, a',
-        'XX, a, a',
-        'a, a',
+        array('a', 'a', 'a'),
+        array('XX', 'a', 'a'),
+        array('a', 'a'),
       ),
-      PhabricatorLiskDAO::chunkSQL($fragments, ', ', 8));
+      PhabricatorLiskDAO::chunkSQL($fragments, 8));
 
 
     $fragments = array(
@@ -55,12 +57,12 @@ final class LiskChunkTestCase extends PhabricatorTestCase {
 
     $this->assertEqual(
       array(
-        'xxxxxxxxxx',
-        'yyyyyyyyyy',
-        'a, b, c',
-        'zzzzzzzzzz',
+        array('xxxxxxxxxx'),
+        array('yyyyyyyyyy'),
+        array('a', 'b', 'c'),
+        array('zzzzzzzzzz'),
       ),
-      PhabricatorLiskDAO::chunkSQL($fragments, ', ', 8));
+      PhabricatorLiskDAO::chunkSQL($fragments, 8));
   }
 
 }

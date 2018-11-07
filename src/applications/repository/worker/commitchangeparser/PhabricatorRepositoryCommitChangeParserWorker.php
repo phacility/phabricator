@@ -151,7 +151,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
         'INSERT INTO %T
           (repositoryID, pathID, commitID, targetPathID, targetCommitID,
             changeType, fileType, isDirect, commitSequence)
-          VALUES %Q',
+          VALUES %LQ',
         PhabricatorRepository::TABLE_PATHCHANGE,
         $chunk);
     }

@@ -34,10 +34,10 @@ foreach ($chunk_iter as $chunk) {
     continue;
   }
 
-  foreach (PhabricatorLiskDAO::chunkSQL($sql, ', ') as $sql_chunk) {
+  foreach (PhabricatorLiskDAO::chunkSQL($sql) as $sql_chunk) {
     queryfx(
       $conn_w,
-      'INSERT IGNORE INTO %T (id, phid) VALUES %Q
+      'INSERT IGNORE INTO %T (id, phid) VALUES %LQ
         ON DUPLICATE KEY UPDATE phid = VALUES(phid)',
       $diff_table->getTableName(),
       $sql_chunk);

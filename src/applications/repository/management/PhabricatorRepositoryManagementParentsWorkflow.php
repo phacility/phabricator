@@ -161,7 +161,7 @@ final class PhabricatorRepositoryManagementParentsWorkflow
     foreach (PhabricatorLiskDAO::chunkSQL($delete_sql) as $chunk) {
       queryfx(
         $conn_w,
-        'DELETE FROM %T WHERE childCommitID IN (%Q)',
+        'DELETE FROM %T WHERE childCommitID IN (%LQ)',
         PhabricatorRepository::TABLE_PARENTS,
         $chunk);
     }
@@ -169,7 +169,7 @@ final class PhabricatorRepositoryManagementParentsWorkflow
     foreach (PhabricatorLiskDAO::chunkSQL($insert_sql) as $chunk) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (childCommitID, parentCommitID) VALUES %Q',
+        'INSERT INTO %T (childCommitID, parentCommitID) VALUES %LQ',
         PhabricatorRepository::TABLE_PARENTS,
         $chunk);
     }
