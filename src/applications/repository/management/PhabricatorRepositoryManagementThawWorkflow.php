@@ -120,33 +120,71 @@ final class PhabricatorRepositoryManagementThawWorkflow
               $repository->getDisplayName()));
         }
 
-        $bindings = $service->getActiveBindings();
-        $bindings = mpull($bindings, null, 'getDevicePHID');
-        if (empty($bindings[$device->getPHID()])) {
-          throw new PhutilArgumentUsageException(
-            pht(
-              'Repository "%s" has no active binding to device "%s". Only '.
-              'actively bound devices can be promoted or demoted.',
-              $repository->getDisplayName(),
-              $device->getName()));
-        }
-
-        $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
-          $repository->getPHID());
-
-        $versions = mpull($versions, null, 'getDevicePHID');
-        $versions = array_select_keys($versions, array_keys($bindings));
-
-        if ($versions && $promote) {
-          throw new PhutilArgumentUsageException(
-            pht(
-              'Unable to promote "%s" for repository "%s": the leaders for '.
-              'this cluster are not ambiguous.',
-              $device->getName(),
-              $repository->getDisplayName()));
-        }
-
         if ($promote) {
+          // You can only promote active devices. (You may demote active or
+          // inactive devices.)
+          $bindings = $service->getActiveBindings();
+          $bindings = mpull($bindings, null, 'getDevicePHID');
+          if (empty($bindings[$device->getPHID()])) {
+            throw new PhutilArgumentUsageException(
+              pht(
+                'Repository "%s" has no active binding to device "%s". Only '.
+                'actively bound devices can be promoted.',
+                $repository->getDisplayName(),
+                $device->getName()));
+          }
+
+          $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
+            $repository->getPHID());
+          $versions = mpull($versions, null, 'getDevicePHID');
+
+          // Before we promote, make sure there are no outstanding versions on
+          // devices with inactive bindings. If there are, you need to demote
+          // these first.
+          $inactive = array();
+          foreach ($versions as $device_phid => $version) {
+            if (isset($bindings[$device_phid])) {
+              continue;
+            }
+            $inactive[$device_phid] = $version;
+          }
+
+          if ($inactive) {
+            $handles = $viewer->loadHandles(array_keys($inactive));
+
+            $handle_list = iterator_to_array($handles);
+            $handle_list = mpull($handle_list, 'getName');
+            $handle_list = implode(', ', $handle_list);
+
+            throw new PhutilArgumentUsageException(
+              pht(
+                'Repository "%s" has versions on inactive devices. Demote '.
+                '(or reactivate) these devices before promoting a new '.
+                'leader: %s.',
+                $repository->getDisplayName(),
+                $handle_list));
+          }
+
+          // Now, make sure there are no outstanding versions on devices with
+          // active bindings. These also need to be demoted (or promoting is a
+          // mistake or already happened).
+          $active = array_select_keys($versions, array_keys($bindings));
+          if ($active) {
+            $handles = $viewer->loadHandles(array_keys($active));
+
+            $handle_list = iterator_to_array($handles);
+            $handle_list = mpull($handle_list, 'getName');
+            $handle_list = implode(', ', $handle_list);
+
+            throw new PhutilArgumentUsageException(
+              pht(
+                'Unable to promote "%s" for repository "%s" because this '.
+                'cluster already has one or more unambiguous leaders: %s.',
+                $device->getName(),
+                $repository->getDisplayName(),
+                $handle_list));
+          }
+
           PhabricatorRepositoryWorkingCopyVersion::updateVersion(
             $repository->getPHID(),
             $device->getPHID(),
