@@ -59,26 +59,26 @@ final class PhabricatorAuthInviteQuery
     return $invites;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->emailAddresses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'emailAddress IN (%Ls)',
         $this->emailAddresses);
     }
@@ -90,21 +90,21 @@ final class PhabricatorAuthInviteQuery
       }
 
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'verificationHash IN (%Ls)',
         $hashes);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

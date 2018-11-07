@@ -55,26 +55,26 @@ final class PhabricatorChatLogQuery
     return $events;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    if ($this->maximumEpoch) {
+    if ($this->maximumEpoch !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'epoch <= %d',
         $this->maximumEpoch);
     }
 
-    if ($this->channelIDs) {
+    if ($this->channelIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'channelID IN (%Ld)',
         $this->channelIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

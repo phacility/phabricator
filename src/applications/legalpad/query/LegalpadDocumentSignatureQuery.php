@@ -86,61 +86,61 @@ final class LegalpadDocumentSignatureQuery
     return $signatures;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->documentPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'documentPHID IN (%Ls)',
         $this->documentPHIDs);
     }
 
     if ($this->signerPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'signerPHID IN (%Ls)',
         $this->signerPHIDs);
     }
 
     if ($this->documentVersions !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'documentVersion IN (%Ld)',
         $this->documentVersions);
     }
 
     if ($this->secretKeys !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'secretKey IN (%Ls)',
         $this->secretKeys);
     }
 
     if ($this->nameContains !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'signerName LIKE %~',
         $this->nameContains);
     }
 
     if ($this->emailContains !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'signerEmail LIKE %~',
         $this->emailContains);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

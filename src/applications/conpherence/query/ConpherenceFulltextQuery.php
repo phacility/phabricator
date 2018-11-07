@@ -38,19 +38,19 @@ final class ConpherenceFulltextQuery
     return $rows;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->threadPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'i.threadPHID IN (%Ls)',
         $this->threadPHIDs);
     }
 
     if ($this->previousTransactionPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'i.previousTransactionPHID IN (%Ls)',
         $this->previousTransactionPHIDs);
     }
@@ -61,12 +61,12 @@ final class ConpherenceFulltextQuery
       $compiled_query = $compiler->compileQuery($tokens);
 
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'MATCH(i.corpus) AGAINST (%s IN BOOLEAN MODE)',
         $compiled_query);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function buildOrderByClause(AphrontDatabaseConnection $conn_r) {

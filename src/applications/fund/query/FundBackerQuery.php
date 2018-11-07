@@ -68,47 +68,47 @@ final class FundBackerQuery
     return $backers;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->initiativePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'initiativePHID IN (%Ls)',
         $this->initiativePHIDs);
     }
 
     if ($this->backerPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'backerPHID IN (%Ls)',
         $this->backerPHIDs);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'status IN (%Ls)',
         $this->statuses);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

@@ -160,52 +160,52 @@ final class PhabricatorWorkerTriggerQuery
     return implode(' ', $joins);
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         't.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         't.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->versionMin !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         't.triggerVersion >= %d',
         $this->versionMin);
     }
 
     if ($this->versionMax !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         't.triggerVersion <= %d',
         $this->versionMax);
     }
 
     if ($this->nextEpochMin !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'e.nextEventEpoch >= %d',
         $this->nextEpochMin);
     }
 
     if ($this->nextEpochMax !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'e.nextEventEpoch <= %d',
         $this->nextEpochMax);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function buildOrderClause(AphrontDatabaseConnection $conn_r) {

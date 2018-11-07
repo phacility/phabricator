@@ -48,59 +48,59 @@ abstract class PhabricatorWorkerTaskQuery
     return $this;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id in (%Ld)',
         $this->ids);
     }
 
     if ($this->objectPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'objectPHID IN (%Ls)',
         $this->objectPHIDs);
     }
 
     if ($this->dateModifiedSince !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'dateModified > %d',
         $this->dateModifiedSince);
     }
 
     if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'dateCreated < %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->classNames !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'taskClass IN (%Ls)',
         $this->classNames);
     }
 
     if ($this->minFailureCount !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'failureCount >= %d',
         $this->minFailureCount);
     }
 
     if ($this->maxFailureCount !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'failureCount <= %d',
         $this->maxFailureCount);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   protected function buildOrderClause(AphrontDatabaseConnection $conn_r) {

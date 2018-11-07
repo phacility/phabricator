@@ -290,19 +290,19 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
   /**
    * @task internal
    */
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->sourcePHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'edge.src IN (%Ls)',
         $this->sourcePHIDs);
     }
 
     if ($this->edgeTypes) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'edge.type IN (%Ls)',
         $this->edgeTypes);
     }
@@ -310,12 +310,12 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
     if ($this->destPHIDs) {
       // potentially complain if $this->edgeType was not set
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'edge.dst IN (%Ls)',
         $this->destPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
 

@@ -209,39 +209,47 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   }
 
   protected function buildCustomWhereClause(
-    AphrontDatabaseConnection $conn_w,
+    AphrontDatabaseConnection $conn,
     $phase) {
 
     $where = array();
 
     switch ($phase) {
       case self::PHASE_LEASED:
-        $where[] = 'leaseOwner IS NOT NULL';
-        $where[] = 'leaseExpires >= UNIX_TIMESTAMP()';
+        $where[] = qsprintf(
+          $conn,
+          'leaseOwner IS NOT NULL');
+        $where[] = qsprintf(
+          $conn,
+          'leaseExpires >= UNIX_TIMESTAMP()');
         break;
       case self::PHASE_UNLEASED:
-        $where[] = 'leaseOwner IS NULL';
+        $where[] = qsprintf(
+          $conn,
+          'leaseOwner IS NULL');
         break;
       case self::PHASE_EXPIRED:
-        $where[] = 'leaseExpires < UNIX_TIMESTAMP()';
+        $where[] = qsprintf(
+          $conn,
+          'leaseExpires < UNIX_TIMESTAMP()');
         break;
       default:
         throw new Exception(pht("Unknown phase '%s'!", $phase));
     }
 
     if ($this->ids !== null) {
-      $where[] = qsprintf($conn_w, 'id IN (%Ld)', $this->ids);
+      $where[] = qsprintf($conn, 'id IN (%Ld)', $this->ids);
     }
 
     if ($this->objectPHIDs !== null) {
-      $where[] = qsprintf($conn_w, 'objectPHID IN (%Ls)', $this->objectPHIDs);
+      $where[] = qsprintf($conn, 'objectPHID IN (%Ls)', $this->objectPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function buildUpdateWhereClause(
-    AphrontDatabaseConnection $conn_w,
+    AphrontDatabaseConnection $conn,
     $phase,
     array $rows) {
 
@@ -257,25 +265,25 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
             'Trying to lease tasks selected in the leased phase! This is '.
             'intended to be impossible.'));
       case self::PHASE_UNLEASED:
-        $where[] = qsprintf($conn_w, 'leaseOwner IS NULL');
-        $where[] = qsprintf($conn_w, 'id IN (%Ld)', ipull($rows, 'id'));
+        $where[] = qsprintf($conn, 'leaseOwner IS NULL');
+        $where[] = qsprintf($conn, 'id IN (%Ld)', ipull($rows, 'id'));
         break;
       case self::PHASE_EXPIRED:
         $in = array();
         foreach ($rows as $row) {
           $in[] = qsprintf(
-            $conn_w,
+            $conn,
             '(id = %d AND leaseOwner = %s)',
             $row['id'],
             $row['leaseOwner']);
         }
-        $where[] = qsprintf($conn_w, '(%Q)', implode(' OR ', $in));
+        $where[] = qsprintf($conn, '%LO', $in);
         break;
       default:
         throw new Exception(pht('Unknown phase "%s"!', $phase));
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function buildOrderClause(AphrontDatabaseConnection $conn_w, $phase) {

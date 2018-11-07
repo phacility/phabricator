@@ -175,68 +175,68 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $rules;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->authorPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->ruleTypes) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.ruleType IN (%Ls)',
         $this->ruleTypes);
     }
 
     if ($this->contentTypes) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.contentType IN (%Ls)',
         $this->contentTypes);
     }
 
     if ($this->disabled !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.isDisabled = %d',
         (int)$this->disabled);
     }
 
     if ($this->datasourceQuery) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.name LIKE %>',
         $this->datasourceQuery);
     }
 
     if ($this->triggerObjectPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'rule.triggerObjectPHID IN (%Ls)',
         $this->triggerObjectPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function validateRuleAuthors(array $rules) {

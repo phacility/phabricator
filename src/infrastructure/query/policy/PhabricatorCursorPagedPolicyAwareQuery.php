@@ -195,15 +195,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
   }
 
-  final protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {
+  final protected function buildLimitClause(AphrontDatabaseConnection $conn) {
     if ($this->shouldLimitResults()) {
       $limit = $this->getRawResultLimit();
       if ($limit) {
-        return qsprintf($conn_r, 'LIMIT %d', $limit);
+        return qsprintf($conn, 'LIMIT %d', $limit);
       }
     }
 
-    return '';
+    return qsprintf($conn, '');
   }
 
   protected function shouldLimitResults() {
@@ -306,7 +306,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $joins = $this->buildJoinClauseParts($conn);
-    return $this->formatJoinClause($joins);
+    return $this->formatJoinClause($conn, $joins);
   }
 
 
@@ -328,7 +328,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = $this->buildWhereClauseParts($conn);
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
 
@@ -352,7 +352,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildHavingClause(AphrontDatabaseConnection $conn) {
     $having = $this->buildHavingClauseParts($conn);
-    return $this->formatHavingClause($having);
+    return $this->formatHavingClause($conn, $having);
   }
 
 
@@ -371,13 +371,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildGroupClause(AphrontDatabaseConnection $conn) {
     if (!$this->shouldGroupQueryResultRows()) {
-      return '';
+      return qsprintf($conn, '');
     }
 
     return qsprintf(
       $conn,
       'GROUP BY %Q',
-      $this->getApplicationSearchObjectPHIDColumn());
+      $this->getApplicationSearchObjectPHIDColumn($conn));
   }
 
 
@@ -1134,7 +1134,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    return qsprintf($conn, 'ORDER BY %Q', implode(', ', $sql));
+    return qsprintf($conn, 'ORDER BY %LQ', $sql);
   }
 
 
@@ -1244,17 +1244,18 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * See @{method:getPrimaryTableAlias} if the column needs to be qualified with
    * a table alias.
    *
-   * @return string Column name.
+   * @param AphrontDatabaseConnection Connection executing queries.
+   * @return PhutilQueryString Column name.
    * @task appsearch
    */
-  protected function getApplicationSearchObjectPHIDColumn() {
-    if ($this->getPrimaryTableAlias()) {
-      $prefix = $this->getPrimaryTableAlias().'.';
-    } else {
-      $prefix = '';
-    }
+  protected function getApplicationSearchObjectPHIDColumn(
+    AphrontDatabaseConnection $conn) {
 
-    return $prefix.'phid';
+    if ($this->getPrimaryTableAlias()) {
+      return qsprintf($conn, '%T.phid', $this->getPrimaryTableAlias());
+    } else {
+      return qsprintf($conn, 'phid');
+    }
   }
 
 
@@ -1308,15 +1309,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task appsearch
    */
   protected function buildApplicationSearchGroupClause(
-    AphrontDatabaseConnection $conn_r) {
+    AphrontDatabaseConnection $conn) {
 
     if ($this->getApplicationSearchMayJoinMultipleRows()) {
       return qsprintf(
-        $conn_r,
+        $conn,
         'GROUP BY %Q',
         $this->getApplicationSearchObjectPHIDColumn());
     } else {
-      return '';
+      return qsprintf($conn, '');
     }
   }
 
@@ -1410,7 +1411,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+    $phid_column = $this->getApplicationSearchObjectPHIDColumn($conn);
     $orderable = $this->getOrderableColumns();
 
     $vector = $this->getOrderVector();
@@ -2373,7 +2374,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   public function buildEdgeLogicJoinClause(AphrontDatabaseConnection $conn) {
     $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
-    $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+    $phid_column = $this->getApplicationSearchObjectPHIDColumn($conn);
 
     $joins = array();
     foreach ($this->edgeLogicConstraints as $type => $constraints) {
@@ -2531,9 +2532,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
 
       if ($full && $null) {
-        $full = $this->formatWhereSubclause($full);
-        $null = $this->formatWhereSubclause($null);
-        $where[] = qsprintf($conn, '(%Q OR %Q)', $full, $null);
+        $where[] = qsprintf($conn, '(%LA OR %LA)', $full, $null);
       } else if ($full) {
         foreach ($full as $condition) {
           $where[] = $condition;

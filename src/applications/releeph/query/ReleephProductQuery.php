@@ -83,40 +83,40 @@ final class ReleephProductQuery
     return $projects;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->active !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'isActive = %d',
         (int)$this->active);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ls)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->repositoryPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getOrderableColumns() {

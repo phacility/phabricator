@@ -517,13 +517,14 @@ abstract class LiskDAO extends Phobject
 
 
   protected function loadRawDataWhere($pattern /* , $args... */) {
-    $connection = $this->establishConnection('r');
+    $conn = $this->establishConnection('r');
 
-    $lock_clause = '';
-    if ($connection->isReadLocking()) {
-      $lock_clause = 'FOR UPDATE';
-    } else if ($connection->isWriteLocking()) {
-      $lock_clause = 'LOCK IN SHARE MODE';
+    if ($conn->isReadLocking()) {
+      $lock_clause = qsprintf($conn, 'FOR UPDATE');
+    } else if ($conn->isWriteLocking()) {
+      $lock_clause = qsprintf($conn, 'LOCK IN SHARE MODE');
+    } else {
+      $lock_clause = qsprintf($conn, '');
     }
 
     $args = func_get_args();
@@ -534,9 +535,7 @@ abstract class LiskDAO extends Phobject
     array_push($args, $lock_clause);
     array_unshift($args, $pattern);
 
-    return call_user_func_array(
-      array($connection, 'queryData'),
-      $args);
+    return call_user_func_array(array($conn, 'queryData'), $args);
   }
 
 

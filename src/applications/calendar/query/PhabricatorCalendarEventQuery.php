@@ -509,10 +509,6 @@ final class PhabricatorCalendarEventQuery
     return parent::shouldGroupQueryResultRows();
   }
 
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'event.phid';
-  }
-
   public function getQueryApplicationClass() {
     return 'PhabricatorCalendarApplication';
   }

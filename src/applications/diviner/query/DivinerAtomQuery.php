@@ -299,40 +299,40 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $atoms;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->bookPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'bookPHID IN (%Ls)',
         $this->bookPHIDs);
     }
 
     if ($this->types) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'type IN (%Ls)',
         $this->types);
     }
 
     if ($this->names) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name IN (%Ls)',
         $this->names);
     }
@@ -347,7 +347,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       }
 
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'titleSlugHash in (%Ls)',
         $hashes);
     }
@@ -366,46 +366,46 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
       if ($contexts && $with_null) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'context IN (%Ls) OR context IS NULL',
           $contexts);
       } else if ($contexts) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'context IN (%Ls)',
           $contexts);
       } else if ($with_null) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'context IS NULL');
       }
     }
 
     if ($this->indexes) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'atomIndex IN (%Ld)',
         $this->indexes);
     }
 
     if ($this->isDocumentable !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'isDocumentable = %d',
         (int)$this->isDocumentable);
     }
 
     if ($this->isGhost !== null) {
       if ($this->isGhost) {
-        $where[] = qsprintf($conn_r, 'graphHash IS NULL');
+        $where[] = qsprintf($conn, 'graphHash IS NULL');
       } else {
-        $where[] = qsprintf($conn_r, 'graphHash IS NOT NULL');
+        $where[] = qsprintf($conn, 'graphHash IS NOT NULL');
       }
     }
 
     if ($this->nodeHashes) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'nodeHash IN (%Ls)',
         $this->nodeHashes);
     }
@@ -415,21 +415,21 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       // the column has binary collation. Eventually, this should move into
       // fulltext.
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'CONVERT(name USING utf8) LIKE %~',
         $this->nameContains);
     }
 
     if ($this->repositoryPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   /**

@@ -86,26 +86,26 @@ final class PhabricatorFileChunkQuery
     return $chunks;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->chunkHandles !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'chunkHandle IN (%Ls)',
         $this->chunkHandles);
     }
 
     if ($this->rangeStart !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'byteEnd > %d',
         $this->rangeStart);
     }
 
     if ($this->rangeEnd !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'byteStart < %d',
         $this->rangeEnd);
     }
@@ -113,18 +113,18 @@ final class PhabricatorFileChunkQuery
     if ($this->isComplete !== null) {
       if ($this->isComplete) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'dataFilePHID IS NOT NULL');
       } else {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'dataFilePHID IS NULL');
       }
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

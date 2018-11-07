@@ -27,15 +27,15 @@ abstract class PhabricatorOffsetPagedQuery extends PhabricatorQuery {
     return $this->limit;
   }
 
-  protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildLimitClause(AphrontDatabaseConnection $conn) {
     if ($this->limit && $this->offset) {
-      return qsprintf($conn_r, 'LIMIT %d, %d', $this->offset, $this->limit);
+      return qsprintf($conn, 'LIMIT %d, %d', $this->offset, $this->limit);
     } else if ($this->limit) {
-      return qsprintf($conn_r, 'LIMIT %d', $this->limit);
+      return qsprintf($conn, 'LIMIT %d', $this->limit);
     } else if ($this->offset) {
-      return qsprintf($conn_r, 'LIMIT %d, %d', $this->offset, PHP_INT_MAX);
+      return qsprintf($conn, 'LIMIT %d, %d', $this->offset, PHP_INT_MAX);
     } else {
-      return '';
+      return qsprintf($conn, '');
     }
   }
 

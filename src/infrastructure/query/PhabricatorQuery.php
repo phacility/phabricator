@@ -15,27 +15,18 @@ abstract class PhabricatorQuery extends Phobject {
   /**
    * @task format
    */
-  protected function formatWhereClause(array $parts) {
+  protected function formatWhereClause(
+    AphrontDatabaseConnection $conn,
+    array $parts) {
+
     $parts = $this->flattenSubclause($parts);
     if (!$parts) {
-      return '';
+      return qsprintf($conn, '');
     }
 
-    return 'WHERE '.$this->formatWhereSubclause($parts);
+    return qsprintf($conn, 'WHERE %LA', $parts);
   }
 
-
-  /**
-   * @task format
-   */
-  protected function formatWhereSubclause(array $parts) {
-    $parts = $this->flattenSubclause($parts);
-    if (!$parts) {
-      return null;
-    }
-
-    return '('.implode(') AND (', $parts).')';
-  }
 
 
   /**
@@ -57,39 +48,32 @@ abstract class PhabricatorQuery extends Phobject {
   /**
    * @task format
    */
-  protected function formatJoinClause(array $parts) {
+  protected function formatJoinClause(
+    AphrontDatabaseConnection $conn,
+    array $parts) {
+
     $parts = $this->flattenSubclause($parts);
     if (!$parts) {
-      return '';
+      return qsprintf($conn, '');
     }
 
-    return implode(' ', $parts);
+    return qsprintf($conn, '%LJ', $parts);
   }
 
 
   /**
    * @task format
    */
-  protected function formatHavingClause(array $parts) {
+  protected function formatHavingClause(
+    AphrontDatabaseConnection $conn,
+    array $parts) {
+
     $parts = $this->flattenSubclause($parts);
     if (!$parts) {
-      return '';
+      return qsprintf($conn, '');
     }
 
-    return 'HAVING '.$this->formatHavingSubclause($parts);
-  }
-
-
-  /**
-   * @task format
-   */
-  protected function formatHavingSubclause(array $parts) {
-    $parts = $this->flattenSubclause($parts);
-    if (!$parts) {
-      return null;
-    }
-
-    return '('.implode(') AND (', $parts).')';
+    return qsprintf($conn, 'HAVING %LA', $parts);
   }
 
 

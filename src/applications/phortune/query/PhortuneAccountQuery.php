@@ -99,7 +99,7 @@ final class PhortuneAccountQuery
         $this->memberPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   protected function buildJoinClause(AphrontDatabaseConnection $conn) {

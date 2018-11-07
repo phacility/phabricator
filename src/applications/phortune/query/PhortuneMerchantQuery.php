@@ -114,7 +114,7 @@ final class PhortuneMerchantQuery
 
     $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   protected function buildJoinClause(AphrontDatabaseConnection $conn) {

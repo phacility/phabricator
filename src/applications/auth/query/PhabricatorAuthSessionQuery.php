@@ -65,44 +65,44 @@ final class PhabricatorAuthSessionQuery
     return $sessions;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->identityPHIDs) {
+    if ($this->identityPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'userPHID IN (%Ls)',
         $this->identityPHIDs);
     }
 
-    if ($this->sessionKeys) {
+    if ($this->sessionKeys !== null) {
       $hashes = array();
       foreach ($this->sessionKeys as $session_key) {
         $hashes[] = PhabricatorHash::weakDigest($session_key);
       }
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'sessionKey IN (%Ls)',
         $hashes);
     }
 
-    if ($this->sessionTypes) {
+    if ($this->sessionTypes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'type IN (%Ls)',
         $this->sessionTypes);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {
