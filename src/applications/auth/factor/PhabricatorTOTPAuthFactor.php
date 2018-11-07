@@ -185,7 +185,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
 
   public static function generateNewTOTPKey() {
-    return strtoupper(Filesystem::readRandomCharacters(16));
+    return strtoupper(Filesystem::readRandomCharacters(32));
   }
 
   public static function verifyTOTPCode(
