@@ -453,7 +453,7 @@ final class DifferentialRevisionQuery
 
   private function loadData() {
     $table = $this->newResultObject();
-    $conn_r = $table->establishConnection('r');
+    $conn = $table->establishConnection('r');
 
     $selects = array();
 
@@ -469,13 +469,13 @@ final class DifferentialRevisionQuery
         $this->authors = array_merge($basic_authors, $this->responsibles);
 
         $this->reviewers = $basic_reviewers;
-        $selects[] = $this->buildSelectStatement($conn_r);
+        $selects[] = $this->buildSelectStatement($conn);
 
         // Build the query where the responsible users are reviewers, or
         // projects they are members of are reviewers.
         $this->authors = $basic_authors;
         $this->reviewers = array_merge($basic_reviewers, $this->responsibles);
-        $selects[] = $this->buildSelectStatement($conn_r);
+        $selects[] = $this->buildSelectStatement($conn);
 
         // Put everything back like it was.
         $this->authors = $basic_authors;
@@ -486,21 +486,35 @@ final class DifferentialRevisionQuery
         throw $ex;
       }
     } else {
-      $selects[] = $this->buildSelectStatement($conn_r);
+      $selects[] = $this->buildSelectStatement($conn);
     }
 
     if (count($selects) > 1) {
+      $unions = null;
+      foreach ($selects as $select) {
+        if (!$unions) {
+          $unions = $select;
+          continue;
+        }
+
+        $unions = qsprintf(
+          $conn,
+          '%Q UNION DISTINCT %Q',
+          $unions,
+          $select);
+      }
+
       $query = qsprintf(
-        $conn_r,
+        $conn,
         '%Q %Q %Q',
-        implode(' UNION DISTINCT ', $selects),
-        $this->buildOrderClause($conn_r, true),
-        $this->buildLimitClause($conn_r));
+        $unions,
+        $this->buildOrderClause($conn, true),
+        $this->buildLimitClause($conn));
     } else {
       $query = head($selects);
     }
 
-    return queryfx_all($conn_r, '%Q', $query);
+    return queryfx_all($conn, '%Q', $query);
   }
 
   private function buildSelectStatement(AphrontDatabaseConnection $conn_r) {

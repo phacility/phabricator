@@ -322,11 +322,11 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
   /**
    * @task internal
    */
-  private function buildOrderClause($conn_r) {
+  private function buildOrderClause(AphrontDatabaseConnection $conn) {
     if ($this->order == self::ORDER_NEWEST_FIRST) {
-      return 'ORDER BY edge.dateCreated DESC, edge.seq DESC';
+      return qsprintf($conn, 'ORDER BY edge.dateCreated DESC, edge.seq DESC');
     } else {
-      return 'ORDER BY edge.dateCreated ASC, edge.seq ASC';
+      return qsprintf($conn, 'ORDER BY edge.dateCreated ASC, edge.seq ASC');
     }
   }
 

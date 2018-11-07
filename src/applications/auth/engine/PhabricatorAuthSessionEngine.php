@@ -809,15 +809,15 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     if ($cache_selects) {
-      $cache_selects = ', '.implode(', ', $cache_selects);
+      $cache_selects = qsprintf($conn, ', %LQ', $cache_selects);
     } else {
-      $cache_selects = '';
+      $cache_selects = qsprintf($conn, '');
     }
 
     if ($cache_joins) {
-      $cache_joins = implode(' ', $cache_joins);
+      $cache_joins = qsprintf($conn, '%LJ', $cache_joins);
     } else {
-      $cache_joins = '';
+      $cache_joins = qsprintf($conn, '');
     }
 
     return array($cache_selects, $cache_joins, $cache_map, $types_map);

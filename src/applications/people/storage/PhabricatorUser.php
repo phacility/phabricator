@@ -663,9 +663,9 @@ final class PhabricatorUser
     if ($sql) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (userID, token) VALUES %Q',
+        'INSERT INTO %T (userID, token) VALUES %LQ',
         $table,
-        implode(', ', $sql));
+        $sql);
     }
   }
 

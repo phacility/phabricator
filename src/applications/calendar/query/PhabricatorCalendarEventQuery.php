@@ -513,7 +513,6 @@ final class PhabricatorCalendarEventQuery
     return 'PhabricatorCalendarApplication';
   }
 
-
   protected function willFilterPage(array $events) {
     $instance_of_event_phids = array();
     $recurring_events = array();

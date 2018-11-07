@@ -237,7 +237,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $where = $this->buildWhereClause($conn);
 
-    $group_column = '';
+    $group_column = qsprintf($conn, '');
     switch ($this->groupBy) {
       case self::GROUP_PROJECT:
         $group_column = qsprintf(
@@ -601,10 +601,10 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     if (!$subclause) {
-      return '';
+      return qsprintf($conn, '');
     }
 
-    return '('.implode(') OR (', $subclause).')';
+    return qsprintf($conn, '%LO', $subclause);
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
@@ -736,7 +736,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $joins;
   }
 
-  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn) {
     $joined_multiple_rows =
       ($this->hasOpenParents !== null) ||
       ($this->hasOpenSubtasks !== null) ||
@@ -750,13 +750,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     // task IDs.
     if ($joined_multiple_rows) {
       if ($joined_project_name) {
-        return 'GROUP BY task.phid, projectGroup.dst';
+        return qsprintf($conn, 'GROUP BY task.phid, projectGroup.dst');
       } else {
-        return 'GROUP BY task.phid';
+        return qsprintf($conn, 'GROUP BY task.phid');
       }
-    } else {
-      return '';
     }
+
+    return qsprintf($conn, '');
   }
 
 

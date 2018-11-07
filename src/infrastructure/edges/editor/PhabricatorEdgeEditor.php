@@ -275,13 +275,13 @@ final class PhabricatorEdgeEditor extends Phobject {
       $conn_w->openTransaction();
       $this->openTransactions[] = $conn_w;
 
-      foreach (array_chunk($sql, 256) as $chunk) {
+      foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
         queryfx(
           $conn_w,
           'INSERT INTO %T (src, type, dst, dateCreated, seq, dataID)
-            VALUES %Q ON DUPLICATE KEY UPDATE dataID = VALUES(dataID)',
+            VALUES %LQ ON DUPLICATE KEY UPDATE dataID = VALUES(dataID)',
           PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-          implode(', ', $chunk));
+          $chunk);
       }
     }
   }
@@ -320,9 +320,9 @@ final class PhabricatorEdgeEditor extends Phobject {
       foreach (array_chunk($sql, 256) as $chunk) {
         queryfx(
           $conn_w,
-          'DELETE FROM %T WHERE (%Q)',
+          'DELETE FROM %T WHERE %LO',
           PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-          implode(' OR ', $chunk));
+          $chunk);
       }
     }
   }
