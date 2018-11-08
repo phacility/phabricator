@@ -410,8 +410,8 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
     $log = $this->logger;
     if ($log) {
-      $log->writeClusterEngineLogProperty('readWait', $read_wait);
       $log->writeClusterEngineLogProperty('writeWait', $write_wait);
+      $log->writeClusterEngineLogProperty('readWait', $read_wait);
     }
   }
 
