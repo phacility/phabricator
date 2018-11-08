@@ -65,7 +65,7 @@ final class PhabricatorRepositorySyncEvent
   }
 
   public function setProperty($key, $value) {
-    $this->properites[$key] = $value;
+    $this->properties[$key] = $value;
     return $this;
   }
 

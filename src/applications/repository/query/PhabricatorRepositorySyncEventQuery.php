@@ -31,7 +31,7 @@ final class PhabricatorRepositorySyncEventQuery
   }
 
   public function newResultObject() {
-    return new PhabricatorRepositoryPullEvent();
+    return new PhabricatorRepositorySyncEvent();
   }
 
   protected function loadPage() {
