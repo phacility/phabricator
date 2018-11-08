@@ -1113,14 +1113,13 @@ final class DiffusionCommitHookEngine extends Phobject {
     $viewer = $this->getViewer();
 
     $hook_start = $this->getStartTime();
-    $hook_end = microtime(true);
 
     $event = PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->setRemoteAddress($this->getRemoteAddress())
       ->setRemoteProtocol($this->getRemoteProtocol())
       ->setEpoch(PhabricatorTime::getNow())
-      ->setHookWait((int)(1000000 * ($hook_end - $hook_start)));
+      ->setHookWait(phutil_microseconds_since($hook_start));
 
     $identifier = $this->getRequestIdentifier();
     if (strlen($identifier)) {

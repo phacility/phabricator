@@ -307,7 +307,7 @@ try {
 $ssh_log->setData(
   array(
     'c' => $err,
-    'T' => (int)(1000000 * (microtime(true) - $ssh_start_time)),
+    'T' => phutil_microseconds_since($ssh_start_time),
   ));
 
 exit($err);

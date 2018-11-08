@@ -109,15 +109,13 @@ final class PhabricatorConduitAPIController
       $error_info = $ex->getMessage();
     }
 
-    $time_end = microtime(true);
-
     $log
       ->setCallerPHID(
         isset($conduit_user)
           ? $conduit_user->getPHID()
           : null)
       ->setError((string)$error_code)
-      ->setDuration(1000000 * ($time_end - $time_start));
+      ->setDuration(phutil_microseconds_since($time_start));
 
     if (!PhabricatorEnv::isReadOnly()) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();

@@ -772,8 +772,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     try {
       $future->resolvex();
     } catch (Exception $ex) {
-      $sync_end = microtime(true);
-      $log->setSyncWait((int)(1000000 * ($sync_end - $sync_start)));
+      $log->setSyncWait(phutil_microseconds_since($sync_start));
 
       if ($ex instanceof CommandException) {
         if ($future->getWasKilledByTimeout()) {
@@ -806,10 +805,8 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       throw $ex;
     }
 
-    $sync_end = microtime(true);
-
     $log
-      ->setSyncWait((int)(1000000 * ($sync_end - $sync_start)))
+      ->setSyncWait(phutil_microseconds_since($sync_start))
       ->setResultCode(0)
       ->setResultType(PhabricatorRepositorySyncEvent::RESULT_SYNC)
       ->save();
