@@ -73,15 +73,13 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
     // if the response is large and the receiver is slow to read it.
     $this->getIOChannel()->flush();
 
-    $time_end = microtime(true);
-
     $connection_id = idx($metadata, 'connectionID');
     $log = id(new PhabricatorConduitMethodCallLog())
       ->setCallerPHID($this->getSSHUser()->getPHID())
       ->setConnectionID($connection_id)
       ->setMethod($method)
       ->setError((string)$error_code)
-      ->setDuration(1000000 * ($time_end - $time_start))
+      ->setDuration(phutil_microseconds_since($time_start))
       ->save();
   }
 }

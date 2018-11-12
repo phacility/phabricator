@@ -414,28 +414,24 @@ present on the leaders but not present on the followers by examining the
 push logs.
 
 If you are comfortable discarding these changes, you can instruct Phabricator
-that it can forget about the leaders in two ways: disable the service bindings
-to all of the leader devices so they are no longer part of the cluster, or use
-`bin/repository thaw` to `--demote` the leaders explicitly.
+that it can forget about the leaders by doing this:
 
-If you do this, **you will lose data**. Either action will discard any changes
-on the affected leaders which have not replicated to other devices in the
-cluster.
+  - Disable the service bindings to all of the leader devices so they are no
+    longer part of the cluster.
+  - Then, use `bin/repository thaw` to `--demote` the leaders explicitly.
 
-To remove a device from the cluster, disable all of the bindings to it
-in Almanac, using the web UI.
-
-{icon exclamation-triangle, color="red"} Any data which is only present on
-the disabled device will be lost.
-
-To demote a device without removing it from the cluster, run this command:
+To demote a device, run this command:
 
 ```
 phabricator/ $ ./bin/repository thaw rXYZ --demote repo002.corp.net
 ```
 
 {icon exclamation-triangle, color="red"} Any data which is only present on
-**this** device will be lost.
+the demoted device will be lost.
+
+If you do this, **you will lose unreplicated data**. You will discard any
+changes on the affected leaders which have not replicated to other devices
+in the cluster.
 
 
 Ambiguous Leaders

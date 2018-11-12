@@ -31,6 +31,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $mercurialHook;
   private $mercurialCommits = array();
   private $gitCommits = array();
+  private $startTime;
 
   private $heraldViewerProjects;
   private $rejectCode = PhabricatorRepositoryPushLog::REJECT_BROKEN;
@@ -68,6 +69,15 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function getRequestIdentifier() {
     return $this->requestIdentifier;
+  }
+
+  public function setStartTime($start_time) {
+    $this->startTime = $start_time;
+    return $this;
+  }
+
+  public function getStartTime() {
+    return $this->startTime;
   }
 
   public function setSubversionTransactionInfo($transaction, $repository) {
@@ -1102,11 +1112,14 @@ final class DiffusionCommitHookEngine extends Phobject {
   private function newPushEvent() {
     $viewer = $this->getViewer();
 
+    $hook_start = $this->getStartTime();
+
     $event = PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->setRemoteAddress($this->getRemoteAddress())
       ->setRemoteProtocol($this->getRemoteProtocol())
-      ->setEpoch(PhabricatorTime::getNow());
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setHookWait(phutil_microseconds_since($hook_start));
 
     $identifier = $this->getRequestIdentifier();
     if (strlen($identifier)) {

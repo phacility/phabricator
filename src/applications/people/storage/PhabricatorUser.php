@@ -1665,5 +1665,23 @@ final class PhabricatorUser
     return new PhutilOpaqueEnvelope($digest);
   }
 
+  public function newPasswordBlocklist(
+    PhabricatorUser $viewer,
+    PhabricatorAuthPasswordEngine $engine) {
+
+    $list = array();
+    $list[] = $this->getUsername();
+    $list[] = $this->getRealName();
+
+    $emails = id(new PhabricatorUserEmail())->loadAllWhere(
+      'userPHID = %s',
+      $this->getPHID());
+    foreach ($emails as $email) {
+      $list[] = $email->getAddress();
+    }
+
+    return $list;
+  }
+
 
 }

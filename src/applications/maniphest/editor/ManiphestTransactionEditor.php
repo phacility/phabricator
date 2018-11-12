@@ -290,7 +290,7 @@ final class ManiphestTransactionEditor
           $copy->setOwnerPHID($xaction->getNewValue());
           break;
         default:
-          continue;
+          break;
       }
     }
 

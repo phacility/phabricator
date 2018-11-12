@@ -7,6 +7,10 @@ final class PhabricatorSlowvoteVoteController
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
+    if (!$request->isFormPost()) {
+      return id(new Aphront404Response());
+    }
+
     $poll = id(new PhabricatorSlowvoteQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
@@ -16,69 +20,36 @@ final class PhabricatorSlowvoteVoteController
     if (!$poll) {
       return new Aphront404Response();
     }
+
     if ($poll->getIsClosed()) {
       return new Aphront400Response();
     }
 
     $options = $poll->getOptions();
-    $viewer_choices = $poll->getViewerChoices($viewer);
+    $options = mpull($options, null, 'getID');
 
-    $old_votes = mpull($viewer_choices, null, 'getOptionID');
-
-    if ($request->isAjax()) {
-      $vote = $request->getInt('vote');
-      $votes = array_keys($old_votes);
-      $votes = array_fuse($votes);
-
-      if ($poll->getMethod() == PhabricatorSlowvotePoll::METHOD_PLURALITY) {
-        if (idx($votes, $vote, false)) {
-          $votes = array();
-        } else {
-          $votes = array($vote);
-        }
-      } else {
-        if (idx($votes, $vote, false)) {
-          unset($votes[$vote]);
-        } else {
-          $votes[$vote] = $vote;
-        }
-      }
-
-      $this->updateVotes($viewer, $poll, $old_votes, $votes);
-
-      $updated_choices = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
-        'pollID = %d AND authorPHID = %s',
-        $poll->getID(),
-        $viewer->getPHID());
-
-      $embed = id(new SlowvoteEmbedView())
-        ->setPoll($poll)
-        ->setOptions($options)
-        ->setViewerChoices($updated_choices);
-
-      return id(new AphrontAjaxResponse())
-        ->setContent(array(
-          'pollID' => $poll->getID(),
-          'contentHTML' => $embed->render(),
-        ));
-    }
-
-    if (!$request->isFormPost()) {
-      return id(new Aphront404Response());
-    }
+    $old_votes = $poll->getViewerChoices($viewer);
+    $old_votes = mpull($old_votes, null, 'getOptionID');
 
     $votes = $request->getArr('vote');
     $votes = array_fuse($votes);
 
-    $this->updateVotes($viewer, $poll, $old_votes, $votes);
+    $method = $poll->getMethod();
+    $is_plurality = ($method == PhabricatorSlowvotePoll::METHOD_PLURALITY);
 
-    return id(new AphrontRedirectResponse())->setURI('/V'.$poll->getID());
-  }
+    if ($is_plurality && count($votes) > 1) {
+      throw new Exception(
+        pht('In this poll, you may only vote for one option.'));
+    }
 
-  private function updateVotes($viewer, $poll, $old_votes, $votes) {
-    if (!empty($votes) && count($votes) > 1 &&
-        $poll->getMethod() == PhabricatorSlowvotePoll::METHOD_PLURALITY) {
-      return id(new Aphront400Response());
+    foreach ($votes as $vote) {
+      if (!isset($options[$vote])) {
+        throw new Exception(
+          pht(
+            'Option ("%s") is not a valid poll option. You may only '.
+            'vote for valid options.',
+            $vote));
+      }
     }
 
     foreach ($old_votes as $old_vote) {
@@ -98,6 +69,9 @@ final class PhabricatorSlowvoteVoteController
         ->setOptionID($vote)
         ->save();
     }
+
+    return id(new AphrontRedirectResponse())
+      ->setURI($poll->getURI());
   }
 
 }

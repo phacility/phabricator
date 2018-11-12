@@ -133,7 +133,7 @@ tricky because of shell escaping. The easiest way to do it is to use the
 Then set the value like this:
 
 ```
-phabricator/ $ ./bin/config set --stdin < mailers.json
+phabricator/ $ ./bin/config set --stdin cluster.mailers < mailers.json
 ```
 
 For alternatives and more information on configuration, see

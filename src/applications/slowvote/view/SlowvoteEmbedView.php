@@ -39,12 +39,6 @@ final class SlowvoteEmbedView extends AphrontView {
     }
 
     require_celerity_resource('phabricator-slowvote-css');
-    require_celerity_resource('javelin-behavior-slowvote-embed');
-
-    $config = array(
-      'pollID' => $poll->getID(),
-    );
-    Javelin::initBehavior('slowvote-embed', $config);
 
     $user_choices = $poll->getViewerChoices($this->getUser());
     $user_choices = mpull($user_choices, 'getOptionID', 'getOptionID');
