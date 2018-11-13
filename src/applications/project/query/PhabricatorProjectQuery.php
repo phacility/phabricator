@@ -557,7 +557,7 @@ final class PhabricatorProjectQuery
           $ancestor_path['projectDepth']);
       }
 
-      $where[] = '('.implode(' OR ', $sql).')';
+      $where[] = qsprintf($conn, '%LO', $sql);
 
       $where[] = qsprintf(
         $conn,

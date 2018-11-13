@@ -70,9 +70,9 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
         }
         queryfx(
           $conn_w,
-          'INSERT IGNORE INTO %T (path, pathHash) VALUES %Q',
+          'INSERT IGNORE INTO %T (path, pathHash) VALUES %LQ',
           PhabricatorRepository::TABLE_PATH,
-          implode(', ', $sql));
+          $sql);
       }
       $result_map += self::lookupPaths($missing_paths);
     }

@@ -696,7 +696,7 @@ final class DiffusionCommitQuery
           pht('No commit identifiers.'));
       }
 
-      $where[] = '('.implode(' OR ', $sql).')';
+      $where[] = qsprintf($conn, '%LO', $sql);
     }
 
     if ($this->auditIDs !== null) {

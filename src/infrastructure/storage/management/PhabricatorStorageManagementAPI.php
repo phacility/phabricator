@@ -265,7 +265,9 @@ final class PhabricatorStorageManagementAPI extends Phobject {
       }
 
       try {
-        queryfx($conn, '%Q', $query);
+        // NOTE: We're using the unsafe "%Z" conversion here. There's no
+        // avoiding it since we're executing raw text files full of SQL.
+        queryfx($conn, '%Z', $query);
       } catch (AphrontAccessDeniedQueryException $ex) {
         throw new PhutilProxyException(
           pht(

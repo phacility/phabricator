@@ -2353,7 +2353,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
                   (array)$constraint->getValue(),
                   $idx++);
               }
-              $parts = implode(', ', $parts);
+              $parts = qsprintf($conn, '%LQ', $parts);
 
               $select[] = qsprintf(
                 $conn,

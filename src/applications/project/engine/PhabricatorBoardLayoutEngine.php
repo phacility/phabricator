@@ -297,9 +297,9 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       queryfx(
         $conn_w,
         'INSERT INTO %T (id, sequence, boardPHID, columnPHID, objectPHID)
-          VALUES %Q ON DUPLICATE KEY UPDATE sequence = VALUES(sequence)',
+          VALUES %LQ ON DUPLICATE KEY UPDATE sequence = VALUES(sequence)',
         $table->getTableName(),
-        implode(', ', $pairs));
+        $pairs);
     }
 
     foreach ($adds as $position) {
