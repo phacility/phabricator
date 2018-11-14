@@ -70,19 +70,12 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function newResultObject() {
+    return new HeraldRule();
+  }
+
   protected function loadPage() {
-    $table = new HeraldRule();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT rule.* FROM %T rule %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $rules) {
@@ -175,38 +168,38 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $rules;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'rule.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'rule.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'rule.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->ruleTypes) {
+    if ($this->ruleTypes !== null) {
       $where[] = qsprintf(
         $conn,
         'rule.ruleType IN (%Ls)',
         $this->ruleTypes);
     }
 
-    if ($this->contentTypes) {
+    if ($this->contentTypes !== null) {
       $where[] = qsprintf(
         $conn,
         'rule.contentType IN (%Ls)',
@@ -220,23 +213,21 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         (int)$this->disabled);
     }
 
-    if ($this->datasourceQuery) {
+    if ($this->datasourceQuery !== null) {
       $where[] = qsprintf(
         $conn,
         'rule.name LIKE %>',
         $this->datasourceQuery);
     }
 
-    if ($this->triggerObjectPHIDs) {
+    if ($this->triggerObjectPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'rule.triggerObjectPHID IN (%Ls)',
         $this->triggerObjectPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn);
-
-    return $this->formatWhereClause($conn, $where);
+    return $where;
   }
 
   private function validateRuleAuthors(array $rules) {
@@ -279,6 +270,10 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function getQueryApplicationClass() {
     return 'PhabricatorHeraldApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'rule';
   }
 
 }
