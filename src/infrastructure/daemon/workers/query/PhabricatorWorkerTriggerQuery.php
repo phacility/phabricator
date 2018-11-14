@@ -145,19 +145,23 @@ final class PhabricatorWorkerTriggerQuery
     return $triggers;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $joins = array();
 
     if (($this->nextEpochMin !== null) ||
         ($this->nextEpochMax !== null) ||
         ($this->order == self::ORDER_EXECUTION)) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T e ON e.triggerID = t.id',
         id(new PhabricatorWorkerTriggerEvent())->getTableName());
     }
 
-    return implode(' ', $joins);
+    if ($joins) {
+      return qsprintf($conn, '%LJ', $joins);
+    } else {
+      return qsprintf($conn, '');
+    }
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {

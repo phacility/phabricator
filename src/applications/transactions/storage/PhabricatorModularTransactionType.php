@@ -35,6 +35,10 @@ abstract class PhabricatorModularTransactionType
     return;
   }
 
+  public function didCommitTransaction($object, $value) {
+    return;
+  }
+
   public function getTransactionHasEffect($object, $old, $new) {
     return ($old !== $new);
   }

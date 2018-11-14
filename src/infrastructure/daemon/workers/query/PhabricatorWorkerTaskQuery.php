@@ -103,26 +103,26 @@ abstract class PhabricatorWorkerTaskQuery
     return $this->formatWhereClause($conn, $where);
   }
 
-  protected function buildOrderClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildOrderClause(AphrontDatabaseConnection $conn) {
     // NOTE: The garbage collector executes this query with a date constraint,
     // and the query is inefficient if we don't use the same key for ordering.
     // See T9808 for discussion.
 
     if ($this->dateCreatedBefore) {
-      return qsprintf($conn_r, 'ORDER BY dateCreated DESC, id DESC');
+      return qsprintf($conn, 'ORDER BY dateCreated DESC, id DESC');
     } else if ($this->dateModifiedSince) {
-      return qsprintf($conn_r, 'ORDER BY dateModified DESC, id DESC');
+      return qsprintf($conn, 'ORDER BY dateModified DESC, id DESC');
     } else {
-      return qsprintf($conn_r, 'ORDER BY id DESC');
+      return qsprintf($conn, 'ORDER BY id DESC');
     }
   }
 
-  protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {
-    $clause =  '';
+  protected function buildLimitClause(AphrontDatabaseConnection $conn) {
     if ($this->limit) {
-      $clause = qsprintf($conn_r, 'LIMIT %d', $this->limit);
+      return qsprintf($conn, 'LIMIT %d', $this->limit);
+    } else {
+      return qsprintf($conn, '');
     }
-    return $clause;
   }
 
 }
