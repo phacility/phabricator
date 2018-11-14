@@ -11,7 +11,8 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
   }
 
   public function newQuery() {
-    return new HeraldRuleQuery();
+    return id(new HeraldRuleQuery())
+      ->needValidateAuthors(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -41,7 +42,14 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
           pht('Search for rules affecting given types of content.'))
         ->setOptions($content_types),
       id(new PhabricatorSearchThreeStateField())
-        ->setLabel(pht('Rule Status'))
+        ->setLabel(pht('Active Rules'))
+        ->setKey('active')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Active Rules'),
+          pht('Show Only Inactive Rules')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Disabled Rules'))
         ->setKey('disabled')
         ->setOptions(
           pht('(Show All)'),
@@ -67,6 +75,10 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
 
     if ($map['disabled'] !== null) {
       $query->withDisabled($map['disabled']);
+    }
+
+    if ($map['active'] !== null) {
+      $query->withActive($map['active']);
     }
 
     return $query;
@@ -99,7 +111,8 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
       case 'all':
         return $query;
       case 'active':
-        return $query->setParameter('disabled', false);
+        return $query
+          ->setParameter('active', true);
       case 'authored':
         return $query
           ->setParameter('authorPHIDs', array($viewer_phid))
@@ -145,6 +158,9 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
       if ($rule->getIsDisabled()) {
         $item->setDisabled(true);
         $item->addIcon('fa-lock grey', pht('Disabled'));
+      } else if (!$rule->hasValidAuthor()) {
+        $item->setDisabled(true);
+        $item->addIcon('fa-user grey', pht('Author Not Active'));
       }
 
       $content_type_name = idx($content_type_map, $rule->getContentType());

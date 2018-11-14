@@ -8,6 +8,7 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ruleTypes;
   private $contentTypes;
   private $disabled;
+  private $active;
   private $datasourceQuery;
   private $triggerObjectPHIDs;
 
@@ -42,6 +43,11 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withDisabled($disabled) {
     $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function withActive($active) {
+    $this->active = $active;
     return $this;
   }
 
@@ -92,8 +98,29 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       }
     }
 
-    if ($this->needValidateAuthors) {
+    if ($this->needValidateAuthors || ($this->active !== null)) {
       $this->validateRuleAuthors($rules);
+    }
+
+    if ($this->active !== null) {
+      $need_active = (bool)$this->active;
+      foreach ($rules as $key => $rule) {
+        if ($rule->getIsDisabled()) {
+          $is_active = false;
+        } else if (!$rule->hasValidAuthor()) {
+          $is_active = false;
+        } else {
+          $is_active = true;
+        }
+
+        if ($is_active != $need_active) {
+          unset($rules[$key]);
+        }
+      }
+    }
+
+    if (!$rules) {
+      return array();
     }
 
     if ($this->needConditionsAndActions) {
@@ -211,6 +238,13 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn,
         'rule.isDisabled = %d',
         (int)$this->disabled);
+    }
+
+    if ($this->active !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'rule.isDisabled = %d',
+        (int)(!$this->active));
     }
 
     if ($this->datasourceQuery !== null) {

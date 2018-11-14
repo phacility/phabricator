@@ -44,13 +44,13 @@ final class HeraldDisableController extends HeraldController {
     }
 
     if ($is_disable) {
-      $title = pht('Really archive this rule?');
+      $title = pht('Really disable this rule?');
       $body = pht('This rule will no longer activate.');
-      $button = pht('Archive Rule');
+      $button = pht('Disable Rule');
     } else {
-      $title = pht('Really activate this rule?');
+      $title = pht('Really enable this rule?');
       $body = pht('This rule will become active again.');
-      $button = pht('Activate Rule');
+      $button = pht('Enable Rule');
     }
 
     $dialog = id(new AphrontDialogView())
