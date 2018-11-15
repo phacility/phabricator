@@ -127,12 +127,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           u.*
           %Q
         FROM %T u JOIN %T s ON u.phid = s.userPHID
-        AND s.type = %s AND s.sessionKey = %s %Q',
+        AND s.type = %s AND s.sessionKey = %P %Q',
       $cache_selects,
       $user_table->getTableName(),
       $session_table->getTableName(),
       $session_type,
-      $session_key,
+      new PhutilOpaqueEnvelope($session_key),
       $cache_joins);
 
     if (!$info) {
