@@ -5,6 +5,12 @@
 .jx-tooltip-container {
   position: absolute;
   padding: 5px;
+
+  /* In Chrome, moving the cursor into the empty space next to the "caret" on
+     the caret side of the tooltip can cause the tooltip to flicker rapidly
+     because the cursor hits the container. To stop this, prevent cursor
+     events on the container. See T8440. */
+  pointer-events: none;
 }
 
 .jx-tooltip-appear {
