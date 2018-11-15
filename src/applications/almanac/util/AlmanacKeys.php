@@ -63,7 +63,7 @@ final class AlmanacKeys extends Phobject {
     // protocol does not have a mechanism like a "Host" header.
     $username = PhabricatorEnv::getEnvConfig('cluster.instance');
     if (strlen($username)) {
-//      return $username;
+      return $username;
     }
 
     $username = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');

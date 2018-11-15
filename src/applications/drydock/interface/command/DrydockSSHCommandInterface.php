@@ -30,8 +30,8 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
     $full_command = call_user_func_array('csprintf', $argv);
 
     $flags = array();
-    // $flags[] = '-o';
-    // $flags[] = 'LogLevel=quiet';
+    $flags[] = '-o';
+    $flags[] = 'LogLevel=quiet';
 
     $flags[] = '-o';
     $flags[] = 'StrictHostKeyChecking=no';
