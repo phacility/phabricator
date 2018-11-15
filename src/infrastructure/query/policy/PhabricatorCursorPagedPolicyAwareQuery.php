@@ -1440,7 +1440,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $key);
     }
 
-    return implode(' ', $joins);
+    if ($joins) {
+      return qsprintf($conn, '%LJ', $joins);
+    } else {
+      return qsprintf($conn, '');
+    }
   }
 
   /**
@@ -1516,7 +1520,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           }
 
           if ($constraint_parts) {
-            $where[] = '('.implode(') OR (', $constraint_parts).')';
+            $where[] = qsprintf($conn, '%LO', $constraint_parts);
           }
           break;
       }
@@ -1670,7 +1674,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     if (!$this->ferretEngine) {
-      $select[] = '0 _ft_rank';
+      $select[] = qsprintf($conn, '0 _ft_rank');
       return $select;
     }
 
@@ -1736,12 +1740,21 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    $parts[] = '0';
+    $parts[] = qsprintf($conn, '%d', 0);
+
+    $sum = array_shift($parts);
+    foreach ($parts as $part) {
+      $sum = qsprintf(
+        $conn,
+        '%Q + %Q',
+        $sum,
+        $part);
+    }
 
     $select[] = qsprintf(
       $conn,
       '%Q _ft_rank',
-      implode(' + ', $parts));
+      $sum);
 
     return $select;
   }
@@ -2031,20 +2044,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       if ($is_not) {
         $where[] = qsprintf(
           $conn,
-          '(%Q)',
-          implode(' AND ', $term_constraints));
+          '%LA',
+          $term_constraints);
       } else if ($is_quoted) {
         $where[] = qsprintf(
           $conn,
-          '(%T.rawCorpus LIKE %~ AND (%Q))',
+          '(%T.rawCorpus LIKE %~ AND %LO)',
           $table_alias,
           $value,
-          implode(' OR ', $term_constraints));
+          $term_constraints);
       } else {
         $where[] = qsprintf(
           $conn,
-          '(%Q)',
-          implode(' OR ', $term_constraints));
+          '%LO',
+          $term_constraints);
       }
     }
 

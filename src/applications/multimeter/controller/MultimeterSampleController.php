@@ -52,8 +52,6 @@ final class MultimeterSampleController extends MultimeterController {
       }
     }
 
-    $where = '('.implode(') AND (', $where).')';
-
     $data = queryfx_all(
       $conn,
       'SELECT *,
@@ -61,13 +59,13 @@ final class MultimeterSampleController extends MultimeterController {
           SUM(sampleRate * resourceCost) AS totalCost,
           SUM(sampleRate * resourceCost) / SUM(sampleRate) AS averageCost
         FROM %T
-        WHERE %Q
-        GROUP BY %Q
+        WHERE %LA
+        GROUP BY %LC
         ORDER BY totalCost DESC, MAX(id) DESC
         LIMIT 100',
       $table->getTableName(),
       $where,
-      implode(', ', array_select_keys($group_map, $group)));
+      array_select_keys($group_map, $group));
 
     $this->loadDimensions($data);
     $phids = array();

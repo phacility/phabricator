@@ -444,8 +444,8 @@ final class PhabricatorCalendarEventQuery
 
       $where[] = qsprintf(
         $conn,
-        '%Q',
-        implode(' OR ', $sql));
+        '%LO',
+        $sql);
     }
 
     if ($this->isStub !== null) {

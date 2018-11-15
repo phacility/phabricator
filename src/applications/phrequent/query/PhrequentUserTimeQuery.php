@@ -177,9 +177,9 @@ final class PhrequentUserTimeQuery
 
       $preempting_events = queryfx_all(
         $conn_r,
-        'SELECT * FROM %T WHERE %Q ORDER BY dateStarted ASC, id ASC',
+        'SELECT * FROM %T WHERE %LO ORDER BY dateStarted ASC, id ASC',
         $usertime->getTableName(),
-        implode(' OR ', $preempt));
+        $preempt);
       $preempting_events = $usertime->loadAllFromArray($preempting_events);
 
       $preempting_events = mgroup($preempting_events, 'getUserPHID');

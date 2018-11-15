@@ -309,10 +309,14 @@ final class PhrictionDocumentQuery
             $max);
         }
 
-        $path_clauses[] = '('.implode(') AND (', $parts).')';
+        if ($parts) {
+          $path_clauses[] = qsprintf($conn, '%LA', $parts);
+        }
       }
 
-      $where[] = '('.implode(') OR (', $path_clauses).')';
+      if ($path_clauses) {
+        $where[] = qsprintf($conn, '%LO', $path_clauses);
+      }
     }
 
     return $where;

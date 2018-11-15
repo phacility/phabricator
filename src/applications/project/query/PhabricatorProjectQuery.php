@@ -514,7 +514,7 @@ final class PhabricatorProjectQuery
           'name LIKE %>',
           $name_prefix);
       }
-      $where[] = '('.implode(' OR ', $parts).')';
+      $where[] = qsprintf($conn, '%LO', $parts);
     }
 
     if ($this->icons !== null) {

@@ -107,9 +107,9 @@ final class PhabricatorLockLogManagementWorkflow
     }
 
     if (!$parts) {
-      $constraint = '1 = 1';
+      $constraint = qsprintf($conn, '1 = 1');
     } else {
-      $constraint = '('.implode(') AND (', $parts).')';
+      $constraint = qsprintf($conn, '%LA', $parts);
     }
 
     $logs = $table->loadAllWhere(
