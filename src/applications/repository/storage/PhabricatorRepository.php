@@ -1890,6 +1890,19 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   /**
+   * Time limit for cloning or copying this repository.
+   *
+   * This limit is used to timeout operations like `git clone` or `git fetch`
+   * when doing intracluster synchronization, building working copies, etc.
+   *
+   * @return int Maximum number of seconds to spend copying this repository.
+   */
+  public function getCopyTimeLimit() {
+    return phutil_units('15 minutes in seconds');
+  }
+
+
+  /**
    * Retrieve the service URI for the device hosting this repository.
    *
    * See @{method:newConduitClient} for a general discussion of interacting

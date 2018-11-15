@@ -48,16 +48,16 @@ final class PhabricatorRepositoryURIIndex
 
       queryfx(
         $conn_w,
-        'DELETE FROM %T WHERE repositoryPHID = %s',
-        $table->getTableName(),
+        'DELETE FROM %R WHERE repositoryPHID = %s',
+        $table,
         $repository_phid);
 
       if ($sql) {
         queryfx(
           $conn_w,
-          'INSERT INTO %T (repositoryPHID, repositoryURI) VALUES %Q',
-          $table->getTableName(),
-          implode(', ', $sql));
+          'INSERT INTO %R (repositoryPHID, repositoryURI) VALUES %LQ',
+          $table,
+          $sql);
       }
 
     $table->saveTransaction();
