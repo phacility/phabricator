@@ -3,6 +3,7 @@
 final class AphrontFormSubmitControl extends AphrontFormControl {
 
   private $buttons = array();
+  private $sigils = array();
 
   public function addCancelButton($href, $label = null) {
     if (!$label) {
@@ -22,6 +23,11 @@ final class AphrontFormSubmitControl extends AphrontFormControl {
     return $this;
   }
 
+  public function addSigil($sigil) {
+    $this->sigils[] = $sigil;
+    return $this;
+  }
+
   protected function getCustomControlClass() {
     return 'aphront-form-control-submit';
   }
@@ -29,11 +35,19 @@ final class AphrontFormSubmitControl extends AphrontFormControl {
   protected function renderInput() {
     $submit_button = null;
     if ($this->getValue()) {
-      $submit_button = phutil_tag(
+
+      if ($this->sigils) {
+        $sigils = $this->sigils;
+      } else {
+        $sigils = null;
+      }
+
+      $submit_button = javelin_tag(
         'button',
         array(
           'type'      => 'submit',
           'name'      => '__submit__',
+          'sigil' => $sigils,
           'disabled'  => $this->getDisabled() ? 'disabled' : null,
         ),
         $this->getValue());

@@ -57,6 +57,11 @@ abstract class DifferentialRevisionActionTransaction
     return null;
   }
 
+  protected function getRevisionActionSubmitButtonText(
+    DifferentialRevision $revision) {
+    return null;
+  }
+
   public static function loadAllActions() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
@@ -109,6 +114,9 @@ abstract class DifferentialRevisionActionTransaction
 
         $group_key = $this->getRevisionActionGroupKey();
         $field->setCommentActionGroupKey($group_key);
+
+        $button_text = $this->getRevisionActionSubmitButtonText($revision);
+        $field->setActionSubmitButtonText($button_text);
 
         // Currently, every revision action conflicts with every other
         // revision action: for example, you can not simultaneously Accept and
