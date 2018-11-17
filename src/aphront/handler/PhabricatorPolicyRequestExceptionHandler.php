@@ -83,6 +83,18 @@ final class PhabricatorPolicyRequestExceptionHandler
       $dialog->appendList($list);
     }
 
+    // If the install is in developer mode, include a stack trace for the
+    // exception. When debugging things, it isn't always obvious where a
+    // policy exception came from and this can make it easier to hunt down
+    // bugs or improve ambiguous/confusing messaging.
+
+    $is_developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+    if ($is_developer) {
+      $dialog->appendChild(
+        id(new AphrontStackTraceView())
+          ->setTrace($throwable->getTrace()));
+    }
+
     if ($request->isAjax()) {
       $dialog->addCancelButton('/', pht('Close'));
     } else {

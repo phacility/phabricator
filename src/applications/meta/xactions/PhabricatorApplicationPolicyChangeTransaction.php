@@ -35,11 +35,20 @@ final class PhabricatorApplicationPolicyChangeTransaction
 
     $editor = $this->getEditor();
     $content_source = $editor->getContentSource();
+
+    // NOTE: We allow applications to have custom edit policies, but they are
+    // currently stored in the Config application. The ability to edit Config
+    // values is always restricted to administrators, today. Empower this
+    // particular edit to punch through possible stricter policies, so normal
+    // users can change application configuration if the application allows
+    // them to do so.
+
     PhabricatorConfigEditor::storeNewValue(
-      $user,
+      PhabricatorUser::getOmnipotentUser(),
       $config_entry,
       $current_value,
-      $content_source);
+      $content_source,
+      $user->getPHID());
   }
 
   public function getTitle() {

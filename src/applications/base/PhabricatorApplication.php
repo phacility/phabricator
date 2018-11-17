@@ -545,7 +545,7 @@ abstract class PhabricatorApplication
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->canUninstall();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return false;
+        return true;
       default:
         $spec = $this->getCustomCapabilitySpecification($capability);
         return idx($spec, 'edit', true);
