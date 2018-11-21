@@ -13,6 +13,10 @@ final class DiffusionRepositorySymbolsManagementPanel
     return 900;
   }
 
+  public function getManagementPanelGroupKey() {
+    return DiffusionRepositoryManagementIntegrationsPanelGroup::PANELGROUPKEY;
+  }
+
   public function getManagementPanelIcon() {
     $repository = $this->getRepository();
 

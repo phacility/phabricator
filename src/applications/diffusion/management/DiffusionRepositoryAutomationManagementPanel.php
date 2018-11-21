@@ -13,6 +13,10 @@ final class DiffusionRepositoryAutomationManagementPanel
     return 800;
   }
 
+  public function getManagementPanelGroupKey() {
+    return DiffusionRepositoryManagementBuildsPanelGroup::PANELGROUPKEY;
+  }
+
   public function shouldEnableForRepository(
     PhabricatorRepository $repository) {
     return $repository->isGit();

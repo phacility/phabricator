@@ -47,8 +47,8 @@ abstract class DiffusionRepositoryManagementPanel
     return 'fa-pencil';
   }
 
-  protected function buildManagementPanelActions() {
-    return array();
+  public function getManagementPanelGroupKey() {
+    return DiffusionRepositoryManagementMainPanelGroup::PANELGROUPKEY;
   }
 
   public function shouldEnableForRepository(
