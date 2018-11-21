@@ -68,13 +68,17 @@ final class DiffusionRepositoryManagePanelsController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
       ->setMainColumn($content);
+
+    $curtain = $panel->buildManagementPanelCurtain();
+    if ($curtain) {
+      $view->setCurtain($curtain);
+    }
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($view);
   }
 

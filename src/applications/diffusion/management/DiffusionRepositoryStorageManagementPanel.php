@@ -14,7 +14,32 @@ final class DiffusionRepositoryStorageManagementPanel
   }
 
   public function getManagementPanelIcon() {
-    return 'fa-database';
+    $repository = $this->getRepository();
+
+    if ($repository->getAlmanacServicePHID()) {
+      return 'fa-sitemap';
+    } else if ($repository->isHosted()) {
+      return 'fa-database';
+    } else {
+      return 'fa-download';
+    }
+  }
+
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-book')
+        ->setHref($doc_href)
+        ->setName(pht('Cluster Documentation')));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -47,15 +72,7 @@ final class DiffusionRepositoryStorageManagementPanel
     $view->addProperty(pht('Storage Path'), $storage_path);
     $view->addProperty(pht('Storage Cluster'), $storage_service);
 
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-book')
-      ->setHref($doc_href)
-      ->setText(pht('Help'));
-
-    return $this->newBox(pht('Storage'), $view, array($button));
+    return $this->newBox(pht('Storage'), $view);
   }
 
   private function buildClusterStatusPanel() {
