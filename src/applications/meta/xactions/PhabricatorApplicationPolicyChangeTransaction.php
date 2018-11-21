@@ -52,8 +52,8 @@ final class PhabricatorApplicationPolicyChangeTransaction
   }
 
   public function getTitle() {
-    $old = $this->renderPolicy($this->getOldValue());
-    $new = $this->renderPolicy($this->getNewValue());
+    $old = $this->renderApplicationPolicy($this->getOldValue());
+    $new = $this->renderApplicationPolicy($this->getNewValue());
 
     return pht(
       '%s changed the "%s" policy from "%s" to "%s".',
@@ -64,8 +64,8 @@ final class PhabricatorApplicationPolicyChangeTransaction
   }
 
   public function getTitleForFeed() {
-    $old = $this->renderPolicy($this->getOldValue());
-    $new = $this->renderPolicy($this->getNewValue());
+    $old = $this->renderApplicationPolicy($this->getOldValue());
+    $new = $this->renderApplicationPolicy($this->getNewValue());
 
     return pht(
       '%s changed the "%s" policy for application %s from "%s" to "%s".',
@@ -165,7 +165,7 @@ final class PhabricatorApplicationPolicyChangeTransaction
     return $errors;
   }
 
-  private function renderPolicy($name) {
+  private function renderApplicationPolicy($name) {
     $policies = $this->getAllPolicies();
     if (empty($policies[$name])) {
       // Not a standard policy, check for a custom policy.
