@@ -25,20 +25,6 @@ final class PhabricatorRepositoryTransaction
   const TYPE_AUTOMATION_BLUEPRINTS = 'repo:automation-blueprints';
   const TYPE_CALLSIGN = 'repo:callsign';
 
-  // TODO: Clean up these legacy transaction types.
-  const TYPE_SSH_LOGIN = 'repo:ssh-login';
-  const TYPE_SSH_KEY = 'repo:ssh-key';
-  const TYPE_SSH_KEYFILE = 'repo:ssh-keyfile';
-  const TYPE_HTTP_LOGIN = 'repo:http-login';
-  const TYPE_HTTP_PASS = 'repo:http-pass';
-  const TYPE_CREDENTIAL = 'repo:credential';
-  const TYPE_PROTOCOL_HTTP = 'repo:serve-http';
-  const TYPE_PROTOCOL_SSH = 'repo:serve-ssh';
-  const TYPE_HOSTING = 'repo:hosting';
-  const TYPE_LOCAL_PATH = 'repo:local-path';
-  const TYPE_REMOTE_URI = 'repo:remote-uri';
-  const TYPE_UUID = 'repo:uuid';
-
   public function getApplicationName() {
     return 'repository';
   }
@@ -86,15 +72,6 @@ final class PhabricatorRepositoryTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_REMOTE_URI:
-      case self::TYPE_SSH_LOGIN:
-      case self::TYPE_SSH_KEY:
-      case self::TYPE_SSH_KEYFILE:
-      case self::TYPE_HTTP_LOGIN:
-      case self::TYPE_HTTP_PASS:
-        // Hide null vs empty string changes.
-        return (!strlen($old) && !strlen($new));
-      case self::TYPE_LOCAL_PATH:
       case self::TYPE_NAME:
         // Hide these on create, they aren't interesting and we have an
         // explicit "create" transaction.
@@ -233,25 +210,6 @@ final class PhabricatorRepositoryTransaction
             implode(', ', $new));
         }
         break;
-      case self::TYPE_UUID:
-        if (!strlen($new)) {
-          return pht(
-            '%s removed "%s" as the repository UUID.',
-            $this->renderHandleLink($author_phid),
-            $old);
-        } else if (!strlen($old)) {
-          return pht(
-            '%s set the repository UUID to "%s".',
-            $this->renderHandleLink($author_phid),
-            $new);
-        } else {
-          return pht(
-            '%s changed the repository UUID from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $old,
-            $new);
-        }
-        break;
       case self::TYPE_SVN_SUBPATH:
         if (!strlen($new)) {
           return pht(
@@ -293,74 +251,6 @@ final class PhabricatorRepositoryTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
-      case self::TYPE_REMOTE_URI:
-        if (!strlen($old)) {
-          return pht(
-            '%s set the remote URI for this repository to "%s".',
-            $this->renderHandleLink($author_phid),
-            $new);
-        } else if (!strlen($new)) {
-          return pht(
-            '%s removed the remote URI for this repository.',
-            $this->renderHandleLink($author_phid));
-        } else {
-          return pht(
-            '%s changed the remote URI for this repository from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $old,
-            $new);
-        }
-        break;
-      case self::TYPE_SSH_LOGIN:
-        return pht(
-          '%s updated the SSH login for this repository.',
-          $this->renderHandleLink($author_phid));
-      case self::TYPE_SSH_KEY:
-        return pht(
-          '%s updated the SSH key for this repository.',
-          $this->renderHandleLink($author_phid));
-      case self::TYPE_SSH_KEYFILE:
-        return pht(
-          '%s updated the SSH keyfile for this repository.',
-          $this->renderHandleLink($author_phid));
-      case self::TYPE_HTTP_LOGIN:
-        return pht(
-          '%s updated the HTTP login for this repository.',
-          $this->renderHandleLink($author_phid));
-      case self::TYPE_HTTP_PASS:
-        return pht(
-          '%s updated the HTTP password for this repository.',
-          $this->renderHandleLink($author_phid));
-      case self::TYPE_LOCAL_PATH:
-        return pht(
-          '%s changed the local path from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $old,
-          $new);
-      case self::TYPE_HOSTING:
-        if ($new) {
-          return pht(
-            '%s changed this repository to be hosted on Phabricator.',
-            $this->renderHandleLink($author_phid));
-        } else {
-          return pht(
-            '%s changed this repository to track a remote elsewhere.',
-            $this->renderHandleLink($author_phid));
-        }
-      case self::TYPE_PROTOCOL_HTTP:
-        return pht(
-          '%s changed the availability of this repository over HTTP from '.
-          '"%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $old,
-          $new);
-      case self::TYPE_PROTOCOL_SSH:
-        return pht(
-          '%s changed the availability of this repository over SSH from '.
-          '"%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $old,
-          $new);
       case self::TYPE_PUSH_POLICY:
         return pht(
           '%s changed the push policy of this repository from "%s" to "%s".',

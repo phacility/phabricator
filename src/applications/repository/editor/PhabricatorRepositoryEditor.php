@@ -22,7 +22,6 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH;
     $types[] = PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_UUID;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH;
     $types[] = PhabricatorRepositoryTransaction::TYPE_NOTIFY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE;
@@ -65,8 +64,6 @@ final class PhabricatorRepositoryEditor
         return array_keys($object->getDetail('branch-filter', array()));
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
         return array_keys($object->getDetail('close-commits-filter', array()));
-      case PhabricatorRepositoryTransaction::TYPE_UUID:
-        return $object->getUUID();
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
         return $object->getDetail('svn-subpath');
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
@@ -108,7 +105,6 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_DEFAULT_BRANCH:
       case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
-      case PhabricatorRepositoryTransaction::TYPE_UUID:
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
       case PhabricatorRepositoryTransaction::TYPE_VCS:
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
@@ -170,9 +166,6 @@ final class PhabricatorRepositoryEditor
         $object->setDetail(
           'close-commits-filter',
           array_fill_keys($xaction->getNewValue(), true));
-        break;
-      case PhabricatorRepositoryTransaction::TYPE_UUID:
-        $object->setUUID($xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
         $object->setDetail('svn-subpath', $xaction->getNewValue());
