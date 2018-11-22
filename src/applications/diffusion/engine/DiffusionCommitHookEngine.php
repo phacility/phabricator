@@ -1305,97 +1305,11 @@ final class DiffusionCommitHookEngine extends Phobject {
 
   public function loadFileSizesForCommit($identifier) {
     $repository = $this->getRepository();
-    $vcs = $repository->getVersionControlSystem();
 
-    $path_sizes = array();
-
-    switch ($vcs) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        list($paths_raw) = $repository->execxLocalCommand(
-          'diff-tree -z -r --no-commit-id %s --',
-          $identifier);
-
-        // With "-z" we get "<fields>\0<filename>\0" for each line. Group the
-        // delimited text into "<fields>, <filename>" pairs.
-        $paths_raw = trim($paths_raw, "\0");
-        $paths_raw = explode("\0", $paths_raw);
-        if (count($paths_raw) % 2) {
-          throw new Exception(
-            pht(
-              'Unexpected number of output lines from "git diff-tree" when '.
-              'processing commit ("%s"): got %s lines, expected an even '.
-              'number.',
-              $identifier,
-              phutil_count($paths_raw)));
-        }
-        $paths_raw = array_chunk($paths_raw, 2);
-
-        $paths = array();
-        foreach ($paths_raw as $path_raw) {
-          list($fields, $pathname) = $path_raw;
-          $fields = explode(' ', $fields);
-
-          // Fields are:
-          //
-          //    :100644 100644 aaaa bbbb M
-          //
-          // [0] Old file mode.
-          // [1] New file mode.
-          // [2] Old object hash.
-          // [3] New object hash.
-          // [4] Change mode.
-
-          $paths[] = array(
-            'path' => $pathname,
-            'newHash' => $fields[3],
-          );
-        }
-
-        if ($paths) {
-          $check_paths = array();
-          foreach ($paths as $path) {
-            if ($path['newHash'] === self::EMPTY_HASH) {
-              $path_sizes[$path['path']] = 0;
-              continue;
-            }
-            $check_paths[$path['newHash']][] = $path['path'];
-          }
-
-          if ($check_paths) {
-            $future = $repository->getLocalCommandFuture(
-              'cat-file --batch-check=%s',
-              '%(objectsize)')
-              ->write(implode("\n", array_keys($check_paths)));
-
-            list($sizes) = $future->resolvex();
-            $sizes = trim($sizes);
-            $sizes = phutil_split_lines($sizes, false);
-            if (count($sizes) !== count($check_paths)) {
-              throw new Exception(
-                pht(
-                  'Unexpected number of output lines from "git cat-file" when '.
-                  'processing commit ("%s"): got %s lines, expected %s.',
-                  $identifier,
-                  phutil_count($sizes),
-                  phutil_count($check_paths)));
-            }
-
-            foreach ($check_paths as $object_hash => $path_names) {
-              $object_size = (int)array_shift($sizes);
-              foreach ($path_names as $path_name) {
-                $path_sizes[$path_name] = $object_size;
-              }
-            }
-          }
-        }
-        break;
-      default:
-        throw new Exception(
-          pht(
-            'File size limits are not supported for this VCS.'));
-    }
-
-    return $path_sizes;
+    return id(new DiffusionLowLevelFilesizeQuery())
+      ->setRepository($repository)
+      ->withIdentifier($identifier)
+      ->execute();
   }
 
   public function loadCommitRefForCommit($identifier) {
