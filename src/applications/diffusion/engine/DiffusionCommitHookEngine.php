@@ -1268,9 +1268,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private function rejectOversizedFiles(array $content_updates) {
     $repository = $this->getRepository();
 
-    // TODO: Allow repositories to be configured for a maximum filesize.
-    $limit = 0;
-
+    $limit = $repository->getFilesizeLimit();
     if (!$limit) {
       return;
     }

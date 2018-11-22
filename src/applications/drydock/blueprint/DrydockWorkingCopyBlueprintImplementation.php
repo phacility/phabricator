@@ -187,7 +187,7 @@ final class DrydockWorkingCopyBlueprintImplementation
         (string)$repository->getCloneURIObject(),
         $path);
 
-      $future->setTimeout($repository->getCopyTimeLimit());
+      $future->setTimeout($repository->getEffectiveCopyTimeLimit());
 
       $futures[$directory] = $future;
     }
@@ -284,7 +284,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       }
 
       $this->newExecvFuture($interface, $cmd, $arg)
-        ->setTimeout($repository->getCopyTimeLimit())
+        ->setTimeout($repository->getEffectiveCopyTimeLimit())
         ->resolvex();
 
       if (idx($spec, 'default')) {
@@ -310,7 +310,7 @@ final class DrydockWorkingCopyBlueprintImplementation
 
         try {
           $this->newExecvFuture($interface, $cmd, $arg)
-            ->setTimeout($repository->getCopyTimeLimit())
+            ->setTimeout($repository->getEffectiveCopyTimeLimit())
             ->resolvex();
         } catch (CommandException $ex) {
           $display_command = csprintf(

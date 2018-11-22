@@ -1898,9 +1898,33 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @return int Maximum number of seconds to spend copying this repository.
    */
   public function getCopyTimeLimit() {
+    return $this->getDetail('limit.copy');
+  }
+
+  public function setCopyTimeLimit($limit) {
+    return $this->setDetail('limit.copy', $limit);
+  }
+
+  public function getDefaultCopyTimeLimit() {
     return phutil_units('15 minutes in seconds');
   }
 
+  public function getEffectiveCopyTimeLimit() {
+    $limit = $this->getCopyTimeLimit();
+    if ($limit) {
+      return $limit;
+    }
+
+    return $this->getDefaultCopyTimeLimit();
+  }
+
+  public function getFilesizeLimit() {
+    return $this->getDetail('limit.filesize');
+  }
+
+  public function setFilesizeLimit($limit) {
+    return $this->setDetail('limit.filesize', $limit);
+  }
 
   /**
    * Retrieve the service URI for the device hosting this repository.

@@ -139,7 +139,7 @@ abstract class DiffusionCommandEngine extends Phobject {
     // to try to avoid cases where `git fetch` hangs for some reason and we're
     // left sitting with a held lock forever.
     $repository = $this->getRepository();
-    $future->setTimeout($repository->getCopyTimeLimit());
+    $future->setTimeout($repository->getEffectiveCopyTimeLimit());
 
     return $future;
   }

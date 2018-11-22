@@ -472,6 +472,25 @@ final class DiffusionRepositoryEditEngine
           pht('Change the push policy of the repository.'))
         ->setConduitTypeDescription(pht('New policy PHID or constant.'))
         ->setValue($object->getPolicy(DiffusionPushCapability::CAPABILITY)),
+      id(new PhabricatorTextEditField())
+        ->setKey('filesizeLimit')
+        ->setLabel(pht('Filesize Limit'))
+        ->setTransactionType(
+          PhabricatorRepositoryFilesizeLimitTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('Maximum permitted file size.'))
+        ->setConduitDescription(pht('Change the filesize limit.'))
+        ->setConduitTypeDescription(pht('New repository filesize limit.'))
+        ->setValue($object->getFilesizeLimit()),
+      id(new PhabricatorTextEditField())
+        ->setKey('copyTimeLimit')
+        ->setLabel(pht('Clone/Fetch Timeout'))
+        ->setTransactionType(
+          PhabricatorRepositoryCopyTimeLimitTransaction::TRANSACTIONTYPE)
+        ->setDescription(
+          pht('Maximum permitted duration of internal clone/fetch.'))
+        ->setConduitDescription(pht('Change the copy time limit.'))
+        ->setConduitTypeDescription(pht('New repository copy time limit.'))
+        ->setValue($object->getCopyTimeLimit()),
     );
   }
 

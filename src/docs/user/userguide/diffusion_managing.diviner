@@ -236,37 +236,20 @@ fetch from, serve from, and push to.
 These options are covered in detail in @{article:Diffusion User Guide: URIs}.
 
 
-Staging Area
-============
-
-The **Staging Area** panel configures staging areas, used to make proposed
-changes available to build and continuous integration systems.
-
-For more details, see @{article:Harbormaster User Guide}.
-
-
-Automation
-==========
-
-The **Automation** panel configures support for allowing Phabricator to make
-writes directly to the repository, so that it can perform operations like
-automatically landing revisions from the web UI.
-
-For details on repository automation, see
-@{article:Drydock User Guide: Repository Automation}.
-
-
-Symbols
+Limits
 ======
 
-The **Symbols** panel allows you to customize how symbols (like class and
-function names) are linked when viewing code in the repository, and when
-viewing revisions which propose code changes to the repository.
+The **Limits** panel allows you to configure limits and timeouts.
 
-To take advantage of this feature, you need to do additional work to build
-symbol indexes. For details on configuring and populating symbol indexes, see
-@{article:User Guide: Symbol Indexes}.
+**Filesize Limit**: Allows you to set a maximum filesize for any file in the
+repository. If a commit creates a larger file (or modifies an existing file so
+it becomes too large) it will be rejected. This option only applies to hosted
+repositories.
 
+**Clone/Fetch Timeout**: Configure the internal timeout for creating copies
+of this repository during operations like intracluster synchronization and
+Drydock working copy construction. This timeout does not affect external
+users.
 
 Branches
 ========
@@ -309,6 +292,38 @@ plans) for this repository.
 When Phabricator discovers a new commit, it can automatically close associated
 revisions and tasks. If you don't want Phabricator to close objects when it
 discovers new commits, disable **Autoclose** for the repository.
+
+
+Staging Area
+============
+
+The **Staging Area** panel configures staging areas, used to make proposed
+changes available to build and continuous integration systems.
+
+For more details, see @{article:Harbormaster User Guide}.
+
+
+Automation
+==========
+
+The **Automation** panel configures support for allowing Phabricator to make
+writes directly to the repository, so that it can perform operations like
+automatically landing revisions from the web UI.
+
+For details on repository automation, see
+@{article:Drydock User Guide: Repository Automation}.
+
+
+Symbols
+======
+
+The **Symbols** panel allows you to customize how symbols (like class and
+function names) are linked when viewing code in the repository, and when
+viewing revisions which propose code changes to the repository.
+
+To take advantage of this feature, you need to do additional work to build
+symbol indexes. For details on configuring and populating symbol indexes, see
+@{article:User Guide: Symbol Indexes}.
 
 
 Repository Identifiers and Names
