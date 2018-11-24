@@ -1261,7 +1261,10 @@ JX.install('DiffChangesetList', {
     _onrangedown: function(e) {
       // NOTE: We're allowing "mousedown" from a touch event through so users
       // can leave inlines on a single line.
-      if (e.isRightButton()) {
+
+      // See PHI985. We want to exclude both right-mouse and middle-mouse
+      // clicks from continuing.
+      if (!e.isLeftButton()) {
         return;
       }
 

@@ -133,6 +133,20 @@ JX.install('Event', {
       return r.which == 3 || r.button == 2;
     },
 
+
+    /**
+     * Get whether the mouse button associated with the mouse event is the
+     * left-side button in a browser-agnostic way.
+     *
+     * @return bool
+     * @task info
+     */
+    isLeftButton: function() {
+      var r = this.getRawEvent();
+      return (r.which == 1 || r.button == 0);
+    },
+
+
     /**
      * Determine if a mouse event is a normal event (left mouse button, no
      * modifier keys).
