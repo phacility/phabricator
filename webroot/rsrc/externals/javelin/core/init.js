@@ -214,8 +214,13 @@
     'mouseup'
   ];
 
-  if (window.localStorage) {
-    window_events.push('storage');
+  try {
+    if (window.localStorage) {
+      window_events.push('storage');
+    }
+  } catch (storage_exception) {
+    // See PHI985. In Firefox, accessing "window.localStorage" may throw an
+    // exception if cookies are disabled.
   }
 
   for (ii = 0; ii < window_events.length; ++ii) {
