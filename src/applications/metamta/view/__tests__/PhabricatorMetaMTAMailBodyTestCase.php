@@ -10,36 +10,15 @@ HEADER
   bass
   trout
 
-WHY DID I GET THIS EMAIL?
-  http://test.com/xscript/
-
 EOTEXT;
 
-    $this->assertEmail($expect, true);
+    $this->assertEmail($expect);
   }
 
-  public function testBodyRenderNoHerald() {
-    $expect = <<<EOTEXT
-salmon
-
-HEADER
-  bass
-  trout
-
-EOTEXT;
-
-    $this->assertEmail($expect, false);
-  }
-
-  private function assertEmail($expect, $herald_hints) {
-    $env = PhabricatorEnv::beginScopedEnv();
-    $env->overrideEnvConfig('phabricator.production-uri', 'http://test.com/');
-    $env->overrideEnvConfig('metamta.herald.show-hints', $herald_hints);
-
+  private function assertEmail($expect) {
     $body = new PhabricatorMetaMTAMailBody();
     $body->addRawSection('salmon');
     $body->addTextSection('HEADER', "bass\ntrout\n");
-    $body->addHeraldSection('/xscript/');
 
     $this->assertEqual($expect, $body->render());
   }

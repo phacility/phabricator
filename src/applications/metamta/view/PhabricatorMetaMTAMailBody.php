@@ -151,24 +151,6 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
     return $this;
   }
 
-  /**
-   * Add a Herald section with a rule management URI and a transcript URI.
-   *
-   * @param string URI to rule transcripts.
-   * @return this
-   * @task compose
-   */
-  public function addHeraldSection($xscript_uri) {
-    if (!PhabricatorEnv::getEnvConfig('metamta.herald.show-hints')) {
-      return $this;
-    }
-
-    $this->addLinkSection(
-      pht('WHY DID I GET THIS EMAIL?'),
-      PhabricatorEnv::getProductionURI($xscript_uri));
-
-    return $this;
-  }
 
   /**
    * Add an attachment.
