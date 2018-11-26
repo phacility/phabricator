@@ -1926,6 +1926,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->setDetail('limit.filesize', $limit);
   }
 
+  public function getTouchLimit() {
+    return $this->getDetail('limit.touch');
+  }
+
+  public function setTouchLimit($limit) {
+    return $this->setDetail('limit.touch', $limit);
+  }
+
   /**
    * Retrieve the service URI for the device hosting this repository.
    *

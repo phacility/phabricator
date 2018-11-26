@@ -491,6 +491,15 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Change the copy time limit.'))
         ->setConduitTypeDescription(pht('New repository copy time limit.'))
         ->setValue($object->getCopyTimeLimit()),
+      id(new PhabricatorTextEditField())
+        ->setKey('touchLimit')
+        ->setLabel(pht('Touched Paths Limit'))
+        ->setTransactionType(
+          PhabricatorRepositoryTouchLimitTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('Maximum permitted paths touched per commit.'))
+        ->setConduitDescription(pht('Change the touch limit.'))
+        ->setConduitTypeDescription(pht('New repository touch limit.'))
+        ->setValue($object->getTouchLimit()),
     );
   }
 

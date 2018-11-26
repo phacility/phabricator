@@ -38,6 +38,7 @@ final class DiffusionRepositoryLimitsManagementPanel
     return array(
       'filesizeLimit',
       'copyTimeLimit',
+      'touchLimit',
     );
   }
 
@@ -94,6 +95,16 @@ final class DiffusionRepositoryLimitsManagementPanel
     }
 
     $view->addProperty(pht('Clone/Fetch Timeout'), $copy_display);
+
+    $touch_limit = $repository->getTouchLimit();
+    if ($touch_limit) {
+      $touch_display = pht('%s Paths', new PhutilNumber($touch_limit));
+    } else {
+      $touch_display = pht('Unlimited');
+      $touch_display = phutil_tag('em', array(), $touch_display);
+    }
+
+    $view->addProperty(pht('Touched Paths Limit'), $touch_display);
 
     return $this->newBox(pht('Limits'), $view);
   }

@@ -25,6 +25,7 @@ final class PhabricatorRepositoryPushLog
   const CHANGEFLAG_DANGEROUS = 16;
   const CHANGEFLAG_ENORMOUS = 32;
   const CHANGEFLAG_OVERSIZED = 64;
+  const CHANGEFLAG_TOUCHES = 128;
 
   const REJECT_ACCEPT = 0;
   const REJECT_DANGEROUS = 1;
@@ -33,6 +34,7 @@ final class PhabricatorRepositoryPushLog
   const REJECT_BROKEN = 4;
   const REJECT_ENORMOUS = 5;
   const REJECT_OVERSIZED = 6;
+  const REJECT_TOUCHES = 7;
 
   protected $repositoryPHID;
   protected $epoch;
@@ -66,6 +68,7 @@ final class PhabricatorRepositoryPushLog
       self::CHANGEFLAG_DANGEROUS => pht('Dangerous'),
       self::CHANGEFLAG_ENORMOUS => pht('Enormous'),
       self::CHANGEFLAG_OVERSIZED => pht('Oversized'),
+      self::CHANGEFLAG_TOUCHES => pht('Touches Too Many Paths'),
     );
   }
 
@@ -78,6 +81,7 @@ final class PhabricatorRepositoryPushLog
       self::REJECT_BROKEN => pht('Rejected: Broken'),
       self::REJECT_ENORMOUS => pht('Rejected: Enormous'),
       self::REJECT_OVERSIZED => pht('Rejected: Oversized File'),
+      self::REJECT_TOUCHES => pht('Rejected: Touches Too Many Paths'),
     );
   }
 
