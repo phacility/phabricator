@@ -71,7 +71,7 @@ final class PhabricatorUserEditEngine
         ->setLabel(pht('Disabled'))
         ->setDescription(pht('Disable the user.'))
         ->setTransactionType(PhabricatorUserDisableTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setConduitDescription(pht('Disable or enable the user.'))
         ->setConduitTypeDescription(pht('True to disable the user.'))
         ->setValue($object->getIsDisabled()),

@@ -99,7 +99,7 @@ final class PhabricatorCalendarExportEditEngine
         ->setDescription(pht('Disable the export.'))
         ->setTransactionType(
           PhabricatorCalendarExportDisableTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setConduitDescription(pht('Disable or restore the export.'))
         ->setConduitTypeDescription(pht('True to cancel the export.'))
         ->setValue($object->getIsDisabled()),

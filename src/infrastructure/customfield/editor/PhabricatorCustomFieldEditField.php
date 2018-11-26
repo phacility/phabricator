@@ -59,7 +59,7 @@ final class PhabricatorCustomFieldEditField
   }
 
   protected function buildControl() {
-    if ($this->getIsConduitOnly()) {
+    if (!$this->getIsFormField()) {
       return null;
     }
 

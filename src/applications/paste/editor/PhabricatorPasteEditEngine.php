@@ -104,7 +104,7 @@ final class PhabricatorPasteEditEngine
         ->setLabel(pht('Status'))
         ->setTransactionType(
           PhabricatorPasteStatusTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setOptions(PhabricatorPaste::getStatusNameMap())
         ->setDescription(pht('Active or archived status.'))
         ->setConduitDescription(pht('Active or archive the paste.'))

@@ -139,9 +139,14 @@ final class PhabricatorEditEngineConfiguration
 
     $values = $this->getProperty('defaults', array());
     foreach ($fields as $key => $field) {
+      if (!$field->getIsFormField()) {
+        continue;
+      }
+
       if (!$field->getIsDefaultable()) {
         continue;
       }
+
       if ($is_new) {
         if (array_key_exists($key, $values)) {
           $field->readDefaultValueFromConfiguration($values[$key]);

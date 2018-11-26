@@ -138,7 +138,7 @@ final class DifferentialRevisionEditEngine
         DifferentialRevisionUpdateTransaction::TRANSACTIONTYPE)
       ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
       ->setSingleValue($diff_phid)
-      ->setIsConduitOnly(!$diff)
+      ->setIsFormField((bool)$diff)
       ->setIsReorderable(false)
       ->setIsDefaultable(false)
       ->setIsInvisible(true)
@@ -225,7 +225,7 @@ final class DifferentialRevisionEditEngine
     $fields[] = id(new PhabricatorHandlesEditField())
       ->setKey('tasks')
       ->setUseEdgeTransactions(true)
-      ->setIsConduitOnly(true)
+      ->setIsFormField(false)
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue(
         'edge:type',
@@ -245,7 +245,7 @@ final class DifferentialRevisionEditEngine
     $fields[] = id(new PhabricatorBoolEditField())
       ->setKey('draft')
       ->setLabel(pht('Hold as Draft'))
-      ->setIsConduitOnly(true)
+      ->setIsFormField(false)
       ->setOptions(
         pht('Autosubmit Once Builds Finish'),
         pht('Hold as Draft'))

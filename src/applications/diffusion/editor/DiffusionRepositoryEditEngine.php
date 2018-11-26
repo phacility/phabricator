@@ -244,7 +244,7 @@ final class DiffusionRepositoryEditEngine
         ->setKey('vcs')
         ->setLabel(pht('Version Control System'))
         ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_VCS)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setIsCopyable(true)
         ->setOptions(PhabricatorRepositoryType::getAllRepositoryTypes())
         ->setDescription(pht('Underlying repository version control system.'))
@@ -300,7 +300,7 @@ final class DiffusionRepositoryEditEngine
         ->setKey('allowDangerousChanges')
         ->setLabel(pht('Allow Dangerous Changes'))
         ->setIsCopyable(true)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setOptions(
           pht('Prevent Dangerous Changes'),
           pht('Allow Dangerous Changes'))
@@ -313,7 +313,7 @@ final class DiffusionRepositoryEditEngine
         ->setKey('allowEnormousChanges')
         ->setLabel(pht('Allow Enormous Changes'))
         ->setIsCopyable(true)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setOptions(
           pht('Prevent Enormous Changes'),
           pht('Allow Enormous Changes'))
@@ -326,7 +326,7 @@ final class DiffusionRepositoryEditEngine
         ->setKey('status')
         ->setLabel(pht('Status'))
         ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_ACTIVATE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setOptions(PhabricatorRepository::getStatusNameMap())
         ->setDescription(pht('Active or inactive status.'))
         ->setConduitDescription(pht('Active or deactivate the repository.'))

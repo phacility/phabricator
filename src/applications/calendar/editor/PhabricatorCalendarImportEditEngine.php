@@ -101,7 +101,7 @@ final class PhabricatorCalendarImportEditEngine
         ->setDescription(pht('Disable the import.'))
         ->setTransactionType(
           PhabricatorCalendarImportDisableTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setConduitDescription(pht('Disable or restore the import.'))
         ->setConduitTypeDescription(pht('True to cancel the import.'))
         ->setValue($object->getIsDisabled()),
@@ -111,7 +111,7 @@ final class PhabricatorCalendarImportEditEngine
         ->setDescription(pht('Delete all events from this source.'))
         ->setTransactionType(
           PhabricatorCalendarImportDisableTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setConduitDescription(pht('Disable or restore the import.'))
         ->setConduitTypeDescription(pht('True to delete imported events.'))
         ->setValue(false),
@@ -121,7 +121,7 @@ final class PhabricatorCalendarImportEditEngine
         ->setDescription(pht('Reload events imported from this source.'))
         ->setTransactionType(
           PhabricatorCalendarImportDisableTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setConduitDescription(pht('Disable or restore the import.'))
         ->setConduitTypeDescription(pht('True to reload the import.'))
         ->setValue(false),
