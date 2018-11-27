@@ -149,15 +149,16 @@ final class LegalpadDocumentSignController extends LegalpadController {
     }
 
     $errors = array();
+    $hisec_token = null;
     if ($request->isFormOrHisecPost() && !$has_signed) {
 
       // Require two-factor auth to sign legal documents.
       if ($viewer->isLoggedIn()) {
-        $engine = new PhabricatorAuthSessionEngine();
-        $engine->requireHighSecuritySession(
-          $viewer,
-          $request,
-          '/'.$document->getMonogram());
+        $hisec_token = id(new PhabricatorAuthSessionEngine())
+          ->requireHighSecurityToken(
+            $viewer,
+            $request,
+            $document->getURI());
       }
 
       list($form_data, $errors, $field_errors) = $this->readSignatureForm(
