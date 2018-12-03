@@ -13,6 +13,10 @@ final class DiffusionRepositoryAutomationManagementPanel
     return 800;
   }
 
+  public function getManagementPanelGroupKey() {
+    return DiffusionRepositoryManagementBuildsPanelGroup::PANELGROUPKEY;
+  }
+
   public function shouldEnableForRepository(
     PhabricatorRepository $repository) {
     return $repository->isGit();
@@ -27,16 +31,58 @@ final class DiffusionRepositoryAutomationManagementPanel
   public function getManagementPanelIcon() {
     $repository = $this->getRepository();
 
+    if (!$repository->canPerformAutomation()) {
+      return 'fa-truck grey';
+    }
+
     $blueprint_phids = $repository->getAutomationBlueprintPHIDs();
+    if (!$blueprint_phids) {
+      return 'fa-truck grey';
+    }
 
     $is_authorized = DrydockAuthorizationQuery::isFullyAuthorized(
       $repository->getPHID(),
       $blueprint_phids);
     if (!$is_authorized) {
-      return 'fa-exclamation-triangle';
+      return 'fa-exclamation-triangle yellow';
     }
 
     return 'fa-truck';
+  }
+
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $can_test = $can_edit && $repository->canPerformAutomation();
+
+    $automation_uri = $this->getEditPageURI();
+    $test_uri = $repository->getPathURI('edit/testautomation/');
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setName(pht('Edit Automation'))
+        ->setHref($automation_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-gamepad')
+        ->setName(pht('Test Configuration'))
+        ->setWorkflow(true)
+        ->setDisabled(!$can_test)
+        ->setHref($test_uri));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -58,33 +104,7 @@ final class DiffusionRepositoryAutomationManagementPanel
 
     $view->addProperty(pht('Automation'), $blueprint_view);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $can_test = $can_edit && $repository->canPerformAutomation();
-
-    $automation_uri = $this->getEditPageURI();
-    $test_uri = $repository->getPathURI('edit/testautomation/');
-
-    $edit = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-pencil')
-      ->setText(pht('Edit'))
-      ->setHref($automation_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
-
-    $test = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-gamepad')
-      ->setText(pht('Test Config'))
-      ->setWorkflow(true)
-      ->setDisabled(!$can_test)
-      ->setHref($test_uri);
-
-    return $this->newBox(pht('Automation'), $view, array($edit, $test));
+    return $this->newBox(pht('Automation'), $view);
   }
 
 }

@@ -153,7 +153,7 @@ final class DrydockBlueprintEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('type')
         ->setLabel(pht('Type'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           DrydockBlueprintTypeTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('When creating a blueprint, set the type.'))

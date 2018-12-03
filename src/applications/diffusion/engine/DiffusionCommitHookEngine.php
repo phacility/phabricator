@@ -39,6 +39,7 @@ final class DiffusionCommitHookEngine extends Phobject {
   private $emailPHIDs = array();
   private $changesets = array();
   private $changesetsSize = 0;
+  private $filesizeCache = array();
 
 
 /* -(  Config  )------------------------------------------------------------- */
@@ -162,6 +163,25 @@ final class DiffusionCommitHookEngine extends Phobject {
 
       if (!$is_initial_import) {
         $this->applyHeraldRefRules($ref_updates);
+      }
+
+      try {
+        if (!$is_initial_import) {
+          $this->rejectOversizedFiles($content_updates);
+        }
+      } catch (DiffusionCommitHookRejectException $ex) {
+        // If we're rejecting oversized files, flag everything.
+        $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_OVERSIZED;
+        throw $ex;
+      }
+
+      try {
+        if (!$is_initial_import) {
+          $this->rejectCommitsAffectingTooManyPaths($content_updates);
+        }
+      } catch (DiffusionCommitHookRejectException $ex) {
+        $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_TOUCHES;
+        throw $ex;
       }
 
       try {
@@ -1253,6 +1273,92 @@ final class DiffusionCommitHookEngine extends Phobject {
     $info = $this->loadChangesetsForCommit($identifier);
     list($changesets, $size) = $info;
     return $changesets;
+  }
+
+  private function rejectOversizedFiles(array $content_updates) {
+    $repository = $this->getRepository();
+
+    $limit = $repository->getFilesizeLimit();
+    if (!$limit) {
+      return;
+    }
+
+    foreach ($content_updates as $update) {
+      $identifier = $update->getRefNew();
+
+      $sizes = $this->getFileSizesForCommit($identifier);
+
+      foreach ($sizes as $path => $size) {
+        if ($size <= $limit) {
+          continue;
+        }
+
+        $message = pht(
+          'OVERSIZED FILE'.
+          "\n".
+          'This repository ("%s") is configured with a maximum individual '.
+          'file size limit, but you are pushing a change ("%s") which causes '.
+          'the size of a file ("%s") to exceed the limit. The commit makes '.
+          'the file %s bytes long, but the limit for this repository is '.
+          '%s bytes.',
+          $repository->getDisplayName(),
+          $identifier,
+          $path,
+          new PhutilNumber($size),
+          new PhutilNumber($limit));
+
+        throw new DiffusionCommitHookRejectException($message);
+      }
+    }
+  }
+
+  private function rejectCommitsAffectingTooManyPaths(array $content_updates) {
+    $repository = $this->getRepository();
+
+    $limit = $repository->getTouchLimit();
+    if (!$limit) {
+      return;
+    }
+
+    foreach ($content_updates as $update) {
+      $identifier = $update->getRefNew();
+
+      $sizes = $this->getFileSizesForCommit($identifier);
+      if (count($sizes) > $limit) {
+        $message = pht(
+          'COMMIT AFFECTS TOO MANY PATHS'.
+          "\n".
+          'This repository ("%s") is configured with a touched files limit '.
+          'that caps the maximum number of paths any single commit may '.
+          'affect. You are pushing a change ("%s") which exceeds this '.
+          'limit: it affects %s paths, but the largest number of paths any '.
+          'commit may affect is %s paths.',
+          $repository->getDisplayName(),
+          $identifier,
+          phutil_count($sizes),
+          new PhutilNumber($limit));
+
+        throw new DiffusionCommitHookRejectException($message);
+      }
+    }
+  }
+
+  public function getFileSizesForCommit($identifier) {
+    if (!isset($this->filesizeCache[$identifier])) {
+      $file_sizes = $this->loadFileSizesForCommit($identifier);
+      $this->filesizeCache[$identifier] = $file_sizes;
+    }
+
+    return $this->filesizeCache[$identifier];
+  }
+
+  private function loadFileSizesForCommit($identifier) {
+    $repository = $this->getRepository();
+
+    return id(new DiffusionLowLevelFilesizeQuery())
+      ->setRepository($repository)
+      ->withIdentifier($identifier)
+      ->execute();
   }
 
   public function loadCommitRefForCommit($identifier) {

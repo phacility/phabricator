@@ -32,7 +32,7 @@ abstract class PhabricatorPackagesQuery
       throw new PhabricatorEmptyQueryException();
     }
 
-    return implode(' OR ', $parts);
+    return qsprintf($conn, '%LO', $parts);
   }
 
 }

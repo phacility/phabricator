@@ -38,7 +38,7 @@ final class ConpherenceParticipantQuery extends PhabricatorOffsetPagedQuery {
         $this->participantPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function buildOrderClause(AphrontDatabaseConnection $conn) {

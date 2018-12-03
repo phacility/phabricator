@@ -72,20 +72,35 @@ final class DifferentialReviewersField
       return array();
     }
 
+    $all_resigned = true;
+    $all_disabled = true;
+    $any_reviewers = false;
+
     foreach ($this->getValue() as $reviewer) {
-      if (!$handles[$reviewer->getReviewerPHID()]->isDisabled()) {
-        return array();
+      $reviewer_phid = $reviewer->getReviewerPHID();
+
+      $any_reviewers = true;
+
+      if (!$handles[$reviewer_phid]->isDisabled()) {
+        $all_disabled = false;
+      }
+
+      if (!$reviewer->isResigned()) {
+        $all_resigned = false;
       }
     }
 
     $warnings = array();
-    if ($this->getValue()) {
+    if (!$any_reviewers) {
+      $warnings[] = pht(
+        'This revision needs review, but there are no reviewers specified.');
+    } else if ($all_disabled) {
       $warnings[] = pht(
         'This revision needs review, but all specified reviewers are '.
         'disabled or inactive.');
-    } else {
+    } else if ($all_resigned) {
       $warnings[] = pht(
-        'This revision needs review, but there are no reviewers specified.');
+        'This revision needs review, but all reviewers have resigned.');
     }
 
     return $warnings;

@@ -517,13 +517,14 @@ abstract class LiskDAO extends Phobject
 
 
   protected function loadRawDataWhere($pattern /* , $args... */) {
-    $connection = $this->establishConnection('r');
+    $conn = $this->establishConnection('r');
 
-    $lock_clause = '';
-    if ($connection->isReadLocking()) {
-      $lock_clause = 'FOR UPDATE';
-    } else if ($connection->isWriteLocking()) {
-      $lock_clause = 'LOCK IN SHARE MODE';
+    if ($conn->isReadLocking()) {
+      $lock_clause = qsprintf($conn, 'FOR UPDATE');
+    } else if ($conn->isWriteLocking()) {
+      $lock_clause = qsprintf($conn, 'LOCK IN SHARE MODE');
+    } else {
+      $lock_clause = qsprintf($conn, '');
     }
 
     $args = func_get_args();
@@ -534,9 +535,7 @@ abstract class LiskDAO extends Phobject
     array_push($args, $lock_clause);
     array_unshift($args, $pattern);
 
-    return call_user_func_array(
-      array($connection, 'queryData'),
-      $args);
+    return call_user_func_array(array($conn, 'queryData'), $args);
   }
 
 
@@ -1150,11 +1149,10 @@ abstract class LiskDAO extends Phobject
         $map[$key] = qsprintf($conn, '%C = %ns', $key, $value);
       }
     }
-    $map = implode(', ', $map);
 
     $id = $this->getID();
     $conn->query(
-      'UPDATE %R SET %Q WHERE %C = '.(is_int($id) ? '%d' : '%s'),
+      'UPDATE %R SET %LQ WHERE %C = '.(is_int($id) ? '%d' : '%s'),
       $this,
       $map,
       $this->getIDKeyForUse(),
@@ -1256,11 +1254,24 @@ abstract class LiskDAO extends Phobject
           $parameter_exception);
       }
     }
-    $data = implode(', ', $data);
+
+    switch ($mode) {
+      case 'INSERT':
+        $verb = qsprintf($conn, 'INSERT');
+        break;
+      case 'REPLACE':
+        $verb = qsprintf($conn, 'REPLACE');
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'Insert mode verb "%s" is not recognized, use INSERT or REPLACE.',
+            $mode));
+    }
 
     $conn->query(
-      '%Q INTO %R (%LC) VALUES (%Q)',
-      $mode,
+      '%Q INTO %R (%LC) VALUES (%LQ)',
+      $verb,
       $this,
       $columns,
       $data);
@@ -1641,6 +1652,11 @@ abstract class LiskDAO extends Phobject
 
     $now = PhabricatorTime::getNow();
     foreach ($connections as $key => $connection) {
+      // If the connection is not idle, never consider it inactive.
+      if (!$connection->isIdle()) {
+        continue;
+      }
+
       $last_active = $connection->getLastActiveEpoch();
 
       $idle_duration = ($now - $last_active);
@@ -1657,6 +1673,18 @@ abstract class LiskDAO extends Phobject
     $connections = self::$connections;
 
     foreach ($connections as $key => $connection) {
+      self::closeConnection($key);
+    }
+  }
+
+  public static function closeIdleConnections() {
+    $connections = self::$connections;
+
+    foreach ($connections as $key => $connection) {
+      if (!$connection->isIdle()) {
+        continue;
+      }
+
       self::closeConnection($key);
     }
   }

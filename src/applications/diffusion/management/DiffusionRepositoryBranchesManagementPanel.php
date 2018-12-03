@@ -19,7 +19,18 @@ final class DiffusionRepositoryBranchesManagementPanel
   }
 
   public function getManagementPanelIcon() {
-    return 'fa-code-fork';
+    $repository = $this->getRepository();
+
+    $has_any =
+      $repository->getDetail('default-branch') ||
+      $repository->getDetail('branch-filter') ||
+      $repository->getDetail('close-commits-filter');
+
+    if ($has_any) {
+      return 'fa-code-fork';
+    } else {
+      return 'fa-code-fork grey';
+    }
   }
 
   protected function getEditEngineFieldKeys() {
@@ -28,6 +39,30 @@ final class DiffusionRepositoryBranchesManagementPanel
       'trackOnly',
       'autocloseOnly',
     );
+  }
+
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $branches_uri = $this->getEditPageURI();
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setName(pht('Edit Branches'))
+        ->setHref($branches_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -61,22 +96,7 @@ final class DiffusionRepositoryBranchesManagementPanel
 
     $view->addProperty(pht('Autoclose Only'), $autoclose_only);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $branches_uri = $this->getEditPageURI();
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-pencil')
-      ->setText(pht('Edit'))
-      ->setHref($branches_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
-
-    $content[] = $this->newBox(pht('Branches'), $view, array($button));
+    $content[] = $this->newBox(pht('Branches'), $view);
 
     // Branch Autoclose Table
     if (!$repository->isImporting()) {

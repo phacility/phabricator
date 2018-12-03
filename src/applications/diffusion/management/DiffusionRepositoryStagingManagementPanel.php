@@ -13,20 +13,55 @@ final class DiffusionRepositoryStagingManagementPanel
     return 700;
   }
 
+  public function getManagementPanelGroupKey() {
+    return DiffusionRepositoryManagementBuildsPanelGroup::PANELGROUPKEY;
+  }
+
   public function shouldEnableForRepository(
     PhabricatorRepository $repository) {
     return $repository->isGit();
   }
 
-
   public function getManagementPanelIcon() {
-    return 'fa-upload';
+    $repository = $this->getRepository();
+
+    $staging_uri = $repository->getStagingURI();
+
+    if ($staging_uri) {
+      return 'fa-upload';
+    } else {
+      return 'fa-upload grey';
+    }
   }
 
   protected function getEditEngineFieldKeys() {
     return array(
       'stagingAreaURI',
     );
+  }
+
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $staging_uri = $this->getEditPageURI();
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setName(pht('Edit Staging'))
+        ->setHref($staging_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -43,22 +78,7 @@ final class DiffusionRepositoryStagingManagementPanel
 
     $view->addProperty(pht('Staging Area URI'), $staging_uri);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $staging_uri = $this->getEditPageURI();
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-pencil')
-      ->setText(pht('Edit'))
-      ->setHref($staging_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
-
-    return $this->newBox(pht('Staging Area'), $view, array($button));
+    return $this->newBox(pht('Staging Area'), $view);
   }
 
 }

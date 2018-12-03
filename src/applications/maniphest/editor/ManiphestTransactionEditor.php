@@ -471,27 +471,28 @@ final class ManiphestTransactionEditor
     // be worth evaluating is to use "CASE". Another approach is to disable
     // strict mode for this query.
 
-    $extra_columns = array(
-      'phid' => '""',
-      'authorPHID' => '""',
-      'status' => '""',
-      'priority' => 0,
-      'title' => '""',
-      'description' => '""',
-      'dateCreated' => 0,
-      'dateModified' => 0,
-      'mailKey' => '""',
-      'viewPolicy' => '""',
-      'editPolicy' => '""',
-      'ownerOrdering' => '""',
-      'spacePHID' => '""',
-      'bridgedObjectPHID' => '""',
-      'properties' => '""',
-      'points' => 0,
-      'subtype' => '""',
-    );
+    $default_str = qsprintf($conn, '%s', '');
+    $default_int = qsprintf($conn, '%d', 0);
 
-    $defaults = implode(', ', $extra_columns);
+    $extra_columns = array(
+      'phid' => $default_str,
+      'authorPHID' => $default_str,
+      'status' => $default_str,
+      'priority' => $default_int,
+      'title' => $default_str,
+      'description' => $default_str,
+      'dateCreated' => $default_int,
+      'dateModified' => $default_int,
+      'mailKey' => $default_str,
+      'viewPolicy' => $default_str,
+      'editPolicy' => $default_str,
+      'ownerOrdering' => $default_str,
+      'spacePHID' => $default_str,
+      'bridgedObjectPHID' => $default_str,
+      'properties' => $default_str,
+      'points' => $default_int,
+      'subtype' => $default_str,
+    );
 
     $sql = array();
     $offset = 0;
@@ -520,9 +521,9 @@ final class ManiphestTransactionEditor
 
       $sql[] = qsprintf(
         $conn,
-        '(%d, %Q, %f)',
+        '(%d, %LQ, %f)',
         $id,
-        $defaults,
+        $extra_columns,
         $subpriority);
 
       $offset++;
@@ -531,10 +532,10 @@ final class ManiphestTransactionEditor
     foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
       queryfx(
         $conn,
-        'INSERT INTO %T (id, %Q, subpriority) VALUES %Q
+        'INSERT INTO %T (id, %LC, subpriority) VALUES %LQ
           ON DUPLICATE KEY UPDATE subpriority = VALUES(subpriority)',
         $task->getTableName(),
-        implode(', ', array_keys($extra_columns)),
+        array_keys($extra_columns),
         $chunk);
     }
 

@@ -21,6 +21,7 @@ final class DiffusionBranchQueryConduitAPIMethod
       'limit' => 'optional int',
       'offset' => 'optional int',
       'contains' => 'optional string',
+      'patterns' => 'optional list<string>',
     );
   }
 
@@ -31,15 +32,17 @@ final class DiffusionBranchQueryConduitAPIMethod
     $contains = $request->getValue('contains');
     if (strlen($contains)) {
 
-      // See PHI720. If the standard "branch" field is provided, use it
-      // as the "pattern" argument to "git branch ..." to let callers test
-      // for reachability from a particular branch head.
-      $pattern = $request->getValue('branch');
-      if (strlen($pattern)) {
-        $pattern_argv = array($pattern);
-      } else {
-        $pattern_argv = array();
-      }
+      // See PHI958 (and, earlier, PHI720). If "patterns" are provided, pass
+      // them to "git branch ..." to let callers test for reachability from
+      // particular branch heads.
+      $patterns_argv = $request->getValue('patterns', array());
+      PhutilTypeSpec::checkMap(
+        array(
+          'patterns' => $patterns_argv,
+        ),
+        array(
+          'patterns' => 'list<string>',
+        ));
 
       // NOTE: We can't use DiffusionLowLevelGitRefQuery here because
       // `git for-each-ref` does not support `--contains`.
@@ -47,14 +50,14 @@ final class DiffusionBranchQueryConduitAPIMethod
         list($stdout) = $repository->execxLocalCommand(
           'branch --verbose --no-abbrev --contains %s -- %Ls',
           $contains,
-          $pattern_argv);
+          $patterns_argv);
         $ref_map = DiffusionGitBranch::parseLocalBranchOutput(
           $stdout);
       } else {
         list($stdout) = $repository->execxLocalCommand(
           'branch -r --verbose --no-abbrev --contains %s -- %Ls',
           $contains,
-          $pattern_argv);
+          $patterns_argv);
         $ref_map = DiffusionGitBranch::parseRemoteBranchOutput(
           $stdout,
           DiffusionGitBranch::DEFAULT_GIT_REMOTE);

@@ -1145,10 +1145,10 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->newStandardEditField();
     }
 
-    if (!$this->shouldAppearInEditView()) {
-      $conduit_only = true;
+    if ($this->shouldAppearInEditView()) {
+      $form_field = true;
     } else {
-      $conduit_only = false;
+      $form_field = false;
     }
 
     $bulk_label = $this->getBulkEditLabel();
@@ -1160,7 +1160,7 @@ abstract class PhabricatorCustomField extends Phobject {
       ->setBulkEditLabel($bulk_label)
       ->setDescription($this->getFieldDescription())
       ->setTransactionType($this->getApplicationTransactionType())
-      ->setIsConduitOnly($conduit_only)
+      ->setIsFormField($form_field)
       ->setValue($this->getNewValueForApplicationTransactions());
   }
 

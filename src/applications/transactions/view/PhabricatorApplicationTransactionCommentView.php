@@ -329,7 +329,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         $key = $comment_action->getKey();
         $label = $comment_action->getLabel();
 
-
         $action_map[$key] = array(
           'key' => $key,
           'label' => $label,
@@ -339,6 +338,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'groupKey' => $comment_action->getGroupKey(),
           'conflictKey' => $comment_action->getConflictKey(),
           'auralLabel' => pht('Remove Action: %s', $label),
+          'buttonText' => $comment_action->getSubmitButtonText(),
         );
 
         $type_map[$key] = $comment_action;
@@ -404,6 +404,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'showPreview' => $this->getShowPreview(),
           'actionURI' => $this->getAction(),
           'drafts' => $draft_keys,
+          'defaultButtonText' => $this->getSubmitButtonName(),
         ));
     }
 
@@ -426,6 +427,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         id(new AphrontFormSubmitControl())
           ->addClass('phui-comment-fullwidth-control')
           ->addClass('phui-comment-submit-control')
+          ->addSigil('submit-transactions')
           ->setValue($this->getSubmitButtonName()));
 
     return $form;

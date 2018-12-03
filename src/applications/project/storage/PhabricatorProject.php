@@ -467,7 +467,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
         queryfx(
           $conn_w,
-          'INSERT INTO %T (projectID, token) VALUES %Q',
+          'INSERT INTO %T (projectID, token) VALUES %LQ',
           $table,
           $chunk);
       }

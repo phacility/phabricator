@@ -123,7 +123,7 @@ final class PhabricatorSearchManagementNgramsWorkflow
         queryfx(
           $conn,
           'INSERT IGNORE INTO %T (ngram, needsCollection)
-            VALUES %Q',
+            VALUES %LQ',
           $engine->getCommonNgramsTableName(),
           $chunk);
       }

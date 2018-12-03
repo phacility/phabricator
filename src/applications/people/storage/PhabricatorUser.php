@@ -458,11 +458,14 @@ final class PhabricatorUser
   }
 
   public function loadPrimaryEmail() {
+    $email = new PhabricatorUserEmail();
+    $conn = $email->establishConnection('r');
+
     return $this->loadOneRelative(
-      new PhabricatorUserEmail(),
+      $email,
       'userPHID',
       'getPHID',
-      '(isPrimary = 1)');
+      qsprintf($conn, '(isPrimary = 1)'));
   }
 
 
@@ -663,9 +666,9 @@ final class PhabricatorUser
     if ($sql) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (userID, token) VALUES %Q',
+        'INSERT INTO %T (userID, token) VALUES %LQ',
         $table,
-        implode(', ', $sql));
+        $sql);
     }
   }
 

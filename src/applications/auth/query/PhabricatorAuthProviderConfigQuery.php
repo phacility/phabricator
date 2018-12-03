@@ -54,26 +54,26 @@ final class PhabricatorAuthProviderConfigQuery
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->providerClasses) {
+    if ($this->providerClasses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'providerClass IN (%Ls)',
         $this->providerClasses);
     }
@@ -84,16 +84,16 @@ final class PhabricatorAuthProviderConfigQuery
         break;
       case self::STATUS_ENABLED:
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'isEnabled = 1');
         break;
       default:
         throw new Exception(pht("Unknown status '%s'!", $status));
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

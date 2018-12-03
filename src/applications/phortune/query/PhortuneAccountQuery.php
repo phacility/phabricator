@@ -42,20 +42,12 @@ final class PhortuneAccountQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhortuneAccount();
+  }
+
   protected function loadPage() {
-    $table = new PhortuneAccount();
-    $conn = $table->establishConnection('r');
-
-    $rows = queryfx_all(
-      $conn,
-      'SELECT a.* FROM %T a %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn),
-      $this->buildWhereClause($conn),
-      $this->buildOrderClause($conn),
-      $this->buildLimitClause($conn));
-
-    return $table->loadAllFromArray($rows);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $accounts) {
@@ -73,39 +65,37 @@ final class PhortuneAccountQuery
     return $accounts;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    $where[] = $this->buildPagingClause($conn);
-
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'a.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'a.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->memberPHIDs) {
+    if ($this->memberPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'm.dst IN (%Ls)',
         $this->memberPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
-    if ($this->memberPHIDs) {
+    if ($this->memberPHIDs !== null) {
       $joins[] = qsprintf(
         $conn,
         'LEFT JOIN %T m ON a.phid = m.src AND m.type = %d',
@@ -113,11 +103,15 @@ final class PhortuneAccountQuery
         PhortuneAccountHasMemberEdgeType::EDGECONST);
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPhortuneApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'a';
   }
 
 }

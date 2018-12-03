@@ -444,8 +444,8 @@ final class PhabricatorCalendarEventQuery
 
       $where[] = qsprintf(
         $conn,
-        '%Q',
-        implode(' OR ', $sql));
+        '%LO',
+        $sql);
     }
 
     if ($this->isStub !== null) {
@@ -509,14 +509,9 @@ final class PhabricatorCalendarEventQuery
     return parent::shouldGroupQueryResultRows();
   }
 
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'event.phid';
-  }
-
   public function getQueryApplicationClass() {
     return 'PhabricatorCalendarApplication';
   }
-
 
   protected function willFilterPage(array $events) {
     $instance_of_event_phids = array();

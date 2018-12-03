@@ -30,36 +30,35 @@ final class HeraldTranscriptQuery
 
   protected function loadPage() {
     $transcript = new HeraldTranscript();
-    $conn_r = $transcript->establishConnection('r');
+    $conn = $transcript->establishConnection('r');
 
     // NOTE: Transcripts include a potentially enormous amount of serialized
     // data, so we're loading only some of the fields here if the caller asked
     // for partial records.
 
     if ($this->needPartialRecords) {
-      $fields = implode(
-        ', ',
-        array(
-          'id',
-          'phid',
-          'objectPHID',
-          'time',
-          'duration',
-          'dryRun',
-          'host',
-        ));
+      $fields = array(
+        'id',
+        'phid',
+        'objectPHID',
+        'time',
+        'duration',
+        'dryRun',
+        'host',
+      );
+      $fields = qsprintf($conn, '%LC', $fields);
     } else {
-      $fields = '*';
+      $fields = qsprintf($conn, '*');
     }
 
     $rows = queryfx_all(
-      $conn_r,
+      $conn,
       'SELECT %Q FROM %T t %Q %Q %Q',
       $fields,
       $transcript->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
+      $this->buildWhereClause($conn),
+      $this->buildOrderClause($conn),
+      $this->buildLimitClause($conn));
 
     $transcripts = $transcript->loadAllFromArray($rows);
 
@@ -91,33 +90,33 @@ final class HeraldTranscriptQuery
     return $transcripts;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->objectPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'objectPHID in (%Ls)',
         $this->objectPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

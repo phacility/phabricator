@@ -117,7 +117,8 @@ final class PhabricatorRepositoryManagementClusterizeWorkflow
       $xactions = array();
 
       $xactions[] = id(new PhabricatorRepositoryTransaction())
-        ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_SERVICE)
+        ->setTransactionType(
+          PhabricatorRepositoryServiceTransaction::TRANSACTIONTYPE)
         ->setNewValue($service_phid);
 
       id(new PhabricatorRepositoryEditor())

@@ -27,9 +27,10 @@ final class DiffusionRepositoryBasicsManagementPanel
     );
   }
 
-  private function buildActionMenu() {
+  public function buildManagementPanelCurtain() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
+
     $action_list = id(new PhabricatorActionListView())
       ->setViewer($viewer);
 
@@ -44,27 +45,34 @@ final class DiffusionRepositoryBasicsManagementPanel
     $encoding_uri = $this->getEditPageURI('encoding');
     $dangerous_uri = $repository->getPathURI('edit/dangerous/');
     $enormous_uri = $repository->getPathURI('edit/enormous/');
+    $update_uri = $repository->getPathURI('edit/update/');
 
     if ($repository->isTracked()) {
+      $activate_icon = 'fa-ban';
       $activate_label = pht('Deactivate Repository');
     } else {
+      $activate_icon = 'fa-check';
       $activate_label = pht('Activate Repository');
     }
 
     $should_dangerous = $repository->shouldAllowDangerousChanges();
     if ($should_dangerous) {
+      $dangerous_icon = 'fa-shield';
       $dangerous_name = pht('Prevent Dangerous Changes');
       $can_dangerous = $can_edit;
     } else {
+      $dangerous_icon = 'fa-exclamation-triangle';
       $dangerous_name = pht('Allow Dangerous Changes');
       $can_dangerous = ($can_edit && $repository->canAllowDangerousChanges());
     }
 
     $should_enormous = $repository->shouldAllowEnormousChanges();
     if ($should_enormous) {
+      $enormous_icon = 'fa-shield';
       $enormous_name = pht('Prevent Enormous Changes');
       $can_enormous = $can_edit;
     } else {
+      $enormous_icon = 'fa-exclamation-triangle';
       $enormous_name = pht('Allow Enormous Changes');
       $can_enormous = ($can_edit && $repository->canAllowEnormousChanges());
     }
@@ -73,12 +81,14 @@ final class DiffusionRepositoryBasicsManagementPanel
       id(new PhabricatorActionView())
         ->setName(pht('Edit Basic Information'))
         ->setHref($edit_uri)
+        ->setIcon('fa-pencil')
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
     $action_list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Text Encoding'))
+        ->setIcon('fa-text-width')
         ->setHref($encoding_uri)
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
@@ -87,6 +97,7 @@ final class DiffusionRepositoryBasicsManagementPanel
       id(new PhabricatorActionView())
         ->setName($dangerous_name)
         ->setHref($dangerous_uri)
+        ->setIcon($dangerous_icon)
         ->setDisabled(!$can_dangerous)
         ->setWorkflow(true));
 
@@ -94,15 +105,25 @@ final class DiffusionRepositoryBasicsManagementPanel
       id(new PhabricatorActionView())
         ->setName($enormous_name)
         ->setHref($enormous_uri)
+        ->setIcon($enormous_icon)
         ->setDisabled(!$can_enormous)
         ->setWorkflow(true));
 
     $action_list->addAction(
       id(new PhabricatorActionView())
-        ->setHref($activate_uri)
         ->setName($activate_label)
+        ->setHref($activate_uri)
+        ->setIcon($activate_icon)
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+      ->setName(pht('Update Now'))
+      ->setHref($update_uri)
+      ->setIcon('fa-refresh')
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit));
 
     $action_list->addAction(
       id(new PhabricatorActionView())
@@ -112,25 +133,18 @@ final class DiffusionRepositoryBasicsManagementPanel
       id(new PhabricatorActionView())
         ->setName(pht('Delete Repository'))
         ->setHref($delete_uri)
+        ->setIcon('fa-times')
         ->setColor(PhabricatorActionView::RED)
         ->setDisabled(true)
         ->setWorkflow(true));
 
-    return $action_list;
+    return $this->newCurtainView()
+      ->setActionList($action_list);
   }
 
   public function buildManagementPanelContent() {
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Actions'))
-      ->setHref('#')
-      ->setIcon('fa-bars')
-      ->addClass('phui-mobile-menu')
-      ->setDropdownMenu($this->buildActionMenu());
-
     $basics = $this->buildBasics();
-    $basics = $this->newBox(pht('Properties'), $basics, array($button));
+    $basics = $this->newBox(pht('Properties'), $basics);
 
     $repository = $this->getRepository();
     $is_new = $repository->isNewlyInitialized();
@@ -254,7 +268,6 @@ final class DiffusionRepositoryBasicsManagementPanel
   private function buildStatus() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
-    $update_uri = $repository->getPathURI('edit/update/');
 
     $view = id(new PHUIPropertyListView())
       ->setViewer($viewer);
@@ -274,20 +287,7 @@ final class DiffusionRepositoryBasicsManagementPanel
       $view->addTextContent($raw_error);
     }
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-refresh')
-      ->setText(pht('Update Now'))
-      ->setWorkflow(true)
-      ->setDisabled(!$can_edit)
-      ->setHref($update_uri);
-
-    return $this->newBox(pht('Status'), $view, array($button));
+    return $this->newBox(pht('Status'), $view);
   }
 
   private function buildRepositoryUpdateInterval(

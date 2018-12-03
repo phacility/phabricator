@@ -68,13 +68,17 @@ final class DiffusionRepositoryManagePanelsController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
       ->setMainColumn($content);
+
+    $curtain = $panel->buildManagementPanelCurtain();
+    if ($curtain) {
+      $view->setCurtain($curtain);
+    }
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($view);
   }
 
@@ -89,20 +93,45 @@ final class DiffusionRepositoryManagePanelsController
     $nav = id(new AphrontSideNavFilterView())
       ->setBaseURI($base_uri);
 
-    foreach ($panels as $panel) {
-      $key = $panel->getManagementPanelKey();
-      $label = $panel->getManagementPanelLabel();
-      $icon = $panel->getManagementPanelIcon();
-      $href = $panel->getPanelNavigationURI();
+    $groups = DiffusionRepositoryManagementPanelGroup::getAllPanelGroups();
+    $panel_groups = mgroup($panels, 'getManagementPanelGroupKey');
+    $other_key = DiffusionRepositoryManagementOtherPanelGroup::PANELGROUPKEY;
 
-      $item = id(new PHUIListItemView())
-        ->setKey($key)
-        ->setName($label)
-        ->setType(PHUIListItemView::TYPE_LINK)
-        ->setHref($href)
-        ->setIcon($icon);
+    foreach ($groups as $group_key => $group) {
+      // If this is the "Other" group, include everything else that isn't in
+      // some actual group.
+      if ($group_key === $other_key) {
+        $group_panels = array_mergev($panel_groups);
+        $panel_groups = array();
+      } else {
+        $group_panels = idx($panel_groups, $group_key);
+        unset($panel_groups[$group_key]);
+      }
 
-      $nav->addMenuItem($item);
+      if (!$group_panels) {
+        continue;
+      }
+
+      $label = $group->getManagementPanelGroupLabel();
+      if ($label) {
+        $nav->addLabel($label);
+      }
+
+      foreach ($group_panels as $panel) {
+        $key = $panel->getManagementPanelKey();
+        $label = $panel->getManagementPanelLabel();
+        $icon = $panel->getManagementPanelIcon();
+        $href = $panel->getPanelNavigationURI();
+
+        $item = id(new PHUIListItemView())
+          ->setKey($key)
+          ->setName($label)
+          ->setType(PHUIListItemView::TYPE_LINK)
+          ->setHref($href)
+          ->setIcon($icon);
+
+        $nav->addMenuItem($item);
+      }
     }
 
     $nav->selectFilter($selected);

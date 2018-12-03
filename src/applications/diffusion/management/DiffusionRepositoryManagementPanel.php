@@ -41,13 +41,14 @@ abstract class DiffusionRepositoryManagementPanel
   abstract public function getManagementPanelLabel();
   abstract public function getManagementPanelOrder();
   abstract public function buildManagementPanelContent();
+  public function buildManagementPanelCurtain() { return null; }
 
   public function getManagementPanelIcon() {
     return 'fa-pencil';
   }
 
-  protected function buildManagementPanelActions() {
-    return array();
+  public function getManagementPanelGroupKey() {
+    return DiffusionRepositoryManagementMainPanelGroup::PANELGROUPKEY;
   }
 
   public function shouldEnableForRepository(
@@ -61,22 +62,6 @@ abstract class DiffusionRepositoryManagementPanel
       ->setUniqueMethod('getManagementPanelKey')
       ->setSortMethod('getManagementPanelOrder')
       ->execute();
-  }
-
-  final protected function newBox($header_text, $body, $button = array()) {
-    $header = id(new PHUIHeaderView())
-      ->setHeader($header_text);
-
-    foreach ($button as $link) {
-      $header->addActionLink($link);
-    }
-
-    $view = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
-      ->appendChild($body);
-
-    return $view;
   }
 
   final protected function newTimeline() {
@@ -122,6 +107,38 @@ abstract class DiffusionRepositoryManagementPanel
 
   public function getPanelNavigationURI() {
     return $this->getPanelURI();
+  }
+
+  final protected function newActionList() {
+    $viewer = $this->getViewer();
+    $action_id = celerity_generate_unique_node_id();
+
+    return id(new PhabricatorActionListView())
+      ->setViewer($viewer)
+      ->setID($action_id);
+  }
+
+  final protected function newCurtainView() {
+    $viewer = $this->getViewer();
+
+    return id(new PHUICurtainView())
+      ->setViewer($viewer);
+  }
+
+  final protected function newBox($header_text, $body) {
+    $viewer = $this->getViewer();
+
+    $header = id(new PHUIHeaderView())
+      ->setViewer($viewer)
+      ->setHeader($header_text);
+
+    $view = id(new PHUIObjectBoxView())
+      ->setViewer($viewer)
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($body);
+
+    return $view;
   }
 
 }

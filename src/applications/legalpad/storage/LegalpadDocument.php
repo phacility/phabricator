@@ -120,7 +120,7 @@ final class LegalpadDocument extends LegalpadDAO
     return 'L'.$this->getID();
   }
 
-  public function getViewURI() {
+  public function getURI() {
     return '/'.$this->getMonogram();
   }
 

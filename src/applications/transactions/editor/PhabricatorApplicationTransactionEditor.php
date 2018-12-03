@@ -869,6 +869,24 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xactions;
   }
 
+  final protected function didCommitTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    foreach ($xactions as $xaction) {
+      $type = $xaction->getTransactionType();
+
+      $xtype = $this->getModularTransactionType($type);
+      if (!$xtype) {
+        continue;
+      }
+
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+      $xtype->didCommitTransaction($object, $xaction->getNewValue());
+    }
+  }
+
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
     return $this;
@@ -1106,6 +1124,9 @@ abstract class PhabricatorApplicationTransactionEditor
         $object->saveTransaction();
         $transaction_open = false;
       }
+
+      $this->didCommitTransactions($object, $xactions);
+
     } catch (Exception $ex) {
       if ($read_locking) {
         $object->endReadLocking();

@@ -43,6 +43,22 @@ JX.behavior('comment-actions', function(config) {
     return null;
   }
 
+  function redraw() {
+    // If any of the stacked actions specify that they change the label for
+    // the "Submit" button, update the button text. Otherwise, return it to
+    // the default text.
+    var button_text = config.defaultButtonText;
+    for (var k in rows) {
+      var action = action_map[k];
+      if (action.buttonText) {
+        button_text = action.buttonText;
+      }
+    }
+
+    var button_node = JX.DOM.find(form_node, 'button', 'submit-transactions');
+    JX.DOM.setContent(button_node, button_text);
+  }
+
   function remove_action(key) {
     var row = rows[key];
     if (row) {
@@ -50,6 +66,8 @@ JX.behavior('comment-actions', function(config) {
       row.option.disabled = false;
       delete rows[key];
     }
+
+    redraw();
   }
 
   function serialize_actions() {
@@ -90,6 +108,8 @@ JX.behavior('comment-actions', function(config) {
 
       control = add_row(option);
     }
+
+    redraw();
   }
 
   function onresponse(response) {
@@ -208,6 +228,8 @@ JX.behavior('comment-actions', function(config) {
     });
 
     place_node.parentNode.insertBefore(node, place_node);
+
+    redraw();
 
     force_preview();
 

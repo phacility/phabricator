@@ -49,47 +49,47 @@ final class PhabricatorCalendarEventInviteeQuery
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->eventPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'eventPHID IN (%Ls)',
         $this->eventPHIDs);
     }
 
     if ($this->inviteePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'inviteePHID IN (%Ls)',
         $this->inviteePHIDs);
     }
 
     if ($this->inviterPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'inviterPHID IN (%Ls)',
         $this->inviterPHIDs);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'status = %d',
         $this->statuses);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

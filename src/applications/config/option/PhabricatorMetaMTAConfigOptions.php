@@ -84,14 +84,6 @@ of each approach are:
 EODOC
 ));
 
-    $herald_hints_description = $this->deformat(pht(<<<EODOC
-You can disable the Herald hints in email if users prefer smaller messages.
-These are the links under the header "WHY DID I GET THIS EMAIL?". If you set
-this to `false`, they will not appear in any mail. Users can still navigate to
-the links via the web interface.
-EODOC
-));
-
     $reply_hints_description = $this->deformat(pht(<<<EODOC
 You can disable the hints under "REPLY HANDLER ACTIONS" if users prefer
 smaller messages. The actions themselves will still work properly.
@@ -256,14 +248,6 @@ EODOC
         ->setLocked(true)
         ->setDescription(pht('Domain used for reply email addresses.'))
         ->addExample('phabricator.example.com', ''),
-      $this->newOption('metamta.herald.show-hints', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Show Herald Hints'),
-            pht('No Herald Hints'),
-          ))
-        ->setSummary(pht('Show hints about Herald rules in email.'))
-        ->setDescription($herald_hints_description),
       $this->newOption('metamta.recipients.show-hints', 'bool', true)
         ->setBoolOptions(
           array(

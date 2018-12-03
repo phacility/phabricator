@@ -136,7 +136,7 @@ final class AlmanacBindingEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('service')
         ->setLabel(pht('Service'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           AlmanacBindingServiceTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Service to create a binding for.'))
@@ -146,7 +146,7 @@ final class AlmanacBindingEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('interface')
         ->setLabel(pht('Interface'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           AlmanacBindingInterfaceTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Interface to bind the service to.'))
@@ -156,7 +156,7 @@ final class AlmanacBindingEditEngine
       id(new PhabricatorBoolEditField())
         ->setKey('disabled')
         ->setLabel(pht('Disabled'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           AlmanacBindingDisableTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Disable or enable the binding.'))

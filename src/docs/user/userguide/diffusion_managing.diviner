@@ -236,36 +236,46 @@ fetch from, serve from, and push to.
 These options are covered in detail in @{article:Diffusion User Guide: URIs}.
 
 
-Staging Area
-============
-
-The **Staging Area** panel configures staging areas, used to make proposed
-changes available to build and continuous integration systems.
-
-For more details, see @{article:Harbormaster User Guide}.
-
-
-Automation
-==========
-
-The **Automation** panel configures support for allowing Phabricator to make
-writes directly to the repository, so that it can perform operations like
-automatically landing revisions from the web UI.
-
-For details on repository automation, see
-@{article:Drydock User Guide: Repository Automation}.
-
-
-Symbols
+Limits
 ======
 
-The **Symbols** panel allows you to customize how symbols (like class and
-function names) are linked when viewing code in the repository, and when
-viewing revisions which propose code changes to the repository.
+The **Limits** panel allows you to configure limits and timeouts.
 
-To take advantage of this feature, you need to do additional work to build
-symbol indexes. For details on configuring and populating symbol indexes, see
-@{article:User Guide: Symbol Indexes}.
+**Filesize Limit**: Allows you to set a maximum filesize for any file in the
+repository. If a commit creates a larger file (or modifies an existing file so
+it becomes too large) it will be rejected. This option only applies to hosted
+repositories.
+
+This limit is primarily intended to make it more difficult to accidentally push
+very large files that shouldn't be version controlled (like logs, binaries,
+machine learning data, or media assets). Pushing huge datafiles by mistake can
+make the repository unwieldy by dramatically increasing how much data must be
+transferred over the network to clone it, and simply reverting the changes
+doesn't reduce the impact of this kind of mistake.
+
+**Clone/Fetch Timeout**: Configure the internal timeout for creating copies
+of this repository during operations like intracluster synchronization and
+Drydock working copy construction. This timeout does not affect external
+users.
+
+**Touch Limit**: Apply a limit to the maximum number of paths that any commit
+may touch. If a commit affects more paths than this limit, it will be rejected.
+This option only applies to hosted repositories. Users may work around this
+limit by breaking the commit into several smaller commits which each affect
+fewer paths.
+
+This limit is intended to offer a guard rail against users making silly
+mistakes that create obviously mistaken changes, like copying an entire
+repository into itself and pushing the result. This kind of change can take
+some effort to clean up if it becomes part of repository history.
+
+Note that if you move a file, both the old and new locations count as touched
+paths. You should generally configure this limit to be more than twice the
+number of files you anticipate any user ever legitimately wanting to move in
+a single commit. For example, a limit of `20000` will let users move up to
+10,000 files in a single commit, but will reject users mistakenly trying to
+push a copy of another repository or a directory with a million logfiles or
+whatever other kind of creative nonsense they manage to dream up.
 
 
 Branches
@@ -309,6 +319,38 @@ plans) for this repository.
 When Phabricator discovers a new commit, it can automatically close associated
 revisions and tasks. If you don't want Phabricator to close objects when it
 discovers new commits, disable **Autoclose** for the repository.
+
+
+Staging Area
+============
+
+The **Staging Area** panel configures staging areas, used to make proposed
+changes available to build and continuous integration systems.
+
+For more details, see @{article:Harbormaster User Guide}.
+
+
+Automation
+==========
+
+The **Automation** panel configures support for allowing Phabricator to make
+writes directly to the repository, so that it can perform operations like
+automatically landing revisions from the web UI.
+
+For details on repository automation, see
+@{article:Drydock User Guide: Repository Automation}.
+
+
+Symbols
+======
+
+The **Symbols** panel allows you to customize how symbols (like class and
+function names) are linked when viewing code in the repository, and when
+viewing revisions which propose code changes to the repository.
+
+To take advantage of this feature, you need to do additional work to build
+symbol indexes. For details on configuring and populating symbol indexes, see
+@{article:User Guide: Symbol Indexes}.
 
 
 Repository Identifiers and Names

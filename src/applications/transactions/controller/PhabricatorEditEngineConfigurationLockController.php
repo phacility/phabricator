@@ -79,6 +79,10 @@ EOTEXT
     );
 
     foreach ($fields as $field) {
+      if (!$field->getIsFormField()) {
+        continue;
+      }
+
       if (!$field->getIsLockable()) {
         continue;
       }

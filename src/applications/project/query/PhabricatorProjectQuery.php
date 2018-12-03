@@ -514,7 +514,7 @@ final class PhabricatorProjectQuery
           'name LIKE %>',
           $name_prefix);
       }
-      $where[] = '('.implode(' OR ', $parts).')';
+      $where[] = qsprintf($conn, '%LO', $parts);
     }
 
     if ($this->icons !== null) {
@@ -557,7 +557,7 @@ final class PhabricatorProjectQuery
           $ancestor_path['projectDepth']);
       }
 
-      $where[] = '('.implode(' OR ', $sql).')';
+      $where[] = qsprintf($conn, '%LO', $sql);
 
       $where[] = qsprintf(
         $conn,

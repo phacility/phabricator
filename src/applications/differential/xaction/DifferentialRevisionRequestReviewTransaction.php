@@ -19,6 +19,19 @@ final class DifferentialRevisionRequestReviewTransaction
     }
   }
 
+  protected function getRevisionActionSubmitButtonText(
+    DifferentialRevision $revision) {
+
+    // See PHI975. When the action stack will promote the revision out of
+    // draft, change the button text from "Submit Quietly".
+    if ($revision->isDraft()) {
+      return pht('Publish Revision');
+    }
+
+    return null;
+  }
+
+
   public function getColor() {
     return 'sky';
   }

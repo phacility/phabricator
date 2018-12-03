@@ -150,7 +150,7 @@ final class AlmanacInterfaceEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('device')
         ->setLabel(pht('Device'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           AlmanacInterfaceDeviceTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('When creating an interface, set the device.'))

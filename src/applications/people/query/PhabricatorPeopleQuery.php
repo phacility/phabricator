@@ -268,7 +268,7 @@ final class PhabricatorPeopleQuery
           'user.username LIKE %>',
           $name_prefix);
       }
-      $where[] = '('.implode(' OR ', $parts).')';
+      $where[] = qsprintf($conn, '%LO', $parts);
     }
 
     if ($this->emails !== null) {

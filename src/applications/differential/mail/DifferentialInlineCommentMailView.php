@@ -361,7 +361,7 @@ final class DifferentialInlineCommentMailView
 
     return $parser->render(
       $start - $context,
-      $length + 1 + (2 * $context),
+      $length + (2 * $context),
       array());
   }
 

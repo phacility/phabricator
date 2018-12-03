@@ -4,7 +4,8 @@ final class HarbormasterBuildTarget
   extends HarbormasterDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $buildPHID;
@@ -409,6 +410,87 @@ final class HarbormasterBuildTarget
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the build target.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildPHID')
+        ->setType('phid')
+        ->setDescription(pht('The build the target is associated with.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildStepPHID')
+        ->setType('phid')
+        ->setDescription(pht('The build step the target runs.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Status for the build target.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('epochStarted')
+        ->setType('epoch?')
+        ->setDescription(
+          pht(
+            'Epoch timestamp for target start, if the target '.
+            'has started.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('epochCompleted')
+        ->setType('epoch?')
+        ->setDescription(
+          pht(
+            'Epoch timestamp for target completion, if the target '.
+            'has completed.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildGeneration')
+        ->setType('int')
+        ->setDescription(
+          pht(
+            'Build generation this target belongs to. When builds '.
+            'restart, a new generation with new targets is created.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $status = $this->getTargetStatus();
+
+    $epoch_started = $this->getDateStarted();
+    if ($epoch_started) {
+      $epoch_started = (int)$epoch_started;
+    } else {
+      $epoch_started = null;
+    }
+
+    $epoch_completed = $this->getDateCompleted();
+    if ($epoch_completed) {
+      $epoch_completed = (int)$epoch_completed;
+    } else {
+      $epoch_completed = null;
+    }
+
+    return array(
+      'name' => $this->getName(),
+      'buildPHID' => $this->getBuildPHID(),
+      'buildStepPHID' => $this->getBuildStepPHID(),
+      'status' => array(
+        'value' => $status,
+        'name' => self::getBuildTargetStatusName($status),
+      ),
+      'epochStarted' => $epoch_started,
+      'epochCompleted' => $epoch_completed,
+      'buildGeneration' => (int)$this->getBuildGeneration(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 

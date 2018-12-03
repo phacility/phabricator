@@ -103,26 +103,26 @@ final class ReleephBranchQuery
     return $branches;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->productIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'releephProjectID IN (%Ld)',
         $this->productIDs);
     }
@@ -133,16 +133,16 @@ final class ReleephBranchQuery
         break;
       case self::STATUS_OPEN:
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'isActive = 1');
         break;
       default:
         throw new Exception(pht("Unknown status constant '%s'!", $status));
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

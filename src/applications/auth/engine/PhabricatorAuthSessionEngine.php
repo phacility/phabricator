@@ -127,12 +127,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           u.*
           %Q
         FROM %T u JOIN %T s ON u.phid = s.userPHID
-        AND s.type = %s AND s.sessionKey = %s %Q',
+        AND s.type = %s AND s.sessionKey = %P %Q',
       $cache_selects,
       $user_table->getTableName(),
       $session_table->getTableName(),
       $session_type,
-      $session_key,
+      new PhutilOpaqueEnvelope($session_key),
       $cache_joins);
 
     if (!$info) {
@@ -346,11 +346,43 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
 
   /**
+   * Require the user respond to a high security (MFA) check.
+   *
+   * This method differs from @{method:requireHighSecuritySession} in that it
+   * does not upgrade the user's session as a side effect. This method is
+   * appropriate for one-time checks.
+   *
+   * @param PhabricatorUser User whose session needs to be in high security.
+   * @param AphrontReqeust  Current request.
+   * @param string          URI to return the user to if they cancel.
+   * @return PhabricatorAuthHighSecurityToken Security token.
+   * @task hisec
+   */
+  public function requireHighSecurityToken(
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    $cancel_uri) {
+
+    return $this->newHighSecurityToken(
+      $viewer,
+      $request,
+      $cancel_uri,
+      false,
+      false);
+  }
+
+
+  /**
    * Require high security, or prompt the user to enter high security.
    *
    * If the user's session is in high security, this method will return a
    * token. Otherwise, it will throw an exception which will eventually
    * be converted into a multi-factor authentication workflow.
+   *
+   * This method upgrades the user's session to high security for a short
+   * period of time, and is appropriate if you anticipate they may need to
+   * take multiple high security actions. To perform a one-time check instead,
+   * use @{method:requireHighSecurityToken}.
    *
    * @param PhabricatorUser User whose session needs to be in high security.
    * @param AphrontReqeust  Current request.
@@ -367,10 +399,29 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $cancel_uri,
     $jump_into_hisec = false) {
 
+    return $this->newHighSecurityToken(
+      $viewer,
+      $request,
+      $cancel_uri,
+      false,
+      true);
+  }
+
+  private function newHighSecurityToken(
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    $cancel_uri,
+    $jump_into_hisec,
+    $upgrade_session) {
+
     if (!$viewer->hasSession()) {
       throw new Exception(
         pht('Requiring a high-security session from a user with no session!'));
     }
+
+    // TODO: If a user answers a "requireHighSecurityToken()" prompt and hits
+    // a "requireHighSecuritySession()" prompt a short time later, the one-shot
+    // token should be good enough to upgrade the session.
 
     $session = $viewer->getSession();
 
@@ -438,6 +489,11 @@ final class PhabricatorAuthSessionEngine extends Phobject {
             // If we have a partial session and are not jumping directly into
             // hisec, just issue a token without putting it in high security
             // mode.
+            return $this->issueHighSecurityToken($session, true);
+          }
+
+          // If we aren't upgrading the session itself, just issue a token.
+          if (!$upgrade_session) {
             return $this->issueHighSecurityToken($session, true);
           }
 
@@ -809,15 +865,15 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     if ($cache_selects) {
-      $cache_selects = ', '.implode(', ', $cache_selects);
+      $cache_selects = qsprintf($conn, ', %LQ', $cache_selects);
     } else {
-      $cache_selects = '';
+      $cache_selects = qsprintf($conn, '');
     }
 
     if ($cache_joins) {
-      $cache_joins = implode(' ', $cache_joins);
+      $cache_joins = qsprintf($conn, '%LJ', $cache_joins);
     } else {
-      $cache_joins = '';
+      $cache_joins = qsprintf($conn, '');
     }
 
     return array($cache_selects, $cache_joins, $cache_map, $types_map);

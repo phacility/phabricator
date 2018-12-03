@@ -30,7 +30,8 @@ final class DiffusionRepositoryEditDangerousController
 
     if ($request->isFormPost()) {
       $xaction = id(new PhabricatorRepositoryTransaction())
-        ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_DANGEROUS)
+        ->setTransactionType(
+          PhabricatorRepositoryDangerousTransaction::TRANSACTIONTYPE)
         ->setNewValue(!$repository->shouldAllowDangerousChanges());
 
       $editor = id(new PhabricatorRepositoryEditor())

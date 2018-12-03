@@ -136,7 +136,7 @@ final class AlmanacServiceEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('type')
         ->setLabel(pht('Type'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           AlmanacServiceTypeTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('When creating a service, set the type.'))

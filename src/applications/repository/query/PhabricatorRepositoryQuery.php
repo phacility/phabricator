@@ -491,10 +491,10 @@ final class PhabricatorRepositoryQuery
   protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
     $parts = parent::buildSelectClauseParts($conn);
 
-    $parts[] = 'r.*';
+    $parts[] = qsprintf($conn, 'r.*');
 
     if ($this->shouldJoinSummaryTable()) {
-      $parts[] = 's.*';
+      $parts[] = qsprintf($conn, 's.*');
     }
 
     return $parts;
@@ -513,8 +513,8 @@ final class PhabricatorRepositoryQuery
     if ($this->shouldJoinURITable()) {
       $joins[] = qsprintf(
         $conn,
-        'LEFT JOIN %T uri ON r.phid = uri.repositoryPHID',
-        id(new PhabricatorRepositoryURIIndex())->getTableName());
+        'LEFT JOIN %R uri ON r.phid = uri.repositoryPHID',
+        new PhabricatorRepositoryURIIndex());
     }
 
     return $joins;
@@ -639,7 +639,7 @@ final class PhabricatorRepositoryQuery
           $this->slugIdentifiers);
       }
 
-      $where = array('('.implode(' OR ', $identifier_clause).')');
+      $where[] = qsprintf($conn, '%LO', $identifier_clause);
     }
 
     if ($this->types) {

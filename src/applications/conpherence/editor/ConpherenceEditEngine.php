@@ -76,8 +76,8 @@ final class ConpherenceEditEngine
       $initial_phids = $participant_phids;
     }
 
-    // Only show participants on create or conduit, not edit
-    $conduit_only = !$this->getIsCreate();
+    // Only show participants on create or conduit, not edit.
+    $show_participants = (bool)$this->getIsCreate();
 
     return array(
       id(new PhabricatorTextEditField())
@@ -103,7 +103,7 @@ final class ConpherenceEditEngine
         ->setKey('participants')
         ->setValue($participant_phids)
         ->setInitialValue($initial_phids)
-        ->setIsConduitOnly($conduit_only)
+        ->setIsFormField($show_participants)
         ->setAliases(array('users', 'members', 'participants', 'userPHID'))
         ->setDescription(pht('Room participants.'))
         ->setUseEdgeTransactions(true)

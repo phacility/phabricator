@@ -140,9 +140,9 @@ final class DrydockSlotLock extends DrydockDAO {
     try {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (ownerPHID, lockIndex, lockKey) VALUES %Q',
+        'INSERT INTO %T (ownerPHID, lockIndex, lockKey) VALUES %LQ',
         $table->getTableName(),
-        implode(', ', $sql));
+        $sql);
     } catch (AphrontDuplicateKeyQueryException $ex) {
       // Try to improve the readability of the exception. We might miss on
       // this query if the lock has already been released, but most of the

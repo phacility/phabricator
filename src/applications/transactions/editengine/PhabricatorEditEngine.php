@@ -1289,6 +1289,10 @@ abstract class PhabricatorEditEngine
     }
 
     foreach ($fields as $field) {
+      if (!$field->getIsFormField()) {
+        continue;
+      }
+
       $field->appendToForm($form);
     }
 

@@ -30,14 +30,14 @@ final class AlmanacPropertiesEditEngineExtension
         ->setConduitDescription(
           pht('Pass a map of values to set one or more properties.'))
         ->setConduitTypeDescription(pht('Map of property names to values.'))
-        ->setIsConduitOnly(true),
+        ->setIsFormField(false),
       id(new AlmanacDeletePropertyEditField())
         ->setKey('property.delete')
         ->setTransactionType($object->getAlmanacPropertyDeleteTransactionType())
         ->setConduitDescription(
           pht('Pass a list of property names to delete properties.'))
         ->setConduitTypeDescription(pht('List of property names.'))
-        ->setIsConduitOnly(true),
+        ->setIsFormField(false),
     );
   }
 

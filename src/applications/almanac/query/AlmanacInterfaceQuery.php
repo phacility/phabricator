@@ -121,7 +121,7 @@ final class AlmanacInterfaceQuery
           $address->getAddress(),
           $address->getPort());
       }
-      $where[] = implode(' OR ', $parts);
+      $where[] = qsprintf($conn, '%LO', $parts);
     }
 
     return $where;

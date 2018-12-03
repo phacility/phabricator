@@ -43,11 +43,15 @@ final class PhabricatorApplicationUninstallTransaction
 
     $editor = $this->getEditor();
     $content_source = $editor->getContentSource();
+
+    // Today, changing config requires "Administrator", but "Can Edit" on
+    // applications to let you uninstall them may be granted to any user.
     PhabricatorConfigEditor::storeNewValue(
-      $user,
+      PhabricatorUser::getOmnipotentUser(),
       $config_entry,
       $list,
-      $content_source);
+      $content_source,
+      $user->getPHID());
   }
 
   public function getTitle() {

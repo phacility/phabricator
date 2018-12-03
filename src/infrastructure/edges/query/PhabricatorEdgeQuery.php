@@ -290,19 +290,19 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
   /**
    * @task internal
    */
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->sourcePHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'edge.src IN (%Ls)',
         $this->sourcePHIDs);
     }
 
     if ($this->edgeTypes) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'edge.type IN (%Ls)',
         $this->edgeTypes);
     }
@@ -310,23 +310,23 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
     if ($this->destPHIDs) {
       // potentially complain if $this->edgeType was not set
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'edge.dst IN (%Ls)',
         $this->destPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
 
   /**
    * @task internal
    */
-  private function buildOrderClause($conn_r) {
+  private function buildOrderClause(AphrontDatabaseConnection $conn) {
     if ($this->order == self::ORDER_NEWEST_FIRST) {
-      return 'ORDER BY edge.dateCreated DESC, edge.seq DESC';
+      return qsprintf($conn, 'ORDER BY edge.dateCreated DESC, edge.seq DESC');
     } else {
-      return 'ORDER BY edge.dateCreated ASC, edge.seq ASC';
+      return qsprintf($conn, 'ORDER BY edge.dateCreated ASC, edge.seq ASC');
     }
   }
 

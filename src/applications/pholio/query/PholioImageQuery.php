@@ -61,40 +61,40 @@ final class PholioImageQuery
     return $images;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->mockIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mockID IN (%Ld)',
         $this->mockIDs);
     }
 
     if ($this->obsolete !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'isObsolete = %d',
         $this->obsolete);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   protected function willFilterPage(array $images) {

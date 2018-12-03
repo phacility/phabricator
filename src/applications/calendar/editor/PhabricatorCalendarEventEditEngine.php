@@ -148,7 +148,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('Cancel the event.'))
         ->setTransactionType(
           PhabricatorCalendarEventCancelTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setConduitDescription(pht('Cancel or restore the event.'))
         ->setConduitTypeDescription(pht('True to cancel the event.'))
         ->setValue($object->getIsCancelled()),
@@ -161,7 +161,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('Host of the event.'))
         ->setTransactionType(
           PhabricatorCalendarEventHostTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly($this->getIsCreate())
+        ->setIsFormField(!$this->getIsCreate())
         ->setConduitDescription(pht('Change the host of the event.'))
         ->setConduitTypeDescription(pht('New event host.'))
         ->setSingleValue($object->getHostPHID()),

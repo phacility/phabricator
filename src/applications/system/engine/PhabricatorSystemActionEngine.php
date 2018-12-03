@@ -153,7 +153,7 @@ final class PhabricatorSystemActionEngine extends Phobject {
       queryfx(
         $conn_w,
         'INSERT INTO %T (actorHash, actorIdentity, action, score, epoch)
-          VALUES %Q',
+          VALUES %LQ',
         $log->getTableName(),
         $chunk);
     }

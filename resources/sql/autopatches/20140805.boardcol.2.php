@@ -45,7 +45,7 @@ foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
   queryfx(
     $conn_w,
     'INSERT INTO %T (boardPHID, columnPHID, objectPHID, sequence)
-      VALUES %Q',
+      VALUES %LQ',
     id(new PhabricatorProjectColumnPosition())->getTableName(),
     $chunk);
 }

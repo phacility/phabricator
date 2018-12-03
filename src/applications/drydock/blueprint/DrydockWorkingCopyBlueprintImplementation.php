@@ -173,6 +173,7 @@ final class DrydockWorkingCopyBlueprintImplementation
 
     $map = $resource->getAttribute('repositories.map');
 
+    $futures = array();
     $repositories = $this->loadRepositories(ipull($map, 'phid'));
     foreach ($map as $directory => $spec) {
       // TODO: Validate directory isn't goofy like "/etc" or "../../lol"
@@ -181,11 +182,18 @@ final class DrydockWorkingCopyBlueprintImplementation
       $repository = $repositories[$spec['phid']];
       $path = "{$root}/repo/{$directory}/";
 
-      // TODO: Run these in parallel?
-      $interface->execx(
+      $future = $interface->getExecFuture(
         'git clone -- %s %s',
         (string)$repository->getCloneURIObject(),
         $path);
+
+      $future->setTimeout($repository->getEffectiveCopyTimeLimit());
+
+      $futures[$directory] = $future;
+    }
+
+    foreach (new FutureIterator($futures) as $key => $future) {
+      $future->resolvex();
     }
 
     $resource
@@ -240,8 +248,12 @@ final class DrydockWorkingCopyBlueprintImplementation
     $map = $lease->getAttribute('repositories.map');
     $root = $resource->getAttribute('workingcopy.root');
 
+    $repositories = $this->loadRepositories(ipull($map, 'phid'));
+
     $default = null;
     foreach ($map as $directory => $spec) {
+      $repository = $repositories[$spec['phid']];
+
       $interface->pushWorkingDirectory("{$root}/repo/{$directory}/");
 
       $cmd = array();
@@ -271,7 +283,9 @@ final class DrydockWorkingCopyBlueprintImplementation
         $arg[] = $branch;
       }
 
-      $this->execxv($interface, $cmd, $arg);
+      $this->newExecvFuture($interface, $cmd, $arg)
+        ->setTimeout($repository->getEffectiveCopyTimeLimit())
+        ->resolvex();
 
       if (idx($spec, 'default')) {
         $default = $directory;
@@ -295,7 +309,9 @@ final class DrydockWorkingCopyBlueprintImplementation
         $arg[] = $ref_ref;
 
         try {
-          $this->execxv($interface, $cmd, $arg);
+          $this->newExecvFuture($interface, $cmd, $arg)
+            ->setTimeout($repository->getEffectiveCopyTimeLimit())
+            ->resolvex();
         } catch (CommandException $ex) {
           $display_command = csprintf(
             'git fetch %R %R',
@@ -509,12 +525,18 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockCommandInterface $interface,
     array $commands,
     array $arguments) {
+    return $this->newExecvFuture($interface, $commands, $arguments)->resolvex();
+  }
+
+  private function newExecvFuture(
+    DrydockCommandInterface $interface,
+    array $commands,
+    array $arguments) {
 
     $commands = implode(' && ', $commands);
     $argv = array_merge(array($commands), $arguments);
 
-    return call_user_func_array(array($interface, 'execx'), $argv);
+    return call_user_func_array(array($interface, 'getExecFuture'), $argv);
   }
-
 
 }

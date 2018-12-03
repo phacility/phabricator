@@ -64,22 +64,20 @@ final class PhabricatorFeedQuery
     }
 
     if ($this->chronologicalKeys !== null) {
-      // NOTE: We want to use integers in the query so we can take advantage
-      // of keys, but can't use %d on 32-bit systems. Make sure all the keys
-      // are integers and then format them raw.
+      // NOTE: We can't use "%d" to format these large integers on 32-bit
+      // systems. Historically, we formatted these into integers in an
+      // awkward way because MySQL could sometimes (?) fail to use the proper
+      // keys if the values were formatted as strings instead of integers.
 
-      $keys = $this->chronologicalKeys;
-      foreach ($keys as $key) {
-        if (!ctype_digit($key)) {
-          throw new Exception(
-            pht("Key '%s' is not a valid chronological key!", $key));
-        }
-      }
+      // After the "qsprintf()" update to use PhutilQueryString, we can no
+      // longer do this in a sneaky way. However, the MySQL key issue also
+      // no longer appears to reproduce across several systems. So: just use
+      // strings until problems turn up?
 
       $where[] = qsprintf(
         $conn,
-        'ref.chronologicalKey IN (%Q)',
-        implode(', ', $keys));
+        'ref.chronologicalKey IN (%Ls)',
+        $this->chronologicalKeys);
     }
 
     // NOTE: We may not have 64-bit PHP, so do the shifts in MySQL instead.

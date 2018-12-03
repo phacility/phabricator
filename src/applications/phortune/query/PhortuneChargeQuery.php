@@ -134,7 +134,7 @@ final class PhortuneChargeQuery
         $this->statuses);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

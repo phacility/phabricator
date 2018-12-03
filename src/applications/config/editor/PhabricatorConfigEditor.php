@@ -118,7 +118,8 @@ final class PhabricatorConfigEditor
     PhabricatorUser $user,
     PhabricatorConfigEntry $config_entry,
     $value,
-    PhabricatorContentSource $source) {
+    PhabricatorContentSource $source,
+    $acting_as_phid = null) {
 
     $xaction = id(new PhabricatorConfigTransaction())
       ->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT)
@@ -132,6 +133,10 @@ final class PhabricatorConfigEditor
       ->setActor($user)
       ->setContinueOnNoEffect(true)
       ->setContentSource($source);
+
+    if ($acting_as_phid) {
+      $editor->setActingAsPHID($acting_as_phid);
+    }
 
     $editor->applyTransactions($config_entry, array($xaction));
   }

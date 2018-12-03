@@ -111,7 +111,7 @@ final class PhabricatorAuthSSHKeyQuery
           $key->getType(),
           $key->getHash());
       }
-      $where[] = implode(' OR ', $sql);
+      $where[] = qsprintf($conn, '%LO', $sql);
     }
 
     if ($this->isActive !== null) {

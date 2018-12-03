@@ -14,7 +14,35 @@ final class DiffusionRepositoryPoliciesManagementPanel
   }
 
   public function getManagementPanelIcon() {
-    return 'fa-lock';
+    $viewer = $this->getViewer();
+    $repository = $this->getRepository();
+
+    $can_view = PhabricatorPolicyCapability::CAN_VIEW;
+    $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
+    $can_push = DiffusionPushCapability::CAPABILITY;
+
+    $actual_values = array(
+      'spacePHID' => $repository->getSpacePHID(),
+      'view' => $repository->getPolicy($can_view),
+      'edit' => $repository->getPolicy($can_edit),
+      'push' => $repository->getPolicy($can_push),
+    );
+
+    $default = PhabricatorRepository::initializeNewRepository(
+      $viewer);
+
+    $default_values = array(
+      'spacePHID' => $default->getSpacePHID(),
+      'view' => $default->getPolicy($can_view),
+      'edit' => $default->getPolicy($can_edit),
+      'push' => $default->getPolicy($can_push),
+    );
+
+    if ($actual_values === $default_values) {
+      return 'fa-lock grey';
+    } else {
+      return 'fa-lock';
+    }
   }
 
   protected function getEditEngineFieldKeys() {
@@ -25,6 +53,31 @@ final class DiffusionRepositoryPoliciesManagementPanel
       'policy.push',
     );
   }
+
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit_uri = $this->getEditPageURI();
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Policies'))
+        ->setHref($edit_uri)
+        ->setIcon('fa-pencil')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
+  }
+
 
   public function buildManagementPanelContent() {
     $repository = $this->getRepository();
@@ -58,22 +111,7 @@ final class DiffusionRepositoryPoliciesManagementPanel
       : phutil_tag('em', array(), pht('Not a Hosted Repository'));
     $view->addProperty(pht('Pushable By'), $pushable);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $edit_uri = $this->getEditPageURI();
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-pencil')
-      ->setText(pht('Edit'))
-      ->setHref($edit_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
-
-    return $this->newBox(pht('Policies'), $view, array($button));
+    return $this->newBox(pht('Policies'), $view);
   }
 
 }

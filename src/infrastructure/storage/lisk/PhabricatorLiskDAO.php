@@ -196,14 +196,11 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
    * INSERT, previously built with @{function:qsprintf}) into chunks which will
    * fit under the MySQL 'max_allowed_packet' limit.
    *
-   * Chunks are glued together with `$glue`, by default ", ".
-   *
    * If a statement is too large to fit within the limit, it is broken into
    * its own chunk (but might fail when the query executes).
    */
   public static function chunkSQL(
     array $fragments,
-    $glue = ', ',
     $limit = null) {
 
     if ($limit === null) {
@@ -216,9 +213,13 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
 
     $chunk = array();
     $len = 0;
-    $glue_len = strlen($glue);
+    $glue_len = strlen(', ');
     foreach ($fragments as $fragment) {
-      $this_len = strlen($fragment);
+      if ($fragment instanceof PhutilQueryString) {
+        $this_len = strlen($fragment->getUnmaskedString());
+      } else {
+        $this_len = strlen($fragment);
+      }
 
       if ($chunk) {
         // Chunks after the first also imply glue.
@@ -232,17 +233,13 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
         if ($chunk) {
           $result[] = $chunk;
         }
-        $len = strlen($fragment);
+        $len = ($this_len - $glue_len);
         $chunk = array($fragment);
       }
     }
 
     if ($chunk) {
       $result[] = $chunk;
-    }
-
-    foreach ($result as $key => $fragment_list) {
-      $result[$key] = implode($glue, $fragment_list);
     }
 
     return $result;

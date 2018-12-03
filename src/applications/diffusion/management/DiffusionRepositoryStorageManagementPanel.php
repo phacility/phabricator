@@ -14,7 +14,32 @@ final class DiffusionRepositoryStorageManagementPanel
   }
 
   public function getManagementPanelIcon() {
-    return 'fa-database';
+    $repository = $this->getRepository();
+
+    if ($repository->getAlmanacServicePHID()) {
+      return 'fa-sitemap';
+    } else if ($repository->isHosted()) {
+      return 'fa-database';
+    } else {
+      return 'fa-download';
+    }
+  }
+
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-book')
+        ->setHref($doc_href)
+        ->setName(pht('Cluster Documentation')));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -47,15 +72,7 @@ final class DiffusionRepositoryStorageManagementPanel
     $view->addProperty(pht('Storage Path'), $storage_path);
     $view->addProperty(pht('Storage Cluster'), $storage_service);
 
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-book')
-      ->setHref($doc_href)
-      ->setText(pht('Help'));
-
-    return $this->newBox(pht('Storage'), $view, array($button));
+    return $this->newBox(pht('Storage'), $view);
   }
 
   private function buildClusterStatusPanel() {
@@ -99,15 +116,20 @@ final class DiffusionRepositoryStorageManagementPanel
 
       $versions = mpull($versions, null, 'getDevicePHID');
 
-      foreach ($bindings as $binding_group) {
-        $all_disabled = true;
-        foreach ($binding_group as $binding) {
-          if (!$binding->getIsDisabled()) {
-            $all_disabled = false;
-            break;
-          }
-        }
+      // List enabled devices first, then sort devices in each group by name.
+      $sort = array();
+      foreach ($bindings as $key => $binding_group) {
+        $all_disabled = $this->isDisabledGroup($binding_group);
 
+        $sort[$key] = id(new PhutilSortVector())
+          ->addInt($all_disabled ? 1 : 0)
+          ->addString(head($binding_group)->getDevice()->getName());
+      }
+      $sort = msortv($sort, 'getSelf');
+      $bindings = array_select_keys($bindings, array_keys($sort)) + $bindings;
+
+      foreach ($bindings as $binding_group) {
+        $all_disabled = $this->isDisabledGroup($binding_group);
         $any_binding = head($binding_group);
 
         if ($all_disabled) {
@@ -226,6 +248,18 @@ final class DiffusionRepositoryStorageManagementPanel
         ));
 
     return $this->newBox(pht('Cluster Status'), $table);
+  }
+
+  private function isDisabledGroup(array $binding_group) {
+    assert_instances_of($binding_group, 'AlmanacBinding');
+
+    foreach ($binding_group as $binding) {
+      if (!$binding->getIsDisabled()) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 }

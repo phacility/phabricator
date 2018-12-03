@@ -229,9 +229,9 @@ final class DiffusionLintSaveRunner extends Phobject {
         $this->conn,
         'INSERT INTO %T
           (branchID, path, line, code, severity, name, description)
-          VALUES %Q',
+          VALUES %LQ',
         PhabricatorRepository::TABLE_LINTMESSAGE,
-        implode(', ', $values));
+        $values);
     }
 
     $this->conn->saveTransaction();
@@ -295,10 +295,10 @@ final class DiffusionLintSaveRunner extends Phobject {
         }
         queryfx(
           $this->conn,
-          'UPDATE %T SET authorPHID = %s WHERE %Q',
+          'UPDATE %T SET authorPHID = %s WHERE %LO',
           PhabricatorRepository::TABLE_LINTMESSAGE,
           $author,
-          implode(' OR ', $where));
+          $where);
       }
 
       $this->conn->saveTransaction();

@@ -38,7 +38,7 @@ final class PhabricatorKeyValueDatabaseCache
             $conn_w,
             'INSERT INTO %T
               (cacheKeyHash, cacheKey, cacheFormat, cacheData,
-                cacheCreated, cacheExpires) VALUES %Q
+                cacheCreated, cacheExpires) VALUES %LQ
               ON DUPLICATE KEY UPDATE
                 cacheKey = VALUES(cacheKey),
                 cacheFormat = VALUES(cacheFormat),

@@ -1890,6 +1890,51 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   /**
+   * Time limit for cloning or copying this repository.
+   *
+   * This limit is used to timeout operations like `git clone` or `git fetch`
+   * when doing intracluster synchronization, building working copies, etc.
+   *
+   * @return int Maximum number of seconds to spend copying this repository.
+   */
+  public function getCopyTimeLimit() {
+    return $this->getDetail('limit.copy');
+  }
+
+  public function setCopyTimeLimit($limit) {
+    return $this->setDetail('limit.copy', $limit);
+  }
+
+  public function getDefaultCopyTimeLimit() {
+    return phutil_units('15 minutes in seconds');
+  }
+
+  public function getEffectiveCopyTimeLimit() {
+    $limit = $this->getCopyTimeLimit();
+    if ($limit) {
+      return $limit;
+    }
+
+    return $this->getDefaultCopyTimeLimit();
+  }
+
+  public function getFilesizeLimit() {
+    return $this->getDetail('limit.filesize');
+  }
+
+  public function setFilesizeLimit($limit) {
+    return $this->setDetail('limit.filesize', $limit);
+  }
+
+  public function getTouchLimit() {
+    return $this->getDetail('limit.touch');
+  }
+
+  public function setTouchLimit($limit) {
+    return $this->setDetail('limit.touch', $limit);
+  }
+
+  /**
    * Retrieve the service URI for the device hosting this repository.
    *
    * See @{method:newConduitClient} for a general discussion of interacting

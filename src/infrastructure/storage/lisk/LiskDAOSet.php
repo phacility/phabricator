@@ -77,11 +77,20 @@ final class LiskDAOSet extends Phobject {
       } else {
         $set = new LiskDAOSet();
         $this->subsets[] = $set;
+
+        $conn = $object->establishConnection('r');
+
+        if (strlen($where)) {
+          $where_clause = qsprintf($conn, 'AND %Q', $where);
+        } else {
+          $where_clause = qsprintf($conn, '');
+        }
+
         $relatives = $object->putInSet($set)->loadAllWhere(
           '%C IN (%Ls) %Q',
           $foreign_column,
           $ids,
-          ($where != '' ? 'AND '.$where : ''));
+          $where_clause);
         $relatives = mgroup($relatives, 'get'.$foreign_column);
       }
     }

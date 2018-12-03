@@ -287,13 +287,13 @@ final class PhabricatorProjectEditEngine
 
       // Show this on the web UI when creating a project, but not when editing
       // one. It is always available via Conduit.
-      $conduit_only = !$this->getIsCreate();
+      $show_field = (bool)$this->getIsCreate();
 
       $members_field = id(new PhabricatorUsersEditField())
         ->setKey('members')
         ->setAliases(array('memberPHIDs'))
         ->setLabel(pht('Initial Members'))
-        ->setIsConduitOnly($conduit_only)
+        ->setIsFormField($show_field)
         ->setUseEdgeTransactions(true)
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue(
