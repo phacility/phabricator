@@ -649,7 +649,7 @@ final class ManiphestTransactionEditor
         $old_value = $object->getOwnerPHID();
         $new_value = $xaction->getNewValue();
         if ($old_value === $new_value) {
-          continue;
+          break;
         }
 
         // When a task is reassigned, move the old owner to the subscriber
