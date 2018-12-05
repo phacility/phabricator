@@ -33,6 +33,12 @@ final class PhabricatorRepositoryManagementThawWorkflow
             'help' => pht('Run operations without asking for confirmation.'),
           ),
           array(
+            'name' => 'all-repositories',
+            'help' => pht(
+              'Apply the promotion or demotion to all repositories hosted '.
+              'on the device.'),
+          ),
+          array(
             'name' => 'repositories',
             'wildcard' => true,
           ),
@@ -41,12 +47,6 @@ final class PhabricatorRepositoryManagementThawWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $viewer = $this->getViewer();
-
-    $repositories = $this->loadRepositories($args, 'repositories');
-    if (!$repositories) {
-      throw new PhutilArgumentUsageException(
-        pht('Specify one or more repositories to thaw.'));
-    }
 
     $promote = $args->getArg('promote');
     $demote = $args->getArg('demote');
@@ -71,6 +71,60 @@ final class PhabricatorRepositoryManagementThawWorkflow
       throw new PhutilArgumentUsageException(
         pht('No device "%s" exists.', $device_name));
     }
+
+    $repository_names = $args->getArg('repositories');
+    $all_repositories = $args->getArg('all-repositories');
+    if ($repository_names && $all_repositories) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify a list of repositories or "--all-repositories", '.
+          'but not both.'));
+    } else if (!$repository_names && !$all_repositories) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Select repositories to affect by providing a list of repositories '.
+          'or using the "--all-repositories" flag.'));
+    }
+
+    if ($repository_names) {
+      $repositories = $this->loadRepositories($args, 'repositories');
+      if (!$repositories) {
+        throw new PhutilArgumentUsageException(
+          pht('Specify one or more repositories to thaw.'));
+      }
+    } else {
+      $repositories = array();
+
+      $services = id(new AlmanacServiceQuery())
+        ->setViewer($viewer)
+        ->withDevicePHIDs(array($device->getPHID()))
+        ->execute();
+      if ($services) {
+        $repositories = id(new PhabricatorRepositoryQuery())
+          ->setViewer($viewer)
+          ->withAlmanacServicePHIDs(mpull($services, 'getPHID'))
+          ->execute();
+      }
+
+      if (!$repositories) {
+        throw new PhutilArgumentUsageException(
+          pht('There are no repositories on the selected device.'));
+      }
+    }
+
+    $display_list = new PhutilConsoleList();
+    foreach ($repositories as $repository) {
+      $display_list->addItem(
+        pht(
+          '%s %s',
+          $repository->getMonogram(),
+          $repository->getName()));
+    }
+
+    echo tsprintf(
+      "%s\n\n%B\n",
+      pht('These repositories will be thawed:'),
+      $display_list->drawConsoleString());
 
     if ($promote) {
       $risk_message = pht(
