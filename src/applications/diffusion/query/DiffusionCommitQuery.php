@@ -17,6 +17,7 @@ final class DiffusionCommitQuery
   private $unreachable;
 
   private $needAuditRequests;
+  private $needAuditAuthority;
   private $auditIDs;
   private $auditorPHIDs;
   private $epochMin;
@@ -118,6 +119,12 @@ final class DiffusionCommitQuery
 
   public function needAuditRequests($need) {
     $this->needAuditRequests = $need;
+    return $this;
+  }
+
+  public function needAuditAuthority(array $users) {
+    assert_instances_of($users, 'PhabricatorUser');
+    $this->needAuditAuthority = $users;
     return $this;
   }
 
@@ -231,14 +238,27 @@ final class DiffusionCommitQuery
     }
 
     if (count($subqueries) > 1) {
-      foreach ($subqueries as $key => $subquery) {
-        $subqueries[$key] = '('.$subquery.')';
+      $unions = null;
+      foreach ($subqueries as $subquery) {
+        if (!$unions) {
+          $unions = qsprintf(
+            $conn,
+            '(%Q)',
+            $subquery);
+          continue;
+        }
+
+        $unions = qsprintf(
+          $conn,
+          '%Q UNION DISTINCT (%Q)',
+          $unions,
+          $subquery);
       }
 
       $query = qsprintf(
         $conn,
         '%Q %Q %Q',
-        implode(' UNION DISTINCT ', $subqueries),
+        $unions,
         $this->buildOrderClause($conn, true),
         $this->buildLimitClause($conn));
     } else {
@@ -421,6 +441,72 @@ final class DiffusionCommitQuery
       PhabricatorDraftEngine::attachDrafts(
         $viewer,
         $commits);
+    }
+
+    if ($this->needAuditAuthority) {
+      $authority_users = $this->needAuditAuthority;
+
+      // NOTE: This isn't very efficient since we're running two queries per
+      // user, but there's currently no way to figure out authority for
+      // multiple users in one query. Today, we only ever request authority for
+      // a single user and single commit, so this has no practical impact.
+
+      // NOTE: We're querying with the viewership of query viewer, not the
+      // actual users. If the viewer can't see a project or package, they
+      // won't be able to see who has authority on it. This is safer than
+      // showing them true authority, and should never matter today, but it
+      // also doesn't seem like a significant disclosure and might be
+      // reasonable to adjust later if it causes something weird or confusing
+      // to happen.
+
+      $authority_map = array();
+      foreach ($authority_users as $authority_user) {
+        $authority_phid = $authority_user->getPHID();
+        if (!$authority_phid) {
+          continue;
+        }
+
+        $result_phids = array();
+
+        // Users have authority over themselves.
+        $result_phids[] = $authority_phid;
+
+        // Users have authority over packages they own.
+        $owned_packages = id(new PhabricatorOwnersPackageQuery())
+          ->setViewer($viewer)
+          ->withAuthorityPHIDs(array($authority_phid))
+          ->execute();
+        foreach ($owned_packages as $package) {
+          $result_phids[] = $package->getPHID();
+        }
+
+        // Users have authority over projects they're members of.
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer($viewer)
+          ->withMemberPHIDs(array($authority_phid))
+          ->execute();
+        foreach ($projects as $project) {
+          $result_phids[] = $project->getPHID();
+        }
+
+        $result_phids = array_fuse($result_phids);
+
+        foreach ($commits as $commit) {
+          $attach_phids = $result_phids;
+
+          // NOTE: When modifying your own commits, you act only on behalf of
+          // yourself, not your packages or projects. The idea here is that you
+          // can't accept your own commits. In the future, this might change or
+          // depend on configuration.
+          $author_phid = $commit->getAuthorPHID();
+          if ($author_phid == $authority_phid) {
+            $attach_phids = array($author_phid);
+            $attach_phids = array_fuse($attach_phids);
+          }
+
+          $commit->attachAuditAuthority($authority_user, $attach_phids);
+        }
+      }
     }
 
     return $commits;
