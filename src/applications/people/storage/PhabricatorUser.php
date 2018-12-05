@@ -1466,7 +1466,10 @@ final class PhabricatorUser
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new PhabricatorPeopleAvailabilitySearchEngineAttachment())
+        ->setAttachmentKey('availability'),
+    );
   }
 
 
