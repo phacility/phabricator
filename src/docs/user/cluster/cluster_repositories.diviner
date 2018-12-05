@@ -433,6 +433,18 @@ If you do this, **you will lose unreplicated data**. You will discard any
 changes on the affected leaders which have not replicated to other devices
 in the cluster.
 
+If you have lost an entire cluster and replaced it with new devices that you
+have restored from backups, you can aggressively wipe all memory of the old
+devices by using `--demote <service>` and `--all-repositories`. **This is
+dangerous and discards all unreplicated data in any repository on any device.**
+
+```
+phabricator/ $ ./bin/repository thaw --demote repo.corp.net --all-repositories
+```
+
+After you do this, continue below to promote a leader and restore the cluster
+to service.
+
 
 Ambiguous Leaders
 =================
