@@ -1367,9 +1367,9 @@ final class DifferentialTransactionEditor
     foreach (array_chunk($sql, 256) as $chunk) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (repositoryID, pathID, epoch, revisionID) VALUES %Q',
+        'INSERT INTO %T (repositoryID, pathID, epoch, revisionID) VALUES %LQ',
         $table->getTableName(),
-        implode(', ', $chunk));
+        $chunk);
     }
   }
 
@@ -1444,9 +1444,9 @@ final class DifferentialTransactionEditor
     if ($sql) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (revisionID, type, hash) VALUES %Q',
+        'INSERT INTO %T (revisionID, type, hash) VALUES %LQ',
         ArcanistDifferentialRevisionHash::TABLE_NAME,
-        implode(', ', $sql));
+        $sql);
     }
   }
 
