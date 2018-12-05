@@ -44,6 +44,15 @@ final class PhabricatorRepositorySearchEngine
         ->setKey('uris')
         ->setDescription(
           pht('Search for repositories by clone/checkout URI.')),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Services'))
+        ->setKey('almanacServicePHIDs')
+        ->setAliases(
+          array(
+            'almanacServicePHID',
+            'almanacService',
+            'almanacServices',
+          )),
     );
   }
 
@@ -78,6 +87,10 @@ final class PhabricatorRepositorySearchEngine
 
     if ($map['uris']) {
       $query->withURIs($map['uris']);
+    }
+
+    if ($map['almanacServicePHIDs']) {
+      $query->withAlmanacServicePHIDs($map['almanacServicePHIDs']);
     }
 
     return $query;

@@ -2773,6 +2773,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ->setDescription(
           pht(
             'True if the repository is importing initial commits.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('almanacServicePHID')
+        ->setType('phid?')
+        ->setDescription(
+          pht(
+            'The Almanac Service that hosts this repository, if the '.
+            'repository is clustered.')),
     );
   }
 
@@ -2784,6 +2791,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'shortName' => $this->getRepositorySlug(),
       'status' => $this->getStatus(),
       'isImporting' => (bool)$this->isImporting(),
+      'almanacServicePHID' => $this->getAlmanacServicePHID(),
     );
   }
 
