@@ -46,16 +46,14 @@ final class PhabricatorEditEngineSubtypeMap
     $subtype_key = $object->getEditEngineSubtype();
     $subtype = $this->getSubtype($subtype_key);
 
-    // TODO: Allow subtype configuration to specify that children should be
-    // created from particular forms or subtypes.
-    $select_ids = array();
-    $select_subtypes = array();
+    $select_identifiers = $subtype->getChildFormIdentifiers();
+    $select_subtypes = $subtype->getChildSubtypes();
 
     $query = $edit_engine->newConfigurationQuery()
       ->withIsDisabled(false);
 
-    if ($select_ids) {
-      $query->withIDs($select_ids);
+    if ($select_identifiers) {
+      $query->withIdentifiers($select_identifiers);
     } else {
       // If we're selecting by subtype rather than selecting specific forms,
       // only select create forms.
@@ -73,8 +71,8 @@ final class PhabricatorEditEngineSubtypeMap
 
     // If we're selecting by ID, respect the order specified in the
     // constraint. Otherwise, use the create form sort order.
-    if ($select_ids) {
-      $forms = array_select_keys($forms, $select_ids) + $forms;
+    if ($select_identifiers) {
+      $forms = array_select_keys($forms, $select_identifiers) + $forms;
     } else {
       $forms = msort($forms, 'getCreateSortKey');
     }
