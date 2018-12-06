@@ -28,7 +28,7 @@ final class ManiphestTaskSubtypeDatasource
     $results = array();
 
     $subtype_map = id(new ManiphestTask())->newEditEngineSubtypeMap();
-    foreach ($subtype_map as $key => $subtype) {
+    foreach ($subtype_map->getSubtypes() as $key => $subtype) {
 
       $result = id(new PhabricatorTypeaheadResult())
         ->setIcon($subtype->getIcon())

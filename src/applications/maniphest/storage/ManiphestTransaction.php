@@ -214,11 +214,12 @@ final class ManiphestTransaction
   public function renderSubtypeName($value) {
     $object = $this->getObject();
     $map = $object->newEditEngineSubtypeMap();
-    if (!isset($map[$value])) {
+
+    if (!$map->isValidSubtype($value)) {
       return $value;
     }
 
-    return $map[$value]->getName();
+    return $map->getSubtype($value)->getName();
   }
 
 }

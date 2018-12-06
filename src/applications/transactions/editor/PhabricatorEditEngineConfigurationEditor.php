@@ -64,7 +64,7 @@ final class PhabricatorEditEngineConfigurationEditor
           foreach ($xactions as $xaction) {
             $new = $xaction->getNewValue();
 
-            if (isset($map[$new])) {
+            if ($map->isValidSubtype($new)) {
               continue;
             }
 

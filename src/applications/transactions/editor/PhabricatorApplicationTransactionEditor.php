@@ -2541,7 +2541,7 @@ abstract class PhabricatorApplicationTransactionEditor
         continue;
       }
 
-      if (!isset($map[$new])) {
+      if (!$map->isValidSubtype($new)) {
         $errors[] = new PhabricatorApplicationTransactionValidationError(
           $transaction_type,
           pht('Invalid'),
