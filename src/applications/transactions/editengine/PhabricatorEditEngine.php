@@ -358,7 +358,7 @@ abstract class PhabricatorEditEngine
     return $this->editEngineConfiguration;
   }
 
-  private function newConfigurationQuery() {
+  public function newConfigurationQuery() {
     return id(new PhabricatorEditEngineConfigurationQuery())
       ->setViewer($this->getViewer())
       ->withEngineKeys(array($this->getEngineKey()));
