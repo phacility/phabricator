@@ -239,4 +239,9 @@ final class PhabricatorEditEngineSubtype
     return new PhabricatorEditEngineSubtypeMap($map);
   }
 
+  public function newIconView() {
+    return id(new PHUIIconView())
+      ->setIcon($this->getIcon(), $this->getColor());
+  }
+
 }

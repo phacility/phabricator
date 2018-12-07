@@ -37,39 +37,34 @@ final class ManiphestTaskSubtaskController
         ->addCancelButton($cancel_uri, pht('Close'));
     }
 
-    if ($request->isFormPost()) {
-      $form_key = $request->getStr('formKey');
-      if (isset($subtype_options[$form_key])) {
-        $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
-          ->setQueryParam('parent', $id)
-          ->setQueryParam('template', $id)
-          ->setQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
-        $subtask_uri = $this->getApplicationURI($subtask_uri);
+    $menu = id(new PHUIObjectItemListView())
+      ->setUser($viewer)
+      ->setBig(true)
+      ->setFlush(true);
 
-        return id(new AphrontRedirectResponse())
-          ->setURI($subtask_uri);
-      }
+    foreach ($subtype_options as $form_key => $subtype_form) {
+      $subtype_key = $subtype_form->getSubtype();
+      $subtype = $subtype_map->getSubtype($subtype_key);
+
+      $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
+        ->setQueryParam('parent', $id)
+        ->setQueryParam('template', $id)
+        ->setQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
+      $subtask_uri = $this->getApplicationURI($subtask_uri);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($subtype_form->getDisplayName())
+        ->setHref($subtask_uri)
+        ->setClickable(true)
+        ->setImageIcon($subtype->newIconView())
+        ->addAttribute($subtype->getName());
+
+      $menu->addItem($item);
     }
-
-    $control = id(new AphrontFormRadioButtonControl())
-      ->setName('formKey')
-      ->setLabel(pht('Subtype'));
-
-    foreach ($subtype_options as $key => $subtype_form) {
-      $control->addButton(
-        $key,
-        $subtype_form->getDisplayName(),
-        null);
-    }
-
-    $form = id(new AphrontFormView())
-      ->setViewer($viewer)
-      ->appendControl($control);
 
     return $this->newDialog()
       ->setTitle(pht('Choose Subtype'))
-      ->appendForm($form)
-      ->addSubmitButton(pht('Continue'))
+      ->appendChild($menu)
       ->addCancelButton($cancel_uri);
   }
 
