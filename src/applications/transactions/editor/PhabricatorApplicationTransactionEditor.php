@@ -3428,7 +3428,19 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions,
     array $mailed_phids) {
 
-    $xactions = mfilter($xactions, 'shouldHideForFeed', true);
+    // Remove transactions which don't publish feed stories or notifications.
+    // These never show up anywhere, so we don't need to do anything with them.
+    foreach ($xactions as $key => $xaction) {
+      if (!$xaction->shouldHideForFeed()) {
+        continue;
+      }
+
+      if (!$xaction->shouldHideForNotifications()) {
+        continue;
+      }
+
+      unset($xactions[$key]);
+    }
 
     if (!$xactions) {
       return;

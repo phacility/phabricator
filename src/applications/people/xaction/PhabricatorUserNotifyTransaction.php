@@ -23,8 +23,12 @@ final class PhabricatorUserNotifyTransaction
     return $this->getNewValue();
   }
 
-  public function shouldHideForFeed() {
+  public function shouldHideForNotifications() {
     return false;
+  }
+
+  public function shouldHideForFeed() {
+    return true;
   }
 
   public function shouldHideForMail() {

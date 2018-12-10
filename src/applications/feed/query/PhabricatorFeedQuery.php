@@ -34,7 +34,15 @@ final class PhabricatorFeedQuery
   }
 
   protected function willFilterPage(array $data) {
-    return PhabricatorFeedStory::loadAllFromRows($data, $this->getViewer());
+    $stories = PhabricatorFeedStory::loadAllFromRows($data, $this->getViewer());
+
+    foreach ($stories as $key => $story) {
+      if (!$story->isVisibleInFeed()) {
+        unset($stories[$key]);
+      }
+    }
+
+    return $stories;
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {

@@ -418,6 +418,14 @@ abstract class PhabricatorFeedStory
     return array();
   }
 
+  public function isVisibleInFeed() {
+    return true;
+  }
+
+  public function isVisibleInNotifications() {
+    return true;
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
