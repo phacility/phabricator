@@ -43,9 +43,12 @@ final class DiffusionCommitEditEngine
   }
 
   protected function newObjectQuery() {
+    $viewer = $this->getViewer();
+
     return id(new DiffusionCommitQuery())
       ->needCommitData(true)
-      ->needAuditRequests(true);
+      ->needAuditRequests(true)
+      ->needAuditAuthority(array($viewer));
   }
 
   protected function getEditorURI() {

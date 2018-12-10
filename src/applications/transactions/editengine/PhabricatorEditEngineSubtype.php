@@ -182,7 +182,7 @@ final class PhabricatorEditEngineSubtype
       $map[$key] = $subtype;
     }
 
-    return $map;
+    return new PhabricatorEditEngineSubtypeMap($map);
   }
 
 }

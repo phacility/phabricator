@@ -31,7 +31,7 @@ final class PhabricatorSubtypeEditEngineExtension
     $subtype_type = PhabricatorTransactions::TYPE_SUBTYPE;
 
     $map = $object->newEditEngineSubtypeMap();
-    $options = mpull($map, 'getName');
+    $options = $map->getDisplayMap();
 
     $subtype_field = id(new PhabricatorSelectEditField())
       ->setKey(self::EDITKEY)
@@ -45,7 +45,7 @@ final class PhabricatorSubtypeEditEngineExtension
 
     // If subtypes are configured, enable changing them from the bulk editor
     // and comment action stack.
-    if (count($map) > 1) {
+    if ($map->getCount() > 1) {
       $subtype_field
         ->setBulkEditLabel(pht('Change subtype to'))
         ->setCommentActionLabel(pht('Change Subtype'))

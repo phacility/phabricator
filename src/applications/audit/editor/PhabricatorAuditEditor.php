@@ -59,10 +59,6 @@ final class PhabricatorAuditEditor
 
     $this->oldAuditStatus = $object->getAuditStatus();
 
-    $object->loadAndAttachAuditAuthority(
-      $this->getActor(),
-      $this->getActingAsPHID());
-
     return parent::expandTransactions($object, $xactions);
   }
 

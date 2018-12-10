@@ -210,83 +210,31 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->committerIdentity);
   }
 
-  public function loadAndAttachAuditAuthority(
-    PhabricatorUser $viewer,
-    $actor_phid = null) {
+  public function attachAuditAuthority(
+    PhabricatorUser $user,
+    array $authority) {
 
-    if ($actor_phid === null) {
-      $actor_phid = $viewer->getPHID();
+    $user_phid = $user->getPHID();
+    if (!$user->getPHID()) {
+      throw new Exception(
+        pht('You can not attach audit authority for a user with no PHID.'));
     }
 
-    // TODO: This method is a little weird and sketchy, but worlds better than
-    // what came before it. Eventually, this should probably live in a Query
-    // class.
-
-    // Figure out which requests the actor has authority over: these are user
-    // requests where they are the auditor, and packages and projects they are
-    // a member of.
-
-    if (!$actor_phid) {
-      $attach_key = $viewer->getCacheFragment();
-      $phids = array();
-    } else {
-      $attach_key = $actor_phid;
-      // At least currently, when modifying your own commits, you act only on
-      // behalf of yourself, not your packages/projects -- the idea being that
-      // you can't accept your own commits. This may change or depend on
-      // config.
-      $actor_is_author = ($actor_phid == $this->getAuthorPHID());
-      if ($actor_is_author) {
-        $phids = array($actor_phid);
-      } else {
-        $phids = array();
-        $phids[$actor_phid] = true;
-
-        $owned_packages = id(new PhabricatorOwnersPackageQuery())
-          ->setViewer($viewer)
-          ->withAuthorityPHIDs(array($actor_phid))
-          ->execute();
-        foreach ($owned_packages as $package) {
-          $phids[$package->getPHID()] = true;
-        }
-
-        $projects = id(new PhabricatorProjectQuery())
-          ->setViewer($viewer)
-          ->withMemberPHIDs(array($actor_phid))
-          ->execute();
-        foreach ($projects as $project) {
-          $phids[$project->getPHID()] = true;
-        }
-
-        $phids = array_keys($phids);
-      }
-    }
-
-    $this->auditAuthorityPHIDs[$attach_key] = array_fuse($phids);
+    $this->auditAuthorityPHIDs[$user_phid] = $authority;
 
     return $this;
   }
 
   public function hasAuditAuthority(
-    PhabricatorUser $viewer,
-    PhabricatorRepositoryAuditRequest $audit,
-    $actor_phid = null) {
+    PhabricatorUser $user,
+    PhabricatorRepositoryAuditRequest $audit) {
 
-    if ($actor_phid === null) {
-      $actor_phid = $viewer->getPHID();
-    }
-
-    if (!$actor_phid) {
-      $attach_key = $viewer->getCacheFragment();
-    } else {
-      $attach_key = $actor_phid;
-    }
-
-    $map = $this->assertAttachedKey($this->auditAuthorityPHIDs, $attach_key);
-
-    if (!$actor_phid) {
+    $user_phid = $user->getPHID();
+    if (!$user_phid) {
       return false;
     }
+
+    $map = $this->assertAttachedKey($this->auditAuthorityPHIDs, $user_phid);
 
     return isset($map[$audit->getAuditorPHID()]);
   }
