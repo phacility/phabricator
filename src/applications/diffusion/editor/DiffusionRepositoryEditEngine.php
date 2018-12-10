@@ -212,9 +212,7 @@ final class DiffusionRepositoryEditEngine
       ->setObject($object)
       ->execute();
 
-    $track_value = $object->getDetail('branch-filter', array());
-    $track_value = array_keys($track_value);
-
+    $track_value = $object->getTrackOnlyRules();
     $autoclose_value = $object->getAutocloseOnlyRules();
 
     $automation_instructions = pht(

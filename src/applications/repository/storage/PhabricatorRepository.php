@@ -239,19 +239,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return idx($this->details, $key, $default);
   }
 
-  public function getHumanReadableDetail($key, $default = null) {
-    $value = $this->getDetail($key, $default);
-
-    switch ($key) {
-      case 'branch-filter':
-        $value = array_keys($value);
-        $value = implode(', ', $value);
-        break;
-    }
-
-    return $value;
-  }
-
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;
@@ -1208,6 +1195,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function setAutocloseOnlyRules(array $rules) {
     $rules = array_fill_keys($rules, true);
     $this->setDetail('close-commits-filter', $rules);
+    return $this;
+  }
+
+  public function getTrackOnlyRules() {
+    return array_keys($this->getDetail('branch-filter', array()));
+  }
+
+  public function setTrackOnlyRules(array $rules) {
+    $rules = array_fill_keys($rules, true);
+    $this->setDetail('branch-filter', $rules);
     return $this;
   }
 

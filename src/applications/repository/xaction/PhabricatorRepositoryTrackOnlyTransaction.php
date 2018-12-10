@@ -6,11 +6,11 @@ final class PhabricatorRepositoryTrackOnlyTransaction
   const TRANSACTIONTYPE = 'repo:track-only';
 
   public function generateOldValue($object) {
-    return array_keys($object->getDetail('branch-filter', array()));
+    return $object->getTrackOnlyRules();
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setDetail('branch-filter', array_fill_keys($value, true));
+    $object->setTrackOnlyRules($value);
   }
 
   public function getTitle() {
