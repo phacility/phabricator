@@ -4658,9 +4658,21 @@ abstract class PhabricatorApplicationTransactionEditor
       $new_value[$key] = $state_map[$state];
     }
 
+    // See PHI995. Copy some information about the inlines into the transaction
+    // so we can tailor rendering behavior. In particular, we don't want to
+    // render transactions about users marking their own inlines as "Done".
+
+    $inline_details = array();
+    foreach ($inlines as $inline) {
+      $inline_details[$inline->getPHID()] = array(
+        'authorPHID' => $inline->getAuthorPHID(),
+      );
+    }
+
     return $object->getApplicationTransactionTemplate()
       ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
       ->setIgnoreOnNoEffect(true)
+      ->setMetadataValue('inline.details', $inline_details)
       ->setOldValue($old_value)
       ->setNewValue($new_value);
   }
