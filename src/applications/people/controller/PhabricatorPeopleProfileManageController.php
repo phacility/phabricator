@@ -43,6 +43,11 @@ final class PhabricatorPeopleProfileManageController
       ->setCurtain($curtain)
       ->addPropertySection(pht('Details'), $properties);
 
+    $timeline = $this->buildTransactionTimeline(
+      $user,
+      new PhabricatorPeopleTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
     return $this->newPage()
       ->setTitle(
         array(
@@ -54,6 +59,7 @@ final class PhabricatorPeopleProfileManageController
       ->appendChild(
         array(
           $manage,
+          $timeline,
         ));
   }
 

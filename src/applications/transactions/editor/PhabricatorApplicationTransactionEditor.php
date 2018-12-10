@@ -3378,9 +3378,28 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    return array_unique(array_merge(
-      $this->getMailTo($object),
-      $this->getMailCC($object)));
+    // If some transactions are forcing notification delivery, add the forced
+    // recipients to the notify list.
+    $force_list = array();
+    foreach ($xactions as $xaction) {
+      $force_phids = $xaction->getForceNotifyPHIDs();
+
+      if (!$force_phids) {
+        continue;
+      }
+
+      foreach ($force_phids as $force_phid) {
+        $force_list[] = $force_phid;
+      }
+    }
+
+    $to_list = $this->getMailTo($object);
+    $cc_list = $this->getMailCC($object);
+
+    $full_list = array_merge($force_list, $to_list, $cc_list);
+    $full_list = array_fuse($full_list);
+
+    return array_keys($full_list);
   }
 
 

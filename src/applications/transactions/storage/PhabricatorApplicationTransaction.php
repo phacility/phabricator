@@ -1662,6 +1662,15 @@ abstract class PhabricatorApplicationTransaction
     return null;
   }
 
+  public function setForceNotifyPHIDs(array $phids) {
+    $this->setMetadataValue('notify.force', $phids);
+    return $this;
+  }
+
+  public function getForceNotifyPHIDs() {
+    return $this->getMetadataValue('notify.force', array());
+  }
+
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

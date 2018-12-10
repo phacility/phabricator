@@ -4623,6 +4623,7 @@ phutil_register_library_map(array(
     'PhabricatorUserLogView' => 'applications/people/view/PhabricatorUserLogView.php',
     'PhabricatorUserMessageCountCacheType' => 'applications/people/cache/PhabricatorUserMessageCountCacheType.php',
     'PhabricatorUserNotificationCountCacheType' => 'applications/people/cache/PhabricatorUserNotificationCountCacheType.php',
+    'PhabricatorUserNotifyTransaction' => 'applications/people/xaction/PhabricatorUserNotifyTransaction.php',
     'PhabricatorUserPHIDResolver' => 'applications/phid/resolver/PhabricatorUserPHIDResolver.php',
     'PhabricatorUserPreferences' => 'applications/settings/storage/PhabricatorUserPreferences.php',
     'PhabricatorUserPreferencesCacheType' => 'applications/people/cache/PhabricatorUserPreferencesCacheType.php',
@@ -10676,6 +10677,7 @@ phutil_register_library_map(array(
     'PhabricatorUserLogView' => 'AphrontView',
     'PhabricatorUserMessageCountCacheType' => 'PhabricatorUserCacheType',
     'PhabricatorUserNotificationCountCacheType' => 'PhabricatorUserCacheType',
+    'PhabricatorUserNotifyTransaction' => 'PhabricatorUserTransactionType',
     'PhabricatorUserPHIDResolver' => 'PhabricatorPHIDResolver',
     'PhabricatorUserPreferences' => array(
       'PhabricatorUserDAO',

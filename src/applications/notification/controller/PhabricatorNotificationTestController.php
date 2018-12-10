@@ -6,34 +6,31 @@ final class PhabricatorNotificationTestController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $story_type = 'PhabricatorNotificationTestFeedStory';
-    $story_data = array(
-      'title' => pht(
-        'This is a test notification, sent at %s.',
-        phabricator_datetime(time(), $viewer)),
-    );
-
-    $viewer_phid = $viewer->getPHID();
-
-    // NOTE: Because we don't currently show you your own notifications, make
-    // sure this comes from a different PHID.
-    $application_phid = id(new PhabricatorNotificationsApplication())
-      ->getPHID();
-
-    // TODO: When it's easier to get these buttons to render as forms, this
-    // would be slightly nicer as a more standard isFormPost() check.
-
     if ($request->validateCSRF()) {
-      id(new PhabricatorFeedStoryPublisher())
-        ->setStoryType($story_type)
-        ->setStoryData($story_data)
-        ->setStoryTime(time())
-        ->setStoryAuthorPHID($application_phid)
-        ->setRelatedPHIDs(array($viewer_phid))
-        ->setPrimaryObjectPHID($viewer_phid)
-        ->setSubscribedPHIDs(array($viewer_phid))
-        ->setNotifyAuthor(true)
-        ->publish();
+      $message_text = pht(
+        'This is a test notification, sent at %s.',
+        phabricator_datetime(time(), $viewer));
+
+      // NOTE: Currently, the FeedStoryPublisher explicitly filters out
+      // notifications about your own actions. Send this notification from
+      // a different actor to get around this.
+      $application_phid = id(new PhabricatorNotificationsApplication())
+        ->getPHID();
+
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorUserTransaction())
+        ->setTransactionType(
+          PhabricatorUserNotifyTransaction::TRANSACTIONTYPE)
+        ->setNewValue($message_text)
+        ->setForceNotifyPHIDs(array($viewer->getPHID()));
+
+      $editor = id(new PhabricatorUserTransactionEditor())
+        ->setActor($viewer)
+        ->setActingAsPHID($application_phid)
+        ->setContentSourceFromRequest($request);
+
+      $editor->applyTransactions($viewer, $xactions);
     }
 
     return id(new AphrontAjaxResponse());
