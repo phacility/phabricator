@@ -244,7 +244,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     switch ($key) {
       case 'branch-filter':
-      case 'close-commits-filter':
         $value = array_keys($value);
         $value = implode(', ', $value);
         break;
@@ -1200,6 +1199,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return null;
+  }
+
+  public function getAutocloseOnlyRules() {
+    return array_keys($this->getDetail('close-commits-filter', array()));
+  }
+
+  public function setAutocloseOnlyRules(array $rules) {
+    $rules = array_fill_keys($rules, true);
+    $this->setDetail('close-commits-filter', $rules);
+    return $this;
   }
 
 

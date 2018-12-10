@@ -215,8 +215,7 @@ final class DiffusionRepositoryEditEngine
     $track_value = $object->getDetail('branch-filter', array());
     $track_value = array_keys($track_value);
 
-    $autoclose_value = $object->getDetail('close-commits-filter', array());
-    $autoclose_value = array_keys($autoclose_value);
+    $autoclose_value = $object->getAutocloseOnlyRules();
 
     $automation_instructions = pht(
       "Configure **Repository Automation** to allow Phabricator to ".

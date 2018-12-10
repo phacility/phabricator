@@ -15,11 +15,11 @@ final class PhabricatorRepositoryManagementThawWorkflow
         array(
           array(
             'name' => 'demote',
-            'param' => 'device/service',
+            'param' => 'device|service',
             'help' => pht(
               'Demote a device (or all devices in a service) discarding '.
-              'local changes. Clears stuck write locks and recovers from '.
-              'lost leaders.'),
+              'unsynchronized changes. Clears stuck write locks and recovers '.
+              'from lost leaders.'),
           ),
           array(
             'name' => 'promote',
