@@ -4594,4 +4594,75 @@ abstract class PhabricatorApplicationTransactionEditor
     return $mail;
   }
 
+  public function newAutomaticInlineTransactions(
+    PhabricatorLiskDAO $object,
+    array $inlines,
+    $transaction_type,
+    PhabricatorCursorPagedPolicyAwareQuery $query_template) {
+
+    $xactions = array();
+
+    foreach ($inlines as $inline) {
+      $xactions[] = $object->getApplicationTransactionTemplate()
+        ->setTransactionType($transaction_type)
+        ->attachComment($inline);
+    }
+
+    $state_xaction = $this->newInlineStateTransaction(
+      $object,
+      $query_template);
+
+    if ($state_xaction) {
+      $xactions[] = $state_xaction;
+    }
+
+    return $xactions;
+  }
+
+  protected function newInlineStateTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorCursorPagedPolicyAwareQuery $query_template) {
+
+    $actor_phid = $this->getActingAsPHID();
+    $author_phid = $object->getAuthorPHID();
+    $actor_is_author = ($actor_phid == $author_phid);
+
+    $state_map = PhabricatorTransactions::getInlineStateMap();
+
+    $query = id(clone $query_template)
+      ->setViewer($this->getActor())
+      ->withFixedStates(array_keys($state_map));
+
+    $inlines = array();
+
+    $inlines[] = id(clone $query)
+      ->withAuthorPHIDs(array($actor_phid))
+      ->withHasTransaction(false)
+      ->execute();
+
+    if ($actor_is_author) {
+      $inlines[] = id(clone $query)
+        ->withHasTransaction(true)
+        ->execute();
+    }
+
+    $inlines = array_mergev($inlines);
+
+    if (!$inlines) {
+      return null;
+    }
+
+    $old_value = mpull($inlines, 'getFixedState', 'getPHID');
+    $new_value = array();
+    foreach ($old_value as $key => $state) {
+      $new_value[$key] = $state_map[$state];
+    }
+
+    return $object->getApplicationTransactionTemplate()
+      ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
+      ->setIgnoreOnNoEffect(true)
+      ->setOldValue($old_value)
+      ->setNewValue($new_value);
+  }
+
 }
