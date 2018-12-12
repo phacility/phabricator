@@ -37,10 +37,9 @@ final class ReleephGetBranchesConduitAPIMethod extends ReleephConduitAPIMethod {
       foreach ($branches as $branch) {
         $full_branch_name = $branch->getName();
 
-        $cut_point_commit = $branch->loadOneRelative(
-          id(new PhabricatorRepositoryCommit()),
-          'phid',
-          'getCutPointCommitPHID');
+        $cut_point_commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+          'phid = %s',
+          $branch->getCutPointCommitPHID());
 
         $results[] = array(
           'project'         => $project->getName(),

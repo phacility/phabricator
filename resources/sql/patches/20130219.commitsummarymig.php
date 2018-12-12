@@ -12,9 +12,9 @@ foreach ($commits as $commit) {
     continue;
   }
 
-  $data = $commit->loadOneRelative(
-    new PhabricatorRepositoryCommitData(),
-    'commitID');
+  $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+    'commitID = %d',
+    $commit->getID());
 
   if (!$data) {
     continue;
