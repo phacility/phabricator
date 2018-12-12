@@ -30,11 +30,9 @@ final class ReleephGetBranchesConduitAPIMethod extends ReleephConduitAPIMethod {
     foreach ($projects as $project) {
       $repository = $project->getRepository();
 
-      $branches = $project->loadRelatives(
-        id(new ReleephBranch()),
-        'releephProjectID',
-        'getID',
-        'isActive = 1');
+      $branches = id(new ReleephBranch())->loadAllWhere(
+        'releephProjectID = %d AND isActive = 1',
+        $project->getID());
 
       foreach ($branches as $branch) {
         $full_branch_name = $branch->getName();

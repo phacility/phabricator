@@ -22,16 +22,17 @@ final class ReleephDiffSizeFieldSpecification
     }
     $diff_rev = $requested_object;
 
-    $diffs = $diff_rev->loadRelatives(
-      new DifferentialDiff(),
-      'revisionID',
-      'getID',
-      'creationMethod <> "commit"');
+    $diffs = id(new DifferentialDiff())->loadAllWhere(
+      'revisionID = %d AND creationMethod != %s',
+      $diff_rev->getID(),
+      'commit');
 
     $all_changesets = array();
     $most_recent_changesets = null;
     foreach ($diffs as $diff) {
-      $changesets = $diff->loadRelatives(new DifferentialChangeset(), 'diffID');
+      $changesets = id(new DifferentialChangeset())->loadAllWhere(
+        'diffID = %d',
+        $diff->getID());
       $all_changesets += $changesets;
       $most_recent_changesets = $changesets;
     }
