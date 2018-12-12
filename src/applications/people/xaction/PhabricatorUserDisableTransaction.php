@@ -15,7 +15,9 @@ final class PhabricatorUserDisableTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setIsDisabled((int)$value);
+  }
 
+  public function applyExternalEffects($object, $value) {
     $this->newUserLog(PhabricatorUserLog::ACTION_DISABLE)
       ->setOldValue((bool)$object->getIsDisabled())
       ->setNewValue((bool)$value)

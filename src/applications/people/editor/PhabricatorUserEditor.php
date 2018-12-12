@@ -293,45 +293,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     return $this;
   }
 
-  /**
-   * @task role
-   */
-  public function approveUser(PhabricatorUser $user, $approve) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    $user->openTransaction();
-      $user->beginWriteLocking();
-
-        $user->reload();
-        if ($user->getIsApproved() == $approve) {
-          $user->endWriteLocking();
-          $user->killTransaction();
-          return $this;
-        }
-
-        $log = PhabricatorUserLog::initializeNewLog(
-          $actor,
-          $user->getPHID(),
-          PhabricatorUserLog::ACTION_APPROVE);
-        $log->setOldValue($user->getIsApproved());
-        $log->setNewValue($approve);
-
-        $user->setIsApproved($approve);
-        $user->save();
-
-        $log->save();
-
-      $user->endWriteLocking();
-    $user->saveTransaction();
-
-    return $this;
-  }
-
-
 /* -(  Adding, Removing and Changing Email  )-------------------------------- */
 
 
