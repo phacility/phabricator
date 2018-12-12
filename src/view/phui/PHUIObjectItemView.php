@@ -471,7 +471,10 @@ final class PHUIObjectItemView extends AphrontTagView {
           array(
             'class' => implode(' ', $classes),
           ),
-          $icon);
+          array(
+            $icon,
+            $label,
+          ));
       }
 
       $icons[] = phutil_tag(
