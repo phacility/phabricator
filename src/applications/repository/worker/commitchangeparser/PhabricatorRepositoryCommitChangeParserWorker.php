@@ -114,40 +114,36 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     PhabricatorRepositoryCommit $commit,
     array $changes) {
 
+    $conn = $repository->establishConnection('w');
+
     $repository_id = (int)$repository->getID();
     $commit_id = (int)$commit->getID();
 
-    // NOTE: This SQL is being built manually instead of with qsprintf()
-    // because some SVN changes affect an enormous number of paths (millions)
-    // and this showed up as significantly slow on a profile at some point.
-
     $changes_sql = array();
     foreach ($changes as $change) {
-      $values = array(
+      $changes_sql[] = qsprintf(
+        $conn,
+        '(%d, %d, %d, %nd, %nd, %d, %d, %d, %d)',
         $repository_id,
         (int)$change->getPathID(),
         $commit_id,
-        nonempty((int)$change->getTargetPathID(), 'null'),
-        nonempty((int)$change->getTargetCommitID(), 'null'),
+        nonempty((int)$change->getTargetPathID(), null),
+        nonempty((int)$change->getTargetCommitID(), null),
         (int)$change->getChangeType(),
         (int)$change->getFileType(),
         (int)$change->getIsDirect(),
-        (int)$change->getCommitSequence(),
-      );
-      $changes_sql[] = '('.implode(', ', $values).')';
+        (int)$change->getCommitSequence());
     }
 
-    $conn_w = $repository->establishConnection('w');
-
     queryfx(
-      $conn_w,
+      $conn,
       'DELETE FROM %T WHERE commitID = %d',
       PhabricatorRepository::TABLE_PATHCHANGE,
       $commit_id);
 
     foreach (PhabricatorLiskDAO::chunkSQL($changes_sql) as $chunk) {
       queryfx(
-        $conn_w,
+        $conn,
         'INSERT INTO %T
           (repositoryID, pathID, commitID, targetPathID, targetCommitID,
             changeType, fileType, isDirect, commitSequence)
