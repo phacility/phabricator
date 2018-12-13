@@ -29,12 +29,27 @@ final class PhabricatorHighSecurityRequestExceptionHandler
     $throwable) {
 
     $viewer = $this->getViewer($request);
+    $results = $throwable->getFactorValidationResults();
 
     $form = id(new PhabricatorAuthSessionEngine())->renderHighSecurityForm(
       $throwable->getFactors(),
-      $throwable->getFactorValidationResults(),
+      $results,
       $viewer,
       $request);
+
+    $is_wait = false;
+    foreach ($results as $result) {
+      if ($result->getIsWait()) {
+        $is_wait = true;
+        break;
+      }
+    }
+
+    if ($is_wait) {
+      $submit = pht('Wait Patiently');
+    } else {
+      $submit = pht('Enter High Security');
+    }
 
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
@@ -62,7 +77,7 @@ final class PhabricatorHighSecurityRequestExceptionHandler
           'actions, you should leave high security.'))
       ->setSubmitURI($request->getPath())
       ->addCancelButton($throwable->getCancelURI())
-      ->addSubmitButton(pht('Enter High Security'));
+      ->addSubmitButton($submit);
 
     $request_parameters = $request->getPassthroughRequestParameters(
       $respect_quicksand = true);

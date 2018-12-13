@@ -77,7 +77,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
     $e_code = true;
     if ($request->getExists('totp')) {
-      $okay = self::verifyTOTPCode(
+      $okay = $this->verifyTOTPCode(
         $user,
         new PhutilOpaqueEnvelope($key),
         $code);
@@ -150,50 +150,131 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
   }
 
+  protected function newIssuedChallenges(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    array $challenges) {
+
+    $now = $this->getCurrentTimestep();
+
+    // If we already issued a valid challenge, don't issue a new one.
+    if ($challenges) {
+      return array();
+    }
+
+    // Otherwise, generate a new challenge for the current timestep. It TTLs
+    // after it would fall off the bottom of the window.
+    $timesteps = $this->getAllowedTimesteps();
+    $min_step = min($timesteps);
+
+    $step_duration = $this->getTimestepDuration();
+    $ttl_steps = ($now - $min_step) + 1;
+    $ttl_seconds = ($ttl_steps * $step_duration);
+
+    return array(
+      $this->newChallenge($config, $viewer)
+        ->setChallengeKey($now)
+        ->setChallengeTTL(PhabricatorTime::getNow() + $ttl_seconds),
+    );
+  }
+
   public function renderValidateFactorForm(
     PhabricatorAuthFactorConfig $config,
     AphrontFormView $form,
     PhabricatorUser $viewer,
-    PhabricatorAuthFactorResult $validation_result = null) {
+    PhabricatorAuthFactorResult $result) {
 
-    if ($validation_result) {
-      $value = $validation_result->getValue();
-      $hint = $validation_result->getHint();
+    $value = $result->getValue();
+    $error = $result->getErrorMessage();
+    $is_wait = $result->getIsWait();
+
+    if ($is_wait) {
+      $control = id(new AphrontFormMarkupControl())
+        ->setValue($error)
+        ->setError(pht('Wait'));
     } else {
-      $value = null;
-      $hint = true;
+      $control = id(new PHUIFormNumberControl())
+        ->setName($this->getParameterName($config, 'totpcode'))
+        ->setDisableAutocomplete(true)
+        ->setValue($value)
+        ->setError($error);
     }
 
-    $form->appendChild(
-      id(new PHUIFormNumberControl())
-        ->setName($this->getParameterName($config, 'totpcode'))
-        ->setLabel(pht('App Code'))
-        ->setDisableAutocomplete(true)
-        ->setCaption(pht('Factor Name: %s', $config->getFactorName()))
-        ->setValue($value)
-        ->setError($hint));
+    $control
+      ->setLabel(pht('App Code'))
+      ->setCaption(pht('Factor Name: %s', $config->getFactorName()));
+
+    $form->appendChild($control);
   }
 
-  public function processValidateFactorForm(
+  protected function newResultFromIssuedChallenges(
     PhabricatorAuthFactorConfig $config,
     PhabricatorUser $viewer,
-    AphrontRequest $request) {
+    array $challenges) {
+
+    // If we've already issued a challenge at the current timestep or any
+    // nearby timestep, require that it was issued to the current session.
+    // This is defusing attacks where you (broadly) look at someone's phone
+    // and type the code in more quickly than they do.
+
+    $step_duration = $this->getTimestepDuration();
+    $now = $this->getCurrentTimestep();
+    $timesteps = $this->getAllowedTimesteps();
+    $timesteps = array_fuse($timesteps);
+    $min_step = min($timesteps);
+
+    $session_phid = $viewer->getSession()->getPHID();
+
+    foreach ($challenges as $challenge) {
+      $challenge_timestep = (int)$challenge->getChallengeKey();
+
+      // This challenge isn't for one of the timesteps you'd be able to respond
+      // to if you submitted the form right now, so we're good to keep going.
+      if (!isset($timesteps[$challenge_timestep])) {
+        continue;
+      }
+
+      // This is the number of timesteps you need to wait for the problem
+      // timestep to leave the window, rounded up.
+      $wait_steps = ($challenge_timestep - $min_step) + 1;
+      $wait_duration = ($wait_steps * $step_duration);
+
+      if ($challenge->getSessionPHID() !== $session_phid) {
+        return $this->newResult()
+          ->setIsWait(true)
+          ->setErrorMessage(
+            pht(
+              'This factor recently issued a challenge to a different login '.
+              'session. Wait %s seconds for the code to cycle, then try '.
+              'again.',
+              new PhutilNumber($wait_duration)));
+      }
+    }
+
+    return null;
+  }
+
+  protected function newResultFromChallengeResponse(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    array $challenges) {
 
     $code = $request->getStr($this->getParameterName($config, 'totpcode'));
     $key = new PhutilOpaqueEnvelope($config->getFactorSecret());
 
-    $result = id(new PhabricatorAuthFactorResult())
+    $result = $this->newResult()
       ->setValue($code);
 
-    if (self::verifyTOTPCode($viewer, $key, $code)) {
+    if ($this->verifyTOTPCode($viewer, $key, (string)$code)) {
       $result->setIsValid(true);
     } else {
       if (strlen($code)) {
-        $hint = pht('Invalid');
+        $error_message = pht('Invalid');
       } else {
-        $hint = pht('Required');
+        $error_message = pht('Required');
       }
-      $result->setHint($hint);
+      $result->setErrorMessage($error_message);
     }
 
     return $result;
@@ -203,7 +284,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return strtoupper(Filesystem::readRandomCharacters(32));
   }
 
-  public static function verifyTOTPCode(
+  private function verifyTOTPCode(
     PhabricatorUser $user,
     PhutilOpaqueEnvelope $key,
     $code) {
@@ -317,5 +398,20 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       ),
       $rows);
   }
+
+  private function getTimestepDuration() {
+    return 30;
+  }
+
+  private function getCurrentTimestep() {
+    $duration = $this->getTimestepDuration();
+    return (int)(PhabricatorTime::getNow() / $duration);
+  }
+
+  private function getAllowedTimesteps() {
+    $now = $this->getCurrentTimestep();
+    return range($now - 2, $now + 2);
+  }
+
 
 }

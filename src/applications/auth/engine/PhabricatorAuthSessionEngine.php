@@ -480,7 +480,59 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       new PhabricatorAuthTryFactorAction(),
       0);
 
+    $now = PhabricatorTime::getNow();
+
+    // We need to do challenge validation first, since this happens whether you
+    // submitted responses or not. You can't get a "bad response" error before
+    // you actually submit a response, but you can get a "wait, we can't
+    // issue a challenge yet" response. Load all issued challenges which are
+    // currently valid.
+    $challenges = id(new PhabricatorAuthChallengeQuery())
+      ->setViewer($viewer)
+      ->withFactorPHIDs(mpull($factors, 'getPHID'))
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withChallengeTTLBetween($now, null)
+      ->execute();
+    $challenge_map = mgroup($challenges, 'getFactorPHID');
+
     $validation_results = array();
+    $ok = true;
+
+    // Validate each factor against issued challenges. For example, this
+    // prevents you from receiving or responding to a TOTP challenge if another
+    // challenge was recently issued to a different session.
+    foreach ($factors as $factor) {
+      $factor_phid = $factor->getPHID();
+      $issued_challenges = idx($challenge_map, $factor_phid, array());
+      $impl = $factor->requireImplementation();
+
+      $new_challenges = $impl->getNewIssuedChallenges(
+        $factor,
+        $viewer,
+        $issued_challenges);
+
+      foreach ($new_challenges as $new_challenge) {
+        $issued_challenges[] = $new_challenge;
+      }
+      $challenge_map[$factor_phid] = $issued_challenges;
+
+      if (!$issued_challenges) {
+        continue;
+      }
+
+      $result = $impl->getResultFromIssuedChallenges(
+        $factor,
+        $viewer,
+        $issued_challenges);
+
+      if (!$result) {
+        continue;
+      }
+
+      $ok = false;
+      $validation_results[$factor_phid] = $result;
+    }
+
     if ($request->isHTTPPost()) {
       $request->validateCSRF();
       if ($request->getExists(AphrontRequest::TYPE_HISEC)) {
@@ -491,30 +543,28 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           new PhabricatorAuthTryFactorAction(),
           1);
 
-        $ok = true;
         foreach ($factors as $factor) {
-          $id = $factor->getID();
+          $factor_phid = $factor->getPHID();
+
+          // If we already have a validation result from previously issued
+          // challenges, skip validating this factor.
+          if (isset($validation_results[$factor_phid])) {
+            continue;
+          }
+
           $impl = $factor->requireImplementation();
 
-          $validation_result = $impl->processValidateFactorForm(
+          $validation_result = $impl->getResultFromChallengeResponse(
             $factor,
             $viewer,
-            $request);
-
-          if (!($validation_result instanceof PhabricatorAuthFactorResult)) {
-            throw new Exception(
-              pht(
-                'Expected "processValidateFactorForm()" to return an object '.
-                'of class "%s"; got something else (from "%s").',
-                'PhabricatorAuthFactorResult',
-                get_class($impl)));
-          }
+            $request,
+            $issued_challenges);
 
           if (!$validation_result->getIsValid()) {
             $ok = false;
           }
 
-          $validation_results[$id] = $validation_result;
+          $validation_results[$factor_phid] = $validation_result;
         }
 
         if ($ok) {
@@ -566,6 +616,18 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $token;
     }
 
+    // If we don't have a validation result for some factors yet, fill them
+    // in with an empty result so form rendering doesn't have to care if the
+    // results exist or not. This happens when you first load the form and have
+    // not submitted any responses yet.
+    foreach ($factors as $factor) {
+      $factor_phid = $factor->getPHID();
+      if (isset($validation_results[$factor_phid])) {
+        continue;
+      }
+      $validation_results[$factor_phid] = new PhabricatorAuthFactorResult();
+    }
+
     throw id(new PhabricatorAuthHighSecurityRequiredException())
       ->setCancelURI($cancel_uri)
       ->setFactors($factors)
@@ -613,7 +675,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       ->appendRemarkupInstructions('');
 
     foreach ($factors as $factor) {
-      $result = idx($validation_results, $factor->getID());
+      $result = $validation_results[$factor->getPHID()];
 
       $factor->requireImplementation()->renderValidateFactorForm(
         $factor,
