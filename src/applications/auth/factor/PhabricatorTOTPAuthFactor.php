@@ -2,6 +2,8 @@
 
 final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
+  const DIGEST_TEMPORARY_KEY = 'mfa.totp.sync';
+
   public function getFactorKey() {
     return 'totp';
   }
@@ -34,12 +36,16 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       // (We store and verify the hash of the key, not the key itself, to limit
       // how useful the data in the table is to an attacker.)
 
+      $token_code = PhabricatorHash::digestWithNamedKey(
+        $key,
+        self::DIGEST_TEMPORARY_KEY);
+
       $temporary_token = id(new PhabricatorAuthTemporaryTokenQuery())
         ->setViewer($user)
         ->withTokenResources(array($user->getPHID()))
         ->withTokenTypes(array($totp_token_type))
         ->withExpired(false)
-        ->withTokenCodes(array(PhabricatorHash::weakDigest($key)))
+        ->withTokenCodes(array($token_code))
         ->executeOne();
       if (!$temporary_token) {
         // If we don't have a matching token, regenerate the key below.
@@ -53,12 +59,16 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       // Mark this key as one we generated, so the user is allowed to submit
       // a response for it.
 
+      $token_code = PhabricatorHash::digestWithNamedKey(
+        $key,
+        self::DIGEST_TEMPORARY_KEY);
+
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         id(new PhabricatorAuthTemporaryToken())
           ->setTokenResource($user->getPHID())
           ->setTokenType($totp_token_type)
           ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
-          ->setTokenCode(PhabricatorHash::weakDigest($key))
+          ->setTokenCode($token_code)
           ->save();
       unset($unguarded);
     }
