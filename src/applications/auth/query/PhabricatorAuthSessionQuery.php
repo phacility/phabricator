@@ -91,7 +91,8 @@ final class PhabricatorAuthSessionQuery
     if ($this->sessionKeys !== null) {
       $hashes = array();
       foreach ($this->sessionKeys as $session_key) {
-        $hashes[] = PhabricatorHash::weakDigest($session_key);
+        $hashes[] = PhabricatorAuthSession::newSessionDigest(
+          new PhutilOpaqueEnvelope($session_key));
       }
       $where[] = qsprintf(
         $conn,

@@ -6,6 +6,8 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
   const TYPE_WEB      = 'web';
   const TYPE_CONDUIT  = 'conduit';
 
+  const SESSION_DIGEST_KEY = 'session.digest';
+
   protected $userPHID;
   protected $type;
   protected $sessionKey;
@@ -17,13 +19,19 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
 
   private $identityObject = self::ATTACHABLE;
 
+  public static function newSessionDigest(PhutilOpaqueEnvelope $session_token) {
+    return PhabricatorHash::digestWithNamedKey(
+      $session_token->openEnvelope(),
+      self::SESSION_DIGEST_KEY);
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'type' => 'text32',
-        'sessionKey' => 'bytes40',
+        'sessionKey' => 'text64',
         'sessionStart' => 'epoch',
         'sessionExpires' => 'epoch',
         'highSecurityUntil' => 'epoch?',
