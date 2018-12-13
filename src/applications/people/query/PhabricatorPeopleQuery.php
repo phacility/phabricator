@@ -163,14 +163,7 @@ final class PhabricatorPeopleQuery
   }
 
   protected function loadPage() {
-    $table = new PhabricatorUser();
-    $data = $this->loadStandardPageRows($table);
-
-    if ($this->needPrimaryEmail) {
-      $table->putInSet(new LiskDAOSet());
-    }
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function didFilterPage(array $users) {
