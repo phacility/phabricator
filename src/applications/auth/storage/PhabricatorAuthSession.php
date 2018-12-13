@@ -20,6 +20,7 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'type' => 'text32',
         'sessionKey' => 'bytes40',
@@ -72,6 +73,10 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
       default:
         throw new Exception(pht('Unknown session type "%s".', $session_type));
     }
+  }
+
+  public function getPHIDType() {
+    return PhabricatorAuthSessionPHIDType::TYPECONST;
   }
 
   public function isHighSecuritySession() {

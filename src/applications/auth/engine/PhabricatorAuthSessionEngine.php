@@ -119,6 +119,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $conn_r,
       'SELECT
           s.id AS s_id,
+          s.phid AS s_phid,
           s.sessionExpires AS s_sessionExpires,
           s.sessionStart AS s_sessionStart,
           s.highSecurityUntil AS s_highSecurityUntil,
