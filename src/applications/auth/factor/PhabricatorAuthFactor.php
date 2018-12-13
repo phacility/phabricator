@@ -14,18 +14,12 @@ abstract class PhabricatorAuthFactor extends Phobject {
     PhabricatorAuthFactorConfig $config,
     AphrontFormView $form,
     PhabricatorUser $viewer,
-    $validation_result);
+    PhabricatorAuthFactorResult $validation_result = null);
 
   abstract public function processValidateFactorForm(
     PhabricatorAuthFactorConfig $config,
     PhabricatorUser $viewer,
     AphrontRequest $request);
-
-  public function isFactorValid(
-    PhabricatorAuthFactorConfig $config,
-    $validation_result) {
-    return (idx($validation_result, 'valid') === true);
-  }
 
   public function getParameterName(
     PhabricatorAuthFactorConfig $config,

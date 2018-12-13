@@ -496,14 +496,25 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           $id = $factor->getID();
           $impl = $factor->requireImplementation();
 
-          $validation_results[$id] = $impl->processValidateFactorForm(
+          $validation_result = $impl->processValidateFactorForm(
             $factor,
             $viewer,
             $request);
 
-          if (!$impl->isFactorValid($factor, $validation_results[$id])) {
+          if (!($validation_result instanceof PhabricatorAuthFactorResult)) {
+            throw new Exception(
+              pht(
+                'Expected "processValidateFactorForm()" to return an object '.
+                'of class "%s"; got something else (from "%s").',
+                'PhabricatorAuthFactorResult',
+                get_class($impl)));
+          }
+
+          if (!$validation_result->getIsValid()) {
             $ok = false;
           }
+
+          $validation_results[$id] = $validation_result;
         }
 
         if ($ok) {
@@ -595,17 +606,20 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     array $validation_results,
     PhabricatorUser $viewer,
     AphrontRequest $request) {
+    assert_instances_of($validation_results, 'PhabricatorAuthFactorResult');
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendRemarkupInstructions('');
 
     foreach ($factors as $factor) {
+      $result = idx($validation_results, $factor->getID());
+
       $factor->requireImplementation()->renderValidateFactorForm(
         $factor,
         $form,
         $viewer,
-        idx($validation_results, $factor->getID()));
+        $result);
     }
 
     $form->appendRemarkupInstructions('');

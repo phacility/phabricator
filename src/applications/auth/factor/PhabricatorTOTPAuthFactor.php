@@ -154,10 +154,14 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     PhabricatorAuthFactorConfig $config,
     AphrontFormView $form,
     PhabricatorUser $viewer,
-    $validation_result) {
+    PhabricatorAuthFactorResult $validation_result = null) {
 
-    if (!$validation_result) {
-      $validation_result = array();
+    if ($validation_result) {
+      $value = $validation_result->getValue();
+      $hint = $validation_result->getHint();
+    } else {
+      $value = null;
+      $hint = true;
     }
 
     $form->appendChild(
@@ -166,8 +170,8 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
         ->setLabel(pht('App Code'))
         ->setDisableAutocomplete(true)
         ->setCaption(pht('Factor Name: %s', $config->getFactorName()))
-        ->setValue(idx($validation_result, 'value'))
-        ->setError(idx($validation_result, 'error', true)));
+        ->setValue($value)
+        ->setError($hint));
   }
 
   public function processValidateFactorForm(
@@ -178,21 +182,22 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     $code = $request->getStr($this->getParameterName($config, 'totpcode'));
     $key = new PhutilOpaqueEnvelope($config->getFactorSecret());
 
-    if (self::verifyTOTPCode($viewer, $key, $code)) {
-      return array(
-        'error' => null,
-        'value' => $code,
-        'valid' => true,
-      );
-    } else {
-      return array(
-        'error' => strlen($code) ? pht('Invalid') : pht('Required'),
-        'value' => $code,
-        'valid' => false,
-      );
-    }
-  }
+    $result = id(new PhabricatorAuthFactorResult())
+      ->setValue($code);
 
+    if (self::verifyTOTPCode($viewer, $key, $code)) {
+      $result->setIsValid(true);
+    } else {
+      if (strlen($code)) {
+        $hint = pht('Invalid');
+      } else {
+        $hint = pht('Required');
+      }
+      $result->setHint($hint);
+    }
+
+    return $result;
+  }
 
   public static function generateNewTOTPKey() {
     return strtoupper(Filesystem::readRandomCharacters(32));

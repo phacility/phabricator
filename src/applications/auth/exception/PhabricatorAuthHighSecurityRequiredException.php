@@ -7,6 +7,7 @@ final class PhabricatorAuthHighSecurityRequiredException extends Exception {
   private $factorValidationResults;
 
   public function setFactorValidationResults(array $results) {
+    assert_instances_of($results, 'PhabricatorAuthFactorResult');
     $this->factorValidationResults = $results;
     return $this;
   }
