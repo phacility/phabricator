@@ -131,45 +131,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
 /* -(  Editing Roles  )------------------------------------------------------ */
 
-
-  /**
-   * @task role
-   */
-  public function makeAdminUser(PhabricatorUser $user, $admin) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    $user->openTransaction();
-      $user->beginWriteLocking();
-
-        $user->reload();
-        if ($user->getIsAdmin() == $admin) {
-          $user->endWriteLocking();
-          $user->killTransaction();
-          return $this;
-        }
-
-        $log = PhabricatorUserLog::initializeNewLog(
-          $actor,
-          $user->getPHID(),
-          PhabricatorUserLog::ACTION_ADMIN);
-        $log->setOldValue($user->getIsAdmin());
-        $log->setNewValue($admin);
-
-        $user->setIsAdmin((int)$admin);
-        $user->save();
-
-        $log->save();
-
-      $user->endWriteLocking();
-    $user->saveTransaction();
-
-    return $this;
-  }
-
   /**
    * @task role
    */

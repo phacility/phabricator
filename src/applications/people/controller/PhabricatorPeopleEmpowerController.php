@@ -22,22 +22,26 @@ final class PhabricatorPeopleEmpowerController
       $request,
       $done_uri);
 
-    if ($user->getPHID() == $viewer->getPHID()) {
-      return $this->newDialog()
-        ->setTitle(pht('Your Way is Blocked'))
-        ->appendParagraph(
-          pht(
-            'After a time, your efforts fail. You can not adjust your own '.
-            'status as an administrator.'))
-        ->addCancelButton($done_uri, pht('Accept Fate'));
-    }
+    $validation_exception = null;
 
     if ($request->isFormPost()) {
-      id(new PhabricatorUserEditor())
-        ->setActor($viewer)
-        ->makeAdminUser($user, !$user->getIsAdmin());
+      $xactions = array();
+      $xactions[] = id(new PhabricatorUserTransaction())
+        ->setTransactionType(
+          PhabricatorUserEmpowerTransaction::TRANSACTIONTYPE)
+        ->setNewValue(!$user->getIsAdmin());
 
-      return id(new AphrontRedirectResponse())->setURI($done_uri);
+      $editor = id(new PhabricatorUserTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnMissingFields(true);
+
+      try {
+        $editor->applyTransactions($user, $xactions);
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+      }
     }
 
     if ($user->getIsAdmin()) {
@@ -60,6 +64,7 @@ final class PhabricatorPeopleEmpowerController
     }
 
     return $this->newDialog()
+      ->setValidationException($validation_exception)
       ->setTitle($title)
       ->setShortTitle($short)
       ->appendParagraph($body)
