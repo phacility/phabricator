@@ -25,6 +25,9 @@ final class PhabricatorAuthChallenge
         'key_issued' => array(
           'columns' => array('userPHID', 'challengeTTL'),
         ),
+        'key_collection' => array(
+          'columns' => array('challengeTTL'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
