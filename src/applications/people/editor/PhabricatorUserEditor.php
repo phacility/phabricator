@@ -129,53 +129,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
   }
 
 
-  /**
-   * @task edit
-   */
-  public function changeUsername(PhabricatorUser $user, $username) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    if (!PhabricatorUser::validateUsername($username)) {
-      $valid = PhabricatorUser::describeValidUsername();
-      throw new Exception(pht('Username is invalid! %s', $valid));
-    }
-
-    $old_username = $user->getUsername();
-
-    $user->openTransaction();
-      $user->reload();
-      $user->setUsername($username);
-
-      try {
-        $user->save();
-      } catch (AphrontDuplicateKeyQueryException $ex) {
-        $user->setUsername($old_username);
-        $user->killTransaction();
-        throw $ex;
-      }
-
-      $log = PhabricatorUserLog::initializeNewLog(
-        $actor,
-        $user->getPHID(),
-        PhabricatorUserLog::ACTION_CHANGE_USERNAME);
-      $log->setOldValue($old_username);
-      $log->setNewValue($username);
-      $log->save();
-
-    $user->saveTransaction();
-
-    // The SSH key cache currently includes usernames, so dirty it. See T12554
-    // for discussion.
-    PhabricatorAuthSSHKeyQuery::deleteSSHKeyCache();
-
-    $user->sendUsernameChangeEmail($actor, $old_username);
-  }
-
-
 /* -(  Editing Roles  )------------------------------------------------------ */
 
 
