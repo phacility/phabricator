@@ -7,6 +7,7 @@ final class PhabricatorAuthChallenge
   protected $userPHID;
   protected $factorPHID;
   protected $sessionPHID;
+  protected $workflowKey;
   protected $challengeKey;
   protected $challengeTTL;
   protected $properties = array();
@@ -20,6 +21,7 @@ final class PhabricatorAuthChallenge
       self::CONFIG_COLUMN_SCHEMA => array(
         'challengeKey' => 'text255',
         'challengeTTL' => 'epoch',
+        'workflowKey' => 'text255',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_issued' => array(

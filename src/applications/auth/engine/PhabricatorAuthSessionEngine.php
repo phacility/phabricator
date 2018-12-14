@@ -46,6 +46,26 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   const ONETIME_USERNAME = 'rename';
 
 
+  private $workflowKey;
+
+  public function setWorkflowKey($workflow_key) {
+    $this->workflowKey = $workflow_key;
+    return $this;
+  }
+
+  public function getWorkflowKey() {
+
+    // TODO: A workflow key should become required in order to issue an MFA
+    // challenge, but allow things to keep working for now until we can update
+    // callsites.
+    if ($this->workflowKey === null) {
+      return 'legacy';
+    }
+
+    return $this->workflowKey;
+  }
+
+
   /**
    * Get the session kind (e.g., anonymous, user, external account) from a
    * session token. Returns a `KIND_` constant.
@@ -471,6 +491,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // since they never actually got marked as hisec.
     if (!$factors) {
       return $this->issueHighSecurityToken($session, true);
+    }
+
+    foreach ($factors as $factor) {
+      $factor->setSessionEngine($this);
     }
 
     // Check for a rate limit without awarding points, so the user doesn't

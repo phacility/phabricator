@@ -225,6 +225,9 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
     $session_phid = $viewer->getSession()->getPHID();
 
+    $engine = $config->getSessionEngine();
+    $workflow_key = $engine->getWorkflowKey();
+
     foreach ($challenges as $challenge) {
       $challenge_timestep = (int)$challenge->getChallengeKey();
 
@@ -246,6 +249,17 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
             pht(
               'This factor recently issued a challenge to a different login '.
               'session. Wait %s seconds for the code to cycle, then try '.
+              'again.',
+              new PhutilNumber($wait_duration)));
+      }
+
+      if ($challenge->getWorkflowKey() !== $workflow_key) {
+        return $this->newResult()
+          ->setIsWait(true)
+          ->setErrorMessage(
+            pht(
+              'This factor recently issued a challenge for a different '.
+              'workflow. Wait %s seconds for the code to cycle, then try '.
               'again.',
               new PhutilNumber($wait_duration)));
       }

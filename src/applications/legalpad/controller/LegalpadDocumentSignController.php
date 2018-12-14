@@ -154,7 +154,12 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
       // Require two-factor auth to sign legal documents.
       if ($viewer->isLoggedIn()) {
+        $workflow_key = sprintf(
+          'legalpad.sign(%s)',
+          $document->getPHID());
+
         $hisec_token = id(new PhabricatorAuthSessionEngine())
+          ->setWorkflowKey($workflow_key)
           ->requireHighSecurityToken(
             $viewer,
             $request,
