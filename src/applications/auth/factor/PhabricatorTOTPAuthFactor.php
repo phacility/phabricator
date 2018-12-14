@@ -155,25 +155,43 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     PhabricatorUser $viewer,
     array $challenges) {
 
-    $now = $this->getCurrentTimestep();
+    $current_step = $this->getCurrentTimestep();
 
     // If we already issued a valid challenge, don't issue a new one.
     if ($challenges) {
       return array();
     }
 
-    // Otherwise, generate a new challenge for the current timestep. It TTLs
-    // after it would fall off the bottom of the window.
-    $timesteps = $this->getAllowedTimesteps();
-    $min_step = min($timesteps);
+    // Otherwise, generate a new challenge for the current timestep and compute
+    // the TTL.
 
+    // When computing the TTL, note that we accept codes within a certain
+    // window of the challenge timestep to account for clock skew and users
+    // needing time to enter codes.
+
+    // We don't want this challenge to expire until after all valid responses
+    // to it are no longer valid responses to any other challenge we might
+    // issue in the future. If the challenge expires too quickly, we may issue
+    // a new challenge which can accept the same TOTP code response.
+
+    // This means that we need to keep this challenge alive for double the
+    // window size: if we're currently at timestep 3, the user might respond
+    // with the code for timestep 5. This is valid, since timestep 5 is within
+    // the window for timestep 3.
+
+    // But the code for timestep 5 can be used to respond at timesteps 3, 4, 5,
+    // 6, and 7. To prevent any valid response to this challenge from being
+    // used again, we need to keep this challenge active until timestep 8.
+
+    $window_size = $this->getTimestepWindowSize();
     $step_duration = $this->getTimestepDuration();
-    $ttl_steps = ($now - $min_step) + 1;
+
+    $ttl_steps = ($window_size * 2) + 1;
     $ttl_seconds = ($ttl_steps * $step_duration);
 
     return array(
       $this->newChallenge($config, $viewer)
-        ->setChallengeKey($now)
+        ->setChallengeKey($current_step)
         ->setChallengeTTL(PhabricatorTime::getNow() + $ttl_seconds),
     );
   }
@@ -216,31 +234,15 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     // nearby timestep, require that it was issued to the current session.
     // This is defusing attacks where you (broadly) look at someone's phone
     // and type the code in more quickly than they do.
-
-    $step_duration = $this->getTimestepDuration();
-    $now = $this->getCurrentTimestep();
-    $timesteps = $this->getAllowedTimesteps();
-    $timesteps = array_fuse($timesteps);
-    $min_step = min($timesteps);
-
     $session_phid = $viewer->getSession()->getPHID();
+    $now = PhabricatorTime::getNow();
 
     $engine = $config->getSessionEngine();
     $workflow_key = $engine->getWorkflowKey();
 
     foreach ($challenges as $challenge) {
       $challenge_timestep = (int)$challenge->getChallengeKey();
-
-      // This challenge isn't for one of the timesteps you'd be able to respond
-      // to if you submitted the form right now, so we're good to keep going.
-      if (!isset($timesteps[$challenge_timestep])) {
-        continue;
-      }
-
-      // This is the number of timesteps you need to wait for the problem
-      // timestep to leave the window, rounded up.
-      $wait_steps = ($challenge_timestep - $min_step) + 1;
-      $wait_duration = ($wait_steps * $step_duration);
+      $wait_duration = ($challenge->getChallengeTTL() - $now) + 1;
 
       if ($challenge->getSessionPHID() !== $session_phid) {
         return $this->newResult()
@@ -248,7 +250,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
           ->setErrorMessage(
             pht(
               'This factor recently issued a challenge to a different login '.
-              'session. Wait %s seconds for the code to cycle, then try '.
+              'session. Wait %s second(s) for the code to cycle, then try '.
               'again.',
               new PhutilNumber($wait_duration)));
       }
@@ -259,7 +261,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
           ->setErrorMessage(
             pht(
               'This factor recently issued a challenge for a different '.
-              'workflow. Wait %s seconds for the code to cycle, then try '.
+              'workflow. Wait %s second(s) for the code to cycle, then try '.
               'again.',
               new PhutilNumber($wait_duration)));
       }
@@ -423,8 +425,13 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
   }
 
   private function getAllowedTimesteps() {
-    $now = $this->getCurrentTimestep();
-    return range($now - 2, $now + 2);
+    $current_step = $this->getCurrentTimestep();
+    $window = $this->getTimestepWindowSize();
+    return range($current_step - $window, $current_step + $window);
+  }
+
+  private function getTimestepWindowSize() {
+    return 2;
   }
 
 
