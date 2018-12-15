@@ -74,6 +74,10 @@ final class PhabricatorPeopleProfileViewController
       ->setTitle($user->getUsername())
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(
+        array(
+          $user->getPHID(),
+        ))
       ->appendChild(
         array(
           $home,

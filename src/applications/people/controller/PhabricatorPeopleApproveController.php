@@ -24,30 +24,18 @@ final class PhabricatorPeopleApproveController
     }
 
     if ($request->isFormPost()) {
-      id(new PhabricatorUserEditor())
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorUserTransaction())
+        ->setTransactionType(PhabricatorUserApproveTransaction::TRANSACTIONTYPE)
+        ->setNewValue(true);
+
+      id(new PhabricatorUserTransactionEditor())
         ->setActor($viewer)
-        ->approveUser($user, true);
-
-      $title = pht(
-        'Phabricator Account "%s" Approved',
-        $user->getUsername());
-
-      $body = sprintf(
-        "%s\n\n  %s\n\n",
-        pht(
-          'Your Phabricator account (%s) has been approved by %s. You can '.
-          'login here:',
-          $user->getUsername(),
-          $viewer->getUsername()),
-        PhabricatorEnv::getProductionURI('/'));
-
-      $mail = id(new PhabricatorMetaMTAMail())
-        ->addTos(array($user->getPHID()))
-        ->addCCs(array($viewer->getPHID()))
-        ->setSubject('[Phabricator] '.$title)
-        ->setForceDelivery(true)
-        ->setBody($body)
-        ->saveAndSend();
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
+        ->applyTransactions($user, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($done_uri);
     }

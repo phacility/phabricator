@@ -641,9 +641,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     if ($this->hasOpenSubtasks !== null) {
       if ($this->hasOpenSubtasks) {
-        $join_type = 'JOIN';
+        $join_type = qsprintf($conn, 'JOIN');
       } else {
-        $join_type = 'LEFT JOIN';
+        $join_type = qsprintf($conn, 'LEFT JOIN');
       }
 
       $joins[] = qsprintf(

@@ -108,6 +108,17 @@ abstract class PhabricatorModularTransaction
     return parent::shouldHideForMail($xactions);
   }
 
+  final public function shouldHideForNotifications() {
+    $hide = $this->getTransactionImplementation()->shouldHideForNotifications();
+
+    // Returning "null" means "use the default behavior".
+    if ($hide === null) {
+      return parent::shouldHideForNotifications();
+    }
+
+    return $hide;
+  }
+
   /* final */ public function getIcon() {
     $icon = $this->getTransactionImplementation()->getIcon();
     if ($icon !== null) {

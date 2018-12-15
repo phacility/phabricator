@@ -281,29 +281,39 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow($workflow_edit));
 
-    $edit_config = $edit_engine->loadDefaultEditConfiguration($task);
-    $can_create = (bool)$edit_config;
+    $subtype_map = $task->newEditEngineSubtypeMap();
+    $subtask_options = $subtype_map->getCreateFormsForSubtype(
+      $edit_engine,
+      $task);
 
-    if ($can_create) {
-      $form_key = $edit_config->getIdentifier();
-      $edit_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
+    // If no forms are available, we want to show the user an error.
+    // If one form is available, we take them user directly to the form.
+    // If two or more forms are available, we give the user a choice.
+
+    // The "subtask" controller handles the first case (no forms) and the
+    // third case (more than one form). In the case of one form, we link
+    // directly to the form.
+    $subtask_uri = "/task/subtask/{$id}/";
+    $subtask_workflow = true;
+
+    if (count($subtask_options) == 1) {
+      $subtask_form = head($subtask_options);
+      $form_key = $subtask_form->getIdentifier();
+      $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
         ->setQueryParam('parent', $id)
         ->setQueryParam('template', $id)
         ->setQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
-      $edit_uri = $this->getApplicationURI($edit_uri);
-    } else {
-      // TODO: This will usually give us a somewhat-reasonable error page, but
-      // could be a bit cleaner.
-      $edit_uri = "/task/edit/{$id}/";
-      $edit_uri = $this->getApplicationURI($edit_uri);
+      $subtask_workflow = false;
     }
+
+    $subtask_uri = $this->getApplicationURI($subtask_uri);
 
     $subtask_item = id(new PhabricatorActionView())
       ->setName(pht('Create Subtask'))
-      ->setHref($edit_uri)
+      ->setHref($subtask_uri)
       ->setIcon('fa-level-down')
-      ->setDisabled(!$can_create)
-      ->setWorkflow(!$can_create);
+      ->setDisabled(!$subtask_options)
+      ->setWorkflow($subtask_workflow);
 
     $relationship_list = PhabricatorObjectRelationshipList::newForObject(
       $viewer,

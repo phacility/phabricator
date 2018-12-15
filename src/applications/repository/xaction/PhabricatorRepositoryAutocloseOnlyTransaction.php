@@ -6,11 +6,11 @@ final class PhabricatorRepositoryAutocloseOnlyTransaction
   const TRANSACTIONTYPE = 'repo:autoclose-only';
 
   public function generateOldValue($object) {
-    return array_keys($object->getDetail('close-commits-filter', array()));
+    return $object->getAutocloseOnlyRules();
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setDetail('close-commits-filter', array_fill_keys($value, true));
+    $object->setAutocloseOnlyRules($value);
   }
 
   public function getTitle() {

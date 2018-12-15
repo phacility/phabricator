@@ -68,7 +68,7 @@ final class DiffusionRepositorySubversionManagementPanel
       ->setViewer($viewer);
 
     $default_branch = nonempty(
-      $repository->getHumanReadableDetail('svn-subpath'),
+      $repository->getDetail('svn-subpath'),
       phutil_tag('em', array(), pht('Import Entire Repository')));
     $view->addProperty(pht('Import Only'), $default_branch);
 

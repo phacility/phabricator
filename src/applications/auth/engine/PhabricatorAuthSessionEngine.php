@@ -109,35 +109,48 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $session_table = new PhabricatorAuthSession();
     $user_table = new PhabricatorUser();
-    $conn_r = $session_table->establishConnection('r');
-    $session_key = PhabricatorHash::weakDigest($session_token);
+    $conn = $session_table->establishConnection('r');
 
-    $cache_parts = $this->getUserCacheQueryParts($conn_r);
+    // TODO: See T13225. We're moving sessions to a more modern digest
+    // algorithm, but still accept older cookies for compatibility.
+    $session_key = PhabricatorAuthSession::newSessionDigest(
+      new PhutilOpaqueEnvelope($session_token));
+    $weak_key = PhabricatorHash::weakDigest($session_token);
+
+    $cache_parts = $this->getUserCacheQueryParts($conn);
     list($cache_selects, $cache_joins, $cache_map, $types_map) = $cache_parts;
 
     $info = queryfx_one(
-      $conn_r,
+      $conn,
       'SELECT
           s.id AS s_id,
+          s.phid AS s_phid,
           s.sessionExpires AS s_sessionExpires,
           s.sessionStart AS s_sessionStart,
           s.highSecurityUntil AS s_highSecurityUntil,
           s.isPartial AS s_isPartial,
           s.signedLegalpadDocuments as s_signedLegalpadDocuments,
+          IF(s.sessionKey = %P, 1, 0) as s_weak,
           u.*
           %Q
-        FROM %T u JOIN %T s ON u.phid = s.userPHID
-        AND s.type = %s AND s.sessionKey = %P %Q',
+        FROM %R u JOIN %R s ON u.phid = s.userPHID
+        AND s.type = %s AND s.sessionKey IN (%P, %P) %Q',
+      new PhutilOpaqueEnvelope($weak_key),
       $cache_selects,
-      $user_table->getTableName(),
-      $session_table->getTableName(),
+      $user_table,
+      $session_table,
       $session_type,
       new PhutilOpaqueEnvelope($session_key),
+      new PhutilOpaqueEnvelope($weak_key),
       $cache_joins);
 
     if (!$info) {
       return null;
     }
+
+    // TODO: Remove this, see T13225.
+    $is_weak = (bool)$info['s_weak'];
+    unset($info['s_weak']);
 
     $session_dict = array(
       'userPHID' => $info['phid'],
@@ -201,6 +214,19 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       unset($unguarded);
     }
 
+    // TODO: Remove this, see T13225.
+    if ($is_weak) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $conn_w = $session_table->establishConnection('w');
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET sessionKey = %P WHERE id = %d',
+          $session->getTableName(),
+          new PhutilOpaqueEnvelope($session_key),
+          $session->getID());
+      unset($unguarded);
+    }
+
     $user->attachSession($session);
     return $user;
   }
@@ -240,7 +266,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // This has a side effect of validating the session type.
     $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
 
-    $digest_key = PhabricatorHash::weakDigest($session_key);
+    $digest_key = PhabricatorAuthSession::newSessionDigest(
+      new PhutilOpaqueEnvelope($session_key));
 
     // Logging-in users don't have CSRF stuff yet, so we have to unguard this
     // write.
@@ -298,7 +325,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    */
   public function terminateLoginSessions(
     PhabricatorUser $user,
-    $except_session = null) {
+    PhutilOpaqueEnvelope $except_session = null) {
 
     $sessions = id(new PhabricatorAuthSessionQuery())
       ->setViewer($user)
@@ -306,7 +333,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       ->execute();
 
     if ($except_session !== null) {
-      $except_session = PhabricatorHash::weakDigest($except_session);
+      $except_session = PhabricatorAuthSession::newSessionDigest(
+        $except_session);
     }
 
     foreach ($sessions as $key => $session) {

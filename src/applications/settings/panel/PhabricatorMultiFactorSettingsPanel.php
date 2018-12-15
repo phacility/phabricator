@@ -193,7 +193,8 @@ final class PhabricatorMultiFactorSettingsPanel
 
         id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
           $user,
-          $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
+          new PhutilOpaqueEnvelope(
+            $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
 
         return id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?id='.$config->getID()));

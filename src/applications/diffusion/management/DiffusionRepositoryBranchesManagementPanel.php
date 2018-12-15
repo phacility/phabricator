@@ -23,8 +23,8 @@ final class DiffusionRepositoryBranchesManagementPanel
 
     $has_any =
       $repository->getDetail('default-branch') ||
-      $repository->getDetail('branch-filter') ||
-      $repository->getDetail('close-commits-filter');
+      $repository->getTrackOnlyRules() ||
+      $repository->getAutocloseOnlyRules();
 
     if ($has_any) {
       return 'fa-code-fork';
@@ -74,17 +74,21 @@ final class DiffusionRepositoryBranchesManagementPanel
       ->setViewer($viewer);
 
     $default_branch = nonempty(
-      $repository->getHumanReadableDetail('default-branch'),
+      $repository->getDetail('default-branch'),
       phutil_tag('em', array(), $repository->getDefaultBranch()));
     $view->addProperty(pht('Default Branch'), $default_branch);
 
+    $track_only_rules = $repository->getTrackOnlyRules();
+    $track_only_rules = implode(', ', $track_only_rules);
     $track_only = nonempty(
-      $repository->getHumanReadableDetail('branch-filter', array()),
+      $track_only_rules,
       phutil_tag('em', array(), pht('Track All Branches')));
     $view->addProperty(pht('Track Only'), $track_only);
 
+    $autoclose_rules = $repository->getAutocloseOnlyRules();
+    $autoclose_rules = implode(', ', $autoclose_rules);
     $autoclose_only = nonempty(
-      $repository->getHumanReadableDetail('close-commits-filter', array()),
+      $autoclose_rules,
       phutil_tag('em', array(), pht('Autoclose On All Branches')));
 
     $autoclose_disabled = false;

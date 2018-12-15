@@ -664,6 +664,16 @@ abstract class PhabricatorApplicationTransaction
             break;
         }
         break;
+
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+        list($done, $undone) = $this->getInterestingInlineStateChangeCounts();
+
+        if (!$done && !$undone) {
+          return true;
+        }
+
+        break;
+
     }
 
     return false;
@@ -747,6 +757,10 @@ abstract class PhabricatorApplicationTransaction
     }
 
     return $this->shouldHide();
+  }
+
+  public function shouldHideForNotifications() {
+    return $this->shouldHideForFeed();
   }
 
   public function getTitleForMail() {
@@ -1007,15 +1021,7 @@ abstract class PhabricatorApplicationTransaction
         }
 
       case PhabricatorTransactions::TYPE_INLINESTATE:
-        $done = 0;
-        $undone = 0;
-        foreach ($new as $phid => $state) {
-          if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
-            $done++;
-          } else {
-            $undone++;
-          }
-        }
+        list($done, $undone) = $this->getInterestingInlineStateChangeCounts();
         if ($done && $undone) {
           return pht(
             '%s marked %s inline comment(s) as done and %s inline comment(s) '.
@@ -1582,6 +1588,49 @@ abstract class PhabricatorApplicationTransaction
     return $moves;
   }
 
+  private function getInterestingInlineStateChangeCounts() {
+    // See PHI995. Newer inline state transactions have additional details
+    // which we use to tailor the rendering behavior. These details are not
+    // present on older transactions.
+    $details = $this->getMetadataValue('inline.details', array());
+
+    $new = $this->getNewValue();
+
+    $done = 0;
+    $undone = 0;
+    foreach ($new as $phid => $state) {
+      $is_done = ($state == PhabricatorInlineCommentInterface::STATE_DONE);
+
+      // See PHI995. If you're marking your own inline comments as "Done",
+      // don't count them when rendering a timeline story. In the case where
+      // you're only affecting your own comments, this will hide the
+      // "alice marked X comments as done" story entirely.
+
+      // Usually, this happens when you pre-mark inlines as "done" and submit
+      // them yourself. We'll still generate an "alice added inline comments"
+      // story (in most cases/contexts), but the state change story is largely
+      // just clutter and slightly confusing/misleading.
+
+      $inline_details = idx($details, $phid, array());
+      $inline_author_phid = idx($inline_details, 'authorPHID');
+      if ($inline_author_phid) {
+        if ($inline_author_phid == $this->getAuthorPHID()) {
+          if ($is_done) {
+            continue;
+          }
+        }
+      }
+
+      if ($is_done) {
+        $done++;
+      } else {
+        $undone++;
+      }
+    }
+
+    return array($done, $undone);
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
@@ -1615,6 +1664,15 @@ abstract class PhabricatorApplicationTransaction
 
   public function getModularType() {
     return null;
+  }
+
+  public function setForceNotifyPHIDs(array $phids) {
+    $this->setMetadataValue('notify.force', $phids);
+    return $this;
+  }
+
+  public function getForceNotifyPHIDs() {
+    return $this->getMetadataValue('notify.force', array());
   }
 
 

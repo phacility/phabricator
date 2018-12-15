@@ -115,14 +115,6 @@ final class PhabricatorEditEngineConfigurationSearchEngine
         ->setHeader($config->getDisplayName());
 
       $id = $config->getID();
-      if ($id) {
-        $item->addIcon('fa-file-text-o bluegrey', pht('Form %d', $id));
-        $key = $id;
-      } else {
-        $item->addIcon('fa-file-text bluegrey', pht('Builtin'));
-        $key = $config->getBuiltinKey();
-      }
-      $item->setHref("/transactions/editengine/{$engine_key}/view/{$key}/");
 
       if ($config->getIsDefault()) {
         $item->addAttribute(pht('Default Create Form'));
@@ -138,6 +130,31 @@ final class PhabricatorEditEngineConfigurationSearchEngine
       } else {
         $item->setStatusIcon('fa-file-text-o green', pht('Enabled'));
       }
+
+      $subtype_key = $config->getSubtype();
+      if ($subtype_key !== PhabricatorEditEngineSubtype::SUBTYPE_DEFAULT) {
+        $engine = $config->getEngine();
+        if ($engine->supportsSubtypes()) {
+          $map = $engine->newSubtypeMap();
+          if ($map->isValidSubtype($subtype_key)) {
+            $subtype = $map->getSubtype($subtype_key);
+
+            $icon = $subtype->getIcon();
+            $color = $subtype->getColor();
+
+            $item->addIcon("{$icon} {$color}", $subtype->getName());
+          }
+        }
+      }
+
+      if ($id) {
+        $item->setObjectName(pht('Form %d', $id));
+        $key = $id;
+      } else {
+        $item->addIcon('fa-file-text bluegrey', pht('Builtin'));
+        $key = $config->getBuiltinKey();
+      }
+      $item->setHref("/transactions/editengine/{$engine_key}/view/{$key}/");
 
       $list->addItem($item);
     }

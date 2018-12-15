@@ -59,3 +59,16 @@
   background-color: {$hoverblue};
   border-radius: 3px;
 }
+
+.device-desktop .phui-oi-linked-container {
+  cursor: pointer;
+}
+
+.device-desktop .phui-oi-linked-container:hover {
+  background-color: {$hoverblue};
+  border-radius: 3px;
+}
+
+.device-desktop .phui-oi-linked-container a:hover {
+  text-decoration: none;
+}

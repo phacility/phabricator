@@ -243,9 +243,9 @@ final class HeraldEngine extends Phobject {
         }
         queryfx(
           $conn_w,
-          'INSERT IGNORE INTO %T (phid, ruleID) VALUES %Q',
+          'INSERT IGNORE INTO %T (phid, ruleID) VALUES %LQ',
           HeraldRule::TABLE_RULE_APPLIED,
-          implode(', ', $sql));
+          $sql);
       }
     }
   }

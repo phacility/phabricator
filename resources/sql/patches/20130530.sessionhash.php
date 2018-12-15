@@ -1,22 +1,7 @@
 <?php
 
-$table = new PhabricatorUser();
-$table->openTransaction();
-$conn = $table->establishConnection('w');
-
-$sessions = queryfx_all(
-  $conn,
-  'SELECT userPHID, type, sessionKey FROM %T FOR UPDATE',
-  PhabricatorUser::SESSION_TABLE);
-
-foreach ($sessions as $session) {
-  queryfx(
-    $conn,
-    'UPDATE %T SET sessionKey = %s WHERE userPHID = %s AND type = %s',
-    PhabricatorUser::SESSION_TABLE,
-    PhabricatorHash::weakDigest($session['sessionKey']),
-    $session['userPHID'],
-    $session['type']);
-}
-
-$table->saveTransaction();
+// See T13225. Long ago, this upgraded session key storage from unhashed to
+// HMAC-SHA1 here. We later upgraded storage to HMAC-SHA256, so this is initial
+// upgrade is now fairly pointless. Dropping this migration entirely only logs
+// users out of installs that waited more than 5 years to upgrade, which seems
+// like a reasonable behavior.

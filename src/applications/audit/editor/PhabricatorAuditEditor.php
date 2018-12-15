@@ -251,47 +251,16 @@ final class PhabricatorAuditEditor
         case PhabricatorTransactions::TYPE_COMMENT:
           $this->didExpandInlineState = true;
 
-          $actor_phid = $this->getActingAsPHID();
-          $author_phid = $object->getAuthorPHID();
-          $actor_is_author = ($actor_phid == $author_phid);
+          $query_template = id(new DiffusionDiffInlineCommentQuery())
+            ->withCommitPHIDs(array($object->getPHID()));
 
-          $state_map = PhabricatorTransactions::getInlineStateMap();
+          $state_xaction = $this->newInlineStateTransaction(
+            $object,
+            $query_template);
 
-          $query = id(new DiffusionDiffInlineCommentQuery())
-            ->setViewer($this->getActor())
-            ->withCommitPHIDs(array($object->getPHID()))
-            ->withFixedStates(array_keys($state_map));
-
-          $inlines = array();
-
-          $inlines[] = id(clone $query)
-            ->withAuthorPHIDs(array($actor_phid))
-            ->withHasTransaction(false)
-            ->execute();
-
-          if ($actor_is_author) {
-            $inlines[] = id(clone $query)
-              ->withHasTransaction(true)
-              ->execute();
+          if ($state_xaction) {
+            $xactions[] = $state_xaction;
           }
-
-          $inlines = array_mergev($inlines);
-
-          if (!$inlines) {
-            break;
-          }
-
-          $old_value = mpull($inlines, 'getFixedState', 'getPHID');
-          $new_value = array();
-          foreach ($old_value as $key => $state) {
-            $new_value[$key] = $state_map[$state];
-          }
-
-          $xactions[] = id(new PhabricatorAuditTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
-            ->setIgnoreOnNoEffect(true)
-            ->setOldValue($old_value)
-            ->setNewValue($new_value);
           break;
       }
     }

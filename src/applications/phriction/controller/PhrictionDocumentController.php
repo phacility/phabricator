@@ -9,6 +9,7 @@ final class PhrictionDocumentController
     return true;
   }
 
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $this->slug = $request->getURIData('slug');
@@ -35,15 +36,15 @@ final class PhrictionDocumentController
       ->needContent(true)
       ->executeOne();
     if (!$document) {
-
       $document = PhrictionDocument::initializeNewDocument($viewer, $slug);
-
       if ($slug == '/') {
         $title = pht('Welcome to Phriction');
         $subtitle = pht('Phriction is a simple and easy to use wiki for '.
           'keeping track of documents and their changes.');
         $page_title = pht('Welcome');
         $create_text = pht('Edit this Document');
+        $this->setShowingWelcomeDocument(true);
+
 
       } else {
         $title = pht('No Document Here');

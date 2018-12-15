@@ -2,6 +2,14 @@
 
 abstract class PhrictionController extends PhabricatorController {
 
+  private $showingWelcomeDocument = false;
+
+  public function setShowingWelcomeDocument($show_welcome) {
+    $this->showingWelcomeDocument = $show_welcome;
+    return $this;
+
+  }
+
   public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
@@ -37,12 +45,14 @@ abstract class PhrictionController extends PhabricatorController {
           ->setIcon('fa-home'));
     }
 
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('New Document'))
-        ->setHref('/phriction/new/?slug='.$this->getDocumentSlug())
-        ->setWorkflow(true)
-        ->setIcon('fa-plus-square'));
+    if (!$this->showingWelcomeDocument) {
+      $crumbs->addAction(
+        id(new PHUIListItemView())
+          ->setName(pht('New Document'))
+          ->setHref('/phriction/new/?slug='.$this->getDocumentSlug())
+          ->setWorkflow(true)
+          ->setIcon('fa-plus-square'));
+    }
 
     return $crumbs;
   }

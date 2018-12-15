@@ -56,7 +56,8 @@ final class PhabricatorAuthUnlinkController
 
       id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
         $viewer,
-        $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
+        new PhutilOpaqueEnvelope(
+          $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
 
       return id(new AphrontRedirectResponse())->setURI($this->getDoneURI());
     }

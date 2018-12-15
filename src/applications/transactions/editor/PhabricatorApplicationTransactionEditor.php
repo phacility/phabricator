@@ -3378,9 +3378,28 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    return array_unique(array_merge(
-      $this->getMailTo($object),
-      $this->getMailCC($object)));
+    // If some transactions are forcing notification delivery, add the forced
+    // recipients to the notify list.
+    $force_list = array();
+    foreach ($xactions as $xaction) {
+      $force_phids = $xaction->getForceNotifyPHIDs();
+
+      if (!$force_phids) {
+        continue;
+      }
+
+      foreach ($force_phids as $force_phid) {
+        $force_list[] = $force_phid;
+      }
+    }
+
+    $to_list = $this->getMailTo($object);
+    $cc_list = $this->getMailCC($object);
+
+    $full_list = array_merge($force_list, $to_list, $cc_list);
+    $full_list = array_fuse($full_list);
+
+    return array_keys($full_list);
   }
 
 
@@ -3409,7 +3428,19 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions,
     array $mailed_phids) {
 
-    $xactions = mfilter($xactions, 'shouldHideForFeed', true);
+    // Remove transactions which don't publish feed stories or notifications.
+    // These never show up anywhere, so we don't need to do anything with them.
+    foreach ($xactions as $key => $xaction) {
+      if (!$xaction->shouldHideForFeed()) {
+        continue;
+      }
+
+      if (!$xaction->shouldHideForNotifications()) {
+        continue;
+      }
+
+      unset($xactions[$key]);
+    }
 
     if (!$xactions) {
       return;
@@ -4592,6 +4623,89 @@ abstract class PhabricatorApplicationTransactionEditor
     $mail->setForceDelivery(true);
 
     return $mail;
+  }
+
+  public function newAutomaticInlineTransactions(
+    PhabricatorLiskDAO $object,
+    array $inlines,
+    $transaction_type,
+    PhabricatorCursorPagedPolicyAwareQuery $query_template) {
+
+    $xactions = array();
+
+    foreach ($inlines as $inline) {
+      $xactions[] = $object->getApplicationTransactionTemplate()
+        ->setTransactionType($transaction_type)
+        ->attachComment($inline);
+    }
+
+    $state_xaction = $this->newInlineStateTransaction(
+      $object,
+      $query_template);
+
+    if ($state_xaction) {
+      $xactions[] = $state_xaction;
+    }
+
+    return $xactions;
+  }
+
+  protected function newInlineStateTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorCursorPagedPolicyAwareQuery $query_template) {
+
+    $actor_phid = $this->getActingAsPHID();
+    $author_phid = $object->getAuthorPHID();
+    $actor_is_author = ($actor_phid == $author_phid);
+
+    $state_map = PhabricatorTransactions::getInlineStateMap();
+
+    $query = id(clone $query_template)
+      ->setViewer($this->getActor())
+      ->withFixedStates(array_keys($state_map));
+
+    $inlines = array();
+
+    $inlines[] = id(clone $query)
+      ->withAuthorPHIDs(array($actor_phid))
+      ->withHasTransaction(false)
+      ->execute();
+
+    if ($actor_is_author) {
+      $inlines[] = id(clone $query)
+        ->withHasTransaction(true)
+        ->execute();
+    }
+
+    $inlines = array_mergev($inlines);
+
+    if (!$inlines) {
+      return null;
+    }
+
+    $old_value = mpull($inlines, 'getFixedState', 'getPHID');
+    $new_value = array();
+    foreach ($old_value as $key => $state) {
+      $new_value[$key] = $state_map[$state];
+    }
+
+    // See PHI995. Copy some information about the inlines into the transaction
+    // so we can tailor rendering behavior. In particular, we don't want to
+    // render transactions about users marking their own inlines as "Done".
+
+    $inline_details = array();
+    foreach ($inlines as $inline) {
+      $inline_details[$inline->getPHID()] = array(
+        'authorPHID' => $inline->getAuthorPHID(),
+      );
+    }
+
+    return $object->getApplicationTransactionTemplate()
+      ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
+      ->setIgnoreOnNoEffect(true)
+      ->setMetadataValue('inline.details', $inline_details)
+      ->setOldValue($old_value)
+      ->setNewValue($new_value);
   }
 
 }

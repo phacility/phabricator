@@ -59,6 +59,10 @@ abstract class PhabricatorModularTransactionType
     return false;
   }
 
+  public function shouldHideForNotifications() {
+    return null;
+  }
+
   public function getIcon() {
     return null;
   }

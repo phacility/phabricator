@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => 'e68cf1fa',
     'conpherence.pkg.js' => '15191c65',
-    'core.pkg.css' => 'cff4ff6f',
+    'core.pkg.css' => '9d1148a4',
     'core.pkg.js' => '4bde473b',
     'differential.pkg.css' => '06dc617c',
     'differential.pkg.js' => 'ef0b989b',
@@ -127,7 +127,7 @@ return array(
     'rsrc/css/phui/calendar/phui-calendar-list.css' => '576be600',
     'rsrc/css/phui/calendar/phui-calendar-month.css' => '21154caf',
     'rsrc/css/phui/calendar/phui-calendar.css' => 'f1ddf11c',
-    'rsrc/css/phui/object-item/phui-oi-big-ui.css' => '628f59de',
+    'rsrc/css/phui/object-item/phui-oi-big-ui.css' => '7a7c22af',
     'rsrc/css/phui/object-item/phui-oi-color.css' => 'cd2b9b77',
     'rsrc/css/phui/object-item/phui-oi-drag-ui.css' => '08f4ccc3',
     'rsrc/css/phui/object-item/phui-oi-flush-ui.css' => '9d9685d6',
@@ -214,7 +214,7 @@ return array(
     'rsrc/externals/javelin/core/__tests__/stratcom.js' => '88bf7313',
     'rsrc/externals/javelin/core/__tests__/util.js' => 'e251703d',
     'rsrc/externals/javelin/core/init.js' => '8d83d2a1',
-    'rsrc/externals/javelin/core/init_node.js' => 'c234aded',
+    'rsrc/externals/javelin/core/init_node.js' => 'f7732951',
     'rsrc/externals/javelin/core/install.js' => '05270951',
     'rsrc/externals/javelin/core/util.js' => '93cc50d6',
     'rsrc/externals/javelin/docs/Base.js' => '74676256',
@@ -469,6 +469,7 @@ return array(
     'rsrc/js/core/behavior-keyboard-shortcuts.js' => '01fca1f0',
     'rsrc/js/core/behavior-lightbox-attachments.js' => '6b31879a',
     'rsrc/js/core/behavior-line-linker.js' => '66a62306',
+    'rsrc/js/core/behavior-linked-container.js' => '291da458',
     'rsrc/js/core/behavior-more.js' => 'a80d0378',
     'rsrc/js/core/behavior-object-selector.js' => '77c1f0b0',
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
@@ -616,6 +617,7 @@ return array(
     'javelin-behavior-launch-icon-composer' => '48086888',
     'javelin-behavior-lightbox-attachments' => '6b31879a',
     'javelin-behavior-line-chart' => 'e4232876',
+    'javelin-behavior-linked-container' => '291da458',
     'javelin-behavior-maniphest-batch-selector' => 'ad54037e',
     'javelin-behavior-maniphest-list-editor' => 'a9f88de2',
     'javelin-behavior-maniphest-subpriority-editor' => '71237763',
@@ -832,7 +834,7 @@ return array(
     'phui-lightbox-css' => '0a035e40',
     'phui-list-view-css' => '38f8c9bd',
     'phui-object-box-css' => '9cff003c',
-    'phui-oi-big-ui-css' => '628f59de',
+    'phui-oi-big-ui-css' => '7a7c22af',
     'phui-oi-color-css' => 'cd2b9b77',
     'phui-oi-drag-ui-css' => '08f4ccc3',
     'phui-oi-flush-ui-css' => '9d9685d6',
@@ -1026,6 +1028,10 @@ return array(
       'javelin-dom',
       'javelin-uri',
       'phabricator-notification',
+    ),
+    '291da458' => array(
+      'javelin-behavior',
+      'javelin-dom',
     ),
     '2926fff2' => array(
       'javelin-behavior',
@@ -1348,9 +1354,6 @@ return array(
       'javelin-magical-init',
       'javelin-util',
     ),
-    '628f59de' => array(
-      'phui-oi-list-view-css',
-    ),
     '62dfea03' => array(
       'javelin-install',
       'javelin-util',
@@ -1507,6 +1510,9 @@ return array(
     '7a68dda3' => array(
       'owners-path-editor',
       'javelin-behavior',
+    ),
+    '7a7c22af' => array(
+      'phui-oi-list-view-css',
     ),
     '7cbe244b' => array(
       'javelin-install',

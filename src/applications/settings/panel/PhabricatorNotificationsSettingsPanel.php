@@ -143,7 +143,7 @@ final class PhabricatorNotificationsSettingsPanel
         ->setCaption(
           pht(
             'Phabricator can send real-time notifications to your web browser '.
-            'or to your desktop. Select where you\'d want to receive these '.
+            'or to your desktop. Select where you want to receive these '.
             'real-time updates.'))
         ->initBehavior(
           'desktop-notifications-control',

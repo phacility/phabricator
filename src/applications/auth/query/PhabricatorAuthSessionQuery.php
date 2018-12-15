@@ -4,6 +4,7 @@ final class PhabricatorAuthSessionQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
+  private $phids;
   private $identityPHIDs;
   private $sessionKeys;
   private $sessionTypes;
@@ -28,19 +29,17 @@ final class PhabricatorAuthSessionQuery
     return $this;
   }
 
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new PhabricatorAuthSession();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorAuthSession();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $sessions) {
@@ -65,14 +64,21 @@ final class PhabricatorAuthSessionQuery
     return $sessions;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'id IN (%Ld)',
         $this->ids);
+    }
+
+    if ($this->phids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     if ($this->identityPHIDs !== null) {
@@ -85,7 +91,8 @@ final class PhabricatorAuthSessionQuery
     if ($this->sessionKeys !== null) {
       $hashes = array();
       foreach ($this->sessionKeys as $session_key) {
-        $hashes[] = PhabricatorHash::weakDigest($session_key);
+        $hashes[] = PhabricatorAuthSession::newSessionDigest(
+          new PhutilOpaqueEnvelope($session_key));
       }
       $where[] = qsprintf(
         $conn,
@@ -100,9 +107,7 @@ final class PhabricatorAuthSessionQuery
         $this->sessionTypes);
     }
 
-    $where[] = $this->buildPagingClause($conn);
-
-    return $this->formatWhereClause($conn, $where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

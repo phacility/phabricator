@@ -169,7 +169,9 @@ EODOCS
         ->setConduitDocumentation($column_documentation)
         ->setAliases(array('columnPHID', 'columns', 'columnPHIDs'))
         ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
-        ->setIsFormField(false)
+        ->setIsReorderable(false)
+        ->setIsDefaultable(false)
+        ->setIsLockable(false)
         ->setCommentActionLabel(pht('Move on Workboard'))
         ->setCommentActionOrder(2000)
         ->setColumnMap($column_map),

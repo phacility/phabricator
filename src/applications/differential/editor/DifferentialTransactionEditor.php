@@ -247,50 +247,16 @@ final class DifferentialTransactionEditor
         case DifferentialTransaction::TYPE_INLINE:
           $this->didExpandInlineState = true;
 
-          $actor_phid = $this->getActingAsPHID();
-          $author_phid = $object->getAuthorPHID();
-          $actor_is_author = ($actor_phid == $author_phid);
+          $query_template = id(new DifferentialDiffInlineCommentQuery())
+            ->withRevisionPHIDs(array($object->getPHID()));
 
-          $state_map = PhabricatorTransactions::getInlineStateMap();
+          $state_xaction = $this->newInlineStateTransaction(
+            $object,
+            $query_template);
 
-          $query = id(new DifferentialDiffInlineCommentQuery())
-            ->setViewer($this->getActor())
-            ->withRevisionPHIDs(array($object->getPHID()))
-            ->withFixedStates(array_keys($state_map));
-
-          $inlines = array();
-
-          // We're going to undraft any "done" marks on your own inlines.
-          $inlines[] = id(clone $query)
-            ->withAuthorPHIDs(array($actor_phid))
-            ->withHasTransaction(false)
-            ->execute();
-
-          // If you're the author, we also undraft any "done" marks on other
-          // inlines.
-          if ($actor_is_author) {
-            $inlines[] = id(clone $query)
-              ->withHasTransaction(true)
-              ->execute();
+          if ($state_xaction) {
+            $results[] = $state_xaction;
           }
-
-          $inlines = array_mergev($inlines);
-
-          if (!$inlines) {
-            break;
-          }
-
-          $old_value = mpull($inlines, 'getFixedState', 'getPHID');
-          $new_value = array();
-          foreach ($old_value as $key => $state) {
-            $new_value[$key] = $state_map[$state];
-          }
-
-          $results[] = id(new DifferentialTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
-            ->setIgnoreOnNoEffect(true)
-            ->setOldValue($old_value)
-            ->setNewValue($new_value);
           break;
       }
     }
