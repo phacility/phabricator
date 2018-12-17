@@ -45,7 +45,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
     $engine = $config->getSessionEngine();
 
-    return id(new PhabricatorAuthChallenge())
+    return PhabricatorAuthChallenge::initializeNewChallenge()
       ->setUserPHID($viewer->getPHID())
       ->setSessionPHID($viewer->getSession()->getPHID())
       ->setFactorPHID($config->getPHID())

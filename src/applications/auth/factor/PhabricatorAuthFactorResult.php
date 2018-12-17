@@ -3,19 +3,36 @@
 final class PhabricatorAuthFactorResult
   extends Phobject {
 
-  private $isValid = false;
+  private $answeredChallenge;
   private $isWait = false;
   private $errorMessage;
   private $value;
   private $issuedChallenges = array();
 
-  public function setIsValid($is_valid) {
-    $this->isValid = $is_valid;
+  public function setAnsweredChallenge(PhabricatorAuthChallenge $challenge) {
+    if (!$challenge->getIsAnsweredChallenge()) {
+      throw new PhutilInvalidStateException('markChallengeAsAnswered');
+    }
+
+    if ($challenge->getIsCompleted()) {
+      throw new Exception(
+        pht(
+          'A completed challenge was provided as an answered challenge. '.
+          'The underlying factor is implemented improperly, challenges '.
+          'may not be reused.'));
+    }
+
+    $this->answeredChallenge = $challenge;
+
     return $this;
   }
 
+  public function getAnsweredChallenge() {
+    return $this->answeredChallenge;
+  }
+
   public function getIsValid() {
-    return $this->isValid;
+    return (bool)$this->getAnsweredChallenge();
   }
 
   public function setIsWait($is_wait) {

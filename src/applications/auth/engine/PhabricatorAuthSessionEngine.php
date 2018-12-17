@@ -576,6 +576,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
             continue;
           }
 
+          $issued_challenges = idx($challenge_map, $factor_phid, array());
+
           $impl = $factor->requireImplementation();
 
           $validation_result = $impl->getResultFromChallengeResponse(
@@ -592,6 +594,16 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         }
 
         if ($ok) {
+          // We're letting you through, so mark all the challenges you
+          // responded to as completed. These challenges can never be used
+          // again, even by the same session and workflow: you can't use the
+          // same response to take two different actions, even if those actions
+          // are of the same type.
+          foreach ($validation_results as $validation_result) {
+            $challenge = $validation_result->getAnsweredChallenge()
+              ->markChallengeAsCompleted();
+          }
+
           // Give the user a credit back for a successful factor verification.
           PhabricatorSystemActionEngine::willTakeAction(
             array($viewer->getPHID()),

@@ -283,6 +283,17 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
               'the code to cycle, then try again.',
               new PhutilNumber($wait_duration)));
       }
+
+      if ($challenge->getIsReusedChallenge()) {
+        return $this->newResult()
+          ->setIsWait(true)
+          ->setErrorMessage(
+            pht(
+              'You recently provided a response to this factor. Responses '.
+              'may not be reused. Wait %s second(s) for the code to cycle, '.
+              'then try again.',
+              new PhutilNumber($wait_duration)));
+      }
     }
 
     return null;
@@ -325,7 +336,16 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       (string)$code);
 
     if ($valid_timestep) {
-      $result->setIsValid(true);
+      $now = PhabricatorTime::getNow();
+      $step_duration = $this->getTimestepDuration();
+      $step_window = $this->getTimestepWindowSize();
+      $ttl = $now + ($step_duration * $step_window);
+
+      $challenge
+        ->setProperty('totp.timestep', $valid_timestep)
+        ->markChallengeAsAnswered($ttl);
+
+      $result->setAnsweredChallenge($challenge);
     } else {
       if (strlen($code)) {
         $error_message = pht('Invalid');
