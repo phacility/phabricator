@@ -202,15 +202,11 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     PhabricatorUser $viewer,
     PhabricatorAuthFactorResult $result) {
 
-    $value = $result->getValue();
-    $error = $result->getErrorMessage();
-    $is_wait = $result->getIsWait();
+    $control = $this->newAutomaticControl($result);
+    if (!$control) {
+      $value = $result->getValue();
+      $error = $result->getErrorMessage();
 
-    if ($is_wait) {
-      $control = id(new AphrontFormMarkupControl())
-        ->setValue($error)
-        ->setError(pht('Wait'));
-    } else {
       $control = id(new PHUIFormNumberControl())
         ->setName($this->getParameterName($config, 'totpcode'))
         ->setDisableAutocomplete(true)
@@ -320,6 +316,12 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     }
 
     $challenge = head($challenges);
+
+    // If the client has already provided a valid answer to this challenge and
+    // submitted a token proving they answered it, we're all set.
+    if ($challenge->getIsAnsweredChallenge()) {
+      return $result->setAnsweredChallenge($challenge);
+    }
 
     $challenge_timestep = (int)$challenge->getChallengeKey();
     $current_timestep = $this->getCurrentTimestep();

@@ -517,6 +517,11 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       ->withUserPHIDs(array($viewer->getPHID()))
       ->withChallengeTTLBetween($now, null)
       ->execute();
+
+    PhabricatorAuthChallenge::newChallengeResponsesFromRequest(
+      $challenges,
+      $request);
+
     $challenge_map = mgroup($challenges, 'getFactorPHID');
 
     $validation_results = array();
@@ -710,6 +715,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       ->setUser($viewer)
       ->appendRemarkupInstructions('');
 
+    $answered = array();
     foreach ($factors as $factor) {
       $result = $validation_results[$factor->getPHID()];
 
@@ -718,9 +724,22 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         $form,
         $viewer,
         $result);
+
+      $answered_challenge = $result->getAnsweredChallenge();
+      if ($answered_challenge) {
+        $answered[] = $answered_challenge;
+      }
     }
 
     $form->appendRemarkupInstructions('');
+
+    if ($answered) {
+      $http_params = PhabricatorAuthChallenge::newHTTPParametersFromChallenges(
+        $answered);
+      foreach ($http_params as $key => $value) {
+        $form->addHiddenInput($key, $value);
+      }
+    }
 
     return $form;
   }

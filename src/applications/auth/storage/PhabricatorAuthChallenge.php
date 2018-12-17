@@ -17,12 +17,96 @@ final class PhabricatorAuthChallenge
 
   private $responseToken;
 
+  const HTTPKEY = '__hisec.challenges__';
   const TOKEN_DIGEST_KEY = 'auth.challenge.token';
 
   public static function initializeNewChallenge() {
     return id(new self())
       ->setIsCompleted(0);
   }
+
+  public static function newHTTPParametersFromChallenges(array $challenges) {
+    assert_instances_of($challenges, __CLASS__);
+
+    $token_list = array();
+    foreach ($challenges as $challenge) {
+      $token = $challenge->getResponseToken();
+      if ($token) {
+        $token_list[] = sprintf(
+          '%s:%s',
+          $challenge->getPHID(),
+          $token->openEnvelope());
+      }
+    }
+
+    if (!$token_list) {
+      return array();
+    }
+
+    $token_list = implode(' ', $token_list);
+
+    return array(
+      self::HTTPKEY => $token_list,
+    );
+  }
+
+  public static function newChallengeResponsesFromRequest(
+    array $challenges,
+    AphrontRequest $request) {
+    assert_instances_of($challenges, __CLASS__);
+
+    $token_list = $request->getStr(self::HTTPKEY);
+    $token_list = explode(' ', $token_list);
+
+    $token_map = array();
+    foreach ($token_list as $token_element) {
+      $token_element = trim($token_element, ' ');
+
+      if (!strlen($token_element)) {
+        continue;
+      }
+
+      // NOTE: This error message is intentionally not printing the token to
+      // avoid disclosing it. As a result, it isn't terribly useful, but no
+      // normal user should ever end up here.
+      if (!preg_match('/^[^:]+:/', $token_element)) {
+        throw new Exception(
+          pht(
+            'This request included an improperly formatted MFA challenge '.
+            'token and can not be processed.'));
+      }
+
+      list($phid, $token) = explode(':', $token_element, 2);
+
+      if (isset($token_map[$phid])) {
+        throw new Exception(
+          pht(
+            'This request improperly specifies an MFA challenge token ("%s") '.
+            'multiple times and can not be processed.',
+            $phid));
+      }
+
+      $token_map[$phid] = new PhutilOpaqueEnvelope($token);
+    }
+
+    $challenges = mpull($challenges, null, 'getPHID');
+
+    $now = PhabricatorTime::getNow();
+    foreach ($challenges as $challenge_phid => $challenge) {
+      // If the response window has expired, don't attach the token.
+      if ($challenge->getResponseTTL() < $now) {
+        continue;
+      }
+
+      $token = idx($token_map, $challenge_phid);
+      if (!$token) {
+        continue;
+      }
+
+      $challenge->setResponseToken($token);
+    }
+  }
+
 
   protected function getConfiguration() {
     return array(
@@ -58,12 +142,17 @@ final class PhabricatorAuthChallenge
       return true;
     }
 
-    // TODO: A challenge is "reused" if it has been answered previously and
-    // the request doesn't include proof that the client provided the answer.
-    // Since we aren't tracking client responses yet, any answered challenge
-    // is always a reused challenge for now.
+    if (!$this->getIsAnsweredChallenge()) {
+      return false;
+    }
 
-    return $this->getIsAnsweredChallenge();
+    // If the challenge has been answered but the client has provided a token
+    // proving that they answered it, this is still a valid response.
+    if ($this->getResponseToken()) {
+      return false;
+    }
+
+    return true;
   }
 
   public function getIsAnsweredChallenge() {
@@ -75,7 +164,8 @@ final class PhabricatorAuthChallenge
     $token = new PhutilOpaqueEnvelope($token);
 
     return $this
-      ->setResponseToken($token, $ttl)
+      ->setResponseToken($token)
+      ->setResponseTTL($ttl)
       ->save();
   }
 
@@ -85,7 +175,7 @@ final class PhabricatorAuthChallenge
       ->save();
   }
 
-  public function setResponseToken(PhutilOpaqueEnvelope $token, $ttl) {
+  public function setResponseToken(PhutilOpaqueEnvelope $token) {
     if (!$this->getUserPHID()) {
       throw new PhutilInvalidStateException('setUserPHID');
     }
@@ -95,15 +185,6 @@ final class PhabricatorAuthChallenge
         pht(
           'This challenge already has a response token; you can not '.
           'set a new response token.'));
-    }
-
-    $now = PhabricatorTime::getNow();
-    if ($ttl < $now) {
-      throw new Exception(
-        pht(
-          'Response TTL is invalid: TTLs must be an epoch timestamp '.
-          'coresponding to a future time (did you use a relative TTL by '.
-          'mistake?).'));
     }
 
     if (preg_match('/ /', $token->openEnvelope())) {
@@ -129,9 +210,12 @@ final class PhabricatorAuthChallenge
     }
 
     $this->responseToken = $token;
-    $this->responseTTL = $ttl;
 
     return $this;
+  }
+
+  public function getResponseToken() {
+    return $this->responseToken;
   }
 
   public function setResponseDigest($value) {

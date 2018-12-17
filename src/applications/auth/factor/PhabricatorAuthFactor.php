@@ -165,4 +165,38 @@ abstract class PhabricatorAuthFactor extends Phobject {
     AphrontRequest $request,
     array $challenges);
 
+  final protected function newAutomaticControl(
+    PhabricatorAuthFactorResult $result) {
+
+    $is_answered = (bool)$result->getAnsweredChallenge();
+    if ($is_answered) {
+      return $this->newAnsweredControl($result);
+    }
+
+    $is_wait = $result->getIsWait();
+    if ($is_wait) {
+      return $this->newWaitControl($result);
+    }
+
+    return null;
+  }
+
+  private function newWaitControl(
+    PhabricatorAuthFactorResult $result) {
+
+    $error = $result->getErrorMessage();
+
+    return id(new AphrontFormMarkupControl())
+      ->setValue($error)
+      ->setError(pht('Wait'));
+  }
+
+  private function newAnsweredControl(
+    PhabricatorAuthFactorResult $result) {
+
+    return id(new AphrontFormMarkupControl())
+      ->setValue(pht('Answered!'));
+  }
+
+
 }
