@@ -473,6 +473,8 @@ abstract class PhabricatorApplicationTransaction
         return 'fa-th-large';
       case PhabricatorTransactions::TYPE_COLUMNS:
         return 'fa-columns';
+      case PhabricatorTransactions::TYPE_MFA:
+        return 'fa-vcard';
     }
 
     return 'fa-pencil';
@@ -510,6 +512,8 @@ abstract class PhabricatorApplicationTransaction
             return 'sky';
         }
         break;
+      case PhabricatorTransactions::TYPE_MFA;
+        return 'pink';
     }
     return null;
   }
@@ -835,6 +839,10 @@ abstract class PhabricatorApplicationTransaction
         return pht(
           'You have not moved this object to any columns it is not '.
           'already in.');
+      case PhabricatorTransactions::TYPE_MFA:
+        return pht(
+          'You can not sign a transaction group that has no other '.
+          'effects.');
     }
 
     return pht(
@@ -1076,6 +1084,12 @@ abstract class PhabricatorApplicationTransaction
         }
         break;
 
+
+      case PhabricatorTransactions::TYPE_MFA:
+        return pht(
+          '%s signed these changes with MFA.',
+          $this->renderHandleLink($author_phid));
+
       default:
         // In developer mode, provide a better hint here about which string
         // we're missing.
@@ -1238,6 +1252,9 @@ abstract class PhabricatorApplicationTransaction
         }
         break;
 
+      case PhabricatorTransactions::TYPE_MFA:
+        return null;
+
     }
 
     return $this->getTitle();
@@ -1320,6 +1337,10 @@ abstract class PhabricatorApplicationTransaction
         // (which are shown anyway) but less interesting than any other type of
         // transaction.
         return 0.75;
+      case PhabricatorTransactions::TYPE_MFA:
+        // We want MFA signatures to render at the top of transaction groups,
+        // on top of the things they signed.
+        return 10;
     }
 
     return 1.0;
@@ -1434,6 +1455,8 @@ abstract class PhabricatorApplicationTransaction
       $this_source = $this->getContentSource()->getSource();
     }
 
+    $type_mfa = PhabricatorTransactions::TYPE_MFA;
+
     foreach ($group as $xaction) {
       // Don't group transactions by different authors.
       if ($xaction->getAuthorPHID() != $this->getAuthorPHID()) {
@@ -1476,6 +1499,13 @@ abstract class PhabricatorApplicationTransaction
       $is_mfa = $this->getIsMFATransaction();
       if ($is_mfa != $xaction->getIsMFATransaction()) {
         return false;
+      }
+
+      // Don't group two "Sign with MFA" transactions together.
+      if ($this->getTransactionType() === $type_mfa) {
+        if ($xaction->getTransactionType() === $type_mfa) {
+          return false;
+        }
       }
     }
 

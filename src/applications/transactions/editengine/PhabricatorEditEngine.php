@@ -1105,6 +1105,7 @@ abstract class PhabricatorEditEngine
       $editor = $object->getApplicationTransactionEditor()
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
+        ->setCancelURI($cancel_uri)
         ->setContinueOnNoEffect(true);
 
       try {
@@ -1785,7 +1786,9 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
-    if (!$request->isFormPost()) {
+    // NOTE: We handle hisec inside the transaction editor with "Sign With MFA"
+    // comment actions.
+    if (!$request->isFormOrHisecPost()) {
       return new Aphront400Response();
     }
 
@@ -1919,6 +1922,7 @@ abstract class PhabricatorEditEngine
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContinueOnMissingFields(true)
       ->setContentSourceFromRequest($request)
+      ->setCancelURI($view_uri)
       ->setRaiseWarnings(!$request->getBool('editEngine.warnings'))
       ->setIsPreview($is_preview);
 
