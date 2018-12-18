@@ -4,6 +4,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
   private $newImages = array();
 
+  private $images = array();
+
   public function getEditorApplicationClass() {
     return 'PhabricatorPholioApplication';
   }
@@ -48,9 +50,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PholioImageFileTransaction::TRANSACTIONTYPE:
-        case PholioImageReplaceTransaction::TRANSACTIONTYPE:
           return true;
-          break;
       }
     }
     return false;
@@ -74,11 +74,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
               $new_images[] = $image;
             }
           }
-          break;
-        case PholioImageReplaceTransaction::TRANSACTIONTYPE:
-          $image = $xaction->getNewValue();
-          $image->save();
-          $new_images[] = $image;
           break;
       }
     }
@@ -273,6 +268,39 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     }
 
     return parent::shouldImplyCC($object, $xaction);
+  }
+
+  public function loadPholioImage($object, $phid) {
+    if (!isset($this->images[$phid])) {
+
+      $image = id(new PholioImageQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs(array($phid))
+        ->executeOne();
+
+      if (!$image) {
+        throw new Exception(
+          pht(
+            'No image exists with PHID "%s".',
+            $phid));
+      }
+
+      $mock_phid = $image->getMockPHID();
+      if ($mock_phid) {
+        if ($mock_phid !== $object->getPHID()) {
+          throw new Exception(
+            pht(
+              'Image ("%s") belongs to the wrong object ("%s", expected "%s").',
+              $phid,
+              $mock_phid,
+              $object->getPHID()));
+        }
+      }
+
+      $this->images[$phid] = $image;
+    }
+
+    return $this->images[$phid];
   }
 
 }

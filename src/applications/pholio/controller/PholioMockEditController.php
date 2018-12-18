@@ -143,20 +143,22 @@ final class PholioMockEditController extends PholioController {
           $replace_image = PholioImage::initializeNewImage()
             ->setAuthorPHID($viewer->getPHID())
             ->setReplacesImagePHID($replaces_image_phid)
-            ->setFilePhid($file_phid)
+            ->setFilePHID($file_phid)
             ->attachFile($file)
             ->setName(strlen($title) ? $title : $file->getName())
             ->setDescription($description)
-            ->setSequence($sequence);
+            ->setSequence($sequence)
+            ->save();
+
           $xactions[] = id(new PholioTransaction())
-            ->setTransactionType(
-              PholioImageReplaceTransaction::TRANSACTIONTYPE)
-            ->setNewValue($replace_image);
+            ->setTransactionType(PholioImageReplaceTransaction::TRANSACTIONTYPE)
+            ->setNewValue($replace_image->getPHID());
+
           $posted_mock_images[] = $replace_image;
         } else if (!$existing_image) { // this is an add
           $add_image = PholioImage::initializeNewImage()
             ->setAuthorPHID($viewer->getPHID())
-            ->setFilePhid($file_phid)
+            ->setFilePHID($file_phid)
             ->attachFile($file)
             ->setName(strlen($title) ? $title : $file->getName())
             ->setDescription($description)
@@ -202,15 +204,12 @@ final class PholioMockEditController extends PholioController {
           ->setMetadataValue('edge:type', $proj_edge_type)
           ->setNewValue(array('=' => array_fuse($v_projects)));
 
-        $mock->openTransaction();
         $editor = id(new PholioMockEditor())
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)
           ->setActor($viewer);
 
         $xactions = $editor->applyTransactions($mock, $xactions);
-
-        $mock->saveTransaction();
 
         return id(new AphrontRedirectResponse())
           ->setURI('/M'.$mock->getID());

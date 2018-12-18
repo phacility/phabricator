@@ -6,25 +6,25 @@ final class PholioImageReplaceTransaction
   const TRANSACTIONTYPE = 'image-replace';
 
   public function generateOldValue($object) {
-    $new_image = $this->getNewValue();
-    return $new_image->getReplacesImagePHID();
+    $editor = $this->getEditor();
+    $new_phid = $this->getNewValue();
+
+    return $editor->loadPholioImage($object, $new_phid)
+      ->getReplacesImagePHID();
   }
 
-  public function generateNewValue($object, $value) {
-    return $value->getPHID();
-  }
+  public function applyExternalEffects($object, $value) {
+    $editor = $this->getEditor();
+    $old_phid = $this->getOldValue();
 
-  public function applyInternalEffects($object, $value) {
-    $old = $this->getOldValue();
-    $images = $object->getImages();
-    foreach ($images as $seq => $image) {
-      if ($image->getPHID() == $old) {
-        $image->setIsObsolete(1);
-        $image->save();
-        unset($images[$seq]);
-      }
-    }
-    $object->attachImages($images);
+    $old_image = $editor->loadPholioImage($object, $old_phid)
+      ->setIsObsolete(1)
+      ->save();
+
+    $editor->loadPholioImage($object, $value)
+      ->setMockPHID($object->getPHID())
+      ->setSequence($old_image->getSequence())
+      ->save();
   }
 
   public function getTitle() {
@@ -54,27 +54,87 @@ final class PholioImageReplaceTransaction
     $object,
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
-    $u_img = $u->getNewValue();
-    $v_img = $v->getNewValue();
-    if ($u_img->getReplacesImagePHID() == $v_img->getReplacesImagePHID()) {
+
+    $u_phid = $u->getOldValue();
+    $v_phid = $v->getOldValue();
+
+    if ($u_phid === $v_phid) {
       return $v;
     }
+
+    return null;
   }
 
   public function extractFilePHIDs($object, $value) {
-    $file_phids = array();
+    $editor = $this->getEditor();
+
+    $file_phid = $editor->loadPholioImage($object, $value)
+      ->getFilePHID();
+
+    return array($file_phid);
+  }
+
+  public function validateTransactions($object, array $xactions) {
+    $errors = array();
+
+    $mock_phid = $object->getPHID();
 
     $editor = $this->getEditor();
-    $images = $editor->getNewImages();
-    foreach ($images as $image) {
-      if ($image->getPHID() !== $value) {
+    foreach ($xactions as $xaction) {
+      $new_phid = $xaction->getNewValue();
+
+      try {
+        $new_image = $editor->loadPholioImage($object, $new_phid);
+      } catch (Exception $ex) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'Unable to load replacement image ("%s"): %s',
+            $new_phid,
+            $ex->getMessage()),
+          $xaction);
         continue;
       }
 
-      $file_phids[] = $image->getFilePHID();
+      $old_phid = $new_image->getReplacesImagePHID();
+      if (!$old_phid) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'Image ("%s") does not specify which image it replaces.',
+            $new_phid),
+          $xaction);
+        continue;
+      }
+
+      try {
+        $old_image = $editor->loadPholioImage($object, $old_phid);
+      } catch (Exception $ex) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'Unable to load replaced image ("%s"): %s',
+            $old_phid,
+            $ex->getMessage()),
+          $xaction);
+        continue;
+      }
+
+      if ($old_image->getMockPHID() !== $mock_phid) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'Replaced image ("%s") belongs to the wrong mock ("%s", expected '.
+            '"%s").',
+            $old_phid,
+            $old_image->getMockPHID(),
+            $mock_phid),
+          $xaction);
+        continue;
+      }
+
+      // TODO: You shouldn't be able to replace an image if it has already
+      // been replaced.
+
     }
 
-    return $file_phids;
+    return $errors;
   }
 
 }
