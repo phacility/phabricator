@@ -9,15 +9,22 @@ final class PholioImage extends PholioDAO
 
   protected $mockID;
   protected $filePHID;
-  protected $name = '';
-  protected $description = '';
+  protected $name;
+  protected $description;
   protected $sequence;
-  protected $isObsolete = 0;
+  protected $isObsolete;
   protected $replacesImagePHID = null;
 
   private $inlineComments = self::ATTACHABLE;
   private $file = self::ATTACHABLE;
   private $mock = self::ATTACHABLE;
+
+  public static function initializeNewImage() {
+    return id(new self())
+      ->setName('')
+      ->setDescription('')
+      ->setIsObsolete(0);
+  }
 
   protected function getConfiguration() {
     return array(
@@ -43,8 +50,8 @@ final class PholioImage extends PholioDAO
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(PholioImagePHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PholioImagePHIDType::TYPECONST;
   }
 
   public function attachFile(PhabricatorFile $file) {
@@ -66,7 +73,6 @@ final class PholioImage extends PholioDAO
     $this->assertAttached($this->mock);
     return $this->mock;
   }
-
 
   public function attachInlineComments(array $inline_comments) {
     assert_instances_of($inline_comments, 'PholioTransactionComment');

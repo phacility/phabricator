@@ -140,7 +140,7 @@ final class PholioMockEditController extends PholioController {
         $sequence = $sequence_map[$file_phid];
 
         if ($replaces_image_phid) {
-          $replace_image = id(new PholioImage())
+          $replace_image = PholioImage::initializeNewImage()
             ->setReplacesImagePHID($replaces_image_phid)
             ->setFilePhid($file_phid)
             ->attachFile($file)
@@ -153,7 +153,7 @@ final class PholioMockEditController extends PholioController {
             ->setNewValue($replace_image);
           $posted_mock_images[] = $replace_image;
         } else if (!$existing_image) { // this is an add
-          $add_image = id(new PholioImage())
+          $add_image = PholioImage::initializeNewImage()
             ->setFilePhid($file_phid)
             ->attachFile($file)
             ->setName(strlen($title) ? $title : $file->getName())
