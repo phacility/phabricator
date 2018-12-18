@@ -80,7 +80,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       $okay = (bool)$this->getTimestepAtWhichResponseIsValid(
         $this->getAllowedTimesteps($this->getCurrentTimestep()),
         new PhutilOpaqueEnvelope($key),
-        (string)$code);
+        $code);
 
       if ($okay) {
         $config = $this->newConfigForUser($user)
@@ -206,9 +206,10 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     if (!$control) {
       $value = $result->getValue();
       $error = $result->getErrorMessage();
+      $name = $this->getChallengeResponseParameterName($config);
 
       $control = id(new PHUIFormNumberControl())
-        ->setName($this->getParameterName($config, 'totpcode'))
+        ->setName($name)
         ->setDisableAutocomplete(true)
         ->setValue($value)
         ->setError($error);
@@ -220,6 +221,15 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
     $form->appendChild($control);
   }
+
+  public function getRequestHasChallengeResponse(
+    PhabricatorAuthFactorConfig $config,
+    AphrontRequest $request) {
+
+    $value = $this->getChallengeResponseFromRequest($config, $request);
+    return (bool)strlen($value);
+  }
+
 
   protected function newResultFromIssuedChallenges(
     PhabricatorAuthFactorConfig $config,
@@ -301,7 +311,9 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     AphrontRequest $request,
     array $challenges) {
 
-    $code = $request->getStr($this->getParameterName($config, 'totpcode'));
+    $code = $this->getChallengeResponseFromRequest(
+      $config,
+      $request);
 
     $result = $this->newResult()
       ->setValue($code);
@@ -335,13 +347,10 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     $valid_timestep = $this->getTimestepAtWhichResponseIsValid(
       array_intersect_key($challenge_timesteps, $current_timesteps),
       new PhutilOpaqueEnvelope($config->getFactorSecret()),
-      (string)$code);
+      $code);
 
     if ($valid_timestep) {
-      $now = PhabricatorTime::getNow();
-      $step_duration = $this->getTimestepDuration();
-      $step_window = $this->getTimestepWindowSize();
-      $ttl = $now + ($step_duration * $step_window);
+      $ttl = PhabricatorTime::getNow() + 60;
 
       $challenge
         ->setProperty('totp.timestep', $valid_timestep)
@@ -475,7 +484,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     // The user is allowed to provide a code from the recent past or the
     // near future to account for minor clock skew between the client
     // and server, and the time it takes to actually enter a code.
-    return 2;
+    return 1;
   }
 
   private function getTimestepAtWhichResponseIsValid(
@@ -493,6 +502,21 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return null;
   }
 
+  private function getChallengeResponseParameterName(
+    PhabricatorAuthFactorConfig $config) {
+    return $this->getParameterName($config, 'totpcode');
+  }
 
+  private function getChallengeResponseFromRequest(
+    PhabricatorAuthFactorConfig $config,
+    AphrontRequest $request) {
 
+    $name = $this->getChallengeResponseParameterName($config);
+
+    $value = $request->getStr($name);
+    $value = (string)$value;
+    $value = trim($value);
+
+    return $value;
+  }
 }

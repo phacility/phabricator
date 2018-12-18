@@ -567,10 +567,21 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       if ($request->getExists(AphrontRequest::TYPE_HISEC)) {
 
         // Limit factor verification rates to prevent brute force attacks.
-        PhabricatorSystemActionEngine::willTakeAction(
-          array($viewer->getPHID()),
-          new PhabricatorAuthTryFactorAction(),
-          1);
+        $any_attempt = false;
+        foreach ($factors as $factor) {
+          $impl = $factor->requireImplementation();
+          if ($impl->getRequestHasChallengeResponse($factor, $request)) {
+            $any_attempt = true;
+            break;
+          }
+        }
+
+        if ($any_attempt) {
+          PhabricatorSystemActionEngine::willTakeAction(
+            array($viewer->getPHID()),
+            new PhabricatorAuthTryFactorAction(),
+            1);
+        }
 
         foreach ($factors as $factor) {
           $factor_phid = $factor->getPHID();
@@ -610,10 +621,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           }
 
           // Give the user a credit back for a successful factor verification.
-          PhabricatorSystemActionEngine::willTakeAction(
-            array($viewer->getPHID()),
-            new PhabricatorAuthTryFactorAction(),
-            -1);
+          if ($any_attempt) {
+            PhabricatorSystemActionEngine::willTakeAction(
+              array($viewer->getPHID()),
+              new PhabricatorAuthTryFactorAction(),
+              -1);
+          }
 
           if ($session->getIsPartial() && !$jump_into_hisec) {
             // If we have a partial session and are not jumping directly into

@@ -9,7 +9,7 @@ final class PhabricatorAuthTryFactorAction extends PhabricatorSystemAction {
   }
 
   public function getScoreThreshold() {
-    return 100 / phutil_units('1 hour in seconds');
+    return 10 / phutil_units('1 hour in seconds');
   }
 
   public function getLimitExplanation() {

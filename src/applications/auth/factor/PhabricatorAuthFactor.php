@@ -52,6 +52,10 @@ abstract class PhabricatorAuthFactor extends Phobject {
       ->setWorkflowKey($engine->getWorkflowKey());
   }
 
+  abstract public function getRequestHasChallengeResponse(
+    PhabricatorAuthFactorConfig $config,
+    AphrontRequest $response);
+
   final public function getNewIssuedChallenges(
     PhabricatorAuthFactorConfig $config,
     PhabricatorUser $viewer,
