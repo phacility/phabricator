@@ -434,7 +434,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $viewer,
       $request,
       $cancel_uri,
-      false,
+      $jump_into_hisec,
       true);
   }
 
