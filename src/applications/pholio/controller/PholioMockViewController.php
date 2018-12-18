@@ -37,10 +37,6 @@ final class PholioMockViewController extends PholioController {
       PholioMockHasTaskEdgeType::EDGECONST);
     $this->setManiphestTaskPHIDs($phids);
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    $engine->addObject($mock, PholioMock::MARKUP_FIELD_DESCRIPTION);
-
     $title = $mock->getName();
 
     if ($mock->isClosed()) {
@@ -62,8 +58,7 @@ final class PholioMockViewController extends PholioController {
 
     $timeline = $this->buildTransactionTimeline(
       $mock,
-      new PholioTransactionQuery(),
-      $engine);
+      new PholioTransactionQuery());
     $timeline->setMock($mock);
 
     $curtain = $this->buildCurtainView($mock);

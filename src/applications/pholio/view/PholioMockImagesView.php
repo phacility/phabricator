@@ -72,13 +72,6 @@ final class PholioMockImagesView extends AphrontView {
 
     $default = PhabricatorFile::loadBuiltin($viewer, 'image-100x100.png');
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($this->getUser());
-    foreach ($mock->getAllImages() as $image) {
-      $engine->addObject($image, 'default');
-    }
-    $engine->process();
-
     $images = array();
     $current_set = 0;
     foreach ($mock->getAllImages() as $image) {
@@ -92,14 +85,9 @@ final class PholioMockImagesView extends AphrontView {
         $current_set++;
       }
 
-      $description = $engine->getOutput($image, 'default');
+      $description = $image->getDescription();
       if (strlen($description)) {
-        $description = phutil_tag(
-          'div',
-          array(
-            'class' => 'phabricator-remarkup',
-          ),
-          $description);
+        $description = new PHUIRemarkupView($viewer, $description);
       }
 
       $history_uri = '/pholio/image/history/'.$image->getID().'/';

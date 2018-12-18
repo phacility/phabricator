@@ -10946,7 +10946,6 @@ phutil_register_library_map(array(
     'PholioDefaultViewCapability' => 'PhabricatorPolicyCapability',
     'PholioImage' => array(
       'PholioDAO',
-      'PhabricatorMarkupInterface',
       'PhabricatorPolicyInterface',
     ),
     'PholioImageDescriptionTransaction' => 'PholioImageTransactionType',
@@ -10962,7 +10961,6 @@ phutil_register_library_map(array(
     'PholioInlineListController' => 'PholioController',
     'PholioMock' => array(
       'PholioDAO',
-      'PhabricatorMarkupInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorTokenReceiverInterface',

@@ -2,10 +2,7 @@
 
 final class PholioImage extends PholioDAO
   implements
-    PhabricatorMarkupInterface,
     PhabricatorPolicyInterface {
-
-  const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
   protected $mockID;
   protected $filePHID;
@@ -86,31 +83,8 @@ final class PholioImage extends PholioDAO
   }
 
 
-/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
-
-
-  public function getMarkupFieldKey($field) {
-    $content = $this->getMarkupText($field);
-    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
-  }
-
-  public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
-  }
-
-  public function getMarkupText($field) {
-    return $this->getDescription();
-  }
-
-  public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
-    return $output;
-  }
-
-  public function shouldUseMarkupCache($field) {
-    return (bool)$this->getID();
-  }
-
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+
 
   public function getCapabilities() {
     return $this->getMock()->getCapabilities();

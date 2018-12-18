@@ -2,7 +2,6 @@
 
 final class PholioMock extends PholioDAO
   implements
-    PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface,
@@ -14,8 +13,6 @@ final class PholioMock extends PholioDAO
     PhabricatorMentionableInterface,
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface {
-
-  const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
   const STATUS_OPEN = 'open';
   const STATUS_CLOSED = 'closed';
@@ -213,41 +210,6 @@ final class PholioMock extends PholioDAO
 
   public function describeAutomaticCapability($capability) {
     return pht("A mock's owner can always view and edit it.");
-  }
-
-
-/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
-
-
-  public function getMarkupFieldKey($field) {
-    $content = $this->getMarkupText($field);
-    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
-  }
-
-  public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
-  }
-
-  public function getMarkupText($field) {
-    if ($this->getDescription()) {
-      return $this->getDescription();
-    }
-
-    return null;
-  }
-
-  public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
-    require_celerity_resource('phabricator-remarkup-css');
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-remarkup',
-      ),
-      $output);
-  }
-
-  public function shouldUseMarkupCache($field) {
-    return (bool)$this->getID();
   }
 
 
