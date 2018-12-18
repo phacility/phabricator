@@ -4893,6 +4893,13 @@ abstract class PhabricatorApplicationTransactionEditor
       return $xactions;
     }
 
+    // If the user is mentioning an MFA object on another object or creating
+    // a relationship like "parent" or "child" to this object, we allow the
+    // edit to move forward without requiring MFA.
+    if ($this->getIsInverseEdgeEditor()) {
+      return $xactions;
+    }
+
     $template = $object->getApplicationTransactionTemplate();
 
     $mfa_xaction = id(clone $template)
