@@ -44,43 +44,32 @@ final class PholioImageQuery
     return $this->mockCache;
   }
 
-  protected function loadPage() {
-    $table = new PholioImage();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $images = $table->loadAllFromArray($data);
-
-    return $images;
+  public function newResultObject() {
+    return new PholioImage();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    $where[] = $this->buildPagingClause($conn);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->mockIDs) {
+    if ($this->mockIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'mockID IN (%Ld)',
@@ -94,7 +83,7 @@ final class PholioImageQuery
         $this->obsolete);
     }
 
-    return $this->formatWhereClause($conn, $where);
+    return $where;
   }
 
   protected function willFilterPage(array $images) {
