@@ -187,6 +187,11 @@ final class PhabricatorProjectQuery
         'column' => 'milestoneNumber',
         'type' => 'int',
       ),
+      'status' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'status',
+        'type' => 'int',
+      ),
     );
   }
 
