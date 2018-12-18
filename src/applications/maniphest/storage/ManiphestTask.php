@@ -19,7 +19,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorFerretInterface,
     DoorkeeperBridgedObjectInterface,
     PhabricatorEditEngineSubtypeInterface,
-    PhabricatorEditEngineLockableInterface {
+    PhabricatorEditEngineLockableInterface,
+    PhabricatorEditEngineMFAInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -617,6 +618,14 @@ final class ManiphestTask extends ManiphestDAO
 
   public function newFerretEngine() {
     return new ManiphestTaskFerretEngine();
+  }
+
+
+/* -(  PhabricatorEditEngineMFAInterface  )---------------------------------- */
+
+
+  public function newEditEngineMFAEngine() {
+    return new ManiphestTaskMFAEngine();
   }
 
 }

@@ -953,6 +953,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->isNewObject = ($object->getPHID() === null);
 
     $this->validateEditParameters($object, $xactions);
+    $xactions = $this->newMFATransactions($object, $xactions);
 
     $actor = $this->requireActor();
 
@@ -4825,11 +4826,22 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $request = $this->getRequest();
     if ($request === null) {
-      throw new Exception(
-        pht(
-          'This transaction group requires MFA to apply, but the Editor was '.
-          'not configured with a Request. This workflow can not perform an '.
-          'MFA check.'));
+      $source_type = $this->getContentSource()->getSourceTypeConstant();
+      $conduit_type = PhabricatorConduitContentSource::SOURCECONST;
+      $is_conduit = ($source_type === $conduit_type);
+      if ($is_conduit) {
+        throw new Exception(
+          pht(
+            'This transaction group requires MFA to apply, but you can not '.
+            'provide an MFA response via Conduit. Edit this object via the '.
+            'web UI.'));
+      } else {
+        throw new Exception(
+          pht(
+            'This transaction group requires MFA to apply, but the Editor was '.
+            'not configured with a Request. This workflow can not perform an '.
+            'MFA check.'));
+      }
     }
 
     $cancel_uri = $this->getCancelURI();
@@ -4848,6 +4860,48 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($xactions as $xaction) {
       $xaction->setIsMFATransaction(true);
     }
+  }
+
+  private function newMFATransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $is_mfa = ($object instanceof PhabricatorEditEngineMFAInterface);
+    if (!$is_mfa) {
+      return $xactions;
+    }
+
+    $engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
+      ->setViewer($this->getActor());
+    $require_mfa = $engine->shouldRequireMFA();
+
+    if (!$require_mfa) {
+      return $xactions;
+    }
+
+    $type_mfa = PhabricatorTransactions::TYPE_MFA;
+
+    $has_mfa = false;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() === $type_mfa) {
+        $has_mfa = true;
+        break;
+      }
+    }
+
+    if ($has_mfa) {
+      return $xactions;
+    }
+
+    $template = $object->getApplicationTransactionTemplate();
+
+    $mfa_xaction = id(clone $template)
+      ->setTransactionType($type_mfa)
+      ->setNewValue(true);
+
+    array_unshift($xactions, $mfa_xaction);
+
+    return $xactions;
   }
 
 }

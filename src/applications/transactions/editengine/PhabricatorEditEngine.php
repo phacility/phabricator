@@ -1041,7 +1041,7 @@ abstract class PhabricatorEditEngine
     }
 
     $validation_exception = null;
-    if ($request->isFormPost() && $request->getBool('editEngine')) {
+    if ($request->isFormOrHisecPost() && $request->getBool('editEngine')) {
       $submit_fields = $fields;
 
       foreach ($submit_fields as $key => $field) {
