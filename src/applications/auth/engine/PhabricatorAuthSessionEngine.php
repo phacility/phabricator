@@ -213,26 +213,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $session = id(new PhabricatorAuthSession())->loadFromArray($session_dict);
 
-    $ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
-
-    // If more than 20% of the time on this session has been used, refresh the
-    // TTL back up to the full duration. The idea here is that sessions are
-    // good forever if used regularly, but get GC'd when they fall out of use.
-
-    // NOTE: If we begin rotating session keys when extending sessions, the
-    // CSRF code needs to be updated so CSRF tokens survive session rotation.
-
-    if (time() + (0.80 * $ttl) > $session->getSessionExpires()) {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $conn_w = $session_table->establishConnection('w');
-        queryfx(
-          $conn_w,
-          'UPDATE %T SET sessionExpires = UNIX_TIMESTAMP() + %d WHERE id = %d',
-          $session->getTableName(),
-          $ttl,
-          $session->getID());
-      unset($unguarded);
-    }
+    $this->extendSession($session);
 
     // TODO: Remove this, see T13225.
     if ($is_weak) {
@@ -284,7 +265,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $conn_w = $session_table->establishConnection('w');
 
     // This has a side effect of validating the session type.
-    $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
+    $session_ttl = PhabricatorAuthSession::getSessionTypeTTL(
+      $session_type,
+      $partial);
 
     $digest_key = PhabricatorAuthSession::newSessionDigest(
       new PhutilOpaqueEnvelope($session_key));
@@ -1085,5 +1068,41 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $extension->willServeRequestForUser($user);
     }
   }
+
+  private function extendSession(PhabricatorAuthSession $session) {
+    $is_partial = $session->getIsPartial();
+
+    // Don't extend partial sessions. You have a relatively short window to
+    // upgrade into a full session, and your session expires otherwise.
+    if ($is_partial) {
+      return;
+    }
+
+    $session_type = $session->getType();
+
+    $ttl = PhabricatorAuthSession::getSessionTypeTTL(
+      $session_type,
+      $session->getIsPartial());
+
+    // If more than 20% of the time on this session has been used, refresh the
+    // TTL back up to the full duration. The idea here is that sessions are
+    // good forever if used regularly, but get GC'd when they fall out of use.
+
+    $now = PhabricatorTime::getNow();
+    if ($now + (0.80 * $ttl) <= $session->getSessionExpires()) {
+      return;
+    }
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      queryfx(
+        $session->establishConnection('w'),
+        'UPDATE %R SET sessionExpires = UNIX_TIMESTAMP() + %d
+          WHERE id = %d',
+        $session,
+        $ttl,
+        $session->getID());
+    unset($unguarded);
+  }
+
 
 }
