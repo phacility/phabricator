@@ -1026,8 +1026,6 @@ abstract class PhabricatorApplicationTransactionEditor
     $xactions = $this->filterTransactions($object, $xactions);
 
     if (!$is_preview) {
-      $this->willApplyTransactions($object, $xactions);
-
       $this->hasRequiredMFA = true;
       if ($this->getShouldRequireMFA()) {
         $this->requireMFA($object, $xactions);
@@ -4372,19 +4370,6 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getModularTransactionType($type) {
     $types = $this->getModularTransactionTypes();
     return idx($types, $type);
-  }
-
-  private function willApplyTransactions($object, array $xactions) {
-    foreach ($xactions as $xaction) {
-      $type = $xaction->getTransactionType();
-
-      $xtype = $this->getModularTransactionType($type);
-      if (!$xtype) {
-        continue;
-      }
-
-      $xtype->willApplyTransactions($object, $xactions);
-    }
   }
 
   public function getCreateObjectTitle($author, $object) {

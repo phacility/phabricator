@@ -23,10 +23,6 @@ abstract class PhabricatorModularTransactionType
     return array();
   }
 
-  public function willApplyTransactions($object, array $xactions) {
-    return;
-  }
-
   public function applyInternalEffects($object, $value) {
     return;
   }
