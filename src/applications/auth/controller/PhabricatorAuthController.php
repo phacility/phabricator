@@ -55,44 +55,29 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     $response = $this->buildLoginValidateResponse($user);
     $session_type = PhabricatorAuthSession::TYPE_WEB;
 
-    $event_type = PhabricatorEventType::TYPE_AUTH_WILLLOGINUSER;
-    $event_data = array(
-      'user'        => $user,
-      'type'        => $session_type,
-      'response'    => $response,
-      'shouldLogin' => true,
-    );
-
-    $event = id(new PhabricatorEvent($event_type, $event_data))
-      ->setUser($user);
-    PhutilEventEngine::dispatchEvent($event);
-
-    $should_login = $event->getValue('shouldLogin');
-    if ($should_login) {
-      if ($force_full_session) {
-        $partial_session = false;
-      } else {
-        $partial_session = true;
-      }
-
-      $session_key = id(new PhabricatorAuthSessionEngine())
-        ->establishSession($session_type, $user->getPHID(), $partial_session);
-
-      // NOTE: We allow disabled users to login and roadblock them later, so
-      // there's no check for users being disabled here.
-
-      $request = $this->getRequest();
-      $request->setCookie(
-        PhabricatorCookies::COOKIE_USERNAME,
-        $user->getUsername());
-      $request->setCookie(
-        PhabricatorCookies::COOKIE_SESSION,
-        $session_key);
-
-      $this->clearRegistrationCookies();
+    if ($force_full_session) {
+      $partial_session = false;
+    } else {
+      $partial_session = true;
     }
 
-    return $event->getValue('response');
+    $session_key = id(new PhabricatorAuthSessionEngine())
+      ->establishSession($session_type, $user->getPHID(), $partial_session);
+
+    // NOTE: We allow disabled users to login and roadblock them later, so
+    // there's no check for users being disabled here.
+
+    $request = $this->getRequest();
+    $request->setCookie(
+      PhabricatorCookies::COOKIE_USERNAME,
+      $user->getUsername());
+    $request->setCookie(
+      PhabricatorCookies::COOKIE_SESSION,
+      $session_key);
+
+    $this->clearRegistrationCookies();
+
+    return $response;
   }
 
   protected function clearRegistrationCookies() {
