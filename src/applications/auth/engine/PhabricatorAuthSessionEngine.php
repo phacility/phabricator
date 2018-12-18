@@ -684,6 +684,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     throw id(new PhabricatorAuthHighSecurityRequiredException())
       ->setCancelURI($cancel_uri)
+      ->setIsSessionUpgrade($upgrade_session)
       ->setFactors($factors)
       ->setFactorValidationResults($validation_results);
   }

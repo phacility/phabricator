@@ -5,6 +5,7 @@ final class PhabricatorAuthHighSecurityRequiredException extends Exception {
   private $cancelURI;
   private $factors;
   private $factorValidationResults;
+  private $isSessionUpgrade;
 
   public function setFactorValidationResults(array $results) {
     assert_instances_of($results, 'PhabricatorAuthFactorResult');
@@ -33,6 +34,15 @@ final class PhabricatorAuthHighSecurityRequiredException extends Exception {
 
   public function getCancelURI() {
     return $this->cancelURI;
+  }
+
+  public function setIsSessionUpgrade($is_upgrade) {
+    $this->isSessionUpgrade = $is_upgrade;
+    return $this;
+  }
+
+  public function getIsSessionUpgrade() {
+    return $this->isSessionUpgrade;
   }
 
 }
