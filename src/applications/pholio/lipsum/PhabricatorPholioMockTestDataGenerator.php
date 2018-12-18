@@ -42,6 +42,7 @@ final class PhabricatorPholioMockTestDataGenerator
     $images = array();
     foreach ($files as $file) {
       $image = PholioImage::initializeNewImage()
+        ->setAuthorPHID($author_phid)
         ->setFilePHID($file->getPHID())
         ->setSequence($sequence++)
         ->attachMock($mock);

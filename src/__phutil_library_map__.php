@@ -10947,6 +10947,7 @@ phutil_register_library_map(array(
     'PholioImage' => array(
       'PholioDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorExtendedPolicyInterface',
     ),
     'PholioImageDescriptionTransaction' => 'PholioImageTransactionType',
     'PholioImageFileTransaction' => 'PholioImageTransactionType',

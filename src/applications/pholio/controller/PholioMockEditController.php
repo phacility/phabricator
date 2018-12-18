@@ -141,6 +141,7 @@ final class PholioMockEditController extends PholioController {
 
         if ($replaces_image_phid) {
           $replace_image = PholioImage::initializeNewImage()
+            ->setAuthorPHID($viewer->getPHID())
             ->setReplacesImagePHID($replaces_image_phid)
             ->setFilePhid($file_phid)
             ->attachFile($file)
@@ -154,6 +155,7 @@ final class PholioMockEditController extends PholioController {
           $posted_mock_images[] = $replace_image;
         } else if (!$existing_image) { // this is an add
           $add_image = PholioImage::initializeNewImage()
+            ->setAuthorPHID($viewer->getPHID())
             ->setFilePhid($file_phid)
             ->attachFile($file)
             ->setName(strlen($title) ? $title : $file->getName())

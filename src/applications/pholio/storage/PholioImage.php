@@ -2,8 +2,10 @@
 
 final class PholioImage extends PholioDAO
   implements
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface {
 
+  protected $authorPHID;
   protected $mockID;
   protected $filePHID;
   protected $name;
@@ -57,8 +59,7 @@ final class PholioImage extends PholioDAO
   }
 
   public function getFile() {
-    $this->assertAttached($this->file);
-    return $this->file;
+    return $this->assertAttached($this->file);
   }
 
   public function attachMock(PholioMock $mock) {
@@ -67,8 +68,7 @@ final class PholioImage extends PholioDAO
   }
 
   public function getMock() {
-    $this->assertAttached($this->mock);
-    return $this->mock;
+    return $this->assertAttached($this->mock);
   }
 
   public function attachInlineComments(array $inline_comments) {
@@ -83,20 +83,46 @@ final class PholioImage extends PholioDAO
   }
 
 
-/* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
   public function getCapabilities() {
-    return $this->getMock()->getCapabilities();
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
   }
 
   public function getPolicy($capability) {
-    return $this->getMock()->getPolicy($capability);
+    // If the image is attached to a mock, we use an extended policy to match
+    // the mock's permissions.
+    if ($this->getMockID()) {
+      return PhabricatorPolicies::getMostOpenPolicy();
+    }
+
+    // If the image is not attached to a mock, only the author can see it.
+    return $this->getAuthorPHID();
   }
 
-  // really the *mock* controls who can see an image
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getMock()->hasAutomaticCapability($capability, $viewer);
+    return false;
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    if ($this->getMockID()) {
+      return array(
+        array(
+          $this->getMock(),
+          $capability,
+        ),
+      );
+    }
+
+    return array();
   }
 
 }
