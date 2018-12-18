@@ -893,24 +893,28 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    *  link is used.
    * @param string Optional context string for the URI. This is purely cosmetic
    *  and used only to customize workflow and error messages.
+   * @param bool True to generate a URI which forces an immediate upgrade to
+   *  a full session, bypassing MFA and other login checks.
    * @return string Login URI.
    * @task onetime
    */
   public function getOneTimeLoginURI(
     PhabricatorUser $user,
     PhabricatorUserEmail $email = null,
-    $type = self::ONETIME_RESET) {
+    $type = self::ONETIME_RESET,
+    $force_full_session = false) {
 
     $key = Filesystem::readRandomCharacters(32);
     $key_hash = $this->getOneTimeLoginKeyHash($user, $email, $key);
     $onetime_type = PhabricatorAuthOneTimeLoginTemporaryTokenType::TOKENTYPE;
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      id(new PhabricatorAuthTemporaryToken())
+      $token = id(new PhabricatorAuthTemporaryToken())
         ->setTokenResource($user->getPHID())
         ->setTokenType($onetime_type)
         ->setTokenExpires(time() + phutil_units('1 day in seconds'))
         ->setTokenCode($key_hash)
+        ->setShouldForceFullSession($force_full_session)
         ->save();
     unset($unguarded);
 
