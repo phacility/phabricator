@@ -190,16 +190,25 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
     $error = $result->getErrorMessage();
 
-    return id(new AphrontFormMarkupControl())
-      ->setValue($error)
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-clock-o', 'red');
+
+    return id(new PHUIFormTimerControl())
+      ->setIcon($icon)
+      ->appendChild($error)
       ->setError(pht('Wait'));
   }
 
   private function newAnsweredControl(
     PhabricatorAuthFactorResult $result) {
 
-    return id(new AphrontFormMarkupControl())
-      ->setValue(pht('Answered!'));
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-check-circle-o', 'green');
+
+    return id(new PHUIFormTimerControl())
+      ->setIcon($icon)
+      ->appendChild(
+        pht('You responded to this challenge correctly.'));
   }
 
 
