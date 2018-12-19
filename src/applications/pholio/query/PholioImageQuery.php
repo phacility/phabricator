@@ -5,8 +5,7 @@ final class PholioImageQuery
 
   private $ids;
   private $phids;
-  private $mockIDs;
-  private $obsolete;
+  private $mockPHIDs;
 
   private $needInlineComments;
   private $mockCache = array();
@@ -21,13 +20,8 @@ final class PholioImageQuery
     return $this;
   }
 
-  public function withMockIDs(array $mock_ids) {
-    $this->mockIDs = $mock_ids;
-    return $this;
-  }
-
-  public function withObsolete($obsolete) {
-    $this->obsolete = $obsolete;
+  public function withMockPHIDs(array $mock_phids) {
+    $this->mockPHIDs = $mock_phids;
     return $this;
   }
 
@@ -69,18 +63,11 @@ final class PholioImageQuery
         $this->phids);
     }
 
-    if ($this->mockIDs !== null) {
+    if ($this->mockPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'mockID IN (%Ld)',
-        $this->mockIDs);
-    }
-
-    if ($this->obsolete !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'isObsolete = %d',
-        $this->obsolete);
+        'mockPHID IN (%Ls)',
+        $this->mockPHIDs);
     }
 
     return $where;
@@ -92,16 +79,18 @@ final class PholioImageQuery
     if ($this->getMockCache()) {
       $mocks = $this->getMockCache();
     } else {
-      $mock_ids = mpull($images, 'getMockID');
+      $mock_phids = mpull($images, 'getMockPHID');
+
       // DO NOT set needImages to true; recursion results!
       $mocks = id(new PholioMockQuery())
         ->setViewer($this->getViewer())
-        ->withIDs($mock_ids)
+        ->withPHIDs($mock_phids)
         ->execute();
-      $mocks = mpull($mocks, null, 'getID');
+      $mocks = mpull($mocks, null, 'getPHID');
     }
+
     foreach ($images as $index => $image) {
-      $mock = idx($mocks, $image->getMockID());
+      $mock = idx($mocks, $image->getMockPHID());
       if ($mock) {
         $image->attachMock($mock);
       } else {

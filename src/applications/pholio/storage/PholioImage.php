@@ -6,7 +6,7 @@ final class PholioImage extends PholioDAO
     PhabricatorExtendedPolicyInterface {
 
   protected $authorPHID;
-  protected $mockID;
+  protected $mockPHID;
   protected $filePHID;
   protected $name;
   protected $description;
@@ -29,7 +29,7 @@ final class PholioImage extends PholioDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'mockID' => 'id?',
+        'mockPHID' => 'phid?',
         'name' => 'text128',
         'description' => 'text',
         'sequence' => 'uint32',
@@ -37,14 +37,9 @@ final class PholioImage extends PholioDAO
         'replacesImagePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'keyPHID' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
-        'mockID' => array(
-          'columns' => array('mockID', 'isObsolete', 'sequence'),
-        ),
+        // TODO: There should be a key starting with "mockPHID" here at a
+        // minimum, but it's not entirely clear what other columns we should
+        // have as part of the key.
       ),
     ) + parent::getConfiguration();
   }
@@ -71,6 +66,10 @@ final class PholioImage extends PholioDAO
     return $this->assertAttached($this->mock);
   }
 
+  public function hasMock() {
+    return (bool)$this->getMockPHID();
+  }
+
   public function attachInlineComments(array $inline_comments) {
     assert_instances_of($inline_comments, 'PholioTransactionComment');
     $this->inlineComments = $inline_comments;
@@ -80,6 +79,22 @@ final class PholioImage extends PholioDAO
   public function getInlineComments() {
     $this->assertAttached($this->inlineComments);
     return $this->inlineComments;
+  }
+
+  public function getURI() {
+    if ($this->hasMock()) {
+      $mock = $this->getMock();
+
+      $mock_uri = $mock->getURI();
+      $image_id = $this->getID();
+
+      return "{$mock_uri}/{$image_id}/";
+    }
+
+    // For now, standalone images have no URI. We could provide one at some
+    // point, although it's not clear that there's any motivation to do so.
+
+    return null;
   }
 
 
@@ -96,7 +111,7 @@ final class PholioImage extends PholioDAO
   public function getPolicy($capability) {
     // If the image is attached to a mock, we use an extended policy to match
     // the mock's permissions.
-    if ($this->getMockID()) {
+    if ($this->hasMock()) {
       return PhabricatorPolicies::getMostOpenPolicy();
     }
 
@@ -113,7 +128,7 @@ final class PholioImage extends PholioDAO
 
 
   public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
-    if ($this->getMockID()) {
+    if ($this->hasMock()) {
       return array(
         array(
           $this->getMock(),

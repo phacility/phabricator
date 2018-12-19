@@ -115,18 +115,18 @@ final class PholioMockQuery
     $need_inline_comments) {
     assert_instances_of($mocks, 'PholioMock');
 
-    $mock_map = mpull($mocks, null, 'getID');
+    $mock_map = mpull($mocks, null, 'getPHID');
     $all_images = id(new PholioImageQuery())
       ->setViewer($viewer)
       ->setMockCache($mock_map)
-      ->withMockIDs(array_keys($mock_map))
+      ->withMockPHIDs(array_keys($mock_map))
       ->needInlineComments($need_inline_comments)
       ->execute();
 
-    $image_groups = mgroup($all_images, 'getMockID');
+    $image_groups = mgroup($all_images, 'getMockPHID');
 
     foreach ($mocks as $mock) {
-      $mock_images = idx($image_groups, $mock->getID(), array());
+      $mock_images = idx($image_groups, $mock->getPHID(), array());
       $mock->attachAllImages($mock_images);
       $active_images = mfilter($mock_images, 'getIsObsolete', true);
       $mock->attachImages(msort($active_images, 'getSequence'));

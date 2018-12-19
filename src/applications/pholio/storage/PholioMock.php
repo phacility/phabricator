@@ -259,7 +259,7 @@ final class PholioMock extends PholioDAO
     $this->openTransaction();
       $images = id(new PholioImageQuery())
         ->setViewer($engine->getViewer())
-        ->withMockIDs(array($this->getID()))
+        ->withMockIDs(array($this->getPHID()))
         ->execute();
       foreach ($images as $image) {
         $image->delete();

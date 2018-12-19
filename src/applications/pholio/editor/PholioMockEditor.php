@@ -91,7 +91,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
     $images = $this->getNewImages();
     foreach ($images as $image) {
-      $image->setMockID($object->getID());
+      $image->setMockPHID($object->getPHID());
       $image->save();
     }
 

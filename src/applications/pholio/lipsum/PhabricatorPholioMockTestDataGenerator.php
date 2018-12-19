@@ -65,7 +65,7 @@ final class PhabricatorPholioMockTestDataGenerator
       ->setActor($author)
       ->applyTransactions($mock, $transactions);
     foreach ($images as $image) {
-      $image->setMockID($mock->getID());
+      $image->setMockPHID($mock->getPHID());
       $image->save();
     }
 
