@@ -6,9 +6,9 @@ final class PholioImageQuery
   private $ids;
   private $phids;
   private $mockPHIDs;
+  private $mocks;
 
   private $needInlineComments;
-  private $mockCache = array();
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -20,6 +20,16 @@ final class PholioImageQuery
     return $this;
   }
 
+  public function withMocks(array $mocks) {
+    assert_instances_of($mocks, 'PholioMock');
+
+    $mocks = mpull($mocks, null, 'getPHID');
+    $this->mocks = $mocks;
+    $this->mockPHIDs = array_keys($mocks);
+
+    return $this;
+  }
+
   public function withMockPHIDs(array $mock_phids) {
     $this->mockPHIDs = $mock_phids;
     return $this;
@@ -28,14 +38,6 @@ final class PholioImageQuery
   public function needInlineComments($need_inline_comments) {
     $this->needInlineComments = $need_inline_comments;
     return $this;
-  }
-
-  public function setMockCache($mock_cache) {
-    $this->mockCache = $mock_cache;
-    return $this;
-  }
-  public function getMockCache() {
-    return $this->mockCache;
   }
 
   public function newResultObject() {
@@ -76,26 +78,40 @@ final class PholioImageQuery
   protected function willFilterPage(array $images) {
     assert_instances_of($images, 'PholioImage');
 
-    if ($this->getMockCache()) {
-      $mocks = $this->getMockCache();
-    } else {
-      $mock_phids = mpull($images, 'getMockPHID');
+    $mock_phids = array();
+    foreach ($images as $image) {
+      if (!$image->hasMock()) {
+        continue;
+      }
 
-      // DO NOT set needImages to true; recursion results!
-      $mocks = id(new PholioMockQuery())
-        ->setViewer($this->getViewer())
-        ->withPHIDs($mock_phids)
-        ->execute();
-      $mocks = mpull($mocks, null, 'getPHID');
+      $mock_phids[] = $image->getMockPHID();
     }
 
-    foreach ($images as $index => $image) {
-      $mock = idx($mocks, $image->getMockPHID());
-      if ($mock) {
-        $image->attachMock($mock);
+    if ($mock_phids) {
+      if ($this->mocks) {
+        $mocks = $this->mocks;
       } else {
-        // mock is missing or we can't see it
-        unset($images[$index]);
+        $mocks = id(new PholioMockQuery())
+          ->setViewer($this->getViewer())
+          ->withPHIDs($mock_phids)
+          ->execute();
+      }
+
+      $mocks = mpull($mocks, null, 'getPHID');
+
+      foreach ($images as $key => $image) {
+        if (!$image->hasMock()) {
+          continue;
+        }
+
+        $mock = idx($mocks, $image->getMockPHID());
+        if (!$mock) {
+          unset($images[$key]);
+          $this->didRejectResult($image);
+          continue;
+        }
+
+        $image->attachMock($mock);
       }
     }
 

@@ -110,7 +110,7 @@ final class PholioMockImagesView extends AphrontView {
       );
     }
 
-    $ids = mpull($mock->getActiveImages(), 'getID');
+    $ids = mpull($mock->getActiveImages(), null, 'getID');
     if ($this->imageID && isset($ids[$this->imageID])) {
       $selected_id = $this->imageID;
     } else {
