@@ -46,6 +46,7 @@ final class PonderQuestionCommentController extends PonderController {
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())
+        ->setObject($question)
         ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview);

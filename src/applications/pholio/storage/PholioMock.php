@@ -7,6 +7,7 @@ final class PholioMock extends PholioDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
+    PhabricatorTimelineInterface,
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
     PhabricatorSpacesInterface,
@@ -228,17 +229,6 @@ final class PholioMock extends PholioDAO
     return new PholioTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    PholioMockQuery::loadImages(
-      $request->getUser(),
-      array($this),
-      $need_inline_comments = true);
-    $timeline->setMock($this);
-    return $timeline;
-  }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
@@ -288,8 +278,17 @@ final class PholioMock extends PholioDAO
 
 /* -(  PhabricatorFerretInterface  )----------------------------------------- */
 
+
   public function newFerretEngine() {
     return new PholioMockFerretEngine();
+  }
+
+
+/* -(  PhabricatorTimelineInterace  )---------------------------------------- */
+
+
+  public function newTimelineEngine() {
+    return new PholioMockTimelineEngine();
   }
 
 

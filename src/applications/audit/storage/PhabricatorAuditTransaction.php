@@ -32,10 +32,6 @@ final class PhabricatorAuditTransaction
     return new PhabricatorAuditTransactionComment();
   }
 
-  public function getApplicationTransactionViewObject() {
-    return new PhabricatorAuditTransactionView();
-  }
-
   public function getRemarkupBlocks() {
     $blocks = parent::getRemarkupBlocks();
 

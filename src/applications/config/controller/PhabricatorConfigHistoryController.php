@@ -16,17 +16,13 @@ final class PhabricatorConfigHistoryController
 
     $xaction = $object->getApplicationTransactionTemplate();
 
-    $view = $xaction->getApplicationTransactionViewObject();
-
-    $timeline = $view
-      ->setUser($viewer)
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setViewer($viewer)
       ->setTransactions($xactions)
       ->setRenderAsFeed(true)
       ->setObjectPHID(PhabricatorPHIDConstants::PHID_VOID);
 
     $timeline->setShouldTerminate(true);
-
-    $object->willRenderTimeline($timeline, $this->getRequest());
 
     $title = pht('Settings History');
     $header = $this->buildHeaderView($title);

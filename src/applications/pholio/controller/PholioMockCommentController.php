@@ -68,13 +68,10 @@ final class PholioMockCommentController extends PholioController {
     }
 
     if ($request->isAjax() && $is_preview) {
-      $xaction_view = id(new PholioTransactionView())
-        ->setMock($mock);
-
       return id(new PhabricatorApplicationTransactionResponse())
+        ->setObject($mock)
         ->setViewer($viewer)
         ->setTransactions($xactions)
-        ->setTransactionView($xaction_view)
         ->setIsPreview($is_preview);
     } else {
       return id(new AphrontRedirectResponse())->setURI($mock_uri);

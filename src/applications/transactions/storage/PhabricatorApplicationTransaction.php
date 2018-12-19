@@ -79,10 +79,6 @@ abstract class PhabricatorApplicationTransaction
     throw new PhutilMethodNotImplementedException();
   }
 
-  public function getApplicationTransactionViewObject() {
-    return new PhabricatorApplicationTransactionView();
-  }
-
   public function getMetadataValue($key, $default = null) {
     return idx($this->metadata, $key, $default);
   }

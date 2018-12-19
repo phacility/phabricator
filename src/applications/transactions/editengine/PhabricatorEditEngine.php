@@ -1955,6 +1955,7 @@ abstract class PhabricatorEditEngine
       $preview_content = $this->newCommentPreviewContent($object, $xactions);
 
       return id(new PhabricatorApplicationTransactionResponse())
+        ->setObject($object)
         ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview)
