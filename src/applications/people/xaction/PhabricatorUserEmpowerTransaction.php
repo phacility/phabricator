@@ -45,7 +45,10 @@ final class PhabricatorUserEmpowerTransaction
               'status as an administrator.'), $xaction);
       }
 
-      if (!$actor->getIsAdmin()) {
+      $is_admin = $actor->getIsAdmin();
+      $is_omnipotent = $actor->isOmnipotent();
+
+      if (!$is_admin && !$is_omnipotent) {
         $errors[] = $this->newInvalidError(
           pht('You must be an administrator to create administrators.'),
           $xaction);

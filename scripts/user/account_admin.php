@@ -200,8 +200,27 @@ $user->openTransaction();
     $editor->updateUser($user, $verify_email);
   }
 
-  $editor->makeAdminUser($user, $set_admin);
   $editor->makeSystemAgentUser($user, $set_system_agent);
+
+  $xactions = array();
+  $xactions[] = id(new PhabricatorUserTransaction())
+    ->setTransactionType(
+      PhabricatorUserEmpowerTransaction::TRANSACTIONTYPE)
+    ->setNewValue($set_admin);
+
+  $actor = PhabricatorUser::getOmnipotentUser();
+  $content_source = PhabricatorContentSource::newForSource(
+    PhabricatorConsoleContentSource::SOURCECONST);
+
+  $people_application_phid = id(new PhabricatorPeopleApplication())->getPHID();
+
+  $transaction_editor = id(new PhabricatorUserTransactionEditor())
+    ->setActor($actor)
+    ->setActingAsPHID($people_application_phid)
+    ->setContentSource($content_source)
+    ->setContinueOnMissingFields(true);
+
+  $transaction_editor->applyTransactions($user, $xactions);
 
 $user->saveTransaction();
 
