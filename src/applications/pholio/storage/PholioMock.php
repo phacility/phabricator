@@ -25,7 +25,6 @@ final class PholioMock extends PholioDAO
   protected $name;
   protected $description;
   protected $coverPHID;
-  protected $mailKey;
   protected $status;
   protected $spacePHID;
 
@@ -65,15 +64,9 @@ final class PholioMock extends PholioDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'description' => 'text',
-        'mailKey' => 'bytes20',
         'status' => 'text12',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'authorPHID' => array(
           'columns' => array('authorPHID'),
         ),
@@ -81,15 +74,8 @@ final class PholioMock extends PholioDAO
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('MOCK');
-  }
-
-  public function save() {
-    if (!$this->getMailKey()) {
-      $this->setMailKey(Filesystem::readRandomCharacters(20));
-    }
-    return parent::save();
+  public function getPHIDType() {
+    return PholioMockPHIDType::TYPECONST;
   }
 
   public function attachImages(array $images) {
