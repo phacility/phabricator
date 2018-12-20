@@ -6,7 +6,7 @@ final class PholioImageFileTransaction
   const TRANSACTIONTYPE = 'image-file';
 
   public function generateOldValue($object) {
-    $images = $object->getImages();
+    $images = $object->getActiveImages();
     return array_values(mpull($images, 'getPHID'));
   }
 
@@ -24,7 +24,7 @@ final class PholioImageFileTransaction
     $new_map = array_fuse($this->getNewValue());
 
     $obsolete_map = array_diff_key($old_map, $new_map);
-    $images = $object->getImages();
+    $images = $object->getActiveImages();
     foreach ($images as $seq => $image) {
       if (isset($obsolete_map[$image->getPHID()])) {
         $image->setIsObsolete(1);

@@ -24,7 +24,7 @@ final class PholioMockCommentController extends PholioController {
 
     $draft = PhabricatorDraft::buildFromRequest($request);
 
-    $mock_uri = '/M'.$mock->getID();
+    $mock_uri = $mock->getURI();
 
     $comment = $request->getStr('comment');
 
@@ -33,7 +33,7 @@ final class PholioMockCommentController extends PholioController {
     $inline_comments = id(new PholioTransactionComment())->loadAllWhere(
       'authorphid = %s AND transactionphid IS NULL AND imageid IN (%Ld)',
       $viewer->getPHID(),
-      mpull($mock->getImages(), 'getID'));
+      mpull($mock->getActiveImages(), 'getID'));
 
     if (!$inline_comments || strlen($comment)) {
       $xactions[] = id(new PholioTransaction())

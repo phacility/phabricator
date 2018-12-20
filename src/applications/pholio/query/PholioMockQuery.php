@@ -58,7 +58,7 @@ final class PholioMockQuery
   }
 
   protected function loadPage() {
-    $mocks = $this->loadStandardPage(new PholioMock());
+    $mocks = $this->loadStandardPage($this->newResultObject());
 
     if ($mocks && $this->needImages) {
       self::loadImages($this->getViewer(), $mocks, $this->needInlineComments);
@@ -127,9 +127,7 @@ final class PholioMockQuery
 
     foreach ($mocks as $mock) {
       $mock_images = idx($image_groups, $mock->getPHID(), array());
-      $mock->attachAllImages($mock_images);
-      $active_images = mfilter($mock_images, 'getIsObsolete', true);
-      $mock->attachImages(msort($active_images, 'getSequence'));
+      $mock->attachImages($mock_images);
     }
   }
 

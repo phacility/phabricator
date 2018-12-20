@@ -74,7 +74,7 @@ final class PholioMockImagesView extends AphrontView {
 
     $images = array();
     $current_set = 0;
-    foreach ($mock->getAllImages() as $image) {
+    foreach ($mock->getImages() as $image) {
       $file = $image->getFile();
       $metadata = $file->getMetadata();
       $x = idx($metadata, PhabricatorFile::METADATA_IMAGE_WIDTH);
@@ -110,7 +110,7 @@ final class PholioMockImagesView extends AphrontView {
       );
     }
 
-    $ids = mpull($mock->getImages(), 'getID');
+    $ids = mpull($mock->getActiveImages(), 'getID');
     if ($this->imageID && isset($ids[$this->imageID])) {
       $selected_id = $this->imageID;
     } else {
@@ -118,7 +118,7 @@ final class PholioMockImagesView extends AphrontView {
     }
 
     $navsequence = array();
-    foreach ($mock->getImages() as $image) {
+    foreach ($mock->getActiveImages() as $image) {
       $navsequence[] = $image->getID();
     }
 

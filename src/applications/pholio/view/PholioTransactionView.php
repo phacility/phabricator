@@ -97,7 +97,7 @@ final class PholioTransactionView
   private function renderInlineContent(PholioTransaction $inline) {
     $comment = $inline->getComment();
     $mock = $this->getMock();
-    $images = $mock->getAllImages();
+    $images = $mock->getImages();
     $images = mpull($images, null, 'getID');
 
     $image = idx($images, $comment->getImageID());

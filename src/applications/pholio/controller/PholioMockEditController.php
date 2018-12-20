@@ -25,7 +25,7 @@ final class PholioMockEditController extends PholioController {
       $title = pht('Edit Mock: %s', $mock->getName());
 
       $is_new = false;
-      $mock_images = $mock->getImages();
+      $mock_images = $mock->getActiveImages();
       $files = mpull($mock_images, 'getFile');
       $mock_images = mpull($mock_images, null, 'getFilePHID');
     } else {

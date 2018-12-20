@@ -30,7 +30,6 @@ final class PholioMock extends PholioDAO
   protected $spacePHID;
 
   private $images = self::ATTACHABLE;
-  private $allImages = self::ATTACHABLE;
   private $coverFile = self::ATTACHABLE;
   private $tokenCount = self::ATTACHABLE;
 
@@ -93,33 +92,28 @@ final class PholioMock extends PholioDAO
     return parent::save();
   }
 
-  /**
-   * These should be the images currently associated with the Mock.
-   */
   public function attachImages(array $images) {
     assert_instances_of($images, 'PholioImage');
+    $images = mpull($images, null, 'getPHID');
+    $images = msort($images, 'getSequence');
     $this->images = $images;
     return $this;
   }
 
   public function getImages() {
-    $this->assertAttached($this->images);
-    return $this->images;
+    return $this->assertAttached($this->images);
   }
 
-  /**
-   * These should be *all* images associated with the Mock. This includes
-   * images which have been removed and / or replaced from the Mock.
-   */
-  public function attachAllImages(array $images) {
-    assert_instances_of($images, 'PholioImage');
-    $this->allImages = $images;
-    return $this;
-  }
+  public function getActiveImages() {
+    $images = $this->getImages();
 
-  public function getAllImages() {
-    $this->assertAttached($this->images);
-    return $this->allImages;
+    foreach ($images as $phid => $image) {
+      if ($image->getIsObsolete()) {
+        unset($images[$phid]);
+      }
+    }
+
+    return $images;
   }
 
   public function attachCoverFile(PhabricatorFile $file) {
@@ -143,7 +137,7 @@ final class PholioMock extends PholioDAO
   }
 
   public function getImageHistorySet($image_id) {
-    $images = $this->getAllImages();
+    $images = $this->getImages();
     $images = mpull($images, null, 'getID');
     $selected_image = $images[$image_id];
 
