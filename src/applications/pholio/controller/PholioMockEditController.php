@@ -162,11 +162,13 @@ final class PholioMockEditController extends PholioController {
             ->attachFile($file)
             ->setName(strlen($title) ? $title : $file->getName())
             ->setDescription($description)
-            ->setSequence($sequence);
+            ->setSequence($sequence)
+            ->save();
+
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(PholioImageFileTransaction::TRANSACTIONTYPE)
             ->setNewValue(
-              array('+' => array($add_image)));
+              array('+' => array($add_image->getPHID())));
           $posted_mock_images[] = $add_image;
         } else {
           $xactions[] = id(new PholioTransaction())
@@ -193,7 +195,7 @@ final class PholioMockEditController extends PholioController {
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(PholioImageFileTransaction::TRANSACTIONTYPE)
             ->setNewValue(
-              array('-' => array($mock_image)));
+              array('-' => array($mock_image->getPHID())));
         }
       }
 
