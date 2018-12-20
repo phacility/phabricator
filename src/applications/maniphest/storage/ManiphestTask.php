@@ -452,10 +452,6 @@ final class ManiphestTask extends ManiphestDAO
     return new ManiphestTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new ManiphestTransaction();
   }

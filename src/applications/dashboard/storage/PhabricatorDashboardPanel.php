@@ -113,10 +113,6 @@ final class PhabricatorDashboardPanel
     return new PhabricatorDashboardPanelTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorDashboardPanelTransaction();
   }

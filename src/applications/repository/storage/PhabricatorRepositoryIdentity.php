@@ -134,10 +134,6 @@ final class PhabricatorRepositoryIdentity
     return new DiffusionRepositoryIdentityEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorRepositoryIdentityTransaction();
   }

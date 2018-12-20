@@ -117,10 +117,6 @@ final class PassphraseCredential extends PassphraseDAO
     return new PassphraseCredentialTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PassphraseCredentialTransaction();
   }

@@ -158,10 +158,6 @@ final class ReleephBranch extends ReleephDAO
     return new ReleephBranchEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new ReleephBranchTransaction();
   }

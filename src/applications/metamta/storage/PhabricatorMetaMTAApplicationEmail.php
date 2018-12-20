@@ -123,10 +123,6 @@ final class PhabricatorMetaMTAApplicationEmail
     return new PhabricatorMetaMTAApplicationEmailEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorMetaMTAApplicationEmailTransaction();
   }

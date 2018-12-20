@@ -217,10 +217,6 @@ final class PhabricatorAuthPassword
     return new PhabricatorAuthPasswordEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorAuthPasswordTransaction();
   }

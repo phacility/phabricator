@@ -165,10 +165,6 @@ final class PhabricatorPackagesPublisher
     return new PhabricatorPackagesPublisherEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorPackagesPublisherTransaction();
   }

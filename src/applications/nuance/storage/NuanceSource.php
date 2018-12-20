@@ -99,10 +99,6 @@ final class NuanceSource extends NuanceDAO
     return new NuanceSourceEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new NuanceSourceTransaction();
   }

@@ -233,10 +233,6 @@ final class PhabricatorWorkerBulkJob
     return new PhabricatorWorkerBulkJobEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorWorkerBulkJobTransaction();
   }

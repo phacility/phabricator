@@ -18,17 +18,6 @@ interface PhabricatorApplicationTransactionInterface {
 
 
   /**
-   * Return the object to apply transactions to. Normally this is the current
-   * object (that is, `$this`), but in some cases transactions may apply to
-   * a different object: for example, @{class:DifferentialDiff} applies
-   * transactions to the associated @{class:DifferentialRevision}.
-   *
-   * @return PhabricatorLiskDAO Object to apply transactions to.
-   */
-  public function getApplicationTransactionObject();
-
-
-  /**
    * Return a template transaction for this object.
    *
    * @return PhabricatorApplicationTransaction
@@ -45,10 +34,6 @@ interface PhabricatorApplicationTransactionInterface {
 
   public function getApplicationTransactionEditor() {
     return new <<<???>>>Editor();
-  }
-
-  public function getApplicationTransactionObject() {
-    return $this;
   }
 
   public function getApplicationTransactionTemplate() {

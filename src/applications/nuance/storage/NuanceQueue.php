@@ -79,10 +79,6 @@ final class NuanceQueue
     return new NuanceQueueEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new NuanceQueueTransaction();
   }

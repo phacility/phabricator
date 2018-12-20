@@ -145,10 +145,6 @@ final class PonderQuestion extends PonderDAO
     return new PonderQuestionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PonderQuestionTransaction();
   }

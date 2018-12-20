@@ -695,10 +695,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return new PhabricatorProjectTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorProjectTransaction();
   }

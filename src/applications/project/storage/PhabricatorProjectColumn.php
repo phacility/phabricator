@@ -234,10 +234,6 @@ final class PhabricatorProjectColumn
     return new PhabricatorProjectColumnTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorProjectColumnTransaction();
   }

@@ -125,10 +125,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return new PhabricatorBadgesEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorBadgesTransaction();
   }

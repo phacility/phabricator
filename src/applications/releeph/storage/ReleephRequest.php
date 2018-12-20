@@ -299,10 +299,6 @@ final class ReleephRequest extends ReleephDAO
     return new ReleephRequestTransactionalEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new ReleephRequestTransaction();
   }

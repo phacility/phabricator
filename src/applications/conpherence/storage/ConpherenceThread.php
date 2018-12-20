@@ -311,10 +311,6 @@ final class ConpherenceThread extends ConpherenceDAO
     return new ConpherenceEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new ConpherenceTransaction();
   }

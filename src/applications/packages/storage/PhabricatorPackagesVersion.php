@@ -156,10 +156,6 @@ final class PhabricatorPackagesVersion
     return new PhabricatorPackagesVersionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorPackagesVersionTransaction();
   }

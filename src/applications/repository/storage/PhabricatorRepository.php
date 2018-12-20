@@ -2613,10 +2613,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return new PhabricatorRepositoryEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorRepositoryTransaction();
   }

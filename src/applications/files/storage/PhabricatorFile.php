@@ -1544,10 +1544,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return new PhabricatorFileEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorFileTransaction();
   }

@@ -1311,10 +1311,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return new PhabricatorCalendarEventEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorCalendarEventTransaction();
   }

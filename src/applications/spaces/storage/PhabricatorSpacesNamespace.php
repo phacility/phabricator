@@ -91,10 +91,6 @@ final class PhabricatorSpacesNamespace
     return new PhabricatorSpacesNamespaceEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorSpacesNamespaceTransaction();
   }

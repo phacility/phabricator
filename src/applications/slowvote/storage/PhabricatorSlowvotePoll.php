@@ -131,10 +131,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return new PhabricatorSlowvoteEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorSlowvoteTransaction();
   }

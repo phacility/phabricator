@@ -157,10 +157,6 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     return new PhabricatorPhurlURLEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorPhurlURLTransaction();
   }

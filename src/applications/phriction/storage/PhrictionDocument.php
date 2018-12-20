@@ -223,10 +223,6 @@ final class PhrictionDocument extends PhrictionDAO
     return new PhrictionTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhrictionTransaction();
   }

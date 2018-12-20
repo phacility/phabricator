@@ -110,10 +110,6 @@ final class FundBacker extends FundDAO
     return new FundBackerEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new FundBackerTransaction();
   }

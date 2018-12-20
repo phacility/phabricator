@@ -393,10 +393,6 @@ final class HarbormasterBuild extends HarbormasterDAO
     return new HarbormasterBuildTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new HarbormasterBuildTransaction();
   }

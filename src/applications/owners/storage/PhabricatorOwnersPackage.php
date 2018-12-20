@@ -607,10 +607,6 @@ final class PhabricatorOwnersPackage
     return new PhabricatorOwnersPackageTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorOwnersPackageTransaction();
   }

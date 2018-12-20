@@ -159,10 +159,6 @@ final class PhabricatorAuthSSHKey
     return new PhabricatorAuthSSHKeyEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorAuthSSHKeyTransaction();
   }

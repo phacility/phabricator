@@ -3766,7 +3766,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $editor = $node->getApplicationTransactionEditor();
       $template = $node->getApplicationTransactionTemplate();
-      $target = $node->getApplicationTransactionObject();
 
       if (isset($add[$node->getPHID()])) {
         $edge_edit_type = '+';
@@ -3792,7 +3791,7 @@ abstract class PhabricatorApplicationTransactionEditor
         ->setActingAsPHID($this->getActingAsPHID())
         ->setContentSource($this->getContentSource());
 
-      $editor->applyTransactions($target, array($template));
+      $editor->applyTransactions($node, array($template));
     }
   }
 

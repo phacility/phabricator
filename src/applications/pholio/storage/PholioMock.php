@@ -221,10 +221,6 @@ final class PholioMock extends PholioDAO
     return new PholioMockEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PholioTransaction();
   }

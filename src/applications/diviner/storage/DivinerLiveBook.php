@@ -143,10 +143,6 @@ final class DivinerLiveBook extends DivinerDAO
     return new DivinerLiveBookEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new DivinerLiveBookTransaction();
   }

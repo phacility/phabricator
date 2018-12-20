@@ -168,10 +168,6 @@ final class AlmanacInterface
     return new AlmanacInterfaceEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new AlmanacInterfaceTransaction();
   }

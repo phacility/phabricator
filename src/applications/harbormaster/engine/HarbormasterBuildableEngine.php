@@ -96,9 +96,7 @@ abstract class HarbormasterBuildableEngine
     $publishable = $this->getPublishableObject();
     $editor = $this->newEditor();
 
-    $editor->applyTransactions(
-      $publishable->getApplicationTransactionObject(),
-      $xactions);
+    $editor->applyTransactions($publishable, $xactions);
   }
 
   public function getAuthorIdentity() {

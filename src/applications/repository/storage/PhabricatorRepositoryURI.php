@@ -605,10 +605,6 @@ final class PhabricatorRepositoryURI
     return new DiffusionURIEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorRepositoryURITransaction();
   }

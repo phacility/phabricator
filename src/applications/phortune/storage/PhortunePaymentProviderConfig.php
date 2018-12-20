@@ -106,10 +106,6 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
     return new PhortunePaymentProviderConfigEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhortunePaymentProviderConfigTransaction();
   }

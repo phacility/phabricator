@@ -77,9 +77,7 @@ final class PhabricatorSubscriptionsEditController
         ->setContinueOnMissingFields(true)
         ->setContentSourceFromRequest($request);
 
-      $editor->applyTransactions(
-        $object->getApplicationTransactionObject(),
-        array($xaction));
+      $editor->applyTransactions($object, array($xaction));
     } else {
 
       // TODO: Eventually, get rid of this once everything implements

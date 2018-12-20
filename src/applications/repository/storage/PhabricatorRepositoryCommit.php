@@ -731,10 +731,6 @@ final class PhabricatorRepositoryCommit
     return new PhabricatorAuditEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorAuditTransaction();
   }

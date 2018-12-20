@@ -991,10 +991,6 @@ final class DifferentialRevision extends DifferentialDAO
     return new DifferentialTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new DifferentialTransaction();
   }

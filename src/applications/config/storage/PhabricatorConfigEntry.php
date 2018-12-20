@@ -61,10 +61,6 @@ final class PhabricatorConfigEntry
     return new PhabricatorConfigEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorConfigTransaction();
   }

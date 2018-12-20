@@ -166,9 +166,7 @@ final class PhabricatorTokenGivenEditor
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
 
-    $editor->applyTransactions(
-      $object->getApplicationTransactionObject(),
-      $xactions);
+    $editor->applyTransactions($object, $xactions);
   }
 
 }

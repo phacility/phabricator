@@ -107,11 +107,9 @@ abstract class PhabricatorApplicationTransactionReplyHandler
         ->attachComment($comment);
     }
 
-    $target = $object->getApplicationTransactionObject();
-
     $this->newEditor($mail)
       ->setContinueOnNoEffect(true)
-      ->applyTransactions($target, $xactions);
+      ->applyTransactions($object, $xactions);
   }
 
   private function processMailCommands(

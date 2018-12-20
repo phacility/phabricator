@@ -219,10 +219,6 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return new PhabricatorPasteEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorPasteTransaction();
   }

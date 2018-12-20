@@ -204,10 +204,6 @@ final class AlmanacDevice
     return new AlmanacDeviceEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new AlmanacDeviceTransaction();
   }

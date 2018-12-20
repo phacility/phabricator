@@ -200,10 +200,6 @@ final class HeraldWebhook
     return new HeraldWebhookEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new HeraldWebhookTransaction();
   }

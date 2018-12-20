@@ -649,10 +649,6 @@ abstract class PhabricatorApplication
     return new PhabricatorApplicationEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorApplicationApplicationTransaction();
   }

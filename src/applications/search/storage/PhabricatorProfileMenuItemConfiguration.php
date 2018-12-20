@@ -265,10 +265,6 @@ final class PhabricatorProfileMenuItemConfiguration
     return new PhabricatorProfileMenuEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorProfileMenuItemConfigurationTransaction();
   }

@@ -283,10 +283,6 @@ final class HarbormasterBuildable
     return new HarbormasterBuildableTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new HarbormasterBuildableTransaction();
   }

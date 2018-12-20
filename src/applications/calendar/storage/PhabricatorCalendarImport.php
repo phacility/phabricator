@@ -140,10 +140,6 @@ final class PhabricatorCalendarImport
     return new PhabricatorCalendarImportEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorCalendarImportTransaction();
   }

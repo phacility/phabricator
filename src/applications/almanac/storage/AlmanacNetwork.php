@@ -61,10 +61,6 @@ final class AlmanacNetwork
     return new AlmanacNetworkEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new AlmanacNetworkTransaction();
   }

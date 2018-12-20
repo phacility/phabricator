@@ -191,10 +191,6 @@ final class AlmanacNamespace
     return new AlmanacNamespaceEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new AlmanacNamespaceTransaction();
   }
