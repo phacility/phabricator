@@ -148,12 +148,6 @@ final class PhabricatorCalendarImport
     return new PhabricatorCalendarImportTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
   public function newLogMessage($type, array $parameters) {
     $parameters = array(
       'type' => $type,

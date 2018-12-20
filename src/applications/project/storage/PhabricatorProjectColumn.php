@@ -242,13 +242,6 @@ final class PhabricatorProjectColumn
     return new PhabricatorProjectColumnTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

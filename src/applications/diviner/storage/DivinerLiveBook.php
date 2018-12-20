@@ -151,13 +151,6 @@ final class DivinerLiveBook extends DivinerDAO
     return new DivinerLiveBookTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 /* -(  PhabricatorFulltextInterface  )--------------------------------------- */
 
 

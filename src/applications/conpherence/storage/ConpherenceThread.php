@@ -319,11 +319,6 @@ final class ConpherenceThread extends ConpherenceDAO
     return new ConpherenceTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
 
 /* -(  PhabricatorNgramInterface  )------------------------------------------ */
 

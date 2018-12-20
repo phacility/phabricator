@@ -460,13 +460,6 @@ final class ManiphestTask extends ManiphestDAO
     return new ManiphestTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorSpacesInterface  )----------------------------------------- */
 

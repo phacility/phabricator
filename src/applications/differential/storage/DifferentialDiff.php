@@ -707,13 +707,6 @@ final class DifferentialDiff
     return new DifferentialDiffTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

@@ -118,11 +118,4 @@ final class FundBacker extends FundDAO
     return new FundBackerTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 }

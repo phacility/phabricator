@@ -166,13 +166,6 @@ final class ReleephBranch extends ReleephDAO
     return new ReleephBranchTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

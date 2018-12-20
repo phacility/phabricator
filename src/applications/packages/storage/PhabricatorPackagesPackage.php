@@ -197,12 +197,6 @@ final class PhabricatorPackagesPackage
     return new PhabricatorPackagesPackageTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 

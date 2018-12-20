@@ -253,10 +253,4 @@ final class PhabricatorUserPreferences
     return new PhabricatorUserPreferencesTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 }

@@ -49,13 +49,6 @@ final class PhluxVariable extends PhluxDAO
     return new PhluxTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

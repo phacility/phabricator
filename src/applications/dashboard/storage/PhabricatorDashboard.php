@@ -138,13 +138,6 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return new PhabricatorDashboardTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

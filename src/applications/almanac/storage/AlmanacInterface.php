@@ -176,12 +176,6 @@ final class AlmanacInterface
     return new AlmanacInterfaceTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorConduitResultInterface  )---------------------------------- */
 

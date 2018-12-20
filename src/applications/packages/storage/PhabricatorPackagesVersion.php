@@ -164,12 +164,6 @@ final class PhabricatorPackagesVersion
     return new PhabricatorPackagesVersionTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 

@@ -103,12 +103,6 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     return new PhabricatorCountdownTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

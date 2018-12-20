@@ -347,10 +347,4 @@ final class PhabricatorEditEngineConfiguration
     return new PhabricatorEditEngineConfigurationTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 }

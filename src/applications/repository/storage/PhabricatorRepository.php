@@ -2621,13 +2621,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return new PhabricatorRepositoryTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

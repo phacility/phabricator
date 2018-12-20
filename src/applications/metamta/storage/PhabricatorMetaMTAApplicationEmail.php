@@ -131,12 +131,6 @@ final class PhabricatorMetaMTAApplicationEmail
     return new PhabricatorMetaMTAApplicationEmailTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

@@ -199,12 +199,6 @@ final class AlmanacNamespace
     return new AlmanacNamespaceTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

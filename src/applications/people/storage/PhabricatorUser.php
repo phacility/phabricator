@@ -1379,12 +1379,6 @@ final class PhabricatorUser
     return new PhabricatorUserTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorFulltextInterface  )--------------------------------------- */
 

@@ -657,10 +657,4 @@ abstract class PhabricatorApplication
     return new PhabricatorApplicationApplicationTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
 }

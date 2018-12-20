@@ -1319,12 +1319,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return new PhabricatorCalendarEventTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

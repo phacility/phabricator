@@ -165,12 +165,6 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     return new PhabricatorPhurlURLTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

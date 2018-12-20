@@ -125,13 +125,6 @@ final class PassphraseCredential extends PassphraseDAO
     return new PassphraseCredentialTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

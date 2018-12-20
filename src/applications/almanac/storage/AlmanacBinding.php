@@ -214,12 +214,6 @@ final class AlmanacBinding
     return new AlmanacBindingTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

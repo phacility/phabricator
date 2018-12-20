@@ -99,12 +99,6 @@ final class PhabricatorSpacesNamespace
     return new PhabricatorSpacesNamespaceTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

@@ -114,11 +114,4 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
     return new PhortunePaymentProviderConfigTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 }

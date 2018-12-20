@@ -615,12 +615,6 @@ final class PhabricatorOwnersPackage
     return new PhabricatorOwnersPackageTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

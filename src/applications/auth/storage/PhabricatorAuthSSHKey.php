@@ -167,10 +167,4 @@ final class PhabricatorAuthSSHKey
     return new PhabricatorAuthSSHKeyTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 }

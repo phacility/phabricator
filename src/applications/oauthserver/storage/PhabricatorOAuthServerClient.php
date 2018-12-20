@@ -99,12 +99,6 @@ final class PhabricatorOAuthServerClient
     return new PhabricatorOAuthServerTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

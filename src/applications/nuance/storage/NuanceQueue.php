@@ -87,10 +87,4 @@ final class NuanceQueue
     return new NuanceQueueTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 }

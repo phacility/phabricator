@@ -133,13 +133,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return new PhabricatorBadgesTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

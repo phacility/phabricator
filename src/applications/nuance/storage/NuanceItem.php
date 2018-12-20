@@ -201,10 +201,4 @@ final class NuanceItem
     return new NuanceItemTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
-
 }

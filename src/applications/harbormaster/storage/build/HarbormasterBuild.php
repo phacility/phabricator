@@ -401,13 +401,6 @@ final class HarbormasterBuild extends HarbormasterDAO
     return new HarbormasterBuildTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

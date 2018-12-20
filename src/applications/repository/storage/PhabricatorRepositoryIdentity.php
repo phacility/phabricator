@@ -142,11 +142,4 @@ final class PhabricatorRepositoryIdentity
     return new PhabricatorRepositoryIdentityTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
-
 }

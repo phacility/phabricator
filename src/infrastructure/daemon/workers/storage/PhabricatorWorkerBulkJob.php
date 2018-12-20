@@ -241,11 +241,6 @@ final class PhabricatorWorkerBulkJob
     return new PhabricatorWorkerBulkJobTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
