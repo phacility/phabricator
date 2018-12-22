@@ -37,9 +37,9 @@ final class PholioImage extends PholioDAO
         'replacesImagePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        // TODO: There should be a key starting with "mockPHID" here at a
-        // minimum, but it's not entirely clear what other columns we should
-        // have as part of the key.
+        'key_mock' => array(
+          'columns' => array('mockPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
