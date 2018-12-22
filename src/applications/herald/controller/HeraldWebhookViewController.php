@@ -50,6 +50,19 @@ final class HeraldWebhookViewController
       ->setLimit(20)
       ->execute();
 
+    $warnings = array();
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $message = pht(
+        'Phabricator is currently configured in silent mode, so it will not '.
+        'publish webhooks. To adjust this setting, see '.
+        '@{config:phabricator.silent} in Config.');
+
+      $warnings[] = id(new PHUIInfoView())
+        ->setTitle(pht('Silent Mode'))
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->appendChild(new PHUIRemarkupView($viewer, $message));
+    }
+
     $requests_table = id(new HeraldWebhookRequestListView())
       ->setViewer($viewer)
       ->setRequests($requests)

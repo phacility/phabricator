@@ -26,6 +26,15 @@ final class HeraldWebhookRequest
   const RESULT_OKAY = 'okay';
   const RESULT_FAIL = 'fail';
 
+  const ERRORTYPE_HOOK = 'hook';
+  const ERRORTYPE_HTTP = 'http';
+  const ERRORTYPE_TIMEOUT = 'timeout';
+
+  const ERROR_SILENT = 'silent';
+  const ERROR_DISABLED = 'disabled';
+  const ERROR_URI = 'uri';
+  const ERROR_OBJECT = 'object';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -108,6 +117,28 @@ final class HeraldWebhookRequest
     return $this->getProperty('errorCode');
   }
 
+  public function getErrorTypeForDisplay() {
+    $map = array(
+      self::ERRORTYPE_HOOK => pht('Hook Error'),
+      self::ERRORTYPE_HTTP => pht('HTTP Error'),
+      self::ERRORTYPE_TIMEOUT => pht('Request Timeout'),
+    );
+
+    $type = $this->getErrorType();
+    return idx($map, $type, $type);
+  }
+
+  public function getErrorCodeForDisplay() {
+    $code = $this->getErrorCode();
+
+    if ($this->getErrorType() !== self::ERRORTYPE_HOOK) {
+      return $code;
+    }
+
+    $spec = $this->getHookErrorSpec($code);
+    return idx($spec, 'display', $code);
+  }
+
   public function setTransactionPHIDs(array $phids) {
     return $this->setProperty('transactionPHIDs', $phids);
   }
@@ -185,6 +216,28 @@ final class HeraldWebhookRequest
     return id(new PHUIIconView())
       ->setIcon($icon, $color)
       ->setTooltip($tooltip);
+  }
+
+  private function getHookErrorSpec($code) {
+    $map = $this->getHookErrorMap();
+    return idx($map, $code, array());
+  }
+
+  private function getHookErrorMap() {
+    return array(
+      self::ERROR_SILENT => array(
+        'display' => pht('In Silent Mode'),
+      ),
+      self::ERROR_DISABLED => array(
+        'display' => pht('Hook Disabled'),
+      ),
+      self::ERROR_URI => array(
+        'display' => pht('Invalid URI'),
+      ),
+      self::ERROR_OBJECT => array(
+        'display' => pht('Invalid Object'),
+      ),
+    );
   }
 
 

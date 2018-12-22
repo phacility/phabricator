@@ -55,8 +55,8 @@ final class HeraldWebhookRequestListView
         $request->getID(),
         $icon,
         $handles[$request->getObjectPHID()]->renderLink(),
-        $request->getErrorType(),
-        $request->getErrorCode(),
+        $request->getErrorTypeForDisplay(),
+        $request->getErrorCodeForDisplay(),
         $last_request,
       );
     }
@@ -66,7 +66,7 @@ final class HeraldWebhookRequestListView
       ->setHeaders(
         array(
           pht('ID'),
-          '',
+          null,
           pht('Object'),
           pht('Type'),
           pht('Code'),
