@@ -209,12 +209,6 @@ final class PhabricatorConfigOption
       return null;
     }
 
-    // TODO: Some day, we should probably implement this as a real rule.
-    $description = preg_replace(
-      '/{{([^}]+)}}/',
-      '[[/config/edit/\\1/ | \\1]]',
-      $description);
-
     return new PHUIRemarkupView($viewer, $description);
   }
 

@@ -12,7 +12,7 @@ final class PholioMockThumbGridView extends AphrontView {
   public function render() {
     $mock = $this->mock;
 
-    $all_images = $mock->getAllImages();
+    $all_images = $mock->getImages();
     $all_images = mpull($all_images, null, 'getPHID');
 
     $history = mpull($all_images, 'getReplacesImagePHID', 'getPHID');
@@ -25,10 +25,10 @@ final class PholioMockThumbGridView extends AphrontView {
     }
 
     // Figure out the columns. Start with all the active images.
-    $images = mpull($mock->getImages(), null, 'getPHID');
+    $images = mpull($mock->getActiveImages(), null, 'getPHID');
 
     // Now, find deleted images: obsolete images which were not replaced.
-    foreach ($mock->getAllImages() as $image) {
+    foreach ($mock->getImages() as $image) {
       if (!$image->getIsObsolete()) {
         // Image is current.
         continue;

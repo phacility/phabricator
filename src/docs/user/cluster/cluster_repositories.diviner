@@ -98,7 +98,7 @@ repository to retrieve the data it needs. It will use the result of this query
 to respond to the user.
 
 
-Setting up a Cluster Services
+Setting up Cluster Services
 =============================
 
 To set up clustering, first register the devices that you want to use as part
@@ -106,6 +106,17 @@ of the cluster with Almanac. For details, see @{article:Cluster: Devices}.
 
 NOTE: Once you create a service, new repositories will immediately allocate
 on it. You may want to disable repository creation during initial setup.
+
+NOTE: To create clustered services, your account must have the "Can Manage
+Cluster Services" capability. By default, no accounts have this capability,
+and you must enable it by changing the configuration of the Almanac
+application. Navigate to the Alamanc application configuration as follows:
+{nav icon=home, name=Home >
+Applications >
+Almanac >
+Configure >
+Edit Policies >
+Can Manage Cluster Services }
 
 Once the hosts are registered as devices, you can create a new service in
 Almanac:

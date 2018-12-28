@@ -106,6 +106,16 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
     return $this;
   }
 
+  public function setShouldForceFullSession($force_full) {
+    return $this->setTemporaryTokenProperty('force-full-session', $force_full);
+  }
+
+  public function getShouldForceFullSession() {
+    return $this->getTemporaryTokenProperty('force-full-session', false);
+  }
+
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

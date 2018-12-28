@@ -33,7 +33,7 @@ final class PhabricatorAuthenticationConfigOptions
           pht(
             'If true, email addresses must be verified (by clicking a link '.
             'in an email) before a user can login. By default, verification '.
-            'is optional unless {{auth.email-domains}} is nonempty.')),
+            'is optional unless @{config:auth.email-domains} is nonempty.')),
       $this->newOption('auth.require-approval', 'bool', true)
         ->setBoolOptions(
           array(
@@ -55,7 +55,7 @@ final class PhabricatorAuthenticationConfigOptions
             "registration, you can disable the queue to reduce administrative ".
             "overhead.\n\n".
             "NOTE: Before you disable the queue, make sure ".
-            "{{auth.email-domains}} is configured correctly ".
+            "@{config:auth.email-domains} is configured correctly ".
             "for your install!")),
       $this->newOption('auth.email-domains', 'list<string>', array())
         ->setSummary(pht('Only allow registration from particular domains.'))
@@ -66,7 +66,7 @@ final class PhabricatorAuthenticationConfigOptions
             "here.\n\nUsers will only be allowed to register using email ".
             "addresses at one of the domains, and will only be able to add ".
             "new email addresses for these domains. If you configure this, ".
-            "it implies {{auth.require-email-verification}}.\n\n".
+            "it implies @{config:auth.require-email-verification}.\n\n".
             "You should omit the `@` from domains. Note that the domain must ".
             "match exactly. If you allow `yourcompany.com`, that permits ".
             "`joe@yourcompany.com` but rejects `joe@mail.yourcompany.com`."))

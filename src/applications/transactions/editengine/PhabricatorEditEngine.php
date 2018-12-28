@@ -1041,7 +1041,7 @@ abstract class PhabricatorEditEngine
     }
 
     $validation_exception = null;
-    if ($request->isFormPost() && $request->getBool('editEngine')) {
+    if ($request->isFormOrHisecPost() && $request->getBool('editEngine')) {
       $submit_fields = $fields;
 
       foreach ($submit_fields as $key => $field) {
@@ -1105,6 +1105,7 @@ abstract class PhabricatorEditEngine
       $editor = $object->getApplicationTransactionEditor()
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
+        ->setCancelURI($cancel_uri)
         ->setContinueOnNoEffect(true);
 
       try {
@@ -1785,7 +1786,9 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
-    if (!$request->isFormPost()) {
+    // NOTE: We handle hisec inside the transaction editor with "Sign With MFA"
+    // comment actions.
+    if (!$request->isFormOrHisecPost()) {
       return new Aphront400Response();
     }
 
@@ -1919,6 +1922,7 @@ abstract class PhabricatorEditEngine
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContinueOnMissingFields(true)
       ->setContentSourceFromRequest($request)
+      ->setCancelURI($view_uri)
       ->setRaiseWarnings(!$request->getBool('editEngine.warnings'))
       ->setIsPreview($is_preview);
 
@@ -1955,6 +1959,7 @@ abstract class PhabricatorEditEngine
       $preview_content = $this->newCommentPreviewContent($object, $xactions);
 
       return id(new PhabricatorApplicationTransactionResponse())
+        ->setObject($object)
         ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview)

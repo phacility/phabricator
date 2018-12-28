@@ -9,8 +9,8 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => 'e68cf1fa',
     'conpherence.pkg.js' => '15191c65',
-    'core.pkg.css' => '9d1148a4',
-    'core.pkg.js' => '4bde473b',
+    'core.pkg.css' => '47535fd5',
+    'core.pkg.js' => 'bd89cb1d',
     'differential.pkg.css' => '06dc617c',
     'differential.pkg.js' => 'ef0b989b',
     'diffusion.pkg.css' => 'a2d17c7d',
@@ -151,7 +151,7 @@ return array(
     'rsrc/css/phui/phui-document.css' => 'c4ac41f9',
     'rsrc/css/phui/phui-feed-story.css' => '44a9c8e9',
     'rsrc/css/phui/phui-fontkit.css' => '1320ed01',
-    'rsrc/css/phui/phui-form-view.css' => '2f43fae7',
+    'rsrc/css/phui/phui-form-view.css' => 'b04e08d9',
     'rsrc/css/phui/phui-form.css' => '7aaa04e3',
     'rsrc/css/phui/phui-head-thing.css' => 'fd311e5f',
     'rsrc/css/phui/phui-header-view.css' => '1ba8b707',
@@ -425,7 +425,7 @@ return array(
     'rsrc/js/application/transactions/behavior-comment-actions.js' => '59e27e74',
     'rsrc/js/application/transactions/behavior-reorder-configs.js' => 'd7a74243',
     'rsrc/js/application/transactions/behavior-reorder-fields.js' => 'b59e1e96',
-    'rsrc/js/application/transactions/behavior-show-older-transactions.js' => '8f29b364',
+    'rsrc/js/application/transactions/behavior-show-older-transactions.js' => '0e1eca96',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => 'b23b49e6',
     'rsrc/js/application/transactions/behavior-transaction-list.js' => '1f6794f6',
     'rsrc/js/application/typeahead/behavior-typeahead-browse.js' => '635de1ec',
@@ -639,7 +639,7 @@ return array(
     'javelin-behavior-phabricator-remarkup-assist' => 'acd29eee',
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => 'c3e917d9',
-    'javelin-behavior-phabricator-show-older-transactions' => '8f29b364',
+    'javelin-behavior-phabricator-show-older-transactions' => '0e1eca96',
     'javelin-behavior-phabricator-tooltips' => 'c420b0b9',
     'javelin-behavior-phabricator-transaction-comment-form' => 'b23b49e6',
     'javelin-behavior-phabricator-transaction-list' => '1f6794f6',
@@ -819,7 +819,7 @@ return array(
     'phui-font-icon-base-css' => '870a7360',
     'phui-fontkit-css' => '1320ed01',
     'phui-form-css' => '7aaa04e3',
-    'phui-form-view-css' => '2f43fae7',
+    'phui-form-view-css' => 'b04e08d9',
     'phui-head-thing-view-css' => 'fd311e5f',
     'phui-header-view-css' => '1ba8b707',
     'phui-hovercard' => '1bd28176',
@@ -949,6 +949,12 @@ return array(
     '0a84bcc1' => array(
       'javelin-install',
       'phuix-button-view',
+    ),
+    '0e1eca96' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'phabricator-busy',
     ),
     '0f764c35' => array(
       'javelin-install',
@@ -1580,12 +1586,6 @@ return array(
     ),
     '8e1baf68' => array(
       'phui-button-css',
-    ),
-    '8f29b364' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'phabricator-busy',
     ),
     '8ff5e24c' => array(
       'javelin-behavior',

@@ -24,7 +24,7 @@ final class PholioMockCommentController extends PholioController {
 
     $draft = PhabricatorDraft::buildFromRequest($request);
 
-    $mock_uri = '/M'.$mock->getID();
+    $mock_uri = $mock->getURI();
 
     $comment = $request->getStr('comment');
 
@@ -33,7 +33,7 @@ final class PholioMockCommentController extends PholioController {
     $inline_comments = id(new PholioTransactionComment())->loadAllWhere(
       'authorphid = %s AND transactionphid IS NULL AND imageid IN (%Ld)',
       $viewer->getPHID(),
-      mpull($mock->getImages(), 'getID'));
+      mpull($mock->getActiveImages(), 'getID'));
 
     if (!$inline_comments || strlen($comment)) {
       $xactions[] = id(new PholioTransaction())
@@ -68,13 +68,10 @@ final class PholioMockCommentController extends PholioController {
     }
 
     if ($request->isAjax() && $is_preview) {
-      $xaction_view = id(new PholioTransactionView())
-        ->setMock($mock);
-
       return id(new PhabricatorApplicationTransactionResponse())
+        ->setObject($mock)
         ->setViewer($viewer)
         ->setTransactions($xactions)
-        ->setTransactionView($xaction_view)
         ->setIsPreview($is_preview);
     } else {
       return id(new AphrontRedirectResponse())->setURI($mock_uri);

@@ -16,6 +16,7 @@ final class PhabricatorTransactions extends Phobject {
   const TYPE_COLUMNS = 'core:columns';
   const TYPE_SUBTYPE = 'core:subtype';
   const TYPE_HISTORY = 'core:history';
+  const TYPE_MFA = 'core:mfa';
 
   const COLOR_RED         = 'red';
   const COLOR_ORANGE      = 'orange';

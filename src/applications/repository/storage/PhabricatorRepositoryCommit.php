@@ -14,6 +14,7 @@ final class PhabricatorRepositoryCommit
     HarbormasterBuildkiteBuildableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
+    PhabricatorTimelineInterface,
     PhabricatorFulltextInterface,
     PhabricatorFerretInterface,
     PhabricatorConduitResultInterface,
@@ -730,39 +731,8 @@ final class PhabricatorRepositoryCommit
     return new PhabricatorAuditEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorAuditTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    $xactions = $timeline->getTransactions();
-
-    $path_ids = array();
-    foreach ($xactions as $xaction) {
-      if ($xaction->hasComment()) {
-        $path_id = $xaction->getComment()->getPathID();
-        if ($path_id) {
-          $path_ids[] = $path_id;
-        }
-      }
-    }
-
-    $path_map = array();
-    if ($path_ids) {
-      $path_map = id(new DiffusionPathQuery())
-        ->withPathIDs($path_ids)
-        ->execute();
-      $path_map = ipull($path_map, 'path', 'id');
-    }
-
-    return $timeline->setPathMap($path_map);
   }
 
 /* -(  PhabricatorFulltextInterface  )--------------------------------------- */
@@ -914,6 +884,14 @@ final class PhabricatorRepositoryCommit
   public function attachHasDraft(PhabricatorUser $viewer, $has_draft) {
     $this->drafts[$viewer->getCacheFragment()] = $has_draft;
     return $this;
+  }
+
+
+/* -(  PhabricatorTimelineInterface  )--------------------------------------- */
+
+
+  public function newTimelineEngine() {
+    return new DiffusionCommitTimelineEngine();
   }
 
 }

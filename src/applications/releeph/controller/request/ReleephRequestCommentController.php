@@ -51,6 +51,7 @@ final class ReleephRequestCommentController
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())
+        ->setObject($pull)
         ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview);

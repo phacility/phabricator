@@ -29,40 +29,80 @@ final class PhabricatorHighSecurityRequestExceptionHandler
     $throwable) {
 
     $viewer = $this->getViewer($request);
+    $results = $throwable->getFactorValidationResults();
 
     $form = id(new PhabricatorAuthSessionEngine())->renderHighSecurityForm(
       $throwable->getFactors(),
-      $throwable->getFactorValidationResults(),
+      $results,
       $viewer,
       $request);
 
+    $is_wait = false;
+    foreach ($results as $result) {
+      if ($result->getIsWait()) {
+        $is_wait = true;
+        break;
+      }
+    }
+
+    $is_upgrade = $throwable->getIsSessionUpgrade();
+
+    if ($is_upgrade) {
+      $title = pht('Enter High Security');
+    } else {
+      $title = pht('Provide MFA Credentials');
+    }
+
+    if ($is_wait) {
+      $submit = pht('Wait Patiently');
+    } else if ($is_upgrade) {
+      $submit = pht('Enter High Security');
+    } else {
+      $submit = pht('Continue');
+    }
+
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
-      ->setTitle(pht('Entering High Security'))
+      ->setTitle($title)
       ->setShortTitle(pht('Security Checkpoint'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->addHiddenInput(AphrontRequest::TYPE_HISEC, true)
-      ->setErrors(
-        array(
-          pht(
-            'You are taking an action which requires you to enter '.
-            'high security.'),
-        ))
-      ->appendParagraph(
-        pht(
-          'High security mode helps protect your account from security '.
-          'threats, like session theft or someone messing with your stuff '.
-          'while you\'re grabbing a coffee. To enter high security mode, '.
-          'confirm your credentials.'))
-      ->appendChild($form->buildLayoutView())
-      ->appendParagraph(
-        pht(
-          'Your account will remain in high security mode for a short '.
-          'period of time. When you are finished taking sensitive '.
-          'actions, you should leave high security.'))
       ->setSubmitURI($request->getPath())
       ->addCancelButton($throwable->getCancelURI())
-      ->addSubmitButton(pht('Enter High Security'));
+      ->addSubmitButton($submit);
+
+    $form_layout = $form->buildLayoutView();
+
+    if ($is_upgrade) {
+      $dialog
+        ->setErrors(
+          array(
+            pht(
+              'You are taking an action which requires you to enter '.
+              'high security.'),
+          ))
+        ->appendParagraph(
+          pht(
+            'High security mode helps protect your account from security '.
+            'threats, like session theft or someone messing with your stuff '.
+            'while you\'re grabbing a coffee. To enter high security mode, '.
+            'confirm your credentials.'))
+        ->appendChild($form_layout)
+        ->appendParagraph(
+          pht(
+            'Your account will remain in high security mode for a short '.
+            'period of time. When you are finished taking sensitive '.
+            'actions, you should leave high security.'));
+    } else {
+      $dialog
+        ->setErrors(
+          array(
+            pht(
+              'You are taking an action which requires you to provide '.
+              'multi-factor credentials.'),
+          ))
+        ->appendChild($form_layout);
+    }
 
     $request_parameters = $request->getPassthroughRequestParameters(
       $respect_quicksand = true);

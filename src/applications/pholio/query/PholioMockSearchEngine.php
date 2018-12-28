@@ -111,7 +111,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
         ->setImageURI($image_uri)
         ->setImageSize($x, $y)
         ->setDisabled($mock->isClosed())
-        ->addIconCount('fa-picture-o', count($mock->getImages()))
+        ->addIconCount('fa-picture-o', count($mock->getActiveImages()))
         ->addIconCount('fa-trophy', $mock->getTokenCount());
 
       if ($mock->getAuthorPHID()) {

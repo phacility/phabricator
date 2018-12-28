@@ -55,9 +55,7 @@ final class PhabricatorSubscriptionsMuteController
         ->setContinueOnMissingFields(true)
         ->setContentSourceFromRequest($request);
 
-      $editor->applyTransactions(
-        $object->getApplicationTransactionObject(),
-        array($xaction));
+      $editor->applyTransactions($object, array($xaction));
 
       return id(new AphrontReloadResponse())->setURI($object_uri);
     }

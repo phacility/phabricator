@@ -8,6 +8,8 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
   protected $factorSecret;
   protected $properties = array();
 
+  private $sessionEngine;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
@@ -47,6 +49,19 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
     }
 
     return $impl;
+  }
+
+  public function setSessionEngine(PhabricatorAuthSessionEngine $engine) {
+    $this->sessionEngine = $engine;
+    return $this;
+  }
+
+  public function getSessionEngine() {
+    if (!$this->sessionEngine) {
+      throw new PhutilInvalidStateException('setSessionEngine');
+    }
+
+    return $this->sessionEngine;
   }
 
 }

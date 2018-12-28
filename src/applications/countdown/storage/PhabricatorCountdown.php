@@ -95,20 +95,10 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     return new PhabricatorCountdownEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorCountdownTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

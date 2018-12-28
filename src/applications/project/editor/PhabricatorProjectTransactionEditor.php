@@ -55,12 +55,12 @@ final class PhabricatorProjectTransactionEditor
         case PhabricatorProjectParentTransaction::TRANSACTIONTYPE:
         case PhabricatorProjectMilestoneTransaction::TRANSACTIONTYPE:
           if ($xaction->getNewValue() === null) {
-            continue;
+            continue 2;
           }
 
           if (!$parent_xaction) {
             $parent_xaction = $xaction;
-            continue;
+            continue 2;
           }
 
           $errors[] = new PhabricatorApplicationTransactionValidationError(
@@ -71,8 +71,7 @@ final class PhabricatorProjectTransactionEditor
               'project or milestone project. A project can not be both a '.
               'subproject and a milestone.'),
             $xaction);
-          break;
-          break;
+          break 2;
       }
     }
 

@@ -29,6 +29,7 @@ final class PhrequentCurtainExtension
 
     $handles = $viewer->loadHandles(array_keys($event_groups));
     $status_view = new PHUIStatusListView();
+    $now = PhabricatorTime::getNow();
 
     foreach ($event_groups as $user_phid => $event_group) {
       $item = new PHUIStatusItemView();
@@ -68,15 +69,19 @@ final class PhrequentCurtainExtension
       }
 
       $block = new PhrequentTimeBlock($event_group);
-      $item->setNote(
-        phutil_format_relative_time(
-          $block->getTimeSpentOnObject(
-            $object->getPHID(),
-            time())));
+
+      $duration = $block->getTimeSpentOnObject(
+        $object->getPHID(),
+        $now);
+
+      $duration_display = phutil_format_relative_time_detailed(
+        $duration,
+        $levels = 3);
+
+      $item->setNote($duration_display);
 
       $status_view->addItem($item);
     }
-
 
     return $this->newPanel()
       ->setHeaderText(pht('Time Spent'))

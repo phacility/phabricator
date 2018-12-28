@@ -58,21 +58,14 @@ final class PholioMockQuery
   }
 
   protected function loadPage() {
-    $mocks = $this->loadStandardPage(new PholioMock());
-
-    if ($mocks && $this->needImages) {
-      self::loadImages($this->getViewer(), $mocks, $this->needInlineComments);
+    if ($this->needInlineComments && !$this->needImages) {
+      throw new Exception(
+        pht(
+          'You can not query for inline comments without also querying for '.
+          'images.'));
     }
 
-    if ($mocks && $this->needCoverFiles) {
-      $this->loadCoverFiles($mocks);
-    }
-
-    if ($mocks && $this->needTokenCounts) {
-      $this->loadTokenCounts($mocks);
-    }
-
-    return $mocks;
+    return $this->loadStandardPage(new PholioMock());
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -109,60 +102,53 @@ final class PholioMockQuery
     return $where;
   }
 
-  public static function loadImages(
-    PhabricatorUser $viewer,
-    array $mocks,
-    $need_inline_comments) {
-    assert_instances_of($mocks, 'PholioMock');
+  protected function didFilterPage(array $mocks) {
+    $viewer = $this->getViewer();
 
-    $mock_map = mpull($mocks, null, 'getID');
-    $all_images = id(new PholioImageQuery())
-      ->setViewer($viewer)
-      ->setMockCache($mock_map)
-      ->withMockIDs(array_keys($mock_map))
-      ->needInlineComments($need_inline_comments)
-      ->execute();
+    if ($this->needImages) {
+      $images = id(new PholioImageQuery())
+        ->setViewer($viewer)
+        ->withMocks($mocks)
+        ->needInlineComments($this->needInlineComments)
+        ->execute();
 
-    $image_groups = mgroup($all_images, 'getMockID');
-
-    foreach ($mocks as $mock) {
-      $mock_images = idx($image_groups, $mock->getID(), array());
-      $mock->attachAllImages($mock_images);
-      $active_images = mfilter($mock_images, 'getIsObsolete', true);
-      $mock->attachImages(msort($active_images, 'getSequence'));
-    }
-  }
-
-  private function loadCoverFiles(array $mocks) {
-    assert_instances_of($mocks, 'PholioMock');
-    $cover_file_phids = mpull($mocks, 'getCoverPHID');
-    $cover_files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($cover_file_phids)
-      ->execute();
-
-    $cover_files = mpull($cover_files, null, 'getPHID');
-
-    foreach ($mocks as $mock) {
-      $file = idx($cover_files, $mock->getCoverPHID());
-      if (!$file) {
-        $file = PhabricatorFile::loadBuiltin($this->getViewer(), 'missing.png');
+      $image_groups = mgroup($images, 'getMockPHID');
+      foreach ($mocks as $mock) {
+        $images = idx($image_groups, $mock->getPHID(), array());
+        $mock->attachImages($images);
       }
-      $mock->attachCoverFile($file);
     }
-  }
 
-  private function loadTokenCounts(array $mocks) {
-    assert_instances_of($mocks, 'PholioMock');
+    if ($this->needCoverFiles) {
+      $cover_files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(mpull($mocks, 'getCoverPHID'))
+        ->execute();
+      $cover_files = mpull($cover_files, null, 'getPHID');
 
-    $phids = mpull($mocks, 'getPHID');
-    $counts = id(new PhabricatorTokenCountQuery())
-      ->withObjectPHIDs($phids)
-      ->execute();
-
-    foreach ($mocks as $mock) {
-      $mock->attachTokenCount(idx($counts, $mock->getPHID(), 0));
+      foreach ($mocks as $mock) {
+        $file = idx($cover_files, $mock->getCoverPHID());
+        if (!$file) {
+          $file = PhabricatorFile::loadBuiltin(
+            $viewer,
+            'missing.png');
+        }
+        $mock->attachCoverFile($file);
+      }
     }
+
+    if ($this->needTokenCounts) {
+      $counts = id(new PhabricatorTokenCountQuery())
+        ->withObjectPHIDs(mpull($mocks, 'getPHID'))
+        ->execute();
+
+      foreach ($mocks as $mock) {
+        $token_count = idx($counts, $mock->getPHID(), 0);
+        $mock->attachTokenCount($token_count);
+      }
+    }
+
+    return $mocks;
   }
 
   public function getQueryApplicationClass() {

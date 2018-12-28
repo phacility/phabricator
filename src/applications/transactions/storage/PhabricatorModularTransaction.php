@@ -69,11 +69,6 @@ abstract class PhabricatorModularTransaction
       ->generateNewValue($object, $this->getNewValue());
   }
 
-  final public function willApplyTransactions($object, array $xactions) {
-    return $this->getTransactionImplementation()
-      ->willApplyTransactions($object, $xactions);
-  }
-
   final public function applyInternalEffects($object) {
     return $this->getTransactionImplementation()
       ->applyInternalEffects($object);

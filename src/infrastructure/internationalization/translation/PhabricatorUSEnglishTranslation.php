@@ -1673,6 +1673,51 @@ final class PhabricatorUSEnglishTranslation
         'pass: %2$s.',
       ),
 
+      'This factor recently issued a challenge to a different login '.
+      'session. Wait %s second(s) for the code to cycle, then try '.
+      'again.' => array(
+        'This factor recently issued a challenge to a different login '.
+        'session. Wait %s second for the code to cycle, then try '.
+        'again.',
+        'This factor recently issued a challenge to a different login '.
+        'session. Wait %s seconds for the code to cycle, then try '.
+        'again.',
+      ),
+
+      'This factor recently issued a challenge for a different '.
+      'workflow. Wait %s second(s) for the code to cycle, then try '.
+      'again.' => array(
+        'This factor recently issued a challenge for a different '.
+        'workflow. Wait %s second for the code to cycle, then try '.
+        'again.',
+        'This factor recently issued a challenge for a different '.
+        'workflow. Wait %s seconds for the code to cycle, then try '.
+        'again.',
+      ),
+
+
+      'This factor recently issued a challenge which has expired. '.
+      'A new challenge can not be issued yet. Wait %s second(s) for '.
+      'the code to cycle, then try again.' => array(
+        'This factor recently issued a challenge which has expired. '.
+        'A new challenge can not be issued yet. Wait %s second for '.
+        'the code to cycle, then try again.',
+        'This factor recently issued a challenge which has expired. '.
+        'A new challenge can not be issued yet. Wait %s seconds for '.
+        'the code to cycle, then try again.',
+      ),
+
+      'You recently provided a response to this factor. Responses '.
+      'may not be reused. Wait %s second(s) for the code to cycle, '.
+      'then try again.' => array(
+        'You recently provided a response to this factor. Responses '.
+        'may not be reused. Wait %s second for the code to cycle, '.
+        'then try again.',
+        'You recently provided a response to this factor. Responses '.
+        'may not be reused. Wait %s seconds for the code to cycle, '.
+        'then try again.',
+      ),
+
     );
   }
 

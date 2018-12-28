@@ -166,19 +166,8 @@ final class PhabricatorCalendarExport extends PhabricatorCalendarDAO
     return new PhabricatorCalendarExportEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorCalendarExportTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
   }
 
 

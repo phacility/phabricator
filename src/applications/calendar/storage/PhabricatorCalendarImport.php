@@ -140,18 +140,8 @@ final class PhabricatorCalendarImport
     return new PhabricatorCalendarImportEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorCalendarImportTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
   }
 
   public function newLogMessage($type, array $parameters) {

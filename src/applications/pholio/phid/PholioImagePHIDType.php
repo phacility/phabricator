@@ -32,13 +32,9 @@ final class PholioImagePHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $image = $objects[$phid];
 
-      $id = $image->getID();
-      $mock_id = $image->getMockID();
-      $name = $image->getName();
-
-      $handle->setURI("/M{$mock_id}/{$id}/");
-      $handle->setName($name);
-      $handle->setFullName($name);
+      $handle
+        ->setName($image->getName())
+        ->setURI($image->getURI());
     }
   }
 

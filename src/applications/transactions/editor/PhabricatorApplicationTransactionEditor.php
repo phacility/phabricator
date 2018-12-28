@@ -84,6 +84,10 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private $transactionQueue = array();
   private $sendHistory = false;
+  private $shouldRequireMFA = false;
+  private $hasRequiredMFA = false;
+  private $request;
+  private $cancelURI;
 
   const STORAGE_ENCODING_BINARY = 'binary';
 
@@ -284,6 +288,22 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->raiseWarnings;
   }
 
+  public function setShouldRequireMFA($should_require_mfa) {
+    if ($this->hasRequiredMFA) {
+      throw new Exception(
+        pht(
+          'Call to setShouldRequireMFA() is too late: this Editor has already '.
+          'checked for MFA requirements.'));
+    }
+
+    $this->shouldRequireMFA = $should_require_mfa;
+    return $this;
+  }
+
+  public function getShouldRequireMFA() {
+    return $this->shouldRequireMFA;
+  }
+
   public function getTransactionTypesForObject($object) {
     $old = $this->object;
     try {
@@ -327,6 +347,8 @@ abstract class PhabricatorApplicationTransactionEditor
     if ($this->object instanceof PhabricatorSpacesInterface) {
       $types[] = PhabricatorTransactions::TYPE_SPACE;
     }
+
+    $types[] = PhabricatorTransactions::TYPE_MFA;
 
     $template = $this->object->getApplicationTransactionTemplate();
     if ($template instanceof PhabricatorModularTransaction) {
@@ -383,6 +405,8 @@ abstract class PhabricatorApplicationTransactionEditor
         return null;
       case PhabricatorTransactions::TYPE_SUBTYPE:
         return $object->getEditEngineSubtype();
+      case PhabricatorTransactions::TYPE_MFA:
+        return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return array_values($this->subscribers);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -473,6 +497,8 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_SUBTYPE:
       case PhabricatorTransactions::TYPE_HISTORY:
         return $xaction->getNewValue();
+      case PhabricatorTransactions::TYPE_MFA:
+        return true;
       case PhabricatorTransactions::TYPE_SPACE:
         $space_phid = $xaction->getNewValue();
         if (!strlen($space_phid)) {
@@ -611,6 +637,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_HISTORY:
       case PhabricatorTransactions::TYPE_SUBTYPE:
+      case PhabricatorTransactions::TYPE_MFA:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
@@ -673,6 +700,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_HISTORY:
       case PhabricatorTransactions::TYPE_SUBTYPE:
+      case PhabricatorTransactions::TYPE_MFA:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -850,10 +878,6 @@ abstract class PhabricatorApplicationTransactionEditor
       $xaction->setIsSilentTransaction(true);
     }
 
-    if ($actor->hasHighSecuritySession()) {
-      $xaction->setIsMFATransaction(true);
-    }
-
     return $xaction;
   }
 
@@ -893,12 +917,31 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
   public function setContentSourceFromRequest(AphrontRequest $request) {
+    $this->setRequest($request);
     return $this->setContentSource(
       PhabricatorContentSource::newFromRequest($request));
   }
 
   public function getContentSource() {
     return $this->contentSource;
+  }
+
+  public function setRequest(AphrontRequest $request) {
+    $this->request = $request;
+    return $this;
+  }
+
+  public function getRequest() {
+    return $this->request;
+  }
+
+  public function setCancelURI($cancel_uri) {
+    $this->cancelURI = $cancel_uri;
+    return $this;
+  }
+
+  public function getCancelURI() {
+    return $this->cancelURI;
   }
 
   final public function applyTransactions(
@@ -910,6 +953,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->isNewObject = ($object->getPHID() === null);
 
     $this->validateEditParameters($object, $xactions);
+    $xactions = $this->newMFATransactions($object, $xactions);
 
     $actor = $this->requireActor();
 
@@ -966,8 +1010,26 @@ abstract class PhabricatorApplicationTransactionEditor
             $warnings);
         }
       }
+    }
 
-      $this->willApplyTransactions($object, $xactions);
+    foreach ($xactions as $xaction) {
+      $this->adjustTransactionValues($object, $xaction);
+    }
+
+    // Now that we've merged and combined transactions, check for required
+    // capabilities. Note that we're doing this before filtering
+    // transactions: if you try to apply an edit which you do not have
+    // permission to apply, we want to give you a permissions error even
+    // if the edit would have no effect.
+    $this->applyCapabilityChecks($object, $xactions);
+
+    $xactions = $this->filterTransactions($object, $xactions);
+
+    if (!$is_preview) {
+      $this->hasRequiredMFA = true;
+      if ($this->getShouldRequireMFA()) {
+        $this->requireMFA($object, $xactions);
+      }
 
       if ($object->getID()) {
         $this->buildOldRecipientLists($object, $xactions);
@@ -993,33 +1055,6 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($this->shouldApplyInitialEffects($object, $xactions)) {
         $this->applyInitialEffects($object, $xactions);
       }
-
-      foreach ($xactions as $xaction) {
-        $this->adjustTransactionValues($object, $xaction);
-      }
-
-      // Now that we've merged and combined transactions, check for required
-      // capabilities. Note that we're doing this before filtering
-      // transactions: if you try to apply an edit which you do not have
-      // permission to apply, we want to give you a permissions error even
-      // if the edit would have no effect.
-      $this->applyCapabilityChecks($object, $xactions);
-
-      // See T13186. Fatal hard if this object has an older
-      // "requireCapabilities()" method. The code may rely on this method being
-      // called to apply policy checks, so err on the side of safety and fatal.
-      // TODO: Remove this check after some time has passed.
-      if (method_exists($this, 'requireCapabilities')) {
-        throw new Exception(
-          pht(
-            'Editor (of class "%s") implements obsolete policy method '.
-            'requireCapabilities(). The implementation for this Editor '.
-            'MUST be updated. See <%s> for discussion.',
-            get_class($this),
-            'https://secure.phabricator.com/T13186'));
-      }
-
-      $xactions = $this->filterTransactions($object, $xactions);
 
       // TODO: Once everything is on EditEngine, just use getIsNewObject() to
       // figure this out instead.
@@ -1579,6 +1614,10 @@ abstract class PhabricatorApplicationTransactionEditor
         // This is a special magic transaction which sends you history via
         // email and is only partially supported in the upstream. You don't
         // need any capabilities to apply it.
+        return null;
+      case PhabricatorTransactions::TYPE_MFA:
+        // Signing a transaction group with MFA does not require permissions
+        // on its own.
         return null;
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getLegacyRequiredEdgeCapabilities($xaction);
@@ -2272,11 +2311,19 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions) {
 
     $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+    $type_mfa = PhabricatorTransactions::TYPE_MFA;
 
     $no_effect = array();
     $has_comment = false;
     $any_effect = false;
+
+    $meta_xactions = array();
     foreach ($xactions as $key => $xaction) {
+      if ($xaction->getTransactionType() === $type_mfa) {
+        $meta_xactions[$key] = $xaction;
+        continue;
+      }
+
       if ($this->transactionHasEffect($object, $xaction)) {
         if ($xaction->getTransactionType() != $type_comment) {
           $any_effect = true;
@@ -2286,13 +2333,28 @@ abstract class PhabricatorApplicationTransactionEditor
       } else {
         $no_effect[$key] = $xaction;
       }
+
       if ($xaction->hasComment()) {
         $has_comment = true;
       }
     }
 
+    // If every transaction is a meta-transaction applying to the transaction
+    // group, these transactions are junk.
+    if (count($meta_xactions) == count($xactions)) {
+      $no_effect = $xactions;
+      $any_effect = false;
+    }
+
     if (!$no_effect) {
       return $xactions;
+    }
+
+    // If none of the transactions have an effect, the meta-transactions also
+    // have no effect. Add them to the "no effect" list so we get a full set
+    // of errors for everything.
+    if (!$any_effect) {
+      $no_effect += $meta_xactions;
     }
 
     if (!$this->getContinueOnNoEffect() && !$this->getIsPreview()) {
@@ -2371,6 +2433,12 @@ abstract class PhabricatorApplicationTransactionEditor
         break;
       case PhabricatorTransactions::TYPE_SUBTYPE:
         $errors[] = $this->validateSubtypeTransactions(
+          $object,
+          $xactions,
+          $type);
+        break;
+      case PhabricatorTransactions::TYPE_MFA:
+        $errors[] = $this->validateMFATransactions(
           $object,
           $xactions,
           $type);
@@ -2551,6 +2619,36 @@ abstract class PhabricatorApplicationTransactionEditor
           $xaction);
         continue;
       }
+    }
+
+    return $errors;
+  }
+
+  private function validateMFATransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $transaction_type) {
+    $errors = array();
+
+    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
+      'userPHID = %s',
+      $this->getActingAsPHID());
+
+    foreach ($xactions as $xaction) {
+      if (!$factors) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('No MFA'),
+          pht(
+            'You do not have any MFA factors attached to your account, so '.
+            'you can not sign this transaction group with MFA. Add MFA to '.
+            'your account in Settings.'),
+          $xaction);
+      }
+    }
+
+    if ($xactions) {
+      $this->setShouldRequireMFA(true);
     }
 
     return $errors;
@@ -3766,7 +3864,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $editor = $node->getApplicationTransactionEditor();
       $template = $node->getApplicationTransactionTemplate();
-      $target = $node->getApplicationTransactionObject();
 
       if (isset($add[$node->getPHID()])) {
         $edge_edit_type = '+';
@@ -3792,7 +3889,7 @@ abstract class PhabricatorApplicationTransactionEditor
         ->setActingAsPHID($this->getActingAsPHID())
         ->setContentSource($this->getContentSource());
 
-      $editor->applyTransactions($target, array($template));
+      $editor->applyTransactions($node, array($template));
     }
   }
 
@@ -4275,19 +4372,6 @@ abstract class PhabricatorApplicationTransactionEditor
     return idx($types, $type);
   }
 
-  private function willApplyTransactions($object, array $xactions) {
-    foreach ($xactions as $xaction) {
-      $type = $xaction->getTransactionType();
-
-      $xtype = $this->getModularTransactionType($type);
-      if (!$xtype) {
-        continue;
-      }
-
-      $xtype->willApplyTransactions($object, $xactions);
-    }
-  }
-
   public function getCreateObjectTitle($author, $object) {
     return pht('%s created this object.', $author);
   }
@@ -4706,6 +4790,110 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setMetadataValue('inline.details', $inline_details)
       ->setOldValue($old_value)
       ->setNewValue($new_value);
+  }
+
+  private function requireMFA(PhabricatorLiskDAO $object, array $xactions) {
+    $editor_class = get_class($this);
+
+    $object_phid = $object->getPHID();
+    if ($object_phid) {
+      $workflow_key = sprintf(
+        'editor(%s).phid(%s)',
+        $editor_class,
+        $object_phid);
+    } else {
+      $workflow_key = sprintf(
+        'editor(%s).new()',
+        $editor_class);
+    }
+
+    $actor = $this->getActor();
+
+    $request = $this->getRequest();
+    if ($request === null) {
+      $source_type = $this->getContentSource()->getSourceTypeConstant();
+      $conduit_type = PhabricatorConduitContentSource::SOURCECONST;
+      $is_conduit = ($source_type === $conduit_type);
+      if ($is_conduit) {
+        throw new Exception(
+          pht(
+            'This transaction group requires MFA to apply, but you can not '.
+            'provide an MFA response via Conduit. Edit this object via the '.
+            'web UI.'));
+      } else {
+        throw new Exception(
+          pht(
+            'This transaction group requires MFA to apply, but the Editor was '.
+            'not configured with a Request. This workflow can not perform an '.
+            'MFA check.'));
+      }
+    }
+
+    $cancel_uri = $this->getCancelURI();
+    if ($cancel_uri === null) {
+      throw new Exception(
+        pht(
+          'This transaction group requires MFA to apply, but the Editor was '.
+          'not configured with a Cancel URI. This workflow can not perform '.
+          'an MFA check.'));
+    }
+
+    id(new PhabricatorAuthSessionEngine())
+      ->setWorkflowKey($workflow_key)
+      ->requireHighSecurityToken($actor, $request, $cancel_uri);
+
+    foreach ($xactions as $xaction) {
+      $xaction->setIsMFATransaction(true);
+    }
+  }
+
+  private function newMFATransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $is_mfa = ($object instanceof PhabricatorEditEngineMFAInterface);
+    if (!$is_mfa) {
+      return $xactions;
+    }
+
+    $engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
+      ->setViewer($this->getActor());
+    $require_mfa = $engine->shouldRequireMFA();
+
+    if (!$require_mfa) {
+      return $xactions;
+    }
+
+    $type_mfa = PhabricatorTransactions::TYPE_MFA;
+
+    $has_mfa = false;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() === $type_mfa) {
+        $has_mfa = true;
+        break;
+      }
+    }
+
+    if ($has_mfa) {
+      return $xactions;
+    }
+
+    // If the user is mentioning an MFA object on another object or creating
+    // a relationship like "parent" or "child" to this object, we allow the
+    // edit to move forward without requiring MFA.
+    if ($this->getIsInverseEdgeEditor()) {
+      return $xactions;
+    }
+
+    $template = $object->getApplicationTransactionTemplate();
+
+    $mfa_xaction = id(clone $template)
+      ->setTransactionType($type_mfa)
+      ->setNewValue(true);
+
+    array_unshift($xactions, $mfa_xaction);
+
+    return $xactions;
   }
 
 }

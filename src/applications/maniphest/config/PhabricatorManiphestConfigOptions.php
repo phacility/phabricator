@@ -212,6 +212,8 @@ The keys you can provide in a specification are:
     status.
   - `locked` //Optional bool.// Lock tasks in this status, preventing users
     from commenting.
+  - `mfa` //Optional bool.// Require all edits to this task to be signed with
+    multi-factor authentication.
 
 Statuses will appear in the UI in the order specified. Note the status marked
 `special` as `duplicate` is not settable directly and will not appear in UI

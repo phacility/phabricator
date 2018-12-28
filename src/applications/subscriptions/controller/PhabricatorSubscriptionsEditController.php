@@ -8,7 +8,7 @@ final class PhabricatorSubscriptionsEditController
     $phid = $request->getURIData('phid');
     $action = $request->getURIData('action');
 
-    if (!$request->isFormPost()) {
+    if (!$request->isFormOrHisecPost()) {
       return new Aphront400Response();
     }
 
@@ -73,13 +73,12 @@ final class PhabricatorSubscriptionsEditController
 
       $editor = id($object->getApplicationTransactionEditor())
         ->setActor($viewer)
+        ->setCancelURI($handle->getURI())
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
         ->setContentSourceFromRequest($request);
 
-      $editor->applyTransactions(
-        $object->getApplicationTransactionObject(),
-        array($xaction));
+      $editor->applyTransactions($object, array($xaction));
     } else {
 
       // TODO: Eventually, get rid of this once everything implements

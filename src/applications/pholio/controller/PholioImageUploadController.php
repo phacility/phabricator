@@ -22,7 +22,8 @@ final class PholioImageUploadController extends PholioController {
       $title = $file->getName();
     }
 
-    $image = id(new PholioImage())
+    $image = PholioImage::initializeNewImage()
+      ->setAuthorPHID($viewer->getPHID())
       ->attachFile($file)
       ->setName($title)
       ->setDescription($description)

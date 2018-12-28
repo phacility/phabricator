@@ -351,7 +351,7 @@ final class PhrictionTransactionEditor
       switch ($type) {
         case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
           if ($xaction->getMetadataValue('stub:create:phid')) {
-            continue;
+            break;
           }
 
           if ($this->getProcessContentVersionError()) {

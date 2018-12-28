@@ -2,7 +2,7 @@
 
 final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
-  private $newImages = array();
+  private $images = array();
 
   public function getEditorApplicationClass() {
     return 'PhabricatorPholioApplication';
@@ -10,16 +10,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
   public function getEditorObjectsDescription() {
     return pht('Pholio Mocks');
-  }
-
-  private function setNewImages(array $new_images) {
-    assert_instances_of($new_images, 'PholioImage');
-    $this->newImages = $new_images;
-    return $this;
-  }
-
-  public function getNewImages() {
-    return $this->newImages;
   }
 
   public function getCreateObjectTitle($author, $object) {
@@ -41,63 +31,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     return $types;
   }
 
-  protected function shouldApplyInitialEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PholioImageFileTransaction::TRANSACTIONTYPE:
-        case PholioImageReplaceTransaction::TRANSACTIONTYPE:
-          return true;
-          break;
-      }
-    }
-    return false;
-  }
-
-  protected function applyInitialEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    $new_images = array();
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PholioImageFileTransaction::TRANSACTIONTYPE:
-          $new_value = $xaction->getNewValue();
-          foreach ($new_value as $key => $txn_images) {
-            if ($key != '+') {
-              continue;
-            }
-            foreach ($txn_images as $image) {
-              $image->save();
-              $new_images[] = $image;
-            }
-          }
-          break;
-        case PholioImageReplaceTransaction::TRANSACTIONTYPE:
-          $image = $xaction->getNewValue();
-          $image->save();
-          $new_images[] = $image;
-          break;
-      }
-    }
-    $this->setNewImages($new_images);
-  }
-
-  protected function applyFinalEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    $images = $this->getNewImages();
-    foreach ($images as $image) {
-      $image->setMockID($object->getID());
-      $image->save();
-    }
-
-    return $xactions;
-  }
-
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -110,11 +43,11 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $id = $object->getID();
+    $monogram = $object->getMonogram();
     $name = $object->getName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("M{$id}: {$name}");
+      ->setSubject("{$monogram}: {$name}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
@@ -155,7 +88,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
     $body->addLinkSection(
       pht('MOCK DETAIL'),
-      PhabricatorEnv::getProductionURI('/M'.$object->getID()));
+      PhabricatorEnv::getProductionURI($object->getURI()));
 
     return $body;
   }
@@ -273,6 +206,39 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     }
 
     return parent::shouldImplyCC($object, $xaction);
+  }
+
+  public function loadPholioImage($object, $phid) {
+    if (!isset($this->images[$phid])) {
+
+      $image = id(new PholioImageQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs(array($phid))
+        ->executeOne();
+
+      if (!$image) {
+        throw new Exception(
+          pht(
+            'No image exists with PHID "%s".',
+            $phid));
+      }
+
+      $mock_phid = $image->getMockPHID();
+      if ($mock_phid) {
+        if ($mock_phid !== $object->getPHID()) {
+          throw new Exception(
+            pht(
+              'Image ("%s") belongs to the wrong object ("%s", expected "%s").',
+              $phid,
+              $mock_phid,
+              $object->getPHID()));
+        }
+      }
+
+      $this->images[$phid] = $image;
+    }
+
+    return $this->images[$phid];
   }
 
 }

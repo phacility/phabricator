@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_pholio.pholio_image
+  ADD authorPHID VARBINARY(64) NOT NULL;

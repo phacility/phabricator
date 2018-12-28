@@ -482,14 +482,14 @@ abstract class PhabricatorController extends AphrontController {
     PhabricatorApplicationTransactionInterface $object,
     PhabricatorApplicationTransactionQuery $query,
     PhabricatorMarkupEngine $engine = null,
-    $render_data = array()) {
+    $view_data = array()) {
 
-    $viewer = $this->getRequest()->getUser();
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
     $xaction = $object->getApplicationTransactionTemplate();
-    $view = $xaction->getApplicationTransactionViewObject();
 
     $pager = id(new AphrontCursorPagerView())
-      ->readFromRequest($this->getRequest())
+      ->readFromRequest($request)
       ->setURI(new PhutilURI(
         '/transactions/showolder/'.$object->getPHID().'/'));
 
@@ -499,6 +499,13 @@ abstract class PhabricatorController extends AphrontController {
       ->needComments(true)
       ->executeWithCursorPager($pager);
     $xactions = array_reverse($xactions);
+
+    $timeline_engine = PhabricatorTimelineEngine::newForObject($object)
+      ->setViewer($viewer)
+      ->setTransactions($xactions)
+      ->setViewData($view_data);
+
+    $view = $timeline_engine->buildTimelineView();
 
     if ($engine) {
       foreach ($xactions as $xaction) {
@@ -513,14 +520,9 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     $timeline = $view
-      ->setUser($viewer)
-      ->setObjectPHID($object->getPHID())
-      ->setTransactions($xactions)
       ->setPager($pager)
-      ->setRenderData($render_data)
       ->setQuoteTargetID($this->getRequest()->getStr('quoteTargetID'))
       ->setQuoteRef($this->getRequest()->getStr('quoteRef'));
-    $object->willRenderTimeline($timeline, $this->getRequest());
 
     return $timeline;
   }

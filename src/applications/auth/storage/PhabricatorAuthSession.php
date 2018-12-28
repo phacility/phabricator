@@ -72,10 +72,14 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
     return $this->assertAttached($this->identityObject);
   }
 
-  public static function getSessionTypeTTL($session_type) {
+  public static function getSessionTypeTTL($session_type, $is_partial) {
     switch ($session_type) {
       case self::TYPE_WEB:
-        return phutil_units('30 days in seconds');
+        if ($is_partial) {
+          return phutil_units('30 minutes in seconds');
+        } else {
+          return phutil_units('30 days in seconds');
+        }
       case self::TYPE_CONDUIT:
         return phutil_units('24 hours in seconds');
       default:

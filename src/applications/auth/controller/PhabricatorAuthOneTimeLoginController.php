@@ -152,7 +152,12 @@ final class PhabricatorAuthOneTimeLoginController
 
       PhabricatorCookies::setNextURICookie($request, $next, $force = true);
 
-      return $this->loginUser($target_user);
+      $force_full_session = false;
+      if ($link_type === PhabricatorAuthSessionEngine::ONETIME_RECOVER) {
+        $force_full_session = $token->getShouldForceFullSession();
+      }
+
+      return $this->loginUser($target_user, $force_full_session);
     }
 
     // NOTE: We need to CSRF here so attackers can't generate an email link,
