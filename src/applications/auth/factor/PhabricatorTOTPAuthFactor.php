@@ -12,6 +12,12 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return pht('Mobile Phone App (TOTP)');
   }
 
+  public function getFactorCreateHelp() {
+    return pht(
+      'Allow users to attach a mobile authenticator application (like '.
+      'Google Authenticator) to their account.');
+  }
+
   public function getFactorDescription() {
     return pht(
       'Attach a mobile authenticator application (like Authy '.

@@ -85,6 +85,15 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
         ),
         'password/' => 'PhabricatorAuthSetPasswordController',
+
+        'mfa/' => array(
+          $this->getQueryRoutePattern() =>
+            'PhabricatorAuthFactorProviderListController',
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorAuthFactorProviderEditController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthFactorProviderViewController',
+        ),
       ),
 
       '/oauth/(?P<provider>\w+)/login/'
