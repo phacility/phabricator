@@ -380,6 +380,11 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'Resource deflation is now managed automatically.'),
       'celerity.minify' => pht(
         'Resource minification is now managed automatically.'),
+
+      'metamta.domain' => pht(
+        'Mail thread IDs are now generated automatically.'),
+      'metamta.placeholder-to-recipient' => pht(
+        'Placeholder recipients are now generated automatically.'),
     );
 
     return $ancient_config;
