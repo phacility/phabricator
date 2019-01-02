@@ -33,18 +33,6 @@ final class PhabricatorMailImplementationPHPMailerAdapter
     );
   }
 
-  public function newLegacyOptions() {
-    return array(
-      'host' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-host'),
-      'port' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-port'),
-      'user' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-user'),
-      'password' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-password'),
-      'protocol' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-protocol'),
-      'encoding' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding'),
-      'mailer' => PhabricatorEnv::getEnvConfig('phpmailer.mailer'),
-    );
-  }
-
   /**
    * @phutil-external-symbol class PHPMailer
    */

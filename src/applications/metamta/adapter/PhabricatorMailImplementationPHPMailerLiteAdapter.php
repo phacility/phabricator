@@ -24,12 +24,6 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
     );
   }
 
-  public function newLegacyOptions() {
-    return array(
-      'encoding' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding'),
-    );
-  }
-
   /**
    * @phutil-external-symbol class PHPMailerLite
    */

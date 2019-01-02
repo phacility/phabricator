@@ -209,13 +209,6 @@ EODOC
         'phabricator.example.com')
         ->setDescription(pht('Domain used to generate Message-IDs.')),
       $this->newOption(
-        'metamta.mail-adapter',
-        'class',
-        'PhabricatorMailImplementationPHPMailerLiteAdapter')
-        ->setBaseClass('PhabricatorMailImplementationAdapter')
-        ->setSummary(pht('Control how mail is sent.'))
-        ->setDescription($adapter_description),
-      $this->newOption(
         'metamta.one-mail-per-recipient',
         'bool',
         true)

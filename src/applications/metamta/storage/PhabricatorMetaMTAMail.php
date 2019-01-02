@@ -520,53 +520,38 @@ final class PhabricatorMetaMTAMail
     $mailers = array();
 
     $config = PhabricatorEnv::getEnvConfig('cluster.mailers');
-    if ($config === null) {
-      $mailer = PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');
+
+    $adapters = PhabricatorMailImplementationAdapter::getAllAdapters();
+    $next_priority = -1;
+
+    foreach ($config as $spec) {
+      $type = $spec['type'];
+      if (!isset($adapters[$type])) {
+        throw new Exception(
+          pht(
+            'Unknown mailer ("%s")!',
+            $type));
+      }
+
+      $key = $spec['key'];
+      $mailer = id(clone $adapters[$type])
+        ->setKey($key);
+
+      $priority = idx($spec, 'priority');
+      if (!$priority) {
+        $priority = $next_priority;
+        $next_priority--;
+      }
+      $mailer->setPriority($priority);
 
       $defaults = $mailer->newDefaultOptions();
-      $options = $mailer->newLegacyOptions();
+      $options = idx($spec, 'options', array()) + $defaults;
+      $mailer->setOptions($options);
 
-      $options = $options + $defaults;
-
-      $mailer
-        ->setKey('default')
-        ->setPriority(-1)
-        ->setOptions($options);
+      $mailer->setSupportsInbound(idx($spec, 'inbound', true));
+      $mailer->setSupportsOutbound(idx($spec, 'outbound', true));
 
       $mailers[] = $mailer;
-    } else {
-      $adapters = PhabricatorMailImplementationAdapter::getAllAdapters();
-      $next_priority = -1;
-
-      foreach ($config as $spec) {
-        $type = $spec['type'];
-        if (!isset($adapters[$type])) {
-          throw new Exception(
-            pht(
-              'Unknown mailer ("%s")!',
-              $type));
-        }
-
-        $key = $spec['key'];
-        $mailer = id(clone $adapters[$type])
-          ->setKey($key);
-
-        $priority = idx($spec, 'priority');
-        if (!$priority) {
-          $priority = $next_priority;
-          $next_priority--;
-        }
-        $mailer->setPriority($priority);
-
-        $defaults = $mailer->newDefaultOptions();
-        $options = idx($spec, 'options', array()) + $defaults;
-        $mailer->setOptions($options);
-
-        $mailer->setSupportsInbound(idx($spec, 'inbound', true));
-        $mailer->setSupportsOutbound(idx($spec, 'outbound', true));
-
-        $mailers[] = $mailer;
-      }
     }
 
     // Remove mailers with the wrong types.
