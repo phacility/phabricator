@@ -146,38 +146,12 @@ final class PhabricatorDeveloperConfigOptions
             pht('Enable developer mode'),
             pht('Disable developer mode'),
           ))
-          ->setSummary(pht('Enable verbose error reporting and disk reads.'))
-          ->setDescription(
-            pht(
-              'This option enables verbose error reporting (stack traces, '.
-              'error callouts) and forces disk reads of static assets on '.
-              'every reload.')),
-      $this->newOption('celerity.minify', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Minify static resources.'),
-            pht("Don't minify static resources."),
-          ))
-        ->setSummary(pht('Minify static Celerity resources.'))
+        ->setSummary(pht('Enable verbose error reporting and disk reads.'))
         ->setDescription(
           pht(
-            'Minify static resources by removing whitespace and comments. You '.
-            'should enable this in production, but disable it in '.
-            'development.')),
-      $this->newOption('cache.enable-deflate', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Enable deflate compression'),
-            pht('Disable deflate compression'),
-          ))
-        ->setSummary(
-          pht('Toggle %s-based compression for some caches.', 'gzdeflate()'))
-        ->setDescription(
-          pht(
-            'Set this to false to disable the use of %s-based '.
-            'compression in some caches. This may give you less performant '.
-            '(but more debuggable) caching.',
-            'gzdeflate()')),
+            'This option enables verbose error reporting (stack traces, '.
+            'error callouts) and forces disk reads of static assets on '.
+            'every reload.')),
     );
   }
 }

@@ -372,6 +372,14 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'phpmailer.smtp-encoding' => $mailers_reason,
       'sendgrid.api-user' => $mailers_reason,
       'sendgrid.api-key' => $mailers_reason,
+
+      'celerity.resource-hash' => pht(
+        'This option generally did not prove useful. Resource hash keys '.
+        'are now managed automatically.'),
+      'celerity.enable-deflate' => pht(
+        'Resource deflation is now managed automatically.'),
+      'celerity.minify' => pht(
+        'Resource minification is now managed automatically.'),
     );
 
     return $ancient_config;

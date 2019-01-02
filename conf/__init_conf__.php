@@ -21,7 +21,6 @@ function phabricator_read_config_file($original_config) {
         return array(
           'phabricator.developer-mode'      => true,
           'darkconsole.enabled'             => true,
-          'celerity.minify'                 => false,
         );
     }
 

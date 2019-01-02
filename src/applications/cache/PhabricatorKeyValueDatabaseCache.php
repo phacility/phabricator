@@ -145,8 +145,7 @@ final class PhabricatorKeyValueDatabaseCache
 
     static $can_deflate;
     if ($can_deflate === null) {
-      $can_deflate = function_exists('gzdeflate') &&
-                     PhabricatorEnv::getEnvConfig('cache.enable-deflate');
+      $can_deflate = function_exists('gzdeflate');
     }
 
     if ($can_deflate) {

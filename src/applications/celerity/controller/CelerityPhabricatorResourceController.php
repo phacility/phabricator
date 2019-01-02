@@ -39,10 +39,8 @@ final class CelerityPhabricatorResourceController
   }
 
   protected function buildResourceTransformer() {
-    $minify_on = PhabricatorEnv::getEnvConfig('celerity.minify');
     $developer_on = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
-
-    $should_minify = ($minify_on && !$developer_on);
+    $should_minify = !$developer_on;
 
     return id(new CelerityResourceTransformer())
       ->setMinify($should_minify)

@@ -234,21 +234,6 @@ EOTEXT
             'Users can configure a URI pattern to open files in a text '.
             'editor. The URI must use a protocol on this whitelist.'))
         ->setLocked(true),
-       $this->newOption(
-         'celerity.resource-hash',
-         'string',
-         'd9455ea150622ee044f7931dabfa52aa')
-        ->setSummary(
-          pht('An input to the hash function when building resource hashes.'))
-        ->setDescription(
-          pht(
-            'This value is an input to the hash function when building '.
-            'resource hashes. It has no security value, but if you '.
-            'accidentally poison user caches (by pushing a bad patch or '.
-            'having something go wrong with a CDN, e.g.) you can change this '.
-            'to something else and rebuild the Celerity map to break user '.
-            'caches. Unless you are doing Celerity development, it is '.
-            'exceptionally unlikely that you need to modify this.')),
        $this->newOption('remarkup.enable-embedded-youtube', 'bool', false)
         ->setBoolOptions(
           array(
