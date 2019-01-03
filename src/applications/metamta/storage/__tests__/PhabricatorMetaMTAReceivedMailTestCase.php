@@ -54,6 +54,10 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
         'Message-ID' => 'test@example.com',
         'To'         => 'does+not+exist@example.com',
       ));
+    $mail->setBodies(
+      array(
+        'text' => 'test',
+      ));
     $mail->save();
 
     $mail->processReceivedMail();
@@ -76,6 +80,10 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
         'Message-ID' => 'test@example.com',
         'To'         => 'bugs@example.com',
         'From'       => 'does+not+exist@example.com',
+      ));
+    $mail->setBodies(
+      array(
+        'text' => 'test',
       ));
     $mail->save();
 
@@ -100,6 +108,10 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
         'Message-ID'  => 'test@example.com',
         'From'        => $user->loadPrimaryEmail()->getAddress(),
         'To'          => 'bugs@example.com',
+      ));
+    $mail->setBodies(
+      array(
+        'text' => 'test',
       ));
     $mail->save();
 

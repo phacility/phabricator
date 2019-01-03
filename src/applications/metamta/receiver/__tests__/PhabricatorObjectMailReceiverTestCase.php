@@ -23,14 +23,16 @@ final class PhabricatorObjectMailReceiverTestCase
       $mail->getStatus());
   }
 
-/*
-
-  TODO: Tasks don't support policies yet. Implement this once they do.
-
   public function testDropPolicyViolationMail() {
-    list($task, $user, $mail) = $this->buildMail('public');
+    list($task, $user, $mail) = $this->buildMail('policy');
 
-    // TODO: Set task policy to "no one" here.
+    $task
+      ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+      ->setOwnerPHID(null)
+      ->save();
+
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('metamta.public-replies', true);
 
     $mail->save();
     $mail->processReceivedMail();
@@ -39,8 +41,6 @@ final class PhabricatorObjectMailReceiverTestCase
       MetaMTAReceivedMailStatus::STATUS_POLICY_PROBLEM,
       $mail->getStatus());
   }
-
-*/
 
   public function testDropInvalidObjectMail() {
     list($task, $user, $mail) = $this->buildMail('404');
@@ -120,6 +120,11 @@ final class PhabricatorObjectMailReceiverTestCase
         'Message-ID' => 'test@example.com',
         'From'       => $user->loadPrimaryEmail()->getAddress(),
         'To'         => $to,
+      ));
+
+    $mail->setBodies(
+      array(
+        'text' => 'test',
       ));
 
     return array($task, $user, $mail);
