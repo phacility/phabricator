@@ -245,14 +245,6 @@ EODOC
           ))
         ->setSummary(pht('Show email preferences link in email.'))
         ->setDescription($email_preferences_description),
-      $this->newOption('metamta.insecure-auth-with-reply-to', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Allow Insecure Reply-To Auth'),
-            pht('Disallow Reply-To Auth'),
-          ))
-        ->setSummary(pht('Trust "Reply-To" headers for authentication.'))
-        ->setDescription($reply_to_description),
       $this->newOption('metamta.public-replies', 'bool', false)
         ->setBoolOptions(
           array(

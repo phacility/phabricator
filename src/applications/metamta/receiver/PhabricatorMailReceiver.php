@@ -109,31 +109,6 @@ abstract class PhabricatorMailReceiver extends Phobject {
         $raw_from);
     }
 
-    // If we missed on "From", try "Reply-To" if we're configured for it.
-    $raw_reply_to = $mail->getHeader('Reply-To');
-    if (strlen($raw_reply_to)) {
-      $reply_to_key = 'metamta.insecure-auth-with-reply-to';
-      $allow_reply_to = PhabricatorEnv::getEnvConfig($reply_to_key);
-      if ($allow_reply_to) {
-        $reply_to = self::getRawAddress($raw_reply_to);
-
-        $user = PhabricatorUser::loadOneWithEmailAddress($reply_to);
-        if ($user) {
-          return $user;
-        } else {
-          $reasons[] = pht(
-            'Phabricator is configured to authenticate users using the '.
-            '"Reply-To" header, but the reply address ("%s") on this '.
-            'message does not correspond to any known user account.',
-            $raw_reply_to);
-        }
-      } else {
-        $reasons[] = pht(
-          '(Phabricator is not configured to authenticate users using the '.
-          '"Reply-To" header, so it was ignored.)');
-      }
-    }
-
     // If we don't know who this user is, load or create an external user
     // account for them if we're configured for it.
     $email_key = 'phabricator.allow-email-users';

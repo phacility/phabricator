@@ -391,6 +391,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'phabricator.csrf-key' => pht(
         'CSRF HMAC keys are now managed automatically.'),
+
+      'metamta.insecure-auth-with-reply-to' => pht(
+        'Authenticating users based on "Reply-To" is no longer supported.'),
     );
 
     return $ancient_config;
