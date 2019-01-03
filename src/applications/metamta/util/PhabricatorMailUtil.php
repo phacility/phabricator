@@ -62,4 +62,50 @@ final class PhabricatorMailUtil
     return ($u->getAddress() === $v->getAddress());
   }
 
+  public static function isReservedAddress(PhutilEmailAddress $address) {
+    $address = self::normalizeAddress($address);
+    $local = $address->getLocalPart();
+
+    $reserved = array(
+      'admin',
+      'administrator',
+      'hostmaster',
+      'list',
+      'list-request',
+      'majordomo',
+      'postmaster',
+      'root',
+      'ssl-admin',
+      'ssladmin',
+      'ssladministrator',
+      'sslwebmaster',
+      'sysadmin',
+      'uucp',
+      'webmaster',
+
+      'noreply',
+      'no-reply',
+    );
+
+    $reserved = array_fuse($reserved);
+
+    if (isset($reserved[$local])) {
+      return true;
+    }
+
+    $default_address = id(new PhabricatorMetaMTAMail())
+      ->newDefaultEmailAddress();
+    if (self::matchAddresses($address, $default_address)) {
+      return true;
+    }
+
+    $void_address = id(new PhabricatorMetaMTAMail())
+      ->newVoidEmailAddress();
+    if (self::matchAddresses($address, $void_address)) {
+      return true;
+    }
+
+    return false;
+  }
+
 }

@@ -104,6 +104,16 @@ final class PhabricatorMetaMTAApplicationEmailEditor
               pht('Invalid'),
               pht('Email address is not formatted properly.'));
           }
+
+          $address = new PhutilEmailAddress($email);
+          if (PhabricatorMailUtil::isReservedAddress($address)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Reserved'),
+              pht(
+                'This email address is reserved. Choose a different '.
+                'address.'));
+          }
         }
 
         $missing = $this->validateIsEmptyTextField(

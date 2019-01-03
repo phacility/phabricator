@@ -713,7 +713,7 @@ final class PhabricatorMetaMTAMail
     $actors = $this->loadAllActors();
     $deliverable_actors = $this->filterDeliverableActors($actors);
 
-    $default_from = PhabricatorEnv::getEnvConfig('metamta.default-address');
+    $default_from = (string)$this->newDefaultEmailAddress();
     if (empty($params['from'])) {
       $mailer->setFrom($default_from);
     }
@@ -1463,16 +1463,31 @@ final class PhabricatorMetaMTAMail
   }
 
   private function newMailDomain() {
+    $domain = PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain');
+    if (strlen($domain)) {
+      return $domain;
+    }
+
     $install_uri = PhabricatorEnv::getURI('/');
     $install_uri = new PhutilURI($install_uri);
 
     return $install_uri->getDomain();
   }
 
-  public function newVoidEmailAddress() {
+  public function newDefaultEmailAddress() {
+    $raw_address = PhabricatorEnv::getEnvConfig('metamta.default-address');
+    if (strlen($raw_address)) {
+      return new PhutilEmailAddress($raw_address);
+    }
+
     $domain = $this->newMailDomain();
-    $address = "void-recipient@{$domain}";
+    $address = "noreply@{$domain}";
+
     return new PhutilEmailAddress($address);
+  }
+
+  public function newVoidEmailAddress() {
+    return $this->newDefaultEmailAddress();
   }
 
 

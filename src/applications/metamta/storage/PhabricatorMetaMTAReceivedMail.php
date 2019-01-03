@@ -161,10 +161,19 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         ->setFilterMethod('isEnabled')
         ->execute();
 
+      $targets = $this->newTargetAddresses();
+      foreach ($targets as $key => $target) {
+        // Never accept any reserved address as a mail target. This prevents
+        // security issues around "hostmaster@" and bad behavior with
+        // "noreply@".
+        if (PhabricatorMailUtil::isReservedAddress($target)) {
+          unset($targets[$key]);
+          continue;
+        }
+      }
+
       $any_accepted = false;
       $receiver_exception = null;
-
-      $targets = $this->newTargetAddresses();
       foreach ($receivers as $receiver) {
         $receiver = id(clone $receiver)
           ->setViewer($viewer);
