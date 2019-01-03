@@ -12,7 +12,7 @@ final class PhabricatorAuditMailReceiver extends PhabricatorObjectMailReceiver {
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)preg_replace('/^COMMIT/', '', $pattern);
+    $id = (int)preg_replace('/^COMMIT/i', '', $pattern);
 
     return id(new DiffusionCommitQuery())
       ->setViewer($viewer)

@@ -394,6 +394,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'metamta.insecure-auth-with-reply-to' => pht(
         'Authenticating users based on "Reply-To" is no longer supported.'),
+
+      'phabricator.allow-email-users' => pht(
+        'Public email is now accepted if the associated address has a '.
+        'default author, and rejected otherwise.'),
     );
 
     return $ancient_config;

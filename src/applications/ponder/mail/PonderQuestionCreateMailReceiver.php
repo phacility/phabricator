@@ -9,7 +9,8 @@ final class PonderQuestionCreateMailReceiver
 
   protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
+    PhutilEmailAddress $target) {
+    $author = $this->getAuthor();
 
     $title = $mail->getSubject();
     if (!strlen($title)) {
@@ -26,18 +27,17 @@ final class PonderQuestionCreateMailReceiver
       ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
       ->setNewValue($mail->getCleanTextBody());
 
-    $question = PonderQuestion::initializeNewQuestion($sender);
+    $question = PonderQuestion::initializeNewQuestion($author);
 
     $content_source = $mail->newContentSource();
 
     $editor = id(new PonderQuestionEditor())
-      ->setActor($sender)
+      ->setActor($author)
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true);
     $xactions = $editor->applyTransactions($question, $xactions);
 
     $mail->setRelatedPHID($question->getPHID());
-
   }
 
 

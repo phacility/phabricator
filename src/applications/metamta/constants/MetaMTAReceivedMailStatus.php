@@ -6,7 +6,6 @@ final class MetaMTAReceivedMailStatus
   const STATUS_DUPLICATE            = 'err:duplicate';
   const STATUS_FROM_PHABRICATOR     = 'err:self';
   const STATUS_NO_RECEIVERS         = 'err:no-receivers';
-  const STATUS_ABUNDANT_RECEIVERS   = 'err:multiple-receivers';
   const STATUS_UNKNOWN_SENDER       = 'err:unknown-sender';
   const STATUS_DISABLED_SENDER      = 'err:disabled-sender';
   const STATUS_NO_PUBLIC_MAIL       = 'err:no-public-mail';
@@ -23,7 +22,6 @@ final class MetaMTAReceivedMailStatus
       self::STATUS_DUPLICATE => pht('Duplicate Message'),
       self::STATUS_FROM_PHABRICATOR => pht('Phabricator Mail'),
       self::STATUS_NO_RECEIVERS => pht('No Receivers'),
-      self::STATUS_ABUNDANT_RECEIVERS => pht('Multiple Receivers'),
       self::STATUS_UNKNOWN_SENDER => pht('Unknown Sender'),
       self::STATUS_DISABLED_SENDER => pht('Disabled Sender'),
       self::STATUS_NO_PUBLIC_MAIL => pht('No Public Mail'),

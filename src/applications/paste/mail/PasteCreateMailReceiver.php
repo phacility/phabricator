@@ -9,7 +9,8 @@ final class PasteCreateMailReceiver
 
   protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
+    PhutilEmailAddress $target) {
+    $author = $this->getAuthor();
 
     $title = $mail->getSubject();
     if (!$title) {
@@ -26,17 +27,22 @@ final class PasteCreateMailReceiver
       ->setTransactionType(PhabricatorPasteTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue($title);
 
-    $paste = PhabricatorPaste::initializeNewPaste($sender);
+    $paste = PhabricatorPaste::initializeNewPaste($author);
 
     $content_source = $mail->newContentSource();
 
     $editor = id(new PhabricatorPasteEditor())
-      ->setActor($sender)
+      ->setActor($author)
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true);
     $xactions = $editor->applyTransactions($paste, $xactions);
 
     $mail->setRelatedPHID($paste->getPHID());
+
+    $sender = $this->getSender();
+    if (!$sender) {
+      return;
+    }
 
     $subject_prefix =
       PhabricatorEnv::getEnvConfig('metamta.paste.subject-prefix');
@@ -55,6 +61,5 @@ final class PasteCreateMailReceiver
       ->setBody($body->render())
       ->saveAndSend();
   }
-
 
 }

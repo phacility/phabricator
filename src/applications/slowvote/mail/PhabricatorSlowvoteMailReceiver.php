@@ -13,7 +13,7 @@ final class PhabricatorSlowvoteMailReceiver
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)substr($pattern, 4);
+    $id = (int)substr($pattern, 1);
 
     return id(new PhabricatorSlowvoteQuery())
       ->setViewer($viewer)

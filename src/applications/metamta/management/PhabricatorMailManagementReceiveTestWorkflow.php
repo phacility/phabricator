@@ -33,6 +33,7 @@ final class PhabricatorMailManagementReceiveTestWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $viewer = $this->getViewer();
     $console = PhutilConsole::getConsole();
 
     $to = $args->getArg('to');
@@ -95,14 +96,23 @@ final class PhabricatorMailManagementReceiveTestWorkflow
     if (preg_match('/.+@.+/', $to)) {
       $header_content['to'] = $to;
     } else {
+
       // We allow the user to use an object name instead of a real address
       // as a convenience. To build the mail, we build a similar message and
       // look for a receiver which will accept it.
+
+      // In the general case, mail may be processed by multiple receivers,
+      // but mail to objects only ever has one receiver today.
+
       $pseudohash = PhabricatorObjectMailReceiver::computeMailHash('x', 'y');
+
+      $raw_target = $to.'+1+'.$pseudohash;
+      $target = new PhutilEmailAddress($raw_target.'@local.cli');
+
       $pseudomail = id(new PhabricatorMetaMTAReceivedMail())
         ->setHeaders(
           array(
-            'to' => $to.'+1+'.$pseudohash,
+            'to' => $raw_target,
           ));
 
       $receivers = id(new PhutilClassMapQuery())
@@ -112,7 +122,11 @@ final class PhabricatorMailManagementReceiveTestWorkflow
 
       $receiver = null;
       foreach ($receivers as $possible_receiver) {
-        if (!$possible_receiver->canAcceptMail($pseudomail)) {
+        $possible_receiver = id(clone $possible_receiver)
+          ->setViewer($viewer)
+          ->setSender($user);
+
+        if (!$possible_receiver->canAcceptMail($pseudomail, $target)) {
           continue;
         }
         $receiver = $possible_receiver;

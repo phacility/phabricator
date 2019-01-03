@@ -9,7 +9,8 @@ final class FileCreateMailReceiver
 
   protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
+    PhutilEmailAddress $target) {
+    $author = $this->getAuthor();
 
     $attachment_phids = $mail->getAttachments();
     if (empty($attachment_phids)) {
@@ -20,6 +21,11 @@ final class FileCreateMailReceiver
     }
     $first_phid = head($attachment_phids);
     $mail->setRelatedPHID($first_phid);
+
+    $sender = $this->getSender();
+    if (!$sender) {
+      return;
+    }
 
     $attachment_count = count($attachment_phids);
     if ($attachment_count > 1) {

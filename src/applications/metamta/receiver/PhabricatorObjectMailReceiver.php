@@ -29,52 +29,23 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
 
   final protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
+    PhutilEmailAddress $target) {
 
-    $object = $this->loadObjectFromMail($mail, $sender);
-    $mail->setRelatedPHID($object->getPHID());
-
-    $this->processReceivedObjectMail($mail, $object, $sender);
-
-    return $this;
-  }
-
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    $handler = $this->getTransactionReplyHandler();
-    if ($handler) {
-      return $handler
-        ->setMailReceiver($object)
-        ->setActor($sender)
-        ->setExcludeMailRecipientPHIDs($mail->loadAllRecipientPHIDs())
-        ->processEmail($mail);
+    $parts = $this->matchObjectAddress($target);
+    if (!$parts) {
+      // We should only make it here if we matched already in "canAcceptMail()",
+      // so this is a surprise.
+      throw new Exception(
+        pht(
+          'Failed to parse object address ("%s") during processing.',
+          (string)$target));
     }
 
-    throw new PhutilMethodNotImplementedException();
-  }
-
-  protected function getTransactionReplyHandler() {
-    return null;
-  }
-
-  public function loadMailReceiverObject($pattern, PhabricatorUser $viewer) {
-    return $this->loadObject($pattern, $viewer);
-  }
-
-  public function validateSender(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
-
-    parent::validateSender($mail, $sender);
-
-    $parts = $this->matchObjectAddressInMail($mail);
     $pattern = $parts['pattern'];
+    $sender = $this->getSender();
 
     try {
-      $object = $this->loadObjectFromMail($mail, $sender);
+      $object = $this->loadObject($pattern, $sender);
     } catch (PhabricatorPolicyException $policy_exception) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_POLICY_PROBLEM,
@@ -95,7 +66,6 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
     }
 
     $sender_identifier = $parts['sender'];
-
     if ($sender_identifier === 'public') {
       if (!PhabricatorEnv::getEnvConfig('metamta.public-replies')) {
         throw new PhabricatorMetaMTAReceivedMailProcessingException(
@@ -136,28 +106,50 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
           'is correct.',
           $pattern));
     }
+
+    $mail->setRelatedPHID($object->getPHID());
+    $this->processReceivedObjectMail($mail, $object, $sender);
+
+    return $this;
   }
 
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
 
-  final public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    if ($this->matchObjectAddressInMail($mail)) {
-      return true;
+    $handler = $this->getTransactionReplyHandler();
+    if ($handler) {
+      return $handler
+        ->setMailReceiver($object)
+        ->setActor($sender)
+        ->setExcludeMailRecipientPHIDs($mail->loadAllRecipientPHIDs())
+        ->processEmail($mail);
     }
 
-    return false;
+    throw new PhutilMethodNotImplementedException();
   }
 
-  private function matchObjectAddressInMail(
-    PhabricatorMetaMTAReceivedMail $mail) {
-
-    foreach ($mail->newTargetAddresses() as $address) {
-      $parts = $this->matchObjectAddress($address);
-      if ($parts) {
-        return $parts;
-      }
-    }
-
+  protected function getTransactionReplyHandler() {
     return null;
+  }
+
+  public function loadMailReceiverObject($pattern, PhabricatorUser $viewer) {
+    return $this->loadObject($pattern, $viewer);
+  }
+
+  final public function canAcceptMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhutilEmailAddress $target) {
+
+    // If we don't have a valid sender user account, we can never accept
+    // mail to any object.
+    $sender = $this->getSender();
+    if (!$sender) {
+      return false;
+    }
+
+    return (bool)$this->matchObjectAddress($target);
   }
 
   private function matchObjectAddress(PhutilEmailAddress $address) {
@@ -186,16 +178,6 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
       '$)Ui';
 
     return $regexp;
-  }
-
-  private function loadObjectFromMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
-    $parts = $this->matchObjectAddressInMail($mail);
-
-    return $this->loadObject(
-      phutil_utf8_strtoupper($parts['pattern']),
-      $sender);
   }
 
   public static function computeMailHash($mail_key, $phid) {

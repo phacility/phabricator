@@ -13,7 +13,7 @@ final class PhabricatorCalendarEventMailReceiver
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'E');
+    $id = (int)substr($pattern, 1);
 
     return id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
