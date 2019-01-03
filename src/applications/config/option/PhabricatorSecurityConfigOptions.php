@@ -170,20 +170,6 @@ EOTEXT
             'seconds of mashing on your keyboard to set it up so you might '.
             'as well.')),
        $this->newOption(
-         'phabricator.mail-key',
-         'string',
-         '5ce3e7e8787f6e40dfae861da315a5cdf1018f12')
-        ->setHidden(true)
-        ->setSummary(
-          pht('Hashed with other inputs to generate mail tokens.'))
-        ->setDescription(
-          pht(
-            "This is hashed with other inputs to generate mail tokens. If ".
-            "you want, you can change it to some other string which is ".
-            "unique to your install. In particular, you will want to do ".
-            "this if you accidentally send a bunch of mail somewhere you ".
-            "shouldn't have, to invalidate all old reply-to addresses.")),
-       $this->newOption(
         'uri.allowed-protocols',
         'set',
         array(

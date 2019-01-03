@@ -200,9 +200,9 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
   }
 
   public static function computeMailHash($mail_key, $phid) {
-    $global_mail_key = PhabricatorEnv::getEnvConfig('phabricator.mail-key');
-
-    $hash = PhabricatorHash::weakDigest($mail_key.$global_mail_key.$phid);
+    $hash = PhabricatorHash::digestWithNamedKey(
+      $mail_key.$phid,
+      'mail.object-address-key');
     return substr($hash, 0, 16);
   }
 

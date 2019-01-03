@@ -385,6 +385,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'Mail thread IDs are now generated automatically.'),
       'metamta.placeholder-to-recipient' => pht(
         'Placeholder recipients are now generated automatically.'),
+
+      'metamta.mail-key' => pht(
+        'Mail object address hash keys are now generated automatically.'),
     );
 
     return $ancient_config;
