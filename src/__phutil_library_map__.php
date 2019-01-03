@@ -2190,6 +2190,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthApplication' => 'applications/auth/application/PhabricatorAuthApplication.php',
     'PhabricatorAuthAuthFactorPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthFactorPHIDType.php',
     'PhabricatorAuthAuthProviderPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthProviderPHIDType.php',
+    'PhabricatorAuthCSRFEngine' => 'applications/auth/engine/PhabricatorAuthCSRFEngine.php',
     'PhabricatorAuthChallenge' => 'applications/auth/storage/PhabricatorAuthChallenge.php',
     'PhabricatorAuthChallengeGarbageCollector' => 'applications/auth/garbagecollector/PhabricatorAuthChallengeGarbageCollector.php',
     'PhabricatorAuthChallengePHIDType' => 'applications/auth/phid/PhabricatorAuthChallengePHIDType.php',
@@ -7828,6 +7829,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthApplication' => 'PhabricatorApplication',
     'PhabricatorAuthAuthFactorPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorAuthAuthProviderPHIDType' => 'PhabricatorPHIDType',
+    'PhabricatorAuthCSRFEngine' => 'Phobject',
     'PhabricatorAuthChallenge' => array(
       'PhabricatorAuthDAO',
       'PhabricatorPolicyInterface',

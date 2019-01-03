@@ -388,6 +388,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'metamta.mail-key' => pht(
         'Mail object address hash keys are now generated automatically.'),
+
+      'phabricator.csrf-key' => pht(
+        'CSRF HMAC keys are now managed automatically.'),
     );
 
     return $ancient_config;

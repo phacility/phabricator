@@ -154,21 +154,6 @@ EOTEXT
             pht('Multi-Factor Required'),
             pht('Multi-Factor Optional'),
           )),
-      $this->newOption(
-        'phabricator.csrf-key',
-        'string',
-        '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3')
-        ->setHidden(true)
-        ->setSummary(
-          pht('Hashed with other inputs to generate CSRF tokens.'))
-        ->setDescription(
-          pht(
-            'This is hashed with other inputs to generate CSRF tokens. If '.
-            'you want, you can change it to some other string which is '.
-            'unique to your install. This will make your install more secure '.
-            'in a vague, mostly theoretical way. But it will take you like 3 '.
-            'seconds of mashing on your keyboard to set it up so you might '.
-            'as well.')),
        $this->newOption(
         'uri.allowed-protocols',
         'set',

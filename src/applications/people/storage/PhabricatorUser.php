@@ -318,111 +318,8 @@ final class PhabricatorUser
     return Filesystem::readRandomCharacters(255);
   }
 
-  const CSRF_CYCLE_FREQUENCY  = 3600;
-  const CSRF_SALT_LENGTH      = 8;
-  const CSRF_TOKEN_LENGTH     = 16;
-  const CSRF_BREACH_PREFIX    = 'B@';
-
   const EMAIL_CYCLE_FREQUENCY = 86400;
   const EMAIL_TOKEN_LENGTH    = 24;
-
-  private function getRawCSRFToken($offset = 0) {
-    return $this->generateToken(
-      time() + (self::CSRF_CYCLE_FREQUENCY * $offset),
-      self::CSRF_CYCLE_FREQUENCY,
-      PhabricatorEnv::getEnvConfig('phabricator.csrf-key'),
-      self::CSRF_TOKEN_LENGTH);
-  }
-
-  public function getCSRFToken() {
-    if ($this->isOmnipotent()) {
-      // We may end up here when called from the daemons. The omnipotent user
-      // has no meaningful CSRF token, so just return `null`.
-      return null;
-    }
-
-    if ($this->csrfSalt === null) {
-      $this->csrfSalt = Filesystem::readRandomCharacters(
-        self::CSRF_SALT_LENGTH);
-    }
-
-    $salt = $this->csrfSalt;
-
-    // Generate a token hash to mitigate BREACH attacks against SSL. See
-    // discussion in T3684.
-    $token = $this->getRawCSRFToken();
-    $hash = PhabricatorHash::weakDigest($token, $salt);
-    return self::CSRF_BREACH_PREFIX.$salt.substr(
-        $hash, 0, self::CSRF_TOKEN_LENGTH);
-  }
-
-  public function validateCSRFToken($token) {
-    // We expect a BREACH-mitigating token. See T3684.
-    $breach_prefix = self::CSRF_BREACH_PREFIX;
-    $breach_prelen = strlen($breach_prefix);
-    if (strncmp($token, $breach_prefix, $breach_prelen) !== 0) {
-      return false;
-    }
-
-    $salt = substr($token, $breach_prelen, self::CSRF_SALT_LENGTH);
-    $token = substr($token, $breach_prelen + self::CSRF_SALT_LENGTH);
-
-    // When the user posts a form, we check that it contains a valid CSRF token.
-    // Tokens cycle each hour (every CSRF_CYCLE_FREQUENCY seconds) and we accept
-    // either the current token, the next token (users can submit a "future"
-    // token if you have two web frontends that have some clock skew) or any of
-    // the last 6 tokens. This means that pages are valid for up to 7 hours.
-    // There is also some Javascript which periodically refreshes the CSRF
-    // tokens on each page, so theoretically pages should be valid indefinitely.
-    // However, this code may fail to run (if the user loses their internet
-    // connection, or there's a JS problem, or they don't have JS enabled).
-    // Choosing the size of the window in which we accept old CSRF tokens is
-    // an issue of balancing concerns between security and usability. We could
-    // choose a very narrow (e.g., 1-hour) window to reduce vulnerability to
-    // attacks using captured CSRF tokens, but it's also more likely that real
-    // users will be affected by this, e.g. if they close their laptop for an
-    // hour, open it back up, and try to submit a form before the CSRF refresh
-    // can kick in. Since the user experience of submitting a form with expired
-    // CSRF is often quite bad (you basically lose data, or it's a big pain to
-    // recover at least) and I believe we gain little additional protection
-    // by keeping the window very short (the overwhelming value here is in
-    // preventing blind attacks, and most attacks which can capture CSRF tokens
-    // can also just capture authentication information [sniffing networks]
-    // or act as the user [xss]) the 7 hour default seems like a reasonable
-    // balance. Other major platforms have much longer CSRF token lifetimes,
-    // like Rails (session duration) and Django (forever), which suggests this
-    // is a reasonable analysis.
-    $csrf_window = 6;
-
-    for ($ii = -$csrf_window; $ii <= 1; $ii++) {
-      $valid = $this->getRawCSRFToken($ii);
-
-      $digest = PhabricatorHash::weakDigest($valid, $salt);
-      $digest = substr($digest, 0, self::CSRF_TOKEN_LENGTH);
-      if (phutil_hashes_are_identical($digest, $token)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private function generateToken($epoch, $frequency, $key, $len) {
-    if ($this->getPHID()) {
-      $vec = $this->getPHID().$this->getAccountSecret();
-    } else {
-      $vec = $this->getAlternateCSRFString();
-    }
-
-    if ($this->hasSession()) {
-      $vec = $vec.$this->getSession()->getSessionKey();
-    }
-
-    $time_block = floor($epoch / $frequency);
-    $vec = $vec.$key.$time_block;
-
-    return substr(PhabricatorHash::weakDigest($vec), 0, $len);
-  }
 
   public function getUserProfile() {
     return $this->assertAttached($this->profile);
@@ -621,15 +518,6 @@ final class PhabricatorUser
     }
 
     return (string)$uri;
-  }
-
-  public function getAlternateCSRFString() {
-    return $this->assertAttached($this->alternateCSRFString);
-  }
-
-  public function attachAlternateCSRFString($string) {
-    $this->alternateCSRFString = $string;
-    return $this;
   }
 
   /**
@@ -1214,6 +1102,58 @@ final class PhabricatorUser
 
   public function getBadgePHIDs() {
     return $this->assertAttached($this->badgePHIDs);
+  }
+
+/* -(  CSRF  )--------------------------------------------------------------- */
+
+
+  public function getCSRFToken() {
+    if ($this->isOmnipotent()) {
+      // We may end up here when called from the daemons. The omnipotent user
+      // has no meaningful CSRF token, so just return `null`.
+      return null;
+    }
+
+    return $this->newCSRFEngine()
+      ->newToken();
+  }
+
+  public function validateCSRFToken($token) {
+    return $this->newCSRFengine()
+      ->isValidToken($token);
+  }
+
+  public function getAlternateCSRFString() {
+    return $this->assertAttached($this->alternateCSRFString);
+  }
+
+  public function attachAlternateCSRFString($string) {
+    $this->alternateCSRFString = $string;
+    return $this;
+  }
+
+  private function newCSRFEngine() {
+    if ($this->getPHID()) {
+      $vec = $this->getPHID().$this->getAccountSecret();
+    } else {
+      $vec = $this->getAlternateCSRFString();
+    }
+
+    if ($this->hasSession()) {
+      $vec = $vec.$this->getSession()->getSessionKey();
+    }
+
+    $engine = new PhabricatorAuthCSRFEngine();
+
+    if ($this->csrfSalt === null) {
+      $this->csrfSalt = $engine->newSalt();
+    }
+
+    $engine
+      ->setSalt($this->csrfSalt)
+      ->setSecret(new PhutilOpaqueEnvelope($vec));
+
+    return $engine;
   }
 
 
