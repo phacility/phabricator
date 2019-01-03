@@ -1,15 +1,10 @@
 <?php
 
-final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
+final class PasteCreateMailReceiver
+  extends PhabricatorApplicationMailReceiver {
 
-  public function isEnabled() {
-    $app_class = 'PhabricatorPasteApplication';
-    return PhabricatorApplication::isClassInstalled($app_class);
-  }
-
-  public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $paste_app = new PhabricatorPasteApplication();
-    return $this->canAcceptApplicationMail($paste_app, $mail);
+  protected function newApplication() {
+    return new PhabricatorPasteApplication();
   }
 
   protected function processReceivedMail(

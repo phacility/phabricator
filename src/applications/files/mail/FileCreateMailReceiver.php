@@ -1,15 +1,10 @@
 <?php
 
-final class FileCreateMailReceiver extends PhabricatorMailReceiver {
+final class FileCreateMailReceiver
+  extends PhabricatorApplicationMailReceiver {
 
-  public function isEnabled() {
-    $app_class = 'PhabricatorFilesApplication';
-    return PhabricatorApplication::isClassInstalled($app_class);
-  }
-
-  public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $files_app = new PhabricatorFilesApplication();
-    return $this->canAcceptApplicationMail($files_app, $mail);
+  protected function newApplication() {
+    return new PhabricatorFilesApplication();
   }
 
   protected function processReceivedMail(

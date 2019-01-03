@@ -16,28 +16,6 @@ abstract class PhabricatorMailReceiver extends Phobject {
 
   abstract public function isEnabled();
   abstract public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail);
-  final protected function canAcceptApplicationMail(
-    PhabricatorApplication $app,
-    PhabricatorMetaMTAReceivedMail $mail) {
-
-    $application_emails = id(new PhabricatorMetaMTAApplicationEmailQuery())
-      ->setViewer($this->getViewer())
-      ->withApplicationPHIDs(array($app->getPHID()))
-      ->execute();
-
-    foreach ($mail->newTargetAddresses() as $address) {
-      foreach ($application_emails as $application_email) {
-        $create_address = $application_email->newAddress();
-        if (PhabricatorMailUtil::matchAddresses($create_address, $address)) {
-          $this->setApplicationEmail($application_email);
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
 
   abstract protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
