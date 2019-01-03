@@ -1958,11 +1958,19 @@ abstract class PhabricatorEditEngine
     if ($request->isAjax() && $is_preview) {
       $preview_content = $this->newCommentPreviewContent($object, $xactions);
 
+      $raw_view_data = $request->getStr('viewData');
+      try {
+        $view_data = phutil_json_decode($raw_view_data);
+      } catch (Exception $ex) {
+        $view_data = array();
+      }
+
       return id(new PhabricatorApplicationTransactionResponse())
         ->setObject($object)
         ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview)
+        ->setViewData($view_data)
         ->setPreviewContent($preview_content);
     } else {
       return id(new AphrontRedirectResponse())

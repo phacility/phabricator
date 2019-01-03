@@ -90,6 +90,8 @@ JX.behavior('comment-actions', function(config) {
     data.__preview__ = 1;
     data[input_node.name] = serialize_actions();
 
+    data.viewData = JX.JSON.stringify(config.viewData);
+
     return data;
   }
 

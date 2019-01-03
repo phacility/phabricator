@@ -391,6 +391,13 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $form->appendChild($invisi_bar);
       $form->addClass('phui-comment-has-actions');
 
+      $timeline = $this->transactionTimeline;
+
+      $view_data = array();
+      if ($timeline) {
+        $view_data = $timeline->getViewData();
+      }
+
       Javelin::initBehavior(
         'comment-actions',
         array(
@@ -405,6 +412,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'actionURI' => $this->getAction(),
           'drafts' => $draft_keys,
           'defaultButtonText' => $this->getSubmitButtonName(),
+          'viewData' => $view_data,
         ));
     }
 
