@@ -97,6 +97,7 @@ The `type` field can be used to select these third-party mailers:
   - `ses`: Use Amazon SES.
   - `sendgrid`: Use SendGrid.
   - `postmark`: Use Postmark.
+  - `sns`: Use Amazon SNS (only for sending SMS messages).
 
 It also supports these local mailers:
 
@@ -208,6 +209,15 @@ which "From" address to use by setting `metamta.default-address` in your
 config, then follow the Amazon SES verification process to verify it. You
 won't be able to send email until you do this!
 
+Mailer: Amazon SNS
+==================
+
+Amazon SNS is Amazon's cloud notification service. You can learn more at
+<http://aws.amazon.com/sns/>. Note that this mailer is only able to send
+SMS messages, not emails.
+
+To use this mailer, set `type` to `sns`, then configure the options similarly
+to the SES configuration above.
 
 Mailer: SendGrid
 ================
