@@ -88,6 +88,10 @@ final class PhabricatorMetaMTAApplicationEmail
     return $message;
   }
 
+  public function newAddress() {
+    return new PhutilEmailAddress($this->getAddress());
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

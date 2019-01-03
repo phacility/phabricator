@@ -82,6 +82,27 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this->getRawEmailAddresses(idx($this->headers, 'to'));
   }
 
+  public function newTargetAddresses() {
+    $raw_addresses = array();
+
+    foreach ($this->getToAddresses() as $raw_address) {
+      $raw_addresses[] = $raw_address;
+    }
+
+    foreach ($this->getCCAddresses() as $raw_address) {
+      $raw_addresses[] = $raw_address;
+    }
+
+    $raw_addresses = array_unique($raw_addresses);
+
+    $addresses = array();
+    foreach ($raw_addresses as $raw_address) {
+      $addresses[] = new PhutilEmailAddress($raw_address);
+    }
+
+    return $addresses;
+  }
+
   public function loadAllRecipientPHIDs() {
     $addresses = array_merge(
       $this->getToAddresses(),
