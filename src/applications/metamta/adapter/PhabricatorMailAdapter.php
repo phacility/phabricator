@@ -1,13 +1,16 @@
 <?php
 
-abstract class PhabricatorMailImplementationAdapter extends Phobject {
+abstract class PhabricatorMailAdapter
+  extends Phobject {
 
   private $key;
   private $priority;
+  private $media;
   private $options = array();
 
   private $supportsInbound = true;
   private $supportsOutbound = true;
+  private $mediaMap;
 
   final public function getAdapterType() {
     return $this->getPhobjectClassConstant('ADAPTERTYPE');
@@ -20,37 +23,67 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
       ->execute();
   }
 
+  /* abstract */ public function getSupportedMessageTypes() {
+    throw new PhutilMethodNotImplementedException();
+  }
 
-  abstract public function setFrom($email, $name = '');
-  abstract public function addReplyTo($email, $name = '');
-  abstract public function addTos(array $emails);
-  abstract public function addCCs(array $emails);
-  abstract public function addAttachment($data, $filename, $mimetype);
-  abstract public function addHeader($header_name, $header_value);
-  abstract public function setBody($plaintext_body);
-  abstract public function setHTMLBody($html_body);
-  abstract public function setSubject($subject);
-
+  /* abstract */ public function sendMessage(
+    PhabricatorMailExternalMessage $message) {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   /**
-   * Some mailers, notably Amazon SES, do not support us setting a specific
-   * Message-ID header.
+   * Return true if this adapter supports setting a "Message-ID" when sending
+   * email.
+   *
+   * This is an ugly implementation detail because mail threading is a horrible
+   * mess, implemented differently by every client in existence.
    */
-  abstract public function supportsMessageIDHeader();
+  public function supportsMessageIDHeader() {
+    return false;
+  }
 
+  final public function supportsMessageType($message_type) {
+    if ($this->mediaMap === null) {
+      $media_map = $this->getSupportedMessageTypes();
+      $media_map = array_fuse($media_map);
 
-  /**
-   * Send the message. Generally, this means connecting to some service and
-   * handing data to it.
-   *
-   * If the adapter determines that the mail will never be deliverable, it
-   * should throw a @{class:PhabricatorMetaMTAPermanentFailureException}.
-   *
-   * For temporary failures, throw some other exception or return `false`.
-   *
-   * @return bool True on success.
-   */
-  abstract public function send();
+      if ($this->media) {
+        $config_map = $this->media;
+        $config_map = array_fuse($config_map);
+
+        $media_map = array_intersect_key($media_map, $config_map);
+      }
+
+      $this->mediaMap = $media_map;
+    }
+
+    return isset($this->mediaMap[$message_type]);
+  }
+
+  final public function setMedia(array $media) {
+    $native_map = $this->getSupportedMessageTypes();
+    $native_map = array_fuse($native_map);
+
+    foreach ($media as $medium) {
+      if (!isset($native_map[$medium])) {
+        throw new Exception(
+          pht(
+            'Adapter ("%s") is configured for medium "%s", but this is not '.
+            'a supported delivery medium. Supported media are: %s.',
+            $medium,
+            implode(', ', $native_map)));
+      }
+    }
+
+    $this->media = $media;
+    $this->mediaMap = null;
+    return $this;
+  }
+
+  final public function getMedia() {
+    return $this->media;
+  }
 
   final public function setKey($key) {
     $this->key = $key;
@@ -109,19 +142,5 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
   abstract protected function validateOptions(array $options);
 
   abstract public function newDefaultOptions();
-
-  public function prepareForSend() {
-    return;
-  }
-
-  protected function renderAddress($email, $name = null) {
-    if (strlen($name)) {
-      return (string)id(new PhutilEmailAddress())
-        ->setDisplayName($name)
-        ->setAddress($email);
-    } else {
-      return $email;
-    }
-  }
 
 }

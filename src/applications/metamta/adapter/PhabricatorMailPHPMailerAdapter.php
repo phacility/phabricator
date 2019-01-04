@@ -1,46 +1,79 @@
 <?php
 
-/**
- * TODO: Should be final, but inherited by SES.
- */
-class PhabricatorMailImplementationPHPMailerLiteAdapter
-  extends PhabricatorMailImplementationAdapter {
+final class PhabricatorMailPHPMailerAdapter
+  extends PhabricatorMailAdapter {
 
-  const ADAPTERTYPE = 'sendmail';
+  const ADAPTERTYPE = 'smtp';
 
-  protected $mailer;
+  private $mailer;
 
   protected function validateOptions(array $options) {
     PhutilTypeSpec::checkMap(
       $options,
       array(
+        'host' => 'string|null',
+        'port' => 'int',
+        'user' => 'string|null',
+        'password' => 'string|null',
+        'protocol' => 'string|null',
         'encoding' => 'string',
+        'mailer' => 'string',
       ));
   }
 
   public function newDefaultOptions() {
     return array(
+      'host' => null,
+      'port' => 25,
+      'user' => null,
+      'password' => null,
+      'protocol' => null,
       'encoding' => 'base64',
+      'mailer' => 'smtp',
     );
   }
 
   /**
-   * @phutil-external-symbol class PHPMailerLite
+   * @phutil-external-symbol class PHPMailer
    */
   public function prepareForSend() {
     $root = phutil_get_library_root('phabricator');
     $root = dirname($root);
-    require_once $root.'/externals/phpmailer/class.phpmailer-lite.php';
-    $this->mailer = new PHPMailerLite($use_exceptions = true);
+    require_once $root.'/externals/phpmailer/class.phpmailer.php';
+    $this->mailer = new PHPMailer($use_exceptions = true);
     $this->mailer->CharSet = 'utf-8';
 
     $encoding = $this->getOption('encoding');
     $this->mailer->Encoding = $encoding;
 
-    // By default, PHPMailerLite sends one mail per recipient. We handle
+    // By default, PHPMailer sends one mail per recipient. We handle
     // combining or separating To and Cc higher in the stack, so tell it to
     // send mail exactly like we ask.
     $this->mailer->SingleTo = false;
+
+    $mailer = $this->getOption('mailer');
+    if ($mailer == 'smtp') {
+      $this->mailer->IsSMTP();
+      $this->mailer->Host = $this->getOption('host');
+      $this->mailer->Port = $this->getOption('port');
+      $user = $this->getOption('user');
+      if ($user) {
+        $this->mailer->SMTPAuth = true;
+        $this->mailer->Username = $user;
+        $this->mailer->Password = $this->getOption('password');
+      }
+
+      $protocol = $this->getOption('protocol');
+      if ($protocol) {
+        $protocol = phutil_utf8_strtolower($protocol);
+        $this->mailer->SMTPSecure = $protocol;
+      }
+    } else if ($mailer == 'sendmail') {
+      $this->mailer->IsSendmail();
+    } else {
+      // Do nothing, by default PHPMailer send message using PHP mail()
+      // function.
+    }
   }
 
   public function supportsMessageIDHeader() {
@@ -90,20 +123,14 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
   }
 
   public function setBody($body) {
-    $this->mailer->Body = $body;
     $this->mailer->IsHTML(false);
+    $this->mailer->Body = $body;
     return $this;
   }
 
-
-  /**
-   * Note: phpmailer-lite does NOT support sending messages with mixed version
-   * (plaintext and html). So for now lets just use HTML if it's available.
-   * @param $html
-   */
   public function setHTMLBody($html_body) {
-    $this->mailer->Body = $html_body;
     $this->mailer->IsHTML(true);
+    $this->mailer->Body = $html_body;
     return $this;
   }
 

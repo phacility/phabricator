@@ -16,7 +16,7 @@ final class PhabricatorMetaMTAPostmarkReceiveController
       array(
         'inbound' => true,
         'types' => array(
-          PhabricatorMailImplementationPostmarkAdapter::ADAPTERTYPE,
+          PhabricatorMailPostmarkAdapter::ADAPTERTYPE,
         ),
       ));
     if (!$mailers) {

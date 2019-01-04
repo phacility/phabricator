@@ -31,7 +31,7 @@ final class PhabricatorClusterMailersConfigType
       }
     }
 
-    $adapters = PhabricatorMailImplementationAdapter::getAllAdapters();
+    $adapters = PhabricatorMailAdapter::getAllAdapters();
 
     $map = array();
     foreach ($value as $index => $spec) {

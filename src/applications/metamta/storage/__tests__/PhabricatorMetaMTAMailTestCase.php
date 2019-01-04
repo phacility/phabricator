@@ -17,7 +17,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mail = new PhabricatorMetaMTAMail();
     $mail->addTos(array($phid));
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
     $mail->sendWithMailers(array($mailer));
     $this->assertEqual(
       PhabricatorMailOutboundStatus::STATUS_SENT,
@@ -28,7 +28,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mail = new PhabricatorMetaMTAMail();
     $mail->addTos(array($phid));
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
     $mailer->setFailTemporarily(true);
     try {
       $mail->sendWithMailers(array($mailer));
@@ -44,7 +44,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mail = new PhabricatorMetaMTAMail();
     $mail->addTos(array($phid));
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
     $mailer->setFailPermanently(true);
     try {
       $mail->sendWithMailers(array($mailer));
@@ -60,7 +60,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $user = $this->generateNewTestUser();
     $phid = $user->getPHID();
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
 
     $mail = new PhabricatorMetaMTAMail();
     $mail->addTos(array($phid));
@@ -182,7 +182,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $supports_message_id,
     $is_first_mail) {
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
 
     $mailer->prepareForSend(
       array(
@@ -261,10 +261,10 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $status_queue = PhabricatorMailOutboundStatus::STATUS_QUEUE;
     $status_fail = PhabricatorMailOutboundStatus::STATUS_FAIL;
 
-    $mailer1 = id(new PhabricatorMailImplementationTestAdapter())
+    $mailer1 = id(new PhabricatorMailTestAdapter())
       ->setKey('mailer1');
 
-    $mailer2 = id(new PhabricatorMailImplementationTestAdapter())
+    $mailer2 = id(new PhabricatorMailTestAdapter())
       ->setKey('mailer2');
 
     $mailers = array(
@@ -350,7 +350,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       ->setBody($string_1kb)
       ->setHTMLBody($html_1kb);
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
     $mail->sendWithMailers(array($mailer));
     $this->assertEqual(
       PhabricatorMailOutboundStatus::STATUS_SENT,
@@ -370,7 +370,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       ->setBody($string_1mb)
       ->setHTMLBody($html_1mb);
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
     $mail->sendWithMailers(array($mailer));
     $this->assertEqual(
       PhabricatorMailOutboundStatus::STATUS_SENT,
@@ -398,7 +398,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       ->setBody($string_1kb)
       ->setHTMLBody($html_1mb);
 
-    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer = new PhabricatorMailTestAdapter();
     $mail->sendWithMailers(array($mailer));
     $this->assertEqual(
       PhabricatorMailOutboundStatus::STATUS_SENT,

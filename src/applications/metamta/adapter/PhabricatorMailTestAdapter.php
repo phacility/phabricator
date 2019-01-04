@@ -4,8 +4,8 @@
  * Mail adapter that doesn't actually send any email, for writing unit tests
  * against.
  */
-final class PhabricatorMailImplementationTestAdapter
-  extends PhabricatorMailImplementationAdapter {
+final class PhabricatorMailTestAdapter
+  extends PhabricatorMailAdapter {
 
   const ADAPTERTYPE = 'test';
 

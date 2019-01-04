@@ -547,13 +547,14 @@ final class PhabricatorMetaMTAMail
         'types' => 'optional list<string>',
         'inbound' => 'optional bool',
         'outbound' => 'optional bool',
+        'media' => 'optional list<string>',
       ));
 
     $mailers = array();
 
     $config = PhabricatorEnv::getEnvConfig('cluster.mailers');
 
-    $adapters = PhabricatorMailImplementationAdapter::getAllAdapters();
+    $adapters = PhabricatorMailAdapter::getAllAdapters();
     $next_priority = -1;
 
     foreach ($config as $spec) {
@@ -582,6 +583,11 @@ final class PhabricatorMetaMTAMail
 
       $mailer->setSupportsInbound(idx($spec, 'inbound', true));
       $mailer->setSupportsOutbound(idx($spec, 'outbound', true));
+
+      $media = idx($spec, 'media');
+      if ($media !== null) {
+        $mailer->setMedia($media);
+      }
 
       $mailers[] = $mailer;
     }
@@ -613,6 +619,24 @@ final class PhabricatorMetaMTAMail
     if (!empty($constraints['outbound'])) {
       foreach ($mailers as $key => $mailer) {
         if (!$mailer->getSupportsOutbound()) {
+          unset($mailers[$key]);
+        }
+      }
+    }
+
+    // Select only the mailers which can transmit messages with requested media
+    // types.
+    if (!empty($constraints['media'])) {
+      foreach ($mailers as $key => $mailer) {
+        $supports_any = false;
+        foreach ($constraints['media'] as $medium) {
+          if ($mailer->supportsMessageType($medium)) {
+            $supports_any = true;
+            break;
+          }
+        }
+
+        if (!$supports_any) {
           unset($mailers[$key]);
         }
       }

@@ -8,8 +8,7 @@ abstract class PhabricatorMailMessageEngine
   private $actors = array();
   private $preferences;
 
-  final public function setMailer(
-    PhabricatorMailImplementationAdapter $mailer) {
+  final public function setMailer(PhabricatorMailAdapter $mailer) {
 
     $this->mailer = $mailer;
     return $this;
