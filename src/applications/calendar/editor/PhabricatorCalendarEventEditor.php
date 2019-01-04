@@ -364,7 +364,7 @@ final class PhabricatorCalendarEventEditor
       ->setEvents(array($event))
       ->writeICSDocument();
 
-    $ics_attachment = new PhabricatorMetaMTAAttachment(
+    $ics_attachment = new PhabricatorMailAttachment(
       $ics_data,
       $event->getICSFilename(),
       'text/calendar');

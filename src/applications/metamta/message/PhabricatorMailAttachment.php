@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorMetaMTAAttachment extends Phobject {
+final class PhabricatorMailAttachment extends Phobject {
 
   private $data;
   private $filename;

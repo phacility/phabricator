@@ -715,7 +715,7 @@ final class DifferentialTransactionEditor
             $name = pht('D%s.%s.patch', $object->getID(), $diff->getID());
             $mime_type = 'text/x-patch; charset=utf-8';
             $body->addAttachment(
-              new PhabricatorMetaMTAAttachment($patch, $name, $mime_type));
+              new PhabricatorMailAttachment($patch, $name, $mime_type));
           }
         }
       }

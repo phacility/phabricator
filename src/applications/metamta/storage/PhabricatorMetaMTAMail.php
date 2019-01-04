@@ -191,7 +191,7 @@ final class PhabricatorMetaMTAMail
     return $this;
   }
 
-  public function addAttachment(PhabricatorMetaMTAAttachment $attachment) {
+  public function addAttachment(PhabricatorMailAttachment $attachment) {
     $this->parameters['attachments'][] = $attachment->toDictionary();
     return $this;
   }
@@ -201,7 +201,7 @@ final class PhabricatorMetaMTAMail
 
     $result = array();
     foreach ($dicts as $dict) {
-      $result[] = PhabricatorMetaMTAAttachment::newFromDictionary($dict);
+      $result[] = PhabricatorMailAttachment::newFromDictionary($dict);
     }
     return $result;
   }
@@ -236,7 +236,7 @@ final class PhabricatorMetaMTAMail
   }
 
   public function setAttachments(array $attachments) {
-    assert_instances_of($attachments, 'PhabricatorMetaMTAAttachment');
+    assert_instances_of($attachments, 'PhabricatorMailAttachment');
     $this->setParam('attachments', mpull($attachments, 'toDictionary'));
     return $this;
   }
