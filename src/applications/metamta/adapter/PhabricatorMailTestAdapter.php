@@ -10,114 +10,124 @@ final class PhabricatorMailTestAdapter
   const ADAPTERTYPE = 'test';
 
   private $guts = array();
-  private $config = array();
+
+  private $supportsMessageID;
+  private $failPermanently;
+  private $failTemporarily;
+
+  public function setSupportsMessageID($support) {
+    $this->supportsMessageID = $support;
+    return $this;
+  }
+
+  public function setFailPermanently($fail) {
+    $this->failPermanently = true;
+    return $this;
+  }
+
+  public function setFailTemporarily($fail) {
+    $this->failTemporarily = true;
+    return $this;
+  }
+
+  public function getSupportedMessageTypes() {
+    return array(
+      PhabricatorMailEmailMessage::MESSAGETYPE,
+    );
+  }
 
   protected function validateOptions(array $options) {
-    PhutilTypeSpec::checkMap(
-      $options,
-      array());
+    PhutilTypeSpec::checkMap($options, array());
   }
 
   public function newDefaultOptions() {
     return array();
   }
 
-  public function prepareForSend(array $config = array()) {
-    $this->config = $config;
-  }
-
-  public function setFrom($email, $name = '') {
-    $this->guts['from'] = $email;
-    $this->guts['from-name'] = $name;
-    return $this;
-  }
-
-  public function addReplyTo($email, $name = '') {
-    if (empty($this->guts['reply-to'])) {
-      $this->guts['reply-to'] = array();
-    }
-    $this->guts['reply-to'][] = array(
-      'email' => $email,
-      'name'  => $name,
-    );
-    return $this;
-  }
-
-  public function addTos(array $emails) {
-    foreach ($emails as $email) {
-      $this->guts['tos'][] = $email;
-    }
-    return $this;
-  }
-
-  public function addCCs(array $emails) {
-    foreach ($emails as $email) {
-      $this->guts['ccs'][] = $email;
-    }
-    return $this;
-  }
-
-  public function addAttachment($data, $filename, $mimetype) {
-    $this->guts['attachments'][] = array(
-      'data' => $data,
-      'filename' => $filename,
-      'mimetype' => $mimetype,
-    );
-    return $this;
-  }
-
-  public function addHeader($header_name, $header_value) {
-    $this->guts['headers'][] = array($header_name, $header_value);
-    return $this;
-  }
-
-  public function setBody($body) {
-    $this->guts['body'] = $body;
-    return $this;
-  }
-
-  public function setHTMLBody($html_body) {
-    $this->guts['html-body'] = $html_body;
-    return $this;
-  }
-
-  public function setSubject($subject) {
-    $this->guts['subject'] = $subject;
-    return $this;
-  }
-
   public function supportsMessageIDHeader() {
-    return idx($this->config, 'supportsMessageIDHeader', true);
-  }
-
-  public function send() {
-    if (!empty($this->guts['fail-permanently'])) {
-      throw new PhabricatorMetaMTAPermanentFailureException(
-        pht('Unit Test (Permanent)'));
-    }
-
-    if (!empty($this->guts['fail-temporarily'])) {
-      throw new Exception(
-        pht('Unit Test (Temporary)'));
-    }
-
-    $this->guts['did-send'] = true;
-    return true;
+    return $this->supportsMessageID;
   }
 
   public function getGuts() {
     return $this->guts;
   }
 
-  public function setFailPermanently($fail) {
-    $this->guts['fail-permanently'] = $fail;
-    return $this;
+  public function sendMessage(PhabricatorMailExternalMessage $message) {
+    if ($this->failPermanently) {
+      throw new PhabricatorMetaMTAPermanentFailureException(
+        pht('Unit Test (Permanent)'));
+    }
+
+    if ($this->failTemporarily) {
+      throw new Exception(
+        pht('Unit Test (Temporary)'));
+    }
+
+    $guts = array();
+
+    $from = $message->getFromAddress();
+    $guts['from'] = (string)$from;
+
+    $reply_to = $message->getReplyToAddress();
+    if ($reply_to) {
+      $guts['reply-to'] = (string)$reply_to;
+    }
+
+    $to_addresses = $message->getToAddresses();
+    $to = array();
+    foreach ($to_addresses as $address) {
+      $to[] = (string)$address;
+    }
+    $guts['tos'] = $to;
+
+    $cc_addresses = $message->getCCAddresses();
+    $cc = array();
+    foreach ($cc_addresses as $address) {
+      $cc[] = (string)$address;
+    }
+    $guts['ccs'] = $cc;
+
+    $subject = $message->getSubject();
+    if (strlen($subject)) {
+      $guts['subject'] = $subject;
+    }
+
+    $headers = $message->getHeaders();
+    $header_list = array();
+    foreach ($headers as $header) {
+      $header_list[] = array(
+        $header->getName(),
+        $header->getValue(),
+      );
+    }
+    $guts['headers'] = $header_list;
+
+    $text_body = $message->getTextBody();
+    if (strlen($text_body)) {
+      $guts['body'] = $text_body;
+    }
+
+    $html_body = $message->getHTMLBody();
+    if (strlen($html_body)) {
+      $guts['html-body'] = $html_body;
+    }
+
+    $attachments = $message->getAttachments();
+    $file_list = array();
+    foreach ($attachments as $attachment) {
+      $file_list[] = array(
+        'data' => $attachment->getData(),
+        'filename' => $attachment->getFilename(),
+        'mimetype' => $attachment->getMimeType(),
+      );
+    }
+    $guts['attachments'] = $file_list;
+
+    $guts['did-send'] = true;
+
+    $this->guts = $guts;
   }
 
-  public function setFailTemporarily($fail) {
-    $this->guts['fail-temporarily'] = $fail;
-    return $this;
-  }
 
   public function getBody() {
     return idx($this->guts, 'body');
@@ -126,5 +136,6 @@ final class PhabricatorMailTestAdapter
   public function getHTMLBody() {
     return idx($this->guts, 'html-body');
   }
+
 
 }

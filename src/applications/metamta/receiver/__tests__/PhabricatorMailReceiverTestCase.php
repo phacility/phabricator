@@ -42,10 +42,10 @@ final class PhabricatorMailReceiverTestCase extends PhabricatorTestCase {
   }
 
   public function testReservedAddresses() {
-    $default_address = id(new PhabricatorMetaMTAMail())
+    $default_address = id(new PhabricatorMailEmailEngine())
       ->newDefaultEmailAddress();
 
-    $void_address = id(new PhabricatorMetaMTAMail())
+    $void_address = id(new PhabricatorMailEmailEngine())
       ->newVoidEmailAddress();
 
     $map = array(

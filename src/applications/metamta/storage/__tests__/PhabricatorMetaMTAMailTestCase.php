@@ -182,21 +182,29 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $supports_message_id,
     $is_first_mail) {
 
+    $user = $this->generateNewTestUser();
+    $phid = $user->getPHID();
+
     $mailer = new PhabricatorMailTestAdapter();
 
-    $mailer->prepareForSend(
-      array(
-        'supportsMessageIDHeader' => $supports_message_id,
-      ));
+    $mailer->setSupportsMessageID($supports_message_id);
 
-    $thread_id = '<somethread-12345@somedomain.tld>';
+    $thread_id = 'somethread-12345';
 
-    $mail = new PhabricatorMetaMTAMail();
-    $mail->setThreadID($thread_id, $is_first_mail);
-    $mail->sendWithMailers(array($mailer));
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->setThreadID($thread_id, $is_first_mail)
+      ->addTos(array($phid))
+      ->sendWithMailers(array($mailer));
 
     $guts = $mailer->getGuts();
-    $dict = ipull($guts['headers'], 1, 0);
+
+    $headers = idx($guts, 'headers', array());
+
+    $dict = array();
+    foreach ($headers as $header) {
+      list($name, $value) = $header;
+      $dict[$name] = $value;
+    }
 
     if ($is_first_mail && $supports_message_id) {
       $expect_message_id = true;

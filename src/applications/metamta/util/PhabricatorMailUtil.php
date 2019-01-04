@@ -93,13 +93,13 @@ final class PhabricatorMailUtil
       return true;
     }
 
-    $default_address = id(new PhabricatorMetaMTAMail())
+    $default_address = id(new PhabricatorMailEmailEngine())
       ->newDefaultEmailAddress();
     if (self::matchAddresses($address, $default_address)) {
       return true;
     }
 
-    $void_address = id(new PhabricatorMetaMTAMail())
+    $void_address = id(new PhabricatorMailEmailEngine())
       ->newVoidEmailAddress();
     if (self::matchAddresses($address, $void_address)) {
       return true;
