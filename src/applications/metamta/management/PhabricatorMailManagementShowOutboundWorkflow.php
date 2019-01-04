@@ -116,10 +116,6 @@ final class PhabricatorMailManagementShowOutboundWorkflow
 
       $headers = $message->getDeliveredHeaders();
       $unfiltered = $message->getUnfilteredHeaders();
-      if (!$unfiltered) {
-        $headers = $message->generateHeaders();
-        $unfiltered = $headers;
-      }
 
       $header_map = array();
       foreach ($headers as $header) {

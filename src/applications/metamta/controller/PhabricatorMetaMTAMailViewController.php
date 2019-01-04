@@ -187,9 +187,6 @@ final class PhabricatorMetaMTAMailViewController
       ->setStacked(true);
 
     $headers = $mail->getDeliveredHeaders();
-    if ($headers === null) {
-      $headers = $mail->generateHeaders();
-    }
 
     // Sort headers by name.
     $headers = isort($headers, 0);
