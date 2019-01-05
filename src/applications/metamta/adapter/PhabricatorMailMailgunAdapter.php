@@ -8,65 +8,10 @@ final class PhabricatorMailMailgunAdapter
 
   const ADAPTERTYPE = 'mailgun';
 
-  private $params = array();
-  private $attachments = array();
-
-  public function setFrom($email, $name = '') {
-    $this->params['from'] = $email;
-    $this->params['from-name'] = $name;
-    return $this;
-  }
-
-  public function addReplyTo($email, $name = '') {
-    if (empty($this->params['reply-to'])) {
-      $this->params['reply-to'] = array();
-    }
-    $this->params['reply-to'][] = $this->renderAddress($email, $name);
-    return $this;
-  }
-
-  public function addTos(array $emails) {
-    foreach ($emails as $email) {
-      $this->params['tos'][] = $email;
-    }
-    return $this;
-  }
-
-  public function addCCs(array $emails) {
-    foreach ($emails as $email) {
-      $this->params['ccs'][] = $email;
-    }
-    return $this;
-  }
-
-  public function addAttachment($data, $filename, $mimetype) {
-    $this->attachments[] = array(
-      'data' => $data,
-      'name' => $filename,
-      'type' => $mimetype,
+  public function getSupportedMessageTypes() {
+    return array(
+      PhabricatorMailEmailMessage::MESSAGETYPE,
     );
-
-    return $this;
-  }
-
-  public function addHeader($header_name, $header_value) {
-    $this->params['headers'][] = array($header_name, $header_value);
-    return $this;
-  }
-
-  public function setBody($body) {
-    $this->params['body'] = $body;
-    return $this;
-  }
-
-  public function setHTMLBody($html_body) {
-    $this->params['html-body'] = $html_body;
-    return $this;
-  }
-
-  public function setSubject($subject) {
-    $this->params['subject'] = $subject;
-    return $this;
   }
 
   public function supportsMessageIDHeader() {
@@ -89,48 +34,79 @@ final class PhabricatorMailMailgunAdapter
     );
   }
 
-  public function send() {
-    $key = $this->getOption('api-key');
+  public function sendMessage(PhabricatorMailExternalMessage $message) {
+    $api_key = $this->getOption('api-key');
     $domain = $this->getOption('domain');
     $params = array();
 
-    $params['to'] = implode(', ', idx($this->params, 'tos', array()));
-    $params['subject'] = idx($this->params, 'subject');
-    $params['text'] = idx($this->params, 'body');
-
-    if (idx($this->params, 'html-body')) {
-      $params['html'] = idx($this->params, 'html-body');
+    $subject = $message->getSubject();
+    if ($subject !== null) {
+      $params['subject'] = $subject;
     }
 
-    $from = idx($this->params, 'from');
-    $from_name = idx($this->params, 'from-name');
-    $params['from'] = $this->renderAddress($from, $from_name);
-
-    if (idx($this->params, 'reply-to')) {
-      $replyto = $this->params['reply-to'];
-      $params['h:reply-to'] = implode(', ', $replyto);
+    $from_address = $message->getFromAddress();
+    if ($from_address) {
+      $params['from'] = (string)$from_address;
     }
 
-    if (idx($this->params, 'ccs')) {
-      $params['cc'] = implode(', ', $this->params['ccs']);
+    $to_addresses = $message->getToAddresses();
+    if ($to_addresses) {
+      $to = array();
+      foreach ($to_addresses as $address) {
+        $to[] = (string)$address;
+      }
+      $params['to'] = implode(', ', $to);
     }
 
-    foreach (idx($this->params, 'headers', array()) as $header) {
-      list($name, $value) = $header;
-      $params['h:'.$name] = $value;
+    $cc_addresses = $message->getCCAddresses();
+    if ($cc_addresses) {
+      $cc = array();
+      foreach ($cc_addresses as $address) {
+        $cc[] = (string)$address;
+      }
+      $params['cc'] = implode(', ', $cc);
     }
 
-    $future = new HTTPSFuture(
-      "https://api:{$key}@api.mailgun.net/v2/{$domain}/messages",
-      $params);
-    $future->setMethod('POST');
+    $reply_address = $message->getReplyToAddress();
+    if ($reply_address) {
+      $params['h:reply-to'] = (string)$reply_address;
+    }
 
-    foreach ($this->attachments as $attachment) {
+    $headers = $message->getHeaders();
+    if ($headers) {
+      foreach ($headers as $header) {
+        $name = $header->getName();
+        $value = $header->getValue();
+        $params['h:'.$name] = $value;
+      }
+    }
+
+    $text_body = $message->getTextBody();
+    if ($text_body !== null) {
+      $params['text'] = $text_body;
+    }
+
+    $html_body = $message->getHTMLBody();
+    if ($html_body !== null) {
+      $params['html'] = $html_body;
+    }
+
+    $mailgun_uri = urisprintf(
+      'https://api.mailgun.net/v2/%s/messages',
+      $domain);
+
+    $future = id(new HTTPSFuture($mailgun_uri, $params))
+      ->setMethod('POST')
+      ->setHTTPBasicAuthCredentials('api', new PhutilOpaqueEnvelope($api_key))
+      ->setTimeout(60);
+
+    $attachments = $message->getAttachments();
+    foreach ($attachments as $attachment) {
       $future->attachFileData(
         'attachment',
-        $attachment['data'],
-        $attachment['name'],
-        $attachment['type']);
+        $attachment->getData(),
+        $attachment->getFilename(),
+        $attachment->getMimeType());
     }
 
     list($body) = $future->resolvex();
@@ -151,8 +127,6 @@ final class PhabricatorMailMailgunAdapter
           'Request failed with errors: %s.',
           $message));
     }
-
-    return true;
   }
 
 }
