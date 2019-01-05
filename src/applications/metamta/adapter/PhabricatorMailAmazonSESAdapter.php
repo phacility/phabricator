@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMailAmazonSESAdapter
-  extends PhabricatorMailPHPMailerLiteAdapter {
+  extends PhabricatorMailSendmailAdapter {
 
   const ADAPTERTYPE = 'ses';
 
