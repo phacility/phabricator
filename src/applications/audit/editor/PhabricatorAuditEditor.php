@@ -611,7 +611,7 @@ final class PhabricatorAuditEditor
       $commit->getCommitIdentifier());
 
     $template->addAttachment(
-      new PhabricatorMetaMTAAttachment(
+      new PhabricatorMailAttachment(
         $raw_patch,
         $commit_name.'.patch',
         'text/x-patch; charset='.$encoding));

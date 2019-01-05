@@ -141,13 +141,6 @@ custom mailers). This option is deprecated in favor of 'cluster.mailers'.
 EODOC
 ));
 
-    $placeholder_description = $this->deformat(pht(<<<EODOC
-When sending a message that has no To recipient (i.e. all recipients are CC'd),
-set the To field to the following value. If no value is set, messages with no
-To will have their CCs upgraded to To.
-EODOC
-));
-
     $public_replies_description = $this->deformat(pht(<<<EODOC
 By default, Phabricator generates unique reply-to addresses and sends a separate
 email to each recipient when you enable reply handling. This is more secure than
@@ -204,18 +197,6 @@ EODOC
         'noreply@phabricator.example.com')
         ->setDescription(pht('Default "From" address.')),
       $this->newOption(
-        'metamta.domain',
-        'string',
-        'phabricator.example.com')
-        ->setDescription(pht('Domain used to generate Message-IDs.')),
-      $this->newOption(
-        'metamta.mail-adapter',
-        'class',
-        'PhabricatorMailImplementationPHPMailerLiteAdapter')
-        ->setBaseClass('PhabricatorMailImplementationAdapter')
-        ->setSummary(pht('Control how mail is sent.'))
-        ->setDescription($adapter_description),
-      $this->newOption(
         'metamta.one-mail-per-recipient',
         'bool',
         true)
@@ -264,17 +245,6 @@ EODOC
           ))
         ->setSummary(pht('Show email preferences link in email.'))
         ->setDescription($email_preferences_description),
-      $this->newOption('metamta.insecure-auth-with-reply-to', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Allow Insecure Reply-To Auth'),
-            pht('Disallow Reply-To Auth'),
-          ))
-        ->setSummary(pht('Trust "Reply-To" headers for authentication.'))
-        ->setDescription($reply_to_description),
-      $this->newOption('metamta.placeholder-to-recipient', 'string', null)
-        ->setSummary(pht('Placeholder for mail with only CCs.'))
-        ->setDescription($placeholder_description),
       $this->newOption('metamta.public-replies', 'bool', false)
         ->setBoolOptions(
           array(

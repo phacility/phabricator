@@ -82,6 +82,27 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this->getRawEmailAddresses(idx($this->headers, 'to'));
   }
 
+  public function newTargetAddresses() {
+    $raw_addresses = array();
+
+    foreach ($this->getToAddresses() as $raw_address) {
+      $raw_addresses[] = $raw_address;
+    }
+
+    foreach ($this->getCCAddresses() as $raw_address) {
+      $raw_addresses[] = $raw_address;
+    }
+
+    $raw_addresses = array_unique($raw_addresses);
+
+    $addresses = array();
+    foreach ($raw_addresses as $raw_address) {
+      $addresses[] = new PhutilEmailAddress($raw_address);
+    }
+
+    return $addresses;
+  }
+
   public function loadAllRecipientPHIDs() {
     $addresses = array_merge(
       $this->getToAddresses(),
@@ -109,6 +130,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     try {
       $this->dropMailFromPhabricator();
       $this->dropMailAlreadyReceived();
+      $this->dropEmptyMail();
 
       $receiver = $this->loadReceiver();
       $sender = $receiver->loadSender($this);
@@ -260,6 +282,34 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $message);
   }
 
+  private function dropEmptyMail() {
+    $body = $this->getCleanTextBody();
+    $attachments = $this->getAttachments();
+
+    if (strlen($body) || $attachments) {
+      return;
+    }
+
+    // Only send an error email if the user is talking to just Phabricator.
+    // We can assume if there is only one "To" address it is a Phabricator
+    // address since this code is running and everything.
+    $is_direct_mail = (count($this->getToAddresses()) == 1) &&
+                      (count($this->getCCAddresses()) == 0);
+
+    if ($is_direct_mail) {
+      $status_code = MetaMTAReceivedMailStatus::STATUS_EMPTY;
+    } else {
+      $status_code = MetaMTAReceivedMailStatus::STATUS_EMPTY_IGNORED;
+    }
+
+    throw new PhabricatorMetaMTAReceivedMailProcessingException(
+      $status_code,
+      pht(
+        'Your message does not contain any body text or attachments, so '.
+        'Phabricator can not do anything useful with it. Make sure comment '.
+        'text appears at the top of your message: quoted replies, inline '.
+        'text, and signatures are discarded and ignored.'));
+  }
 
   /**
    * Load a concrete instance of the @{class:PhabricatorMailReceiver} which

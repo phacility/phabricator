@@ -605,6 +605,15 @@ final class PhabricatorConduitAPIController
     AphrontRequest $request,
     $method) {
 
+    $content_type = $request->getHTTPHeader('Content-Type');
+
+    if ($content_type == 'application/json') {
+      throw new Exception(
+        pht('Use form-encoded data to submit parameters to Conduit endpoints. '.
+            'Sending a JSON-encoded body and setting \'Content-Type\': '.
+            '\'application/json\' is not currently supported.'));
+    }
+
     // Look for parameters from the Conduit API Console, which are encoded
     // as HTTP POST parameters in an array, e.g.:
     //

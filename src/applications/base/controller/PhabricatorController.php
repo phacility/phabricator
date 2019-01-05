@@ -98,7 +98,8 @@ abstract class PhabricatorController extends AphrontController {
 
 
       if (!$user->isLoggedIn()) {
-        $user->attachAlternateCSRFString(PhabricatorHash::weakDigest($phsid));
+        $csrf = PhabricatorHash::digestWithNamedKey($phsid, 'csrf.alternate');
+        $user->attachAlternateCSRFString($csrf);
       }
 
       $request->setUser($user);

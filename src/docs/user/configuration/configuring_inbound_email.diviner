@@ -79,9 +79,6 @@ authenticating senders in the general case (e.g., where you are an open source
 project and need to interact with users whose email accounts you have no control
 over).
 
-If you leak a bunch of reply-to addresses by accident, you can change
-`phabricator.mail-key` in your configuration to invalidate all the old hashes.
-
 You can also set `metamta.public-replies`, which will change how Phabricator
 delivers email. Instead of sending each recipient a unique mail with a personal
 reply-to address, it will send a single email to everyone with a public reply-to
@@ -129,7 +126,7 @@ like this:
   - Add a Mailgun route with a `catch_all()` rule which takes the action
     `forward("https://phabricator.example.com/mail/mailgun/")`. Replace the
     example domain with your actual domain.
-  - Set the `mailgun.api-key` config key to your Mailgun API key.
+  - Configure a mailer in `cluster.mailers` with your Mailgun API key.
 
 Postmark Setup
 ==============

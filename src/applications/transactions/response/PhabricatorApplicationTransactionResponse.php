@@ -8,6 +8,7 @@ final class PhabricatorApplicationTransactionResponse
   private $isPreview;
   private $previewContent;
   private $object;
+  private $viewData = array();
 
   protected function buildProxy() {
     return new AphrontAjaxResponse();
@@ -56,6 +57,15 @@ final class PhabricatorApplicationTransactionResponse
     return $this->previewContent;
   }
 
+  public function setViewData(array $view_data) {
+    $this->viewData = $view_data;
+    return $this;
+  }
+
+  public function getViewData() {
+    return $this->viewData;
+  }
+
   public function reduceProxyResponse() {
     $object = $this->getObject();
     $viewer = $this->getViewer();
@@ -63,7 +73,8 @@ final class PhabricatorApplicationTransactionResponse
 
     $timeline_engine = PhabricatorTimelineEngine::newForObject($object)
       ->setViewer($viewer)
-      ->setTransactions($xactions);
+      ->setTransactions($xactions)
+      ->setViewData($this->viewData);
 
     $view = $timeline_engine->buildTimelineView();
 

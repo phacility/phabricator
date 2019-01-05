@@ -22,10 +22,6 @@ final class PhabricatorMailImplementationTestAdapter
     return array();
   }
 
-  public function newLegacyOptions() {
-    return array();
-  }
-
   public function prepareForSend(array $config = array()) {
     $this->config = $config;
   }

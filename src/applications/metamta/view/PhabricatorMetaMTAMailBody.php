@@ -155,11 +155,11 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
   /**
    * Add an attachment.
    *
-   * @param PhabricatorMetaMTAAttachment Attachment.
+   * @param PhabricatorMailAttachment Attachment.
    * @return this
    * @task compose
    */
-  public function addAttachment(PhabricatorMetaMTAAttachment $attachment) {
+  public function addAttachment(PhabricatorMailAttachment $attachment) {
     $this->attachments[] = $attachment;
     return $this;
   }
@@ -187,7 +187,7 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
   /**
    * Retrieve attachments.
    *
-   * @return list<PhabricatorMetaMTAAttachment> Attachments.
+   * @return list<PhabricatorMailAttachment> Attachments.
    * @task render
    */
   public function getAttachments() {

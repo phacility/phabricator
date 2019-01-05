@@ -191,7 +191,7 @@ final class PhabricatorMetaMTAMail
     return $this;
   }
 
-  public function addAttachment(PhabricatorMetaMTAAttachment $attachment) {
+  public function addAttachment(PhabricatorMailAttachment $attachment) {
     $this->parameters['attachments'][] = $attachment->toDictionary();
     return $this;
   }
@@ -201,7 +201,7 @@ final class PhabricatorMetaMTAMail
 
     $result = array();
     foreach ($dicts as $dict) {
-      $result[] = PhabricatorMetaMTAAttachment::newFromDictionary($dict);
+      $result[] = PhabricatorMailAttachment::newFromDictionary($dict);
     }
     return $result;
   }
@@ -236,7 +236,7 @@ final class PhabricatorMetaMTAMail
   }
 
   public function setAttachments(array $attachments) {
-    assert_instances_of($attachments, 'PhabricatorMetaMTAAttachment');
+    assert_instances_of($attachments, 'PhabricatorMailAttachment');
     $this->setParam('attachments', mpull($attachments, 'toDictionary'));
     return $this;
   }
@@ -520,53 +520,38 @@ final class PhabricatorMetaMTAMail
     $mailers = array();
 
     $config = PhabricatorEnv::getEnvConfig('cluster.mailers');
-    if ($config === null) {
-      $mailer = PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');
+
+    $adapters = PhabricatorMailImplementationAdapter::getAllAdapters();
+    $next_priority = -1;
+
+    foreach ($config as $spec) {
+      $type = $spec['type'];
+      if (!isset($adapters[$type])) {
+        throw new Exception(
+          pht(
+            'Unknown mailer ("%s")!',
+            $type));
+      }
+
+      $key = $spec['key'];
+      $mailer = id(clone $adapters[$type])
+        ->setKey($key);
+
+      $priority = idx($spec, 'priority');
+      if (!$priority) {
+        $priority = $next_priority;
+        $next_priority--;
+      }
+      $mailer->setPriority($priority);
 
       $defaults = $mailer->newDefaultOptions();
-      $options = $mailer->newLegacyOptions();
+      $options = idx($spec, 'options', array()) + $defaults;
+      $mailer->setOptions($options);
 
-      $options = $options + $defaults;
-
-      $mailer
-        ->setKey('default')
-        ->setPriority(-1)
-        ->setOptions($options);
+      $mailer->setSupportsInbound(idx($spec, 'inbound', true));
+      $mailer->setSupportsOutbound(idx($spec, 'outbound', true));
 
       $mailers[] = $mailer;
-    } else {
-      $adapters = PhabricatorMailImplementationAdapter::getAllAdapters();
-      $next_priority = -1;
-
-      foreach ($config as $spec) {
-        $type = $spec['type'];
-        if (!isset($adapters[$type])) {
-          throw new Exception(
-            pht(
-              'Unknown mailer ("%s")!',
-              $type));
-        }
-
-        $key = $spec['key'];
-        $mailer = id(clone $adapters[$type])
-          ->setKey($key);
-
-        $priority = idx($spec, 'priority');
-        if (!$priority) {
-          $priority = $next_priority;
-          $next_priority--;
-        }
-        $mailer->setPriority($priority);
-
-        $defaults = $mailer->newDefaultOptions();
-        $options = idx($spec, 'options', array()) + $defaults;
-        $mailer->setOptions($options);
-
-        $mailer->setSupportsInbound(idx($spec, 'inbound', true));
-        $mailer->setSupportsOutbound(idx($spec, 'outbound', true));
-
-        $mailers[] = $mailer;
-      }
     }
 
     // Remove mailers with the wrong types.
@@ -872,7 +857,7 @@ final class PhabricatorMetaMTAMail
           // aren't in the form "<string@domain.tld>"; this is also required
           // by RFC 2822, although some clients are more liberal in what they
           // accept.
-          $domain = PhabricatorEnv::getEnvConfig('metamta.domain');
+          $domain = $this->newMailDomain();
           $value = '<'.$value.'@'.$domain.'>';
 
           if ($is_first && $mailer->supportsMessageIDHeader()) {
@@ -1032,18 +1017,13 @@ final class PhabricatorMetaMTAMail
       return null;
     }
 
-    // Some mailers require a valid "To:" in order to deliver mail. If we
-    // don't have any "To:", try to fill it in with a placeholder "To:".
-    // If that also fails, move the "Cc:" line to "To:".
+    // Some mailers require a valid "To:" in order to deliver mail. If we don't
+    // have any "To:", fill it in with a placeholder "To:". This allows client
+    // rules based on whether the recipient is in "To:" or "CC:" to continue
+    // behaving in the same way.
     if (!$add_to) {
-      $placeholder_key = 'metamta.placeholder-to-recipient';
-      $placeholder = PhabricatorEnv::getEnvConfig($placeholder_key);
-      if ($placeholder !== null) {
-        $add_to = array($placeholder);
-      } else {
-        $add_to = $add_cc;
-        $add_cc = array();
-      }
+      $void_recipient = $this->newVoidEmailAddress();
+      $add_to = array($void_recipient->getAddress());
     }
 
     $add_to = array_unique($add_to);
@@ -1480,6 +1460,19 @@ final class PhabricatorMetaMTAMail
 
   public function getURI() {
     return '/mail/detail/'.$this->getID().'/';
+  }
+
+  private function newMailDomain() {
+    $install_uri = PhabricatorEnv::getURI('/');
+    $install_uri = new PhutilURI($install_uri);
+
+    return $install_uri->getDomain();
+  }
+
+  public function newVoidEmailAddress() {
+    $domain = $this->newMailDomain();
+    $address = "void-recipient@{$domain}";
+    return new PhutilEmailAddress($address);
   }
 
 

@@ -94,10 +94,6 @@ final class PhabricatorMailImplementationPostmarkAdapter
     );
   }
 
-  public function newLegacyOptions() {
-    return array();
-  }
-
   public function send() {
     $access_token = $this->getOption('access-token');
 

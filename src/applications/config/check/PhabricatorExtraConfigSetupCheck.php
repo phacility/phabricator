@@ -193,12 +193,15 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'in global settings.');
 
     $dashboard_reason = pht(
-        'This option has been removed, you can use Dashboards to provide '.
-        'homepage customization. See T11533 for more details.');
+      'This option has been removed, you can use Dashboards to provide '.
+      'homepage customization. See T11533 for more details.');
 
     $elastic_reason = pht(
-        'Elasticsearch is now configured with "%s".',
-        'cluster.search');
+      'Elasticsearch is now configured with "%s".',
+      'cluster.search');
+
+    $mailers_reason = pht(
+      'Inbound and outbound mail is now configured with "cluster.mailers".');
 
     $ancient_config += array(
       'phid.external-loaders' =>
@@ -354,6 +357,43 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'search.elastic.host' => $elastic_reason,
       'search.elastic.namespace' => $elastic_reason,
 
+      'metamta.mail-adapter' => $mailers_reason,
+      'amazon-ses.access-key' => $mailers_reason,
+      'amazon-ses.secret-key' => $mailers_reason,
+      'amazon-ses.endpoint' => $mailers_reason,
+      'mailgun.domain' => $mailers_reason,
+      'mailgun.api-key' => $mailers_reason,
+      'phpmailer.mailer' => $mailers_reason,
+      'phpmailer.smtp-host' => $mailers_reason,
+      'phpmailer.smtp-port' => $mailers_reason,
+      'phpmailer.smtp-protocol' => $mailers_reason,
+      'phpmailer.smtp-user' => $mailers_reason,
+      'phpmailer.smtp-password' => $mailers_reason,
+      'phpmailer.smtp-encoding' => $mailers_reason,
+      'sendgrid.api-user' => $mailers_reason,
+      'sendgrid.api-key' => $mailers_reason,
+
+      'celerity.resource-hash' => pht(
+        'This option generally did not prove useful. Resource hash keys '.
+        'are now managed automatically.'),
+      'celerity.enable-deflate' => pht(
+        'Resource deflation is now managed automatically.'),
+      'celerity.minify' => pht(
+        'Resource minification is now managed automatically.'),
+
+      'metamta.domain' => pht(
+        'Mail thread IDs are now generated automatically.'),
+      'metamta.placeholder-to-recipient' => pht(
+        'Placeholder recipients are now generated automatically.'),
+
+      'metamta.mail-key' => pht(
+        'Mail object address hash keys are now generated automatically.'),
+
+      'phabricator.csrf-key' => pht(
+        'CSRF HMAC keys are now managed automatically.'),
+
+      'metamta.insecure-auth-with-reply-to' => pht(
+        'Authenticating users based on "Reply-To" is no longer supported.'),
     );
 
     return $ancient_config;

@@ -1,15 +1,10 @@
 <?php
 
-final class DifferentialCreateMailReceiver extends PhabricatorMailReceiver {
+final class DifferentialCreateMailReceiver
+  extends PhabricatorApplicationMailReceiver {
 
-  public function isEnabled() {
-    return PhabricatorApplication::isClassInstalled(
-      'PhabricatorDifferentialApplication');
-  }
-
-  public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $differential_app = new PhabricatorDifferentialApplication();
-    return $this->canAcceptApplicationMail($differential_app, $mail);
+  protected function newApplication() {
+    return new PhabricatorDifferentialApplication();
   }
 
   protected function processReceivedMail(

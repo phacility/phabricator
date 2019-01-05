@@ -45,7 +45,6 @@ in your configuration:
   - **metamta.default-address** determines where mail is sent "From" by
     default. If your domain is `example.org`, set this to something like
     `noreply@example.org`.
-  - **metamta.domain** should be set to your domain, e.g. `example.org`.
   - **metamta.can-send-as-user** should be left as `false` in most cases,
     but see the documentation for details.
 

@@ -25,6 +25,9 @@ final class DiffusionBlameController extends DiffusionController {
         ->withRepository($repository)
         ->withIdentifiers($identifiers)
         ->needIdentities(true)
+        // See PHI1014. If identities haven't been built yet, we may need to
+        // fall back to raw commit data.
+        ->needCommitData(true)
         ->execute();
       $commits = mpull($commits, null, 'getCommitIdentifier');
     } else {

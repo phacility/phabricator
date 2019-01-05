@@ -1,15 +1,10 @@
 <?php
 
-final class PonderQuestionCreateMailReceiver extends PhabricatorMailReceiver {
+final class PonderQuestionCreateMailReceiver
+  extends PhabricatorApplicationMailReceiver {
 
-  public function isEnabled() {
-    $app_class = 'PhabricatorPonderApplication';
-    return PhabricatorApplication::isClassInstalled($app_class);
-  }
-
-  public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $ponder_app = new PhabricatorPonderApplication();
-    return $this->canAcceptApplicationMail($ponder_app, $mail);
+  protected function newApplication() {
+    return new PhabricatorPonderApplication();
   }
 
   protected function processReceivedMail(

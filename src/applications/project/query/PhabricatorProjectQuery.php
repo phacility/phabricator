@@ -200,6 +200,7 @@ final class PhabricatorProjectQuery
     return array(
       'id' => $project->getID(),
       'name' => $project->getName(),
+      'status' => $project->getStatus(),
     );
   }
 

@@ -193,7 +193,7 @@ final class PhabricatorMailManagementSendTestWorkflow
       $data = Filesystem::readFile($attachment);
       $name = basename($attachment);
       $mime = Filesystem::getMimeType($attachment);
-      $file = new PhabricatorMetaMTAAttachment($data, $name, $mime);
+      $file = new PhabricatorMailAttachment($data, $name, $mime);
       $mail->addAttachment($file);
     }
 

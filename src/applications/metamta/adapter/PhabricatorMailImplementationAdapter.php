@@ -109,7 +109,6 @@ abstract class PhabricatorMailImplementationAdapter extends Phobject {
   abstract protected function validateOptions(array $options);
 
   abstract public function newDefaultOptions();
-  abstract public function newLegacyOptions();
 
   public function prepareForSend() {
     return;
