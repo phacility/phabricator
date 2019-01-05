@@ -8,166 +8,137 @@ final class PhabricatorMailSendGridAdapter
 
   const ADAPTERTYPE = 'sendgrid';
 
-  private $params = array();
+  public function getSupportedMessageTypes() {
+    return array(
+      PhabricatorMailEmailMessage::MESSAGETYPE,
+    );
+  }
 
   protected function validateOptions(array $options) {
     PhutilTypeSpec::checkMap(
       $options,
       array(
-        'api-user' => 'string',
         'api-key' => 'string',
       ));
   }
 
   public function newDefaultOptions() {
     return array(
-      'api-user' => null,
       'api-key' => null,
     );
   }
 
-  public function setFrom($email, $name = '') {
-    $this->params['from'] = $email;
-    $this->params['from-name'] = $name;
-    return $this;
-  }
-
-  public function addReplyTo($email, $name = '') {
-    if (empty($this->params['reply-to'])) {
-      $this->params['reply-to'] = array();
-    }
-    $this->params['reply-to'][] = array(
-      'email' => $email,
-      'name'  => $name,
-    );
-    return $this;
-  }
-
-  public function addTos(array $emails) {
-    foreach ($emails as $email) {
-      $this->params['tos'][] = $email;
-    }
-    return $this;
-  }
-
-  public function addCCs(array $emails) {
-    foreach ($emails as $email) {
-      $this->params['ccs'][] = $email;
-    }
-    return $this;
-  }
-
-  public function addAttachment($data, $filename, $mimetype) {
-    if (empty($this->params['files'])) {
-      $this->params['files'] = array();
-    }
-    $this->params['files'][$filename] = $data;
-  }
-
-  public function addHeader($header_name, $header_value) {
-    $this->params['headers'][] = array($header_name, $header_value);
-    return $this;
-  }
-
-  public function setBody($body) {
-    $this->params['body'] = $body;
-    return $this;
-  }
-
-  public function setHTMLBody($body) {
-    $this->params['html-body'] = $body;
-    return $this;
-  }
-
-
-  public function setSubject($subject) {
-    $this->params['subject'] = $subject;
-    return $this;
-  }
-
-  public function supportsMessageIDHeader() {
-    return false;
-  }
-
-  public function send() {
-    $user = $this->getOption('api-user');
+  public function sendMessage(PhabricatorMailExternalMessage $message) {
     $key = $this->getOption('api-key');
 
-    $params = array();
+    $parameters = array();
 
-    $ii = 0;
-    foreach (idx($this->params, 'tos', array()) as $to) {
-      $params['to['.($ii++).']'] = $to;
+    $subject = $message->getSubject();
+    if ($subject !== null) {
+      $parameters['subject'] = $subject;
     }
 
-    $params['subject'] = idx($this->params, 'subject');
-    $params['text'] = idx($this->params, 'body');
+    $personalizations = array();
 
-    if (idx($this->params, 'html-body')) {
-      $params['html'] = idx($this->params, 'html-body');
+    $to_addresses = $message->getToAddresses();
+    if ($to_addresses) {
+      $personalizations['to'] = array();
+      foreach ($to_addresses as $address) {
+        $personalizations['to'][] = $this->newPersonalization($address);
+      }
     }
 
-    $params['from'] = idx($this->params, 'from');
-    if (idx($this->params, 'from-name')) {
-      $params['fromname'] = $this->params['from-name'];
+    $cc_addresses = $message->getCCAddresses();
+    if ($cc_addresses) {
+      $personalizations['cc'] = array();
+      foreach ($cc_addresses as $address) {
+        $personalizations['cc'][] = $this->newPersonalization($address);
+      }
     }
 
-    if (idx($this->params, 'reply-to')) {
-      $replyto = $this->params['reply-to'];
+    // This is a list of different sets of recipients who should receive copies
+    // of the mail. We handle "one message to each recipient" ourselves.
+    $parameters['personalizations'] = array(
+      $personalizations,
+    );
 
-      // Pick off the email part, no support for the name part in this API.
-      $params['replyto'] = $replyto[0]['email'];
+    $from_address = $message->getFromAddress();
+    if ($from_address) {
+      $parameters['from'] = $this->newPersonalization($from_address);
     }
 
-    foreach (idx($this->params, 'files', array()) as $name => $data) {
-      $params['files['.$name.']'] = $data;
+    $reply_address = $message->getReplyToAddress();
+    if ($reply_address) {
+      $parameters['reply_to'] = $this->newPersonalization($reply_address);
     }
 
-    $headers = idx($this->params, 'headers', array());
-
-    // See SendGrid Support Ticket #29390; there's no explicit REST API support
-    // for CC right now but it works if you add a generic "Cc" header.
-    //
-    // SendGrid said this is supported:
-    //   "You can use CC as you are trying to do there [by adding a generic
-    //    header]. It is supported despite our limited documentation to this
-    //    effect, I am glad you were able to figure it out regardless. ..."
-    if (idx($this->params, 'ccs')) {
-      $headers[] = array('Cc', implode(', ', $this->params['ccs']));
-    }
-
+    $headers = $message->getHeaders();
     if ($headers) {
-      // Convert to dictionary.
-      $headers = ipull($headers, 1, 0);
-      $headers = json_encode($headers);
-      $params['headers'] = $headers;
+      $map = array();
+      foreach ($headers as $header) {
+        $map[$header->getName()] = $header->getValue();
+      }
+      $parameters['headers'] = $map;
     }
 
-    $params['api_user'] = $user;
-    $params['api_key'] = $key;
-
-    $future = new HTTPSFuture(
-      'https://sendgrid.com/api/mail.send.json',
-      $params);
-    $future->setMethod('POST');
-
-    list($body) = $future->resolvex();
-
-    $response = null;
-    try {
-      $response = phutil_json_decode($body);
-    } catch (PhutilJSONParserException $ex) {
-      throw new PhutilProxyException(
-        pht('Failed to JSON decode response.'),
-        $ex);
+    $content = array();
+    $text_body = $message->getTextBody();
+    if ($text_body !== null) {
+      $content[] = array(
+        'type' => 'text/plain',
+        'value' => $text_body,
+      );
     }
 
-    if ($response['message'] !== 'success') {
-      $errors = implode(';', $response['errors']);
-      throw new Exception(pht('Request failed with errors: %s.', $errors));
+    $html_body = $message->getHTMLBody();
+    if ($html_body !== null) {
+      $content[] = array(
+        'type' => 'text/html',
+        'value' => $html_body,
+      );
+    }
+    $parameters['content'] = $content;
+
+    $attachments = $message->getAttachments();
+    if ($attachments) {
+      $files = array();
+      foreach ($attachments as $attachment) {
+        $files[] = array(
+          'content' => base64_encode($attachment->getData()),
+          'type' => $attachment->getMimeType(),
+          'filename' => $attachment->getFilename(),
+          'disposition' => 'attachment',
+        );
+      }
+      $parameters['attachments'] = $files;
     }
 
-    return true;
+    $sendgrid_uri = 'https://api.sendgrid.com/v3/mail/send';
+    $json_parameters = phutil_json_encode($parameters);
+
+    id(new HTTPSFuture($sendgrid_uri))
+      ->setMethod('POST')
+      ->addHeader('Authorization', "Bearer {$key}")
+      ->addHeader('Content-Type', 'application/json')
+      ->setData($json_parameters)
+      ->setTimeout(60)
+      ->resolvex();
+
+    // The SendGrid v3 API does not return a JSON response body. We get a
+    // non-2XX HTTP response in the case of an error, which throws above.
+  }
+
+  private function newPersonalization(PhutilEmailAddress $address) {
+    $result = array(
+      'email' => $address->getAddress(),
+    );
+
+    $display_name = $address->getDisplayName();
+    if ($display_name) {
+      $result['name'] = $display_name;
+    }
+
+    return $result;
   }
 
 }
