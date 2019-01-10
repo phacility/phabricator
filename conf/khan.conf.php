@@ -69,6 +69,12 @@ return array(
   'metamta.default-address' => 'noreply@phabricator.khanacademy.org',
   'metamta.can-send-as-user'    => true,
   'metamta.user-address-format' => 'short',
+  'cluster.mailers' => array(
+    array(
+      "key" => "khan-mailer",
+      "type" => "sendmail",
+    )
+  ),
 
   // Connection information for MySQL.
   'mysql.host' => 'localhost',
