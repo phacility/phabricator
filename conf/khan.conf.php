@@ -67,7 +67,6 @@ return array(
 
   // Basic email domain configuration.
   'metamta.default-address' => 'noreply@phabricator.khanacademy.org',
-  'metamta.domain'          => 'phabricator.khanacademy.org',
   'metamta.can-send-as-user'    => true,
   'metamta.user-address-format' => 'short',
 
@@ -78,7 +77,6 @@ return array(
 
   // Global phabricator options, such as the timezone for khan academy.
   'phabricator.timezone'    => 'America/Los_Angeles',
-  'phabricator.csrf-key'    => '0016ee009c31da52bc9044dd5a989ff1ec6da80',
 
   // source-code highlighting is the bomb
   'pygments.enabled'            => true,
