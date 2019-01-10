@@ -25,7 +25,8 @@ final class DiffusionRepositoryEditActivateController
       }
 
       $xaction = id(new PhabricatorRepositoryTransaction())
-        ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_ACTIVATE)
+        ->setTransactionType(
+          PhabricatorRepositoryActivateTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       $editor = id(new PhabricatorRepositoryEditor())

@@ -189,18 +189,8 @@ final class PhabricatorPackagesPackage
     return new PhabricatorPackagesPackageEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorPackagesPackageTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
   }
 
 

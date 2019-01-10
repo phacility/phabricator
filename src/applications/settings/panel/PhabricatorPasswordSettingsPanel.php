@@ -121,7 +121,8 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
         id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
           $user,
-          $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
+          new PhutilOpaqueEnvelope(
+            $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
 
         return id(new AphrontRedirectResponse())->setURI($next);
       }

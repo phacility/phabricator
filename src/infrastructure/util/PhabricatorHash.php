@@ -187,6 +187,16 @@ final class PhabricatorHash extends Phobject {
   }
 
   public static function digestHMACSHA256($message, $key) {
+    if (!is_string($message)) {
+      throw new Exception(
+        pht('HMAC-SHA256 can only digest strings.'));
+    }
+
+    if (!is_string($key)) {
+      throw new Exception(
+        pht('HMAC-SHA256 keys must be strings.'));
+    }
+
     if (!strlen($key)) {
       throw new Exception(
         pht('HMAC-SHA256 requires a nonempty key.'));
@@ -194,7 +204,9 @@ final class PhabricatorHash extends Phobject {
 
     $result = hash_hmac('sha256', $message, $key, $raw_output = false);
 
-    if ($result === false) {
+    // Although "hash_hmac()" is documented as returning `false` when it fails,
+    // it can also return `null` if you pass an object as the "$message".
+    if ($result === false || $result === null) {
       throw new Exception(
         pht('Unable to compute HMAC-SHA256 digest of message.'));
     }

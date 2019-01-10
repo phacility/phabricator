@@ -126,7 +126,7 @@ final class PhabricatorBadgesEditEngine
         ->setValue($object->getDescription()),
       id(new PhabricatorUsersEditField())
         ->setKey('award')
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setDescription(pht('New badge award recipients.'))
         ->setConduitTypeDescription(pht('New badge award recipients.'))
         ->setTransactionType(
@@ -134,7 +134,7 @@ final class PhabricatorBadgesEditEngine
         ->setLabel(pht('Award Recipients')),
       id(new PhabricatorUsersEditField())
         ->setKey('revoke')
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setDescription(pht('Revoke badge award recipients.'))
         ->setConduitTypeDescription(pht('Revoke badge award recipients.'))
         ->setTransactionType(

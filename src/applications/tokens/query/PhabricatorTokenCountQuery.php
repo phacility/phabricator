@@ -24,17 +24,17 @@ final class PhabricatorTokenCountQuery
     return ipull($rows, 'tokenCount', 'objectPHID');
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->objectPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'objectPHID IN (%Ls)',
         $this->objectPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
 }

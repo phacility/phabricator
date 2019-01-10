@@ -62,6 +62,10 @@ final class PhabricatorEditEngineConfigurationReorderController
 
     $key_order = array();
     foreach ($fields as $field) {
+      if (!$field->getIsFormField()) {
+        continue;
+      }
+
       if (!$field->getIsReorderable()) {
         continue;
       }

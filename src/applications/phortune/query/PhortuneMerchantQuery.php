@@ -28,20 +28,12 @@ final class PhortuneMerchantQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhortuneMerchant();
+  }
+
   protected function loadPage() {
-    $table = new PhortuneMerchant();
-    $conn = $table->establishConnection('r');
-
-    $rows = queryfx_all(
-      $conn,
-      'SELECT m.* FROM %T m %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn),
-      $this->buildWhereClause($conn),
-      $this->buildOrderClause($conn),
-      $this->buildLimitClause($conn));
-
-    return $table->loadAllFromArray($rows);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $merchants) {
@@ -88,8 +80,8 @@ final class PhortuneMerchantQuery
     return $merchants;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
@@ -112,13 +104,11 @@ final class PhortuneMerchantQuery
         $this->memberPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->memberPHIDs !== null) {
       $joins[] = qsprintf(
@@ -128,11 +118,15 @@ final class PhortuneMerchantQuery
         PhortuneMerchantHasMemberEdgeType::EDGECONST);
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPhortuneApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'm';
   }
 
 }

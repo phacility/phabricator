@@ -35,14 +35,20 @@ final class HeraldWebhookWorker
     // If we're in silent mode, permanently fail the webhook request and then
     // return to complete this task.
     if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
-      $this->failRequest($request, 'hook', 'silent');
+      $this->failRequest(
+        $request,
+        HeraldWebhookRequest::ERRORTYPE_HOOK,
+        HeraldWebhookRequest::ERROR_SILENT);
       return;
     }
 
     $hook = $request->getWebhook();
 
     if ($hook->isDisabled()) {
-      $this->failRequest($request, 'hook', 'disabled');
+      $this->failRequest(
+        $request,
+        HeraldWebhookRequest::ERRORTYPE_HOOK,
+        HeraldWebhookRequest::ERROR_DISABLED);
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
           'Associated hook ("%s") for webhook request ("%s") is disabled.',
@@ -59,7 +65,10 @@ final class HeraldWebhookWorker
           'https',
         ));
     } catch (Exception $ex) {
-      $this->failRequest($request, 'hook', 'uri');
+      $this->failRequest(
+        $request,
+        HeraldWebhookRequest::ERRORTYPE_HOOK,
+        HeraldWebhookRequest::ERROR_URI);
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
           'Associated hook ("%s") for webhook request ("%s") has invalid '.
@@ -76,7 +85,11 @@ final class HeraldWebhookWorker
       ->withPHIDs(array($object_phid))
       ->executeOne();
     if (!$object) {
-      $this->failRequest($request, 'hook', 'object');
+      $this->failRequest(
+        $request,
+        HeraldWebhookRequest::ERRORTYPE_HOOK,
+        HeraldWebhookRequest::ERROR_OBJECT);
+
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
           'Unable to load object ("%s") for webhook request ("%s").',
@@ -182,9 +195,9 @@ final class HeraldWebhookWorker
     list($status) = $future->resolve();
 
     if ($status->isTimeout()) {
-      $error_type = 'timeout';
+      $error_type = HeraldWebhookRequest::ERRORTYPE_TIMEOUT;
     } else {
-      $error_type = 'http';
+      $error_type = HeraldWebhookRequest::ERRORTYPE_HTTP;
     }
     $error_code = $status->getStatusCode();
 

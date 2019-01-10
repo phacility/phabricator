@@ -82,7 +82,7 @@ access to fix any mistakes.
 attacker who has gained access to an administrator account in order to gain
 greater access.
 
-For example, an attacker who could modify `metamta.mail-adapter` (and other
+For example, an attacker who could modify `cluster.mailers` (and other
 similar options), could potentially reconfigure Phabricator to send mail
 through an evil server they controlled, then trigger password resets on other
 user accounts to compromise them.

@@ -126,7 +126,7 @@ final class PhameBlogEditEngine
         ->setKey('status')
         ->setLabel(pht('Status'))
         ->setTransactionType(PhameBlogStatusTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setOptions(PhameBlog::getStatusNameMap())
         ->setDescription(pht('Active or archived status.'))
         ->setConduitDescription(pht('Active or archive the blog.'))

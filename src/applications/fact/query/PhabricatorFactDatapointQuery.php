@@ -158,7 +158,7 @@ final class PhabricatorFactDatapointQuery extends Phobject {
         $this->dimensionMap);
     }
 
-    $where = '('.implode(') AND (', $where).')';
+    $where = qsprintf($conn, '%LA', $where);
 
     if ($this->limit) {
       $limit = qsprintf(
@@ -166,7 +166,7 @@ final class PhabricatorFactDatapointQuery extends Phobject {
         'LIMIT %d',
         $this->limit);
     } else {
-      $limit = '';
+      $limit = qsprintf($conn, '');
     }
 
     return queryfx_all(

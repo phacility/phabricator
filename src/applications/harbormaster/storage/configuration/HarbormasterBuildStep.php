@@ -121,19 +121,8 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     return new HarbormasterBuildStepEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new HarbormasterBuildStepTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
   }
 
 

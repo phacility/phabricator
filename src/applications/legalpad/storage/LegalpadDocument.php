@@ -120,7 +120,7 @@ final class LegalpadDocument extends LegalpadDAO
     return 'L'.$this->getID();
   }
 
-  public function getViewURI() {
+  public function getURI() {
     return '/'.$this->getMonogram();
   }
 
@@ -209,19 +209,8 @@ final class LegalpadDocument extends LegalpadDAO
     return new LegalpadDocumentEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new LegalpadTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
   }
 
 

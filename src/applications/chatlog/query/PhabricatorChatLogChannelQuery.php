@@ -33,14 +33,14 @@ final class PhabricatorChatLogChannelQuery
     return $logs;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
     if ($this->channelIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->channelIDs);
 
@@ -48,12 +48,12 @@ final class PhabricatorChatLogChannelQuery
 
     if ($this->channels) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'channelName IN (%Ls)',
         $this->channels);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

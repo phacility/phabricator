@@ -85,7 +85,7 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
       queryfx(
         $conn_w,
         'INSERT INTO %T (userPHID, cacheIndex, cacheKey, cacheData, cacheType)
-          VALUES %Q
+          VALUES %LQ
           ON DUPLICATE KEY UPDATE
             cacheData = VALUES(cacheData),
             cacheType = VALUES(cacheType)',

@@ -35,16 +35,25 @@ final class PhabricatorApplicationPolicyChangeTransaction
 
     $editor = $this->getEditor();
     $content_source = $editor->getContentSource();
+
+    // NOTE: We allow applications to have custom edit policies, but they are
+    // currently stored in the Config application. The ability to edit Config
+    // values is always restricted to administrators, today. Empower this
+    // particular edit to punch through possible stricter policies, so normal
+    // users can change application configuration if the application allows
+    // them to do so.
+
     PhabricatorConfigEditor::storeNewValue(
-      $user,
+      PhabricatorUser::getOmnipotentUser(),
       $config_entry,
       $current_value,
-      $content_source);
+      $content_source,
+      $user->getPHID());
   }
 
   public function getTitle() {
-    $old = $this->renderPolicy($this->getOldValue());
-    $new = $this->renderPolicy($this->getNewValue());
+    $old = $this->renderApplicationPolicy($this->getOldValue());
+    $new = $this->renderApplicationPolicy($this->getNewValue());
 
     return pht(
       '%s changed the "%s" policy from "%s" to "%s".',
@@ -55,8 +64,8 @@ final class PhabricatorApplicationPolicyChangeTransaction
   }
 
   public function getTitleForFeed() {
-    $old = $this->renderPolicy($this->getOldValue());
-    $new = $this->renderPolicy($this->getNewValue());
+    $old = $this->renderApplicationPolicy($this->getOldValue());
+    $new = $this->renderApplicationPolicy($this->getNewValue());
 
     return pht(
       '%s changed the "%s" policy for application %s from "%s" to "%s".',
@@ -156,7 +165,7 @@ final class PhabricatorApplicationPolicyChangeTransaction
     return $errors;
   }
 
-  private function renderPolicy($name) {
+  private function renderApplicationPolicy($name) {
     $policies = $this->getAllPolicies();
     if (empty($policies[$name])) {
       // Not a standard policy, check for a custom policy.

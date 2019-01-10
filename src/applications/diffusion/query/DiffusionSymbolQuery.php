@@ -192,52 +192,52 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   /**
    * @task internal
    */
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if (isset($this->context)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'symbolContext = %s',
         $this->context);
     }
 
     if ($this->name) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'symbolName = %s',
         $this->name);
     }
 
     if ($this->namePrefix) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'symbolName LIKE %>',
         $this->namePrefix);
     }
 
     if ($this->repositoryPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
     if ($this->language) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'symbolLanguage = %s',
         $this->language);
     }
 
     if ($this->type) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'symbolType = %s',
         $this->type);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
 

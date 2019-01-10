@@ -416,7 +416,26 @@ final class PhabricatorAuthRegisterController
             }
 
             if ($is_setup) {
-              $editor->makeAdminUser($user, true);
+              $xactions = array();
+              $xactions[] = id(new PhabricatorUserTransaction())
+                ->setTransactionType(
+                  PhabricatorUserEmpowerTransaction::TRANSACTIONTYPE)
+                ->setNewValue(true);
+
+              $actor = PhabricatorUser::getOmnipotentUser();
+              $content_source = PhabricatorContentSource::newFromRequest(
+                $request);
+
+              $people_application_phid = id(new PhabricatorPeopleApplication())
+                ->getPHID();
+
+              $transaction_editor = id(new PhabricatorUserTransactionEditor())
+                ->setActor($actor)
+                ->setActingAsPHID($people_application_phid)
+                ->setContentSource($content_source)
+                ->setContinueOnMissingFields(true);
+
+              $transaction_editor->applyTransactions($user, $xactions);
             }
 
             $account->setUserPHID($user->getPHID());

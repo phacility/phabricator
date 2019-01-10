@@ -5,6 +5,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
   private $ids;
   private $phids;
   private $resourcePHIDs;
+  private $ownerPHIDs;
   private $statuses;
   private $datasourceQuery;
   private $needUnconsumedCommands;
@@ -21,6 +22,11 @@ final class DrydockLeaseQuery extends DrydockQuery {
 
   public function withResourcePHIDs(array $phids) {
     $this->resourcePHIDs = $phids;
+    return $this;
+  }
+
+  public function withOwnerPHIDs(array $phids) {
+    $this->ownerPHIDs = $phids;
     return $this;
   }
 
@@ -103,6 +109,13 @@ final class DrydockLeaseQuery extends DrydockQuery {
         $conn,
         'resourcePHID IN (%Ls)',
         $this->resourcePHIDs);
+    }
+
+    if ($this->ownerPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'ownerPHID IN (%Ls)',
+        $this->ownerPHIDs);
     }
 
     if ($this->ids !== null) {

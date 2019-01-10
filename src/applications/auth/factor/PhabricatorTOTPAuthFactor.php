@@ -2,6 +2,8 @@
 
 final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
+  const DIGEST_TEMPORARY_KEY = 'mfa.totp.sync';
+
   public function getFactorKey() {
     return 'totp';
   }
@@ -34,12 +36,16 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       // (We store and verify the hash of the key, not the key itself, to limit
       // how useful the data in the table is to an attacker.)
 
+      $token_code = PhabricatorHash::digestWithNamedKey(
+        $key,
+        self::DIGEST_TEMPORARY_KEY);
+
       $temporary_token = id(new PhabricatorAuthTemporaryTokenQuery())
         ->setViewer($user)
         ->withTokenResources(array($user->getPHID()))
         ->withTokenTypes(array($totp_token_type))
         ->withExpired(false)
-        ->withTokenCodes(array(PhabricatorHash::weakDigest($key)))
+        ->withTokenCodes(array($token_code))
         ->executeOne();
       if (!$temporary_token) {
         // If we don't have a matching token, regenerate the key below.
@@ -53,12 +59,16 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       // Mark this key as one we generated, so the user is allowed to submit
       // a response for it.
 
+      $token_code = PhabricatorHash::digestWithNamedKey(
+        $key,
+        self::DIGEST_TEMPORARY_KEY);
+
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         id(new PhabricatorAuthTemporaryToken())
           ->setTokenResource($user->getPHID())
           ->setTokenType($totp_token_type)
           ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
-          ->setTokenCode(PhabricatorHash::weakDigest($key))
+          ->setTokenCode($token_code)
           ->save();
       unset($unguarded);
     }
@@ -67,8 +77,8 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
     $e_code = true;
     if ($request->getExists('totp')) {
-      $okay = self::verifyTOTPCode(
-        $user,
+      $okay = (bool)$this->getTimestepAtWhichResponseIsValid(
+        $this->getAllowedTimesteps($this->getCurrentTimestep()),
         new PhutilOpaqueEnvelope($key),
         $code);
 
@@ -140,76 +150,228 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
   }
 
+  protected function newIssuedChallenges(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    array $challenges) {
+
+    $current_step = $this->getCurrentTimestep();
+
+    // If we already issued a valid challenge, don't issue a new one.
+    if ($challenges) {
+      return array();
+    }
+
+    // Otherwise, generate a new challenge for the current timestep and compute
+    // the TTL.
+
+    // When computing the TTL, note that we accept codes within a certain
+    // window of the challenge timestep to account for clock skew and users
+    // needing time to enter codes.
+
+    // We don't want this challenge to expire until after all valid responses
+    // to it are no longer valid responses to any other challenge we might
+    // issue in the future. If the challenge expires too quickly, we may issue
+    // a new challenge which can accept the same TOTP code response.
+
+    // This means that we need to keep this challenge alive for double the
+    // window size: if we're currently at timestep 3, the user might respond
+    // with the code for timestep 5. This is valid, since timestep 5 is within
+    // the window for timestep 3.
+
+    // But the code for timestep 5 can be used to respond at timesteps 3, 4, 5,
+    // 6, and 7. To prevent any valid response to this challenge from being
+    // used again, we need to keep this challenge active until timestep 8.
+
+    $window_size = $this->getTimestepWindowSize();
+    $step_duration = $this->getTimestepDuration();
+
+    $ttl_steps = ($window_size * 2) + 1;
+    $ttl_seconds = ($ttl_steps * $step_duration);
+
+    return array(
+      $this->newChallenge($config, $viewer)
+        ->setChallengeKey($current_step)
+        ->setChallengeTTL(PhabricatorTime::getNow() + $ttl_seconds),
+    );
+  }
+
   public function renderValidateFactorForm(
     PhabricatorAuthFactorConfig $config,
     AphrontFormView $form,
     PhabricatorUser $viewer,
-    $validation_result) {
+    PhabricatorAuthFactorResult $result) {
 
-    if (!$validation_result) {
-      $validation_result = array();
+    $control = $this->newAutomaticControl($result);
+    if (!$control) {
+      $value = $result->getValue();
+      $error = $result->getErrorMessage();
+      $name = $this->getChallengeResponseParameterName($config);
+
+      $control = id(new PHUIFormNumberControl())
+        ->setName($name)
+        ->setDisableAutocomplete(true)
+        ->setValue($value)
+        ->setError($error);
     }
 
-    $form->appendChild(
-      id(new PHUIFormNumberControl())
-        ->setName($this->getParameterName($config, 'totpcode'))
-        ->setLabel(pht('App Code'))
-        ->setDisableAutocomplete(true)
-        ->setCaption(pht('Factor Name: %s', $config->getFactorName()))
-        ->setValue(idx($validation_result, 'value'))
-        ->setError(idx($validation_result, 'error', true)));
+    $control
+      ->setLabel(pht('App Code'))
+      ->setCaption(pht('Factor Name: %s', $config->getFactorName()));
+
+    $form->appendChild($control);
   }
 
-  public function processValidateFactorForm(
+  public function getRequestHasChallengeResponse(
     PhabricatorAuthFactorConfig $config,
-    PhabricatorUser $viewer,
     AphrontRequest $request) {
 
-    $code = $request->getStr($this->getParameterName($config, 'totpcode'));
-    $key = new PhutilOpaqueEnvelope($config->getFactorSecret());
-
-    if (self::verifyTOTPCode($viewer, $key, $code)) {
-      return array(
-        'error' => null,
-        'value' => $code,
-        'valid' => true,
-      );
-    } else {
-      return array(
-        'error' => strlen($code) ? pht('Invalid') : pht('Required'),
-        'value' => $code,
-        'valid' => false,
-      );
-    }
+    $value = $this->getChallengeResponseFromRequest($config, $request);
+    return (bool)strlen($value);
   }
 
 
-  public static function generateNewTOTPKey() {
-    return strtoupper(Filesystem::readRandomCharacters(16));
-  }
+  protected function newResultFromIssuedChallenges(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    array $challenges) {
 
-  public static function verifyTOTPCode(
-    PhabricatorUser $user,
-    PhutilOpaqueEnvelope $key,
-    $code) {
+    // If we've already issued a challenge at the current timestep or any
+    // nearby timestep, require that it was issued to the current session.
+    // This is defusing attacks where you (broadly) look at someone's phone
+    // and type the code in more quickly than they do.
+    $session_phid = $viewer->getSession()->getPHID();
+    $now = PhabricatorTime::getNow();
 
-    $now = (int)(time() / 30);
+    $engine = $config->getSessionEngine();
+    $workflow_key = $engine->getWorkflowKey();
 
-    // Allow the user to enter a code a few minutes away on either side, in
-    // case the server or client has some clock skew.
-    for ($offset = -2; $offset <= 2; $offset++) {
-      $real = self::getTOTPCode($key, $now + $offset);
-      if (phutil_hashes_are_identical($real, $code)) {
-        return true;
+    $current_timestep = $this->getCurrentTimestep();
+
+    foreach ($challenges as $challenge) {
+      $challenge_timestep = (int)$challenge->getChallengeKey();
+      $wait_duration = ($challenge->getChallengeTTL() - $now) + 1;
+
+      if ($challenge->getSessionPHID() !== $session_phid) {
+        return $this->newResult()
+          ->setIsWait(true)
+          ->setErrorMessage(
+            pht(
+              'This factor recently issued a challenge to a different login '.
+              'session. Wait %s second(s) for the code to cycle, then try '.
+              'again.',
+              new PhutilNumber($wait_duration)));
+      }
+
+      if ($challenge->getWorkflowKey() !== $workflow_key) {
+        return $this->newResult()
+          ->setIsWait(true)
+          ->setErrorMessage(
+            pht(
+              'This factor recently issued a challenge for a different '.
+              'workflow. Wait %s second(s) for the code to cycle, then try '.
+              'again.',
+              new PhutilNumber($wait_duration)));
+      }
+
+      // If the current realtime timestep isn't a valid response to the current
+      // challenge but the challenge hasn't expired yet, we're locking out
+      // the factor to prevent challenge windows from overlapping. Let the user
+      // know that they should wait for a new challenge.
+      $challenge_timesteps = $this->getAllowedTimesteps($challenge_timestep);
+      if (!isset($challenge_timesteps[$current_timestep])) {
+        return $this->newResult()
+          ->setIsWait(true)
+          ->setErrorMessage(
+            pht(
+              'This factor recently issued a challenge which has expired. '.
+              'A new challenge can not be issued yet. Wait %s second(s) for '.
+              'the code to cycle, then try again.',
+              new PhutilNumber($wait_duration)));
+      }
+
+      if ($challenge->getIsReusedChallenge()) {
+        return $this->newResult()
+          ->setIsWait(true)
+          ->setErrorMessage(
+            pht(
+              'You recently provided a response to this factor. Responses '.
+              'may not be reused. Wait %s second(s) for the code to cycle, '.
+              'then try again.',
+              new PhutilNumber($wait_duration)));
       }
     }
 
-    // TODO: After validating a code, this should mark it as used and prevent
-    // it from being reused.
-
-    return false;
+    return null;
   }
 
+  protected function newResultFromChallengeResponse(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    array $challenges) {
+
+    $code = $this->getChallengeResponseFromRequest(
+      $config,
+      $request);
+
+    $result = $this->newResult()
+      ->setValue($code);
+
+    // We expect to reach TOTP validation with exactly one valid challenge.
+    if (count($challenges) !== 1) {
+      throw new Exception(
+        pht(
+          'Reached TOTP challenge validation with an unexpected number of '.
+          'unexpired challenges (%d), expected exactly one.',
+          phutil_count($challenges)));
+    }
+
+    $challenge = head($challenges);
+
+    // If the client has already provided a valid answer to this challenge and
+    // submitted a token proving they answered it, we're all set.
+    if ($challenge->getIsAnsweredChallenge()) {
+      return $result->setAnsweredChallenge($challenge);
+    }
+
+    $challenge_timestep = (int)$challenge->getChallengeKey();
+    $current_timestep = $this->getCurrentTimestep();
+
+    $challenge_timesteps = $this->getAllowedTimesteps($challenge_timestep);
+    $current_timesteps = $this->getAllowedTimesteps($current_timestep);
+
+    // We require responses be both valid for the challenge and valid for the
+    // current timestep. A longer challenge TTL doesn't let you use older
+    // codes for a longer period of time.
+    $valid_timestep = $this->getTimestepAtWhichResponseIsValid(
+      array_intersect_key($challenge_timesteps, $current_timesteps),
+      new PhutilOpaqueEnvelope($config->getFactorSecret()),
+      $code);
+
+    if ($valid_timestep) {
+      $ttl = PhabricatorTime::getNow() + 60;
+
+      $challenge
+        ->setProperty('totp.timestep', $valid_timestep)
+        ->markChallengeAsAnswered($ttl);
+
+      $result->setAnsweredChallenge($challenge);
+    } else {
+      if (strlen($code)) {
+        $error_message = pht('Invalid');
+      } else {
+        $error_message = pht('Required');
+      }
+      $result->setErrorMessage($error_message);
+    }
+
+    return $result;
+  }
+
+  public static function generateNewTOTPKey() {
+    return strtoupper(Filesystem::readRandomCharacters(32));
+  }
 
   public static function base32Decode($buf) {
     $buf = strtoupper($buf);
@@ -303,4 +465,58 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       $rows);
   }
 
+  private function getTimestepDuration() {
+    return 30;
+  }
+
+  private function getCurrentTimestep() {
+    $duration = $this->getTimestepDuration();
+    return (int)(PhabricatorTime::getNow() / $duration);
+  }
+
+  private function getAllowedTimesteps($at_timestep) {
+    $window = $this->getTimestepWindowSize();
+    $range = range($at_timestep - $window, $at_timestep + $window);
+    return array_fuse($range);
+  }
+
+  private function getTimestepWindowSize() {
+    // The user is allowed to provide a code from the recent past or the
+    // near future to account for minor clock skew between the client
+    // and server, and the time it takes to actually enter a code.
+    return 1;
+  }
+
+  private function getTimestepAtWhichResponseIsValid(
+    array $timesteps,
+    PhutilOpaqueEnvelope $key,
+    $code) {
+
+    foreach ($timesteps as $timestep) {
+      $expect_code = self::getTOTPCode($key, $timestep);
+      if (phutil_hashes_are_identical($code, $expect_code)) {
+        return $timestep;
+      }
+    }
+
+    return null;
+  }
+
+  private function getChallengeResponseParameterName(
+    PhabricatorAuthFactorConfig $config) {
+    return $this->getParameterName($config, 'totpcode');
+  }
+
+  private function getChallengeResponseFromRequest(
+    PhabricatorAuthFactorConfig $config,
+    AphrontRequest $request) {
+
+    $name = $this->getChallengeResponseParameterName($config);
+
+    $value = $request->getStr($name);
+    $value = (string)$value;
+    $value = trim($value);
+
+    return $value;
+  }
 }

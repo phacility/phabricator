@@ -75,7 +75,7 @@ abstract class PhabricatorFactDimension extends PhabricatorFactDAO {
       foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
         queryfx(
           $conn,
-          'INSERT IGNORE INTO %T (%C) VALUES %Q',
+          'INSERT IGNORE INTO %T (%C) VALUES %LQ',
           $this->getTableName(),
           $column,
           $chunk);

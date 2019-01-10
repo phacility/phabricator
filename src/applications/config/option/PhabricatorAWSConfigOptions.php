@@ -21,24 +21,6 @@ final class PhabricatorAWSConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('amazon-ses.access-key', 'string', null)
-        ->setLocked(true)
-        ->setDescription(pht('Access key for Amazon SES.')),
-      $this->newOption('amazon-ses.secret-key', 'string', null)
-        ->setHidden(true)
-        ->setDescription(pht('Secret key for Amazon SES.')),
-      $this->newOption('amazon-ses.endpoint', 'string', null)
-        ->setLocked(true)
-        ->setDescription(
-          pht(
-            'SES endpoint domain name. You can find a list of available '.
-            'regions and endpoints in the AWS documentation.'))
-        ->addExample(
-          'email.us-east-1.amazonaws.com',
-          pht('US East (N. Virginia, Older default endpoint)'))
-        ->addExample(
-          'email.us-west-2.amazonaws.com',
-          pht('US West (Oregon)')),
       $this->newOption('amazon-s3.access-key', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Access key for Amazon S3.')),

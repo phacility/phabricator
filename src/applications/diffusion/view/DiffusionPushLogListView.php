@@ -41,9 +41,10 @@ final class DiffusionPushLogListView extends AphrontView {
     $any_host = false;
     foreach ($logs as $log) {
       $repository = $log->getRepository();
+      $event = $log->getPushEvent();
 
       if ($remotes_visible) {
-        $remote_address = $log->getPushEvent()->getRemoteAddress();
+        $remote_address = $event->getRemoteAddress();
       } else {
         $remote_address = null;
       }
@@ -79,10 +80,10 @@ final class DiffusionPushLogListView extends AphrontView {
         phutil_tag('br'),
         $flag_names);
 
-      $reject_code = $log->getPushEvent()->getRejectCode();
+      $reject_code = $event->getRejectCode();
 
       if ($reject_code == $reject_herald) {
-        $rule_phid = $log->getPushEvent()->getRejectDetails();
+        $rule_phid = $event->getRejectDetails();
         $handle = $viewer->renderHandle($rule_phid);
         $reject_label = pht('Blocked: %s', $handle);
       } else {
@@ -91,6 +92,11 @@ final class DiffusionPushLogListView extends AphrontView {
           $reject_code,
           pht('Unknown ("%s")', $reject_code));
       }
+
+      $host_wait = $this->formatMicroseconds($event->getHostWait());
+      $write_wait = $this->formatMicroseconds($event->getWriteWait());
+      $read_wait = $this->formatMicroseconds($event->getReadWait());
+      $hook_wait = $this->formatMicroseconds($event->getHookWait());
 
       $rows[] = array(
         phutil_tag(
@@ -107,7 +113,7 @@ final class DiffusionPushLogListView extends AphrontView {
           $repository->getDisplayName()),
         $viewer->renderHandle($log->getPusherPHID()),
         $remote_address,
-        $log->getPushEvent()->getRemoteProtocol(),
+        $event->getRemoteProtocol(),
         $device,
         $log->getRefType(),
         $log->getRefName(),
@@ -121,6 +127,10 @@ final class DiffusionPushLogListView extends AphrontView {
         $flag_names,
         $reject_label,
         $viewer->formatShortDateTime($log->getEpoch()),
+        $host_wait,
+        $write_wait,
+        $read_wait,
+        $hook_wait,
       );
     }
 
@@ -140,6 +150,10 @@ final class DiffusionPushLogListView extends AphrontView {
           pht('Flags'),
           pht('Result'),
           pht('Date'),
+          pht('Host Wait'),
+          pht('Write Wait'),
+          pht('Read Wait'),
+          pht('Hook Wait'),
         ))
       ->setColumnClasses(
         array(
@@ -156,6 +170,10 @@ final class DiffusionPushLogListView extends AphrontView {
           '',
           '',
           'right',
+          'n right',
+          'n right',
+          'n right',
+          'n right',
         ))
       ->setColumnVisibility(
         array(
@@ -168,6 +186,14 @@ final class DiffusionPushLogListView extends AphrontView {
         ));
 
     return $table;
+  }
+
+  private function formatMicroseconds($duration) {
+    if ($duration === null) {
+      return null;
+    }
+
+    return pht('%sus', new PhutilNumber($duration));
   }
 
 }

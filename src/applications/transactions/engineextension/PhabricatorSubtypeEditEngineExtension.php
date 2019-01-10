@@ -31,25 +31,25 @@ final class PhabricatorSubtypeEditEngineExtension
     $subtype_type = PhabricatorTransactions::TYPE_SUBTYPE;
 
     $map = $object->newEditEngineSubtypeMap();
-    $options = mpull($map, 'getName');
+    $options = $map->getDisplayMap();
 
     $subtype_field = id(new PhabricatorSelectEditField())
       ->setKey(self::EDITKEY)
       ->setLabel(pht('Subtype'))
-      ->setIsConduitOnly(true)
-      ->setIsHidden(true)
-      ->setIsReorderable(false)
-      ->setIsDefaultable(false)
-      ->setIsLockable(false)
+      ->setIsFormField(false)
       ->setTransactionType($subtype_type)
       ->setConduitDescription(pht('Change the object subtype.'))
       ->setConduitTypeDescription(pht('New object subtype key.'))
       ->setValue($object->getEditEngineSubtype())
       ->setOptions($options);
 
-    // If subtypes are configured, enable changing them from the bulk editor.
-    if (count($map) > 1) {
-      $subtype_field->setBulkEditLabel(pht('Change subtype to'));
+    // If subtypes are configured, enable changing them from the bulk editor
+    // and comment action stack.
+    if ($map->getCount() > 1) {
+      $subtype_field
+        ->setBulkEditLabel(pht('Change subtype to'))
+        ->setCommentActionLabel(pht('Change Subtype'))
+        ->setCommentActionOrder(3000);
     }
 
     return array(

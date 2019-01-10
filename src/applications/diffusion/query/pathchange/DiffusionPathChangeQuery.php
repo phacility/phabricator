@@ -43,12 +43,13 @@ final class DiffusionPathChangeQuery extends Phobject {
 
     $conn_r = $repository->establishConnection('r');
 
-    $limit = '';
     if ($this->limit) {
       $limit = qsprintf(
         $conn_r,
         'LIMIT %d',
         $this->limit + 1);
+    } else {
+      $limit = qsprintf($conn_r, '');
     }
 
     $raw_changes = queryfx_all(

@@ -84,14 +84,6 @@ of each approach are:
 EODOC
 ));
 
-    $herald_hints_description = $this->deformat(pht(<<<EODOC
-You can disable the Herald hints in email if users prefer smaller messages.
-These are the links under the header "WHY DID I GET THIS EMAIL?". If you set
-this to `false`, they will not appear in any mail. Users can still navigate to
-the links via the web interface.
-EODOC
-));
-
     $reply_hints_description = $this->deformat(pht(<<<EODOC
 You can disable the hints under "REPLY HANDLER ACTIONS" if users prefer
 smaller messages. The actions themselves will still work properly.
@@ -146,13 +138,6 @@ PHPMailerLite, which will invoke "sendmail". This is appropriate if sendmail
 actually works on your host, but if you haven't configured mail it may not be so
 great. A number of other mailers are available (e.g., SES, SendGrid, SMTP,
 custom mailers). This option is deprecated in favor of 'cluster.mailers'.
-EODOC
-));
-
-    $placeholder_description = $this->deformat(pht(<<<EODOC
-When sending a message that has no To recipient (i.e. all recipients are CC'd),
-set the To field to the following value. If no value is set, messages with no
-To will have their CCs upgraded to To.
 EODOC
 ));
 
@@ -212,18 +197,6 @@ EODOC
         'noreply@phabricator.example.com')
         ->setDescription(pht('Default "From" address.')),
       $this->newOption(
-        'metamta.domain',
-        'string',
-        'phabricator.example.com')
-        ->setDescription(pht('Domain used to generate Message-IDs.')),
-      $this->newOption(
-        'metamta.mail-adapter',
-        'class',
-        'PhabricatorMailImplementationPHPMailerLiteAdapter')
-        ->setBaseClass('PhabricatorMailImplementationAdapter')
-        ->setSummary(pht('Control how mail is sent.'))
-        ->setDescription($adapter_description),
-      $this->newOption(
         'metamta.one-mail-per-recipient',
         'bool',
         true)
@@ -256,14 +229,6 @@ EODOC
         ->setLocked(true)
         ->setDescription(pht('Domain used for reply email addresses.'))
         ->addExample('phabricator.example.com', ''),
-      $this->newOption('metamta.herald.show-hints', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Show Herald Hints'),
-            pht('No Herald Hints'),
-          ))
-        ->setSummary(pht('Show hints about Herald rules in email.'))
-        ->setDescription($herald_hints_description),
       $this->newOption('metamta.recipients.show-hints', 'bool', true)
         ->setBoolOptions(
           array(
@@ -280,17 +245,6 @@ EODOC
           ))
         ->setSummary(pht('Show email preferences link in email.'))
         ->setDescription($email_preferences_description),
-      $this->newOption('metamta.insecure-auth-with-reply-to', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Allow Insecure Reply-To Auth'),
-            pht('Disallow Reply-To Auth'),
-          ))
-        ->setSummary(pht('Trust "Reply-To" headers for authentication.'))
-        ->setDescription($reply_to_description),
-      $this->newOption('metamta.placeholder-to-recipient', 'string', null)
-        ->setSummary(pht('Placeholder for mail with only CCs.'))
-        ->setDescription($placeholder_description),
       $this->newOption('metamta.public-replies', 'bool', false)
         ->setBoolOptions(
           array(

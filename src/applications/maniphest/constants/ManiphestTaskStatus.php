@@ -160,6 +160,10 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return self::getStatusAttribute($status, 'locked', false);
   }
 
+  public static function isMFAStatus($status) {
+    return self::getStatusAttribute($status, 'mfa', false);
+  }
+
   public static function getStatusActionName($status) {
     return self::getStatusAttribute($status, 'name.action');
   }
@@ -282,6 +286,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'disabled' => 'optional bool',
           'claim' => 'optional bool',
           'locked' => 'optional bool',
+          'mfa' => 'optional bool',
         ));
     }
 

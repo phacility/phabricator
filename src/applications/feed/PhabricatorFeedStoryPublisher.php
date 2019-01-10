@@ -133,9 +133,9 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
 
       queryfx(
         $conn,
-        'INSERT INTO %T (objectPHID, chronologicalKey) VALUES %Q',
+        'INSERT INTO %T (objectPHID, chronologicalKey) VALUES %LQ',
         $ref->getTableName(),
-        implode(', ', $sql));
+        $sql);
     }
 
     $subscribed_phids = $this->subscribedPHIDs;
@@ -191,9 +191,9 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
         $conn,
         'INSERT INTO %T '.
         '(primaryObjectPHID, userPHID, chronologicalKey, hasViewed) '.
-        'VALUES %Q',
+        'VALUES %LQ',
         $notif->getTableName(),
-        implode(', ', $sql));
+        $sql);
     }
 
     PhabricatorUserCache::clearCaches(

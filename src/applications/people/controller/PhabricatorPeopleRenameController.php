@@ -22,36 +22,29 @@ final class PhabricatorPeopleRenameController
       $request,
       $done_uri);
 
-    $errors = array();
-
-    $v_username = $user->getUsername();
-    $e_username = true;
+    $validation_exception = null;
+    $username = $user->getUsername();
     if ($request->isFormPost()) {
-      $v_username = $request->getStr('username');
+      $username = $request->getStr('username');
+      $xactions = array();
 
-      if (!strlen($v_username)) {
-        $e_username = pht('Required');
-        $errors[] = pht('New username is required.');
-      } else if ($v_username == $user->getUsername()) {
-        $e_username = pht('Invalid');
-        $errors[] = pht('New username must be different from old username.');
-      } else if (!PhabricatorUser::validateUsername($v_username)) {
-        $e_username = pht('Invalid');
-        $errors[] = PhabricatorUser::describeValidUsername();
+      $xactions[] = id(new PhabricatorUserTransaction())
+        ->setTransactionType(
+          PhabricatorUserUsernameTransaction::TRANSACTIONTYPE)
+        ->setNewValue($username);
+
+      $editor = id(new PhabricatorUserTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnMissingFields(true);
+
+      try {
+        $editor->applyTransactions($user, $xactions);
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
       }
 
-      if (!$errors) {
-        try {
-          id(new PhabricatorUserEditor())
-            ->setActor($viewer)
-            ->changeUsername($user, $v_username);
-
-          return id(new AphrontRedirectResponse())->setURI($done_uri);
-        } catch (AphrontDuplicateKeyQueryException $ex) {
-          $e_username = pht('Not Unique');
-          $errors[] = pht('Another user already has that username.');
-        }
-      }
     }
 
     $inst1 = pht(
@@ -87,18 +80,13 @@ final class PhabricatorPeopleRenameController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('New Username'))
-          ->setValue($v_username)
-          ->setName('username')
-          ->setError($e_username));
-
-    if ($errors) {
-      $errors = id(new PHUIInfoView())->setErrors($errors);
-    }
+          ->setValue($username)
+          ->setName('username'));
 
     return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle(pht('Change Username'))
-      ->appendChild($errors)
+      ->setValidationException($validation_exception)
       ->appendParagraph($inst1)
       ->appendParagraph($inst2)
       ->appendParagraph($inst3)

@@ -358,7 +358,7 @@ abstract class PhabricatorEditEngine
     return $this->editEngineConfiguration;
   }
 
-  private function newConfigurationQuery() {
+  public function newConfigurationQuery() {
     return id(new PhabricatorEditEngineConfigurationQuery())
       ->setViewer($this->getViewer())
       ->withEngineKeys(array($this->getEngineKey()));
@@ -1041,7 +1041,7 @@ abstract class PhabricatorEditEngine
     }
 
     $validation_exception = null;
-    if ($request->isFormPost() && $request->getBool('editEngine')) {
+    if ($request->isFormOrHisecPost() && $request->getBool('editEngine')) {
       $submit_fields = $fields;
 
       foreach ($submit_fields as $key => $field) {
@@ -1105,6 +1105,7 @@ abstract class PhabricatorEditEngine
       $editor = $object->getApplicationTransactionEditor()
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
+        ->setCancelURI($cancel_uri)
         ->setContinueOnNoEffect(true);
 
       try {
@@ -1289,6 +1290,10 @@ abstract class PhabricatorEditEngine
     }
 
     foreach ($fields as $field) {
+      if (!$field->getIsFormField()) {
+        continue;
+      }
+
       $field->appendToForm($form);
     }
 
@@ -1781,7 +1786,9 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
-    if (!$request->isFormPost()) {
+    // NOTE: We handle hisec inside the transaction editor with "Sign With MFA"
+    // comment actions.
+    if (!$request->isFormOrHisecPost()) {
       return new Aphront400Response();
     }
 
@@ -1915,6 +1922,7 @@ abstract class PhabricatorEditEngine
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContinueOnMissingFields(true)
       ->setContentSourceFromRequest($request)
+      ->setCancelURI($view_uri)
       ->setRaiseWarnings(!$request->getBool('editEngine.warnings'))
       ->setIsPreview($is_preview);
 
@@ -1950,10 +1958,19 @@ abstract class PhabricatorEditEngine
     if ($request->isAjax() && $is_preview) {
       $preview_content = $this->newCommentPreviewContent($object, $xactions);
 
+      $raw_view_data = $request->getStr('viewData');
+      try {
+        $view_data = phutil_json_decode($raw_view_data);
+      } catch (Exception $ex) {
+        $view_data = array();
+      }
+
       return id(new PhabricatorApplicationTransactionResponse())
+        ->setObject($object)
         ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview)
+        ->setViewData($view_data)
         ->setPreviewContent($preview_content);
     } else {
       return id(new AphrontRedirectResponse())

@@ -79,10 +79,6 @@ abstract class PhabricatorApplicationTransaction
     throw new PhutilMethodNotImplementedException();
   }
 
-  public function getApplicationTransactionViewObject() {
-    return new PhabricatorApplicationTransactionView();
-  }
-
   public function getMetadataValue($key, $default = null) {
     return idx($this->metadata, $key, $default);
   }
@@ -477,6 +473,8 @@ abstract class PhabricatorApplicationTransaction
         return 'fa-th-large';
       case PhabricatorTransactions::TYPE_COLUMNS:
         return 'fa-columns';
+      case PhabricatorTransactions::TYPE_MFA:
+        return 'fa-vcard';
     }
 
     return 'fa-pencil';
@@ -514,6 +512,8 @@ abstract class PhabricatorApplicationTransaction
             return 'sky';
         }
         break;
+      case PhabricatorTransactions::TYPE_MFA;
+        return 'pink';
     }
     return null;
   }
@@ -664,6 +664,16 @@ abstract class PhabricatorApplicationTransaction
             break;
         }
         break;
+
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+        list($done, $undone) = $this->getInterestingInlineStateChangeCounts();
+
+        if (!$done && !$undone) {
+          return true;
+        }
+
+        break;
+
     }
 
     return false;
@@ -749,6 +759,10 @@ abstract class PhabricatorApplicationTransaction
     return $this->shouldHide();
   }
 
+  public function shouldHideForNotifications() {
+    return $this->shouldHideForFeed();
+  }
+
   public function getTitleForMail() {
     return id(clone $this)->setRenderingTarget('text')->getTitle();
   }
@@ -825,6 +839,10 @@ abstract class PhabricatorApplicationTransaction
         return pht(
           'You have not moved this object to any columns it is not '.
           'already in.');
+      case PhabricatorTransactions::TYPE_MFA:
+        return pht(
+          'You can not sign a transaction group that has no other '.
+          'effects.');
     }
 
     return pht(
@@ -1007,15 +1025,7 @@ abstract class PhabricatorApplicationTransaction
         }
 
       case PhabricatorTransactions::TYPE_INLINESTATE:
-        $done = 0;
-        $undone = 0;
-        foreach ($new as $phid => $state) {
-          if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
-            $done++;
-          } else {
-            $undone++;
-          }
-        }
+        list($done, $undone) = $this->getInterestingInlineStateChangeCounts();
         if ($done && $undone) {
           return pht(
             '%s marked %s inline comment(s) as done and %s inline comment(s) '.
@@ -1073,6 +1083,12 @@ abstract class PhabricatorApplicationTransaction
             phutil_implode_html(', ', $fragments));
         }
         break;
+
+
+      case PhabricatorTransactions::TYPE_MFA:
+        return pht(
+          '%s signed these changes with MFA.',
+          $this->renderHandleLink($author_phid));
 
       default:
         // In developer mode, provide a better hint here about which string
@@ -1236,6 +1252,9 @@ abstract class PhabricatorApplicationTransaction
         }
         break;
 
+      case PhabricatorTransactions::TYPE_MFA:
+        return null;
+
     }
 
     return $this->getTitle();
@@ -1318,6 +1337,10 @@ abstract class PhabricatorApplicationTransaction
         // (which are shown anyway) but less interesting than any other type of
         // transaction.
         return 0.75;
+      case PhabricatorTransactions::TYPE_MFA:
+        // We want MFA signatures to render at the top of transaction groups,
+        // on top of the things they signed.
+        return 10;
     }
 
     return 1.0;
@@ -1432,6 +1455,8 @@ abstract class PhabricatorApplicationTransaction
       $this_source = $this->getContentSource()->getSource();
     }
 
+    $type_mfa = PhabricatorTransactions::TYPE_MFA;
+
     foreach ($group as $xaction) {
       // Don't group transactions by different authors.
       if ($xaction->getAuthorPHID() != $this->getAuthorPHID()) {
@@ -1474,6 +1499,13 @@ abstract class PhabricatorApplicationTransaction
       $is_mfa = $this->getIsMFATransaction();
       if ($is_mfa != $xaction->getIsMFATransaction()) {
         return false;
+      }
+
+      // Don't group two "Sign with MFA" transactions together.
+      if ($this->getTransactionType() === $type_mfa) {
+        if ($xaction->getTransactionType() === $type_mfa) {
+          return false;
+        }
       }
     }
 
@@ -1582,6 +1614,49 @@ abstract class PhabricatorApplicationTransaction
     return $moves;
   }
 
+  private function getInterestingInlineStateChangeCounts() {
+    // See PHI995. Newer inline state transactions have additional details
+    // which we use to tailor the rendering behavior. These details are not
+    // present on older transactions.
+    $details = $this->getMetadataValue('inline.details', array());
+
+    $new = $this->getNewValue();
+
+    $done = 0;
+    $undone = 0;
+    foreach ($new as $phid => $state) {
+      $is_done = ($state == PhabricatorInlineCommentInterface::STATE_DONE);
+
+      // See PHI995. If you're marking your own inline comments as "Done",
+      // don't count them when rendering a timeline story. In the case where
+      // you're only affecting your own comments, this will hide the
+      // "alice marked X comments as done" story entirely.
+
+      // Usually, this happens when you pre-mark inlines as "done" and submit
+      // them yourself. We'll still generate an "alice added inline comments"
+      // story (in most cases/contexts), but the state change story is largely
+      // just clutter and slightly confusing/misleading.
+
+      $inline_details = idx($details, $phid, array());
+      $inline_author_phid = idx($inline_details, 'authorPHID');
+      if ($inline_author_phid) {
+        if ($inline_author_phid == $this->getAuthorPHID()) {
+          if ($is_done) {
+            continue;
+          }
+        }
+      }
+
+      if ($is_done) {
+        $done++;
+      } else {
+        $undone++;
+      }
+    }
+
+    return array($done, $undone);
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
@@ -1615,6 +1690,15 @@ abstract class PhabricatorApplicationTransaction
 
   public function getModularType() {
     return null;
+  }
+
+  public function setForceNotifyPHIDs(array $phids) {
+    $this->setMetadataValue('notify.force', $phids);
+    return $this;
+  }
+
+  public function getForceNotifyPHIDs() {
+    return $this->getMetadataValue('notify.force', array());
   }
 
 

@@ -36,12 +36,18 @@ final class PhabricatorPeopleProfileManageController
     $crumbs->addTextCrumb(pht('Manage'));
     $crumbs->setBorder(true);
 
+    $timeline = $this->buildTransactionTimeline(
+      $user,
+      new PhabricatorPeopleTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->addClass('project-view-home')
       ->addClass('project-view-people-home')
       ->setCurtain($curtain)
-      ->addPropertySection(pht('Details'), $properties);
+      ->addPropertySection(pht('Details'), $properties)
+      ->setMainColumn($timeline);
 
     return $this->newPage()
       ->setTitle(
@@ -51,10 +57,7 @@ final class PhabricatorPeopleProfileManageController
         ))
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $manage,
-        ));
+      ->appendChild($manage);
   }
 
   private function buildPropertyView(PhabricatorUser $user) {

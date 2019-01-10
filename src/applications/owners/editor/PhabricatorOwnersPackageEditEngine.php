@@ -159,7 +159,7 @@ EOTEXT
         ->setDescription(pht('Archive or enable the package.'))
         ->setTransactionType(
           PhabricatorOwnersPackageStatusTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setValue($object->getStatus())
         ->setOptions($object->getStatusNameMap()),
       id(new PhabricatorCheckboxesEditField())
@@ -176,7 +176,7 @@ EOTEXT
       id(new PhabricatorConduitEditField())
         ->setKey('paths.set')
         ->setLabel(pht('Paths'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           PhabricatorOwnersPackagePathsTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(

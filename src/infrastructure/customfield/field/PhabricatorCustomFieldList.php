@@ -303,7 +303,7 @@ final class PhabricatorCustomFieldList extends Phobject {
         foreach (PhabricatorLiskDAO::chunkSQL($sql_list) as $chunk) {
           queryfx(
             $conn_w,
-            'INSERT INTO %T (objectPHID, indexKey, indexValue) VALUES %Q',
+            'INSERT INTO %T (objectPHID, indexKey, indexValue) VALUES %LQ',
             $table,
             $chunk);
         }

@@ -129,93 +129,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
   }
 
 
-  /**
-   * @task edit
-   */
-  public function changeUsername(PhabricatorUser $user, $username) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    if (!PhabricatorUser::validateUsername($username)) {
-      $valid = PhabricatorUser::describeValidUsername();
-      throw new Exception(pht('Username is invalid! %s', $valid));
-    }
-
-    $old_username = $user->getUsername();
-
-    $user->openTransaction();
-      $user->reload();
-      $user->setUsername($username);
-
-      try {
-        $user->save();
-      } catch (AphrontDuplicateKeyQueryException $ex) {
-        $user->setUsername($old_username);
-        $user->killTransaction();
-        throw $ex;
-      }
-
-      $log = PhabricatorUserLog::initializeNewLog(
-        $actor,
-        $user->getPHID(),
-        PhabricatorUserLog::ACTION_CHANGE_USERNAME);
-      $log->setOldValue($old_username);
-      $log->setNewValue($username);
-      $log->save();
-
-    $user->saveTransaction();
-
-    // The SSH key cache currently includes usernames, so dirty it. See T12554
-    // for discussion.
-    PhabricatorAuthSSHKeyQuery::deleteSSHKeyCache();
-
-    $user->sendUsernameChangeEmail($actor, $old_username);
-  }
-
-
 /* -(  Editing Roles  )------------------------------------------------------ */
-
-
-  /**
-   * @task role
-   */
-  public function makeAdminUser(PhabricatorUser $user, $admin) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    $user->openTransaction();
-      $user->beginWriteLocking();
-
-        $user->reload();
-        if ($user->getIsAdmin() == $admin) {
-          $user->endWriteLocking();
-          $user->killTransaction();
-          return $this;
-        }
-
-        $log = PhabricatorUserLog::initializeNewLog(
-          $actor,
-          $user->getPHID(),
-          PhabricatorUserLog::ACTION_ADMIN);
-        $log->setOldValue($user->getIsAdmin());
-        $log->setNewValue($admin);
-
-        $user->setIsAdmin((int)$admin);
-        $user->save();
-
-        $log->save();
-
-      $user->endWriteLocking();
-    $user->saveTransaction();
-
-    return $this;
-  }
 
   /**
    * @task role
@@ -292,45 +206,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
     return $this;
   }
-
-  /**
-   * @task role
-   */
-  public function approveUser(PhabricatorUser $user, $approve) {
-    $actor = $this->requireActor();
-
-    if (!$user->getID()) {
-      throw new Exception(pht('User has not been created yet!'));
-    }
-
-    $user->openTransaction();
-      $user->beginWriteLocking();
-
-        $user->reload();
-        if ($user->getIsApproved() == $approve) {
-          $user->endWriteLocking();
-          $user->killTransaction();
-          return $this;
-        }
-
-        $log = PhabricatorUserLog::initializeNewLog(
-          $actor,
-          $user->getPHID(),
-          PhabricatorUserLog::ACTION_APPROVE);
-        $log->setOldValue($user->getIsApproved());
-        $log->setNewValue($approve);
-
-        $user->setIsApproved($approve);
-        $user->save();
-
-        $log->save();
-
-      $user->endWriteLocking();
-    $user->saveTransaction();
-
-    return $this;
-  }
-
 
 /* -(  Adding, Removing and Changing Email  )-------------------------------- */
 

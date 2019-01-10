@@ -150,7 +150,7 @@ final class DiffusionURIEditEngine
         ->setAliases(array('repositoryPHID'))
         ->setLabel(pht('Repository'))
         ->setIsRequired(true)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           PhabricatorRepositoryURITransaction::TYPE_REPOSITORY)
         ->setDescription(pht('The repository this URI is associated with.'))
@@ -195,7 +195,7 @@ final class DiffusionURIEditEngine
         ->setKey('credential')
         ->setAliases(array('credentialPHID'))
         ->setLabel(pht('Credential'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(
           PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL)
         ->setDescription(
@@ -206,7 +206,7 @@ final class DiffusionURIEditEngine
       id(new PhabricatorBoolEditField())
         ->setKey('disable')
         ->setLabel(pht('Disabled'))
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setTransactionType(PhabricatorRepositoryURITransaction::TYPE_DISABLE)
         ->setDescription(pht('Active status of the URI.'))
         ->setConduitDescription(pht('Disable or activate the URI.'))

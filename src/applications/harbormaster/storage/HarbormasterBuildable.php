@@ -6,6 +6,7 @@ final class HarbormasterBuildable
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     HarbormasterBuildableInterface,
+    PhabricatorConduitResultInterface,
     PhabricatorDestructibleInterface {
 
   protected $buildablePHID;
@@ -282,19 +283,8 @@ final class HarbormasterBuildable
     return new HarbormasterBuildableTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new HarbormasterBuildableTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
   }
 
 
@@ -352,6 +342,46 @@ final class HarbormasterBuildable
 
   public function newBuildableEngine() {
     return $this->getBuildableObject()->newBuildableEngine();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('objectPHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the object that is built.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('containerPHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the object containing this buildable.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildableStatus')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('The current status of this buildable.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isManual')
+        ->setType('bool')
+        ->setDescription(pht('True if this is a manual buildable.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'objectPHID' => $this->getBuildablePHID(),
+      'containerPHID' => $this->getContainerPHID(),
+      'buildableStatus' => array(
+        'value' => $this->getBuildableStatus(),
+      ),
+      'isManual' => (bool)$this->getIsManualBuildable(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 

@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_drydock.drydock_command
+  ADD properties LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT};

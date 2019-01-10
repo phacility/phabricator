@@ -116,54 +116,54 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $books;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if (strlen($this->nameLike)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name LIKE %~',
         $this->nameLike);
     }
 
     if ($this->names !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name IN (%Ls)',
         $this->names);
     }
 
     if (strlen($this->namePrefix)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name LIKE %>',
         $this->namePrefix);
     }
 
     if ($this->repositoryPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

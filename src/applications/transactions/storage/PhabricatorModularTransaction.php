@@ -69,11 +69,6 @@ abstract class PhabricatorModularTransaction
       ->generateNewValue($object, $this->getNewValue());
   }
 
-  final public function willApplyTransactions($object, array $xactions) {
-    return $this->getTransactionImplementation()
-      ->willApplyTransactions($object, $xactions);
-  }
-
   final public function applyInternalEffects($object) {
     return $this->getTransactionImplementation()
       ->applyInternalEffects($object);
@@ -106,6 +101,17 @@ abstract class PhabricatorModularTransaction
     }
 
     return parent::shouldHideForMail($xactions);
+  }
+
+  final public function shouldHideForNotifications() {
+    $hide = $this->getTransactionImplementation()->shouldHideForNotifications();
+
+    // Returning "null" means "use the default behavior".
+    if ($hide === null) {
+      return parent::shouldHideForNotifications();
+    }
+
+    return $hide;
   }
 
   /* final */ public function getIcon() {

@@ -61,8 +61,7 @@ Choose the object **subtype** that this form should create and edit.
 EOTEXT
       );
 
-    $map = $engine->newSubtypeMap();
-    $map = mpull($map, 'getName');
+    $map = $engine->newSubtypeMap()->getDisplayMap();
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)

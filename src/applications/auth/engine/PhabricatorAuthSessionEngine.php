@@ -46,6 +46,26 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   const ONETIME_USERNAME = 'rename';
 
 
+  private $workflowKey;
+
+  public function setWorkflowKey($workflow_key) {
+    $this->workflowKey = $workflow_key;
+    return $this;
+  }
+
+  public function getWorkflowKey() {
+
+    // TODO: A workflow key should become required in order to issue an MFA
+    // challenge, but allow things to keep working for now until we can update
+    // callsites.
+    if ($this->workflowKey === null) {
+      return 'legacy';
+    }
+
+    return $this->workflowKey;
+  }
+
+
   /**
    * Get the session kind (e.g., anonymous, user, external account) from a
    * session token. Returns a `KIND_` constant.
@@ -109,35 +129,48 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $session_table = new PhabricatorAuthSession();
     $user_table = new PhabricatorUser();
-    $conn_r = $session_table->establishConnection('r');
-    $session_key = PhabricatorHash::weakDigest($session_token);
+    $conn = $session_table->establishConnection('r');
 
-    $cache_parts = $this->getUserCacheQueryParts($conn_r);
+    // TODO: See T13225. We're moving sessions to a more modern digest
+    // algorithm, but still accept older cookies for compatibility.
+    $session_key = PhabricatorAuthSession::newSessionDigest(
+      new PhutilOpaqueEnvelope($session_token));
+    $weak_key = PhabricatorHash::weakDigest($session_token);
+
+    $cache_parts = $this->getUserCacheQueryParts($conn);
     list($cache_selects, $cache_joins, $cache_map, $types_map) = $cache_parts;
 
     $info = queryfx_one(
-      $conn_r,
+      $conn,
       'SELECT
           s.id AS s_id,
+          s.phid AS s_phid,
           s.sessionExpires AS s_sessionExpires,
           s.sessionStart AS s_sessionStart,
           s.highSecurityUntil AS s_highSecurityUntil,
           s.isPartial AS s_isPartial,
           s.signedLegalpadDocuments as s_signedLegalpadDocuments,
+          IF(s.sessionKey = %P, 1, 0) as s_weak,
           u.*
           %Q
-        FROM %T u JOIN %T s ON u.phid = s.userPHID
-        AND s.type = %s AND s.sessionKey = %s %Q',
+        FROM %R u JOIN %R s ON u.phid = s.userPHID
+        AND s.type = %s AND s.sessionKey IN (%P, %P) %Q',
+      new PhutilOpaqueEnvelope($weak_key),
       $cache_selects,
-      $user_table->getTableName(),
-      $session_table->getTableName(),
+      $user_table,
+      $session_table,
       $session_type,
-      $session_key,
+      new PhutilOpaqueEnvelope($session_key),
+      new PhutilOpaqueEnvelope($weak_key),
       $cache_joins);
 
     if (!$info) {
       return null;
     }
+
+    // TODO: Remove this, see T13225.
+    $is_weak = (bool)$info['s_weak'];
+    unset($info['s_weak']);
 
     $session_dict = array(
       'userPHID' => $info['phid'],
@@ -180,23 +213,17 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $session = id(new PhabricatorAuthSession())->loadFromArray($session_dict);
 
-    $ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
+    $this->extendSession($session);
 
-    // If more than 20% of the time on this session has been used, refresh the
-    // TTL back up to the full duration. The idea here is that sessions are
-    // good forever if used regularly, but get GC'd when they fall out of use.
-
-    // NOTE: If we begin rotating session keys when extending sessions, the
-    // CSRF code needs to be updated so CSRF tokens survive session rotation.
-
-    if (time() + (0.80 * $ttl) > $session->getSessionExpires()) {
+    // TODO: Remove this, see T13225.
+    if ($is_weak) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $conn_w = $session_table->establishConnection('w');
         queryfx(
           $conn_w,
-          'UPDATE %T SET sessionExpires = UNIX_TIMESTAMP() + %d WHERE id = %d',
+          'UPDATE %T SET sessionKey = %P WHERE id = %d',
           $session->getTableName(),
-          $ttl,
+          new PhutilOpaqueEnvelope($session_key),
           $session->getID());
       unset($unguarded);
     }
@@ -238,9 +265,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $conn_w = $session_table->establishConnection('w');
 
     // This has a side effect of validating the session type.
-    $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
+    $session_ttl = PhabricatorAuthSession::getSessionTypeTTL(
+      $session_type,
+      $partial);
 
-    $digest_key = PhabricatorHash::weakDigest($session_key);
+    $digest_key = PhabricatorAuthSession::newSessionDigest(
+      new PhutilOpaqueEnvelope($session_key));
 
     // Logging-in users don't have CSRF stuff yet, so we have to unguard this
     // write.
@@ -298,7 +328,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    */
   public function terminateLoginSessions(
     PhabricatorUser $user,
-    $except_session = null) {
+    PhutilOpaqueEnvelope $except_session = null) {
 
     $sessions = id(new PhabricatorAuthSessionQuery())
       ->setViewer($user)
@@ -306,7 +336,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       ->execute();
 
     if ($except_session !== null) {
-      $except_session = PhabricatorHash::weakDigest($except_session);
+      $except_session = PhabricatorAuthSession::newSessionDigest(
+        $except_session);
     }
 
     foreach ($sessions as $key => $session) {
@@ -346,11 +377,43 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
 
   /**
+   * Require the user respond to a high security (MFA) check.
+   *
+   * This method differs from @{method:requireHighSecuritySession} in that it
+   * does not upgrade the user's session as a side effect. This method is
+   * appropriate for one-time checks.
+   *
+   * @param PhabricatorUser User whose session needs to be in high security.
+   * @param AphrontReqeust  Current request.
+   * @param string          URI to return the user to if they cancel.
+   * @return PhabricatorAuthHighSecurityToken Security token.
+   * @task hisec
+   */
+  public function requireHighSecurityToken(
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    $cancel_uri) {
+
+    return $this->newHighSecurityToken(
+      $viewer,
+      $request,
+      $cancel_uri,
+      false,
+      false);
+  }
+
+
+  /**
    * Require high security, or prompt the user to enter high security.
    *
    * If the user's session is in high security, this method will return a
    * token. Otherwise, it will throw an exception which will eventually
    * be converted into a multi-factor authentication workflow.
+   *
+   * This method upgrades the user's session to high security for a short
+   * period of time, and is appropriate if you anticipate they may need to
+   * take multiple high security actions. To perform a one-time check instead,
+   * use @{method:requireHighSecurityToken}.
    *
    * @param PhabricatorUser User whose session needs to be in high security.
    * @param AphrontReqeust  Current request.
@@ -367,10 +430,29 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $cancel_uri,
     $jump_into_hisec = false) {
 
+    return $this->newHighSecurityToken(
+      $viewer,
+      $request,
+      $cancel_uri,
+      $jump_into_hisec,
+      true);
+  }
+
+  private function newHighSecurityToken(
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    $cancel_uri,
+    $jump_into_hisec,
+    $upgrade_session) {
+
     if (!$viewer->hasSession()) {
       throw new Exception(
         pht('Requiring a high-security session from a user with no session!'));
     }
+
+    // TODO: If a user answers a "requireHighSecurityToken()" prompt and hits
+    // a "requireHighSecuritySession()" prompt a short time later, the one-shot
+    // token should be good enough to upgrade the session.
 
     $session = $viewer->getSession();
 
@@ -394,6 +476,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $this->issueHighSecurityToken($session, true);
     }
 
+    foreach ($factors as $factor) {
+      $factor->setSessionEngine($this);
+    }
+
     // Check for a rate limit without awarding points, so the user doesn't
     // get partway through the workflow only to get blocked.
     PhabricatorSystemActionEngine::willTakeAction(
@@ -401,43 +487,139 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       new PhabricatorAuthTryFactorAction(),
       0);
 
+    $now = PhabricatorTime::getNow();
+
+    // We need to do challenge validation first, since this happens whether you
+    // submitted responses or not. You can't get a "bad response" error before
+    // you actually submit a response, but you can get a "wait, we can't
+    // issue a challenge yet" response. Load all issued challenges which are
+    // currently valid.
+    $challenges = id(new PhabricatorAuthChallengeQuery())
+      ->setViewer($viewer)
+      ->withFactorPHIDs(mpull($factors, 'getPHID'))
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withChallengeTTLBetween($now, null)
+      ->execute();
+
+    PhabricatorAuthChallenge::newChallengeResponsesFromRequest(
+      $challenges,
+      $request);
+
+    $challenge_map = mgroup($challenges, 'getFactorPHID');
+
     $validation_results = array();
+    $ok = true;
+
+    // Validate each factor against issued challenges. For example, this
+    // prevents you from receiving or responding to a TOTP challenge if another
+    // challenge was recently issued to a different session.
+    foreach ($factors as $factor) {
+      $factor_phid = $factor->getPHID();
+      $issued_challenges = idx($challenge_map, $factor_phid, array());
+      $impl = $factor->requireImplementation();
+
+      $new_challenges = $impl->getNewIssuedChallenges(
+        $factor,
+        $viewer,
+        $issued_challenges);
+
+      foreach ($new_challenges as $new_challenge) {
+        $issued_challenges[] = $new_challenge;
+      }
+      $challenge_map[$factor_phid] = $issued_challenges;
+
+      if (!$issued_challenges) {
+        continue;
+      }
+
+      $result = $impl->getResultFromIssuedChallenges(
+        $factor,
+        $viewer,
+        $issued_challenges);
+
+      if (!$result) {
+        continue;
+      }
+
+      $ok = false;
+      $validation_results[$factor_phid] = $result;
+    }
+
     if ($request->isHTTPPost()) {
       $request->validateCSRF();
       if ($request->getExists(AphrontRequest::TYPE_HISEC)) {
 
         // Limit factor verification rates to prevent brute force attacks.
-        PhabricatorSystemActionEngine::willTakeAction(
-          array($viewer->getPHID()),
-          new PhabricatorAuthTryFactorAction(),
-          1);
-
-        $ok = true;
+        $any_attempt = false;
         foreach ($factors as $factor) {
-          $id = $factor->getID();
           $impl = $factor->requireImplementation();
-
-          $validation_results[$id] = $impl->processValidateFactorForm(
-            $factor,
-            $viewer,
-            $request);
-
-          if (!$impl->isFactorValid($factor, $validation_results[$id])) {
-            $ok = false;
+          if ($impl->getRequestHasChallengeResponse($factor, $request)) {
+            $any_attempt = true;
+            break;
           }
         }
 
-        if ($ok) {
-          // Give the user a credit back for a successful factor verification.
+        if ($any_attempt) {
           PhabricatorSystemActionEngine::willTakeAction(
             array($viewer->getPHID()),
             new PhabricatorAuthTryFactorAction(),
-            -1);
+            1);
+        }
+
+        foreach ($factors as $factor) {
+          $factor_phid = $factor->getPHID();
+
+          // If we already have a validation result from previously issued
+          // challenges, skip validating this factor.
+          if (isset($validation_results[$factor_phid])) {
+            continue;
+          }
+
+          $issued_challenges = idx($challenge_map, $factor_phid, array());
+
+          $impl = $factor->requireImplementation();
+
+          $validation_result = $impl->getResultFromChallengeResponse(
+            $factor,
+            $viewer,
+            $request,
+            $issued_challenges);
+
+          if (!$validation_result->getIsValid()) {
+            $ok = false;
+          }
+
+          $validation_results[$factor_phid] = $validation_result;
+        }
+
+        if ($ok) {
+          // We're letting you through, so mark all the challenges you
+          // responded to as completed. These challenges can never be used
+          // again, even by the same session and workflow: you can't use the
+          // same response to take two different actions, even if those actions
+          // are of the same type.
+          foreach ($validation_results as $validation_result) {
+            $challenge = $validation_result->getAnsweredChallenge()
+              ->markChallengeAsCompleted();
+          }
+
+          // Give the user a credit back for a successful factor verification.
+          if ($any_attempt) {
+            PhabricatorSystemActionEngine::willTakeAction(
+              array($viewer->getPHID()),
+              new PhabricatorAuthTryFactorAction(),
+              -1);
+          }
 
           if ($session->getIsPartial() && !$jump_into_hisec) {
             // If we have a partial session and are not jumping directly into
             // hisec, just issue a token without putting it in high security
             // mode.
+            return $this->issueHighSecurityToken($session, true);
+          }
+
+          // If we aren't upgrading the session itself, just issue a token.
+          if (!$upgrade_session) {
             return $this->issueHighSecurityToken($session, true);
           }
 
@@ -471,8 +653,21 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $token;
     }
 
+    // If we don't have a validation result for some factors yet, fill them
+    // in with an empty result so form rendering doesn't have to care if the
+    // results exist or not. This happens when you first load the form and have
+    // not submitted any responses yet.
+    foreach ($factors as $factor) {
+      $factor_phid = $factor->getPHID();
+      if (isset($validation_results[$factor_phid])) {
+        continue;
+      }
+      $validation_results[$factor_phid] = new PhabricatorAuthFactorResult();
+    }
+
     throw id(new PhabricatorAuthHighSecurityRequiredException())
       ->setCancelURI($cancel_uri)
+      ->setIsSessionUpgrade($upgrade_session)
       ->setFactors($factors)
       ->setFactorValidationResults($validation_results);
   }
@@ -511,20 +706,37 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     array $validation_results,
     PhabricatorUser $viewer,
     AphrontRequest $request) {
+    assert_instances_of($validation_results, 'PhabricatorAuthFactorResult');
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendRemarkupInstructions('');
 
+    $answered = array();
     foreach ($factors as $factor) {
+      $result = $validation_results[$factor->getPHID()];
+
       $factor->requireImplementation()->renderValidateFactorForm(
         $factor,
         $form,
         $viewer,
-        idx($validation_results, $factor->getID()));
+        $result);
+
+      $answered_challenge = $result->getAnsweredChallenge();
+      if ($answered_challenge) {
+        $answered[] = $answered_challenge;
+      }
     }
 
     $form->appendRemarkupInstructions('');
+
+    if ($answered) {
+      $http_params = PhabricatorAuthChallenge::newHTTPParametersFromChallenges(
+        $answered);
+      foreach ($http_params as $key => $value) {
+        $form->addHiddenInput($key, $value);
+      }
+    }
 
     return $form;
   }
@@ -664,24 +876,28 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    *  link is used.
    * @param string Optional context string for the URI. This is purely cosmetic
    *  and used only to customize workflow and error messages.
+   * @param bool True to generate a URI which forces an immediate upgrade to
+   *  a full session, bypassing MFA and other login checks.
    * @return string Login URI.
    * @task onetime
    */
   public function getOneTimeLoginURI(
     PhabricatorUser $user,
     PhabricatorUserEmail $email = null,
-    $type = self::ONETIME_RESET) {
+    $type = self::ONETIME_RESET,
+    $force_full_session = false) {
 
     $key = Filesystem::readRandomCharacters(32);
     $key_hash = $this->getOneTimeLoginKeyHash($user, $email, $key);
     $onetime_type = PhabricatorAuthOneTimeLoginTemporaryTokenType::TOKENTYPE;
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      id(new PhabricatorAuthTemporaryToken())
+      $token = id(new PhabricatorAuthTemporaryToken())
         ->setTokenResource($user->getPHID())
         ->setTokenType($onetime_type)
         ->setTokenExpires(time() + phutil_units('1 day in seconds'))
         ->setTokenCode($key_hash)
+        ->setShouldForceFullSession($force_full_session)
         ->save();
     unset($unguarded);
 
@@ -809,15 +1025,15 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     if ($cache_selects) {
-      $cache_selects = ', '.implode(', ', $cache_selects);
+      $cache_selects = qsprintf($conn, ', %LQ', $cache_selects);
     } else {
-      $cache_selects = '';
+      $cache_selects = qsprintf($conn, '');
     }
 
     if ($cache_joins) {
-      $cache_joins = implode(' ', $cache_joins);
+      $cache_joins = qsprintf($conn, '%LJ', $cache_joins);
     } else {
-      $cache_joins = '';
+      $cache_joins = qsprintf($conn, '');
     }
 
     return array($cache_selects, $cache_joins, $cache_map, $types_map);
@@ -852,5 +1068,41 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $extension->willServeRequestForUser($user);
     }
   }
+
+  private function extendSession(PhabricatorAuthSession $session) {
+    $is_partial = $session->getIsPartial();
+
+    // Don't extend partial sessions. You have a relatively short window to
+    // upgrade into a full session, and your session expires otherwise.
+    if ($is_partial) {
+      return;
+    }
+
+    $session_type = $session->getType();
+
+    $ttl = PhabricatorAuthSession::getSessionTypeTTL(
+      $session_type,
+      $session->getIsPartial());
+
+    // If more than 20% of the time on this session has been used, refresh the
+    // TTL back up to the full duration. The idea here is that sessions are
+    // good forever if used regularly, but get GC'd when they fall out of use.
+
+    $now = PhabricatorTime::getNow();
+    if ($now + (0.80 * $ttl) <= $session->getSessionExpires()) {
+      return;
+    }
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      queryfx(
+        $session->establishConnection('w'),
+        'UPDATE %R SET sessionExpires = UNIX_TIMESTAMP() + %d
+          WHERE id = %d',
+        $session,
+        $ttl,
+        $session->getID());
+    unset($unguarded);
+  }
+
 
 }

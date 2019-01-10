@@ -141,10 +141,10 @@ final class PhabricatorIndexEngine extends Phobject {
     queryfx(
       $conn_w,
       'INSERT INTO %T (objectPHID, extensionKey, version)
-        VALUES %Q
+        VALUES %LQ
         ON DUPLICATE KEY UPDATE version = VALUES(version)',
       $table->getTableName(),
-      implode(', ', $sql));
+      $sql);
   }
 
 }

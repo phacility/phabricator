@@ -3,23 +3,23 @@
 final class QueryFormattingTestCase extends PhabricatorTestCase {
 
   public function testQueryFormatting() {
-    $conn_r = id(new PhabricatorUser())->establishConnection('r');
+    $conn = id(new PhabricatorUser())->establishConnection('r');
 
     $this->assertEqual(
       'NULL',
-      qsprintf($conn_r, '%nd', null));
+      (string)qsprintf($conn, '%nd', null));
 
     $this->assertEqual(
       '0',
-      qsprintf($conn_r, '%nd', 0));
+      (string)qsprintf($conn, '%nd', 0));
 
     $this->assertEqual(
       '0',
-      qsprintf($conn_r, '%d', 0));
+      (string)qsprintf($conn, '%d', 0));
 
     $raised = null;
     try {
-      qsprintf($conn_r, '%d', 'derp');
+      qsprintf($conn, '%d', 'derp');
     } catch (Exception $ex) {
       $raised = $ex;
     }
@@ -29,27 +29,40 @@ final class QueryFormattingTestCase extends PhabricatorTestCase {
 
     $this->assertEqual(
       "'<S>'",
-      qsprintf($conn_r, '%s', null));
+      (string)qsprintf($conn, '%s', null));
 
     $this->assertEqual(
       'NULL',
-      qsprintf($conn_r, '%ns', null));
+      (string)qsprintf($conn, '%ns', null));
 
     $this->assertEqual(
       "'<S>', '<S>'",
-      qsprintf($conn_r, '%Ls', array('x', 'y')));
+      (string)qsprintf($conn, '%Ls', array('x', 'y')));
 
     $this->assertEqual(
       "'<B>'",
-      qsprintf($conn_r, '%B', null));
+      (string)qsprintf($conn, '%B', null));
 
     $this->assertEqual(
       'NULL',
-      qsprintf($conn_r, '%nB', null));
+      (string)qsprintf($conn, '%nB', null));
 
     $this->assertEqual(
       "'<B>', '<B>'",
-      qsprintf($conn_r, '%LB', array('x', 'y')));
+      (string)qsprintf($conn, '%LB', array('x', 'y')));
+
+    $this->assertEqual(
+      '<C>',
+      (string)qsprintf($conn, '%T', 'x'));
+
+    $this->assertEqual(
+      '<C>',
+      (string)qsprintf($conn, '%C', 'y'));
+
+    $this->assertEqual(
+      '<C>.<C>',
+      (string)qsprintf($conn, '%R', new AphrontDatabaseTableRef('x', 'y')));
+
   }
 
 

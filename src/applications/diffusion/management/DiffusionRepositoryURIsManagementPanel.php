@@ -17,6 +17,36 @@ final class DiffusionRepositoryURIsManagementPanel
     return 400;
   }
 
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: URIs');
+    $add_href = $repository->getPathURI('uri/edit/');
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-plus')
+        ->setHref($add_href)
+        ->setDisabled(!$can_edit)
+        ->setName(pht('Add New URI')));
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-book')
+        ->setHref($doc_href)
+        ->setName(pht('URI Documentation')));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
+  }
+
   public function buildManagementPanelContent() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -122,30 +152,9 @@ final class DiffusionRepositoryURIsManagementPanel
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
       ->setErrors($messages);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    $box = $this->newBox(pht('Repository URIs'), $table);
 
-    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: URIs');
-    $add_href = $repository->getPathURI('uri/edit/');
-
-    $add = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-plus')
-      ->setHref($add_href)
-      ->setDisabled(!$can_edit)
-      ->setText(pht('New URI'));
-
-    $help = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-book')
-      ->setHref($doc_href)
-      ->setText(pht('Help'));
-
-    $box = $this->newBox(pht('Repository URIs'), $table, array($add, $help));
-
-    return array($box, $info_view);
+    return array($info_view, $box);
   }
 
 }

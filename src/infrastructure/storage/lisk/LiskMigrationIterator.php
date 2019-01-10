@@ -17,11 +17,9 @@ final class LiskMigrationIterator extends PhutilBufferedIterator {
 
   private $object;
   private $cursor;
-  private $set;
 
   public function __construct(LiskDAO $object) {
-    $this->set = new LiskDAOSet();
-    $this->object = $object->putInSet($this->set);
+    $this->object = $object;
   }
 
   protected function didRewind() {
@@ -33,15 +31,15 @@ final class LiskMigrationIterator extends PhutilBufferedIterator {
   }
 
   protected function loadPage() {
-    $this->set->clearSet();
-
     $results = $this->object->loadAllWhere(
       'id > %d ORDER BY id ASC LIMIT %d',
       $this->cursor,
       $this->getPageSize());
+
     if ($results) {
       $this->cursor = last($results)->getID();
     }
+
     return $results;
   }
 

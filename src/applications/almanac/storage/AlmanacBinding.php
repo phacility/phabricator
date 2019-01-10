@@ -206,20 +206,10 @@ final class AlmanacBinding
     return new AlmanacBindingEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new AlmanacBindingTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
-  }
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

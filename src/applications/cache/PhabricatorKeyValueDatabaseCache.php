@@ -38,7 +38,7 @@ final class PhabricatorKeyValueDatabaseCache
             $conn_w,
             'INSERT INTO %T
               (cacheKeyHash, cacheKey, cacheFormat, cacheData,
-                cacheCreated, cacheExpires) VALUES %Q
+                cacheCreated, cacheExpires) VALUES %LQ
               ON DUPLICATE KEY UPDATE
                 cacheKey = VALUES(cacheKey),
                 cacheFormat = VALUES(cacheFormat),
@@ -145,8 +145,7 @@ final class PhabricatorKeyValueDatabaseCache
 
     static $can_deflate;
     if ($can_deflate === null) {
-      $can_deflate = function_exists('gzdeflate') &&
-                     PhabricatorEnv::getEnvConfig('cache.enable-deflate');
+      $can_deflate = function_exists('gzdeflate');
     }
 
     if ($can_deflate) {

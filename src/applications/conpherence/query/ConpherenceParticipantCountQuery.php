@@ -57,7 +57,7 @@ final class ConpherenceParticipantCountQuery
       }
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function buildGroupByClause(AphrontDatabaseConnection $conn) {

@@ -70,7 +70,7 @@ final class DiffusionLintCountQuery extends PhabricatorQuery {
   }
 
   protected function buildCustomWhereClause(
-    AphrontDatabaseConnection $conn_r,
+    AphrontDatabaseConnection $conn,
     $part) {
 
     $where = array();
@@ -79,19 +79,19 @@ final class DiffusionLintCountQuery extends PhabricatorQuery {
 
     if ($this->codes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'code IN (%Ls)',
         $this->codes);
     }
 
     if ($this->branchIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'branchID IN (%Ld)',
         $this->branchIDs);
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function processPaths() {

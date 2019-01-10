@@ -57,6 +57,12 @@ final class DifferentialRevisionUpdateTransaction
     // Harbormaster. See discussion in T8650.
     $diff->setRevisionID($object->getID());
     $diff->save();
+  }
+
+  public function didCommitTransaction($object, $value) {
+    $editor = $this->getEditor();
+    $diff = $editor->requireDiff($value);
+    $omnipotent = PhabricatorUser::getOmnipotentUser();
 
     // If there are any outstanding buildables for this diff, tell
     // Harbormaster that their containers need to be updated. This is
@@ -64,7 +70,7 @@ final class DifferentialRevisionUpdateTransaction
     // and unit results.
 
     $buildables = id(new HarbormasterBuildableQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($omnipotent)
       ->withManualBuildables(false)
       ->withBuildablePHIDs(array($diff->getPHID()))
       ->execute();

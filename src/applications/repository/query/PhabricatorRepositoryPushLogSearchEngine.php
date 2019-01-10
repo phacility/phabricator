@@ -163,14 +163,17 @@ final class PhabricatorRepositoryPushLogSearchEngine
         ->setKey('resultDetails')
         ->setLabel(pht('Result Details')),
       id(new PhabricatorIntExportField())
+        ->setKey('hostWait')
+        ->setLabel(pht('Host Wait (us)')),
+      id(new PhabricatorIntExportField())
         ->setKey('writeWait')
         ->setLabel(pht('Write Wait (us)')),
       id(new PhabricatorIntExportField())
         ->setKey('readWait')
         ->setLabel(pht('Read Wait (us)')),
       id(new PhabricatorIntExportField())
-        ->setKey('hostWait')
-        ->setLabel(pht('Host Wait (us)')),
+        ->setKey('hookWait')
+        ->setLabel(pht('Hook Wait (us)')),
     );
 
     if ($viewer->getIsAdmin()) {
@@ -251,9 +254,10 @@ final class PhabricatorRepositoryPushLogSearchEngine
         'result' => $result,
         'resultName' => $result_name,
         'resultDetails' => $event->getRejectDetails(),
+        'hostWait' => $event->getHostWait(),
         'writeWait' => $event->getWriteWait(),
         'readWait' => $event->getReadWait(),
-        'hostWait' => $event->getHostWait(),
+        'hookWait' => $event->getHookWait(),
       );
 
       if ($viewer->getIsAdmin()) {

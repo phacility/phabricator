@@ -99,8 +99,8 @@ final class PhabricatorMetaMTAMailQuery
     return $where;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->actorPHIDs === null && $this->recipientPHIDs === null) {
       $joins[] = qsprintf(
@@ -119,7 +119,7 @@ final class PhabricatorMetaMTAMailQuery
         PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
   protected function getPrimaryTableAlias() {

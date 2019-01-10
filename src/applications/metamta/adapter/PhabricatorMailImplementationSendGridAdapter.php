@@ -26,13 +26,6 @@ final class PhabricatorMailImplementationSendGridAdapter
     );
   }
 
-  public function newLegacyOptions() {
-    return array(
-      'api-user' => PhabricatorEnv::getEnvConfig('sendgrid.api-user'),
-      'api-key' => PhabricatorEnv::getEnvConfig('sendgrid.api-key'),
-    );
-  }
-
   public function setFrom($email, $name = '') {
     $this->params['from'] = $email;
     $this->params['from-name'] = $name;
@@ -97,17 +90,8 @@ final class PhabricatorMailImplementationSendGridAdapter
   }
 
   public function send() {
-
     $user = $this->getOption('api-user');
     $key = $this->getOption('api-key');
-
-    if (!$user || !$key) {
-      throw new Exception(
-        pht(
-          "Configure '%s' and '%s' to use SendGrid for mail delivery.",
-          'sendgrid.api-user',
-          'sendgrid.api-key'));
-    }
 
     $params = array();
 

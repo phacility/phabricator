@@ -115,7 +115,9 @@ final class PhabricatorAuthPasswordEngine
     // revoked passwords or colliding passwords either, so we can skip these
     // checks.
 
-    if ($this->getObject()->getPHID()) {
+    $object = $this->getObject();
+
+    if ($object->getPHID()) {
       if ($this->isRevokedPassword($password)) {
         throw new PhabricatorAuthPasswordException(
           pht(
@@ -130,6 +132,66 @@ final class PhabricatorAuthPasswordEngine
             'The password you entered is the same as another password '.
             'associated with your account. Each password must be unique.'),
           pht('Not Unique'));
+      }
+    }
+
+    // Prevent use of passwords which are similar to any object identifier.
+    // For example, if your username is "alincoln", your password may not be
+    // "alincoln", "lincoln", or "alincoln1".
+    $viewer = $this->getViewer();
+    $blocklist = $object->newPasswordBlocklist($viewer, $this);
+
+    // Smallest number of overlapping characters that we'll consider to be
+    // too similar.
+    $minimum_similarity = 4;
+
+    // Add the domain name to the blocklist.
+    $base_uri = PhabricatorEnv::getAnyBaseURI();
+    $base_uri = new PhutilURI($base_uri);
+    $blocklist[] = $base_uri->getDomain();
+
+    // Generate additional subterms by splitting the raw blocklist on
+    // characters like "@", " " (space), and "." to break up email addresses,
+    // readable names, and domain names into components.
+    $terms_map = array();
+    foreach ($blocklist as $term) {
+      $terms_map[$term] = $term;
+      foreach (preg_split('/[ @.]/', $term) as $subterm) {
+        $terms_map[$subterm] = $term;
+      }
+    }
+
+    // Skip very short terms: it's okay if your password has the substring
+    // "com" in it somewhere even if the install is on "mycompany.com".
+    foreach ($terms_map as $term => $source) {
+      if (strlen($term) < $minimum_similarity) {
+        unset($terms_map[$term]);
+      }
+    }
+
+    // Normalize terms for comparison.
+    $normal_map = array();
+    foreach ($terms_map as $term => $source) {
+      $term = phutil_utf8_strtolower($term);
+      $normal_map[$term] = $source;
+    }
+
+    // Finally, make sure that none of the terms appear in the password,
+    // and that the password does not appear in any of the terms.
+    $normal_password = phutil_utf8_strtolower($raw_password);
+    if (strlen($normal_password) >= $minimum_similarity) {
+      foreach ($normal_map as $term => $source) {
+        if (strpos($term, $normal_password) === false &&
+            strpos($normal_password, $term) === false) {
+          continue;
+        }
+
+        throw new PhabricatorAuthPasswordException(
+          pht(
+            'The password you entered is very similar to a nonsecret account '.
+            'identifier (like a username or email address). Choose a more '.
+            'distinct password.'),
+          pht('Not Distinct'));
       }
     }
   }

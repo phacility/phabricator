@@ -9,10 +9,6 @@ final class PhabricatorUSEnglishTranslation
 
   protected function getTranslations() {
     return array(
-      'No daemon(s) with id(s) "%s" exist!' => array(
-        'No daemon with id %s exists!',
-        'No daemons with ids %s exist!',
-      ),
       'These %d configuration value(s) are related:' => array(
         'This configuration value is related:',
         'These configuration values are related:',
@@ -1675,6 +1671,51 @@ final class PhabricatorUSEnglishTranslation
         'passes: %2$s.',
         'This draft revision will be sent for review once these builds '.
         'pass: %2$s.',
+      ),
+
+      'This factor recently issued a challenge to a different login '.
+      'session. Wait %s second(s) for the code to cycle, then try '.
+      'again.' => array(
+        'This factor recently issued a challenge to a different login '.
+        'session. Wait %s second for the code to cycle, then try '.
+        'again.',
+        'This factor recently issued a challenge to a different login '.
+        'session. Wait %s seconds for the code to cycle, then try '.
+        'again.',
+      ),
+
+      'This factor recently issued a challenge for a different '.
+      'workflow. Wait %s second(s) for the code to cycle, then try '.
+      'again.' => array(
+        'This factor recently issued a challenge for a different '.
+        'workflow. Wait %s second for the code to cycle, then try '.
+        'again.',
+        'This factor recently issued a challenge for a different '.
+        'workflow. Wait %s seconds for the code to cycle, then try '.
+        'again.',
+      ),
+
+
+      'This factor recently issued a challenge which has expired. '.
+      'A new challenge can not be issued yet. Wait %s second(s) for '.
+      'the code to cycle, then try again.' => array(
+        'This factor recently issued a challenge which has expired. '.
+        'A new challenge can not be issued yet. Wait %s second for '.
+        'the code to cycle, then try again.',
+        'This factor recently issued a challenge which has expired. '.
+        'A new challenge can not be issued yet. Wait %s seconds for '.
+        'the code to cycle, then try again.',
+      ),
+
+      'You recently provided a response to this factor. Responses '.
+      'may not be reused. Wait %s second(s) for the code to cycle, '.
+      'then try again.' => array(
+        'You recently provided a response to this factor. Responses '.
+        'may not be reused. Wait %s second for the code to cycle, '.
+        'then try again.',
+        'You recently provided a response to this factor. Responses '.
+        'may not be reused. Wait %s seconds for the code to cycle, '.
+        'then try again.',
       ),
 
     );

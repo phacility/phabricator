@@ -357,22 +357,76 @@ abstract class PhabricatorStorageManagementWorkflow
                 }
 
                 if ($adjust['charset']) {
+                  switch ($adjust['charset']) {
+                    case 'binary':
+                      $charset_value = qsprintf($conn, 'binary');
+                      break;
+                    case 'utf8':
+                      $charset_value = qsprintf($conn, 'utf8');
+                      break;
+                    case 'utf8mb4':
+                      $charset_value = qsprintf($conn, 'utf8mb4');
+                      break;
+                    default:
+                      throw new Exception(
+                        pht(
+                          'Unsupported character set "%s".',
+                          $adjust['charset']));
+                  }
+
+                  switch ($adjust['collation']) {
+                    case 'binary':
+                      $collation_value = qsprintf($conn, 'binary');
+                      break;
+                    case 'utf8_general_ci':
+                      $collation_value = qsprintf($conn, 'utf8_general_ci');
+                      break;
+                    case 'utf8mb4_bin':
+                      $collation_value = qsprintf($conn, 'utf8mb4_bin');
+                      break;
+                    case 'utf8mb4_unicode_ci':
+                      $collation_value = qsprintf($conn, 'utf8mb4_unicode_ci');
+                      break;
+                    default:
+                      throw new Exception(
+                        pht(
+                          'Unsupported collation set "%s".',
+                          $adjust['collation']));
+                  }
+
                   $parts[] = qsprintf(
                     $conn,
                     'CHARACTER SET %Q COLLATE %Q',
-                    $adjust['charset'],
-                    $adjust['collation']);
+                    $charset_value,
+                    $collation_value);
                 }
+
+                if ($parts) {
+                  $parts = qsprintf($conn, '%LJ', $parts);
+                } else {
+                  $parts = qsprintf($conn, '');
+                }
+
+                if ($adjust['nullable']) {
+                  $nullable = qsprintf($conn, 'NULL');
+                } else {
+                  $nullable = qsprintf($conn, 'NOT NULL');
+                }
+
+                // TODO: We're using "%Z" here for the column type, which is
+                // technically unsafe. It would be nice to be able to use "%Q"
+                // instead, but this requires a fair amount of legwork to
+                // enumerate all column types.
 
                 queryfx(
                   $conn,
-                  'ALTER TABLE %T.%T MODIFY %T %Q %Q %Q',
+                  'ALTER TABLE %T.%T MODIFY %T %Z %Q %Q',
                   $adjust['database'],
                   $adjust['table'],
                   $adjust['name'],
                   $adjust['type'],
-                  implode(' ', $parts),
-                  $adjust['nullable'] ? 'NULL' : 'NOT NULL');
+                  $parts,
+                  $nullable);
               }
               break;
             case 'key':
@@ -395,7 +449,7 @@ abstract class PhabricatorStorageManagementWorkflow
                 // Different keys need different creation syntax. Notable
                 // special cases are primary keys and fulltext keys.
                 if ($adjust['name'] == 'PRIMARY') {
-                  $key_name = 'PRIMARY KEY';
+                  $key_name = qsprintf($conn, 'PRIMARY KEY');
                 } else if ($adjust['indexType'] == 'FULLTEXT') {
                   $key_name = qsprintf($conn, 'FULLTEXT %T', $adjust['name']);
                 } else {
@@ -414,11 +468,11 @@ abstract class PhabricatorStorageManagementWorkflow
 
                 queryfx(
                   $conn,
-                  'ALTER TABLE %T.%T ADD %Q (%Q)',
+                  'ALTER TABLE %T.%T ADD %Q (%LK)',
                   $adjust['database'],
                   $adjust['table'],
                   $key_name,
-                  implode(', ', $adjust['columns']));
+                  $adjust['columns']);
               }
               break;
             default:

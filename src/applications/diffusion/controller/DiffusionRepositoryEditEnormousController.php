@@ -30,7 +30,8 @@ final class DiffusionRepositoryEditEnormousController
 
     if ($request->isFormPost()) {
       $xaction = id(new PhabricatorRepositoryTransaction())
-        ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_ENORMOUS)
+        ->setTransactionType(
+          PhabricatorRepositoryEnormousTransaction::TRANSACTIONTYPE)
         ->setNewValue(!$repository->shouldAllowEnormousChanges());
 
       $editor = id(new PhabricatorRepositoryEditor())

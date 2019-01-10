@@ -25,7 +25,7 @@ final class PholioMockEmbedView extends AphrontView {
     $thumbnail = null;
     if (!empty($this->images)) {
       $images_to_show = array_intersect_key(
-        $this->mock->getImages(), array_flip($this->images));
+        $this->mock->getActiveImages(), array_flip($this->images));
     }
 
     $xform = PhabricatorFileTransform::getTransformByKey(
@@ -54,7 +54,7 @@ final class PholioMockEmbedView extends AphrontView {
       ->setImageURI($thumbnail)
       ->setImageSize($x, $y)
       ->setDisabled($mock->isClosed())
-      ->addIconCount('fa-picture-o', count($mock->getImages()))
+      ->addIconCount('fa-picture-o', count($mock->getActiveImages()))
       ->addIconCount('fa-trophy', $mock->getTokenCount());
 
     return $item;

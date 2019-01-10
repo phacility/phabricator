@@ -201,7 +201,7 @@ final class PhabricatorFerretFulltextEngineExtension
         foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
           queryfx(
             $conn,
-            'INSERT INTO %T (documentID, ngram) VALUES %Q',
+            'INSERT INTO %T (documentID, ngram) VALUES %LQ',
             $engine->getNgramsTableName(),
             $chunk);
         }

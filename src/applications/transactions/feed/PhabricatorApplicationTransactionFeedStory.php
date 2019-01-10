@@ -36,12 +36,7 @@ class PhabricatorApplicationTransactionFeedStory
       // time because it's cheap and gets us better results when things change
       // by letting the changes apply retroactively.
 
-      $xaction_phids = $this->getValue('transactionPHIDs');
-
-      $xactions = array();
-      foreach ($xaction_phids as $xaction_phid) {
-        $xactions[] = $this->getObject($xaction_phid);
-      }
+      $xactions = $this->getTransactions();
 
       foreach ($xactions as $key => $xaction) {
         if ($xaction->shouldHideForFeed()) {
@@ -52,13 +47,48 @@ class PhabricatorApplicationTransactionFeedStory
       if ($xactions) {
         $primary_phid = head($xactions)->getPHID();
       } else {
-        $primary_phid = head($xaction_phids);
+        $primary_phid = head($this->getValue('transactionPHIDs'));
       }
 
       $this->primaryTransactionPHID = $primary_phid;
     }
 
     return $this->primaryTransactionPHID;
+  }
+
+  public function isVisibleInNotifications() {
+    $xactions = $this->getTransactions();
+
+    foreach ($xactions as $key => $xaction) {
+      if (!$xaction->shouldHideForNotifications()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public function isVisibleInFeed() {
+    $xactions = $this->getTransactions();
+
+    foreach ($xactions as $key => $xaction) {
+      if (!$xaction->shouldHideForFeed()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private function getTransactions() {
+    $xaction_phids = $this->getValue('transactionPHIDs');
+
+    $xactions = array();
+    foreach ($xaction_phids as $xaction_phid) {
+      $xactions[] = $this->getObject($xaction_phid);
+    }
+
+    return $xactions;
   }
 
   public function getPrimaryTransaction() {

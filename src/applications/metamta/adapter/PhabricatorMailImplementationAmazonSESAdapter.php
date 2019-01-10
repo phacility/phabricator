@@ -39,15 +39,6 @@ final class PhabricatorMailImplementationAmazonSESAdapter
     );
   }
 
-  public function newLegacyOptions() {
-    return array(
-      'access-key' => PhabricatorEnv::getEnvConfig('amazon-ses.access-key'),
-      'secret-key' => PhabricatorEnv::getEnvConfig('amazon-ses.secret-key'),
-      'endpoint' => PhabricatorEnv::getEnvConfig('amazon-ses.endpoint'),
-      'encoding' => PhabricatorEnv::getEnvConfig('phpmailer.smtp-encoding'),
-    );
-  }
-
   /**
    * @phutil-external-symbol class SimpleEmailService
    */

@@ -106,8 +106,8 @@ final class DiffusionUpdateCoverageConduitAPIMethod
       foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
         queryfx(
           $conn,
-          'INSERT INTO %T (branchID, pathID, commitID, coverage) VALUES %Q'.
-          ' ON DUPLICATE KEY UPDATE coverage=VALUES(coverage)',
+          'INSERT INTO %T (branchID, pathID, commitID, coverage) VALUES %LQ'.
+          ' ON DUPLICATE KEY UPDATE coverage = VALUES(coverage)',
           $table_name,
           $chunk);
       }

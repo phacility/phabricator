@@ -11,4 +11,18 @@ final class PhabricatorUserTransactionEditor
     return pht('Users');
   }
 
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array();
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    return array();
+  }
+
 }

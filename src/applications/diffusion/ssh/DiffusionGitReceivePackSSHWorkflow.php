@@ -30,7 +30,7 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
     if ($this->shouldProxy()) {
       $command = $this->getProxyCommand(true);
-      $did_synchronize = false;
+      $did_write = false;
 
       if ($device) {
         $this->writeClusterEngineLogMessage(
@@ -40,7 +40,7 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
       }
     } else {
       $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
-      $did_synchronize = true;
+      $did_write = true;
       $cluster_engine->synchronizeWorkingCopyBeforeWrite();
 
       if ($device) {
@@ -60,7 +60,7 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
     // We've committed the write (or rejected it), so we can release the lock
     // without waiting for the client to receive the acknowledgement.
-    if ($did_synchronize) {
+    if ($did_write) {
       $cluster_engine->synchronizeWorkingCopyAfterWrite();
     }
 
@@ -69,18 +69,23 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
     }
 
     if (!$err) {
-      $repository->writeStatusMessage(
-        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-        PhabricatorRepositoryStatusMessage::CODE_OKAY);
       $this->waitForGitClient();
 
-      $host_wait_end = microtime(true);
+      // When a repository is clustered, we reach this cleanup code on both
+      // the proxy and the actual final endpoint node. Don't do more cleanup
+      // or logging than we need to.
+      if ($did_write) {
+        $repository->writeStatusMessage(
+          PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+          PhabricatorRepositoryStatusMessage::CODE_OKAY);
 
-      $this->updatePushLogWithTimingInformation(
-        $this->getClusterEngineLogProperty('writeWait'),
-        $this->getClusterEngineLogProperty('readWait'),
-        ($host_wait_end - $host_wait_start));
+        $host_wait_end = microtime(true);
 
+        $this->updatePushLogWithTimingInformation(
+          $this->getClusterEngineLogProperty('writeWait'),
+          $this->getClusterEngineLogProperty('readWait'),
+          ($host_wait_end - $host_wait_start));
+      }
     }
 
     return $err;

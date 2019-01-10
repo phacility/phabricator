@@ -47,7 +47,7 @@ final class ManiphestTaskSearchEngine
     // Hide the "Subtypes" constraint from the web UI if the install only
     // defines one task subtype, since it isn't of any use in this case.
     $subtype_map = id(new ManiphestTask())->newEditEngineSubtypeMap();
-    $hide_subtypes = (count($subtype_map) == 1);
+    $hide_subtypes = ($subtype_map->getCount() == 1);
 
     return array(
       id(new PhabricatorOwnersSearchField())

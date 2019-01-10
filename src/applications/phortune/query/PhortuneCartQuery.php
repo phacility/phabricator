@@ -213,7 +213,7 @@ final class PhortuneCartQuery
       }
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function getQueryApplicationClass() {

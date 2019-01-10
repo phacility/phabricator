@@ -6,33 +6,39 @@ final class PholioImageFileTransaction
   const TRANSACTIONTYPE = 'image-file';
 
   public function generateOldValue($object) {
-    $images = $object->getImages();
+    $images = $object->getActiveImages();
     return array_values(mpull($images, 'getPHID'));
   }
 
   public function generateNewValue($object, $value) {
-    $new_value = array();
-    foreach ($value as $key => $images) {
-      $new_value[$key] = mpull($images, 'getPHID');
-    }
-    $old = array_fuse($this->getOldValue());
-    return $this->getEditor()->getPHIDList($old, $new_value);
+    $editor = $this->getEditor();
+
+    $old_value = $this->getOldValue();
+    $new_value = $value;
+
+    return $editor->getPHIDList($old_value, $new_value);
   }
 
-  public function applyInternalEffects($object, $value) {
+  public function applyExternalEffects($object, $value) {
     $old_map = array_fuse($this->getOldValue());
     $new_map = array_fuse($this->getNewValue());
 
-    $obsolete_map = array_diff_key($old_map, $new_map);
-    $images = $object->getImages();
-    foreach ($images as $seq => $image) {
-      if (isset($obsolete_map[$image->getPHID()])) {
-        $image->setIsObsolete(1);
-        $image->save();
-        unset($images[$seq]);
-      }
+    $add_map = array_diff_key($new_map, $old_map);
+    $rem_map = array_diff_key($old_map, $new_map);
+
+    $editor = $this->getEditor();
+
+    foreach ($rem_map as $phid) {
+      $editor->loadPholioImage($object, $phid)
+        ->setIsObsolete(1)
+        ->save();
     }
-    $object->attachImages($images);
+
+    foreach ($add_map as $phid) {
+      $editor->loadPholioImage($object, $phid)
+        ->setMockPHID($object->getPHID())
+        ->save();
+    }
   }
 
   public function getTitle() {
@@ -95,18 +101,20 @@ final class PholioImageFileTransaction
   }
 
   public function extractFilePHIDs($object, $value) {
-    $images = $this->getEditor()->getNewImages();
-    $images = mpull($images, null, 'getPHID');
+    $editor = $this->getEditor();
 
+    // NOTE: This method is a little weird (and includes ALL the file PHIDs,
+    // including old file PHIDs) because we currently don't have a storage
+    // object when called. This might change at some point.
+
+    $new_phids = $value;
 
     $file_phids = array();
-    foreach ($value as $image_phid) {
-      $image = idx($images, $image_phid);
-      if (!$image) {
-        continue;
-      }
-      $file_phids[] = $image->getFilePHID();
+    foreach ($new_phids as $phid) {
+      $file_phids[] = $editor->loadPholioImage($object, $phid)
+        ->getFilePHID();
     }
+
     return $file_phids;
   }
 
@@ -114,7 +122,7 @@ final class PholioImageFileTransaction
     $object,
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
-    return  $this->getEditor()->mergePHIDOrEdgeTransactions($u, $v);
+    return $this->getEditor()->mergePHIDOrEdgeTransactions($u, $v);
   }
 
 }

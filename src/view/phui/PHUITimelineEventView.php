@@ -605,7 +605,7 @@ final class PHUITimelineEventView extends AphrontView {
       // provide a hint that it was extra authentic.
       if ($this->getIsMFA()) {
         $extra[] = id(new PHUIIconView())
-          ->setIcon('fa-vcard', 'green')
+          ->setIcon('fa-vcard', 'pink')
           ->setTooltip(pht('MFA Authenticated'));
       }
     }

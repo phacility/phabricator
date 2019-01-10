@@ -12,17 +12,11 @@ $status_map = array(
   5 => 'needs-verification',
 );
 
-foreach (new LiskMigrationIterator($table) as $commit) {
-  $status = $commit->getAuditStatus();
-
-  if (!isset($status_map[$status])) {
-    continue;
-  }
-
+foreach ($status_map as $old_status => $new_status) {
   queryfx(
     $conn,
-    'UPDATE %T SET auditStatus = %s WHERE id = %d',
-    $table->getTableName(),
-    $status_map[$status],
-    $commit->getID());
+    'UPDATE %R SET auditStatus = %s WHERE auditStatus = %s',
+    $table,
+    $new_status,
+    $old_status);
 }

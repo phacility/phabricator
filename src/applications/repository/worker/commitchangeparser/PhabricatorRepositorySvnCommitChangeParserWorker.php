@@ -463,9 +463,9 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
         $conn_w,
         'INSERT INTO %T
           (repositoryID, parentID, svnCommit, pathID, existed, fileType)
-          VALUES %Q',
+          VALUES %LQ',
         PhabricatorRepository::TABLE_FILESYSTEM,
-        implode(', ', $sql_chunk));
+        $sql_chunk);
     }
 
   }

@@ -404,7 +404,7 @@ final class AphrontDialogView
         $header),
       phutil_tag('div',
         array(
-          'class' => 'aphront-dialog-body phabricator-remarkup grouped',
+          'class' => 'aphront-dialog-body grouped',
         ),
         $children),
       $tail,

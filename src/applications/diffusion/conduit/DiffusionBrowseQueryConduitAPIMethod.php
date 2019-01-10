@@ -451,13 +451,13 @@ final class DiffusionBrowseQueryConduitAPIMethod
         WHERE repositoryID = %d
           AND parentID = %d
           AND existed = 1
-        AND (%Q)
+        AND (%LO)
         ORDER BY pathName',
       PhabricatorRepository::TABLE_FILESYSTEM,
       PhabricatorRepository::TABLE_PATH,
       $repository->getID(),
       $path_id,
-      implode(' OR ', $sql));
+      $sql);
 
     $loadable_commits = array();
     foreach ($browse as $key => $file) {

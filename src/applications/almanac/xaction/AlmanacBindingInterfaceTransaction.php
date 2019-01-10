@@ -55,11 +55,22 @@ final class AlmanacBindingInterfaceTransaction
   }
 
   public function getTitle() {
-    return pht(
-      '%s changed the interface for this binding from %s to %s.',
-      $this->renderAuthor(),
-      $this->renderOldHandle(),
-      $this->renderNewHandle());
+    if ($this->getOldValue() === null) {
+      return pht(
+        '%s set the interface for this binding to %s.',
+        $this->renderAuthor(),
+        $this->renderNewHandle());
+    } else if ($this->getNewValue() == null) {
+      return pht(
+        '%s removed the interface for this binding.',
+        $this->renderAuthor());
+    } else {
+      return pht(
+        '%s changed the interface for this binding from %s to %s.',
+        $this->renderAuthor(),
+        $this->renderOldHandle(),
+        $this->renderNewHandle());
+    }
   }
 
   public function validateTransactions($object, array $xactions) {

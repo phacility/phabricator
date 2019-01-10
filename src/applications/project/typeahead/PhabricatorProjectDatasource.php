@@ -26,7 +26,8 @@ final class PhabricatorProjectDatasource
 
     $query = id(new PhabricatorProjectQuery())
       ->needImages(true)
-      ->needSlugs(true);
+      ->needSlugs(true)
+      ->setOrderVector(array('-status', 'id'));
 
     if ($this->getPhase() == self::PHASE_PREFIX) {
       $prefix = $this->getPrefixQuery();

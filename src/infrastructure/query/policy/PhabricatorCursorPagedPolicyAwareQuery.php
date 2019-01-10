@@ -123,12 +123,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     AphrontDatabaseConnection $conn,
     $table_name) {
 
+    $table_alias = $this->getPrimaryTableAlias();
+    if ($table_alias === null) {
+      $table_alias = qsprintf($conn, '');
+    } else {
+      $table_alias = qsprintf($conn, '%T', $table_alias);
+    }
+
     return qsprintf(
       $conn,
       '%Q FROM %T %Q %Q %Q %Q %Q %Q %Q',
       $this->buildSelectClause($conn),
       $table_name,
-      (string)$this->getPrimaryTableAlias(),
+      $table_alias,
       $this->buildJoinClause($conn),
       $this->buildWhereClause($conn),
       $this->buildGroupClause($conn),
@@ -195,15 +202,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
   }
 
-  final protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {
+  final protected function buildLimitClause(AphrontDatabaseConnection $conn) {
     if ($this->shouldLimitResults()) {
       $limit = $this->getRawResultLimit();
       if ($limit) {
-        return qsprintf($conn_r, 'LIMIT %d', $limit);
+        return qsprintf($conn, 'LIMIT %d', $limit);
       }
     }
 
-    return '';
+    return qsprintf($conn, '');
   }
 
   protected function shouldLimitResults() {
@@ -277,7 +284,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildSelectClause(AphrontDatabaseConnection $conn) {
     $parts = $this->buildSelectClauseParts($conn);
-    return $this->formatSelectClause($parts);
+    return $this->formatSelectClause($conn, $parts);
   }
 
 
@@ -291,7 +298,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if ($alias) {
       $select[] = qsprintf($conn, '%T.*', $alias);
     } else {
-      $select[] = '*';
+      $select[] = qsprintf($conn, '*');
     }
 
     $select[] = $this->buildEdgeLogicSelectClause($conn);
@@ -306,7 +313,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $joins = $this->buildJoinClauseParts($conn);
-    return $this->formatJoinClause($joins);
+    return $this->formatJoinClause($conn, $joins);
   }
 
 
@@ -328,7 +335,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = $this->buildWhereClauseParts($conn);
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
 
@@ -352,7 +359,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildHavingClause(AphrontDatabaseConnection $conn) {
     $having = $this->buildHavingClauseParts($conn);
-    return $this->formatHavingClause($having);
+    return $this->formatHavingClause($conn, $having);
   }
 
 
@@ -371,13 +378,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildGroupClause(AphrontDatabaseConnection $conn) {
     if (!$this->shouldGroupQueryResultRows()) {
-      return '';
+      return qsprintf($conn, '');
     }
 
     return qsprintf(
       $conn,
       'GROUP BY %Q',
-      $this->getApplicationSearchObjectPHIDColumn());
+      $this->getApplicationSearchObjectPHIDColumn($conn));
   }
 
 
@@ -425,7 +432,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     } else {
       // No paging is being applied to this query so we do not need to
       // construct a paging clause.
-      return '';
+      return qsprintf($conn, '');
     }
 
     $keys = array();
@@ -655,24 +662,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           $conn,
           '%Q %Q %Q',
           $field,
-          $reverse ? '>' : '<',
+          $reverse ? qsprintf($conn, '>') : qsprintf($conn, '<'),
           $value);
       }
 
       if ($parts) {
-        if (count($parts) > 1) {
-          $clause[] = '('.implode(') OR (', $parts).')';
-        } else {
-          $clause[] = head($parts);
-        }
+        $clause[] = qsprintf($conn, '%LO', $parts);
       }
 
       if ($clause) {
-        if (count($clause) > 1) {
-          $clauses[] = '('.implode(') AND (', $clause).')';
-        } else {
-          $clauses[] = head($clause);
-        }
+        $clauses[] = qsprintf($conn, '%LA', $clause);
       }
 
       if ($value === null) {
@@ -689,7 +688,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    return '('.implode(') OR (', $clauses).')';
+    if ($clauses) {
+      return qsprintf($conn, '%LO', $clauses);
+    }
+
+    return qsprintf($conn, '');
   }
 
 
@@ -1134,7 +1137,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    return qsprintf($conn, 'ORDER BY %Q', implode(', ', $sql));
+    return qsprintf($conn, 'ORDER BY %LQ', $sql);
   }
 
 
@@ -1244,17 +1247,18 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * See @{method:getPrimaryTableAlias} if the column needs to be qualified with
    * a table alias.
    *
-   * @return string Column name.
+   * @param AphrontDatabaseConnection Connection executing queries.
+   * @return PhutilQueryString Column name.
    * @task appsearch
    */
-  protected function getApplicationSearchObjectPHIDColumn() {
-    if ($this->getPrimaryTableAlias()) {
-      $prefix = $this->getPrimaryTableAlias().'.';
-    } else {
-      $prefix = '';
-    }
+  protected function getApplicationSearchObjectPHIDColumn(
+    AphrontDatabaseConnection $conn) {
 
-    return $prefix.'phid';
+    if ($this->getPrimaryTableAlias()) {
+      return qsprintf($conn, '%T.phid', $this->getPrimaryTableAlias());
+    } else {
+      return qsprintf($conn, 'phid');
+    }
   }
 
 
@@ -1308,15 +1312,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task appsearch
    */
   protected function buildApplicationSearchGroupClause(
-    AphrontDatabaseConnection $conn_r) {
+    AphrontDatabaseConnection $conn) {
 
     if ($this->getApplicationSearchMayJoinMultipleRows()) {
       return qsprintf(
-        $conn_r,
+        $conn,
         'GROUP BY %Q',
-        $this->getApplicationSearchObjectPHIDColumn());
+        $this->getApplicationSearchObjectPHIDColumn($conn));
     } else {
-      return '';
+      return qsprintf($conn, '');
     }
   }
 
@@ -1338,16 +1342,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $alias = $constraint['alias'];
       $index = $constraint['index'];
       $cond = $constraint['cond'];
-      $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+      $phid_column = $this->getApplicationSearchObjectPHIDColumn($conn);
       switch ($cond) {
         case '=':
           // Figure out whether we need to do a LEFT JOIN or not. We need to
           // LEFT JOIN if we're going to select "IS NULL" rows.
-          $join_type = 'JOIN';
+          $join_type = qsprintf($conn, 'JOIN');
           foreach ($constraint['constraints'] as $query_constraint) {
             $op = $query_constraint->getOperator();
             if ($op === PhabricatorQueryConstraint::OPERATOR_NULL) {
-              $join_type = 'LEFT JOIN';
+              $join_type = qsprintf($conn, 'LEFT JOIN');
               break;
             }
           }
@@ -1410,7 +1414,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+    $phid_column = $this->getApplicationSearchObjectPHIDColumn($conn);
     $orderable = $this->getOrderableColumns();
 
     $vector = $this->getOrderVector();
@@ -1436,7 +1440,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $key);
     }
 
-    return implode(' ', $joins);
+    if ($joins) {
+      return qsprintf($conn, '%LJ', $joins);
+    } else {
+      return qsprintf($conn, '');
+    }
   }
 
   /**
@@ -1512,7 +1520,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           }
 
           if ($constraint_parts) {
-            $where[] = '('.implode(') OR (', $constraint_parts).')';
+            $where[] = qsprintf($conn, '%LO', $constraint_parts);
           }
           break;
       }
@@ -1666,7 +1674,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     if (!$this->ferretEngine) {
-      $select[] = '0 _ft_rank';
+      $select[] = qsprintf($conn, '0 _ft_rank');
       return $select;
     }
 
@@ -1732,12 +1740,21 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    $parts[] = '0';
+    $parts[] = qsprintf($conn, '%d', 0);
+
+    $sum = array_shift($parts);
+    foreach ($parts as $part) {
+      $sum = qsprintf(
+        $conn,
+        '%Q + %Q',
+        $sum,
+        $part);
+    }
 
     $select[] = qsprintf(
       $conn,
       '%Q _ft_rank',
-      implode(' + ', $parts));
+      $sum);
 
     return $select;
   }
@@ -2027,20 +2044,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       if ($is_not) {
         $where[] = qsprintf(
           $conn,
-          '(%Q)',
-          implode(' AND ', $term_constraints));
+          '%LA',
+          $term_constraints);
       } else if ($is_quoted) {
         $where[] = qsprintf(
           $conn,
-          '(%T.rawCorpus LIKE %~ AND (%Q))',
+          '(%T.rawCorpus LIKE %~ AND %LO)',
           $table_alias,
           $value,
-          implode(' OR ', $term_constraints));
+          $term_constraints);
       } else {
         $where[] = qsprintf(
           $conn,
-          '(%Q)',
-          implode(' OR ', $term_constraints));
+          '%LO',
+          $term_constraints);
       }
     }
 
@@ -2349,7 +2366,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
                   (array)$constraint->getValue(),
                   $idx++);
               }
-              $parts = implode(', ', $parts);
+              $parts = qsprintf($conn, '%LQ', $parts);
 
               $select[] = qsprintf(
                 $conn,
@@ -2373,7 +2390,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   public function buildEdgeLogicJoinClause(AphrontDatabaseConnection $conn) {
     $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
-    $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+    $phid_column = $this->getApplicationSearchObjectPHIDColumn($conn);
 
     $joins = array();
     foreach ($this->edgeLogicConstraints as $type => $constraints) {
@@ -2436,9 +2453,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             // this to a LEFT join. We'll use WHERE to select matching rows
             // later.
             if ($has_null) {
-              $join_type = 'LEFT';
+              $join_type = qsprintf($conn, 'LEFT');
             } else {
-              $join_type = '';
+              $join_type = qsprintf($conn, '');
             }
 
             $joins[] = qsprintf(
@@ -2531,9 +2548,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
 
       if ($full && $null) {
-        $full = $this->formatWhereSubclause($full);
-        $null = $this->formatWhereSubclause($null);
-        $where[] = qsprintf($conn, '(%Q OR %Q)', $full, $null);
+        $where[] = qsprintf($conn, '(%LA OR %LA)', $full, $null);
       } else if ($full) {
         foreach ($full as $condition) {
           $where[] = $condition;
@@ -2913,7 +2928,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if ($alias) {
       $col = qsprintf($conn, '%T.spacePHID', $alias);
     } else {
-      $col = 'spacePHID';
+      $col = qsprintf($conn, 'spacePHID');
     }
 
     if ($space_phids && $include_null) {

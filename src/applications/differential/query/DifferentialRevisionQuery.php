@@ -453,7 +453,7 @@ final class DifferentialRevisionQuery
 
   private function loadData() {
     $table = $this->newResultObject();
-    $conn_r = $table->establishConnection('r');
+    $conn = $table->establishConnection('r');
 
     $selects = array();
 
@@ -469,13 +469,13 @@ final class DifferentialRevisionQuery
         $this->authors = array_merge($basic_authors, $this->responsibles);
 
         $this->reviewers = $basic_reviewers;
-        $selects[] = $this->buildSelectStatement($conn_r);
+        $selects[] = $this->buildSelectStatement($conn);
 
         // Build the query where the responsible users are reviewers, or
         // projects they are members of are reviewers.
         $this->authors = $basic_authors;
         $this->reviewers = array_merge($basic_reviewers, $this->responsibles);
-        $selects[] = $this->buildSelectStatement($conn_r);
+        $selects[] = $this->buildSelectStatement($conn);
 
         // Put everything back like it was.
         $this->authors = $basic_authors;
@@ -486,21 +486,35 @@ final class DifferentialRevisionQuery
         throw $ex;
       }
     } else {
-      $selects[] = $this->buildSelectStatement($conn_r);
+      $selects[] = $this->buildSelectStatement($conn);
     }
 
     if (count($selects) > 1) {
+      $unions = null;
+      foreach ($selects as $select) {
+        if (!$unions) {
+          $unions = $select;
+          continue;
+        }
+
+        $unions = qsprintf(
+          $conn,
+          '%Q UNION DISTINCT %Q',
+          $unions,
+          $select);
+      }
+
       $query = qsprintf(
-        $conn_r,
+        $conn,
         '%Q %Q %Q',
-        implode(' UNION DISTINCT ', $selects),
-        $this->buildOrderClause($conn_r, true),
-        $this->buildLimitClause($conn_r));
+        $unions,
+        $this->buildOrderClause($conn, true),
+        $this->buildLimitClause($conn));
     } else {
       $query = head($selects);
     }
 
-    return queryfx_all($conn_r, '%Q', $query);
+    return queryfx_all($conn, '%Q', $query);
   }
 
   private function buildSelectStatement(AphrontDatabaseConnection $conn_r) {
@@ -542,26 +556,26 @@ final class DifferentialRevisionQuery
   /**
    * @task internal
    */
-  private function buildJoinsClause($conn_r) {
+  private function buildJoinsClause(AphrontDatabaseConnection $conn) {
     $joins = array();
     if ($this->pathIDs) {
       $path_table = new DifferentialAffectedPath();
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T p ON p.revisionID = r.id',
         $path_table->getTableName());
     }
 
     if ($this->commitHashes) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T hash_rel ON hash_rel.revisionID = r.id',
         ArcanistDifferentialRevisionHash::TABLE_NAME);
     }
 
     if ($this->ccs) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T e_ccs ON e_ccs.src = r.phid '.
         'AND e_ccs.type = %s '.
         'AND e_ccs.dst in (%Ls)',
@@ -572,7 +586,7 @@ final class DifferentialRevisionQuery
 
     if ($this->reviewers) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T reviewer ON reviewer.revisionPHID = r.phid
           AND reviewer.reviewerStatus != %s
           AND reviewer.reviewerPHID in (%Ls)',
@@ -583,7 +597,7 @@ final class DifferentialRevisionQuery
 
     if ($this->draftAuthors) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T has_draft ON has_draft.srcPHID = r.phid
           AND has_draft.type = %s
           AND has_draft.dstPHID IN (%Ls)',
@@ -594,21 +608,21 @@ final class DifferentialRevisionQuery
 
     if ($this->commitPHIDs) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T commits ON commits.revisionID = r.id',
         DifferentialRevision::TABLE_COMMIT);
     }
 
-    $joins[] = $this->buildJoinClauseParts($conn_r);
+    $joins[] = $this->buildJoinClauseParts($conn);
 
-    return $this->formatJoinClause($joins);
+    return $this->formatJoinClause($conn, $joins);
   }
 
 
   /**
    * @task internal
    */
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->pathIDs) {
@@ -616,32 +630,32 @@ final class DifferentialRevisionQuery
       $repo_info = igroup($this->pathIDs, 'repositoryID');
       foreach ($repo_info as $repository_id => $paths) {
         $path_clauses[] = qsprintf(
-          $conn_r,
+          $conn,
           '(p.repositoryID = %d AND p.pathID IN (%Ld))',
           $repository_id,
           ipull($paths, 'pathID'));
       }
-      $path_clauses = '('.implode(' OR ', $path_clauses).')';
+      $path_clauses = qsprintf($conn, '%LO', $path_clauses);
       $where[] = $path_clauses;
     }
 
     if ($this->authors) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.authorPHID IN (%Ls)',
         $this->authors);
     }
 
     if ($this->revIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.id IN (%Ld)',
         $this->revIDs);
     }
 
     if ($this->repositoryPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
@@ -651,67 +665,67 @@ final class DifferentialRevisionQuery
       foreach ($this->commitHashes as $info) {
         list($type, $hash) = $info;
         $hash_clauses[] = qsprintf(
-          $conn_r,
+          $conn,
           '(hash_rel.type = %s AND hash_rel.hash = %s)',
           $type,
           $hash);
       }
-      $hash_clauses = '('.implode(' OR ', $hash_clauses).')';
+      $hash_clauses = qsprintf($conn, '%LO', $hash_clauses);
       $where[] = $hash_clauses;
     }
 
     if ($this->commitPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'commits.commitPHID IN (%Ls)',
         $this->commitPHIDs);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->branches) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.branchName in (%Ls)',
         $this->branches);
     }
 
     if ($this->updatedEpochMin !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.dateModified >= %d',
         $this->updatedEpochMin);
     }
 
     if ($this->updatedEpochMax !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.dateModified <= %d',
         $this->updatedEpochMax);
     }
 
     if ($this->createdEpochMin !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.dateCreated >= %d',
         $this->createdEpochMin);
     }
 
     if ($this->createdEpochMax !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.dateCreated <= %d',
         $this->createdEpochMax);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.status in (%Ls)',
         $this->statuses);
     }
@@ -725,13 +739,14 @@ final class DifferentialRevisionQuery
           DifferentialLegacyQuery::STATUS_CLOSED);
       }
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.status in (%Ls)',
         $statuses);
     }
 
-    $where[] = $this->buildWhereClauseParts($conn_r);
-    return $this->formatWhereClause($where);
+    $where[] = $this->buildWhereClauseParts($conn);
+
+    return $this->formatWhereClause($conn, $where);
   }
 
 

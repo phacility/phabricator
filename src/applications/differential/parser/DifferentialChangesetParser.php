@@ -874,9 +874,16 @@ final class DifferentialChangesetParser extends Phobject {
         $offset_map = $this->old;
       }
 
+      // NOTE: Inline comments use zero-based lengths. For example, a comment
+      // that starts and ends on line 123 has length 0. Rendering considers
+      // this range to have length 1. Probably both should agree, but that
+      // ship likely sailed long ago. Tweak things here to get the two systems
+      // to agree. See PHI985, where this affected mail rendering of inline
+      // comments left on the final line of a file.
+
       $range_end = $this->getOffset($offset_map, $range_start + $range_len);
       $range_start = $this->getOffset($offset_map, $range_start);
-      $range_len = ($range_end - $range_start);
+      $range_len = ($range_end - $range_start) + 1;
     }
 
     $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);

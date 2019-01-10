@@ -557,8 +557,14 @@ final class PhabricatorDatabaseRef
     $conn = $this->newManagementConnection();
 
     try {
-      $value = queryfx_one($conn, 'SELECT @@%Q', $key);
-      $value = $value['@@'.$key];
+      $value = queryfx_one($conn, 'SELECT @@%C', $key);
+
+      // NOTE: Although MySQL allows us to escape configuration values as if
+      // they are column names, the escaping is included in the column name
+      // of the return value: if we select "@@`x`", we get back a column named
+      // "@@`x`", not "@@x" as we might expect.
+      $value = head($value);
+
     } catch (AphrontQueryException $ex) {
       $value = null;
     }

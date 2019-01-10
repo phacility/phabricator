@@ -156,7 +156,7 @@ EOFILE;
     $result_map = array();
 
     foreach ($binary_map as $name => $data_hash) {
-      $hash = $resources->getCelerityHash($data_hash.$name);
+      $hash = $this->newResourceHash($data_hash.$name);
 
       $result_map[$name] = array(
         'hash' => $hash,
@@ -185,8 +185,8 @@ EOFILE;
       $raw_data = $resources->getResourceData($name);
       $xformed_data = $xformer->transformResource($name, $raw_data);
 
-      $data_hash = $resources->getCelerityHash($xformed_data);
-      $hash = $resources->getCelerityHash($data_hash.$name);
+      $data_hash = $this->newResourceHash($xformed_data);
+      $hash = $this->newResourceHash($data_hash.$name);
 
       list($provides, $requires) = $this->getProvidesAndRequires(
         $name,
@@ -324,7 +324,7 @@ EOFILE;
         $hashes[] = $symbol.':'.$symbol_hash;
       }
 
-      $hash = $resources->getCelerityHash(implode("\n", $hashes));
+      $hash = $this->newResourceHash(implode("\n", $hashes));
       $package_map[$package_name] = array(
         'hash' => $hash,
         'symbols' => $package_symbols,
@@ -392,6 +392,16 @@ EOFILE;
     $list = array_filter($list);
 
     return $list;
+  }
+
+  private function newResourceHash($data) {
+    // This HMAC key is a static, hard-coded value because we don't want the
+    // hashes in the map to depend on database state: when two different
+    // developers regenerate the map, they should end up with the same output.
+
+    $hash = PhabricatorHash::digestHMACSHA256($data, 'celerity-resource-data');
+
+    return substr($hash, 0, 8);
   }
 
 }

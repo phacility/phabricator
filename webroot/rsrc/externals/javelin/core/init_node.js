@@ -49,7 +49,7 @@ JX.require = function(thing) {
   }
 
   vm.createScript(content, path)
-    .runInNewContext(sandbox, path);
+    .runInNewContext(sandbox);
 };
 
 exports.JX = JX;

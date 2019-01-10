@@ -15,7 +15,9 @@ final class PhabricatorUserDisableTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setIsDisabled((int)$value);
+  }
 
+  public function applyExternalEffects($object, $value) {
     $this->newUserLog(PhabricatorUserLog::ACTION_DISABLE)
       ->setOldValue((bool)$object->getIsDisabled())
       ->setNewValue((bool)$value)
@@ -35,19 +37,10 @@ final class PhabricatorUserDisableTransaction
     }
   }
 
-  public function getTitleForFeed() {
-    $new = $this->getNewValue();
-    if ($new) {
-      return pht(
-        '%s disabled %s.',
-        $this->renderAuthor(),
-        $this->renderObject());
-    } else {
-      return pht(
-        '%s enabled %s.',
-        $this->renderAuthor(),
-        $this->renderObject());
-    }
+  public function shouldHideForFeed() {
+    // Don't publish feed stories about disabling users, since this can be
+    // a sensitive action.
+    return true;
   }
 
   public function validateTransactions($object, array $xactions) {

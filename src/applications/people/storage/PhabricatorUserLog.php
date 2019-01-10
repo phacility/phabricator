@@ -150,7 +150,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
         'actorPHID' => 'phid?',
         'action' => 'text64',
         'remoteAddr' => 'text64',
-        'session' => 'bytes40?',
+        'session' => 'text64?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'actorPHID' => array(

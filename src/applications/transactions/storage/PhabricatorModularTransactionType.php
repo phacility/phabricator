@@ -23,15 +23,15 @@ abstract class PhabricatorModularTransactionType
     return array();
   }
 
-  public function willApplyTransactions($object, array $xactions) {
-    return;
-  }
-
   public function applyInternalEffects($object, $value) {
     return;
   }
 
   public function applyExternalEffects($object, $value) {
+    return;
+  }
+
+  public function didCommitTransaction($object, $value) {
     return;
   }
 
@@ -53,6 +53,10 @@ abstract class PhabricatorModularTransactionType
 
   public function shouldHideForMail() {
     return false;
+  }
+
+  public function shouldHideForNotifications() {
+    return null;
   }
 
   public function getIcon() {
@@ -193,6 +197,35 @@ abstract class PhabricatorModularTransactionType
 
   final protected function renderNewHandle() {
     return $this->renderHandle($this->getNewValue());
+  }
+
+  final protected function renderOldPolicy() {
+    return $this->renderPolicy($this->getOldValue(), 'old');
+  }
+
+  final protected function renderNewPolicy() {
+    return $this->renderPolicy($this->getNewValue(), 'new');
+  }
+
+  final protected function renderPolicy($phid, $mode) {
+    $viewer = $this->getViewer();
+    $handles = $viewer->loadHandles(array($phid));
+
+    $policy = PhabricatorPolicy::newFromPolicyAndHandle(
+      $phid,
+      $handles[$phid]);
+
+    if ($this->isTextMode()) {
+      return $this->renderValue($policy->getFullName());
+    }
+
+    $storage = $this->getStorage();
+    if ($policy->getType() == PhabricatorPolicyType::TYPE_CUSTOM) {
+      $policy->setHref('/transactions/'.$mode.'/'.$storage->getPHID().'/');
+      $policy->setWorkflow(true);
+    }
+
+    return $this->renderValue($policy->renderDescription());
   }
 
   final protected function renderHandleList(array $phids) {

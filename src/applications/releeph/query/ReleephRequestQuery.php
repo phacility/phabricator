@@ -147,54 +147,54 @@ final class ReleephRequestQuery
     return $requests;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->branchIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'branchID IN (%Ld)',
         $this->branchIDs);
     }
 
     if ($this->requestedCommitPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'requestCommitPHID IN (%Ls)',
         $this->requestedCommitPHIDs);
     }
 
     if ($this->requestorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'requestUserPHID IN (%Ls)',
         $this->requestorPHIDs);
     }
 
     if ($this->requestedObjectPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'requestedObjectPHID IN (%Ls)',
         $this->requestedObjectPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildPagingClause($conn);
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function getKeepStatusConstants() {

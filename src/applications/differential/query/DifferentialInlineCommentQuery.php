@@ -107,31 +107,31 @@ final class DifferentialInlineCommentQuery
     return head($this->execute());
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     // Only find inline comments.
     $where[] = qsprintf(
-      $conn_r,
+      $conn,
       'changesetID IS NOT NULL');
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->revisionPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'revisionPHID IN (%Ls)',
         $this->revisionPHIDs);
     }
@@ -139,28 +139,28 @@ final class DifferentialInlineCommentQuery
     if ($this->drafts === null) {
       if ($this->deletedDrafts) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           '(authorPHID = %s) OR (transactionPHID IS NOT NULL)',
           $this->getViewer()->getPHID());
       } else {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           '(authorPHID = %s AND isDeleted = 0)
             OR (transactionPHID IS NOT NULL)',
           $this->getViewer()->getPHID());
       }
     } else if ($this->drafts) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         '(authorPHID = %s AND isDeleted = 0) AND (transactionPHID IS NULL)',
         $this->getViewer()->getPHID());
     } else {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'transactionPHID IS NOT NULL');
     }
 
-    return $this->formatWhereClause($where);
+    return $this->formatWhereClause($conn, $where);
   }
 
   public function adjustInlinesForChangesets(

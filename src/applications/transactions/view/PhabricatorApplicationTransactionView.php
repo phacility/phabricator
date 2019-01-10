@@ -15,8 +15,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $quoteRef;
   private $pager;
   private $renderAsFeed;
-  private $renderData = array();
   private $hideCommentOptions = false;
+  private $viewData = array();
 
   public function setRenderAsFeed($feed) {
     $this->renderAsFeed = $feed;
@@ -97,21 +97,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $this->pager;
   }
 
-  /**
-   * This is additional data that may be necessary to render the next set
-   * of transactions. Objects that implement
-   * PhabricatorApplicationTransactionInterface use this data in
-   * willRenderTimeline.
-   */
-  public function setRenderData(array $data) {
-    $this->renderData = $data;
-    return $this;
-  }
-
-  public function getRenderData() {
-    return $this->renderData;
-  }
-
   public function setHideCommentOptions($hide_comment_options) {
     $this->hideCommentOptions = $hide_comment_options;
     return $this;
@@ -119,6 +104,15 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
   public function getHideCommentOptions() {
     return $this->hideCommentOptions;
+  }
+
+  public function setViewData(array $view_data) {
+    $this->viewData = $view_data;
+    return $this;
+  }
+
+  public function getViewData() {
+    return $this->viewData;
   }
 
   public function buildEvents($with_hiding = false) {
@@ -216,10 +210,11 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     $view = id(new PHUITimelineView())
-      ->setUser($this->getUser())
+      ->setViewer($this->getViewer())
       ->setShouldTerminate($this->shouldTerminate)
       ->setQuoteTargetID($this->getQuoteTargetID())
-      ->setQuoteRef($this->getQuoteRef());
+      ->setQuoteRef($this->getQuoteRef())
+      ->setViewData($this->getViewData());
 
     $events = $this->buildEvents($with_hiding);
     foreach ($events as $event) {
@@ -228,10 +223,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
     if ($this->getPager()) {
       $view->setPager($this->getPager());
-    }
-
-    if ($this->getRenderData()) {
-      $view->setRenderData($this->getRenderData());
     }
 
     return $view;
@@ -246,7 +237,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
 
       $engine = id(new PhabricatorMarkupEngine())
-        ->setViewer($this->getUser());
+        ->setViewer($this->getViewer());
       foreach ($this->transactions as $xaction) {
         if (!$xaction->hasComment()) {
           continue;
@@ -414,10 +405,10 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private function renderEvent(
     PhabricatorApplicationTransaction $xaction,
     array $group) {
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
 
     $event = id(new PHUITimelineEventView())
-      ->setUser($viewer)
+      ->setViewer($viewer)
       ->setAuthorPHID($xaction->getAuthorPHID())
       ->setTransactionPHID($xaction->getPHID())
       ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))

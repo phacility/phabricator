@@ -6,6 +6,8 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
   const TYPE_WEB      = 'web';
   const TYPE_CONDUIT  = 'conduit';
 
+  const SESSION_DIGEST_KEY = 'session.digest';
+
   protected $userPHID;
   protected $type;
   protected $sessionKey;
@@ -17,12 +19,19 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
 
   private $identityObject = self::ATTACHABLE;
 
+  public static function newSessionDigest(PhutilOpaqueEnvelope $session_token) {
+    return PhabricatorHash::digestWithNamedKey(
+      $session_token->openEnvelope(),
+      self::SESSION_DIGEST_KEY);
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'type' => 'text32',
-        'sessionKey' => 'bytes40',
+        'sessionKey' => 'text64',
         'sessionStart' => 'epoch',
         'sessionExpires' => 'epoch',
         'highSecurityUntil' => 'epoch?',
@@ -63,15 +72,23 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
     return $this->assertAttached($this->identityObject);
   }
 
-  public static function getSessionTypeTTL($session_type) {
+  public static function getSessionTypeTTL($session_type, $is_partial) {
     switch ($session_type) {
       case self::TYPE_WEB:
-        return phutil_units('30 days in seconds');
+        if ($is_partial) {
+          return phutil_units('30 minutes in seconds');
+        } else {
+          return phutil_units('30 days in seconds');
+        }
       case self::TYPE_CONDUIT:
         return phutil_units('24 hours in seconds');
       default:
         throw new Exception(pht('Unknown session type "%s".', $session_type));
     }
+  }
+
+  public function getPHIDType() {
+    return PhabricatorAuthSessionPHIDType::TYPECONST;
   }
 
   public function isHighSecuritySession() {

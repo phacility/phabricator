@@ -13,7 +13,13 @@ final class PhabricatorAuthManagementRecoverWorkflow
           'of Phabricator.'))
       ->setArguments(
         array(
-          'username' => array(
+          array(
+            'name' => 'force-full-session',
+            'help' => pht(
+              'Recover directly into a full session without requiring MFA '.
+              'or other login checks.'),
+          ),
+          array(
             'name' => 'username',
             'wildcard' => true,
           ),
@@ -54,11 +60,14 @@ final class PhabricatorAuthManagementRecoverWorkflow
           $username));
     }
 
+    $force_full_session = $args->getArg('force-full-session');
+
     $engine = new PhabricatorAuthSessionEngine();
     $onetime_uri = $engine->getOneTimeLoginURI(
       $user,
       null,
-      PhabricatorAuthSessionEngine::ONETIME_RECOVER);
+      PhabricatorAuthSessionEngine::ONETIME_RECOVER,
+      $force_full_session);
 
     $console = PhutilConsole::getConsole();
     $console->writeOut(

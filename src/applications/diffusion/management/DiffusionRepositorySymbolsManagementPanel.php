@@ -13,8 +13,22 @@ final class DiffusionRepositorySymbolsManagementPanel
     return 900;
   }
 
+  public function getManagementPanelGroupKey() {
+    return DiffusionRepositoryManagementIntegrationsPanelGroup::PANELGROUPKEY;
+  }
+
   public function getManagementPanelIcon() {
-    return 'fa-bullseye';
+    $repository = $this->getRepository();
+
+    $has_any =
+      $repository->getSymbolLanguages() ||
+      $repository->getSymbolSources();
+
+    if ($has_any) {
+      return 'fa-link';
+    } else {
+      return 'fa-link grey';
+    }
   }
 
   protected function getEditEngineFieldKeys() {
@@ -22,6 +36,30 @@ final class DiffusionRepositorySymbolsManagementPanel
       'symbolLanguages',
       'symbolRepositoryPHIDs',
     );
+  }
+
+  public function buildManagementPanelCurtain() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+    $action_list = $this->newActionList();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $symbols_uri = $this->getEditPageURI();
+
+    $action_list->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setName(pht('Edit Symbols'))
+        ->setHref($symbols_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    return $this->newCurtainView()
+      ->setActionList($action_list);
   }
 
   public function buildManagementPanelContent() {
@@ -47,22 +85,7 @@ final class DiffusionRepositorySymbolsManagementPanel
     }
     $view->addProperty(pht('Uses Symbols From'), $sources);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $symbols_uri = $this->getEditPageURI();
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setIcon('fa-pencil')
-      ->setText(pht('Edit'))
-      ->setHref($symbols_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
-
-    return $this->newBox(pht('Symbols'), $view, array($button));
+    return $this->newBox(pht('Symbols'), $view);
   }
 
 }

@@ -291,7 +291,7 @@ EODOCS
       ->setConduitDescription(pht('Change the parents of this task.'))
       ->setConduitTypeDescription(pht('List of parent task PHIDs.'))
       ->setUseEdgeTransactions(true)
-      ->setIsConduitOnly(true)
+      ->setIsFormField(false)
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue('edge:type', $parent_type)
       ->setValue($parent_phids);
@@ -303,7 +303,7 @@ EODOCS
       ->setConduitDescription(pht('Change the subtasks of this task.'))
       ->setConduitTypeDescription(pht('List of subtask PHIDs.'))
       ->setUseEdgeTransactions(true)
-      ->setIsConduitOnly(true)
+      ->setIsFormField(false)
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue('edge:type', $subtask_type)
       ->setValue($parent_phids);

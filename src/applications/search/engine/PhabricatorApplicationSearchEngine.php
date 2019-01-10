@@ -103,6 +103,14 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
   public function saveQuery(PhabricatorSavedQuery $query) {
+    if ($query->getID()) {
+      throw new Exception(
+        pht(
+          'Query (with ID "%s") has already been saved. Queries are '.
+          'immutable once saved.',
+          $query->getID()));
+    }
+
     $query->setEngineClassName(get_class($this));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();

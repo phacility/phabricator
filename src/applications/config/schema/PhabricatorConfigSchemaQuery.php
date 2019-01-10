@@ -115,8 +115,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
         'SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME,
             COLLATION_NAME, COLUMN_TYPE, IS_NULLABLE, EXTRA
           FROM INFORMATION_SCHEMA.COLUMNS
-          WHERE (%Q)',
-        '('.implode(') OR (', $sql).')');
+          WHERE %LO',
+        $sql);
       $column_info = igroup($column_info, 'TABLE_SCHEMA');
     } else {
       $column_info = array();

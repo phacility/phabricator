@@ -81,10 +81,10 @@ final class DiffusionCachedResolveRefsQuery
       $commits = queryfx_all(
         $conn_r,
         'SELECT commitIdentifier FROM %T
-          WHERE repositoryID = %s AND %Q',
+          WHERE repositoryID = %s AND %LO',
         id(new PhabricatorRepositoryCommit())->getTableName(),
         $repository->getID(),
-        implode(' OR ', $prefixes));
+        $prefixes);
 
       foreach ($commits as $commit) {
         $hash = $commit['commitIdentifier'];

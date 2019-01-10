@@ -391,7 +391,7 @@ final class PhabricatorFileQuery
             $transform['transform']);
         }
       }
-      $where[] = qsprintf($conn, '(%Q)', implode(') OR (', $clauses));
+      $where[] = qsprintf($conn, '%LO', $clauses);
     }
 
     if ($this->dateCreatedAfter !== null) {

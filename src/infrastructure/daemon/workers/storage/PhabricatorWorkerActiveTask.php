@@ -169,8 +169,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
 
       $t_start = microtime(true);
         $worker->executeTask();
-      $t_end = microtime(true);
-      $duration = (int)(1000000 * ($t_end - $t_start));
+      $duration = phutil_microseconds_since($t_start);
 
       $result = $this->archiveTask(
         PhabricatorWorkerArchiveTask::RESULT_SUCCESS,

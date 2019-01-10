@@ -124,46 +124,47 @@ final class PhabricatorDaemonLogQuery
     return $daemons;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->notIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id NOT IN (%Ld)',
         $this->notIDs);
     }
 
     if ($this->getStatusConstants()) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'status IN (%Ls)',
         $this->getStatusConstants());
     }
 
     if ($this->daemonClasses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'daemon IN (%Ls)',
         $this->daemonClasses);
     }
 
     if ($this->daemonIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'daemonID IN (%Ls)',
         $this->daemonIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-    return $this->formatWhereClause($where);
+    $where[] = $this->buildPagingClause($conn);
+
+    return $this->formatWhereClause($conn, $where);
   }
 
   private function getStatusConstants() {

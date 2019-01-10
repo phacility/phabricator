@@ -41,10 +41,12 @@ final class PhabricatorPholioMockTestDataGenerator
     $sequence = 0;
     $images = array();
     foreach ($files as $file) {
-      $image = new PholioImage();
-      $image->setFilePHID($file->getPHID());
-      $image->setSequence($sequence++);
-      $image->attachMock($mock);
+      $image = PholioImage::initializeNewImage()
+        ->setAuthorPHID($author_phid)
+        ->setFilePHID($file->getPHID())
+        ->setSequence($sequence++)
+        ->attachMock($mock);
+
       $images[] = $image;
     }
 
@@ -63,7 +65,7 @@ final class PhabricatorPholioMockTestDataGenerator
       ->setActor($author)
       ->applyTransactions($mock, $transactions);
     foreach ($images as $image) {
-      $image->setMockID($mock->getID());
+      $image->setMockPHID($mock->getPHID());
       $image->save();
     }
 

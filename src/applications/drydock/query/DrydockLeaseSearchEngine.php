@@ -40,6 +40,10 @@ final class DrydockLeaseSearchEngine
       $query->withStatuses($map['statuses']);
     }
 
+    if ($map['ownerPHIDs']) {
+      $query->withOwnerPHIDs($map['ownerPHIDs']);
+    }
+
     return $query;
   }
 
@@ -49,6 +53,11 @@ final class DrydockLeaseSearchEngine
         ->setLabel(pht('Statuses'))
         ->setKey('statuses')
         ->setOptions(DrydockLeaseStatus::getStatusMap()),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Owners'))
+        ->setKey('ownerPHIDs')
+        ->setAliases(array('owner', 'owners', 'ownerPHID'))
+        ->setDescription(pht('Search leases by owner.')),
     );
   }
 

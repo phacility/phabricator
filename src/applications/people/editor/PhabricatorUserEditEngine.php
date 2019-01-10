@@ -71,10 +71,20 @@ final class PhabricatorUserEditEngine
         ->setLabel(pht('Disabled'))
         ->setDescription(pht('Disable the user.'))
         ->setTransactionType(PhabricatorUserDisableTransaction::TRANSACTIONTYPE)
-        ->setIsConduitOnly(true)
+        ->setIsFormField(false)
         ->setConduitDescription(pht('Disable or enable the user.'))
         ->setConduitTypeDescription(pht('True to disable the user.'))
         ->setValue($object->getIsDisabled()),
+      id(new PhabricatorBoolEditField())
+        ->setKey('approved')
+        ->setOptions(pht('Approved'), pht('Unapproved'))
+        ->setLabel(pht('Approved'))
+        ->setDescription(pht('Approve the user.'))
+        ->setTransactionType(PhabricatorUserApproveTransaction::TRANSACTIONTYPE)
+        ->setIsFormField(false)
+        ->setConduitDescription(pht('Approve or reject the user.'))
+        ->setConduitTypeDescription(pht('True to approve the user.'))
+        ->setValue($object->getIsApproved()),
     );
   }
 

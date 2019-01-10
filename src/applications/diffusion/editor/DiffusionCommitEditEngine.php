@@ -43,9 +43,12 @@ final class DiffusionCommitEditEngine
   }
 
   protected function newObjectQuery() {
+    $viewer = $this->getViewer();
+
     return id(new DiffusionCommitQuery())
       ->needCommitData(true)
-      ->needAuditRequests(true);
+      ->needAuditRequests(true)
+      ->needAuditAuthority(array($viewer));
   }
 
   protected function getEditorURI() {
@@ -167,36 +170,17 @@ final class DiffusionCommitEditEngine
       $raw = true);
     $inlines = msort($inlines, 'getID');
 
-    foreach ($inlines as $inline) {
-      $xactions[] = $object->getApplicationTransactionTemplate()
-        ->setTransactionType(PhabricatorAuditActionConstants::INLINE)
-        ->attachComment($inline);
-    }
+    $editor = $object->getApplicationTransactionEditor()
+      ->setActor($viewer);
 
-    $viewer_phid = $viewer->getPHID();
-    $viewer_is_author = ($object->getAuthorPHID() == $viewer_phid);
-    if ($viewer_is_author) {
-      $state_map = PhabricatorTransactions::getInlineStateMap();
+    $query_template = id(new DiffusionDiffInlineCommentQuery())
+      ->withCommitPHIDs(array($object->getPHID()));
 
-      $inlines = id(new DiffusionDiffInlineCommentQuery())
-        ->setViewer($viewer)
-        ->withCommitPHIDs(array($object->getPHID()))
-        ->withFixedStates(array_keys($state_map))
-        ->execute();
-      if ($inlines) {
-        $old_value = mpull($inlines, 'getFixedState', 'getPHID');
-        $new_value = array();
-        foreach ($old_value as $key => $state) {
-          $new_value[$key] = $state_map[$state];
-        }
-
-        $xactions[] = $object->getApplicationTransactionTemplate()
-          ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
-          ->setIgnoreOnNoEffect(true)
-          ->setOldValue($old_value)
-          ->setNewValue($new_value);
-      }
-    }
+    $xactions = $editor->newAutomaticInlineTransactions(
+      $object,
+      $inlines,
+      PhabricatorAuditActionConstants::INLINE,
+      $query_template);
 
     return $xactions;
   }

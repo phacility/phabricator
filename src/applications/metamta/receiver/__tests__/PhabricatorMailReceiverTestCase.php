@@ -17,7 +17,9 @@ final class PhabricatorMailReceiverTestCase extends PhabricatorTestCase {
 
     foreach ($same as $address) {
       $this->assertTrue(
-        PhabricatorMailReceiver::matchAddresses($base, $address),
+        PhabricatorMailUtil::matchAddresses(
+          new PhutilEmailAddress($base),
+          new PhutilEmailAddress($address)),
         pht('Address %s', $address));
     }
 
@@ -32,7 +34,9 @@ final class PhabricatorMailReceiverTestCase extends PhabricatorTestCase {
 
     foreach ($diff as $address) {
       $this->assertFalse(
-        PhabricatorMailReceiver::matchAddresses($base, $address),
+        PhabricatorMailUtil::matchAddresses(
+          new PhutilEmailAddress($base),
+          new PhutilEmailAddress($address)),
         pht('Address: %s', $address));
     }
   }

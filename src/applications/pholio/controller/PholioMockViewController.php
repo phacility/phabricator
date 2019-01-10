@@ -37,10 +37,6 @@ final class PholioMockViewController extends PholioController {
       PholioMockHasTaskEdgeType::EDGECONST);
     $this->setManiphestTaskPHIDs($phids);
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    $engine->addObject($mock, PholioMock::MARKUP_FIELD_DESCRIPTION);
-
     $title = $mock->getName();
 
     if ($mock->isClosed()) {
@@ -62,8 +58,7 @@ final class PholioMockViewController extends PholioController {
 
     $timeline = $this->buildTransactionTimeline(
       $mock,
-      new PholioTransactionQuery(),
-      $engine);
+      new PholioTransactionQuery());
     $timeline->setMock($mock);
 
     $curtain = $this->buildCurtainView($mock);
@@ -87,7 +82,7 @@ final class PholioMockViewController extends PholioController {
     $add_comment = $this->buildAddCommentView($mock, $comment_form_id);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb('M'.$mock->getID(), '/M'.$mock->getID());
+    $crumbs->addTextCrumb($mock->getMonogram(), $mock->getURI());
     $crumbs->setBorder(true);
 
     $thumb_grid = id(new PholioMockThumbGridView())
@@ -97,16 +92,17 @@ final class PholioMockViewController extends PholioController {
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $output,
-        $thumb_grid,
-        $details,
-        $timeline,
-        $add_comment,
-      ));
+      ->setMainColumn(
+        array(
+          $output,
+          $thumb_grid,
+          $details,
+          $timeline,
+          $add_comment,
+        ));
 
     return $this->newPage()
-      ->setTitle('M'.$mock->getID().' '.$title)
+      ->setTitle(pht('%s %s', $mock->getMonogram(), $title))
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($mock->getPHID()))
       ->addQuicksandConfig(

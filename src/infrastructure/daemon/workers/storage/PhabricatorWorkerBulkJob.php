@@ -233,19 +233,10 @@ final class PhabricatorWorkerBulkJob
     return new PhabricatorWorkerBulkJobEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorWorkerBulkJobTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

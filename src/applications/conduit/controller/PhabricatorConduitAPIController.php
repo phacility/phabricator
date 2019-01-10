@@ -109,15 +109,13 @@ final class PhabricatorConduitAPIController
       $error_info = $ex->getMessage();
     }
 
-    $time_end = microtime(true);
-
     $log
       ->setCallerPHID(
         isset($conduit_user)
           ? $conduit_user->getPHID()
           : null)
       ->setError((string)$error_code)
-      ->setDuration(1000000 * ($time_end - $time_start));
+      ->setDuration(phutil_microseconds_since($time_start));
 
     if (!PhabricatorEnv::isReadOnly()) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -606,6 +604,15 @@ final class PhabricatorConduitAPIController
   private function decodeConduitParams(
     AphrontRequest $request,
     $method) {
+
+    $content_type = $request->getHTTPHeader('Content-Type');
+
+    if ($content_type == 'application/json') {
+      throw new Exception(
+        pht('Use form-encoded data to submit parameters to Conduit endpoints. '.
+            'Sending a JSON-encoded body and setting \'Content-Type\': '.
+            '\'application/json\' is not currently supported.'));
+    }
 
     // Look for parameters from the Conduit API Console, which are encoded
     // as HTTP POST parameters in an array, e.g.:

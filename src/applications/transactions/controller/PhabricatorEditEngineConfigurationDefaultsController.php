@@ -30,6 +30,11 @@ final class PhabricatorEditEngineConfigurationDefaultsController
     $fields = $engine->getFieldsForConfig($config);
 
     foreach ($fields as $key => $field) {
+      if (!$field->getIsFormField()) {
+        unset($fields[$key]);
+        continue;
+      }
+
       if (!$field->getIsDefaultable()) {
         unset($fields[$key]);
         continue;

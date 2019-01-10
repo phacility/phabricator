@@ -6,17 +6,9 @@ final class PhabricatorApplicationTransactionResponse
   private $viewer;
   private $transactions;
   private $isPreview;
-  private $transactionView;
   private $previewContent;
-
-  public function setTransactionView($transaction_view) {
-    $this->transactionView = $transaction_view;
-    return $this;
-  }
-
-  public function getTransactionView() {
-    return $this->transactionView;
-  }
+  private $object;
+  private $viewData = array();
 
   protected function buildProxy() {
     return new AphrontAjaxResponse();
@@ -31,6 +23,15 @@ final class PhabricatorApplicationTransactionResponse
 
   public function getTransactions() {
     return $this->transactions;
+  }
+
+  public function setObject($object) {
+    $this->object = $object;
+    return $this;
+  }
+
+  public function getObject() {
+    return $this->object;
   }
 
   public function setViewer(PhabricatorUser $viewer) {
@@ -56,20 +57,28 @@ final class PhabricatorApplicationTransactionResponse
     return $this->previewContent;
   }
 
-  public function reduceProxyResponse() {
-    if ($this->transactionView) {
-      $view = $this->transactionView;
-    } else if ($this->getTransactions()) {
-      $view = head($this->getTransactions())
-        ->getApplicationTransactionViewObject();
-    } else {
-      $view = new PhabricatorApplicationTransactionView();
-    }
+  public function setViewData(array $view_data) {
+    $this->viewData = $view_data;
+    return $this;
+  }
 
-    $view
-      ->setUser($this->getViewer())
-      ->setTransactions($this->getTransactions())
-      ->setIsPreview($this->isPreview);
+  public function getViewData() {
+    return $this->viewData;
+  }
+
+  public function reduceProxyResponse() {
+    $object = $this->getObject();
+    $viewer = $this->getViewer();
+    $xactions = $this->getTransactions();
+
+    $timeline_engine = PhabricatorTimelineEngine::newForObject($object)
+      ->setViewer($viewer)
+      ->setTransactions($xactions)
+      ->setViewData($this->viewData);
+
+    $view = $timeline_engine->buildTimelineView();
+
+    $view->setIsPreview($this->isPreview);
 
     if ($this->isPreview) {
       $xactions = mpull($view->buildEvents(), 'render');

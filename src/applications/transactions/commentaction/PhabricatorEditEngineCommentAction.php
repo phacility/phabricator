@@ -9,6 +9,7 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
   private $order;
   private $groupKey;
   private $conflictKey;
+  private $submitButtonText;
 
   abstract public function getPHUIXControlType();
   abstract public function getPHUIXControlSpecification();
@@ -79,6 +80,15 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
 
   public function getInitialValue() {
     return $this->initialValue;
+  }
+
+  public function setSubmitButtonText($text) {
+    $this->submitButtonText = $text;
+    return $this;
+  }
+
+  public function getSubmitButtonText() {
+    return $this->submitButtonText;
   }
 
 }

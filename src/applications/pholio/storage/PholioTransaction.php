@@ -23,10 +23,6 @@ final class PholioTransaction extends PhabricatorModularTransaction {
     return new PholioTransactionComment();
   }
 
-  public function getApplicationTransactionViewObject() {
-    return new PholioTransactionView();
-  }
-
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {

@@ -2,28 +2,34 @@
 
 final class PholioImage extends PholioDAO
   implements
-    PhabricatorMarkupInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface {
 
-  const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
-
-  protected $mockID;
+  protected $authorPHID;
+  protected $mockPHID;
   protected $filePHID;
-  protected $name = '';
-  protected $description = '';
+  protected $name;
+  protected $description;
   protected $sequence;
-  protected $isObsolete = 0;
+  protected $isObsolete;
   protected $replacesImagePHID = null;
 
   private $inlineComments = self::ATTACHABLE;
   private $file = self::ATTACHABLE;
   private $mock = self::ATTACHABLE;
 
+  public static function initializeNewImage() {
+    return id(new self())
+      ->setName('')
+      ->setDescription('')
+      ->setIsObsolete(0);
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'mockID' => 'id?',
+        'mockPHID' => 'phid?',
         'name' => 'text128',
         'description' => 'text',
         'sequence' => 'uint32',
@@ -31,20 +37,15 @@ final class PholioImage extends PholioDAO
         'replacesImagePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'keyPHID' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
-        'mockID' => array(
-          'columns' => array('mockID', 'isObsolete', 'sequence'),
+        'key_mock' => array(
+          'columns' => array('mockPHID'),
         ),
       ),
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(PholioImagePHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PholioImagePHIDType::TYPECONST;
   }
 
   public function attachFile(PhabricatorFile $file) {
@@ -53,8 +54,7 @@ final class PholioImage extends PholioDAO
   }
 
   public function getFile() {
-    $this->assertAttached($this->file);
-    return $this->file;
+    return $this->assertAttached($this->file);
   }
 
   public function attachMock(PholioMock $mock) {
@@ -63,10 +63,12 @@ final class PholioImage extends PholioDAO
   }
 
   public function getMock() {
-    $this->assertAttached($this->mock);
-    return $this->mock;
+    return $this->assertAttached($this->mock);
   }
 
+  public function hasMock() {
+    return (bool)$this->getMockPHID();
+  }
 
   public function attachInlineComments(array $inline_comments) {
     assert_instances_of($inline_comments, 'PholioTransactionComment');
@@ -79,44 +81,63 @@ final class PholioImage extends PholioDAO
     return $this->inlineComments;
   }
 
+  public function getURI() {
+    if ($this->hasMock()) {
+      $mock = $this->getMock();
 
-/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
+      $mock_uri = $mock->getURI();
+      $image_id = $this->getID();
 
+      return "{$mock_uri}/{$image_id}/";
+    }
 
-  public function getMarkupFieldKey($field) {
-    $content = $this->getMarkupText($field);
-    return PhabricatorMarkupEngine::digestRemarkupContent($this, $content);
+    // For now, standalone images have no URI. We could provide one at some
+    // point, although it's not clear that there's any motivation to do so.
+
+    return null;
   }
 
-  public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
-  }
 
-  public function getMarkupText($field) {
-    return $this->getDescription();
-  }
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
-  public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
-    return $output;
-  }
-
-  public function shouldUseMarkupCache($field) {
-    return (bool)$this->getID();
-  }
-
-/* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
   public function getCapabilities() {
-    return $this->getMock()->getCapabilities();
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
   }
 
   public function getPolicy($capability) {
-    return $this->getMock()->getPolicy($capability);
+    // If the image is attached to a mock, we use an extended policy to match
+    // the mock's permissions.
+    if ($this->hasMock()) {
+      return PhabricatorPolicies::getMostOpenPolicy();
+    }
+
+    // If the image is not attached to a mock, only the author can see it.
+    return $this->getAuthorPHID();
   }
 
-  // really the *mock* controls who can see an image
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getMock()->hasAutomaticCapability($capability, $viewer);
+    return false;
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    if ($this->hasMock()) {
+      return array(
+        array(
+          $this->getMock(),
+          $capability,
+        ),
+      );
+    }
+
+    return array();
   }
 
 }

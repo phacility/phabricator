@@ -57,46 +57,48 @@ abstract class PhabricatorApplicationTransactionCommentQuery
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    return $this->formatWhereClause($this->buildWhereClauseComponents($conn_r));
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
+    return $this->formatWhereClause(
+      $conn,
+      $this->buildWhereClauseComponents($conn));
   }
 
   protected function buildWhereClauseComponents(
-    AphrontDatabaseConnection $conn_r) {
+    AphrontDatabaseConnection $conn) {
 
     $where = array();
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'xcomment.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'xcomment.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'xcomment.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->transactionPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'xcomment.transactionPHID IN (%Ls)',
         $this->transactionPHIDs);
     }
 
     if ($this->isDeleted !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'xcomment.isDeleted = %d',
         (int)$this->isDeleted);
     }
@@ -104,11 +106,11 @@ abstract class PhabricatorApplicationTransactionCommentQuery
     if ($this->hasTransaction !== null) {
       if ($this->hasTransaction) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'xcomment.transactionPHID IS NOT NULL');
       } else {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'xcomment.transactionPHID IS NULL');
       }
     }

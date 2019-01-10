@@ -64,6 +64,8 @@ final class PhabricatorStartup {
    * @task info
    */
   public static function getMicrosecondsSinceStart() {
+    // This is the same as "phutil_microseconds_since()", but we may not have
+    // loaded libphutil yet.
     return (int)(1000000 * (microtime(true) - self::getStartTime()));
   }
 

@@ -154,35 +154,6 @@ EOTEXT
             pht('Multi-Factor Required'),
             pht('Multi-Factor Optional'),
           )),
-      $this->newOption(
-        'phabricator.csrf-key',
-        'string',
-        '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3')
-        ->setHidden(true)
-        ->setSummary(
-          pht('Hashed with other inputs to generate CSRF tokens.'))
-        ->setDescription(
-          pht(
-            'This is hashed with other inputs to generate CSRF tokens. If '.
-            'you want, you can change it to some other string which is '.
-            'unique to your install. This will make your install more secure '.
-            'in a vague, mostly theoretical way. But it will take you like 3 '.
-            'seconds of mashing on your keyboard to set it up so you might '.
-            'as well.')),
-       $this->newOption(
-         'phabricator.mail-key',
-         'string',
-         '5ce3e7e8787f6e40dfae861da315a5cdf1018f12')
-        ->setHidden(true)
-        ->setSummary(
-          pht('Hashed with other inputs to generate mail tokens.'))
-        ->setDescription(
-          pht(
-            "This is hashed with other inputs to generate mail tokens. If ".
-            "you want, you can change it to some other string which is ".
-            "unique to your install. In particular, you will want to do ".
-            "this if you accidentally send a bunch of mail somewhere you ".
-            "shouldn't have, to invalidate all old reply-to addresses.")),
        $this->newOption(
         'uri.allowed-protocols',
         'set',
@@ -234,21 +205,6 @@ EOTEXT
             'Users can configure a URI pattern to open files in a text '.
             'editor. The URI must use a protocol on this whitelist.'))
         ->setLocked(true),
-       $this->newOption(
-         'celerity.resource-hash',
-         'string',
-         'd9455ea150622ee044f7931dabfa52aa')
-        ->setSummary(
-          pht('An input to the hash function when building resource hashes.'))
-        ->setDescription(
-          pht(
-            'This value is an input to the hash function when building '.
-            'resource hashes. It has no security value, but if you '.
-            'accidentally poison user caches (by pushing a bad patch or '.
-            'having something go wrong with a CDN, e.g.) you can change this '.
-            'to something else and rebuild the Celerity map to break user '.
-            'caches. Unless you are doing Celerity development, it is '.
-            'exceptionally unlikely that you need to modify this.')),
        $this->newOption('remarkup.enable-embedded-youtube', 'bool', false)
         ->setBoolOptions(
           array(

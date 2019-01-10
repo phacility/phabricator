@@ -160,15 +160,6 @@ final class PhabricatorNotificationBuilder extends Phobject {
           'href'         => $story->getURI(),
           'icon'         => $story->getImageURI(),
         );
-      } else if ($story instanceof PhabricatorNotificationTestFeedStory) {
-        $dict[] = array(
-          'showAnyNotification' => $web_ready,
-          'showDesktopNotification' => $desktop_ready,
-          'title'        => pht('Test Notification'),
-          'body'         => $story->renderText(),
-          'href'         => null,
-          'icon'         => PhabricatorUser::getDefaultProfileImageURI(),
-        );
       } else {
         $dict[] = array(
           'showWebNotification' => false,

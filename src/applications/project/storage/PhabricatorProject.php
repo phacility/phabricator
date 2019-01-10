@@ -467,7 +467,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
         queryfx(
           $conn_w,
-          'INSERT INTO %T (projectID, token) VALUES %Q',
+          'INSERT INTO %T (projectID, token) VALUES %LQ',
           $table,
           $chunk);
       }
@@ -695,19 +695,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return new PhabricatorProjectTransactionEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new PhabricatorProjectTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
   }
 
 

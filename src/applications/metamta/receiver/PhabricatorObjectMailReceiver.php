@@ -150,7 +150,7 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
   private function matchObjectAddressInMail(
     PhabricatorMetaMTAReceivedMail $mail) {
 
-    foreach ($mail->getToAddresses() as $address) {
+    foreach ($mail->newTargetAddresses() as $address) {
       $parts = $this->matchObjectAddress($address);
       if ($parts) {
         return $parts;
@@ -160,12 +160,11 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
     return null;
   }
 
-  private function matchObjectAddress($address) {
+  private function matchObjectAddress(PhutilEmailAddress $address) {
+    $address = PhabricatorMailUtil::normalizeAddress($address);
+    $local = $address->getLocalPart();
+
     $regexp = $this->getAddressRegexp();
-
-    $address = self::stripMailboxPrefix($address);
-    $local = id(new PhutilEmailAddress($address))->getLocalPart();
-
     $matches = null;
     if (!preg_match($regexp, $local, $matches)) {
       return false;
@@ -200,9 +199,9 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
   }
 
   public static function computeMailHash($mail_key, $phid) {
-    $global_mail_key = PhabricatorEnv::getEnvConfig('phabricator.mail-key');
-
-    $hash = PhabricatorHash::weakDigest($mail_key.$global_mail_key.$phid);
+    $hash = PhabricatorHash::digestWithNamedKey(
+      $mail_key.$phid,
+      'mail.object-address-key');
     return substr($hash, 0, 16);
   }
 

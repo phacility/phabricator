@@ -212,6 +212,8 @@ The keys you can provide in a specification are:
     status.
   - `locked` //Optional bool.// Lock tasks in this status, preventing users
     from commenting.
+  - `mfa` //Optional bool.// Require all edits to this task to be signed with
+    multi-factor authentication.
 
 Statuses will appear in the UI in the order specified. Note the status marked
 `special` as `duplicate` is not settable directly and will not appear in UI
@@ -338,6 +340,8 @@ dictionary with these keys:
   - `tag` //Optional string.// Tag text for this subtype.
   - `color` //Optional string.// Display color for this subtype.
   - `icon` //Optional string.// Icon for the subtype.
+  - `children` //Optional map.// Configure options shown to the user when
+     they "Create Subtask". See below.
 
 Each subtype must have a unique key, and you must define a subtype with
 the key "%s", which is used as a default subtype.
@@ -345,6 +349,54 @@ the key "%s", which is used as a default subtype.
 The tag text (`tag`) is used to set the text shown in the subtype tag on list
 views and workboards. If you do not configure it, the default subtype will have
 no subtype tag and other subtypes will use their name as tag text.
+
+The `children` key allows you to configure which options are presented to the
+user when they "Create Subtask" from a task of this subtype. You can specify
+these keys:
+
+  - `subtypes`: //Optional list<string>.// Show users creation forms for these
+    task subtypes.
+  - `forms`: //Optional list<string|int>.// Show users these specific forms,
+    in order.
+
+If you don't specify either constraint, users will be shown creation forms
+for the same subtype.
+
+For example, if you have a "quest" subtype and do not configure `children`,
+users who click "Create Subtask" will be presented with all create forms for
+"quest" tasks.
+
+If you want to present them with forms for a different task subtype or set of
+subtypes instead, use `subtypes`:
+
+```
+  {
+    ...
+    "children": {
+      "subtypes": ["objective", "boss", "reward"]
+    }
+    ...
+  }
+```
+
+If you want to present them with specific forms, use `forms` and specify form
+IDs:
+
+```
+  {
+    ...
+    "children": {
+      "forms": [12, 16]
+    }
+    ...
+  }
+```
+
+When specifying forms by ID explicitly, the order you specify the forms in will
+be used when presenting options to the user.
+
+If only one option would be presented, the user will be taken directly to the
+appropriate form instead of being prompted to choose a form.
 EOTEXT
       ,
       $subtype_default_key));

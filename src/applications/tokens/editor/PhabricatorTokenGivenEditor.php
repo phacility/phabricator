@@ -4,6 +4,8 @@ final class PhabricatorTokenGivenEditor
   extends PhabricatorEditor {
 
   private $contentSource;
+  private $request;
+  private $cancelURI;
 
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
@@ -12,6 +14,24 @@ final class PhabricatorTokenGivenEditor
 
   public function getContentSource() {
     return $this->contentSource;
+  }
+
+  public function setRequest(AphrontRequest $request) {
+    $this->request = $request;
+    return $this;
+  }
+
+  public function getRequest() {
+    return $this->request;
+  }
+
+  public function setCancelURI($cancel_uri) {
+    $this->cancelURI = $cancel_uri;
+    return $this;
+  }
+
+  public function getCancelURI() {
+    return $this->cancelURI;
   }
 
   public function addToken($object_phid, $token_phid) {
@@ -41,17 +61,22 @@ final class PhabricatorTokenGivenEditor
         id(new PhabricatorTokenCount())->getTableName(),
         $object->getPHID());
 
+      $current_token_phid = null;
+      if ($current_token) {
+        $current_token_phid = $current_token->getTokenPHID();
+      }
+
+      try {
+        $this->publishTransaction(
+          $object,
+          $current_token_phid,
+          $token->getPHID());
+      } catch (Exception $ex) {
+        $token_given->killTransaction();
+        throw $ex;
+      }
+
     $token_given->saveTransaction();
-
-    $current_token_phid = null;
-    if ($current_token) {
-      $current_token_phid = $current_token->getTokenPHID();
-    }
-
-    $this->publishTransaction(
-      $object,
-      $current_token_phid,
-      $token->getPHID());
 
     $subscribed_phids = $object->getUsersToNotifyOfTokenGiven();
     if ($subscribed_phids) {
@@ -86,11 +111,20 @@ final class PhabricatorTokenGivenEditor
       return;
     }
 
-    $this->executeDeleteToken($object, $token_given);
-    $this->publishTransaction(
-      $object,
-      $token_given->getTokenPHID(),
-      null);
+    $token_given->openTransaction();
+      $this->executeDeleteToken($object, $token_given);
+
+      try {
+        $this->publishTransaction(
+          $object,
+          $token_given->getTokenPHID(),
+          null);
+      } catch (Exception $ex) {
+        $token_given->killTransaction();
+        throw $ex;
+      }
+
+    $token_given->saveTransaction();
   }
 
   private function executeDeleteToken(
@@ -166,9 +200,17 @@ final class PhabricatorTokenGivenEditor
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
 
-    $editor->applyTransactions(
-      $object->getApplicationTransactionObject(),
-      $xactions);
+    $request = $this->getRequest();
+    if ($request) {
+      $editor->setRequest($request);
+    }
+
+    $cancel_uri = $this->getCancelURI();
+    if ($cancel_uri) {
+      $editor->setCancelURI($cancel_uri);
+    }
+
+    $editor->applyTransactions($object, $xactions);
   }
 
 }

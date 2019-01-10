@@ -27,7 +27,18 @@ final class PhabricatorApplicationTransactionShowOlderController
       return new Aphront404Response();
     }
 
-    $timeline = $this->buildTransactionTimeline($object, $query);
+    $raw_view_data = $request->getStr('viewData');
+    try {
+      $view_data = phutil_json_decode($raw_view_data);
+    } catch (Exception $ex) {
+      $view_data = array();
+    }
+
+    $timeline = $this->buildTransactionTimeline(
+      $object,
+      $query,
+      null,
+      $view_data);
 
     $phui_timeline = $timeline->buildPHUITimelineView($with_hiding = false);
     $phui_timeline->setShouldAddSpacers(false);

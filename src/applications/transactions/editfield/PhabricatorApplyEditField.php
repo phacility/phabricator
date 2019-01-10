@@ -5,6 +5,7 @@ final class PhabricatorApplyEditField
 
   private $actionDescription;
   private $actionConflictKey;
+  private $actionSubmitButtonText;
   private $options;
 
   protected function newControl() {
@@ -27,6 +28,15 @@ final class PhabricatorApplyEditField
 
   public function getActionConflictKey() {
     return $this->actionConflictKey;
+  }
+
+  public function setActionSubmitButtonText($text) {
+    $this->actionSubmitButtonText = $text;
+    return $this;
+  }
+
+  public function getActionSubmitButtonText() {
+    return $this->actionSubmitButtonText;
   }
 
   public function setOptions(array $options) {
@@ -59,14 +69,16 @@ final class PhabricatorApplyEditField
   protected function newCommentAction() {
     $options = $this->getOptions();
     if ($options) {
-      return id(new PhabricatorEditEngineCheckboxesCommentAction())
-        ->setConflictKey($this->getActionConflictKey())
+      $action = id(new PhabricatorEditEngineCheckboxesCommentAction())
         ->setOptions($options);
     } else {
-      return id(new PhabricatorEditEngineStaticCommentAction())
-        ->setConflictKey($this->getActionConflictKey())
+      $action = id(new PhabricatorEditEngineStaticCommentAction())
         ->setDescription($this->getActionDescription());
     }
+
+    return $action
+      ->setConflictKey($this->getActionConflictKey())
+      ->setSubmitButtonText($this->getActionSubmitButtonText());
   }
 
 }

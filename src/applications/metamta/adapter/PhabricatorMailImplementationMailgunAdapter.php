@@ -89,13 +89,6 @@ final class PhabricatorMailImplementationMailgunAdapter
     );
   }
 
-  public function newLegacyOptions() {
-    return array(
-      'api-key' => PhabricatorEnv::getEnvConfig('mailgun.api-key'),
-      'domain' => PhabricatorEnv::getEnvConfig('mailgun.domain'),
-    );
-  }
-
   public function send() {
     $key = $this->getOption('api-key');
     $domain = $this->getOption('domain');

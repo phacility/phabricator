@@ -8,7 +8,9 @@ $commit_table->establishConnection('w');
 $edges = 0;
 
 foreach (new LiskMigrationIterator($commit_table) as $commit) {
-  $data = $commit->loadOneRelative($data_table, 'commitID');
+  $data = $data_table->loadOneWhere(
+    'commitID = %d',
+    $commit->getID());
   if (!$data) {
     continue;
   }

@@ -311,19 +311,10 @@ final class ConpherenceThread extends ConpherenceDAO
     return new ConpherenceEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new ConpherenceTransaction();
   }
 
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-    return $timeline;
-  }
 
 /* -(  PhabricatorNgramInterface  )------------------------------------------ */
 

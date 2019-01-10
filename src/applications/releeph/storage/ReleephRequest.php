@@ -257,18 +257,17 @@ final class ReleephRequest extends ReleephDAO
 /* -(  Loading external objects  )------------------------------------------- */
 
   public function loadPhabricatorRepositoryCommit() {
-    return $this->loadOneRelative(
-      new PhabricatorRepositoryCommit(),
-      'phid',
-      'getRequestCommitPHID');
+    return id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'phid = %s',
+      $this->getRequestCommitPHID());
   }
 
   public function loadPhabricatorRepositoryCommitData() {
     $commit = $this->loadPhabricatorRepositoryCommit();
     if ($commit) {
-      return $commit->loadOneRelative(
-        new PhabricatorRepositoryCommitData(),
-        'commitID');
+      return id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+        'commitID = %d',
+        $commit->getID());
     }
   }
 
@@ -300,19 +299,8 @@ final class ReleephRequest extends ReleephDAO
     return new ReleephRequestTransactionalEditor();
   }
 
-  public function getApplicationTransactionObject() {
-    return $this;
-  }
-
   public function getApplicationTransactionTemplate() {
     return new ReleephRequestTransaction();
-  }
-
-  public function willRenderTimeline(
-    PhabricatorApplicationTransactionView $timeline,
-    AphrontRequest $request) {
-
-    return $timeline;
   }
 
 
