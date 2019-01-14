@@ -395,7 +395,7 @@ return array(
     'rsrc/js/application/herald/PathTypeahead.js' => 'ad486db3',
     'rsrc/js/application/herald/herald-rule-editor.js' => '0922e81d',
     'rsrc/js/application/maniphest/behavior-batch-selector.js' => 'cffd39b4',
-    'rsrc/js/application/maniphest/behavior-line-chart.js' => '3e9da12d',
+    'rsrc/js/application/maniphest/behavior-line-chart.js' => 'c8147a20',
     'rsrc/js/application/maniphest/behavior-list-edit.js' => 'c687e867',
     'rsrc/js/application/maniphest/behavior-subpriorityeditor.js' => '8400307c',
     'rsrc/js/application/owners/OwnersPathEditor.js' => '2a8b62d9',
@@ -614,7 +614,7 @@ return array(
     'javelin-behavior-icon-composer' => '38a6cedb',
     'javelin-behavior-launch-icon-composer' => 'a17b84f1',
     'javelin-behavior-lightbox-attachments' => 'c7e748bf',
-    'javelin-behavior-line-chart' => '3e9da12d',
+    'javelin-behavior-line-chart' => 'c8147a20',
     'javelin-behavior-linked-container' => '74446546',
     'javelin-behavior-maniphest-batch-selector' => 'cffd39b4',
     'javelin-behavior-maniphest-list-editor' => 'c687e867',
@@ -1199,12 +1199,6 @@ return array(
       'javelin-stratcom',
       'javelin-vector',
       'javelin-dom',
-    ),
-    '3e9da12d' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-vector',
-      'phui-chart-css',
     ),
     '3eed1f2b' => array(
       'javelin-behavior',
@@ -1949,6 +1943,12 @@ return array(
       'javelin-util',
       'phuix-icon-view',
       'phabricator-busy',
+    ),
+    'c8147a20' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-vector',
+      'phui-chart-css',
     ),
     'c9749dcd' => array(
       'javelin-install',

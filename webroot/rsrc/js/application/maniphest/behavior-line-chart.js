@@ -107,7 +107,10 @@ JX.behavior('line-chart', function(config) {
     .attr('cy', function(d) { return y(d.count); })
     .on('mouseover', function(d) {
       var d_y = d.date.getFullYear();
-      var d_m = d.date.getMonth();
+
+      // NOTE: Javascript months are zero-based. See PHI1017.
+      var d_m = d.date.getMonth() + 1;
+
       var d_d = d.date.getDate();
 
       div
