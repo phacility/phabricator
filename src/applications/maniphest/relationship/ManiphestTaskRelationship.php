@@ -31,13 +31,12 @@ abstract class ManiphestTaskRelationship
     $subscriber_phids = $this->loadMergeSubscriberPHIDs($tasks);
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-      ->setNewValue(array('+' => $subscriber_phids));
+      ->setTransactionType(ManiphestTaskMergedFromTransaction::TRANSACTIONTYPE)
+      ->setNewValue(mpull($tasks, 'getPHID'));
 
     $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(
-          ManiphestTaskMergedFromTransaction::TRANSACTIONTYPE)
-        ->setNewValue(mpull($tasks, 'getPHID'));
+      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+      ->setNewValue(array('+' => $subscriber_phids));
 
     return $xactions;
   }
