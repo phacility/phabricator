@@ -3265,7 +3265,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       if (!$is_comment || !$seen_comment) {
-        $header = $xaction->getTitleForMail();
+        $header = $xaction->getTitleForTextMail();
         if ($header !== null) {
           $headers[] = $header;
         }
@@ -3350,7 +3350,7 @@ abstract class PhabricatorApplicationTransactionEditor
       // If this is not the first comment in the mail, add the header showing
       // who wrote the comment immediately above the comment.
       if (!$is_initial) {
-        $header = $xaction->getTitleForMail();
+        $header = $xaction->getTitleForTextMail();
         if ($header !== null) {
           $body->addRawPlaintextSection($header);
         }

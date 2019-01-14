@@ -763,12 +763,29 @@ abstract class PhabricatorApplicationTransaction
     return $this->shouldHideForFeed();
   }
 
+  private function getTitleForMailWithRenderingTarget($new_target) {
+    $old_target = $this->getRenderingTarget();
+    try {
+      $this->setRenderingTarget($new_target);
+      $result = $this->getTitleForMail();
+    } catch (Exception $ex) {
+      $this->setRenderingTarget($old_target);
+      throw $ex;
+    }
+    $this->setRenderingTarget($old_target);
+    return $result;
+  }
+
   public function getTitleForMail() {
-    return id(clone $this)->setRenderingTarget('text')->getTitle();
+    return $this->getTitle();
+  }
+
+  public function getTitleForTextMail() {
+    return $this->getTitleForMailWithRenderingTarget(self::TARGET_TEXT);
   }
 
   public function getTitleForHTMLMail() {
-    $title = $this->getTitleForMail();
+    $title = $this->getTitleForMailWithRenderingTarget(self::TARGET_HTML);
     if ($title === null) {
       return null;
     }
