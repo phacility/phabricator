@@ -188,7 +188,7 @@ EODOC
       pht('Configuring Outbound Email')));
 
     return array(
-      $this->newOption('cluster.mailers', 'cluster.mailers', null)
+      $this->newOption('cluster.mailers', 'cluster.mailers', array())
         ->setHidden(true)
         ->setDescription($mailers_description),
       $this->newOption(

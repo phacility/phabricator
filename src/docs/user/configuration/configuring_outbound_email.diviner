@@ -235,7 +235,7 @@ To use this mailer, set `type` to `sendmail`. There are no `options` to
 configure.
 
 
-Mailer: STMP
+Mailer: SMTP
 ============
 
 You can use this adapter to send mail via an external SMTP server, like Gmail.
