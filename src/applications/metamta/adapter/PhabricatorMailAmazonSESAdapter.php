@@ -1,21 +1,17 @@
 <?php
 
 final class PhabricatorMailAmazonSESAdapter
-  extends PhabricatorMailSendmailAdapter {
+  extends PhabricatorMailAdapter {
 
   const ADAPTERTYPE = 'ses';
 
-  private $message;
-  private $isHTML;
-
-  public function prepareForSend() {
-    parent::prepareForSend();
-    $this->mailer->Mailer = 'amazon-ses';
-    $this->mailer->customMailer = $this;
+  public function getSupportedMessageTypes() {
+    return array(
+      PhabricatorMailEmailMessage::MESSAGETYPE,
+    );
   }
 
   public function supportsMessageIDHeader() {
-    // Amazon SES will ignore any Message-ID we provide.
     return false;
   }
 
@@ -26,7 +22,6 @@ final class PhabricatorMailAmazonSESAdapter
         'access-key' => 'string',
         'secret-key' => 'string',
         'endpoint' => 'string',
-        'encoding' => 'string',
       ));
   }
 
@@ -35,9 +30,26 @@ final class PhabricatorMailAmazonSESAdapter
       'access-key' => null,
       'secret-key' => null,
       'endpoint' => null,
-      'encoding' => 'base64',
     );
   }
+
+  /**
+   * @phutil-external-symbol class PHPMailerLite
+   */
+  public function sendMessage(PhabricatorMailExternalMessage $message) {
+    $root = phutil_get_library_root('phabricator');
+    $root = dirname($root);
+    require_once $root.'/externals/phpmailer/class.phpmailer-lite.php';
+
+    $mailer = PHPMailerLite::newFromMessage($message);
+
+    $mailer->Mailer = 'amazon-ses';
+    $mailer->customMailer = $this;
+
+    $mailer->Send();
+  }
+
+
 
   /**
    * @phutil-external-symbol class SimpleEmailService

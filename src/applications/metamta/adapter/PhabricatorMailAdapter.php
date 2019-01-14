@@ -23,14 +23,8 @@ abstract class PhabricatorMailAdapter
       ->execute();
   }
 
-  /* abstract */ public function getSupportedMessageTypes() {
-    throw new PhutilMethodNotImplementedException();
-  }
-
-  /* abstract */ public function sendMessage(
-    PhabricatorMailExternalMessage $message) {
-    throw new PhutilMethodNotImplementedException();
-  }
+  abstract public function getSupportedMessageTypes();
+  abstract public function sendMessage(PhabricatorMailExternalMessage $message);
 
   /**
    * Return true if this adapter supports setting a "Message-ID" when sending

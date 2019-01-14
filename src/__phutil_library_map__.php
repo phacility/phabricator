@@ -9222,7 +9222,7 @@ phutil_register_library_map(array(
     'PhabricatorMacroTransactionType' => 'PhabricatorModularTransactionType',
     'PhabricatorMacroViewController' => 'PhabricatorMacroController',
     'PhabricatorMailAdapter' => 'Phobject',
-    'PhabricatorMailAmazonSESAdapter' => 'PhabricatorMailSendmailAdapter',
+    'PhabricatorMailAmazonSESAdapter' => 'PhabricatorMailAdapter',
     'PhabricatorMailAttachment' => 'Phobject',
     'PhabricatorMailConfigTestCase' => 'PhabricatorTestCase',
     'PhabricatorMailEmailEngine' => 'PhabricatorMailMessageEngine',
