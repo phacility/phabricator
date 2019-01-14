@@ -54,7 +54,6 @@ final class PhabricatorMailEmailEngine
     // If that also fails, move the "Cc:" line to "To:".
     if (!$to_addresses) {
       $void_address = $this->newVoidEmailAddress();
-      $cc_addresses = $to_addresses;
       $to_addresses = array($void_address);
     }
 
