@@ -16,7 +16,7 @@ final class PhabricatorMultiFactorSettingsPanel
   }
 
   public function processRequest(AphrontRequest $request) {
-    if ($request->getExists('new')) {
+    if ($request->getExists('new') || $request->getExists('providerPHID')) {
       return $this->processNew($request);
     }
 
@@ -31,22 +31,18 @@ final class PhabricatorMultiFactorSettingsPanel
     $user = $this->getUser();
     $viewer = $request->getUser();
 
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $user->getPHID());
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->setOrderVector(array('-id'))
+      ->execute();
 
     $rows = array();
     $rowc = array();
 
     $highlight_id = $request->getInt('id');
     foreach ($factors as $factor) {
-
-      $impl = $factor->getImplementation();
-      if ($impl) {
-        $type = $impl->getFactorName();
-      } else {
-        $type = $factor->getFactorKey();
-      }
+      $provider = $factor->getFactorProvider();
 
       if ($factor->getID() == $highlight_id) {
         $rowc[] = 'highlighted';
@@ -62,7 +58,7 @@ final class PhabricatorMultiFactorSettingsPanel
             'sigil' => 'workflow',
           ),
           $factor->getFactorName()),
-        $type,
+        $provider->getDisplayName(),
         phabricator_datetime($factor->getDateCreated(), $viewer),
         javelin_tag(
           'a',
@@ -128,88 +124,101 @@ final class PhabricatorMultiFactorSettingsPanel
     $viewer = $request->getUser();
     $user = $this->getUser();
 
+    $cancel_uri = $this->getPanelURI();
+
+    // Check that we have providers before we send the user through the MFA
+    // gate, so you don't authenticate and then immediately get roadblocked.
+    $providers = id(new PhabricatorAuthFactorProviderQuery())
+      ->setViewer($viewer)
+      ->withStatuses(array(PhabricatorAuthFactorProvider::STATUS_ACTIVE))
+      ->execute();
+    if (!$providers) {
+      return $this->newDialog()
+        ->setTitle(pht('No MFA Providers'))
+        ->appendParagraph(
+          pht(
+            'There are no active MFA providers. At least one active provider '.
+            'must be available to add new MFA factors.'))
+        ->addCancelButton($cancel_uri);
+    }
+    $providers = mpull($providers, null, 'getPHID');
+
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
       $request,
-      $this->getPanelURI());
+      $cancel_uri);
 
-    $factors = PhabricatorAuthFactor::getAllFactors();
+    $selected_phid = $request->getStr('providerPHID');
+    if (empty($providers[$selected_phid])) {
+      $selected_provider = null;
+    } else {
+      $selected_provider = $providers[$selected_phid];
+    }
+
+    if (!$selected_provider) {
+      $menu = id(new PHUIObjectItemListView())
+        ->setViewer($viewer)
+        ->setBig(true)
+        ->setFlush(true);
+
+      foreach ($providers as $provider_phid => $provider) {
+        $provider_uri = id(new PhutilURI($this->getPanelURI()))
+          ->setQueryParam('providerPHID', $provider_phid);
+
+        $item = id(new PHUIObjectItemView())
+          ->setHeader($provider->getDisplayName())
+          ->setHref($provider_uri)
+          ->setClickable(true)
+          ->setImageIcon($provider->newIconView())
+          ->addAttribute($provider->getDisplayDescription());
+
+        $menu->addItem($item);
+      }
+
+      return $this->newDialog()
+        ->setTitle(pht('Choose Factor Type'))
+        ->appendChild($menu)
+        ->addCancelButton($cancel_uri);
+    }
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer);
+      ->setViewer($viewer);
 
-    $type = $request->getStr('type');
-    if (empty($factors[$type]) || !$request->isFormPost()) {
-      $factor = null;
-    } else {
-      $factor = $factors[$type];
+    $config = $selected_provider->processAddFactorForm(
+      $form,
+      $request,
+      $user);
+
+    if ($config) {
+      $config->save();
+
+      $log = PhabricatorUserLog::initializeNewLog(
+        $viewer,
+        $user->getPHID(),
+        PhabricatorUserLog::ACTION_MULTI_ADD);
+      $log->save();
+
+      $user->updateMultiFactorEnrollment();
+
+      // Terminate other sessions so they must log in and survive the
+      // multi-factor auth check.
+
+      id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
+        $user,
+        new PhutilOpaqueEnvelope(
+          $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($this->getPanelURI('?id='.$config->getID()));
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
-      ->addHiddenInput('new', true);
-
-    if ($factor === null) {
-      $choice_control = id(new AphrontFormRadioButtonControl())
-        ->setName('type')
-        ->setValue(key($factors));
-
-      foreach ($factors as $available_factor) {
-        $choice_control->addButton(
-          $available_factor->getFactorKey(),
-          $available_factor->getFactorName(),
-          $available_factor->getFactorDescription());
-      }
-
-      $dialog->appendParagraph(
-        pht(
-          'Adding an additional authentication factor improves the security '.
-          'of your account. Choose the type of factor to add:'));
-
-      $form
-        ->appendChild($choice_control);
-
-    } else {
-      $dialog->addHiddenInput('type', $type);
-
-      $config = $factor->processAddFactorForm(
-        $form,
-        $request,
-        $user);
-
-      if ($config) {
-        $config->save();
-
-        $log = PhabricatorUserLog::initializeNewLog(
-          $viewer,
-          $user->getPHID(),
-          PhabricatorUserLog::ACTION_MULTI_ADD);
-        $log->save();
-
-        $user->updateMultiFactorEnrollment();
-
-        // Terminate other sessions so they must log in and survive the
-        // multi-factor auth check.
-
-        id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
-          $user,
-          new PhutilOpaqueEnvelope(
-            $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
-
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getPanelURI('?id='.$config->getID()));
-      }
-    }
-
-    $dialog
+    return $this->newDialog()
+      ->addHiddenInput('providerPHID', $selected_provider->getPHID())
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle(pht('Add Authentication Factor'))
       ->appendChild($form->buildLayoutView())
       ->addSubmitButton(pht('Continue'))
-      ->addCancelButton($this->getPanelURI());
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
+      ->addCancelButton($cancel_uri);
   }
 
   private function processEdit(AphrontRequest $request) {

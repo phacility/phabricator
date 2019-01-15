@@ -78,6 +78,29 @@ final class PhabricatorAuthFactorProvider
     return $this->getFactor()->getFactorName();
   }
 
+  public function newIconView() {
+    return $this->getFactor()->newIconView();
+  }
+
+  public function getDisplayDescription() {
+    return $this->getFactor()->getFactorDescription();
+  }
+
+  public function processAddFactorForm(
+    AphrontFormView $form,
+    AphrontRequest $request,
+    PhabricatorUser $user) {
+
+    $factor = $this->getFactor();
+
+    $config = $factor->processAddFactorForm($this, $form, $request, $user);
+    if ($config) {
+      $config->setFactorProviderPHID($this->getPHID());
+    }
+
+    return $config;
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

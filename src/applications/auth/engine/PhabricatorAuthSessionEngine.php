@@ -462,10 +462,14 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $token;
     }
 
-    // Load the multi-factor auth sources attached to this account.
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $viewer->getPHID());
+    // Load the multi-factor auth sources attached to this account. Note that
+    // we order factors from oldest to newest, which is not the default query
+    // ordering but makes the greatest sense in context.
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->setOrderVector(array('-id'))
+      ->execute();
 
     // If the account has no associated multi-factor auth, just issue a token
     // without putting the session into high security mode. This is generally
@@ -516,7 +520,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     foreach ($factors as $factor) {
       $factor_phid = $factor->getPHID();
       $issued_challenges = idx($challenge_map, $factor_phid, array());
-      $impl = $factor->requireImplementation();
+      $provider = $factor->getFactorProvider();
+      $impl = $provider->getFactor();
 
       $new_challenges = $impl->getNewIssuedChallenges(
         $factor,
@@ -552,7 +557,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         // Limit factor verification rates to prevent brute force attacks.
         $any_attempt = false;
         foreach ($factors as $factor) {
-          $impl = $factor->requireImplementation();
+          $provider = $factor->getFactorProvider();
+          $impl = $provider->getFactor();
+
           if ($impl->getRequestHasChallengeResponse($factor, $request)) {
             $any_attempt = true;
             break;
@@ -577,7 +584,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
           $issued_challenges = idx($challenge_map, $factor_phid, array());
 
-          $impl = $factor->requireImplementation();
+          $provider = $factor->getFactorProvider();
+          $impl = $provider->getFactor();
 
           $validation_result = $impl->getResultFromChallengeResponse(
             $factor,
@@ -716,7 +724,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     foreach ($factors as $factor) {
       $result = $validation_results[$factor->getPHID()];
 
-      $factor->requireImplementation()->renderValidateFactorForm(
+      $provider = $factor->getFactorProvider();
+      $impl = $provider->getFactor();
+
+      $impl->renderValidateFactorForm(
         $factor,
         $form,
         $viewer,

@@ -2207,6 +2207,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthEditController' => 'applications/auth/controller/config/PhabricatorAuthEditController.php',
     'PhabricatorAuthFactor' => 'applications/auth/factor/PhabricatorAuthFactor.php',
     'PhabricatorAuthFactorConfig' => 'applications/auth/storage/PhabricatorAuthFactorConfig.php',
+    'PhabricatorAuthFactorConfigQuery' => 'applications/auth/query/PhabricatorAuthFactorConfigQuery.php',
     'PhabricatorAuthFactorProvider' => 'applications/auth/storage/PhabricatorAuthFactorProvider.php',
     'PhabricatorAuthFactorProviderController' => 'applications/auth/controller/mfa/PhabricatorAuthFactorProviderController.php',
     'PhabricatorAuthFactorProviderEditController' => 'applications/auth/controller/mfa/PhabricatorAuthFactorProviderEditController.php',
@@ -7888,7 +7889,11 @@ phutil_register_library_map(array(
     'PhabricatorAuthDowngradeSessionController' => 'PhabricatorAuthController',
     'PhabricatorAuthEditController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthFactor' => 'Phobject',
-    'PhabricatorAuthFactorConfig' => 'PhabricatorAuthDAO',
+    'PhabricatorAuthFactorConfig' => array(
+      'PhabricatorAuthDAO',
+      'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorAuthFactorConfigQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorAuthFactorProvider' => array(
       'PhabricatorAuthDAO',
       'PhabricatorApplicationTransactionInterface',

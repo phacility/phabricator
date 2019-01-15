@@ -7,6 +7,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
   abstract public function getFactorCreateHelp();
   abstract public function getFactorDescription();
   abstract public function processAddFactorForm(
+    PhabricatorAuthFactorProvider $provider,
     AphrontFormView $form,
     AphrontRequest $request,
     PhabricatorUser $user);
@@ -32,8 +33,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
   protected function newConfigForUser(PhabricatorUser $user) {
     return id(new PhabricatorAuthFactorConfig())
-      ->setUserPHID($user->getPHID())
-      ->setFactorKey($this->getFactorKey());
+      ->setUserPHID($user->getPHID());
   }
 
   protected function newResult() {

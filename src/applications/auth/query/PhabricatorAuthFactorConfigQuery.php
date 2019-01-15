@@ -1,12 +1,11 @@
 <?php
 
-final class PhabricatorAuthFactorProviderQuery
+final class PhabricatorAuthFactorConfigQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
-  private $statuses;
-  private $providerFactorKeys;
+  private $userPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -18,18 +17,13 @@ final class PhabricatorAuthFactorProviderQuery
     return $this;
   }
 
-  public function withProviderFactorKeys(array $keys) {
-    $this->providerFactorKeys = $keys;
-    return $this;
-  }
-
-  public function withStatuses(array $statuses) {
-    $this->statuses = $statuses;
+  public function withUserPHIDs(array $user_phids) {
+    $this->userPHIDs = $user_phids;
     return $this;
   }
 
   public function newResultObject() {
-    return new PhabricatorAuthFactorProvider();
+    return new PhabricatorAuthFactorConfig();
   }
 
   protected function loadPage() {
@@ -53,38 +47,38 @@ final class PhabricatorAuthFactorProviderQuery
         $this->phids);
     }
 
-    if ($this->statuses !== null) {
+    if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
-        $this->statuses);
-    }
-
-    if ($this->providerFactorKeys !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'providerFactorKey IN (%Ls)',
-        $this->providerFactorKeys);
+        'userPHID IN (%Ls)',
+        $this->userPHIDs);
     }
 
     return $where;
   }
 
-  protected function willFilterPage(array $providers) {
-    $map = PhabricatorAuthFactor::getAllFactors();
-    foreach ($providers as $key => $provider) {
-      $factor_key = $provider->getProviderFactorKey();
-      $factor = idx($map, $factor_key);
+  protected function willFilterPage(array $configs) {
+    $provider_phids = mpull($configs, 'getFactorProviderPHID');
 
-      if (!$factor) {
-        unset($providers[$key]);
+    $providers = id(new PhabricatorAuthFactorProviderQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($provider_phids)
+      ->execute();
+    $providers = mpull($providers, null, 'getPHID');
+
+    foreach ($configs as $key => $config) {
+      $provider = idx($providers, $config->getFactorProviderPHID());
+
+      if (!$provider) {
+        unset($configs[$key]);
+        $this->didRejectResult($config);
         continue;
       }
 
-      $provider->attachFactor($factor);
+      $config->attachFactorProvider($provider);
     }
 
-    return $providers;
+    return $configs;
   }
 
   public function getQueryApplicationClass() {

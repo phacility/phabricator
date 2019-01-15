@@ -26,6 +26,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
   }
 
   public function processAddFactorForm(
+    PhabricatorAuthFactorProvider $provider,
     AphrontFormView $form,
     AphrontRequest $request,
     PhabricatorUser $user) {
