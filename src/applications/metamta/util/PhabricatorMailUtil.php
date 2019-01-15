@@ -108,4 +108,12 @@ final class PhabricatorMailUtil
     return false;
   }
 
+  public static function isUserAddress(PhutilEmailAddress $address) {
+    $user_email = id(new PhabricatorUserEmail())->loadOneWhere(
+      'address = %s',
+      $address->getAddress());
+
+    return (bool)$user_email;
+  }
+
 }

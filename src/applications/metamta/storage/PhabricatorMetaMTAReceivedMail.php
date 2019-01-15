@@ -170,6 +170,13 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
           unset($targets[$key]);
           continue;
         }
+
+        // See T13234. Don't process mail if a user has attached this address
+        // to their account.
+        if (PhabricatorMailUtil::isUserAddress($target)) {
+          unset($targets[$key]);
+          continue;
+        }
       }
 
       $any_accepted = false;
