@@ -126,9 +126,28 @@ You can run `bin/auth help strip` for more detail and all available flags and
 arguments.
 
 This command can selectively strip types of factors. You can use
-`bin/auth list-factors` for a list of available factor types.
+`bin/auth list-factors` to get a list of available factor types.
 
 ```lang=console
 # Show supported factor types.
 phabricator/ $ ./bin/auth list-factors
+```
+
+Once you've identified the factor types you want to strip, you can strip them
+using the `--type` flag to specify one or more factor types:
+
+```lang=console
+# Strip all SMS and TOTP factors for a user.
+phabricator/ $ ./bin/auth strip --user <username> --type sms --type totp
+```
+
+The `bin/auth strip` command can also selectively strip factors for certain
+providers. This is more granular than stripping all factors of a given type.
+You can use `bin/auth list-mfa-providers` to get a list of providers.
+
+Once you have a provider PHID, use `--provider` to select factors to strip:
+
+```lang=console
+# Strip all factors for a particular provider.
+phabricator/ $ ./bin/auth strip --user <username> --provider <providerPHID>
 ```

@@ -2254,6 +2254,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthManagementCachePKCS8Workflow' => 'applications/auth/management/PhabricatorAuthManagementCachePKCS8Workflow.php',
     'PhabricatorAuthManagementLDAPWorkflow' => 'applications/auth/management/PhabricatorAuthManagementLDAPWorkflow.php',
     'PhabricatorAuthManagementListFactorsWorkflow' => 'applications/auth/management/PhabricatorAuthManagementListFactorsWorkflow.php',
+    'PhabricatorAuthManagementListMFAProvidersWorkflow' => 'applications/auth/management/PhabricatorAuthManagementListMFAProvidersWorkflow.php',
     'PhabricatorAuthManagementRecoverWorkflow' => 'applications/auth/management/PhabricatorAuthManagementRecoverWorkflow.php',
     'PhabricatorAuthManagementRefreshWorkflow' => 'applications/auth/management/PhabricatorAuthManagementRefreshWorkflow.php',
     'PhabricatorAuthManagementRevokeWorkflow' => 'applications/auth/management/PhabricatorAuthManagementRevokeWorkflow.php',
@@ -7892,6 +7893,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthFactorConfig' => array(
       'PhabricatorAuthDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorAuthFactorConfigQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorAuthFactorProvider' => array(
@@ -7948,6 +7950,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthManagementCachePKCS8Workflow' => 'PhabricatorAuthManagementWorkflow',
     'PhabricatorAuthManagementLDAPWorkflow' => 'PhabricatorAuthManagementWorkflow',
     'PhabricatorAuthManagementListFactorsWorkflow' => 'PhabricatorAuthManagementWorkflow',
+    'PhabricatorAuthManagementListMFAProvidersWorkflow' => 'PhabricatorAuthManagementWorkflow',
     'PhabricatorAuthManagementRecoverWorkflow' => 'PhabricatorAuthManagementWorkflow',
     'PhabricatorAuthManagementRefreshWorkflow' => 'PhabricatorAuthManagementWorkflow',
     'PhabricatorAuthManagementRevokeWorkflow' => 'PhabricatorAuthManagementWorkflow',

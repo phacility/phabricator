@@ -6,6 +6,7 @@ final class PhabricatorAuthFactorConfigQuery
   private $ids;
   private $phids;
   private $userPHIDs;
+  private $factorProviderPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class PhabricatorAuthFactorConfigQuery
 
   public function withUserPHIDs(array $user_phids) {
     $this->userPHIDs = $user_phids;
+    return $this;
+  }
+
+  public function withFactorProviderPHIDs(array $provider_phids) {
+    $this->factorProviderPHIDs = $provider_phids;
     return $this;
   }
 
@@ -52,6 +58,13 @@ final class PhabricatorAuthFactorConfigQuery
         $conn,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
+    }
+
+    if ($this->factorProviderPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'factorProviderPHID IN (%Ls)',
+        $this->factorProviderPHIDs);
     }
 
     return $where;

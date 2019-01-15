@@ -1,8 +1,11 @@
 <?php
 
+
 final class PhabricatorAuthFactorConfig
   extends PhabricatorAuthDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $userPHID;
   protected $factorProviderPHID;
@@ -75,6 +78,25 @@ final class PhabricatorAuthFactorConfig
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($engine->getViewer())
+      ->withPHIDs(array($this->getUserPHID()))
+      ->executeOne();
+
+    $this->delete();
+
+    if ($user) {
+      $user->updateMultiFactorEnrollment();
+    }
   }
 
 }
