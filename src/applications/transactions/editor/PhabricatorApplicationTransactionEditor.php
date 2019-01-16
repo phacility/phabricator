@@ -1677,6 +1677,9 @@ abstract class PhabricatorApplicationTransactionEditor
 
         // You need CAN_EDIT to change members other than yourself.
         return PhabricatorPolicyCapability::CAN_EDIT;
+      case PhabricatorObjectHasWatcherEdgeType::EDGECONST:
+        // See PHI1024. Watching a project does not require CAN_EDIT.
+        return null;
       default:
         return PhabricatorPolicyCapability::CAN_EDIT;
     }
