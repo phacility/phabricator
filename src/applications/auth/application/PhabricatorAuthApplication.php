@@ -104,6 +104,12 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             'PhabricatorAuthMessageViewController',
         ),
 
+        'contact/' => array(
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorAuthContactNumberEditController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberViewController',
+        ),
       ),
 
       '/oauth/(?P<provider>\w+)/login/'

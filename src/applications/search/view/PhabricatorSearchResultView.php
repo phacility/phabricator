@@ -126,7 +126,7 @@ final class PhabricatorSearchResultView extends AphrontView {
     }
 
     // Go through the string one display glyph at a time. If a glyph starts
-    // on a highlighted byte position, turn on highlighting for the nubmer
+    // on a highlighted byte position, turn on highlighting for the number
     // of matching bytes. If a query searches for "e" and the document contains
     // an "e" followed by a bunch of combining marks, this will correctly
     // highlight the entire glyph.
