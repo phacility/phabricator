@@ -19,7 +19,9 @@ final class PhabricatorAuthMessagePHIDType extends PhabricatorPHIDType {
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
-    return new PhabricatorAuthMessageQuery();
+
+    return id(new PhabricatorAuthMessageQuery())
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

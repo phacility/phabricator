@@ -33,7 +33,8 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
   protected function newConfigForUser(PhabricatorUser $user) {
     return id(new PhabricatorAuthFactorConfig())
-      ->setUserPHID($user->getPHID());
+      ->setUserPHID($user->getPHID())
+      ->setFactorSecret('');
   }
 
   protected function newResult() {
@@ -107,6 +108,10 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
     $now = PhabricatorTime::getNow();
 
+    // Factor implementations may need to perform writes in order to issue
+    // challenges, particularly push factors like SMS.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
     $new_challenges = $this->newIssuedChallenges(
       $config,
       $viewer,
@@ -131,10 +136,10 @@ abstract class PhabricatorAuthFactor extends Phobject {
       }
     }
 
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      foreach ($new_challenges as $challenge) {
-        $challenge->save();
-      }
+    foreach ($new_challenges as $challenge) {
+      $challenge->save();
+    }
+
     unset($unguarded);
 
     return $new_challenges;
@@ -349,6 +354,38 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
   private function getMFASyncTokenTTL() {
     return phutil_units('1 hour in seconds');
+  }
+
+  final protected function getChallengeForCurrentContext(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    array $challenges) {
+
+    $session_phid = $viewer->getSession()->getPHID();
+    $engine = $config->getSessionEngine();
+    $workflow_key = $engine->getWorkflowKey();
+
+    foreach ($challenges as $challenge) {
+      if ($challenge->getSessionPHID() !== $session_phid) {
+        continue;
+      }
+
+      if ($challenge->getWorkflowKey() !== $workflow_key) {
+        continue;
+      }
+
+      if ($challenge->getIsCompleted()) {
+        continue;
+      }
+
+      if ($challenge->getIsReusedChallenge()) {
+        continue;
+      }
+
+      return $challenge;
+    }
+
+    return null;
   }
 
 }
