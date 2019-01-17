@@ -92,8 +92,11 @@ final class PhabricatorPeopleProfileManageController
       PeopleDisableUsersCapability::CAPABILITY);
     $can_disable = ($has_disable && !$is_self);
 
-    $can_welcome = ($is_admin && $user->canEstablishWebSessions());
+    $welcome_engine = id(new PhabricatorPeopleWelcomeMailEngine())
+      ->setSender($viewer)
+      ->setRecipient($user);
 
+    $can_welcome = $welcome_engine->canSendMail();
     $curtain = $this->newCurtainView($user);
 
     $curtain->addAction(

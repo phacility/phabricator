@@ -555,56 +555,6 @@ final class PhabricatorUser
     }
   }
 
-  public function sendWelcomeEmail(PhabricatorUser $admin) {
-    if (!$this->canEstablishWebSessions()) {
-      throw new Exception(
-        pht(
-          'Can not send welcome mail to users who can not establish '.
-          'web sessions!'));
-    }
-
-    $admin_username = $admin->getUserName();
-    $admin_realname = $admin->getRealName();
-    $user_username = $this->getUserName();
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $base_uri = PhabricatorEnv::getProductionURI('/');
-
-    $engine = new PhabricatorAuthSessionEngine();
-    $uri = $engine->getOneTimeLoginURI(
-      $this,
-      $this->loadPrimaryEmail(),
-      PhabricatorAuthSessionEngine::ONETIME_WELCOME);
-
-    $body = pht(
-      "Welcome to Phabricator!\n\n".
-      "%s (%s) has created an account for you.\n\n".
-      "  Username: %s\n\n".
-      "To login to Phabricator, follow this link and set a password:\n\n".
-      "  %s\n\n".
-      "After you have set a password, you can login in the future by ".
-      "going here:\n\n".
-      "  %s\n",
-      $admin_username,
-      $admin_realname,
-      $user_username,
-      $uri,
-      $base_uri);
-
-    if (!$is_serious) {
-      $body .= sprintf(
-        "\n%s\n",
-        pht("Love,\nPhabricator"));
-    }
-
-    $mail = id(new PhabricatorMetaMTAMail())
-      ->addTos(array($this->getPHID()))
-      ->setForceDelivery(true)
-      ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
-      ->setBody($body)
-      ->saveAndSend();
-  }
-
   public function sendUsernameChangeEmail(
     PhabricatorUser $admin,
     $old_username) {

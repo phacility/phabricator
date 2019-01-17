@@ -3,6 +3,13 @@
 final class PhabricatorPeopleWelcomeController
   extends PhabricatorPeopleController {
 
+  public function shouldRequireAdmin() {
+    // You need to be an administrator to actually send welcome email, but
+    // we let anyone hit this page so they can get a nice error dialog
+    // explaining the issue.
+    return false;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $admin = $this->getViewer();
 
@@ -14,22 +21,24 @@ final class PhabricatorPeopleWelcomeController
       return new Aphront404Response();
     }
 
-    $profile_uri = '/p/'.$user->getUsername().'/';
+    $id = $user->getID();
+    $profile_uri = "/people/manage/{$id}/";
 
-    if (!$user->canEstablishWebSessions()) {
+    $welcome_engine = id(new PhabricatorPeopleWelcomeMailEngine())
+      ->setSender($admin)
+      ->setRecipient($user);
+
+    try {
+      $welcome_engine->validateMail();
+    } catch (PhabricatorPeopleMailEngineException $ex) {
       return $this->newDialog()
-        ->setTitle(pht('Not a Normal User'))
-        ->appendParagraph(
-          pht(
-            'You can not send this user a welcome mail because they are not '.
-            'a normal user and can not log in to the web interface. Special '.
-            'users (like bots and mailing lists) are unable to establish web '.
-            'sessions.'))
+        ->setTitle($ex->getTitle())
+        ->appendParagraph($ex->getBody())
         ->addCancelButton($profile_uri, pht('Done'));
     }
 
     if ($request->isFormPost()) {
-      $user->sendWelcomeEmail($admin);
+      $welcome_engine->sendMail();
       return id(new AphrontRedirectResponse())->setURI($profile_uri);
     }
 

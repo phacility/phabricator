@@ -59,7 +59,12 @@ id(new PhabricatorUserEditor())
   ->setActor($admin)
   ->createNewUser($user, $email_object);
 
-$user->sendWelcomeEmail($admin);
+$welcome_engine = id(new PhabricatorPeopleWelcomeMailEngine())
+  ->setSender($admin)
+  ->setRecipient($user);
+if ($welcome_engine->canSendMail()) {
+  $welcome_engine->sendMail();
+}
 
 echo pht(
   "Created user '%s' (realname='%s', email='%s').\n",
