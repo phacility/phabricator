@@ -161,12 +161,16 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         ->setFilterMethod('isEnabled')
         ->execute();
 
+      $reserved_recipient = null;
       $targets = $this->newTargetAddresses();
       foreach ($targets as $key => $target) {
         // Never accept any reserved address as a mail target. This prevents
         // security issues around "hostmaster@" and bad behavior with
         // "noreply@".
         if (PhabricatorMailUtil::isReservedAddress($target)) {
+          if (!$reserved_recipient) {
+            $reserved_recipient = $target;
+          }
           unset($targets[$key]);
           continue;
         }
@@ -212,8 +216,26 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         throw $receiver_exception;
       }
 
+
       if (!$any_accepted) {
-        if (!$sender) {
+        if ($reserved_recipient) {
+          // If nothing accepted the mail, we normally raise an error to help
+          // users who mistakenly send mail to "barges@" instead of "bugs@".
+
+          // However, if the recipient list included a reserved recipient, we
+          // don't bounce the mail with an error.
+
+          // The intent here is that if a user does a "Reply All" and includes
+          // "From: noreply@phabricator" in the receipient list, we just want
+          // to drop the mail rather than send them an unhelpful bounce message.
+
+          throw new PhabricatorMetaMTAReceivedMailProcessingException(
+            MetaMTAReceivedMailStatus::STATUS_RESERVED,
+            pht(
+              'No application handled this mail. This mail was sent to a '.
+              'reserved recipient ("%s") so bounces are suppressed.',
+              (string)$reserved_recipient));
+        } else if (!$sender) {
           // NOTE: Currently, we'll always drop this mail (since it's headed to
           // an unverified recipient). See T12237. These details are still
           // useful because they'll appear in the mail logs and Mail web UI.
@@ -243,6 +265,10 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         case MetaMTAReceivedMailStatus::STATUS_FROM_PHABRICATOR:
           // Don't send an error email back in these cases, since they're
           // very unlikely to be the sender's fault.
+          break;
+        case MetaMTAReceivedMailStatus::STATUS_RESERVED:
+          // This probably is the sender's fault, but it's likely an accident
+          // that we received the mail at all.
           break;
         case MetaMTAReceivedMailStatus::STATUS_EMPTY_IGNORED:
           // This error is explicitly ignored.

@@ -16,6 +16,7 @@ final class MetaMTAReceivedMailStatus
   const STATUS_UNHANDLED_EXCEPTION  = 'err:exception';
   const STATUS_EMPTY                = 'err:empty';
   const STATUS_EMPTY_IGNORED        = 'err:empty-ignored';
+  const STATUS_RESERVED = 'err:reserved-recipient';
 
   public static function getHumanReadableName($status) {
     $map = array(
@@ -32,6 +33,7 @@ final class MetaMTAReceivedMailStatus
       self::STATUS_UNHANDLED_EXCEPTION => pht('Unhandled Exception'),
       self::STATUS_EMPTY => pht('Empty Mail'),
       self::STATUS_EMPTY_IGNORED => pht('Ignored Empty Mail'),
+      self::STATUS_RESERVED => pht('Reserved Recipient'),
     );
 
     return idx($map, $status, pht('Processing Exception'));
