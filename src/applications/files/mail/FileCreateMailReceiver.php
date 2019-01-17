@@ -33,8 +33,7 @@ final class FileCreateMailReceiver
     } else {
       $subject = pht('You successfully uploaded a file.');
     }
-    $subject_prefix =
-      PhabricatorEnv::getEnvConfig('metamta.files.subject-prefix');
+    $subject_prefix = pht('[File]');
 
     $file_uris = array();
     foreach ($attachment_phids as $phid) {

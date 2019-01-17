@@ -27,7 +27,7 @@ final class PhabricatorOwnersPackageTransactionEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.package.subject-prefix');
+    return pht('[Package]');
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {

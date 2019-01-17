@@ -44,8 +44,7 @@ final class PasteCreateMailReceiver
       return;
     }
 
-    $subject_prefix =
-      PhabricatorEnv::getEnvConfig('metamta.paste.subject-prefix');
+    $subject_prefix = pht('[Paste]');
     $subject = pht('You successfully created a paste.');
     $paste_uri = PhabricatorEnv::getProductionURI($paste->getURI());
     $body = new PhabricatorMetaMTAMailBody();

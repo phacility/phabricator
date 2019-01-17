@@ -69,8 +69,7 @@ final class DifferentialCreateMailReceiver
       }
     }
 
-    $subject_prefix =
-      PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
+    $subject_prefix = pht('[Differential]');
     if (count($diffs)) {
       $subject = pht(
         'You successfully created %d diff(s).',

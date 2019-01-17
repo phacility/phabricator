@@ -36,8 +36,6 @@ final class PhabricatorOwnersConfigOptions
     $fields_example = id(new PhutilJSON())->encodeFormatted($fields_example);
 
     return array(
-      $this->newOption('metamta.package.subject-prefix', 'string', '[Package]')
-        ->setDescription(pht('Subject prefix for Owners email.')),
       $this->newOption('owners.fields', $custom_field_type, $default_fields)
         ->setCustomData($field_base_class)
         ->setDescription(pht('Select and reorder package fields.')),

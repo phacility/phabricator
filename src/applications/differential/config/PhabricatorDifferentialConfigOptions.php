@@ -229,11 +229,6 @@ EOHELP
             'This sort of workflow is very unusual. Very few installs should '.
             'need to change this option.')),
       $this->newOption(
-        'metamta.differential.subject-prefix',
-        'string',
-        '[Differential]')
-        ->setDescription(pht('Subject prefix for Differential mail.')),
-      $this->newOption(
         'metamta.differential.attach-patches',
         'bool',
         false)

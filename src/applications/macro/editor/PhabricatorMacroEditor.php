@@ -57,7 +57,7 @@ final class PhabricatorMacroEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.macro.subject-prefix');
+    return pht('[Macro]');
   }
 
   protected function shouldPublishFeedStory(

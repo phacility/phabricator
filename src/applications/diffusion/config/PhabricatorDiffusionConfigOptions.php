@@ -38,11 +38,6 @@ final class PhabricatorDiffusionConfigOptions
 
     return array(
       $this->newOption(
-        'metamta.diffusion.subject-prefix',
-        'string',
-        '[Diffusion]')
-        ->setDescription(pht('Subject prefix for Diffusion mail.')),
-      $this->newOption(
         'metamta.diffusion.attach-patches',
         'bool',
         false)

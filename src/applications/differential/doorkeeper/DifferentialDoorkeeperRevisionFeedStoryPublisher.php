@@ -81,8 +81,7 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
   }
 
   private function getTitlePrefix(DifferentialRevision $revision) {
-    $prefix_key = 'metamta.differential.subject-prefix';
-    return PhabricatorEnv::getEnvConfig($prefix_key);
+    return pht('[Differential]');
   }
 
 }
