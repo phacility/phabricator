@@ -38,9 +38,6 @@ final class PhabricatorPeopleWelcomeMailEngine
     $sender = $this->getSender();
     $recipient = $this->getRecipient();
 
-    $sender_username = $sender->getUserName();
-    $sender_realname = $sender->getRealName();
-
     $recipient_username = $recipient->getUserName();
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
@@ -53,31 +50,54 @@ final class PhabricatorPeopleWelcomeMailEngine
       $recipient->loadPrimaryEmail(),
       PhabricatorAuthSessionEngine::ONETIME_WELCOME);
 
-    $body = pht(
-      "Welcome to Phabricator!\n\n".
-      "%s (%s) has created an account for you.\n\n".
-      "  Username: %s\n\n".
-      "To login to Phabricator, follow this link and set a password:\n\n".
-      "  %s\n\n".
-      "After you have set a password, you can login in the future by ".
-      "going here:\n\n".
-      "  %s\n",
-      $sender_username,
-      $sender_realname,
-      $recipient_username,
-      $uri,
-      $base_uri);
+    $message = array();
+
+    $message[] = pht('Welcome to Phabricator!');
+
+    $message[] = pht(
+      '%s (%s) has created an account for you.',
+      $sender->getUsername(),
+      $sender->getRealName());
+
+    $message[] = pht(
+      '    Username: %s',
+      $recipient->getUsername());
+
+    // If password auth is enabled, give the user specific instructions about
+    // how to add a credential to their account.
+
+    // If we aren't sure what they're supposed to be doing and passwords are
+    // not enabled, just give them generic instructions.
+
+    $use_passwords = PhabricatorPasswordAuthProvider::getPasswordProvider();
+    if ($use_passwords) {
+      $message[] = pht(
+        'To log in to Phabricator, follow this link and set a password:');
+      $message[] = pht('  %s', $uri);
+      $message[] = pht(
+        'After you have set a password, you can log in to Phabricator in '.
+        'the future by going here:');
+      $message[] = pht('  %s', $base_uri);
+    } else {
+      $message[] = pht(
+        'To log in to your account for the first time, follow this link:');
+      $message[] = pht('  %s', $uri);
+      $message[] = pht(
+        'After you set up your account, you can log in to Phabricator in '.
+        'the future by going here:');
+      $message[] = pht('  %s', $base_uri);
+    }
 
     if (!$is_serious) {
-      $body .= sprintf(
-        "\n%s\n",
-        pht("Love,\nPhabricator"));
+      $message[] = pht("Love,\nPhabricator");
     }
+
+    $message = implode("\n\n", $message);
 
     return id(new PhabricatorMetaMTAMail())
       ->addTos(array($recipient->getPHID()))
       ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
-      ->setBody($body);
+      ->setBody($message);
   }
 
 }
