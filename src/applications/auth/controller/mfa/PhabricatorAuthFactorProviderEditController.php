@@ -23,7 +23,7 @@ final class PhabricatorAuthFactorProviderEditController
       $engine
         ->addContextParameter('providerFactorKey', $factor_key)
         ->setProviderFactor($factor);
-      }
+    }
 
     return $engine->buildResponse();
   }

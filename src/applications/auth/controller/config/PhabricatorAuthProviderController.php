@@ -31,6 +31,20 @@ abstract class PhabricatorAuthProviderController
         ->setHref($this->getApplicationURI('mfa/'))
         ->setIcon('fa-mobile'));
 
+    $nav->addMenuItem(
+      id(new PHUIListItemView())
+        ->setName(pht('Onboarding'))
+        ->setType(PHUIListItemView::TYPE_LABEL));
+
+    $nav->addMenuItem(
+      id(new PHUIListItemView())
+        ->setKey('message')
+        ->setName(pht('Customize Messages'))
+        ->setType(PHUIListItemView::TYPE_LINK)
+        ->setHref($this->getApplicationURI('message/'))
+        ->setIcon('fa-commenting-o'));
+
+
     $nav->selectFilter(null);
 
     return $nav;

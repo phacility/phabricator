@@ -94,6 +94,16 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           '(?P<id>[1-9]\d*)/' =>
             'PhabricatorAuthFactorProviderViewController',
         ),
+
+        'message/' => array(
+          $this->getQueryRoutePattern() =>
+            'PhabricatorAuthMessageListController',
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorAuthMessageEditController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthMessageViewController',
+        ),
+
       ),
 
       '/oauth/(?P<provider>\w+)/login/'
