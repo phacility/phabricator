@@ -157,6 +157,18 @@ final class PhabricatorPeopleProfileManageController
 
     $curtain->addAction(
       id(new PhabricatorActionView())
+        ->setIcon('fa-envelope')
+        ->setName(pht('Send Welcome Email'))
+        ->setWorkflow(true)
+        ->setDisabled(!$can_welcome)
+        ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
         ->setIcon($disable_icon)
         ->setName($disable_name)
         ->setDisabled(!$can_disable)
@@ -173,11 +185,7 @@ final class PhabricatorPeopleProfileManageController
 
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('fa-envelope')
-        ->setName(pht('Send Welcome Email'))
-        ->setWorkflow(true)
-        ->setDisabled(!$can_welcome)
-        ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
+        ->setType(PhabricatorActionView::TYPE_DIVIDER));
 
     return $curtain;
   }

@@ -37,24 +37,45 @@ final class PhabricatorPeopleWelcomeController
         ->addCancelButton($profile_uri, pht('Done'));
     }
 
+    $v_message = $request->getStr('message');
+
     if ($request->isFormPost()) {
+      if (strlen($v_message)) {
+        $welcome_engine->setWelcomeMessage($v_message);
+      }
+
       $welcome_engine->sendMail();
       return id(new AphrontRedirectResponse())->setURI($profile_uri);
     }
 
+    $form = id(new AphrontFormView())
+      ->setViewer($admin)
+      ->appendInstructions(
+        pht(
+          'This workflow will send this user ("%s") a copy of the "Welcome to '.
+          'Phabricator" email that users normally receive when their '.
+          'accounts are created by an administrator.',
+          $user->getUsername()))
+      ->appendInstructions(
+        pht(
+          'The email will contain a link that the user may use to log in '.
+          'to their account. This link bypasses authentication requirements '.
+          'and allows them to log in without credentials. Sending a copy of '.
+          'this email can be useful if the original was lost or never sent.'))
+      ->appendInstructions(
+        pht(
+          'The email will identify you as the sender. You may optionally '.
+          'include additional text in the mail body by specifying it below.'))
+      ->appendControl(
+        id(new AphrontFormTextAreaControl())
+          ->setName('message')
+          ->setLabel(pht('Custom Message'))
+          ->setValue($v_message));
+
     return $this->newDialog()
       ->setTitle(pht('Send Welcome Email'))
-      ->appendParagraph(
-        pht(
-          'This will send the user another copy of the "Welcome to '.
-          'Phabricator" email that users normally receive when their '.
-          'accounts are created.'))
-      ->appendParagraph(
-        pht(
-          'The email contains a link to log in to their account. Sending '.
-          'another copy of the email can be useful if the original was lost '.
-          'or never sent.'))
-      ->appendParagraph(pht('The email will identify you as the sender.'))
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->appendForm($form)
       ->addSubmitButton(pht('Send Email'))
       ->addCancelButton($profile_uri);
   }

@@ -3,6 +3,17 @@
 final class PhabricatorPeopleWelcomeMailEngine
   extends PhabricatorPeopleMailEngine {
 
+  private $welcomeMessage;
+
+  public function setWelcomeMessage($welcome_message) {
+    $this->welcomeMessage = $welcome_message;
+    return $this;
+  }
+
+  public function getWelcomeMessage() {
+    return $this->welcomeMessage;
+  }
+
   public function validateMail() {
     $sender = $this->getSender();
     $recipient = $this->getRecipient();
@@ -88,8 +99,13 @@ final class PhabricatorPeopleWelcomeMailEngine
       $message[] = pht('  %s', $base_uri);
     }
 
-    if (!$is_serious) {
-      $message[] = pht("Love,\nPhabricator");
+    $custom_body = $this->getWelcomeMessage();
+    if (strlen($custom_body)) {
+      $message[] = $custom_body;
+    } else {
+      if (!$is_serious) {
+        $message[] = pht("Love,\nPhabricator");
+      }
     }
 
     $message = implode("\n\n", $message);
