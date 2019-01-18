@@ -48,26 +48,38 @@ final class PhabricatorPeopleWelcomeController
       return id(new AphrontRedirectResponse())->setURI($profile_uri);
     }
 
+    $default_message = PhabricatorAuthMessage::loadMessage(
+      $admin,
+      PhabricatorAuthWelcomeMailMessageType::MESSAGEKEY);
+    if (strlen($default_message->getMessageText())) {
+      $message_instructions = pht(
+        'The email will identify you as the sender. You may optionally '.
+        'replace the [[ %s | default custom mail body ]] with different text '.
+        'by providing a message below.',
+        $default_message->getURI());
+    } else {
+      $message_instructions = pht(
+        'The email will identify you as the sender. You may optionally '.
+        'include additional text in the mail body by specifying it below.');
+    }
+
     $form = id(new AphrontFormView())
       ->setViewer($admin)
-      ->appendInstructions(
+      ->appendRemarkupInstructions(
         pht(
           'This workflow will send this user ("%s") a copy of the "Welcome to '.
           'Phabricator" email that users normally receive when their '.
           'accounts are created by an administrator.',
           $user->getUsername()))
-      ->appendInstructions(
+      ->appendRemarkupInstructions(
         pht(
           'The email will contain a link that the user may use to log in '.
           'to their account. This link bypasses authentication requirements '.
           'and allows them to log in without credentials. Sending a copy of '.
           'this email can be useful if the original was lost or never sent.'))
-      ->appendInstructions(
-        pht(
-          'The email will identify you as the sender. You may optionally '.
-          'include additional text in the mail body by specifying it below.'))
+      ->appendRemarkupInstructions($message_instructions)
       ->appendControl(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setName('message')
           ->setLabel(pht('Custom Message'))
           ->setValue($v_message));

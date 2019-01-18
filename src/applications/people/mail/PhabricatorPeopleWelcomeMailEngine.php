@@ -49,9 +49,6 @@ final class PhabricatorPeopleWelcomeMailEngine
     $sender = $this->getSender();
     $recipient = $this->getRecipient();
 
-    $recipient_username = $recipient->getUserName();
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
     $base_uri = PhabricatorEnv::getProductionURI('/');
 
     $engine = new PhabricatorAuthSessionEngine();
@@ -99,13 +96,9 @@ final class PhabricatorPeopleWelcomeMailEngine
       $message[] = pht('  %s', $base_uri);
     }
 
-    $custom_body = $this->getWelcomeMessage();
-    if (strlen($custom_body)) {
-      $message[] = $custom_body;
-    } else {
-      if (!$is_serious) {
-        $message[] = pht("Love,\nPhabricator");
-      }
+    $message_body = $this->newBody();
+    if ($message_body !== null) {
+      $message[] = $message_body;
     }
 
     $message = implode("\n\n", $message);
@@ -114,6 +107,29 @@ final class PhabricatorPeopleWelcomeMailEngine
       ->addTos(array($recipient->getPHID()))
       ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
       ->setBody($message);
+  }
+
+  private function newBody() {
+    $recipient = $this->getRecipient();
+
+    $custom_body = $this->getWelcomeMessage();
+    if (strlen($custom_body)) {
+      return $this->newRemarkupText($custom_body);
+    }
+
+    $default_body = PhabricatorAuthMessage::loadMessageText(
+      $recipient,
+      PhabricatorAuthWelcomeMailMessageType::MESSAGEKEY);
+    if (strlen($default_body)) {
+      return $this->newRemarkupText($default_body);
+    }
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    if (!$is_serious) {
+      return pht("Love,\nPhabricator");
+    }
+
+    return null;
   }
 
 }

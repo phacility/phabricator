@@ -61,14 +61,20 @@ final class PhabricatorAuthMessage
     return $this->getMessageType()->getDisplayName();
   }
 
+  public static function loadMessage(
+    PhabricatorUser $viewer,
+    $message_key) {
+    return id(new PhabricatorAuthMessageQuery())
+      ->setViewer($viewer)
+      ->withMessageKeys(array($message_key))
+      ->executeOne();
+  }
+
   public static function loadMessageText(
     PhabricatorUser $viewer,
     $message_key) {
 
-    $message = id(new PhabricatorAuthMessageQuery())
-      ->setViewer($viewer)
-      ->withMessageKeys(array($message_key))
-      ->executeOne();
+    $message = self::loadMessage($viewer, $message_key);
 
     if (!$message) {
       return null;

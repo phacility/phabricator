@@ -58,4 +58,15 @@ abstract class PhabricatorPeopleMailEngine
     throw new PhabricatorPeopleMailEngineException($title, $body);
   }
 
+  final protected function newRemarkupText($text) {
+    $recipient = $this->getRecipient();
+
+    $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
+      ->setConfig('viewer', $recipient)
+      ->setConfig('uri.base', PhabricatorEnv::getProductionURI('/'))
+      ->setMode(PhutilRemarkupEngine::MODE_TEXT);
+
+    return $engine->markupText($text);
+  }
+
 }
