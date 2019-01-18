@@ -46,16 +46,20 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/conduit/' => array(
-        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorConduitListController',
+        $this->getQueryRoutePattern() => 'PhabricatorConduitListController',
         'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
-        'log/(?:query/(?P<queryKey>[^/]+)/)?' =>
-          'PhabricatorConduitLogController',
-        'log/view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',
-        'token/' => 'PhabricatorConduitTokenController',
-        'token/edit/(?:(?P<id>\d+)/)?' =>
-          'PhabricatorConduitTokenEditController',
-        'token/terminate/(?:(?P<id>\d+)/)?' =>
-          'PhabricatorConduitTokenTerminateController',
+        'log/' => array(
+          $this->getQueryRoutePattern() =>
+            'PhabricatorConduitLogController',
+          'view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',
+        ),
+        'token/' => array(
+          '' => 'PhabricatorConduitTokenController',
+          'edit/(?:(?P<id>\d+)/)?' =>
+            'PhabricatorConduitTokenEditController',
+          'terminate/(?:(?P<id>\d+)/)?' =>
+            'PhabricatorConduitTokenTerminateController',
+        ),
         'login/' => 'PhabricatorConduitTokenHandshakeController',
       ),
       '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',

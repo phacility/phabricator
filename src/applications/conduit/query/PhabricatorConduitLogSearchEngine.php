@@ -34,6 +34,12 @@ final class PhabricatorConduitLogSearchEngine
       $query->withMethodStatuses($map['statuses']);
     }
 
+    if ($map['epochMin'] || $map['epochMax']) {
+      $query->withEpochBetween(
+        $map['epochMin'],
+        $map['epochMax']);
+    }
+
     return $query;
   }
 
@@ -55,6 +61,12 @@ final class PhabricatorConduitLogSearchEngine
         ->setDescription(
           pht('Find calls to stable, unstable, or deprecated methods.'))
         ->setOptions(ConduitAPIMethod::getMethodStatusMap()),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Called After'))
+        ->setKey('epochMin'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Called Before'))
+        ->setKey('epochMax'),
     );
   }
 
@@ -104,6 +116,62 @@ final class PhabricatorConduitLogSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function newExportFields() {
+    $viewer = $this->requireViewer();
+
+    return array(
+      id(new PhabricatorPHIDExportField())
+        ->setKey('callerPHID')
+        ->setLabel(pht('Caller PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('caller')
+        ->setLabel(pht('Caller')),
+      id(new PhabricatorStringExportField())
+        ->setKey('method')
+        ->setLabel(pht('Method')),
+      id(new PhabricatorIntExportField())
+        ->setKey('duration')
+        ->setLabel(pht('Call Duration (us)')),
+      id(new PhabricatorStringExportField())
+        ->setKey('error')
+        ->setLabel(pht('Error')),
+    );
+  }
+
+  protected function newExportData(array $logs) {
+    $viewer = $this->requireViewer();
+
+    $phids = array();
+    foreach ($logs as $log) {
+      if ($log->getCallerPHID()) {
+        $phids[] = $log->getCallerPHID();
+      }
+    }
+    $handles = $viewer->loadHandles($phids);
+
+    $export = array();
+    foreach ($logs as $log) {
+      $caller_phid = $log->getCallerPHID();
+      if ($caller_phid) {
+        $caller_name = $handles[$caller_phid]->getName();
+      } else {
+        $caller_name = null;
+      }
+
+      $map = array(
+        'callerPHID' => $caller_phid,
+        'caller' => $caller_name,
+        'method' => $log->getMethod(),
+        'duration' => (int)$log->getDuration(),
+        'error' => $log->getError(),
+      );
+
+      $export[] = $map;
+    }
+
+    return $export;
   }
 
   protected function renderResultList(
