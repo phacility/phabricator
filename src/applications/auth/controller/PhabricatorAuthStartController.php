@@ -194,6 +194,8 @@ final class PhabricatorAuthStartController
       $invite_message = $this->renderInviteHeader($invite);
     }
 
+    $custom_message = $this->newCustomStartMessage();
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login'));
     $crumbs->setBorder(true);
@@ -202,6 +204,7 @@ final class PhabricatorAuthStartController
     $view = array(
       $header,
       $invite_message,
+      $custom_message,
       $out,
     );
 
@@ -303,6 +306,27 @@ final class PhabricatorAuthStartController
     return id(new AphrontRedirectResponse())
       ->setIsExternal(true)
       ->setURI($auto_uri);
+  }
+
+  private function newCustomStartMessage() {
+    $viewer = $this->getViewer();
+
+    $text = PhabricatorAuthMessage::loadMessageText(
+      $viewer,
+      PhabricatorAuthLoginMessageType::MESSAGEKEY);
+
+    if (!strlen($text)) {
+      return null;
+    }
+
+    $remarkup_view = new PHUIRemarkupView($viewer, $text);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'auth-custom-message',
+      ),
+      $remarkup_view);
   }
 
 }
