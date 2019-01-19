@@ -785,7 +785,11 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getTitleForHTMLMail() {
-    $title = $this->getTitleForMailWithRenderingTarget(self::TARGET_HTML);
+    // TODO: For now, rendering this with TARGET_HTML generates links with
+    // bad targets ("/x/y/" instead of "https://dev.example.com/x/y/"). Throw
+    // a rug over the issue for the moment. See T12921.
+
+    $title = $this->getTitleForMailWithRenderingTarget(self::TARGET_TEXT);
     if ($title === null) {
       return null;
     }
