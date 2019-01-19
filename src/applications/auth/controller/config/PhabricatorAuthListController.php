@@ -91,7 +91,7 @@ final class PhabricatorAuthListController
           pht('Add Authentication Provider'))));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Auth Providers'));
+    $crumbs->addTextCrumb(pht('Login and Registration'));
     $crumbs->setBorder(true);
 
     $guidance_context = new PhabricatorAuthProvidersGuidanceContext();
@@ -102,12 +102,12 @@ final class PhabricatorAuthListController
       ->newInfoView();
 
     $button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
-        ->setHref($this->getApplicationURI('config/new/'))
-        ->setIcon('fa-plus')
-        ->setDisabled(!$can_manage)
-        ->setText(pht('Add Provider'));
+      ->setTag('a')
+      ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
+      ->setHref($this->getApplicationURI('config/new/'))
+      ->setIcon('fa-plus')
+      ->setDisabled(!$can_manage)
+      ->setText(pht('Add Provider'));
 
     $list->setFlush(true);
     $list = id(new PHUIObjectBoxView())
@@ -115,7 +115,7 @@ final class PhabricatorAuthListController
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($list);
 
-    $title = pht('Auth Providers');
+    $title = pht('Login and Registration Providers');
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setHeaderIcon('fa-key')
@@ -128,10 +128,15 @@ final class PhabricatorAuthListController
         $list,
       ));
 
-    return $this->newPage()
-      ->setTitle($title)
+    $nav = $this->newNavigation()
       ->setCrumbs($crumbs)
       ->appendChild($view);
+
+    $nav->selectFilter('login');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
   }
 
 }

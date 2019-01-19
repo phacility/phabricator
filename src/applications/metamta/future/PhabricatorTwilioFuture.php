@@ -7,6 +7,7 @@ final class PhabricatorTwilioFuture extends FutureProxy {
   private $authToken;
   private $method;
   private $parameters;
+  private $timeout;
 
   public function __construct() {
     parent::__construct(null);
@@ -26,6 +27,15 @@ final class PhabricatorTwilioFuture extends FutureProxy {
     $this->method = $method;
     $this->parameters = $parameters;
     return $this;
+  }
+
+  public function setTimeout($timeout) {
+    $this->timeout = $timeout;
+    return $this;
+  }
+
+  public function getTimeout() {
+    return $this->timeout;
   }
 
   protected function getProxiedFuture() {
@@ -57,6 +67,11 @@ final class PhabricatorTwilioFuture extends FutureProxy {
         ->setHTTPBasicAuthCredentials($this->accountSID, $this->authToken)
         ->setMethod('POST')
         ->addHeader('Accept', 'application/json');
+
+      $timeout = $this->getTimeout();
+      if ($timeout) {
+        $future->setTimeout($timeout);
+      }
 
       $this->future = $future;
     }

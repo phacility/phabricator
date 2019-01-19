@@ -155,7 +155,7 @@ final class ManiphestTransactionEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.maniphest.subject-prefix');
+    return pht('[Maniphest]');
   }
 
   protected function getMailThreadID(PhabricatorLiskDAO $object) {

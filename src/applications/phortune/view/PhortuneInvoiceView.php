@@ -82,7 +82,7 @@ final class PhortuneInvoiceView extends AphrontTagView {
       array(
         'class' => 'phortune-mini-header',
       ),
-      pht('To:'));
+      pht('Bill To:'));
 
     $bill_to = phutil_tag(
       'td',

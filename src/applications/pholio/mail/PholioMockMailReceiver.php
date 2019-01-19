@@ -12,7 +12,7 @@ final class PholioMockMailReceiver extends PhabricatorObjectMailReceiver {
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'M');
+    $id = (int)substr($pattern, 1);
 
     return id(new PholioMockQuery())
       ->setViewer($viewer)

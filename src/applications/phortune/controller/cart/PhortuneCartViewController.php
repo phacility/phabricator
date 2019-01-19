@@ -226,25 +226,37 @@ final class PhortuneCartViewController
         ->withPHIDs(array($buyer_phid))
         ->needProfileImage(true)
         ->executeOne();
-      // TODO: Add account "Contact" info
 
       $merchant_contact = new PHUIRemarkupView(
-        $viewer, $merchant->getContactInfo());
-      $description = null;
+        $viewer,
+        $merchant->getContactInfo());
+
+      $account_name = $account->getBillingName();
+      if (!strlen($account_name)) {
+        $account_name = $buyer->getRealName();
+      }
+
+      $account_contact = $account->getBillingAddress();
+      if (strlen($account_contact)) {
+        $account_contact = new PHUIRemarkupView(
+          $viewer,
+          $account_contact);
+      }
 
       $view = id(new PhortuneInvoiceView())
         ->setMerchantName($merchant->getName())
         ->setMerchantLogo($merchant->getProfileImageURI())
         ->setMerchantContact($merchant_contact)
         ->setMerchantFooter($merchant->getInvoiceFooter())
-        ->setAccountName($buyer->getRealName())
+        ->setAccountName($account_name)
+        ->setAccountContact($account_contact)
         ->setStatus($error_view)
-        ->setContent(array(
-          $description,
-          $details,
-          $cart_box,
-          $charges,
-        ));
+        ->setContent(
+          array(
+            $details,
+            $cart_box,
+            $charges,
+          ));
     }
 
     $page = $this->newPage()

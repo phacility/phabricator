@@ -1677,6 +1677,9 @@ abstract class PhabricatorApplicationTransactionEditor
 
         // You need CAN_EDIT to change members other than yourself.
         return PhabricatorPolicyCapability::CAN_EDIT;
+      case PhabricatorObjectHasWatcherEdgeType::EDGECONST:
+        // See PHI1024. Watching a project does not require CAN_EDIT.
+        return null;
       default:
         return PhabricatorPolicyCapability::CAN_EDIT;
     }
@@ -3262,7 +3265,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       if (!$is_comment || !$seen_comment) {
-        $header = $xaction->getTitleForMail();
+        $header = $xaction->getTitleForTextMail();
         if ($header !== null) {
           $headers[] = $header;
         }
@@ -3347,7 +3350,7 @@ abstract class PhabricatorApplicationTransactionEditor
       // If this is not the first comment in the mail, add the header showing
       // who wrote the comment immediately above the comment.
       if (!$is_initial) {
-        $header = $xaction->getTitleForMail();
+        $header = $xaction->getTitleForTextMail();
         if ($header !== null) {
           $body->addRawPlaintextSection($header);
         }

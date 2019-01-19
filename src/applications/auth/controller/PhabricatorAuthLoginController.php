@@ -17,6 +17,7 @@ final class PhabricatorAuthLoginController
     if ($parameter_name == 'code') {
       return true;
     }
+
     return parent::shouldAllowRestrictedParameter($parameter_name);
   }
 

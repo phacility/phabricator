@@ -8,6 +8,7 @@ final class PhabricatorProjectColumnQuery
   private $projectPHIDs;
   private $proxyPHIDs;
   private $statuses;
+  private $isProxyColumn;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +32,11 @@ final class PhabricatorProjectColumnQuery
 
   public function withStatuses(array $status) {
     $this->statuses = $status;
+    return $this;
+  }
+
+  public function withIsProxyColumn($is_proxy) {
+    $this->isProxyColumn = $is_proxy;
     return $this;
   }
 
@@ -154,6 +160,14 @@ final class PhabricatorProjectColumnQuery
         $conn,
         'status IN (%Ld)',
         $this->statuses);
+    }
+
+    if ($this->isProxyColumn !== null) {
+      if ($this->isProxyColumn) {
+        $where[] = qsprintf($conn, 'proxyPHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf($conn, 'proxyPHID IS NULL');
+      }
     }
 
     return $where;

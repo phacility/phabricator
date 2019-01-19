@@ -9,7 +9,8 @@ final class FileCreateMailReceiver
 
   protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
+    PhutilEmailAddress $target) {
+    $author = $this->getAuthor();
 
     $attachment_phids = $mail->getAttachments();
     if (empty($attachment_phids)) {
@@ -21,14 +22,18 @@ final class FileCreateMailReceiver
     $first_phid = head($attachment_phids);
     $mail->setRelatedPHID($first_phid);
 
+    $sender = $this->getSender();
+    if (!$sender) {
+      return;
+    }
+
     $attachment_count = count($attachment_phids);
     if ($attachment_count > 1) {
       $subject = pht('You successfully uploaded %d files.', $attachment_count);
     } else {
       $subject = pht('You successfully uploaded a file.');
     }
-    $subject_prefix =
-      PhabricatorEnv::getEnvConfig('metamta.files.subject-prefix');
+    $subject_prefix = pht('[File]');
 
     $file_uris = array();
     foreach ($attachment_phids as $phid) {

@@ -103,6 +103,30 @@ final class PhabricatorMetaMTAApplicationEmailEditor
               $type,
               pht('Invalid'),
               pht('Email address is not formatted properly.'));
+            continue;
+          }
+
+          $address = new PhutilEmailAddress($email);
+          if (PhabricatorMailUtil::isReservedAddress($address)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Reserved'),
+              pht(
+                'This email address is reserved. Choose a different '.
+                'address.'));
+            continue;
+          }
+
+          // See T13234. Prevent use of user email addresses as application
+          // email addresses.
+          if (PhabricatorMailUtil::isUserAddress($address)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('In Use'),
+              pht(
+                'This email address is already in use by a user. Choose '.
+                'a different address.'));
+            continue;
           }
         }
 

@@ -67,6 +67,9 @@ final class PhabricatorMetaMTAApplicationEmail
     return idx($this->configData, $key, $default);
   }
 
+  public function getDefaultAuthorPHID() {
+    return $this->getConfigValue(self::CONFIG_DEFAULT_AUTHOR);
+  }
 
   public function getInUseMessage() {
     $applications = PhabricatorApplication::getAllApplications();

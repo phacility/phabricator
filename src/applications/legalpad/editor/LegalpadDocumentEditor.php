@@ -166,7 +166,7 @@ final class LegalpadDocumentEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.legalpad.subject-prefix');
+    return pht('[Legalpad]');
   }
 
 

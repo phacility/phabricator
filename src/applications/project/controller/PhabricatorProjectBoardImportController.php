@@ -21,16 +21,27 @@ final class PhabricatorProjectBoardImportController
     }
     $this->setProject($project);
 
+    $project_id = $project->getID();
+    $board_uri = $this->getApplicationURI("board/{$project_id}/");
+
+    // See PHI1025. We only want to prevent the import if the board already has
+    // real columns. If it has proxy columns (for example, for milestones) you
+    // can still import columns from another board.
     $columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()))
+      ->withIsProxyColumn(false)
       ->execute();
     if ($columns) {
-      return new Aphront400Response();
+      return $this->newDialog()
+        ->setTitle(pht('Workboard Already Has Columns'))
+        ->appendParagraph(
+          pht(
+            'You can not import columns into this workboard because it '.
+            'already has columns. You can only import into an empty '.
+            'workboard.'))
+        ->addCancelButton($board_uri);
     }
-
-    $project_id = $project->getID();
-    $board_uri = $this->getApplicationURI("board/{$project_id}/");
 
     if ($request->isFormPost()) {
       $import_phid = $request->getArr('importProjectPHID');
@@ -39,18 +50,22 @@ final class PhabricatorProjectBoardImportController
       $import_columns = id(new PhabricatorProjectColumnQuery())
         ->setViewer($viewer)
         ->withProjectPHIDs(array($import_phid))
+        ->withIsProxyColumn(false)
         ->execute();
       if (!$import_columns) {
-        return new Aphront400Response();
+        return $this->newDialog()
+          ->setTitle(pht('Source Workboard Has No Columns'))
+          ->appendParagraph(
+            pht(
+              'You can not import columns from that workboard because it has '.
+              'no importable columns.'))
+          ->addCancelButton($board_uri);
       }
 
       $table = id(new PhabricatorProjectColumn())
         ->openTransaction();
       foreach ($import_columns as $import_column) {
         if ($import_column->isHidden()) {
-          continue;
-        }
-        if ($import_column->getProxy()) {
           continue;
         }
 

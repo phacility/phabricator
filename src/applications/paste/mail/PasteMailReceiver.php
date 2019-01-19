@@ -12,7 +12,7 @@ final class PasteMailReceiver extends PhabricatorObjectMailReceiver {
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'P');
+    $id = (int)substr($pattern, 1);
 
     return id(new PhabricatorPasteQuery())
       ->setViewer($viewer)

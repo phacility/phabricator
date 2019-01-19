@@ -13,7 +13,7 @@ final class ConpherenceThreadMailReceiver
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'Z');
+    $id = (int)substr($pattern, 1);
 
     return id(new ConpherenceThreadQuery())
       ->setViewer($viewer)

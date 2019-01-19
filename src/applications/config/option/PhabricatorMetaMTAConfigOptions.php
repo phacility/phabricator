@@ -188,13 +188,10 @@ EODOC
       pht('Configuring Outbound Email')));
 
     return array(
-      $this->newOption('cluster.mailers', 'cluster.mailers', null)
+      $this->newOption('cluster.mailers', 'cluster.mailers', array())
         ->setHidden(true)
         ->setDescription($mailers_description),
-      $this->newOption(
-        'metamta.default-address',
-        'string',
-        'noreply@phabricator.example.com')
+      $this->newOption('metamta.default-address', 'string', null)
         ->setDescription(pht('Default "From" address.')),
       $this->newOption(
         'metamta.one-mail-per-recipient',

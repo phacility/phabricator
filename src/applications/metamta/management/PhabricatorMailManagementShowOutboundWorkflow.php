@@ -115,10 +115,13 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       $info[] = $this->newSectionHeader(pht('HEADERS'));
 
       $headers = $message->getDeliveredHeaders();
+      if (!$headers) {
+        $headers = array();
+      }
+
       $unfiltered = $message->getUnfilteredHeaders();
       if (!$unfiltered) {
-        $headers = $message->generateHeaders();
-        $unfiltered = $headers;
+        $unfiltered = array();
       }
 
       $header_map = array();
@@ -205,6 +208,7 @@ final class PhabricatorMailManagementShowOutboundWorkflow
         $info[] = null;
       } else {
         $info[] = pht('(This message has no HTML body.)');
+        $info[] = null;
       }
 
       $console->writeOut('%s', implode("\n", $info));

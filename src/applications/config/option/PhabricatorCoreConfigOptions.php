@@ -234,14 +234,6 @@ EOREMARKUP
       $this->newOption('phabricator.cache-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setDescription(pht('Cache namespace.')),
-      $this->newOption('phabricator.allow-email-users', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Allow'),
-            pht('Disallow'),
-          ))
-        ->setDescription(
-           pht('Allow non-members to interact with tasks over email.')),
       $this->newOption('phabricator.silent', 'bool', false)
         ->setLocked(true)
         ->setBoolOptions(

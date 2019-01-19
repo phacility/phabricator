@@ -110,9 +110,9 @@ function commit_symbols(
       $conn_w,
       'INSERT INTO %T
         (repositoryPHID, symbolContext, symbolName, symbolType,
-        symbolLanguage, lineNumber, pathID) VALUES %Q',
+        symbolLanguage, lineNumber, pathID) VALUES %LQ',
       $symbol->getTableName(),
-      implode(', ', $chunk));
+      $chunk);
   }
 }
 

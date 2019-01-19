@@ -13,7 +13,7 @@ final class DifferentialRevisionMailReceiver
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'D');
+    $id = (int)substr($pattern, 1);
 
     return id(new DifferentialRevisionQuery())
       ->setViewer($viewer)

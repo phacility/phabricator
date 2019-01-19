@@ -203,6 +203,11 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
     $mailers_reason = pht(
       'Inbound and outbound mail is now configured with "cluster.mailers".');
 
+    $prefix_reason = pht(
+      'Per-application mail subject prefix customization is no longer '.
+      'directly supported. Prefixes and other strings may be customized with '.
+      '"translation.override".');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -394,6 +399,23 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'metamta.insecure-auth-with-reply-to' => pht(
         'Authenticating users based on "Reply-To" is no longer supported.'),
+
+      'phabricator.allow-email-users' => pht(
+        'Public email is now accepted if the associated address has a '.
+        'default author, and rejected otherwise.'),
+
+      'metamta.conpherence.subject-prefix' => $prefix_reason,
+      'metamta.differential.subject-prefix' => $prefix_reason,
+      'metamta.diffusion.subject-prefix' => $prefix_reason,
+      'metamta.files.subject-prefix' => $prefix_reason,
+      'metamta.legalpad.subject-prefix' => $prefix_reason,
+      'metamta.macro.subject-prefix' => $prefix_reason,
+      'metamta.maniphest.subject-prefix' => $prefix_reason,
+      'metamta.package.subject-prefix' => $prefix_reason,
+      'metamta.paste.subject-prefix' => $prefix_reason,
+      'metamta.pholio.subject-prefix' => $prefix_reason,
+      'metamta.phriction.subject-prefix' => $prefix_reason,
+
     );
 
     return $ancient_config;

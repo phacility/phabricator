@@ -9,15 +9,20 @@ final class ManiphestCreateMailReceiver
 
   protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
+    PhutilEmailAddress $target) {
 
-    $task = ManiphestTask::initializeNewTask($sender);
-    $task->setOriginalEmailSource($mail->getHeader('From'));
+    $author = $this->getAuthor();
+    $task = ManiphestTask::initializeNewTask($author);
+
+    $from_address = $mail->newFromAddress();
+    if ($from_address) {
+      $task->setOriginalEmailSource((string)$from_address);
+    }
 
     $handler = new ManiphestReplyHandler();
     $handler->setMailReceiver($task);
 
-    $handler->setActor($sender);
+    $handler->setActor($author);
     $handler->setExcludeMailRecipientPHIDs(
       $mail->loadAllRecipientPHIDs());
     if ($this->getApplicationEmail()) {

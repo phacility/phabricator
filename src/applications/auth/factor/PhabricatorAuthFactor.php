@@ -4,6 +4,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
   abstract public function getFactorName();
   abstract public function getFactorKey();
+  abstract public function getFactorCreateHelp();
   abstract public function getFactorDescription();
   abstract public function processAddFactorForm(
     AphrontFormView $form,
@@ -37,6 +38,11 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
   protected function newResult() {
     return new PhabricatorAuthFactorResult();
+  }
+
+  public function newIconView() {
+    return id(new PHUIIconView())
+      ->setIcon('fa-mobile');
   }
 
   protected function newChallenge(

@@ -15,7 +15,7 @@ final class PhabricatorMetaMTASendGridReceiveController
       array(
         'inbound' => true,
         'types' => array(
-          PhabricatorMailImplementationSendGridAdapter::ADAPTERTYPE,
+          PhabricatorMailSendGridAdapter::ADAPTERTYPE,
         ),
       ));
     if (!$mailers) {

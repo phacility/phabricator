@@ -53,6 +53,7 @@ final class PhabricatorProjectDatasource
       $columns = id(new PhabricatorProjectColumnQuery())
         ->setViewer($viewer)
         ->withProjectPHIDs(array_keys($projs))
+        ->withIsProxyColumn(false)
         ->execute();
       $has_cols = mgroup($columns, 'getProjectPHID');
     } else {

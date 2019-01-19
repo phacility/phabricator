@@ -239,7 +239,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.conpherence.subject-prefix');
+    return pht('[Conpherence]');
   }
 
   protected function supportsSearch() {

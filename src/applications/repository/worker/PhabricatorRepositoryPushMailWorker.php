@@ -99,7 +99,7 @@ final class PhabricatorRepositoryPushMailWorker
       $body->addTextSection(pht('REFERENCES'), implode("\n", $ref_lines));
     }
 
-    $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
+    $prefix = pht('[Diffusion]');
 
     $parts = array();
     if ($commit_count) {

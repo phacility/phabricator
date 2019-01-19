@@ -11,8 +11,8 @@ including a local mailer or various third-party services. Options include:
 
 | Send Mail With | Setup | Cost | Inbound | Notes |
 |---------|-------|------|---------|-------|
-| Mailgun | Easy | Cheap | Yes | Recommended |
 | Postmark | Easy | Cheap | Yes | Recommended |
+| Mailgun | Easy | Cheap | Yes | Recommended |
 | Amazon SES | Easy | Cheap | No | Recommended |
 | SendGrid | Medium | Cheap | Yes | Discouraged |
 | External SMTP | Medium | Varies | No | Gmail, etc. |
@@ -23,12 +23,11 @@ including a local mailer or various third-party services. Options include:
 See below for details on how to select and configure mail delivery for each
 mailer.
 
-Overall, Mailgun and SES are much easier to set up, and using one of them is
-recommended. In particular, Mailgun will also let you set up inbound email
-easily.
+Overall, Postmark and Mailgun are much easier to set up, and using one of them
+is recommended. Both will also let you set up inbound email easily.
 
-If you have some internal mail service you'd like to use you can also
-write a custom mailer, but this requires digging into the code.
+If you have some internal mail service you'd like to use you can also write a
+custom mailer, but this requires digging into the code.
 
 Phabricator sends mail in the background, so the daemons need to be running for
 it to be able to deliver mail. You should receive setup warnings if they are
@@ -39,14 +38,15 @@ not. For more information on using daemons, see
 Basics
 ======
 
-Regardless of how outbound email is delivered, you should configure these keys
-in your configuration:
+Before configuring outbound mail, you should first set up
+`metamta.default-address` in Configuration. This determines where mail is sent
+"From" by default.
 
-  - **metamta.default-address** determines where mail is sent "From" by
-    default. If your domain is `example.org`, set this to something like
-    `noreply@example.org`.
-  - **metamta.can-send-as-user** should be left as `false` in most cases,
-    but see the documentation for details.
+If your domain is `example.org`, set this to something
+like `noreply@example.org`.
+
+Ideally, this should be a valid, deliverable address that doesn't bounce if
+users accidentally send mail to it.
 
 
 Configuring Mailers
@@ -85,12 +85,18 @@ The supported keys for each mailer are:
     used to receive inbound mail.
   - `outbound`: Optional bool. Use `false` to prevent this mailer from being
     used to send outbound mail.
+  - `media`: Optional list<string>. Some mailers support delivering multiple
+    types of messages (like Email and SMS). If you want to configure a mailer
+    to support only a subset of possible message types, list only those message
+    types. Normally, you do not need to configure this. See below for a list
+    of media types.
 
 The `type` field can be used to select these third-party mailers:
 
   - `mailgun`: Use Mailgun.
   - `ses`: Use Amazon SES.
-  - `sendgrid`: Use Sendgrid.
+  - `sendgrid`: Use SendGrid.
+  - `postmark`: Use Postmark.
 
 It also supports these local mailers:
 
@@ -98,8 +104,12 @@ It also supports these local mailers:
   - `smtp`: Connect directly to an SMTP server.
   - `test`: Internal mailer for testing. Does not send mail.
 
-You can also write your own mailer by extending
-`PhabricatorMailImplementationAdapter`.
+You can also write your own mailer by extending `PhabricatorMailAdapter`.
+
+The `media` field supports these values:
+
+  - `email`: Configure this mailer for email.
+  - `sms`: Configure this mailer for SMS.
 
 Once you've selected a mailer, find the corresponding section below for
 instructions on configuring it.
@@ -139,22 +149,10 @@ For alternatives and more information on configuration, see
 @{article:Configuration User Guide: Advanced Configuration}
 
 
-Mailer: Mailgun
-===============
-
-Mailgun is a third-party email delivery service. You can learn more at
-<http://www.mailgun.com>. Mailgun is easy to configure and works well.
-
-To use this mailer, set `type` to `mailgun`, then configure these `options`:
-
-  - `api-key`: Required string. Your Mailgun API key.
-  - `domain`: Required string. Your Mailgun domain.
-
-
 Mailer: Postmark
 ================
 
-Postmark is a third-party email delivery serivice. You can learn more at
+Postmark is a third-party email delivery service. You can learn more at
 <https://www.postmarkapp.com/>.
 
 To use this mailer, set `type` to `postmark`, then configure these `options`:
@@ -171,12 +169,26 @@ The option accepts a list of CIDR ranges, like `1.2.3.4/16` (IPv4) or
 
 ```lang=json
 [
-  "50.31.156.6/32"
+  "50.31.156.6/32",
+  "50.31.156.77/32",
+  "18.217.206.57/32"
 ]
 ```
 
-The default address ranges were last updated in February 2018, and were
+The default address ranges were last updated in January 2019, and were
 documented at: <https://postmarkapp.com/support/article/800-ips-for-firewalls>
+
+
+Mailer: Mailgun
+===============
+
+Mailgun is a third-party email delivery service. You can learn more at
+<http://www.mailgun.com>. Mailgun is easy to configure and works well.
+
+To use this mailer, set `type` to `mailgun`, then configure these `options`:
+
+  - `api-key`: Required string. Your Mailgun API key.
+  - `domain`: Required string. Your Mailgun domain.
 
 
 Mailer: Amazon SES
@@ -192,7 +204,7 @@ To use this mailer, set `type` to `ses`, then configure these `options`:
   - `endpoint`: Required string. Your Amazon SES endpoint.
 
 NOTE: Amazon SES **requires you to verify your "From" address**. Configure
-which "From" address to use by setting "`metamta.default-address`" in your
+which "From" address to use by setting `metamta.default-address` in your
 config, then follow the Amazon SES verification process to verify it. You
 won't be able to send email until you do this!
 
@@ -209,33 +221,31 @@ API. To use SMTP, configure Phabricator to use an `smtp` mailer.
 To use the REST API mailer, set `type` to `sendgrid`, then configure
 these `options`:
 
-  - `api-user`: Required string. Your SendGrid login name.
   - `api-key`: Required string. Your SendGrid API key.
 
-NOTE: Users have experienced a number of odd issues with SendGrid, compared to
-fewer issues with other mailers. We discourage SendGrid unless you're already
-using it.
+Older versions of the SendGrid API used different sets of credentials,
+including an "API User". Make sure you're configuring your "API Key".
 
 
 Mailer: Sendmail
 ================
 
-This requires a `sendmail` binary to be installed on
-the system. Most MTAs (e.g., sendmail, qmail, postfix) should do this, but your
-machine may not have one installed by default. For install instructions, consult
-the documentation for your favorite MTA.
+This requires a `sendmail` binary to be installed on the system. Most MTAs
+(e.g., sendmail, qmail, postfix) should do this, but your machine may not have
+one installed by default. For install instructions, consult the documentation
+for your favorite MTA.
 
 Since you'll be sending the mail yourself, you are subject to things like SPF
 rules, blackholes, and MTA configuration which are beyond the scope of this
 document. If you can already send outbound email from the command line or know
 how to configure it, this option is straightforward. If you have no idea how to
-do any of this, strongly consider using Mailgun or Amazon SES instead.
+do any of this, strongly consider using Postmark or Mailgun instead.
 
 To use this mailer, set `type` to `sendmail`. There are no `options` to
 configure.
 
 
-Mailer: STMP
+Mailer: SMTP
 ============
 
 You can use this adapter to send mail via an external SMTP server, like Gmail.
