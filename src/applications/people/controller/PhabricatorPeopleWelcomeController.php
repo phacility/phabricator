@@ -51,7 +51,7 @@ final class PhabricatorPeopleWelcomeController
     $default_message = PhabricatorAuthMessage::loadMessage(
       $admin,
       PhabricatorAuthWelcomeMailMessageType::MESSAGEKEY);
-    if (strlen($default_message->getMessageText())) {
+    if ($default_message != null && strlen($default_message->getMessageText())) {
       $message_instructions = pht(
         'The email will identify you as the sender. You may optionally '.
         'replace the [[ %s | default custom mail body ]] with different text '.
