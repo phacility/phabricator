@@ -8,6 +8,7 @@ final class PhabricatorAuthContactNumberQuery
   private $objectPHIDs;
   private $statuses;
   private $uniqueKeys;
+  private $isPrimary;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +32,11 @@ final class PhabricatorAuthContactNumberQuery
 
   public function withUniqueKeys(array $unique_keys) {
     $this->uniqueKeys = $unique_keys;
+    return $this;
+  }
+
+  public function withIsPrimary($is_primary) {
+    $this->isPrimary = $is_primary;
     return $this;
   }
 
@@ -78,6 +84,13 @@ final class PhabricatorAuthContactNumberQuery
         $conn,
         'uniqueKey IN (%Ls)',
         $this->uniqueKeys);
+    }
+
+    if ($this->isPrimary !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isPrimary = %d',
+        (int)$this->isPrimary);
     }
 
     return $where;

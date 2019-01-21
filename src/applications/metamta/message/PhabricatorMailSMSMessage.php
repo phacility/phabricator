@@ -8,6 +8,10 @@ final class PhabricatorMailSMSMessage
   private $toNumber;
   private $textBody;
 
+  public function newMailMessageEngine() {
+    return new PhabricatorMailSMSEngine();
+  }
+
   public function setToNumber(PhabricatorPhoneNumber $to_number) {
     $this->toNumber = $to_number;
     return $this;
