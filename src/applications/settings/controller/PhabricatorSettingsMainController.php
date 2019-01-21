@@ -115,7 +115,7 @@ final class PhabricatorSettingsMainController
     $crumbs->setBorder(true);
 
     if ($this->user) {
-      $header_text = pht('Edit Settings (%s)', $user->getUserName());
+      $header_text = pht('Edit Settings: %s', $user->getUserName());
     } else {
       $header_text = pht('Edit Global Settings');
     }
@@ -127,15 +127,13 @@ final class PhabricatorSettingsMainController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFixed(true)
-      ->setNavigation($nav)
-      ->setMainColumn($response);
+      ->setFooter($response);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($view);
-
   }
 
   private function buildPanels(PhabricatorUserPreferences $preferences) {

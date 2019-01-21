@@ -101,7 +101,7 @@ final class PhabricatorSettingsEditEngine
   protected function getPageHeader($object) {
     $user = $object->getUser();
     if ($user) {
-      $text = pht('Edit Settings (%s)', $user->getUserName());
+      $text = pht('Edit Settings: %s', $user->getUserName());
     } else {
       $text = pht('Edit Global Settings');
     }
