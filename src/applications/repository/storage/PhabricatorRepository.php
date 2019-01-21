@@ -2172,7 +2172,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $parts = array(
       "repo({$repository_phid})",
       "serv({$service_phid})",
-      'v3',
+      'v4',
     );
 
     return implode('.', $parts);
