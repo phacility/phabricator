@@ -11,6 +11,10 @@ final class PhabricatorEmailAddressesSettingsPanel
     return pht('Email Addresses');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-at';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }

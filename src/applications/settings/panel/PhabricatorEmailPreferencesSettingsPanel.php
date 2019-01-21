@@ -11,6 +11,10 @@ final class PhabricatorEmailPreferencesSettingsPanel
     return pht('Email Preferences');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-envelope-open-o';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }

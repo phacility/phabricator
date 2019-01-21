@@ -18,6 +18,10 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     return pht('SSH Public Keys');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-file-text-o';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }

@@ -9,6 +9,10 @@ final class PhabricatorEmailDeliverySettingsPanel
     return pht('Email Delivery');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-envelope-o';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }

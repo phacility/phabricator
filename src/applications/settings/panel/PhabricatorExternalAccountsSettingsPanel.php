@@ -11,6 +11,10 @@ final class PhabricatorExternalAccountsSettingsPanel
     return pht('External Accounts');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-users';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }

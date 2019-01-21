@@ -11,6 +11,10 @@ final class PhabricatorMultiFactorSettingsPanel
     return pht('Multi-Factor Auth');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-lock';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }

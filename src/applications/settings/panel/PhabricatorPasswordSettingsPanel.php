@@ -10,6 +10,10 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     return pht('Password');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-key';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }

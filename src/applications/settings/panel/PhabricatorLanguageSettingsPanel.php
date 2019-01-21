@@ -9,6 +9,10 @@ final class PhabricatorLanguageSettingsPanel
     return pht('Language');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-globe';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAccountPanelGroup::PANELGROUPKEY;
   }

@@ -11,6 +11,10 @@ final class PhabricatorContactNumbersSettingsPanel
     return pht('Contact Numbers');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-mobile';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }

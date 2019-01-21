@@ -9,6 +9,10 @@ final class PhabricatorConpherencePreferencesSettingsPanel
     return pht('Conpherence');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-comment-o';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
   }

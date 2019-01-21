@@ -209,7 +209,11 @@ final class PhabricatorSettingsMainController
         }
       }
 
-      $nav->addFilter($panel->getPanelKey(), $panel->getPanelName());
+      $nav->addFilter(
+        $panel->getPanelKey(),
+        $panel->getPanelName(),
+        null,
+        $panel->getPanelMenuIcon());
     }
 
     return $nav;

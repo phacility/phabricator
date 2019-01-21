@@ -9,6 +9,10 @@ final class PhabricatorDateTimeSettingsPanel
     return pht('Date and Time');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-calendar';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAccountPanelGroup::PANELGROUPKEY;
   }

@@ -132,6 +132,16 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
 
   /**
+   * Return an icon for the panel in the menu.
+   *
+   * @return string Icon identifier.
+   * @task config
+   */
+  public function getPanelMenuIcon() {
+    return 'fa-wrench';
+  }
+
+  /**
    * Return a panel group key constant for this panel.
    *
    * @return const Panel group key.
