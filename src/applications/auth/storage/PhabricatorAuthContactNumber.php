@@ -93,8 +93,30 @@ final class PhabricatorAuthContactNumber
   }
 
   public function save() {
-    $this->uniqueKey = $this->newUniqueKey();
+    // We require that active contact numbers be unique, but it's okay to
+    // disable a number and then reuse it somewhere else.
+    if ($this->isDisabled()) {
+      $this->uniqueKey = null;
+    } else {
+      $this->uniqueKey = $this->newUniqueKey();
+    }
+
     return parent::save();
+  }
+
+  public static function getStatusNameMap() {
+    return ipull(self::getStatusPropertyMap(), 'name');
+  }
+
+  private static function getStatusPropertyMap() {
+    return array(
+      self::STATUS_ACTIVE => array(
+        'name' => pht('Active'),
+      ),
+      self::STATUS_DISABLED => array(
+        'name' => pht('Disabled'),
+      ),
+    );
   }
 
 

@@ -54,6 +54,10 @@ final class PhabricatorAuthContactNumberViewController
       ->setHeader($number->getObjectName())
       ->setPolicyObject($number);
 
+    if ($number->isDisabled()) {
+      $view->setStatus('fa-ban', 'red', pht('Disabled'));
+    }
+
     return $view;
   }
 
@@ -91,6 +95,24 @@ final class PhabricatorAuthContactNumberViewController
         ->setHref($this->getApplicationURI("contact/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+
+    if ($number->isDisabled()) {
+      $disable_uri = $this->getApplicationURI("contact/enable/{$id}/");
+      $disable_name = pht('Enable Contact Number');
+      $disable_icon = 'fa-check';
+    } else {
+      $disable_uri = $this->getApplicationURI("contact/disable/{$id}/");
+      $disable_name = pht('Disable Contact Number');
+      $disable_icon = 'fa-ban';
+    }
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName($disable_name)
+        ->setIcon($disable_icon)
+        ->setHref($disable_uri)
+        ->setWorkflow(true));
 
     return $curtain;
   }

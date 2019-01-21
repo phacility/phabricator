@@ -111,6 +111,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             'PhabricatorAuthContactNumberEditController',
           '(?P<id>[1-9]\d*)/' =>
             'PhabricatorAuthContactNumberViewController',
+          '(?P<action>disable|enable)/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberDisableController',
         ),
       ),
 
