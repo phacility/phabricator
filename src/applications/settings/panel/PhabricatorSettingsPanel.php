@@ -198,6 +198,17 @@ abstract class PhabricatorSettingsPanel extends Phobject {
     return false;
   }
 
+  /**
+   * Return true if this panel should be available when enrolling in MFA on
+   * a new account with MFA requiredd.
+   *
+   * @return bool True to allow configuration during MFA enrollment.
+   * @task config
+   */
+  public function isMultiFactorEnrollmentPanel() {
+    return false;
+  }
+
 
 /* -(  Panel Implementation  )----------------------------------------------- */
 

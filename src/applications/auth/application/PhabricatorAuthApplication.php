@@ -72,8 +72,10 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           => 'PhabricatorAuthRevokeTokenController',
         'session/downgrade/'
           => 'PhabricatorAuthDowngradeSessionController',
-        'multifactor/'
-          => 'PhabricatorAuthNeedsMultiFactorController',
+        'enroll/' => array(
+          '(?:(?P<pageKey>[^/]+)/)?(?:(?P<formSaved>saved)/)?'
+            => 'PhabricatorAuthNeedsMultiFactorController',
+        ),
         'sshkey/' => array(
           $this->getQueryRoutePattern('for/(?P<forPHID>[^/]+)/')
             => 'PhabricatorAuthSSHKeyListController',

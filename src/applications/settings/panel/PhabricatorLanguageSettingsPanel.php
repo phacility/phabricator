@@ -25,4 +25,8 @@ final class PhabricatorLanguageSettingsPanel
     return true;
   }
 
+  public function isMultiFactorEnrollmentPanel() {
+    return true;
+  }
+
 }

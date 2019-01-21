@@ -19,6 +19,10 @@ final class PhabricatorContactNumbersSettingsPanel
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
+  public function isMultiFactorEnrollmentPanel() {
+    return true;
+  }
+
   public function processRequest(AphrontRequest $request) {
     $user = $this->getUser();
     $viewer = $request->getUser();

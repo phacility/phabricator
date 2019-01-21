@@ -3,6 +3,8 @@
 final class PhabricatorMultiFactorSettingsPanel
   extends PhabricatorSettingsPanel {
 
+  private $isEnrollment;
+
   public function getPanelKey() {
     return 'multifactor';
   }
@@ -17,6 +19,19 @@ final class PhabricatorMultiFactorSettingsPanel
 
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
+  }
+
+  public function isMultiFactorEnrollmentPanel() {
+    return true;
+  }
+
+  public function setIsEnrollment($is_enrollment) {
+    $this->isEnrollment = $is_enrollment;
+    return $this;
+  }
+
+  public function getIsEnrollment() {
+    return $this->isEnrollment;
   }
 
   public function processRequest(AphrontRequest $request) {
@@ -106,13 +121,21 @@ final class PhabricatorMultiFactorSettingsPanel
 
     $buttons = array();
 
+    // If we're enrolling a new account in MFA, provide a small visual hint
+    // that this is the button they want to click.
+    if ($this->getIsEnrollment()) {
+      $add_color = PHUIButtonView::BLUE;
+    } else {
+      $add_color = PHUIButtonView::GREY;
+    }
+
     $buttons[] = id(new PHUIButtonView())
       ->setTag('a')
       ->setIcon('fa-plus')
       ->setText(pht('Add Auth Factor'))
       ->setHref($this->getPanelURI('?new=true'))
       ->setWorkflow(true)
-      ->setColor(PHUIButtonView::GREY);
+      ->setColor($add_color);
 
     $buttons[] = id(new PHUIButtonView())
       ->setTag('a')
