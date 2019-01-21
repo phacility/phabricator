@@ -33,6 +33,7 @@ final class PhabricatorMailTestAdapter
   public function getSupportedMessageTypes() {
     return array(
       PhabricatorMailEmailMessage::MESSAGETYPE,
+      PhabricatorMailSMSMessage::MESSAGETYPE,
     );
   }
 
@@ -63,6 +64,28 @@ final class PhabricatorMailTestAdapter
         pht('Unit Test (Temporary)'));
     }
 
+    switch ($message->getMessageType()) {
+      case PhabricatorMailEmailMessage::MESSAGETYPE:
+        $guts = $this->newEmailGuts($message);
+        break;
+      case PhabricatorMailSMSMessage::MESSAGETYPE:
+        $guts = $this->newSMSGuts($message);
+        break;
+    }
+
+    $guts['did-send'] = true;
+    $this->guts = $guts;
+  }
+
+  public function getBody() {
+    return idx($this->guts, 'body');
+  }
+
+  public function getHTMLBody() {
+    return idx($this->guts, 'html-body');
+  }
+
+  private function newEmailGuts(PhabricatorMailExternalMessage $message) {
     $guts = array();
 
     $from = $message->getFromAddress();
@@ -123,19 +146,16 @@ final class PhabricatorMailTestAdapter
     }
     $guts['attachments'] = $file_list;
 
-    $guts['did-send'] = true;
-
-    $this->guts = $guts;
+    return $guts;
   }
 
+  private function newSMSGuts(PhabricatorMailExternalMessage $message) {
+    $guts = array();
 
-  public function getBody() {
-    return idx($this->guts, 'body');
+    $guts['to'] = $message->getToNumber();
+    $guts['body'] = $message->getTextBody();
+
+    return $guts;
   }
-
-  public function getHTMLBody() {
-    return idx($this->guts, 'html-body');
-  }
-
 
 }
