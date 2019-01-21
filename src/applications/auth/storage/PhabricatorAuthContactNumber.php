@@ -12,6 +12,7 @@ final class PhabricatorAuthContactNumber
   protected $contactNumber;
   protected $uniqueKey;
   protected $status;
+  protected $isPrimary;
   protected $properties = array();
 
   const STATUS_ACTIVE = 'active';
@@ -27,6 +28,7 @@ final class PhabricatorAuthContactNumber
         'contactNumber' => 'text255',
         'status' => 'text32',
         'uniqueKey' => 'bytes12?',
+        'isPrimary' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_object' => array(
@@ -43,7 +45,8 @@ final class PhabricatorAuthContactNumber
   public static function initializeNewContactNumber($object) {
     return id(new self())
       ->setStatus(self::STATUS_ACTIVE)
-      ->setObjectPHID($object->getPHID());
+      ->setObjectPHID($object->getPHID())
+      ->setIsPrimary(0);
   }
 
   public function getPHIDType() {
@@ -73,8 +76,14 @@ final class PhabricatorAuthContactNumber
         ->setTooltip(pht('Disabled'));
     }
 
+    if ($this->getIsPrimary()) {
+      return id(new PHUIIconView())
+        ->setIcon('fa-certificate', 'blue')
+        ->setTooltip(pht('Primary Number'));
+    }
+
     return id(new PHUIIconView())
-      ->setIcon('fa-mobile', 'green')
+      ->setIcon('fa-hashtag', 'bluegrey')
       ->setTooltip(pht('Active Phone Number'));
   }
 
@@ -101,7 +110,61 @@ final class PhabricatorAuthContactNumber
       $this->uniqueKey = $this->newUniqueKey();
     }
 
-    return parent::save();
+    parent::save();
+
+    return $this->updatePrimaryContactNumber();
+  }
+
+  private function updatePrimaryContactNumber() {
+    // Update the "isPrimary" column so that at most one number is primary for
+    // each user, and no disabled number is primary.
+
+    $conn = $this->establishConnection('w');
+    $this_id = (int)$this->getID();
+
+    if ($this->getIsPrimary() && !$this->isDisabled()) {
+      // If we're trying to make this number primary and it's active, great:
+      // make this number the primary number.
+      $primary_id = $this_id;
+    } else {
+      // If we aren't trying to make this number primary or it is disabled,
+      // pick another number to make primary if we can. A number must be active
+      // to become primary.
+
+      // If there are multiple active numbers, pick the oldest one currently
+      // marked primary (usually, this should mean that we just keep the
+      // current primary number as primary).
+
+      // If none are marked primary, just pick the oldest one.
+      $primary_row = queryfx_one(
+        $conn,
+        'SELECT id FROM %R
+          WHERE objectPHID = %s AND status = %s
+          ORDER BY isPrimary DESC, id ASC
+          LIMIT 1',
+        $this,
+        $this->getObjectPHID(),
+        self::STATUS_ACTIVE);
+      if ($primary_row) {
+        $primary_id = (int)$primary_row['id'];
+      } else {
+        $primary_id = -1;
+      }
+    }
+
+    // Set the chosen number to primary, and all other numbers to nonprimary.
+
+    queryfx(
+      $conn,
+      'UPDATE %R SET isPrimary = IF(id = %d, 1, 0)
+        WHERE objectPHID = %s',
+      $this,
+      $primary_id,
+      $this->getObjectPHID());
+
+    $this->setIsPrimary((int)($primary_id === $this_id));
+
+    return $this;
   }
 
   public static function getStatusNameMap() {
@@ -117,6 +180,15 @@ final class PhabricatorAuthContactNumber
         'name' => pht('Disabled'),
       ),
     );
+  }
+
+  public function getSortVector() {
+    // Sort the primary number first, then active numbers, then disabled
+    // numbers. In each group, sort from oldest to newest.
+    return id(new PhutilSortVector())
+      ->addInt($this->getIsPrimary() ? 0 : 1)
+      ->addInt($this->isDisabled() ? 1 : 0)
+      ->addInt($this->getID());
   }
 
 

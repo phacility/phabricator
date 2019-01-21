@@ -12,7 +12,7 @@ final class PhabricatorContactNumbersSettingsPanel
   }
 
   public function getPanelMenuIcon() {
-    return 'fa-mobile';
+    return 'fa-hashtag';
   }
 
   public function getPanelGroupKey() {
@@ -31,9 +31,19 @@ final class PhabricatorContactNumbersSettingsPanel
       ->setViewer($viewer)
       ->withObjectPHIDs(array($user->getPHID()))
       ->execute();
+    $numbers = msortv($numbers, 'getSortVector');
 
     $rows = array();
+    $row_classes = array();
     foreach ($numbers as $number) {
+      if ($number->getIsPrimary()) {
+        $primary_display = pht('Primary');
+        $row_classes[] = 'highlighted';
+      } else {
+        $primary_display = null;
+        $row_classes[] = null;
+      }
+
       $rows[] = array(
         $number->newIconView(),
         phutil_tag(
@@ -42,6 +52,7 @@ final class PhabricatorContactNumbersSettingsPanel
             'href' => $number->getURI(),
           ),
           $number->getDisplayName()),
+        $primary_display,
         phabricator_datetime($number->getDateCreated(), $viewer),
       );
     }
@@ -49,16 +60,19 @@ final class PhabricatorContactNumbersSettingsPanel
     $table = id(new AphrontTableView($rows))
       ->setNoDataString(
         pht("You haven't added any contact numbers to your account."))
+      ->setRowClasses($row_classes)
       ->setHeaders(
         array(
           null,
           pht('Number'),
+          pht('Status'),
           pht('Created'),
         ))
       ->setColumnClasses(
         array(
           null,
           'wide pri',
+          null,
           'right',
         ));
 

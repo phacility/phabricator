@@ -56,6 +56,8 @@ final class PhabricatorAuthContactNumberViewController
 
     if ($number->isDisabled()) {
       $view->setStatus('fa-ban', 'red', pht('Disabled'));
+    } else if ($number->getIsPrimary()) {
+      $view->setStatus('fa-certificate', 'blue', pht('Primary'));
     }
 
     return $view;
@@ -96,16 +98,25 @@ final class PhabricatorAuthContactNumberViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-
     if ($number->isDisabled()) {
       $disable_uri = $this->getApplicationURI("contact/enable/{$id}/");
       $disable_name = pht('Enable Contact Number');
       $disable_icon = 'fa-check';
+      $can_primary = false;
     } else {
       $disable_uri = $this->getApplicationURI("contact/disable/{$id}/");
       $disable_name = pht('Disable Contact Number');
       $disable_icon = 'fa-ban';
+      $can_primary = !$number->getIsPrimary();
     }
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Make Primary Number'))
+        ->setIcon('fa-certificate')
+        ->setHref($this->getApplicationURI("contact/primary/{$id}/"))
+        ->setDisabled(!$can_primary)
+        ->setWorkflow(true));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
