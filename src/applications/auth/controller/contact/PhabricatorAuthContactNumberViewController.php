@@ -98,6 +98,14 @@ final class PhabricatorAuthContactNumberViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Send Test Message'))
+        ->setIcon('fa-envelope-o')
+        ->setHref($this->getApplicationURI("contact/test/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
     if ($number->isDisabled()) {
       $disable_uri = $this->getApplicationURI("contact/enable/{$id}/");
       $disable_name = pht('Enable Contact Number');
