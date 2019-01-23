@@ -6,7 +6,8 @@ final class PhabricatorAuthContactNumber
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorEditEngineMFAInterface {
 
   protected $objectPHID;
   protected $contactNumber;
@@ -231,5 +232,12 @@ final class PhabricatorAuthContactNumber
     return new PhabricatorAuthContactNumberTransaction();
   }
 
+
+/* -(  PhabricatorEditEngineMFAInterface  )---------------------------------- */
+
+
+  public function newEditEngineMFAEngine() {
+    return new PhabricatorAuthContactNumberMFAEngine();
+  }
 
 }

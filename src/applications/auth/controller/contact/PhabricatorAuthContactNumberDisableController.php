@@ -24,7 +24,7 @@ final class PhabricatorAuthContactNumberDisableController
     $id = $number->getID();
     $cancel_uri = $number->getURI();
 
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHisecPost()) {
       $xactions = array();
 
       if ($is_disable) {
@@ -42,7 +42,8 @@ final class PhabricatorAuthContactNumberDisableController
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true);
+        ->setContinueOnMissingFields(true)
+        ->setCancelURI($cancel_uri);
 
       try {
         $editor->applyTransactions($number, $xactions);

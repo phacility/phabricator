@@ -4916,6 +4916,10 @@ abstract class PhabricatorApplicationTransactionEditor
     $require_mfa = $engine->shouldRequireMFA();
 
     if (!$require_mfa) {
+      $try_mfa = $engine->shouldTryMFA();
+      if ($try_mfa) {
+        $this->setShouldRequireMFA(true);
+      }
       return $xactions;
     }
 

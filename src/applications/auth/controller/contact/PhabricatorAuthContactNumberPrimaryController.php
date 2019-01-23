@@ -41,7 +41,7 @@ final class PhabricatorAuthContactNumberPrimaryController
         ->addCancelButton($cancel_uri);
     }
 
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHisecPost()) {
       $xactions = array();
 
       $xactions[] = id(new PhabricatorAuthContactNumberTransaction())
@@ -53,7 +53,8 @@ final class PhabricatorAuthContactNumberPrimaryController
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true);
+        ->setContinueOnMissingFields(true)
+        ->setCancelURI($cancel_uri);
 
       try {
         $editor->applyTransactions($number, $xactions);
