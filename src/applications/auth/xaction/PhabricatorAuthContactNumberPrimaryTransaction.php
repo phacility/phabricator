@@ -41,6 +41,12 @@ final class PhabricatorAuthContactNumberPrimaryTransaction
           $xaction);
         continue;
       }
+
+      $mfa_error = $this->newContactNumberMFAError($object, $xaction);
+      if ($mfa_error) {
+        $errors[] = $mfa_error;
+        continue;
+      }
     }
 
     return $errors;

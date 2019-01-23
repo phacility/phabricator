@@ -55,7 +55,16 @@ final class PhabricatorAuthContactNumberPrimaryController
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true);
 
-      $editor->applyTransactions($number, $xactions);
+      try {
+        $editor->applyTransactions($number, $xactions);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        // This happens when you try to make a number into your primary
+        // number, but you have contact number MFA on your account.
+        return $this->newDialog()
+          ->setTitle(pht('Unable to Make Primary'))
+          ->setValidationException($ex)
+          ->addCancelButton($cancel_uri);
+      }
 
       return id(new AphrontRedirectResponse())->setURI($cancel_uri);
     }

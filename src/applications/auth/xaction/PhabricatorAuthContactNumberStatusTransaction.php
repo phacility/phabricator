@@ -46,6 +46,12 @@ final class PhabricatorAuthContactNumberStatusTransaction
         continue;
       }
 
+      $mfa_error = $this->newContactNumberMFAError($object, $xaction);
+      if ($mfa_error) {
+        $errors[] = $mfa_error;
+        continue;
+      }
+
       // NOTE: Enabling a contact number may cause us to collide with another
       // active contact number. However, there might also be a transaction in
       // this group that changes the number itself. Since we can't easily

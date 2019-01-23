@@ -62,6 +62,18 @@ abstract class PhabricatorAuthFactor extends Phobject {
     return null;
   }
 
+  /**
+   * Is this a factor which depends on the user's contact number?
+   *
+   * If a user has a "contact number" factor configured, they can not modify
+   * or switch their primary contact number.
+   *
+   * @return bool True if this factor should lock contact numbers.
+   */
+  public function isContactNumberFactor() {
+    return false;
+  }
+
   abstract public function getEnrollDescription(
     PhabricatorAuthFactorProvider $provider,
     PhabricatorUser $user);

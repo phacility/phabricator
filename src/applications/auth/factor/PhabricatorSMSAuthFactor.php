@@ -28,6 +28,10 @@ final class PhabricatorSMSAuthFactor
     return 2000;
   }
 
+  public function isContactNumberFactor() {
+    return true;
+  }
+
   public function canCreateNewProvider() {
     return $this->isSMSMailerConfigured();
   }
