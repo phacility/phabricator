@@ -2,8 +2,6 @@
 
 final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
-  const DIGEST_TEMPORARY_KEY = 'mfa.totp.sync';
-
   public function getFactorKey() {
     return 'totp';
   }
@@ -31,68 +29,26 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     AphrontRequest $request,
     PhabricatorUser $user) {
 
-    $totp_token_type = PhabricatorAuthTOTPKeyTemporaryTokenType::TOKENTYPE;
-
-    $key = $request->getStr('totpkey');
-    if (strlen($key)) {
-      // If the user is providing a key, make sure it's a key we generated.
-      // This raises the barrier to theoretical attacks where an attacker might
-      // provide a known key (such attacks are already prevented by CSRF, but
-      // this is a second barrier to overcome).
-
-      // (We store and verify the hash of the key, not the key itself, to limit
-      // how useful the data in the table is to an attacker.)
-
-      $token_code = PhabricatorHash::digestWithNamedKey(
-        $key,
-        self::DIGEST_TEMPORARY_KEY);
-
-      $temporary_token = id(new PhabricatorAuthTemporaryTokenQuery())
-        ->setViewer($user)
-        ->withTokenResources(array($user->getPHID()))
-        ->withTokenTypes(array($totp_token_type))
-        ->withExpired(false)
-        ->withTokenCodes(array($token_code))
-        ->executeOne();
-      if (!$temporary_token) {
-        // If we don't have a matching token, regenerate the key below.
-        $key = null;
-      }
-    }
-
-    if (!strlen($key)) {
-      $key = self::generateNewTOTPKey();
-
-      // Mark this key as one we generated, so the user is allowed to submit
-      // a response for it.
-
-      $token_code = PhabricatorHash::digestWithNamedKey(
-        $key,
-        self::DIGEST_TEMPORARY_KEY);
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        id(new PhabricatorAuthTemporaryToken())
-          ->setTokenResource($user->getPHID())
-          ->setTokenType($totp_token_type)
-          ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
-          ->setTokenCode($token_code)
-          ->save();
-      unset($unguarded);
-    }
+    $sync_token = $this->loadMFASyncToken(
+      $request,
+      $form,
+      $user);
+    $secret = $sync_token->getTemporaryTokenProperty('secret');
 
     $code = $request->getStr('totpcode');
 
     $e_code = true;
-    if ($request->getExists('totp')) {
+    if (!$sync_token->getIsNewTemporaryToken()) {
       $okay = (bool)$this->getTimestepAtWhichResponseIsValid(
         $this->getAllowedTimesteps($this->getCurrentTimestep()),
-        new PhutilOpaqueEnvelope($key),
+        new PhutilOpaqueEnvelope($secret),
         $code);
 
       if ($okay) {
         $config = $this->newConfigForUser($user)
           ->setFactorName(pht('Mobile App (TOTP)'))
-          ->setFactorSecret($key);
+          ->setFactorSecret($secret)
+          ->setMFASyncToken($sync_token);
 
         return $config;
       } else {
@@ -103,9 +59,6 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
         }
       }
     }
-
-    $form->addHiddenInput('totp', true);
-    $form->addHiddenInput('totpkey', $key);
 
     $form->appendRemarkupInstructions(
       pht(
@@ -126,7 +79,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       'otpauth://totp/%s:%s?secret=%s&issuer=%s',
       $issuer,
       $user->getUsername(),
-      $key,
+      $secret,
       $issuer);
 
     $qrcode = $this->renderQRCode($uri);
@@ -135,7 +88,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     $form->appendChild(
       id(new AphrontFormStaticControl())
         ->setLabel(pht('Key'))
-        ->setValue(phutil_tag('strong', array(), $key)));
+        ->setValue(phutil_tag('strong', array(), $secret)));
 
     $form->appendInstructions(
       pht(
@@ -526,4 +479,11 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
     return $value;
   }
+
+  protected function newMFASyncTokenProperties(PhabricatorUser $user) {
+    return array(
+      'secret' => self::generateNewTOTPKey(),
+    );
+  }
+
 }

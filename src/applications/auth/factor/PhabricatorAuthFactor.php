@@ -245,4 +245,104 @@ abstract class PhabricatorAuthFactor extends Phobject {
   }
 
 
+/* -(  Synchronizing New Factors  )------------------------------------------ */
+
+
+  final protected function loadMFASyncToken(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    PhabricatorUser $user) {
+
+    // If the form included a synchronization key, load the corresponding
+    // token. The user must synchronize to a key we generated because this
+    // raises the barrier to theoretical attacks where an attacker might
+    // provide a known key for factors like TOTP.
+
+    // (We store and verify the hash of the key, not the key itself, to limit
+    // how useful the data in the table is to an attacker.)
+
+    $sync_type = PhabricatorAuthMFASyncTemporaryTokenType::TOKENTYPE;
+    $sync_token = null;
+
+    $sync_key = $request->getStr($this->getMFASyncTokenFormKey());
+    if (strlen($sync_key)) {
+      $sync_key_digest = PhabricatorHash::digestWithNamedKey(
+        $sync_key,
+        PhabricatorAuthMFASyncTemporaryTokenType::DIGEST_KEY);
+
+      $sync_token = id(new PhabricatorAuthTemporaryTokenQuery())
+        ->setViewer($user)
+        ->withTokenResources(array($user->getPHID()))
+        ->withTokenTypes(array($sync_type))
+        ->withExpired(false)
+        ->withTokenCodes(array($sync_key_digest))
+        ->executeOne();
+    }
+
+    if (!$sync_token) {
+
+      // Don't generate a new sync token if there are too many outstanding
+      // tokens already. This is mostly relevant for push factors like SMS,
+      // where generating a token has the side effect of sending a user a
+      // message.
+
+      $outstanding_limit = 10;
+      $outstanding_tokens = id(new PhabricatorAuthTemporaryTokenQuery())
+        ->setViewer($user)
+        ->withTokenResources(array($user->getPHID()))
+        ->withTokenTypes(array($sync_type))
+        ->withExpired(false)
+        ->execute();
+      if (count($outstanding_tokens) > $outstanding_limit) {
+        throw new Exception(
+          pht(
+            'Your account has too many outstanding, incomplete MFA '.
+            'synchronization attempts. Wait an hour and try again.'));
+      }
+
+      $now = PhabricatorTime::getNow();
+
+      $sync_key = Filesystem::readRandomCharacters(32);
+      $sync_key_digest = PhabricatorHash::digestWithNamedKey(
+        $sync_key,
+        PhabricatorAuthMFASyncTemporaryTokenType::DIGEST_KEY);
+      $sync_ttl = $this->getMFASyncTokenTTL();
+
+      $sync_token = id(new PhabricatorAuthTemporaryToken())
+        ->setIsNewTemporaryToken(true)
+        ->setTokenResource($user->getPHID())
+        ->setTokenType($sync_type)
+        ->setTokenCode($sync_key_digest)
+        ->setTokenExpires($now + $sync_ttl);
+
+      // Note that property generation is unguarded, since factors that push
+      // a challenge generally need to perform a write there.
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $properties = $this->newMFASyncTokenProperties($user);
+
+        foreach ($properties as $key => $value) {
+          $sync_token->setTemporaryTokenProperty($key, $value);
+        }
+
+        $sync_token->save();
+      unset($unguarded);
+    }
+
+    $form->addHiddenInput($this->getMFASyncTokenFormKey(), $sync_key);
+
+    return $sync_token;
+  }
+
+  protected function newMFASyncTokenProperties(PhabricatorUser $user) {
+    return array();
+  }
+
+  private function getMFASyncTokenFormKey() {
+    return 'sync.key';
+  }
+
+  private function getMFASyncTokenTTL() {
+    return phutil_units('1 hour in seconds');
+  }
+
 }

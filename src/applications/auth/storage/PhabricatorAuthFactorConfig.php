@@ -15,6 +15,7 @@ final class PhabricatorAuthFactorConfig
 
   private $sessionEngine;
   private $factorProvider = self::ATTACHABLE;
+  private $mfaSyncToken;
 
   protected function getConfiguration() {
     return array(
@@ -59,6 +60,15 @@ final class PhabricatorAuthFactorConfig
     }
 
     return $this->sessionEngine;
+  }
+
+  public function setMFASyncToken(PhabricatorAuthTemporaryToken $token) {
+    $this->mfaSyncToken = $token;
+    return $this;
+  }
+
+  public function getMFASyncToken() {
+    return $this->mfaSyncToken;
   }
 
 

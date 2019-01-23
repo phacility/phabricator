@@ -266,6 +266,13 @@ final class PhabricatorMultiFactorSettingsPanel
 
       $config->save();
 
+      // If we used a temporary token to handle synchronizing the factor,
+      // revoke it now.
+      $sync_token = $config->getMFASyncToken();
+      if ($sync_token) {
+        $sync_token->revokeToken();
+      }
+
       $log = PhabricatorUserLog::initializeNewLog(
         $viewer,
         $user->getPHID(),
