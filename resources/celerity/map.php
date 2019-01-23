@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
-    'core.pkg.css' => 'e94cc920',
+    'core.pkg.css' => 'a66ea2e7',
     'core.pkg.js' => '5c737607',
     'differential.pkg.css' => 'b8df73d4',
     'differential.pkg.js' => '67c9ea4c',
@@ -127,7 +127,7 @@ return array(
     'rsrc/css/phui/calendar/phui-calendar-list.css' => 'ccd7e4e2',
     'rsrc/css/phui/calendar/phui-calendar-month.css' => 'cb758c42',
     'rsrc/css/phui/calendar/phui-calendar.css' => 'f11073aa',
-    'rsrc/css/phui/object-item/phui-oi-big-ui.css' => 'e5b1fb04',
+    'rsrc/css/phui/object-item/phui-oi-big-ui.css' => '9e037c7a',
     'rsrc/css/phui/object-item/phui-oi-color.css' => 'b517bfa0',
     'rsrc/css/phui/object-item/phui-oi-drag-ui.css' => 'da15d3dc',
     'rsrc/css/phui/object-item/phui-oi-flush-ui.css' => '490e2e2e',
@@ -832,7 +832,7 @@ return array(
     'phui-lightbox-css' => '4ebf22da',
     'phui-list-view-css' => '470b1adb',
     'phui-object-box-css' => '9b58483d',
-    'phui-oi-big-ui-css' => 'e5b1fb04',
+    'phui-oi-big-ui-css' => '9e037c7a',
     'phui-oi-color-css' => 'b517bfa0',
     'phui-oi-drag-ui-css' => 'da15d3dc',
     'phui-oi-flush-ui-css' => '490e2e2e',
@@ -1710,6 +1710,9 @@ return array(
       'javelin-uri',
       'phabricator-textareautils',
     ),
+    '9e037c7a' => array(
+      'phui-oi-list-view-css',
+    ),
     '9f081f05' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -2023,9 +2026,6 @@ return array(
     ),
     'e562708c' => array(
       'javelin-install',
-    ),
-    'e5b1fb04' => array(
-      'phui-oi-list-view-css',
     ),
     'e5bdb730' => array(
       'javelin-behavior',

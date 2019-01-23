@@ -101,6 +101,14 @@ final class PhabricatorAuthFactorProvider
     return $config;
   }
 
+  public function newSortVector() {
+    $factor = $this->getFactor();
+
+    return id(new PhutilSortVector())
+      ->addInt($factor->getFactorOrder())
+      ->addInt($this->getID());
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

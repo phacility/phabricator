@@ -169,6 +169,7 @@ final class PhabricatorMultiFactorSettingsPanel
         ->addCancelButton($cancel_uri);
     }
     $providers = mpull($providers, null, 'getPHID');
+    $proivders = msortv($providers, 'newSortVector');
 
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
@@ -180,6 +181,13 @@ final class PhabricatorMultiFactorSettingsPanel
       $selected_provider = null;
     } else {
       $selected_provider = $providers[$selected_phid];
+
+      // Only let the user continue creating a factor for a given provider if
+      // they actually pass the provider's checks.
+      $selected_factor = $selected_provider->getFactor();
+      if (!$selected_factor->canCreateNewConfiguration($viewer)) {
+        $selected_provider = null;
+      }
     }
 
     if (!$selected_provider) {
@@ -192,12 +200,27 @@ final class PhabricatorMultiFactorSettingsPanel
         $provider_uri = id(new PhutilURI($this->getPanelURI()))
           ->setQueryParam('providerPHID', $provider_phid);
 
+        $factor = $provider->getFactor();
+        $is_enabled = $factor->canCreateNewConfiguration($viewer);
+
         $item = id(new PHUIObjectItemView())
           ->setHeader($provider->getDisplayName())
-          ->setHref($provider_uri)
-          ->setClickable(true)
           ->setImageIcon($provider->newIconView())
           ->addAttribute($provider->getDisplayDescription());
+
+        if ($is_enabled) {
+          $item
+            ->setHref($provider_uri)
+            ->setClickable(true);
+        } else {
+          $item->setDisabled(true);
+        }
+
+        $create_description = $factor->getConfigurationCreateDescription(
+          $viewer);
+        if ($create_description) {
+          $item->appendChild($create_description);
+        }
 
         $menu->addItem($item);
       }

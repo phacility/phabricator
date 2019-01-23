@@ -45,6 +45,33 @@ abstract class PhabricatorAuthFactor extends Phobject {
       ->setIcon('fa-mobile');
   }
 
+  public function canCreateNewProvider() {
+    return true;
+  }
+
+  public function getProviderCreateDescription() {
+    return null;
+  }
+
+  public function canCreateNewConfiguration(PhabricatorUser $user) {
+    return true;
+  }
+
+  public function getConfigurationCreateDescription(PhabricatorUser $user) {
+    return null;
+  }
+
+  public function getFactorOrder() {
+    return 1000;
+  }
+
+  final public function newSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->canCreateNewProvider() ? 0 : 1)
+      ->addInt($this->getFactorOrder())
+      ->addString($this->getFactorName());
+  }
+
   protected function newChallenge(
     PhabricatorAuthFactorConfig $config,
     PhabricatorUser $viewer) {
