@@ -234,12 +234,36 @@ final class PhabricatorMultiFactorSettingsPanel
     $form = id(new AphrontFormView())
       ->setViewer($viewer);
 
+    if ($request->isFormPost()) {
+      // Subject users to rate limiting so that it's difficult to add factors
+      // by pure brute force. This is normally not much of an attack, but push
+      // factor types may have side effects.
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhabricatorAuthNewFactorAction(),
+        1);
+    } else {
+      // Test the limit before showing the user a form, so we don't give them
+      // a form which can never possibly work because it will always hit rate
+      // limiting.
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhabricatorAuthNewFactorAction(),
+        0);
+    }
+
     $config = $selected_provider->processAddFactorForm(
       $form,
       $request,
       $user);
 
     if ($config) {
+      // If the user added a factor, give them a rate limiting point back.
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhabricatorAuthNewFactorAction(),
+        -1);
+
       $config->save();
 
       $log = PhabricatorUserLog::initializeNewLog(
