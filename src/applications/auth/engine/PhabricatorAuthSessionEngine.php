@@ -557,8 +557,17 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         // Limit factor verification rates to prevent brute force attacks.
         $any_attempt = false;
         foreach ($factors as $factor) {
+          $factor_phid = $factor->getPHID();
+
           $provider = $factor->getFactorProvider();
           $impl = $provider->getFactor();
+
+          // If we already have a result (normally "wait..."), we won't try
+          // to validate whatever the user submitted, so this doesn't count as
+          // an attempt for rate limiting purposes.
+          if (isset($validation_results[$factor_phid])) {
+            continue;
+          }
 
           if ($impl->getRequestHasChallengeResponse($factor, $request)) {
             $any_attempt = true;
