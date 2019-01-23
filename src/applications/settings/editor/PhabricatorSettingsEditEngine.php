@@ -152,7 +152,7 @@ final class PhabricatorSettingsEditEngine
     $viewer = $this->getViewer();
     $user = $object->getUser();
 
-    $panels = PhabricatorSettingsPanel::getAllPanels();
+    $panels = PhabricatorSettingsPanel::getAllDisplayPanels();
 
     foreach ($panels as $key => $panel) {
       if (!($panel instanceof PhabricatorEditEngineSettingsPanel)) {
