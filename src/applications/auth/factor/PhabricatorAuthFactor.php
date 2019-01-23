@@ -61,6 +61,16 @@ abstract class PhabricatorAuthFactor extends Phobject {
     return null;
   }
 
+  abstract public function getEnrollDescription(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user);
+
+  public function getEnrollButtonText(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
+    return pht('Continue');
+  }
+
   public function getFactorOrder() {
     return 1000;
   }
@@ -315,17 +325,13 @@ abstract class PhabricatorAuthFactor extends Phobject {
         ->setTokenCode($sync_key_digest)
         ->setTokenExpires($now + $sync_ttl);
 
-      // Note that property generation is unguarded, since factors that push
-      // a challenge generally need to perform a write there.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $properties = $this->newMFASyncTokenProperties($user);
+      $properties = $this->newMFASyncTokenProperties($user);
 
-        foreach ($properties as $key => $value) {
-          $sync_token->setTemporaryTokenProperty($key, $value);
-        }
+      foreach ($properties as $key => $value) {
+        $sync_token->setTemporaryTokenProperty($key, $value);
+      }
 
-        $sync_token->save();
-      unset($unguarded);
+      $sync_token->save();
     }
 
     $form->addHiddenInput($this->getMFASyncTokenFormKey(), $sync_key);

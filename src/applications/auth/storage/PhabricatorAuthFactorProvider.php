@@ -109,6 +109,13 @@ final class PhabricatorAuthFactorProvider
       ->addInt($this->getID());
   }
 
+  public function getEnrollDescription(PhabricatorUser $user) {
+    return $this->getFactor()->getEnrollDescription($this, $user);
+  }
+
+  public function getEnrollButtonText(PhabricatorUser $user) {
+    return $this->getFactor()->getEnrollButtonText($this, $user);
+  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

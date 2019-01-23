@@ -23,6 +23,21 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       'authenticate, you will enter a code shown on your phone.');
   }
 
+  public function getEnrollDescription(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
+
+    return pht(
+      'To add a TOTP factor to your account, you will first need to install '.
+      'a mobile authenticator application on your phone. Two applications '.
+      'which work well are **Google Authenticator** and **Authy**, but any '.
+      'other TOTP application should also work.'.
+      "\n\n".
+      'If you haven\'t already, download and install a TOTP application on '.
+      'your phone now. Once you\'ve launched the application and are ready '.
+      'to add a new TOTP code, continue to the next step.');
+  }
+
   public function processAddFactorForm(
     PhabricatorAuthFactorProvider $provider,
     AphrontFormView $form,
@@ -60,17 +75,10 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       }
     }
 
-    $form->appendRemarkupInstructions(
-      pht(
-        'First, download an authenticator application on your phone. Two '.
-        'applications which work well are **Authy** and **Google '.
-        'Authenticator**, but any other TOTP application should also work.'));
-
     $form->appendInstructions(
       pht(
-        'Launch the application on your phone, and add a new entry for '.
-        'this Phabricator install. When prompted, scan the QR code or '.
-        'manually enter the key shown below into the application.'));
+        'Scan the QR code or manually enter the key shown below into the '.
+        'application.'));
 
     $prod_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
     $issuer = $prod_uri->getDomain();

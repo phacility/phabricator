@@ -231,10 +231,26 @@ final class PhabricatorMultiFactorSettingsPanel
         ->addCancelButton($cancel_uri);
     }
 
+    // NOTE: Beyond providing guidance, this step is also providing a CSRF gate
+    // on this endpoint, since prompting the user to respond to a challenge
+    // sometimes requires us to push a challenge to them as a side effect (for
+    // example, with SMS).
+    if (!$request->isFormPost() || !$request->getBool('mfa.start')) {
+      $description = $selected_provider->getEnrollDescription($viewer);
+
+      return $this->newDialog()
+        ->addHiddenInput('providerPHID', $selected_provider->getPHID())
+        ->addHiddenInput('mfa.start', 1)
+        ->setTitle(pht('Add Authentication Factor'))
+        ->appendChild(new PHUIRemarkupView($viewer, $description))
+        ->addCancelButton($cancel_uri)
+        ->addSubmitButton($selected_provider->getEnrollButtonText($viewer));
+    }
+
     $form = id(new AphrontFormView())
       ->setViewer($viewer);
 
-    if ($request->isFormPost()) {
+    if ($request->getBool('mfa.enroll')) {
       // Subject users to rate limiting so that it's difficult to add factors
       // by pure brute force. This is normally not much of an attack, but push
       // factor types may have side effects.
@@ -295,6 +311,8 @@ final class PhabricatorMultiFactorSettingsPanel
 
     return $this->newDialog()
       ->addHiddenInput('providerPHID', $selected_provider->getPHID())
+      ->addHiddenInput('mfa.start', 1)
+      ->addHiddenInput('mfa.enroll', 1)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle(pht('Add Authentication Factor'))
       ->appendChild($form->buildLayoutView())
