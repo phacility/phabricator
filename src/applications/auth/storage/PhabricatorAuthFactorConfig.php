@@ -71,6 +71,15 @@ final class PhabricatorAuthFactorConfig
     return $this->mfaSyncToken;
   }
 
+  public function getAuthFactorConfigProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setAuthFactorConfigProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

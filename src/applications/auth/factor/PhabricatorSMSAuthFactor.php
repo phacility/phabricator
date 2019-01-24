@@ -171,6 +171,38 @@ final class PhabricatorSMSAuthFactor
       return array();
     }
 
+    if (!$this->loadUserContactNumber($viewer)) {
+      $result = $this->newResult()
+        ->setIsError(true)
+        ->setErrorMessage(
+          pht(
+            'Your account has no primary contact number.'));
+
+      $this->throwResult($result);
+    }
+
+    if (!$this->isSMSMailerConfigured()) {
+      $result = $this->newResult()
+        ->setIsError(true)
+        ->setErrorMessage(
+          pht(
+            'No outbound mailer which can deliver SMS messages is '.
+            'configured.'));
+
+      $this->throwResult($result);
+    }
+
+    if (!$this->hasCSRF($config)) {
+      $result = $this->newResult()
+        ->setIsContinue(true)
+        ->setErrorMessage(
+          pht(
+            'A text message with an authorization code will be sent to your '.
+            'primary contact number.'));
+
+      $this->throwResult($result);
+    }
+
     // Otherwise, issue a new challenge.
 
     $challenge_code = $this->newSMSChallengeCode();
@@ -329,10 +361,6 @@ final class PhabricatorSMSAuthFactor
   private function sendSMSCodeToUser(
     PhutilOpaqueEnvelope $envelope,
     PhabricatorUser $user) {
-
-    $uri = PhabricatorEnv::getURI('/');
-    $uri = new PhutilURI($uri);
-
     return id(new PhabricatorMetaMTAMail())
       ->setMessageType(PhabricatorMailSMSMessage::MESSAGETYPE)
       ->addTos(array($user->getPHID()))
@@ -341,31 +369,13 @@ final class PhabricatorSMSAuthFactor
       ->setBody(
         pht(
           'Phabricator (%s) MFA Code: %s',
-          $uri->getDomain(),
+          $this->getInstallDisplayName(),
           $envelope->openEnvelope()))
       ->save();
   }
 
   private function normalizeSMSCode($code) {
     return trim($code);
-  }
-
-  private function getChallengeResponseParameterName(
-    PhabricatorAuthFactorConfig $config) {
-    return $this->getParameterName($config, 'sms.code');
-  }
-
-  private function getChallengeResponseFromRequest(
-    PhabricatorAuthFactorConfig $config,
-    AphrontRequest $request) {
-
-    $name = $this->getChallengeResponseParameterName($config);
-
-    $value = $request->getStr($name);
-    $value = (string)$value;
-    $value = trim($value);
-
-    return $value;
   }
 
 }

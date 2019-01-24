@@ -90,7 +90,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       $secret,
       $issuer);
 
-    $qrcode = $this->renderQRCode($uri);
+    $qrcode = $this->newQRCode($uri);
     $form->appendChild($qrcode);
 
     $form->appendChild(
@@ -390,49 +390,6 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return $code;
   }
 
-
-  /**
-   * @phutil-external-symbol class QRcode
-   */
-  private function renderQRCode($uri) {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/phpqrcode/phpqrcode.php';
-
-    $lines = QRcode::text($uri);
-
-    $total_width = 240;
-    $cell_size = floor($total_width / count($lines));
-
-    $rows = array();
-    foreach ($lines as $line) {
-      $cells = array();
-      for ($ii = 0; $ii < strlen($line); $ii++) {
-        if ($line[$ii] == '1') {
-          $color = '#000';
-        } else {
-          $color = '#fff';
-        }
-
-        $cells[] = phutil_tag(
-          'td',
-          array(
-            'width' => $cell_size,
-            'height' => $cell_size,
-            'style' => 'background: '.$color,
-          ),
-          '');
-      }
-      $rows[] = phutil_tag('tr', array(), $cells);
-    }
-
-    return phutil_tag(
-      'table',
-      array(
-        'style' => 'margin: 24px auto;',
-      ),
-      $rows);
-  }
-
   private function getTimestepDuration() {
     return 30;
   }
@@ -468,24 +425,6 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     }
 
     return null;
-  }
-
-  private function getChallengeResponseParameterName(
-    PhabricatorAuthFactorConfig $config) {
-    return $this->getParameterName($config, 'totpcode');
-  }
-
-  private function getChallengeResponseFromRequest(
-    PhabricatorAuthFactorConfig $config,
-    AphrontRequest $request) {
-
-    $name = $this->getChallengeResponseParameterName($config);
-
-    $value = $request->getStr($name);
-    $value = (string)$value;
-    $value = trim($value);
-
-    return $value;
   }
 
   protected function newMFASyncTokenProperties(PhabricatorUser $user) {

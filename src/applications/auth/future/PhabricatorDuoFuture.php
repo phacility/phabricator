@@ -112,6 +112,11 @@ final class PhabricatorDuoFuture
         $this->secretKey->openEnvelope());
       $signature = new PhutilOpaqueEnvelope($signature);
 
+      if ($http_method === 'GET') {
+        $uri->setQueryParams($data);
+        $data = array();
+      }
+
       $future = id(new HTTPSFuture($uri, $data))
         ->setHTTPBasicAuthCredentials($this->integrationKey, $signature)
         ->setMethod($http_method)

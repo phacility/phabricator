@@ -232,6 +232,16 @@ abstract class PhabricatorAuthFactor extends Phobject {
   final protected function newAutomaticControl(
     PhabricatorAuthFactorResult $result) {
 
+    $is_error = $result->getIsError();
+    if ($is_error) {
+      return $this->newErrorControl($result);
+    }
+
+    $is_continue = $result->getIsContinue();
+    if ($is_continue) {
+      return $this->newContinueControl($result);
+    }
+
     $is_answered = (bool)$result->getAnsweredChallenge();
     if ($is_answered) {
       return $this->newAnsweredControl($result);
@@ -270,6 +280,34 @@ abstract class PhabricatorAuthFactor extends Phobject {
       ->appendChild(
         pht('You responded to this challenge correctly.'));
   }
+
+  private function newErrorControl(
+    PhabricatorAuthFactorResult $result) {
+
+    $error = $result->getErrorMessage();
+
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-times', 'red');
+
+    return id(new PHUIFormTimerControl())
+      ->setIcon($icon)
+      ->appendChild($error)
+      ->setError(pht('Error'));
+  }
+
+  private function newContinueControl(
+    PhabricatorAuthFactorResult $result) {
+
+    $error = $result->getErrorMessage();
+
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-commenting', 'green');
+
+    return id(new PHUIFormTimerControl())
+      ->setIcon($icon)
+      ->appendChild($error);
+  }
+
 
 
 /* -(  Synchronizing New Factors  )------------------------------------------ */
@@ -398,6 +436,88 @@ abstract class PhabricatorAuthFactor extends Phobject {
     }
 
     return null;
+  }
+
+
+  /**
+   * @phutil-external-symbol class QRcode
+   */
+  final protected function newQRCode($uri) {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/phpqrcode/phpqrcode.php';
+
+    $lines = QRcode::text($uri);
+
+    $total_width = 240;
+    $cell_size = floor($total_width / count($lines));
+
+    $rows = array();
+    foreach ($lines as $line) {
+      $cells = array();
+      for ($ii = 0; $ii < strlen($line); $ii++) {
+        if ($line[$ii] == '1') {
+          $color = '#000';
+        } else {
+          $color = '#fff';
+        }
+
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'width' => $cell_size,
+            'height' => $cell_size,
+            'style' => 'background: '.$color,
+          ),
+          '');
+      }
+      $rows[] = phutil_tag('tr', array(), $cells);
+    }
+
+    return phutil_tag(
+      'table',
+      array(
+        'style' => 'margin: 24px auto;',
+      ),
+      $rows);
+  }
+
+  final protected function throwResult(PhabricatorAuthFactorResult $result) {
+    throw new PhabricatorAuthFactorResultException($result);
+  }
+
+  final protected function getInstallDisplayName() {
+    $uri = PhabricatorEnv::getURI('/');
+    $uri = new PhutilURI($uri);
+    return $uri->getDomain();
+  }
+
+  final protected function getChallengeResponseParameterName(
+    PhabricatorAuthFactorConfig $config) {
+    return $this->getParameterName($config, 'mfa.response');
+  }
+
+  final protected function getChallengeResponseFromRequest(
+    PhabricatorAuthFactorConfig $config,
+    AphrontRequest $request) {
+
+    $name = $this->getChallengeResponseParameterName($config);
+
+    $value = $request->getStr($name);
+    $value = (string)$value;
+    $value = trim($value);
+
+    return $value;
+  }
+
+  final protected function hasCSRF(PhabricatorAuthFactorConfig $config) {
+    $engine = $config->getSessionEngine();
+    $request = $engine->getRequest();
+
+    if (!$request->isHTTPPost()) {
+      return false;
+    }
+
+    return $request->validateCSRF();
   }
 
 }

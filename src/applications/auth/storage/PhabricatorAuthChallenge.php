@@ -163,10 +163,16 @@ final class PhabricatorAuthChallenge
     $token = Filesystem::readRandomCharacters(32);
     $token = new PhutilOpaqueEnvelope($token);
 
-    return $this
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+    $this
       ->setResponseToken($token)
       ->setResponseTTL($ttl)
       ->save();
+
+    unset($unguarded);
+
+    return $this;
   }
 
   public function markChallengeAsCompleted() {

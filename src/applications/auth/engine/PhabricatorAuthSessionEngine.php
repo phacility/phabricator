@@ -47,6 +47,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
 
   private $workflowKey;
+  private $request;
 
   public function setWorkflowKey($workflow_key) {
     $this->workflowKey = $workflow_key;
@@ -63,6 +64,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     return $this->workflowKey;
+  }
+
+  public function getRequest() {
+    return $this->request;
   }
 
 
@@ -480,6 +485,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $this->issueHighSecurityToken($session, true);
     }
 
+    $this->request = $request;
     foreach ($factors as $factor) {
       $factor->setSessionEngine($this);
     }
@@ -523,10 +529,17 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $provider = $factor->getFactorProvider();
       $impl = $provider->getFactor();
 
-      $new_challenges = $impl->getNewIssuedChallenges(
-        $factor,
-        $viewer,
-        $issued_challenges);
+      try {
+        $new_challenges = $impl->getNewIssuedChallenges(
+          $factor,
+          $viewer,
+          $issued_challenges);
+      } catch (PhabricatorAuthFactorResultException $ex) {
+        $ok = false;
+        $validation_results[$factor_phid] = $ex->getResult();
+        $challenge_map[$factor_phid] = $issued_challenges;
+        continue;
+      }
 
       foreach ($new_challenges as $new_challenge) {
         $issued_challenges[] = $new_challenge;
@@ -546,7 +559,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         continue;
       }
 
-      $ok = false;
+      if (!$result->getIsValid()) {
+        $ok = false;
+      }
+
       $validation_results[$factor_phid] = $result;
     }
 
