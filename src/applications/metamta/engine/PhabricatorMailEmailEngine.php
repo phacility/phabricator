@@ -90,9 +90,9 @@ final class PhabricatorMailEmailEngine
     if ($must_encrypt) {
       $parts = array();
 
-      $encrypt_uri = $this->getMustEncryptURI();
+      $encrypt_uri = $mail->getMustEncryptURI();
       if (!strlen($encrypt_uri)) {
-        $encrypt_phid = $this->getRelatedPHID();
+        $encrypt_phid = $mail->getRelatedPHID();
         if ($encrypt_phid) {
           $encrypt_uri = urisprintf(
             '/object/%s/',
@@ -111,7 +111,7 @@ final class PhabricatorMailEmailEngine
         'secure channel. To view the message content, follow this '.
         'link:');
 
-      $parts[] = PhabricatorEnv::getProductionURI($this->getURI());
+      $parts[] = PhabricatorEnv::getProductionURI($mail->getURI());
 
       $body = implode("\n\n", $parts);
     } else {
