@@ -30,4 +30,10 @@ final class PassphraseCredentialLookedAtTransaction
     return 'blue';
   }
 
+  public function shouldTryMFA(
+    $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return true;
+  }
+
 }

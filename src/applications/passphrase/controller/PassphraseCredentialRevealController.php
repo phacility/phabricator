@@ -21,12 +21,8 @@ final class PassphraseCredentialRevealController
       return new Aphront404Response();
     }
 
-    $view_uri = '/K'.$credential->getID();
+    $view_uri = $credential->getURI();
 
-    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $viewer,
-      $request,
-      $view_uri);
     $is_locked = $credential->getIsLocked();
 
     if ($is_locked) {
@@ -39,7 +35,7 @@ final class PassphraseCredentialRevealController
         ->addCancelButton($view_uri);
     }
 
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHisecPost()) {
       $secret = $credential->getSecret();
       if (!$secret) {
         $body = pht('This credential has no associated secret.');
@@ -76,6 +72,7 @@ final class PassphraseCredentialRevealController
 
       $editor = id(new PassphraseCredentialTransactionEditor())
         ->setActor($viewer)
+        ->setCancelURI($view_uri)
         ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request)
         ->applyTransactions($credential, $xactions);

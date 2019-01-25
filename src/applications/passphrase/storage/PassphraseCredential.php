@@ -52,6 +52,10 @@ final class PassphraseCredential extends PassphraseDAO
     return 'K'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
