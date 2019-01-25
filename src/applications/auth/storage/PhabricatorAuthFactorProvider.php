@@ -5,7 +5,8 @@ final class PhabricatorAuthFactorProvider
   implements
      PhabricatorApplicationTransactionInterface,
      PhabricatorPolicyInterface,
-     PhabricatorExtendedPolicyInterface {
+     PhabricatorExtendedPolicyInterface,
+     PhabricatorEditEngineMFAInterface {
 
   protected $providerFactorKey;
   protected $name;
@@ -187,5 +188,12 @@ final class PhabricatorAuthFactorProvider
     return $extended;
   }
 
+
+/* -(  PhabricatorEditEngineMFAInterface  )---------------------------------- */
+
+
+  public function newEditEngineMFAEngine() {
+    return new PhabricatorAuthFactorProviderMFAEngine();
+  }
 
 }
