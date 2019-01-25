@@ -77,6 +77,8 @@ final class PhabricatorMultiFactorSettingsPanel
         ->setIcon("{$status_icon} {$status_color}")
         ->setTooltip(pht('Provider: %s', $status->getName()));
 
+      $details = $provider->getConfigurationListDetails($factor, $viewer);
+
       $rows[] = array(
         $icon,
         javelin_tag(
@@ -86,7 +88,9 @@ final class PhabricatorMultiFactorSettingsPanel
             'sigil' => 'workflow',
           ),
           $factor->getFactorName()),
+        $provider->getFactor()->getFactorShortName(),
         $provider->getDisplayName(),
+        $details,
         phabricator_datetime($factor->getDateCreated(), $viewer),
         javelin_tag(
           'a',
@@ -107,6 +111,8 @@ final class PhabricatorMultiFactorSettingsPanel
         null,
         pht('Name'),
         pht('Type'),
+        pht('Provider'),
+        pht('Details'),
         pht('Created'),
         null,
       ));
@@ -114,6 +120,8 @@ final class PhabricatorMultiFactorSettingsPanel
       array(
         null,
         'wide pri',
+        null,
+        null,
         null,
         'right',
         'action',
@@ -123,6 +131,8 @@ final class PhabricatorMultiFactorSettingsPanel
       array(
         true,
         true,
+        false,
+        false,
         false,
         false,
         true,

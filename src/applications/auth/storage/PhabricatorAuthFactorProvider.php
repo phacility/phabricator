@@ -126,6 +126,15 @@ final class PhabricatorAuthFactorProvider
     return $this->getFactor()->getConfigurationCreateDescription($this, $user);
   }
 
+  public function getConfigurationListDetails(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer) {
+    return $this->getFactor()->getConfigurationListDetails(
+      $config,
+      $this,
+      $viewer);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

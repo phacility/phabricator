@@ -8,6 +8,10 @@ final class PhabricatorSMSAuthFactor
   }
 
   public function getFactorName() {
+    return pht('Text Message (SMS)');
+  }
+
+  public function getFactorShortName() {
     return pht('SMS');
   }
 
@@ -75,6 +79,10 @@ final class PhabricatorSMSAuthFactor
       return false;
     }
 
+    if ($this->loadConfigurationsForProvider($provider, $user)) {
+      return false;
+    }
+
     return true;
   }
 
@@ -93,6 +101,16 @@ final class PhabricatorSMSAuthFactor
               'You have not configured a primary contact number. Configure '.
               'a contact number before adding SMS as an authentication '.
               'factor.'),
+          ));
+    }
+
+    if ($this->loadConfigurationsForProvider($provider, $user)) {
+      $messages[] = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(
+          array(
+            pht(
+              'You already have SMS authentication attached to your account.'),
           ));
     }
 

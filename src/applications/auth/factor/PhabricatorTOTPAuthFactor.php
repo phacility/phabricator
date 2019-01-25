@@ -10,6 +10,10 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return pht('Mobile Phone App (TOTP)');
   }
 
+  public function getFactorShortName() {
+    return pht('TOTP');
+  }
+
   public function getFactorCreateHelp() {
     return pht(
       'Allow users to attach a mobile authenticator application (like '.
@@ -36,6 +40,15 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       'If you haven\'t already, download and install a TOTP application on '.
       'your phone now. Once you\'ve launched the application and are ready '.
       'to add a new TOTP code, continue to the next step.');
+  }
+
+  public function getConfigurationListDetails(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $viewer) {
+
+    $bits = strlen($config->getFactorSecret()) * 8;
+    return pht('%d-Bit Secret', $bits);
   }
 
   public function processAddFactorForm(

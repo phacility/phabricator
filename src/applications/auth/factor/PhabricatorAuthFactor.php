@@ -3,6 +3,7 @@
 abstract class PhabricatorAuthFactor extends Phobject {
 
   abstract public function getFactorName();
+  abstract public function getFactorShortName();
   abstract public function getFactorKey();
   abstract public function getFactorCreateHelp();
   abstract public function getFactorDescription();
@@ -63,6 +64,13 @@ abstract class PhabricatorAuthFactor extends Phobject {
   public function getConfigurationCreateDescription(
     PhabricatorAuthFactorProvider $provider,
     PhabricatorUser $user) {
+    return null;
+  }
+
+  public function getConfigurationListDetails(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $viewer) {
     return null;
   }
 
@@ -522,6 +530,17 @@ abstract class PhabricatorAuthFactor extends Phobject {
     }
 
     return $request->validateCSRF();
+  }
+
+  final protected function loadConfigurationsForProvider(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
+
+    return id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($user)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->withFactorProviderPHIDs(array($provider->getPHID()))
+      ->execute();
   }
 
 }
