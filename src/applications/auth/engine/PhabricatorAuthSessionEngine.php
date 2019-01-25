@@ -540,14 +540,22 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $provider = $factor->getFactorProvider();
       $impl = $provider->getFactor();
 
-      try {
-        $new_challenges = $impl->getNewIssuedChallenges(
-          $factor,
-          $viewer,
-          $issued_challenges);
-      } catch (PhabricatorAuthFactorResultException $ex) {
-        $ok = false;
-        $validation_results[$factor_phid] = $ex->getResult();
+      $new_challenges = $impl->getNewIssuedChallenges(
+        $factor,
+        $viewer,
+        $issued_challenges);
+
+      // NOTE: We may get a list of challenges back, or may just get an early
+      // result. For example, this can happen on an SMS factor if all SMS
+      // mailers have been disabled.
+      if ($new_challenges instanceof PhabricatorAuthFactorResult) {
+        $result = $new_challenges;
+
+        if (!$result->getIsValid()) {
+          $ok = false;
+        }
+
+        $validation_results[$factor_phid] = $result;
         $challenge_map[$factor_phid] = $issued_challenges;
         continue;
       }

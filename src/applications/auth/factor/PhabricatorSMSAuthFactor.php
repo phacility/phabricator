@@ -195,35 +195,29 @@ final class PhabricatorSMSAuthFactor
     }
 
     if (!$this->loadUserContactNumber($viewer)) {
-      $result = $this->newResult()
+      return $this->newResult()
         ->setIsError(true)
         ->setErrorMessage(
           pht(
             'Your account has no primary contact number.'));
-
-      $this->throwResult($result);
     }
 
     if (!$this->isSMSMailerConfigured()) {
-      $result = $this->newResult()
+      return $this->newResult()
         ->setIsError(true)
         ->setErrorMessage(
           pht(
             'No outbound mailer which can deliver SMS messages is '.
             'configured.'));
-
-      $this->throwResult($result);
     }
 
     if (!$this->hasCSRF($config)) {
-      $result = $this->newResult()
+      return $this->newResult()
         ->setIsContinue(true)
         ->setErrorMessage(
           pht(
             'A text message with an authorization code will be sent to your '.
             'primary contact number.'));
-
-      $this->throwResult($result);
     }
 
     // Otherwise, issue a new challenge.

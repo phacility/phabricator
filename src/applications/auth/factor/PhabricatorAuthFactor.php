@@ -141,6 +141,11 @@ abstract class PhabricatorAuthFactor extends Phobject {
       $viewer,
       $challenges);
 
+    if ($new_challenges instanceof PhabricatorAuthFactorResult) {
+      unset($unguarded);
+      return $new_challenges;
+    }
+
     assert_instances_of($new_challenges, 'PhabricatorAuthChallenge');
 
     foreach ($new_challenges as $new_challenge) {
@@ -491,10 +496,6 @@ abstract class PhabricatorAuthFactor extends Phobject {
         'style' => 'margin: 24px auto;',
       ),
       $rows);
-  }
-
-  final protected function throwResult(PhabricatorAuthFactorResult $result) {
-    throw new PhabricatorAuthFactorResultException($result);
   }
 
   final protected function getInstallDisplayName() {
