@@ -28,7 +28,6 @@ final class PhabricatorSpaceEditField
     return new ConduitPHIDParameterType();
   }
 
-
   public function shouldReadValueFromRequest() {
     return $this->getPolicyField()->shouldReadValueFromRequest();
   }

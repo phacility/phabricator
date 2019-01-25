@@ -74,6 +74,12 @@ abstract class PhabricatorAuthFactor extends Phobject {
     return null;
   }
 
+  public function newEditEngineFields(
+    PhabricatorEditEngine $engine,
+    PhabricatorAuthFactorProvider $provider) {
+    return array();
+  }
+
   /**
    * Is this a factor which depends on the user's contact number?
    *
@@ -331,6 +337,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
 
   final protected function loadMFASyncToken(
+    PhabricatorAuthFactorProvider $provider,
     AphrontRequest $request,
     AphrontFormView $form,
     PhabricatorUser $user) {
@@ -397,7 +404,9 @@ abstract class PhabricatorAuthFactor extends Phobject {
         ->setTokenCode($sync_key_digest)
         ->setTokenExpires($now + $sync_ttl);
 
-      $properties = $this->newMFASyncTokenProperties($user);
+      $properties = $this->newMFASyncTokenProperties(
+        $provider,
+        $user);
 
       foreach ($properties as $key => $value) {
         $sync_token->setTemporaryTokenProperty($key, $value);
@@ -411,7 +420,9 @@ abstract class PhabricatorAuthFactor extends Phobject {
     return $sync_token;
   }
 
-  protected function newMFASyncTokenProperties(PhabricatorUser $user) {
+  protected function newMFASyncTokenProperties(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
     return array();
   }
 

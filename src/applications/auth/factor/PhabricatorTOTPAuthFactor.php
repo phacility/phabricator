@@ -58,6 +58,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     PhabricatorUser $user) {
 
     $sync_token = $this->loadMFASyncToken(
+      $provider,
       $request,
       $form,
       $user);
@@ -440,7 +441,9 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return null;
   }
 
-  protected function newMFASyncTokenProperties(PhabricatorUser $user) {
+  protected function newMFASyncTokenProperties(
+    PhabricatorAuthFactorProvider $providerr,
+    PhabricatorUser $user) {
     return array(
       'secret' => self::generateNewTOTPKey(),
     );

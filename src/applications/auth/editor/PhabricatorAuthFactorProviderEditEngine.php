@@ -93,11 +93,12 @@ final class PhabricatorAuthFactorProviderEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    $factor_name = $object->getFactor()->getFactorName();
+    $factor = $object->getFactor();
+    $factor_name = $factor->getFactorName();
 
     $status_map = PhabricatorAuthFactorProviderStatus::getMap();
 
-    return array(
+    $fields = array(
       id(new PhabricatorStaticEditField())
         ->setKey('displayType')
         ->setLabel(pht('Factor Type'))
@@ -120,6 +121,13 @@ final class PhabricatorAuthFactorProviderEditEngine
         ->setValue($object->getStatus())
         ->setOptions($status_map),
     );
+
+    $factor_fields = $factor->newEditEngineFields($this, $object);
+    foreach ($factor_fields as $field) {
+      $fields[] = $field;
+    }
+
+    return $fields;
   }
 
 }

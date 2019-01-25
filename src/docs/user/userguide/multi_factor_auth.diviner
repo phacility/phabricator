@@ -109,6 +109,17 @@ an authorization code to enter into the prompt.
 details, see: <https://phurl.io/u/sms>.
 
 
+Factor: Duo
+===========
+
+This factor supports integration with [[ https://duo.com/ | Duo Security ]], a
+third-party authentication service popular with enterprises that have a lot of
+policies to enforce.
+
+To use Duo, you'll install the Duo application on your phone. When you try
+to take a sensitive action, you'll be asked to confirm it in the application.
+
+
 Administration: Configuration
 =============================
 

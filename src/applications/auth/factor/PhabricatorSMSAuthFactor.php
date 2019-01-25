@@ -140,7 +140,7 @@ final class PhabricatorSMSAuthFactor
     AphrontRequest $request,
     PhabricatorUser $user) {
 
-    $token = $this->loadMFASyncToken($request, $form, $user);
+    $token = $this->loadMFASyncToken($provider, $request, $form, $user);
     $code = $request->getStr('sms.code');
 
     $e_code = true;
@@ -364,7 +364,10 @@ final class PhabricatorSMSAuthFactor
     return head($contact_numbers);
   }
 
-  protected function newMFASyncTokenProperties(PhabricatorUser $user) {
+  protected function newMFASyncTokenProperties(
+    PhabricatorAuthFactorProvider $providerr,
+    PhabricatorUser $user) {
+
     $sms_code = $this->newSMSChallengeCode();
 
     $envelope = new PhutilOpaqueEnvelope($sms_code);
