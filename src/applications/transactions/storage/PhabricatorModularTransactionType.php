@@ -425,4 +425,10 @@ abstract class PhabricatorModularTransactionType
     return PhabricatorPolicyCapability::CAN_EDIT;
   }
 
+  public function shouldTryMFA(
+    $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return false;
+  }
+
 }

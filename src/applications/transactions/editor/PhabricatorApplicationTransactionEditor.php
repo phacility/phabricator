@@ -4906,20 +4906,47 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $is_mfa = ($object instanceof PhabricatorEditEngineMFAInterface);
-    if (!$is_mfa) {
+    $has_engine = ($object instanceof PhabricatorEditEngineMFAInterface);
+    if ($has_engine) {
+      $engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
+        ->setViewer($this->getActor());
+      $require_mfa = $engine->shouldRequireMFA();
+      $try_mfa = $engine->shouldTryMFA();
+    } else {
+      $require_mfa = false;
+      $try_mfa = false;
+    }
+
+    // If the user is mentioning an MFA object on another object or creating
+    // a relationship like "parent" or "child" to this object, we always
+    // allow the edit to move forward without requiring MFA.
+    if ($this->getIsInverseEdgeEditor()) {
       return $xactions;
     }
 
-    $engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
-      ->setViewer($this->getActor());
-    $require_mfa = $engine->shouldRequireMFA();
-
     if (!$require_mfa) {
-      $try_mfa = $engine->shouldTryMFA();
+      // If the object hasn't already opted into MFA, see if any of the
+      // transactions want it.
+      if (!$try_mfa) {
+        foreach ($xactions as $xaction) {
+          $type = $xaction->getTransactionType();
+
+          $xtype = $this->getModularTransactionType($type);
+          if ($xtype) {
+            $xtype = clone $xtype;
+            $xtype->setStorage($xaction);
+            if ($xtype->shouldTryMFA($object, $xaction)) {
+              $try_mfa = true;
+              break;
+            }
+          }
+        }
+      }
+
       if ($try_mfa) {
         $this->setShouldRequireMFA(true);
       }
+
       return $xactions;
     }
 
@@ -4934,13 +4961,6 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($has_mfa) {
-      return $xactions;
-    }
-
-    // If the user is mentioning an MFA object on another object or creating
-    // a relationship like "parent" or "child" to this object, we allow the
-    // edit to move forward without requiring MFA.
-    if ($this->getIsInverseEdgeEditor()) {
       return $xactions;
     }
 
