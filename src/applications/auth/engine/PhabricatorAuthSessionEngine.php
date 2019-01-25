@@ -473,8 +473,19 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $factors = id(new PhabricatorAuthFactorConfigQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
-      ->setOrderVector(array('-id'))
+      ->withFactorProviderStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+          PhabricatorAuthFactorProviderStatus::STATUS_DEPRECATED,
+        ))
       ->execute();
+
+    // Sort factors in the same order that they appear in on the Settings
+    // panel. This means that administrators changing provider statuses may
+    // change the order of prompts for users, but the alternative is that the
+    // Settings panel order disagrees with the prompt order, which seems more
+    // disruptive.
+    $factors = msort($factors, 'newSortVector');
 
     // If the account has no associated multi-factor auth, just issue a token
     // without putting the session into high security mode. This is generally

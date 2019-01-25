@@ -14,15 +14,11 @@ final class PhabricatorAuthFactorProvider
 
   private $factor = self::ATTACHABLE;
 
-  const STATUS_ACTIVE = 'active';
-  const STATUS_DEPRECATED = 'deprecated';
-  const STATUS_DISABLED = 'disabled';
-
   public static function initializeNewProvider(PhabricatorAuthFactor $factor) {
     return id(new self())
       ->setProviderFactorKey($factor->getFactorKey())
       ->attachFactor($factor)
-      ->setStatus(self::STATUS_ACTIVE);
+      ->setStatus(PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE);
   }
 
   protected function getConfiguration() {
@@ -116,6 +112,20 @@ final class PhabricatorAuthFactorProvider
   public function getEnrollButtonText(PhabricatorUser $user) {
     return $this->getFactor()->getEnrollButtonText($this, $user);
   }
+
+  public function newStatus() {
+    $status_key = $this->getStatus();
+    return PhabricatorAuthFactorProviderStatus::newForStatus($status_key);
+  }
+
+  public function canCreateNewConfiguration(PhabricatorUser $user) {
+    return $this->getFactor()->canCreateNewConfiguration($this, $user);
+  }
+
+  public function getConfigurationCreateDescription(PhabricatorUser $user) {
+    return $this->getFactor()->getConfigurationCreateDescription($this, $user);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

@@ -80,6 +80,12 @@ final class PhabricatorAuthFactorConfig
     return $this;
   }
 
+  public function newSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->getFactorProvider()->newStatus()->getOrder())
+      ->addInt($this->getID());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

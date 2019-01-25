@@ -53,8 +53,8 @@ final class PhabricatorMultiFactorSettingsPanel
     $factors = id(new PhabricatorAuthFactorConfigQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($user->getPHID()))
-      ->setOrderVector(array('-id'))
       ->execute();
+    $factors = msort($factors, 'newSortVector');
 
     $rows = array();
     $rowc = array();
@@ -69,7 +69,16 @@ final class PhabricatorMultiFactorSettingsPanel
         $rowc[] = null;
       }
 
+      $status = $provider->newStatus();
+      $status_icon = $status->getFactorIcon();
+      $status_color = $status->getFactorColor();
+
+      $icon = id(new PHUIIconView())
+        ->setIcon("{$status_icon} {$status_color}")
+        ->setTooltip(pht('Provider: %s', $status->getName()));
+
       $rows[] = array(
+        $icon,
         javelin_tag(
           'a',
           array(
@@ -95,21 +104,24 @@ final class PhabricatorMultiFactorSettingsPanel
       pht("You haven't added any authentication factors to your account yet."));
     $table->setHeaders(
       array(
+        null,
         pht('Name'),
         pht('Type'),
         pht('Created'),
-        '',
+        null,
       ));
     $table->setColumnClasses(
       array(
+        null,
         'wide pri',
-        '',
+        null,
         'right',
         'action',
       ));
     $table->setRowClasses($rowc);
     $table->setDeviceVisibility(
       array(
+        true,
         true,
         false,
         false,
@@ -129,12 +141,15 @@ final class PhabricatorMultiFactorSettingsPanel
       $add_color = PHUIButtonView::GREY;
     }
 
+    $can_add = (bool)$this->loadActiveMFAProviders();
+
     $buttons[] = id(new PHUIButtonView())
       ->setTag('a')
       ->setIcon('fa-plus')
       ->setText(pht('Add Auth Factor'))
       ->setHref($this->getPanelURI('?new=true'))
       ->setWorkflow(true)
+      ->setDisabled(!$can_add)
       ->setColor($add_color);
 
     $buttons[] = id(new PHUIButtonView())
@@ -155,21 +170,18 @@ final class PhabricatorMultiFactorSettingsPanel
 
     // Check that we have providers before we send the user through the MFA
     // gate, so you don't authenticate and then immediately get roadblocked.
-    $providers = id(new PhabricatorAuthFactorProviderQuery())
-      ->setViewer($viewer)
-      ->withStatuses(array(PhabricatorAuthFactorProvider::STATUS_ACTIVE))
-      ->execute();
+    $providers = $this->loadActiveMFAProviders();
+
     if (!$providers) {
       return $this->newDialog()
         ->setTitle(pht('No MFA Providers'))
         ->appendParagraph(
           pht(
-            'There are no active MFA providers. At least one active provider '.
-            'must be available to add new MFA factors.'))
+            'This install does not have any active MFA providers configured. '.
+            'At least one provider must be configured and active before you '.
+            'can add new MFA factors.'))
         ->addCancelButton($cancel_uri);
     }
-    $providers = mpull($providers, null, 'getPHID');
-    $proivders = msortv($providers, 'newSortVector');
 
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
@@ -184,8 +196,7 @@ final class PhabricatorMultiFactorSettingsPanel
 
       // Only let the user continue creating a factor for a given provider if
       // they actually pass the provider's checks.
-      $selected_factor = $selected_provider->getFactor();
-      if (!$selected_factor->canCreateNewConfiguration($viewer)) {
+      if (!$selected_provider->canCreateNewConfiguration($viewer)) {
         $selected_provider = null;
       }
     }
@@ -200,8 +211,7 @@ final class PhabricatorMultiFactorSettingsPanel
         $provider_uri = id(new PhutilURI($this->getPanelURI()))
           ->setQueryParam('providerPHID', $provider_phid);
 
-        $factor = $provider->getFactor();
-        $is_enabled = $factor->canCreateNewConfiguration($viewer);
+        $is_enabled = $provider->canCreateNewConfiguration($viewer);
 
         $item = id(new PHUIObjectItemView())
           ->setHeader($provider->getDisplayName())
@@ -216,7 +226,7 @@ final class PhabricatorMultiFactorSettingsPanel
           $item->setDisabled(true);
         }
 
-        $create_description = $factor->getConfigurationCreateDescription(
+        $create_description = $provider->getConfigurationCreateDescription(
           $viewer);
         if ($create_description) {
           $item->appendChild($create_description);
@@ -422,6 +432,23 @@ final class PhabricatorMultiFactorSettingsPanel
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);
+  }
+
+  private function loadActiveMFAProviders() {
+    $viewer = $this->getViewer();
+
+    $providers = id(new PhabricatorAuthFactorProviderQuery())
+      ->setViewer($viewer)
+      ->withStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+        ))
+      ->execute();
+
+    $providers = mpull($providers, null, 'getPHID');
+    $providers = msortv($providers, 'newSortVector');
+
+    return $providers;
   }
 
 

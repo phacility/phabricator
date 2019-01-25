@@ -908,9 +908,15 @@ final class PhabricatorUser
    * @task factors
    */
   public function updateMultiFactorEnrollment() {
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $this->getPHID());
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($this)
+      ->withUserPHIDs(array($this->getPHID()))
+      ->withFactorProviderStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+          PhabricatorAuthFactorProviderStatus::STATUS_DEPRECATED,
+        ))
+      ->execute();
 
     $enrolled = count($factors) ? 1 : 0;
     if ($enrolled !== $this->isEnrolledInMultiFactor) {

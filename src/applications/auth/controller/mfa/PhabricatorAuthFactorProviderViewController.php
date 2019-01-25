@@ -58,6 +58,15 @@ final class PhabricatorAuthFactorProviderViewController
       ->setHeader($provider->getDisplayName())
       ->setPolicyObject($provider);
 
+    $status = $provider->newStatus();
+
+    $header_icon = $status->getStatusHeaderIcon();
+    $header_color = $status->getStatusHeaderColor();
+    $header_name = $status->getName();
+    if ($header_icon !== null) {
+      $view->setStatus($header_icon, $header_color, $header_name);
+    }
+
     return $view;
   }
 

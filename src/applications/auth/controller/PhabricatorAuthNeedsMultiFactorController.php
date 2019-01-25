@@ -197,6 +197,8 @@ final class PhabricatorAuthNeedsMultiFactorController
         ->addCancelButton('/', pht('Continue'));
     }
 
+    $views = array();
+
     $messages = array();
 
     $messages[] = pht(
@@ -210,7 +212,39 @@ final class PhabricatorAuthNeedsMultiFactorController
       ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
       ->setErrors($messages);
 
-    return $view;
+    $views[] = $view;
+
+
+    $providers = id(new PhabricatorAuthFactorProviderQuery())
+      ->setViewer($viewer)
+      ->withStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+        ))
+      ->execute();
+    if (!$providers) {
+      $messages = array();
+
+      $required_key = 'security.require-multi-factor-auth';
+
+      $messages[] = pht(
+        'This install has the configuration option "%s" enabled, but does '.
+        'not have any active multifactor providers configured. This means '.
+        'you are required to add MFA, but are also prevented from doing so. '.
+        'An administrator must disable "%s" or enable an MFA provider to '.
+        'allow you to continue.',
+        $required_key,
+        $required_key);
+
+      $view = id(new PHUIInfoView())
+        ->setTitle(pht('Multi-Factor Authentication is Misconfigured'))
+        ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
+        ->setErrors($messages);
+
+      $views[] = $view;
+    }
+
+    return $views;
   }
 
 }

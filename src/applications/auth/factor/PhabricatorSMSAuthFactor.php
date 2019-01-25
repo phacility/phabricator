@@ -67,7 +67,10 @@ final class PhabricatorSMSAuthFactor
     return $messages;
   }
 
-  public function canCreateNewConfiguration(PhabricatorUser $user) {
+  public function canCreateNewConfiguration(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
+
     if (!$this->loadUserContactNumber($user)) {
       return false;
     }
@@ -75,7 +78,9 @@ final class PhabricatorSMSAuthFactor
     return true;
   }
 
-  public function getConfigurationCreateDescription(PhabricatorUser $user) {
+  public function getConfigurationCreateDescription(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
 
     $messages = array();
 

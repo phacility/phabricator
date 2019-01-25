@@ -54,11 +54,15 @@ abstract class PhabricatorAuthFactor extends Phobject {
     return null;
   }
 
-  public function canCreateNewConfiguration(PhabricatorUser $user) {
+  public function canCreateNewConfiguration(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
     return true;
   }
 
-  public function getConfigurationCreateDescription(PhabricatorUser $user) {
+  public function getConfigurationCreateDescription(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
     return null;
   }
 

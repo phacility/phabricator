@@ -7,6 +7,7 @@ final class PhabricatorAuthFactorConfigQuery
   private $phids;
   private $userPHIDs;
   private $factorProviderPHIDs;
+  private $factorProviderStatuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -28,6 +29,11 @@ final class PhabricatorAuthFactorConfigQuery
     return $this;
   }
 
+  public function withFactorProviderStatuses(array $statuses) {
+    $this->factorProviderStatuses = $statuses;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorAuthFactorConfig();
   }
@@ -42,32 +48,52 @@ final class PhabricatorAuthFactorConfigQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'config.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'config.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'userPHID IN (%Ls)',
+        'config.userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
     if ($this->factorProviderPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'factorProviderPHID IN (%Ls)',
+        'config.factorProviderPHID IN (%Ls)',
         $this->factorProviderPHIDs);
     }
 
+    if ($this->factorProviderStatuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'provider.status IN (%Ls)',
+        $this->factorProviderStatuses);
+    }
+
     return $where;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->factorProviderStatuses !== null) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %R provider ON config.factorProviderPHID = provider.phid',
+        new PhabricatorAuthFactorProvider());
+    }
+
+    return $joins;
   }
 
   protected function willFilterPage(array $configs) {
@@ -92,6 +118,10 @@ final class PhabricatorAuthFactorConfigQuery
     }
 
     return $configs;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'config';
   }
 
   public function getQueryApplicationClass() {
