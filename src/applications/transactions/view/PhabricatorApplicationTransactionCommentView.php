@@ -1,9 +1,7 @@
 <?php
 
-/**
- * @concrete-extensible
- */
-class PhabricatorApplicationTransactionCommentView extends AphrontView {
+final class PhabricatorApplicationTransactionCommentView
+  extends AphrontView {
 
   private $submitButtonName;
   private $action;
@@ -24,6 +22,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $infoView;
   private $editEngineLock;
   private $noBorder;
+  private $requiresMFA;
 
   private $currentVersion;
   private $versionedDraft;
@@ -160,6 +159,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this->editEngineLock;
   }
 
+  public function setRequiresMFA($requires_mfa) {
+    $this->requiresMFA = $requires_mfa;
+    return $this;
+  }
+
+  public function getRequiresMFA() {
+    return $this->requiresMFA;
+  }
+
   public function setTransactionTimeline(
     PhabricatorApplicationTransactionView $timeline) {
 
@@ -187,8 +195,8 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           ));
     }
 
-    $user = $this->getUser();
-    if (!$user->isLoggedIn()) {
+    $viewer = $this->getViewer();
+    if (!$viewer->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
         ->setQueryParam('next', (string)$this->getRequestURI());
       return id(new PHUIObjectBoxView())
@@ -201,6 +209,25 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
               'href' => $uri,
             ),
             pht('Log In to Comment')));
+    }
+
+    if ($this->getRequiresMFA()) {
+      if (!$viewer->getIsEnrolledInMultiFactor()) {
+        $viewer->updateMultiFactorEnrollment();
+        if (!$viewer->getIsEnrolledInMultiFactor()) {
+          $messages = array();
+          $messages[] = pht(
+            'You must provide multi-factor credentials to comment or make '.
+            'changes, but you do not have multi-factor authentication '.
+            'configured on your account.');
+          $messages[] = pht(
+            'To continue, configure multi-factor authentication in Settings.');
+
+          return id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_MFA)
+            ->setErrors($messages);
+        }
+      }
     }
 
     $data = array();
@@ -226,7 +253,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     }
 
     require_celerity_resource('phui-comment-form-css');
-    $image_uri = $user->getProfileImageURI();
+    $image_uri = $viewer->getProfileImageURI();
     $image = phutil_tag(
       'div',
       array(
@@ -386,6 +413,17 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $info_view = $this->getInfoView();
       if ($info_view) {
         $form->appendChild($info_view);
+      }
+
+      if ($this->getRequiresMFA()) {
+        $message = pht(
+          'You will be required to provide multi-factor credentials to '.
+          'comment or make changes.');
+
+        $form->appendChild(
+          id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_MFA)
+            ->setErrors(array($message)));
       }
 
       $form->appendChild($invisi_bar);

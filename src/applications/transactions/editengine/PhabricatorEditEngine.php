@@ -1565,11 +1565,19 @@ abstract class PhabricatorEditEngine
 
     $comment_uri = $this->getEditURI($object, 'comment/');
 
+    $requires_mfa = false;
+    if ($object instanceof PhabricatorEditEngineMFAInterface) {
+      $mfa_engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
+        ->setViewer($viewer);
+      $requires_mfa = $mfa_engine->shouldRequireMFA();
+    }
+
     $view = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($object_phid)
       ->setHeaderText($header_text)
       ->setAction($comment_uri)
+      ->setRequiresMFA($requires_mfa)
       ->setSubmitButtonName($button_text);
 
     $draft = PhabricatorVersionedDraft::loadDraft(
