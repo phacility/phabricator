@@ -95,6 +95,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             'PhabricatorAuthFactorProviderEditController',
           '(?P<id>[1-9]\d*)/' =>
             'PhabricatorAuthFactorProviderViewController',
+          'message/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthFactorProviderMessageController',
         ),
 
         'message/' => array(

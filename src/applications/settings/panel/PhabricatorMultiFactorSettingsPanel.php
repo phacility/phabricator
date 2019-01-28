@@ -256,13 +256,16 @@ final class PhabricatorMultiFactorSettingsPanel
     // sometimes requires us to push a challenge to them as a side effect (for
     // example, with SMS).
     if (!$request->isFormPost() || !$request->getBool('mfa.start')) {
-      $description = $selected_provider->getEnrollDescription($viewer);
+      $enroll = $selected_provider->getEnrollMessage();
+      if (!strlen($enroll)) {
+        $enroll = $selected_provider->getEnrollDescription($viewer);
+      }
 
       return $this->newDialog()
         ->addHiddenInput('providerPHID', $selected_provider->getPHID())
         ->addHiddenInput('mfa.start', 1)
         ->setTitle(pht('Add Authentication Factor'))
-        ->appendChild(new PHUIRemarkupView($viewer, $description))
+        ->appendChild(new PHUIRemarkupView($viewer, $enroll))
         ->addCancelButton($cancel_uri)
         ->addSubmitButton($selected_provider->getEnrollButtonText($viewer));
     }
