@@ -183,7 +183,6 @@ phutil_register_library_map(array(
     'AphrontCalendarEventView' => 'applications/calendar/view/AphrontCalendarEventView.php',
     'AphrontController' => 'aphront/AphrontController.php',
     'AphrontCursorPagerView' => 'view/control/AphrontCursorPagerView.php',
-    'AphrontDefaultApplicationConfiguration' => 'aphront/configuration/AphrontDefaultApplicationConfiguration.php',
     'AphrontDialogResponse' => 'aphront/response/AphrontDialogResponse.php',
     'AphrontDialogView' => 'view/AphrontDialogView.php',
     'AphrontEpochHTTPParameterType' => 'aphront/httpparametertype/AphrontEpochHTTPParameterType.php',
@@ -5631,7 +5630,6 @@ phutil_register_library_map(array(
     'AphrontCalendarEventView' => 'AphrontView',
     'AphrontController' => 'Phobject',
     'AphrontCursorPagerView' => 'AphrontView',
-    'AphrontDefaultApplicationConfiguration' => 'AphrontApplicationConfiguration',
     'AphrontDialogResponse' => 'AphrontResponse',
     'AphrontDialogView' => array(
       'AphrontView',

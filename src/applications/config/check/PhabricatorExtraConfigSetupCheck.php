@@ -416,6 +416,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'metamta.pholio.subject-prefix' => $prefix_reason,
       'metamta.phriction.subject-prefix' => $prefix_reason,
 
+      'aphront.default-application-configuration-class' => pht(
+        'This ancient extension point has been replaced with other '.
+        'mechanisms, including "AphrontSite".'),
+
     );
 
     return $ancient_config;
