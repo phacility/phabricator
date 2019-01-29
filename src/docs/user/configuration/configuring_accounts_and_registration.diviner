@@ -14,8 +14,6 @@ there is a "Username/Password" authentication provider available, which allows
 users to log in with a traditional username and password. Other providers
 support logging in with other credentials. For example:
 
-  - **Username/Password:** Users use a username and password to log in or
-    register.
   - **LDAP:** Users use LDAP credentials to log in or register.
   - **OAuth:** Users use accounts on a supported OAuth2 provider (like
     GitHub, Facebook, or Google) to log in or register.
@@ -30,16 +28,16 @@ After you add a provider, you can link it to existing accounts (for example,
 associate an existing Phabricator account with a GitHub OAuth account) or users
 can use it to register new accounts (assuming you enable these options).
 
-= Recovering Administrator Accounts =
+= Recovering Inaccessible Accounts =
 
-If you accidentally lock yourself out of Phabricator, you can use the `bin/auth`
-script to recover access to an administrator account. To recover access, run:
+If you accidentally lock yourself out of Phabricator (for example, by disabling
+all authentication providers), you can use the `bin/auth`
+script to recover access to an account. To recover access, run:
 
   phabricator/ $ ./bin/auth recover <username>
 
-...where `<username>` is the admin account username you want to recover access
-to. This will give you a link which will log you in as the specified
-administrative user.
+...where `<username>` is the account username you want to recover access
+to. This will generate a link which will log you in as the specified user.
 
 = Managing Accounts with the Web Console =
 
@@ -57,9 +55,9 @@ To use the CLI script, run:
 
   phabricator/ $ ./bin/accountadmin
 
-Some options (like setting passwords and changing certain account flags) are
-only available from the CLI. You can also use this script to make a user
-an administrator (if you accidentally remove your admin flag) or create an
+Some options (like changing certain account flags) are only available from
+the CLI. You can also use this script to make a user
+an administrator (if you accidentally remove your admin flag) or to create an
 administrative account.
 
 = Next Steps =

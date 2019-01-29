@@ -400,6 +400,18 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('cc', array());
   }
 
+  public function setMessageType($message_type) {
+    return $this->setParam('message.type', $message_type);
+  }
+
+  public function getMessageType() {
+    return $this->getParam(
+      'message.type',
+      PhabricatorMailEmailMessage::MESSAGETYPE);
+  }
+
+
+
   /**
    * Force delivery of a message, even if recipients have preferences which
    * would otherwise drop the message.
@@ -529,6 +541,9 @@ final class PhabricatorMetaMTAMail
     $mailers = self::newMailers(
       array(
         'outbound' => true,
+        'media' => array(
+          $this->getMessageType(),
+        ),
       ));
 
     $try_mailers = $this->getParam('mailers.try');
@@ -699,10 +714,19 @@ final class PhabricatorMetaMTAMail
       $file->attachToObject($this->getPHID());
     }
 
+    $type_map = PhabricatorMailExternalMessage::getAllMessageTypes();
+    $type = idx($type_map, $this->getMessageType());
+    if (!$type) {
+      throw new Exception(
+        pht(
+          'Unable to send message with unknown message type "%s".',
+          $type));
+    }
+
     $exceptions = array();
     foreach ($mailers as $mailer) {
       try {
-        $message = id(new PhabricatorMailEmailEngine())
+        $message = $type->newMailMessageEngine()
           ->setMailer($mailer)
           ->setMail($this)
           ->setActors($actors)

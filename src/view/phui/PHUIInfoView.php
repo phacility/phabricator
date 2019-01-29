@@ -8,6 +8,7 @@ final class PHUIInfoView extends AphrontTagView {
   const SEVERITY_NODATA = 'nodata';
   const SEVERITY_SUCCESS = 'success';
   const SEVERITY_PLAIN = 'plain';
+  const SEVERITY_MFA = 'mfa';
 
   private $title;
   private $errors = array();
@@ -73,20 +74,22 @@ final class PHUIInfoView extends AphrontTagView {
     switch ($this->getSeverity()) {
       case self::SEVERITY_ERROR:
         $icon = 'fa-exclamation-circle';
-      break;
+        break;
       case self::SEVERITY_WARNING:
         $icon = 'fa-exclamation-triangle';
-      break;
+        break;
       case self::SEVERITY_NOTICE:
         $icon = 'fa-info-circle';
-      break;
+        break;
       case self::SEVERITY_PLAIN:
       case self::SEVERITY_NODATA:
         return null;
-      break;
       case self::SEVERITY_SUCCESS:
         $icon = 'fa-check-circle';
-      break;
+        break;
+      case self::SEVERITY_MFA:
+        $icon = 'fa-lock';
+        break;
     }
 
     $icon = id(new PHUIIconView())

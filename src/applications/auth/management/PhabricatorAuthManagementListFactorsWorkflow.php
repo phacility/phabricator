@@ -14,9 +14,8 @@ final class PhabricatorAuthManagementListFactorsWorkflow
   public function execute(PhutilArgumentParser $args) {
     $factors = PhabricatorAuthFactor::getAllFactors();
 
-    $console = PhutilConsole::getConsole();
     foreach ($factors as $factor) {
-      $console->writeOut(
+      echo tsprintf(
         "%s\t%s\n",
         $factor->getFactorKey(),
         $factor->getFactorName());

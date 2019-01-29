@@ -20,6 +20,16 @@ final class PhabricatorAuthFactorProviderListController
         ->setHeader($provider->getDisplayName())
         ->setHref($provider->getURI());
 
+      $status = $provider->newStatus();
+
+      $icon = $status->getListIcon();
+      $color = $status->getListColor();
+      if ($icon !== null) {
+        $item->setStatusIcon("{$icon} {$color}", $status->getName());
+      }
+
+      $item->setDisabled(!$status->isActive());
+
       $list->addItem($item);
     }
 

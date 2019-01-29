@@ -2,14 +2,16 @@
 
 final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
-  const DIGEST_TEMPORARY_KEY = 'mfa.totp.sync';
-
   public function getFactorKey() {
     return 'totp';
   }
 
   public function getFactorName() {
     return pht('Mobile Phone App (TOTP)');
+  }
+
+  public function getFactorShortName() {
+    return pht('TOTP');
   }
 
   public function getFactorCreateHelp() {
@@ -25,73 +27,57 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       'authenticate, you will enter a code shown on your phone.');
   }
 
+  public function getEnrollDescription(
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $user) {
+
+    return pht(
+      'To add a TOTP factor to your account, you will first need to install '.
+      'a mobile authenticator application on your phone. Two applications '.
+      'which work well are **Google Authenticator** and **Authy**, but any '.
+      'other TOTP application should also work.'.
+      "\n\n".
+      'If you haven\'t already, download and install a TOTP application on '.
+      'your phone now. Once you\'ve launched the application and are ready '.
+      'to add a new TOTP code, continue to the next step.');
+  }
+
+  public function getConfigurationListDetails(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $viewer) {
+
+    $bits = strlen($config->getFactorSecret()) * 8;
+    return pht('%d-Bit Secret', $bits);
+  }
+
   public function processAddFactorForm(
+    PhabricatorAuthFactorProvider $provider,
     AphrontFormView $form,
     AphrontRequest $request,
     PhabricatorUser $user) {
 
-    $totp_token_type = PhabricatorAuthTOTPKeyTemporaryTokenType::TOKENTYPE;
-
-    $key = $request->getStr('totpkey');
-    if (strlen($key)) {
-      // If the user is providing a key, make sure it's a key we generated.
-      // This raises the barrier to theoretical attacks where an attacker might
-      // provide a known key (such attacks are already prevented by CSRF, but
-      // this is a second barrier to overcome).
-
-      // (We store and verify the hash of the key, not the key itself, to limit
-      // how useful the data in the table is to an attacker.)
-
-      $token_code = PhabricatorHash::digestWithNamedKey(
-        $key,
-        self::DIGEST_TEMPORARY_KEY);
-
-      $temporary_token = id(new PhabricatorAuthTemporaryTokenQuery())
-        ->setViewer($user)
-        ->withTokenResources(array($user->getPHID()))
-        ->withTokenTypes(array($totp_token_type))
-        ->withExpired(false)
-        ->withTokenCodes(array($token_code))
-        ->executeOne();
-      if (!$temporary_token) {
-        // If we don't have a matching token, regenerate the key below.
-        $key = null;
-      }
-    }
-
-    if (!strlen($key)) {
-      $key = self::generateNewTOTPKey();
-
-      // Mark this key as one we generated, so the user is allowed to submit
-      // a response for it.
-
-      $token_code = PhabricatorHash::digestWithNamedKey(
-        $key,
-        self::DIGEST_TEMPORARY_KEY);
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        id(new PhabricatorAuthTemporaryToken())
-          ->setTokenResource($user->getPHID())
-          ->setTokenType($totp_token_type)
-          ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
-          ->setTokenCode($token_code)
-          ->save();
-      unset($unguarded);
-    }
+    $sync_token = $this->loadMFASyncToken(
+      $provider,
+      $request,
+      $form,
+      $user);
+    $secret = $sync_token->getTemporaryTokenProperty('secret');
 
     $code = $request->getStr('totpcode');
 
     $e_code = true;
-    if ($request->getExists('totp')) {
+    if (!$sync_token->getIsNewTemporaryToken()) {
       $okay = (bool)$this->getTimestepAtWhichResponseIsValid(
         $this->getAllowedTimesteps($this->getCurrentTimestep()),
-        new PhutilOpaqueEnvelope($key),
+        new PhutilOpaqueEnvelope($secret),
         $code);
 
       if ($okay) {
         $config = $this->newConfigForUser($user)
           ->setFactorName(pht('Mobile App (TOTP)'))
-          ->setFactorSecret($key);
+          ->setFactorSecret($secret)
+          ->setMFASyncToken($sync_token);
 
         return $config;
       } else {
@@ -103,20 +89,10 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       }
     }
 
-    $form->addHiddenInput('totp', true);
-    $form->addHiddenInput('totpkey', $key);
-
-    $form->appendRemarkupInstructions(
-      pht(
-        'First, download an authenticator application on your phone. Two '.
-        'applications which work well are **Authy** and **Google '.
-        'Authenticator**, but any other TOTP application should also work.'));
-
     $form->appendInstructions(
       pht(
-        'Launch the application on your phone, and add a new entry for '.
-        'this Phabricator install. When prompted, scan the QR code or '.
-        'manually enter the key shown below into the application.'));
+        'Scan the QR code or manually enter the key shown below into the '.
+        'application.'));
 
     $prod_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
     $issuer = $prod_uri->getDomain();
@@ -125,16 +101,16 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       'otpauth://totp/%s:%s?secret=%s&issuer=%s',
       $issuer,
       $user->getUsername(),
-      $key,
+      $secret,
       $issuer);
 
-    $qrcode = $this->renderQRCode($uri);
+    $qrcode = $this->newQRCode($uri);
     $form->appendChild($qrcode);
 
     $form->appendChild(
       id(new AphrontFormStaticControl())
         ->setLabel(pht('Key'))
-        ->setValue(phutil_tag('strong', array(), $key)));
+        ->setValue(phutil_tag('strong', array(), $secret)));
 
     $form->appendInstructions(
       pht(
@@ -428,49 +404,6 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return $code;
   }
 
-
-  /**
-   * @phutil-external-symbol class QRcode
-   */
-  private function renderQRCode($uri) {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/phpqrcode/phpqrcode.php';
-
-    $lines = QRcode::text($uri);
-
-    $total_width = 240;
-    $cell_size = floor($total_width / count($lines));
-
-    $rows = array();
-    foreach ($lines as $line) {
-      $cells = array();
-      for ($ii = 0; $ii < strlen($line); $ii++) {
-        if ($line[$ii] == '1') {
-          $color = '#000';
-        } else {
-          $color = '#fff';
-        }
-
-        $cells[] = phutil_tag(
-          'td',
-          array(
-            'width' => $cell_size,
-            'height' => $cell_size,
-            'style' => 'background: '.$color,
-          ),
-          '');
-      }
-      $rows[] = phutil_tag('tr', array(), $cells);
-    }
-
-    return phutil_tag(
-      'table',
-      array(
-        'style' => 'margin: 24px auto;',
-      ),
-      $rows);
-  }
-
   private function getTimestepDuration() {
     return 30;
   }
@@ -508,21 +441,12 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     return null;
   }
 
-  private function getChallengeResponseParameterName(
-    PhabricatorAuthFactorConfig $config) {
-    return $this->getParameterName($config, 'totpcode');
+  protected function newMFASyncTokenProperties(
+    PhabricatorAuthFactorProvider $providerr,
+    PhabricatorUser $user) {
+    return array(
+      'secret' => self::generateNewTOTPKey(),
+    );
   }
 
-  private function getChallengeResponseFromRequest(
-    PhabricatorAuthFactorConfig $config,
-    AphrontRequest $request) {
-
-    $name = $this->getChallengeResponseParameterName($config);
-
-    $value = $request->getStr($name);
-    $value = (string)$value;
-    $value = trim($value);
-
-    return $value;
-  }
 }

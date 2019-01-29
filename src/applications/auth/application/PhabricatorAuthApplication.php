@@ -72,8 +72,10 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           => 'PhabricatorAuthRevokeTokenController',
         'session/downgrade/'
           => 'PhabricatorAuthDowngradeSessionController',
-        'multifactor/'
-          => 'PhabricatorAuthNeedsMultiFactorController',
+        'enroll/' => array(
+          '(?:(?P<pageKey>[^/]+)/)?(?:(?P<formSaved>saved)/)?'
+            => 'PhabricatorAuthNeedsMultiFactorController',
+        ),
         'sshkey/' => array(
           $this->getQueryRoutePattern('for/(?P<forPHID>[^/]+)/')
             => 'PhabricatorAuthSSHKeyListController',
@@ -104,6 +106,18 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             'PhabricatorAuthMessageViewController',
         ),
 
+        'contact/' => array(
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorAuthContactNumberEditController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberViewController',
+          '(?P<action>disable|enable)/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberDisableController',
+          'primary/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberPrimaryController',
+          'test/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberTestController',
+        ),
       ),
 
       '/oauth/(?P<provider>\w+)/login/'

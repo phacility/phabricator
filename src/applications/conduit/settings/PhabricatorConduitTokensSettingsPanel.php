@@ -19,6 +19,10 @@ final class PhabricatorConduitTokensSettingsPanel
     return pht('Conduit API Tokens');
   }
 
+  public function getPanelMenuIcon() {
+    return id(new PhabricatorConduitApplication())->getIcon();
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }

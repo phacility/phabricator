@@ -9,6 +9,10 @@ final class PhabricatorDeveloperPreferencesSettingsPanel
     return pht('Developer Settings');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-magic';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsDeveloperPanelGroup::PANELGROUPKEY;
   }

@@ -58,7 +58,7 @@ final class PhabricatorTwilioFuture extends FutureProxy {
         $this->accountSID,
         $this->method);
 
-      $uri = id(new PhutilURI('https://api.twilio.com/2010-04-01/accounts/'))
+      $uri = id(new PhutilURI('https://api.twilio.com/'))
         ->setPath($path);
 
       $data = $this->parameters;

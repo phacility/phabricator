@@ -1249,6 +1249,8 @@ abstract class PhabricatorEditEngine
       $view->setHeader($page_header);
     }
 
+    $view->setFooter($content);
+
     $page = $controller->newPage()
       ->setTitle($header_text)
       ->setCrumbs($crumbs)
@@ -1256,11 +1258,7 @@ abstract class PhabricatorEditEngine
 
     $navigation = $this->getNavigation();
     if ($navigation) {
-      $view->setFixed(true);
-      $view->setNavigation($navigation);
-      $view->setMainColumn($content);
-    } else {
-      $view->setFooter($content);
+      $page->setNavigation($navigation);
     }
 
     return $page;

@@ -3,6 +3,8 @@
 final class PhabricatorMultiFactorSettingsPanel
   extends PhabricatorSettingsPanel {
 
+  private $isEnrollment;
+
   public function getPanelKey() {
     return 'multifactor';
   }
@@ -11,12 +13,29 @@ final class PhabricatorMultiFactorSettingsPanel
     return pht('Multi-Factor Auth');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-lock';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
+  public function isMultiFactorEnrollmentPanel() {
+    return true;
+  }
+
+  public function setIsEnrollment($is_enrollment) {
+    $this->isEnrollment = $is_enrollment;
+    return $this;
+  }
+
+  public function getIsEnrollment() {
+    return $this->isEnrollment;
+  }
+
   public function processRequest(AphrontRequest $request) {
-    if ($request->getExists('new')) {
+    if ($request->getExists('new') || $request->getExists('providerPHID')) {
       return $this->processNew($request);
     }
 
@@ -31,22 +50,18 @@ final class PhabricatorMultiFactorSettingsPanel
     $user = $this->getUser();
     $viewer = $request->getUser();
 
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $user->getPHID());
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->execute();
+    $factors = msort($factors, 'newSortVector');
 
     $rows = array();
     $rowc = array();
 
     $highlight_id = $request->getInt('id');
     foreach ($factors as $factor) {
-
-      $impl = $factor->getImplementation();
-      if ($impl) {
-        $type = $impl->getFactorName();
-      } else {
-        $type = $factor->getFactorKey();
-      }
+      $provider = $factor->getFactorProvider();
 
       if ($factor->getID() == $highlight_id) {
         $rowc[] = 'highlighted';
@@ -54,7 +69,18 @@ final class PhabricatorMultiFactorSettingsPanel
         $rowc[] = null;
       }
 
+      $status = $provider->newStatus();
+      $status_icon = $status->getFactorIcon();
+      $status_color = $status->getFactorColor();
+
+      $icon = id(new PHUIIconView())
+        ->setIcon("{$status_icon} {$status_color}")
+        ->setTooltip(pht('Provider: %s', $status->getName()));
+
+      $details = $provider->getConfigurationListDetails($factor, $viewer);
+
       $rows[] = array(
+        $icon,
         javelin_tag(
           'a',
           array(
@@ -62,7 +88,9 @@ final class PhabricatorMultiFactorSettingsPanel
             'sigil' => 'workflow',
           ),
           $factor->getFactorName()),
-        $type,
+        $provider->getFactor()->getFactorShortName(),
+        $provider->getDisplayName(),
+        $details,
         phabricator_datetime($factor->getDateCreated(), $viewer),
         javelin_tag(
           'a',
@@ -80,15 +108,21 @@ final class PhabricatorMultiFactorSettingsPanel
       pht("You haven't added any authentication factors to your account yet."));
     $table->setHeaders(
       array(
+        null,
         pht('Name'),
         pht('Type'),
+        pht('Provider'),
+        pht('Details'),
         pht('Created'),
-        '',
+        null,
       ));
     $table->setColumnClasses(
       array(
+        null,
         'wide pri',
-        '',
+        null,
+        null,
+        null,
         'right',
         'action',
       ));
@@ -96,6 +130,9 @@ final class PhabricatorMultiFactorSettingsPanel
     $table->setDeviceVisibility(
       array(
         true,
+        true,
+        false,
+        false,
         false,
         false,
         true,
@@ -106,13 +143,24 @@ final class PhabricatorMultiFactorSettingsPanel
 
     $buttons = array();
 
+    // If we're enrolling a new account in MFA, provide a small visual hint
+    // that this is the button they want to click.
+    if ($this->getIsEnrollment()) {
+      $add_color = PHUIButtonView::BLUE;
+    } else {
+      $add_color = PHUIButtonView::GREY;
+    }
+
+    $can_add = (bool)$this->loadActiveMFAProviders();
+
     $buttons[] = id(new PHUIButtonView())
       ->setTag('a')
       ->setIcon('fa-plus')
       ->setText(pht('Add Auth Factor'))
       ->setHref($this->getPanelURI('?new=true'))
       ->setWorkflow(true)
-      ->setColor(PHUIButtonView::GREY);
+      ->setDisabled(!$can_add)
+      ->setColor($add_color);
 
     $buttons[] = id(new PHUIButtonView())
       ->setTag('a')
@@ -128,88 +176,168 @@ final class PhabricatorMultiFactorSettingsPanel
     $viewer = $request->getUser();
     $user = $this->getUser();
 
+    $cancel_uri = $this->getPanelURI();
+
+    // Check that we have providers before we send the user through the MFA
+    // gate, so you don't authenticate and then immediately get roadblocked.
+    $providers = $this->loadActiveMFAProviders();
+
+    if (!$providers) {
+      return $this->newDialog()
+        ->setTitle(pht('No MFA Providers'))
+        ->appendParagraph(
+          pht(
+            'This install does not have any active MFA providers configured. '.
+            'At least one provider must be configured and active before you '.
+            'can add new MFA factors.'))
+        ->addCancelButton($cancel_uri);
+    }
+
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
       $request,
-      $this->getPanelURI());
+      $cancel_uri);
 
-    $factors = PhabricatorAuthFactor::getAllFactors();
+    $selected_phid = $request->getStr('providerPHID');
+    if (empty($providers[$selected_phid])) {
+      $selected_provider = null;
+    } else {
+      $selected_provider = $providers[$selected_phid];
+
+      // Only let the user continue creating a factor for a given provider if
+      // they actually pass the provider's checks.
+      if (!$selected_provider->canCreateNewConfiguration($viewer)) {
+        $selected_provider = null;
+      }
+    }
+
+    if (!$selected_provider) {
+      $menu = id(new PHUIObjectItemListView())
+        ->setViewer($viewer)
+        ->setBig(true)
+        ->setFlush(true);
+
+      foreach ($providers as $provider_phid => $provider) {
+        $provider_uri = id(new PhutilURI($this->getPanelURI()))
+          ->setQueryParam('providerPHID', $provider_phid);
+
+        $is_enabled = $provider->canCreateNewConfiguration($viewer);
+
+        $item = id(new PHUIObjectItemView())
+          ->setHeader($provider->getDisplayName())
+          ->setImageIcon($provider->newIconView())
+          ->addAttribute($provider->getDisplayDescription());
+
+        if ($is_enabled) {
+          $item
+            ->setHref($provider_uri)
+            ->setClickable(true);
+        } else {
+          $item->setDisabled(true);
+        }
+
+        $create_description = $provider->getConfigurationCreateDescription(
+          $viewer);
+        if ($create_description) {
+          $item->appendChild($create_description);
+        }
+
+        $menu->addItem($item);
+      }
+
+      return $this->newDialog()
+        ->setTitle(pht('Choose Factor Type'))
+        ->appendChild($menu)
+        ->addCancelButton($cancel_uri);
+    }
+
+    // NOTE: Beyond providing guidance, this step is also providing a CSRF gate
+    // on this endpoint, since prompting the user to respond to a challenge
+    // sometimes requires us to push a challenge to them as a side effect (for
+    // example, with SMS).
+    if (!$request->isFormPost() || !$request->getBool('mfa.start')) {
+      $description = $selected_provider->getEnrollDescription($viewer);
+
+      return $this->newDialog()
+        ->addHiddenInput('providerPHID', $selected_provider->getPHID())
+        ->addHiddenInput('mfa.start', 1)
+        ->setTitle(pht('Add Authentication Factor'))
+        ->appendChild(new PHUIRemarkupView($viewer, $description))
+        ->addCancelButton($cancel_uri)
+        ->addSubmitButton($selected_provider->getEnrollButtonText($viewer));
+    }
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer);
+      ->setViewer($viewer);
 
-    $type = $request->getStr('type');
-    if (empty($factors[$type]) || !$request->isFormPost()) {
-      $factor = null;
+    if ($request->getBool('mfa.enroll')) {
+      // Subject users to rate limiting so that it's difficult to add factors
+      // by pure brute force. This is normally not much of an attack, but push
+      // factor types may have side effects.
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhabricatorAuthNewFactorAction(),
+        1);
     } else {
-      $factor = $factors[$type];
+      // Test the limit before showing the user a form, so we don't give them
+      // a form which can never possibly work because it will always hit rate
+      // limiting.
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhabricatorAuthNewFactorAction(),
+        0);
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
-      ->addHiddenInput('new', true);
+    $config = $selected_provider->processAddFactorForm(
+      $form,
+      $request,
+      $user);
 
-    if ($factor === null) {
-      $choice_control = id(new AphrontFormRadioButtonControl())
-        ->setName('type')
-        ->setValue(key($factors));
+    if ($config) {
+      // If the user added a factor, give them a rate limiting point back.
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhabricatorAuthNewFactorAction(),
+        -1);
 
-      foreach ($factors as $available_factor) {
-        $choice_control->addButton(
-          $available_factor->getFactorKey(),
-          $available_factor->getFactorName(),
-          $available_factor->getFactorDescription());
+      $config->save();
+
+      // If we used a temporary token to handle synchronizing the factor,
+      // revoke it now.
+      $sync_token = $config->getMFASyncToken();
+      if ($sync_token) {
+        $sync_token->revokeToken();
       }
 
-      $dialog->appendParagraph(
-        pht(
-          'Adding an additional authentication factor improves the security '.
-          'of your account. Choose the type of factor to add:'));
+      $log = PhabricatorUserLog::initializeNewLog(
+        $viewer,
+        $user->getPHID(),
+        PhabricatorUserLog::ACTION_MULTI_ADD);
+      $log->save();
 
-      $form
-        ->appendChild($choice_control);
+      $user->updateMultiFactorEnrollment();
 
-    } else {
-      $dialog->addHiddenInput('type', $type);
+      // Terminate other sessions so they must log in and survive the
+      // multi-factor auth check.
 
-      $config = $factor->processAddFactorForm(
-        $form,
-        $request,
-        $user);
+      id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
+        $user,
+        new PhutilOpaqueEnvelope(
+          $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
 
-      if ($config) {
-        $config->save();
-
-        $log = PhabricatorUserLog::initializeNewLog(
-          $viewer,
-          $user->getPHID(),
-          PhabricatorUserLog::ACTION_MULTI_ADD);
-        $log->save();
-
-        $user->updateMultiFactorEnrollment();
-
-        // Terminate other sessions so they must log in and survive the
-        // multi-factor auth check.
-
-        id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
-          $user,
-          new PhutilOpaqueEnvelope(
-            $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
-
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getPanelURI('?id='.$config->getID()));
-      }
+      return id(new AphrontRedirectResponse())
+        ->setURI($this->getPanelURI('?id='.$config->getID()));
     }
 
-    $dialog
+    return $this->newDialog()
+      ->addHiddenInput('providerPHID', $selected_provider->getPHID())
+      ->addHiddenInput('mfa.start', 1)
+      ->addHiddenInput('mfa.enroll', 1)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle(pht('Add Authentication Factor'))
       ->appendChild($form->buildLayoutView())
       ->addSubmitButton(pht('Continue'))
-      ->addCancelButton($this->getPanelURI());
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
+      ->addCancelButton($cancel_uri);
   }
 
   private function processEdit(AphrontRequest $request) {
@@ -314,6 +442,23 @@ final class PhabricatorMultiFactorSettingsPanel
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);
+  }
+
+  private function loadActiveMFAProviders() {
+    $viewer = $this->getViewer();
+
+    $providers = id(new PhabricatorAuthFactorProviderQuery())
+      ->setViewer($viewer)
+      ->withStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+        ))
+      ->execute();
+
+    $providers = mpull($providers, null, 'getPHID');
+    $providers = msortv($providers, 'newSortVector');
+
+    return $providers;
   }
 
 

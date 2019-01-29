@@ -93,9 +93,12 @@ final class PhabricatorAuthFactorProviderEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    $factor_name = $object->getFactor()->getFactorName();
+    $factor = $object->getFactor();
+    $factor_name = $factor->getFactorName();
 
-    return array(
+    $status_map = PhabricatorAuthFactorProviderStatus::getMap();
+
+    $fields = array(
       id(new PhabricatorStaticEditField())
         ->setKey('displayType')
         ->setLabel(pht('Factor Type'))
@@ -109,7 +112,22 @@ final class PhabricatorAuthFactorProviderEditEngine
         ->setDescription(pht('Display name for the MFA provider.'))
         ->setValue($object->getName())
         ->setPlaceholder($factor_name),
+      id(new PhabricatorSelectEditField())
+        ->setKey('status')
+        ->setTransactionType(
+          PhabricatorAuthFactorProviderStatusTransaction::TRANSACTIONTYPE)
+        ->setLabel(pht('Status'))
+        ->setDescription(pht('Status of the MFA provider.'))
+        ->setValue($object->getStatus())
+        ->setOptions($status_map),
     );
+
+    $factor_fields = $factor->newEditEngineFields($this, $object);
+    foreach ($factor_fields as $field) {
+      $fields[] = $field;
+    }
+
+    return $fields;
   }
 
 }

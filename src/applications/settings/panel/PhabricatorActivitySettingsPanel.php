@@ -10,6 +10,10 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
     return pht('Activity Logs');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-list';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }

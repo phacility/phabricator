@@ -1,17 +1,18 @@
 <?php
 
-final class PhabricatorAuthTOTPKeyTemporaryTokenType
+final class PhabricatorAuthMFASyncTemporaryTokenType
   extends PhabricatorAuthTemporaryTokenType {
 
-  const TOKENTYPE = 'mfa:totp:key';
+  const TOKENTYPE = 'mfa.sync';
+  const DIGEST_KEY = 'mfa.sync';
 
   public function getTokenTypeDisplayName() {
-    return pht('TOTP Synchronization');
+    return pht('MFA Sync');
   }
 
   public function getTokenReadableTypeName(
     PhabricatorAuthTemporaryToken $token) {
-    return pht('TOTP Sync Token');
+    return pht('MFA Sync Token');
   }
 
 }

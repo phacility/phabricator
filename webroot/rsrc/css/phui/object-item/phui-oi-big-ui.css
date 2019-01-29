@@ -72,3 +72,8 @@
 .device-desktop .phui-oi-linked-container a:hover {
   text-decoration: none;
 }
+
+/* Spacing for InfoView inside an object item list, like MFA setup. */
+.phui-oi .phui-info-view {
+  margin: 0 4px 4px;
+}

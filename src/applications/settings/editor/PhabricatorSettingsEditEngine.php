@@ -101,7 +101,7 @@ final class PhabricatorSettingsEditEngine
   protected function getPageHeader($object) {
     $user = $object->getUser();
     if ($user) {
-      $text = pht('Edit Settings (%s)', $user->getUserName());
+      $text = pht('Edit Settings: %s', $user->getUserName());
     } else {
       $text = pht('Edit Global Settings');
     }
@@ -152,7 +152,7 @@ final class PhabricatorSettingsEditEngine
     $viewer = $this->getViewer();
     $user = $object->getUser();
 
-    $panels = PhabricatorSettingsPanel::getAllPanels();
+    $panels = PhabricatorSettingsPanel::getAllDisplayPanels();
 
     foreach ($panels as $key => $panel) {
       if (!($panel instanceof PhabricatorEditEngineSettingsPanel)) {

@@ -9,40 +9,39 @@ Overview
 Multi-factor authentication allows you to add additional credentials to your
 account to make it more secure.
 
-This sounds complicated, but in most cases it just means that Phabricator will
-make sure you have your mobile phone (by sending you a text message or having
-you enter a code from a mobile application) before allowing you to log in or
-take certain "high security" actions (like changing your password).
+Once multi-factor authentication is configured on your account, you'll usually
+use your mobile phone to provide an authorization code or an extra confirmation
+when you try to log in to a new session or take certain actions (like changing
+your password).
 
 Requiring you to prove you're really you by asking for something you know (your
 password) //and// something you have (your mobile phone) makes it much harder
 for attackers to access your account. The phone is an additional "factor" which
 protects your account from attacks.
 
-Requiring re-authentication before performing high security actions further
-limits the damage an attacker can do even if they manage to compromise a
-login session.
-
 
 How Multi-Factor Authentication Works
 =====================================
 
 If you've configured multi-factor authentication and try to log in to your
-account or take certain high security actions (like changing your password),
+account or take certain sensitive actions (like changing your password),
 you'll be stopped and asked to enter additional credentials.
 
-Usually, this means you'll receive an SMS with a security code on your phone, or
-you'll open an app on your phone which will show you a security code.
-In both cases, you'll enter the security code into Phabricator.
+Usually, this means you'll receive an SMS with a authorization code on your
+phone, or you'll open an app on your phone which will show you a authorization
+code or ask you to confirm the action. If you're given a authorization code,
+you'll enter it into Phabricator.
 
 If you're logging in, Phabricator will log you in after you enter the code.
 
-If you're taking a high security action, Phabricator will put your account in
-"high security" mode for a few minutes. In this mode, you can take high security
-actions like changing passwords or SSH keys freely without entering any more
-credentials. You can explicitly leave high security once you're done performing
-account management, or your account will naturally return to normal security
-after a short period of time.
+If you're taking a sensitive action, Phabricator will sometimes put your
+account in "high security" mode for a few minutes. In this mode, you can take
+sensitive actions like changing passwords or SSH keys freely, without
+entering any more credentials.
+
+You can explicitly leave high security once you're done performing account
+management, or your account will naturally return to normal security after a
+short period of time.
 
 While your account is in high security, you'll see a notification on screen
 with instructions for returning to normal security.
@@ -52,8 +51,8 @@ Configuring Multi-Factor Authentication
 =======================================
 
 To manage authentication factors for your account, go to
-Settings > Multi-Factor Auth. You can use this control panel to add or remove
-authentication factors from your account.
+{nav Settings > Multi-Factor Auth}. You can use this control panel to add
+or remove authentication factors from your account.
 
 You can also rename a factor by clicking the name. This can help you identify
 factors if you have several similar factors attached to your account.
@@ -65,7 +64,7 @@ Factor: Mobile Phone App (TOTP)
 ===============================
 
 TOTP stands for "Time-based One-Time Password". This factor operates by having
-you enter security codes from your mobile phone into Phabricator. The codes
+you enter authorization codes from your mobile phone into Phabricator. The codes
 change every 30 seconds, so you will need to have your phone with you in order
 to enter them.
 
@@ -79,23 +78,91 @@ application, so check any in-house documentation for details. In general, any
 TOTP application should work properly.
 
 After you've downloaded the application onto your phone, use the Phabricator
-settings panel to add a factor to your account. You'll be prompted to enter a
-master key into your phone, and then read a security code from your phone and
-type it into Phabricator.
+settings panel to add a factor to your account. You'll be prompted to scan a
+QR code, and then read an authorization code from your phone and type it into
+Phabricator.
 
 Later, when you need to authenticate, you'll follow this same process: launch
-the application, read the security code, and type it into Phabricator. This will
-prove you have your phone.
+the application, read the authorization code, and type it into Phabricator.
+This will prove you have your phone.
 
 Don't lose your phone! You'll need it to log into Phabricator in the future.
 
 
-Recovering from Lost Factors
-============================
+Factor: SMS
+===========
 
-If you've lost a factor associated with your account (for example, your phone
-has been lost or damaged), an administrator can strip the factor off your
-account so that you can log in without it.
+This factor operates by texting you a short authorization code when you try to
+log in or perform a sensitive action.
+
+To use SMS, first add your phone number in {nav Settings > Contact Numbers}.
+Once a primary contact number is configured on your account, you'll be able
+to add an SMS factor.
+
+To enroll in SMS, you'll be sent a confirmation code to make sure your contact
+number is correct and SMS is being delivered properly. Enter it when prompted.
+
+When you're asked to confirm your identity in the future, you'll be texted
+an authorization code to enter into the prompt.
+
+(WARNING) SMS is a very weak factor and can be compromised or intercepted. For
+details, see: <https://phurl.io/u/sms>.
+
+
+Factor: Duo
+===========
+
+This factor supports integration with [[ https://duo.com/ | Duo Security ]], a
+third-party authentication service popular with enterprises that have a lot of
+policies to enforce.
+
+To use Duo, you'll install the Duo application on your phone. When you try
+to take a sensitive action, you'll be asked to confirm it in the application.
+
+
+Administration: Configuration
+=============================
+
+New Phabricator installs start without any multi-factor providers enabled.
+Users won't be able to add new factors until you set up multi-factor
+authentication by configuring at least one provider.
+
+Configure new providers in {nav Auth > Multi-Factor}.
+
+Providers may be in these states:
+
+  - **Active**: Users may add new factors. Users will be prompted to respond
+    to challenges from these providers when they take a sensitive action.
+  - **Deprecated**: Users may not add new factors, but they will still be
+    asked to respond to challenges from exising factors.
+  - **Disabled**: Users may not add new factors, and existing factors will
+    not be used. If MFA is required and a user only has disabled factors,
+    they will be forced to add a new factor.
+
+If you want to change factor types for your organization, the process will
+normally look something like this:
+
+  - Configure and test a new provider.
+  - Deprecate the old provider.
+  - Notify users that the old provider is deprecated and that they should move
+    to the new provider at their convenience, but before some upcoming
+    deadline.
+  - Once the deadline arrives, disable the old provider.
+
+
+Administration: Requiring MFA
+=============================
+
+As an administrator, you can require all users to add MFA to their accounts by
+setting the `security.require-multi-factor-auth` option in Config.
+
+
+Administration: Recovering from Lost Factors
+============================================
+
+If a user has lost a factor associated with their account (for example, their
+phone has been lost or damaged), an administrator with host access can strip
+the factor off their account so that they can log in without it.
 
 IMPORTANT: Before stripping factors from a user account, be absolutely certain
 that the user is who they claim to be!
@@ -113,9 +180,10 @@ advance and require them to perform it. But no matter what you do, be certain
 the user (not an attacker //pretending// to be the user) is really the one
 making the request before stripping factors.
 
-After verifying identity, administrators can strip authentication factors from
-user accounts using the `bin/auth strip` command. For example, to strip all
-factors from the account of a user who has lost their phone, run this command:
+After verifying identity, administrators with host access can strip
+authentication factors from user accounts using the `bin/auth strip` command.
+For example, to strip all factors from the account of a user who has lost
+their phone, run this command:
 
 ```lang=console
 # Strip all factors from a given user account.
@@ -125,10 +193,30 @@ phabricator/ $ ./bin/auth strip --user <username> --all-types
 You can run `bin/auth help strip` for more detail and all available flags and
 arguments.
 
-This command can selectively strip types of factors. You can use
-`bin/auth list-factors` for a list of available factor types.
+This command can selectively strip factors by factor type. You can use
+`bin/auth list-factors` to get a list of available factor types.
 
 ```lang=console
 # Show supported factor types.
 phabricator/ $ ./bin/auth list-factors
+```
+
+Once you've identified the factor types you want to strip, you can strip
+matching factors by using the `--type` flag to specify one or more factor
+types:
+
+```lang=console
+# Strip all SMS and TOTP factors for a user.
+phabricator/ $ ./bin/auth strip --user <username> --type sms --type totp
+```
+
+The `bin/auth strip` command can also selectively strip factors for certain
+providers. This is more granular than stripping all factors of a given type.
+You can use `bin/auth list-mfa-providers` to get a list of providers.
+
+Once you have a provider PHID, use `--provider` to select factors to strip:
+
+```lang=console
+# Strip all factors for a particular provider.
+phabricator/ $ ./bin/auth strip --user <username> --provider <providerPHID>
 ```

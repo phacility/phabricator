@@ -1,12 +1,16 @@
 <?php
 
-final class PhabricatorAccountSettingsPanel
+final class PhabricatorLanguageSettingsPanel
   extends PhabricatorEditEngineSettingsPanel {
 
-  const PANELKEY = 'account';
+  const PANELKEY = 'language';
 
   public function getPanelName() {
-    return pht('Account');
+    return pht('Language');
+  }
+
+  public function getPanelMenuIcon() {
+    return 'fa-globe';
   }
 
   public function getPanelGroupKey() {
@@ -18,6 +22,10 @@ final class PhabricatorAccountSettingsPanel
   }
 
   public function isTemplatePanel() {
+    return true;
+  }
+
+  public function isMultiFactorEnrollmentPanel() {
     return true;
   }
 

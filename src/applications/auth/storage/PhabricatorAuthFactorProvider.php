@@ -5,7 +5,8 @@ final class PhabricatorAuthFactorProvider
   implements
      PhabricatorApplicationTransactionInterface,
      PhabricatorPolicyInterface,
-     PhabricatorExtendedPolicyInterface {
+     PhabricatorExtendedPolicyInterface,
+     PhabricatorEditEngineMFAInterface {
 
   protected $providerFactorKey;
   protected $name;
@@ -14,15 +15,11 @@ final class PhabricatorAuthFactorProvider
 
   private $factor = self::ATTACHABLE;
 
-  const STATUS_ACTIVE = 'active';
-  const STATUS_DEPRECATED = 'deprecated';
-  const STATUS_DISABLED = 'disabled';
-
   public static function initializeNewProvider(PhabricatorAuthFactor $factor) {
     return id(new self())
       ->setProviderFactorKey($factor->getFactorKey())
       ->attachFactor($factor)
-      ->setStatus(self::STATUS_ACTIVE);
+      ->setStatus(PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE);
   }
 
   protected function getConfiguration() {
@@ -78,6 +75,67 @@ final class PhabricatorAuthFactorProvider
     return $this->getFactor()->getFactorName();
   }
 
+  public function newIconView() {
+    return $this->getFactor()->newIconView();
+  }
+
+  public function getDisplayDescription() {
+    return $this->getFactor()->getFactorDescription();
+  }
+
+  public function processAddFactorForm(
+    AphrontFormView $form,
+    AphrontRequest $request,
+    PhabricatorUser $user) {
+
+    $factor = $this->getFactor();
+
+    $config = $factor->processAddFactorForm($this, $form, $request, $user);
+    if ($config) {
+      $config->setFactorProviderPHID($this->getPHID());
+    }
+
+    return $config;
+  }
+
+  public function newSortVector() {
+    $factor = $this->getFactor();
+
+    return id(new PhutilSortVector())
+      ->addInt($factor->getFactorOrder())
+      ->addInt($this->getID());
+  }
+
+  public function getEnrollDescription(PhabricatorUser $user) {
+    return $this->getFactor()->getEnrollDescription($this, $user);
+  }
+
+  public function getEnrollButtonText(PhabricatorUser $user) {
+    return $this->getFactor()->getEnrollButtonText($this, $user);
+  }
+
+  public function newStatus() {
+    $status_key = $this->getStatus();
+    return PhabricatorAuthFactorProviderStatus::newForStatus($status_key);
+  }
+
+  public function canCreateNewConfiguration(PhabricatorUser $user) {
+    return $this->getFactor()->canCreateNewConfiguration($this, $user);
+  }
+
+  public function getConfigurationCreateDescription(PhabricatorUser $user) {
+    return $this->getFactor()->getConfigurationCreateDescription($this, $user);
+  }
+
+  public function getConfigurationListDetails(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer) {
+    return $this->getFactor()->getConfigurationListDetails(
+      $config,
+      $this,
+      $viewer);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -130,5 +188,12 @@ final class PhabricatorAuthFactorProvider
     return $extended;
   }
 
+
+/* -(  PhabricatorEditEngineMFAInterface  )---------------------------------- */
+
+
+  public function newEditEngineMFAEngine() {
+    return new PhabricatorAuthFactorProviderMFAEngine();
+  }
 
 }

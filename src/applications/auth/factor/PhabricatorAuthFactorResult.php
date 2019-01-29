@@ -5,6 +5,8 @@ final class PhabricatorAuthFactorResult
 
   private $answeredChallenge;
   private $isWait = false;
+  private $isError = false;
+  private $isContinue = false;
   private $errorMessage;
   private $value;
   private $issuedChallenges = array();
@@ -42,6 +44,24 @@ final class PhabricatorAuthFactorResult
 
   public function getIsWait() {
     return $this->isWait;
+  }
+
+  public function setIsError($is_error) {
+    $this->isError = $is_error;
+    return $this;
+  }
+
+  public function getIsError() {
+    return $this->isError;
+  }
+
+  public function setIsContinue($is_continue) {
+    $this->isContinue = $is_continue;
+    return $this;
+  }
+
+  public function getIsContinue() {
+    return $this->isContinue;
   }
 
   public function setErrorMessage($error_message) {

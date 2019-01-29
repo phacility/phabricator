@@ -11,16 +11,23 @@ final class PhabricatorPHPPreflightSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
-    if (version_compare(phpversion(), 7, '>=') &&
-        version_compare(phpversion(), 7.1, '<')) {
+    $version = phpversion();
+    if (version_compare($version, 7, '>=') &&
+        version_compare($version, 7.1, '<')) {
       $message = pht(
-        'This version of Phabricator does not support PHP 7.0. You '.
-        'are running PHP %s. Upgrade to PHP 7.1 or newer.',
-        phpversion());
+        'You are running PHP version %s. Phabricator does not support PHP '.
+        'versions between 7.0 and 7.1.'.
+        "\n\n".
+        'PHP removed signal handling features that Phabricator requires in '.
+        'PHP 7.0, and did not restore them until PHP 7.1.'.
+        "\n\n".
+        'Upgrade to PHP 7.1 or newer (recommended) or downgrade to an older '.
+        'version of PHP 5 (discouraged).',
+        $version);
 
       $this->newIssue('php.version7')
         ->setIsFatal(true)
-        ->setName(pht('PHP 7.0 Not Supported'))
+        ->setName(pht('PHP 7.0-7.1 Not Supported'))
         ->setMessage($message)
         ->addLink(
           'https://phurl.io/u/php7',

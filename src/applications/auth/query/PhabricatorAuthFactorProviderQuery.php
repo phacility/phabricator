@@ -5,6 +5,8 @@ final class PhabricatorAuthFactorProviderQuery
 
   private $ids;
   private $phids;
+  private $statuses;
+  private $providerFactorKeys;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -15,6 +17,17 @@ final class PhabricatorAuthFactorProviderQuery
     $this->phids = $phids;
     return $this;
   }
+
+  public function withProviderFactorKeys(array $keys) {
+    $this->providerFactorKeys = $keys;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorAuthFactorProvider();
   }
@@ -38,6 +51,20 @@ final class PhabricatorAuthFactorProviderQuery
         $conn,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
+    }
+
+    if ($this->providerFactorKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'providerFactorKey IN (%Ls)',
+        $this->providerFactorKeys);
     }
 
     return $where;

@@ -1,33 +1,45 @@
 @title Configuring Outbound Email
 @group config
 
-Instructions for configuring Phabricator to send mail.
+Instructions for configuring Phabricator to send email and other types of
+messages, like text messages.
 
 Overview
 ========
 
-Phabricator can send outbound email through several different mail services,
+Phabricator sends outbound messages through "mailers". Most mailers send
+email and most messages are email messages, but mailers may also send other
+types of messages (like text messages).
+
+Phabricator can send outbound messages through multiple different mailers,
 including a local mailer or various third-party services. Options include:
 
-| Send Mail With | Setup | Cost | Inbound | Notes |
-|---------|-------|------|---------|-------|
-| Postmark | Easy | Cheap | Yes | Recommended |
-| Mailgun | Easy | Cheap | Yes | Recommended |
-| Amazon SES | Easy | Cheap | No | Recommended |
-| SendGrid | Medium | Cheap | Yes | Discouraged |
-| External SMTP | Medium | Varies | No | Gmail, etc. |
-| Local SMTP | Hard | Free | No | sendmail, postfix, etc |
-| Custom | Hard | Free | No | Write a custom mailer for some other service. |
-| Drop in a Hole | Easy | Free | No | Drops mail in a deep, dark hole. |
+| Send Mail With | Setup | Cost | Inbound | Media | Notes |
+|----------------|-------|------|---------|-------|-------|
+| Postmark | Easy | Cheap | Yes | Email | Recommended |
+| Mailgun | Easy | Cheap | Yes | Email | Recommended |
+| Amazon SES | Easy | Cheap | No | Email | |
+| SendGrid | Medium | Cheap | Yes | Email | |
+| Twilio | Easy | Cheap | No | SMS | Recommended |
+| Amazon SNS | Easy | Cheap | No | SMS | Recommended |
+| External SMTP | Medium | Varies | No | Email | Gmail, etc. |
+| Local SMTP | Hard | Free | No | Email | sendmail, postfix, etc |
+| Custom | Hard | Free | No | All | Write a custom mailer. |
+| Drop in a Hole | Easy | Free | No | All | Drops mail in a deep, dark hole. |
 
 See below for details on how to select and configure mail delivery for each
 mailer.
 
-Overall, Postmark and Mailgun are much easier to set up, and using one of them
-is recommended. Both will also let you set up inbound email easily.
+For email, Postmark or Mailgun are recommended because they make it easy to
+set up inbound and outbound mail and have good track records in our production
+services. Other services will also generally work well, but they may be more
+difficult to set up.
 
-If you have some internal mail service you'd like to use you can also write a
-custom mailer, but this requires digging into the code.
+For SMS, Twilio or SNS are recommended. They're also your only upstream
+options.
+
+If you have some internal mail or messaging service you'd like to use you can
+also write a custom mailer, but this requires digging into the code.
 
 Phabricator sends mail in the background, so the daemons need to be running for
 it to be able to deliver mail. You should receive setup warnings if they are
@@ -91,12 +103,14 @@ The supported keys for each mailer are:
     types. Normally, you do not need to configure this. See below for a list
     of media types.
 
-The `type` field can be used to select these third-party mailers:
+The `type` field can be used to select these mailer services:
 
   - `mailgun`: Use Mailgun.
   - `ses`: Use Amazon SES.
   - `sendgrid`: Use SendGrid.
   - `postmark`: Use Postmark.
+  - `twilio`: Use Twilio.
+  - `sns`: Use Amazon SNS.
 
 It also supports these local mailers:
 
@@ -152,6 +166,12 @@ For alternatives and more information on configuration, see
 Mailer: Postmark
 ================
 
+| Media   | Email
+|---------|
+| Inbound | Yes
+|---------|
+
+
 Postmark is a third-party email delivery service. You can learn more at
 <https://www.postmarkapp.com/>.
 
@@ -182,8 +202,13 @@ documented at: <https://postmarkapp.com/support/article/800-ips-for-firewalls>
 Mailer: Mailgun
 ===============
 
+| Media   | Email
+|---------|
+| Inbound | Yes
+|---------|
+
 Mailgun is a third-party email delivery service. You can learn more at
-<http://www.mailgun.com>. Mailgun is easy to configure and works well.
+<https://www.mailgun.com>. Mailgun is easy to configure and works well.
 
 To use this mailer, set `type` to `mailgun`, then configure these `options`:
 
@@ -194,8 +219,13 @@ To use this mailer, set `type` to `mailgun`, then configure these `options`:
 Mailer: Amazon SES
 ==================
 
+| Media   | Email
+|---------|
+| Inbound | No
+|---------|
+
 Amazon SES is Amazon's cloud email service. You can learn more at
-<http://aws.amazon.com/ses/>.
+<https://aws.amazon.com/ses/>.
 
 To use this mailer, set `type` to `ses`, then configure these `options`:
 
@@ -208,12 +238,58 @@ which "From" address to use by setting `metamta.default-address` in your
 config, then follow the Amazon SES verification process to verify it. You
 won't be able to send email until you do this!
 
+Mailer: Twilio
+==================
+
+| Media   | SMS
+|---------|
+| Inbound | No
+|---------|
+
+Twilio is a third-party notification service. You can learn more at
+<https://www.twilio.com/>.
+
+
+To use this mailer, set `type` to `twilio`, then configure these options:
+
+  - `account-sid`: Your Twilio Account SID.
+  - `auth-token`: Your Twilio Auth Token.
+  - `from-number`: Number to send text messages from, in E.164 format
+    (like `+15551237890`).
+
+Mailer: Amazon SNS
+==================
+
+| Media   | SMS
+|---------|
+| Inbound | No
+|---------|
+
+
+Amazon SNS is Amazon's cloud notification service. You can learn more at
+<https://aws.amazon.com/sns/>. Note that this mailer is only able to send
+SMS messages, not emails.
+
+To use this mailer, set `type` to `sns`, then configure these options:
+
+  - `access-key`: Required string. Your Amazon SNS access key.
+  - `secret-key`: Required string. Your Amazon SNS secret key.
+  - `endpoint`: Required string. Your Amazon SNS endpoint.
+  - `region`: Required string. Your Amazon SNS region.
+
+You can find the correct `region` value for your endpoint in the SNS
+documentation.
 
 Mailer: SendGrid
 ================
 
+| Media   | Email
+|---------|
+| Inbound | Yes
+|---------|
+
 SendGrid is a third-party email delivery service. You can learn more at
-<http://sendgrid.com/>.
+<https://sendgrid.com/>.
 
 You can configure SendGrid in two ways: you can send via SMTP or via the REST
 API. To use SMTP, configure Phabricator to use an `smtp` mailer.
@@ -230,10 +306,16 @@ including an "API User". Make sure you're configuring your "API Key".
 Mailer: Sendmail
 ================
 
+| Media   | Email
+|---------|
+| Inbound | Requires Configuration
+|---------|
+
+
 This requires a `sendmail` binary to be installed on the system. Most MTAs
-(e.g., sendmail, qmail, postfix) should do this, but your machine may not have
-one installed by default. For install instructions, consult the documentation
-for your favorite MTA.
+(e.g., sendmail, qmail, postfix) should install one for you, but your machine
+may not have one installed by default. For install instructions, consult the
+documentation for your favorite MTA.
 
 Since you'll be sending the mail yourself, you are subject to things like SPF
 rules, blackholes, and MTA configuration which are beyond the scope of this
@@ -247,6 +329,11 @@ configure.
 
 Mailer: SMTP
 ============
+
+| Media   | Email
+|---------|
+| Inbound | Requires Configuration
+|---------|
 
 You can use this adapter to send mail via an external SMTP server, like Gmail.
 
@@ -263,7 +350,15 @@ To use this mailer, set `type` to `smtp`, then configure these `options`:
 Disable Mail
 ============
 
-To disable mail, just don't configure any mailers.
+| Media   | All
+|---------|
+| Inbound | No
+|---------|
+
+
+To disable mail, just don't configure any mailers. (You can safely ignore the
+setup warning reminding you to set up mailers if you don't plan to configure
+any.)
 
 
 Testing and Debugging Outbound Email
@@ -277,6 +372,9 @@ particular:
   phabricator/ $ ./bin/mail send-test       # Send test messages.
 
 Run `bin/mail help <command>` for more help on using these commands.
+
+By default, `bin/mail send-test` sends email messages, but you can use
+the `--type` flag to send different types of messages.
 
 You can monitor daemons using the Daemon Console (`/daemon/`, or click
 **Daemon Console** from the homepage).

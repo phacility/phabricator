@@ -38,10 +38,14 @@ final class PhabricatorHighSecurityRequestExceptionHandler
       $request);
 
     $is_wait = false;
+    $is_continue = false;
     foreach ($results as $result) {
       if ($result->getIsWait()) {
         $is_wait = true;
-        break;
+      }
+
+      if ($result->getIsContinue()) {
+        $is_continue = true;
       }
     }
 
@@ -55,7 +59,7 @@ final class PhabricatorHighSecurityRequestExceptionHandler
 
     if ($is_wait) {
       $submit = pht('Wait Patiently');
-    } else if ($is_upgrade) {
+    } else if ($is_upgrade && !$is_continue) {
       $submit = pht('Enter High Security');
     } else {
       $submit = pht('Continue');
@@ -74,19 +78,21 @@ final class PhabricatorHighSecurityRequestExceptionHandler
     $form_layout = $form->buildLayoutView();
 
     if ($is_upgrade) {
+      $messages = array(
+        pht(
+          'You are taking an action which requires you to enter '.
+          'high security.'),
+      );
+
+      $info_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_MFA)
+        ->setErrors($messages);
+
       $dialog
-        ->setErrors(
-          array(
-            pht(
-              'You are taking an action which requires you to enter '.
-              'high security.'),
-          ))
+        ->appendChild($info_view)
         ->appendParagraph(
           pht(
-            'High security mode helps protect your account from security '.
-            'threats, like session theft or someone messing with your stuff '.
-            'while you\'re grabbing a coffee. To enter high security mode, '.
-            'confirm your credentials.'))
+            'To enter high security mode, confirm your credentials:'))
         ->appendChild($form_layout)
         ->appendParagraph(
           pht(

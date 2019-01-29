@@ -30,6 +30,14 @@ final class AlmanacCacheEngineExtension
       foreach ($interfaces as $interface) {
         $results[] = $interface;
       }
+
+      $bindings = id(new AlmanacBindingQuery())
+        ->setViewer($viewer)
+        ->withDevicePHIDs(mpull($devices, 'getPHID'))
+        ->execute();
+      foreach ($bindings as $binding) {
+        $results[] = $binding;
+      }
     }
 
     foreach ($this->selectObjects($objects, 'AlmanacInterface') as $iface) {

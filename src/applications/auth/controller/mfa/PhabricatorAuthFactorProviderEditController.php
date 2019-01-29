@@ -41,17 +41,32 @@ final class PhabricatorAuthFactorProviderEditController
       ->setBig(true)
       ->setFlush(true);
 
+    $factors = msortv($factors, 'newSortVector');
+
     foreach ($factors as $factor_key => $factor) {
       $factor_uri = id(new PhutilURI('/mfa/edit/'))
         ->setQueryParam('providerFactorKey', $factor_key);
       $factor_uri = $this->getApplicationURI($factor_uri);
 
+      $is_enabled = $factor->canCreateNewProvider();
+
       $item = id(new PHUIObjectItemView())
         ->setHeader($factor->getFactorName())
-        ->setHref($factor_uri)
-        ->setClickable(true)
         ->setImageIcon($factor->newIconView())
         ->addAttribute($factor->getFactorCreateHelp());
+
+      if ($is_enabled) {
+        $item
+          ->setHref($factor_uri)
+          ->setClickable(true);
+      } else {
+        $item->setDisabled(true);
+      }
+
+      $create_description = $factor->getProviderCreateDescription();
+      if ($create_description) {
+        $item->appendChild($create_description);
+      }
 
       $menu->addItem($item);
     }

@@ -447,6 +447,12 @@ abstract class PhabricatorApplicationTransactionEditor
               'edge:type'));
         }
 
+        // See T13082. If this is an inverse edit, the parent editor has
+        // already populated the transaction values correctly.
+        if ($this->getIsInverseEdgeEditor()) {
+          return $xaction->getOldValue();
+        }
+
         $old_edges = array();
         if ($object->getPHID()) {
           $edge_src = $object->getPHID();
@@ -513,6 +519,12 @@ abstract class PhabricatorApplicationTransactionEditor
           return $space_phid;
         }
       case PhabricatorTransactions::TYPE_EDGE:
+        // See T13082. If this is an inverse edit, the parent editor has
+        // already populated appropriate transaction values.
+        if ($this->getIsInverseEdgeEditor()) {
+          return $xaction->getNewValue();
+        }
+
         $new_value = $this->getEdgeTransactionNewValue($xaction);
 
         $edge_type = $xaction->getMetadataValue('edge:type');
@@ -790,14 +802,6 @@ abstract class PhabricatorApplicationTransactionEditor
         $src = $object->getPHID();
         $const = $xaction->getMetadataValue('edge:type');
 
-        $type = PhabricatorEdgeType::getByConstant($const);
-        if ($type->shouldWriteInverseTransactions()) {
-          $this->applyInverseEdgeTransactions(
-            $object,
-            $xaction,
-            $type->getInverseEdgeConstant());
-        }
-
         foreach ($new as $dst_phid => $edge) {
           $new[$dst_phid]['src'] = $src;
         }
@@ -899,6 +903,30 @@ abstract class PhabricatorApplicationTransactionEditor
 
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
+
+      // See T13082. When we're writing edges that imply corresponding inverse
+      // transactions, apply those inverse transactions now. We have to wait
+      // until the object we're editing (with this editor) has committed its
+      // transactions to do this. If we don't, the inverse editor may race,
+      // build a mail before we actually commit this object, and render "alice
+      // added an edge: Unknown Object".
+
+      if ($type === PhabricatorTransactions::TYPE_EDGE) {
+        // Don't do anything if we're already an inverse edge editor.
+        if ($this->getIsInverseEdgeEditor()) {
+          continue;
+        }
+
+        $edge_const = $xaction->getMetadataValue('edge:type');
+        $edge_type = PhabricatorEdgeType::getByConstant($edge_const);
+        if ($edge_type->shouldWriteInverseTransactions()) {
+          $this->applyInverseEdgeTransactions(
+            $object,
+            $xaction,
+            $edge_type->getInverseEdgeConstant());
+        }
+        continue;
+      }
 
       $xtype = $this->getModularTransactionType($type);
       if (!$xtype) {
@@ -1503,6 +1531,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $expect_value = !$xaction->shouldGenerateOldValue();
       $has_value = $xaction->hasOldValue();
+
+      // See T13082. In the narrow case of applying inverse edge edits, we
+      // expect the old value to be populated.
+      if ($this->getIsInverseEdgeEditor()) {
+        $expect_value = true;
+      }
 
       if ($expect_value && !$has_value) {
         throw new PhabricatorApplicationTransactionStructureException(
@@ -3853,6 +3887,8 @@ abstract class PhabricatorApplicationTransactionEditor
       ->withPHIDs($all)
       ->execute();
 
+    $object_phid = $object->getPHID();
+
     foreach ($nodes as $node) {
       if (!($node instanceof PhabricatorApplicationTransactionInterface)) {
         continue;
@@ -3865,22 +3901,38 @@ abstract class PhabricatorApplicationTransactionEditor
         continue;
       }
 
+      $node_phid = $node->getPHID();
       $editor = $node->getApplicationTransactionEditor();
       $template = $node->getApplicationTransactionTemplate();
 
-      if (isset($add[$node->getPHID()])) {
-        $edge_edit_type = '+';
+      // See T13082. We have to build these transactions with synthetic values
+      // because we've already applied the actual edit to the edge database
+      // table. If we try to apply this transaction naturally, it will no-op
+      // itself because it doesn't have any effect.
+
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array($node_phid))
+        ->withEdgeTypes(array($inverse_type));
+
+      $edge_query->execute();
+
+      $edge_phids = $edge_query->getDestinationPHIDs();
+      $edge_phids = array_fuse($edge_phids);
+
+      $new_phids = $edge_phids;
+      $old_phids = $edge_phids;
+
+      if (isset($add[$node_phid])) {
+        unset($old_phids[$object_phid]);
       } else {
-        $edge_edit_type = '-';
+        $old_phids[$object_phid] = $object_phid;
       }
 
       $template
         ->setTransactionType($xaction->getTransactionType())
         ->setMetadataValue('edge:type', $inverse_type)
-        ->setNewValue(
-          array(
-            $edge_edit_type => array($object->getPHID() => $object->getPHID()),
-          ));
+        ->setOldValue($old_phids)
+        ->setNewValue($new_phids);
 
       $editor
         ->setContinueOnNoEffect(true)
@@ -4854,16 +4906,47 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $is_mfa = ($object instanceof PhabricatorEditEngineMFAInterface);
-    if (!$is_mfa) {
+    $has_engine = ($object instanceof PhabricatorEditEngineMFAInterface);
+    if ($has_engine) {
+      $engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
+        ->setViewer($this->getActor());
+      $require_mfa = $engine->shouldRequireMFA();
+      $try_mfa = $engine->shouldTryMFA();
+    } else {
+      $require_mfa = false;
+      $try_mfa = false;
+    }
+
+    // If the user is mentioning an MFA object on another object or creating
+    // a relationship like "parent" or "child" to this object, we always
+    // allow the edit to move forward without requiring MFA.
+    if ($this->getIsInverseEdgeEditor()) {
       return $xactions;
     }
 
-    $engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
-      ->setViewer($this->getActor());
-    $require_mfa = $engine->shouldRequireMFA();
-
     if (!$require_mfa) {
+      // If the object hasn't already opted into MFA, see if any of the
+      // transactions want it.
+      if (!$try_mfa) {
+        foreach ($xactions as $xaction) {
+          $type = $xaction->getTransactionType();
+
+          $xtype = $this->getModularTransactionType($type);
+          if ($xtype) {
+            $xtype = clone $xtype;
+            $xtype->setStorage($xaction);
+            if ($xtype->shouldTryMFA($object, $xaction)) {
+              $try_mfa = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if ($try_mfa) {
+        $this->setShouldRequireMFA(true);
+      }
+
       return $xactions;
     }
 
@@ -4878,13 +4961,6 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($has_mfa) {
-      return $xactions;
-    }
-
-    // If the user is mentioning an MFA object on another object or creating
-    // a relationship like "parent" or "child" to this object, we allow the
-    // edit to move forward without requiring MFA.
-    if ($this->getIsInverseEdgeEditor()) {
       return $xactions;
     }
 

@@ -7,4 +7,11 @@ abstract class PhabricatorMailExternalMessage
     return $this->getPhobjectClassConstant('MESSAGETYPE');
   }
 
+  final public static function getAllMessageTypes() {
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getMessageType')
+      ->execute();
+  }
+
 }
