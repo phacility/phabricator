@@ -227,6 +227,9 @@ To use this mailer, set `type` to `mailgun`, then configure these `options`:
 
   - `api-key`: Required string. Your Mailgun API key.
   - `domain`: Required string. Your Mailgun domain.
+  - `api-hostname`: Optional string. Defaults to "api.mailgun.net". If your
+    account is in another region (like the EU), you may need to specify a
+    different hostname. Consult the Mailgun documentation.
 
 
 Mailer: Amazon SES
