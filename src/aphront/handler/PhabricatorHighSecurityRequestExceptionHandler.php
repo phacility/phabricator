@@ -78,15 +78,13 @@ final class PhabricatorHighSecurityRequestExceptionHandler
     $form_layout = $form->buildLayoutView();
 
     if ($is_upgrade) {
-      $messages = array(
-        pht(
-          'You are taking an action which requires you to enter '.
-          'high security.'),
-      );
+      $message = pht(
+        'You are taking an action which requires you to enter '.
+        'high security.');
 
       $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_MFA)
-        ->setErrors($messages);
+        ->setErrors(array($message));
 
       $dialog
         ->appendChild($info_view)
@@ -100,12 +98,18 @@ final class PhabricatorHighSecurityRequestExceptionHandler
             'period of time. When you are finished taking sensitive '.
             'actions, you should leave high security.'));
     } else {
+      $message = pht(
+        'You are taking an action which requires you to provide '.
+        'multi-factor credentials.');
+
+      $info_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_MFA)
+        ->setErrors(array($message));
+
       $dialog
+        ->appendChild($info_view)
         ->setErrors(
           array(
-            pht(
-              'You are taking an action which requires you to provide '.
-              'multi-factor credentials.'),
           ))
         ->appendChild($form_layout);
     }
