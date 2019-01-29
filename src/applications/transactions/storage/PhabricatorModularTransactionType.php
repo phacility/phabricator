@@ -431,4 +431,68 @@ abstract class PhabricatorModularTransactionType
     return false;
   }
 
+  // NOTE: See T12921. These APIs are somewhat aspirational. For now, all of
+  // these use "TARGET_TEXT" (even the HTML methods!) and the body methods
+  // actually return Remarkup, not text or HTML.
+
+  final public function getTitleForTextMail() {
+    return $this->getTitleForMailWithRenderingTarget(
+      PhabricatorApplicationTransaction::TARGET_TEXT);
+  }
+
+  final public function getTitleForHTMLMail() {
+    return $this->getTitleForMailWithRenderingTarget(
+      PhabricatorApplicationTransaction::TARGET_TEXT);
+  }
+
+  final public function getBodyForTextMail() {
+    return $this->getBodyForMailWithRenderingTarget(
+      PhabricatorApplicationTransaction::TARGET_TEXT);
+  }
+
+  final public function getBodyForHTMLMail() {
+    return $this->getBodyForMailWithRenderingTarget(
+      PhabricatorApplicationTransaction::TARGET_TEXT);
+  }
+
+  private function getTitleForMailWithRenderingTarget($target) {
+    $storage = $this->getStorage();
+
+    $old_target = $storage->getRenderingTarget();
+    try {
+      $storage->setRenderingTarget($target);
+      $result = $this->getTitleForMail();
+    } catch (Exception $ex) {
+      $storage->setRenderingTarget($old_target);
+      throw $ex;
+    }
+    $storage->setRenderingTarget($old_target);
+
+    return $result;
+  }
+
+  private function getBodyForMailWithRenderingTarget($target) {
+    $storage = $this->getStorage();
+
+    $old_target = $storage->getRenderingTarget();
+    try {
+      $storage->setRenderingTarget($target);
+      $result = $this->getBodyForMail();
+    } catch (Exception $ex) {
+      $storage->setRenderingTarget($old_target);
+      throw $ex;
+    }
+    $storage->setRenderingTarget($old_target);
+
+    return $result;
+  }
+
+  protected function getTitleForMail() {
+    return false;
+  }
+
+  protected function getBodyForMail() {
+    return false;
+  }
+
 }

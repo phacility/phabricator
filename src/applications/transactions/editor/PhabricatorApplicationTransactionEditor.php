@@ -3294,7 +3294,7 @@ abstract class PhabricatorApplicationTransactionEditor
       // move the other transactions down so they provide context above the
       // actual comment.
 
-      $comment = $xaction->getBodyForMail();
+      $comment = $this->getBodyForTextMail($xaction);
       if ($comment !== null) {
         $is_comment = true;
         $comments[] = array(
@@ -3307,12 +3307,12 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       if (!$is_comment || !$seen_comment) {
-        $header = $xaction->getTitleForTextMail();
+        $header = $this->getTitleForTextMail($xaction);
         if ($header !== null) {
           $headers[] = $header;
         }
 
-        $header_html = $xaction->getTitleForHTMLMail();
+        $header_html = $this->getTitleForHTMLMail($xaction);
         if ($header_html !== null) {
           $headers_html[] = $header_html;
         }
@@ -3392,12 +3392,12 @@ abstract class PhabricatorApplicationTransactionEditor
       // If this is not the first comment in the mail, add the header showing
       // who wrote the comment immediately above the comment.
       if (!$is_initial) {
-        $header = $xaction->getTitleForTextMail();
+        $header = $this->getTitleForTextMail($xaction);
         if ($header !== null) {
           $body->addRawPlaintextSection($header);
         }
 
-        $header_html = $xaction->getTitleForHTMLMail();
+        $header_html = $this->getTitleForHTMLMail($xaction);
         if ($header_html !== null) {
           $body->addRawHTMLSection($header_html);
         }
@@ -4981,6 +4981,58 @@ abstract class PhabricatorApplicationTransactionEditor
     array_unshift($xactions, $mfa_xaction);
 
     return $xactions;
+  }
+
+  private function getTitleForTextMail(
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+      $comment = $xtype->getTitleForTextMail();
+      if ($comment !== false) {
+        return $comment;
+      }
+    }
+
+    return $xaction->getTitleForTextMail();
+  }
+
+  private function getBodyForHTMLMail(
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+      $comment = $xtype->getTitleForHTMLMail();
+      if ($comment !== false) {
+        return $comment;
+      }
+    }
+
+    return $xaction->getTitleForHTMLMail();
+  }
+
+
+  private function getBodyForTextMail(
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+      $comment = $xtype->getBodyForTextMail();
+      if ($comment !== false) {
+        return $comment;
+      }
+    }
+
+    return $xaction->getBodyForMail();
   }
 
 
