@@ -177,14 +177,21 @@ final class DifferentialDiffExtractionEngine extends Phobject {
             'repository' => $repository,
           ));
 
-        $response = DiffusionQuery::callConduitWithDiffusionRequest(
-          $viewer,
-          $drequest,
-          'diffusion.filecontentquery',
-          array(
-            'commit' => $identifier,
-            'path' => $path,
-          ));
+        try {
+          $response = DiffusionQuery::callConduitWithDiffusionRequest(
+            $viewer,
+            $drequest,
+            'diffusion.filecontentquery',
+            array(
+              'commit' => $identifier,
+              'path' => $path,
+            ));
+        } catch (Exception $ex) {
+          // TODO: See PHI1044. This call may fail if the diff deleted the
+          // file. If the call fails, just detect a change for now. This should
+          // generally be made cleaner in the future.
+          return true;
+        }
 
         $new_file_phid = $response['filePHID'];
         if (!$new_file_phid) {
