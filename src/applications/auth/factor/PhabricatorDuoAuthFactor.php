@@ -504,10 +504,7 @@ final class PhabricatorDuoAuthFactor
     $push_info = array(
       pht('Domain') => $this->getInstallDisplayName(),
     );
-    foreach ($push_info as $k => $v) {
-      $push_info[$k] = rawurlencode($k).'='.rawurlencode($v);
-    }
-    $push_info = implode('&', $push_info);
+    $push_info = phutil_build_http_querystring($push_info);
 
     $parameters = array(
       'username' => $duo_user,

@@ -772,6 +772,11 @@ final class AphrontApplicationConfiguration
         $multipart_parser->continueParse($raw_input);
         $parts = $multipart_parser->endParse();
 
+        // We're building and then parsing a query string so that requests
+        // with arrays (like "x[]=apple&x[]=banana") work correctly. This also
+        // means we can't use "phutil_build_http_querystring()", since it
+        // can't build a query string with duplicate names.
+
         $query_string = array();
         foreach ($parts as $part) {
           if (!$part->isVariable()) {
@@ -780,8 +785,7 @@ final class AphrontApplicationConfiguration
 
           $name = $part->getName();
           $value = $part->getVariableValue();
-
-          $query_string[] = urlencode($name).'='.urlencode($value);
+          $query_string[] = rawurlencode($name).'='.rawurlencode($value);
         }
         $query_string = implode('&', $query_string);
         $post = $parser->parseQueryString($query_string);
