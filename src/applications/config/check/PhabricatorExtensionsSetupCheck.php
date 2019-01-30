@@ -11,14 +11,13 @@ final class PhabricatorExtensionsSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
-    // TODO: Make 'mbstring' and 'iconv' soft requirements.
+    // TODO: Make 'mbstring' a soft requirement.
 
     $required = array(
       'hash',
       'json',
       'openssl',
       'mbstring',
-      'iconv',
       'ctype',
 
       // There is a tiny chance we might not need this, but a significant
