@@ -740,8 +740,9 @@ abstract class PhabricatorApplicationTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
+      case PhabricatorTransactions::TYPE_MFA:
         return true;
-     case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
