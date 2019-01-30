@@ -147,7 +147,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
       $viewer,
       $challenges);
 
-    if ($new_challenges instanceof PhabricatorAuthFactorResult) {
+    if ($this->isAuthResult($new_challenges)) {
       unset($unguarded);
       return $new_challenges;
     }
@@ -200,7 +200,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
       return $result;
     }
 
-    if (!($result instanceof PhabricatorAuthFactorResult)) {
+    if (!$this->isAuthResult($result)) {
       throw new Exception(
         pht(
           'Expected "newResultFromIssuedChallenges()" to return null or '.
@@ -232,7 +232,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
       $request,
       $challenges);
 
-    if (!($result instanceof PhabricatorAuthFactorResult)) {
+    if (!$this->isAuthResult($result)) {
       throw new Exception(
         pht(
           'Expected "newResultFromChallengeResponse()" to return an object '.
@@ -408,6 +408,10 @@ abstract class PhabricatorAuthFactor extends Phobject {
         $provider,
         $user);
 
+      if ($this->isAuthResult($properties)) {
+        return $properties;
+      }
+
       foreach ($properties as $key => $value) {
         $sync_token->setTemporaryTokenProperty($key, $value);
       }
@@ -553,6 +557,10 @@ abstract class PhabricatorAuthFactor extends Phobject {
       ->withUserPHIDs(array($user->getPHID()))
       ->withFactorProviderPHIDs(array($provider->getPHID()))
       ->execute();
+  }
+
+  final protected function isAuthResult($object) {
+    return ($object instanceof PhabricatorAuthFactorResult);
   }
 
 }
