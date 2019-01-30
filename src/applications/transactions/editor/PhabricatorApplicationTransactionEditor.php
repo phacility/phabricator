@@ -2669,9 +2669,15 @@ abstract class PhabricatorApplicationTransactionEditor
     $transaction_type) {
     $errors = array();
 
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $this->getActingAsPHID());
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($this->getActor())
+      ->withUserPHIDs(array($this->getActingAsPHID()))
+      ->withFactorProviderStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+          PhabricatorAuthFactorProviderStatus::STATUS_DEPRECATED,
+        ))
+      ->execute();
 
     foreach ($xactions as $xaction) {
       if (!$factors) {
