@@ -5000,7 +5000,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xaction->getTitleForTextMail();
   }
 
-  private function getBodyForHTMLMail(
+  private function getTitleForHTMLMail(
     PhabricatorApplicationTransaction $xaction) {
     $type = $xaction->getTransactionType();
 
