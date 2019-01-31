@@ -109,6 +109,8 @@ final class AphrontApplicationConfiguration
 
     PhabricatorStartup::beginStartupPhase('env.init');
 
+    self::readHTTPPOSTData();
+
     try {
       PhabricatorEnv::initializeWebEnvironment();
       $database_exception = null;
@@ -151,8 +153,6 @@ final class AphrontApplicationConfiguration
         'r' => $address_string,
         'M' => idx($_SERVER, 'REQUEST_METHOD', '-'),
       ));
-
-    self::readHTTPPOSTData();
 
     DarkConsoleXHProfPluginAPI::hookProfiler();
 
