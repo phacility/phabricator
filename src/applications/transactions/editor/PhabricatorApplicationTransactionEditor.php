@@ -4856,6 +4856,13 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
   private function requireMFA(PhabricatorLiskDAO $object, array $xactions) {
+    $actor = $this->getActor();
+
+    // Let omnipotent editors skip MFA. This is mostly aimed at scripts.
+    if ($actor->isOmnipotent()) {
+      return;
+    }
+
     $editor_class = get_class($this);
 
     $object_phid = $object->getPHID();
@@ -4869,8 +4876,6 @@ abstract class PhabricatorApplicationTransactionEditor
         'editor(%s).new()',
         $editor_class);
     }
-
-    $actor = $this->getActor();
 
     $request = $this->getRequest();
     if ($request === null) {
