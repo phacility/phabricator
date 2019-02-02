@@ -91,11 +91,7 @@ final class PhabricatorDuoFuture
       $http_method = $this->getHTTPMethod();
 
       ksort($data);
-      $data_parts = array();
-      foreach ($data as $key => $value) {
-        $data_parts[] = rawurlencode($key).'='.rawurlencode($value);
-      }
-      $data_parts = implode('&', $data_parts);
+      $data_parts = phutil_build_http_querystring($data);
 
       $corpus = array(
         $date,

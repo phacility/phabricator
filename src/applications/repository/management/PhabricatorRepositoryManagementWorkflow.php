@@ -7,7 +7,7 @@ abstract class PhabricatorRepositoryManagementWorkflow
     $identifiers = $args->getArg($param);
 
     if (!$identifiers) {
-      return null;
+      return array();
     }
 
     $query = id(new PhabricatorRepositoryQuery())

@@ -1506,9 +1506,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->setDetail('hosting-enabled', $enabled);
   }
 
-  public function canServeProtocol($protocol, $write) {
-    if (!$this->isTracked()) {
-      return false;
+  public function canServeProtocol(
+    $protocol,
+    $write,
+    $is_intracluster = false) {
+
+    // See T13192. If a repository is inactive, don't serve it to users. We
+    // still synchronize it within the cluster and serve it to other repository
+    // nodes.
+    if (!$is_intracluster) {
+      if (!$this->isTracked()) {
+        return false;
+      }
     }
 
     $clone_uris = $this->getCloneURIs();

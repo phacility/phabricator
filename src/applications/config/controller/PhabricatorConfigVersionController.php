@@ -63,6 +63,8 @@ final class PhabricatorConfigVersionController
         $version_from_file);
     }
 
+    $version_property_list->addProperty('php', phpversion());
+
     $binaries = PhutilBinaryAnalyzer::getAllBinaries();
     foreach ($binaries as $binary) {
       if (!$binary->isBinaryAvailable()) {

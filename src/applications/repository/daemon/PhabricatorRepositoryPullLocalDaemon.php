@@ -73,6 +73,9 @@ final class PhabricatorRepositoryPullLocalDaemon
     $futures = array();
     $queue = array();
 
+    $sync_wait = phutil_units('2 minutes in seconds');
+    $last_sync = array();
+
     while (!$this->shouldExit()) {
       PhabricatorCaches::destroyRequestCache();
       $device = AlmanacKeys::getLiveDevice();
@@ -94,6 +97,37 @@ final class PhabricatorRepositoryPullLocalDaemon
             $repo->getMonogram()));
 
         $retry_after[$message->getRepositoryID()] = time();
+      }
+
+      if ($device) {
+        $unsynchronized = $this->loadUnsynchronizedRepositories($device);
+        $now = PhabricatorTime::getNow();
+        foreach ($unsynchronized as $repository) {
+          $id = $repository->getID();
+
+          $this->log(
+            pht(
+              'Cluster repository ("%s") is out of sync on this node ("%s").',
+              $repository->getDisplayName(),
+              $device->getName()));
+
+          // Don't let out-of-sync conditions trigger updates too frequently,
+          // since we don't want to get trapped in a death spiral if sync is
+          // failing.
+          $sync_at = idx($last_sync, $id, 0);
+          $wait_duration = ($now - $sync_at);
+          if ($wait_duration < $sync_wait) {
+            $this->log(
+              pht(
+                'Skipping forced out-of-sync update because the last update '.
+                'was too recent (%s seconds ago).',
+                $wait_duration));
+            continue;
+          }
+
+          $last_sync[$id] = $now;
+          $retry_after[$id] = $now;
+        }
       }
 
       // If any repositories were deleted, remove them from the retry timer map
@@ -519,6 +553,43 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
 
     return false;
+  }
+
+  private function loadUnsynchronizedRepositories(AlmanacDevice $device) {
+    $viewer = $this->getViewer();
+    $table = new PhabricatorRepositoryWorkingCopyVersion();
+    $conn = $table->establishConnection('r');
+
+    $our_versions = queryfx_all(
+      $conn,
+      'SELECT repositoryPHID, repositoryVersion FROM %R WHERE devicePHID = %s',
+      $table,
+      $device->getPHID());
+    $our_versions = ipull($our_versions, 'repositoryVersion', 'repositoryPHID');
+
+    $max_versions = queryfx_all(
+      $conn,
+      'SELECT repositoryPHID, MAX(repositoryVersion) maxVersion FROM %R
+        GROUP BY repositoryPHID',
+      $table);
+    $max_versions = ipull($max_versions, 'maxVersion', 'repositoryPHID');
+
+    $unsynchronized_phids = array();
+    foreach ($max_versions as $repository_phid => $max_version) {
+      $our_version = idx($our_versions, $repository_phid);
+      if (($our_version === null) || ($our_version < $max_version)) {
+        $unsynchronized_phids[] = $repository_phid;
+      }
+    }
+
+    if (!$unsynchronized_phids) {
+      return array();
+    }
+
+    return id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($unsynchronized_phids)
+      ->execute();
   }
 
 }

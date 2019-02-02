@@ -1279,12 +1279,39 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->willBuildEditForm($object, $fields);
 
+    $request_path = $request->getRequestURI()
+      ->setQueryParams(array());
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->setAction($request_path)
       ->addHiddenInput('editEngine', 'true');
 
     foreach ($this->contextParameters as $param) {
       $form->addHiddenInput($param, $request->getStr($param));
+    }
+
+    $requires_mfa = false;
+    if ($object instanceof PhabricatorEditEngineMFAInterface) {
+      $mfa_engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
+        ->setViewer($viewer);
+      $requires_mfa = $mfa_engine->shouldRequireMFA();
+    }
+
+    if ($requires_mfa) {
+      $message = pht(
+        'You will be required to provide multi-factor credentials to make '.
+        'changes.');
+      $form->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_MFA)
+          ->setErrors(array($message)));
+
+      // TODO: This should also set workflow on the form, so the user doesn't
+      // lose any form data if they "Cancel". However, Maniphest currently
+      // overrides "newEditResponse()" if the request is Ajax and returns a
+      // bag of view data. This can reasonably be cleaned up when workboards
+      // get their next iteration.
     }
 
     foreach ($fields as $field) {
@@ -1565,11 +1592,19 @@ abstract class PhabricatorEditEngine
 
     $comment_uri = $this->getEditURI($object, 'comment/');
 
+    $requires_mfa = false;
+    if ($object instanceof PhabricatorEditEngineMFAInterface) {
+      $mfa_engine = PhabricatorEditEngineMFAEngine::newEngineForObject($object)
+        ->setViewer($viewer);
+      $requires_mfa = $mfa_engine->shouldRequireMFA();
+    }
+
     $view = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($object_phid)
       ->setHeaderText($header_text)
       ->setAction($comment_uri)
+      ->setRequiresMFA($requires_mfa)
       ->setSubmitButtonName($button_text);
 
     $draft = PhabricatorVersionedDraft::loadDraft(

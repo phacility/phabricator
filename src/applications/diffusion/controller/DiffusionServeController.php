@@ -528,7 +528,7 @@ final class DiffusionServeController extends DiffusionController {
         unset($query_data[$key]);
       }
     }
-    $query_string = http_build_query($query_data, '', '&');
+    $query_string = phutil_build_http_querystring($query_data);
 
     // We're about to wipe out PATH with the rest of the environment, so
     // resolve the binary first.

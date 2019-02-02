@@ -57,6 +57,14 @@ final class PhabricatorAuthFactorProvider
     return $this;
   }
 
+  public function getEnrollMessage() {
+    return $this->getAuthFactorProviderProperty('enroll-message');
+  }
+
+  public function setEnrollMessage($message) {
+    return $this->setAuthFactorProviderProperty('enroll-message', $message);
+  }
+
   public function attachFactor(PhabricatorAuthFactor $factor) {
     $this->factor = $factor;
     return $this;

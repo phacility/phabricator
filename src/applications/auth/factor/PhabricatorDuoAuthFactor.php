@@ -157,6 +157,10 @@ final class PhabricatorDuoAuthFactor
     PhabricatorUser $user) {
 
     $token = $this->loadMFASyncToken($provider, $request, $form, $user);
+    if ($this->isAuthResult($token)) {
+      $form->appendChild($this->newAutomaticControl($token));
+      return;
+    }
 
     $enroll = $token->getTemporaryTokenProperty('duo.enroll');
     $duo_id = $token->getTemporaryTokenProperty('duo.user-id');
@@ -350,6 +354,7 @@ final class PhabricatorDuoAuthFactor
 
     $external_uri = null;
     $result_code = $result['response']['result'];
+    $status_message = $result['response']['status_msg'];
     switch ($result_code) {
       case 'auth':
       case 'allow':
@@ -376,7 +381,13 @@ final class PhabricatorDuoAuthFactor
         return $this->newResult()
           ->setIsError(true)
           ->setErrorMessage(
-            pht('Your account is not permitted to access this system.'));
+            pht(
+              'Your Duo account ("%s") is not permitted to access this '.
+              'system. Contact your Duo administrator for help. '.
+              'The Duo preauth API responded with status message ("%s"): %s',
+              $duo_user,
+              $result_code,
+              $status_message));
     }
 
     // Duo's "/enroll" API isn't repeatable for the same username. If we're
@@ -476,7 +487,10 @@ final class PhabricatorDuoAuthFactor
           ->setIsError(true)
           ->setErrorMessage(
             pht(
-              'Duo has denied you access. Duo status message ("%s"): %s',
+              'Your Duo account ("%s") is not permitted to access this '.
+              'system. Contact your Duo administrator for help. The Duo '.
+              'preauth API responded with status message ("%s"): %s',
+              $duo_user,
               $next_step,
               $status_message));
     }
@@ -504,10 +518,7 @@ final class PhabricatorDuoAuthFactor
     $push_info = array(
       pht('Domain') => $this->getInstallDisplayName(),
     );
-    foreach ($push_info as $k => $v) {
-      $push_info[$k] = rawurlencode($k).'='.rawurlencode($v);
-    }
-    $push_info = implode('&', $push_info);
+    $push_info = phutil_build_http_querystring($push_info);
 
     $parameters = array(
       'username' => $duo_user,

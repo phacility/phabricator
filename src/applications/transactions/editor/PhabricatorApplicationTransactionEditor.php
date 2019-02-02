@@ -88,6 +88,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $hasRequiredMFA = false;
   private $request;
   private $cancelURI;
+  private $extensions;
 
   const STORAGE_ENCODING_BINARY = 'binary';
 
@@ -1013,6 +1014,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       $errors[] = $this->validateAllTransactions($object, $xactions);
+      $errors[] = $this->validateTransactionsWithExtensions($object, $xactions);
       $errors = array_mergev($errors);
 
       $continue_on_missing = $this->getContinueOnMissingFields();
@@ -2667,9 +2669,15 @@ abstract class PhabricatorApplicationTransactionEditor
     $transaction_type) {
     $errors = array();
 
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $this->getActingAsPHID());
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($this->getActor())
+      ->withUserPHIDs(array($this->getActingAsPHID()))
+      ->withFactorProviderStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+          PhabricatorAuthFactorProviderStatus::STATUS_DEPRECATED,
+        ))
+      ->execute();
 
     foreach ($xactions as $xaction) {
       if (!$factors) {
@@ -3286,7 +3294,7 @@ abstract class PhabricatorApplicationTransactionEditor
       // move the other transactions down so they provide context above the
       // actual comment.
 
-      $comment = $xaction->getBodyForMail();
+      $comment = $this->getBodyForTextMail($xaction);
       if ($comment !== null) {
         $is_comment = true;
         $comments[] = array(
@@ -3299,12 +3307,12 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       if (!$is_comment || !$seen_comment) {
-        $header = $xaction->getTitleForTextMail();
+        $header = $this->getTitleForTextMail($xaction);
         if ($header !== null) {
           $headers[] = $header;
         }
 
-        $header_html = $xaction->getTitleForHTMLMail();
+        $header_html = $this->getTitleForHTMLMail($xaction);
         if ($header_html !== null) {
           $headers_html[] = $header_html;
         }
@@ -3384,12 +3392,12 @@ abstract class PhabricatorApplicationTransactionEditor
       // If this is not the first comment in the mail, add the header showing
       // who wrote the comment immediately above the comment.
       if (!$is_initial) {
-        $header = $xaction->getTitleForTextMail();
+        $header = $this->getTitleForTextMail($xaction);
         if ($header !== null) {
           $body->addRawPlaintextSection($header);
         }
 
-        $header_html = $xaction->getTitleForHTMLMail();
+        $header_html = $this->getTitleForHTMLMail($xaction);
         if ($header_html !== null) {
           $body->addRawHTMLSection($header_html);
         }
@@ -4848,6 +4856,13 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
   private function requireMFA(PhabricatorLiskDAO $object, array $xactions) {
+    $actor = $this->getActor();
+
+    // Let omnipotent editors skip MFA. This is mostly aimed at scripts.
+    if ($actor->isOmnipotent()) {
+      return;
+    }
+
     $editor_class = get_class($this);
 
     $object_phid = $object->getPHID();
@@ -4861,8 +4876,6 @@ abstract class PhabricatorApplicationTransactionEditor
         'editor(%s).new()',
         $editor_class);
     }
-
-    $actor = $this->getActor();
 
     $request = $this->getRequest();
     if ($request === null) {
@@ -4974,5 +4987,113 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return $xactions;
   }
+
+  private function getTitleForTextMail(
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+      $comment = $xtype->getTitleForTextMail();
+      if ($comment !== false) {
+        return $comment;
+      }
+    }
+
+    return $xaction->getTitleForTextMail();
+  }
+
+  private function getTitleForHTMLMail(
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+      $comment = $xtype->getTitleForHTMLMail();
+      if ($comment !== false) {
+        return $comment;
+      }
+    }
+
+    return $xaction->getTitleForHTMLMail();
+  }
+
+
+  private function getBodyForTextMail(
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $xtype = clone $xtype;
+      $xtype->setStorage($xaction);
+      $comment = $xtype->getBodyForTextMail();
+      if ($comment !== false) {
+        return $comment;
+      }
+    }
+
+    return $xaction->getBodyForMail();
+  }
+
+
+/* -(  Extensions  )--------------------------------------------------------- */
+
+
+  private function validateTransactionsWithExtensions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    $errors = array();
+
+    $extensions = $this->getEditorExtensions();
+    foreach ($extensions as $extension) {
+      $extension_errors = $extension
+        ->setObject($object)
+        ->validateTransactions($object, $xactions);
+
+      assert_instances_of(
+        $extension_errors,
+        'PhabricatorApplicationTransactionValidationError');
+
+      $errors[] = $extension_errors;
+    }
+
+    return array_mergev($errors);
+  }
+
+  private function getEditorExtensions() {
+    if ($this->extensions === null) {
+      $this->extensions = $this->newEditorExtensions();
+    }
+    return $this->extensions;
+  }
+
+  private function newEditorExtensions() {
+    $extensions = PhabricatorEditorExtension::getAllExtensions();
+
+    $actor = $this->getActor();
+    $object = $this->object;
+    foreach ($extensions as $key => $extension) {
+
+      $extension = id(clone $extension)
+        ->setViewer($actor)
+        ->setEditor($this)
+        ->setObject($object);
+
+      if (!$extension->supportsObject($this, $object)) {
+        unset($extensions[$key]);
+        continue;
+      }
+
+      $extensions[$key] = $extension;
+    }
+
+    return $extensions;
+  }
+
 
 }

@@ -81,6 +81,16 @@ final class PhabricatorAuthFactorProviderViewController
       pht('Factor Type'),
       $provider->getFactor()->getFactorName());
 
+
+    $custom_enroll = $provider->getEnrollMessage();
+    if (strlen($custom_enroll)) {
+      $view->addSectionHeader(
+        pht('Custom Enroll Message'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent(
+        new PHUIRemarkupView($viewer, $custom_enroll));
+    }
+
     return $view;
   }
 
@@ -102,6 +112,14 @@ final class PhabricatorAuthFactorProviderViewController
         ->setHref($this->getApplicationURI("mfa/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Customize Enroll Message'))
+        ->setIcon('fa-commenting-o')
+        ->setHref($this->getApplicationURI("mfa/message/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
 
     return $curtain;
   }

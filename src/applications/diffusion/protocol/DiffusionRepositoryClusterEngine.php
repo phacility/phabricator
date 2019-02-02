@@ -188,7 +188,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     if ($this_version) {
       $this_version = (int)$this_version->getRepositoryVersion();
     } else {
-      $this_version = -1;
+      $this_version = null;
     }
 
     if ($versions) {
@@ -197,7 +197,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       // leader, we want to fetch from a leader and then update our version.
 
       $max_version = (int)max(mpull($versions, 'getRepositoryVersion'));
-      if ($max_version > $this_version) {
+      if (($this_version === null) || ($max_version > $this_version)) {
         if ($repository->isHosted()) {
           $fetchable = array();
           foreach ($versions as $version) {
@@ -205,6 +205,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
               $fetchable[] = $version->getDevicePHID();
             }
           }
+
 
           $this->synchronizeWorkingCopyFromDevices(
             $fetchable,
@@ -445,10 +446,10 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     if ($this_version) {
       $this_version = (int)$this_version->getRepositoryVersion();
     } else {
-      $this_version = -1;
+      $this_version = null;
     }
 
-    if ($new_version > $this_version) {
+    if (($this_version === null) || ($new_version > $this_version)) {
       PhabricatorRepositoryWorkingCopyVersion::updateVersion(
         $repository_phid,
         $device_phid,
