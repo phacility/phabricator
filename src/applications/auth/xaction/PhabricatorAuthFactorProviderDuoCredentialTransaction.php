@@ -27,6 +27,10 @@ final class PhabricatorAuthFactorProviderDuoCredentialTransaction
     $actor = $this->getActor();
     $errors = array();
 
+    if (!$this->isDuoProvider($object)) {
+      return $errors;
+    }
+
     $old_value = $this->generateOldValue($object);
     if ($this->isEmptyTextTransaction($old_value, $xactions)) {
       $errors[] = $this->newRequiredError(
