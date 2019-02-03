@@ -26,6 +26,10 @@ final class PhabricatorAuthFactorProviderDuoHostnameTransaction
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
+    if (!$this->isDuoProvider($object)) {
+      return $errors;
+    }
+
     $old_value = $this->generateOldValue($object);
     if ($this->isEmptyTextTransaction($old_value, $xactions)) {
       $errors[] = $this->newRequiredError(
