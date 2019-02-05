@@ -40,6 +40,15 @@ final class PhabricatorUserUsernameTransaction
       $this->renderNewValue());
   }
 
+  public function getTitleForFeed() {
+    return pht(
+      '%s renamed %s from %s to %s.',
+      $this->renderAuthor(),
+      $this->renderObject(),
+      $this->renderOldValue(),
+      $this->renderNewValue());
+  }
+
   public function validateTransactions($object, array $xactions) {
     $actor = $this->getActor();
     $errors = array();
