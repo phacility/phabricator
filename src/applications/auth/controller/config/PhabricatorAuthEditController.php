@@ -6,8 +6,9 @@ final class PhabricatorAuthEditController
   public function handleRequest(AphrontRequest $request) {
     $this->requireApplicationCapability(
       AuthManageProvidersCapability::CAPABILITY);
-    $viewer = $request->getUser();
-    $provider_class = $request->getURIData('className');
+
+    $viewer = $this->getViewer();
+    $provider_class = $request->getStr('provider');
     $config_id = $request->getURIData('id');
 
     if ($config_id) {
@@ -275,6 +276,7 @@ final class PhabricatorAuthEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->addHiddenInput('provider', $provider_class)
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->setLabel(pht('Allow'))

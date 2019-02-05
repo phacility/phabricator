@@ -311,6 +311,12 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return 'Generic';
   }
 
+  public function newIconView() {
+    return id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+      ->setSpriteIcon($this->getLoginIcon());
+  }
+
   public function isLoginFormAButton() {
     return false;
   }

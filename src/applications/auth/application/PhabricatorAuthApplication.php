@@ -48,8 +48,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         '' => 'PhabricatorAuthListController',
         'config/' => array(
           'new/' => 'PhabricatorAuthNewController',
-          'new/(?P<className>[^/]+)/' => 'PhabricatorAuthEditController',
-          'edit/(?P<id>\d+)/' => 'PhabricatorAuthEditController',
+          'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorAuthEditController',
           '(?P<action>enable|disable)/(?P<id>\d+)/'
             => 'PhabricatorAuthDisableController',
         ),
