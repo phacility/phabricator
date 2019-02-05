@@ -38,6 +38,9 @@ final class PhabricatorOwnersPackage
   const AUTOREVIEW_BLOCK = 'block';
   const AUTOREVIEW_BLOCK_ALWAYS = 'block-always';
 
+  const AUDITING_NONE = 'none';
+  const AUDITING_AUDIT = 'audit';
+
   const DOMINION_STRONG = 'strong';
   const DOMINION_WEAK = 'weak';
 
@@ -564,6 +567,14 @@ final class PhabricatorOwnersPackage
     return '/owners/package/'.$this->getID().'/';
   }
 
+  public function getAuditingState() {
+    if ($this->getAuditingEnabled()) {
+      return self::AUDITING_AUDIT;
+    } else {
+      return self::AUDITING_NONE;
+    }
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -720,11 +731,10 @@ final class PhabricatorOwnersPackage
       'label' => $review_label,
     );
 
+    $audit_value = $this->getAuditingState();
     if ($this->getAuditingEnabled()) {
-      $audit_value = 'audit';
       $audit_label = pht('Auditing Enabled');
     } else {
-      $audit_value = 'none';
       $audit_label = pht('No Auditing');
     }
 
