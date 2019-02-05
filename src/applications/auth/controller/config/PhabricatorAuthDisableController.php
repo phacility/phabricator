@@ -6,7 +6,8 @@ final class PhabricatorAuthDisableController
   public function handleRequest(AphrontRequest $request) {
     $this->requireApplicationCapability(
       AuthManageProvidersCapability::CAPABILITY);
-    $viewer = $request->getUser();
+
+    $viewer = $this->getViewer();
     $config_id = $request->getURIData('id');
     $action = $request->getURIData('action');
 
@@ -24,6 +25,7 @@ final class PhabricatorAuthDisableController
     }
 
     $is_enable = ($action === 'enable');
+    $done_uri = $config->getURI();
 
     if ($request->isDialogFormPost()) {
       $xactions = array();
@@ -39,8 +41,7 @@ final class PhabricatorAuthDisableController
         ->setContinueOnNoEffect(true)
         ->applyTransactions($config, $xactions);
 
-      return id(new AphrontRedirectResponse())->setURI(
-        $this->getApplicationURI());
+      return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
 
     if ($is_enable) {
@@ -64,8 +65,9 @@ final class PhabricatorAuthDisableController
       // account and pop a warning like "YOU WILL NO LONGER BE ABLE TO LOGIN
       // YOU GOOF, YOU PROBABLY DO NOT MEAN TO DO THIS". None of this is
       // critical and we can wait to see how users manage to shoot themselves
-      // in the feet. Shortly, `bin/auth` will be able to recover from these
-      // types of mistakes.
+      // in the feet.
+
+      // `bin/auth` can recover from these types of mistakes.
 
       $title = pht('Disable Provider?');
       $body = pht(
@@ -77,14 +79,11 @@ final class PhabricatorAuthDisableController
       $button = pht('Disable Provider');
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle($title)
       ->appendChild($body)
-      ->addCancelButton($this->getApplicationURI())
+      ->addCancelButton($done_uri)
       ->addSubmitButton($button);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

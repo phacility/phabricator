@@ -70,6 +70,19 @@ final class PhabricatorAuthProviderConfigQuery
     return $where;
   }
 
+  protected function willFilterPage(array $configs) {
+
+    foreach ($configs as $key => $config) {
+      $provider = $config->getProvider();
+      if (!$provider) {
+        unset($configs[$key]);
+        continue;
+      }
+    }
+
+    return $configs;
+  }
+
   public function getQueryApplicationClass() {
     return 'PhabricatorAuthApplication';
   }
