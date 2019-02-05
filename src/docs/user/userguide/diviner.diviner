@@ -3,17 +3,28 @@
 
 Using Diviner, a documentation generator.
 
-= Overview =
+Overview
+========
 
-NOTE: Diviner is new and not yet generally useful.
+Diviner is an application for creating technical documentation.
 
-= Generating Documentation =
+This article is maintained in a text file in the Phabricator repository and
+generated into the display document you are currently reading using Diviner.
+
+Beyond generating articles, Diviner can also analyze source code and generate
+documentation about classes, methods, and other primitives.
+
+
+Generating Documentation
+========================
 
 To generate documentation, run:
 
   phabricator/ $ ./bin/diviner generate --book <book>
 
-= .book Files =
+
+Diviner ".book" Files
+=====================
 
 Diviner documentation books are configured using JSON `.book` files, which
 look like this:
