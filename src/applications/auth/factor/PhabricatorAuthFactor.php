@@ -123,6 +123,7 @@ abstract class PhabricatorAuthFactor extends Phobject {
       ->setUserPHID($viewer->getPHID())
       ->setSessionPHID($viewer->getSession()->getPHID())
       ->setFactorPHID($config->getPHID())
+      ->setIsNewChallenge(true)
       ->setWorkflowKey($engine->getWorkflowKey());
   }
 
@@ -283,8 +284,11 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
     $error = $result->getErrorMessage();
 
-    $icon = id(new PHUIIconView())
-      ->setIcon('fa-clock-o', 'red');
+    $icon = $result->getIcon();
+    if (!$icon) {
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-clock-o', 'red');
+    }
 
     return id(new PHUIFormTimerControl())
       ->setIcon($icon)
@@ -295,8 +299,11 @@ abstract class PhabricatorAuthFactor extends Phobject {
   private function newAnsweredControl(
     PhabricatorAuthFactorResult $result) {
 
-    $icon = id(new PHUIIconView())
-      ->setIcon('fa-check-circle-o', 'green');
+    $icon = $result->getIcon();
+    if (!$icon) {
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-check-circle-o', 'green');
+    }
 
     return id(new PHUIFormTimerControl())
       ->setIcon($icon)
@@ -309,8 +316,11 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
     $error = $result->getErrorMessage();
 
-    $icon = id(new PHUIIconView())
-      ->setIcon('fa-times', 'red');
+    $icon = $result->getIcon();
+    if (!$icon) {
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-times', 'red');
+    }
 
     return id(new PHUIFormTimerControl())
       ->setIcon($icon)
@@ -323,8 +333,11 @@ abstract class PhabricatorAuthFactor extends Phobject {
 
     $error = $result->getErrorMessage();
 
-    $icon = id(new PHUIIconView())
-      ->setIcon('fa-commenting', 'green');
+    $icon = $result->getIcon();
+    if (!$icon) {
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-commenting', 'green');
+    }
 
     return id(new PHUIFormTimerControl())
       ->setIcon($icon)
