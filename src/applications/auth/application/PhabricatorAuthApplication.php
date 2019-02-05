@@ -86,7 +86,9 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             => 'PhabricatorAuthSSHKeyRevokeController',
           'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
         ),
+
         'password/' => 'PhabricatorAuthSetPasswordController',
+        'external/' => 'PhabricatorAuthSetExternalController',
 
         'mfa/' => array(
           $this->getQueryRoutePattern() =>

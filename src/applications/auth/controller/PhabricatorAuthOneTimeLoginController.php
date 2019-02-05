@@ -225,17 +225,45 @@ final class PhabricatorAuthOneTimeLoginController
       return (string)new PhutilURI($panel_uri, $params);
     }
 
-    $providers = id(new PhabricatorAuthProviderConfigQuery())
+    // Check if the user already has external accounts linked. If they do,
+    // it's not obvious why they aren't using them to log in, but assume they
+    // know what they're doing. We won't send them to the link workflow.
+    $accounts = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($user)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->execute();
+
+    $configs = id(new PhabricatorAuthProviderConfigQuery())
       ->setViewer($user)
       ->withIsEnabled(true)
       ->execute();
+
+    $linkable = array();
+    foreach ($configs as $config) {
+      if (!$config->getShouldAllowLink()) {
+        continue;
+      }
+
+      $provider = $config->getProvider();
+      if (!$provider->isLoginFormAButton()) {
+        continue;
+      }
+
+      $linkable[] = $provider;
+    }
+
+    // If there's at least one linkable provider, and the user doesn't already
+    // have accounts, send the user to the link workflow.
+    if (!$accounts && $linkable) {
+      return '/auth/external/';
+    }
 
     // If there are no configured providers and the user is an administrator,
     // send them to Auth to configure a provider. This is probably where they
     // want to go. You can end up in this state by accidentally losing your
     // first session during initial setup, or after restoring exported data
     // from a hosted instance.
-    if (!$providers && $user->getIsAdmin()) {
+    if (!$configs && $user->getIsAdmin()) {
       return '/auth/';
     }
 
