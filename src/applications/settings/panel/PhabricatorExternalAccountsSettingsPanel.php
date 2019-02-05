@@ -41,13 +41,6 @@ final class PhabricatorExternalAccountsSettingsPanel
       ->setUser($viewer)
       ->setNoDataString(pht('You have no linked accounts.'));
 
-    $login_accounts = 0;
-    foreach ($accounts as $account) {
-      if ($account->isUsableForLogin()) {
-        $login_accounts++;
-      }
-    }
-
     foreach ($accounts as $account) {
       $item = new PHUIObjectItemView();
 
@@ -71,8 +64,6 @@ final class PhabricatorExternalAccountsSettingsPanel
             'Disabled (an administrator has disabled login for this '.
             'account provider).'));
       }
-
-      $can_unlink = $can_unlink && (!$can_login || ($login_accounts > 1));
 
       $can_refresh = $provider && $provider->shouldAllowAccountRefresh();
       if ($can_refresh) {
