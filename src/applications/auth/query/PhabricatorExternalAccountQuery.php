@@ -168,35 +168,4 @@ final class PhabricatorExternalAccountQuery
     return 'PhabricatorPeopleApplication';
   }
 
-  /**
-   * Attempts to find an external account and if none exists creates a new
-   * external account with a shiny new ID and PHID.
-   *
-   * NOTE: This function assumes the first item in various query parameters is
-   * the correct value to use in creating a new external account.
-   */
-  public function loadOneOrCreate() {
-    $account = $this->executeOne();
-    if (!$account) {
-      $account = new PhabricatorExternalAccount();
-      if ($this->accountIDs) {
-        $account->setAccountID(reset($this->accountIDs));
-      }
-      if ($this->accountTypes) {
-        $account->setAccountType(reset($this->accountTypes));
-      }
-      if ($this->accountDomains) {
-        $account->setAccountDomain(reset($this->accountDomains));
-      }
-      if ($this->accountSecrets) {
-        $account->setAccountSecret(reset($this->accountSecrets));
-      }
-      if ($this->userPHIDs) {
-        $account->setUserPHID(reset($this->userPHIDs));
-      }
-      $account->save();
-    }
-    return $account;
-  }
-
 }
