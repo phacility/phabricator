@@ -1131,9 +1131,10 @@ final class PhabricatorUser
     $this->openTransaction();
       $this->delete();
 
-      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $externals = id(new PhabricatorExternalAccountQuery())
+        ->setViewer($engine->getViewer())
+        ->withUserPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($externals as $external) {
         $external->delete();
       }
