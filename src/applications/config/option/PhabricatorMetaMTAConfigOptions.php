@@ -187,12 +187,33 @@ EODOC
       PhabricatorEnv::getDoclink('Configuring Outbound Email'),
       pht('Configuring Outbound Email')));
 
+    $default_description = $this->deformat(pht(<<<EODOC
+Default address used as a "From" or "To" email address when an address is
+required but no meaningful address is available.
+
+If you configure inbound mail, you generally do not need to set this:
+Phabricator will automatically generate and use a suitable mailbox on the
+inbound mail domain.
+
+Otherwise, this option should be configured to point at a valid mailbox which
+discards all mail sent to it. If you point it at an invalid mailbox, mail sent
+by Phabricator and some mail sent by users will bounce. If you point it at a
+real user mailbox, that user will get a lot of mail they don't want.
+
+For further guidance, see **[[ %s | %s ]]** in the documentation.
+EODOC
+      ,
+      PhabricatorEnv::getDoclink('Configuring Outbound Email'),
+      pht('Configuring Outbound Email')));
+
     return array(
       $this->newOption('cluster.mailers', 'cluster.mailers', array())
         ->setHidden(true)
         ->setDescription($mailers_description),
       $this->newOption('metamta.default-address', 'string', null)
-        ->setDescription(pht('Default "From" address.')),
+        ->setLocked(true)
+        ->setSummary(pht('Default address used when generating mail.'))
+        ->setDescription($default_description),
       $this->newOption(
         'metamta.one-mail-per-recipient',
         'bool',

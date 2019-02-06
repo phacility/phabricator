@@ -47,18 +47,31 @@ not. For more information on using daemons, see
 @{article:Managing Daemons with phd}.
 
 
-Basics
-======
+Outbound "From" and "To" Addresses
+==================================
 
-Before configuring outbound mail, you should first set up
-`metamta.default-address` in Configuration. This determines where mail is sent
-"From" by default.
+When Phabricator sends outbound mail, it must select some "From" address to
+send mail from, since mailers require this.
 
-If your domain is `example.org`, set this to something
-like `noreply@example.org`.
+When mail only has "CC" recipients, Phabricator generates a dummy "To" address,
+since some mailers require this and some users write mail rules that depend
+on whether they appear in the "To" or "CC" line.
 
-Ideally, this should be a valid, deliverable address that doesn't bounce if
-users accidentally send mail to it.
+In both cases, the address should ideally correspond to a valid, deliverable
+mailbox that accepts the mail and then simply discards it. If the address is
+not valid, some outbound mail will bounce, and users will receive bounces when
+they "Reply All" even if the other recipients for the message are valid. In
+contrast, if the address is a real user address, that user will receive a lot
+of mail they probably don't want.
+
+If you plan to configure //inbound// mail later, you usually don't need to do
+anything. Phabricator will automatically create a `noreply@` mailbox which
+works the right way (accepts and discards all mail it receives) and
+automatically use it when generating addresses.
+
+If you don't plan to configure inbound mail, you may need to configure an
+address for Phabricator to use. You can do this by setting
+`metamta.default-address`.
 
 
 Configuring Mailers
