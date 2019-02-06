@@ -220,9 +220,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
       $adapter->getAdapterDomain(),
       $account_id);
     if (!$account) {
-      $account = id(new PhabricatorExternalAccount())
-        ->setAccountType($adapter->getAdapterType())
-        ->setAccountDomain($adapter->getAdapterDomain())
+      $account = $this->newExternalAccount()
         ->setAccountID($account_id);
     }
 
@@ -299,8 +297,18 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return false;
   }
 
-  public function getDefaultExternalAccount() {
-    throw new PhutilMethodNotImplementedException();
+  public function newDefaultExternalAccount() {
+    return $this->newExternalAccount();
+  }
+
+  protected function newExternalAccount() {
+    $config = $this->getProviderConfig();
+    $adapter = $this->getAdapter();
+
+    return id(new PhabricatorExternalAccount())
+      ->setAccountType($adapter->getAdapterType())
+      ->setAccountDomain($adapter->getAdapterDomain())
+      ->setProviderConfigPHID($config->getPHID());
   }
 
   public function getLoginOrder() {

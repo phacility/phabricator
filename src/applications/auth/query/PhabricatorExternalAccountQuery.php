@@ -71,6 +71,26 @@ final class PhabricatorExternalAccountQuery
   }
 
   protected function willFilterPage(array $accounts) {
+    $viewer = $this->getViewer();
+
+    $configs = id(new PhabricatorAuthProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(mpull($accounts, 'getProviderConfigPHID'))
+      ->execute();
+    $configs = mpull($configs, null, 'getPHID');
+
+    foreach ($accounts as $key => $account) {
+      $config_phid = $account->getProviderConfigPHID();
+      $config = idx($configs, $config_phid);
+
+      if (!$config) {
+        unset($accounts[$key]);
+        continue;
+      }
+
+      $account->attachProviderConfig($config);
+    }
+
     if ($this->needImages) {
       $file_phids = mpull($accounts, 'getProfileImagePHID');
       $file_phids = array_filter($file_phids);

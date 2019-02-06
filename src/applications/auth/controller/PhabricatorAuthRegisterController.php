@@ -671,7 +671,7 @@ final class PhabricatorAuthRegisterController
     }
 
     $provider = head($providers);
-    $account = $provider->getDefaultExternalAccount();
+    $account = $provider->newDefaultExternalAccount();
 
     return array($account, $provider, $response);
   }

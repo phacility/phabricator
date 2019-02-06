@@ -359,14 +359,6 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     return true;
   }
 
-  public function getDefaultExternalAccount() {
-    $adapter = $this->getAdapter();
-
-    return id(new PhabricatorExternalAccount())
-      ->setAccountType($adapter->getAdapterType())
-      ->setAccountDomain($adapter->getAdapterDomain());
-  }
-
   protected function willSaveAccount(PhabricatorExternalAccount $account) {
     parent::willSaveAccount($account);
     $account->setUserPHID($account->getAccountID());
