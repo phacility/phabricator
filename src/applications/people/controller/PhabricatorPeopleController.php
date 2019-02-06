@@ -28,10 +28,6 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
 
       if ($viewer->getIsAdmin()) {
         $nav->addLabel(pht('User Administration'));
-        if (PhabricatorLDAPAuthProvider::getLDAPProvider()) {
-          $nav->addFilter('ldap', pht('Import from LDAP'));
-        }
-
         $nav->addFilter('logs', pht('Activity Logs'));
         $nav->addFilter('invite', pht('Email Invitations'));
       }
