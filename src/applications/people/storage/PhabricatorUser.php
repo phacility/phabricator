@@ -557,7 +557,7 @@ final class PhabricatorUser
 
   public static function describeValidUsername() {
     return pht(
-      'Usernames must contain only numbers, letters, period, underscore and '.
+      'Usernames must contain only numbers, letters, period, underscore, and '.
       'hyphen, and can not end with a period. They must have no more than %d '.
       'characters.',
       new PhutilNumber(self::MAXIMUM_USERNAME_LENGTH));
