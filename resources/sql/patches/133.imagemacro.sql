@@ -1,2 +1,2 @@
-ALTER IGNORE TABLE `{$NAMESPACE}_file`.`file_imagemacro`
-  ADD UNIQUE `name` (`name`);
+ALTER TABLE `{$NAMESPACE}_file`.`file_imagemacro`
+  ADD UNIQUE KEY `name` (`name`);
