@@ -11,9 +11,11 @@ final class PhabricatorAuthRegisterController
     $viewer = $this->getViewer();
     $account_key = $request->getURIData('akey');
 
-    if ($request->getUser()->isLoggedIn()) {
+    if ($viewer->isLoggedIn()) {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
+
+    $invite = $this->loadInvite();
 
     $is_setup = false;
     if (strlen($account_key)) {
@@ -27,15 +29,13 @@ final class PhabricatorAuthRegisterController
       $is_default = true;
       $is_setup = true;
     } else {
-      list($account, $provider, $response) = $this->loadDefaultAccount();
+      list($account, $provider, $response) = $this->loadDefaultAccount($invite);
       $is_default = true;
     }
 
     if ($response) {
       return $response;
     }
-
-    $invite = $this->loadInvite();
 
     if (!$is_setup) {
       if (!$provider->shouldAllowRegistration()) {
@@ -643,17 +643,20 @@ final class PhabricatorAuthRegisterController
       ->appendChild($view);
   }
 
-  private function loadDefaultAccount() {
+  private function loadDefaultAccount($invite) {
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();
     $account = null;
     $provider = null;
     $response = null;
 
     foreach ($providers as $key => $candidate_provider) {
-      if (!$candidate_provider->shouldAllowRegistration()) {
-        unset($providers[$key]);
-        continue;
+      if (!$invite) {
+        if (!$candidate_provider->shouldAllowRegistration()) {
+          unset($providers[$key]);
+          continue;
+        }
       }
+
       if (!$candidate_provider->isDefaultRegistrationProvider()) {
         unset($providers[$key]);
       }
