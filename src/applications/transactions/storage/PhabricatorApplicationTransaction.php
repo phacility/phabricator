@@ -169,6 +169,14 @@ abstract class PhabricatorApplicationTransaction
     return (bool)$this->getMetadataValue('core.mfa', false);
   }
 
+  public function setIsLockOverrideTransaction($override) {
+    return $this->setMetadataValue('core.lock-override', $override);
+  }
+
+  public function getIsLockOverrideTransaction() {
+    return (bool)$this->getMetadataValue('core.lock-override', false);
+  }
+
   public function attachComment(
     PhabricatorApplicationTransactionComment $comment) {
     $this->comment = $comment;
@@ -1528,6 +1536,12 @@ abstract class PhabricatorApplicationTransaction
         if ($xaction->getTransactionType() === $type_mfa) {
           return false;
         }
+      }
+
+      // Don't group lock override and non-override transactions together.
+      $is_override = $this->getIsLockOverrideTransaction();
+      if ($is_override != $xaction->getIsLockOverrideTransaction()) {
+        return false;
       }
     }
 

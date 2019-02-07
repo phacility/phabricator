@@ -1115,6 +1115,16 @@ abstract class PhabricatorApplicationTransactionEditor
         $transaction_open = true;
       }
 
+      // We can technically test any object for CAN_INTERACT, but we can
+      // run into some issues in doing so (for example, in project unit tests).
+      // For now, only test for CAN_INTERACT if the object is explicitly a
+      // lockable object.
+
+      $was_locked = false;
+      if ($object instanceof PhabricatorEditEngineLockableInterface) {
+        $was_locked = !PhabricatorPolicyFilter::canInteract($actor, $object);
+      }
+
       foreach ($xactions as $xaction) {
         $this->applyInternalEffects($object, $xaction);
       }
@@ -1132,6 +1142,10 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       foreach ($xactions as $xaction) {
+        if ($was_locked) {
+          $xaction->setIsLockOverrideTransaction(true);
+        }
+
         $xaction->setObjectPHID($object->getPHID());
         if ($xaction->getComment()) {
           $xaction->setPHID($xaction->generatePHID());
