@@ -14,7 +14,15 @@ final class PhabricatorPeopleApproveController
       return new Aphront404Response();
     }
 
-    $done_uri = $this->getApplicationURI('query/approval/');
+    $via = $request->getURIData('via');
+    switch ($via) {
+      case 'profile':
+        $done_uri = urisprintf('/people/manage/%d/', $user->getID());
+        break;
+      default:
+        $done_uri = $this->getApplicationURI('query/approval/');
+        break;
+    }
 
     if ($user->getIsApproved()) {
       return $this->newDialog()

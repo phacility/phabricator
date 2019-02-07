@@ -51,7 +51,8 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
           'send/'
             => 'PhabricatorPeopleInviteSendController',
         ),
-        'approve/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleApproveController',
+        'approve/(?P<id>[1-9]\d*)/(?:via/(?P<via>[^/]+)/)?'
+          => 'PhabricatorPeopleApproveController',
         '(?P<via>disapprove)/(?P<id>[1-9]\d*)/'
           => 'PhabricatorPeopleDisableController',
         '(?P<via>disable)/(?P<id>[1-9]\d*)/'
