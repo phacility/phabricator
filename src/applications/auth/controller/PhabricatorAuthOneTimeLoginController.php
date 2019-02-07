@@ -14,17 +14,25 @@ final class PhabricatorAuthOneTimeLoginController
     $key = $request->getURIData('key');
     $email_id = $request->getURIData('emailID');
 
-    if ($request->getUser()->isLoggedIn()) {
-      return $this->renderError(
-        pht('You are already logged in.'));
-    }
-
     $target_user = id(new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withIDs(array($id))
       ->executeOne();
     if (!$target_user) {
       return new Aphront404Response();
+    }
+
+    // NOTE: We allow you to use a one-time login link for your own current
+    // login account. This supports the "Set Password" flow.
+
+    $is_logged_in = false;
+    if ($viewer->isLoggedIn()) {
+      if ($viewer->getPHID() !== $target_user->getPHID()) {
+        return $this->renderError(
+          pht('You are already logged in.'));
+      } else {
+        $is_logged_in = true;
+      }
     }
 
     // NOTE: As a convenience to users, these one-time login URIs may also
@@ -100,7 +108,7 @@ final class PhabricatorAuthOneTimeLoginController
         ->addCancelButton('/');
     }
 
-    if ($request->isFormPost()) {
+    if ($request->isFormPost() || $is_logged_in) {
       // If we have an email bound into this URI, verify email so that clicking
       // the link in the "Welcome" email is good enough, without requiring users
       // to go through a second round of email verification.
@@ -120,6 +128,12 @@ final class PhabricatorAuthOneTimeLoginController
       unset($unguarded);
 
       $next_uri = $this->getNextStepURI($target_user);
+
+      // If the user is already logged in, we're just doing a "password set"
+      // flow. Skip directly to the next step.
+      if ($is_logged_in) {
+        return id(new AphrontRedirectResponse())->setURI($next_uri);
+      }
 
       PhabricatorCookies::setNextURICookie($request, $next_uri, $force = true);
 
