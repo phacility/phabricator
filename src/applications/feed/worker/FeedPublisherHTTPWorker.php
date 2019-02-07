@@ -26,6 +26,11 @@ final class FeedPublisherHTTPWorker extends FeedPushWorker {
       'epoch'           => $data->getEpoch(),
     );
 
+    // NOTE: We're explicitly using "http_build_query()" here because the
+    // "storyData" parameter may be a nested object with arbitrary nested
+    // sub-objects.
+    $post_data = http_build_query($post_data, '', '&');
+
     id(new HTTPSFuture($uri, $post_data))
       ->setMethod('POST')
       ->setTimeout(30)
