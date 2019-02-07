@@ -128,6 +128,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
         ->setLabel(pht('TOTP Code'))
         ->setName('totpcode')
         ->setValue($code)
+        ->setAutofocus(true)
         ->setError($e_code));
 
   }
