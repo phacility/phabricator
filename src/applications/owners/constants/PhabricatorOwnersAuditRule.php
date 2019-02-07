@@ -4,7 +4,10 @@ final class PhabricatorOwnersAuditRule
   extends Phobject {
 
   const AUDITING_NONE = 'none';
-  const AUDITING_AUDIT = 'audit';
+  const AUDITING_NO_OWNER = 'audit';
+  const AUDITING_UNREVIEWED = 'unreviewed';
+  const AUDITING_NO_OWNER_AND_UNREVIEWED = 'uninvolved-unreviewed';
+  const AUDITING_ALL = 'all';
 
   private $key;
   private $spec;
@@ -86,12 +89,25 @@ final class PhabricatorOwnersAuditRule
           '0' => '"0"',
         ),
       ),
-      self::AUDITING_AUDIT => array(
-        'name' => pht('Audit Commits'),
+      self::AUDITING_UNREVIEWED => array(
+        'name' => pht('Audit Unreviewed Commits'),
+        'icon.icon' => 'fa-check',
+      ),
+      self::AUDITING_NO_OWNER => array(
+        'name' => pht('Audit Commits With No Owner Involvement'),
         'icon.icon' => 'fa-check',
         'deprecated' => array(
           '1' => '"1"',
         ),
+      ),
+      self::AUDITING_NO_OWNER_AND_UNREVIEWED => array(
+        'name' => pht(
+          'Audit Unreviewed Commits and Commits With No Owner Involvement'),
+        'icon.icon' => 'fa-check',
+      ),
+      self::AUDITING_ALL => array(
+        'name' => pht('Audit All Commits'),
+        'icon.icon' => 'fa-check',
       ),
     );
   }
