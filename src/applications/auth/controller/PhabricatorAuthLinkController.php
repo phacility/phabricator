@@ -6,13 +6,19 @@ final class PhabricatorAuthLinkController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $action = $request->getURIData('action');
-    $provider_key = $request->getURIData('pkey');
 
-    $provider = PhabricatorAuthProvider::getEnabledProviderByKey(
-      $provider_key);
-    if (!$provider) {
+    $id = $request->getURIData('id');
+
+    $config = id(new PhabricatorAuthProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->withIsEnabled(true)
+      ->executeOne();
+    if (!$config) {
       return new Aphront404Response();
     }
+
+    $provider = $config->getProvider();
 
     switch ($action) {
       case 'link':
@@ -37,15 +43,15 @@ final class PhabricatorAuthLinkController
         return new Aphront400Response();
     }
 
-    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
-      'accountType = %s AND accountDomain = %s AND userPHID = %s',
-      $provider->getProviderType(),
-      $provider->getProviderDomain(),
-      $viewer->getPHID());
+    $accounts = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withProviderConfigPHIDs(array($config->getPHID()))
+      ->execute();
 
     switch ($action) {
       case 'link':
-        if ($account) {
+        if ($accounts) {
           return $this->renderErrorPage(
             pht('Account Already Linked'),
             array(
@@ -56,7 +62,7 @@ final class PhabricatorAuthLinkController
         }
         break;
       case 'refresh':
-        if (!$account) {
+        if (!$accounts) {
           return $this->renderErrorPage(
             pht('No Account Linked'),
             array(
@@ -76,11 +82,6 @@ final class PhabricatorAuthLinkController
 
     switch ($action) {
       case 'link':
-        id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-          $viewer,
-          $request,
-          $panel_uri);
-
         $form = $provider->buildLinkForm($this);
         break;
       case 'refresh':

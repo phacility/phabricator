@@ -21,6 +21,7 @@ final class PhabricatorExternalAccountQuery
   private $userPHIDs;
   private $needImages;
   private $accountSecrets;
+  private $providerConfigPHIDs;
 
   public function withUserPHIDs(array $user_phids) {
     $this->userPHIDs = $user_phids;
@@ -59,6 +60,11 @@ final class PhabricatorExternalAccountQuery
 
   public function needImages($need) {
     $this->needImages = $need;
+    return $this;
+  }
+
+  public function withProviderConfigPHIDs(array $phids) {
+    $this->providerConfigPHIDs = $phids;
     return $this;
   }
 
@@ -179,6 +185,13 @@ final class PhabricatorExternalAccountQuery
         $conn,
         'accountSecret IN (%Ls)',
         $this->accountSecrets);
+    }
+
+    if ($this->providerConfigPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'providerConfigPHID IN (%Ls)',
+        $this->providerConfigPHIDs);
     }
 
     return $where;

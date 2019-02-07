@@ -31,7 +31,7 @@ final class PhabricatorAuthUnlinkController
     $confirmations = $request->getStrList('confirmations');
     $confirmations = array_fuse($confirmations);
 
-    if (!$request->isFormPost() || !isset($confirmations['unlink'])) {
+    if (!$request->isFormOrHisecPost() || !isset($confirmations['unlink'])) {
       return $this->renderConfirmDialog($confirmations, $config, $done_uri);
     }
 
@@ -58,6 +58,14 @@ final class PhabricatorAuthUnlinkController
         }
       }
     }
+
+    $workflow_key = sprintf(
+      'account.unlink(%s)',
+      $account->getPHID());
+
+    $hisec_token = id(new PhabricatorAuthSessionEngine())
+      ->setWorkflowKey($workflow_key)
+      ->requireHighSecurityToken($viewer, $request, $done_uri);
 
     $account->delete();
 

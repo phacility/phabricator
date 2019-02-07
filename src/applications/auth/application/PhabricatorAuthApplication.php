@@ -62,7 +62,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         'validate/' => 'PhabricatorAuthValidateController',
         'finish/' => 'PhabricatorAuthFinishController',
         'unlink/(?P<id>\d+)/' => 'PhabricatorAuthUnlinkController',
-        '(?P<action>link|refresh)/(?P<pkey>[^/]+)/'
+        '(?P<action>link|refresh)/(?P<id>\d+)/'
           => 'PhabricatorAuthLinkController',
         'confirmlink/(?P<akey>[^/]+)/'
           => 'PhabricatorAuthConfirmLinkController',
