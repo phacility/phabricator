@@ -78,7 +78,7 @@ final class PhabricatorExternalAccountsSettingsPanel
           ->setIcon('fa-times')
           ->setWorkflow(true)
           ->setDisabled(!$can_unlink)
-          ->setHref('/auth/unlink/'.$account->getProviderKey().'/'));
+          ->setHref('/auth/unlink/'.$account->getID().'/'));
 
       if ($provider) {
         $provider->willRenderLinkedAccount($viewer, $item, $account);
