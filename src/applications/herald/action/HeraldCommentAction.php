@@ -19,12 +19,9 @@ final class HeraldCommentAction extends HeraldAction {
     }
 
     $xaction = $object->getApplicationTransactionTemplate();
-    try {
-      $comment = $xaction->getApplicationTransactionCommentObject();
-      if (!$comment) {
-        return false;
-      }
-    } catch (PhutilMethodNotImplementedException $ex) {
+
+    $comment = $xaction->getApplicationTransactionCommentObject();
+    if (!$comment) {
       return false;
     }
 

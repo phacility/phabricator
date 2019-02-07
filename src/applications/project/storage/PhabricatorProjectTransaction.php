@@ -19,10 +19,6 @@ final class PhabricatorProjectTransaction
     return PhabricatorProjectProjectPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'PhabricatorProjectTransactionType';
   }

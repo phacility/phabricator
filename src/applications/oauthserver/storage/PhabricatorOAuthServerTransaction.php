@@ -19,10 +19,6 @@ final class PhabricatorOAuthServerTransaction
     return PhabricatorOAuthServerClientPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
     $old = $this->getOldValue();

@@ -15,10 +15,6 @@ final class PhameBlogTransaction
     return PhabricatorPhameBlogPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'PhameBlogTransactionType';
   }

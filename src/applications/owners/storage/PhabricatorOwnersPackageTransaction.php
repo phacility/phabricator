@@ -15,8 +15,4 @@ final class PhabricatorOwnersPackageTransaction
     return 'PhabricatorOwnersPackageTransactionType';
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
 }

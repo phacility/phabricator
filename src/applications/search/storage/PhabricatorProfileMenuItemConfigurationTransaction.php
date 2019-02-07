@@ -20,8 +20,4 @@ final class PhabricatorProfileMenuItemConfigurationTransaction
     return PhabricatorProfileMenuItemPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
 }

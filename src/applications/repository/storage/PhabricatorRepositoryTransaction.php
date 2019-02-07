@@ -11,10 +11,6 @@ final class PhabricatorRepositoryTransaction
     return PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'PhabricatorRepositoryTransactionType';
   }

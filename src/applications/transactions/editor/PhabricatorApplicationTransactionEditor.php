@@ -360,12 +360,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($template) {
-      try {
-        $comment = $template->getApplicationTransactionCommentObject();
-      } catch (PhutilMethodNotImplementedException $ex) {
-        $comment = null;
-      }
-
+      $comment = $template->getApplicationTransactionCommentObject();
       if ($comment) {
         $types[] = PhabricatorTransactions::TYPE_COMMENT;
       }

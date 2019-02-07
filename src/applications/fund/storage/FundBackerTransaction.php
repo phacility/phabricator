@@ -11,10 +11,6 @@ final class FundBackerTransaction
     return FundBackerPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'FundBackerTransactionType';
   }

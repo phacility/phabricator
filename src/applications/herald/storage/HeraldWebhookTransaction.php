@@ -11,10 +11,6 @@ final class HeraldWebhookTransaction
     return HeraldWebhookPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'HeraldWebhookTransactionType';
   }

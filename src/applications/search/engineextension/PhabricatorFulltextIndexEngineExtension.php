@@ -70,12 +70,8 @@ final class PhabricatorFulltextIndexEngineExtension
   private function getCommentVersion($object) {
     $xaction = $object->getApplicationTransactionTemplate();
 
-    try {
-      $comment = $xaction->getApplicationTransactionCommentObject();
-      if (!$comment) {
-        return 'none';
-      }
-    } catch (Exception $ex) {
+    $comment = $xaction->getApplicationTransactionCommentObject();
+    if (!$comment) {
       return 'none';
     }
 

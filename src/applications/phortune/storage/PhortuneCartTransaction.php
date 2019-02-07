@@ -19,10 +19,6 @@ final class PhortuneCartTransaction
     return PhortuneCartPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function shouldHideForMail(array $xactions) {
     switch ($this->getTransactionType()) {
       case self::TYPE_CREATED:

@@ -11,10 +11,6 @@ final class PhortuneAccountTransaction
     return PhortuneAccountPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'PhortuneAccountTransactionType';
   }

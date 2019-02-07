@@ -76,7 +76,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    throw new PhutilMethodNotImplementedException();
+    return null;
   }
 
   public function getMetadataValue($key, $default = null) {
@@ -1731,12 +1731,7 @@ abstract class PhabricatorApplicationTransaction
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-      $comment_template = null;
-      try {
-        $comment_template = $this->getApplicationTransactionCommentObject();
-      } catch (Exception $ex) {
-        // Continue; no comments for these transactions.
-      }
+      $comment_template = $this->getApplicationTransactionCommentObject();
 
       if ($comment_template) {
         $comments = $comment_template->loadAllWhere(

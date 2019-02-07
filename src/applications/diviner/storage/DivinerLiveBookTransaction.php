@@ -11,8 +11,4 @@ final class DivinerLiveBookTransaction
     return DivinerBookPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
 }
