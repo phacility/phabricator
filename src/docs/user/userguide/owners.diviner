@@ -129,7 +129,8 @@ audits for commits which:
 
   - affect code owned by the package;
   - were not authored by a package owner; and
-  - were not accepted (in Differential) by a package owner.
+  - were not accepted (in Differential) by a package owner or the package
+    itself.
 
 Audits do not trigger if the package has been archived.
 

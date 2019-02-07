@@ -200,6 +200,12 @@ final class PhabricatorRepositoryCommitOwnersWorker
       ));
     $owner_phids = array_fuse($owner_phids);
 
+    // For the purposes of deciding whether the owners were involved in the
+    // revision or not, consider a review by the package itself to count as
+    // involvement. This can happen when human reviewers force-accept on
+    // behalf of packages they don't own but have authority over.
+    $owner_phids[$package->getPHID()] = $package->getPHID();
+
     // If the commit author is identifiable and a package owner, they're
     // involved.
     if ($author_phid) {
@@ -225,13 +231,14 @@ final class PhabricatorRepositoryCommitOwnersWorker
     foreach ($revision->getReviewers() as $reviewer) {
       $reviewer_phid = $reviewer->getReviewerPHID();
 
-      // If this reviewer isn't a package owner, just ignore them.
+      // If this reviewer isn't a package owner or the package itself,
+      // just ignore them.
       if (empty($owner_phids[$reviewer_phid])) {
         continue;
       }
 
-      // If this reviewer accepted the revision and owns the package, we've
-      // found an involved owner.
+      // If this reviewer accepted the revision and owns the package (or is
+      // the package), we've found an involved owner.
       if (isset($accepted_statuses[$reviewer->getReviewerStatus()])) {
         $found_accept = true;
         break;
