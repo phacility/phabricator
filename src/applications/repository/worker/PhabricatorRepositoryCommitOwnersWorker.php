@@ -133,7 +133,8 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $revision) {
 
     // Don't trigger an audit if auditing isn't enabled for the package.
-    if (!$package->getAuditingEnabled()) {
+    $rule = $package->newAuditingRule();
+    if ($rule->getKey() === PhabricatorOwnersAuditRule::AUDITING_NONE) {
       return false;
     }
 

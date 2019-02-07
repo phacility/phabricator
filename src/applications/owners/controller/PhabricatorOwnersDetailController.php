@@ -194,12 +194,8 @@ final class PhabricatorOwnersDetailController
     $name = idx($spec, 'name', $auto);
     $view->addProperty(pht('Auto Review'), $name);
 
-    if ($package->getAuditingEnabled()) {
-      $auditing = pht('Enabled');
-    } else {
-      $auditing = pht('Disabled');
-    }
-    $view->addProperty(pht('Auditing'), $auditing);
+    $rule = $package->newAuditingRule();
+    $view->addProperty(pht('Auditing'), $rule->getDisplayName());
 
     $ignored = $package->getIgnoredPathAttributes();
     $ignored = array_keys($ignored);
