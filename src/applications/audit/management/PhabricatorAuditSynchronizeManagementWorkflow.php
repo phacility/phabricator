@@ -6,8 +6,16 @@ final class PhabricatorAuditSynchronizeManagementWorkflow
   protected function didConstruct() {
     $this
       ->setName('synchronize')
-      ->setExamples('**synchronize** ...')
-      ->setSynopsis(pht('Update audit status for commits.'))
+      ->setExamples(
+        "**synchronize** __repository__ ...\n".
+        "**synchronize** __commit__ ...\n".
+        "**synchronize** --all")
+      ->setSynopsis(
+        pht(
+          'Update commits to make their summary audit state reflect the '.
+          'state of their actual audit requests. This can fix inconsistencies '.
+          'in database state if audit requests have been mangled '.
+          'accidentally (or on purpose).'))
       ->setArguments(
         array_merge(
           $this->getCommitConstraintArguments(),
@@ -21,36 +29,7 @@ final class PhabricatorAuditSynchronizeManagementWorkflow
     foreach ($objects as $object) {
       $commits = $this->loadCommitsForConstraintObject($object);
       foreach ($commits as $commit) {
-        $commit = id(new DiffusionCommitQuery())
-          ->setViewer($viewer)
-          ->withPHIDs(array($commit->getPHID()))
-          ->needAuditRequests(true)
-          ->executeOne();
-        if (!$commit) {
-          continue;
-        }
-
-        $old_status = $commit->getAuditStatusObject();
-        $commit->updateAuditStatus($commit->getAudits());
-        $new_status = $commit->getAuditStatusObject();
-
-        if ($old_status->getKey() == $new_status->getKey()) {
-          echo tsprintf(
-            "%s\n",
-            pht(
-              'No changes for "%s".',
-              $commit->getDisplayName()));
-        } else {
-          echo tsprintf(
-            "%s\n",
-            pht(
-              'Updating "%s": "%s" -> "%s".',
-              $commit->getDisplayName(),
-              $old_status->getName(),
-              $new_status->getName()));
-
-          $commit->save();
-        }
+        $this->synchronizeCommitAuditState($commit->getPHID());
       }
     }
   }

@@ -87,4 +87,39 @@ abstract class PhabricatorAuditManagementWorkflow
     return $commits;
   }
 
+  protected function synchronizeCommitAuditState($commit_phid) {
+    $viewer = $this->getViewer();
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($commit_phid))
+      ->needAuditRequests(true)
+      ->executeOne();
+    if (!$commit) {
+      return;
+    }
+
+    $old_status = $commit->getAuditStatusObject();
+    $commit->updateAuditStatus($commit->getAudits());
+    $new_status = $commit->getAuditStatusObject();
+
+    if ($old_status->getKey() == $new_status->getKey()) {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'No synchronization changes for "%s".',
+          $commit->getDisplayName()));
+    } else {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Synchronizing "%s": "%s" -> "%s".',
+          $commit->getDisplayName(),
+          $old_status->getName(),
+          $new_status->getName()));
+
+      $commit->save();
+    }
+  }
+
 }
