@@ -210,8 +210,9 @@ The keys you can provide in a specification are:
   - `claim` //Optional bool.// By default, closing an unassigned task claims
     it. You can set this to `false` to disable this behavior for a particular
     status.
-  - `locked` //Optional bool.// Lock tasks in this status, preventing users
-    from commenting.
+  - `locked` //Optional string.// Lock tasks in this status. Specify "comments"
+    to lock comments (users who can edit the task may override this lock).
+    Specify "edits" to prevent anyone except the task owner from making edits.
   - `mfa` //Optional bool.// Require all edits to this task to be signed with
     multi-factor authentication.
 

@@ -552,6 +552,10 @@ final class ManiphestTransactionEditor
       $errors = array_merge($errors, $this->moreValidationErrors);
     }
 
+    foreach ($this->getLockValidationErrors($object, $xactions) as $error) {
+      $errors[] = $error;
+    }
+
     return $errors;
   }
 
@@ -1011,5 +1015,86 @@ final class ManiphestTransactionEditor
   }
 
 
+  private function getLockValidationErrors($object, array $xactions) {
+    $errors = array();
+
+    $old_owner = $object->getOwnerPHID();
+    $old_status = $object->getStatus();
+
+    $new_owner = $old_owner;
+    $new_status = $old_status;
+
+    $owner_xaction = null;
+    $status_xaction = null;
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTaskOwnerTransaction::TRANSACTIONTYPE:
+          $new_owner = $xaction->getNewValue();
+          $owner_xaction = $xaction;
+          break;
+        case ManiphestTaskStatusTransaction::TRANSACTIONTYPE:
+          $new_status = $xaction->getNewValue();
+          $status_xaction = $xaction;
+          break;
+      }
+    }
+
+    $actor_phid = $this->getActingAsPHID();
+
+    $was_locked = ManiphestTaskStatus::areEditsLockedInStatus(
+      $old_status);
+    $now_locked = ManiphestTaskStatus::areEditsLockedInStatus(
+      $new_status);
+
+    if (!$now_locked) {
+      // If we're not ending in an edit-locked status, everything is good.
+    } else if ($new_owner !== null) {
+      // If we ending the edit with some valid owner, this is allowed for
+      // now. We might need to revisit this.
+    } else {
+      // The edits end with the task locked and unowned. No one will be able
+      // to edit it, so we forbid this. We try to be specific about what the
+      // user did wrong.
+
+      $owner_changed = ($old_owner && !$new_owner);
+      $status_changed = ($was_locked !== $now_locked);
+      $message = null;
+
+      if ($status_changed && $owner_changed) {
+        $message = pht(
+          'You can not lock this task and unassign it at the same time '.
+          'because no one will be able to edit it anymore. Lock the task '.
+          'or remove the owner, but not both.');
+        $problem_xaction = $status_xaction;
+      } else if ($status_changed) {
+        $message = pht(
+          'You can not lock this task because it does not have an owner. '.
+          'No one would be able to edit the task. Assign the task to an '.
+          'owner before locking it.');
+        $problem_xaction = $status_xaction;
+      } else if ($owner_changed) {
+        $message = pht(
+          'You can not remove the owner of this task because it is locked '.
+          'and no one would be able to edit the task. Reassign the task or '.
+          'unlock it before removing the owner.');
+        $problem_xaction = $owner_xaction;
+      } else {
+        // If the task was already broken, we don't have a transaction to
+        // complain about so just let it through. In theory, this is
+        // impossible since policy rules should kick in before we get here.
+      }
+
+      if ($message) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $problem_xaction->getTransactionType(),
+          pht('Lock Error'),
+          $message,
+          $problem_xaction);
+      }
+    }
+
+    return $errors;
+  }
 
 }

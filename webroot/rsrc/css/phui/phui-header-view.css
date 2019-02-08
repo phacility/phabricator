@@ -249,6 +249,16 @@ body .phui-header-shell.phui-bleed-header
   color: {$sh-indigotext};
 }
 
+.policy-header-callout.policy-adjusted-locked {
+  background: {$sh-pinkbackground};
+}
+
+.policy-header-callout.policy-adjusted-locked .policy-link,
+.policy-header-callout.policy-adjusted-locked .phui-icon-view {
+  color: {$sh-pinktext};
+}
+
+
 .policy-header-callout .policy-space-container {
   font-weight: bold;
   color: {$sh-redtext};
