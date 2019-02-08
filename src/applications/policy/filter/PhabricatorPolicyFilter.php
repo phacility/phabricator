@@ -175,9 +175,10 @@ final class PhabricatorPolicyFilter extends Phobject {
         if (!in_array($capability, $object_capabilities)) {
           throw new Exception(
             pht(
-              "Testing for capability '%s' on an object which does ".
-              "not have that capability!",
-              $capability));
+              'Testing for capability "%s" on an object ("%s") which does '.
+              'not support that capability.',
+              $capability,
+              get_class($object)));
         }
 
         $policy = $this->getObjectPolicy($object, $capability);
