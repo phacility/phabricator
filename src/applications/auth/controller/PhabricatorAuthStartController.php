@@ -75,6 +75,11 @@ final class PhabricatorAuthStartController
       }
     }
 
+    $configs = array();
+    foreach ($providers as $provider) {
+      $configs[] = $provider->getProviderConfig();
+    }
+
     if (!$providers) {
       if ($this->isFirstTimeSetup()) {
         // If this is a fresh install, let the user register their admin
@@ -172,23 +177,6 @@ final class PhabricatorAuthStartController
         $button_columns);
     }
 
-    $handlers = PhabricatorAuthLoginHandler::getAllHandlers();
-
-    $delegating_controller = $this->getDelegatingController();
-
-    $header = array();
-    foreach ($handlers as $handler) {
-      $handler = clone $handler;
-
-      $handler->setRequest($request);
-
-      if ($delegating_controller) {
-        $handler->setDelegatingController($delegating_controller);
-      }
-
-      $header[] = $handler->getAuthLoginHeaderContent();
-    }
-
     $invite_message = null;
     if ($invite) {
       $invite_message = $this->renderInviteHeader($invite);
@@ -196,16 +184,18 @@ final class PhabricatorAuthStartController
 
     $custom_message = $this->newCustomStartMessage();
 
+    $email_login = $this->newEmailLoginView($configs);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login'));
     $crumbs->setBorder(true);
 
     $title = pht('Login');
     $view = array(
-      $header,
       $invite_message,
       $custom_message,
       $out,
+      $email_login,
     );
 
     return $this->newPage()
@@ -328,5 +318,44 @@ final class PhabricatorAuthStartController
       ),
       $remarkup_view);
   }
+
+  private function newEmailLoginView(array $configs) {
+    assert_instances_of($configs, 'PhabricatorAuthProviderConfig');
+
+    // Check if password auth is enabled. If it is, the password login form
+    // renders a "Forgot password?" link, so we don't need to provide a
+    // supplemental link.
+
+    $has_password = false;
+    foreach ($configs as $config) {
+      $provider = $config->getProvider();
+      if ($provider instanceof PhabricatorPasswordAuthProvider) {
+        $has_password = true;
+      }
+    }
+
+    if ($has_password) {
+      return null;
+    }
+
+    $view = array(
+      pht('Trouble logging in?'),
+      ' ',
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/login/email/',
+        ),
+        pht('Send a login link to your email address.')),
+    );
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'auth-custom-message',
+      ),
+      $view);
+  }
+
 
 }

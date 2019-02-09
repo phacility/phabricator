@@ -84,6 +84,24 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         $issue->addPhabricatorConfig($key);
       }
     }
+
+
+    if (PhabricatorEnv::getEnvConfig('feed.http-hooks')) {
+      $this->newIssue('config.deprecated.feed.http-hooks')
+        ->setShortName(pht('Feed Hooks Deprecated'))
+        ->setName(pht('Migrate From "feed.http-hooks" to Webhooks'))
+        ->addPhabricatorConfig('feed.http-hooks')
+        ->setMessage(
+          pht(
+            'The "feed.http-hooks" option is deprecated in favor of '.
+            'Webhooks. This option will be removed in a future version '.
+            'of Phabricator.'.
+            "\n\n".
+            'You can configure Webhooks in Herald.'.
+            "\n\n".
+            'To resolve this issue, remove all URIs from "feed.http-hooks".'));
+    }
+
   }
 
   /**

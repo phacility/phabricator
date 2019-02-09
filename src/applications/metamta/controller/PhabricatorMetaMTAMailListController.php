@@ -27,4 +27,8 @@ final class PhabricatorMetaMTAMailListController
     return $nav;
   }
 
+  public function buildApplicationMenu() {
+    return $this->buildSideNav()->getMenu();
+  }
+
 }

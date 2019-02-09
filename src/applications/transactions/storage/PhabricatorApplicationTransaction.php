@@ -76,7 +76,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    throw new PhutilMethodNotImplementedException();
+    return null;
   }
 
   public function getMetadataValue($key, $default = null) {
@@ -167,6 +167,14 @@ abstract class PhabricatorApplicationTransaction
 
   public function getIsMFATransaction() {
     return (bool)$this->getMetadataValue('core.mfa', false);
+  }
+
+  public function setIsLockOverrideTransaction($override) {
+    return $this->setMetadataValue('core.lock-override', $override);
+  }
+
+  public function getIsLockOverrideTransaction() {
+    return (bool)$this->getMetadataValue('core.lock-override', false);
   }
 
   public function attachComment(
@@ -1529,6 +1537,12 @@ abstract class PhabricatorApplicationTransaction
           return false;
         }
       }
+
+      // Don't group lock override and non-override transactions together.
+      $is_override = $this->getIsLockOverrideTransaction();
+      if ($is_override != $xaction->getIsLockOverrideTransaction()) {
+        return false;
+      }
     }
 
     return true;
@@ -1731,12 +1745,7 @@ abstract class PhabricatorApplicationTransaction
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-      $comment_template = null;
-      try {
-        $comment_template = $this->getApplicationTransactionCommentObject();
-      } catch (Exception $ex) {
-        // Continue; no comments for these transactions.
-      }
+      $comment_template = $this->getApplicationTransactionCommentObject();
 
       if ($comment_template) {
         $comments = $comment_template->loadAllWhere(

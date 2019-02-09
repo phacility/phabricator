@@ -31,6 +31,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $pinboardItems = array();
   private $isSilent;
   private $isMFA;
+  private $isLockOverride;
 
   public function setAuthorPHID($author_phid) {
     $this->authorPHID = $author_phid;
@@ -195,6 +196,15 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function getIsMFA() {
     return $this->isMFA;
+  }
+
+  public function setIsLockOverride($is_override) {
+    $this->isLockOverride = $is_override;
+    return $this;
+  }
+
+  public function getIsLockOverride() {
+    return $this->isLockOverride;
   }
 
   public function setReallyMajorEvent($me) {
@@ -597,7 +607,8 @@ final class PHUITimelineEventView extends AphrontView {
       // not expect to have received any mail or notifications.
       if ($this->getIsSilent()) {
         $extra[] = id(new PHUIIconView())
-          ->setIcon('fa-bell-slash', 'red')
+          ->setIcon('fa-bell-slash', 'white')
+          ->setEmblemColor('red')
           ->setTooltip(pht('Silent Edit'));
       }
 
@@ -605,8 +616,16 @@ final class PHUITimelineEventView extends AphrontView {
       // provide a hint that it was extra authentic.
       if ($this->getIsMFA()) {
         $extra[] = id(new PHUIIconView())
-          ->setIcon('fa-vcard', 'pink')
+          ->setIcon('fa-vcard', 'white')
+          ->setEmblemColor('pink')
           ->setTooltip(pht('MFA Authenticated'));
+      }
+
+      if ($this->getIsLockOverride()) {
+        $extra[] = id(new PHUIIconView())
+          ->setIcon('fa-chain-broken', 'white')
+          ->setEmblemColor('violet')
+          ->setTooltip(pht('Lock Overridden'));
       }
     }
 

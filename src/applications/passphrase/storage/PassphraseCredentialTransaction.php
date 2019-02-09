@@ -11,10 +11,6 @@ final class PassphraseCredentialTransaction
     return PassphraseCredentialPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'PassphraseCredentialTransactionType';
   }

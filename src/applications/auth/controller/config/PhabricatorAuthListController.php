@@ -19,31 +19,18 @@ final class PhabricatorAuthListController
 
       $id = $config->getID();
 
-      $edit_uri = $this->getApplicationURI('config/edit/'.$id.'/');
-      $enable_uri = $this->getApplicationURI('config/enable/'.$id.'/');
-      $disable_uri = $this->getApplicationURI('config/disable/'.$id.'/');
+      $view_uri = $config->getURI();
 
       $provider = $config->getProvider();
-      if ($provider) {
-        $name = $provider->getProviderName();
-      } else {
-        $name = $config->getProviderType().' ('.$config->getProviderClass().')';
-      }
+      $name = $provider->getProviderName();
 
-      $item->setHeader($name);
+      $item
+        ->setHeader($name)
+        ->setHref($view_uri);
 
-      if ($provider) {
-        $item->setHref($edit_uri);
-      } else {
-        $item->addAttribute(pht('Provider Implementation Missing!'));
-      }
-
-      $domain = null;
-      if ($provider) {
-        $domain = $provider->getProviderDomain();
-        if ($domain !== 'self') {
-          $item->addAttribute($domain);
-        }
+      $domain = $provider->getProviderDomain();
+      if ($domain !== 'self') {
+        $item->addAttribute($domain);
       }
 
       if ($config->getShouldAllowRegistration()) {
@@ -54,21 +41,9 @@ final class PhabricatorAuthListController
 
       if ($config->getIsEnabled()) {
         $item->setStatusIcon('fa-check-circle green');
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-times')
-            ->setHref($disable_uri)
-            ->setDisabled(!$can_manage)
-            ->addSigil('workflow'));
       } else {
         $item->setStatusIcon('fa-ban red');
         $item->addIcon('fa-ban grey', pht('Disabled'));
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-plus')
-            ->setHref($enable_uri)
-            ->setDisabled(!$can_manage)
-            ->addSigil('workflow'));
       }
 
       $list->addItem($item);
@@ -123,10 +98,11 @@ final class PhabricatorAuthListController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $guidance,
-        $list,
-      ));
+      ->setFooter(
+        array(
+          $guidance,
+          $list,
+        ));
 
     $nav = $this->newNavigation()
       ->setCrumbs($crumbs)

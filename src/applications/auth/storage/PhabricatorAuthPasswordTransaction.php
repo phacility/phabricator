@@ -11,10 +11,6 @@ final class PhabricatorAuthPasswordTransaction
     return PhabricatorAuthPasswordPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'PhabricatorAuthPasswordTransactionType';
   }

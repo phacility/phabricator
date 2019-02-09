@@ -99,9 +99,18 @@
   background-color: {$sh-redbackground};
 }
 
+.phabricator-action-view.action-item-green {
+  background-color: {$sh-greenbackground};
+}
+
 .phabricator-action-view.action-item-red .phabricator-action-view-item,
 .phabricator-action-view.action-item-red .phabricator-action-view-icon {
   color: {$sh-redtext};
+}
+
+.phabricator-action-view.action-item-green .phabricator-action-view-item,
+.phabricator-action-view.action-item-green .phabricator-action-view-icon {
+  color: {$sh-greentext};
 }
 
 .device-desktop .phabricator-action-view.action-item-red:hover
@@ -110,6 +119,14 @@
   .phabricator-action-view-icon {
   color: {$red};
 }
+
+.device-desktop .phabricator-action-view.action-item-green:hover
+  .phabricator-action-view-item,
+.device-desktop .phabricator-action-view.action-item-green:hover
+  .phabricator-action-view-icon {
+  color: {$green};
+}
+
 
 .phabricator-action-view-label .phabricator-action-view-item,
 .phabricator-action-view-type-label .phabricator-action-view-item {

@@ -229,6 +229,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
         id(new AphrontFormTextControl())
           ->setLabel(pht('Username or Email'))
           ->setName('username')
+          ->setAutofocus(true)
           ->setValue($v_user)
           ->setError($e_user))
       ->appendChild(

@@ -612,7 +612,22 @@ final class PhabricatorDuoAuthFactor
         return $this->newResult()
           ->setAnsweredChallenge($challenge);
       case 'waiting':
-        // No result yet, we'll render a default state later on.
+        // If we didn't just issue this challenge, give the user a stronger
+        // hint that they need to follow the instructions.
+        if (!$challenge->getIsNewChallenge()) {
+          return $this->newResult()
+            ->setIsContinue(true)
+            ->setIcon(
+              id(new PHUIIconView())
+              ->setIcon('fa-exclamation-triangle', 'yellow'))
+            ->setErrorMessage(
+              pht(
+                'You must approve the challenge which was sent to your '.
+                'phone. Open the Duo application and confirm the challenge, '.
+                'then continue.'));
+        }
+
+        // Otherwise, we'll construct a default message later on.
         break;
       default:
       case 'deny':
@@ -666,8 +681,7 @@ final class PhabricatorDuoAuthFactor
   public function getRequestHasChallengeResponse(
     PhabricatorAuthFactorConfig $config,
     AphrontRequest $request) {
-    $value = $this->getChallengeResponseFromRequest($config, $request);
-    return (bool)strlen($value);
+    return false;
   }
 
   protected function newResultFromChallengeResponse(
@@ -675,41 +689,7 @@ final class PhabricatorDuoAuthFactor
     PhabricatorUser $viewer,
     AphrontRequest $request,
     array $challenges) {
-
-    $challenge = $this->getChallengeForCurrentContext(
-      $config,
-      $viewer,
-      $challenges);
-
-    $code = $this->getChallengeResponseFromRequest(
-      $config,
-      $request);
-
-    $result = $this->newResult()
-      ->setValue($code);
-
-    if ($challenge->getIsAnsweredChallenge()) {
-      return $result->setAnsweredChallenge($challenge);
-    }
-
-    if (phutil_hashes_are_identical($code, $challenge->getChallengeKey())) {
-      $ttl = PhabricatorTime::getNow() + phutil_units('15 minutes in seconds');
-
-      $challenge
-        ->markChallengeAsAnswered($ttl);
-
-      return $result->setAnsweredChallenge($challenge);
-    }
-
-    if (strlen($code)) {
-      $error_message = pht('Invalid');
-    } else {
-      $error_message = pht('Required');
-    }
-
-    $result->setErrorMessage($error_message);
-
-    return $result;
+    return $this->newResult();
   }
 
   private function newDuoFuture(PhabricatorAuthFactorProvider $provider) {

@@ -114,16 +114,23 @@ Auditing
 ========
 
 You can automatically trigger audits on unreviewed code by configuring
-**Auditing**. The available settings are:
+**Auditing**. The available settings allow you to select behavior based on
+these conditions:
 
-  - **Disabled**: Do not trigger audits.
-  - **Enabled**: Trigger audits.
+  - **No Owner Involvement**: Triggers an audit when the commit author is not
+    a package owner, and no package owner reviewed an associated revision in
+    Differential.
+  - **Unreviewed Commits**: Triggers an audit when a commit has no associated
+    revision in Differential, or the associated revision in Differential landed
+    without being "Accepted".
 
-When enabled, audits are triggered for commits which:
+For example, the **Audit Commits With No Owner Involvement** option triggers
+audits for commits which:
 
   - affect code owned by the package;
   - were not authored by a package owner; and
-  - were not accepted by a package owner.
+  - were not accepted (in Differential) by a package owner or the package
+    itself.
 
 Audits do not trigger if the package has been archived.
 

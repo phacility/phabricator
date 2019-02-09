@@ -432,7 +432,7 @@ abstract class PhabricatorStorageManagementWorkflow
             case 'key':
               if (($phase == 'drop_keys') && $adjust['exists']) {
                 if ($adjust['name'] == 'PRIMARY') {
-                  $key_name = 'PRIMARY KEY';
+                  $key_name = qsprintf($conn, 'PRIMARY KEY');
                 } else {
                   $key_name = qsprintf($conn, 'KEY %T', $adjust['name']);
                 }

@@ -555,55 +555,6 @@ final class PhabricatorUser
     }
   }
 
-  public function sendUsernameChangeEmail(
-    PhabricatorUser $admin,
-    $old_username) {
-
-    $admin_username = $admin->getUserName();
-    $admin_realname = $admin->getRealName();
-    $new_username = $this->getUserName();
-
-    $password_instructions = null;
-    if (PhabricatorPasswordAuthProvider::getPasswordProvider()) {
-      $engine = new PhabricatorAuthSessionEngine();
-      $uri = $engine->getOneTimeLoginURI(
-        $this,
-        null,
-        PhabricatorAuthSessionEngine::ONETIME_USERNAME);
-      $password_instructions = sprintf(
-        "%s\n\n  %s\n\n%s\n",
-        pht(
-          "If you use a password to login, you'll need to reset it ".
-          "before you can login again. You can reset your password by ".
-          "following this link:"),
-        $uri,
-        pht(
-          "And, of course, you'll need to use your new username to login ".
-          "from now on. If you use OAuth to login, nothing should change."));
-    }
-
-    $body = sprintf(
-      "%s\n\n  %s\n  %s\n\n%s",
-      pht(
-        '%s (%s) has changed your Phabricator username.',
-        $admin_username,
-        $admin_realname),
-      pht(
-        'Old Username: %s',
-        $old_username),
-      pht(
-        'New Username: %s',
-        $new_username),
-      $password_instructions);
-
-    $mail = id(new PhabricatorMetaMTAMail())
-      ->addTos(array($this->getPHID()))
-      ->setForceDelivery(true)
-      ->setSubject(pht('[Phabricator] Username Changed'))
-      ->setBody($body)
-      ->saveAndSend();
-  }
-
   public static function describeValidUsername() {
     return pht(
       'Usernames must contain only numbers, letters, period, underscore and '.
@@ -1180,9 +1131,10 @@ final class PhabricatorUser
     $this->openTransaction();
       $this->delete();
 
-      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $externals = id(new PhabricatorExternalAccountQuery())
+        ->setViewer($engine->getViewer())
+        ->withUserPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($externals as $external) {
         $external->delete();
       }

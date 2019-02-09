@@ -23,12 +23,7 @@ final class PhabricatorCommentEditEngineExtension
     PhabricatorApplicationTransactionInterface $object) {
 
     $xaction = $object->getApplicationTransactionTemplate();
-
-    try {
-      $comment = $xaction->getApplicationTransactionCommentObject();
-    } catch (PhutilMethodNotImplementedException $ex) {
-      $comment = null;
-    }
+    $comment = $xaction->getApplicationTransactionCommentObject();
 
     return (bool)$comment;
   }

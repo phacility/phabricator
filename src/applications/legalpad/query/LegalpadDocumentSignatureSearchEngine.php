@@ -226,7 +226,7 @@ final class LegalpadDocumentSignatureSearchEngine
         $handles[$document->getPHID()]->renderLink(),
         $signer_phid
           ? $handles[$signer_phid]->renderLink()
-          : null,
+          : phutil_tag('em', array(), pht('None')),
         $name,
         phutil_tag(
           'a',

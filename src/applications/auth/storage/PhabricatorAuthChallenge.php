@@ -16,6 +16,7 @@ final class PhabricatorAuthChallenge
   protected $properties = array();
 
   private $responseToken;
+  private $isNewChallenge;
 
   const HTTPKEY = '__hisec.challenges__';
   const TOKEN_DIGEST_KEY = 'auth.challenge.token';
@@ -239,6 +240,15 @@ final class PhabricatorAuthChallenge
 
   public function getProperty($key, $default = null) {
     return $this->properties[$key];
+  }
+
+  public function setIsNewChallenge($is_new_challenge) {
+    $this->isNewChallenge = $is_new_challenge;
+    return $this;
+  }
+
+  public function getIsNewChallenge() {
+    return $this->isNewChallenge;
   }
 
 

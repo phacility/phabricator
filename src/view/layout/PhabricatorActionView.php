@@ -25,6 +25,7 @@ final class PhabricatorActionView extends AphrontView {
   const TYPE_DIVIDER  = 'type-divider';
   const TYPE_LABEL  = 'label';
   const RED = 'action-item-red';
+  const GREEN = 'action-item-green';
 
   public function setSelected($selected) {
     $this->selected = $selected;

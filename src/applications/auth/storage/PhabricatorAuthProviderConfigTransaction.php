@@ -33,10 +33,6 @@ final class PhabricatorAuthProviderConfigTransaction
     return PhabricatorAuthAuthProviderPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getIcon() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

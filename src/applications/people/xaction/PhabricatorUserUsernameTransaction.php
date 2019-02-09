@@ -18,24 +18,42 @@ final class PhabricatorUserUsernameTransaction
   }
 
   public function applyExternalEffects($object, $value) {
+    $actor = $this->getActor();
     $user = $object;
 
+    $old_username = $this->getOldValue();
+    $new_username = $this->getNewValue();
+
     $this->newUserLog(PhabricatorUserLog::ACTION_CHANGE_USERNAME)
-      ->setOldValue($this->getOldValue())
-      ->setNewValue($value)
+      ->setOldValue($old_username)
+      ->setNewValue($new_username)
       ->save();
 
     // The SSH key cache currently includes usernames, so dirty it. See T12554
     // for discussion.
     PhabricatorAuthSSHKeyQuery::deleteSSHKeyCache();
 
-    $user->sendUsernameChangeEmail($this->getActor(), $this->getOldValue());
+    id(new PhabricatorPeopleUsernameMailEngine())
+      ->setSender($actor)
+      ->setRecipient($object)
+      ->setOldUsername($old_username)
+      ->setNewUsername($new_username)
+      ->sendMail();
   }
 
   public function getTitle() {
     return pht(
       '%s renamed this user from %s to %s.',
       $this->renderAuthor(),
+      $this->renderOldValue(),
+      $this->renderNewValue());
+  }
+
+  public function getTitleForFeed() {
+    return pht(
+      '%s renamed %s from %s to %s.',
+      $this->renderAuthor(),
+      $this->renderObject(),
       $this->renderOldValue(),
       $this->renderNewValue());
   }

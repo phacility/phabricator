@@ -6,8 +6,9 @@ final class PhabricatorAuthEditController
   public function handleRequest(AphrontRequest $request) {
     $this->requireApplicationCapability(
       AuthManageProvidersCapability::CAPABILITY);
-    $viewer = $request->getUser();
-    $provider_class = $request->getURIData('className');
+
+    $viewer = $this->getViewer();
+    $provider_class = $request->getStr('provider');
     $config_id = $request->getURIData('id');
 
     if ($config_id) {
@@ -155,12 +156,7 @@ final class PhabricatorAuthEditController
           ->setContinueOnNoEffect(true)
           ->applyTransactions($config, $xactions);
 
-        if ($provider->hasSetupStep() && $is_new) {
-          $id = $config->getID();
-          $next_uri = $this->getApplicationURI('config/edit/'.$id.'/');
-        } else {
-          $next_uri = $this->getApplicationURI();
-        }
+        $next_uri = $config->getURI();
 
         return id(new AphrontRedirectResponse())->setURI($next_uri);
       }
@@ -184,7 +180,7 @@ final class PhabricatorAuthEditController
       $crumb = pht('Edit Provider');
       $title = pht('Edit Auth Provider');
       $header_icon = 'fa-pencil';
-      $cancel_uri = $this->getApplicationURI();
+      $cancel_uri = $config->getURI();
     }
 
     $header = id(new PHUIHeaderView())
@@ -275,6 +271,7 @@ final class PhabricatorAuthEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->addHiddenInput('provider', $provider_class)
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->setLabel(pht('Allow'))
@@ -346,18 +343,6 @@ final class PhabricatorAuthEditController
     $crumbs->addTextCrumb($crumb);
     $crumbs->setBorder(true);
 
-    $timeline = null;
-    if (!$is_new) {
-      $timeline = $this->buildTransactionTimeline(
-        $config,
-        new PhabricatorAuthProviderConfigTransactionQuery());
-      $xactions = $timeline->getTransactions();
-      foreach ($xactions as $xaction) {
-        $xaction->setProvider($provider);
-      }
-      $timeline->setShouldTerminate(true);
-    }
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Provider'))
       ->setFormErrors($errors)
@@ -369,7 +354,6 @@ final class PhabricatorAuthEditController
       ->setFooter(array(
         $form_box,
         $footer,
-        $timeline,
       ));
 
     return $this->newPage()

@@ -8,17 +8,13 @@ final class PhabricatorEmailLoginController
   }
 
   public function handleRequest(AphrontRequest $request) {
-
-    if (!PhabricatorPasswordAuthProvider::getPasswordProvider()) {
-      return new Aphront400Response();
-    }
+    $viewer = $this->getViewer();
 
     $e_email = true;
     $e_captcha = true;
     $errors = array();
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
+    $v_email = $request->getStr('email');
     if ($request->isFormPost()) {
       $e_email = null;
       $e_captcha = pht('Again');
@@ -29,8 +25,7 @@ final class PhabricatorEmailLoginController
         $e_captcha = pht('Invalid');
       }
 
-      $email = $request->getStr('email');
-      if (!strlen($email)) {
+      if (!strlen($v_email)) {
        $errors[] = pht('You must provide an email address.');
        $e_email = pht('Required');
       }
@@ -42,7 +37,7 @@ final class PhabricatorEmailLoginController
 
         $target_email = id(new PhabricatorUserEmail())->loadOneWhere(
           'address = %s',
-          $email);
+          $v_email);
 
         $target_user = null;
         if ($target_email) {
@@ -81,33 +76,10 @@ final class PhabricatorEmailLoginController
         }
 
         if (!$errors) {
-          $engine = new PhabricatorAuthSessionEngine();
-          $uri = $engine->getOneTimeLoginURI(
-            $target_user,
-            null,
-            PhabricatorAuthSessionEngine::ONETIME_RESET);
-
-          if ($is_serious) {
-            $body = pht(
-              "You can use this link to reset your Phabricator password:".
-              "\n\n  %s\n",
-              $uri);
-          } else {
-            $body = pht(
-              "Condolences on forgetting your password. You can use this ".
-              "link to reset it:\n\n".
-              "  %s\n\n".
-              "After you set a new password, consider writing it down on a ".
-              "sticky note and attaching it to your monitor so you don't ".
-              "forget again! Choosing a very short, easy-to-remember password ".
-              "like \"cat\" or \"1234\" might also help.\n\n".
-              "Best Wishes,\nPhabricator\n",
-              $uri);
-
-          }
+          $body = $this->newAccountLoginMailBody($target_user);
 
           $mail = id(new PhabricatorMetaMTAMail())
-            ->setSubject(pht('[Phabricator] Password Reset'))
+            ->setSubject(pht('[Phabricator] Account Login Link'))
             ->setForceDelivery(true)
             ->addRawTos(array($target_email->getAddress()))
             ->setBody($body)
@@ -123,44 +95,90 @@ final class PhabricatorEmailLoginController
       }
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new PHUIInfoView();
-      $error_view->setErrors($errors);
+    $form = id(new AphrontFormView())
+      ->setViewer($viewer);
+
+    if ($this->isPasswordAuthEnabled()) {
+      $form->appendRemarkupInstructions(
+        pht(
+          'To reset your password, provide your email address. An email '.
+          'with a login link will be sent to you.'));
+    } else {
+      $form->appendRemarkupInstructions(
+        pht(
+          'To access your account, provide your email address. An email '.
+          'with a login link will be sent to you.'));
     }
 
-    $email_auth = new PHUIFormLayoutView();
-    $email_auth->appendChild($error_view);
-    $email_auth
-      ->setUser($request->getUser())
-      ->setFullWidth(true)
-      ->appendChild(
+    $form
+      ->appendControl(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('Email'))
+          ->setLabel(pht('Email Address'))
           ->setName('email')
-          ->setValue($request->getStr('email'))
+          ->setValue($v_email)
           ->setError($e_email))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormRecaptchaControl())
           ->setLabel(pht('Captcha'))
           ->setError($e_captcha));
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Reset Password'));
-    $crumbs->setBorder(true);
+    if ($this->isPasswordAuthEnabled()) {
+      $title = pht('Password Reset');
+    } else {
+      $title = pht('Email Login');
+    }
 
-    $dialog = new AphrontDialogView();
-    $dialog->setUser($request->getUser());
-    $dialog->setTitle(pht('Forgot Password / Email Login'));
-    $dialog->appendChild($email_auth);
-    $dialog->addSubmitButton(pht('Send Email'));
-    $dialog->setSubmitURI('/login/email/');
-
-    return $this->newPage()
-      ->setTitle(pht('Forgot Password'))
-      ->setCrumbs($crumbs)
-      ->appendChild($dialog);
-
+    return $this->newDialog()
+      ->setTitle($title)
+      ->setErrors($errors)
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->appendForm($form)
+      ->addCancelButton('/auth/start/')
+      ->addSubmitButton(pht('Send Email'));
   }
 
+  private function newAccountLoginMailBody(PhabricatorUser $user) {
+    $engine = new PhabricatorAuthSessionEngine();
+    $uri = $engine->getOneTimeLoginURI(
+      $user,
+      null,
+      PhabricatorAuthSessionEngine::ONETIME_RESET);
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    $have_passwords = $this->isPasswordAuthEnabled();
+
+    if ($have_passwords) {
+      if ($is_serious) {
+        $body = pht(
+          "You can use this link to reset your Phabricator password:".
+          "\n\n  %s\n",
+          $uri);
+      } else {
+        $body = pht(
+          "Condolences on forgetting your password. You can use this ".
+          "link to reset it:\n\n".
+          "  %s\n\n".
+          "After you set a new password, consider writing it down on a ".
+          "sticky note and attaching it to your monitor so you don't ".
+          "forget again! Choosing a very short, easy-to-remember password ".
+          "like \"cat\" or \"1234\" might also help.\n\n".
+          "Best Wishes,\nPhabricator\n",
+          $uri);
+
+      }
+    } else {
+      $body = pht(
+        "You can use this login link to regain access to your Phabricator ".
+        "account:".
+        "\n\n".
+        "  %s\n",
+        $uri);
+    }
+
+    return $body;
+  }
+
+  private function isPasswordAuthEnabled() {
+    return (bool)PhabricatorPasswordAuthProvider::getPasswordProvider();
+  }
 }

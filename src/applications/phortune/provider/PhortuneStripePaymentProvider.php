@@ -233,8 +233,6 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     array $token) {
     $this->loadStripeAPILibraries();
 
-    $errors = array();
-
     $secret_key = $this->getSecretKey();
     $stripe_token = $token['stripeCardToken'];
 
@@ -253,7 +251,15 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     // the card more than once. We create one Customer for each card;
     // they do not map to PhortuneAccounts because we allow an account to
     // have more than one active card.
-    $customer = Stripe_Customer::create($params, $secret_key);
+    try {
+      $customer = Stripe_Customer::create($params, $secret_key);
+    } catch (Stripe_CardError $ex) {
+      $display_exception = $this->newDisplayExceptionFromCardError($ex);
+      if ($display_exception) {
+        throw $display_exception;
+      }
+      throw $ex;
+    }
 
     $card = $info->card;
 
@@ -267,8 +273,6 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
           'stripe.customerID' => $customer->id,
           'stripe.cardToken' => $stripe_token,
         ));
-
-    return $errors;
   }
 
   public function renderCreatePaymentMethodForm(
@@ -382,5 +386,85 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/externals/stripe-php/lib/Stripe.php';
   }
+
+
+  private function newDisplayExceptionFromCardError(Stripe_CardError $ex) {
+    $body = $ex->getJSONBody();
+    if (!$body) {
+      return null;
+    }
+
+    $map = idx($body, 'error');
+    if (!$map) {
+      return null;
+    }
+
+    $view = array();
+
+    $message = idx($map, 'message');
+
+    $view[] = id(new PHUIInfoView())
+      ->setErrors(array($message));
+
+    $view[] = phutil_tag(
+      'div',
+      array(
+        'class' => 'mlt mlb',
+      ),
+      pht('Additional details about this error:'));
+
+    $rows = array();
+
+    $rows[] = array(
+      pht('Error Code'),
+      idx($map, 'code'),
+    );
+
+    $rows[] = array(
+      pht('Error Type'),
+      idx($map, 'type'),
+    );
+
+    $param = idx($map, 'param');
+    if (strlen($param)) {
+      $rows[] = array(
+        pht('Error Param'),
+        $param,
+      );
+    }
+
+    $decline_code = idx($map, 'decline_code');
+    if (strlen($decline_code)) {
+      $rows[] = array(
+        pht('Decline Code'),
+        $decline_code,
+      );
+    }
+
+    $doc_url = idx($map, 'doc_url');
+    if ($doc_url) {
+      $rows[] = array(
+        pht('Learn More'),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $doc_url,
+            'target' => '_blank',
+          ),
+          $doc_url),
+      );
+    }
+
+    $view[] = id(new AphrontTableView($rows))
+      ->setColumnClasses(
+        array(
+          'header',
+          'wide',
+        ));
+
+    return id(new PhortuneDisplayException(get_class($ex)))
+      ->setView($view);
+  }
+
 
 }

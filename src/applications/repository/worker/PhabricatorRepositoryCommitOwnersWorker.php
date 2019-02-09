@@ -132,15 +132,67 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $author_phid,
     $revision) {
 
-    // Don't trigger an audit if auditing isn't enabled for the package.
-    if (!$package->getAuditingEnabled()) {
-      return false;
+    $audit_uninvolved = false;
+    $audit_unreviewed = false;
+
+    $rule = $package->newAuditingRule();
+    switch ($rule->getKey()) {
+      case PhabricatorOwnersAuditRule::AUDITING_NONE:
+        return false;
+      case PhabricatorOwnersAuditRule::AUDITING_ALL:
+        return true;
+      case PhabricatorOwnersAuditRule::AUDITING_NO_OWNER:
+        $audit_uninvolved = true;
+        break;
+      case PhabricatorOwnersAuditRule::AUDITING_UNREVIEWED:
+        $audit_unreviewed = true;
+        break;
+      case PhabricatorOwnersAuditRule::AUDITING_NO_OWNER_AND_UNREVIEWED:
+        $audit_uninvolved = true;
+        $audit_unreviewed = true;
+        break;
     }
 
-    // Trigger an audit if we don't recognize the commit's author.
-    if (!$author_phid) {
-      return true;
+    // If auditing is configured to trigger on unreviewed changes, check if
+    // the revision was "Accepted" when it landed. If not, trigger an audit.
+    if ($audit_unreviewed) {
+      $commit_unreviewed = true;
+      if ($revision) {
+        $was_accepted = DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED;
+        if ($revision->isPublished()) {
+          if ($revision->getProperty($was_accepted)) {
+            $commit_unreviewed = false;
+          }
+        }
+      }
+
+      if ($commit_unreviewed) {
+        return true;
+      }
     }
+
+    // If auditing is configured to trigger on changes with no involved owner,
+    // check for an owner. If we don't find one, trigger an audit.
+    if ($audit_uninvolved) {
+      $commit_uninvolved = $this->isOwnerInvolved(
+        $commit,
+        $package,
+        $author_phid,
+        $revision);
+      if ($commit_uninvolved) {
+        return true;
+      }
+    }
+
+    // We can't find any reason to trigger an audit for this commit.
+    return false;
+  }
+
+  private function isOwnerInvolved(
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorOwnersPackage $package,
+    $author_phid,
+    $revision) {
 
     $owner_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
       array(
@@ -148,12 +200,23 @@ final class PhabricatorRepositoryCommitOwnersWorker
       ));
     $owner_phids = array_fuse($owner_phids);
 
-    // Don't trigger an audit if the author is a package owner.
-    if (isset($owner_phids[$author_phid])) {
-      return false;
+    // For the purposes of deciding whether the owners were involved in the
+    // revision or not, consider a review by the package itself to count as
+    // involvement. This can happen when human reviewers force-accept on
+    // behalf of packages they don't own but have authority over.
+    $owner_phids[$package->getPHID()] = $package->getPHID();
+
+    // If the commit author is identifiable and a package owner, they're
+    // involved.
+    if ($author_phid) {
+      if (isset($owner_phids[$author_phid])) {
+        return true;
+      }
     }
 
-    // Trigger an audit of there is no corresponding revision.
+    // Otherwise, we need to find an owner as a reviewer.
+
+    // If we don't have a revision, this is hopeless: no owners are involved.
     if (!$revision) {
       return true;
     }
@@ -168,26 +231,25 @@ final class PhabricatorRepositoryCommitOwnersWorker
     foreach ($revision->getReviewers() as $reviewer) {
       $reviewer_phid = $reviewer->getReviewerPHID();
 
-      // If this reviewer isn't a package owner, just ignore them.
+      // If this reviewer isn't a package owner or the package itself,
+      // just ignore them.
       if (empty($owner_phids[$reviewer_phid])) {
         continue;
       }
 
-      // If this reviewer accepted the revision and owns the package, we're
-      // all clear and do not need to trigger an audit.
+      // If this reviewer accepted the revision and owns the package (or is
+      // the package), we've found an involved owner.
       if (isset($accepted_statuses[$reviewer->getReviewerStatus()])) {
         $found_accept = true;
         break;
       }
     }
 
-    // Don't trigger an audit if a package owner already reviewed the
-    // revision.
     if ($found_accept) {
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 
 }

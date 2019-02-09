@@ -41,13 +41,6 @@ final class PhabricatorExternalAccountsSettingsPanel
       ->setUser($viewer)
       ->setNoDataString(pht('You have no linked accounts.'));
 
-    $login_accounts = 0;
-    foreach ($accounts as $account) {
-      if ($account->isUsableForLogin()) {
-        $login_accounts++;
-      }
-    }
-
     foreach ($accounts as $account) {
       $item = new PHUIObjectItemView();
 
@@ -71,8 +64,6 @@ final class PhabricatorExternalAccountsSettingsPanel
             'Disabled (an administrator has disabled login for this '.
             'account provider).'));
       }
-
-      $can_unlink = $can_unlink && (!$can_login || ($login_accounts > 1));
 
       $can_refresh = $provider && $provider->shouldAllowAccountRefresh();
       if ($can_refresh) {
@@ -105,26 +96,39 @@ final class PhabricatorExternalAccountsSettingsPanel
 
     $accounts = mpull($accounts, null, 'getProviderKey');
 
-    $providers = PhabricatorAuthProvider::getAllEnabledProviders();
-    $providers = msort($providers, 'getProviderName');
-    foreach ($providers as $key => $provider) {
-      if (isset($accounts[$key])) {
-        continue;
-      }
+    $configs = id(new PhabricatorAuthProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withIsEnabled(true)
+      ->execute();
+    $configs = msort($configs, 'getSortVector');
+
+    foreach ($configs as $config) {
+      $provider = $config->getProvider();
 
       if (!$provider->shouldAllowAccountLink()) {
         continue;
       }
 
+      // Don't show the user providers they already have linked.
+      $provider_key = $config->getProvider()->getProviderKey();
+      if (isset($accounts[$provider_key])) {
+        continue;
+      }
+
       $link_uri = '/auth/link/'.$provider->getProviderKey().'/';
 
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($provider->getProviderName())
+      $link_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-link')
         ->setHref($link_uri)
-        ->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-link')
-            ->setHref($link_uri));
+        ->setColor(PHUIButtonView::GREY)
+        ->setText(pht('Link External Account'));
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($config->getDisplayName())
+        ->setHref($link_uri)
+        ->setImageIcon($config->newIconView())
+        ->setSideColumn($link_button);
 
       $linkable->addItem($item);
     }

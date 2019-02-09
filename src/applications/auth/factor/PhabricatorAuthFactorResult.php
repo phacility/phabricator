@@ -10,6 +10,7 @@ final class PhabricatorAuthFactorResult
   private $errorMessage;
   private $value;
   private $issuedChallenges = array();
+  private $icon;
 
   public function setAnsweredChallenge(PhabricatorAuthChallenge $challenge) {
     if (!$challenge->getIsAnsweredChallenge()) {
@@ -90,6 +91,15 @@ final class PhabricatorAuthFactorResult
 
   public function getIssuedChallenges() {
     return $this->issuedChallenges;
+  }
+
+  public function setIcon(PHUIIconView $icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  public function getIcon() {
+    return $this->icon;
   }
 
 }

@@ -364,16 +364,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
             if ($email_obj) {
               return $this->signInResponse();
             }
-            $external_account = id(new PhabricatorExternalAccountQuery())
-              ->setViewer($viewer)
-              ->withAccountTypes(array('email'))
-              ->withAccountDomains(array($email->getDomainName()))
-              ->withAccountIDs(array($email->getAddress()))
-              ->loadOneOrCreate();
-            if ($external_account->getUserPHID()) {
-              return $this->signInResponse();
-            }
-            $signer_phid = $external_account->getPHID();
           }
         }
         break;

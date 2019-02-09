@@ -6,43 +6,11 @@ final class PhabricatorAuthNewController
   public function handleRequest(AphrontRequest $request) {
     $this->requireApplicationCapability(
       AuthManageProvidersCapability::CAPABILITY);
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+
+    $viewer = $this->getViewer();
+    $cancel_uri = $this->getApplicationURI();
 
     $providers = PhabricatorAuthProvider::getAllBaseProviders();
-
-    $e_provider = null;
-    $errors = array();
-
-    if ($request->isFormPost()) {
-      $provider_string = $request->getStr('provider');
-      if (!strlen($provider_string)) {
-        $e_provider = pht('Required');
-        $errors[] = pht('You must select an authentication provider.');
-      } else {
-        $found = false;
-        foreach ($providers as $provider) {
-          if (get_class($provider) === $provider_string) {
-            $found = true;
-            break;
-          }
-        }
-        if (!$found) {
-          $e_provider = pht('Invalid');
-          $errors[] = pht('You must select a valid provider.');
-        }
-      }
-
-      if (!$errors) {
-        return id(new AphrontRedirectResponse())->setURI(
-          $this->getApplicationURI('/config/new/'.$provider_string.'/'));
-      }
-    }
-
-    $options = id(new AphrontFormRadioButtonControl())
-      ->setLabel(pht('Provider'))
-      ->setName('provider')
-      ->setError($e_provider);
 
     $configured = PhabricatorAuthProvider::getAllProviders();
     $configured_classes = array();
@@ -55,57 +23,52 @@ final class PhabricatorAuthNewController
     $providers = msort($providers, 'getLoginOrder');
     $providers = array_diff_key($providers, $configured_classes) + $providers;
 
-    foreach ($providers as $provider) {
-      if (isset($configured_classes[get_class($provider)])) {
-        $disabled = true;
-        $description = pht('This provider is already configured.');
+    $menu = id(new PHUIObjectItemListView())
+      ->setViewer($viewer)
+      ->setBig(true)
+      ->setFlush(true);
+
+    foreach ($providers as $provider_key => $provider) {
+      $provider_class = get_class($provider);
+
+      $provider_uri = id(new PhutilURI('/config/edit/'))
+        ->setQueryParam('provider', $provider_class);
+      $provider_uri = $this->getApplicationURI($provider_uri);
+
+      $already_exists = isset($configured_classes[get_class($provider)]);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($provider->getNameForCreate())
+        ->setImageIcon($provider->newIconView())
+        ->addAttribute($provider->getDescriptionForCreate());
+
+      if (!$already_exists) {
+        $item
+          ->setHref($provider_uri)
+          ->setClickable(true);
       } else {
-        $disabled = false;
-        $description = $provider->getDescriptionForCreate();
+        $item->setDisabled(true);
       }
-      $options->addButton(
-        get_class($provider),
-        $provider->getNameForCreate(),
-        $description,
-        $disabled ? 'disabled' : null,
-        $disabled);
+
+      if ($already_exists) {
+        $messages = array();
+        $messages[] = pht('You already have a provider of this type.');
+
+        $info = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+          ->setErrors($messages);
+
+        $item->appendChild($info);
+      }
+
+      $menu->addItem($item);
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendChild($options)
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($this->getApplicationURI())
-          ->setValue(pht('Continue')));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Provider'))
-      ->setFormErrors($errors)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setForm($form);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Add Provider'));
-    $crumbs->setBorder(true);
-
-    $title = pht('Add Auth Provider');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon('fa-plus-square');
-
-    $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter(array(
-        $form_box,
-      ));
-
-    return $this->newPage()
-      ->setTitle($title)
-      ->setCrumbs($crumbs)
-      ->appendChild($view);
-
+    return $this->newDialog()
+      ->setTitle(pht('Add Auth Provider'))
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->appendChild($menu)
+      ->addCancelButton($cancel_uri);
   }
 
 }

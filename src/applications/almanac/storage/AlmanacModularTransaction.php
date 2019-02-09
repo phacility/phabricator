@@ -7,8 +7,4 @@ abstract class AlmanacModularTransaction
     return 'almanac';
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
 }

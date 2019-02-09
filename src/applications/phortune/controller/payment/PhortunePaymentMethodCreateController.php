@@ -73,6 +73,7 @@ final class PhortunePaymentMethodCreateController
     $provider = $providers[$provider_id];
 
     $errors = array();
+    $display_exception = null;
     if ($request->isFormPost() && $request->getBool('isProviderForm')) {
       $method = id(new PhortunePaymentMethod())
         ->setAccountPHID($account->getPHID())
@@ -107,14 +108,23 @@ final class PhortunePaymentMethodCreateController
         }
 
         if (!$errors) {
-          $errors = $provider->createPaymentMethodFromRequest(
-            $request,
-            $method,
-            $client_token);
+          try {
+            $provider->createPaymentMethodFromRequest(
+              $request,
+              $method,
+              $client_token);
+          } catch (PhortuneDisplayException $exception) {
+            $display_exception = $exception;
+          } catch (Exception $ex) {
+            $errors = array(
+              pht('There was an error adding this payment method:'),
+              $ex->getMessage(),
+            );
+          }
         }
       }
 
-      if (!$errors) {
+      if (!$errors && !$display_exception) {
         $method->save();
 
         // If we added this method on a cart flow, return to the cart to
@@ -133,13 +143,17 @@ final class PhortunePaymentMethodCreateController
 
         return id(new AphrontRedirectResponse())->setURI($next_uri);
       } else {
-        $dialog = id(new AphrontDialogView())
-          ->setUser($viewer)
-          ->setTitle(pht('Error Adding Payment Method'))
-          ->appendChild(id(new PHUIInfoView())->setErrors($errors))
-          ->addCancelButton($request->getRequestURI());
+        if ($display_exception) {
+          $dialog_body = $display_exception->getView();
+        } else {
+          $dialog_body = id(new PHUIInfoView())
+            ->setErrors($errors);
+        }
 
-        return id(new AphrontDialogResponse())->setDialog($dialog);
+        return $this->newDialog()
+          ->setTitle(pht('Error Adding Payment Method'))
+          ->appendChild($dialog_body)
+          ->addCancelButton($request->getRequestURI());
       }
     }
 

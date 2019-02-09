@@ -202,6 +202,7 @@ final class DiffusionCommitQuery
     $table = $this->newResultObject();
     $conn = $table->establishConnection('r');
 
+    $empty_exception = null;
     $subqueries = array();
     if ($this->responsiblePHIDs) {
       $base_authors = $this->authorPHIDs;
@@ -222,19 +223,31 @@ final class DiffusionCommitQuery
 
       $this->authorPHIDs = $all_authors;
       $this->auditorPHIDs = $base_auditors;
-      $subqueries[] = $this->buildStandardPageQuery(
-        $conn,
-        $table->getTableName());
+      try {
+        $subqueries[] = $this->buildStandardPageQuery(
+          $conn,
+          $table->getTableName());
+      } catch (PhabricatorEmptyQueryException $ex) {
+        $empty_exception = $ex;
+      }
 
       $this->authorPHIDs = $base_authors;
       $this->auditorPHIDs = $all_auditors;
-      $subqueries[] = $this->buildStandardPageQuery(
-        $conn,
-        $table->getTableName());
+      try {
+        $subqueries[] = $this->buildStandardPageQuery(
+          $conn,
+          $table->getTableName());
+      } catch (PhabricatorEmptyQueryException $ex) {
+        $empty_exception = $ex;
+      }
     } else {
       $subqueries[] = $this->buildStandardPageQuery(
         $conn,
         $table->getTableName());
+    }
+
+    if (!$subqueries) {
+      throw $empty_exception;
     }
 
     if (count($subqueries) > 1) {
@@ -642,10 +655,19 @@ final class DiffusionCommitQuery
     }
 
     if ($this->authorPHIDs !== null) {
+      $author_phids = $this->authorPHIDs;
+      if ($author_phids) {
+        $author_phids = $this->selectPossibleAuthors($author_phids);
+        if (!$author_phids) {
+          throw new PhabricatorEmptyQueryException(
+            pht('Author PHIDs contain no possible authors.'));
+        }
+      }
+
       $where[] = qsprintf(
         $conn,
         'commit.authorPHID IN (%Ls)',
-        $this->authorPHIDs);
+        $author_phids);
     }
 
     if ($this->epochMin !== null) {
@@ -932,6 +954,21 @@ final class DiffusionCommitQuery
         'name' => pht('Commit Date (Oldest First)'),
       ),
     ) + $parent;
+  }
+
+  private function selectPossibleAuthors(array $phids) {
+    // See PHI1057. Select PHIDs which might possibly be commit authors from
+    // a larger list of PHIDs. This primarily filters out packages and projects
+    // from "Responsible Users: ..." queries. Our goal in performing this
+    // filtering is to improve the performance of the final query.
+
+    foreach ($phids as $key => $phid) {
+      if (phid_get_type($phid) !== PhabricatorPeopleUserPHIDType::TYPECONST) {
+        unset($phids[$key]);
+      }
+    }
+
+    return $phids;
   }
 
 

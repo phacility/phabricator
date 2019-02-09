@@ -16,8 +16,4 @@ final class PhabricatorMetaMTAApplicationEmailTransaction
     return PhabricatorMetaMTAApplicationEmailPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
 }

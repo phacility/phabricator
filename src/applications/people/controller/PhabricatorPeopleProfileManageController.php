@@ -92,6 +92,8 @@ final class PhabricatorPeopleProfileManageController
       PeopleDisableUsersCapability::CAPABILITY);
     $can_disable = ($has_disable && !$is_self);
 
+    $id = $user->getID();
+
     $welcome_engine = id(new PhabricatorPeopleWelcomeMailEngine())
       ->setSender($viewer)
       ->setRecipient($user);
@@ -103,7 +105,7 @@ final class PhabricatorPeopleProfileManageController
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Profile'))
-        ->setHref($this->getApplicationURI('editprofile/'.$user->getID().'/'))
+        ->setHref($this->getApplicationURI('editprofile/'.$id.'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -111,7 +113,7 @@ final class PhabricatorPeopleProfileManageController
       id(new PhabricatorActionView())
         ->setIcon('fa-picture-o')
         ->setName(pht('Edit Profile Picture'))
-        ->setHref($this->getApplicationURI('picture/'.$user->getID().'/'))
+        ->setHref($this->getApplicationURI('picture/'.$id.'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -137,7 +139,7 @@ final class PhabricatorPeopleProfileManageController
         ->setName($empower_name)
         ->setDisabled(!$can_admin)
         ->setWorkflow(true)
-        ->setHref($this->getApplicationURI('empower/'.$user->getID().'/')));
+        ->setHref($this->getApplicationURI('empower/'.$id.'/')));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -145,7 +147,7 @@ final class PhabricatorPeopleProfileManageController
         ->setName(pht('Change Username'))
         ->setDisabled(!$is_admin)
         ->setWorkflow(true)
-        ->setHref($this->getApplicationURI('rename/'.$user->getID().'/')));
+        ->setHref($this->getApplicationURI('rename/'.$id.'/')));
 
     if ($user->getIsDisabled()) {
       $disable_icon = 'fa-check-circle-o';
@@ -161,11 +163,26 @@ final class PhabricatorPeopleProfileManageController
         ->setName(pht('Send Welcome Email'))
         ->setWorkflow(true)
         ->setDisabled(!$can_welcome)
-        ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
+        ->setHref($this->getApplicationURI('welcome/'.$id.'/')));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setType(PhabricatorActionView::TYPE_DIVIDER));
+
+    if (!$user->getIsApproved()) {
+      $approve_action = id(new PhabricatorActionView())
+        ->setIcon('fa-thumbs-up')
+        ->setName(pht('Approve User'))
+        ->setWorkflow(true)
+        ->setDisabled(!$is_admin)
+        ->setHref("/people/approve/{$id}/via/profile/");
+
+      if ($is_admin) {
+        $approve_action->setColor(PhabricatorActionView::GREEN);
+      }
+
+      $curtain->addAction($approve_action);
+    }
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -173,7 +190,7 @@ final class PhabricatorPeopleProfileManageController
         ->setName($disable_name)
         ->setDisabled(!$can_disable)
         ->setWorkflow(true)
-        ->setHref($this->getApplicationURI('disable/'.$user->getID().'/')));
+        ->setHref($this->getApplicationURI('disable/'.$id.'/')));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -181,7 +198,7 @@ final class PhabricatorPeopleProfileManageController
         ->setName(pht('Delete User'))
         ->setDisabled(!$can_admin)
         ->setWorkflow(true)
-        ->setHref($this->getApplicationURI('delete/'.$user->getID().'/')));
+        ->setHref($this->getApplicationURI('delete/'.$id.'/')));
 
     $curtain->addAction(
       id(new PhabricatorActionView())

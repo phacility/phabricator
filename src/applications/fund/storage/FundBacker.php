@@ -76,6 +76,7 @@ final class FundBacker extends FundDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -90,6 +91,8 @@ final class FundBacker extends FundDAO
         if ($initiative) {
           return $initiative->getPolicy($capability);
         }
+        return PhabricatorPolicies::POLICY_NOONE;
+      case PhabricatorPolicyCapability::CAN_EDIT:
         return PhabricatorPolicies::POLICY_NOONE;
     }
   }

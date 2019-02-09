@@ -11,10 +11,6 @@ final class PhabricatorSpacesNamespaceTransaction
     return PhabricatorSpacesNamespacePHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getBaseTransactionClass() {
     return 'PhabricatorSpacesNamespaceTransactionType';
   }
