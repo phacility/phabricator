@@ -174,12 +174,12 @@ final class PhabricatorRepositoryCommitOwnersWorker
     // If auditing is configured to trigger on changes with no involved owner,
     // check for an owner. If we don't find one, trigger an audit.
     if ($audit_uninvolved) {
-      $commit_uninvolved = $this->isOwnerInvolved(
+      $owner_involved = $this->isOwnerInvolved(
         $commit,
         $package,
         $author_phid,
         $revision);
-      if ($commit_uninvolved) {
+      if (!$owner_involved) {
         return true;
       }
     }
