@@ -709,8 +709,6 @@ final class DiffusionBrowseController extends DiffusionController {
         'path'      => $path,
       ));
 
-    $before_uri->setQueryParams($request->getRequestURI()->getQueryParams());
-    $before_uri = $before_uri->alter('before', null);
     $before_uri = $before_uri->alter('renamed', $renamed);
     $before_uri = $before_uri->alter('follow', $follow);
 
