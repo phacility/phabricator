@@ -286,6 +286,7 @@ final class AphrontApplicationConfiguration
       $original_exception = $ex;
     }
 
+    $response_exception = null;
     try {
       if ($original_exception) {
         $response = $this->handleThrowable($original_exception);
@@ -296,7 +297,13 @@ final class AphrontApplicationConfiguration
       $response->setRequest($request);
 
       self::writeResponse($sink, $response);
-    } catch (Exception $response_exception) {
+    } catch (Exception $ex) {
+      $response_exception = $ex;
+    } catch (Throwable $ex) {
+      $response_exception = $ex;
+    }
+
+    if ($response_exception) {
       // If we encountered an exception while building a normal response, then
       // encountered another exception while building a response for the first
       // exception, just throw the original exception. It is more likely to be
