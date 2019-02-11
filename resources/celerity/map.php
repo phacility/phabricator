@@ -46,7 +46,7 @@ return array(
     'rsrc/css/application/config/config-options.css' => '16c920ae',
     'rsrc/css/application/config/config-template.css' => '20babf50',
     'rsrc/css/application/config/setup-issue.css' => '5eed85b2',
-    'rsrc/css/application/config/unhandled-exception.css' => '9da8fdab',
+    'rsrc/css/application/config/unhandled-exception.css' => '9ecfc00d',
     'rsrc/css/application/conpherence/color.css' => 'b17746b0',
     'rsrc/css/application/conpherence/durable-column.css' => '2d57072b',
     'rsrc/css/application/conpherence/header-pane.css' => 'c9a3db8e',
@@ -877,7 +877,7 @@ return array(
     'syntax-highlighting-css' => '8a16f91b',
     'tokens-css' => 'ce5a50bd',
     'typeahead-browse-css' => 'b7ed02d2',
-    'unhandled-exception-css' => '9da8fdab',
+    'unhandled-exception-css' => '9ecfc00d',
   ),
   'requires' => array(
     '01384686' => array(

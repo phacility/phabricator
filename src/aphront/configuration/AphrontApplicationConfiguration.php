@@ -118,6 +118,12 @@ final class AphrontApplicationConfiguration
       $database_exception = $ex;
     }
 
+    // If we're in developer mode, set a flag so that top-level exception
+    // handlers can add more information.
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+      $sink->setShowStackTraces(true);
+    }
+
     if ($database_exception) {
       $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
         $database_exception,

@@ -44,6 +44,7 @@ try {
     try {
       $response = new AphrontUnhandledExceptionResponse();
       $response->setException($main_exception);
+      $response->setShowStackTraces($sink->getShowStackTraces());
 
       PhabricatorStartup::endOutputCapture();
       $sink->writeResponse($response);
