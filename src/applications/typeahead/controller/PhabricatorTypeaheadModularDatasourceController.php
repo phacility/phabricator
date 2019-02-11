@@ -35,7 +35,26 @@ final class PhabricatorTypeaheadModularDatasourceController
 
     if (isset($sources[$class])) {
       $source = $sources[$class];
-      $source->setParameters($request->getRequestData());
+
+      $parameters = array();
+
+      $raw_parameters = $request->getStr('parameters');
+      if (strlen($raw_parameters)) {
+        try {
+          $parameters = phutil_json_decode($raw_parameters);
+        } catch (PhutilJSONParserException $ex) {
+          return $this->newDialog()
+            ->setTitle(pht('Invalid Parameters'))
+            ->appendParagraph(
+              pht(
+                'The HTTP parameter named "parameters" for this request is '.
+                'not a valid JSON parameter. JSON is required. Exception: %s',
+                $ex->getMessage()))
+            ->addCancelButton('/');
+        }
+      }
+
+      $source->setParameters($parameters);
       $source->setViewer($viewer);
 
       // NOTE: Wrapping the source in a Composite datasource ensures we perform

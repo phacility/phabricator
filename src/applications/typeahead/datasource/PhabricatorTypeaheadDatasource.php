@@ -100,7 +100,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
 
   public function getDatasourceURI() {
     $uri = new PhutilURI('/typeahead/class/'.get_class($this).'/');
-    $uri->setQueryParams($this->parameters);
+    $uri->setQueryParams($this->newURIParameters());
     return (string)$uri;
   }
 
@@ -110,8 +110,20 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     }
 
     $uri = new PhutilURI('/typeahead/browse/'.get_class($this).'/');
-    $uri->setQueryParams($this->parameters);
+    $uri->setQueryParams($this->newURIParameters());
     return (string)$uri;
+  }
+
+  private function newURIParameters() {
+    if (!$this->parameters) {
+      return array();
+    }
+
+    $map = array(
+      'parameters' => phutil_json_encode($this->parameters),
+    );
+
+    return $map;
   }
 
   abstract public function getPlaceholderText();
