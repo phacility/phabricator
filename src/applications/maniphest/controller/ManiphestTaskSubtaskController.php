@@ -47,9 +47,9 @@ final class ManiphestTaskSubtaskController
       $subtype = $subtype_map->getSubtype($subtype_key);
 
       $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
-        ->setQueryParam('parent', $id)
-        ->setQueryParam('template', $id)
-        ->setQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
+        ->replaceQueryParam('parent', $id)
+        ->replaceQueryParam('template', $id)
+        ->replaceQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
       $subtask_uri = $this->getApplicationURI($subtask_uri);
 
       $item = id(new PHUIObjectItemView())

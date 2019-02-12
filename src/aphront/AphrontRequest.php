@@ -594,7 +594,7 @@ final class AphrontRequest extends Phobject {
     $request_uri = idx($_SERVER, 'REQUEST_URI', '/');
 
     $uri = new PhutilURI($request_uri);
-    $uri->setQueryParam('__path__', null);
+    $uri->removeQueryParam('__path__');
 
     $path = phutil_escape_uri($this->getPath());
     $uri->setPath($path);

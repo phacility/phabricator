@@ -287,7 +287,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       $edit_uri = "/dashboard/panel/edit/{$panel_id}/";
       $edit_uri = new PhutilURI($edit_uri);
       if ($dashboard_id) {
-        $edit_uri->setQueryParam('dashboardID', $dashboard_id);
+        $edit_uri->replaceQueryParam('dashboardID', $dashboard_id);
       }
 
       $action_edit = id(new PHUIIconView())
@@ -303,7 +303,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
       $remove_uri = "/dashboard/removepanel/{$dashboard_id}/";
       $remove_uri = id(new PhutilURI($remove_uri))
-        ->setQueryParam('panelPHID', $panel_phid);
+        ->replaceQueryParam('panelPHID', $panel_phid);
 
       $action_remove = id(new PHUIIconView())
         ->setIcon('fa-trash-o')

@@ -153,7 +153,7 @@ final class PhabricatorNotificationServerRef
 
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
     if (strlen($instance)) {
-      $uri->setQueryParam('instance', $instance);
+      $uri->replaceQueryParam('instance', $instance);
     }
 
     return $uri;

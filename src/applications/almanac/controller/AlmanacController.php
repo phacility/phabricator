@@ -137,7 +137,7 @@ abstract class AlmanacController
 
     $phid = $object->getPHID();
     $add_uri = id(new PhutilURI($edit_base))
-      ->setQueryParam('objectPHID', $object->getPHID());
+      ->replaceQueryParam('objectPHID', $object->getPHID());
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

@@ -198,7 +198,7 @@ final class PhabricatorApplicationTransactionCommentView
     $viewer = $this->getViewer();
     if (!$viewer->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
-        ->setQueryParam('next', (string)$this->getRequestURI());
+        ->replaceQueryParam('next', (string)$this->getRequestURI());
       return id(new PHUIObjectBoxView())
         ->setFlush(true)
         ->appendChild(

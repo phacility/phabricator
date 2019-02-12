@@ -284,7 +284,7 @@ final class PhabricatorProjectBoardViewController
       $query_key = $saved_query->getQueryKey();
 
       $bulk_uri = new PhutilURI("/maniphest/bulk/query/{$query_key}/");
-      $bulk_uri->setQueryParam('board', $this->id);
+      $bulk_uri->replaceQueryParam('board', $this->id);
 
       return id(new AphrontRedirectResponse())
         ->setURI($bulk_uri);
@@ -878,7 +878,7 @@ final class PhabricatorProjectBoardViewController
       }
 
       $uri = $this->getURIWithState($uri)
-        ->setQueryParam('filter', null);
+        ->removeQueryParam('filter');
       $item->setHref($uri);
 
       $items[] = $item;
@@ -966,12 +966,12 @@ final class PhabricatorProjectBoardViewController
 
     if ($show_hidden) {
       $hidden_uri = $this->getURIWithState()
-        ->setQueryParam('hidden', null);
+        ->removeQueryParam('hidden');
       $hidden_icon = 'fa-eye-slash';
       $hidden_text = pht('Hide Hidden Columns');
     } else {
       $hidden_uri = $this->getURIWithState()
-        ->setQueryParam('hidden', 'true');
+        ->replaceQueryParam('hidden', 'true');
       $hidden_icon = 'fa-eye';
       $hidden_text = pht('Show Hidden Columns');
     }
@@ -999,7 +999,7 @@ final class PhabricatorProjectBoardViewController
       ->setHref($manage_uri);
 
     $batch_edit_uri = $request->getRequestURI();
-    $batch_edit_uri->setQueryParam('batch', self::BATCH_EDIT_ALL);
+    $batch_edit_uri->replaceQueryParam('batch', self::BATCH_EDIT_ALL);
     $can_batch_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       PhabricatorApplication::getByClass('PhabricatorManiphestApplication'),
@@ -1090,7 +1090,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $batch_edit_uri = $request->getRequestURI();
-    $batch_edit_uri->setQueryParam('batch', $column->getID());
+    $batch_edit_uri->replaceQueryParam('batch', $column->getID());
     $can_batch_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       PhabricatorApplication::getByClass('PhabricatorManiphestApplication'),
@@ -1103,7 +1103,7 @@ final class PhabricatorProjectBoardViewController
       ->setDisabled(!$can_batch_edit);
 
     $batch_move_uri = $request->getRequestURI();
-    $batch_move_uri->setQueryParam('move', $column->getID());
+    $batch_move_uri->replaceQueryParam('move', $column->getID());
     $column_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-arrow-right')
       ->setName(pht('Move Tasks to Column...'))
@@ -1111,7 +1111,7 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true);
 
     $query_uri = $request->getRequestURI();
-    $query_uri->setQueryParam('queryColumnID', $column->getID());
+    $query_uri->replaceQueryParam('queryColumnID', $column->getID());
 
     $column_items[] = id(new PhabricatorActionView())
       ->setName(pht('View as Query'))
@@ -1188,18 +1188,22 @@ final class PhabricatorProjectBoardViewController
     $base = new PhutilURI($base);
 
     if ($force || ($this->sortKey != $this->getDefaultSort($project))) {
-      $base->setQueryParam('order', $this->sortKey);
+      $base->replaceQueryParam('order', $this->sortKey);
     } else {
-      $base->setQueryParam('order', null);
+      $base->removeQueryParam('order');
     }
 
     if ($force || ($this->queryKey != $this->getDefaultFilter($project))) {
-      $base->setQueryParam('filter', $this->queryKey);
+      $base->replaceQueryParam('filter', $this->queryKey);
     } else {
-      $base->setQueryParam('filter', null);
+      $base->removeQueryParam('filter');
     }
 
-    $base->setQueryParam('hidden', $this->showHidden ? 'true' : null);
+    if ($this->showHidden) {
+      $base->replaceQueryParam('hidden', 'true');
+    } else {
+      $base->removeQueryParam('hidden');
+    }
 
     return $base;
   }

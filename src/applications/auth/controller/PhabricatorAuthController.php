@@ -95,7 +95,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
   private function buildLoginValidateResponse(PhabricatorUser $user) {
     $validate_uri = new PhutilURI($this->getApplicationURI('validate/'));
-    $validate_uri->setQueryParam('expect', $user->getUsername());
+    $validate_uri->replaceQueryParam('expect', $user->getUsername());
 
     return id(new AphrontRedirectResponse())->setURI((string)$validate_uri);
   }

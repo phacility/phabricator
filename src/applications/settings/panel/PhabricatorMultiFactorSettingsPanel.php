@@ -219,7 +219,7 @@ final class PhabricatorMultiFactorSettingsPanel
 
       foreach ($providers as $provider_phid => $provider) {
         $provider_uri = id(new PhutilURI($this->getPanelURI()))
-          ->setQueryParam('providerPHID', $provider_phid);
+          ->replaceQueryParam('providerPHID', $provider_phid);
 
         $is_enabled = $provider->canCreateNewConfiguration($viewer);
 

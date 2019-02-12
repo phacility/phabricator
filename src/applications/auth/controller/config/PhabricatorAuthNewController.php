@@ -32,7 +32,7 @@ final class PhabricatorAuthNewController
       $provider_class = get_class($provider);
 
       $provider_uri = id(new PhutilURI('/config/edit/'))
-        ->setQueryParam('provider', $provider_class);
+        ->replaceQueryParam('provider', $provider_class);
       $provider_uri = $this->getApplicationURI($provider_uri);
 
       $already_exists = isset($configured_classes[get_class($provider)]);

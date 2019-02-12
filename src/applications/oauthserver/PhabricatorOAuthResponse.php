@@ -36,7 +36,7 @@ final class PhabricatorOAuthResponse extends AphrontResponse {
     $base_uri     = $this->getClientURI();
     $query_params = $this->buildResponseDict();
     foreach ($query_params as $key => $value) {
-      $base_uri->setQueryParam($key, $value);
+      $base_uri->replaceQueryParam($key, $value);
     }
     return $base_uri;
   }

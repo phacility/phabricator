@@ -42,7 +42,7 @@ final class PhabricatorAuthMainMenuBarExtension
     $uri = new PhutilURI('/auth/start/');
     if ($controller) {
       $path = $controller->getRequest()->getPath();
-      $uri->setQueryParam('next', $path);
+      $uri->replaceQueryParam('next', $path);
     }
 
     return id(new PHUIButtonView())

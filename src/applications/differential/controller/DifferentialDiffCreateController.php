@@ -71,7 +71,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
           $uri = $this->getApplicationURI("diff/{$diff_id}/");
           $uri = new PhutilURI($uri);
           if ($revision) {
-            $uri->setQueryParam('revisionID', $revision->getID());
+            $uri->replaceQueryParam('revisionID', $revision->getID());
           }
 
           return id(new AphrontRedirectResponse())->setURI($uri);

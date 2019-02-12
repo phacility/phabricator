@@ -306,7 +306,7 @@ final class PhabricatorOAuthServerAuthController
 
     foreach ($params as $key => $value) {
       if (strlen($value)) {
-        $full_uri->setQueryParam($key, $value);
+        $full_uri->replaceQueryParam($key, $value);
       }
     }
 

@@ -118,8 +118,8 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
 
     $uri = $this->getApplicationURI($account->getID().'/card/new/');
     $uri = new PhutilURI($uri);
-    $uri->setQueryParam('merchantID', $merchant->getID());
-    $uri->setQueryParam('subscriptionID', $subscription->getID());
+    $uri->replaceQueryParam('merchantID', $merchant->getID());
+    $uri->replaceQueryParam('subscriptionID', $subscription->getID());
 
     $add_method_button = phutil_tag(
       'a',

@@ -300,9 +300,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $subtask_form = head($subtask_options);
       $form_key = $subtask_form->getIdentifier();
       $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
-        ->setQueryParam('parent', $id)
-        ->setQueryParam('template', $id)
-        ->setQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
+        ->replaceQueryParam('parent', $id)
+        ->replaceQueryParam('template', $id)
+        ->replaceQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
       $subtask_workflow = false;
     }
 

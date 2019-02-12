@@ -154,8 +154,8 @@ final class PHUITimelineView extends AphrontView {
       }
 
       $uri = $this->getPager()->getNextPageURI();
-      $uri->setQueryParam('quoteTargetID', $this->getQuoteTargetID());
-      $uri->setQueryParam('quoteRef', $this->getQuoteRef());
+      $uri->replaceQueryParam('quoteTargetID', $this->getQuoteTargetID());
+      $uri->replaceQueryParam('quoteRef', $this->getQuoteRef());
       $events[] = javelin_tag(
         'div',
         array(
