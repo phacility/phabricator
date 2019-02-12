@@ -135,7 +135,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       $request_uri = id(clone $request->getAbsoluteRequestURI())
         ->setPath(null)
         ->setFragment(null)
-        ->setQueryParams(array());
+        ->removeAllQueryParams();
 
       $response->addContentSecurityPolicyURI(
         'object-src',

@@ -447,7 +447,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
     $uri = $attributes['uri'];
     $uri = new PhutilURI($uri);
     $params = $uri->getQueryParamsAsPairList();
-    $uri->setQueryParams(array());
+    $uri->removeAllQueryParams();
 
     $content = array($button);
 

@@ -218,7 +218,7 @@ abstract class AphrontResponse extends Phobject {
     $uri = id(new PhutilURI($uri))
       ->setPath(null)
       ->setFragment(null)
-      ->setQueryParams(array());
+      ->removeAllQueryParams();
 
     $uri = (string)$uri;
     if (preg_match('/[ ;\']/', $uri)) {

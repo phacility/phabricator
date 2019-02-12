@@ -829,7 +829,10 @@ final class AphrontRequest extends Phobject {
     }
 
     $uri->setPath($this->getPath());
-    $uri->setQueryParams(self::flattenData($_GET));
+    $uri->removeAllQueryParams();
+    foreach (self::flattenData($_GET) as $query_key => $query_value) {
+      $uri->appendQueryParam($query_key, $query_value);
+    }
 
     $input = PhabricatorStartup::getRawInput();
 
