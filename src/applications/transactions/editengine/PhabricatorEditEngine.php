@@ -1541,8 +1541,7 @@ abstract class PhabricatorEditEngine
         $config_uri = $config->getCreateURI();
 
         if ($parameters) {
-          $config_uri = (string)id(new PhutilURI($config_uri))
-            ->setQueryParams($parameters);
+          $config_uri = (string)new PhutilURI($config_uri, $parameters);
         }
 
         $specs[] = array(

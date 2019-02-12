@@ -80,11 +80,6 @@ final class PhabricatorDuoFuture
       $host = $this->apiHostname;
       $host = phutil_utf8_strtolower($host);
 
-      $uri = id(new PhutilURI(''))
-        ->setProtocol('https')
-        ->setDomain($host)
-        ->setPath($path);
-
       $data = $this->parameters;
       $date = date('r');
 
@@ -109,11 +104,19 @@ final class PhabricatorDuoFuture
       $signature = new PhutilOpaqueEnvelope($signature);
 
       if ($http_method === 'GET') {
-        $uri->setQueryParams($data);
-        $data = array();
+        $uri_data = $data;
+        $body_data = array();
+      } else {
+        $uri_data = array();
+        $body_data = $data;
       }
 
-      $future = id(new HTTPSFuture($uri, $data))
+      $uri = id(new PhutilURI('', $uri_data))
+        ->setProtocol('https')
+        ->setDomain($host)
+        ->setPath($path);
+
+      $future = id(new HTTPSFuture($uri, $body_data))
         ->setHTTPBasicAuthCredentials($this->integrationKey, $signature)
         ->setMethod($http_method)
         ->addHeader('Accept', 'application/json')

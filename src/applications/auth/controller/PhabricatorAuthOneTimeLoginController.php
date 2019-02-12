@@ -218,11 +218,11 @@ final class PhabricatorAuthOneTimeLoginController
 
       $request->setTemporaryCookie(PhabricatorCookies::COOKIE_HISEC, 'yes');
 
-      return (string)id(new PhutilURI($panel_uri))
-        ->setQueryParams(
-          array(
-            'key' => $key,
-          ));
+      $params = array(
+        'key' => $key,
+      );
+
+      return (string)new PhutilURI($panel_uri, $params);
     }
 
     $providers = id(new PhabricatorAuthProviderConfigQuery())

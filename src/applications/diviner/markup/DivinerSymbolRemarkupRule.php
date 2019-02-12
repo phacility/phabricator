@@ -111,15 +111,15 @@ final class DivinerSymbolRemarkupRule extends PhutilRemarkupRule {
         // Here, we're generating comment text or something like that. Just
         // link to Diviner and let it sort things out.
 
-        $href = id(new PhutilURI('/diviner/find/'))
-          ->setQueryParams(
-            array(
-              'book' => $ref->getBook(),
-              'name' => $ref->getName(),
-              'type' => $ref->getType(),
-              'context' => $ref->getContext(),
-              'jump' => true,
-            ));
+        $params = array(
+          'book' => $ref->getBook(),
+          'name' => $ref->getName(),
+          'type' => $ref->getType(),
+          'context' => $ref->getContext(),
+          'jump' => true,
+        );
+
+        $href = new PhutilURI('/diviner/find/', $params);
       }
 
       // TODO: This probably is not the best place to do this. Move it somewhere

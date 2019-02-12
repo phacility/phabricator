@@ -820,8 +820,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return $uri;
     }
 
-    $uri = new PhutilURI($uri);
-
     if (isset($params['lint'])) {
       $params['params'] = idx($params, 'params', array()) + array(
         'lint' => $params['lint'],
@@ -830,11 +828,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $query = idx($params, 'params', array()) + $query;
 
-    if ($query) {
-      $uri->setQueryParams($query);
-    }
-
-    return $uri;
+    return new PhutilURI($uri, $query);
   }
 
   public function updateURIIndex() {
