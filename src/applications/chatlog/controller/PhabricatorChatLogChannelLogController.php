@@ -11,8 +11,7 @@ final class PhabricatorChatLogChannelLogController
     $viewer = $request->getViewer();
     $id = $request->getURIData('channelID');
 
-    $uri = clone $request->getRequestURI();
-    $uri->setQueryParams(array());
+    $uri = new PhutilURI($request->getPath());
 
     $pager = new AphrontCursorPagerView();
     $pager->setURI($uri);

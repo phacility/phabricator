@@ -31,8 +31,7 @@ final class PhabricatorEmailAddressesSettingsPanel
     $user = $this->getUser();
     $editable = PhabricatorEnv::getEnvConfig('account.editable');
 
-    $uri = $request->getRequestURI();
-    $uri->setQueryParams(array());
+    $uri = new PhutilURI($request->getPath());
 
     if ($editable) {
       $new = $request->getStr('new');

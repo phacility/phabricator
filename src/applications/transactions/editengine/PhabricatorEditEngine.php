@@ -1279,8 +1279,7 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->willBuildEditForm($object, $fields);
 
-    $request_path = $request->getRequestURI()
-      ->setQueryParams(array());
+    $request_path = $request->getPath();
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
