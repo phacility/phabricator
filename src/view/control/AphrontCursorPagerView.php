@@ -99,9 +99,9 @@ final class AphrontCursorPagerView extends AphrontView {
       return null;
     }
 
-    return $this->uri
-      ->alter('before', null)
-      ->alter('after', null);
+    return id(clone $this->uri)
+      ->removeQueryParam('after')
+      ->removeQueryParam('before');
   }
 
   public function getPrevPageURI() {
@@ -113,9 +113,9 @@ final class AphrontCursorPagerView extends AphrontView {
       return null;
     }
 
-    return $this->uri
-      ->alter('after', null)
-      ->alter('before', $this->prevPageID);
+    return id(clone $this->uri)
+      ->removeQueryParam('after')
+      ->replaceQueryParam('before', $this->prevPageID);
   }
 
   public function getNextPageURI() {
@@ -127,9 +127,9 @@ final class AphrontCursorPagerView extends AphrontView {
       return null;
     }
 
-    return $this->uri
-      ->alter('after', $this->nextPageID)
-      ->alter('before', null);
+    return id(clone $this->uri)
+      ->replaceQueryParam('after', $this->nextPageID)
+      ->removeQueryParam('before');
   }
 
   public function render() {
