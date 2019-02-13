@@ -74,9 +74,22 @@ abstract class PhabricatorCustomField extends Phobject {
         $spec,
         $object);
 
+      $fields = self::adjustCustomFieldsForObjectSubtype(
+        $object,
+        $role,
+        $fields);
+
       foreach ($fields as $key => $field) {
+        // NOTE: We perform this filtering in "buildFieldList()", but may need
+        // to filter again after subtype adjustment.
+        if (!$field->isFieldEnabled()) {
+          unset($fields[$key]);
+          continue;
+        }
+
         if (!$field->shouldEnableForRole($role)) {
           unset($fields[$key]);
+          continue;
         }
       }
 
@@ -1620,6 +1633,80 @@ abstract class PhabricatorCustomField extends Phobject {
     }
 
     return null;
+  }
+
+  private static function adjustCustomFieldsForObjectSubtype(
+    PhabricatorCustomFieldInterface $object,
+    $role,
+    array $fields) {
+    assert_instances_of($fields, __CLASS__);
+
+    // We only apply subtype adjustment for some roles. For example, when
+    // writing Herald rules or building a Search interface, we always want to
+    // show all the fields in their default state, so we do not apply any
+    // adjustments.
+    $subtype_roles = array(
+      self::ROLE_EDITENGINE,
+      self::ROLE_VIEW,
+    );
+
+    $subtype_roles = array_fuse($subtype_roles);
+    if (!isset($subtype_roles[$role])) {
+      return $fields;
+    }
+
+    // If the object doesn't support subtypes, we can't possibly make
+    // any adjustments based on subtype.
+    if (!($object instanceof PhabricatorEditEngineSubtypeInterface)) {
+      return $fields;
+    }
+
+    $subtype_map = $object->newEditEngineSubtypeMap();
+    $subtype_key = $object->getEditEngineSubtype();
+    $subtype_object = $subtype_map->getSubtype($subtype_key);
+
+    $map = array();
+    foreach ($fields as $field) {
+      $modern_key = $field->getModernFieldKey();
+      if (!strlen($modern_key)) {
+        continue;
+      }
+
+      $map[$modern_key] = $field;
+    }
+
+    foreach ($map as $field_key => $field) {
+      // For now, only support overriding standard custom fields. In the
+      // future there's no technical or product reason we couldn't let you
+      // override (some properites of) other fields like "Title", but they
+      // don't usually support appropriate "setX()" methods today.
+      if (!($field instanceof PhabricatorStandardCustomField)) {
+        // For fields that are proxies on top of StandardCustomField, which
+        // is how most application custom fields work today, we can reconfigure
+        // the proxied field instead.
+        $field = $field->getProxy();
+        if (!$field || !($field instanceof PhabricatorStandardCustomField)) {
+          continue;
+        }
+      }
+
+      $subtype_config = $subtype_object->getSubtypeFieldConfiguration(
+        $field_key);
+
+      if (!$subtype_config) {
+        continue;
+      }
+
+      if (isset($subtype_config['disabled'])) {
+        $field->setIsEnabled(!$subtype_config['disabled']);
+      }
+
+      if (isset($subtype_config['name'])) {
+        $field->setFieldName($subtype_config['name']);
+      }
+    }
+
+    return $fields;
   }
 
 }
