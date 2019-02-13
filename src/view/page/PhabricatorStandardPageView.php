@@ -892,13 +892,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       $response = id(new AphrontWebpageResponse())
         ->setContent($content)
         ->setFrameable($this->getFrameable());
-
-      $static = CelerityAPI::getStaticResourceResponse();
-      foreach ($static->getContentSecurityPolicyURIMap() as $kind => $uris) {
-        foreach ($uris as $uri) {
-          $response->addContentSecurityPolicyURI($kind, $uri);
-        }
-      }
     }
 
     return $response;
