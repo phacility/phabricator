@@ -82,6 +82,15 @@ final class PhortunePaymentMethodCreateController
         ->setProviderPHID($provider->getProviderConfig()->getPHID())
         ->setStatus(PhortunePaymentMethod::STATUS_ACTIVE);
 
+      // Limit the rate at which you can attempt to add payment methods. This
+      // is intended as a line of defense against using Phortune to validate a
+      // large list of stolen credit card numbers.
+
+      PhabricatorSystemActionEngine::willTakeAction(
+        array($viewer->getPHID()),
+        new PhortuneAddPaymentMethodAction(),
+        1);
+
       if (!$errors) {
         $errors = $this->processClientErrors(
           $provider,
