@@ -103,6 +103,17 @@ abstract class AphrontHTTPSink extends Phobject {
     // HTTP headers.
     $data = $response->getContentIterator();
 
+    // This isn't an exceptionally clean separation of concerns, but we need
+    // to add CSP headers for all response types (including both web pages
+    // and dialogs) and can't determine the correct CSP until after we render
+    // the page (because page elements like Recaptcha may add CSP rules).
+    $static = CelerityAPI::getStaticResourceResponse();
+    foreach ($static->getContentSecurityPolicyURIMap() as $kind => $uris) {
+      foreach ($uris as $uri) {
+        $response->addContentSecurityPolicyURI($kind, $uri);
+      }
+    }
+
     $all_headers = array_merge(
       $response->getHeaders(),
       $response->getCacheHeaders());
