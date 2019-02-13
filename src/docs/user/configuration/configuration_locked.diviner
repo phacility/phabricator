@@ -111,6 +111,55 @@ phabricator/ $ ./bin/config set <key> <value>
 ```
 
 
+Locked Configuration With Database Values
+=========================================
+
+You may receive a setup issue warning you that a locked configuration key has a
+value set in the database. Most commonly, this is because:
+
+  - In some earlier version of Phabricator, this configuration was not locked.
+  - In the past, you or some other administrator used the web UI to set a
+    value. This value was written to the database.
+  - In a later version of the software, the value became locked.
+
+When Phabricator was originally released, locked configuration did not yet
+exist. Locked configuration was introduced later, and then configuration options
+were gradually locked for a long time after that.
+
+In some cases the meaning of a value changed and it became possible to use it
+to break an install or the configuration became a security risk. In other
+cases, we identified an existing security risk or arrived at some other reason
+to lock the value.
+
+Locking values was more common in the past, and it is now relatively rare for
+an unlocked value to become locked: when new values are introduced, they are
+generally locked or hidden appropriately. In most cases, this setup issue only
+affects installs that have used Phabricator for a long time.
+
+At time of writing (February 2019), Phabricator currently respects these old
+database values. However, some future version of Phabricator will refuse to
+read locked configuration from the database, because this improves security if
+an attacker manages to find a way to bypass restrictions on editing locked
+configuration from the web UI.
+
+To clear this setup warning and avoid surprise behavioral changes in the future,
+you should move these configuration values from the database to a local config
+file. Usually, you'll do this by first copying the value from the database:
+
+```
+phabricator/ $ ./bin/config set <key> <value>
+```
+
+...and then removing the database value:
+
+```
+phabricator/ $ ./bin/config delete --database <key>
+```
+
+See @{Configuration User Guide: Advanced Configuration} for some more detailed
+discussion of different configuration sources.
+
+
 Next Steps
 ==========
 
