@@ -52,12 +52,13 @@ final class PHUIHeadThingView extends AphrontTagView {
 
   protected function getTagContent() {
 
-    $image = phutil_tag(
+    $image = javelin_tag(
       'a',
       array(
-        'class' => 'phui-head-thing-image visual-only',
+        'class' => 'phui-head-thing-image',
         'style' => 'background-image: url('.$this->image.');',
         'href' => $this->imageHref,
+        'aural' => false,
       ));
 
     if ($this->image) {
