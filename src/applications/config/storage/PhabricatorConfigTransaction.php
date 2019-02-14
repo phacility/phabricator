@@ -13,10 +13,6 @@ final class PhabricatorConfigTransaction
     return PhabricatorConfigConfigPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

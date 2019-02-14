@@ -4,8 +4,20 @@ final class AphrontUnhandledExceptionResponse
   extends AphrontStandaloneHTMLResponse {
 
   private $exception;
+  private $showStackTraces;
 
-  public function setException(Exception $exception) {
+  public function setShowStackTraces($show_stack_traces) {
+    $this->showStackTraces = $show_stack_traces;
+    return $this;
+  }
+
+  public function getShowStackTraces() {
+    return $this->showStackTraces;
+  }
+
+  public function setException($exception) {
+    // NOTE: We accept an Exception or a Throwable.
+
     // Log the exception unless it's specifically a silent malformed request
     // exception.
 
@@ -61,10 +73,36 @@ final class AphrontUnhandledExceptionResponse
     $body = $ex->getMessage();
     $body = phutil_escape_html_newlines($body);
 
+    $classes = array();
+    $classes[] = 'unhandled-exception-detail';
+
+    $stack = null;
+    if ($this->getShowStackTraces()) {
+      try {
+        $stack = id(new AphrontStackTraceView())
+          ->setTrace($ex->getTrace());
+
+        $stack = hsprintf('%s', $stack);
+
+        $stack = phutil_tag(
+          'div',
+          array(
+            'class' => 'unhandled-exception-stack',
+          ),
+          $stack);
+
+        $classes[] = 'unhandled-exception-with-stack';
+      } catch (Exception $trace_exception) {
+        $stack = null;
+      } catch (Throwable $trace_exception) {
+        $stack = null;
+      }
+    }
+
     return phutil_tag(
       'div',
       array(
-        'class' => 'unhandled-exception-detail',
+        'class' => implode(' ', $classes),
       ),
       array(
         phutil_tag(
@@ -79,6 +117,7 @@ final class AphrontUnhandledExceptionResponse
             'class' => 'unhandled-exception-body',
           ),
           $body),
+        $stack,
       ));
   }
 

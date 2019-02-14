@@ -47,6 +47,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
 
   private $workflowKey;
+  private $request;
 
   public function setWorkflowKey($workflow_key) {
     $this->workflowKey = $workflow_key;
@@ -63,6 +64,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     return $this->workflowKey;
+  }
+
+  public function getRequest() {
+    return $this->request;
   }
 
 
@@ -462,10 +467,25 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $token;
     }
 
-    // Load the multi-factor auth sources attached to this account.
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $viewer->getPHID());
+    // Load the multi-factor auth sources attached to this account. Note that
+    // we order factors from oldest to newest, which is not the default query
+    // ordering but makes the greatest sense in context.
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withFactorProviderStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+          PhabricatorAuthFactorProviderStatus::STATUS_DEPRECATED,
+        ))
+      ->execute();
+
+    // Sort factors in the same order that they appear in on the Settings
+    // panel. This means that administrators changing provider statuses may
+    // change the order of prompts for users, but the alternative is that the
+    // Settings panel order disagrees with the prompt order, which seems more
+    // disruptive.
+    $factors = msort($factors, 'newSortVector');
 
     // If the account has no associated multi-factor auth, just issue a token
     // without putting the session into high security mode. This is generally
@@ -476,6 +496,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       return $this->issueHighSecurityToken($session, true);
     }
 
+    $this->request = $request;
     foreach ($factors as $factor) {
       $factor->setSessionEngine($this);
     }
@@ -516,12 +537,28 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     foreach ($factors as $factor) {
       $factor_phid = $factor->getPHID();
       $issued_challenges = idx($challenge_map, $factor_phid, array());
-      $impl = $factor->requireImplementation();
+      $provider = $factor->getFactorProvider();
+      $impl = $provider->getFactor();
 
       $new_challenges = $impl->getNewIssuedChallenges(
         $factor,
         $viewer,
         $issued_challenges);
+
+      // NOTE: We may get a list of challenges back, or may just get an early
+      // result. For example, this can happen on an SMS factor if all SMS
+      // mailers have been disabled.
+      if ($new_challenges instanceof PhabricatorAuthFactorResult) {
+        $result = $new_challenges;
+
+        if (!$result->getIsValid()) {
+          $ok = false;
+        }
+
+        $validation_results[$factor_phid] = $result;
+        $challenge_map[$factor_phid] = $issued_challenges;
+        continue;
+      }
 
       foreach ($new_challenges as $new_challenge) {
         $issued_challenges[] = $new_challenge;
@@ -541,7 +578,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         continue;
       }
 
-      $ok = false;
+      if (!$result->getIsValid()) {
+        $ok = false;
+      }
+
       $validation_results[$factor_phid] = $result;
     }
 
@@ -552,7 +592,18 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         // Limit factor verification rates to prevent brute force attacks.
         $any_attempt = false;
         foreach ($factors as $factor) {
-          $impl = $factor->requireImplementation();
+          $factor_phid = $factor->getPHID();
+
+          $provider = $factor->getFactorProvider();
+          $impl = $provider->getFactor();
+
+          // If we already have a result (normally "wait..."), we won't try
+          // to validate whatever the user submitted, so this doesn't count as
+          // an attempt for rate limiting purposes.
+          if (isset($validation_results[$factor_phid])) {
+            continue;
+          }
+
           if ($impl->getRequestHasChallengeResponse($factor, $request)) {
             $any_attempt = true;
             break;
@@ -577,7 +628,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
           $issued_challenges = idx($challenge_map, $factor_phid, array());
 
-          $impl = $factor->requireImplementation();
+          $provider = $factor->getFactorProvider();
+          $impl = $provider->getFactor();
 
           $validation_result = $impl->getResultFromChallengeResponse(
             $factor,
@@ -716,7 +768,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     foreach ($factors as $factor) {
       $result = $validation_results[$factor->getPHID()];
 
-      $factor->requireImplementation()->renderValidateFactorForm(
+      $provider = $factor->getFactorProvider();
+      $impl = $provider->getFactor();
+
+      $impl->renderValidateFactorForm(
         $factor,
         $form,
         $viewer,

@@ -555,108 +555,9 @@ final class PhabricatorUser
     }
   }
 
-  public function sendWelcomeEmail(PhabricatorUser $admin) {
-    if (!$this->canEstablishWebSessions()) {
-      throw new Exception(
-        pht(
-          'Can not send welcome mail to users who can not establish '.
-          'web sessions!'));
-    }
-
-    $admin_username = $admin->getUserName();
-    $admin_realname = $admin->getRealName();
-    $user_username = $this->getUserName();
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $base_uri = PhabricatorEnv::getProductionURI('/');
-
-    $engine = new PhabricatorAuthSessionEngine();
-    $uri = $engine->getOneTimeLoginURI(
-      $this,
-      $this->loadPrimaryEmail(),
-      PhabricatorAuthSessionEngine::ONETIME_WELCOME);
-
-    $body = pht(
-      "Welcome to Phabricator!\n\n".
-      "%s (%s) has created an account for you.\n\n".
-      "  Username: %s\n\n".
-      "To login to Phabricator, follow this link and set a password:\n\n".
-      "  %s\n\n".
-      "After you have set a password, you can login in the future by ".
-      "going here:\n\n".
-      "  %s\n",
-      $admin_username,
-      $admin_realname,
-      $user_username,
-      $uri,
-      $base_uri);
-
-    if (!$is_serious) {
-      $body .= sprintf(
-        "\n%s\n",
-        pht("Love,\nPhabricator"));
-    }
-
-    $mail = id(new PhabricatorMetaMTAMail())
-      ->addTos(array($this->getPHID()))
-      ->setForceDelivery(true)
-      ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
-      ->setBody($body)
-      ->saveAndSend();
-  }
-
-  public function sendUsernameChangeEmail(
-    PhabricatorUser $admin,
-    $old_username) {
-
-    $admin_username = $admin->getUserName();
-    $admin_realname = $admin->getRealName();
-    $new_username = $this->getUserName();
-
-    $password_instructions = null;
-    if (PhabricatorPasswordAuthProvider::getPasswordProvider()) {
-      $engine = new PhabricatorAuthSessionEngine();
-      $uri = $engine->getOneTimeLoginURI(
-        $this,
-        null,
-        PhabricatorAuthSessionEngine::ONETIME_USERNAME);
-      $password_instructions = sprintf(
-        "%s\n\n  %s\n\n%s\n",
-        pht(
-          "If you use a password to login, you'll need to reset it ".
-          "before you can login again. You can reset your password by ".
-          "following this link:"),
-        $uri,
-        pht(
-          "And, of course, you'll need to use your new username to login ".
-          "from now on. If you use OAuth to login, nothing should change."));
-    }
-
-    $body = sprintf(
-      "%s\n\n  %s\n  %s\n\n%s",
-      pht(
-        '%s (%s) has changed your Phabricator username.',
-        $admin_username,
-        $admin_realname),
-      pht(
-        'Old Username: %s',
-        $old_username),
-      pht(
-        'New Username: %s',
-        $new_username),
-      $password_instructions);
-
-    $mail = id(new PhabricatorMetaMTAMail())
-      ->addTos(array($this->getPHID()))
-      ->setForceDelivery(true)
-      ->setSubject(pht('[Phabricator] Username Changed'))
-      ->setBody($body)
-      ->saveAndSend();
-  }
-
   public static function describeValidUsername() {
     return pht(
-      'Usernames must contain only numbers, letters, period, underscore and '.
+      'Usernames must contain only numbers, letters, period, underscore, and '.
       'hyphen, and can not end with a period. They must have no more than %d '.
       'characters.',
       new PhutilNumber(self::MAXIMUM_USERNAME_LENGTH));
@@ -958,9 +859,15 @@ final class PhabricatorUser
    * @task factors
    */
   public function updateMultiFactorEnrollment() {
-    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
-      'userPHID = %s',
-      $this->getPHID());
+    $factors = id(new PhabricatorAuthFactorConfigQuery())
+      ->setViewer($this)
+      ->withUserPHIDs(array($this->getPHID()))
+      ->withFactorProviderStatuses(
+        array(
+          PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+          PhabricatorAuthFactorProviderStatus::STATUS_DEPRECATED,
+        ))
+      ->execute();
 
     $enrolled = count($factors) ? 1 : 0;
     if ($enrolled !== $this->isEnrolledInMultiFactor) {
@@ -1224,9 +1131,10 @@ final class PhabricatorUser
     $this->openTransaction();
       $this->delete();
 
-      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $externals = id(new PhabricatorExternalAccountQuery())
+        ->setViewer($engine->getViewer())
+        ->withUserPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($externals as $external) {
         $external->delete();
       }

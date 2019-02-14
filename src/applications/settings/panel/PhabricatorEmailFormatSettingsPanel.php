@@ -9,6 +9,10 @@ final class PhabricatorEmailFormatSettingsPanel
     return pht('Email Format');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-font';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }
@@ -19,17 +23,6 @@ final class PhabricatorEmailFormatSettingsPanel
 
   public function isManagementPanel() {
     return false;
-/*
-        if (!$this->isUserPanel()) {
-      return false;
-    }
-
-    if ($this->getUser()->getIsMailingList()) {
-      return true;
-    }
-
-    return false;
-*/
   }
 
   public function isTemplatePanel() {

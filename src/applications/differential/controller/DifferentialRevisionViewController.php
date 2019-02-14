@@ -1098,7 +1098,8 @@ final class DifferentialRevisionViewController
     //   D123.vs123.id123.whitespaceignore-all.diff
     // lame but nice to include these options
     $file_name = ltrim($request_uri->getPath(), '/').'.';
-    foreach ($request_uri->getQueryParams() as $key => $value) {
+    foreach ($request_uri->getQueryParamsAsPairList() as $pair) {
+      list($key, $value) = $pair;
       if ($key == 'download') {
         continue;
       }

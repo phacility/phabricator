@@ -83,9 +83,8 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
    */
   public static function describeValidAddresses() {
     return pht(
-      "Email addresses should be in the form '%s'. The maximum ".
-      "length of an email address is %s character(s).",
-      'user@domain.com',
+      'Email addresses should be in the form "user@domain.com". The maximum '.
+      'length of an email address is %s characters.',
       new PhutilNumber(self::MAX_ADDRESS_LENGTH));
   }
 

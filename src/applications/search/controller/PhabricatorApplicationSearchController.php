@@ -905,7 +905,7 @@ final class PhabricatorApplicationSearchController
       $engine = $this->getSearchEngine();
       $nux_uri = $engine->getQueryBaseURI();
       $nux_uri = id(new PhutilURI($nux_uri))
-        ->setQueryParam('nux', true);
+        ->replaceQueryParam('nux', true);
 
       $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-user-plus')
@@ -915,7 +915,7 @@ final class PhabricatorApplicationSearchController
 
     if ($is_dev) {
       $overheated_uri = $this->getRequest()->getRequestURI()
-        ->setQueryParam('overheated', true);
+        ->replaceQueryParam('overheated', true);
 
       $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-fire')

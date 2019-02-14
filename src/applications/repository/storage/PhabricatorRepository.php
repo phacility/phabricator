@@ -820,8 +820,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return $uri;
     }
 
-    $uri = new PhutilURI($uri);
-
     if (isset($params['lint'])) {
       $params['params'] = idx($params, 'params', array()) + array(
         'lint' => $params['lint'],
@@ -830,11 +828,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $query = idx($params, 'params', array()) + $query;
 
-    if ($query) {
-      $uri->setQueryParams($query);
-    }
-
-    return $uri;
+    return new PhutilURI($uri, $query);
   }
 
   public function updateURIIndex() {
@@ -1506,9 +1500,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->setDetail('hosting-enabled', $enabled);
   }
 
-  public function canServeProtocol($protocol, $write) {
-    if (!$this->isTracked()) {
-      return false;
+  public function canServeProtocol(
+    $protocol,
+    $write,
+    $is_intracluster = false) {
+
+    // See T13192. If a repository is inactive, don't serve it to users. We
+    // still synchronize it within the cluster and serve it to other repository
+    // nodes.
+    if (!$is_intracluster) {
+      if (!$this->isTracked()) {
+        return false;
+      }
     }
 
     $clone_uris = $this->getCloneURIs();
@@ -2024,10 +2027,35 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     if ($never_proxy) {
+      // See PHI1030. This error can arise from various device name/address
+      // mismatches which are hard to detect, so try to provide as much
+      // information as we can.
+
+      if ($writable) {
+        $request_type = pht('(This is a write request.)');
+      } else {
+        $request_type = pht('(This is a read request.)');
+      }
+
       throw new Exception(
         pht(
-          'Refusing to proxy a repository request from a cluster host. '.
-          'Cluster hosts must correctly route their intracluster requests.'));
+          'This repository request (for repository "%s") has been '.
+          'incorrectly routed to a cluster host (with device name "%s", '.
+          'and hostname "%s") which can not serve the request.'.
+          "\n\n".
+          'The Almanac device address for the correct device may improperly '.
+          'point at this host, or the "device.id" configuration file on '.
+          'this host may be incorrect.'.
+          "\n\n".
+          'Requests routed within the cluster by Phabricator are always '.
+          'expected to be sent to a node which can serve the request. To '.
+          'prevent loops, this request will not be proxied again.'.
+          "\n\n".
+          "%s",
+          $this->getDisplayName(),
+          $local_device,
+          php_uname('n'),
+          $request_type));
     }
 
     if (count($results) > 1) {
@@ -2147,7 +2175,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $parts = array(
       "repo({$repository_phid})",
       "serv({$service_phid})",
-      'v3',
+      'v4',
     );
 
     return implode('.', $parts);

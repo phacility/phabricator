@@ -149,7 +149,7 @@ final class PhabricatorImageRemarkupRule extends PhutilRemarkupRule {
           ));
       } else {
         $src_uri = id(new PhutilURI('/file/imageproxy/'))
-          ->setQueryParam('uri', $uri);
+          ->replaceQueryParam('uri', $uri);
 
         $img = id(new PHUIRemarkupImageView())
           ->setURI($src_uri)

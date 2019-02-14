@@ -218,6 +218,7 @@ $user->openTransaction();
     ->setActor($actor)
     ->setActingAsPHID($people_application_phid)
     ->setContentSource($content_source)
+    ->setContinueOnNoEffect(true)
     ->setContinueOnMissingFields(true);
 
   $transaction_editor->applyTransactions($user, $xactions);

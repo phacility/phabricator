@@ -20,7 +20,15 @@ final class PhabricatorAuthConfirmLinkController
 
     $panel_uri = '/settings/panel/external/';
 
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHisecPost()) {
+      $workflow_key = sprintf(
+        'account.link(%s)',
+        $account->getPHID());
+
+      $hisec_token = id(new PhabricatorAuthSessionEngine())
+        ->setWorkflowKey($workflow_key)
+        ->requireHighSecurityToken($viewer, $request, $panel_uri);
+
       $account->setUserPHID($viewer->getPHID());
       $account->save();
 
@@ -31,14 +39,7 @@ final class PhabricatorAuthConfirmLinkController
       return id(new AphrontRedirectResponse())->setURI($panel_uri);
     }
 
-    // TODO: Provide more information about the external account. Clicking
-    // through this form blindly is dangerous.
-
-    // TODO: If the user has password authentication, require them to retype
-    // their password here.
-
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    $dialog = $this->newDialog()
       ->setTitle(pht('Confirm %s Account Link', $provider->getProviderName()))
       ->addCancelButton($panel_uri)
       ->addSubmitButton(pht('Confirm Account Link'));

@@ -68,6 +68,7 @@ final class TransactionSearchConduitAPIMethod
       $object);
 
     $xaction_query
+      ->needHandles(false)
       ->withObjectPHIDs(array($object->getPHID()))
       ->setViewer($viewer);
 

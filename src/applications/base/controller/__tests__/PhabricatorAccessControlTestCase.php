@@ -12,7 +12,7 @@ final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/support/startup/PhabricatorStartup.php';
 
-    $application_configuration = new AphrontDefaultApplicationConfiguration();
+    $application_configuration = new AphrontApplicationConfiguration();
 
     $host = 'meow.example.com';
 

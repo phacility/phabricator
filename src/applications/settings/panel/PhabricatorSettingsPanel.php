@@ -132,6 +132,16 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
 
   /**
+   * Return an icon for the panel in the menu.
+   *
+   * @return string Icon identifier.
+   * @task config
+   */
+  public function getPanelMenuIcon() {
+    return 'fa-wrench';
+  }
+
+  /**
    * Return a panel group key constant for this panel.
    *
    * @return const Panel group key.
@@ -185,6 +195,17 @@ abstract class PhabricatorSettingsPanel extends Phobject {
    * @task config
    */
   public function isTemplatePanel() {
+    return false;
+  }
+
+  /**
+   * Return true if this panel should be available when enrolling in MFA on
+   * a new account with MFA requiredd.
+   *
+   * @return bool True to allow configuration during MFA enrollment.
+   * @task config
+   */
+  public function isMultiFactorEnrollmentPanel() {
     return false;
   }
 

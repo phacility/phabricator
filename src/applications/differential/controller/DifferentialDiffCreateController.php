@@ -71,7 +71,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
           $uri = $this->getApplicationURI("diff/{$diff_id}/");
           $uri = new PhutilURI($uri);
           if ($revision) {
-            $uri->setQueryParam('revisionID', $revision->getID());
+            $uri->replaceQueryParam('revisionID', $revision->getID());
           }
 
           return id(new AphrontRedirectResponse())->setURI($uri);
@@ -112,7 +112,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
               $arcanist_link,
             ),
             pht(
-              'You can also paste a diff below, or upload a file '.
+              'You can also paste a diff above, or upload a file '.
               'containing a diff (for example, from %s, %s or %s).',
               phutil_tag('tt', array(), 'svn diff'),
               phutil_tag('tt', array(), 'git diff'),

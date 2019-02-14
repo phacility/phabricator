@@ -12,7 +12,7 @@ final class FileMailReceiver extends PhabricatorObjectMailReceiver {
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'F');
+    $id = (int)substr($pattern, 1);
 
     return id(new PhabricatorFileQuery())
       ->setViewer($viewer)

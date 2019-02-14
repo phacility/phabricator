@@ -11,10 +11,6 @@ final class PhabricatorUserPreferencesTransaction
     return 'user';
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getApplicationTransactionType() {
     return PhabricatorUserPreferencesPHIDType::TYPECONST;
   }

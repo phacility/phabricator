@@ -133,7 +133,7 @@ final class PholioMockImagesView extends AphrontView {
     );
 
     $login_uri = id(new PhutilURI('/login/'))
-      ->setQueryParam('next', (string)$this->getRequestURI());
+      ->replaceQueryParam('next', (string)$this->getRequestURI());
 
     $config = array(
       'mockID' => $mock->getID(),

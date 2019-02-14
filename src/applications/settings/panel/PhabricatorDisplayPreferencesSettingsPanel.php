@@ -9,6 +9,10 @@ final class PhabricatorDisplayPreferencesSettingsPanel
     return pht('Display Preferences');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-desktop';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
   }

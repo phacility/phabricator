@@ -51,6 +51,12 @@ final class PhabricatorProjectProfileController
     $watch_action = $this->renderWatchAction($project);
     $header->addActionLink($watch_action);
 
+    $subtype = $project->newSubtypeObject();
+    if ($subtype && $subtype->hasTagView()) {
+      $subtype_tag = $subtype->newTagView();
+      $header->addTag($subtype_tag);
+    }
+
     $milestone_list = $this->buildMilestoneList($project);
     $subproject_list = $this->buildSubprojectList($project);
 

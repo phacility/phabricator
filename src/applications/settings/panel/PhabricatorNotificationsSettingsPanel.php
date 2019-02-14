@@ -21,6 +21,10 @@ final class PhabricatorNotificationsSettingsPanel
     return pht('Notifications');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-bell-o';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
   }

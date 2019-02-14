@@ -6,6 +6,7 @@
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
   private static $namespaceStack = array();
+  private $forcedNamespace;
 
   const ATTACHABLE = '<attachable>';
   const CONFIG_APPLICATION_SERIALIZERS = 'phabricator/serializers';
@@ -45,6 +46,11 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       throw new Exception(pht('No storage namespace configured!'));
     }
     return $namespace;
+  }
+
+  public function setForcedStorageNamespace($namespace) {
+    $this->forcedNamespace = $namespace;
+    return $this;
   }
 
   /**
@@ -188,7 +194,13 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   abstract public function getApplicationName();
 
   protected function getDatabaseName() {
-    return self::getStorageNamespace().'_'.$this->getApplicationName();
+    if ($this->forcedNamespace) {
+      $namespace = $this->forcedNamespace;
+    } else {
+      $namespace = self::getStorageNamespace();
+    }
+
+    return $namespace.'_'.$this->getApplicationName();
   }
 
   /**

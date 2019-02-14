@@ -11,9 +11,11 @@ final class PhabricatorAuthRegisterController
     $viewer = $this->getViewer();
     $account_key = $request->getURIData('akey');
 
-    if ($request->getUser()->isLoggedIn()) {
+    if ($viewer->isLoggedIn()) {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
+
+    $invite = $this->loadInvite();
 
     $is_setup = false;
     if (strlen($account_key)) {
@@ -21,11 +23,13 @@ final class PhabricatorAuthRegisterController
       list($account, $provider, $response) = $result;
       $is_default = false;
     } else if ($this->isFirstTimeSetup()) {
-      list($account, $provider, $response) = $this->loadSetupAccount();
+      $account = null;
+      $provider = null;
+      $response = null;
       $is_default = true;
       $is_setup = true;
     } else {
-      list($account, $provider, $response) = $this->loadDefaultAccount();
+      list($account, $provider, $response) = $this->loadDefaultAccount($invite);
       $is_default = true;
     }
 
@@ -33,24 +37,24 @@ final class PhabricatorAuthRegisterController
       return $response;
     }
 
-    $invite = $this->loadInvite();
+    if (!$is_setup) {
+      if (!$provider->shouldAllowRegistration()) {
+        if ($invite) {
+          // If the user has an invite, we allow them to register with any
+          // provider, even a login-only provider.
+        } else {
+          // TODO: This is a routine error if you click "Login" on an external
+          // auth source which doesn't allow registration. The error should be
+          // more tailored.
 
-    if (!$provider->shouldAllowRegistration()) {
-      if ($invite) {
-        // If the user has an invite, we allow them to register with any
-        // provider, even a login-only provider.
-      } else {
-        // TODO: This is a routine error if you click "Login" on an external
-        // auth source which doesn't allow registration. The error should be
-        // more tailored.
-
-        return $this->renderError(
-          pht(
-            'The account you are attempting to register with uses an '.
-            'authentication provider ("%s") which does not allow '.
-            'registration. An administrator may have recently disabled '.
-            'registration with this provider.',
-            $provider->getProviderName()));
+          return $this->renderError(
+            pht(
+              'The account you are attempting to register with uses an '.
+              'authentication provider ("%s") which does not allow '.
+              'registration. An administrator may have recently disabled '.
+              'registration with this provider.',
+              $provider->getProviderName()));
+        }
       }
     }
 
@@ -58,13 +62,18 @@ final class PhabricatorAuthRegisterController
 
     $user = new PhabricatorUser();
 
-    $default_username = $account->getUsername();
-    $default_realname = $account->getRealName();
+    if ($is_setup) {
+      $default_username = null;
+      $default_realname = null;
+      $default_email = null;
+    } else {
+      $default_username = $account->getUsername();
+      $default_realname = $account->getRealName();
+      $default_email = $account->getEmail();
+    }
 
     $account_type = PhabricatorAuthPassword::PASSWORD_TYPE_ACCOUNT;
     $content_source = PhabricatorContentSource::newFromRequest($request);
-
-    $default_email = $account->getEmail();
 
     if ($invite) {
       $default_email = $invite->getEmailAddress();
@@ -212,7 +221,11 @@ final class PhabricatorAuthRegisterController
     $can_edit_email = $profile->getCanEditEmail();
     $can_edit_realname = $profile->getCanEditRealName();
 
-    $must_set_password = $provider->shouldRequireRegistrationPassword();
+    if ($is_setup) {
+      $must_set_password = false;
+    } else {
+      $must_set_password = $provider->shouldRequireRegistrationPassword();
+    }
 
     $can_edit_anything = $profile->getCanEditAnything() || $must_set_password;
     $force_verify = $profile->getShouldVerifyEmail();
@@ -334,9 +347,11 @@ final class PhabricatorAuthRegisterController
       }
 
       if (!$errors) {
-        $image = $this->loadProfilePicture($account);
-        if ($image) {
-          $user->setProfileImagePHID($image->getPHID());
+        if (!$is_setup) {
+          $image = $this->loadProfilePicture($account);
+          if ($image) {
+            $user->setProfileImagePHID($image->getPHID());
+          }
         }
 
         try {
@@ -346,17 +361,19 @@ final class PhabricatorAuthRegisterController
             $verify_email = true;
           }
 
-          if ($value_email === $default_email) {
-            if ($account->getEmailVerified()) {
-              $verify_email = true;
-            }
+          if (!$is_setup) {
+            if ($value_email === $default_email) {
+              if ($account->getEmailVerified()) {
+                $verify_email = true;
+              }
 
-            if ($provider->shouldTrustEmails()) {
-              $verify_email = true;
-            }
+              if ($provider->shouldTrustEmails()) {
+                $verify_email = true;
+              }
 
-            if ($invite) {
-              $verify_email = true;
+              if ($invite) {
+                $verify_email = true;
+              }
             }
           }
 
@@ -438,9 +455,11 @@ final class PhabricatorAuthRegisterController
               $transaction_editor->applyTransactions($user, $xactions);
             }
 
-            $account->setUserPHID($user->getPHID());
-            $provider->willRegisterAccount($account);
-            $account->save();
+            if (!$is_setup) {
+              $account->setUserPHID($user->getPHID());
+              $provider->willRegisterAccount($account);
+              $account->save();
+            }
 
           $user->saveTransaction();
 
@@ -500,7 +519,6 @@ final class PhabricatorAuthRegisterController
               ->setExternalAccount($account)
               ->setAuthProvider($provider)));
     }
-
 
     if ($can_edit_username) {
       $form->appendChild(
@@ -595,7 +613,7 @@ final class PhabricatorAuthRegisterController
           pht(
             'Installation is complete. Register your administrator account '.
             'below to log in. You will be able to configure options and add '.
-            'other authentication mechanisms (like LDAP or OAuth) later on.'));
+            'authentication mechanisms later on.'));
     }
 
     $object_box = id(new PHUIObjectBoxView())
@@ -612,11 +630,12 @@ final class PhabricatorAuthRegisterController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-      $welcome_view,
-      $invite_header,
-      $object_box,
-    ));
+      ->setFooter(
+        array(
+          $welcome_view,
+          $invite_header,
+          $object_box,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -624,17 +643,20 @@ final class PhabricatorAuthRegisterController
       ->appendChild($view);
   }
 
-  private function loadDefaultAccount() {
+  private function loadDefaultAccount($invite) {
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();
     $account = null;
     $provider = null;
     $response = null;
 
     foreach ($providers as $key => $candidate_provider) {
-      if (!$candidate_provider->shouldAllowRegistration()) {
-        unset($providers[$key]);
-        continue;
+      if (!$invite) {
+        if (!$candidate_provider->shouldAllowRegistration()) {
+          unset($providers[$key]);
+          continue;
+        }
       }
+
       if (!$candidate_provider->isDefaultRegistrationProvider()) {
         unset($providers[$key]);
       }
@@ -652,21 +674,8 @@ final class PhabricatorAuthRegisterController
     }
 
     $provider = head($providers);
-    $account = $provider->getDefaultExternalAccount();
+    $account = $provider->newDefaultExternalAccount();
 
-    return array($account, $provider, $response);
-  }
-
-  private function loadSetupAccount() {
-    $provider = new PhabricatorPasswordAuthProvider();
-    $provider->attachProviderConfig(
-      id(new PhabricatorAuthProviderConfig())
-        ->setShouldAllowRegistration(1)
-        ->setShouldAllowLogin(1)
-        ->setIsEnabled(true));
-
-    $account = $provider->getDefaultExternalAccount();
-    $response = null;
     return array($account, $provider, $response);
   }
 

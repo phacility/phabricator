@@ -2,6 +2,7 @@
 
 phabricator_startup();
 
+$fatal_exception = null;
 try {
   PhabricatorStartup::beginStartupPhase('libraries');
   PhabricatorStartup::loadCoreLibraries();
@@ -12,25 +13,66 @@ try {
   PhabricatorStartup::beginStartupPhase('sink');
   $sink = new AphrontPHPHTTPSink();
 
+  // PHP introduced a "Throwable" interface in PHP 7 and began making more
+  // runtime errors throw as "Throwable" errors. This is generally good, but
+  // makes top-level exception handling that is compatible with both PHP 5
+  // and PHP 7 a bit tricky.
+
+  // In PHP 5, "Throwable" does not exist, so "catch (Throwable $ex)" catches
+  // nothing.
+
+  // In PHP 7, various runtime conditions raise an Error which is a Throwable
+  // but NOT an Exception, so "catch (Exception $ex)" will not catch them.
+
+  // To cover both cases, we "catch (Exception $ex)" to catch everything in
+  // PHP 5, and most things in PHP 7. Then, we "catch (Throwable $ex)" to catch
+  // everything else in PHP 7. For the most part, we only need to do this at
+  // the top level.
+
+  $main_exception = null;
   try {
     PhabricatorStartup::beginStartupPhase('run');
     AphrontApplicationConfiguration::runHTTPRequest($sink);
   } catch (Exception $ex) {
+    $main_exception = $ex;
+  } catch (Throwable $ex) {
+    $main_exception = $ex;
+  }
+
+  if ($main_exception) {
+    $response_exception = null;
     try {
       $response = new AphrontUnhandledExceptionResponse();
-      $response->setException($ex);
+      $response->setException($main_exception);
+      $response->setShowStackTraces($sink->getShowStackTraces());
 
       PhabricatorStartup::endOutputCapture();
       $sink->writeResponse($response);
-    } catch (Exception $response_exception) {
-      // If we hit a rendering exception, ignore it and throw the original
-      // exception. It is generally more interesting and more likely to be
-      // the root cause.
-      throw $ex;
+    } catch (Exception $ex) {
+      $response_exception = $ex;
+    } catch (Throwable $ex) {
+      $response_exception = $ex;
+    }
+
+    // If we hit a rendering exception, ignore it and throw the original
+    // exception. It is generally more interesting and more likely to be
+    // the root cause.
+
+    if ($response_exception) {
+      throw $main_exception;
     }
   }
 } catch (Exception $ex) {
-  PhabricatorStartup::didEncounterFatalException('Core Exception', $ex, false);
+  $fatal_exception = $ex;
+} catch (Throwable $ex) {
+  $fatal_exception = $ex;
+}
+
+if ($fatal_exception) {
+  PhabricatorStartup::didEncounterFatalException(
+    'Core Exception',
+    $fatal_exception,
+    false);
 }
 
 function phabricator_startup() {

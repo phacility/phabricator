@@ -222,8 +222,10 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
         pht('No repository "%s" exists!', $identifier));
     }
 
+    $is_cluster = $this->getIsClusterRequest();
+
     $protocol = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH;
-    if (!$repository->canServeProtocol($protocol, false)) {
+    if (!$repository->canServeProtocol($protocol, false, $is_cluster)) {
       throw new Exception(
         pht(
           'This repository ("%s") is not available over SSH.',

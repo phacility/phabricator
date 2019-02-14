@@ -10,6 +10,10 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
     return pht('Sessions');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-user';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }

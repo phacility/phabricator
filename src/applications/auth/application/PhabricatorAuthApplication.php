@@ -48,10 +48,10 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         '' => 'PhabricatorAuthListController',
         'config/' => array(
           'new/' => 'PhabricatorAuthNewController',
-          'new/(?P<className>[^/]+)/' => 'PhabricatorAuthEditController',
-          'edit/(?P<id>\d+)/' => 'PhabricatorAuthEditController',
+          'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorAuthEditController',
           '(?P<action>enable|disable)/(?P<id>\d+)/'
             => 'PhabricatorAuthDisableController',
+          'view/(?P<id>\d+)/' => 'PhabricatorAuthProviderViewController',
         ),
         'login/(?P<pkey>[^/]+)/(?:(?P<extra>[^/]+)/)?'
           => 'PhabricatorAuthLoginController',
@@ -61,8 +61,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',
         'finish/' => 'PhabricatorAuthFinishController',
-        'unlink/(?P<pkey>[^/]+)/' => 'PhabricatorAuthUnlinkController',
-        '(?P<action>link|refresh)/(?P<pkey>[^/]+)/'
+        'unlink/(?P<id>\d+)/' => 'PhabricatorAuthUnlinkController',
+        '(?P<action>link|refresh)/(?P<id>\d+)/'
           => 'PhabricatorAuthLinkController',
         'confirmlink/(?P<akey>[^/]+)/'
           => 'PhabricatorAuthConfirmLinkController',
@@ -72,8 +72,10 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           => 'PhabricatorAuthRevokeTokenController',
         'session/downgrade/'
           => 'PhabricatorAuthDowngradeSessionController',
-        'multifactor/'
-          => 'PhabricatorAuthNeedsMultiFactorController',
+        'enroll/' => array(
+          '(?:(?P<pageKey>[^/]+)/)?(?:(?P<formSaved>saved)/)?'
+            => 'PhabricatorAuthNeedsMultiFactorController',
+        ),
         'sshkey/' => array(
           $this->getQueryRoutePattern('for/(?P<forPHID>[^/]+)/')
             => 'PhabricatorAuthSSHKeyListController',
@@ -85,6 +87,39 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
         ),
         'password/' => 'PhabricatorAuthSetPasswordController',
+
+        'mfa/' => array(
+          $this->getQueryRoutePattern() =>
+            'PhabricatorAuthFactorProviderListController',
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorAuthFactorProviderEditController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthFactorProviderViewController',
+          'message/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthFactorProviderMessageController',
+        ),
+
+        'message/' => array(
+          $this->getQueryRoutePattern() =>
+            'PhabricatorAuthMessageListController',
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorAuthMessageEditController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthMessageViewController',
+        ),
+
+        'contact/' => array(
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorAuthContactNumberEditController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberViewController',
+          '(?P<action>disable|enable)/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberDisableController',
+          'primary/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberPrimaryController',
+          'test/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthContactNumberTestController',
+        ),
       ),
 
       '/oauth/(?P<provider>\w+)/login/'

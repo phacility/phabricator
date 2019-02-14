@@ -172,8 +172,7 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
   }
 
   private function getTitlePrefix(PhabricatorRepositoryCommit $commit) {
-    $prefix_key = 'metamta.diffusion.subject-prefix';
-    return PhabricatorEnv::getEnvConfig($prefix_key);
+    return pht('[Diffusion]');
   }
 
 }

@@ -591,10 +591,15 @@ final class AphrontRequest extends Phobject {
   }
 
   public function getRequestURI() {
-    $get = $_GET;
-    unset($get['__path__']);
+    $request_uri = idx($_SERVER, 'REQUEST_URI', '/');
+
+    $uri = new PhutilURI($request_uri);
+    $uri->removeQueryParam('__path__');
+
     $path = phutil_escape_uri($this->getPath());
-    return id(new PhutilURI($path))->setQueryParams($get);
+    $uri->setPath($path);
+
+    return $uri;
   }
 
   public function getAbsoluteRequestURI() {
@@ -824,7 +829,10 @@ final class AphrontRequest extends Phobject {
     }
 
     $uri->setPath($this->getPath());
-    $uri->setQueryParams(self::flattenData($_GET));
+    $uri->removeAllQueryParams();
+    foreach (self::flattenData($_GET) as $query_key => $query_value) {
+      $uri->appendQueryParam($query_key, $query_value);
+    }
 
     $input = PhabricatorStartup::getRawInput();
 

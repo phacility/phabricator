@@ -17,14 +17,9 @@ final class PhabricatorPeopleRenameController
 
     $done_uri = $this->getApplicationURI("manage/{$id}/");
 
-    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $viewer,
-      $request,
-      $done_uri);
-
     $validation_exception = null;
     $username = $user->getUsername();
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHisecPost()) {
       $username = $request->getStr('username');
       $xactions = array();
 
@@ -36,6 +31,7 @@ final class PhabricatorPeopleRenameController
       $editor = id(new PhabricatorUserTransactionEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
+        ->setCancelURI($done_uri)
         ->setContinueOnMissingFields(true);
 
       try {

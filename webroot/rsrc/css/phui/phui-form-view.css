@@ -574,3 +574,7 @@ properly, and submit values. */
   color: {$darkgreytext};
   vertical-align: middle;
 }
+
+.mfa-form-enroll-button {
+  text-align: center;
+}

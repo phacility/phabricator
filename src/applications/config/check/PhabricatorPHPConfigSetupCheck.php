@@ -112,6 +112,42 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
         ->setMessage($message);
     }
 
+
+    if (extension_loaded('mysqli')) {
+      $infile_key = 'mysqli.allow_local_infile';
+    } else {
+      $infile_key = 'mysql.allow_local_infile';
+    }
+
+    if (ini_get($infile_key)) {
+      $summary = pht(
+        'Disable unsafe option "%s" in PHP configuration.',
+        $infile_key);
+
+      $message = pht(
+        'PHP is currently configured to honor requests from any MySQL server '.
+        'it connects to for the content of any local file.'.
+        "\n\n".
+        'This capability supports MySQL "LOAD DATA LOCAL INFILE" queries, but '.
+        'allows a malicious MySQL server read access to the local disk: the '.
+        'server can ask the client to send the content of any local file, '.
+        'and the client will comply.'.
+        "\n\n".
+        'Although it is normally difficult for an attacker to convince '.
+        'Phabricator to connect to a malicious MySQL server, you should '.
+        'disable this option: this capability is unnecessary and inherently '.
+        'dangerous.'.
+        "\n\n".
+        'To disable this option, set: %s',
+        phutil_tag('tt', array(), pht('%s = 0', $infile_key)));
+
+      $this->newIssue('php.'.$infile_key)
+        ->setName(pht('Unsafe PHP "Local Infile" Configuration'))
+        ->setSummary($summary)
+        ->setMessage($message)
+        ->addPHPConfig($infile_key);
+    }
+
   }
 
 }

@@ -32,22 +32,21 @@ final class AphrontAjaxResponse extends AphrontResponse {
   }
 
   public function buildResponseString() {
+    $request = $this->getRequest();
     $console = $this->getConsole();
     if ($console) {
       // NOTE: We're stripping query parameters here both for readability and
       // to mitigate BREACH and similar attacks. The parameters are available
       // in the "Request" tab, so this should not impact usability. See T3684.
-      $uri = $this->getRequest()->getRequestURI();
-      $uri = new PhutilURI($uri);
-      $uri->setQueryParams(array());
+      $path = $request->getPath();
 
       Javelin::initBehavior(
         'dark-console',
         array(
-          'uri'       => (string)$uri,
-          'key'       => $console->getKey($this->getRequest()),
+          'uri'       => $path,
+          'key'       => $console->getKey($request),
           'color'     => $console->getColor(),
-          'quicksand' => $this->getRequest()->isQuicksand(),
+          'quicksand' => $request->isQuicksand(),
         ));
     }
 
@@ -60,7 +59,6 @@ final class AphrontAjaxResponse extends AphrontResponse {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
-    $request = $this->getRequest();
     if ($request) {
       $viewer = $request->getViewer();
       if ($viewer) {

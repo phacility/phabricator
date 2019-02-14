@@ -66,7 +66,7 @@ final class PonderAddAnswerView extends AphrontView {
 
     if (!$viewer->isLoggedIn()) {
       $login_href = id(new PhutilURI('/auth/start/'))
-          ->setQueryParam('next', '/Q'.$question->getID());
+          ->replaceQueryParam('next', '/Q'.$question->getID());
       $form = id(new PHUIFormLayoutView())
         ->addClass('login-to-participate')
         ->appendChild(

@@ -563,7 +563,7 @@ final class DifferentialTransactionEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
+    return pht('[Differential]');
   }
 
   protected function getMailThreadID(PhabricatorLiskDAO $object) {

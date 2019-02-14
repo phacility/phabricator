@@ -35,7 +35,26 @@ final class PhabricatorTypeaheadModularDatasourceController
 
     if (isset($sources[$class])) {
       $source = $sources[$class];
-      $source->setParameters($request->getRequestData());
+
+      $parameters = array();
+
+      $raw_parameters = $request->getStr('parameters');
+      if (strlen($raw_parameters)) {
+        try {
+          $parameters = phutil_json_decode($raw_parameters);
+        } catch (PhutilJSONParserException $ex) {
+          return $this->newDialog()
+            ->setTitle(pht('Invalid Parameters'))
+            ->appendParagraph(
+              pht(
+                'The HTTP parameter named "parameters" for this request is '.
+                'not a valid JSON parameter. JSON is required. Exception: %s',
+                $ex->getMessage()))
+            ->addCancelButton('/');
+        }
+      }
+
+      $source->setParameters($parameters);
       $source->setViewer($viewer);
 
       // NOTE: Wrapping the source in a Composite datasource ensures we perform
@@ -107,10 +126,10 @@ final class PhabricatorTypeaheadModularDatasourceController
           $results = array_slice($results, 0, $limit, $preserve_keys = true);
           if (($offset + (2 * $limit)) < $hard_limit) {
             $next_uri = id(new PhutilURI($request->getRequestURI()))
-              ->setQueryParam('offset', $offset + $limit)
-              ->setQueryParam('q', $query)
-              ->setQueryParam('raw', $raw_query)
-              ->setQueryParam('format', 'html');
+              ->replaceQueryParam('offset', $offset + $limit)
+              ->replaceQueryParam('q', $query)
+              ->replaceQueryParam('raw', $raw_query)
+              ->replaceQueryParam('format', 'html');
 
             $next_link = javelin_tag(
               'a',
@@ -229,7 +248,9 @@ final class PhabricatorTypeaheadModularDatasourceController
           $parameters = $source->getParameters();
           if ($parameters) {
             $reference_uri = (string)id(new PhutilURI($reference_uri))
-              ->setQueryParam('parameters', phutil_json_encode($parameters));
+              ->replaceQueryParam(
+                'parameters',
+                phutil_json_encode($parameters));
           }
 
           $reference_link = phutil_tag(

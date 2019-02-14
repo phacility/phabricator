@@ -7,7 +7,11 @@ final class DifferentialBuildableEngine
     $object = $this->getObject();
 
     if ($object instanceof DifferentialDiff) {
-      return $object->getRevision();
+      if ($object->getRevisionID()) {
+        return $object->getRevision();
+      } else {
+        return null;
+      }
     }
 
     return $object;

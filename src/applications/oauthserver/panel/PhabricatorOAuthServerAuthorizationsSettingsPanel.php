@@ -11,6 +11,10 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
     return pht('OAuth Authorizations');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-exchange';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }

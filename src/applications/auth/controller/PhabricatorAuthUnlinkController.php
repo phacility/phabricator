@@ -3,41 +3,45 @@
 final class PhabricatorAuthUnlinkController
   extends PhabricatorAuthController {
 
-  private $providerKey;
-
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $this->providerKey = $request->getURIData('pkey');
+    $id = $request->getURIData('id');
 
-    list($type, $domain) = explode(':', $this->providerKey, 2);
-
-    // Check that this account link actually exists. We don't require the
-    // provider to exist because we want users to be able to delete links to
-    // dead accounts if they want.
-    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
-      'accountType = %s AND accountDomain = %s AND userPHID = %s',
-      $type,
-      $domain,
-      $viewer->getPHID());
+    $account = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$account) {
-      return $this->renderNoAccountErrorDialog();
+      return new Aphront404Response();
     }
 
-    // Check that the provider (if it exists) allows accounts to be unlinked.
-    $provider_key = $this->providerKey;
-    $provider = PhabricatorAuthProvider::getEnabledProviderByKey($provider_key);
-    if ($provider) {
-      if (!$provider->shouldAllowAccountUnlink()) {
-        return $this->renderNotUnlinkableErrorDialog($provider);
-      }
+    $done_uri = '/settings/panel/external/';
+
+    $config = $account->getProviderConfig();
+    $provider = $config->getProvider();
+    if (!$provider->shouldAllowAccountUnlink()) {
+      return $this->renderNotUnlinkableErrorDialog($provider, $done_uri);
     }
 
-    // Check that this account isn't the last account which can be used to
-    // login. We prevent you from removing the last account.
+    $confirmations = $request->getStrList('confirmations');
+    $confirmations = array_fuse($confirmations);
+
+    if (!$request->isFormOrHisecPost() || !isset($confirmations['unlink'])) {
+      return $this->renderConfirmDialog($confirmations, $config, $done_uri);
+    }
+
+    // Check that this account isn't the only account which can be used to
+    // login. We warn you when you remove your only login account.
     if ($account->isUsableForLogin()) {
-      $other_accounts = id(new PhabricatorExternalAccount())->loadAllWhere(
-        'userPHID = %s',
-        $viewer->getPHID());
+      $other_accounts = id(new PhabricatorExternalAccountQuery())
+        ->setViewer($viewer)
+        ->withUserPHIDs(array($viewer->getPHID()))
+        ->execute();
 
       $valid_accounts = 0;
       foreach ($other_accounts as $other_account) {
@@ -47,100 +51,91 @@ final class PhabricatorAuthUnlinkController
       }
 
       if ($valid_accounts < 2) {
-        return $this->renderLastUsableAccountErrorDialog();
+        if (!isset($confirmations['only'])) {
+          return $this->renderOnlyUsableAccountConfirmDialog(
+            $confirmations,
+            $done_uri);
+        }
       }
     }
 
-    if ($request->isDialogFormPost()) {
-      $account->delete();
+    $workflow_key = sprintf(
+      'account.unlink(%s)',
+      $account->getPHID());
 
-      id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
-        $viewer,
-        new PhutilOpaqueEnvelope(
-          $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
+    $hisec_token = id(new PhabricatorAuthSessionEngine())
+      ->setWorkflowKey($workflow_key)
+      ->requireHighSecurityToken($viewer, $request, $done_uri);
 
-      return id(new AphrontRedirectResponse())->setURI($this->getDoneURI());
-    }
+    $account->delete();
 
-    return $this->renderConfirmDialog();
-  }
+    id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
+      $viewer,
+      new PhutilOpaqueEnvelope(
+        $request->getCookie(PhabricatorCookies::COOKIE_SESSION)));
 
-  private function getDoneURI() {
-    return '/settings/panel/external/';
-  }
-
-  private function renderNoAccountErrorDialog() {
-    $dialog = id(new AphrontDialogView())
-      ->setUser($this->getRequest()->getUser())
-      ->setTitle(pht('No Such Account'))
-      ->appendChild(
-        pht(
-          'You can not unlink this account because it is not linked.'))
-      ->addCancelButton($this->getDoneURI());
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    return id(new AphrontRedirectResponse())->setURI($done_uri);
   }
 
   private function renderNotUnlinkableErrorDialog(
-    PhabricatorAuthProvider $provider) {
+    PhabricatorAuthProvider $provider,
+    $done_uri) {
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($this->getRequest()->getUser())
+    return $this->newDialog()
       ->setTitle(pht('Permanent Account Link'))
       ->appendChild(
         pht(
           'You can not unlink this account because the administrator has '.
-          'configured Phabricator to make links to %s accounts permanent.',
+          'configured Phabricator to make links to "%s" accounts permanent.',
           $provider->getProviderName()))
-      ->addCancelButton($this->getDoneURI());
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+      ->addCancelButton($done_uri);
   }
 
-  private function renderLastUsableAccountErrorDialog() {
-    $dialog = id(new AphrontDialogView())
-      ->setUser($this->getRequest()->getUser())
-      ->setTitle(pht('Last Valid Account'))
-      ->appendChild(
+  private function renderOnlyUsableAccountConfirmDialog(
+    array $confirmations,
+    $done_uri) {
+
+    $confirmations[] = 'only';
+
+    return $this->newDialog()
+      ->setTitle(pht('Unlink Your Only Login Account?'))
+      ->addHiddenInput('confirmations', implode(',', $confirmations))
+      ->appendParagraph(
         pht(
-          'You can not unlink this account because you have no other '.
-          'valid login accounts. If you removed it, you would be unable '.
-          'to log in. Add another authentication method before removing '.
-          'this one.'))
-      ->addCancelButton($this->getDoneURI());
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+          'This is the only external login account linked to your Phabicator '.
+          'account. If you remove it, you may no longer be able to log in.'))
+      ->appendParagraph(
+        pht(
+          'If you lose access to your account, you can recover access by '.
+          'sending yourself an email login link from the login screen.'))
+      ->addCancelButton($done_uri)
+      ->addSubmitButton(pht('Unlink External Account'));
   }
 
-  private function renderConfirmDialog() {
-    $provider_key = $this->providerKey;
-    $provider = PhabricatorAuthProvider::getEnabledProviderByKey($provider_key);
+  private function renderConfirmDialog(
+    array $confirmations,
+    PhabricatorAuthProviderConfig $config,
+    $done_uri) {
 
-    if ($provider) {
-      $title = pht('Unlink "%s" Account?', $provider->getProviderName());
-      $body = pht(
-        'You will no longer be able to use your %s account to '.
-        'log in to Phabricator.',
-        $provider->getProviderName());
-    } else {
-      $title = pht('Unlink Account?');
-      $body = pht(
-        'You will no longer be able to use this account to log in '.
-        'to Phabricator.');
-    }
+    $confirmations[] = 'unlink';
+    $provider = $config->getProvider();
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($this->getRequest()->getUser())
+    $title = pht('Unlink "%s" Account?', $provider->getProviderName());
+    $body = pht(
+      'You will no longer be able to use your %s account to '.
+      'log in to Phabricator.',
+      $provider->getProviderName());
+
+    return $this->newDialog()
       ->setTitle($title)
+      ->addHiddenInput('confirmations', implode(',', $confirmations))
       ->appendParagraph($body)
       ->appendParagraph(
         pht(
           'Note: Unlinking an authentication provider will terminate any '.
           'other active login sessions.'))
       ->addSubmitButton(pht('Unlink Account'))
-      ->addCancelButton($this->getDoneURI());
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+      ->addCancelButton($done_uri);
   }
 
 }

@@ -121,12 +121,12 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
 
       $actor->setEmailAddress($xuser->getAccountID());
 
-      // NOTE: This effectively drops all outbound mail to unrecognized
-      // addresses unless "phabricator.allow-email-users" is set. See T12237
-      // for context.
-      $allow_key = 'phabricator.allow-email-users';
-      $allow_value = PhabricatorEnv::getEnvConfig($allow_key);
-      $actor->setIsVerified((bool)$allow_value);
+      // Circa T7477, it appears that we never intentionally send email to
+      // external users (even when they email "bugs@" to create a task).
+      // Mark these users as unverified so mail to them is always dropped.
+      // See also T12237. In the future, we might change this behavior.
+
+      $actor->setIsVerified(false);
     }
   }
 

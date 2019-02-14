@@ -14,17 +14,25 @@ final class PhabricatorAuthOneTimeLoginController
     $key = $request->getURIData('key');
     $email_id = $request->getURIData('emailID');
 
-    if ($request->getUser()->isLoggedIn()) {
-      return $this->renderError(
-        pht('You are already logged in.'));
-    }
-
     $target_user = id(new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withIDs(array($id))
       ->executeOne();
     if (!$target_user) {
       return new Aphront404Response();
+    }
+
+    // NOTE: We allow you to use a one-time login link for your own current
+    // login account. This supports the "Set Password" flow.
+
+    $is_logged_in = false;
+    if ($viewer->isLoggedIn()) {
+      if ($viewer->getPHID() !== $target_user->getPHID()) {
+        return $this->renderError(
+          pht('You are already logged in.'));
+      } else {
+        $is_logged_in = true;
+      }
     }
 
     // NOTE: As a convenience to users, these one-time login URIs may also
@@ -100,7 +108,7 @@ final class PhabricatorAuthOneTimeLoginController
         ->addCancelButton('/');
     }
 
-    if ($request->isFormPost()) {
+    if ($request->isFormPost() || $is_logged_in) {
       // If we have an email bound into this URI, verify email so that clicking
       // the link in the "Welcome" email is good enough, without requiring users
       // to go through a second round of email verification.
@@ -119,38 +127,15 @@ final class PhabricatorAuthOneTimeLoginController
         }
       unset($unguarded);
 
-      $next = '/';
-      if (!PhabricatorPasswordAuthProvider::getPasswordProvider()) {
-        $next = '/settings/panel/external/';
-      } else {
+      $next_uri = $this->getNextStepURI($target_user);
 
-        // We're going to let the user reset their password without knowing
-        // the old one. Generate a one-time token for that.
-        $key = Filesystem::readRandomCharacters(16);
-        $password_type =
-          PhabricatorAuthPasswordResetTemporaryTokenType::TOKENTYPE;
-
-        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-          id(new PhabricatorAuthTemporaryToken())
-            ->setTokenResource($target_user->getPHID())
-            ->setTokenType($password_type)
-            ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
-            ->setTokenCode(PhabricatorHash::weakDigest($key))
-            ->save();
-        unset($unguarded);
-
-        $panel_uri = '/auth/password/';
-
-        $next = (string)id(new PhutilURI($panel_uri))
-          ->setQueryParams(
-            array(
-              'key' => $key,
-            ));
-
-        $request->setTemporaryCookie(PhabricatorCookies::COOKIE_HISEC, 'yes');
+      // If the user is already logged in, we're just doing a "password set"
+      // flow. Skip directly to the next step.
+      if ($is_logged_in) {
+        return id(new AphrontRedirectResponse())->setURI($next_uri);
       }
 
-      PhabricatorCookies::setNextURICookie($request, $next, $force = true);
+      PhabricatorCookies::setNextURICookie($request, $next_uri, $force = true);
 
       $force_full_session = false;
       if ($link_type === PhabricatorAuthSessionEngine::ONETIME_RECOVER) {
@@ -206,4 +191,57 @@ final class PhabricatorAuthOneTimeLoginController
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
+  private function getNextStepURI(PhabricatorUser $user) {
+    $request = $this->getRequest();
+
+    // If we have password auth, let the user set or reset their password after
+    // login.
+    $have_passwords = PhabricatorPasswordAuthProvider::getPasswordProvider();
+    if ($have_passwords) {
+      // We're going to let the user reset their password without knowing
+      // the old one. Generate a one-time token for that.
+      $key = Filesystem::readRandomCharacters(16);
+      $password_type =
+        PhabricatorAuthPasswordResetTemporaryTokenType::TOKENTYPE;
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        id(new PhabricatorAuthTemporaryToken())
+          ->setTokenResource($user->getPHID())
+          ->setTokenType($password_type)
+          ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
+          ->setTokenCode(PhabricatorHash::weakDigest($key))
+          ->save();
+      unset($unguarded);
+
+      $panel_uri = '/auth/password/';
+
+      $request->setTemporaryCookie(PhabricatorCookies::COOKIE_HISEC, 'yes');
+
+      $params = array(
+        'key' => $key,
+      );
+
+      return (string)new PhutilURI($panel_uri, $params);
+    }
+
+    $providers = id(new PhabricatorAuthProviderConfigQuery())
+      ->setViewer($user)
+      ->withIsEnabled(true)
+      ->execute();
+
+    // If there are no configured providers and the user is an administrator,
+    // send them to Auth to configure a provider. This is probably where they
+    // want to go. You can end up in this state by accidentally losing your
+    // first session during initial setup, or after restoring exported data
+    // from a hosted instance.
+    if (!$providers && $user->getIsAdmin()) {
+      return '/auth/';
+    }
+
+    // If we didn't find anywhere better to send them, give up and just send
+    // them to the home page.
+    return '/';
+  }
+
 }

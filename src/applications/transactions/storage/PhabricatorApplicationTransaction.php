@@ -76,7 +76,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    throw new PhutilMethodNotImplementedException();
+    return null;
   }
 
   public function getMetadataValue($key, $default = null) {
@@ -167,6 +167,14 @@ abstract class PhabricatorApplicationTransaction
 
   public function getIsMFATransaction() {
     return (bool)$this->getMetadataValue('core.mfa', false);
+  }
+
+  public function setIsLockOverrideTransaction($override) {
+    return $this->setMetadataValue('core.lock-override', $override);
+  }
+
+  public function getIsLockOverrideTransaction() {
+    return (bool)$this->getMetadataValue('core.lock-override', false);
   }
 
   public function attachComment(
@@ -740,8 +748,9 @@ abstract class PhabricatorApplicationTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
+      case PhabricatorTransactions::TYPE_MFA:
         return true;
-     case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
@@ -763,12 +772,33 @@ abstract class PhabricatorApplicationTransaction
     return $this->shouldHideForFeed();
   }
 
+  private function getTitleForMailWithRenderingTarget($new_target) {
+    $old_target = $this->getRenderingTarget();
+    try {
+      $this->setRenderingTarget($new_target);
+      $result = $this->getTitleForMail();
+    } catch (Exception $ex) {
+      $this->setRenderingTarget($old_target);
+      throw $ex;
+    }
+    $this->setRenderingTarget($old_target);
+    return $result;
+  }
+
   public function getTitleForMail() {
-    return id(clone $this)->setRenderingTarget('text')->getTitle();
+    return $this->getTitle();
+  }
+
+  public function getTitleForTextMail() {
+    return $this->getTitleForMailWithRenderingTarget(self::TARGET_TEXT);
   }
 
   public function getTitleForHTMLMail() {
-    $title = $this->getTitleForMail();
+    // TODO: For now, rendering this with TARGET_HTML generates links with
+    // bad targets ("/x/y/" instead of "https://dev.example.com/x/y/"). Throw
+    // a rug over the issue for the moment. See T12921.
+
+    $title = $this->getTitleForMailWithRenderingTarget(self::TARGET_TEXT);
     if ($title === null) {
       return null;
     }
@@ -1507,6 +1537,12 @@ abstract class PhabricatorApplicationTransaction
           return false;
         }
       }
+
+      // Don't group lock override and non-override transactions together.
+      $is_override = $this->getIsLockOverrideTransaction();
+      if ($is_override != $xaction->getIsLockOverrideTransaction()) {
+        return false;
+      }
     }
 
     return true;
@@ -1709,12 +1745,7 @@ abstract class PhabricatorApplicationTransaction
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-      $comment_template = null;
-      try {
-        $comment_template = $this->getApplicationTransactionCommentObject();
-      } catch (Exception $ex) {
-        // Continue; no comments for these transactions.
-      }
+      $comment_template = $this->getApplicationTransactionCommentObject();
 
       if ($comment_template) {
         $comments = $comment_template->loadAllWhere(

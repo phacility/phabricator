@@ -19,6 +19,7 @@ final class PHUIIconView extends AphrontTagView {
   private $iconColor;
   private $iconBackground;
   private $tooltip;
+  private $emblemColor;
 
   public function setHref($href) {
     $this->href = $href;
@@ -66,6 +67,15 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
+  public function setEmblemColor($emblem_color) {
+    $this->emblemColor = $emblem_color;
+    return $this;
+  }
+
+  public function getEmblemColor() {
+    return $this->emblemColor;
+  }
+
   protected function getTagName() {
     $tag = 'span';
     if ($this->href) {
@@ -104,6 +114,10 @@ final class PHUIIconView extends AphrontTagView {
     if ($this->text) {
       $classes[] = 'phui-icon-has-text';
       $this->appendChild($this->text);
+    }
+
+    if ($this->emblemColor) {
+      $classes[] = 'phui-icon-emblem phui-icon-emblem-'.$this->emblemColor;
     }
 
     $sigil = null;

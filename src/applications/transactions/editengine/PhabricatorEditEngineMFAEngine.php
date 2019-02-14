@@ -34,6 +34,28 @@ abstract class PhabricatorEditEngineMFAEngine
       ->setObject($object);
   }
 
-  abstract public function shouldRequireMFA();
+  /**
+   * Do edits to this object REQUIRE that the user submit MFA?
+   *
+   * This is a strict requirement: users will need to add MFA to their accounts
+   * if they don't already have it.
+   *
+   * @return bool True to strictly require MFA.
+   */
+  public function shouldRequireMFA() {
+    return false;
+  }
+
+  /**
+   * Should edits to this object prompt for MFA if it's available?
+   *
+   * This is advisory: users without MFA on their accounts will be able to
+   * perform edits without being required to add MFA.
+   *
+   * @return bool True to prompt for MFA if available.
+   */
+  public function shouldTryMFA() {
+    return false;
+  }
 
 }

@@ -9,6 +9,10 @@ final class PhabricatorDiffPreferencesSettingsPanel
     return pht('Diff Preferences');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-cog';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
   }

@@ -93,6 +93,15 @@ h1.phui-info-view-head {
   color: {$red};
 }
 
+.phui-info-severity-mfa {
+  border-color: {$blue};
+  border-left-width: 6px;
+}
+
+.phui-info-severity-mfa .phui-info-icon {
+  color: {$blue};
+}
+
 .phui-info-severity-warning {
   border-color: {$yellow};
   border-left-width: 6px;

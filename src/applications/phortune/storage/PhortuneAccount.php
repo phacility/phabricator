@@ -12,11 +12,15 @@ final class PhortuneAccount extends PhortuneDAO
     PhabricatorPolicyInterface {
 
   protected $name;
+  protected $billingName;
+  protected $billingAddress;
 
   private $memberPHIDs = self::ATTACHABLE;
 
   public static function initializeNewAccount(PhabricatorUser $actor) {
     return id(new self())
+      ->setBillingName('')
+      ->setBillingAddress('')
       ->attachMemberPHIDs(array());
   }
 
@@ -75,6 +79,8 @@ final class PhortuneAccount extends PhortuneDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
+        'billingName' => 'text255',
+        'billingAddress' => 'text',
       ),
     ) + parent::getConfiguration();
   }

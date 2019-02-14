@@ -15,6 +15,10 @@ final class PhabricatorMailEmailMessage
   private $textBody;
   private $htmlBody;
 
+  public function newMailMessageEngine() {
+    return new PhabricatorMailEmailEngine();
+  }
+
   public function setFromAddress(PhutilEmailAddress $from_address) {
     $this->fromAddress = $from_address;
     return $this;

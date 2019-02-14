@@ -12,7 +12,7 @@ final class PonderAnswerMailReceiver extends PhabricatorObjectMailReceiver {
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'ANSR');
+    $id = (int)substr($pattern, 4);
 
     return id(new PonderAnswerQuery())
       ->setViewer($viewer)

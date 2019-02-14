@@ -11,7 +11,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
 
     if ($request->isFormPost()) {
       $uri = new PhutilURI('/fact/chart/');
-      $uri->setQueryParam('y1', $request->getStr('y1'));
+      $uri->replaceQueryParam('y1', $request->getStr('y1'));
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 

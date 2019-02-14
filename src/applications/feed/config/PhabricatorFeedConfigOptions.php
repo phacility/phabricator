@@ -20,22 +20,22 @@ final class PhabricatorFeedConfigOptions
   }
 
   public function getOptions() {
+    $hooks_help = $this->deformat(pht(<<<EODOC
+IMPORTANT: Feed hooks are deprecated and have been replaced by Webhooks.
+
+You can configure Webhooks in Herald. This configuration option will be removed
+in a future version of Phabricator.
+
+(This legacy option may be configured with a list of URIs; feed stories will
+send to these URIs.)
+EODOC
+      ));
+
     return array(
       $this->newOption('feed.http-hooks', 'list<string>', array())
         ->setLocked(true)
-        ->setSummary(pht('POST notifications of feed events.'))
-        ->setDescription(
-          pht(
-            "If you set this to a list of HTTP URIs, when a feed story is ".
-            "published a task will be created for each URI that posts the ".
-            "story data to the URI. Daemons automagically retry failures 100 ".
-            "times, waiting `\$fail_count * 60s` between each subsequent ".
-            "failure. Be sure to keep the daemon console (`%s`) open ".
-            "while developing and testing your end points. You may need to".
-            "restart your daemons to start sending HTTP requests.\n\n".
-            "NOTE: URIs are not validated, the URI must return HTTP status ".
-            "200 within 30 seconds, and no permission checks are performed.",
-            '/daemon/')),
+        ->setSummary(pht('Deprecated.'))
+        ->setDescription($hooks_help),
     );
   }
 

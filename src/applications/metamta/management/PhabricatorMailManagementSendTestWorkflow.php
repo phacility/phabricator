@@ -60,12 +60,32 @@ final class PhabricatorMailManagementSendTestWorkflow
             'name'    => 'bulk',
             'help'    => pht('Send with bulk headers.'),
           ),
+          array(
+            'name' => 'type',
+            'param' => 'message-type',
+            'help' => pht(
+              'Send the specified type of message (email, sms, ...).'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
     $viewer = $this->getViewer();
+
+    $type = $args->getArg('type');
+    if (!strlen($type)) {
+      $type = PhabricatorMailEmailMessage::MESSAGETYPE;
+    }
+
+    $type_map = PhabricatorMailExternalMessage::getAllMessageTypes();
+    if (!isset($type_map[$type])) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Message type "%s" is unknown, supported message types are: %s.',
+          $type,
+          implode(', ', array_keys($type_map))));
+    }
 
     $from = $args->getArg('from');
     if ($from) {
@@ -86,9 +106,8 @@ final class PhabricatorMailManagementSendTestWorkflow
     if (!$tos && !$ccs) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify one or more users to send mail to with `%s` and `%s`.',
-          '--to',
-          '--cc'));
+          'Specify one or more users to send a message to with "--to" and/or '.
+          '"--cc".'));
     }
 
     $names = array_merge($tos, $ccs);
@@ -166,24 +185,30 @@ final class PhabricatorMailManagementSendTestWorkflow
       $mail->setFrom($from->getPHID());
     }
 
+    $mailers = PhabricatorMetaMTAMail::newMailers(
+      array(
+        'media' => array($type),
+        'outbound' => true,
+      ));
+    $mailers = mpull($mailers, null, 'getKey');
+
+    if (!$mailers) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'No configured mailers support outbound messages of type "%s".',
+          $type));
+    }
+
     $mailer_key = $args->getArg('mailer');
     if ($mailer_key !== null) {
-      $mailers = PhabricatorMetaMTAMail::newMailers(array());
-
-      $mailers = mpull($mailers, null, 'getKey');
       if (!isset($mailers[$mailer_key])) {
         throw new PhutilArgumentUsageException(
           pht(
-            'Mailer key ("%s") is not configured. Available keys are: %s.',
+            'Mailer key ("%s") is not configured, or does not support '.
+            'outbound messages of type "%s". Available mailers are: %s.',
             $mailer_key,
+            $type,
             implode(', ', array_keys($mailers))));
-      }
-
-      if (!$mailers[$mailer_key]->getSupportsOutbound()) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'Mailer ("%s") is not configured to support outbound mail.',
-            $mailer_key));
       }
 
       $mail->setTryMailers(array($mailer_key));
@@ -196,6 +221,8 @@ final class PhabricatorMailManagementSendTestWorkflow
       $file = new PhabricatorMailAttachment($data, $name, $mime);
       $mail->addAttachment($file);
     }
+
+    $mail->setMessageType($type);
 
     PhabricatorWorker::setRunAllTasksInProcess(true);
     $mail->save();

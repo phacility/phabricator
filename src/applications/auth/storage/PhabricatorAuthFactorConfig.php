@@ -1,14 +1,21 @@
 <?php
 
-final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
+
+final class PhabricatorAuthFactorConfig
+  extends PhabricatorAuthDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $userPHID;
-  protected $factorKey;
+  protected $factorProviderPHID;
   protected $factorName;
   protected $factorSecret;
   protected $properties = array();
 
   private $sessionEngine;
+  private $factorProvider = self::ATTACHABLE;
+  private $mfaSyncToken;
 
   protected function getConfiguration() {
     return array(
@@ -17,7 +24,6 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
       ),
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'factorKey' => 'text64',
         'factorName' => 'text',
         'factorSecret' => 'text',
       ),
@@ -29,26 +35,18 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorAuthAuthFactorPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhabricatorAuthAuthFactorPHIDType::TYPECONST;
   }
 
-  public function getImplementation() {
-    return idx(PhabricatorAuthFactor::getAllFactors(), $this->getFactorKey());
+  public function attachFactorProvider(
+    PhabricatorAuthFactorProvider $provider) {
+    $this->factorProvider = $provider;
+    return $this;
   }
 
-  public function requireImplementation() {
-    $impl = $this->getImplementation();
-    if (!$impl) {
-      throw new Exception(
-        pht(
-          'Attempting to operate on multi-factor auth which has no '.
-          'corresponding implementation (factor key is "%s").',
-          $this->getFactorKey()));
-    }
-
-    return $impl;
+  public function getFactorProvider() {
+    return $this->assertAttached($this->factorProvider);
   }
 
   public function setSessionEngine(PhabricatorAuthSessionEngine $engine) {
@@ -62,6 +60,68 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
     }
 
     return $this->sessionEngine;
+  }
+
+  public function setMFASyncToken(PhabricatorAuthTemporaryToken $token) {
+    $this->mfaSyncToken = $token;
+    return $this;
+  }
+
+  public function getMFASyncToken() {
+    return $this->mfaSyncToken;
+  }
+
+  public function getAuthFactorConfigProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setAuthFactorConfigProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function newSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->getFactorProvider()->newStatus()->getOrder())
+      ->addInt($this->getID());
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return $this->getUserPHID();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($engine->getViewer())
+      ->withPHIDs(array($this->getUserPHID()))
+      ->executeOne();
+
+    $this->delete();
+
+    if ($user) {
+      $user->updateMultiFactorEnrollment();
+    }
   }
 
 }

@@ -315,7 +315,7 @@ final class PhabricatorStartup {
    *
    * @param   string    Brief description of the exception context, like
    *                    `"Rendering Exception"`.
-   * @param   Exception The exception itself.
+   * @param   Throwable The exception itself.
    * @param   bool      True if it's okay to show the exception's stack trace
    *                    to the user. The trace will always be logged.
    * @return  exit      This method **does not return**.
@@ -324,7 +324,7 @@ final class PhabricatorStartup {
    */
   public static function didEncounterFatalException(
     $note,
-    Exception $ex,
+    $ex,
     $show_trace) {
 
     $message = '['.$note.'/'.get_class($ex).'] '.$ex->getMessage();

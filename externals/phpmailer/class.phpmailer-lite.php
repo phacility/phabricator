@@ -42,6 +42,102 @@ if (version_compare(PHP_VERSION, '5.0.0', '<') ) exit("Sorry, this version of PH
 
 class PHPMailerLite {
 
+  public static function newFromMessage(
+    PhabricatorMailExternalMessage $message) {
+
+    $mailer = new self($use_exceptions = true);
+
+    // By default, PHPMailerLite sends one mail per recipient. We handle
+    // combining or separating To and Cc higher in the stack, so tell it to
+    // send mail exactly like we ask.
+    $mailer->SingleTo = false;
+
+    $mailer->CharSet = 'utf-8';
+    $mailer->Encoding = 'base64';
+
+    $subject = $message->getSubject();
+    if ($subject !== null) {
+      $mailer->Subject = $subject;
+    }
+
+    $from_address = $message->getFromAddress();
+    if ($from_address) {
+      $mailer->SetFrom(
+        $from_address->getAddress(),
+        (string)$from_address->getDisplayName(),
+        $crazy_side_effects = false);
+    }
+
+    $reply_address = $message->getReplyToAddress();
+    if ($reply_address) {
+      $mailer->AddReplyTo(
+        $reply_address->getAddress(),
+        (string)$reply_address->getDisplayName());
+    }
+
+    $to_addresses = $message->getToAddresses();
+    if ($to_addresses) {
+      foreach ($to_addresses as $address) {
+        $mailer->AddAddress(
+          $address->getAddress(),
+          (string)$address->getDisplayName());
+      }
+    }
+
+    $cc_addresses = $message->getCCAddresses();
+    if ($cc_addresses) {
+      foreach ($cc_addresses as $address) {
+        $mailer->AddCC(
+          $address->getAddress(),
+          (string)$address->getDisplayName());
+      }
+    }
+
+    $headers = $message->getHeaders();
+    if ($headers) {
+      foreach ($headers as $header) {
+        $name = $header->getName();
+        $value = $header->getValue();
+
+        if (phutil_utf8_strtolower($name) === 'message-id') {
+          $mailer->MessageID = $value;
+        } else {
+          $mailer->AddCustomHeader("{$name}: {$value}");
+        }
+      }
+    }
+
+    $attachments = $message->getAttachments();
+    if ($attachments) {
+      foreach ($attachments as $attachment) {
+        $mailer->AddStringAttachment(
+          $attachment->getData(),
+          $attachment->getFilename(),
+          'base64',
+          $attachment->getMimeType());
+      }
+    }
+
+    $text_body = $message->getTextBody();
+    if ($text_body !== null) {
+      $mailer->Body = $text_body;
+    }
+
+    $html_body = $message->getHTMLBody();
+    if ($html_body !== null) {
+      $mailer->IsHTML(true);
+      $mailer->Body = $html_body;
+      if ($text_body !== null) {
+        $mailer->AltBody = $text_body;
+      }
+    }
+
+    return $mailer;
+  }
+
+
+
+
   /////////////////////////////////////////////////
   // PROPERTIES, PUBLIC
   /////////////////////////////////////////////////

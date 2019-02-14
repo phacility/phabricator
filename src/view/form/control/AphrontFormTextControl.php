@@ -5,6 +5,7 @@ final class AphrontFormTextControl extends AphrontFormControl {
   private $disableAutocomplete;
   private $sigil;
   private $placeholder;
+  private $autofocus;
 
   public function setDisableAutocomplete($disable) {
     $this->disableAutocomplete = $disable;
@@ -22,6 +23,15 @@ final class AphrontFormTextControl extends AphrontFormControl {
   public function setPlaceholder($placeholder) {
     $this->placeholder = $placeholder;
     return $this;
+  }
+
+  public function setAutofocus($autofocus) {
+    $this->autofocus = $autofocus;
+    return $this;
+  }
+
+  public function getAutofocus() {
+    return $this->autofocus;
   }
 
   public function getSigil() {
@@ -49,6 +59,7 @@ final class AphrontFormTextControl extends AphrontFormControl {
         'id'           => $this->getID(),
         'sigil'        => $this->getSigil(),
         'placeholder'  => $this->getPlaceholder(),
+        'autofocus' => ($this->getAutofocus() ? 'autofocus' : null),
       ));
   }
 

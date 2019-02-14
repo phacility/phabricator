@@ -16,6 +16,7 @@ final class PhabricatorAuthChallenge
   protected $properties = array();
 
   private $responseToken;
+  private $isNewChallenge;
 
   const HTTPKEY = '__hisec.challenges__';
   const TOKEN_DIGEST_KEY = 'auth.challenge.token';
@@ -163,10 +164,16 @@ final class PhabricatorAuthChallenge
     $token = Filesystem::readRandomCharacters(32);
     $token = new PhutilOpaqueEnvelope($token);
 
-    return $this
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+    $this
       ->setResponseToken($token)
       ->setResponseTTL($ttl)
       ->save();
+
+    unset($unguarded);
+
+    return $this;
   }
 
   public function markChallengeAsCompleted() {
@@ -233,6 +240,15 @@ final class PhabricatorAuthChallenge
 
   public function getProperty($key, $default = null) {
     return $this->properties[$key];
+  }
+
+  public function setIsNewChallenge($is_new_challenge) {
+    $this->isNewChallenge = $is_new_challenge;
+    return $this;
+  }
+
+  public function getIsNewChallenge() {
+    return $this->isNewChallenge;
   }
 
 

@@ -10,7 +10,7 @@ final class PhabricatorPronounSetting
   }
 
   public function getSettingPanelKey() {
-    return PhabricatorAccountSettingsPanel::PANELKEY;
+    return PhabricatorLanguageSettingsPanel::PANELKEY;
   }
 
   protected function getSettingOrder() {

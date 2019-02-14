@@ -459,11 +459,6 @@ EOTEXT
             '%s configuration option. The default value (`90`) '.
             'corresponds to the default "Needs Triage" priority.',
             'maniphest.priorities')),
-      $this->newOption(
-        'metamta.maniphest.subject-prefix',
-        'string',
-        '[Maniphest]')
-        ->setDescription(pht('Subject prefix for Maniphest mail.')),
       $this->newOption('maniphest.points', $points_type, array())
         ->setSummary(pht('Configure point values for tasks.'))
         ->setDescription($points_description)

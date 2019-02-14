@@ -54,7 +54,7 @@ final class PhabricatorAuthStartController
           }
 
           $redirect_uri = $request->getRequestURI();
-          $redirect_uri->setQueryParam('cleared', 1);
+          $redirect_uri->replaceQueryParam('cleared', 1);
           return id(new AphrontRedirectResponse())->setURI($redirect_uri);
       }
     }
@@ -64,7 +64,7 @@ final class PhabricatorAuthStartController
     // the workflow will continue normally.
     if ($did_clear) {
       $redirect_uri = $request->getRequestURI();
-      $redirect_uri->setQueryParam('cleared', null);
+      $redirect_uri->removeQueryParam('cleared');
       return id(new AphrontRedirectResponse())->setURI($redirect_uri);
     }
 
@@ -73,6 +73,11 @@ final class PhabricatorAuthStartController
       if (!$provider->shouldAllowLogin()) {
         unset($providers[$key]);
       }
+    }
+
+    $configs = array();
+    foreach ($providers as $provider) {
+      $configs[] = $provider->getProviderConfig();
     }
 
     if (!$providers) {
@@ -88,7 +93,7 @@ final class PhabricatorAuthStartController
           'This Phabricator install is not configured with any enabled '.
           'authentication providers which can be used to log in. If you '.
           'have accidentally locked yourself out by disabling all providers, '.
-          'you can use `%s` to recover access to an administrative account.',
+          'you can use `%s` to recover access to an account.',
           'phabricator/bin/auth recover <username>'));
     }
 
@@ -172,27 +177,14 @@ final class PhabricatorAuthStartController
         $button_columns);
     }
 
-    $handlers = PhabricatorAuthLoginHandler::getAllHandlers();
-
-    $delegating_controller = $this->getDelegatingController();
-
-    $header = array();
-    foreach ($handlers as $handler) {
-      $handler = clone $handler;
-
-      $handler->setRequest($request);
-
-      if ($delegating_controller) {
-        $handler->setDelegatingController($delegating_controller);
-      }
-
-      $header[] = $handler->getAuthLoginHeaderContent();
-    }
-
     $invite_message = null;
     if ($invite) {
       $invite_message = $this->renderInviteHeader($invite);
     }
+
+    $custom_message = $this->newCustomStartMessage();
+
+    $email_login = $this->newEmailLoginView($configs);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login'));
@@ -200,9 +192,10 @@ final class PhabricatorAuthStartController
 
     $title = pht('Login');
     $view = array(
-      $header,
       $invite_message,
+      $custom_message,
       $out,
+      $email_login,
     );
 
     return $this->newPage()
@@ -304,5 +297,65 @@ final class PhabricatorAuthStartController
       ->setIsExternal(true)
       ->setURI($auto_uri);
   }
+
+  private function newCustomStartMessage() {
+    $viewer = $this->getViewer();
+
+    $text = PhabricatorAuthMessage::loadMessageText(
+      $viewer,
+      PhabricatorAuthLoginMessageType::MESSAGEKEY);
+
+    if (!strlen($text)) {
+      return null;
+    }
+
+    $remarkup_view = new PHUIRemarkupView($viewer, $text);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'auth-custom-message',
+      ),
+      $remarkup_view);
+  }
+
+  private function newEmailLoginView(array $configs) {
+    assert_instances_of($configs, 'PhabricatorAuthProviderConfig');
+
+    // Check if password auth is enabled. If it is, the password login form
+    // renders a "Forgot password?" link, so we don't need to provide a
+    // supplemental link.
+
+    $has_password = false;
+    foreach ($configs as $config) {
+      $provider = $config->getProvider();
+      if ($provider instanceof PhabricatorPasswordAuthProvider) {
+        $has_password = true;
+      }
+    }
+
+    if ($has_password) {
+      return null;
+    }
+
+    $view = array(
+      pht('Trouble logging in?'),
+      ' ',
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/login/email/',
+        ),
+        pht('Send a login link to your email address.')),
+    );
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'auth-custom-message',
+      ),
+      $view);
+  }
+
 
 }

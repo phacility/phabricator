@@ -125,6 +125,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   }
 
   public function processReceivedMail() {
+    $viewer = $this->getViewer();
 
     $sender = null;
     try {
@@ -132,32 +133,142 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $this->dropMailAlreadyReceived();
       $this->dropEmptyMail();
 
-      $receiver = $this->loadReceiver();
-      $sender = $receiver->loadSender($this);
-      $receiver->validateSender($this, $sender);
+      $sender = $this->loadSender();
+      if ($sender) {
+        $this->setAuthorPHID($sender->getPHID());
 
-      $this->setAuthorPHID($sender->getPHID());
+        // If we've identified the sender, mark them as the author of any
+        // attached files. We do this before we validate them (below), since
+        // they still authored these files even if their account is not allowed
+        // to interact via email.
 
-      // Now that we've identified the sender, mark them as the author of
-      // any attached files.
-      $attachments = $this->getAttachments();
-      if ($attachments) {
-        $files = id(new PhabricatorFileQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPHIDs($attachments)
-          ->execute();
-        foreach ($files as $file) {
-          $file->setAuthorPHID($sender->getPHID())->save();
+        $attachments = $this->getAttachments();
+        if ($attachments) {
+          $files = id(new PhabricatorFileQuery())
+            ->setViewer($viewer)
+            ->withPHIDs($attachments)
+            ->execute();
+          foreach ($files as $file) {
+            $file->setAuthorPHID($sender->getPHID())->save();
+          }
+        }
+
+        $this->validateSender($sender);
+      }
+
+      $receivers = id(new PhutilClassMapQuery())
+        ->setAncestorClass('PhabricatorMailReceiver')
+        ->setFilterMethod('isEnabled')
+        ->execute();
+
+      $reserved_recipient = null;
+      $targets = $this->newTargetAddresses();
+      foreach ($targets as $key => $target) {
+        // Never accept any reserved address as a mail target. This prevents
+        // security issues around "hostmaster@" and bad behavior with
+        // "noreply@".
+        if (PhabricatorMailUtil::isReservedAddress($target)) {
+          if (!$reserved_recipient) {
+            $reserved_recipient = $target;
+          }
+          unset($targets[$key]);
+          continue;
+        }
+
+        // See T13234. Don't process mail if a user has attached this address
+        // to their account.
+        if (PhabricatorMailUtil::isUserAddress($target)) {
+          unset($targets[$key]);
+          continue;
         }
       }
 
-      $receiver->receiveMail($this, $sender);
+      $any_accepted = false;
+      $receiver_exception = null;
+      foreach ($receivers as $receiver) {
+        $receiver = id(clone $receiver)
+          ->setViewer($viewer);
+
+        if ($sender) {
+          $receiver->setSender($sender);
+        }
+
+        foreach ($targets as $target) {
+          try {
+            if (!$receiver->canAcceptMail($this, $target)) {
+              continue;
+            }
+
+            $any_accepted = true;
+
+            $receiver->receiveMail($this, $target);
+          } catch (Exception $ex) {
+            // If receivers raise exceptions, we'll keep the first one in hope
+            // that it points at a root cause.
+            if (!$receiver_exception) {
+              $receiver_exception = $ex;
+            }
+          }
+        }
+      }
+
+      if ($receiver_exception) {
+        throw $receiver_exception;
+      }
+
+
+      if (!$any_accepted) {
+        if ($reserved_recipient) {
+          // If nothing accepted the mail, we normally raise an error to help
+          // users who mistakenly send mail to "barges@" instead of "bugs@".
+
+          // However, if the recipient list included a reserved recipient, we
+          // don't bounce the mail with an error.
+
+          // The intent here is that if a user does a "Reply All" and includes
+          // "From: noreply@phabricator" in the receipient list, we just want
+          // to drop the mail rather than send them an unhelpful bounce message.
+
+          throw new PhabricatorMetaMTAReceivedMailProcessingException(
+            MetaMTAReceivedMailStatus::STATUS_RESERVED,
+            pht(
+              'No application handled this mail. This mail was sent to a '.
+              'reserved recipient ("%s") so bounces are suppressed.',
+              (string)$reserved_recipient));
+        } else if (!$sender) {
+          // NOTE: Currently, we'll always drop this mail (since it's headed to
+          // an unverified recipient). See T12237. These details are still
+          // useful because they'll appear in the mail logs and Mail web UI.
+
+          throw new PhabricatorMetaMTAReceivedMailProcessingException(
+            MetaMTAReceivedMailStatus::STATUS_UNKNOWN_SENDER,
+            pht(
+              'This email was sent from an email address ("%s") that is not '.
+              'associated with a Phabricator account. To interact with '.
+              'Phabricator via email, add this address to your account.',
+              (string)$this->newFromAddress()));
+        } else {
+          throw new PhabricatorMetaMTAReceivedMailProcessingException(
+            MetaMTAReceivedMailStatus::STATUS_NO_RECEIVERS,
+            pht(
+              'Phabricator can not process this mail because no application '.
+              'knows how to handle it. Check that the address you sent it to '.
+              'is correct.'.
+              "\n\n".
+              '(No concrete, enabled subclass of PhabricatorMailReceiver can '.
+              'accept this mail.)'));
+        }
+      }
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
       switch ($ex->getStatusCode()) {
         case MetaMTAReceivedMailStatus::STATUS_DUPLICATE:
         case MetaMTAReceivedMailStatus::STATUS_FROM_PHABRICATOR:
           // Don't send an error email back in these cases, since they're
           // very unlikely to be the sender's fault.
+          break;
+        case MetaMTAReceivedMailStatus::STATUS_RESERVED:
+          // This probably is the sender's fault, but it's likely an accident
+          // that we received the mail at all.
           break;
         case MetaMTAReceivedMailStatus::STATUS_EMPTY_IGNORED:
           // This error is explicitly ignored.
@@ -311,51 +422,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         'text, and signatures are discarded and ignored.'));
   }
 
-  /**
-   * Load a concrete instance of the @{class:PhabricatorMailReceiver} which
-   * accepts this mail, if one exists.
-   */
-  private function loadReceiver() {
-    $receivers = id(new PhutilClassMapQuery())
-      ->setAncestorClass('PhabricatorMailReceiver')
-      ->setFilterMethod('isEnabled')
-      ->execute();
-
-    $accept = array();
-    foreach ($receivers as $key => $receiver) {
-      if ($receiver->canAcceptMail($this)) {
-        $accept[$key] = $receiver;
-      }
-    }
-
-    if (!$accept) {
-      throw new PhabricatorMetaMTAReceivedMailProcessingException(
-        MetaMTAReceivedMailStatus::STATUS_NO_RECEIVERS,
-        pht(
-          'Phabricator can not process this mail because no application '.
-          'knows how to handle it. Check that the address you sent it to is '.
-          'correct.'.
-          "\n\n".
-          '(No concrete, enabled subclass of PhabricatorMailReceiver can '.
-          'accept this mail.)'));
-    }
-
-    if (count($accept) > 1) {
-      $names = implode(', ', array_keys($accept));
-      throw new PhabricatorMetaMTAReceivedMailProcessingException(
-        MetaMTAReceivedMailStatus::STATUS_ABUNDANT_RECEIVERS,
-        pht(
-          'Phabricator is not able to process this mail because more than '.
-          'one application is willing to accept it, creating ambiguity. '.
-          'Mail needs to be accepted by exactly one receiving application.'.
-          "\n\n".
-          'Accepting receivers: %s.',
-          $names));
-    }
-
-    return head($accept);
-  }
-
   private function sendExceptionMail(
     Exception $ex,
     PhabricatorUser $viewer = null) {
@@ -432,6 +498,76 @@ EOBODY
       array(
         'id' => $this->getID(),
       ));
+  }
+
+  public function newFromAddress() {
+    $raw_from = $this->getHeader('From');
+
+    if (strlen($raw_from)) {
+      return new PhutilEmailAddress($raw_from);
+    }
+
+    return null;
+  }
+
+  private function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
+  /**
+   * Identify the sender's user account for a piece of received mail.
+   *
+   * Note that this method does not validate that the sender is who they say
+   * they are, just that they've presented some credential which corresponds
+   * to a recognizable user.
+   */
+  private function loadSender() {
+    $viewer = $this->getViewer();
+
+    // Try to identify the user based on their "From" address.
+    $from_address = $this->newFromAddress();
+    if ($from_address) {
+      $user = id(new PhabricatorPeopleQuery())
+        ->setViewer($viewer)
+        ->withEmails(array($from_address->getAddress()))
+        ->executeOne();
+      if ($user) {
+        return $user;
+      }
+    }
+
+    return null;
+  }
+
+  private function validateSender(PhabricatorUser $sender) {
+    $failure_reason = null;
+    if ($sender->getIsDisabled()) {
+      $failure_reason = pht(
+        'Your account ("%s") is disabled, so you can not interact with '.
+        'Phabricator over email.',
+        $sender->getUsername());
+    } else if ($sender->getIsStandardUser()) {
+      if (!$sender->getIsApproved()) {
+        $failure_reason = pht(
+          'Your account ("%s") has not been approved yet. You can not '.
+          'interact with Phabricator over email until your account is '.
+          'approved.',
+          $sender->getUsername());
+      } else if (PhabricatorUserEmail::isEmailVerificationRequired() &&
+               !$sender->getIsEmailVerified()) {
+        $failure_reason = pht(
+          'You have not verified the email address for your account ("%s"). '.
+          'You must verify your email address before you can interact '.
+          'with Phabricator over email.',
+          $sender->getUsername());
+      }
+    }
+
+    if ($failure_reason) {
+      throw new PhabricatorMetaMTAReceivedMailProcessingException(
+        MetaMTAReceivedMailStatus::STATUS_DISABLED_SENDER,
+        $failure_reason);
+    }
   }
 
 }

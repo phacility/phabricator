@@ -25,7 +25,7 @@ final class PhabricatorNotificationPanelController
 
       $notifications_view = $builder->buildView();
       $content = $notifications_view->render();
-      $clear_uri->setQueryParam(
+      $clear_uri->replaceQueryParam(
         'chronoKey',
         head($stories)->getChronologicalKey());
     } else {

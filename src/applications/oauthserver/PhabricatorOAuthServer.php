@@ -256,8 +256,8 @@ final class PhabricatorOAuthServer extends Phobject {
 
     // Any query parameters present in the first URI must be exactly present
     // in the second URI.
-    $need_params = $primary_uri->getQueryParams();
-    $have_params = $secondary_uri->getQueryParams();
+    $need_params = $primary_uri->getQueryParamsAsMap();
+    $have_params = $secondary_uri->getQueryParamsAsMap();
 
     foreach ($need_params as $key => $value) {
       if (!array_key_exists($key, $have_params)) {

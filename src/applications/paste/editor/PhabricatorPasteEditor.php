@@ -41,7 +41,7 @@ final class PhabricatorPasteEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.paste.subject-prefix');
+    return pht('[Paste]');
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {

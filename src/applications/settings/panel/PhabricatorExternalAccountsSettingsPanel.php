@@ -11,6 +11,10 @@ final class PhabricatorExternalAccountsSettingsPanel
     return pht('External Accounts');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-users';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
@@ -37,27 +41,16 @@ final class PhabricatorExternalAccountsSettingsPanel
       ->setUser($viewer)
       ->setNoDataString(pht('You have no linked accounts.'));
 
-    $login_accounts = 0;
-    foreach ($accounts as $account) {
-      if ($account->isUsableForLogin()) {
-        $login_accounts++;
-      }
-    }
-
     foreach ($accounts as $account) {
       $item = new PHUIObjectItemView();
 
-      $provider = idx($providers, $account->getProviderKey());
-      if ($provider) {
-        $item->setHeader($provider->getProviderName());
-        $can_unlink = $provider->shouldAllowAccountUnlink();
-        if (!$can_unlink) {
-          $item->addAttribute(pht('Permanently Linked'));
-        }
-      } else {
-        $item->setHeader(
-          pht('Unknown Account ("%s")', $account->getProviderKey()));
-        $can_unlink = true;
+      $config = $account->getProviderConfig();
+      $provider = $config->getProvider();
+
+      $item->setHeader($provider->getProviderName());
+      $can_unlink = $provider->shouldAllowAccountUnlink();
+      if (!$can_unlink) {
+        $item->addAttribute(pht('Permanently Linked'));
       }
 
       $can_login = $account->isUsableForLogin();
@@ -68,14 +61,12 @@ final class PhabricatorExternalAccountsSettingsPanel
             'account provider).'));
       }
 
-      $can_unlink = $can_unlink && (!$can_login || ($login_accounts > 1));
-
-      $can_refresh = $provider && $provider->shouldAllowAccountRefresh();
+      $can_refresh = $provider->shouldAllowAccountRefresh();
       if ($can_refresh) {
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-refresh')
-            ->setHref('/auth/refresh/'.$account->getProviderKey().'/'));
+            ->setHref('/auth/refresh/'.$config->getID().'/'));
       }
 
       $item->addAction(
@@ -83,7 +74,7 @@ final class PhabricatorExternalAccountsSettingsPanel
           ->setIcon('fa-times')
           ->setWorkflow(true)
           ->setDisabled(!$can_unlink)
-          ->setHref('/auth/unlink/'.$account->getProviderKey().'/'));
+          ->setHref('/auth/unlink/'.$account->getID().'/'));
 
       if ($provider) {
         $provider->willRenderLinkedAccount($viewer, $item, $account);
@@ -99,28 +90,41 @@ final class PhabricatorExternalAccountsSettingsPanel
       ->setNoDataString(
         pht('Your account is linked with all available providers.'));
 
-    $accounts = mpull($accounts, null, 'getProviderKey');
+    $configs = id(new PhabricatorAuthProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withIsEnabled(true)
+      ->execute();
+    $configs = msort($configs, 'getSortVector');
 
-    $providers = PhabricatorAuthProvider::getAllEnabledProviders();
-    $providers = msort($providers, 'getProviderName');
-    foreach ($providers as $key => $provider) {
-      if (isset($accounts[$key])) {
-        continue;
-      }
+    $account_map = mgroup($accounts, 'getProviderConfigPHID');
+
+
+    foreach ($configs as $config) {
+      $provider = $config->getProvider();
 
       if (!$provider->shouldAllowAccountLink()) {
         continue;
       }
 
-      $link_uri = '/auth/link/'.$provider->getProviderKey().'/';
+      // Don't show the user providers they already have linked.
+      if (isset($account_map[$config->getPHID()])) {
+        continue;
+      }
+
+      $link_uri = '/auth/link/'.$config->getID().'/';
+
+      $link_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-link')
+        ->setHref($link_uri)
+        ->setColor(PHUIButtonView::GREY)
+        ->setText(pht('Link External Account'));
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader($provider->getProviderName())
+        ->setHeader($config->getDisplayName())
         ->setHref($link_uri)
-        ->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-link')
-            ->setHref($link_uri));
+        ->setImageIcon($config->newIconView())
+        ->setSideColumn($link_button);
 
       $linkable->addItem($item);
     }

@@ -1,0 +1,19 @@
+CREATE TABLE {$NAMESPACE}_auth.auth_factorprovidertransaction (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  authorPHID VARBINARY(64) NOT NULL,
+  objectPHID VARBINARY(64) NOT NULL,
+  viewPolicy VARBINARY(64) NOT NULL,
+  editPolicy VARBINARY(64) NOT NULL,
+  commentPHID VARBINARY(64) DEFAULT NULL,
+  commentVersion INT UNSIGNED NOT NULL,
+  transactionType VARCHAR(32) NOT NULL,
+  oldValue LONGTEXT NOT NULL,
+  newValue LONGTEXT NOT NULL,
+  contentSource LONGTEXT NOT NULL,
+  metadata LONGTEXT NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE {$COLLATE_TEXT};

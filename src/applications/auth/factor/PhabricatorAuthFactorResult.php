@@ -5,9 +5,12 @@ final class PhabricatorAuthFactorResult
 
   private $answeredChallenge;
   private $isWait = false;
+  private $isError = false;
+  private $isContinue = false;
   private $errorMessage;
   private $value;
   private $issuedChallenges = array();
+  private $icon;
 
   public function setAnsweredChallenge(PhabricatorAuthChallenge $challenge) {
     if (!$challenge->getIsAnsweredChallenge()) {
@@ -44,6 +47,24 @@ final class PhabricatorAuthFactorResult
     return $this->isWait;
   }
 
+  public function setIsError($is_error) {
+    $this->isError = $is_error;
+    return $this;
+  }
+
+  public function getIsError() {
+    return $this->isError;
+  }
+
+  public function setIsContinue($is_continue) {
+    $this->isContinue = $is_continue;
+    return $this;
+  }
+
+  public function getIsContinue() {
+    return $this->isContinue;
+  }
+
   public function setErrorMessage($error_message) {
     $this->errorMessage = $error_message;
     return $this;
@@ -70,6 +91,15 @@ final class PhabricatorAuthFactorResult
 
   public function getIssuedChallenges() {
     return $this->issuedChallenges;
+  }
+
+  public function setIcon(PHUIIconView $icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  public function getIcon() {
+    return $this->icon;
   }
 
 }

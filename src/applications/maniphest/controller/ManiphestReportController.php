@@ -74,8 +74,6 @@ final class ManiphestReportController extends ManiphestController {
     $table = new ManiphestTransaction();
     $conn = $table->establishConnection('r');
 
-    $joins = '';
-    $create_joins = '';
     if ($project_phid) {
       $joins = qsprintf(
         $conn,
@@ -91,6 +89,9 @@ final class ManiphestReportController extends ManiphestController {
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         $project_phid);
+    } else {
+      $joins = qsprintf($conn, '');
+      $create_joins = qsprintf($conn, '');
     }
 
     $data = queryfx_all(

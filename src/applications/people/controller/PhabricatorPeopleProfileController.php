@@ -70,39 +70,52 @@ abstract class PhabricatorPeopleProfileController
     $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
     $profile_title = $profile->getDisplayTitle();
 
-    $roles = array();
+
+    $tag = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_SHADE);
+
+    $tags = array();
     if ($user->getIsAdmin()) {
-      $roles[] = pht('Administrator');
-    }
-    if ($user->getIsDisabled()) {
-      $roles[] = pht('Disabled');
-    }
-    if (!$user->getIsApproved()) {
-      $roles[] = pht('Not Approved');
-    }
-    if ($user->getIsSystemAgent()) {
-      $roles[] = pht('Bot');
-    }
-    if ($user->getIsMailingList()) {
-      $roles[] = pht('Mailing List');
-    }
-    if (!$user->getIsEmailVerified()) {
-      $roles[] = pht('Email Not Verified');
+      $tags[] = id(clone $tag)
+        ->setName(pht('Administrator'))
+        ->setColor('blue');
     }
 
-    $tag = null;
-    if ($roles) {
-      $tag = id(new PHUITagView())
-        ->setName(implode(', ', $roles))
-        ->addClass('project-view-header-tag')
-        ->setType(PHUITagView::TYPE_SHADE);
+    // "Disabled" gets a stronger status tag below.
+
+    if (!$user->getIsApproved()) {
+      $tags[] = id(clone $tag)
+        ->setName('Not Approved')
+        ->setColor('yellow');
+    }
+
+    if ($user->getIsSystemAgent()) {
+      $tags[] = id(clone $tag)
+        ->setName(pht('Bot'))
+        ->setColor('orange');
+    }
+
+    if ($user->getIsMailingList()) {
+      $tags[] = id(clone $tag)
+        ->setName(pht('Mailing List'))
+        ->setColor('orange');
+    }
+
+    if (!$user->getIsEmailVerified()) {
+      $tags[] = id(clone $tag)
+        ->setName(pht('Email Not Verified'))
+        ->setColor('violet');
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(array($user->getFullName(), $tag))
+      ->setHeader($user->getFullName())
       ->setImage($picture)
       ->setProfileHeader(true)
       ->addClass('people-profile-header');
+
+    foreach ($tags as $tag) {
+      $header->addTag($tag);
+    }
 
     require_celerity_resource('project-view-css');
 

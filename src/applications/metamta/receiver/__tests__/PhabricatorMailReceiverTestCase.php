@@ -41,4 +41,30 @@ final class PhabricatorMailReceiverTestCase extends PhabricatorTestCase {
     }
   }
 
+  public function testReservedAddresses() {
+    $default_address = id(new PhabricatorMailEmailEngine())
+      ->newDefaultEmailAddress();
+
+    $void_address = id(new PhabricatorMailEmailEngine())
+      ->newVoidEmailAddress();
+
+    $map = array(
+      'alincoln@example.com' => false,
+      'sysadmin@example.com' => true,
+      'hostmaster@example.com' => true,
+      '"Walter Ebmaster" <webmaster@example.com>' => true,
+      (string)$default_address => true,
+      (string)$void_address => true,
+    );
+
+    foreach ($map as $raw_address => $expect) {
+      $address = new PhutilEmailAddress($raw_address);
+
+      $this->assertEqual(
+        $expect,
+        PhabricatorMailUtil::isReservedAddress($address),
+        pht('Reserved: %s', $raw_address));
+    }
+  }
+
 }

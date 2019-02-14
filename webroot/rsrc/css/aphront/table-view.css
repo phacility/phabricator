@@ -45,14 +45,18 @@
   background: inherit;
 }
 
-.aphront-table-view th {
+.aphront-table-view th,
+.aphront-table-view td.header {
   font-weight: bold;
   white-space: nowrap;
   color: {$bluetext};
-  text-shadow: 0 1px 0 white;
   font-weight: bold;
-  border-bottom: 1px solid {$thinblueborder};
+  text-shadow: 0 1px 0 white;
   background-color: {$lightbluebackground};
+}
+
+.aphront-table-view th {
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 th.aphront-table-view-sortable-selected {
@@ -74,12 +78,8 @@ th.aphront-table-view-sortable-selected {
 }
 
 .aphront-table-view td.header {
-  padding: 4px 8px;
-  white-space: nowrap;
   text-align: right;
-  color: {$bluetext};
-  font-weight: bold;
-  vertical-align: top;
+  border-right: 1px solid {$thinblueborder};
 }
 
 .aphront-table-view td {

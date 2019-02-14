@@ -95,7 +95,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
   private function buildLoginValidateResponse(PhabricatorUser $user) {
     $validate_uri = new PhutilURI($this->getApplicationURI('validate/'));
-    $validate_uri->setQueryParam('expect', $user->getUsername());
+    $validate_uri->replaceQueryParam('expect', $user->getUsername());
 
     return id(new AphrontRedirectResponse())->setURI((string)$validate_uri);
   }
@@ -213,18 +213,18 @@ abstract class PhabricatorAuthController extends PhabricatorController {
       return array($account, $provider, $response);
     }
 
-    $provider = PhabricatorAuthProvider::getEnabledProviderByKey(
-      $account->getProviderKey());
-
-    if (!$provider) {
+    $config = $account->getProviderConfig();
+    if (!$config->getIsEnabled()) {
       $response = $this->renderError(
         pht(
-          'The account you are attempting to register with uses a nonexistent '.
-          'or disabled authentication provider (with key "%s"). An '.
-          'administrator may have recently disabled this provider.',
-          $account->getProviderKey()));
+          'The account you are attempting to register with uses a disabled '.
+          'authentication provider ("%s"). An administrator may have '.
+          'recently disabled this provider.',
+          $config->getDisplayName()));
       return array($account, $provider, $response);
     }
+
+    $provider = $config->getProvider();
 
     return array($account, $provider, null);
   }

@@ -27,7 +27,7 @@ final class PhabricatorFileEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.files.subject-prefix');
+    return pht('[File]');
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {

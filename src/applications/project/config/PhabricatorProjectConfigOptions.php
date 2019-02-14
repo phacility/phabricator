@@ -83,6 +83,34 @@ EOTEXT
 
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
+
+    $subtype_type = 'projects.subtypes';
+    $subtype_default_key = PhabricatorEditEngineSubtype::SUBTYPE_DEFAULT;
+    $subtype_example = array(
+      array(
+        'key' => $subtype_default_key,
+        'name' => pht('Project'),
+      ),
+      array(
+        'key' => 'team',
+        'name' => pht('Team'),
+      ),
+    );
+    $subtype_example = id(new PhutilJSON())->encodeAsList($subtype_example);
+
+    $subtype_default = array(
+      array(
+        'key' => $subtype_default_key,
+        'name' => pht('Project'),
+      ),
+    );
+
+    $subtype_description = $this->deformat(pht(<<<EOTEXT
+Allows you to define project subtypes. For a more detailed description of
+subtype configuration, see @{config:maniphest.subtypes}.
+EOTEXT
+      ));
+
     return array(
       $this->newOption('projects.custom-field-definitions', 'wild', array())
         ->setSummary(pht('Custom Projects fields.'))
@@ -102,6 +130,11 @@ EOTEXT
       $this->newOption('projects.colors', $colors_type, $default_colors)
         ->setSummary(pht('Adjust project colors.'))
         ->setDescription($colors_description),
+      $this->newOption('projects.subtypes', $subtype_type, $subtype_default)
+        ->setSummary(pht('Define project subtypes.'))
+        ->setDescription($subtype_description)
+        ->addExample($subtype_example, pht('Simple Subtypes')),
+
     );
   }
 

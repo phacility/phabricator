@@ -16,8 +16,10 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
   protected $accountURI;
   protected $profileImagePHID;
   protected $properties = array();
+  protected $providerConfigPHID;
 
   private $profileImageFile = self::ATTACHABLE;
+  private $providerConfig = self::ATTACHABLE;
 
   public function getProfileImageFile() {
     return $this->assertAttached($this->profileImageFile);
@@ -65,13 +67,6 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
     ) + parent::getConfiguration();
   }
 
-  public function getPhabricatorUser() {
-    $tmp_usr = id(new PhabricatorUser())
-      ->makeEphemeral()
-      ->setPHID($this->getPHID());
-    return $tmp_usr;
-  }
-
   public function getProviderKey() {
     return $this->getAccountType().':'.$this->getAccountDomain();
   }
@@ -93,13 +88,12 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
   }
 
   public function isUsableForLogin() {
-    $key = $this->getProviderKey();
-    $provider = PhabricatorAuthProvider::getEnabledProviderByKey($key);
-
-    if (!$provider) {
+    $config = $this->getProviderConfig();
+    if (!$config->getIsEnabled()) {
       return false;
     }
 
+    $provider = $config->getProvider();
     if (!$provider->shouldAllowLogin()) {
       return false;
     }
@@ -125,6 +119,14 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
     return idx($map, $type, pht('"%s" User', $type));
   }
 
+  public function attachProviderConfig(PhabricatorAuthProviderConfig $config) {
+    $this->providerConfig = $config;
+    return $this;
+  }
+
+  public function getProviderConfig() {
+    return $this->assertAttached($this->providerConfig);
+  }
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

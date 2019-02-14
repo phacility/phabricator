@@ -41,7 +41,7 @@ final class PhabricatorProjectColumnHideController
     $view_uri = $this->getApplicationURI('/board/'.$project_id.'/');
     $view_uri = new PhutilURI($view_uri);
     foreach ($request->getPassthroughRequestData() as $key => $value) {
-      $view_uri->setQueryParam($key, $value);
+      $view_uri->replaceQueryParam($key, $value);
     }
 
     if ($column->isDefaultColumn()) {

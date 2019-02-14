@@ -2855,6 +2855,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
+    // See T13240. If this query raises policy exceptions, don't filter objects
+    // in the MySQL layer. We want them to reach the application layer so we
+    // can reject them and raise an exception.
+    if ($this->shouldRaisePolicyExceptions()) {
+      return null;
+    }
+
     $space_phids = array();
     $include_null = false;
 

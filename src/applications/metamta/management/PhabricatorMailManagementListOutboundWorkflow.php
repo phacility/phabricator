@@ -7,8 +7,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
     $this
       ->setName('list-outbound')
       ->setSynopsis(pht('List outbound messages sent by Phabricator.'))
-      ->setExamples(
-        '**list-outbound**')
+      ->setExamples('**list-outbound**')
       ->setArguments(
         array(
           array(
@@ -39,6 +38,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
       ->addColumn('id',      array('title' => pht('ID')))
       ->addColumn('encrypt', array('title' => pht('#')))
       ->addColumn('status',  array('title' => pht('Status')))
+      ->addColumn('type', array('title' => pht('Type')))
       ->addColumn('subject', array('title' => pht('Subject')));
 
     foreach (array_reverse($mails) as $mail) {
@@ -48,6 +48,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
         'id'      => $mail->getID(),
         'encrypt' => ($mail->getMustEncrypt() ? '#' : ' '),
         'status'  => PhabricatorMailOutboundStatus::getStatusName($status),
+        'type' => $mail->getMessageType(),
         'subject' => $mail->getSubject(),
       ));
     }

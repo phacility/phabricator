@@ -21,7 +21,7 @@ final class PhabricatorMetaMTAMailgunReceiveController
       array(
         'inbound' => true,
         'types' => array(
-          PhabricatorMailImplementationMailgunAdapter::ADAPTERTYPE,
+          PhabricatorMailMailgunAdapter::ADAPTERTYPE,
         ),
       ));
     foreach ($mailers as $mailer) {

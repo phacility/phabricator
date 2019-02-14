@@ -54,8 +54,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       return new Aphront404Response();
     }
 
-    $uri = $request->getRequestURI();
-    $uri->setQueryParams(array());
+    $uri = new PhutilURI($request->getPath());
 
     $new = $request->getStr('new');
     $edit = $request->getInt('edit');
@@ -261,8 +260,12 @@ final class PhabricatorMetaMTAApplicationEmailPanel
           ->setName($config_default)
           ->setLimit(1)
           ->setValue($v_default)
-          ->setCaption(pht(
-            'Used if the "From:" address does not map to a known account.')));
+          ->setCaption(
+            pht(
+              'Used if the "From:" address does not map to a user account. '.
+              'Setting a default author will allow anyone on the public '.
+              'internet to create objects in Phabricator by sending email to '.
+              'this address.')));
 
     if ($is_new) {
       $title = pht('New Address');
@@ -369,9 +372,17 @@ final class PhabricatorMetaMTAApplicationEmailPanel
         $email_space = null;
       }
 
+      $default_author_phid = $email->getDefaultAuthorPHID();
+      if (!$default_author_phid) {
+        $default_author = phutil_tag('em', array(), pht('None'));
+      } else {
+        $default_author = $viewer->renderHandle($default_author_phid);
+      }
+
       $rows[] = array(
         $email_space,
         $email->getAddress(),
+        $default_author,
         $button_edit,
         $button_remove,
       );
@@ -383,11 +394,13 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       array(
         pht('Space'),
         pht('Email'),
+        pht('Default'),
         pht('Edit'),
         pht('Delete'),
       ));
     $table->setColumnClasses(
       array(
+        '',
         '',
         'wide',
         'action',
@@ -397,6 +410,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
     $table->setColumnVisibility(
       array(
         PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($viewer),
+        true,
         true,
         $is_edit,
         $is_edit,

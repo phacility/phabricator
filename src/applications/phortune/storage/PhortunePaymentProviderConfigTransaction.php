@@ -17,10 +17,6 @@ final class PhortunePaymentProviderConfigTransaction
     return PhortunePaymentProviderPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return null;
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

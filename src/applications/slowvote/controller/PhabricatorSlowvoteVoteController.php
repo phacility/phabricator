@@ -37,6 +37,19 @@ final class PhabricatorSlowvoteVoteController
     $method = $poll->getMethod();
     $is_plurality = ($method == PhabricatorSlowvotePoll::METHOD_PLURALITY);
 
+    if (!$votes) {
+      if ($is_plurality) {
+        $message = pht('You must vote for something.');
+      } else {
+        $message = pht('You must vote for at least one option.');
+      }
+
+      return $this->newDialog()
+        ->setTitle(pht('Stand For Something'))
+        ->appendParagraph($message)
+        ->addCancelButton($poll->getURI());
+    }
+
     if ($is_plurality && count($votes) > 1) {
       throw new Exception(
         pht('In this poll, you may only vote for one option.'));
@@ -52,23 +65,39 @@ final class PhabricatorSlowvoteVoteController
       }
     }
 
-    foreach ($old_votes as $old_vote) {
-      if (!idx($votes, $old_vote->getOptionID(), false)) {
+    $poll->openTransaction();
+      $poll->beginReadLocking();
+
+      $poll->reload();
+
+      $old_votes = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
+        'pollID = %d AND authorPHID = %s',
+        $poll->getID(),
+        $viewer->getPHID());
+      $old_votes = mpull($old_votes, null, 'getOptionID');
+
+      foreach ($old_votes as $old_vote) {
+        if (idx($votes, $old_vote->getOptionID())) {
+          continue;
+        }
+
         $old_vote->delete();
       }
-    }
 
-    foreach ($votes as $vote) {
-      if (idx($old_votes, $vote, false)) {
-        continue;
+      foreach ($votes as $vote) {
+        if (idx($old_votes, $vote)) {
+          continue;
+        }
+
+        id(new PhabricatorSlowvoteChoice())
+          ->setAuthorPHID($viewer->getPHID())
+          ->setPollID($poll->getID())
+          ->setOptionID($vote)
+          ->save();
       }
 
-      id(new PhabricatorSlowvoteChoice())
-        ->setAuthorPHID($viewer->getPHID())
-        ->setPollID($poll->getID())
-        ->setOptionID($vote)
-        ->save();
-    }
+      $poll->endReadLocking();
+    $poll->saveTransaction();
 
     return id(new AphrontRedirectResponse())
       ->setURI($poll->getURI());

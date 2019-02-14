@@ -83,6 +83,27 @@ final class PhabricatorAuthProviderConfig
     return $this->provider;
   }
 
+  public function getURI() {
+    return '/auth/config/view/'.$this->getID().'/';
+  }
+
+  public function getObjectName() {
+    return pht('Auth Provider %d', $this->getID());
+  }
+
+  public function getDisplayName() {
+    return $this->getProvider()->getProviderName();
+  }
+
+  public function getSortVector() {
+    return id(new PhutilSortVector())
+      ->addString($this->getDisplayName());
+  }
+
+  public function newIconView() {
+    return $this->getProvider()->newIconView();
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

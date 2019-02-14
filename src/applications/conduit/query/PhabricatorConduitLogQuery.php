@@ -6,6 +6,8 @@ final class PhabricatorConduitLogQuery
   private $callerPHIDs;
   private $methods;
   private $methodStatuses;
+  private $epochMin;
+  private $epochMax;
 
   public function withCallerPHIDs(array $phids) {
     $this->callerPHIDs = $phids;
@@ -19,6 +21,12 @@ final class PhabricatorConduitLogQuery
 
   public function withMethodStatuses(array $statuses) {
     $this->methodStatuses = $statuses;
+    return $this;
+  }
+
+  public function withEpochBetween($epoch_min, $epoch_max) {
+    $this->epochMin = $epoch_min;
+    $this->epochMax = $epoch_max;
     return $this;
   }
 
@@ -70,6 +78,20 @@ final class PhabricatorConduitLogQuery
         $conn,
         'method IN (%Ls)',
         $method_names);
+    }
+
+    if ($this->epochMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'dateCreated >= %d',
+        $this->epochMin);
+    }
+
+    if ($this->epochMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'dateCreated <= %d',
+        $this->epochMax);
     }
 
     return $where;

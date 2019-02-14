@@ -150,15 +150,6 @@ abstract class PhabricatorModularTransaction
     return parent::getActionStrength();
   }
 
-  public function getTitleForMail() {
-    $old_target = $this->getRenderingTarget();
-    $new_target = self::TARGET_TEXT;
-    $this->setRenderingTarget($new_target);
-    $title = $this->getTitle();
-    $this->setRenderingTarget($old_target);
-    return $title;
-  }
-
   /* final */ public function getTitleForFeed() {
     $title = $this->getTransactionImplementation()->getTitleForFeed();
     if ($title !== null) {

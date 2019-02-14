@@ -140,12 +140,8 @@ EOTEXT
         ->setTransactionType(
           PhabricatorOwnersPackageAuditingTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
-        ->setValue($object->getAuditingEnabled())
-        ->setOptions(
-          array(
-            '' => pht('Disabled'),
-            '1' => pht('Enabled'),
-          )),
+        ->setValue($object->getAuditingState())
+        ->setOptions(PhabricatorOwnersAuditRule::newSelectControlMap()),
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))

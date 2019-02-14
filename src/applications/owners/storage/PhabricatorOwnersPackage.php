@@ -13,7 +13,6 @@ final class PhabricatorOwnersPackage
     PhabricatorNgramsInterface {
 
   protected $name;
-  protected $auditingEnabled;
   protected $autoReview;
   protected $description;
   protected $status;
@@ -21,6 +20,7 @@ final class PhabricatorOwnersPackage
   protected $editPolicy;
   protected $dominion;
   protected $properties = array();
+  protected $auditingState;
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -55,7 +55,7 @@ final class PhabricatorOwnersPackage
       PhabricatorOwnersDefaultEditCapability::CAPABILITY);
 
     return id(new PhabricatorOwnersPackage())
-      ->setAuditingEnabled(0)
+      ->setAuditingState(PhabricatorOwnersAuditRule::AUDITING_NONE)
       ->setAutoReview(self::AUTOREVIEW_NONE)
       ->setDominion(self::DOMINION_STRONG)
       ->setViewPolicy($view_policy)
@@ -126,7 +126,7 @@ final class PhabricatorOwnersPackage
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort',
         'description' => 'text',
-        'auditingEnabled' => 'bool',
+        'auditingState' => 'text32',
         'status' => 'text32',
         'autoReview' => 'text32',
         'dominion' => 'text32',
@@ -564,6 +564,10 @@ final class PhabricatorOwnersPackage
     return '/owners/package/'.$this->getID().'/';
   }
 
+  public function newAuditingRule() {
+    return PhabricatorOwnersAuditRule::newFromState($this->getAuditingState());
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -720,17 +724,11 @@ final class PhabricatorOwnersPackage
       'label' => $review_label,
     );
 
-    if ($this->getAuditingEnabled()) {
-      $audit_value = 'audit';
-      $audit_label = pht('Auditing Enabled');
-    } else {
-      $audit_value = 'none';
-      $audit_label = pht('No Auditing');
-    }
+    $audit_rule = $this->newAuditingRule();
 
     $audit = array(
-      'value' => $audit_value,
-      'label' => $audit_label,
+      'value' => $audit_rule->getKey(),
+      'label' => $audit_rule->getDisplayName(),
     );
 
     $dominion_value = $this->getDominion();

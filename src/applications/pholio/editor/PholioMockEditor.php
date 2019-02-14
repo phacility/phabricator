@@ -139,7 +139,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.pholio.subject-prefix');
+    return pht('[Pholio]');
   }
 
   public function getMailTagsMap() {

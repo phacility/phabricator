@@ -437,7 +437,7 @@ final class PhabricatorAuditEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
+    return pht('[Diffusion]');
   }
 
   protected function getMailThreadID(PhabricatorLiskDAO $object) {

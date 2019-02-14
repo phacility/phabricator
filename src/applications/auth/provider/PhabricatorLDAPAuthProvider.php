@@ -112,6 +112,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
         id(new AphrontFormTextControl())
           ->setLabel(pht('LDAP Username'))
           ->setName('ldap_username')
+          ->setAutofocus(true)
           ->setValue($v_user)
           ->setError($e_user))
       ->appendChild(

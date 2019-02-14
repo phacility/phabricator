@@ -10,7 +10,9 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
   protected $tokenExpires;
   protected $tokenCode;
   protected $userPHID;
-  protected $properties;
+  protected $properties = array();
+
+  private $isNew = false;
 
   protected function getConfiguration() {
     return array(
@@ -114,6 +116,14 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
     return $this->getTemporaryTokenProperty('force-full-session', false);
   }
 
+  public function setIsNewTemporaryToken($is_new) {
+    $this->isNew = $is_new;
+    return $this;
+  }
+
+  public function getIsNewTemporaryToken() {
+    return $this->isNew;
+  }
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

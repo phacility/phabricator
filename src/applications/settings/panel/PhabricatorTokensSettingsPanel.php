@@ -10,6 +10,10 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
     return pht('Temporary Tokens');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-ticket';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }

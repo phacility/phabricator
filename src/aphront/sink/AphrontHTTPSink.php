@@ -5,13 +5,21 @@
  * Normally this is just @{class:AphrontPHPHTTPSink}, which uses "echo" and
  * "header()" to emit responses.
  *
- * Mostly, this class allows us to do install security or metrics hooks in the
- * output pipeline.
- *
  * @task write  Writing Response Components
  * @task emit   Emitting the Response
  */
 abstract class AphrontHTTPSink extends Phobject {
+
+  private $showStackTraces = false;
+
+  final public function setShowStackTraces($show_stack_traces) {
+    $this->showStackTraces = $show_stack_traces;
+    return $this;
+  }
+
+  final public function getShowStackTraces() {
+    return $this->showStackTraces;
+  }
 
 
 /* -(  Writing Response Components  )---------------------------------------- */
@@ -102,6 +110,17 @@ abstract class AphrontHTTPSink extends Phobject {
     // prefer to handle exceptions before we emit the response status or any
     // HTTP headers.
     $data = $response->getContentIterator();
+
+    // This isn't an exceptionally clean separation of concerns, but we need
+    // to add CSP headers for all response types (including both web pages
+    // and dialogs) and can't determine the correct CSP until after we render
+    // the page (because page elements like Recaptcha may add CSP rules).
+    $static = CelerityAPI::getStaticResourceResponse();
+    foreach ($static->getContentSecurityPolicyURIMap() as $kind => $uris) {
+      foreach ($uris as $uri) {
+        $response->addContentSecurityPolicyURI($kind, $uri);
+      }
+    }
 
     $all_headers = array_merge(
       $response->getHeaders(),

@@ -11,6 +11,10 @@ final class PhabricatorEmailAddressesSettingsPanel
     return pht('Email Addresses');
   }
 
+  public function getPanelMenuIcon() {
+    return 'fa-at';
+  }
+
   public function getPanelGroupKey() {
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }
@@ -27,8 +31,7 @@ final class PhabricatorEmailAddressesSettingsPanel
     $user = $this->getUser();
     $editable = PhabricatorEnv::getEnvConfig('account.editable');
 
-    $uri = $request->getRequestURI();
-    $uri->setQueryParams(array());
+    $uri = new PhutilURI($request->getPath());
 
     if ($editable) {
       $new = $request->getStr('new');

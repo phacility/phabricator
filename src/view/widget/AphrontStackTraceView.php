@@ -10,7 +10,6 @@ final class AphrontStackTraceView extends AphrontView {
   }
 
   public function render() {
-    $user = $this->getUser();
     $trace = $this->trace;
 
     $libraries = PhutilBootloader::getInstance()->getAllLibraries();
