@@ -1173,7 +1173,7 @@ final class DifferentialChangesetParser extends Phobject {
     }
     $range_len = min($range_len, $rows - $range_start);
 
-    list($gaps, $mask, $depths) = $this->calculateGapsMaskAndDepths(
+    list($gaps, $mask) = $this->calculateGapsAndMask(
       $mask_force,
       $feedback_mask,
       $range_start,
@@ -1181,8 +1181,7 @@ final class DifferentialChangesetParser extends Phobject {
 
     $renderer
       ->setGaps($gaps)
-      ->setMask($mask)
-      ->setDepths($depths);
+      ->setMask($mask);
 
     $html = $renderer->renderTextChange(
       $range_start,
@@ -1208,15 +1207,9 @@ final class DifferentialChangesetParser extends Phobject {
    * "show more"). The $mask returned is a sparsely populated dictionary
    * of $visible_line_number => true.
    *
-   * Depths - compute how indented any given line is. The $depths returned
-   * is a sparsely populated dictionary of $visible_line_number => $depth.
-   *
-   * This function also has the side effect of modifying member variable
-   * new such that tabs are normalized to spaces for each line of the diff.
-   *
-   * @return array($gaps, $mask, $depths)
+   * @return array($gaps, $mask)
    */
-  private function calculateGapsMaskAndDepths(
+  private function calculateGapsAndMask(
     $mask_force,
     $feedback_mask,
     $range_start,
@@ -1224,7 +1217,6 @@ final class DifferentialChangesetParser extends Phobject {
 
     $lines_context = $this->getLinesOfContext();
 
-    // Calculate gaps and mask first
     $gaps = array();
     $gap_start = 0;
     $in_gap = false;
@@ -1253,38 +1245,7 @@ final class DifferentialChangesetParser extends Phobject {
     $gaps = array_reverse($gaps);
     $mask = $base_mask;
 
-    // Time to calculate depth.
-    // We need to go backwards to properly indent whitespace in this code:
-    //
-    //   0: class C {
-    //   1:
-    //   1:   function f() {
-    //   2:
-    //   2:     return;
-    //   1:
-    //   1:   }
-    //   0:
-    //   0: }
-    //
-    $depths = array();
-    $last_depth = 0;
-    $range_end = $range_start + $range_len;
-    if (!isset($this->new[$range_end])) {
-      $range_end--;
-    }
-    for ($ii = $range_end; $ii >= $range_start; $ii--) {
-      // We need to expand tabs to process mixed indenting and to round
-      // correctly later.
-      $line = str_replace("\t", '  ', $this->new[$ii]['text']);
-      $trimmed = ltrim($line);
-      if ($trimmed != '') {
-        // We round down to flatten "/**" and " *".
-        $last_depth = floor((strlen($line) - strlen($trimmed)) / 2);
-      }
-      $depths[$ii] = $last_depth;
-    }
-
-    return array($gaps, $mask, $depths);
+    return array($gaps, $mask);
   }
 
   /**

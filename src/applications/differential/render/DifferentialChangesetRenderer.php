@@ -28,12 +28,12 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   private $originalNew;
   private $gaps;
   private $mask;
-  private $depths;
   private $originalCharacterEncoding;
   private $showEditAndReplyLinks;
   private $canMarkDone;
   private $objectOwnerPHID;
   private $highlightingDisabled;
+  private $scopeEngine;
 
   private $oldFile = false;
   private $newFile = false;
@@ -74,14 +74,6 @@ abstract class DifferentialChangesetRenderer extends Phobject {
 
   public function getIsUndershield() {
     return $this->isUndershield;
-  }
-
-  public function setDepths($depths) {
-    $this->depths = $depths;
-    return $this;
-  }
-  protected function getDepths() {
-    return $this->depths;
   }
 
   public function setMask($mask) {
@@ -676,6 +668,34 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     }
 
     return $views;
+  }
+
+
+  final protected function getScopeEngine() {
+    if (!$this->scopeEngine) {
+      $line_map = $this->getNewLineTextMap();
+
+      $scope_engine = id(new PhabricatorDiffScopeEngine())
+        ->setLineTextMap($line_map);
+
+      $this->scopeEngine = $scope_engine;
+    }
+
+    return $this->scopeEngine;
+  }
+
+  private function getNewLineTextMap() {
+    $new = $this->getNewLines();
+
+    $text_map = array();
+    foreach ($new as $new_line) {
+      if (!isset($new_line['line'])) {
+        continue;
+      }
+      $text_map[$new_line['line']] = $new_line['text'];
+    }
+
+    return $text_map;
   }
 
 }

@@ -3,6 +3,8 @@
 final class DifferentialChangesetTwoUpRenderer
   extends DifferentialChangesetHTMLRenderer {
 
+  private $newOffsetMap;
+
   public function isOneUpRenderer() {
     return false;
   }
@@ -66,8 +68,11 @@ final class DifferentialChangesetTwoUpRenderer
     $new_render = $this->getNewRender();
     $original_left = $this->getOriginalOld();
     $original_right = $this->getOriginalNew();
-    $depths = $this->getDepths();
     $mask = $this->getMask();
+
+    $scope_engine = $this->getScopeEngine();
+
+    $offset_map = null;
 
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
@@ -87,16 +92,19 @@ final class DifferentialChangesetTwoUpRenderer
           $is_last_block = true;
         }
 
-        $context = null;
+        $context_text = null;
         $context_line = null;
-        if (!$is_last_block && $depths[$ii + $len]) {
-          for ($l = $ii + $len - 1; $l >= $ii; $l--) {
-            $line = $new_lines[$l]['text'];
-            if ($depths[$l] < $depths[$ii + $len] && trim($line) != '') {
-              $context = $new_render[$l];
-              $context_line = $new_lines[$l]['line'];
-              break;
+        if (!$is_last_block) {
+          $target_line = $new_lines[$ii + $len]['line'];
+          $context_line = $scope_engine->getScopeStart($target_line);
+          if ($context_line !== null) {
+            // The scope engine returns a line number in the file. We need
+            // to map that back to a display offset in the diff.
+            if (!$offset_map) {
+              $offset_map = $this->getNewLineToOffsetMap();
             }
+            $offset = $offset_map[$context_line];
+            $context_text = $new_render[$offset];
           }
         }
 
@@ -126,7 +134,7 @@ final class DifferentialChangesetTwoUpRenderer
                 'class' => 'show-context',
               ),
               // TODO: [HTML] Escaping model here isn't ideal.
-              phutil_safe_html($context)),
+              phutil_safe_html($context_text)),
           ));
 
         $html[] = $container;
@@ -384,6 +392,24 @@ final class DifferentialChangesetTwoUpRenderer
   public function getRowScaffoldForInline(PHUIDiffInlineCommentView $view) {
     return id(new PHUIDiffTwoUpInlineCommentRowScaffold())
       ->addInlineView($view);
+  }
+
+  private function getNewLineToOffsetMap() {
+    if ($this->newOffsetMap === null) {
+      $new = $this->getNewLines();
+
+      $map = array();
+      foreach ($new as $offset => $new_line) {
+        if ($new_line['line'] === null) {
+          continue;
+        }
+        $map[$new_line['line']] = $offset;
+      }
+
+      $this->newOffsetMap = $map;
+    }
+
+    return $this->newOffsetMap;
   }
 
 }
