@@ -97,6 +97,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             'PhabricatorAuthFactorProviderViewController',
           'message/(?P<id>[1-9]\d*)/' =>
             'PhabricatorAuthFactorProviderMessageController',
+          'challenge/status/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthChallengeStatusController',
         ),
 
         'message/' => array(

@@ -80,6 +80,14 @@ abstract class PhabricatorAuthFactor extends Phobject {
     return array();
   }
 
+  public function newChallengeStatusView(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $viewer,
+    PhabricatorAuthChallenge $challenge) {
+    return null;
+  }
+
   /**
    * Is this a factor which depends on the user's contact number?
    *
@@ -210,8 +218,6 @@ abstract class PhabricatorAuthFactor extends Phobject {
           get_class($this)));
     }
 
-    $result->setIssuedChallenges($challenges);
-
     return $result;
   }
 
@@ -241,8 +247,6 @@ abstract class PhabricatorAuthFactor extends Phobject {
           'PhabricatorAuthFactorResult',
           get_class($this)));
     }
-
-    $result->setIssuedChallenges($challenges);
 
     return $result;
   }
@@ -339,9 +343,18 @@ abstract class PhabricatorAuthFactor extends Phobject {
         ->setIcon('fa-commenting', 'green');
     }
 
-    return id(new PHUIFormTimerControl())
+    $control = id(new PHUIFormTimerControl())
       ->setIcon($icon)
       ->appendChild($error);
+
+    $status_challenge = $result->getStatusChallenge();
+    if ($status_challenge) {
+      $id = $status_challenge->getID();
+      $uri = "/auth/mfa/challenge/status/{$id}/";
+      $control->setUpdateURI($uri);
+    }
+
+    return $control;
   }
 
 
