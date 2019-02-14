@@ -211,10 +211,6 @@ final class PhabricatorEmailLoginController
           "Condolences on forgetting your password. You can use this ".
           "link to reset it:\n\n".
           "  %s\n\n".
-          "After you set a new password, consider writing it down on a ".
-          "sticky note and attaching it to your monitor so you don't ".
-          "forget again! Choosing a very short, easy-to-remember password ".
-          "like \"cat\" or \"1234\" might also help.\n\n".
           "Best Wishes,\nPhabricator\n",
           $uri);
 
