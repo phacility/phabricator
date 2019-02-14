@@ -14,6 +14,7 @@ final class PhabricatorTypeaheadTokenView
   private $inputName;
   private $value;
   private $tokenType = self::TYPE_OBJECT;
+  private $availabilityColor;
 
   public static function newFromTypeaheadResult(
     PhabricatorTypeaheadResult $result) {
@@ -39,6 +40,21 @@ final class PhabricatorTypeaheadTokenView
       $token->setTokenType(self::TYPE_DISABLED);
     } else {
       $token->setColor($handle->getTagColor());
+    }
+
+    $availability = $handle->getAvailability();
+    $color = null;
+    switch ($availability) {
+      case PhabricatorObjectHandle::AVAILABILITY_PARTIAL:
+        $color = PHUITagView::COLOR_ORANGE;
+        break;
+      case PhabricatorObjectHandle::AVAILABILITY_NONE:
+        $color = PHUITagView::COLOR_RED;
+        break;
+    }
+
+    if ($color !== null) {
+      $token->setAvailabilityColor($color);
     }
 
     return $token;
@@ -106,6 +122,15 @@ final class PhabricatorTypeaheadTokenView
     return 'a';
   }
 
+  public function setAvailabilityColor($availability_color) {
+    $this->availabilityColor = $availability_color;
+    return $this;
+  }
+
+  public function getAvailabilityColor() {
+    return $this->availabilityColor;
+  }
+
   protected function getTagAttributes() {
     $classes = array();
     $classes[] = 'jx-tokenizer-token';
@@ -139,20 +164,32 @@ final class PhabricatorTypeaheadTokenView
 
     $value = $this->getValue();
 
+    $availability = null;
+    $availability_color = $this->getAvailabilityColor();
+    if ($availability_color) {
+      $availability = phutil_tag(
+        'span',
+        array(
+          'class' => 'phui-tag-dot phui-tag-color-'.$availability_color,
+        ));
+    }
+
+    $icon_view = null;
     $icon = $this->getIcon();
     if ($icon) {
-      $value = array(
-        phutil_tag(
-          'span',
-          array(
-            'class' => 'phui-icon-view phui-font-fa '.$icon,
-          )),
-        $value,
-      );
+      $icon_view = phutil_tag(
+        'span',
+        array(
+          'class' => 'phui-icon-view phui-font-fa '.$icon,
+        ));
     }
 
     return array(
-      $value,
+      array(
+        $icon_view,
+        $availability,
+        $value,
+      ),
       phutil_tag(
         'input',
         array(
