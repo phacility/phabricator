@@ -57,6 +57,37 @@ final class HarbormasterBuildUnitMessageQuery
     return $where;
   }
 
+  protected function didFilterPage(array $messages) {
+    $indexes = array();
+    foreach ($messages as $message) {
+      $index = $message->getNameIndex();
+      if (strlen($index)) {
+        $indexes[$index] = $index;
+      }
+    }
+
+    if ($indexes) {
+      $map = HarbormasterString::newIndexMap($indexes);
+
+      foreach ($messages as $message) {
+        $index = $message->getNameIndex();
+
+        if (!strlen($index)) {
+          continue;
+        }
+
+        $name = idx($map, $index);
+        if ($name === null) {
+          $name = pht('Unknown Unit Message ("%s")', $index);
+        }
+
+        $message->setName($name);
+      }
+    }
+
+    return $messages;
+  }
+
   public function getQueryApplicationClass() {
     return 'PhabricatorHarbormasterApplication';
   }

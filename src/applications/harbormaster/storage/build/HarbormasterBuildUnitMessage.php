@@ -8,6 +8,7 @@ final class HarbormasterBuildUnitMessage
   protected $engine;
   protected $namespace;
   protected $name;
+  protected $nameIndex;
   protected $result;
   protected $duration;
   protected $properties = array();
@@ -132,6 +133,7 @@ final class HarbormasterBuildUnitMessage
         'engine' => 'text255',
         'namespace' => 'text255',
         'name' => 'text255',
+        'nameIndex' => 'bytes12',
         'result' => 'text32',
         'duration' => 'double?',
       ),
@@ -258,6 +260,33 @@ final class HarbormasterBuildUnitMessage
     );
 
     return implode("\0", $parts);
+  }
+
+  public function save() {
+    if ($this->nameIndex === null) {
+      $this->nameIndex = HarbormasterString::newIndex($this->getName());
+    }
+
+    // See T13088. While we're letting installs do online migrations to avoid
+    // downtime, don't populate the "name" column for new writes. New writes
+    // use the "HarbormasterString" table instead.
+    $old_name = $this->name;
+    $this->name = '';
+
+    $caught = null;
+    try {
+      $result = parent::save();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->name = $old_name;
+
+    if ($caught) {
+      throw $caught;
+    }
+
+    return $result;
   }
 
 
