@@ -406,9 +406,6 @@ abstract class DifferentialChangesetRenderer extends Phobject {
    *      important (e.g., generated code).
    *    - `"text"`: Force the text to be shown. This is probably only relevant
    *      when a file is not changed.
-   *    - `"whitespace"`: Force the text to be shown, and the diff to be
-   *      rendered with all whitespace shown. This is probably only relevant
-   *      when a file is changed only by altering whitespace.
    *    - `"none"`: Don't show the link (e.g., text not available).
    *
    * @param   string        Message explaining why the diff is hidden.

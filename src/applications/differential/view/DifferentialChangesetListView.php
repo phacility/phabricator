@@ -7,7 +7,6 @@ final class DifferentialChangesetListView extends AphrontView {
   private $references = array();
   private $inlineURI;
   private $renderURI = '/differential/changeset/';
-  private $whitespace;
   private $background;
   private $header;
   private $isStandalone;
@@ -100,11 +99,6 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
-  public function setWhitespace($whitespace) {
-    $this->whitespace = $whitespace;
-    return $this;
-  }
-
   public function setVsMap(array $vs_map) {
     $this->vsMap = $vs_map;
     return $this;
@@ -180,7 +174,6 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setRenderingRef($ref);
 
       $detail->setRenderURI($this->renderURI);
-      $detail->setWhitespace($this->whitespace);
       $detail->setRenderer($renderer);
 
       if ($this->getParser()) {
@@ -352,8 +345,7 @@ final class DifferentialChangesetListView extends AphrontView {
     $meta = array();
 
     $qparams = array(
-      'ref'         => $ref,
-      'whitespace'  => $this->whitespace,
+      'ref' => $ref,
     );
 
     if ($this->standaloneURI) {

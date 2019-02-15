@@ -367,7 +367,6 @@ abstract class DifferentialChangesetHTMLRenderer
     $reference = $this->getRenderingReference();
 
     if ($force !== 'text' &&
-        $force !== 'whitespace' &&
         $force !== 'none' &&
         $force !== 'default') {
       throw new Exception(
@@ -387,10 +386,6 @@ abstract class DifferentialChangesetHTMLRenderer
       'ref'   => $reference,
       'range' => $range,
     );
-
-    if ($force == 'whitespace') {
-      $meta['whitespace'] = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
-    }
 
     $content = array();
     $content[] = $message;

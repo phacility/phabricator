@@ -7,7 +7,6 @@ final class DifferentialHunkParser extends Phobject {
   private $intraLineDiffs;
   private $depthOnlyLines;
   private $visibleLinesMask;
-  private $whitespaceMode;
 
   /**
    * Get a map of lines on which hunks start, other than line 1. This
@@ -125,21 +124,6 @@ final class DifferentialHunkParser extends Phobject {
     return $this->depthOnlyLines;
   }
 
-  public function setWhitespaceMode($white_space_mode) {
-    $this->whitespaceMode = $white_space_mode;
-    return $this;
-  }
-
-  private function getWhitespaceMode() {
-    if ($this->whitespaceMode === null) {
-      throw new Exception(
-        pht(
-          'You must %s before accessing this data.',
-          'setWhitespaceMode'));
-    }
-    return $this->whitespaceMode;
-  }
-
   public function getIsDeleted() {
     foreach ($this->getNewLines() as $line) {
       if ($line) {
@@ -157,13 +141,6 @@ final class DifferentialHunkParser extends Phobject {
 
     // This is an empty file.
     return false;
-  }
-
-  /**
-   * Returns true if the hunks change any text, not just whitespace.
-   */
-  public function getHasTextChanges() {
-    return $this->getHasChanges('text');
   }
 
   /**
@@ -193,9 +170,6 @@ final class DifferentialHunkParser extends Phobject {
       }
 
       if ($o['type'] !== $n['type']) {
-        // The types are different, so either the underlying text is actually
-        // different or whatever whitespace rules we're using consider them
-        // different.
         return true;
       }
 
@@ -277,63 +251,6 @@ final class DifferentialHunkParser extends Phobject {
 
     $this->setOldLines($rebuild_old);
     $this->setNewLines($rebuild_new);
-
-    $this->updateChangeTypesForWhitespaceMode();
-
-    return $this;
-  }
-
-  private function updateChangeTypesForWhitespaceMode() {
-    $mode = $this->getWhitespaceMode();
-
-    $mode_show_all = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
-    if ($mode === $mode_show_all) {
-      // If we're showing all whitespace, we don't need to perform any updates.
-      return;
-    }
-
-    $mode_trailing = DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING;
-    $is_trailing = ($mode === $mode_trailing);
-
-    $new = $this->getNewLines();
-    $old = $this->getOldLines();
-    foreach ($old as $key => $o) {
-      $n = $new[$key];
-
-      if (!$o || !$n) {
-        continue;
-      }
-
-      if ($is_trailing) {
-        // In "trailing" mode, we need to identify lines which are marked
-        // changed but differ only by trailing whitespace. We mark these lines
-        // unchanged.
-        if ($o['type'] != $n['type']) {
-          if (rtrim($o['text']) === rtrim($n['text'])) {
-            $old[$key]['type'] = null;
-            $new[$key]['type'] = null;
-          }
-        }
-      } else {
-        // In "ignore most" and "ignore all" modes, we need to identify lines
-        // which are marked unchanged but have internal whitespace changes.
-        // We want to ignore leading and trailing whitespace changes only, not
-        // internal whitespace changes (`diff` doesn't have a mode for this, so
-        // we have to fix it here). If the text is marked unchanged but the
-        // old and new text differs by internal space, mark the lines changed.
-        if ($o['type'] === null && $n['type'] === null) {
-          if ($o['text'] !== $n['text']) {
-            if (trim($o['text']) !== trim($n['text'])) {
-              $old[$key]['type'] = '-';
-              $new[$key]['type'] = '+';
-            }
-          }
-        }
-      }
-    }
-
-    $this->setOldLines($old);
-    $this->setNewLines($new);
 
     return $this;
   }

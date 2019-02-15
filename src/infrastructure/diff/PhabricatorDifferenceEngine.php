@@ -10,25 +10,11 @@
 final class PhabricatorDifferenceEngine extends Phobject {
 
 
-  private $ignoreWhitespace;
   private $oldName;
   private $newName;
 
 
 /* -(  Configuring the Engine  )--------------------------------------------- */
-
-
-  /**
-   * If true, ignore whitespace when computing differences.
-   *
-   * @param bool Ignore whitespace?
-   * @return this
-   * @task config
-   */
-  public function setIgnoreWhitespace($ignore_whitespace) {
-    $this->ignoreWhitespace = $ignore_whitespace;
-    return $this;
-  }
 
 
   /**
@@ -73,9 +59,6 @@ final class PhabricatorDifferenceEngine extends Phobject {
   public function generateRawDiffFromFileContent($old, $new) {
 
     $options = array();
-    if ($this->ignoreWhitespace) {
-      $options[] = '-bw';
-    }
 
     // Generate diffs with full context.
     $options[] = '-U65535';
@@ -100,12 +83,10 @@ final class PhabricatorDifferenceEngine extends Phobject {
       $new_tmp);
 
     if (!$err) {
-      // This indicates that the two files are the same (or, possibly, the
-      // same modulo whitespace differences, which is why we can't do this
-      // check trivially before running `diff`). Build a synthetic, changeless
-      // diff so that we can still render the raw, unchanged file instead of
-      // being forced to just say "this file didn't change" since we don't have
-      // the content.
+      // This indicates that the two files are the same. Build a synthetic,
+      // changeless diff so that we can still render the raw, unchanged file
+      // instead of being forced to just say "this file didn't change" since we
+      // don't have the content.
 
       $entire_file = explode("\n", $old);
       foreach ($entire_file as $k => $line) {
@@ -123,26 +104,6 @@ final class PhabricatorDifferenceEngine extends Phobject {
               "+++ {$new_name}\n".
               "@@ -1,{$len} +1,{$len} @@\n".
               $entire_file."\n";
-    } else {
-      if ($this->ignoreWhitespace) {
-
-        // Under "-bw", `diff` is inconsistent about emitting "\ No newline
-        // at end of file". For instance, a long file with a change in the
-        // middle will emit a contextless "\ No newline..." at the end if a
-        // newline is removed, but not if one is added. A file with a change
-        // at the end will emit the "old" "\ No newline..." block only, even
-        // if the newline was not removed. Since we're ostensibly ignoring
-        // whitespace changes, just drop these lines if they appear anywhere
-        // in the diff.
-
-        $lines = explode("\n", $diff);
-        foreach ($lines as $key => $line) {
-          if (isset($line[0]) && $line[0] == '\\') {
-            unset($lines[$key]);
-          }
-        }
-        $diff = implode("\n", $lines);
-      }
     }
 
     return $diff;

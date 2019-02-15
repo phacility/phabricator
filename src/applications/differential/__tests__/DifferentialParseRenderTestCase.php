@@ -31,7 +31,6 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
       foreach (array('one', 'two') as $type) {
         $this->runParser($type, $data, $file, 'expect');
         $this->runParser($type, $data, $file, 'unshielded');
-        $this->runParser($type, $data, $file, 'whitespace');
       }
     }
   }
@@ -44,25 +43,20 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
     }
 
     $unshielded = false;
-    $whitespace = false;
     switch ($extension) {
       case 'unshielded':
         $unshielded = true;
         break;
-      case 'whitespace';
-        $unshielded = true;
-        $whitespace = true;
-        break;
     }
 
     $parsers = $this->buildChangesetParsers($type, $data, $file);
-    $actual = $this->renderParsers($parsers, $unshielded, $whitespace);
+    $actual = $this->renderParsers($parsers, $unshielded);
     $expect = Filesystem::readFile($test_file);
 
     $this->assertEqual($expect, $actual, basename($test_file));
   }
 
-  private function renderParsers(array $parsers, $unshield, $whitespace) {
+  private function renderParsers(array $parsers, $unshield) {
     $result = array();
     foreach ($parsers as $parser) {
       if ($unshield) {
@@ -71,11 +65,6 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
       } else {
         $s_range = null;
         $e_range = null;
-      }
-
-      if ($whitespace) {
-        $parser->setWhitespaceMode(
-          DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
       }
 
       $result[] = $parser->render($s_range, $e_range, array());

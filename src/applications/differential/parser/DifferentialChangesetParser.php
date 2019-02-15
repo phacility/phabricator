@@ -19,7 +19,6 @@ final class DifferentialChangesetParser extends Phobject {
   protected $specialAttributes = array();
 
   protected $changeset;
-  protected $whitespaceMode = null;
 
   protected $renderCacheKey = null;
 
@@ -163,7 +162,6 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   public function readParametersFromRequest(AphrontRequest $request) {
-    $this->setWhitespaceMode($request->getStr('whitespace'));
     $this->setCharacterEncoding($request->getStr('encoding'));
     $this->setHighlightAs($request->getStr('highlight'));
 
@@ -191,19 +189,13 @@ final class DifferentialChangesetParser extends Phobject {
     return $this;
   }
 
-  const CACHE_VERSION = 12;
+  const CACHE_VERSION = 13;
   const CACHE_MAX_SIZE = 8e6;
 
   const ATTR_GENERATED  = 'attr:generated';
   const ATTR_DELETED    = 'attr:deleted';
   const ATTR_UNCHANGED  = 'attr:unchanged';
-  const ATTR_WHITELINES = 'attr:white';
   const ATTR_MOVEAWAY   = 'attr:moveaway';
-
-  const WHITESPACE_SHOW_ALL         = 'show-all';
-  const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
-  const WHITESPACE_IGNORE_MOST      = 'ignore-most';
-  const WHITESPACE_IGNORE_ALL       = 'ignore-all';
 
   public function setOldLines(array $lines) {
     $this->old = $lines;
@@ -333,11 +325,6 @@ final class DifferentialChangesetParser extends Phobject {
 
     $this->setFilename($changeset->getFilename());
 
-    return $this;
-  }
-
-  public function setWhitespaceMode($whitespace_mode) {
-    $this->whitespaceMode = $whitespace_mode;
     return $this;
   }
 
@@ -574,10 +561,6 @@ final class DifferentialChangesetParser extends Phobject {
     return idx($this->specialAttributes, self::ATTR_UNCHANGED, false);
   }
 
-  public function isWhitespaceOnly() {
-    return idx($this->specialAttributes, self::ATTR_WHITELINES, false);
-  }
-
   public function isMoveAway() {
     return idx($this->specialAttributes, self::ATTR_MOVEAWAY, false);
   }
@@ -624,18 +607,8 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   private function tryCacheStuff() {
-    $whitespace_mode = $this->whitespaceMode;
-    switch ($whitespace_mode) {
-      case self::WHITESPACE_SHOW_ALL:
-      case self::WHITESPACE_IGNORE_TRAILING:
-      case self::WHITESPACE_IGNORE_ALL:
-        break;
-      default:
-        $whitespace_mode = self::WHITESPACE_IGNORE_MOST;
-        break;
-    }
+    $skip_cache = false;
 
-    $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_MOST);
     if ($this->disableCache) {
       $skip_cache = true;
     }
@@ -647,8 +620,6 @@ final class DifferentialChangesetParser extends Phobject {
     if ($this->highlightAs) {
       $skip_cache = true;
     }
-
-    $this->whitespaceMode = $whitespace_mode;
 
     $changeset = $this->changeset;
 
@@ -668,71 +639,10 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   private function process() {
-    $whitespace_mode = $this->whitespaceMode;
     $changeset = $this->changeset;
 
-    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_MOST) ||
-                  ($whitespace_mode == self::WHITESPACE_IGNORE_ALL));
-
-    $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_ALL);
-
-    if (!$force_ignore) {
-      if ($ignore_all && $changeset->getWhitespaceMatters()) {
-        $ignore_all = false;
-      }
-    }
-
-    // The "ignore all whitespace" algorithm depends on rediffing the
-    // files, and we currently need complete representations of both
-    // files to do anything reasonable. If we only have parts of the files,
-    // don't use the "ignore all" algorithm.
-    if ($ignore_all) {
-      $hunks = $changeset->getHunks();
-      if (count($hunks) !== 1) {
-        $ignore_all = false;
-      } else {
-        $first_hunk = reset($hunks);
-        if ($first_hunk->getOldOffset() != 1 ||
-            $first_hunk->getNewOffset() != 1) {
-            $ignore_all = false;
-        }
-      }
-    }
-
-    if ($ignore_all) {
-      $old_file = $changeset->makeOldFile();
-      $new_file = $changeset->makeNewFile();
-      if ($old_file == $new_file) {
-        // If the old and new files are exactly identical, the synthetic
-        // diff below will give us nonsense and whitespace modes are
-        // irrelevant anyway. This occurs when you, e.g., copy a file onto
-        // itself in Subversion (see T271).
-        $ignore_all = false;
-      }
-    }
-
     $hunk_parser = new DifferentialHunkParser();
-    $hunk_parser->setWhitespaceMode($whitespace_mode);
     $hunk_parser->parseHunksForLineData($changeset->getHunks());
-
-    // Depending on the whitespace mode, we may need to compute a different
-    // set of changes than the set of changes in the hunk data (specifically,
-    // we might want to consider changed lines which have only whitespace
-    // changes as unchanged).
-    if ($ignore_all) {
-      $engine = new PhabricatorDifferenceEngine();
-      $engine->setIgnoreWhitespace(true);
-      $no_whitespace_changeset = $engine->generateChangesetFromFileContent(
-        $old_file,
-        $new_file);
-
-      $type_parser = new DifferentialHunkParser();
-      $type_parser->parseHunksForLineData($no_whitespace_changeset->getHunks());
-
-      $hunk_parser->setOldLineTypeMap($type_parser->getOldLineTypeMap());
-      $hunk_parser->setNewLineTypeMap($type_parser->getNewLineTypeMap());
-    }
-
     $hunk_parser->reparseHunksForSpecialAttributes();
 
     $unchanged = false;
@@ -753,7 +663,6 @@ final class DifferentialChangesetParser extends Phobject {
     $this->setSpecialAttributes(array(
       self::ATTR_UNCHANGED  => $unchanged,
       self::ATTR_DELETED    => $hunk_parser->getIsDeleted(),
-      self::ATTR_WHITELINES => !$hunk_parser->getHasTextChanges(),
       self::ATTR_MOVEAWAY   => $moveaway,
     ));
 
@@ -971,10 +880,6 @@ final class DifferentialChangesetParser extends Phobject {
             pht('The contents of this file were not changed.'),
             $type);
         }
-      } else if ($this->isWhitespaceOnly()) {
-        $shield = $renderer->renderShield(
-          pht('This file was changed only by adding or removing whitespace.'),
-          'whitespace');
       } else if ($this->isDeleted()) {
         $shield = $renderer->renderShield(
           pht('This file was completely deleted.'));

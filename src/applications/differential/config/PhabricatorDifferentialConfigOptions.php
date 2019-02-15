@@ -80,18 +80,6 @@ EOHELP
             "Select and reorder revision fields.\n\n".
             "NOTE: This feature is under active development and subject ".
             "to change.")),
-      $this->newOption(
-        'differential.whitespace-matters',
-        'list<regex>',
-        array(
-          '/\.py$/',
-          '/\.l?hs$/',
-          '/\.ya?ml$/',
-        ))
-        ->setDescription(
-          pht(
-            "List of file regexps where whitespace is meaningful and should ".
-            "not use 'ignore-all' by default")),
       $this->newOption('differential.require-test-plan-field', 'bool', true)
         ->setBoolOptions(
           array(

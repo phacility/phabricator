@@ -5,7 +5,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   private $diffs = array();
   private $selectedVersusDiffID;
   private $selectedDiffID;
-  private $selectedWhitespace;
   private $commitsForLinks = array();
   private $unitStatus = array();
 
@@ -22,11 +21,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
   public function setSelectedDiffID($id) {
     $this->selectedDiffID = $id;
-    return $this;
-  }
-
-  public function setSelectedWhitespace($whitespace) {
-    $this->selectedWhitespace = $whitespace;
     return $this;
   }
 
@@ -224,28 +218,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         'radios' => $radios,
       ));
 
-    $options = array(
-      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL => pht('Ignore All'),
-      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST => pht('Ignore Most'),
-      DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING =>
-        pht('Ignore Trailing'),
-      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => pht('Show All'),
-    );
-
-    foreach ($options as $value => $label) {
-      $options[$value] = phutil_tag(
-        'option',
-        array(
-          'value' => $value,
-          'selected' => ($value == $this->selectedWhitespace)
-          ? 'selected'
-          : null,
-        ),
-        $label);
-    }
-    $select = phutil_tag('select', array('name' => 'whitespace'), $options);
-
-
     $table = id(new AphrontTableView($rows));
     $table->setHeaders(
       array(
@@ -291,13 +263,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         'class' => 'differential-update-history-footer',
       ),
       array(
-        phutil_tag(
-          'label',
-          array(),
-          array(
-            pht('Whitespace Changes:'),
-            $select,
-          )),
         phutil_tag(
           'button',
           array(),
