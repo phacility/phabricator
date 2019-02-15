@@ -28,9 +28,6 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
       'dateCreated' => array(
         'columns' => array('dateCreated'),
       ),
-      'leaseOwner' => array(
-        'columns' => array('leaseOwner', 'priority', 'id'),
-      ),
       'key_modified' => array(
         'columns' => array('dateModified'),
       ),

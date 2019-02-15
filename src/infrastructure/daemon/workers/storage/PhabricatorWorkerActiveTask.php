@@ -14,34 +14,20 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       self::CONFIG_IDS => self::IDS_COUNTER,
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_KEY_SCHEMA => array(
-        'dataID' => array(
-          'columns' => array('dataID'),
-          'unique' => true,
-        ),
         'taskClass' => array(
           'columns' => array('taskClass'),
         ),
         'leaseExpires' => array(
           'columns' => array('leaseExpires'),
         ),
-        'leaseOwner' => array(
-          'columns' => array('leaseOwner(16)'),
-        ),
         'key_failuretime' => array(
           'columns' => array('failureTime'),
         ),
-        'leaseOwner_2' => array(
+        'key_owner' => array(
           'columns' => array('leaseOwner', 'priority', 'id'),
         ),
       ) + $parent[self::CONFIG_KEY_SCHEMA],
     );
-
-    $config[self::CONFIG_COLUMN_SCHEMA] = array(
-      // T6203/NULLABILITY
-      // This isn't nullable in the archive table, so at a minimum these
-      // should be the same.
-      'dataID' => 'uint32?',
-    ) + $parent[self::CONFIG_COLUMN_SCHEMA];
 
     return $config + $parent;
   }
@@ -74,7 +60,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       $this->failureCount = 0;
     }
 
-    if ($is_new && ($this->getData() !== null)) {
+    if ($is_new) {
       $data = new PhabricatorWorkerTaskData();
       $data->setData($this->getData());
       $data->save();
