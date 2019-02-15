@@ -135,11 +135,32 @@
   background: {$old-bright};
 }
 
+
 .differential-diff td.new span.bright,
 .differential-diff td.new-full,
 .prose-diff span.new {
   background: {$new-bright};
 }
+
+.differential-diff td span.depth-out,
+.differential-diff td span.depth-in {
+  padding: 2px 0;
+  background-size: 12px 12px;
+  background-repeat: no-repeat;
+  background-position: left center;
+}
+
+.differential-diff td span.depth-out {
+  background-image: url(/rsrc/image/chevron-out.png);
+  background-color: {$old-background-strong};
+}
+
+.differential-diff td span.depth-in {
+  background-position: 2px center;
+  background-image: url(/rsrc/image/chevron-in.png);
+  background-color: {$new-background-strong};
+}
+
 
 .differential-diff td.copy {
   min-width: 0.5%;

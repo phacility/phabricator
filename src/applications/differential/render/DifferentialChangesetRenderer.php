@@ -34,6 +34,7 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   private $objectOwnerPHID;
   private $highlightingDisabled;
   private $scopeEngine;
+  private $depthOnlyLines;
 
   private $oldFile = false;
   private $newFile = false;
@@ -90,6 +91,15 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   }
   protected function getGaps() {
     return $this->gaps;
+  }
+
+  public function setDepthOnlyLines(array $lines) {
+    $this->depthOnlyLines = $lines;
+    return $this;
+  }
+
+  public function getDepthOnlyLines() {
+    return $this->depthOnlyLines;
   }
 
   public function attachOldFile(PhabricatorFile $old = null) {

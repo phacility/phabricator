@@ -5,6 +5,7 @@ final class DifferentialHunkParser extends Phobject {
   private $oldLines;
   private $newLines;
   private $intraLineDiffs;
+  private $depthOnlyLines;
   private $visibleLinesMask;
   private $whitespaceMode;
 
@@ -115,6 +116,14 @@ final class DifferentialHunkParser extends Phobject {
     return $this;
   }
 
+  public function setDepthOnlyLines(array $map) {
+    $this->depthOnlyLines = $map;
+    return $this;
+  }
+
+  public function getDepthOnlyLines() {
+    return $this->depthOnlyLines;
+  }
 
   public function setWhitespaceMode($white_space_mode) {
     $this->whitespaceMode = $white_space_mode;
@@ -334,6 +343,7 @@ final class DifferentialHunkParser extends Phobject {
     $new = $this->getNewLines();
 
     $diffs = array();
+    $depth_only = array();
     foreach ($old as $key => $o) {
       $n = $new[$key];
 
@@ -342,13 +352,75 @@ final class DifferentialHunkParser extends Phobject {
       }
 
       if ($o['type'] != $n['type']) {
-        $diffs[$key] = ArcanistDiffUtils::generateIntralineDiff(
-          $o['text'],
-          $n['text']);
+        $o_segments = array();
+        $n_segments = array();
+        $tab_width = 2;
+
+        $o_text = $o['text'];
+        $n_text = $n['text'];
+
+        if ($o_text !== $n_text) {
+          $o_depth = $this->getIndentDepth($o_text, $tab_width);
+          $n_depth = $this->getIndentDepth($n_text, $tab_width);
+
+          if ($o_depth < $n_depth) {
+            $segment_type = '>';
+            $segment_width = $this->getCharacterCountForVisualWhitespace(
+              $n_text,
+              ($n_depth - $o_depth),
+              $tab_width);
+            if ($segment_width) {
+              $n_text = substr($n_text, $segment_width);
+              $n_segments[] = array(
+                $segment_type,
+                $segment_width,
+              );
+            }
+          } else if ($o_depth > $n_depth) {
+            $segment_type = '<';
+            $segment_width = $this->getCharacterCountForVisualWhitespace(
+              $o_text,
+              ($o_depth - $n_depth),
+              $tab_width);
+            if ($segment_width) {
+              $o_text = substr($o_text, $segment_width);
+              $o_segments[] = array(
+                $segment_type,
+                $segment_width,
+              );
+            }
+          }
+
+          // If there are no remaining changes to this line after we've marked
+          // off the indent depth changes, this line was only modified by
+          // changing the indent depth. Mark it for later so we can change how
+          // it is displayed.
+          if ($o_text === $n_text) {
+            $depth_only[$key] = $segment_type;
+          }
+        }
+
+        $intraline_segments = ArcanistDiffUtils::generateIntralineDiff(
+          $o_text,
+          $n_text);
+
+        foreach ($intraline_segments[0] as $o_segment) {
+          $o_segments[] = $o_segment;
+        }
+
+        foreach ($intraline_segments[1] as $n_segment) {
+          $n_segments[] = $n_segment;
+        }
+
+        $diffs[$key] = array(
+          $o_segments,
+          $n_segments,
+        );
       }
     }
 
     $this->setIntraLineDiffs($diffs);
+    $this->setDepthOnlyLines($depth_only);
 
     return $this;
   }
@@ -671,4 +743,97 @@ final class DifferentialHunkParser extends Phobject {
 
     return $offsets;
   }
+
+  private function getIndentDepth($text, $tab_width) {
+    $len = strlen($text);
+
+    $depth = 0;
+    for ($ii = 0; $ii < $len; $ii++) {
+      $c = $text[$ii];
+
+      // If this is a space, increase the indent depth by 1.
+      if ($c == ' ') {
+        $depth++;
+        continue;
+      }
+
+      // If this is a tab, increase the indent depth to the next tabstop.
+
+      // For example, if the tab width is 4, these sequences both lead us to
+      // a visual width of 8, i.e. the cursor will be in the 8th column:
+      //
+      //   <tab><tab>
+      //   <space><tab><space><space><space><tab>
+
+      if ($c == "\t") {
+        $depth = ($depth + $tab_width);
+        $depth = $depth - ($depth % $tab_width);
+        continue;
+      }
+
+      break;
+    }
+
+    return $depth;
+  }
+
+  private function getCharacterCountForVisualWhitespace(
+    $text,
+    $depth,
+    $tab_width) {
+
+    // Here, we know the visual indent depth of a line has been increased by
+    // some amount (for example, 6 characters).
+
+    // We want to find the largest whitespace prefix of the string we can
+    // which still fits into that amount of visual space.
+
+    // In most cases, this is very easy. For example, if the string has been
+    // indented by two characters and the string begins with two spaces, that's
+    // a perfect match.
+
+    // However, if the string has been indented by 7 characters, the tab width
+    // is 8, and the string begins with "<space><space><tab>", we can only
+    // mark the two spaces as an indent change. These cases are unusual.
+
+    $character_depth = 0;
+    $visual_depth = 0;
+
+    $len = strlen($text);
+    for ($ii = 0; $ii < $len; $ii++) {
+      if ($visual_depth >= $depth) {
+        break;
+      }
+
+      $c = $text[$ii];
+
+      if ($c == ' ') {
+        $character_depth++;
+        $visual_depth++;
+        continue;
+      }
+
+      if ($c == "\t") {
+        // Figure out how many visual spaces we have until the next tabstop.
+        $tab_visual = ($visual_depth + $tab_width);
+        $tab_visual = $tab_visual - ($tab_visual % $tab_width);
+        $tab_visual = ($tab_visual - $visual_depth);
+
+        // If this tab would take us over the limit, we're all done.
+        $remaining_depth = ($depth - $visual_depth);
+        if ($remaining_depth < $tab_visual) {
+          break;
+        }
+
+        $character_depth++;
+        $visual_depth += $tab_visual;
+        continue;
+      }
+
+      break;
+    }
+
+    return $character_depth;
+  }
+
 }

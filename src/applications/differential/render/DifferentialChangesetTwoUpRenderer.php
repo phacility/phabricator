@@ -71,8 +71,8 @@ final class DifferentialChangesetTwoUpRenderer
     $mask = $this->getMask();
 
     $scope_engine = $this->getScopeEngine();
-
     $offset_map = null;
+    $depth_only = $this->getDepthOnlyLines();
 
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
@@ -196,11 +196,29 @@ final class DifferentialChangesetTwoUpRenderer
           } else if (empty($old_lines[$ii])) {
             $n_class = 'new new-full';
           } else {
-            $n_class = 'new';
+
+            // NOTE: At least for the moment, I'm intentionally clearing the
+            // line highlighting only on the right side of the diff when a
+            // line has only depth changes. When a block depth is decreased,
+            // this gives us a large color block on the left (to make it easy
+            // to see the depth change) but a clean diff on the right (to make
+            // it easy to pick out actual code changes).
+
+            if (isset($depth_only[$ii])) {
+              $n_class = '';
+            } else {
+              $n_class = 'new';
+            }
           }
           $n_classes = $n_class;
 
-          if ($new_lines[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
+          $not_copied =
+            // If this line only changed depth, copy markers are pointless.
+            (!isset($copy_lines[$n_num])) ||
+            (isset($depth_only[$ii])) ||
+            ($new_lines[$ii]['type'] == '\\');
+
+          if ($not_copied) {
             $n_copy = phutil_tag('td', array('class' => "copy {$n_class}"));
           } else {
             list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];

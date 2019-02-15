@@ -8,6 +8,7 @@ final class DifferentialChangesetParser extends Phobject {
   protected $new          = array();
   protected $old          = array();
   protected $intra        = array();
+  protected $depthOnlyLines = array();
   protected $newRender    = null;
   protected $oldRender    = null;
 
@@ -190,7 +191,7 @@ final class DifferentialChangesetParser extends Phobject {
     return $this;
   }
 
-  const CACHE_VERSION = 11;
+  const CACHE_VERSION = 12;
   const CACHE_MAX_SIZE = 8e6;
 
   const ATTR_GENERATED  = 'attr:generated';
@@ -222,6 +223,15 @@ final class DifferentialChangesetParser extends Phobject {
   public function setIntraLineDiffs(array $diffs) {
     $this->intra = $diffs;
     return $this;
+  }
+
+  public function setDepthOnlyLines(array $lines) {
+    $this->depthOnlyLines = $lines;
+    return $this;
+  }
+
+  public function getDepthOnlyLines() {
+    return $this->depthOnlyLines;
   }
 
   public function setVisibileLinesMask(array $mask) {
@@ -450,6 +460,7 @@ final class DifferentialChangesetParser extends Phobject {
       'new',
       'old',
       'intra',
+      'depthOnlyLines',
       'newRender',
       'oldRender',
       'specialAttributes',
@@ -754,6 +765,7 @@ final class DifferentialChangesetParser extends Phobject {
     $this->setOldLines($hunk_parser->getOldLines());
     $this->setNewLines($hunk_parser->getNewLines());
     $this->setIntraLineDiffs($hunk_parser->getIntraLineDiffs());
+    $this->setDepthOnlyLines($hunk_parser->getDepthOnlyLines());
     $this->setVisibileLinesMask($hunk_parser->getVisibleLinesMask());
     $this->hunkStartLines = $hunk_parser->getHunkStartLines(
       $changeset->getHunks());
@@ -914,7 +926,8 @@ final class DifferentialChangesetParser extends Phobject {
       ->setShowEditAndReplyLinks($this->getShowEditAndReplyLinks())
       ->setCanMarkDone($this->getCanMarkDone())
       ->setObjectOwnerPHID($this->getObjectOwnerPHID())
-      ->setHighlightingDisabled($this->highlightingDisabled);
+      ->setHighlightingDisabled($this->highlightingDisabled)
+      ->setDepthOnlyLines($this->getDepthOnlyLines());
 
     $shield = null;
     if ($this->isTopLevel && !$this->comments) {
