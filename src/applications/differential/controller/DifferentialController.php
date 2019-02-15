@@ -192,9 +192,10 @@ abstract class DifferentialController extends PhabricatorController {
     $all_target_phids = array_mergev($target_map);
 
     if ($all_target_phids) {
-      $unit_messages = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
-        'buildTargetPHID IN (%Ls)',
-        $all_target_phids);
+      $unit_messages = id(new HarbormasterBuildUnitMessageQuery())
+        ->setViewer($viewer)
+        ->withBuildTargetPHIDs($all_target_phids)
+        ->execute();
       $unit_messages = mgroup($unit_messages, 'getBuildTargetPHID');
     } else {
       $unit_messages = array();

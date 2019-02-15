@@ -1,7 +1,8 @@
 <?php
 
 final class HarbormasterBuildUnitMessage
-  extends HarbormasterDAO {
+  extends HarbormasterDAO
+  implements PhabricatorPolicyInterface {
 
   protected $buildTargetPHID;
   protected $engine;
@@ -257,6 +258,27 @@ final class HarbormasterBuildUnitMessage
     );
 
     return implode("\0", $parts);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }
