@@ -47,10 +47,13 @@ final class PhabricatorMemeEngine extends Phobject {
   }
 
   public function getGenerateURI() {
-    return id(new PhutilURI('/macro/meme/'))
-      ->alter('macro', $this->getTemplate())
-      ->alter('above', $this->getAboveText())
-      ->alter('below', $this->getBelowText());
+    $params = array(
+      'macro' => $this->getTemplate(),
+      'above' => $this->getAboveText(),
+      'below' => $this->getBelowText(),
+    );
+
+    return new PhutilURI('/macro/meme/', $params);
   }
 
   public function newAsset() {
