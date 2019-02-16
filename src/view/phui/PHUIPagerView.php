@@ -187,9 +187,15 @@ final class PHUIPagerView extends AphrontView {
       foreach ($pager_index as $key => $index) {
         if ($index !== null) {
           $display_index = $this->getDisplayIndex($index);
-          $pager_links[$key] = (string)$base_uri->alter(
-            $parameter,
-            $display_index);
+
+          $uri = id(clone $base_uri);
+          if ($display_index === null) {
+            $uri->removeQueryParam($parameter);
+          } else {
+            $uri->replaceQueryParam($parameter, $display_index);
+          }
+
+          $pager_links[$key] = phutil_string_cast($uri);
         }
       }
       Javelin::initBehavior('phabricator-keyboard-pager', $pager_links);
@@ -200,10 +206,17 @@ final class PHUIPagerView extends AphrontView {
     foreach ($links as $link) {
       list($index, $label, $class) = $link;
       $display_index = $this->getDisplayIndex($index);
-      $link = $base_uri->alter($parameter, $display_index);
+
+      $uri = id(clone $base_uri);
+      if ($display_index === null) {
+        $uri->removeQueryParam($parameter);
+      } else {
+        $uri->replaceQueryParam($parameter, $display_index);
+      }
+
       $rendered_links[] = id(new PHUIButtonView())
         ->setTag('a')
-        ->setHref($link)
+        ->setHref($uri)
         ->setColor(PHUIButtonView::GREY)
         ->addClass('mml')
         ->addClass($class)
