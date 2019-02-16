@@ -34,11 +34,6 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
     $content_source = PhabricatorContentSource::newFromRequest($request);
 
-    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $viewer,
-      $request,
-      '/settings/');
-
     $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
     $min_len = (int)$min_len;
 
@@ -55,20 +50,25 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
       ->withPasswordTypes(array($account_type))
       ->withIsRevoked(false)
       ->execute();
-    if ($password_objects) {
-      $password_object = head($password_objects);
-    } else {
-      $password_object = PhabricatorAuthPassword::initializeNewPassword(
-        $user,
-        $account_type);
+    if (!$password_objects) {
+      return $this->newSetPasswordView($request);
     }
+    $password_object = head($password_objects);
 
     $e_old = true;
     $e_new = true;
     $e_conf = true;
 
     $errors = array();
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHisecPost()) {
+      $workflow_key = sprintf(
+        'password.change(%s)',
+        $user->getPHID());
+
+      $hisec_token = id(new PhabricatorAuthSessionEngine())
+        ->setWorkflowKey($workflow_key)
+        ->requireHighSecurityToken($viewer, $request, '/settings/');
+
       // Rate limit guesses about the old password. This page requires MFA and
       // session compromise already, so this is mostly just to stop researchers
       // from reporting this as a vulnerability.
@@ -216,6 +216,28 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
       $algo_box,
       $info_view,
     );
+  }
+
+  private function newSetPasswordView(AphrontRequest $request) {
+    $viewer = $request->getUser();
+    $user = $this->getUser();
+
+    $form = id(new AphrontFormView())
+      ->setViewer($viewer)
+      ->appendRemarkupInstructions(
+        pht(
+          'Your account does not currently have a password set. You can '.
+          'choose a password by performing a password reset.'))
+      ->appendControl(
+        id(new AphrontFormSubmitControl())
+          ->addCancelButton('/login/email/', pht('Reset Password')));
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Set Password'))
+      ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
+      ->setForm($form);
+
+    return $form_box;
   }
 
 

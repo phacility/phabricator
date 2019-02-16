@@ -99,9 +99,9 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   }
 
   public function getDatasourceURI() {
-    $uri = new PhutilURI('/typeahead/class/'.get_class($this).'/');
-    $uri->setQueryParams($this->newURIParameters());
-    return (string)$uri;
+    $params = $this->newURIParameters();
+    $uri = new PhutilURI('/typeahead/class/'.get_class($this).'/', $params);
+    return phutil_string_cast($uri);
   }
 
   public function getBrowseURI() {
@@ -109,9 +109,9 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       return null;
     }
 
-    $uri = new PhutilURI('/typeahead/browse/'.get_class($this).'/');
-    $uri->setQueryParams($this->newURIParameters());
-    return (string)$uri;
+    $params = $this->newURIParameters();
+    $uri = new PhutilURI('/typeahead/browse/'.get_class($this).'/', $params);
+    return phutil_string_cast($uri);
   }
 
   private function newURIParameters() {

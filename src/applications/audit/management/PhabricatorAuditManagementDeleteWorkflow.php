@@ -105,10 +105,10 @@ final class PhabricatorAuditManagementDeleteWorkflow
       $query->withPHIDs(mpull($commits, 'getPHID'));
     }
 
-    $commits = $query->execute();
-    $commits = mpull($commits, null, 'getPHID');
+    $commit_iterator = new PhabricatorQueryIterator($query);
+
     $audits = array();
-    foreach ($commits as $commit) {
+    foreach ($commit_iterator as $commit) {
       $commit_audits = $commit->getAudits();
       foreach ($commit_audits as $key => $audit) {
         if ($id_map && empty($id_map[$audit->getID()])) {
@@ -131,51 +131,87 @@ final class PhabricatorAuditManagementDeleteWorkflow
           continue;
         }
       }
-      $audits[] = $commit_audits;
-    }
-    $audits = array_mergev($audits);
 
-    $console = PhutilConsole::getConsole();
+      if (!$commit_audits) {
+        continue;
+      }
 
-    if (!$audits) {
-      $console->writeErr("%s\n", pht('No audits match the query.'));
-      return 0;
-    }
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(mpull($commit_audits, 'getAuditorPHID'))
+        ->execute();
 
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs(mpull($audits, 'getAuditorPHID'))
-      ->execute();
+      foreach ($commit_audits as $audit) {
+        $audit_id = $audit->getID();
 
-
-    foreach ($audits as $audit) {
-      $commit = $commits[$audit->getCommitPHID()];
-
-      $console->writeOut(
-        "%s\n",
-        sprintf(
+        $description = sprintf(
           '%10d %-16s %-16s %s: %s',
-          $audit->getID(),
+          $audit_id,
           $handles[$audit->getAuditorPHID()]->getName(),
           PhabricatorAuditStatusConstants::getStatusName(
             $audit->getAuditStatus()),
           $commit->getRepository()->formatCommitName(
             $commit->getCommitIdentifier()),
-          trim($commit->getSummary())));
+          trim($commit->getSummary()));
+
+        $audits[] = array(
+          'auditID' => $audit_id,
+          'commitPHID' => $commit->getPHID(),
+          'description' => $description,
+        );
+      }
     }
 
-    if (!$is_dry_run) {
-      $message = pht(
-        'Really delete these %d audit(s)? They will be permanently deleted '.
-        'and can not be recovered.',
-        count($audits));
-      if ($console->confirm($message)) {
-        foreach ($audits as $audit) {
-          $id = $audit->getID();
-          $console->writeOut("%s\n", pht('Deleting audit %d...', $id));
-          $audit->delete();
-        }
+    if (!$audits) {
+      echo tsprintf(
+        "%s\n",
+        pht('No audits match the query.'));
+      return 0;
+    }
+
+    foreach ($audits as $audit_spec) {
+      echo tsprintf(
+        "%s\n",
+        $audit_spec['description']);
+    }
+
+    if ($is_dry_run) {
+      echo tsprintf(
+        "%s\n",
+        pht('This is a dry run, so no changes will be made.'));
+      return 0;
+    }
+
+    $message = pht(
+      'Really delete these %s audit(s)? They will be permanently deleted '.
+      'and can not be recovered.',
+      phutil_count($audits));
+    if (!phutil_console_confirm($message)) {
+      echo tsprintf(
+        "%s\n",
+        pht('User aborted the workflow.'));
+      return 1;
+    }
+
+    $audits_by_commit = igroup($audits, 'commitPHID');
+    foreach ($audits_by_commit as $commit_phid => $audit_specs) {
+      $audit_ids = ipull($audit_specs, 'auditID');
+
+      $audits = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
+        'id IN (%Ld)',
+        $audit_ids);
+
+      foreach ($audits as $audit) {
+        $id = $audit->getID();
+
+        echo tsprintf(
+          "%s\n",
+          pht('Deleting audit %d...', $id));
+
+        $audit->delete();
       }
+
+      $this->synchronizeCommitAuditState($commit_phid);
     }
 
     return 0;

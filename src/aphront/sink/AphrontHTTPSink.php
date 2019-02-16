@@ -5,13 +5,21 @@
  * Normally this is just @{class:AphrontPHPHTTPSink}, which uses "echo" and
  * "header()" to emit responses.
  *
- * Mostly, this class allows us to do install security or metrics hooks in the
- * output pipeline.
- *
  * @task write  Writing Response Components
  * @task emit   Emitting the Response
  */
 abstract class AphrontHTTPSink extends Phobject {
+
+  private $showStackTraces = false;
+
+  final public function setShowStackTraces($show_stack_traces) {
+    $this->showStackTraces = $show_stack_traces;
+    return $this;
+  }
+
+  final public function getShowStackTraces() {
+    return $this->showStackTraces;
+  }
 
 
 /* -(  Writing Response Components  )---------------------------------------- */

@@ -3,7 +3,8 @@
 
 Describes how to configure user access to Phabricator.
 
-= Overview =
+Overview
+========
 
 Phabricator supports a number of login systems. You can enable or disable these
 systems to configure who can register for and access your install, and how users
@@ -28,24 +29,37 @@ After you add a provider, you can link it to existing accounts (for example,
 associate an existing Phabricator account with a GitHub OAuth account) or users
 can use it to register new accounts (assuming you enable these options).
 
-= Recovering Inaccessible Accounts =
+
+Recovering Inaccessible Accounts
+================================
 
 If you accidentally lock yourself out of Phabricator (for example, by disabling
-all authentication providers), you can use the `bin/auth`
-script to recover access to an account. To recover access, run:
+all authentication providers), you can normally use the "send a login link"
+action from the login screen to email yourself a login link and regain access
+to your account.
 
-  phabricator/ $ ./bin/auth recover <username>
+If that isn't working (perhaps because you haven't configured email yet), you
+can use the `bin/auth` script to recover access to an account. To recover
+access, run:
+
+```
+phabricator/ $ ./bin/auth recover <username>
+```
 
 ...where `<username>` is the account username you want to recover access
 to. This will generate a link which will log you in as the specified user.
 
-= Managing Accounts with the Web Console =
+
+Managing Accounts with the Web Console
+======================================
 
 To manage accounts from the web, login as an administrator account and go to
 `/people/` or click "People" on the homepage. Provided you're an admin,
 you'll see options to create or edit accounts.
 
-= Manually Creating New Accounts =
+
+Manually Creating New Accounts
+==============================
 
 There are two ways to manually create new accounts: via the web UI using
 the "People" application (this is easiest), or via the CLI using the
@@ -60,7 +74,9 @@ the CLI. You can also use this script to make a user
 an administrator (if you accidentally remove your admin flag) or to create an
 administrative account.
 
-= Next Steps =
+
+Next Steps
+==========
 
 Continue by:
 

@@ -154,8 +154,21 @@ final class PHUITimelineView extends AphrontView {
       }
 
       $uri = $this->getPager()->getNextPageURI();
-      $uri->setQueryParam('quoteTargetID', $this->getQuoteTargetID());
-      $uri->setQueryParam('quoteRef', $this->getQuoteRef());
+
+      $target_id = $this->getQuoteTargetID();
+      if ($target_id === null) {
+        $uri->removeQueryParam('quoteTargetID');
+      } else {
+        $uri->replaceQueryParam('quoteTargetID', $target_id);
+      }
+
+      $quote_ref = $this->getQuoteRef();
+      if ($quote_ref === null) {
+        $uri->removeQueryParam('quoteRef');
+      } else {
+        $uri->replaceQueryParam('quoteRef', $quote_ref);
+      }
+
       $events[] = javelin_tag(
         'div',
         array(

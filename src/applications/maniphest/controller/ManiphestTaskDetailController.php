@@ -80,7 +80,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $related_tabs = array();
     $graph_menu = null;
 
-    $graph_limit = 100;
+    $graph_limit = 200;
+    $overflow_message = null;
     $task_graph = id(new ManiphestTaskGraph())
       ->setViewer($viewer)
       ->setSeedPHID($task->getPHID())
@@ -96,61 +97,55 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $has_parents = (bool)$parent_list;
       $has_subtasks = (bool)$subtask_list;
 
-      $search_text = pht('Search...');
-
       // First, get a count of direct parent tasks and subtasks. If there
       // are too many of these, we just don't draw anything. You can use
       // the search button to browse tasks with the search UI instead.
       $direct_count = count($parent_list) + count($subtask_list);
 
       if ($direct_count > $graph_limit) {
-        $message = pht(
-          'Task graph too large to display (this task is directly connected '.
-          'to more than %s other tasks). Use %s to explore connected tasks.',
-          $graph_limit,
-          phutil_tag('strong', array(), $search_text));
-        $message = phutil_tag('em', array(), $message);
-        $graph_table = id(new PHUIPropertyListView())
-          ->addTextContent($message);
+        $overflow_message = pht(
+          'This task is directly connected to more than %s other tasks. '.
+          'Use %s to browse parents or subtasks, or %s to show more of the '.
+          'graph.',
+          new PhutilNumber($graph_limit),
+          phutil_tag('strong', array(), pht('Search...')),
+          phutil_tag('strong', array(), pht('View Standalone Graph')));
+
+        $graph_table = null;
       } else {
         // If there aren't too many direct tasks, but there are too many total
         // tasks, we'll only render directly connected tasks.
         if ($task_graph->isOverLimit()) {
           $task_graph->setRenderOnlyAdjacentNodes(true);
+
+          $overflow_message = pht(
+            'This task is connected to more than %s other tasks. '.
+            'Only direct parents and subtasks are shown here. Use '.
+            '%s to show more of the graph.',
+            new PhutilNumber($graph_limit),
+            phutil_tag('strong', array(), pht('View Standalone Graph')));
         }
+
         $graph_table = $task_graph->newGraphTable();
       }
 
-      $parents_uri = urisprintf(
-        '/?subtaskIDs=%d#R',
-        $task->getID());
-      $parents_uri = $this->getApplicationURI($parents_uri);
+      if ($overflow_message) {
+        $overflow_view = $this->newTaskGraphOverflowView(
+          $task,
+          $overflow_message,
+          true);
 
-      $subtasks_uri = urisprintf(
-        '/?parentIDs=%d#R',
-        $task->getID());
-      $subtasks_uri = $this->getApplicationURI($subtasks_uri);
+        $graph_table = array(
+          $overflow_view,
+          $graph_table,
+        );
+      }
 
-      $dropdown_menu = id(new PhabricatorActionListView())
-        ->setViewer($viewer)
-        ->addAction(
-          id(new PhabricatorActionView())
-            ->setHref($parents_uri)
-            ->setName(pht('Search Parent Tasks'))
-            ->setDisabled(!$has_parents)
-            ->setIcon('fa-chevron-circle-up'))
-        ->addAction(
-          id(new PhabricatorActionView())
-            ->setHref($subtasks_uri)
-            ->setName(pht('Search Subtasks'))
-            ->setDisabled(!$has_subtasks)
-            ->setIcon('fa-chevron-circle-down'));
-
-      $graph_menu = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-search')
-        ->setText($search_text)
-        ->setDropdownMenu($dropdown_menu);
+      $graph_menu = $this->newTaskGraphDropdownMenu(
+        $task,
+        $has_parents,
+        $has_subtasks,
+        true);
 
       $related_tabs[] = id(new PHUITabView())
         ->setName(pht('Task Graph'))
@@ -300,9 +295,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $subtask_form = head($subtask_options);
       $form_key = $subtask_form->getIdentifier();
       $subtask_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
-        ->setQueryParam('parent', $id)
-        ->setQueryParam('template', $id)
-        ->setQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
+        ->replaceQueryParam('parent', $id)
+        ->replaceQueryParam('template', $id)
+        ->replaceQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
       $subtask_workflow = false;
     }
 

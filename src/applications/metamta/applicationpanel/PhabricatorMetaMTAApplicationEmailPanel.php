@@ -54,8 +54,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       return new Aphront404Response();
     }
 
-    $uri = $request->getRequestURI();
-    $uri->setQueryParams(array());
+    $uri = new PhutilURI($request->getPath());
 
     $new = $request->getStr('new');
     $edit = $request->getInt('edit');

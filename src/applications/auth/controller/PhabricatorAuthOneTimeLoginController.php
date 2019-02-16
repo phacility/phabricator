@@ -14,17 +14,25 @@ final class PhabricatorAuthOneTimeLoginController
     $key = $request->getURIData('key');
     $email_id = $request->getURIData('emailID');
 
-    if ($request->getUser()->isLoggedIn()) {
-      return $this->renderError(
-        pht('You are already logged in.'));
-    }
-
     $target_user = id(new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withIDs(array($id))
       ->executeOne();
     if (!$target_user) {
       return new Aphront404Response();
+    }
+
+    // NOTE: We allow you to use a one-time login link for your own current
+    // login account. This supports the "Set Password" flow.
+
+    $is_logged_in = false;
+    if ($viewer->isLoggedIn()) {
+      if ($viewer->getPHID() !== $target_user->getPHID()) {
+        return $this->renderError(
+          pht('You are already logged in.'));
+      } else {
+        $is_logged_in = true;
+      }
     }
 
     // NOTE: As a convenience to users, these one-time login URIs may also
@@ -100,7 +108,7 @@ final class PhabricatorAuthOneTimeLoginController
         ->addCancelButton('/');
     }
 
-    if ($request->isFormPost()) {
+    if ($request->isFormPost() || $is_logged_in) {
       // If we have an email bound into this URI, verify email so that clicking
       // the link in the "Welcome" email is good enough, without requiring users
       // to go through a second round of email verification.
@@ -120,6 +128,12 @@ final class PhabricatorAuthOneTimeLoginController
       unset($unguarded);
 
       $next_uri = $this->getNextStepURI($target_user);
+
+      // If the user is already logged in, we're just doing a "password set"
+      // flow. Skip directly to the next step.
+      if ($is_logged_in) {
+        return id(new AphrontRedirectResponse())->setURI($next_uri);
+      }
 
       PhabricatorCookies::setNextURICookie($request, $next_uri, $force = true);
 
@@ -204,24 +218,52 @@ final class PhabricatorAuthOneTimeLoginController
 
       $request->setTemporaryCookie(PhabricatorCookies::COOKIE_HISEC, 'yes');
 
-      return (string)id(new PhutilURI($panel_uri))
-        ->setQueryParams(
-          array(
-            'key' => $key,
-          ));
+      $params = array(
+        'key' => $key,
+      );
+
+      return (string)new PhutilURI($panel_uri, $params);
     }
 
-    $providers = id(new PhabricatorAuthProviderConfigQuery())
+    // Check if the user already has external accounts linked. If they do,
+    // it's not obvious why they aren't using them to log in, but assume they
+    // know what they're doing. We won't send them to the link workflow.
+    $accounts = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($user)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->execute();
+
+    $configs = id(new PhabricatorAuthProviderConfigQuery())
       ->setViewer($user)
       ->withIsEnabled(true)
       ->execute();
+
+    $linkable = array();
+    foreach ($configs as $config) {
+      if (!$config->getShouldAllowLink()) {
+        continue;
+      }
+
+      $provider = $config->getProvider();
+      if (!$provider->isLoginFormAButton()) {
+        continue;
+      }
+
+      $linkable[] = $provider;
+    }
+
+    // If there's at least one linkable provider, and the user doesn't already
+    // have accounts, send the user to the link workflow.
+    if (!$accounts && $linkable) {
+      return '/auth/external/';
+    }
 
     // If there are no configured providers and the user is an administrator,
     // send them to Auth to configure a provider. This is probably where they
     // want to go. You can end up in this state by accidentally losing your
     // first session during initial setup, or after restoring exported data
     // from a hosted instance.
-    if (!$providers && $user->getIsAdmin()) {
+    if (!$configs && $user->getIsAdmin()) {
       return '/auth/';
     }
 

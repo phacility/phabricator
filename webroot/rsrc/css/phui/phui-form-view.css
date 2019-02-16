@@ -578,3 +578,17 @@ properly, and submit values. */
 .mfa-form-enroll-button {
   text-align: center;
 }
+
+.phui-form-timer-updated {
+  animation: phui-form-timer-fade-in 2s linear;
+}
+
+
+@keyframes phui-form-timer-fade-in {
+  0% {
+    background-color: {$lightyellow};
+  }
+  100% {
+    background-color: transparent;
+  }
+}

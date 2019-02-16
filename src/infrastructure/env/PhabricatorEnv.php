@@ -483,11 +483,17 @@ final class PhabricatorEnv extends Phobject {
    * @task read
    */
   public static function getDoclink($resource, $type = 'article') {
-    $uri = new PhutilURI('https://secure.phabricator.com/diviner/find/');
-    $uri->setQueryParam('name', $resource);
-    $uri->setQueryParam('type', $type);
-    $uri->setQueryParam('jump', true);
-    return (string)$uri;
+    $params = array(
+      'name' => $resource,
+      'type' => $type,
+      'jump' => true,
+    );
+
+    $uri = new PhutilURI(
+      'https://secure.phabricator.com/diviner/find/',
+      $params);
+
+    return phutil_string_cast($uri);
   }
 
 

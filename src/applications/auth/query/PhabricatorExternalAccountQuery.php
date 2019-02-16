@@ -21,6 +21,7 @@ final class PhabricatorExternalAccountQuery
   private $userPHIDs;
   private $needImages;
   private $accountSecrets;
+  private $providerConfigPHIDs;
 
   public function withUserPHIDs(array $user_phids) {
     $this->userPHIDs = $user_phids;
@@ -62,6 +63,11 @@ final class PhabricatorExternalAccountQuery
     return $this;
   }
 
+  public function withProviderConfigPHIDs(array $phids) {
+    $this->providerConfigPHIDs = $phids;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorExternalAccount();
   }
@@ -71,6 +77,26 @@ final class PhabricatorExternalAccountQuery
   }
 
   protected function willFilterPage(array $accounts) {
+    $viewer = $this->getViewer();
+
+    $configs = id(new PhabricatorAuthProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(mpull($accounts, 'getProviderConfigPHID'))
+      ->execute();
+    $configs = mpull($configs, null, 'getPHID');
+
+    foreach ($accounts as $key => $account) {
+      $config_phid = $account->getProviderConfigPHID();
+      $config = idx($configs, $config_phid);
+
+      if (!$config) {
+        unset($accounts[$key]);
+        continue;
+      }
+
+      $account->attachProviderConfig($config);
+    }
+
     if ($this->needImages) {
       $file_phids = mpull($accounts, 'getProfileImagePHID');
       $file_phids = array_filter($file_phids);
@@ -159,6 +185,13 @@ final class PhabricatorExternalAccountQuery
         $conn,
         'accountSecret IN (%Ls)',
         $this->accountSecrets);
+    }
+
+    if ($this->providerConfigPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'providerConfigPHID IN (%Ls)',
+        $this->providerConfigPHIDs);
     }
 
     return $where;

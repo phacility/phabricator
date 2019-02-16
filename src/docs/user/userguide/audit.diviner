@@ -175,16 +175,13 @@ You can use this command to forcibly delete requests which may have triggered
 incorrectly (for example, because a package or Herald rule was configured in an
 overbroad way).
 
-After deleting audits, you may want to run `bin/audit synchronize` to
-synchronize audit state.
-
 **Synchronize Audit State**: Synchronize the audit state of commits to the
 current open audit requests with `bin/audit synchronize`.
 
 Normally, overall audit state is automatically kept up to date as changes are
-made to an audit. However, if you delete audits or manually update the database
-to make changes to audit request state, the state of corresponding commits may
-no longer be correct.
+made to an audit. However, if you manually update the database to make changes
+to audit request state, the state of corresponding commits may no longer be
+consistent.
 
 This command will update commits so their overall audit state reflects the
 cumulative state of their actual audit requests.

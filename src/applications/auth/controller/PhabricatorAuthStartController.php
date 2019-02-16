@@ -54,7 +54,7 @@ final class PhabricatorAuthStartController
           }
 
           $redirect_uri = $request->getRequestURI();
-          $redirect_uri->setQueryParam('cleared', 1);
+          $redirect_uri->replaceQueryParam('cleared', 1);
           return id(new AphrontRedirectResponse())->setURI($redirect_uri);
       }
     }
@@ -64,7 +64,7 @@ final class PhabricatorAuthStartController
     // the workflow will continue normally.
     if ($did_clear) {
       $redirect_uri = $request->getRequestURI();
-      $redirect_uri->setQueryParam('cleared', null);
+      $redirect_uri->removeQueryParam('cleared');
       return id(new AphrontRedirectResponse())->setURI($redirect_uri);
     }
 

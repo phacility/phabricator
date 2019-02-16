@@ -44,17 +44,13 @@ final class PhabricatorExternalAccountsSettingsPanel
     foreach ($accounts as $account) {
       $item = new PHUIObjectItemView();
 
-      $provider = idx($providers, $account->getProviderKey());
-      if ($provider) {
-        $item->setHeader($provider->getProviderName());
-        $can_unlink = $provider->shouldAllowAccountUnlink();
-        if (!$can_unlink) {
-          $item->addAttribute(pht('Permanently Linked'));
-        }
-      } else {
-        $item->setHeader(
-          pht('Unknown Account ("%s")', $account->getProviderKey()));
-        $can_unlink = true;
+      $config = $account->getProviderConfig();
+      $provider = $config->getProvider();
+
+      $item->setHeader($provider->getProviderName());
+      $can_unlink = $provider->shouldAllowAccountUnlink();
+      if (!$can_unlink) {
+        $item->addAttribute(pht('Permanently Linked'));
       }
 
       $can_login = $account->isUsableForLogin();
@@ -65,12 +61,12 @@ final class PhabricatorExternalAccountsSettingsPanel
             'account provider).'));
       }
 
-      $can_refresh = $provider && $provider->shouldAllowAccountRefresh();
+      $can_refresh = $provider->shouldAllowAccountRefresh();
       if ($can_refresh) {
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-refresh')
-            ->setHref('/auth/refresh/'.$account->getProviderKey().'/'));
+            ->setHref('/auth/refresh/'.$config->getID().'/'));
       }
 
       $item->addAction(
@@ -78,7 +74,7 @@ final class PhabricatorExternalAccountsSettingsPanel
           ->setIcon('fa-times')
           ->setWorkflow(true)
           ->setDisabled(!$can_unlink)
-          ->setHref('/auth/unlink/'.$account->getProviderKey().'/'));
+          ->setHref('/auth/unlink/'.$account->getID().'/'));
 
       if ($provider) {
         $provider->willRenderLinkedAccount($viewer, $item, $account);
@@ -94,13 +90,14 @@ final class PhabricatorExternalAccountsSettingsPanel
       ->setNoDataString(
         pht('Your account is linked with all available providers.'));
 
-    $accounts = mpull($accounts, null, 'getProviderKey');
-
     $configs = id(new PhabricatorAuthProviderConfigQuery())
       ->setViewer($viewer)
       ->withIsEnabled(true)
       ->execute();
     $configs = msort($configs, 'getSortVector');
+
+    $account_map = mgroup($accounts, 'getProviderConfigPHID');
+
 
     foreach ($configs as $config) {
       $provider = $config->getProvider();
@@ -110,12 +107,11 @@ final class PhabricatorExternalAccountsSettingsPanel
       }
 
       // Don't show the user providers they already have linked.
-      $provider_key = $config->getProvider()->getProviderKey();
-      if (isset($accounts[$provider_key])) {
+      if (isset($account_map[$config->getPHID()])) {
         continue;
       }
 
-      $link_uri = '/auth/link/'.$provider->getProviderKey().'/';
+      $link_uri = '/auth/link/'.$config->getID().'/';
 
       $link_button = id(new PHUIButtonView())
         ->setTag('a')

@@ -198,7 +198,7 @@ final class PhabricatorApplicationTransactionCommentView
     $viewer = $this->getViewer();
     if (!$viewer->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
-        ->setQueryParam('next', (string)$this->getRequestURI());
+        ->replaceQueryParam('next', (string)$this->getRequestURI());
       return id(new PHUIObjectBoxView())
         ->setFlush(true)
         ->appendChild(
@@ -254,11 +254,12 @@ final class PhabricatorApplicationTransactionCommentView
 
     require_celerity_resource('phui-comment-form-css');
     $image_uri = $viewer->getProfileImageURI();
-    $image = phutil_tag(
+    $image = javelin_tag(
       'div',
       array(
         'style' => 'background-image: url('.$image_uri.')',
-        'class' => 'phui-comment-image visual-only',
+        'class' => 'phui-comment-image',
+        'aural' => false,
       ));
     $wedge = phutil_tag(
       'div',

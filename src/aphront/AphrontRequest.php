@@ -594,7 +594,7 @@ final class AphrontRequest extends Phobject {
     $request_uri = idx($_SERVER, 'REQUEST_URI', '/');
 
     $uri = new PhutilURI($request_uri);
-    $uri->setQueryParam('__path__', null);
+    $uri->removeQueryParam('__path__');
 
     $path = phutil_escape_uri($this->getPath());
     $uri->setPath($path);
@@ -829,7 +829,10 @@ final class AphrontRequest extends Phobject {
     }
 
     $uri->setPath($this->getPath());
-    $uri->setQueryParams(self::flattenData($_GET));
+    $uri->removeAllQueryParams();
+    foreach (self::flattenData($_GET) as $query_key => $query_value) {
+      $uri->appendQueryParam($query_key, $query_value);
+    }
 
     $input = PhabricatorStartup::getRawInput();
 

@@ -234,7 +234,7 @@ final class PhabricatorCalendarImportViewController
 
     $all_uri = $this->getApplicationURI('import/log/');
     $all_uri = (string)id(new PhutilURI($all_uri))
-      ->setQueryParam('importSourcePHID', $import->getPHID());
+      ->replaceQueryParam('importSourcePHID', $import->getPHID());
 
     $all_button = id(new PHUIButtonView())
       ->setTag('a')
@@ -273,8 +273,8 @@ final class PhabricatorCalendarImportViewController
 
     $all_uri = $this->getApplicationURI();
     $all_uri = (string)id(new PhutilURI($all_uri))
-      ->setQueryParam('importSourcePHID', $import->getPHID())
-      ->setQueryParam('display', 'list');
+      ->replaceQueryParam('importSourcePHID', $import->getPHID())
+      ->replaceQueryParam('display', 'list');
 
     $all_button = id(new PHUIButtonView())
       ->setTag('a')

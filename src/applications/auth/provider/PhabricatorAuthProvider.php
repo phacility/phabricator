@@ -161,7 +161,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
   abstract public function processLoginRequest(
     PhabricatorAuthLoginController $controller);
 
-  public function buildLinkForm(PhabricatorAuthLinkController $controller) {
+  public function buildLinkForm($controller) {
     return $this->renderLoginForm($controller->getRequest(), $mode = 'link');
   }
 
@@ -220,9 +220,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
       $adapter->getAdapterDomain(),
       $account_id);
     if (!$account) {
-      $account = id(new PhabricatorExternalAccount())
-        ->setAccountType($adapter->getAdapterType())
-        ->setAccountDomain($adapter->getAdapterDomain())
+      $account = $this->newExternalAccount()
         ->setAccountID($account_id);
     }
 
@@ -299,8 +297,18 @@ abstract class PhabricatorAuthProvider extends Phobject {
     return false;
   }
 
-  public function getDefaultExternalAccount() {
-    throw new PhutilMethodNotImplementedException();
+  public function newDefaultExternalAccount() {
+    return $this->newExternalAccount();
+  }
+
+  protected function newExternalAccount() {
+    $config = $this->getProviderConfig();
+    $adapter = $this->getAdapter();
+
+    return id(new PhabricatorExternalAccount())
+      ->setAccountType($adapter->getAdapterType())
+      ->setAccountDomain($adapter->getAdapterDomain())
+      ->setProviderConfigPHID($config->getPHID());
   }
 
   public function getLoginOrder() {
@@ -438,12 +446,13 @@ abstract class PhabricatorAuthProvider extends Phobject {
 
     $uri = $attributes['uri'];
     $uri = new PhutilURI($uri);
-    $params = $uri->getQueryParams();
-    $uri->setQueryParams(array());
+    $params = $uri->getQueryParamsAsPairList();
+    $uri->removeAllQueryParams();
 
     $content = array($button);
 
-    foreach ($params as $key => $value) {
+    foreach ($params as $pair) {
+      list($key, $value) = $pair;
       $content[] = phutil_tag(
         'input',
         array(

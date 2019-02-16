@@ -1279,8 +1279,7 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->willBuildEditForm($object, $fields);
 
-    $request_path = $request->getRequestURI()
-      ->setQueryParams(array());
+    $request_path = $request->getPath();
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -1542,8 +1541,7 @@ abstract class PhabricatorEditEngine
         $config_uri = $config->getCreateURI();
 
         if ($parameters) {
-          $config_uri = (string)id(new PhutilURI($config_uri))
-            ->setQueryParams($parameters);
+          $config_uri = (string)new PhutilURI($config_uri, $parameters);
         }
 
         $specs[] = array(

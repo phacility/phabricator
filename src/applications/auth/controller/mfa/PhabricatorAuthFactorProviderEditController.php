@@ -45,7 +45,7 @@ final class PhabricatorAuthFactorProviderEditController
 
     foreach ($factors as $factor_key => $factor) {
       $factor_uri = id(new PhutilURI('/mfa/edit/'))
-        ->setQueryParam('providerFactorKey', $factor_key);
+        ->replaceQueryParam('providerFactorKey', $factor_key);
       $factor_uri = $this->getApplicationURI($factor_uri);
 
       $is_enabled = $factor->canCreateNewProvider();

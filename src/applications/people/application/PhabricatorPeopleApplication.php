@@ -63,7 +63,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         'welcome/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleWelcomeController',
         'create/' => 'PhabricatorPeopleCreateController',
         'new/(?P<type>[^/]+)/' => 'PhabricatorPeopleNewController',
-        'ldap/' => 'PhabricatorPeopleLdapController',
         'editprofile/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileEditController',
         'badges/(?P<id>[1-9]\d*)/' =>

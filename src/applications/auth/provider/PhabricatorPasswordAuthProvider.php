@@ -159,8 +159,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     return $dialog;
   }
 
-  public function buildLinkForm(
-    PhabricatorAuthLinkController $controller) {
+  public function buildLinkForm($controller) {
     throw new Exception(pht("Password providers can't be linked."));
   }
 
@@ -357,14 +356,6 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
 
   public function shouldRequireRegistrationPassword() {
     return true;
-  }
-
-  public function getDefaultExternalAccount() {
-    $adapter = $this->getAdapter();
-
-    return id(new PhabricatorExternalAccount())
-      ->setAccountType($adapter->getAdapterType())
-      ->setAccountDomain($adapter->getAdapterDomain());
   }
 
   protected function willSaveAccount(PhabricatorExternalAccount $account) {

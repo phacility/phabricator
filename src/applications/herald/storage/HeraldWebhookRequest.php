@@ -120,7 +120,7 @@ final class HeraldWebhookRequest
   public function getErrorTypeForDisplay() {
     $map = array(
       self::ERRORTYPE_HOOK => pht('Hook Error'),
-      self::ERRORTYPE_HTTP => pht('HTTP Error'),
+      self::ERRORTYPE_HTTP => pht('HTTP Status Code'),
       self::ERRORTYPE_TIMEOUT => pht('Request Timeout'),
     );
 

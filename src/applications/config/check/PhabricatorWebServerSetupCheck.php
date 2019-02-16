@@ -40,7 +40,7 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
 
     $base_uri = id(new PhutilURI($base_uri))
       ->setPath($send_path)
-      ->setQueryParam($expect_key, $expect_value);
+      ->replaceQueryParam($expect_key, $expect_value);
 
     $self_future = id(new HTTPSFuture($base_uri))
       ->addHeader('X-Phabricator-SelfCheck', 1)

@@ -348,12 +348,14 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
           ->setRawPayPalQuery('SetExpressCheckout', $params)
           ->resolve();
 
-        $uri = new PhutilURI('https://www.sandbox.paypal.com/cgi-bin/webscr');
-        $uri->setQueryParams(
-          array(
-            'cmd'   => '_express-checkout',
-            'token' => $result['TOKEN'],
-          ));
+        $params = array(
+          'cmd'   => '_express-checkout',
+          'token' => $result['TOKEN'],
+        );
+
+        $uri = new PhutilURI(
+          'https://www.sandbox.paypal.com/cgi-bin/webscr',
+          $params);
 
         $cart->setMetadataValue('provider.checkoutURI', (string)$uri);
         $cart->save();

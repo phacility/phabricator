@@ -70,7 +70,7 @@ final class PhabricatorFileLightboxController
 
     if (!$viewer->isLoggedIn()) {
       $login_href = id(new PhutilURI('/auth/start/'))
-        ->setQueryParam('next', '/'.$file->getMonogram());
+        ->replaceQueryParam('next', '/'.$file->getMonogram());
       return id(new PHUIFormLayoutView())
         ->addClass('phui-comment-panel-empty')
         ->appendChild(

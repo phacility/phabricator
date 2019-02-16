@@ -24,6 +24,7 @@ final class PhabricatorMailMailgunAdapter
       array(
         'api-key' => 'string',
         'domain' => 'string',
+        'api-hostname' => 'string',
       ));
   }
 
@@ -31,12 +32,14 @@ final class PhabricatorMailMailgunAdapter
     return array(
       'api-key' => null,
       'domain' => null,
+      'api-hostname' => 'api.mailgun.net',
     );
   }
 
   public function sendMessage(PhabricatorMailExternalMessage $message) {
     $api_key = $this->getOption('api-key');
     $domain = $this->getOption('domain');
+    $api_hostname = $this->getOption('api-hostname');
     $params = array();
 
     $subject = $message->getSubject();
@@ -92,7 +95,8 @@ final class PhabricatorMailMailgunAdapter
     }
 
     $mailgun_uri = urisprintf(
-      'https://api.mailgun.net/v2/%s/messages',
+      'https://%s/v2/%s/messages',
+      $api_hostname,
       $domain);
 
     $future = id(new HTTPSFuture($mailgun_uri, $params))

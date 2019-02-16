@@ -157,13 +157,10 @@ final class PhabricatorPeopleProfilePictureController
         continue;
       }
 
-      $provider = PhabricatorAuthProvider::getEnabledProviderByKey(
-        $account->getProviderKey());
-      if ($provider) {
-        $tip = pht('Picture From %s', $provider->getProviderName());
-      } else {
-        $tip = pht('Picture From External Account');
-      }
+      $config = $account->getProviderConfig();
+      $provider = $config->getProvider();
+
+      $tip = pht('Picture From %s', $provider->getProviderName());
 
       if ($file->isTransformableImage()) {
         $images[$file->getPHID()] = array(

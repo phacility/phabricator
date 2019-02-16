@@ -61,8 +61,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',
         'finish/' => 'PhabricatorAuthFinishController',
-        'unlink/(?P<pkey>[^/]+)/' => 'PhabricatorAuthUnlinkController',
-        '(?P<action>link|refresh)/(?P<pkey>[^/]+)/'
+        'unlink/(?P<id>\d+)/' => 'PhabricatorAuthUnlinkController',
+        '(?P<action>link|refresh)/(?P<id>\d+)/'
           => 'PhabricatorAuthLinkController',
         'confirmlink/(?P<akey>[^/]+)/'
           => 'PhabricatorAuthConfirmLinkController',
@@ -86,7 +86,9 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             => 'PhabricatorAuthSSHKeyRevokeController',
           'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
         ),
+
         'password/' => 'PhabricatorAuthSetPasswordController',
+        'external/' => 'PhabricatorAuthSetExternalController',
 
         'mfa/' => array(
           $this->getQueryRoutePattern() =>
@@ -97,6 +99,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             'PhabricatorAuthFactorProviderViewController',
           'message/(?P<id>[1-9]\d*)/' =>
             'PhabricatorAuthFactorProviderMessageController',
+          'challenge/status/(?P<id>[1-9]\d*)/' =>
+            'PhabricatorAuthChallengeStatusController',
         ),
 
         'message/' => array(

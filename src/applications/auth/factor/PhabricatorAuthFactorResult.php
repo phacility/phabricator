@@ -11,6 +11,7 @@ final class PhabricatorAuthFactorResult
   private $value;
   private $issuedChallenges = array();
   private $icon;
+  private $statusChallenge;
 
   public function setAnsweredChallenge(PhabricatorAuthChallenge $challenge) {
     if (!$challenge->getIsAnsweredChallenge()) {
@@ -32,6 +33,15 @@ final class PhabricatorAuthFactorResult
 
   public function getAnsweredChallenge() {
     return $this->answeredChallenge;
+  }
+
+  public function setStatusChallenge(PhabricatorAuthChallenge $challenge) {
+    $this->statusChallenge = $challenge;
+    return $this;
+  }
+
+  public function getStatusChallenge() {
+    return $this->statusChallenge;
   }
 
   public function getIsValid() {
@@ -81,16 +91,6 @@ final class PhabricatorAuthFactorResult
 
   public function getValue() {
     return $this->value;
-  }
-
-  public function setIssuedChallenges(array $issued_challenges) {
-    assert_instances_of($issued_challenges, 'PhabricatorAuthChallenge');
-    $this->issuedChallenges = $issued_challenges;
-    return $this;
-  }
-
-  public function getIssuedChallenges() {
-    return $this->issuedChallenges;
   }
 
   public function setIcon(PHUIIconView $icon) {

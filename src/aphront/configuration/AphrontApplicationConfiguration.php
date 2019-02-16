@@ -118,6 +118,12 @@ final class AphrontApplicationConfiguration
       $database_exception = $ex;
     }
 
+    // If we're in developer mode, set a flag so that top-level exception
+    // handlers can add more information.
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+      $sink->setShowStackTraces(true);
+    }
+
     if ($database_exception) {
       $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
         $database_exception,
@@ -282,23 +288,69 @@ final class AphrontApplicationConfiguration
       }
     } catch (Exception $ex) {
       $original_exception = $ex;
-      $response = $this->handleThrowable($ex);
     } catch (Throwable $ex) {
       $original_exception = $ex;
-      $response = $this->handleThrowable($ex);
     }
 
+    $response_exception = null;
     try {
+      if ($original_exception) {
+        $response = $this->handleThrowable($original_exception);
+      }
+
       $response = $this->produceResponse($request, $response);
       $response = $controller->willSendResponse($response);
       $response->setRequest($request);
 
       self::writeResponse($sink, $response);
     } catch (Exception $ex) {
+      $response_exception = $ex;
+    } catch (Throwable $ex) {
+      $response_exception = $ex;
+    }
+
+    if ($response_exception) {
+      // If we encountered an exception while building a normal response, then
+      // encountered another exception while building a response for the first
+      // exception, just throw the original exception. It is more likely to be
+      // useful and point at a root cause than the second exception we ran into
+      // while telling the user about it.
       if ($original_exception) {
         throw $original_exception;
       }
-      throw $ex;
+
+      // If we built a response successfully and then ran into an exception
+      // trying to render it, try to handle and present that exception to the
+      // user using the standard handler.
+
+      // The problem here might be in rendering (more common) or in the actual
+      // response mechanism (less common). If it's in rendering, we can likely
+      // still render a nice exception page: the majority of rendering issues
+      // are in main page content, not content shared with the exception page.
+
+      $handling_exception = null;
+      try {
+        $response = $this->handleThrowable($response_exception);
+
+        $response = $this->produceResponse($request, $response);
+        $response = $controller->willSendResponse($response);
+        $response->setRequest($request);
+
+        self::writeResponse($sink, $response);
+      } catch (Exception $ex) {
+        $handling_exception = $ex;
+      } catch (Throwable $ex) {
+        $handling_exception = $ex;
+      }
+
+      // If we didn't have any luck with that, raise the original response
+      // exception. As above, this is the root cause exception and more likely
+      // to be useful. This will go to the fallback error handler at top
+      // level.
+
+      if ($handling_exception) {
+        throw $response_exception;
+      }
     }
 
     return $response;

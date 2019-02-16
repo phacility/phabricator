@@ -585,7 +585,7 @@ final class PhabricatorDuoAuthFactor
       $result = $this->newDuoFuture($provider)
         ->setHTTPMethod('GET')
         ->setMethod('auth_status', $parameters)
-        ->setTimeout(5)
+        ->setTimeout(3)
         ->resolve();
 
       $state = $result['response']['result'];
@@ -661,15 +661,6 @@ final class PhabricatorDuoAuthFactor
     PhabricatorAuthFactorResult $result) {
 
     $control = $this->newAutomaticControl($result);
-    if (!$control) {
-      $result = $this->newResult()
-        ->setIsContinue(true)
-        ->setErrorMessage(
-          pht(
-            'A challenge has been sent to your phone. Open the Duo '.
-            'application and confirm the challenge, then continue.'));
-      $control = $this->newAutomaticControl($result);
-    }
 
     $control
       ->setLabel(pht('Duo'))
@@ -689,7 +680,27 @@ final class PhabricatorDuoAuthFactor
     PhabricatorUser $viewer,
     AphrontRequest $request,
     array $challenges) {
-    return $this->newResult();
+
+    $result = $this->newResult()
+      ->setIsContinue(true)
+      ->setErrorMessage(
+        pht(
+          'A challenge has been sent to your phone. Open the Duo '.
+          'application and confirm the challenge, then continue.'));
+
+    $challenge = $this->getChallengeForCurrentContext(
+      $config,
+      $viewer,
+      $challenges);
+    if ($challenge) {
+      $result
+        ->setStatusChallenge($challenge)
+        ->setIcon(
+          id(new PHUIIconView())
+            ->setIcon('fa-refresh', 'green ph-spin'));
+    }
+
+    return $result;
   }
 
   private function newDuoFuture(PhabricatorAuthFactorProvider $provider) {
@@ -788,6 +799,56 @@ final class PhabricatorDuoAuthFactor
         'Duo API hostname ("%s") is invalid, hostname must be '.
         '"*.duosecurity.com".',
         $hostname));
+  }
+
+  public function newChallengeStatusView(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorAuthFactorProvider $provider,
+    PhabricatorUser $viewer,
+    PhabricatorAuthChallenge $challenge) {
+
+    $duo_xaction = $challenge->getChallengeKey();
+
+    $parameters = array(
+      'txid' => $duo_xaction,
+    );
+
+    $default_result = id(new PhabricatorAuthChallengeUpdate())
+      ->setRetry(true);
+
+    try {
+      $result = $this->newDuoFuture($provider)
+        ->setHTTPMethod('GET')
+        ->setMethod('auth_status', $parameters)
+        ->setTimeout(5)
+        ->resolve();
+
+      $state = $result['response']['result'];
+    } catch (HTTPFutureCURLResponseStatus $exception) {
+      // If we failed or timed out, retry. Usually, this is a timeout.
+      return id(new PhabricatorAuthChallengeUpdate())
+        ->setRetry(true);
+    }
+
+    // For now, don't update the view for anything but an "Allow". Updates
+    // here are just about providing more visual feedback for user convenience.
+    if ($state !== 'allow') {
+      return id(new PhabricatorAuthChallengeUpdate())
+        ->setRetry(false);
+    }
+
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-check-circle-o', 'green');
+
+    $view = id(new PHUIFormTimerControl())
+      ->setIcon($icon)
+      ->appendChild(pht('You responded to this challenge correctly.'))
+      ->newTimerView();
+
+    return id(new PhabricatorAuthChallengeUpdate())
+      ->setState('allow')
+      ->setRetry(false)
+      ->setMarkup($view);
   }
 
 }

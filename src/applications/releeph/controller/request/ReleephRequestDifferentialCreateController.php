@@ -96,7 +96,7 @@ final class ReleephRequestDifferentialCreateController
   private function buildReleephRequestURI(ReleephBranch $branch) {
     $uri = $branch->getURI('request/');
     return id(new PhutilURI($uri))
-      ->setQueryParam('D', $this->revision->getID());
+      ->replaceQueryParam('D', $this->revision->getID());
   }
 
 }

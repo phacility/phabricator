@@ -65,11 +65,11 @@ final class PhabricatorOwnersDetailController
 
     $commit_views = array();
 
-    $commit_uri = id(new PhutilURI('/diffusion/commit/'))
-      ->setQueryParams(
-        array(
-          'package' => $package->getPHID(),
-        ));
+    $params = array(
+      'package' => $package->getPHID(),
+    );
+
+    $commit_uri = new PhutilURI('/diffusion/commit/', $params);
 
     $status_concern = DiffusionCommitAuditStatus::CONCERN_RAISED;
 

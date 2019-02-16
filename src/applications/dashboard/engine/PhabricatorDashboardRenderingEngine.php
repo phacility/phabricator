@@ -113,11 +113,11 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $dashboard_id = $this->dashboard->getID();
 
     $create_uri = id(new PhutilURI('/dashboard/panel/create/'))
-      ->setQueryParam('dashboardID', $dashboard_id)
-      ->setQueryParam('column', $column);
+      ->replaceQueryParam('dashboardID', $dashboard_id)
+      ->replaceQueryParam('column', $column);
 
     $add_uri = id(new PhutilURI('/dashboard/addpanel/'.$dashboard_id.'/'))
-      ->setQueryParam('column', $column);
+      ->replaceQueryParam('column', $column);
 
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
