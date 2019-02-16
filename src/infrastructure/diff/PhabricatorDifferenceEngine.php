@@ -12,6 +12,7 @@ final class PhabricatorDifferenceEngine extends Phobject {
 
   private $oldName;
   private $newName;
+  private $normalize;
 
 
 /* -(  Configuring the Engine  )--------------------------------------------- */
@@ -43,6 +44,16 @@ final class PhabricatorDifferenceEngine extends Phobject {
   }
 
 
+  public function setNormalize($normalize) {
+    $this->normalize = $normalize;
+    return $this;
+  }
+
+  public function getNormalize() {
+    return $this->normalize;
+  }
+
+
 /* -(  Generating Diffs  )--------------------------------------------------- */
 
 
@@ -70,6 +81,12 @@ final class PhabricatorDifferenceEngine extends Phobject {
     $options[] = $old_name;
     $options[] = '-L';
     $options[] = $new_name;
+
+    $normalize = $this->getNormalize();
+    if ($normalize) {
+      $old = $this->normalizeFile($old);
+      $new = $this->normalizeFile($new);
+    }
 
     $old_tmp = new TempFile();
     $new_tmp = new TempFile();
@@ -127,6 +144,29 @@ final class PhabricatorDifferenceEngine extends Phobject {
     $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $changes);
     return head($diff->getChangesets());
+  }
+
+  private function normalizeFile($corpus) {
+    // We can freely apply any other transformations we want to here: we have
+    // no constraints on what we need to preserve. If we normalize every line
+    // to "cat", the diff will still work, the alignment of the "-" / "+"
+    // lines will just be very hard to read.
+
+    // In general, we'll make the diff better if we normalize two lines that
+    // humans think are the same.
+
+    // We'll make the diff worse if we normalize two lines that humans think
+    // are different.
+
+
+    // Strip all whitespace present anywhere in the diff, since humans never
+    // consider whitespace changes to alter the line into a "different line"
+    // even when they're semantic (e.g., in a string constant). This covers
+    // indentation changes, trailing whitepspace, and formatting changes
+    // like "+/-".
+    $corpus = preg_replace('/[ \t]/', '', $corpus);
+
+    return $corpus;
   }
 
 }

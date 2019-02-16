@@ -643,6 +643,9 @@ final class DifferentialChangesetParser extends Phobject {
 
     $hunk_parser = new DifferentialHunkParser();
     $hunk_parser->parseHunksForLineData($changeset->getHunks());
+
+    $this->realignDiff($changeset, $hunk_parser);
+
     $hunk_parser->reparseHunksForSpecialAttributes();
 
     $unchanged = false;
@@ -1365,5 +1368,52 @@ final class DifferentialChangesetParser extends Phobject {
 
     return $key;
   }
+
+  private function realignDiff(
+    DifferentialChangeset $changeset,
+    DifferentialHunkParser $hunk_parser) {
+    // Normalizing and realigning the diff depends on rediffing the files, and
+    // we currently need complete representations of both files to do anything
+    // reasonable. If we only have parts of the files, skip realignment.
+
+    // We have more than one hunk, so we're definitely missing part of the file.
+    $hunks = $changeset->getHunks();
+    if (count($hunks) !== 1) {
+      return null;
+    }
+
+    // The first hunk doesn't start at the beginning of the file, so we're
+    // missing some context.
+    $first_hunk = head($hunks);
+    if ($first_hunk->getOldOffset() != 1 || $first_hunk->getNewOffset() != 1) {
+      return null;
+    }
+
+    $old_file = $changeset->makeOldFile();
+    $new_file = $changeset->makeNewFile();
+    if ($old_file === $new_file) {
+      // If the old and new files are exactly identical, the synthetic
+      // diff below will give us nonsense and whitespace modes are
+      // irrelevant anyway. This occurs when you, e.g., copy a file onto
+      // itself in Subversion (see T271).
+      return null;
+    }
+
+
+    $engine = id(new PhabricatorDifferenceEngine())
+      ->setNormalize(true);
+
+    $normalized_changeset = $engine->generateChangesetFromFileContent(
+      $old_file,
+      $new_file);
+
+    $type_parser = new DifferentialHunkParser();
+    $type_parser->parseHunksForLineData($normalized_changeset->getHunks());
+
+    $hunk_parser->setNormalized(true);
+    $hunk_parser->setOldLineTypeMap($type_parser->getOldLineTypeMap());
+    $hunk_parser->setNewLineTypeMap($type_parser->getNewLineTypeMap());
+  }
+
 
 }

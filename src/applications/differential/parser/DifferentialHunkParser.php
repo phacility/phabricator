@@ -7,6 +7,7 @@ final class DifferentialHunkParser extends Phobject {
   private $intraLineDiffs;
   private $depthOnlyLines;
   private $visibleLinesMask;
+  private $normalized;
 
   /**
    * Get a map of lines on which hunks start, other than line 1. This
@@ -122,6 +123,15 @@ final class DifferentialHunkParser extends Phobject {
 
   public function getDepthOnlyLines() {
     return $this->depthOnlyLines;
+  }
+
+  public function setNormalized($normalized) {
+    $this->normalized = $normalized;
+    return $this;
+  }
+
+  public function getNormalized() {
+    return $this->normalized;
   }
 
   public function getIsDeleted() {
@@ -251,6 +261,8 @@ final class DifferentialHunkParser extends Phobject {
 
     $this->setOldLines($rebuild_old);
     $this->setNewLines($rebuild_new);
+
+    $this->updateChangeTypesForNormalization();
 
     return $this;
   }
@@ -752,5 +764,56 @@ final class DifferentialHunkParser extends Phobject {
 
     return $character_depth;
   }
+
+  private function updateChangeTypesForNormalization() {
+    if (!$this->getNormalized()) {
+      return;
+    }
+
+    // If we've parsed based on a normalized diff alignment, we may currently
+    // believe some lines are unchanged when they have actually changed. This
+    // happens when:
+    //
+    //   - a line changes;
+    //   - the change is a kind of change we normalize away when aligning the
+    //     diff, like an indentation change;
+    //   - we normalize the change away to align the diff; and so
+    //   - the old and new copies of the line are now aligned in the new
+    //     normalized diff.
+    //
+    // Then we end up with an alignment where the two lines that differ only
+    // in some some trivial way are aligned. This is great, and exactly what
+    // we're trying to accomplish by doing all this alignment stuff in the
+    // first place.
+    //
+    // However, in this case the correctly-aligned lines will be incorrectly
+    // marked as unchanged because the diff alorithm was fed normalized copies
+    // of the lines, and these copies truly weren't any different.
+    //
+    // When lines are aligned and marked identical, but they're not actually
+    // identcal, we now mark them as changed. The rest of the processing will
+    // figure out how to render them appropritely.
+
+    $new = $this->getNewLines();
+    $old = $this->getOldLines();
+    foreach ($old as $key => $o) {
+      $n = $new[$key];
+
+      if (!$o || !$n) {
+        continue;
+      }
+
+      if ($o['type'] === null && $n['type'] === null) {
+        if ($o['text'] !== $n['text']) {
+          $old[$key]['type'] = '-';
+          $new[$key]['type'] = '+';
+        }
+      }
+    }
+
+    $this->setOldLines($old);
+    $this->setNewLines($new);
+  }
+
 
 }

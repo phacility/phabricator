@@ -14,6 +14,10 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
       }
       $data = Filesystem::readFile($dir.$file);
 
+      // Strip trailing "~" characters from inputs so they may contain
+      // trailing whitespace.
+      $data = preg_replace('/~$/m', '', $data);
+
       $opt_file = $dir.$file.'.options';
       if (Filesystem::pathExists($opt_file)) {
         $options = Filesystem::readFile($opt_file);
