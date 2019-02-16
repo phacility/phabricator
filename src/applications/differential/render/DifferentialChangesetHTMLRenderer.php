@@ -436,7 +436,7 @@ abstract class DifferentialChangesetHTMLRenderer
       'table',
       array(
         'class' => implode(' ', $classes),
-        'sigil' => 'differential-diff',
+        'sigil' => 'differential-diff intercept-copy',
       ),
       array(
         $this->renderColgroup(),

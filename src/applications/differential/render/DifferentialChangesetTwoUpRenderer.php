@@ -319,12 +319,22 @@ final class DifferentialChangesetTwoUpRenderer
 
       $html[] = phutil_tag('tr', array(), array(
         $old_number,
-        phutil_tag('td', array('class' => $o_classes), $o_text),
+        phutil_tag(
+          'td',
+          array(
+            'class' => $o_classes,
+            'data-copy-mode' => 'copy-l',
+          ),
+          $o_text),
         $new_number,
         $n_copy,
         phutil_tag(
           'td',
-          array('class' => $n_classes, 'colspan' => $n_colspan),
+          array(
+            'class' => $n_classes,
+            'colspan' => $n_colspan,
+            'data-copy-mode' => 'copy-r',
+          ),
           $n_text),
         $n_cov,
       ));

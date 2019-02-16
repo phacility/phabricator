@@ -176,12 +176,6 @@ should always have a boring grey background. */
   cursor: pointer;
   border-right: 1px solid {$thinblueborder};
   overflow: hidden;
-
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
 
 .differential-diff td.n::before {
@@ -429,4 +423,34 @@ tr.differential-inline-loading {
 
 .diff-banner-buttons {
   float: right;
+}
+
+/* In Firefox, making the table unselectable and then making cells selectable
+does not work: the cells remain unselectable. Narrowly mark the cells as
+unselectable. */
+
+.differential-diff.copy-l > tbody > tr > td,
+.differential-diff.copy-r > tbody > tr > td {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.differential-diff.copy-l > tbody > tr > td,
+.differential-diff.copy-r > tbody > tr > td {
+  opacity: 0.5;
+}
+
+.differential-diff.copy-l > tbody > tr > td:nth-child(2) {
+  -webkit-user-select: auto;
+  user-select: auto;
+  opacity: 1;
+}
+
+.differential-diff.copy-r > tbody > tr > td:nth-child(5) {
+  -webkit-user-select: auto;
+  user-select: auto;
+  opacity: 1;
 }
