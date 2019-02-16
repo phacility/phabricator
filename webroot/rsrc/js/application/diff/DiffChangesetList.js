@@ -70,13 +70,13 @@ JX.install('DiffChangesetList', {
     var onrangedown = JX.bind(this, this._ifawake, this._onrangedown);
     JX.Stratcom.listen(
       'mousedown',
-      ['differential-changeset', 'tag:th'],
+      ['differential-changeset', 'tag:td'],
       onrangedown);
 
     var onrangemove = JX.bind(this, this._ifawake, this._onrangemove);
     JX.Stratcom.listen(
       ['mouseover', 'mouseout'],
-      ['differential-changeset', 'tag:th'],
+      ['differential-changeset', 'tag:td'],
       onrangemove);
 
     var onrangeup = JX.bind(this, this._ifawake, this._onrangeup);
@@ -360,7 +360,7 @@ JX.install('DiffChangesetList', {
           while (row) {
             var header = row.firstChild;
             while (header) {
-              if (JX.DOM.isType(header, 'th')) {
+              if (this.getLineNumberFromHeader(header)) {
                 if (header.className.indexOf('old') !== -1) {
                   old_list.push(header);
                 } else if (header.className.indexOf('new') !== -1) {
@@ -1247,11 +1247,7 @@ JX.install('DiffChangesetList', {
     },
 
     getLineNumberFromHeader: function(th) {
-      try {
-        return parseInt(th.id.match(/^C\d+[ON]L(\d+)$/)[1], 10);
-      } catch (x) {
-        return null;
-      }
+      return parseInt(th.getAttribute('data-n'));
     },
 
     getDisplaySideFromHeader: function(th) {

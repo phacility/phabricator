@@ -72,23 +72,6 @@
   width: 0;
 }
 
-.differential-diff th {
-  text-align: right;
-  padding: 1px 6px 1px 0;
-  vertical-align: top;
-  background: {$lightbluebackground};
-  color: {$bluetext};
-  cursor: pointer;
-  border-right: 1px solid {$thinblueborder};
-  overflow: hidden;
-
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
 .prose-diff {
   padding: 12px 0;
   white-space: pre-wrap;
@@ -180,6 +163,34 @@
 
 .differential-diff td.comment {
   background: #dddddd;
+}
+
+.differential-diff .inline > td {
+  padding: 0;
+}
+
+/* Specify line number behaviors after other behaviors because line numbers
+should always have a boring grey background. */
+
+.differential-diff td.n {
+  text-align: right;
+  padding: 1px 6px 1px 0;
+  vertical-align: top;
+  background: {$lightbluebackground};
+  color: {$bluetext};
+  cursor: pointer;
+  border-right: 1px solid {$thinblueborder};
+  overflow: hidden;
+
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.differential-diff td.n::before {
+  content: attr(data-n);
 }
 
 .differential-diff td.cov {
@@ -314,10 +325,6 @@ td.cov-I {
   left: 0;
   box-sizing: border-box;
   pointer-events: none;
-}
-
-.differential-diff .inline > td {
-  padding: 0;
 }
 
 .differential-loading {

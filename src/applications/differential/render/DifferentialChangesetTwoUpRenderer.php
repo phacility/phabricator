@@ -306,10 +306,26 @@ final class DifferentialChangesetTwoUpRenderer
       // clipboard. See the 'phabricator-oncopy' behavior.
       $zero_space = "\xE2\x80\x8B";
 
+      $old_number = phutil_tag(
+        'td',
+        array(
+          'id' => $o_id,
+          'class' => $o_classes.' n',
+          'data-n' => $o_num,
+        ));
+
+      $new_number = phutil_tag(
+        'td',
+        array(
+          'id' => $n_id,
+          'class' => $n_classes.' n',
+          'data-n' => $n_num,
+        ));
+
       $html[] = phutil_tag('tr', array(), array(
-        phutil_tag('th', array('id' => $o_id, 'class' => $o_classes), $o_num),
+        $old_number,
         phutil_tag('td', array('class' => $o_classes), $o_text),
-        phutil_tag('th', array('id' => $n_id, 'class' => $n_classes), $n_num),
+        $new_number,
         $n_copy,
         phutil_tag(
           'td',
