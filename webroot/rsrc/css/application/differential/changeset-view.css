@@ -67,11 +67,6 @@
   padding: 1px 4px;
 }
 
-.differential-diff td .zwsp {
-  position: absolute;
-  width: 0;
-}
-
 .prose-diff {
   padding: 12px 0;
   white-space: pre-wrap;

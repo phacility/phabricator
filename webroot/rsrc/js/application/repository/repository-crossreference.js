@@ -237,11 +237,6 @@ JX.behavior('repository-crossreference', function(config, statics) {
       }
 
       var content = '' + node.textContent;
-
-      // Strip off any ZWS characters. These are marker characters used to
-      // improve copy/paste behavior.
-      content = content.replace(/\u200B/g, '');
-
       char += content.length;
     }
 

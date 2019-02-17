@@ -11,8 +11,8 @@ return array(
     'conpherence.pkg.js' => '020aebcf',
     'core.pkg.css' => '261ee8cf',
     'core.pkg.js' => '5ace8a1e',
-    'differential.pkg.css' => '801c5653',
-    'differential.pkg.js' => '1f211736',
+    'differential.pkg.css' => 'fcc82bc0',
+    'differential.pkg.js' => '0e2b0e2c',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => '91192d85',
     'maniphest.pkg.css' => '35995d6d',
@@ -61,7 +61,7 @@ return array(
     'rsrc/css/application/dashboard/dashboard.css' => '4267d6c6',
     'rsrc/css/application/diff/inline-comment-summary.css' => '81eb368d',
     'rsrc/css/application/differential/add-comment.css' => '7e5900d9',
-    'rsrc/css/application/differential/changeset-view.css' => '8a997ed9',
+    'rsrc/css/application/differential/changeset-view.css' => '58236820',
     'rsrc/css/application/differential/core.css' => 'bdb93065',
     'rsrc/css/application/differential/phui-inline-comment.css' => '48acce5b',
     'rsrc/css/application/differential/revision-comment.css' => '7dbc8d1d',
@@ -420,7 +420,7 @@ return array(
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '75184d68',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => '9f081f05',
     'rsrc/js/application/releeph/releeph-request-typeahead.js' => 'aa3a100c',
-    'rsrc/js/application/repository/repository-crossreference.js' => 'db0c0214',
+    'rsrc/js/application/repository/repository-crossreference.js' => 'c15122b4',
     'rsrc/js/application/search/behavior-reorder-profile-menu-items.js' => 'e5bdb730',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'b86f297f',
     'rsrc/js/application/transactions/behavior-comment-actions.js' => '4dffaeb2',
@@ -541,7 +541,7 @@ return array(
     'conpherence-thread-manager' => 'aec8e38c',
     'conpherence-transaction-css' => '3a3f5e7e',
     'd3' => 'd67475f5',
-    'differential-changeset-view-css' => '8a997ed9',
+    'differential-changeset-view-css' => '58236820',
     'differential-core-view-css' => 'bdb93065',
     'differential-revision-add-comment-css' => '7e5900d9',
     'differential-revision-comment-css' => '7dbc8d1d',
@@ -671,7 +671,7 @@ return array(
     'javelin-behavior-reorder-applications' => 'aa371860',
     'javelin-behavior-reorder-columns' => '8ac32fd9',
     'javelin-behavior-reorder-profile-menu-items' => 'e5bdb730',
-    'javelin-behavior-repository-crossreference' => 'db0c0214',
+    'javelin-behavior-repository-crossreference' => 'c15122b4',
     'javelin-behavior-scrollbar' => '92388bae',
     'javelin-behavior-search-reorder-queries' => 'b86f297f',
     'javelin-behavior-select-content' => 'e8240b50',
@@ -1380,6 +1380,9 @@ return array(
       'javelin-vector',
       'javelin-typeahead-static-source',
     ),
+    58236820 => array(
+      'phui-inline-comment-view-css',
+    ),
     '5902260c' => array(
       'javelin-util',
       'javelin-magical-init',
@@ -1586,9 +1589,6 @@ return array(
     ),
     '8a16f91b' => array(
       'syntax-default-css',
-    ),
-    '8a997ed9' => array(
-      'phui-inline-comment-view-css',
     ),
     '8ac32fd9' => array(
       'javelin-behavior',
@@ -1912,6 +1912,12 @@ return array(
     'c03f2fb4' => array(
       'javelin-install',
     ),
+    'c15122b4' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-uri',
+    ),
     'c2c500a7' => array(
       'javelin-install',
       'javelin-dom',
@@ -2007,12 +2013,6 @@ return array(
       'javelin-behavior',
       'javelin-uri',
       'phabricator-notification',
-    ),
-    'db0c0214' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-uri',
     ),
     'dfa1d313' => array(
       'javelin-behavior',

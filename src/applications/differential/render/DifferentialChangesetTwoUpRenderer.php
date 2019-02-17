@@ -301,11 +301,6 @@ final class DifferentialChangesetTwoUpRenderer
         }
       }
 
-      // NOTE: This is a unicode zero-width space, which we use as a hint when
-      // intercepting 'copy' events to make sure sensible text ends up on the
-      // clipboard. See the 'phabricator-oncopy' behavior.
-      $zero_space = "\xE2\x80\x8B";
-
       $old_number = phutil_tag(
         'td',
         array(
@@ -330,10 +325,7 @@ final class DifferentialChangesetTwoUpRenderer
         phutil_tag(
           'td',
           array('class' => $n_classes, 'colspan' => $n_colspan),
-          array(
-            phutil_tag('span', array('class' => 'zwsp'), $zero_space),
-            $n_text,
-          )),
+          $n_text),
         $n_cov,
       ));
 
