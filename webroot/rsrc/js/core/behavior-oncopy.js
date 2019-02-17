@@ -186,12 +186,12 @@ JX.behavior('phabricator-oncopy', function() {
       return;
     }
 
-    var text_nodes = [];
+    var text = [];
     for (var ii = 0; ii < ranges.length; ii++) {
       var range = ranges[ii];
 
       var fragment = range.cloneContents();
-      if (!fragment.children.length) {
+      if (!fragment.childNodes.length) {
         continue;
       }
 
@@ -217,48 +217,91 @@ JX.behavior('phabricator-oncopy', function() {
 
       for (var jj = 0; jj < fragment.childNodes.length; jj++) {
         var node = fragment.childNodes[jj];
-        if (JX.DOM.isType(node, 'tr')) {
-          // This is an inline comment row, so we never want to copy any
-          // content inside of it.
-          if (JX.Stratcom.hasSigil(node, 'inline-row')) {
-            continue;
-          }
-
-          // Assume anything else is a source code row. Keep only "<td>" cells
-          // with the correct mode.
-          for (var kk = 0; kk < node.childNodes.length; kk++) {
-            var child = node.childNodes[kk];
-
-            var node_mode = child.getAttribute('data-copy-mode');
-            if (node_mode === copy_mode) {
-              text_nodes.push(child);
-            }
-          }
-        } else {
-          // For anything else, assume this is a text fragment or part of
-          // a table cell or something and should be included in the selection
-          // range.
-          text_nodes.push(node);
-        }
+        text.push(extract_text(node));
       }
-
-      var text = [];
-      for (ii = 0; ii < text_nodes.length; ii++) {
-        text.push(text_nodes[ii].textContent);
-      }
-      text = text.join('');
-
-      var rawEvent = e.getRawEvent();
-      var data;
-      if ('clipboardData' in rawEvent) {
-        data = rawEvent.clipboardData;
-      } else {
-        data = window.clipboardData;
-      }
-      data.setData('Text', text);
-
-      e.prevent();
     }
+
+    text = flatten_list(text);
+    text = text.join('');
+
+    var rawEvent = e.getRawEvent();
+    var data;
+    if ('clipboardData' in rawEvent) {
+      data = rawEvent.clipboardData;
+    } else {
+      data = window.clipboardData;
+    }
+    data.setData('Text', text);
+
+    e.prevent();
+  }
+
+  function extract_text(node) {
+    var ii;
+    var text = [];
+
+    if (JX.DOM.isType(node, 'tr')) {
+      // This is an inline comment row, so we never want to copy any
+      // content inside of it.
+      if (JX.Stratcom.hasSigil(node, 'inline-row')) {
+        return null;
+      }
+
+      // This is a "Show More Context" row, so we never want to copy any
+      // of the content inside.
+      if (JX.Stratcom.hasSigil(node, 'context-target')) {
+        return null;
+      }
+
+      // Assume anything else is a source code row. Keep only "<td>" cells
+      // with the correct mode.
+      for (ii = 0; ii < node.childNodes.length; ii++) {
+        text.push(extract_text(node.childNodes[ii]));
+      }
+
+      return text;
+    }
+
+    if (JX.DOM.isType(node, 'td')) {
+      var node_mode = node.getAttribute('data-copy-mode');
+      if (node_mode !== copy_mode) {
+        return;
+      }
+
+      // Otherwise, fall through and extract this node's text normally.
+    }
+
+    if (!node.childNodes || !node.childNodes.length) {
+      return node.textContent;
+    }
+
+    for (ii = 0; ii < node.childNodes.length; ii++) {
+      var child = node.childNodes[ii];
+      text.push(extract_text(child));
+    }
+
+    return text;
+  }
+
+  function flatten_list(list) {
+    var stack = [list];
+    var result = [];
+    while (stack.length) {
+      var next = stack.pop();
+      if (JX.isArray(next)) {
+        for (var ii = 0; ii < next.length; ii++) {
+          stack.push(next[ii]);
+        }
+      } else if (next === null) {
+        continue;
+      } else if (next === undefined) {
+        continue;
+      } else {
+        result.push(next);
+      }
+    }
+
+    return result.reverse();
   }
 
   JX.enableDispatch(document.body, 'copy');

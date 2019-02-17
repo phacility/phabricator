@@ -87,7 +87,7 @@
   color: {$darkgreytext};
 }
 
-.differential-changeset-immutable .differential-diff th {
+.differential-changeset-immutable .differential-diff td {
   cursor: auto;
 }
 
@@ -182,6 +182,10 @@ should always have a boring grey background. */
   content: attr(data-n);
 }
 
+.differential-diff td.show-context-line.n {
+  cursor: auto;
+}
+
 .differential-diff td.cov {
   padding: 0;
 }
@@ -222,7 +226,7 @@ td.cov-I {
 }
 
 .differential-diff td.show-more,
-.differential-diff th.show-context-line,
+.differential-diff td.show-context-line,
 .differential-diff td.show-context,
 .differential-diff td.differential-shield {
   background: {$lightbluebackground};
@@ -232,7 +236,7 @@ td.cov-I {
 }
 
 .device .differential-diff td.show-more,
-.device .differential-diff th.show-context-line,
+.device .differential-diff td.show-context-line,
 .device .differential-diff td.show-context,
 .device .differential-diff td.differential-shield {
   padding: 6px 0;
@@ -250,8 +254,12 @@ td.cov-I {
   color: {$bluetext};
 }
 
-.differential-diff th.show-context-line {
+.differential-diff td.show-context-line {
   padding-right: 6px;
+}
+
+.differential-diff td.show-context-line.left-context {
+  border-right: none;
 }
 
 .differential-diff td.show-context {
@@ -431,8 +439,7 @@ unselectable. */
 
 .differential-diff.copy-l > tbody > tr > td,
 .differential-diff.copy-r > tbody > tr > td {
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
+  -moz-user-select: none;
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
@@ -444,12 +451,24 @@ unselectable. */
 }
 
 .differential-diff.copy-l > tbody > tr > td:nth-child(2) {
+  -moz-user-select: auto;
+  -ms-user-select: auto;
   -webkit-user-select: auto;
   user-select: auto;
   opacity: 1;
 }
 
+.differential-diff.copy-l > tbody > tr > td.show-more:nth-child(2) {
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: 0.25;
+}
+
 .differential-diff.copy-r > tbody > tr > td:nth-child(5) {
+  -moz-user-select: auto;
+  -ms-user-select: auto;
   -webkit-user-select: auto;
   user-select: auto;
   opacity: 1;

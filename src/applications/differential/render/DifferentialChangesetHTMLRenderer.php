@@ -432,16 +432,26 @@ abstract class DifferentialChangesetHTMLRenderer
     $classes[] = 'PhabricatorMonospaced';
     $classes[] = $this->getRendererTableClass();
 
+    $sigils = array();
+    $sigils[] = 'differential-diff';
+    foreach ($this->getTableSigils() as $sigil) {
+      $sigils[] = $sigil;
+    }
+
     return javelin_tag(
       'table',
       array(
         'class' => implode(' ', $classes),
-        'sigil' => 'differential-diff intercept-copy',
+        'sigil' => implode(' ', $sigils),
       ),
       array(
         $this->renderColgroup(),
         $content,
       ));
+  }
+
+  protected function getTableSigils() {
+    return array();
   }
 
   protected function buildInlineComment(

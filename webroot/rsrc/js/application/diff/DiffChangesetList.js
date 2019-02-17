@@ -1246,8 +1246,24 @@ JX.install('DiffChangesetList', {
       return changeset.getInlineForRow(inline_row);
     },
 
-    getLineNumberFromHeader: function(th) {
-      return parseInt(th.getAttribute('data-n'));
+    getLineNumberFromHeader: function(node) {
+      var n = parseInt(node.getAttribute('data-n'));
+
+      if (!n) {
+        return null;
+      }
+
+      // If this is a line number that's part of a row showing more context,
+      // we don't want to let users leave inlines here.
+
+      try {
+        JX.DOM.findAbove(node, 'tr', 'context-target');
+        return null;
+      } catch (ex) {
+        // Ignore.
+      }
+
+      return n;
     },
 
     getDisplaySideFromHeader: function(th) {
@@ -1295,7 +1311,7 @@ JX.install('DiffChangesetList', {
     },
 
     _updateRange: function(target, is_out) {
-      // Don't update the range if this "<th />" doesn't correspond to a line
+      // Don't update the range if this target doesn't correspond to a line
       // number. For instance, this may be a dead line number, like the empty
       // line numbers on the left hand side of a newly added file.
       var number = this.getLineNumberFromHeader(target);

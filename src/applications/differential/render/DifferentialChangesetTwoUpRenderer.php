@@ -117,16 +117,20 @@ final class DifferentialChangesetTwoUpRenderer
             phutil_tag(
               'td',
               array(
-                'colspan' => 2,
+                'class' => 'show-context-line n left-context',
+              )),
+            phutil_tag(
+              'td',
+              array(
                 'class' => 'show-more',
               ),
               $contents),
             phutil_tag(
-              'th',
+              'td',
               array(
-                'class' => 'show-context-line',
-              ),
-              $context_line ? (int)$context_line : null),
+                'class' => 'show-context-line n',
+                'data-n' => $context_line,
+              )),
             phutil_tag(
               'td',
               array(
@@ -446,6 +450,12 @@ final class DifferentialChangesetTwoUpRenderer
     }
 
     return $this->newOffsetMap;
+  }
+
+  protected function getTableSigils() {
+    return array(
+      'intercept-copy',
+    );
   }
 
 }
