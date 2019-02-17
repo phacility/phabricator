@@ -131,7 +131,7 @@ abstract class DifferentialChangesetTestRenderer
     }
 
     $out = implode("\n", $out)."\n";
-    return $out;
+    return phutil_safe_html($out);
   }
 
 

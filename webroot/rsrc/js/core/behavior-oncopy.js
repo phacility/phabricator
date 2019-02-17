@@ -271,6 +271,13 @@ JX.behavior('phabricator-oncopy', function() {
       // Otherwise, fall through and extract this node's text normally.
     }
 
+    if (node.getAttribute) {
+      var copy_text = node.getAttribute('data-copy-text');
+      if (copy_text) {
+        return copy_text;
+      }
+    }
+
     if (!node.childNodes || !node.childNodes.length) {
       return node.textContent;
     }

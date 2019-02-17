@@ -189,7 +189,7 @@ final class DifferentialChangesetParser extends Phobject {
     return $this;
   }
 
-  const CACHE_VERSION = 13;
+  const CACHE_VERSION = 14;
   const CACHE_MAX_SIZE = 8e6;
 
   const ATTR_GENERATED  = 'attr:generated';
@@ -568,11 +568,17 @@ final class DifferentialChangesetParser extends Phobject {
   private function applyIntraline(&$render, $intra, $corpus) {
 
     foreach ($render as $key => $text) {
+      $result = $text;
+
       if (isset($intra[$key])) {
-        $render[$key] = ArcanistDiffUtils::applyIntralineDiff(
-          $text,
+        $result = ArcanistDiffUtils::applyIntralineDiff(
+          $result,
           $intra[$key]);
       }
+
+      $result = $this->adjustRenderedLineForDisplay($result);
+
+      $render[$key] = $result;
     }
   }
 
@@ -1415,5 +1421,183 @@ final class DifferentialChangesetParser extends Phobject {
     $hunk_parser->setNewLineTypeMap($type_parser->getNewLineTypeMap());
   }
 
+  private function adjustRenderedLineForDisplay($line) {
+    // IMPORTANT: We're using "str_replace()" against raw HTML here, which can
+    // easily become unsafe. The input HTML has already had syntax highlighting
+    // and intraline diff highlighting applied, so it's full of "<span />" tags.
+
+    static $search;
+    static $replace;
+    if ($search === null) {
+      $rules = $this->newSuspiciousCharacterRules();
+
+      $map = array();
+      foreach ($rules as $key => $spec) {
+        $tag = phutil_tag(
+          'span',
+          array(
+            'data-copy-text' => $key,
+            'class' => $spec['class'],
+            'title' => $spec['title'],
+          ),
+          $spec['replacement']);
+        $map[$key] = phutil_string_cast($tag);
+      }
+
+      $search = array_keys($map);
+      $replace = array_values($map);
+    }
+
+    $is_html = false;
+    if ($line instanceof PhutilSafeHTML) {
+      $is_html = true;
+      $line = hsprintf('%s', $line);
+    }
+
+    $line = phutil_string_cast($line);
+
+    if (strpos($line, "\t") !== false) {
+      $line = $this->replaceTabsWithSpaces($line);
+    }
+    $line = str_replace($search, $replace, $line);
+
+    if ($is_html) {
+      $line = phutil_safe_html($line);
+    }
+
+    return $line;
+  }
+
+  private function newSuspiciousCharacterRules() {
+    // The "title" attributes are cached in the database, so they're
+    // intentionally not wrapped in "pht(...)".
+
+    $rules = array(
+      "\xE2\x80\x8B" => array(
+        'title' => 'ZWS',
+        'class' => 'suspicious-character',
+        'replacement' => '!',
+      ),
+      "\xC2\xA0" => array(
+        'title' => 'NBSP',
+        'class' => 'suspicious-character',
+        'replacement' => '!',
+      ),
+      "\x7F" => array(
+        'title' => 'DEL (0x7F)',
+        'class' => 'suspicious-character',
+        'replacement' => "\xE2\x90\xA1",
+      ),
+    );
+
+    // Unicode defines special pictures for the control characters in the
+    // range between "0x00" and "0x1F".
+
+    $control = array(
+      'NULL',
+      'SOH',
+      'STX',
+      'ETX',
+      'EOT',
+      'ENQ',
+      'ACK',
+      'BEL',
+      'BS',
+      null, // "\t" Tab
+      null, // "\n" New Line
+      'VT',
+      'FF',
+      null, // "\r" Carriage Return,
+      'SO',
+      'SI',
+      'DLE',
+      'DC1',
+      'DC2',
+      'DC3',
+      'DC4',
+      'NAK',
+      'SYN',
+      'ETB',
+      'CAN',
+      'EM',
+      'SUB',
+      'ESC',
+      'FS',
+      'GS',
+      'RS',
+      'US',
+    );
+
+    foreach ($control as $idx => $label) {
+      if ($label === null) {
+        continue;
+      }
+
+      $rules[chr($idx)] = array(
+        'title' => sprintf('%s (0x%02X)', $label, $idx),
+        'class' => 'suspicious-character',
+        'replacement' => "\xE2\x90".chr(0x80 + $idx),
+      );
+    }
+
+    return $rules;
+  }
+
+  private function replaceTabsWithSpaces($line) {
+    // TODO: This should be flexible, eventually.
+    $tab_width = 2;
+
+    static $tags;
+    if ($tags === null) {
+      $tags = array();
+      for ($ii = 1; $ii <= $tab_width; $ii++) {
+        $tag = phutil_tag(
+          'span',
+          array(
+            'data-copy-text' => "\t",
+          ),
+          str_repeat(' ', $ii));
+        $tag = phutil_string_cast($tag);
+        $tags[$ii] = $tag;
+      }
+    }
+
+    // If the line is particularly long, don't try to vectorize it. Use a
+    // faster approximation of the correct tabstop expansion instead. This
+    // usually still arrives at the right result.
+    if (strlen($line) > 256) {
+      return str_replace("\t", $tags[$tab_width], $line);
+    }
+
+    $line = phutil_utf8v_combined($line);
+    $in_tag = false;
+    $pos = 0;
+    foreach ($line as $key => $char) {
+      if ($char === '<') {
+        $in_tag = true;
+        continue;
+      }
+
+      if ($char === '>') {
+        $in_tag = false;
+        continue;
+      }
+
+      if ($in_tag) {
+        continue;
+      }
+
+      if ($char === "\t") {
+        $count = $tab_width - ($pos % $tab_width);
+        $pos += $count;
+        $line[$key] = $tags[$count];
+        continue;
+      }
+
+      $pos++;
+    }
+
+    return implode('', $line);
+  }
 
 }
