@@ -300,9 +300,10 @@ final class MultimeterSampleController extends MultimeterController {
 
     $group = implode('.', $group);
     if (!strlen($group)) {
-      $group = null;
+      $uri->removeQueryParam('group');
+    } else {
+      $uri->replaceQueryParam('group', $group);
     }
-    $uri->replaceQueryParam('group', $group);
 
     if ($wipe) {
       foreach ($this->getColumnMap() as $key => $column) {
