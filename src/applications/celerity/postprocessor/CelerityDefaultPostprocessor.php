@@ -199,10 +199,8 @@ final class CelerityDefaultPostprocessor
       'diff.background' => '#fff',
       'new-background' => 'rgba(151, 234, 151, .3)',
       'new-bright' => 'rgba(151, 234, 151, .6)',
-      'new-background-strong' => 'rgba(151, 234, 151, 1)',
       'old-background' => 'rgba(251, 175, 175, .3)',
       'old-bright' => 'rgba(251, 175, 175, .7)',
-      'old-background-strong' => 'rgba(251, 175, 175, 1)',
       'move-background' => '#fdf5d4',
       'copy-background' => '#f1c40f',
 

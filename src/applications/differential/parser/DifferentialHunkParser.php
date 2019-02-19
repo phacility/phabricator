@@ -288,7 +288,7 @@ final class DifferentialHunkParser extends Phobject {
         $o_text = $o['text'];
         $n_text = $n['text'];
 
-        if ($o_text !== $n_text) {
+        if ($o_text !== $n_text && (ltrim($o_text) === ltrim($n_text))) {
           $o_depth = $this->getIndentDepth($o_text, $tab_width);
           $n_depth = $this->getIndentDepth($n_text, $tab_width);
 

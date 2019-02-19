@@ -130,13 +130,13 @@
 
 .differential-diff td span.depth-out {
   background-image: url(/rsrc/image/chevron-out.png);
-  background-color: {$old-background-strong};
+  background-color: {$old-bright};
 }
 
 .differential-diff td span.depth-in {
-  background-position: 2px center;
+  background-position: 1px center;
   background-image: url(/rsrc/image/chevron-in.png);
-  background-color: {$new-background-strong};
+  background-color: {$new-bright};
 }
 
 
