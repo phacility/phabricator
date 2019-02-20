@@ -65,8 +65,7 @@ final class PHUIDiffTwoUpInlineCommentRowScaffold
     );
 
     $right_attrs = array(
-      'colspan' => 3,
-      'class' => 'right3',
+      'colspan' => 2,
       'id' => ($right_side ? $right_side->getScaffoldCellID() : null),
     );
 
@@ -74,6 +73,7 @@ final class PHUIDiffTwoUpInlineCommentRowScaffold
       phutil_tag('td', array('class' => 'n'), $left_hidden),
       phutil_tag('td', $left_attrs, $left_side),
       phutil_tag('td', array('class' => 'n'), $right_hidden),
+      phutil_tag('td', array('class' => 'copy')),
       phutil_tag('td', $right_attrs, $right_side),
     );
 

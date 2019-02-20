@@ -144,6 +144,7 @@
   min-width: 0.5%;
   width: 0.5%;
   padding: 0;
+  background: {$lightbluebackground};
 }
 
 .differential-diff td.new-copy,
@@ -176,6 +177,10 @@ should always have a boring grey background. */
   cursor: pointer;
   border-right: 1px solid {$thinblueborder};
   overflow: hidden;
+}
+
+.differential-diff td + td.n {
+  border-left: 1px solid {$thinblueborder};
 }
 
 .differential-diff td.n::before {
@@ -443,10 +448,6 @@ unselectable. */
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-}
-
-.differential-diff.copy-l > tbody > tr > td,
-.differential-diff.copy-r > tbody > tr > td {
   opacity: 0.5;
 }
 
@@ -463,7 +464,7 @@ unselectable. */
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  opacity: 0.25;
+  opacity: 0.5;
 }
 
 .differential-diff.copy-r > tbody > tr > td:nth-child(5) {
@@ -472,4 +473,13 @@ unselectable. */
   -webkit-user-select: auto;
   user-select: auto;
   opacity: 1;
+}
+
+.differential-diff.copy-l > tbody > tr.inline > td,
+.differential-diff.copy-r > tbody > tr.inline > td {
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: 0.5;
 }

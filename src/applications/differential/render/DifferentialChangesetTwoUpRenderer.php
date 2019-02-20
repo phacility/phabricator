@@ -223,7 +223,7 @@ final class DifferentialChangesetTwoUpRenderer
             ($new_lines[$ii]['type'] == '\\');
 
           if ($not_copied) {
-            $n_copy = phutil_tag('td', array('class' => "copy {$n_class}"));
+            $n_copy = phutil_tag('td', array('class' => 'copy'));
           } else {
             list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
             $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
@@ -243,8 +243,7 @@ final class DifferentialChangesetTwoUpRenderer
                   'msg' => $title,
                 ),
                 'class' => 'copy '.$class,
-              ),
-              '');
+              ));
           }
         }
       }
