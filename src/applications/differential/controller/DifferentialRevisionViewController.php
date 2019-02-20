@@ -621,8 +621,6 @@ final class DifferentialRevisionViewController
         ->build($changesets);
     }
 
-    Javelin::initBehavior('differential-user-select');
-
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)

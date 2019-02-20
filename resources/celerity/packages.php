@@ -199,7 +199,6 @@ return array(
     'javelin-behavior-phabricator-object-selector',
     'javelin-behavior-repository-crossreference',
 
-    'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
 
     'phabricator-diff-inline',
