@@ -33,7 +33,7 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   private $canMarkDone;
   private $objectOwnerPHID;
   private $highlightingDisabled;
-  private $scopeEngine;
+  private $scopeEngine = false;
   private $depthOnlyLines;
 
   private $oldFile = false;
@@ -677,13 +677,23 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     return $views;
   }
 
-
   final protected function getScopeEngine() {
-    if (!$this->scopeEngine) {
-      $line_map = $this->getNewLineTextMap();
+    if ($this->scopeEngine === false) {
+      $hunk_starts = $this->getHunkStartLines();
 
-      $scope_engine = id(new PhabricatorDiffScopeEngine())
-        ->setLineTextMap($line_map);
+      // If this change is missing context, don't try to identify scopes, since
+      // we won't really be able to get anywhere.
+      $has_multiple_hunks = (count($hunk_starts) > 1);
+      $has_offset_hunks = (head_key($hunk_starts) != 1);
+      $missing_context = ($has_multiple_hunks || $has_offset_hunks);
+
+      if ($missing_context) {
+        $scope_engine = null;
+      } else {
+        $line_map = $this->getNewLineTextMap();
+        $scope_engine = id(new PhabricatorDiffScopeEngine())
+          ->setLineTextMap($line_map);
+      }
 
       $this->scopeEngine = $scope_engine;
     }

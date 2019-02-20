@@ -94,7 +94,7 @@ final class DifferentialChangesetTwoUpRenderer
 
         $context_text = null;
         $context_line = null;
-        if (!$is_last_block) {
+        if (!$is_last_block && $scope_engine) {
           $target_line = $new_lines[$ii + $len]['line'];
           $context_line = $scope_engine->getScopeStart($target_line);
           if ($context_line !== null) {
