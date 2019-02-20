@@ -12,7 +12,6 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
 
     $config = array(
       self::CONFIG_IDS => self::IDS_COUNTER,
-      self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_KEY_SCHEMA => array(
         'taskClass' => array(
           'columns' => array('taskClass'),
@@ -118,7 +117,9 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ->setPriority($this->getPriority())
       ->setObjectPHID($this->getObjectPHID())
       ->setResult($result)
-      ->setDuration($duration);
+      ->setDuration($duration)
+      ->setDateCreated($this->getDateCreated())
+      ->setArchivedEpoch(PhabricatorTime::getNow());
 
     // NOTE: This deletes the active task (this object)!
     $archive->save();

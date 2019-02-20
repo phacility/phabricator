@@ -8,6 +8,7 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
 
   protected $duration;
   protected $result;
+  protected $archivedEpoch;
 
   protected function getConfiguration() {
     $parent = parent::getConfiguration();
@@ -22,6 +23,7 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
       'result' => 'uint32',
       'duration' => 'uint64',
+      'archivedEpoch' => 'epoch?',
     ) + $config[self::CONFIG_COLUMN_SCHEMA];
 
     $config[self::CONFIG_KEY_SCHEMA] = array(
@@ -85,6 +87,7 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
         ->setDataID($this->getDataID())
         ->setPriority($this->getPriority())
         ->setObjectPHID($this->getObjectPHID())
+        ->setDateCreated($this->getDateCreated())
         ->insert();
 
       $this->setDataID(null);
