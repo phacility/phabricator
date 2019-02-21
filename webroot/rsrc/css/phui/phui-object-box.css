@@ -158,3 +158,8 @@ div.phui-object-box.phui-object-box-flush {
   margin-top: 8px;
   margin-bottom: 8px;
 }
+
+.phui-object-box-instructions {
+  padding: 16px;
+  border-bottom: 1px solid {$thinblueborder};
+}

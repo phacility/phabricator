@@ -96,10 +96,14 @@ abstract class DifferentialChangesetTestRenderer
             array(
               '<span class="bright">',
               '</span>',
+              '<span class="depth-out">',
+              '<span class="depth-in">',
             ),
             array(
               '{(',
               ')}',
+              '{<',
+              '{>',
             ),
             $render);
 
@@ -127,7 +131,7 @@ abstract class DifferentialChangesetTestRenderer
     }
 
     $out = implode("\n", $out)."\n";
-    return $out;
+    return phutil_safe_html($out);
   }
 
 

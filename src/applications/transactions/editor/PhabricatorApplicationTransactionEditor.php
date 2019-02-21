@@ -1648,9 +1648,48 @@ abstract class PhabricatorApplicationTransactionEditor
         // don't enforce it here.
         return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        // TODO: Removing subscribers other than yourself should probably
-        // require CAN_EDIT permission. You can do this via the API but
-        // generally can not via the web interface.
+        // Anyone can subscribe to or unsubscribe from anything they can view,
+        // with no other permissions.
+
+        $old = array_fuse($xaction->getOldValue());
+        $new = array_fuse($xaction->getNewValue());
+
+        // To remove users other than yourself, you must be able to edit the
+        // object.
+        $rem = array_diff_key($old, $new);
+        foreach ($rem as $phid) {
+          if ($phid !== $this->getActingAsPHID()) {
+            return PhabricatorPolicyCapability::CAN_EDIT;
+          }
+        }
+
+        // To add users other than yourself, you must be able to interact.
+        // This allows "@mentioning" users to work as long as you can comment
+        // on objects.
+
+        // If you can edit, we return that policy instead so that you can
+        // override a soft lock and still make edits.
+
+        // TODO: This is a little bit hacky. We really want to be able to say
+        // "this requires either interact or edit", but there's currently no
+        // way to specify this kind of requirement.
+
+        $can_edit = PhabricatorPolicyFilter::hasCapability(
+          $this->getActor(),
+          $this->object,
+          PhabricatorPolicyCapability::CAN_EDIT);
+
+        $add = array_diff_key($new, $old);
+        foreach ($add as $phid) {
+          if ($phid !== $this->getActingAsPHID()) {
+            if ($can_edit) {
+              return PhabricatorPolicyCapability::CAN_EDIT;
+            } else {
+              return PhabricatorPolicyCapability::CAN_INTERACT;
+            }
+          }
+        }
+
         return null;
       case PhabricatorTransactions::TYPE_TOKEN:
         // TODO: This technically requires CAN_INTERACT, like comments.

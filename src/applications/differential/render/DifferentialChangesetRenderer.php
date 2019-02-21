@@ -28,12 +28,13 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   private $originalNew;
   private $gaps;
   private $mask;
-  private $depths;
   private $originalCharacterEncoding;
   private $showEditAndReplyLinks;
   private $canMarkDone;
   private $objectOwnerPHID;
   private $highlightingDisabled;
+  private $scopeEngine = false;
+  private $depthOnlyLines;
 
   private $oldFile = false;
   private $newFile = false;
@@ -76,14 +77,6 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     return $this->isUndershield;
   }
 
-  public function setDepths($depths) {
-    $this->depths = $depths;
-    return $this;
-  }
-  protected function getDepths() {
-    return $this->depths;
-  }
-
   public function setMask($mask) {
     $this->mask = $mask;
     return $this;
@@ -98,6 +91,15 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   }
   protected function getGaps() {
     return $this->gaps;
+  }
+
+  public function setDepthOnlyLines(array $lines) {
+    $this->depthOnlyLines = $lines;
+    return $this;
+  }
+
+  public function getDepthOnlyLines() {
+    return $this->depthOnlyLines;
   }
 
   public function attachOldFile(PhabricatorFile $old = null) {
@@ -361,14 +363,14 @@ abstract class DifferentialChangesetRenderer extends Phobject {
       $undershield = $this->renderUndershieldHeader();
     }
 
-    $result = $notice.$props.$undershield.$content;
+    $result = array(
+      $notice,
+      $props,
+      $undershield,
+      $content,
+    );
 
-    // TODO: Let the user customize their tab width / display style.
-    // TODO: We should possibly post-process "\r" as well.
-    // TODO: Both these steps should happen earlier.
-    $result = str_replace("\t", '  ', $result);
-
-    return phutil_safe_html($result);
+    return hsprintf('%s', $result);
   }
 
   abstract public function isOneUpRenderer();
@@ -404,9 +406,6 @@ abstract class DifferentialChangesetRenderer extends Phobject {
    *      important (e.g., generated code).
    *    - `"text"`: Force the text to be shown. This is probably only relevant
    *      when a file is not changed.
-   *    - `"whitespace"`: Force the text to be shown, and the diff to be
-   *      rendered with all whitespace shown. This is probably only relevant
-   *      when a file is changed only by altering whitespace.
    *    - `"none"`: Don't show the link (e.g., text not available).
    *
    * @param   string        Message explaining why the diff is hidden.
@@ -676,6 +675,44 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     }
 
     return $views;
+  }
+
+  final protected function getScopeEngine() {
+    if ($this->scopeEngine === false) {
+      $hunk_starts = $this->getHunkStartLines();
+
+      // If this change is missing context, don't try to identify scopes, since
+      // we won't really be able to get anywhere.
+      $has_multiple_hunks = (count($hunk_starts) > 1);
+      $has_offset_hunks = (head_key($hunk_starts) != 1);
+      $missing_context = ($has_multiple_hunks || $has_offset_hunks);
+
+      if ($missing_context) {
+        $scope_engine = null;
+      } else {
+        $line_map = $this->getNewLineTextMap();
+        $scope_engine = id(new PhabricatorDiffScopeEngine())
+          ->setLineTextMap($line_map);
+      }
+
+      $this->scopeEngine = $scope_engine;
+    }
+
+    return $this->scopeEngine;
+  }
+
+  private function getNewLineTextMap() {
+    $new = $this->getNewLines();
+
+    $text_map = array();
+    foreach ($new as $new_line) {
+      if (!isset($new_line['line'])) {
+        continue;
+      }
+      $text_map[$new_line['line']] = $new_line['text'];
+    }
+
+    return $text_map;
   }
 
 }

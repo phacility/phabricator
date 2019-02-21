@@ -13,6 +13,7 @@ final class PhabricatorEditEngineSubtype
   private $color;
   private $childSubtypes = array();
   private $childIdentifiers = array();
+  private $fieldConfiguration = array();
 
   public function setKey($key) {
     $this->key = $key;
@@ -94,6 +95,17 @@ final class PhabricatorEditEngineSubtype
     return $view;
   }
 
+  public function setSubtypeFieldConfiguration(
+    $subtype_key,
+    array $configuration) {
+    $this->fieldConfiguration[$subtype_key] = $configuration;
+    return $this;
+  }
+
+  public function getSubtypeFieldConfiguration($subtype_key) {
+    return idx($this->fieldConfiguration, $subtype_key);
+  }
+
   public static function validateSubtypeKey($subtype) {
     if (strlen($subtype) > 64) {
       throw new Exception(
@@ -139,6 +151,7 @@ final class PhabricatorEditEngineSubtype
           'color' => 'optional string',
           'icon' => 'optional string',
           'children' => 'optional map<string, wild>',
+          'fields' => 'optional map<string, wild>',
         ));
 
       $key = $value['key'];
@@ -181,6 +194,18 @@ final class PhabricatorEditEngineSubtype
               'Subtype configuration is invalid: subtype with key "%s" '.
               'specifies both child subtypes and child forms. Specify one '.
               'or the other, but not both.'));
+        }
+      }
+
+      $fields = idx($value, 'fields');
+      if ($fields) {
+        foreach ($fields as $field_key => $configuration) {
+          PhutilTypeSpec::checkMap(
+            $configuration,
+            array(
+              'disabled' => 'optional bool',
+              'name' => 'optional string',
+            ));
         }
       }
     }
@@ -231,6 +256,15 @@ final class PhabricatorEditEngineSubtype
 
       if ($child_forms) {
         $subtype->setChildFormIdentifiers($child_forms);
+      }
+
+      $field_configurations = idx($entry, 'fields');
+      if ($field_configurations) {
+        foreach ($field_configurations as $field_key => $field_configuration) {
+          $subtype->setSubtypeFieldConfiguration(
+            $field_key,
+            $field_configuration);
+        }
       }
 
       $map[$key] = $subtype;

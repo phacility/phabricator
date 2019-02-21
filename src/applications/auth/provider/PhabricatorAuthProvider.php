@@ -161,7 +161,7 @@ abstract class PhabricatorAuthProvider extends Phobject {
   abstract public function processLoginRequest(
     PhabricatorAuthLoginController $controller);
 
-  public function buildLinkForm(PhabricatorAuthLinkController $controller) {
+  public function buildLinkForm($controller) {
     return $this->renderLoginForm($controller->getRequest(), $mode = 'link');
   }
 

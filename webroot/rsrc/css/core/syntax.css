@@ -29,3 +29,9 @@ span.crossreference-item {
   color: #222222;
   background: #dddddd;
 }
+
+.suspicious-character {
+  background: #ff7700;
+  color: #ffffff;
+  cursor: default;
+}

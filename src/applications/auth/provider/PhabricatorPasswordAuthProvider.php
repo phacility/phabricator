@@ -159,8 +159,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     return $dialog;
   }
 
-  public function buildLinkForm(
-    PhabricatorAuthLinkController $controller) {
+  public function buildLinkForm($controller) {
     throw new Exception(pht("Password providers can't be linked."));
   }
 

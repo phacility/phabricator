@@ -31,6 +31,7 @@ final class PhabricatorDaemonConsoleController
         $completed_info[$class] = array(
           'n' => 0,
           'duration' => 0,
+          'queueTime' => 0,
         );
       }
       $completed_info[$class]['n']++;
@@ -41,16 +42,33 @@ final class PhabricatorDaemonConsoleController
       // compute utilization.
       $usage_total += $lease_overhead + ($duration / 1000000);
       $usage_start = min($usage_start, $completed_task->getDateModified());
+
+      $date_archived = $completed_task->getArchivedEpoch();
+      $queue_seconds = $date_archived - $completed_task->getDateCreated();
+
+      // Don't measure queue time for tasks that completed in the same
+      // epoch-second they were created in.
+      if ($queue_seconds > 0) {
+        $sec_in_us = phutil_units('1 second in microseconds');
+        $queue_us = $queue_seconds * $sec_in_us;
+        $queue_exclusive_us = $queue_us - $duration;
+        $queue_exclusive_seconds = $queue_exclusive_us / $sec_in_us;
+        $rounded = floor($queue_exclusive_seconds);
+        $completed_info[$class]['queueTime'] += $rounded;
+      }
     }
 
     $completed_info = isort($completed_info, 'n');
 
     $rows = array();
     foreach ($completed_info as $class => $info) {
+      $duration_avg = new PhutilNumber((int)($info['duration'] / $info['n']));
+      $queue_avg = new PhutilNumber((int)($info['queueTime'] / $info['n']));
       $rows[] = array(
         $class,
         number_format($info['n']),
-        pht('%s us', new PhutilNumber((int)($info['duration'] / $info['n']))),
+        pht('%s us', $duration_avg),
+        pht('%s s', $queue_avg),
       );
     }
 
@@ -98,6 +116,7 @@ final class PhabricatorDaemonConsoleController
         phutil_tag('em', array(), pht('Queue Utilization (Approximate)')),
         sprintf('%.1f%%', 100 * $used_time),
         null,
+        null,
       );
     }
 
@@ -108,11 +127,13 @@ final class PhabricatorDaemonConsoleController
       array(
         pht('Class'),
         pht('Count'),
-        pht('Avg'),
+        pht('Average Duration'),
+        pht('Average Queue Time'),
       ));
     $completed_table->setColumnClasses(
       array(
         'wide',
+        'n',
         'n',
         'n',
       ));

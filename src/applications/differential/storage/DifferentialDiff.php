@@ -387,9 +387,10 @@ final class DifferentialDiff
       return array();
     }
 
-    $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
-      'buildTargetPHID IN (%Ls)',
-      $target_phids);
+    $unit = id(new HarbormasterBuildUnitMessageQuery())
+      ->setViewer($viewer)
+      ->withBuildTargetPHIDs($target_phids)
+      ->execute();
 
     $map = array();
     foreach ($unit as $message) {

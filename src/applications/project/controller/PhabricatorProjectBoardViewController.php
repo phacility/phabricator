@@ -1182,19 +1182,27 @@ final class PhabricatorProjectBoardViewController
     $project = $this->getProject();
 
     if ($base === null) {
-      $base = $this->getRequest()->getRequestURI();
+      $base = $this->getRequest()->getPath();
     }
 
     $base = new PhutilURI($base);
 
     if ($force || ($this->sortKey != $this->getDefaultSort($project))) {
-      $base->replaceQueryParam('order', $this->sortKey);
+      if ($this->sortKey !== null) {
+        $base->replaceQueryParam('order', $this->sortKey);
+      } else {
+        $base->removeQueryParam('order');
+      }
     } else {
       $base->removeQueryParam('order');
     }
 
     if ($force || ($this->queryKey != $this->getDefaultFilter($project))) {
-      $base->replaceQueryParam('filter', $this->queryKey);
+      if ($this->queryKey !== null) {
+        $base->replaceQueryParam('filter', $this->queryKey);
+      } else {
+        $base->removeQueryParam('filter');
+      }
     } else {
       $base->removeQueryParam('filter');
     }

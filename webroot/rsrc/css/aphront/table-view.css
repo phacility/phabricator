@@ -327,3 +327,40 @@ span.single-display-line-content {
 .phui-object-box .aphront-table-view {
   border: none;
 }
+
+.object-graph-header {
+  padding: 8px 12px;
+  overflow: hidden;
+  background: {$lightyellow};
+  border-bottom: 1px solid {$lightblueborder};
+  vertical-align: middle;
+}
+
+.object-graph-header .object-graph-header-icon {
+  float: left;
+  margin-top: 10px;
+}
+
+.object-graph-header a.button {
+  float: right;
+}
+
+.object-graph-header-message {
+  margin: 8px 200px 8px 20px;
+}
+
+.device .object-graph-header .object-graph-header-icon {
+  display: none;
+}
+
+.device .object-graph-header-message {
+  clear: both;
+  margin: 0;
+}
+
+.device .object-graph-header a.button {
+  margin: 0 auto 12px;
+  display: block;
+  width: 180px;
+  float: none;
+}

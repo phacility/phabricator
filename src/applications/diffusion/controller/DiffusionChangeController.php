@@ -64,9 +64,6 @@ final class DiffusionChangeController extends DiffusionController {
     $changeset_view->setRawFileURIs($left_uri, $right_uri);
 
     $changeset_view->setRenderURI($repository->getPathURI('diff/'));
-
-    $changeset_view->setWhitespace(
-      DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
     $changeset_view->setUser($viewer);
     $changeset_view->setHeader($changeset_header);
 

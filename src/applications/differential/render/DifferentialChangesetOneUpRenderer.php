@@ -92,19 +92,23 @@ final class DifferentialChangesetOneUpRenderer
             $line = $p['line'];
 
             $cells[] = phutil_tag(
-              'th',
+              'td',
               array(
                 'id' => $left_id,
-                'class' => $class,
-              ),
-              $line);
+                'class' => $class.' n',
+                'data-n' => $line,
+              ));
 
             $render = $p['render'];
             if ($aural !== null) {
               $render = array($aural, $render);
             }
 
-            $cells[] = phutil_tag('th', array('class' => $class));
+            $cells[] = phutil_tag(
+              'td',
+              array(
+                'class' => $class.' n',
+              ));
             $cells[] = $no_copy;
             $cells[] = phutil_tag('td', array('class' => $class), $render);
             $cells[] = $no_coverage;
@@ -115,7 +119,11 @@ final class DifferentialChangesetOneUpRenderer
               } else {
                 $class = 'right new';
               }
-              $cells[] = phutil_tag('th', array('class' => $class));
+              $cells[] = phutil_tag(
+                'td',
+                array(
+                  'class' => $class.' n',
+                ));
               $aural = $aural_plus;
             } else {
               $class = 'right';
@@ -127,7 +135,13 @@ final class DifferentialChangesetOneUpRenderer
 
               $oline = $p['oline'];
 
-              $cells[] = phutil_tag('th', array('id' => $left_id), $oline);
+              $cells[] = phutil_tag(
+                'td',
+                array(
+                  'id' => $left_id,
+                  'class' => 'n',
+                  'data-n' => $oline,
+                ));
               $aural = null;
             }
 
@@ -144,12 +158,12 @@ final class DifferentialChangesetOneUpRenderer
             $line = $p['line'];
 
             $cells[] = phutil_tag(
-              'th',
+              'td',
               array(
                 'id' => $right_id,
-                'class' => $class,
-              ),
-              $line);
+                'class' => $class.' n',
+                'data-n' => $line,
+              ));
 
             $render = $p['render'];
             if ($aural !== null) {

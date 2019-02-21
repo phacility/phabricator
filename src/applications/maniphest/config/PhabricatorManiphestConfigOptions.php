@@ -210,8 +210,9 @@ The keys you can provide in a specification are:
   - `claim` //Optional bool.// By default, closing an unassigned task claims
     it. You can set this to `false` to disable this behavior for a particular
     status.
-  - `locked` //Optional bool.// Lock tasks in this status, preventing users
-    from commenting.
+  - `locked` //Optional string.// Lock tasks in this status. Specify "comments"
+    to lock comments (users who can edit the task may override this lock).
+    Specify "edits" to prevent anyone except the task owner from making edits.
   - `mfa` //Optional bool.// Require all edits to this task to be signed with
     multi-factor authentication.
 
@@ -342,6 +343,7 @@ dictionary with these keys:
   - `icon` //Optional string.// Icon for the subtype.
   - `children` //Optional map.// Configure options shown to the user when
      they "Create Subtask". See below.
+  - `fields` //Optional map.// Configure field behaviors. See below.
 
 Each subtype must have a unique key, and you must define a subtype with
 the key "%s", which is used as a default subtype.
@@ -397,6 +399,28 @@ be used when presenting options to the user.
 
 If only one option would be presented, the user will be taken directly to the
 appropriate form instead of being prompted to choose a form.
+
+The `fields` key can configure the behavior of custom fields on specific
+task subtypes. For example:
+
+```
+{
+  ...
+  "fields": {
+    "custom.some-field": {
+      "disabled": true
+    }
+  }
+  ...
+}
+```
+
+Each field supports these options:
+
+  - `disabled` //Optional bool.// Allows you to disable fields on certain
+    subtypes.
+  - `name` //Optional string.// Custom name of this field for the subtype.
+
 EOTEXT
       ,
       $subtype_default_key));

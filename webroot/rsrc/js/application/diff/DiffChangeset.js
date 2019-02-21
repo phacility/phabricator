@@ -22,7 +22,6 @@ JX.install('DiffChangeset', {
 
     this._renderURI = data.renderURI;
     this._ref = data.ref;
-    this._whitespace = data.whitespace;
     this._renderer = data.renderer;
     this._highlight = data.highlight;
     this._encoding = data.encoding;
@@ -46,7 +45,6 @@ JX.install('DiffChangeset', {
 
     _renderURI: null,
     _ref: null,
-    _whitespace: null,
     _renderer: null,
     _highlight: null,
     _encoding: null,
@@ -310,7 +308,6 @@ JX.install('DiffChangeset', {
     _getViewParameters: function() {
       return {
         ref: this._ref,
-        whitespace: this._whitespace || '',
         renderer: this.getRenderer() || '',
         highlight: this._highlight || '',
         encoding: this._encoding || ''

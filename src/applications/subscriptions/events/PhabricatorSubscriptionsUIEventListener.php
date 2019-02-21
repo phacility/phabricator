@@ -73,24 +73,20 @@ final class PhabricatorSubscriptionsUIEventListener
         ->setName(pht('Automatically Subscribed'))
         ->setIcon('fa-check-circle lightgreytext');
     } else {
-      $can_interact = PhabricatorPolicyFilter::canInteract($user, $object);
-
       if ($is_subscribed) {
         $sub_action = id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/delete/'.$object->getPHID().'/')
           ->setName(pht('Unsubscribe'))
-          ->setIcon('fa-minus-circle')
-          ->setDisabled(!$can_interact);
+          ->setIcon('fa-minus-circle');
       } else {
         $sub_action = id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/add/'.$object->getPHID().'/')
           ->setName(pht('Subscribe'))
-          ->setIcon('fa-plus-circle')
-          ->setDisabled(!$can_interact);
+          ->setIcon('fa-plus-circle');
       }
 
       if (!$user->isLoggedIn()) {

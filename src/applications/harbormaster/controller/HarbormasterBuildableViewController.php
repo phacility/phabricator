@@ -312,9 +312,10 @@ final class HarbormasterBuildableViewController
       'buildTargetPHID IN (%Ls)',
       $target_phids);
 
-    $unit_data = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
-      'buildTargetPHID IN (%Ls)',
-      $target_phids);
+    $unit_data = id(new HarbormasterBuildUnitMessageQuery())
+      ->setViewer($viewer)
+      ->withBuildTargetPHIDs($target_phids)
+      ->execute();
 
     if ($lint_data) {
       $lint_table = id(new HarbormasterLintPropertyView())

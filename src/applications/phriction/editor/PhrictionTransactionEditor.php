@@ -229,9 +229,14 @@ final class PhrictionTransactionEditor
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PhrictionDocumentContentTransaction::TRANSACTIONTYPE:
-          $uri = id(new PhutilURI('/phriction/diff/'.$object->getID().'/'))
-            ->alter('l', $this->getOldContent()->getVersion())
-            ->alter('r', $this->getNewContent()->getVersion());
+          $params = array(
+            'l' => $this->getOldContent()->getVersion(),
+            'r' => $this->getNewContent()->getVersion(),
+          );
+
+          $path = '/phriction/diff/'.$object->getID().'/';
+          $uri = new PhutilURI($path, $params);
+
           $this->contentDiffURI = (string)$uri;
           break 2;
         default:

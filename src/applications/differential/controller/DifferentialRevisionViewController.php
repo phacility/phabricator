@@ -305,10 +305,6 @@ final class DifferentialRevisionViewController
     $details = $this->buildDetails($revision, $field_list);
     $curtain = $this->buildCurtain($revision);
 
-    $whitespace = $request->getStr(
-      'whitespace',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST);
-
     $repository = $revision->getRepository();
     if ($repository) {
       $symbol_indexes = $this->buildSymbolIndexes(
@@ -383,7 +379,6 @@ final class DifferentialRevisionViewController
         ->setDiff($target)
         ->setRenderingReferences($rendering_references)
         ->setVsMap($vs_map)
-        ->setWhitespace($whitespace)
         ->setSymbolIndexes($symbol_indexes)
         ->setTitle(pht('Diff %s', $target->getID()))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
@@ -412,7 +407,6 @@ final class DifferentialRevisionViewController
       ->setDiffUnitStatuses($broken_diffs)
       ->setSelectedVersusDiffID($diff_vs)
       ->setSelectedDiffID($target->getID())
-      ->setSelectedWhitespace($whitespace)
       ->setCommitsForLinks($commits_for_links);
 
     $local_table = id(new DifferentialLocalCommitsView())
@@ -626,8 +620,6 @@ final class DifferentialRevisionViewController
         ->setWidth((int)$width_value)
         ->build($changesets);
     }
-
-    Javelin::initBehavior('differential-user-select');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -1095,7 +1087,7 @@ final class DifferentialRevisionViewController
     // this ends up being something like
     //   D123.diff
     // or the verbose
-    //   D123.vs123.id123.whitespaceignore-all.diff
+    //   D123.vs123.id123.highlightjs.diff
     // lame but nice to include these options
     $file_name = ltrim($request_uri->getPath(), '/').'.';
     foreach ($request_uri->getQueryParamsAsPairList() as $pair) {

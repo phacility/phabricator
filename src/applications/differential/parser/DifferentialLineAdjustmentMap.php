@@ -359,7 +359,6 @@ final class DifferentialLineAdjustmentMap extends Phobject {
       }
 
       $changeset = id(new PhabricatorDifferenceEngine())
-        ->setIgnoreWhitespace(true)
         ->generateChangesetFromFileContent($u_old, $v_old);
 
       $results[$u][$v] = self::newFromHunks(
