@@ -105,11 +105,13 @@ return array(
   // just to be safe.)
   'syntax.filemap' => array(
     '@\.arcconfig$@' => 'js',
+    '@\.arclint$@' => 'js',
     '@\.q$@' => 'mysql',
     '@\.jsx$@' => 'jsx',
     '@\\.html$@' => 'html+jinja',
-    '@\\.md@' => 'markdown',
-    '@\\.kt@' => 'kotlin',
+    '@\\.md$@' => 'markdown',
+    '@\\.kt$@' => 'kotlin',
+    '@\\.kts$@' => 'kotlin',
   ),
 
   // We use phabricator as a mini-LDAP system.
