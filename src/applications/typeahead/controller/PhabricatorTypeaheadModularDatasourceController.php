@@ -127,9 +127,19 @@ final class PhabricatorTypeaheadModularDatasourceController
           if (($offset + (2 * $limit)) < $hard_limit) {
             $next_uri = id(new PhutilURI($request->getRequestURI()))
               ->replaceQueryParam('offset', $offset + $limit)
-              ->replaceQueryParam('q', $query)
-              ->replaceQueryParam('raw', $raw_query)
               ->replaceQueryParam('format', 'html');
+
+            if ($query !== null) {
+              $next_uri->replaceQueryParam('q', $query);
+            } else {
+              $next_uri->removeQueryParam('q');
+            }
+
+            if ($raw_query !== null) {
+              $next_uri->replaceQueryParam('raw', $raw_query);
+            } else {
+              $next_uri->removeQueryParam('raw');
+            }
 
             $next_link = javelin_tag(
               'a',
