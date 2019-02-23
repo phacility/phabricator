@@ -47,6 +47,14 @@ final class PhabricatorFacebookAuthProvider
     return 'Facebook';
   }
 
+  protected function getContentSecurityPolicyFormActions() {
+    return array(
+      // See T13254. After login with a mobile device, Facebook may redirect
+      // to the mobile site.
+      'https://m.facebook.com/',
+    );
+  }
+
   public function readFormValuesFromProvider() {
     $require_secure = $this->getProviderConfig()->getProperty(
       self::KEY_REQUIRE_SECURE);
@@ -112,17 +120,6 @@ final class PhabricatorFacebookAuthProvider
     }
 
     return parent::renderConfigPropertyTransactionTitle($xaction);
-  }
-
-  public static function getFacebookApplicationID() {
-    $providers = PhabricatorAuthProvider::getAllProviders();
-    $fb_provider = idx($providers, 'facebook:facebook.com');
-    if (!$fb_provider) {
-      return null;
-    }
-
-    return $fb_provider->getProviderConfig()->getProperty(
-      self::PROPERTY_APP_ID);
   }
 
 }
