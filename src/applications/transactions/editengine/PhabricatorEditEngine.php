@@ -165,14 +165,29 @@ abstract class PhabricatorEditEngine
       $extensions = array();
     }
 
+    // See T13248. Create a template object to provide to extensions. We
+    // adjust the template to have the intended subtype, so that extensions
+    // may change behavior based on the form subtype.
+
+    $template_object = clone $object;
+    if ($this->getIsCreate()) {
+      if ($this->supportsSubtypes()) {
+        $config = $this->getEditEngineConfiguration();
+        $subtype = $config->getSubtype();
+        $template_object->setSubtype($subtype);
+      }
+    }
+
     foreach ($extensions as $extension) {
       $extension->setViewer($viewer);
 
-      if (!$extension->supportsObject($this, $object)) {
+      if (!$extension->supportsObject($this, $template_object)) {
         continue;
       }
 
-      $extension_fields = $extension->buildCustomEditFields($this, $object);
+      $extension_fields = $extension->buildCustomEditFields(
+        $this,
+        $template_object);
 
       // TODO: Validate this in more detail with a more tailored error.
       assert_instances_of($extension_fields, 'PhabricatorEditField');

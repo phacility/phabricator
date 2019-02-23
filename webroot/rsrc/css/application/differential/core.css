@@ -16,14 +16,6 @@
   margin-bottom: 8px;
 }
 
-.differential-unselectable tr td:nth-of-type(1) {
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
 .differential-content-hidden {
   margin: 0 0 24px 0;
 }

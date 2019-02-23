@@ -2,7 +2,11 @@
 
 final class PhabricatorSearchWorker extends PhabricatorWorker {
 
-  public static function queueDocumentForIndexing($phid, $parameters = null) {
+  public static function queueDocumentForIndexing(
+    $phid,
+    $parameters = null,
+    $is_strict = false) {
+
     if ($parameters === null) {
       $parameters = array();
     }
@@ -12,6 +16,7 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
       array(
         'documentPHID' => $phid,
         'parameters' => $parameters,
+        'strict' => $is_strict,
       ),
       array(
         'priority' => parent::PRIORITY_INDEX,
@@ -23,7 +28,25 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
     $data = $this->getTaskData();
     $object_phid = idx($data, 'documentPHID');
 
-    $object = $this->loadObjectForIndexing($object_phid);
+    // See T12425. By the time we run an indexing task, the object it indexes
+    // may have been deleted. This is unusual, but not concerning, and failing
+    // to index these objects is correct.
+
+    // To avoid showing these non-actionable errors to users, don't report
+    // indexing exceptions unless we're in "strict" mode. This mode is set by
+    // the "bin/search index" tool.
+
+    $is_strict = idx($data, 'strict', false);
+
+    try {
+      $object = $this->loadObjectForIndexing($object_phid);
+    } catch (PhabricatorWorkerPermanentFailureException $ex) {
+      if ($is_strict) {
+        throw $ex;
+      } else {
+        return;
+      }
+    }
 
     $engine = id(new PhabricatorIndexEngine())
       ->setObject($object);
@@ -35,8 +58,11 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
       return;
     }
 
-    $key = "index.{$object_phid}";
-    $lock = PhabricatorGlobalLock::newLock($key);
+    $lock = PhabricatorGlobalLock::newLock(
+      'index',
+      array(
+        'objectPHID' => $object_phid,
+      ));
 
     try {
       $lock->lock(1);
@@ -48,29 +74,34 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
       throw new PhabricatorWorkerYieldException(15);
     }
 
+    $caught = null;
     try {
       // Reload the object now that we have a lock, to make sure we have the
       // most current version.
       $object = $this->loadObjectForIndexing($object->getPHID());
 
       $engine->setObject($object);
-
       $engine->indexObject();
     } catch (Exception $ex) {
-      $lock->unlock();
+      $caught = $ex;
+    }
 
-      if (!($ex instanceof PhabricatorWorkerPermanentFailureException)) {
-        $ex = new PhabricatorWorkerPermanentFailureException(
+    // Release the lock before we deal with the exception.
+    $lock->unlock();
+
+    if ($caught) {
+      if (!($caught instanceof PhabricatorWorkerPermanentFailureException)) {
+        $caught = new PhabricatorWorkerPermanentFailureException(
           pht(
             'Failed to update search index for document "%s": %s',
             $object_phid,
-            $ex->getMessage()));
+            $caught->getMessage()));
       }
 
-      throw $ex;
+      if ($is_strict) {
+        throw $caught;
+      }
     }
-
-    $lock->unlock();
   }
 
   private function loadObjectForIndexing($phid) {

@@ -19,6 +19,7 @@ final class PhabricatorTypeaheadResult extends Phobject {
   private $autocomplete;
   private $attributes = array();
   private $phase;
+  private $availabilityColor;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -156,6 +157,7 @@ final class PhabricatorTypeaheadResult extends Phobject {
       $this->unique ? 1 : null,
       $this->autocomplete,
       $this->phase,
+      $this->availabilityColor,
     );
     while (end($data) === null) {
       array_pop($data);
@@ -220,6 +222,15 @@ final class PhabricatorTypeaheadResult extends Phobject {
 
   public function getPhase() {
     return $this->phase;
+  }
+
+  public function setAvailabilityColor($availability_color) {
+    $this->availabilityColor = $availability_color;
+    return $this;
+  }
+
+  public function getAvailabilityColor() {
+    return $this->availabilityColor;
   }
 
 }

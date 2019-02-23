@@ -367,7 +367,6 @@ abstract class DifferentialChangesetHTMLRenderer
     $reference = $this->getRenderingReference();
 
     if ($force !== 'text' &&
-        $force !== 'whitespace' &&
         $force !== 'none' &&
         $force !== 'default') {
       throw new Exception(
@@ -387,10 +386,6 @@ abstract class DifferentialChangesetHTMLRenderer
       'ref'   => $reference,
       'range' => $range,
     );
-
-    if ($force == 'whitespace') {
-      $meta['whitespace'] = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
-    }
 
     $content = array();
     $content[] = $message;
@@ -437,16 +432,26 @@ abstract class DifferentialChangesetHTMLRenderer
     $classes[] = 'PhabricatorMonospaced';
     $classes[] = $this->getRendererTableClass();
 
+    $sigils = array();
+    $sigils[] = 'differential-diff';
+    foreach ($this->getTableSigils() as $sigil) {
+      $sigils[] = $sigil;
+    }
+
     return javelin_tag(
       'table',
       array(
         'class' => implode(' ', $classes),
-        'sigil' => 'differential-diff',
+        'sigil' => implode(' ', $sigils),
       ),
       array(
         $this->renderColgroup(),
         $content,
       ));
+  }
+
+  protected function getTableSigils() {
+    return array();
   }
 
   protected function buildInlineComment(

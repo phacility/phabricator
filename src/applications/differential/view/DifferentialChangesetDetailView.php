@@ -9,7 +9,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
   private $id;
   private $vsChangesetID;
   private $renderURI;
-  private $whitespace;
   private $renderingRef;
   private $autoload;
   private $loaded;
@@ -40,15 +39,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
   public function getRenderingRef() {
     return $this->renderingRef;
-  }
-
-  public function setWhitespace($whitespace) {
-    $this->whitespace = $whitespace;
-    return $this;
-  }
-
-  public function getWhitespace() {
-    return $this->whitespace;
   }
 
   public function setRenderURI($render_uri) {
@@ -196,7 +186,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'left'  => $left_id,
           'right' => $right_id,
           'renderURI' => $this->getRenderURI(),
-          'whitespace' => $this->getWhitespace(),
           'highlight' => null,
           'renderer' => $this->getRenderer(),
           'ref' => $this->getRenderingRef(),

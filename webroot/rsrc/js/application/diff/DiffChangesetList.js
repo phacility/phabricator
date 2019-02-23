@@ -70,13 +70,13 @@ JX.install('DiffChangesetList', {
     var onrangedown = JX.bind(this, this._ifawake, this._onrangedown);
     JX.Stratcom.listen(
       'mousedown',
-      ['differential-changeset', 'tag:th'],
+      ['differential-changeset', 'tag:td'],
       onrangedown);
 
     var onrangemove = JX.bind(this, this._ifawake, this._onrangemove);
     JX.Stratcom.listen(
       ['mouseover', 'mouseout'],
-      ['differential-changeset', 'tag:th'],
+      ['differential-changeset', 'tag:td'],
       onrangemove);
 
     var onrangeup = JX.bind(this, this._ifawake, this._onrangeup);
@@ -360,7 +360,7 @@ JX.install('DiffChangesetList', {
           while (row) {
             var header = row.firstChild;
             while (header) {
-              if (JX.DOM.isType(header, 'th')) {
+              if (this.getLineNumberFromHeader(header)) {
                 if (header.className.indexOf('old') !== -1) {
                   old_list.push(header);
                 } else if (header.className.indexOf('new') !== -1) {
@@ -1246,12 +1246,24 @@ JX.install('DiffChangesetList', {
       return changeset.getInlineForRow(inline_row);
     },
 
-    getLineNumberFromHeader: function(th) {
-      try {
-        return parseInt(th.id.match(/^C\d+[ON]L(\d+)$/)[1], 10);
-      } catch (x) {
+    getLineNumberFromHeader: function(node) {
+      var n = parseInt(node.getAttribute('data-n'));
+
+      if (!n) {
         return null;
       }
+
+      // If this is a line number that's part of a row showing more context,
+      // we don't want to let users leave inlines here.
+
+      try {
+        JX.DOM.findAbove(node, 'tr', 'context-target');
+        return null;
+      } catch (ex) {
+        // Ignore.
+      }
+
+      return n;
     },
 
     getDisplaySideFromHeader: function(th) {
@@ -1299,7 +1311,7 @@ JX.install('DiffChangesetList', {
     },
 
     _updateRange: function(target, is_out) {
-      // Don't update the range if this "<th />" doesn't correspond to a line
+      // Don't update the range if this target doesn't correspond to a line
       // number. For instance, this may be a dead line number, like the empty
       // line numbers on the left hand side of a newly added file.
       var number = this.getLineNumberFromHeader(target);

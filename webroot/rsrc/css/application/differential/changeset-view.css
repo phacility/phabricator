@@ -67,28 +67,6 @@
   padding: 1px 4px;
 }
 
-.differential-diff td .zwsp {
-  position: absolute;
-  width: 0;
-}
-
-.differential-diff th {
-  text-align: right;
-  padding: 1px 6px 1px 0;
-  vertical-align: top;
-  background: {$lightbluebackground};
-  color: {$bluetext};
-  cursor: pointer;
-  border-right: 1px solid {$thinblueborder};
-  overflow: hidden;
-
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
 .prose-diff {
   padding: 12px 0;
   white-space: pre-wrap;
@@ -109,7 +87,7 @@
   color: {$darkgreytext};
 }
 
-.differential-changeset-immutable .differential-diff th {
+.differential-changeset-immutable .differential-diff td {
   cursor: auto;
 }
 
@@ -135,16 +113,38 @@
   background: {$old-bright};
 }
 
+
 .differential-diff td.new span.bright,
 .differential-diff td.new-full,
 .prose-diff span.new {
   background: {$new-bright};
 }
 
+.differential-diff td span.depth-out,
+.differential-diff td span.depth-in {
+  padding: 2px 0;
+  background-size: 12px 12px;
+  background-repeat: no-repeat;
+  background-position: left center;
+}
+
+.differential-diff td span.depth-out {
+  background-image: url(/rsrc/image/chevron-out.png);
+  background-color: {$old-bright};
+}
+
+.differential-diff td span.depth-in {
+  background-position: 1px center;
+  background-image: url(/rsrc/image/chevron-in.png);
+  background-color: {$new-bright};
+}
+
+
 .differential-diff td.copy {
   min-width: 0.5%;
   width: 0.5%;
   padding: 0;
+  background: {$lightbluebackground};
 }
 
 .differential-diff td.new-copy,
@@ -159,6 +159,36 @@
 
 .differential-diff td.comment {
   background: #dddddd;
+}
+
+.differential-diff .inline > td {
+  padding: 0;
+}
+
+/* Specify line number behaviors after other behaviors because line numbers
+should always have a boring grey background. */
+
+.differential-diff td.n {
+  text-align: right;
+  padding: 1px 6px 1px 0;
+  vertical-align: top;
+  background: {$lightbluebackground};
+  color: {$bluetext};
+  cursor: pointer;
+  border-right: 1px solid {$thinblueborder};
+  overflow: hidden;
+}
+
+.differential-diff td + td.n {
+  border-left: 1px solid {$thinblueborder};
+}
+
+.differential-diff td.n::before {
+  content: attr(data-n);
+}
+
+.differential-diff td.show-context-line.n {
+  cursor: auto;
 }
 
 .differential-diff td.cov {
@@ -201,7 +231,7 @@ td.cov-I {
 }
 
 .differential-diff td.show-more,
-.differential-diff th.show-context-line,
+.differential-diff td.show-context-line,
 .differential-diff td.show-context,
 .differential-diff td.differential-shield {
   background: {$lightbluebackground};
@@ -211,7 +241,7 @@ td.cov-I {
 }
 
 .device .differential-diff td.show-more,
-.device .differential-diff th.show-context-line,
+.device .differential-diff td.show-context-line,
 .device .differential-diff td.show-context,
 .device .differential-diff td.differential-shield {
   padding: 6px 0;
@@ -229,8 +259,12 @@ td.cov-I {
   color: {$bluetext};
 }
 
-.differential-diff th.show-context-line {
+.differential-diff td.show-context-line {
   padding-right: 6px;
+}
+
+.differential-diff td.show-context-line.left-context {
+  border-right: none;
 }
 
 .differential-diff td.show-context {
@@ -293,10 +327,6 @@ td.cov-I {
   left: 0;
   box-sizing: border-box;
   pointer-events: none;
-}
-
-.differential-diff .inline > td {
-  padding: 0;
 }
 
 .differential-loading {
@@ -406,4 +436,50 @@ tr.differential-inline-loading {
 
 .diff-banner-buttons {
   float: right;
+}
+
+/* In Firefox, making the table unselectable and then making cells selectable
+does not work: the cells remain unselectable. Narrowly mark the cells as
+unselectable. */
+
+.differential-diff.copy-l > tbody > tr > td,
+.differential-diff.copy-r > tbody > tr > td {
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: 0.5;
+}
+
+.differential-diff.copy-l > tbody > tr > td:nth-child(2) {
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  -webkit-user-select: auto;
+  user-select: auto;
+  opacity: 1;
+}
+
+.differential-diff.copy-l > tbody > tr > td.show-more:nth-child(2) {
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: 0.5;
+}
+
+.differential-diff.copy-r > tbody > tr > td:nth-child(5) {
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  -webkit-user-select: auto;
+  user-select: auto;
+  opacity: 1;
+}
+
+.differential-diff.copy-l > tbody > tr.inline > td,
+.differential-diff.copy-r > tbody > tr.inline > td {
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: 0.5;
 }

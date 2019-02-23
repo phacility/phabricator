@@ -125,15 +125,18 @@ JX.install('Prefab', {
         var icon;
         var type;
         var color;
+        var availability_color;
         if (result) {
           icon = result.icon;
           value = result.displayName;
           type = result.tokenType;
           color = result.color;
+          availability_color = result.availabilityColor;
         } else {
           icon = (config.icons || {})[key];
           type = (config.types || {})[key];
           color = (config.colors || {})[key];
+          availability_color = (config.availabilityColors || {})[key];
         }
 
         if (icon) {
@@ -147,7 +150,16 @@ JX.install('Prefab', {
           JX.DOM.alterClass(container, color, true);
         }
 
-        return [icon, value];
+        var dot;
+        if (availability_color) {
+          dot = JX.$N(
+            'span',
+            {
+              className: 'phui-tag-dot phui-tag-color-' + availability_color
+            });
+        }
+
+        return [icon, dot, value];
       });
 
       if (config.placeholder) {
@@ -275,10 +287,20 @@ JX.install('Prefab', {
         icon_ui = JX.Prefab._renderIcon(icon);
       }
 
+      var availability_ui;
+      var availability_color = fields[16];
+      if (availability_color) {
+        availability_ui = JX.$N(
+          'span',
+          {
+            className: 'phui-tag-dot phui-tag-color-' + availability_color
+          });
+      }
+
       var display = JX.$N(
         'div',
         {className: 'tokenizer-result'},
-        [icon_ui, fields[4] || fields[0], closed_ui]);
+        [icon_ui, availability_ui, fields[4] || fields[0], closed_ui]);
       if (closed) {
         JX.DOM.alterClass(display, 'tokenizer-result-closed', true);
       }
@@ -300,7 +322,8 @@ JX.install('Prefab', {
         tokenType: fields[12],
         unique: fields[13] || false,
         autocomplete: fields[14],
-        sort: JX.TypeaheadNormalizer.normalize(fields[0])
+        sort: JX.TypeaheadNormalizer.normalize(fields[0]),
+        availabilityColor: availability_color
       };
     },
 

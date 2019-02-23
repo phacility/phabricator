@@ -12,7 +12,10 @@ final class HarbormasterUnitMessageViewController
 
     $message_id = $request->getURIData('id');
 
-    $message = id(new HarbormasterBuildUnitMessage())->load($message_id);
+    $message = id(new HarbormasterBuildUnitMessageQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($message_id))
+      ->executeOne();
     if (!$message) {
       return new Aphront404Response();
     }

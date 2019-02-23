@@ -68,6 +68,14 @@ final class PhabricatorPolicyEditEngineExtension
       ),
     );
 
+    if ($object instanceof PhabricatorPolicyCodexInterface) {
+      $codex = PhabricatorPolicyCodex::newFromObject(
+        $object,
+        $viewer);
+    } else {
+      $codex = null;
+    }
+
     $fields = array();
     foreach ($map as $type => $spec) {
       if (empty($types[$type])) {
@@ -82,6 +90,18 @@ final class PhabricatorPolicyEditEngineExtension
       $conduit_description = $spec['description.conduit'];
       $edit = $spec['edit'];
 
+      // Objects may present a policy value to the edit workflow that is
+      // different from their nominal policy value: for example, when tasks
+      // are locked, they appear as "Editable By: No One" to other applications
+      // but we still want to edit the actual policy stored in the database
+      // when we show the user a form with a policy control in it.
+
+      if ($codex) {
+        $policy_value = $codex->getPolicyForEdit($capability);
+      } else {
+        $policy_value = $object->getPolicy($capability);
+      }
+
       $policy_field = id(new PhabricatorPolicyEditField())
         ->setKey($key)
         ->setLabel($label)
@@ -94,7 +114,7 @@ final class PhabricatorPolicyEditEngineExtension
         ->setDescription($description)
         ->setConduitDescription($conduit_description)
         ->setConduitTypeDescription(pht('New policy PHID or constant.'))
-        ->setValue($object->getPolicy($capability));
+        ->setValue($policy_value);
       $fields[] = $policy_field;
 
       if ($object instanceof PhabricatorSpacesInterface) {

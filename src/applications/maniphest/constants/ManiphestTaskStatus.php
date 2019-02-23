@@ -16,6 +16,9 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   const SPECIAL_CLOSED      = 'closed';
   const SPECIAL_DUPLICATE   = 'duplicate';
 
+  const LOCKED_COMMENTS = 'comments';
+  const LOCKED_EDITS = 'edits';
+
   private static function getStatusConfig() {
     return PhabricatorEnv::getEnvConfig('maniphest.statuses');
   }
@@ -156,8 +159,13 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return !self::isOpenStatus($status);
   }
 
-  public static function isLockedStatus($status) {
-    return self::getStatusAttribute($status, 'locked', false);
+  public static function areCommentsLockedInStatus($status) {
+    return (bool)self::getStatusAttribute($status, 'locked', false);
+  }
+
+  public static function areEditsLockedInStatus($status) {
+    $locked = self::getStatusAttribute($status, 'locked');
+    return ($locked === self::LOCKED_EDITS);
   }
 
   public static function isMFAStatus($status) {
@@ -285,9 +293,33 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'keywords' => 'optional list<string>',
           'disabled' => 'optional bool',
           'claim' => 'optional bool',
-          'locked' => 'optional bool',
+          'locked' => 'optional bool|string',
           'mfa' => 'optional bool',
         ));
+    }
+
+    // Supported values are "comments" or "edits". For backward compatibility,
+    // "true" is an alias of "comments".
+
+    foreach ($config as $key => $value) {
+      $locked = idx($value, 'locked', false);
+      if ($locked === true || $locked === false) {
+        continue;
+      }
+
+      if ($locked === self::LOCKED_EDITS ||
+          $locked === self::LOCKED_COMMENTS) {
+        continue;
+      }
+
+      throw new Exception(
+        pht(
+          'Task status ("%s") has unrecognized value for "locked" '.
+          'configuration ("%s"). Supported values are: "%s", "%s".',
+          $key,
+          $locked,
+          self::LOCKED_COMMENTS,
+          self::LOCKED_EDITS));
     }
 
     $special_map = array();

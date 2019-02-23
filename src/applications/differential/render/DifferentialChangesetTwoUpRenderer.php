@@ -3,6 +3,8 @@
 final class DifferentialChangesetTwoUpRenderer
   extends DifferentialChangesetHTMLRenderer {
 
+  private $newOffsetMap;
+
   public function isOneUpRenderer() {
     return false;
   }
@@ -66,8 +68,11 @@ final class DifferentialChangesetTwoUpRenderer
     $new_render = $this->getNewRender();
     $original_left = $this->getOriginalOld();
     $original_right = $this->getOriginalNew();
-    $depths = $this->getDepths();
     $mask = $this->getMask();
+
+    $scope_engine = $this->getScopeEngine();
+    $offset_map = null;
+    $depth_only = $this->getDepthOnlyLines();
 
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
@@ -87,16 +92,19 @@ final class DifferentialChangesetTwoUpRenderer
           $is_last_block = true;
         }
 
-        $context = null;
+        $context_text = null;
         $context_line = null;
-        if (!$is_last_block && $depths[$ii + $len]) {
-          for ($l = $ii + $len - 1; $l >= $ii; $l--) {
-            $line = $new_lines[$l]['text'];
-            if ($depths[$l] < $depths[$ii + $len] && trim($line) != '') {
-              $context = $new_render[$l];
-              $context_line = $new_lines[$l]['line'];
-              break;
+        if (!$is_last_block && $scope_engine) {
+          $target_line = $new_lines[$ii + $len]['line'];
+          $context_line = $scope_engine->getScopeStart($target_line);
+          if ($context_line !== null) {
+            // The scope engine returns a line number in the file. We need
+            // to map that back to a display offset in the diff.
+            if (!$offset_map) {
+              $offset_map = $this->getNewLineToOffsetMap();
             }
+            $offset = $offset_map[$context_line];
+            $context_text = $new_render[$offset];
           }
         }
 
@@ -109,16 +117,20 @@ final class DifferentialChangesetTwoUpRenderer
             phutil_tag(
               'td',
               array(
-                'colspan' => 2,
+                'class' => 'show-context-line n left-context',
+              )),
+            phutil_tag(
+              'td',
+              array(
                 'class' => 'show-more',
               ),
               $contents),
             phutil_tag(
-              'th',
+              'td',
               array(
-                'class' => 'show-context-line',
-              ),
-              $context_line ? (int)$context_line : null),
+                'class' => 'show-context-line n',
+                'data-n' => $context_line,
+              )),
             phutil_tag(
               'td',
               array(
@@ -126,7 +138,7 @@ final class DifferentialChangesetTwoUpRenderer
                 'class' => 'show-context',
               ),
               // TODO: [HTML] Escaping model here isn't ideal.
-              phutil_safe_html($context)),
+              phutil_safe_html($context_text)),
           ));
 
         $html[] = $container;
@@ -188,12 +200,30 @@ final class DifferentialChangesetTwoUpRenderer
           } else if (empty($old_lines[$ii])) {
             $n_class = 'new new-full';
           } else {
-            $n_class = 'new';
+
+            // NOTE: At least for the moment, I'm intentionally clearing the
+            // line highlighting only on the right side of the diff when a
+            // line has only depth changes. When a block depth is decreased,
+            // this gives us a large color block on the left (to make it easy
+            // to see the depth change) but a clean diff on the right (to make
+            // it easy to pick out actual code changes).
+
+            if (isset($depth_only[$ii])) {
+              $n_class = '';
+            } else {
+              $n_class = 'new';
+            }
           }
           $n_classes = $n_class;
 
-          if ($new_lines[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
-            $n_copy = phutil_tag('td', array('class' => "copy {$n_class}"));
+          $not_copied =
+            // If this line only changed depth, copy markers are pointless.
+            (!isset($copy_lines[$n_num])) ||
+            (isset($depth_only[$ii])) ||
+            ($new_lines[$ii]['type'] == '\\');
+
+          if ($not_copied) {
+            $n_copy = phutil_tag('td', array('class' => 'copy'));
           } else {
             list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
             $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
@@ -213,8 +243,7 @@ final class DifferentialChangesetTwoUpRenderer
                   'msg' => $title,
                 ),
                 'class' => 'copy '.$class,
-              ),
-              '');
+              ));
           }
         }
       }
@@ -275,23 +304,41 @@ final class DifferentialChangesetTwoUpRenderer
         }
       }
 
-      // NOTE: This is a unicode zero-width space, which we use as a hint when
-      // intercepting 'copy' events to make sure sensible text ends up on the
-      // clipboard. See the 'phabricator-oncopy' behavior.
-      $zero_space = "\xE2\x80\x8B";
+      $old_number = phutil_tag(
+        'td',
+        array(
+          'id' => $o_id,
+          'class' => $o_classes.' n',
+          'data-n' => $o_num,
+        ));
+
+      $new_number = phutil_tag(
+        'td',
+        array(
+          'id' => $n_id,
+          'class' => $n_classes.' n',
+          'data-n' => $n_num,
+        ));
 
       $html[] = phutil_tag('tr', array(), array(
-        phutil_tag('th', array('id' => $o_id, 'class' => $o_classes), $o_num),
-        phutil_tag('td', array('class' => $o_classes), $o_text),
-        phutil_tag('th', array('id' => $n_id, 'class' => $n_classes), $n_num),
+        $old_number,
+        phutil_tag(
+          'td',
+          array(
+            'class' => $o_classes,
+            'data-copy-mode' => 'copy-l',
+          ),
+          $o_text),
+        $new_number,
         $n_copy,
         phutil_tag(
           'td',
-          array('class' => $n_classes, 'colspan' => $n_colspan),
           array(
-            phutil_tag('span', array('class' => 'zwsp'), $zero_space),
-            $n_text,
-          )),
+            'class' => $n_classes,
+            'colspan' => $n_colspan,
+            'data-copy-mode' => 'copy-r',
+          ),
+          $n_text),
         $n_cov,
       ));
 
@@ -384,6 +431,30 @@ final class DifferentialChangesetTwoUpRenderer
   public function getRowScaffoldForInline(PHUIDiffInlineCommentView $view) {
     return id(new PHUIDiffTwoUpInlineCommentRowScaffold())
       ->addInlineView($view);
+  }
+
+  private function getNewLineToOffsetMap() {
+    if ($this->newOffsetMap === null) {
+      $new = $this->getNewLines();
+
+      $map = array();
+      foreach ($new as $offset => $new_line) {
+        if ($new_line['line'] === null) {
+          continue;
+        }
+        $map[$new_line['line']] = $offset;
+      }
+
+      $this->newOffsetMap = $map;
+    }
+
+    return $this->newOffsetMap;
+  }
+
+  protected function getTableSigils() {
+    return array(
+      'intercept-copy',
+    );
   }
 
 }

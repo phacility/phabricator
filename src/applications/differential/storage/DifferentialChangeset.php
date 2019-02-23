@@ -249,17 +249,6 @@ final class DifferentialChangeset
     return $path;
   }
 
-  public function getWhitespaceMatters() {
-    $config = PhabricatorEnv::getEnvConfig('differential.whitespace-matters');
-    foreach ($config as $regexp) {
-      if (preg_match($regexp, $this->getFilename())) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   public function attachDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
     return $this;

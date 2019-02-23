@@ -88,9 +88,6 @@ final class DiffusionDiffController extends DiffusionController {
       ($viewer->getPHID() == $commit->getAuthorPHID()));
     $parser->setObjectOwnerPHID($commit->getAuthorPHID());
 
-    $parser->setWhitespaceMode(
-      DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
-
     $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
       $viewer,
       $commit->getPHID(),

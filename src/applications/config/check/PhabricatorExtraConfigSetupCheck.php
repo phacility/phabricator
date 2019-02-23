@@ -533,6 +533,8 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'This ancient extension point has been replaced with other '.
         'mechanisms, including "AphrontSite".'),
 
+      'differential.whitespace-matters' => pht(
+        'Whitespace rendering is now handled automatically.'),
     );
 
     return $ancient_config;
