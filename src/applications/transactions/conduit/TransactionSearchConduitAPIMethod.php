@@ -73,24 +73,8 @@ final class TransactionSearchConduitAPIMethod
       ->setViewer($viewer);
 
     $constraints = $request->getValue('constraints', array());
-    PhutilTypeSpec::checkMap(
-      $constraints,
-      array(
-        'phids' => 'optional list<string>',
-      ));
 
-    $with_phids = idx($constraints, 'phids');
-
-    if ($with_phids === array()) {
-      throw new Exception(
-        pht(
-          'Constraint "phids" to "transaction.search" requires nonempty list, '.
-          'empty list provided.'));
-    }
-
-    if ($with_phids) {
-      $xaction_query->withPHIDs($with_phids);
-    }
+    $xaction_query = $this->applyConstraints($constraints, $xaction_query);
 
     $xactions = $xaction_query->executeWithCursorPager($pager);
 
@@ -240,4 +224,45 @@ final class TransactionSearchConduitAPIMethod
 
     return $this->addPagerResults($results, $pager);
   }
+
+  private function applyConstraints(
+    array $constraints,
+    PhabricatorApplicationTransactionQuery $query) {
+
+    PhutilTypeSpec::checkMap(
+      $constraints,
+      array(
+        'phids' => 'optional list<string>',
+        'authorPHIDs' => 'optional list<string>',
+      ));
+
+    $with_phids = idx($constraints, 'phids');
+
+    if ($with_phids === array()) {
+      throw new Exception(
+        pht(
+          'Constraint "phids" to "transaction.search" requires nonempty list, '.
+          'empty list provided.'));
+    }
+
+    if ($with_phids) {
+      $query->withPHIDs($with_phids);
+    }
+
+    $with_authors = idx($constraints, 'authorPHIDs');
+    if ($with_authors === array()) {
+      throw new Exception(
+        pht(
+          'Constraint "authorPHIDs" to "transaction.search" requires '.
+          'nonempty list, empty list provided.'));
+    }
+
+    if ($with_authors) {
+      $query->withAuthorPHIDs($with_authors);
+    }
+
+    return $query;
+  }
+
+
 }
