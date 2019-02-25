@@ -204,9 +204,9 @@ final class DifferentialInlineCommentEditController
 
     queryfx(
       $conn_w,
-      'INSERT IGNORE INTO %T (userPHID, commentID) VALUES %Q',
+      'INSERT IGNORE INTO %T (userPHID, commentID) VALUES %LQ',
       $table->getTableName(),
-      implode(', ', $sql));
+      $sql);
   }
 
   protected function showComments(array $ids) {
