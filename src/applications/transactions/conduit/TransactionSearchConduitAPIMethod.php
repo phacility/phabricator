@@ -202,6 +202,14 @@ final class TransactionSearchConduitAPIMethod
           case PhabricatorTransactions::TYPE_CREATE:
             $type = 'create';
             break;
+          case PhabricatorTransactions::TYPE_EDGE:
+            switch ($xaction->getMetadataValue('edge:type')) {
+              case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
+                $type = 'projects';
+                $fields = $this->newEdgeTransactionFields($xaction);
+                break;
+            }
+            break;
         }
       }
 
@@ -264,5 +272,29 @@ final class TransactionSearchConduitAPIMethod
     return $query;
   }
 
+  private function newEdgeTransactionFields(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $record = PhabricatorEdgeChangeRecord::newFromTransaction($xaction);
+
+    $operations = array();
+    foreach ($record->getAddedPHIDs() as $phid) {
+      $operations[] = array(
+        'operation' => 'add',
+        'phid' => $phid,
+      );
+    }
+
+    foreach ($record->getRemovedPHIDs() as $phid) {
+      $operations[] = array(
+        'operation' => 'remove',
+        'phid' => $phid,
+      );
+    }
+
+    return array(
+      'operations' => $operations,
+    );
+  }
 
 }
