@@ -144,7 +144,7 @@ EOTEXT
       ->setHeaderText(pht('Builtin and Saved Queries'))
       ->setCollapsed(true)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($this->newRemarkupDocumentationView($info))
       ->appendChild($table);
   }
 
@@ -223,7 +223,7 @@ EOTEXT
       );
 
       if ($constants) {
-        $constant_lists[] = $this->buildRemarkup(
+        $constant_lists[] = $this->newRemarkupDocumentationView(
           pht(
             'Constants supported by the `%s` constraint:',
             'statuses'));
@@ -283,7 +283,7 @@ EOTEXT
       ->setHeaderText(pht('Custom Query Constraints'))
       ->setCollapsed(true)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($this->newRemarkupDocumentationView($info))
       ->appendChild($table)
       ->appendChild($constant_lists);
   }
@@ -391,9 +391,9 @@ EOTEXT
       ->setHeaderText(pht('Result Ordering'))
       ->setCollapsed(true)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($orders_info))
+      ->appendChild($this->newRemarkupDocumentationView($orders_info))
       ->appendChild($orders_table)
-      ->appendChild($this->buildRemarkup($columns_info))
+      ->appendChild($this->newRemarkupDocumentationView($columns_info))
       ->appendChild($columns_table);
   }
 
@@ -472,7 +472,7 @@ EOTEXT
       ->setHeaderText(pht('Object Fields'))
       ->setCollapsed(true)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($this->newRemarkupDocumentationView($info))
       ->appendChild($table);
   }
 
@@ -562,7 +562,7 @@ EOTEXT
       ->setHeaderText(pht('Attachments'))
       ->setCollapsed(true)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($this->newRemarkupDocumentationView($info))
       ->appendChild($table);
   }
 
@@ -633,21 +633,7 @@ EOTEXT
       ->setHeaderText(pht('Paging and Limits'))
       ->setCollapsed(true)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($this->buildRemarkup($info));
+      ->appendChild($this->newRemarkupDocumentationView($info));
   }
 
-  private function buildRemarkup($remarkup) {
-    $viewer = $this->getViewer();
-
-    $view = new PHUIRemarkupView($viewer, $remarkup);
-
-    $view->setRemarkupOptions(
-      array(
-        PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS => false,
-      ));
-
-    return id(new PHUIBoxView())
-      ->appendChild($view)
-      ->addPadding(PHUI::PADDING_LARGE);
-  }
 }
