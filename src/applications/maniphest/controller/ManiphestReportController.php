@@ -13,10 +13,19 @@ final class ManiphestReportController extends ManiphestController {
 
       $project = head($request->getArr('set_project'));
       $project = nonempty($project, null);
-      $uri = $uri->alter('project', $project);
+
+      if ($project !== null) {
+        $uri->replaceQueryParam('project', $project);
+      } else {
+        $uri->removeQueryParam('project');
+      }
 
       $window = $request->getStr('set_window');
-      $uri = $uri->alter('window', $window);
+      if ($window !== null) {
+        $uri->replaceQueryParam('window', $window);
+      } else {
+        $uri->removeQueryParam('window');
+      }
 
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
