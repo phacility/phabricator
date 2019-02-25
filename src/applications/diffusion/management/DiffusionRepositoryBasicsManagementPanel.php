@@ -444,13 +444,15 @@ final class DiffusionRepositoryBasicsManagementPanel
               id(new PHUIStatusItemView())
               ->setIcon(PHUIStatusItemView::ICON_WARNING, 'red')
               ->setTarget(
-                pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
-              ->setNote(pht(
-                  'Unable to find this binary in `%s`. '.
-                  'You need to configure %s and include %s.',
-                  'environment.append-paths',
-                  $this->getEnvConfigLink(),
-                  $path)));
+                pht('Commit Hooks: %s', phutil_tag('tt', array(), $binary)))
+              ->setNote(
+                pht(
+                  'The directory containing the "svnlook" binary is not '.
+                  'listed in "environment.append-paths", so commit hooks '.
+                  '(which execute with an empty "PATH") will not be able to '.
+                  'find "svnlook". Add `%s` to %s.',
+                  $path,
+                  $this->getEnvConfigLink())));
           }
         }
       }
