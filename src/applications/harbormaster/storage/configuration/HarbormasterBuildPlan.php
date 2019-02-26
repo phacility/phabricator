@@ -17,6 +17,7 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   protected $planAutoKey;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $properties = array();
 
   const STATUS_ACTIVE   = 'active';
   const STATUS_DISABLED = 'disabled';
@@ -45,6 +46,9 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort128',
         'planStatus' => 'text32',
@@ -92,6 +96,15 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
 
   public function getObjectName() {
     return pht('Plan %d', $this->getID());
+  }
+
+  public function getPlanProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setPlanProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
   }
 
 

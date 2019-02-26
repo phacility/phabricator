@@ -77,7 +77,7 @@ final class HarbormasterBuildPlanEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    return array(
+    $fields = array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
@@ -89,6 +89,36 @@ final class HarbormasterBuildPlanEditEngine
         ->setConduitTypeDescription(pht('New plan name.'))
         ->setValue($object->getName()),
     );
+
+
+    $metadata_key = HarbormasterBuildPlanBehavior::getTransactionMetadataKey();
+
+    $behaviors = HarbormasterBuildPlanBehavior::newPlanBehaviors();
+    foreach ($behaviors as $behavior) {
+      $key = $behavior->getKey();
+
+      // Get the raw key off the object so that we don't reset stuff to
+      // default values by mistake if a behavior goes missing somehow.
+      $storage_key = HarbormasterBuildPlanBehavior::getStorageKeyForBehaviorKey(
+        $key);
+      $behavior_option = $object->getPlanProperty($storage_key);
+
+      if (!strlen($behavior_option)) {
+        $behavior_option = $behavior->getPlanOption($object)->getKey();
+      }
+
+      $fields[] = id(new PhabricatorSelectEditField())
+        ->setIsFormField(false)
+        ->setKey(sprintf('behavior.%s', $behavior->getKey()))
+        ->setMetadataValue($metadata_key, $behavior->getKey())
+        ->setLabel(pht('Behavior: %s', $behavior->getName()))
+        ->setTransactionType(
+          HarbormasterBuildPlanBehaviorTransaction::TRANSACTIONTYPE)
+        ->setValue($behavior_option)
+        ->setOptions($behavior->getOptionMap());
+    }
+
+    return $fields;
   }
 
 }

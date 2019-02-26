@@ -61,6 +61,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
     }
 
     $builds_view = $this->newBuildsView($plan);
+    $options_view = $this->newOptionsView($plan);
 
     $timeline = $this->buildTransactionTimeline(
       $plan,
@@ -74,6 +75,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         array(
           $error,
           $step_list,
+          $options_view,
           $builds_view,
           $timeline,
         ));
@@ -482,6 +484,77 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($list);
+  }
+
+
+  private function newOptionsView(HarbormasterBuildPlan $plan) {
+    $viewer = $this->getViewer();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $plan,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $behaviors = HarbormasterBuildPlanBehavior::newPlanBehaviors();
+
+    $rows = array();
+    foreach ($behaviors as $behavior) {
+      $option = $behavior->getPlanOption($plan);
+
+      $icon = $option->getIcon();
+      $icon = id(new PHUIIconView())->setIcon($icon);
+
+      $edit_uri = new PhutilURI(
+        $this->getApplicationURI(
+          urisprintf(
+            'plan/behavior/%d/%s/',
+            $plan->getID(),
+            $behavior->getKey())));
+
+      $edit_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::GREY)
+        ->setSize(PHUIButtonView::SMALL)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true)
+        ->setText(pht('Edit'))
+        ->setHref($edit_uri);
+
+      $rows[] = array(
+        $icon,
+        $behavior->getName(),
+        $option->getName(),
+        $option->getDescription(),
+        $edit_button,
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          null,
+          pht('Name'),
+          pht('Behavior'),
+          pht('Details'),
+          null,
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'pri',
+          null,
+          'wide',
+          null,
+        ));
+
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Plan Behaviors'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($table);
   }
 
 }
