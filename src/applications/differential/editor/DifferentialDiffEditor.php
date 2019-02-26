@@ -208,15 +208,6 @@ final class DifferentialDiffEditor
     return $adapter;
   }
 
-  protected function didApplyHeraldRules(
-    PhabricatorLiskDAO $object,
-    HeraldAdapter $adapter,
-    HeraldTranscript $transcript) {
-
-    $xactions = array();
-    return $xactions;
-  }
-
   private function updateDiffFromDict(DifferentialDiff $diff, $dict) {
     $diff
       ->setSourcePath(idx($dict, 'sourcePath'))
