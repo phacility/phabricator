@@ -43,7 +43,7 @@ final class PhabricatorSetConfigType
     }
 
     if ($value) {
-      if (array_keys($value) !== range(0, count($value) - 1)) {
+      if (!phutil_is_natural_list($value)) {
         throw $this->newException(
           pht(
             'Option "%s" is of type "%s", and should be specified on the '.
