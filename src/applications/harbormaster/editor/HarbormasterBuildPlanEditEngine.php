@@ -82,7 +82,8 @@ final class HarbormasterBuildPlanEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setIsRequired(true)
-        ->setTransactionType(HarbormasterBuildPlanTransaction::TYPE_NAME)
+        ->setTransactionType(
+          HarbormasterBuildPlanNameTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('The build plan name.'))
         ->setConduitDescription(pht('Rename the plan.'))
         ->setConduitTypeDescription(pht('New plan name.'))

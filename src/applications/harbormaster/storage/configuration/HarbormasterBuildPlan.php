@@ -84,6 +84,16 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return ($this->getPlanStatus() == self::STATUS_DISABLED);
   }
 
+  public function getURI() {
+    return urisprintf(
+      '/harbormaster/plan/%s/',
+      $this->getID());
+  }
+
+  public function getObjectName() {
+    return pht('Build Plan %d', $this->getID());
+  }
+
 
 /* -(  Autoplans  )---------------------------------------------------------- */
 

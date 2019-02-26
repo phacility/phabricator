@@ -19,11 +19,11 @@ final class HarbormasterPlanDisableController
       return new Aphront404Response();
     }
 
-    $plan_uri = $this->getApplicationURI('plan/'.$plan->getID().'/');
+    $plan_uri = $plan->getURI();
 
     if ($request->isFormPost()) {
 
-      $type_status = HarbormasterBuildPlanTransaction::TYPE_STATUS;
+      $type_status = HarbormasterBuildPlanStatusTransaction::TRANSACTIONTYPE;
 
       $v_status = $plan->isDisabled()
         ? HarbormasterBuildPlan::STATUS_ACTIVE
