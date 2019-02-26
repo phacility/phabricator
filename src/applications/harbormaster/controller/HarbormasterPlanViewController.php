@@ -263,11 +263,6 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         ->setDisabled(!$can_run)
         ->setIcon('fa-play-circle'));
 
-    $curtain->addPanel(
-      id(new PHUICurtainPanelView())
-        ->setHeaderText(pht('Created'))
-        ->appendChild(phabricator_datetime($plan->getDateCreated(), $viewer)));
-
     return $curtain;
   }
 
