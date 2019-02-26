@@ -91,7 +91,7 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   }
 
   public function getObjectName() {
-    return pht('Build Plan %d', $this->getID());
+    return pht('Plan %d', $this->getID());
   }
 
 

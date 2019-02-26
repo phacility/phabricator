@@ -1370,6 +1370,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildTransactionQuery' => 'applications/harbormaster/query/HarbormasterBuildTransactionQuery.php',
     'HarbormasterBuildUnitMessage' => 'applications/harbormaster/storage/build/HarbormasterBuildUnitMessage.php',
     'HarbormasterBuildUnitMessageQuery' => 'applications/harbormaster/query/HarbormasterBuildUnitMessageQuery.php',
+    'HarbormasterBuildView' => 'applications/harbormaster/view/HarbormasterBuildView.php',
     'HarbormasterBuildViewController' => 'applications/harbormaster/controller/HarbormasterBuildViewController.php',
     'HarbormasterBuildWorker' => 'applications/harbormaster/worker/HarbormasterBuildWorker.php',
     'HarbormasterBuildable' => 'applications/harbormaster/storage/HarbormasterBuildable.php',
@@ -6999,6 +7000,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
     ),
     'HarbormasterBuildUnitMessageQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'HarbormasterBuildView' => 'AphrontView',
     'HarbormasterBuildViewController' => 'HarbormasterController',
     'HarbormasterBuildWorker' => 'HarbormasterWorker',
     'HarbormasterBuildable' => array(

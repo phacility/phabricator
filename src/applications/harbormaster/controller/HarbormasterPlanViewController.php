@@ -18,11 +18,6 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       return new Aphront404Response();
     }
 
-    $timeline = $this->buildTransactionTimeline(
-      $plan,
-      new HarbormasterBuildPlanTransactionQuery());
-    $timeline->setShouldTerminate(true);
-
     $title = $plan->getName();
 
     $header = id(new PHUIHeaderView())
@@ -33,24 +28,30 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
     $curtain = $this->buildCurtainView($plan);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Plan %d', $id));
-    $crumbs->setBorder(true);
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($plan->getObjectName())
+      ->setBorder(true);
 
-    list($step_list, $has_any_conflicts, $would_deadlock) =
+    list($step_list, $has_any_conflicts, $would_deadlock, $steps) =
       $this->buildStepList($plan);
 
     $error = null;
-    if ($would_deadlock) {
-      $error = pht('This build plan will deadlock when executed, due to '.
-                   'circular dependencies present in the build plan. '.
-                   'Examine the step list and resolve the deadlock.');
+    if (!$steps) {
+      $error = pht(
+        'This build plan does not have any build steps yet, so it will '.
+        'not do anything when run.');
+    } else if ($would_deadlock) {
+      $error = pht(
+        'This build plan will deadlock when executed, due to circular '.
+        'dependencies present in the build plan. Examine the step list '.
+        'and resolve the deadlock.');
     } else if ($has_any_conflicts) {
       // A deadlocking build will also cause all the artifacts to be
       // invalid, so we just skip showing this message if that's the
       // case.
-      $error = pht('This build plan has conflicts in one or more build steps. '.
-                   'Examine the step list and resolve the listed errors.');
+      $error = pht(
+        'This build plan has conflicts in one or more build steps. '.
+        'Examine the step list and resolve the listed errors.');
     }
 
     if ($error) {
@@ -59,18 +60,28 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         ->appendChild($error);
     }
 
+    $builds_view = $this->newBuildsView($plan);
+
+    $timeline = $this->buildTransactionTimeline(
+      $plan,
+      new HarbormasterBuildPlanTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $error,
-        $step_list,
-        $timeline,
-      ));
+      ->setMainColumn(
+        array(
+          $error,
+          $step_list,
+          $builds_view,
+          $timeline,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($plan->getPHID()))
       ->appendChild($view);
   }
 
@@ -213,7 +224,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($step_list);
 
-    return array($step_box, $has_any_conflicts, $is_deadlocking);
+    return array($step_box, $has_any_conflicts, $is_deadlocking, $steps);
   }
 
   private function buildCurtainView(HarbormasterBuildPlan $plan) {
@@ -376,7 +387,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
     array $steps) {
     $has_conflicts = false;
 
-    if (count($step_phids) === 0) {
+    if (!$step_phids) {
       return null;
     }
 
@@ -436,4 +447,41 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
     return array($ui, $has_conflicts);
   }
+
+  private function newBuildsView(HarbormasterBuildPlan $plan) {
+    $viewer = $this->getViewer();
+
+    $builds = id(new HarbormasterBuildQuery())
+      ->setViewer($viewer)
+      ->withBuildPlanPHIDs(array($plan->getPHID()))
+      ->setLimit(10)
+      ->execute();
+
+    $list = id(new HarbormasterBuildView())
+      ->setViewer($viewer)
+      ->setBuilds($builds)
+      ->newObjectList();
+
+    $list->setNoDataString(pht('No recent builds.'));
+
+    $more_href = new PhutilURI(
+      $this->getApplicationURI('/build/'),
+      array('plan' => $plan->getPHID()));
+
+    $more_link = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-list-ul')
+      ->setText(pht('View All Builds'))
+      ->setHref($more_href);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Builds'))
+      ->addActionLink($more_link);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($list);
+  }
+
 }

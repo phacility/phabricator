@@ -193,6 +193,10 @@ final class HarbormasterBuild extends HarbormasterDAO
     return HarbormasterBuildStatus::newBuildStatusObject($status_key);
   }
 
+  public function getObjectName() {
+    return pht('Build %d', $this->getID());
+  }
+
 
 /* -(  Build Commands  )----------------------------------------------------- */
 
