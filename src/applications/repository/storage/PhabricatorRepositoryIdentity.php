@@ -14,17 +14,6 @@ final class PhabricatorRepositoryIdentity
   protected $manuallySetUserPHID;
   protected $currentEffectiveUserPHID;
 
-  private $effectiveUser = self::ATTACHABLE;
-
-  public function attachEffectiveUser(PhabricatorUser $user) {
-    $this->effectiveUser = $user;
-    return $this;
-  }
-
-  public function getEffectiveUser() {
-    return $this->assertAttached($this->effectiveUser);
-  }
-
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

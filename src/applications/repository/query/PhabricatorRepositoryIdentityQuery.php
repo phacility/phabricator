@@ -124,29 +124,6 @@ final class PhabricatorRepositoryIdentityQuery
     return $where;
   }
 
-  protected function didFilterPage(array $identities) {
-    $user_ids = array_filter(
-      mpull($identities, 'getCurrentEffectiveUserPHID', 'getID'));
-    if (!$user_ids) {
-      return $identities;
-    }
-
-    $users = id(new PhabricatorPeopleQuery())
-      ->withPHIDs($user_ids)
-      ->setViewer($this->getViewer())
-      ->execute();
-    $users = mpull($users, null, 'getPHID');
-
-    foreach ($identities as $identity) {
-      if ($identity->hasEffectiveUser()) {
-        $user = idx($users, $identity->getCurrentEffectiveUserPHID());
-        $identity->attachEffectiveUser($user);
-      }
-    }
-
-    return $identities;
-  }
-
   public function getQueryApplicationClass() {
     return 'PhabricatorDiffusionApplication';
   }
