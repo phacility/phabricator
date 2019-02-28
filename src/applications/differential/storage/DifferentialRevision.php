@@ -877,7 +877,7 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorUser $viewer,
     array $phids) {
 
-    return id(new HarbormasterBuildQuery())
+    $builds = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
       ->withBuildablePHIDs($phids)
       ->withAutobuilds(false)
@@ -893,6 +893,41 @@ final class DifferentialRevision extends DifferentialDAO
           HarbormasterBuildStatus::STATUS_DEADLOCKED,
         ))
       ->execute();
+
+    // Filter builds based on the "Hold Drafts" behavior of their associated
+    // build plans.
+
+    $hold_drafts = HarbormasterBuildPlanBehavior::BEHAVIOR_DRAFTS;
+    $behavior = HarbormasterBuildPlanBehavior::getBehavior($hold_drafts);
+
+    $key_never = HarbormasterBuildPlanBehavior::DRAFTS_NEVER;
+    $key_building = HarbormasterBuildPlanBehavior::DRAFTS_IF_BUILDING;
+
+    foreach ($builds as $key => $build) {
+      $plan = $build->getBuildPlan();
+      $hold_key = $behavior->getPlanOption($plan)->getKey();
+
+      $hold_never = ($hold_key === $key_never);
+      $hold_building = ($hold_key === $key_building);
+
+      // If the build "Never" holds drafts from promoting, we don't care what
+      // the status is.
+      if ($hold_never) {
+        unset($builds[$key]);
+        continue;
+      }
+
+      // If the build holds drafts from promoting "While Building", we only
+      // care about the status until it completes.
+      if ($hold_building) {
+        if ($build->isComplete()) {
+          unset($builds[$key]);
+          continue;
+        }
+      }
+    }
+
+    return $builds;
   }
 
 

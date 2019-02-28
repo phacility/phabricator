@@ -17,6 +17,11 @@ final class HarbormasterBuildPlanBehavior
   const RESTARTABLE_ALWAYS = 'always';
   const RESTARTABLE_NEVER = 'never';
 
+  const BEHAVIOR_DRAFTS = 'hold-drafts';
+  const DRAFTS_ALWAYS = 'always';
+  const DRAFTS_IF_BUILDING = 'building';
+  const DRAFTS_NEVER = 'never';
+
   public function setKey($key) {
     $this->key = $key;
     return $this;
@@ -138,7 +143,7 @@ final class HarbormasterBuildPlanBehavior
   public static function newPlanBehaviors() {
     $draft_options = array(
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('always')
+        ->setKey(self::DRAFTS_ALWAYS)
         ->setIcon('fa-check-circle-o green')
         ->setName(pht('Always'))
         ->setIsDefault(true)
@@ -147,7 +152,7 @@ final class HarbormasterBuildPlanBehavior
             'Revisions are not sent for review until the build completes, '.
             'and are returned to the author for updates if the build fails.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('building')
+        ->setKey(self::DRAFTS_IF_BUILDING)
         ->setIcon('fa-pause-circle-o yellow')
         ->setName(pht('If Building'))
         ->setDescription(
@@ -155,7 +160,7 @@ final class HarbormasterBuildPlanBehavior
             'Revisions are not sent for review until the build completes, '.
             'but they will be sent for review even if it fails.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('never')
+        ->setKey(self::DRAFTS_NEVER)
         ->setIcon('fa-circle-o red')
         ->setName(pht('Never'))
         ->setDescription(
@@ -262,7 +267,7 @@ final class HarbormasterBuildPlanBehavior
 
     $behaviors = array(
       id(new self())
-        ->setKey('hold-drafts')
+        ->setKey(self::BEHAVIOR_DRAFTS)
         ->setName(pht('Hold Drafts'))
         ->setEditInstructions(
           pht(
