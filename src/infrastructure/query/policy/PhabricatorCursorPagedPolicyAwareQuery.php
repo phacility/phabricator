@@ -1233,6 +1233,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       'index' => $index->getIndexKey(),
       'alias' => $alias,
       'value' => array($min, $max),
+      'data' => null,
+      'constraints' => null,
     );
 
     return $this;
