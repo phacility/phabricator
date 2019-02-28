@@ -123,4 +123,14 @@ final class ManiphestTaskUnblockTransaction
     return parent::shouldHideForFeed();
   }
 
+  public function getRequiredCapabilities(
+    $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    // When you close a task, we want to apply this transaction to its parents
+    // even if you can not edit (or even see) those parents, so don't require
+    // any capabilities. See PHI1059.
+
+    return null;
+  }
 }
