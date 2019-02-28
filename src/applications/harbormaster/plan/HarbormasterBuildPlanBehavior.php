@@ -22,6 +22,11 @@ final class HarbormasterBuildPlanBehavior
   const DRAFTS_IF_BUILDING = 'building';
   const DRAFTS_NEVER = 'never';
 
+  const BEHAVIOR_BUILDABLE = 'buildable';
+  const BUILDABLE_ALWAYS = 'always';
+  const BUILDABLE_IF_BUILDING = 'building';
+  const BUILDABLE_NEVER = 'never';
+
   public function setKey($key) {
     $this->key = $key;
     return $this;
@@ -207,7 +212,7 @@ final class HarbormasterBuildPlanBehavior
 
     $aggregate_options = array(
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('always')
+        ->setKey(self::BUILDABLE_ALWAYS)
         ->setIcon('fa-check-circle-o green')
         ->setName(pht('Always'))
         ->setIsDefault(true)
@@ -216,7 +221,7 @@ final class HarbormasterBuildPlanBehavior
             'The buildable waits for the build, and fails if the '.
             'build fails.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('building')
+        ->setKey(self::BUILDABLE_IF_BUILDING)
         ->setIcon('fa-pause-circle-o yellow')
         ->setName(pht('If Building'))
         ->setDescription(
@@ -224,7 +229,7 @@ final class HarbormasterBuildPlanBehavior
             'The buildable waits for the build, but does not fail '.
             'if the build fails.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('never')
+        ->setKey(self::BUILDABLE_NEVER)
         ->setIcon('fa-circle-o red')
         ->setName(pht('Never'))
         ->setDescription(
@@ -310,7 +315,7 @@ final class HarbormasterBuildPlanBehavior
             'this warning and continue, even if builds have failed.'))
         ->setOptions($land_options),
       id(new self())
-        ->setKey('buildable')
+        ->setKey(self::BEHAVIOR_BUILDABLE)
         ->setEditInstructions(
           pht(
             'The overall state of a buildable (like a commit or revision) is '.
