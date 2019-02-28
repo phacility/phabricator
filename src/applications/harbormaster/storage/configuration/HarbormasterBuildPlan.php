@@ -175,6 +175,16 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
       $capability);
   }
 
+  public function canRestartBuildPlan() {
+    $restartable = HarbormasterBuildPlanBehavior::BEHAVIOR_RESTARTABLE;
+    $is_restartable = HarbormasterBuildPlanBehavior::RESTARTABLE_ALWAYS;
+
+    $option = HarbormasterBuildPlanBehavior::getBehavior($restartable)
+      ->getPlanOption($this);
+
+    return ($option->getKey() === $is_restartable);
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

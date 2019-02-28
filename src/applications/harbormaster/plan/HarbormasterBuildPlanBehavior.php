@@ -13,6 +13,10 @@ final class HarbormasterBuildPlanBehavior
   const RUNNABLE_IF_VIEWABLE = 'view';
   const RUNNABLE_IF_EDITABLE = 'edit';
 
+  const BEHAVIOR_RESTARTABLE = 'restartable';
+  const RESTARTABLE_ALWAYS = 'always';
+  const RESTARTABLE_NEVER = 'never';
+
   public function setKey($key) {
     $this->key = $key;
     return $this;
@@ -225,14 +229,14 @@ final class HarbormasterBuildPlanBehavior
 
     $restart_options = array(
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('always')
+        ->setKey(self::RESTARTABLE_ALWAYS)
         ->setIcon('fa-repeat green')
         ->setName(pht('Always'))
         ->setIsDefault(true)
         ->setDescription(
           pht('The build may be restarted.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('never')
+        ->setKey(self::RESTARTABLE_NEVER)
         ->setIcon('fa-times red')
         ->setName(pht('Never'))
         ->setDescription(
@@ -317,7 +321,7 @@ final class HarbormasterBuildPlanBehavior
         ->setName(pht('Affects Buildable'))
         ->setOptions($aggregate_options),
       id(new self())
-        ->setKey('restartable')
+        ->setKey(self::BEHAVIOR_RESTARTABLE)
         ->setEditInstructions(
           pht(
             'Usually, builds may be restarted. This may be useful if you '.

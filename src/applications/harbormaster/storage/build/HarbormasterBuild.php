@@ -215,6 +215,11 @@ final class HarbormasterBuild extends HarbormasterDAO
       return false;
     }
 
+    $plan = $this->getBuildPlan();
+    if (!$plan->canRestartBuildPlan()) {
+      return false;
+    }
+
     return !$this->isRestarting();
   }
 

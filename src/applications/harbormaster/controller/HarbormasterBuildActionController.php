@@ -64,6 +64,11 @@ final class HarbormasterBuildActionController
             'restart. Side effects of the build will occur again. Really '.
             'restart build?');
           $submit = pht('Restart Build');
+        } else if (!$build->getBuildPlan()->canRestartBuildPlan()) {
+          $title = pht('Not Restartable');
+          $body = pht(
+            'The build plan for this build is not restartable, so you '.
+            'can not restart the build.');
         } else {
           $title = pht('Unable to Restart Build');
           if ($build->isRestarting()) {
@@ -135,8 +140,7 @@ final class HarbormasterBuildActionController
         break;
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    $dialog = $this->newDialog()
       ->setTitle($title)
       ->appendChild($body)
       ->addCancelButton($return_uri);
@@ -145,7 +149,7 @@ final class HarbormasterBuildActionController
       $dialog->addSubmitButton($submit);
     }
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    return $dialog;
   }
 
 }
