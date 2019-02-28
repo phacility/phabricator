@@ -709,8 +709,17 @@ final class DiffusionBrowseController extends DiffusionController {
         'path'      => $path,
       ));
 
-    $before_uri = $before_uri->alter('renamed', $renamed);
-    $before_uri = $before_uri->alter('follow', $follow);
+    if ($renamed === null) {
+      $before_uri->removeQueryParam('renamed');
+    } else {
+      $before_uri->replaceQueryParam('renamed', $renamed);
+    }
+
+    if ($follow === null) {
+      $before_uri->removeQueryParam('follow');
+    } else {
+      $before_uri->replaceQueryParam('follow', $follow);
+    }
 
     return id(new AphrontRedirectResponse())->setURI($before_uri);
   }
