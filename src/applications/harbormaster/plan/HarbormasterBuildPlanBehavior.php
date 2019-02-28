@@ -9,6 +9,10 @@ final class HarbormasterBuildPlanBehavior
   private $defaultKey;
   private $editInstructions;
 
+  const BEHAVIOR_RUNNABLE = 'runnable';
+  const RUNNABLE_IF_VIEWABLE = 'view';
+  const RUNNABLE_IF_EDITABLE = 'edit';
+
   public function setKey($key) {
     $this->key = $key;
     return $this;
@@ -112,6 +116,19 @@ final class HarbormasterBuildPlanBehavior
 
   public static function getStorageKeyForBehaviorKey($behavior_key) {
     return sprintf('behavior.%s', $behavior_key);
+  }
+
+  public static function getBehavior($key) {
+    $behaviors = self::newPlanBehaviors();
+
+    if (!isset($behaviors[$key])) {
+      throw new Exception(
+        pht(
+          'No build plan behavior with key "%s" exists.',
+          $key));
+    }
+
+    return $behaviors[$key];
   }
 
   public static function newPlanBehaviors() {
@@ -224,14 +241,14 @@ final class HarbormasterBuildPlanBehavior
 
     $run_options = array(
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('edit')
+        ->setKey(self::RUNNABLE_IF_EDITABLE)
         ->setIcon('fa-pencil green')
         ->setName(pht('If Editable'))
         ->setIsDefault(true)
         ->setDescription(
           pht('Only users who can edit the plan can run it manually.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('view')
+        ->setKey(self::RUNNABLE_IF_VIEWABLE)
         ->setIcon('fa-exclamation-triangle yellow')
         ->setName(pht('If Viewable'))
         ->setDescription(
@@ -315,7 +332,7 @@ final class HarbormasterBuildPlanBehavior
         ->setName(pht('Restartable'))
         ->setOptions($restart_options),
       id(new self())
-        ->setKey('runnable')
+        ->setKey(self::BEHAVIOR_RUNNABLE)
         ->setEditInstructions(
           pht(
             'To run a build manually, you normally must have permission to '.
@@ -323,9 +340,8 @@ final class HarbormasterBuildPlanBehavior
             'can see the build plan be able to run and restart the build, you '.
             'can change the behavior here.'.
             "\n\n".
-            'Note that this affects both {nav Run Plan Manually} and '.
-            '{nav Restart Build}, since the two actions are largely '.
-            'equivalent.'.
+            'Note that this controls access to all build management actions: '.
+            '"Run Plan Manually", "Restart", "Abort", "Pause", and "Resume".'.
             "\n\n".
             'WARNING: This may be unsafe, particularly if the build has '.
             'side effects like deployment.'.

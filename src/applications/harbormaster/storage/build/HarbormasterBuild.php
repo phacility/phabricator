@@ -334,14 +334,17 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function assertCanIssueCommand(PhabricatorUser $viewer, $command) {
-    $need_edit = false;
+    $plan = $this->getBuildPlan();
+
+    $need_edit = true;
     switch ($command) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
-        break;
       case HarbormasterBuildCommand::COMMAND_PAUSE:
       case HarbormasterBuildCommand::COMMAND_RESUME:
       case HarbormasterBuildCommand::COMMAND_ABORT:
-        $need_edit = true;
+        if ($plan->canRunWithoutEditCapability()) {
+          $need_edit = false;
+        }
         break;
       default:
         throw new Exception(
@@ -355,7 +358,7 @@ final class HarbormasterBuild extends HarbormasterDAO
     if ($need_edit) {
       PhabricatorPolicyFilter::requireCapability(
         $viewer,
-        $this->getBuildPlan(),
+        $plan,
         PhabricatorPolicyCapability::CAN_EDIT);
     }
   }

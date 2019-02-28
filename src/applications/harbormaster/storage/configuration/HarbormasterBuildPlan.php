@@ -10,7 +10,8 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     PhabricatorSubscribableInterface,
     PhabricatorNgramsInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorPolicyCodexInterface {
 
   protected $name;
   protected $planStatus;
@@ -133,7 +134,6 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return true;
   }
 
-
   public function getName() {
     $autoplan = $this->getAutoplan();
     if ($autoplan) {
@@ -141,6 +141,38 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     }
 
     return parent::getName();
+  }
+
+  public function hasRunCapability(PhabricatorUser $viewer) {
+    try {
+      $this->assertHasRunCapability($viewer);
+      return true;
+    } catch (PhabricatorPolicyException $ex) {
+      return false;
+    }
+  }
+
+  public function canRunWithoutEditCapability() {
+    $runnable = HarbormasterBuildPlanBehavior::BEHAVIOR_RUNNABLE;
+    $if_viewable = HarbormasterBuildPlanBehavior::RUNNABLE_IF_VIEWABLE;
+
+    $option = HarbormasterBuildPlanBehavior::getBehavior($runnable)
+      ->getPlanOption($this);
+
+    return ($option->getKey() === $if_viewable);
+  }
+
+  public function assertHasRunCapability(PhabricatorUser $viewer) {
+    if ($this->canRunWithoutEditCapability()) {
+      $capability = PhabricatorPolicyCapability::CAN_VIEW;
+    } else {
+      $capability = PhabricatorPolicyCapability::CAN_EDIT;
+    }
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $this,
+      $capability);
   }
 
 
@@ -263,6 +295,14 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
+
+
+  public function newPolicyCodex() {
+    return new HarbormasterBuildPlanPolicyCodex();
   }
 
 }

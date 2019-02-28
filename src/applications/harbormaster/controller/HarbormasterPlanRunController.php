@@ -9,15 +9,12 @@ final class HarbormasterPlanRunController extends HarbormasterPlanController {
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)
       ->withIDs(array($plan_id))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
       ->executeOne();
     if (!$plan) {
       return new Aphront404Response();
     }
+
+    $plan->assertHasRunCapability($viewer);
 
     $cancel_uri = $this->getApplicationURI("plan/{$plan_id}/");
 

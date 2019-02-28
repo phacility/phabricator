@@ -266,7 +266,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
           ->setIcon('fa-ban'));
     }
 
-    $can_run = ($can_edit && $plan->canRunManually());
+    $can_run = ($plan->hasRunCapability($viewer) && $plan->canRunManually());
 
     $curtain->addAction(
       id(new PhabricatorActionView())
