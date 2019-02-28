@@ -233,15 +233,31 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
         ->setKey('status')
         ->setType('map<string, wild>')
         ->setDescription(pht('The current status of this build plan.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('behaviors')
+        ->setType('map<string, string>')
+        ->setDescription(pht('Behavior configuration for the build plan.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $behavior_map = array();
+
+    $behaviors = HarbormasterBuildPlanBehavior::newPlanBehaviors();
+    foreach ($behaviors as $behavior) {
+      $option = $behavior->getPlanOption($this);
+
+      $behavior_map[$behavior->getKey()] = array(
+        'value' => $option->getKey(),
+      );
+    }
+
     return array(
       'name' => $this->getName(),
       'status' => array(
         'value' => $this->getPlanStatus(),
       ),
+      'behaviors' => $behavior_map,
     );
   }
 
