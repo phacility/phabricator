@@ -714,7 +714,14 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       if (isset($validation_results[$factor_phid])) {
         continue;
       }
-      $validation_results[$factor_phid] = new PhabricatorAuthFactorResult();
+
+      $issued_challenges = idx($challenge_map, $factor_phid, array());
+
+      $validation_results[$factor_phid] = $impl->getResultForPrompt(
+        $factor,
+        $viewer,
+        $request,
+        $issued_challenges);
     }
 
     throw id(new PhabricatorAuthHighSecurityRequiredException())

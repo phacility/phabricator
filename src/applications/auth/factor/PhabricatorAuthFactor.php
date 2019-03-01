@@ -221,6 +221,40 @@ abstract class PhabricatorAuthFactor extends Phobject {
     return $result;
   }
 
+  final public function getResultForPrompt(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    array $challenges) {
+    assert_instances_of($challenges, 'PhabricatorAuthChallenge');
+
+    $result = $this->newResultForPrompt(
+      $config,
+      $viewer,
+      $request,
+      $challenges);
+
+    if (!$this->isAuthResult($result)) {
+      throw new Exception(
+        pht(
+          'Expected "newResultForPrompt()" to return an object of class "%s", '.
+          'but it returned something else ("%s"; in "%s").',
+          'PhabricatorAuthFactorResult',
+          phutil_describe_type($result),
+          get_class($this)));
+    }
+
+    return $result;
+  }
+
+  protected function newResultForPrompt(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    array $challenges) {
+    return $this->newResult();
+  }
+
   abstract protected function newResultFromIssuedChallenges(
     PhabricatorAuthFactorConfig $config,
     PhabricatorUser $viewer,
