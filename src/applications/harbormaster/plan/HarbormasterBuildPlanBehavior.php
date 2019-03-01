@@ -27,6 +27,12 @@ final class HarbormasterBuildPlanBehavior
   const BUILDABLE_IF_BUILDING = 'building';
   const BUILDABLE_NEVER = 'never';
 
+  const BEHAVIOR_LANDWARNING = 'arc-land';
+  const LANDWARNING_ALWAYS = 'always';
+  const LANDWARNING_IF_BUILDING = 'building';
+  const LANDWARNING_IF_COMPLETE = 'complete';
+  const LANDWARNING_NEVER = 'never';
+
   public function setKey($key) {
     $this->key = $key;
     return $this;
@@ -176,7 +182,7 @@ final class HarbormasterBuildPlanBehavior
 
     $land_options = array(
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('always')
+        ->setKey(self::LANDWARNING_ALWAYS)
         ->setIcon('fa-check-circle-o green')
         ->setName(pht('Always'))
         ->setIsDefault(true)
@@ -185,7 +191,7 @@ final class HarbormasterBuildPlanBehavior
             '"arc land" warns if the build is still running or has '.
             'failed.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('building')
+        ->setKey(self::LANDWARNING_IF_BUILDING)
         ->setIcon('fa-pause-circle-o yellow')
         ->setName(pht('If Building'))
         ->setDescription(
@@ -193,7 +199,7 @@ final class HarbormasterBuildPlanBehavior
             '"arc land" warns if the build is still running, but ignores '.
             'the build if it has failed.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('complete')
+        ->setKey(self::LANDWARNING_IF_COMPLETE)
         ->setIcon('fa-dot-circle-o yellow')
         ->setName(pht('If Complete'))
         ->setDescription(
@@ -201,7 +207,7 @@ final class HarbormasterBuildPlanBehavior
             '"arc land" warns if the build has failed, but ignores the '.
             'build if it is still running.')),
       id(new HarbormasterBuildPlanBehaviorOption())
-        ->setKey('never')
+        ->setKey(self::LANDWARNING_NEVER)
         ->setIcon('fa-circle-o red')
         ->setName(pht('Never'))
         ->setDescription(
@@ -296,7 +302,7 @@ final class HarbormasterBuildPlanBehavior
             'revision, even if builds have failed or are still in progress.'))
         ->setOptions($draft_options),
       id(new self())
-        ->setKey('arc-land')
+        ->setKey(self::BEHAVIOR_LANDWARNING)
         ->setName(pht('Warn When Landing'))
         ->setEditInstructions(
           pht(
@@ -312,7 +318,10 @@ final class HarbormasterBuildPlanBehavior
             'for it) or the outcome is not important.'.
             "\n\n".
             'This warning is only advisory. Users may always elect to ignore '.
-            'this warning and continue, even if builds have failed.'))
+            'this warning and continue, even if builds have failed.'.
+            "\n\n".
+            'This setting also affects the warning that is published to '.
+            'revisions when commits land with ongoing or failed builds.'))
         ->setOptions($land_options),
       id(new self())
         ->setKey(self::BEHAVIOR_BUILDABLE)
