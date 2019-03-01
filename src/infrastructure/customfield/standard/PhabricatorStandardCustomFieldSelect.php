@@ -152,5 +152,9 @@ final class PhabricatorStandardCustomFieldSelect
     return id(new BulkSelectParameterType())
       ->setOptions($this->getOptions());
   }
+  
+  protected function newExportFieldType() {
+    return new PhabricatorSelectExportField($this);
+  }
 
 }
