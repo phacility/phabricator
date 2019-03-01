@@ -39,6 +39,7 @@ JX.install('DraggableList', {
 
   properties : {
     findItemsHandler: null,
+    compareHandler: null,
     canDragX: false,
     outerContainer: null,
     hasInfiniteHeight: false
@@ -367,8 +368,29 @@ JX.install('DraggableList', {
       return this;
     },
 
+    _getOrderedTarget: function(src_list, src_node) {
+      var targets = this._getTargets();
+
+      // NOTE: The targets are ordered from the bottom of the column to the
+      // top, so we're looking for the first node that we sort below. If we
+      // don't find one, we'll sort to the head of the column.
+
+      for (var ii = 0; ii < targets.length; ii++) {
+        var target = targets[ii];
+        if (this._compareTargets(src_list, src_node, target.item) > 0) {
+          return target.item;
+        }
+      }
+
+      return null;
+    },
+
+    _compareTargets: function(src_list, src_node, dst_node) {
+      var dst_list = this;
+      return this.getCompareHandler()(src_list, src_node, dst_list, dst_node);
+    },
+
     _getCurrentTarget : function(p) {
-      var ghost = this.getGhostNode();
       var targets = this._getTargets();
       var dragging = this._dragging;
 
@@ -461,9 +483,15 @@ JX.install('DraggableList', {
       // Compute the size and position of the drop target indicator, because we
       // need to update our static position computations to account for it.
 
+      var compare_handler = this.getCompareHandler();
+
       var cur_target = false;
       if (target_list) {
-        cur_target = target_list._getCurrentTarget(p);
+        if (compare_handler && (target_list !== this)) {
+          cur_target = target_list._getOrderedTarget(this, this._dragging);
+        } else {
+          cur_target = target_list._getCurrentTarget(p);
+        }
       }
 
       // If we've selected a new target, update the UI to show where we're

@@ -175,6 +175,19 @@ JX.install('WorkboardColumn', {
       this._dirty = false;
     },
 
+    compareHandler: function(src_list, src_node, dst_list, dst_node) {
+      var board = this.getBoard();
+      var order = board.getOrder();
+
+      var src_phid = JX.Stratcom.getData(src_node).objectPHID;
+      var dst_phid = JX.Stratcom.getData(dst_node).objectPHID;
+
+      var u_vec = this.getBoard().getOrderVector(src_phid, order);
+      var v_vec = this.getBoard().getOrderVector(dst_phid, order);
+
+      return this._compareVectors(u_vec, v_vec);
+    },
+
     _getCardsSortedNaturally: function() {
       var list = [];
 
@@ -200,15 +213,19 @@ JX.install('WorkboardColumn', {
     },
 
     _sortCards: function(order, u, v) {
-      var ud = this.getBoard().getOrderVector(u.getPHID(), order);
-      var vd = this.getBoard().getOrderVector(v.getPHID(), order);
+      var u_vec = this.getBoard().getOrderVector(u.getPHID(), order);
+      var v_vec = this.getBoard().getOrderVector(v.getPHID(), order);
 
-      for (var ii = 0; ii < ud.length; ii++) {
-        if (ud[ii] > vd[ii]) {
+      return this._compareVectors(u_vec, v_vec);
+    },
+
+    _compareVectors: function(u_vec, v_vec) {
+      for (var ii = 0; ii < u_vec.length; ii++) {
+        if (u_vec[ii] > v_vec[ii]) {
           return 1;
         }
 
-        if (ud[ii] < vd[ii]) {
+        if (u_vec[ii] < v_vec[ii]) {
           return -1;
         }
       }

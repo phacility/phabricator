@@ -118,6 +118,10 @@ JX.install('WorkboardBoard', {
           .setCanDragX(true)
           .setHasInfiniteHeight(true);
 
+        if (this.getOrder() !== 'natural') {
+          list.setCompareHandler(JX.bind(column, column.compareHandler));
+        }
+
         list.listen('didDrop', JX.bind(this, this._onmovecard, list));
 
         lists.push(list);
