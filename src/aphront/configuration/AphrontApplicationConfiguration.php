@@ -776,7 +776,6 @@ final class AphrontApplicationConfiguration
       'filler' => str_repeat('Q', 1024 * 16),
     );
 
-
     return id(new AphrontJSONResponse())
       ->setAddJSONShield(false)
       ->setContent($result);
