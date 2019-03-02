@@ -137,3 +137,11 @@
 .phui-workpanel-view.project-panel-over-limit .phui-header-shell {
   border-color: {$red};
 }
+
+.phui-workpanel-view .phui-box-grey {
+  border: 1px solid transparent;
+}
+
+.phui-workpanel-view.workboard-column-drop-target .phui-box-grey {
+  border-color: {$lightblueborder};
+}

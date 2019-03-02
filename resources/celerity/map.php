@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
     'core.pkg.css' => '34ce1741',
-    'core.pkg.js' => '9eb1254b',
+    'core.pkg.js' => 'b96c872e',
     'differential.pkg.css' => '1755a478',
     'differential.pkg.js' => '67e02996',
     'diffusion.pkg.css' => '42c75c37',
@@ -178,7 +178,7 @@ return array(
     'rsrc/css/phui/workboards/phui-workboard-color.css' => 'e86de308',
     'rsrc/css/phui/workboards/phui-workboard.css' => '74fc9d98',
     'rsrc/css/phui/workboards/phui-workcard.css' => '8c536f90',
-    'rsrc/css/phui/workboards/phui-workpanel.css' => 'bd546a49',
+    'rsrc/css/phui/workboards/phui-workpanel.css' => '7e12d43c',
     'rsrc/css/sprite-login.css' => '18b368a6',
     'rsrc/css/sprite-tokens.css' => 'f1896dc5',
     'rsrc/css/syntax/syntax-default.css' => '055fc231',
@@ -409,9 +409,9 @@ return array(
     'rsrc/js/application/phortune/phortune-credit-card-form.js' => 'd12d214f',
     'rsrc/js/application/policy/behavior-policy-control.js' => '0eaa33a9',
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '9347f172',
-    'rsrc/js/application/projects/WorkboardBoard.js' => '3a8c42a3',
+    'rsrc/js/application/projects/WorkboardBoard.js' => 'fd96a6e8',
     'rsrc/js/application/projects/WorkboardCard.js' => '9a513421',
-    'rsrc/js/application/projects/WorkboardColumn.js' => 'b451fd4c',
+    'rsrc/js/application/projects/WorkboardColumn.js' => '1f71e559',
     'rsrc/js/application/projects/WorkboardController.js' => '42c7a5a7',
     'rsrc/js/application/projects/behavior-project-boards.js' => '05c74d65',
     'rsrc/js/application/projects/behavior-project-create.js' => '34c53422',
@@ -434,7 +434,7 @@ return array(
     'rsrc/js/application/uiexample/notification-example.js' => '29819b75',
     'rsrc/js/core/Busy.js' => '5202e831',
     'rsrc/js/core/DragAndDropFileUpload.js' => '4370900d',
-    'rsrc/js/core/DraggableList.js' => 'd594c805',
+    'rsrc/js/core/DraggableList.js' => '8437c663',
     'rsrc/js/core/Favicon.js' => '7930776a',
     'rsrc/js/core/FileUpload.js' => 'ab85e184',
     'rsrc/js/core/Hovercard.js' => '074f0783',
@@ -727,9 +727,9 @@ return array(
     'javelin-view-renderer' => '9aae2b66',
     'javelin-view-visitor' => '308f9fe4',
     'javelin-websocket' => 'fdc13e4e',
-    'javelin-workboard-board' => '3a8c42a3',
+    'javelin-workboard-board' => 'fd96a6e8',
     'javelin-workboard-card' => '9a513421',
-    'javelin-workboard-column' => 'b451fd4c',
+    'javelin-workboard-column' => '1f71e559',
     'javelin-workboard-controller' => '42c7a5a7',
     'javelin-workflow' => '958e9045',
     'maniphest-report-css' => '3d53188b',
@@ -755,7 +755,7 @@ return array(
     'phabricator-diff-changeset-list' => '04023d82',
     'phabricator-diff-inline' => 'a4a14a94',
     'phabricator-drag-and-drop-file-upload' => '4370900d',
-    'phabricator-draggable-list' => 'd594c805',
+    'phabricator-draggable-list' => '8437c663',
     'phabricator-fatal-config-template-css' => '20babf50',
     'phabricator-favicon' => '7930776a',
     'phabricator-feed-css' => 'd8b6e3f8',
@@ -854,7 +854,7 @@ return array(
     'phui-workboard-color-css' => 'e86de308',
     'phui-workboard-view-css' => '74fc9d98',
     'phui-workcard-view-css' => '8c536f90',
-    'phui-workpanel-view-css' => 'bd546a49',
+    'phui-workpanel-view-css' => '7e12d43c',
     'phuix-action-list-view' => 'c68f183f',
     'phuix-action-view' => 'aaa08f3b',
     'phuix-autocomplete' => '8f139ef0',
@@ -1034,6 +1034,10 @@ return array(
       'javelin-behavior',
       'javelin-dom',
     ),
+    '1f71e559' => array(
+      'javelin-install',
+      'javelin-workboard-card',
+    ),
     '1ff278aa' => array(
       'phui-button-css',
     ),
@@ -1187,15 +1191,6 @@ return array(
     '38c1f3fb' => array(
       'javelin-install',
       'javelin-dom',
-    ),
-    '3a8c42a3' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-workflow',
-      'phabricator-draggable-list',
-      'javelin-workboard-column',
     ),
     '3b4899b0' => array(
       'javelin-behavior',
@@ -1540,6 +1535,9 @@ return array(
       'javelin-install',
       'javelin-dom',
     ),
+    '7e12d43c' => array(
+      'phui-workcard-view-css',
+    ),
     '80bff3af' => array(
       'javelin-install',
       'javelin-typeahead-source',
@@ -1556,6 +1554,14 @@ return array(
       'javelin-stratcom',
       'javelin-workflow',
       'phabricator-draggable-list',
+    ),
+    '8437c663' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-util',
+      'javelin-vector',
+      'javelin-magical-init',
     ),
     '87428eb2' => array(
       'javelin-behavior',
@@ -1843,10 +1849,6 @@ return array(
     'b347a301' => array(
       'javelin-behavior',
     ),
-    'b451fd4c' => array(
-      'javelin-install',
-      'javelin-workboard-card',
-    ),
     'b517bfa0' => array(
       'phui-oi-list-view-css',
     ),
@@ -1884,9 +1886,6 @@ return array(
       'javelin-behavior',
       'javelin-uri',
       'phabricator-notification',
-    ),
-    'bd546a49' => array(
-      'phui-workcard-view-css',
     ),
     'bdce4d78' => array(
       'javelin-install',
@@ -1985,14 +1984,6 @@ return array(
     ),
     'd3799cb4' => array(
       'javelin-install',
-    ),
-    'd594c805' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-util',
-      'javelin-vector',
-      'javelin-magical-init',
     ),
     'd8a86cfb' => array(
       'javelin-behavior',
@@ -2128,6 +2119,15 @@ return array(
     'fce5d170' => array(
       'javelin-magical-init',
       'javelin-util',
+    ),
+    'fd96a6e8' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'phabricator-draggable-list',
+      'javelin-workboard-column',
     ),
     'fdc13e4e' => array(
       'javelin-install',

@@ -116,7 +116,8 @@ JX.install('WorkboardBoard', {
           .setOuterContainer(this.getRoot())
           .setFindItemsHandler(JX.bind(column, column.getCardNodes))
           .setCanDragX(true)
-          .setHasInfiniteHeight(true);
+          .setHasInfiniteHeight(true)
+          .setIsDropTargetHandler(JX.bind(column, column.setIsDropTarget));
 
         if (this.getOrder() !== 'natural') {
           list.setCompareHandler(JX.bind(column, column.compareHandler));

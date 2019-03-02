@@ -40,6 +40,7 @@ JX.install('DraggableList', {
   properties : {
     findItemsHandler: null,
     compareHandler: null,
+    isDropTargetHandler: null,
     canDragX: false,
     outerContainer: null,
     hasInfiniteHeight: false
@@ -318,7 +319,7 @@ JX.install('DraggableList', {
             }
           }
 
-          JX.DOM.alterClass(root, 'drag-target-list', is_target);
+          group[ii]._setIsDropTarget(is_target);
         }
       } else {
         target_list = this;
@@ -364,6 +365,18 @@ JX.install('DraggableList', {
       // Clear the target position cache, since adding or removing ghosts
       // changes element positions.
       this._dirtyTargetCache();
+
+      return this;
+    },
+
+    _setIsDropTarget: function(is_target) {
+      var root = this.getRootNode();
+      JX.DOM.alterClass(root, 'drag-target-list', is_target);
+
+      var handler = this.getIsDropTargetHandler();
+      if (handler) {
+        handler(is_target);
+      }
 
       return this;
     },
@@ -633,7 +646,7 @@ JX.install('DraggableList', {
 
       var group = this._group;
       for (var ii = 0; ii < group.length; ii++) {
-        JX.DOM.alterClass(group[ii].getRootNode(), 'drag-target-list', false);
+        group[ii]._setIsDropTarget(false);
         group[ii]._clearTarget();
       }
 

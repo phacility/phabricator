@@ -188,6 +188,11 @@ JX.install('WorkboardColumn', {
       return this._compareVectors(u_vec, v_vec);
     },
 
+    setIsDropTarget: function(is_target) {
+      var node = this.getWorkpanelNode();
+      JX.DOM.alterClass(node, 'workboard-column-drop-target', is_target);
+    },
+
     _getCardsSortedNaturally: function() {
       var list = [];
 
