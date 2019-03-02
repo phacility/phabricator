@@ -1,11 +1,3 @@
 <?php
 
-$table = new HarbormasterBuildPlan();
-
-foreach (new LiskMigrationIterator($table) as $plan) {
-  PhabricatorSearchWorker::queueDocumentForIndexing(
-    $plan->getPHID(),
-    array(
-      'force' => true,
-    ));
-}
+// This was an old reindexing migration that has been obsoleted. See T13253.
