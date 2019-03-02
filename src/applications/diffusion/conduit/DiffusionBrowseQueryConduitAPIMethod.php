@@ -368,9 +368,9 @@ final class DiffusionBrowseQueryConduitAPIMethod
     }
 
     if ($commit) {
-      $slice_clause = 'AND svnCommit <= '.(int)$commit;
+      $slice_clause = qsprintf($conn_r, 'AND svnCommit <= %d', $commit);
     } else {
-      $slice_clause = '';
+      $slice_clause = qsprintf($conn_r, '');
     }
 
     $index = queryfx_all(
@@ -439,9 +439,11 @@ final class DiffusionBrowseQueryConduitAPIMethod
 
     $sql = array();
     foreach ($index as $row) {
-      $sql[] =
-        '(pathID = '.(int)$row['pathID'].' AND '.
-        'svnCommit = '.(int)$row['maxCommit'].')';
+      $sql[] = qsprintf(
+        $conn_r,
+        '(pathID = %d AND svnCommit = %d)',
+        $row['pathID'],
+        $row['maxCommit']);
     }
 
     $browse = queryfx_all(
