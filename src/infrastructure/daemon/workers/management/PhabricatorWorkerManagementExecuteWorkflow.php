@@ -11,23 +11,64 @@ final class PhabricatorWorkerManagementExecuteWorkflow
         pht(
           'Execute a task explicitly. This command ignores leases, is '.
           'dangerous, and may cause work to be performed twice.'))
-      ->setArguments($this->getTaskSelectionArguments());
+      ->setArguments(
+        array_merge(
+          array(
+            array(
+              'name' => 'retry',
+              'help' => pht('Retry archived tasks.'),
+            ),
+            array(
+              'name' => 'repeat',
+              'help' => pht('Repeat archived, successful tasks.'),
+            ),
+          ),
+          $this->getTaskSelectionArguments()));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
     $tasks = $this->loadTasks($args);
 
+    $is_retry = $args->getArg('retry');
+    $is_repeat = $args->getArg('repeat');
+
     foreach ($tasks as $task) {
       $can_execute = !$task->isArchived();
       if (!$can_execute) {
-        $console->writeOut(
+        if (!$is_retry) {
+          $console->writeOut(
+            "**<bg:yellow> %s </bg>** %s\n",
+            pht('ARCHIVED'),
+            pht(
+              '%s is already archived, and will not be executed. '.
+              'Use "--retry" to execute archived tasks.',
+              $this->describeTask($task)));
+          continue;
+        }
+
+        $result_success = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;
+        if ($task->getResult() == $result_success) {
+          if (!$is_repeat) {
+            $console->writeOut(
+              "**<bg:yellow> %s </bg>** %s\n",
+              pht('SUCCEEDED'),
+              pht(
+                '%s has already succeeded, and will not be retried. '.
+                'Use "--repeat" to repeat successful tasks.',
+                $this->describeTask($task)));
+            continue;
+          }
+        }
+
+        echo tsprintf(
           "**<bg:yellow> %s </bg>** %s\n",
           pht('ARCHIVED'),
           pht(
-            '%s is already archived, and can not be executed.',
+            'Unarchiving %s.',
             $this->describeTask($task)));
-        continue;
+
+        $task = $task->unarchiveTask();
       }
 
       // NOTE: This ignores leases, maybe it should respect them without

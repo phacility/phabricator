@@ -10,15 +10,24 @@ final class PhabricatorWorkerManagementRetryWorkflow
       ->setSynopsis(
         pht(
           'Retry selected tasks which previously failed permanently or '.
-          'were cancelled. Only archived, unsuccessful tasks can be '.
-          'retried.'))
-      ->setArguments($this->getTaskSelectionArguments());
+          'were cancelled. Only archived tasks can be retried.'))
+      ->setArguments(
+        array_merge(
+          array(
+            array(
+              'name' => 'repeat',
+              'help' => pht(
+                'Repeat tasks which already completed successfully.'),
+            ),
+          ),
+          $this->getTaskSelectionArguments()));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
     $tasks = $this->loadTasks($args);
 
+    $is_repeat = $args->getArg('repeat');
     foreach ($tasks as $task) {
       if (!$task->isArchived()) {
         $console->writeOut(
@@ -32,13 +41,16 @@ final class PhabricatorWorkerManagementRetryWorkflow
 
       $result_success = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;
       if ($task->getResult() == $result_success) {
-        $console->writeOut(
-          "**<bg:yellow> %s </bg>** %s\n",
-          pht('SUCCEEDED'),
-          pht(
-            '%s has already succeeded, and can not be retried.',
-            $this->describeTask($task)));
-        continue;
+        if (!$is_repeat) {
+          $console->writeOut(
+            "**<bg:yellow> %s </bg>** %s\n",
+            pht('SUCCEEDED'),
+            pht(
+              '%s has already succeeded, and will not be repeated. '.
+              'Use "--repeat" to repeat successful tasks.',
+              $this->describeTask($task)));
+          continue;
+        }
       }
 
       $task->unarchiveTask();
