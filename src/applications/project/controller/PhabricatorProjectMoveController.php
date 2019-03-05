@@ -15,6 +15,14 @@ final class PhabricatorProjectMoveController
     $before_phid = $request->getStr('beforePHID');
     $order = $request->getStr('order', PhabricatorProjectColumn::DEFAULT_ORDER);
 
+    $edit_header = null;
+    $raw_header = $request->getStr('header');
+    if (strlen($raw_header)) {
+      $edit_header = phutil_json_decode($raw_header);
+    } else {
+      $edit_header = array();
+    }
+
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->requireCapabilities(
@@ -87,10 +95,14 @@ final class PhabricatorProjectMoveController
         ));
 
     if ($order == PhabricatorProjectColumn::ORDER_PRIORITY) {
+      $header_priority = idx(
+        $edit_header,
+        PhabricatorProjectColumn::ORDER_PRIORITY);
       $priority_xactions = $this->getPriorityTransactions(
         $object,
         $after_phid,
-        $before_phid);
+        $before_phid,
+        $header_priority);
       foreach ($priority_xactions as $xaction) {
         $xactions[] = $xaction;
       }
@@ -110,13 +122,33 @@ final class PhabricatorProjectMoveController
   private function getPriorityTransactions(
     ManiphestTask $task,
     $after_phid,
-    $before_phid) {
+    $before_phid,
+    $header_priority) {
+
+    $xactions = array();
+    $must_move = false;
+
+    if ($header_priority !== null) {
+      if ($task->getPriority() !== $header_priority) {
+        $task = id(clone $task)
+          ->setPriority($header_priority);
+
+        $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+        $keyword = head(idx($keyword_map, $header_priority));
+
+        $xactions[] = id(new ManiphestTransaction())
+          ->setTransactionType(
+            ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
+          ->setNewValue($keyword);
+
+        $must_move = true;
+      }
+    }
 
     list($after_task, $before_task) = $this->loadPriorityTasks(
       $after_phid,
       $before_phid);
 
-    $must_move = false;
     if ($after_task && !$task->isLowerPriorityThan($after_task)) {
       $must_move = true;
     }
@@ -125,10 +157,10 @@ final class PhabricatorProjectMoveController
       $must_move = true;
     }
 
-    // The move doesn't require a priority change to be valid, so don't
-    // change the priority since we are not being forced to.
+    // The move doesn't require a subpriority change to be valid, so don't
+    // change the subpriority since we are not being forced to.
     if (!$must_move) {
-      return array();
+      return $xactions;
     }
 
     $try = array(
@@ -139,28 +171,41 @@ final class PhabricatorProjectMoveController
     $pri = null;
     $sub = null;
     foreach ($try as $spec) {
-      list($task, $is_after) = $spec;
+      list($nearby_task, $is_after) = $spec;
 
-      if (!$task) {
+      if (!$nearby_task) {
         continue;
       }
 
       list($pri, $sub) = ManiphestTransactionEditor::getAdjacentSubpriority(
-        $task,
+        $nearby_task,
         $is_after);
+
+      // If we drag under a "Low" header between a "Normal" task and a "Low"
+      // task, we don't want to accept a subpriority assignment which changes
+      // our priority to "Normal". Only accept a subpriority that keeps us in
+      // the right primary priority.
+      if ($header_priority !== null) {
+        if ($pri !== $header_priority) {
+          continue;
+        }
+      }
 
       // If we find a priority on the first try, don't keep going.
       break;
     }
 
-    $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
-    $keyword = head(idx($keyword_map, $pri));
-
-    $xactions = array();
     if ($pri !== null) {
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
-        ->setNewValue($keyword);
+      if ($header_priority === null) {
+        $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+        $keyword = head(idx($keyword_map, $pri));
+
+        $xactions[] = id(new ManiphestTransaction())
+          ->setTransactionType(
+            ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
+          ->setNewValue($keyword);
+      }
+
       $xactions[] = id(new ManiphestTransaction())
         ->setTransactionType(
           ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)

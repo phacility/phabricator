@@ -16,6 +16,9 @@ final class PhabricatorProjectColumn
   const ORDER_NATURAL = 'natural';
   const ORDER_PRIORITY = 'priority';
 
+  const NODETYPE_HEADER = 0;
+  const NODETYPE_CARD = 1;
+
   protected $name;
   protected $status;
   protected $projectPHID;

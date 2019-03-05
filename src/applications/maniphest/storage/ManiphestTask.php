@@ -252,6 +252,7 @@ final class ManiphestTask extends ManiphestDAO
     return array(
       PhabricatorProjectColumn::ORDER_PRIORITY => array(
         (int)-$this->getPriority(),
+        PhabricatorProjectColumn::NODETYPE_CARD,
         (double)-$this->getSubpriority(),
         (int)-$this->getID(),
       ),

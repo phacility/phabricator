@@ -52,6 +52,10 @@ JX.install('WorkboardColumn', {
       return this._cards;
     },
 
+    _getObjects: function() {
+      return this._objects;
+    },
+
     getCard: function(phid) {
       return this._cards[phid];
     },
@@ -126,12 +130,13 @@ JX.install('WorkboardColumn', {
       return this;
     },
 
-    getCardNodes: function() {
-      var cards = this.getCards();
+    getDropTargetNodes: function() {
+      var objects = this._getObjects();
 
       var nodes = [];
-      for (var k in cards) {
-        nodes.push(cards[k].getNode());
+      for (var ii = 0; ii < objects.length; ii++) {
+        var object = objects[ii];
+        nodes.push(object.getNode());
       }
 
       return nodes;
@@ -160,6 +165,32 @@ JX.install('WorkboardColumn', {
       return this._headers[key];
     },
 
+    handleDragGhost: function(default_handler, ghost, node) {
+      // If the column has headers, don't let the user drag a card above
+      // the topmost header: for example, you can't change a task to have
+      // a priority higher than the highest possible priority.
+
+      if (this._hasColumnHeaders()) {
+        if (!node) {
+          return false;
+        }
+      }
+
+      return default_handler(ghost, node);
+    },
+
+    _hasColumnHeaders: function() {
+      var board = this.getBoard();
+      var order = board.getOrder();
+
+      switch (order) {
+        case 'natural':
+          return false;
+      }
+
+      return true;
+    },
+
     _getCardHeaderKey: function(card, order) {
       switch (order) {
         case 'priority':
@@ -174,18 +205,16 @@ JX.install('WorkboardColumn', {
       var order = board.getOrder();
 
       var list;
-      var has_headers;
       if (order == 'natural') {
         list = this._getCardsSortedNaturally();
-        has_headers = false;
       } else {
         list = this._getCardsSortedByKey(order);
-        has_headers = true;
       }
 
       var ii;
       var objects = [];
 
+      var has_headers = this._hasColumnHeaders();
       var header_keys = [];
       var seen_headers = {};
       if (has_headers) {
@@ -245,13 +274,21 @@ JX.install('WorkboardColumn', {
       var board = this.getBoard();
       var order = board.getOrder();
 
-      var src_phid = JX.Stratcom.getData(src_node).objectPHID;
-      var dst_phid = JX.Stratcom.getData(dst_node).objectPHID;
-
-      var u_vec = board.getOrderVector(src_phid, order);
-      var v_vec = board.getOrderVector(dst_phid, order);
+      var u_vec = this._getNodeOrderVector(src_node, order);
+      var v_vec = this._getNodeOrderVector(dst_node, order);
 
       return board.compareVectors(u_vec, v_vec);
+    },
+
+    _getNodeOrderVector: function(node, order) {
+      var board = this.getBoard();
+      var data = JX.Stratcom.getData(node);
+
+      if (data.objectPHID) {
+        return board.getOrderVector(data.objectPHID, order);
+      }
+
+      return board.getHeaderTemplate(data.headerKey).getVector();
     },
 
     setIsDropTarget: function(is_target) {

@@ -30,8 +30,14 @@ JX.install('WorkboardHeader', {
         var board = this.getColumn().getBoard();
         var template = board.getHeaderTemplate(header_key).getTemplate();
         this._root = JX.$H(template).getFragment().firstChild;
+
+        JX.Stratcom.getData(this._root).headerKey = header_key;
       }
       return this._root;
+    },
+
+    isWorkboardHeader: function() {
+      return true;
     }
   }
 

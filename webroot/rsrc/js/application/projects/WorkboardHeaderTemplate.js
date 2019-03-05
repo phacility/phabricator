@@ -13,7 +13,8 @@ JX.install('WorkboardHeaderTemplate', {
   properties: {
     template: null,
     order: null,
-    vector: null
+    vector: null,
+    editProperties: null
   },
 
   members: {

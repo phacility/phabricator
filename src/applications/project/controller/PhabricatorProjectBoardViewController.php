@@ -651,11 +651,15 @@ final class PhabricatorProjectBoardViewController
         ));
 
       $headers[] = array(
-        'order' => 'priority',
+        'order' => PhabricatorProjectColumn::ORDER_PRIORITY,
         'key' => $header_key,
         'template' => hsprintf('%s', $template),
         'vector' => array(
           (int)-$priority,
+          PhabricatorProjectColumn::NODETYPE_HEADER,
+        ),
+        'editProperties' => array(
+          PhabricatorProjectColumn::ORDER_PRIORITY => (int)$priority,
         ),
       );
     }

@@ -55,6 +55,10 @@ JX.install('WorkboardCard', {
       return this._root;
     },
 
+    isWorkboardHeader: function() {
+      return false;
+    },
+
     redraw: function() {
       var old_node = this._root;
       this._root = null;

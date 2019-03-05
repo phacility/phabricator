@@ -161,10 +161,14 @@ JX.install('WorkboardBoard', {
 
         var list = new JX.DraggableList('project-card', column.getRoot())
           .setOuterContainer(this.getRoot())
-          .setFindItemsHandler(JX.bind(column, column.getCardNodes))
+          .setFindItemsHandler(JX.bind(column, column.getDropTargetNodes))
           .setCanDragX(true)
           .setHasInfiniteHeight(true)
           .setIsDropTargetHandler(JX.bind(column, column.setIsDropTarget));
+
+        var default_handler = list.getGhostHandler();
+        list.setGhostHandler(
+          JX.bind(column, column.handleDragGhost, default_handler));
 
         if (this.getOrder() !== 'natural') {
           list.setCompareHandler(JX.bind(column, column.compareHandler));
@@ -198,16 +202,39 @@ JX.install('WorkboardBoard', {
         order: this.getOrder()
       };
 
-      if (after_node) {
-        data.afterPHID = JX.Stratcom.getData(after_node).objectPHID;
+      var after_data;
+      var after_card = after_node;
+      while (after_card) {
+        after_data = JX.Stratcom.getData(after_card);
+        if (after_data.objectPHID) {
+          break;
+        }
+        after_card = after_card.previousSibling;
       }
 
-      var before_node = item.nextSibling;
-      if (before_node) {
-        var before_phid = JX.Stratcom.getData(before_node).objectPHID;
-        if (before_phid) {
-          data.beforePHID = before_phid;
+      if (after_data) {
+        data.afterPHID = after_data.objectPHID;
+      }
+
+      var before_data;
+      var before_card = item.nextSibling;
+      while (before_card) {
+        before_data = JX.Stratcom.getData(before_card);
+        if (before_data.objectPHID) {
+          break;
         }
+        before_card = before_card.nextSibling;
+      }
+
+      if (before_data) {
+        data.beforePHID = before_data.objectPHID;
+      }
+
+      var header_key = JX.Stratcom.getData(after_node).headerKey;
+      if (header_key) {
+        var properties = this.getHeaderTemplate(header_key)
+          .getEditProperties();
+        data.header = JX.JSON.stringify(properties);
       }
 
       var visible_phids = [];

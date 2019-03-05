@@ -112,7 +112,8 @@ JX.behavior('project-boards', function(config, statics) {
     board.getHeaderTemplate(header.key)
       .setOrder(header.order)
       .setTemplate(header.template)
-      .setVector(header.vector);
+      .setVector(header.vector)
+      .setEditProperties(header.editProperties);
   }
 
   board.start();
