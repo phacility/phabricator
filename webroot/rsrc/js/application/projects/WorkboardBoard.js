@@ -7,6 +7,7 @@
  *           javelin-workflow
  *           phabricator-draggable-list
  *           javelin-workboard-column
+ *           javelin-workboard-header-template
  * @javelin
  */
 
@@ -20,6 +21,7 @@ JX.install('WorkboardBoard', {
     this._templates = {};
     this._orderMaps = {};
     this._propertiesMap = {};
+    this._headers = {};
     this._buildColumns();
   },
 
@@ -36,6 +38,7 @@ JX.install('WorkboardBoard', {
     _templates: null,
     _orderMaps: null,
     _propertiesMap: null,
+    _headers: null,
 
     getRoot: function() {
       return this._root;
@@ -56,6 +59,36 @@ JX.install('WorkboardBoard', {
     setCardTemplate: function(phid, template)  {
       this._templates[phid] = template;
       return this;
+    },
+
+    getHeaderTemplate: function(header_key) {
+      if (!this._headers[header_key]) {
+        this._headers[header_key] = new JX.WorkboardHeaderTemplate(header_key);
+      }
+
+      return this._headers[header_key];
+    },
+
+    getHeaderTemplatesForOrder: function(order) {
+      var templates = [];
+
+      for (var k in this._headers) {
+        var header = this._headers[k];
+
+        if (header.getOrder() !== order) {
+          continue;
+        }
+
+        templates.push(header);
+      }
+
+      templates.sort(JX.bind(this, this._sortHeaderTemplates));
+
+      return templates;
+    },
+
+    _sortHeaderTemplates: function(u, v) {
+      return this.compareVectors(u.getVector(), v.getVector());
     },
 
     setObjectProperties: function(phid, properties) {
@@ -82,6 +115,20 @@ JX.install('WorkboardBoard', {
 
     getOrderVector: function(phid, key) {
       return this._orderMaps[phid][key];
+    },
+
+    compareVectors: function(u_vec, v_vec) {
+      for (var ii = 0; ii < u_vec.length; ii++) {
+        if (u_vec[ii] > v_vec[ii]) {
+          return 1;
+        }
+
+        if (u_vec[ii] < v_vec[ii]) {
+          return -1;
+        }
+      }
+
+      return 0;
     },
 
     start: function() {

@@ -145,3 +145,16 @@
 .phui-workpanel-view.workboard-column-drop-target .phui-box-grey {
   border-color: {$lightblueborder};
 }
+
+.workboard-group-header {
+  background: rgba({$alphablue}, 0.10);
+  padding: 4px 8px;
+  margin: 0 0 8px -8px;
+  border-bottom: 1px solid {$lightgreyborder};
+  font-weight: bold;
+  color: {$darkgreytext};
+}
+
+.workboard-group-header .phui-icon-view {
+  margin-right: 8px;
+}

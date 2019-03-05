@@ -306,6 +306,7 @@ final class ManiphestTask extends ManiphestDAO
     return array(
       'status' => $this->getStatus(),
       'points' => (double)$this->getPoints(),
+      'priority' => $this->getPriority(),
     );
   }
 

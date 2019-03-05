@@ -178,7 +178,7 @@ return array(
     'rsrc/css/phui/workboards/phui-workboard-color.css' => 'e86de308',
     'rsrc/css/phui/workboards/phui-workboard.css' => '74fc9d98',
     'rsrc/css/phui/workboards/phui-workcard.css' => '8c536f90',
-    'rsrc/css/phui/workboards/phui-workpanel.css' => '7e12d43c',
+    'rsrc/css/phui/workboards/phui-workpanel.css' => 'bc16cf33',
     'rsrc/css/sprite-login.css' => '18b368a6',
     'rsrc/css/sprite-tokens.css' => 'f1896dc5',
     'rsrc/css/syntax/syntax-default.css' => '055fc231',
@@ -409,11 +409,13 @@ return array(
     'rsrc/js/application/phortune/phortune-credit-card-form.js' => 'd12d214f',
     'rsrc/js/application/policy/behavior-policy-control.js' => '0eaa33a9',
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '9347f172',
-    'rsrc/js/application/projects/WorkboardBoard.js' => 'fd96a6e8',
-    'rsrc/js/application/projects/WorkboardCard.js' => '9a513421',
-    'rsrc/js/application/projects/WorkboardColumn.js' => '1f71e559',
+    'rsrc/js/application/projects/WorkboardBoard.js' => 'e4e2d107',
+    'rsrc/js/application/projects/WorkboardCard.js' => 'c23ddfde',
+    'rsrc/js/application/projects/WorkboardColumn.js' => 'fd9cb972',
     'rsrc/js/application/projects/WorkboardController.js' => '42c7a5a7',
-    'rsrc/js/application/projects/behavior-project-boards.js' => '05c74d65',
+    'rsrc/js/application/projects/WorkboardHeader.js' => '354c5c0e',
+    'rsrc/js/application/projects/WorkboardHeaderTemplate.js' => '9b86cd0d',
+    'rsrc/js/application/projects/behavior-project-boards.js' => 'a3f6b67f',
     'rsrc/js/application/projects/behavior-project-create.js' => '34c53422',
     'rsrc/js/application/projects/behavior-reorder-columns.js' => '8ac32fd9',
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '75184d68',
@@ -655,7 +657,7 @@ return array(
     'javelin-behavior-phuix-example' => 'c2c500a7',
     'javelin-behavior-policy-control' => '0eaa33a9',
     'javelin-behavior-policy-rule-editor' => '9347f172',
-    'javelin-behavior-project-boards' => '05c74d65',
+    'javelin-behavior-project-boards' => 'a3f6b67f',
     'javelin-behavior-project-create' => '34c53422',
     'javelin-behavior-quicksand-blacklist' => '5a6f6a06',
     'javelin-behavior-read-only-warning' => 'b9109f8f',
@@ -727,10 +729,12 @@ return array(
     'javelin-view-renderer' => '9aae2b66',
     'javelin-view-visitor' => '308f9fe4',
     'javelin-websocket' => 'fdc13e4e',
-    'javelin-workboard-board' => 'fd96a6e8',
-    'javelin-workboard-card' => '9a513421',
-    'javelin-workboard-column' => '1f71e559',
+    'javelin-workboard-board' => 'e4e2d107',
+    'javelin-workboard-card' => 'c23ddfde',
+    'javelin-workboard-column' => 'fd9cb972',
     'javelin-workboard-controller' => '42c7a5a7',
+    'javelin-workboard-header' => '354c5c0e',
+    'javelin-workboard-header-template' => '9b86cd0d',
     'javelin-workflow' => '958e9045',
     'maniphest-report-css' => '3d53188b',
     'maniphest-task-edit-css' => '272daa84',
@@ -854,7 +858,7 @@ return array(
     'phui-workboard-color-css' => 'e86de308',
     'phui-workboard-view-css' => '74fc9d98',
     'phui-workcard-view-css' => '8c536f90',
-    'phui-workpanel-view-css' => '7e12d43c',
+    'phui-workpanel-view-css' => 'bc16cf33',
     'phuix-action-list-view' => 'c68f183f',
     'phuix-action-view' => 'aaa08f3b',
     'phuix-autocomplete' => '8f139ef0',
@@ -914,15 +918,6 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'javelin-workflow',
-    ),
-    '05c74d65' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-util',
-      'javelin-vector',
-      'javelin-stratcom',
-      'javelin-workflow',
-      'javelin-workboard-controller',
     ),
     '05d290ef' => array(
       'javelin-install',
@@ -1033,10 +1028,6 @@ return array(
     '1e413dc9' => array(
       'javelin-behavior',
       'javelin-dom',
-    ),
-    '1f71e559' => array(
-      'javelin-install',
-      'javelin-workboard-card',
     ),
     '1ff278aa' => array(
       'phui-button-css',
@@ -1171,6 +1162,9 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-workflow',
+    ),
+    '354c5c0e' => array(
+      'javelin-install',
     ),
     '37b8a04a' => array(
       'javelin-install',
@@ -1535,9 +1529,6 @@ return array(
       'javelin-install',
       'javelin-dom',
     ),
-    '7e12d43c' => array(
-      'phui-workcard-view-css',
-    ),
     '80bff3af' => array(
       'javelin-install',
       'javelin-typeahead-source',
@@ -1701,9 +1692,6 @@ return array(
       'javelin-dom',
       'javelin-router',
     ),
-    '9a513421' => array(
-      'javelin-install',
-    ),
     '9aae2b66' => array(
       'javelin-install',
       'javelin-util',
@@ -1712,6 +1700,9 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'javelin-stratcom',
+    ),
+    '9b86cd0d' => array(
+      'javelin-install',
     ),
     '9cec214e' => array(
       'javelin-behavior',
@@ -1736,6 +1727,15 @@ return array(
     ),
     'a241536a' => array(
       'javelin-install',
+    ),
+    'a3f6b67f' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-util',
+      'javelin-vector',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'javelin-workboard-controller',
     ),
     'a4356cde' => array(
       'javelin-install',
@@ -1887,6 +1887,9 @@ return array(
       'javelin-uri',
       'phabricator-notification',
     ),
+    'bc16cf33' => array(
+      'phui-workcard-view-css',
+    ),
     'bdce4d78' => array(
       'javelin-install',
       'javelin-util',
@@ -1902,6 +1905,9 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-uri',
+    ),
+    'c23ddfde' => array(
+      'javelin-install',
     ),
     'c2c500a7' => array(
       'javelin-install',
@@ -2019,6 +2025,16 @@ return array(
       'javelin-dom',
       'javelin-history',
     ),
+    'e4e2d107' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'phabricator-draggable-list',
+      'javelin-workboard-column',
+      'javelin-workboard-header-template',
+    ),
     'e562708c' => array(
       'javelin-install',
     ),
@@ -2120,14 +2136,10 @@ return array(
       'javelin-magical-init',
       'javelin-util',
     ),
-    'fd96a6e8' => array(
+    'fd9cb972' => array(
       'javelin-install',
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-workflow',
-      'phabricator-draggable-list',
-      'javelin-workboard-column',
+      'javelin-workboard-card',
+      'javelin-workboard-header',
     ),
     'fdc13e4e' => array(
       'javelin-install',

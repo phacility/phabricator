@@ -621,6 +621,45 @@ final class PhabricatorProjectBoardViewController
       $board->addPanel($panel);
     }
 
+    // It's possible for tasks to have an invalid/unknown priority in the
+    // database. We still want to generate a header for these tasks so we
+    // don't break the workboard.
+    $priorities =
+      ManiphestTaskPriority::getTaskPriorityMap() +
+      mpull($all_tasks, null, 'getPriority');
+    $priorities = array_keys($priorities);
+
+    $headers = array();
+    foreach ($priorities as $priority) {
+      $header_key = sprintf('priority(%s)', $priority);
+
+      $priority_name = ManiphestTaskPriority::getTaskPriorityName($priority);
+      $priority_color = ManiphestTaskPriority::getTaskPriorityColor($priority);
+      $priority_icon = ManiphestTaskPriority::getTaskPriorityIcon($priority);
+
+      $icon_view = id(new PHUIIconView())
+        ->setIcon("{$priority_icon} {$priority_color}");
+
+      $template = phutil_tag(
+        'li',
+        array(
+          'class' => 'workboard-group-header',
+        ),
+        array(
+          $icon_view,
+          $priority_name,
+        ));
+
+      $headers[] = array(
+        'order' => 'priority',
+        'key' => $header_key,
+        'template' => hsprintf('%s', $template),
+        'vector' => array(
+          (int)-$priority,
+        ),
+      );
+    }
+
     $behavior_config = array(
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
       'uploadURI' => '/file/dropupload/',
@@ -630,6 +669,7 @@ final class PhabricatorProjectBoardViewController
 
       'boardPHID' => $project->getPHID(),
       'order' => $this->sortKey,
+      'headers' => $headers,
       'templateMap' => $templates,
       'columnMaps' => $column_maps,
       'orderMaps' => mpull($all_tasks, 'getWorkboardOrderVectors'),

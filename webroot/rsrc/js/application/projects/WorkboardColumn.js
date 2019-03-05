@@ -2,6 +2,7 @@
  * @provides javelin-workboard-column
  * @requires javelin-install
  *           javelin-workboard-card
+ *           javelin-workboard-header
  * @javelin
  */
 
@@ -21,6 +22,8 @@ JX.install('WorkboardColumn', {
       'column-points-content');
 
     this._cards = {};
+    this._headers = {};
+    this._objects = [];
     this._naturalOrder = [];
   },
 
@@ -29,11 +32,13 @@ JX.install('WorkboardColumn', {
     _root: null,
     _board: null,
     _cards: null,
+    _headers: null,
     _naturalOrder: null,
     _panel: null,
     _pointsNode: null,
     _pointsContentNode: null,
     _dirty: true,
+    _objects: null,
 
     getPHID: function() {
       return this._phid;
@@ -148,24 +153,85 @@ JX.install('WorkboardColumn', {
       return this._dirty;
     },
 
+    getHeader: function(key) {
+      if (!this._headers[key]) {
+        this._headers[key] = new JX.WorkboardHeader(this, key);
+      }
+      return this._headers[key];
+    },
+
+    _getCardHeaderKey: function(card, order) {
+      switch (order) {
+        case 'priority':
+          return 'priority(' + card.getPriority() + ')';
+        default:
+          return null;
+      }
+    },
+
     redraw: function() {
       var board = this.getBoard();
       var order = board.getOrder();
 
       var list;
+      var has_headers;
       if (order == 'natural') {
         list = this._getCardsSortedNaturally();
+        has_headers = false;
       } else {
         list = this._getCardsSortedByKey(order);
+        has_headers = true;
       }
 
-      var content = [];
-      for (var ii = 0; ii < list.length; ii++) {
+      var ii;
+      var objects = [];
+
+      var header_keys = [];
+      var seen_headers = {};
+      if (has_headers) {
+        var header_templates = board.getHeaderTemplatesForOrder(order);
+        for (var k in header_templates) {
+          header_keys.push(header_templates[k].getHeaderKey());
+        }
+        header_keys.reverse();
+      }
+
+      for (ii = 0; ii < list.length; ii++) {
         var card = list[ii];
 
-        var node = card.getNode();
-        content.push(node);
+        // If a column has a "High" priority card and a "Low" priority card,
+        // we need to add the "Normal" header in between them. This allows
+        // you to change priority to "Normal" even if there are no "Normal"
+        // cards in a column.
 
+        if (has_headers) {
+          var header_key = this._getCardHeaderKey(card, order);
+          if (!seen_headers[header_key]) {
+            while (header_keys.length) {
+              var next = header_keys.pop();
+
+              var header = this.getHeader(next);
+              objects.push(header);
+              seen_headers[header_key] = true;
+
+              if (next === header_key) {
+                break;
+              }
+            }
+          }
+        }
+
+        objects.push(card);
+      }
+
+      this._objects = objects;
+
+      var content = [];
+      for (ii = 0; ii < this._objects.length; ii++) {
+        var object = this._objects[ii];
+
+        var node = object.getNode();
+        content.push(node);
       }
 
       JX.DOM.setContent(this.getRoot(), content);
@@ -182,10 +248,10 @@ JX.install('WorkboardColumn', {
       var src_phid = JX.Stratcom.getData(src_node).objectPHID;
       var dst_phid = JX.Stratcom.getData(dst_node).objectPHID;
 
-      var u_vec = this.getBoard().getOrderVector(src_phid, order);
-      var v_vec = this.getBoard().getOrderVector(dst_phid, order);
+      var u_vec = board.getOrderVector(src_phid, order);
+      var v_vec = board.getOrderVector(dst_phid, order);
 
-      return this._compareVectors(u_vec, v_vec);
+      return board.compareVectors(u_vec, v_vec);
     },
 
     setIsDropTarget: function(is_target) {
@@ -218,24 +284,11 @@ JX.install('WorkboardColumn', {
     },
 
     _sortCards: function(order, u, v) {
-      var u_vec = this.getBoard().getOrderVector(u.getPHID(), order);
-      var v_vec = this.getBoard().getOrderVector(v.getPHID(), order);
+      var board = this.getBoard();
+      var u_vec = board.getOrderVector(u.getPHID(), order);
+      var v_vec = board.getOrderVector(v.getPHID(), order);
 
-      return this._compareVectors(u_vec, v_vec);
-    },
-
-    _compareVectors: function(u_vec, v_vec) {
-      for (var ii = 0; ii < u_vec.length; ii++) {
-        if (u_vec[ii] > v_vec[ii]) {
-          return 1;
-        }
-
-        if (u_vec[ii] < v_vec[ii]) {
-          return -1;
-        }
-      }
-
-      return 0;
+      return board.compareVectors(u_vec, v_vec);
     },
 
     _redrawFrame: function() {

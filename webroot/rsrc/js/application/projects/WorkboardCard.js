@@ -40,6 +40,10 @@ JX.install('WorkboardCard', {
       return this.getProperties().status;
     },
 
+    getPriority: function(order) {
+      return this.getProperties().priority;
+    },
+
     getNode: function() {
       if (!this._root) {
         var phid = this.getPHID();

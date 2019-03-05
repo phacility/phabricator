@@ -105,6 +105,16 @@ JX.behavior('project-boards', function(config, statics) {
     board.setObjectProperties(property_phid, property_maps[property_phid]);
   }
 
+  var headers = config.headers;
+  for (var jj = 0; jj < headers.length; jj++) {
+    var header = headers[jj];
+
+    board.getHeaderTemplate(header.key)
+      .setOrder(header.order)
+      .setTemplate(header.template)
+      .setVector(header.vector);
+  }
+
   board.start();
 
 });
