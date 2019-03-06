@@ -64,19 +64,13 @@ final class HarbormasterBuildActionController
             'restart. Side effects of the build will occur again. Really '.
             'restart build?');
           $submit = pht('Restart Build');
-        } else if (!$build->getBuildPlan()->canRestartBuildPlan()) {
-          $title = pht('Not Restartable');
-          $body = pht(
-            'The build plan for this build is not restartable, so you '.
-            'can not restart the build.');
         } else {
-          $title = pht('Unable to Restart Build');
-          if ($build->isRestarting()) {
-            $body = pht(
-              'This build is already restarting. You can not reissue a '.
-              'restart command to a restarting build.');
-          } else {
-            $body = pht('You can not restart this build.');
+          try {
+            $build->assertCanRestartBuild();
+            throw new Exception(pht('Expected to be unable to restart build.'));
+          } catch (HarbormasterRestartException $ex) {
+            $title = $ex->getTitle();
+            $body = $ex->getBody();
           }
         }
         break;

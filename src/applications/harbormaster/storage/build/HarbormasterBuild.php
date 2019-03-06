@@ -183,6 +183,10 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $this->getBuildStatusObject()->isPassed();
   }
 
+  public function isFailed() {
+    return $this->getBuildStatusObject()->isFailed();
+  }
+
   public function getURI() {
     $id = $this->getID();
     return "/harbormaster/build/{$id}/";
@@ -211,16 +215,60 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function canRestartBuild() {
+    try {
+      $this->assertCanRestartBuild();
+      return true;
+    } catch (HarbormasterRestartException $ex) {
+      return false;
+    }
+  }
+
+  public function assertCanRestartBuild() {
     if ($this->isAutobuild()) {
-      return false;
+      throw new HarbormasterRestartException(
+        pht('Can Not Restart Autobuild'),
+        pht(
+          'This build can not be restarted because it is an automatic '.
+          'build.'));
     }
 
+    $restartable = HarbormasterBuildPlanBehavior::BEHAVIOR_RESTARTABLE;
     $plan = $this->getBuildPlan();
-    if (!$plan->canRestartBuildPlan()) {
-      return false;
+
+    $option = HarbormasterBuildPlanBehavior::getBehavior($restartable)
+      ->getPlanOption($plan);
+    $option_key = $option->getKey();
+
+    $never_restartable = HarbormasterBuildPlanBehavior::RESTARTABLE_NEVER;
+    $is_never = ($option_key === $never_restartable);
+    if ($is_never) {
+      throw new HarbormasterRestartException(
+        pht('Build Plan Prevents Restart'),
+        pht(
+          'This build can not be restarted because the build plan is '.
+          'configured to prevent the build from restarting.'));
     }
 
-    return !$this->isRestarting();
+    $failed_restartable = HarbormasterBuildPlanBehavior::RESTARTABLE_IF_FAILED;
+    $is_failed = ($option_key === $failed_restartable);
+    if ($is_failed) {
+      if (!$this->isFailed()) {
+        throw new HarbormasterRestartException(
+          pht('Only Restartable if Failed'),
+          pht(
+            'This build can not be restarted because the build plan is '.
+            'configured to prevent the build from restarting unless it '.
+            'has failed, and it has not failed.'));
+      }
+    }
+
+    if ($this->isRestarting()) {
+      throw new HarbormasterRestartException(
+        pht('Already Restarting'),
+        pht(
+          'This build is already restarting. You can not reissue a restart '.
+          'command to a restarting build.'));
+    }
   }
 
   public function canPauseBuild() {

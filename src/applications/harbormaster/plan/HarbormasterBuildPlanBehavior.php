@@ -15,6 +15,7 @@ final class HarbormasterBuildPlanBehavior
 
   const BEHAVIOR_RESTARTABLE = 'restartable';
   const RESTARTABLE_ALWAYS = 'always';
+  const RESTARTABLE_IF_FAILED = 'failed';
   const RESTARTABLE_NEVER = 'never';
 
   const BEHAVIOR_DRAFTS = 'hold-drafts';
@@ -251,6 +252,12 @@ final class HarbormasterBuildPlanBehavior
         ->setIsDefault(true)
         ->setDescription(
           pht('The build may be restarted.')),
+      id(new HarbormasterBuildPlanBehaviorOption())
+        ->setKey(self::RESTARTABLE_IF_FAILED)
+        ->setIcon('fa-times-circle-o yellow')
+        ->setName(pht('If Failed'))
+        ->setDescription(
+          pht('The build may be restarted if it has failed.')),
       id(new HarbormasterBuildPlanBehaviorOption())
         ->setKey(self::RESTARTABLE_NEVER)
         ->setIcon('fa-times red')
