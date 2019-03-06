@@ -162,7 +162,20 @@ final class DifferentialChangesetTwoUpRenderer
           } else if (empty($new_lines[$ii])) {
             $o_class = 'old old-full';
           } else {
-            $o_class = 'old';
+            if (isset($depth_only[$ii])) {
+              if ($depth_only[$ii] == '>') {
+                // When a line has depth-only change, we only highlight the
+                // left side of the diff if the depth is decreasing. When the
+                // depth is increasing, the ">>" marker on the right hand side
+                // of the diff generally provides enough visibility on its own.
+
+                $o_class = '';
+              } else {
+                $o_class = 'old';
+              }
+            } else {
+              $o_class = 'old';
+            }
           }
           $o_classes = $o_class;
         }
@@ -200,13 +213,10 @@ final class DifferentialChangesetTwoUpRenderer
           } else if (empty($old_lines[$ii])) {
             $n_class = 'new new-full';
           } else {
-
-            // NOTE: At least for the moment, I'm intentionally clearing the
-            // line highlighting only on the right side of the diff when a
-            // line has only depth changes. When a block depth is decreased,
-            // this gives us a large color block on the left (to make it easy
-            // to see the depth change) but a clean diff on the right (to make
-            // it easy to pick out actual code changes).
+            // When a line has a depth-only change, never highlight it on
+            // the right side. The ">>" marker generally provides enough
+            // visibility on its own for indent depth increases, and the left
+            // side is still highlighted for indent depth decreases.
 
             if (isset($depth_only[$ii])) {
               $n_class = '';
