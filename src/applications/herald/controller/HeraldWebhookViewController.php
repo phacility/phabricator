@@ -73,12 +73,15 @@ final class HeraldWebhookViewController
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($requests_table);
 
+    $rules_view = $this->newRulesView($hook);
+
     $hook_view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setMainColumn(
         array(
           $warnings,
           $properties_view,
+          $rules_view,
           $requests_view,
           $timeline,
         ))
@@ -192,6 +195,44 @@ final class HeraldWebhookViewController
       ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
+  }
+
+  private function newRulesView(HeraldWebhook $hook) {
+    $viewer = $this->getViewer();
+
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer($viewer)
+      ->withDisabled(false)
+      ->withAffectedObjectPHIDs(array($hook->getPHID()))
+      ->needValidateAuthors(true)
+      ->setLimit(10)
+      ->execute();
+
+    $list = id(new HeraldRuleListView())
+      ->setViewer($viewer)
+      ->setRules($rules)
+      ->newObjectList();
+
+    $list->setNoDataString(pht('No active Herald rules call this webhook.'));
+
+    $more_href = new PhutilURI(
+      '/herald/',
+      array('affectedPHID' => $hook->getPHID()));
+
+    $more_link = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-list-ul')
+      ->setText(pht('View All Rules'))
+      ->setHref($more_href);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Called By Herald Rules'))
+      ->addActionLink($more_link);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($list);
   }
 
 }

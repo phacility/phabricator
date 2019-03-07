@@ -496,6 +496,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->withDisabled(false)
       ->withAffectedObjectPHIDs(array($plan->getPHID()))
       ->needValidateAuthors(true)
+      ->setLimit(10)
       ->execute();
 
     $list = id(new HeraldRuleListView())

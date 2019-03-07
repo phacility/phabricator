@@ -63,4 +63,8 @@ final class HeraldCallWebhookAction extends HeraldAction {
     return new HeraldWebhookDatasource();
   }
 
+  public function getPHIDsAffectedByAction(HeraldActionRecord $record) {
+    return $record->getTarget();
+  }
+
 }
