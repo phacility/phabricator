@@ -359,11 +359,21 @@ final class HeraldRuleController extends HeraldController {
         $repetition_policy);
 
       $xactions = array();
+
+      // Until this moves to EditEngine, manually add a "CREATE" transaction
+      // if we're creating a new rule. This improves rendering of the initial
+      // group of transactions.
+      $is_new = (bool)(!$rule->getID());
+      if ($is_new) {
+        $xactions[] = id(new HeraldRuleTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+      }
+
       $xactions[] = id(new HeraldRuleTransaction())
-        ->setTransactionType(HeraldRuleTransaction::TYPE_EDIT)
+        ->setTransactionType(HeraldRuleEditTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_state);
       $xactions[] = id(new HeraldRuleTransaction())
-        ->setTransactionType(HeraldRuleTransaction::TYPE_NAME)
+        ->setTransactionType(HeraldRuleNameTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_name);
 
       try {
