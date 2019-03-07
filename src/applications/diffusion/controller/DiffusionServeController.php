@@ -192,7 +192,10 @@ final class DiffusionServeController extends DiffusionController {
       // Try Git LFS auth first since we can usually reject it without doing
       // any queries, since the username won't match the one we expect or the
       // request won't be LFS.
-      $viewer = $this->authenticateGitLFSUser($username, $password);
+      $viewer = $this->authenticateGitLFSUser(
+        $username,
+        $password,
+        $identifier);
 
       // If that failed, try normal auth. Note that we can use normal auth on
       // LFS requests, so this isn't strictly an alternative to LFS auth.
@@ -655,7 +658,8 @@ final class DiffusionServeController extends DiffusionController {
 
   private function authenticateGitLFSUser(
     $username,
-    PhutilOpaqueEnvelope $password) {
+    PhutilOpaqueEnvelope $password,
+    $identifier) {
 
     // Never accept these credentials for requests which aren't LFS requests.
     if (!$this->getIsGitLFSRequest()) {
@@ -668,11 +672,31 @@ final class DiffusionServeController extends DiffusionController {
       return null;
     }
 
+    // See PHI1123. We need to be able to constrain the token query with
+    // "withTokenResources(...)" to take advantage of the key on the table.
+    // In this case, the repository PHID is the "resource" we're after.
+
+    // In normal workflows, we figure out the viewer first, then use the
+    // viewer to load the repository, but that won't work here. Load the
+    // repository as the omnipotent viewer, then use the repository PHID to
+    // look for a token.
+
+    $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
+
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($omnipotent_viewer)
+      ->withIdentifiers(array($identifier))
+      ->executeOne();
+    if (!$repository) {
+      return null;
+    }
+
     $lfs_pass = $password->openEnvelope();
     $lfs_hash = PhabricatorHash::weakDigest($lfs_pass);
 
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($omnipotent_viewer)
+      ->withTokenResources(array($repository->getPHID()))
       ->withTokenTypes(array(DiffusionGitLFSTemporaryTokenType::TOKENTYPE))
       ->withTokenCodes(array($lfs_hash))
       ->withExpired(false)
@@ -682,7 +706,7 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($omnipotent_viewer)
       ->withPHIDs(array($token->getUserPHID()))
       ->executeOne();
 
