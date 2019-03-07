@@ -53,7 +53,6 @@ abstract class ManiphestController extends PhabricatorController {
 
     $view = id(new ManiphestTaskListView())
       ->setUser($user)
-      ->setShowSubpriorityControls(!$request->getStr('ungrippable'))
       ->setShowBatchControls(true)
       ->setHandles($handles)
       ->setTasks(array($task));

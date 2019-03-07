@@ -414,25 +414,17 @@ final class PHUIObjectItemView extends AphrontTagView {
         ));
     }
 
-    // Wrap the header content in a <span> with the "slippery" sigil. This
-    // prevents us from beginning a drag if you click the text (like "T123"),
-    // but not if you click the white space after the header.
     $header = phutil_tag(
       'div',
       array(
         'class' => 'phui-oi-name',
       ),
-      javelin_tag(
-        'span',
-        array(
-          'sigil' => 'slippery',
-        ),
-        array(
-          $this->headIcons,
-          $header_name,
-          $header_link,
-          $description_tag,
-        )));
+      array(
+        $this->headIcons,
+        $header_name,
+        $header_link,
+        $description_tag,
+      ));
 
     $icons = array();
     if ($this->icons) {

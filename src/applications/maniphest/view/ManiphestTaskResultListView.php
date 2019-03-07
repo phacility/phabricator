@@ -4,7 +4,6 @@ final class ManiphestTaskResultListView extends ManiphestView {
 
   private $tasks;
   private $savedQuery;
-  private $canEditPriority;
   private $canBatchEdit;
   private $showBatchControls;
 
@@ -15,11 +14,6 @@ final class ManiphestTaskResultListView extends ManiphestView {
 
   public function setTasks(array $tasks) {
     $this->tasks = $tasks;
-    return $this;
-  }
-
-  public function setCanEditPriority($can_edit_priority) {
-    $this->canEditPriority = $can_edit_priority;
     return $this;
   }
 
@@ -54,28 +48,12 @@ final class ManiphestTaskResultListView extends ManiphestView {
       $group_parameter,
       $handles);
 
-    $can_edit_priority = $this->canEditPriority;
-
-    $can_drag = ($order_parameter == 'priority') &&
-                ($can_edit_priority) &&
-                ($group_parameter == 'none' || $group_parameter == 'priority');
-
-    if (!$viewer->isLoggedIn()) {
-      // TODO: (T7131) Eventually, we conceivably need to make each task
-      // draggable individually, since the user may be able to edit some but
-      // not others.
-      $can_drag = false;
-    }
-
     $result = array();
 
     $lists = array();
     foreach ($groups as $group => $list) {
       $task_list = new ManiphestTaskListView();
       $task_list->setShowBatchControls($this->showBatchControls);
-      if ($can_drag) {
-        $task_list->setShowSubpriorityControls(true);
-      }
       $task_list->setUser($viewer);
       $task_list->setTasks($list);
       $task_list->setHandles($handles);
@@ -89,14 +67,6 @@ final class ManiphestTaskResultListView extends ManiphestView {
         ->setHeader($header)
         ->setObjectList($task_list);
 
-    }
-
-    if ($can_drag) {
-      Javelin::initBehavior(
-        'maniphest-subpriority-editor',
-        array(
-          'uri'   =>  '/maniphest/subpriority/',
-        ));
     }
 
     return array(
