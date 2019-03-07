@@ -74,4 +74,8 @@ final class HeraldRuleEditor
     return $body;
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

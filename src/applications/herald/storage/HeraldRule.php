@@ -6,6 +6,7 @@ final class HeraldRule extends HeraldDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface,
+    PhabricatorIndexableInterface,
     PhabricatorSubscribableInterface {
 
   const TABLE_RULE_APPLIED = 'herald_ruleapplied';

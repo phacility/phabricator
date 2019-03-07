@@ -62,6 +62,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
     $builds_view = $this->newBuildsView($plan);
     $options_view = $this->newOptionsView($plan);
+    $rules_view = $this->newRulesView($plan);
 
     $timeline = $this->buildTransactionTimeline(
       $plan,
@@ -76,6 +77,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
           $error,
           $step_list,
           $options_view,
+          $rules_view,
           $builds_view,
           $timeline,
         ));
@@ -486,6 +488,42 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->appendChild($list);
   }
 
+  private function newRulesView(HarbormasterBuildPlan $plan) {
+    $viewer = $this->getViewer();
+
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer($viewer)
+      ->withDisabled(false)
+      ->withAffectedObjectPHIDs(array($plan->getPHID()))
+      ->needValidateAuthors(true)
+      ->execute();
+
+    $list = id(new HeraldRuleListView())
+      ->setViewer($viewer)
+      ->setRules($rules)
+      ->newObjectList();
+
+    $list->setNoDataString(pht('No active Herald rules trigger this build.'));
+
+    $more_href = new PhutilURI(
+      '/herald/',
+      array('affectedPHID' => $plan->getPHID()));
+
+    $more_link = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-list-ul')
+      ->setText(pht('View All Rules'))
+      ->setHref($more_href);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Run By Herald Rules'))
+      ->addActionLink($more_link);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($list);
+  }
 
   private function newOptionsView(HarbormasterBuildPlan $plan) {
     $viewer = $this->getViewer();

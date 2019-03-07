@@ -11,6 +11,7 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $active;
   private $datasourceQuery;
   private $triggerObjectPHIDs;
+  private $affectedObjectPHIDs;
 
   private $needConditionsAndActions;
   private $needAppliedToPHIDs;
@@ -58,6 +59,11 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withTriggerObjectPHIDs(array $phids) {
     $this->triggerObjectPHIDs = $phids;
+    return $this;
+  }
+
+  public function withAffectedObjectPHIDs(array $phids) {
+    $this->affectedObjectPHIDs = $phids;
     return $this;
   }
 
@@ -261,7 +267,29 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->triggerObjectPHIDs);
     }
 
+    if ($this->affectedObjectPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'edge_affects.dst IN (%Ls)',
+        $this->affectedObjectPHIDs);
+    }
+
     return $where;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->affectedObjectPHIDs !== null) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T edge_affects ON rule.phid = edge_affects.src
+          AND edge_affects.type = %d',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        HeraldRuleActionAffectsObjectEdgeType::EDGECONST);
+    }
+
+    return $joins;
   }
 
   private function validateRuleAuthors(array $rules) {

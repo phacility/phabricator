@@ -55,6 +55,10 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
           pht('(Show All)'),
           pht('Show Only Disabled Rules'),
           pht('Show Only Enabled Rules')),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Affected Objects'))
+        ->setKey('affectedPHIDs')
+        ->setAliases(array('affectedPHID')),
     );
   }
 
@@ -79,6 +83,10 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
 
     if ($map['active'] !== null) {
       $query->withActive($map['active']);
+    }
+
+    if ($map['affectedPHIDs']) {
+      $query->withAffectedObjectPHIDs($map['affectedPHIDs']);
     }
 
     return $query;
@@ -127,54 +135,18 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
     PhabricatorSavedQuery $query,
     array $handles) {
     assert_instances_of($rules, 'HeraldRule');
-
     $viewer = $this->requireViewer();
-    $handles = $viewer->loadHandles(mpull($rules, 'getAuthorPHID'));
 
-    $content_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
-
-    $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
-    foreach ($rules as $rule) {
-      $monogram = $rule->getMonogram();
-
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName($monogram)
-        ->setHeader($rule->getName())
-        ->setHref("/{$monogram}");
-
-      if ($rule->isPersonalRule()) {
-        $item->addIcon('fa-user', pht('Personal Rule'));
-        $item->addByline(
-          pht(
-            'Authored by %s',
-            $handles[$rule->getAuthorPHID()]->renderLink()));
-      } else if ($rule->isObjectRule()) {
-        $item->addIcon('fa-briefcase', pht('Object Rule'));
-      } else {
-        $item->addIcon('fa-globe', pht('Global Rule'));
-      }
-
-      if ($rule->getIsDisabled()) {
-        $item->setDisabled(true);
-        $item->addIcon('fa-lock grey', pht('Disabled'));
-      } else if (!$rule->hasValidAuthor()) {
-        $item->setDisabled(true);
-        $item->addIcon('fa-user grey', pht('Author Not Active'));
-      }
-
-      $content_type_name = idx($content_type_map, $rule->getContentType());
-      $item->addAttribute(pht('Affects: %s', $content_type_name));
-
-      $list->addItem($item);
-    }
+    $list = id(new HeraldRuleListView())
+      ->setViewer($viewer)
+      ->setRules($rules)
+      ->newObjectList();
 
     $result = new PhabricatorApplicationSearchResultView();
     $result->setObjectList($list);
     $result->setNoDataString(pht('No rules found.'));
 
     return $result;
-
   }
 
   protected function getNewUserBody() {
