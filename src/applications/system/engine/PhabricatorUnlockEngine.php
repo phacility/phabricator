@@ -13,7 +13,13 @@ abstract class PhabricatorUnlockEngine
           'PhabricatorApplicationTransactionInterface'));
     }
 
-    return new PhabricatorDefaultUnlockEngine();
+    if ($object instanceof PhabricatorUnlockableInterface) {
+      $engine = $object->newUnlockEngine();
+    } else {
+      $engine = new PhabricatorDefaultUnlockEngine();
+    }
+
+    return $engine;
   }
 
   public function newUnlockViewTransactions($object, $user) {
