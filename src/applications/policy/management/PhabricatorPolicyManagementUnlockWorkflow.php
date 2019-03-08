@@ -8,40 +8,72 @@ final class PhabricatorPolicyManagementUnlockWorkflow
       ->setName('unlock')
       ->setSynopsis(
         pht(
-          'Unlock an object by setting its policies to allow anyone to view '.
-          'and edit it.'))
-      ->setExamples('**unlock** D123')
+          'Unlock an object which has policies that prevent it from being '.
+          'viewed or edited.'))
+      ->setExamples('**unlock** --view __user__ __object__')
       ->setArguments(
         array(
           array(
-            'name'      => 'objects',
-            'wildcard'  => true,
+            'name' => 'view',
+            'param' => 'username',
+            'help' => pht(
+              'Change the view policy of an object so that the specified '.
+              'user may view it.'),
+          ),
+          array(
+            'name' => 'edit',
+            'param' => 'username',
+            'help' => pht(
+              'Change the edit policy of an object so that the specified '.
+              'user may edit it.'),
+          ),
+          array(
+            'name' => 'owner',
+            'param' => 'username',
+            'help' => pht(
+              'Change the owner of an object to the specified user.'),
+          ),
+          array(
+            'name' => 'objects',
+            'wildcard' => true,
           ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
     $viewer = $this->getViewer();
 
-    $obj_names = $args->getArg('objects');
-    if (!$obj_names) {
+    $object_names = $args->getArg('objects');
+    if (!$object_names) {
       throw new PhutilArgumentUsageException(
         pht('Specify the name of an object to unlock.'));
-    } else if (count($obj_names) > 1) {
+    } else if (count($object_names) > 1) {
       throw new PhutilArgumentUsageException(
         pht('Specify the name of exactly one object to unlock.'));
     }
 
+    $object_name = head($object_names);
+
     $object = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withNames($obj_names)
+      ->withNames(array($object_name))
       ->executeOne();
-
     if (!$object) {
-      $name = head($obj_names);
       throw new PhutilArgumentUsageException(
-        pht("No such object '%s'!", $name));
+        pht(
+          'Unable to find any object with the specified name ("%s").',
+          $object_name));
+    }
+
+    $view_user = $this->loadUser($args->getArg('view'));
+    $edit_user = $this->loadUser($args->getArg('edit'));
+    $owner_user = $this->loadUser($args->getArg('owner'));
+
+    if (!$view_user && !$edit_user && !$owner_user) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Choose which capabilities to unlock with "--view", "--edit", '.
+          'or "--owner".'));
     }
 
     $handle = id(new PhabricatorHandleQuery())
@@ -49,84 +81,73 @@ final class PhabricatorPolicyManagementUnlockWorkflow
       ->withPHIDs(array($object->getPHID()))
       ->executeOne();
 
-    if ($object instanceof PhabricatorApplication) {
-      $application = $object;
+    echo tsprintf(
+      "<bg:blue>** %s **</bg> %s\n",
+      pht('UNLOCKING'),
+      pht('Unlocking: %s', $handle->getFullName()));
 
-      $console->writeOut(
-        "%s\n",
-        pht('Unlocking Application: %s', $handle->getFullName()));
+    $engine = PhabricatorUnlockEngine::newUnlockEngineForObject($object);
 
-      // For applications, we can't unlock them in a normal way and don't want
-      // to unlock every capability, just view and edit.
-      $capabilities = array(
-        PhabricatorPolicyCapability::CAN_VIEW,
-        PhabricatorPolicyCapability::CAN_EDIT,
-      );
+    $xactions = array();
+    if ($view_user) {
+      $xactions[] = $engine->newUnlockViewTransactions($object, $view_user);
+    }
+    if ($edit_user) {
+      $xactions[] = $engine->newUnlockEditTransactions($object, $edit_user);
+    }
+    if ($owner_user) {
+      $xactions[] = $engine->newUnlockOwnerTransactions($object, $owner_user);
+    }
+    $xactions = array_mergev($xactions);
 
-      $key = 'phabricator.application-settings';
-      $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
-      $value = $config_entry->getValue();
+    $policy_application = new PhabricatorPolicyApplication();
+    $content_source = $this->newContentSource();
 
-      foreach ($capabilities as $capability) {
-        if ($application->isCapabilityEditable($capability)) {
-          unset($value[$application->getPHID()]['policy'][$capability]);
-        }
-      }
+    $editor = $object->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setActingAsPHID($policy_application->getPHID())
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true)
+      ->setContentSource($content_source);
 
-      $config_entry->setValue($value);
-      $config_entry->save();
+    $editor->applyTransactions($object, $xactions);
 
-      $console->writeOut("%s\n", pht('Saved application.'));
+    echo tsprintf(
+      "<bg:green>** %s **</bg> %s\n",
+      pht('UNLOCKED'),
+      pht('Modified object policies.'));
 
-      return 0;
+    $uri = $handle->getURI();
+    if (strlen($uri)) {
+      echo tsprintf(
+        "\n        **%s**: __%s__\n\n",
+        pht('Object URI'),
+        PhabricatorEnv::getURI($uri));
     }
 
-    $console->writeOut("%s\n", pht('Unlocking: %s', $handle->getFullName()));
+    return 0;
+  }
 
-    $updated = false;
-    foreach ($object->getCapabilities() as $capability) {
-      switch ($capability) {
-        case PhabricatorPolicyCapability::CAN_VIEW:
-          try {
-            $object->setViewPolicy(PhabricatorPolicies::POLICY_USER);
-            $console->writeOut("%s\n", pht('Unlocked view policy.'));
-            $updated = true;
-          } catch (Exception $ex) {
-            $console->writeOut("%s\n", pht('View policy is not mutable.'));
-          }
-          break;
-        case PhabricatorPolicyCapability::CAN_EDIT:
-          try {
-            $object->setEditPolicy(PhabricatorPolicies::POLICY_USER);
-            $console->writeOut("%s\n", pht('Unlocked edit policy.'));
-            $updated = true;
-          } catch (Exception $ex) {
-            $console->writeOut("%s\n", pht('Edit policy is not mutable.'));
-          }
-          break;
-        case PhabricatorPolicyCapability::CAN_JOIN:
-          try {
-            $object->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
-            $console->writeOut("%s\n", pht('Unlocked join policy.'));
-            $updated = true;
-          } catch (Exception $ex) {
-            $console->writeOut("%s\n", pht('Join policy is not mutable.'));
-          }
-          break;
-      }
+  private function loadUser($username) {
+    $viewer = $this->getViewer();
+
+    if ($username === null) {
+      return null;
     }
 
-    if ($updated) {
-      $object->save();
-      $console->writeOut("%s\n", pht('Saved object.'));
-    } else {
-      $console->writeOut(
-        "%s\n",
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withUsernames(array($username))
+      ->executeOne();
+
+    if (!$user) {
+      throw new PhutilArgumentUsageException(
         pht(
-          'Object has no mutable policies. Try unlocking parent/container '.
-          'object instead. For example, to gain access to a commit, unlock '.
-          'the repository it belongs to.'));
+          'No user with username "%s" exists.',
+          $username));
     }
+
+    return $user;
   }
 
 }

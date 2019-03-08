@@ -1,11 +1,3 @@
 <?php
 
-$table = new ConpherenceThread();
-
-foreach (new LiskMigrationIterator($table) as $thread) {
-  PhabricatorSearchWorker::queueDocumentForIndexing(
-    $thread->getPHID(),
-    array(
-      'force' => true,
-    ));
-}
+// This was an old reindexing migration that has been obsoleted. See T13253.

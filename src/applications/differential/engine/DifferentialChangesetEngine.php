@@ -54,6 +54,12 @@ final class DifferentialChangesetEngine extends Phobject {
       if (strpos($new_data, '@'.'generated') !== false) {
         return true;
       }
+
+      // See PHI1112. This is the official pattern for marking Go code as
+      // generated.
+      if (preg_match('(^// Code generated .* DO NOT EDIT\.$)m', $new_data)) {
+        return true;
+      }
     }
 
     return false;

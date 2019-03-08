@@ -126,6 +126,9 @@
   background-size: 12px 12px;
   background-repeat: no-repeat;
   background-position: left center;
+  position: relative;
+  left: -8px;
+  opacity: 0.5;
 }
 
 .differential-diff td span.depth-out {

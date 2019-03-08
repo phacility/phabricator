@@ -128,49 +128,14 @@ final class HarbormasterBuildSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $buildables = mpull($builds, 'getBuildable');
-    $object_phids = mpull($buildables, 'getBuildablePHID');
-    $initiator_phids = mpull($builds, 'getInitiatorPHID');
-    $phids = array_mergev(array($initiator_phids, $object_phids));
-    $phids = array_unique(array_filter($phids));
+    $list = id(new HarbormasterBuildView())
+      ->setViewer($viewer)
+      ->setBuilds($builds)
+      ->newObjectList();
 
-    $handles = $viewer->loadHandles($phids);
-
-    $list = new PHUIObjectItemListView();
-    foreach ($builds as $build) {
-      $id = $build->getID();
-      $initiator = $handles[$build->getInitiatorPHID()];
-      $buildable_object = $handles[$build->getBuildable()->getBuildablePHID()];
-
-      $item = id(new PHUIObjectItemView())
-        ->setViewer($viewer)
-        ->setObject($build)
-        ->setObjectName(pht('Build %d', $build->getID()))
-        ->setHeader($build->getName())
-        ->setHref($build->getURI())
-        ->setEpoch($build->getDateCreated())
-        ->addAttribute($buildable_object->getName());
-
-      if ($initiator) {
-        $item->addHandleIcon($initiator, $initiator->getName());
-      }
-
-      $status = $build->getBuildStatus();
-
-      $status_icon = HarbormasterBuildStatus::getBuildStatusIcon($status);
-      $status_color = HarbormasterBuildStatus::getBuildStatusColor($status);
-      $status_label = HarbormasterBuildStatus::getBuildStatusName($status);
-
-      $item->setStatusIcon("{$status_icon} {$status_color}", $status_label);
-
-      $list->addItem($item);
-    }
-
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setObjectList($list);
-    $result->setNoDataString(pht('No builds found.'));
-
-    return $result;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setObjectList($list)
+      ->setNoDataString(pht('No builds found.'));
   }
 
 }

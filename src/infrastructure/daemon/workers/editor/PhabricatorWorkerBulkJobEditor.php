@@ -15,6 +15,7 @@ final class PhabricatorWorkerBulkJobEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorWorkerBulkJobTransaction::TYPE_STATUS;
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     return $types;
   }

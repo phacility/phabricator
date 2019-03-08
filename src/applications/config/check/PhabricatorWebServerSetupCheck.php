@@ -129,30 +129,16 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
     }
 
     $structure = null;
-    $caught = null;
     $extra_whitespace = ($body !== trim($body));
 
-    if (!$extra_whitespace) {
-      try {
-        $structure = phutil_json_decode($body);
-      } catch (Exception $ex) {
-        $caught = $ex;
-      }
+    try {
+      $structure = phutil_json_decode(trim($body));
+    } catch (Exception $ex) {
+      // Ignore the exception, we only care if the decode worked or not.
     }
 
-    if (!$structure) {
-      if ($extra_whitespace) {
-        $message = pht(
-          'Phabricator sent itself a test request and expected to get a bare '.
-          'JSON response back, but the response had extra whitespace at '.
-          'the beginning or end.'.
-          "\n\n".
-          'This usually means you have edited a file and left whitespace '.
-          'characters before the opening %s tag, or after a closing %s tag. '.
-          'Remove any leading whitespace, and prefer to omit closing tags.',
-          phutil_tag('tt', array(), '<?php'),
-          phutil_tag('tt', array(), '?>'));
-      } else {
+    if (!$structure || $extra_whitespace) {
+      if (!$structure) {
         $short = id(new PhutilUTF8StringTruncator())
           ->setMaximumGlyphs(1024)
           ->truncateString($body);
@@ -166,6 +152,17 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
           "\n\n".
           'Something is misconfigured or otherwise mangling responses.',
           phutil_tag('pre', array(), $short));
+      } else {
+        $message = pht(
+          'Phabricator sent itself a test request and expected to get a bare '.
+          'JSON response back. It received a JSON response, but the response '.
+          'had extra whitespace at the beginning or end.'.
+          "\n\n".
+          'This usually means you have edited a file and left whitespace '.
+          'characters before the opening %s tag, or after a closing %s tag. '.
+          'Remove any leading whitespace, and prefer to omit closing tags.',
+          phutil_tag('tt', array(), '<?php'),
+          phutil_tag('tt', array(), '?>'));
       }
 
       $this->newIssue('webserver.mangle')
@@ -174,7 +171,9 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
         ->setMessage($message);
 
       // We can't run the other checks if we could not decode the response.
-      return;
+      if (!$structure) {
+        return;
+      }
     }
 
     $actual_user = idx($structure, 'user');

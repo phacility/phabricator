@@ -497,9 +497,33 @@ final class HarbormasterBuildEngine extends Phobject {
     // passed everything it needs to.
 
     if (!$buildable->isPreparing()) {
+      $behavior_key = HarbormasterBuildPlanBehavior::BEHAVIOR_BUILDABLE;
+      $behavior = HarbormasterBuildPlanBehavior::getBehavior($behavior_key);
+
+      $key_never = HarbormasterBuildPlanBehavior::BUILDABLE_NEVER;
+      $key_building = HarbormasterBuildPlanBehavior::BUILDABLE_IF_BUILDING;
+
       $all_pass = true;
       $any_fail = false;
       foreach ($buildable->getBuilds() as $build) {
+        $plan = $build->getBuildPlan();
+        $option = $behavior->getPlanOption($plan);
+        $option_key = $option->getKey();
+
+        $is_never = ($option_key === $key_never);
+        $is_building = ($option_key === $key_building);
+
+        // If this build "Never" affects the buildable, ignore it.
+        if ($is_never) {
+          continue;
+        }
+
+        // If this build affects the buildable "If Building", but is already
+        // complete, ignore it.
+        if ($is_building && $build->isComplete()) {
+          continue;
+        }
+
         if (!$build->isPassed()) {
           $all_pass = false;
         }

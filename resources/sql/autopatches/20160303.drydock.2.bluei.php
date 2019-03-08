@@ -1,11 +1,3 @@
 <?php
 
-$table = new DrydockBlueprint();
-
-foreach (new LiskMigrationIterator($table) as $blueprint) {
-  PhabricatorSearchWorker::queueDocumentForIndexing(
-    $blueprint->getPHID(),
-    array(
-      'force' => true,
-    ));
-}
+// This was an old reindexing migration that has been obsoleted. See T13253.

@@ -681,6 +681,19 @@ final class PhabricatorDuoAuthFactor
     AphrontRequest $request,
     array $challenges) {
 
+    return $this->getResultForPrompt(
+      $config,
+      $viewer,
+      $request,
+      $challenges);
+  }
+
+  protected function newResultForPrompt(
+    PhabricatorAuthFactorConfig $config,
+    PhabricatorUser $viewer,
+    AphrontRequest $request,
+    array $challenges) {
+
     $result = $this->newResult()
       ->setIsContinue(true)
       ->setErrorMessage(

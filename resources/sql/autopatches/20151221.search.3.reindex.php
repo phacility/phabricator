@@ -1,11 +1,3 @@
 <?php
 
-$table = new PhabricatorOwnersPackage();
-
-foreach (new LiskMigrationIterator($table) as $package) {
-  PhabricatorSearchWorker::queueDocumentForIndexing(
-    $package->getPHID(),
-    array(
-      'force' => true,
-    ));
-}
+// This was an old reindexing migration that has been obsoleted. See T13253.
