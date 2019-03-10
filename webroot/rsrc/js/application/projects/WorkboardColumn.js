@@ -34,6 +34,7 @@ JX.install('WorkboardColumn', {
     _cards: null,
     _headers: null,
     _naturalOrder: null,
+    _orderVectors: null,
     _panel: null,
     _pointsNode: null,
     _pointsContentNode: null,
@@ -66,6 +67,7 @@ JX.install('WorkboardColumn', {
 
     setNaturalOrder: function(order) {
       this._naturalOrder = order;
+      this._orderVectors = null;
       return this;
     },
 
@@ -86,6 +88,7 @@ JX.install('WorkboardColumn', {
 
       this._cards[phid] = card;
       this._naturalOrder.push(phid);
+      this._orderVectors = null;
 
       return card;
     },
@@ -97,6 +100,7 @@ JX.install('WorkboardColumn', {
       for (var ii = 0; ii < this._naturalOrder.length; ii++) {
         if (this._naturalOrder[ii] == phid) {
           this._naturalOrder.splice(ii, 1);
+          this._orderVectors = null;
           break;
         }
       }
@@ -126,6 +130,8 @@ JX.install('WorkboardColumn', {
       } else {
         this._naturalOrder.splice(index, 0, phid);
       }
+
+      this._orderVectors = null;
 
       return this;
     },
@@ -204,12 +210,7 @@ JX.install('WorkboardColumn', {
       var board = this.getBoard();
       var order = board.getOrder();
 
-      var list;
-      if (order == 'natural') {
-        list = this._getCardsSortedNaturally();
-      } else {
-        list = this._getCardsSortedByKey(order);
-      }
+      var list = this._getCardsSortedByKey(order);
 
       var ii;
       var objects = [];
@@ -285,7 +286,7 @@ JX.install('WorkboardColumn', {
       var data = JX.Stratcom.getData(node);
 
       if (data.objectPHID) {
-        return board.getOrderVector(data.objectPHID, order);
+        return this._getOrderVector(data.objectPHID, order);
       }
 
       return board.getHeaderTemplate(data.headerKey).getVector();
@@ -294,17 +295,6 @@ JX.install('WorkboardColumn', {
     setIsDropTarget: function(is_target) {
       var node = this.getWorkpanelNode();
       JX.DOM.alterClass(node, 'workboard-column-drop-target', is_target);
-    },
-
-    _getCardsSortedNaturally: function() {
-      var list = [];
-
-      for (var ii = 0; ii < this._naturalOrder.length; ii++) {
-        var phid = this._naturalOrder[ii];
-        list.push(this.getCard(phid));
-      }
-
-      return list;
     },
 
     _getCardsSortedByKey: function(order) {
@@ -322,10 +312,60 @@ JX.install('WorkboardColumn', {
 
     _sortCards: function(order, u, v) {
       var board = this.getBoard();
-      var u_vec = board.getOrderVector(u.getPHID(), order);
-      var v_vec = board.getOrderVector(v.getPHID(), order);
+      var u_vec = this._getOrderVector(u.getPHID(), order);
+      var v_vec = this._getOrderVector(v.getPHID(), order);
 
       return board.compareVectors(u_vec, v_vec);
+    },
+
+    _getOrderVector: function(phid, order) {
+      if (!this._orderVectors) {
+        this._orderVectors = {};
+      }
+
+      if (!this._orderVectors[order]) {
+        var board = this.getBoard();
+        var cards = this.getCards();
+        var vectors = {};
+
+        for (var k in cards) {
+          var card_phid = cards[k].getPHID();
+          var vector = board.getOrderVector(card_phid, order);
+          vectors[card_phid] = [].concat(vector);
+
+          // Push a "card" type, so cards always sort after headers; headers
+          // have a "0" in this position.
+          vectors[card_phid].push(1);
+        }
+
+        for (var ii = 0; ii < this._naturalOrder.length; ii++) {
+          var natural_phid = this._naturalOrder[ii];
+          if (vectors[natural_phid]) {
+            vectors[natural_phid].push(ii);
+          }
+        }
+
+        this._orderVectors[order] = vectors;
+      }
+
+      if (!this._orderVectors[order][phid]) {
+        // In this case, we're comparing a card being dragged in from another
+        // column to the cards already in this column. We're just going to
+        // build a temporary vector for it.
+        var incoming_vector = this.getBoard().getOrderVector(phid, order);
+        incoming_vector = [].concat(incoming_vector);
+
+        // Add a "card" type to sort this after headers.
+        incoming_vector.push(1);
+
+        // Add a "0" for the natural ordering to put this on top. A new card
+        // has no natural ordering on a column it isn't part of yet.
+        incoming_vector.push(0);
+
+        return incoming_vector;
+      }
+
+      return this._orderVectors[order][phid];
     },
 
     _redrawFrame: function() {

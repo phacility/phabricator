@@ -522,13 +522,6 @@ final class PhabricatorProjectBoardViewController
         $column->getPHID());
 
       $column_tasks = array_select_keys($tasks, $task_phids);
-
-      // If we aren't using "natural" order, reorder the column by the original
-      // query order.
-      if ($this->sortKey != PhabricatorProjectColumn::ORDER_NATURAL) {
-        $column_tasks = array_select_keys($column_tasks, array_keys($tasks));
-      }
-
       $column_phid = $column->getPHID();
 
       $visible_columns[$column_phid] = $column;
@@ -683,7 +676,6 @@ final class PhabricatorProjectBoardViewController
       'projectPHID' => $project->getPHID(),
     );
     $this->initBehavior('project-boards', $behavior_config);
-
 
     $sort_menu = $this->buildSortMenu(
       $viewer,

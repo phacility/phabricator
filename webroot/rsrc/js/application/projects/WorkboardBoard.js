@@ -202,6 +202,14 @@ JX.install('WorkboardBoard', {
         order: this.getOrder()
       };
 
+      // We're going to send an "afterPHID" and a "beforePHID" if the card
+      // was dropped immediately adjacent to another card. If a card was
+      // dropped before or after a header, we don't send a PHID for the card
+      // on the other side of the header.
+
+      // If the view has headers, we always send the header the card was
+      // dropped under.
+
       var after_data;
       var after_card = after_node;
       while (after_card) {
@@ -209,11 +217,16 @@ JX.install('WorkboardBoard', {
         if (after_data.objectPHID) {
           break;
         }
+        if (after_data.headerKey) {
+          break;
+        }
         after_card = after_card.previousSibling;
       }
 
       if (after_data) {
-        data.afterPHID = after_data.objectPHID;
+        if (after_data.objectPHID) {
+          data.afterPHID = after_data.objectPHID;
+        }
       }
 
       var before_data;
@@ -223,18 +236,35 @@ JX.install('WorkboardBoard', {
         if (before_data.objectPHID) {
           break;
         }
+        if (before_data.headerKey) {
+          break;
+        }
         before_card = before_card.nextSibling;
       }
 
       if (before_data) {
-        data.beforePHID = before_data.objectPHID;
+        if (before_data.objectPHID) {
+          data.beforePHID = before_data.objectPHID;
+        }
       }
 
-      var header_key = JX.Stratcom.getData(after_node).headerKey;
-      if (header_key) {
-        var properties = this.getHeaderTemplate(header_key)
-          .getEditProperties();
-        data.header = JX.JSON.stringify(properties);
+      var header_data;
+      var header_node = after_node;
+      while (header_node) {
+        header_data = JX.Stratcom.getData(header_node);
+        if (header_data.headerKey) {
+          break;
+        }
+        header_node = header_node.previousSibling;
+      }
+
+      if (header_data) {
+        var header_key = header_data.headerKey;
+        if (header_key) {
+          var properties = this.getHeaderTemplate(header_key)
+            .getEditProperties();
+          data.header = JX.JSON.stringify(properties);
+        }
       }
 
       var visible_phids = [];

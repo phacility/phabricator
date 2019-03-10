@@ -71,20 +71,14 @@ final class PhabricatorProjectMoveController
       ->setObjectPHIDs(array($object_phid))
       ->executeLayout();
 
-    $columns = $engine->getObjectColumns($board_phid, $object_phid);
-    $old_column_phids = mpull($columns, 'getPHID');
-
-    $xactions = array();
-
     $order_params = array();
-    if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
-      if ($after_phid) {
-        $order_params['afterPHID'] = $after_phid;
-      } else if ($before_phid) {
-        $order_params['beforePHID'] = $before_phid;
-      }
+    if ($after_phid) {
+      $order_params['afterPHID'] = $after_phid;
+    } else if ($before_phid) {
+      $order_params['beforePHID'] = $before_phid;
     }
 
+    $xactions = array();
     $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
       ->setNewValue(
@@ -94,18 +88,12 @@ final class PhabricatorProjectMoveController
           ) + $order_params,
         ));
 
-    if ($order == PhabricatorProjectColumn::ORDER_PRIORITY) {
-      $header_priority = idx(
-        $edit_header,
-        PhabricatorProjectColumn::ORDER_PRIORITY);
-      $priority_xactions = $this->getPriorityTransactions(
-        $object,
-        $after_phid,
-        $before_phid,
-        $header_priority);
-      foreach ($priority_xactions as $xaction) {
-        $xactions[] = $xaction;
-      }
+    $header_xactions = $this->newHeaderTransactions(
+      $object,
+      $order,
+      $edit_header);
+    foreach ($header_xactions as $header_xaction) {
+      $xactions[] = $header_xaction;
     }
 
     $editor = id(new ManiphestTransactionEditor())
@@ -119,137 +107,30 @@ final class PhabricatorProjectMoveController
     return $this->newCardResponse($board_phid, $object_phid);
   }
 
-  private function getPriorityTransactions(
+  private function newHeaderTransactions(
     ManiphestTask $task,
-    $after_phid,
-    $before_phid,
-    $header_priority) {
+    $order,
+    array $header) {
 
     $xactions = array();
-    $must_move = false;
 
-    if ($header_priority !== null) {
-      if ($task->getPriority() !== $header_priority) {
-        $task = id(clone $task)
-          ->setPriority($header_priority);
+    switch ($order) {
+      case PhabricatorProjectColumn::ORDER_PRIORITY:
+        $new_priority = idx($header, $order);
 
-        $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
-        $keyword = head(idx($keyword_map, $header_priority));
+        if ($task->getPriority() !== $new_priority) {
+          $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
+          $keyword = head(idx($keyword_map, $new_priority));
 
-        $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(
-            ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
-          ->setNewValue($keyword);
-
-        $must_move = true;
-      }
-    }
-
-    list($after_task, $before_task) = $this->loadPriorityTasks(
-      $after_phid,
-      $before_phid);
-
-    if ($after_task && !$task->isLowerPriorityThan($after_task)) {
-      $must_move = true;
-    }
-
-    if ($before_task && !$task->isHigherPriorityThan($before_task)) {
-      $must_move = true;
-    }
-
-    // The move doesn't require a subpriority change to be valid, so don't
-    // change the subpriority since we are not being forced to.
-    if (!$must_move) {
-      return $xactions;
-    }
-
-    $try = array(
-      array($after_task, true),
-      array($before_task, false),
-    );
-
-    $pri = null;
-    $sub = null;
-    foreach ($try as $spec) {
-      list($nearby_task, $is_after) = $spec;
-
-      if (!$nearby_task) {
-        continue;
-      }
-
-      list($pri, $sub) = ManiphestTransactionEditor::getAdjacentSubpriority(
-        $nearby_task,
-        $is_after);
-
-      // If we drag under a "Low" header between a "Normal" task and a "Low"
-      // task, we don't want to accept a subpriority assignment which changes
-      // our priority to "Normal". Only accept a subpriority that keeps us in
-      // the right primary priority.
-      if ($header_priority !== null) {
-        if ($pri !== $header_priority) {
-          continue;
+          $xactions[] = id(new ManiphestTransaction())
+            ->setTransactionType(
+              ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
+            ->setNewValue($keyword);
         }
-      }
-
-      // If we find a priority on the first try, don't keep going.
-      break;
-    }
-
-    if ($pri !== null) {
-      if ($header_priority === null) {
-        $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
-        $keyword = head(idx($keyword_map, $pri));
-
-        $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(
-            ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
-          ->setNewValue($keyword);
-      }
-
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(
-          ManiphestTaskSubpriorityTransaction::TRANSACTIONTYPE)
-        ->setNewValue($sub);
+        break;
     }
 
     return $xactions;
-  }
-
-  private function loadPriorityTasks($after_phid, $before_phid) {
-    $viewer = $this->getViewer();
-
-    $task_phids = array();
-
-    if ($after_phid) {
-      $task_phids[] = $after_phid;
-    }
-    if ($before_phid) {
-      $task_phids[] = $before_phid;
-    }
-
-    if (!$task_phids) {
-      return array(null, null);
-    }
-
-    $tasks = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($task_phids)
-      ->execute();
-    $tasks = mpull($tasks, null, 'getPHID');
-
-    if ($after_phid) {
-      $after_task = idx($tasks, $after_phid);
-    } else {
-      $after_task = null;
-    }
-
-    if ($before_phid) {
-      $before_task = idx($tasks, $before_phid);
-    } else {
-      $before_task = null;
-    }
-
-    return array($after_task, $before_task);
   }
 
 }
