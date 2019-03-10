@@ -267,39 +267,6 @@ final class ManiphestTask extends ManiphestDAO
     return ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD;
   }
 
-  private function comparePriorityTo(ManiphestTask $other) {
-    $upri = $this->getPriority();
-    $vpri = $other->getPriority();
-
-    if ($upri != $vpri) {
-      return ($upri - $vpri);
-    }
-
-    $usub = $this->getSubpriority();
-    $vsub = $other->getSubpriority();
-
-    if ($usub != $vsub) {
-      return ($usub - $vsub);
-    }
-
-    $uid = $this->getID();
-    $vid = $other->getID();
-
-    if ($uid != $vid) {
-      return ($uid - $vid);
-    }
-
-    return 0;
-  }
-
-  public function isLowerPriorityThan(ManiphestTask $other) {
-    return ($this->comparePriorityTo($other) < 0);
-  }
-
-  public function isHigherPriorityThan(ManiphestTask $other) {
-    return ($this->comparePriorityTo($other) > 0);
-  }
-
   public function getWorkboardProperties() {
     return array(
       'status' => $this->getStatus(),
@@ -540,7 +507,6 @@ final class ManiphestTask extends ManiphestDAO
     $priority_value = (int)$this->getPriority();
     $priority_info = array(
       'value' => $priority_value,
-      'subpriority' => (double)$this->getSubpriority(),
       'name' => ManiphestTaskPriority::getTaskPriorityName($priority_value),
       'color' => ManiphestTaskPriority::getTaskPriorityColor($priority_value),
     );
