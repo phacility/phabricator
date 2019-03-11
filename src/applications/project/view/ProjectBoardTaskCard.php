@@ -82,19 +82,31 @@ final class ProjectBoardTaskCard extends Phobject {
     $card = id(new PHUIObjectItemView())
       ->setObject($task)
       ->setUser($viewer)
-      ->setObjectName('T'.$task->getID())
+      ->setObjectName($task->getMonogram())
       ->setHeader($task->getTitle())
-      ->setGrippable($can_edit)
-      ->setHref('/T'.$task->getID())
+      ->setHref($task->getURI())
       ->addSigil('project-card')
       ->setDisabled($task->isClosed())
-      ->addAction(
-        id(new PHUIListItemView())
-        ->setName(pht('Edit'))
-        ->setIcon('fa-pencil')
-        ->addSigil('edit-project-card')
-        ->setHref('/maniphest/task/edit/'.$task->getID().'/'))
       ->setBarColor($bar_color);
+
+    if ($can_edit) {
+      $card
+        ->addSigil('draggable-card')
+        ->addClass('draggable-card');
+      $edit_icon = 'fa-pencil';
+    } else {
+      $card
+        ->addClass('not-editable')
+        ->addClass('undraggable-card');
+      $edit_icon = 'fa-lock red';
+    }
+
+    $card->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Edit'))
+        ->setIcon($edit_icon)
+        ->addSigil('edit-project-card')
+        ->setHref('/maniphest/task/edit/'.$task->getID().'/'));
 
     if ($owner) {
       $card->addHandleIcon($owner, $owner->getName());

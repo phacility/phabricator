@@ -138,7 +138,7 @@ JX.install('WorkboardBoard', {
       for (var k in columns) {
         var column = columns[k];
 
-        var list = new JX.DraggableList('project-card', column.getRoot())
+        var list = new JX.DraggableList('draggable-card', column.getRoot())
           .setOuterContainer(this.getRoot())
           .setFindItemsHandler(JX.bind(column, column.getDropTargetNodes))
           .setCanDragX(true)

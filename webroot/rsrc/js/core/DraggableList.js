@@ -240,6 +240,7 @@ JX.install('DraggableList', {
       frame.appendChild(clone);
 
       document.body.appendChild(frame);
+      JX.DOM.alterClass(document.body, 'jx-dragging', true);
 
       this._dragging = drag;
       this._clone = clone;
@@ -618,6 +619,7 @@ JX.install('DraggableList', {
       this._autoscroller = null;
 
       JX.DOM.remove(this._frame);
+      JX.DOM.alterClass(document.body, 'jx-dragging', false);
       this._frame = null;
       this._clone = null;
 
