@@ -116,9 +116,15 @@ JX.behavior('project-boards', function(config, statics) {
 
     board.getHeaderTemplate(header.key)
       .setOrder(header.order)
-      .setTemplate(header.template)
+      .setNodeHTMLTemplate(header.template)
       .setVector(header.vector)
       .setEditProperties(header.editProperties);
+  }
+
+  var header_keys = config.headerKeys;
+  for (var header_phid in header_keys) {
+    board.getCardTemplate(header_phid)
+      .setHeaderKey(config.order, header_keys[header_phid]);
   }
 
   board.start();

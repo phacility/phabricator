@@ -189,21 +189,15 @@ JX.install('WorkboardColumn', {
       var board = this.getBoard();
       var order = board.getOrder();
 
+      // TODO: This should be modularized into "ProjectColumnOrder" classes,
+      // but is currently hard-coded.
+
       switch (order) {
         case 'natural':
           return false;
       }
 
       return true;
-    },
-
-    _getCardHeaderKey: function(card, order) {
-      switch (order) {
-        case 'priority':
-          return 'priority(' + card.getPriority() + ')';
-        default:
-          return null;
-      }
     },
 
     redraw: function() {
@@ -235,7 +229,9 @@ JX.install('WorkboardColumn', {
         // cards in a column.
 
         if (has_headers) {
-          var header_key = this._getCardHeaderKey(card, order);
+          var header_key = board.getCardTemplate(card.getPHID())
+             .getHeaderKey(order);
+
           if (!seen_headers[header_key]) {
             while (header_keys.length) {
               var next = header_keys.pop();

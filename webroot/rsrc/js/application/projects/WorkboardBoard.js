@@ -289,7 +289,6 @@ JX.install('WorkboardBoard', {
       var columns = this.getColumns();
 
       var phid = response.objectPHID;
-      var card = this.getCardTemplate(phid);
 
       for (var add_phid in response.columnMaps) {
         var target_column = this.getColumn(add_phid);
@@ -300,18 +299,6 @@ JX.install('WorkboardBoard', {
         }
 
         target_column.newCard(phid);
-      }
-
-      card.setNodeHTMLTemplate(response.cardHTML);
-
-      var order_maps = response.orderMaps;
-      for (var order_phid in order_maps) {
-        var card_template = this.getCardTemplate(order_phid);
-        for (var order_key in order_maps[order_phid]) {
-          card_template.setSortVector(
-            order_key,
-            order_maps[order_phid][order_key]);
-        }
       }
 
       var column_maps = response.columnMaps;
@@ -329,10 +316,37 @@ JX.install('WorkboardBoard', {
         natural_column.setNaturalOrder(column_maps[natural_phid]);
       }
 
-      var property_maps = response.propertyMaps;
-      for (var property_phid in property_maps) {
-        this.getCardTemplate(property_phid)
-          .setObjectProperties(property_maps[property_phid]);
+      for (var card_phid in response.cards) {
+        var card_data = response.cards[card_phid];
+        var card_template = this.getCardTemplate(card_phid);
+
+        if (card_data.nodeHTMLTemplate) {
+          card_template.setNodeHTMLTemplate(card_data.nodeHTMLTemplate);
+        }
+
+        var order;
+        for (order in card_data.vectors) {
+          card_template.setSortVector(order, card_data.vectors[order]);
+        }
+
+        for (order in card_data.headers) {
+          card_template.setHeaderKey(order, card_data.headers[order]);
+        }
+
+        for (var key in card_data.properties) {
+          card_template.setObjectProperty(key, card_data.properties[key]);
+        }
+      }
+
+      var headers = response.headers;
+      for (var jj = 0; jj < headers.length; jj++) {
+        var header = headers[jj];
+
+        this.getHeaderTemplate(header.key)
+          .setOrder(header.order)
+          .setNodeHTMLTemplate(header.template)
+          .setVector(header.vector)
+          .setEditProperties(header.editProperties);
       }
 
       for (var column_phid in columns) {

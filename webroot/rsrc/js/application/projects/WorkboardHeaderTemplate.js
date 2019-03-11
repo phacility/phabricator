@@ -19,9 +19,19 @@ JX.install('WorkboardHeaderTemplate', {
 
   members: {
     _headerKey: null,
+    _html: null,
 
     getHeaderKey: function() {
       return this._headerKey;
+    },
+
+    setNodeHTMLTemplate: function(html) {
+      this._html = html;
+      return this;
+    },
+
+    newNode: function() {
+      return JX.$H(this._html).getFragment().firstChild;
     }
 
   }

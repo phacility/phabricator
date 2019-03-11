@@ -13,7 +13,15 @@ final class PhabricatorProjectMoveController
     $object_phid = $request->getStr('objectPHID');
     $after_phid = $request->getStr('afterPHID');
     $before_phid = $request->getStr('beforePHID');
-    $order = $request->getStr('order', PhabricatorProjectColumn::DEFAULT_ORDER);
+
+    $order = $request->getStr('order');
+    if (!strlen($order)) {
+      $order = PhabricatorProjectColumnNaturalOrder::ORDERKEY;
+    }
+
+    $ordering = PhabricatorProjectColumnOrder::getOrderByKey($order);
+    $ordering = id(clone $ordering)
+      ->setViewer($viewer);
 
     $edit_header = null;
     $raw_header = $request->getStr('header');
@@ -88,9 +96,8 @@ final class PhabricatorProjectMoveController
           ) + $order_params,
         ));
 
-    $header_xactions = $this->newHeaderTransactions(
+    $header_xactions = $ordering->getColumnTransactions(
       $object,
-      $order,
       $edit_header);
     foreach ($header_xactions as $header_xaction) {
       $xactions[] = $header_xaction;
@@ -104,33 +111,7 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    return $this->newCardResponse($board_phid, $object_phid);
-  }
-
-  private function newHeaderTransactions(
-    ManiphestTask $task,
-    $order,
-    array $header) {
-
-    $xactions = array();
-
-    switch ($order) {
-      case PhabricatorProjectColumn::ORDER_PRIORITY:
-        $new_priority = idx($header, $order);
-
-        if ($task->getPriority() !== $new_priority) {
-          $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
-          $keyword = head(idx($keyword_map, $new_priority));
-
-          $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(
-              ManiphestTaskPriorityTransaction::TRANSACTIONTYPE)
-            ->setNewValue($keyword);
-        }
-        break;
-    }
-
-    return $xactions;
+    return $this->newCardResponse($board_phid, $object_phid, $ordering);
   }
 
 }

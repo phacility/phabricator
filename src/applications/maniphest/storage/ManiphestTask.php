@@ -248,14 +248,6 @@ final class ManiphestTask extends ManiphestDAO
     return idx($this->properties, 'cover.thumbnailPHID');
   }
 
-  public function getWorkboardOrderVectors() {
-    return array(
-      PhabricatorProjectColumn::ORDER_PRIORITY => array(
-        (int)-$this->getPriority(),
-      ),
-    );
-  }
-
   public function getPriorityKeyword() {
     $priority = $this->getPriority();
 
@@ -265,14 +257,6 @@ final class ManiphestTask extends ManiphestDAO
     }
 
     return ManiphestTaskPriority::UNKNOWN_PRIORITY_KEYWORD;
-  }
-
-  public function getWorkboardProperties() {
-    return array(
-      'status' => $this->getStatus(),
-      'points' => (double)$this->getPoints(),
-      'priority' => $this->getPriority(),
-    );
   }
 
 

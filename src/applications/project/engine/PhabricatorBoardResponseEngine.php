@@ -6,6 +6,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
   private $boardPHID;
   private $objectPHID;
   private $visiblePHIDs;
+  private $ordering;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -43,10 +44,20 @@ final class PhabricatorBoardResponseEngine extends Phobject {
     return $this->visiblePHIDs;
   }
 
+  public function setOrdering(PhabricatorProjectColumnOrder $ordering) {
+    $this->ordering = $ordering;
+    return $this;
+  }
+
+  public function getOrdering() {
+    return $this->ordering;
+  }
+
   public function buildResponse() {
     $viewer = $this->getViewer();
     $object_phid = $this->getObjectPHID();
     $board_phid = $this->getBoardPHID();
+    $ordering = $this->getOrdering();
 
     // Load all the other tasks that are visible in the affected columns and
     // perform layout for them.
@@ -74,10 +85,17 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       ->setViewer($viewer)
       ->withPHIDs($visible_phids)
       ->execute();
+    $all_visible = mpull($all_visible, null, 'getPHID');
 
-    $order_maps = array();
-    foreach ($all_visible as $visible) {
-      $order_maps[$visible->getPHID()] = $visible->getWorkboardOrderVectors();
+    if ($ordering) {
+      $vectors = $ordering->getSortVectorsForObjects($all_visible);
+      $header_keys = $ordering->getHeaderKeysForObjects($all_visible);
+      $headers = $ordering->getHeadersForObjects($all_visible);
+      $headers = mpull($headers, 'toDictionary');
+    } else {
+      $vectors = array();
+      $header_keys = array();
+      $headers = array();
     }
 
     $object = id(new ManiphestTaskQuery())
@@ -91,14 +109,50 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
     $template = $this->buildTemplate($object);
 
+    $cards = array();
+    foreach ($all_visible as $card_phid => $object) {
+      $card = array(
+        'vectors' => array(),
+        'headers' => array(),
+        'properties' => array(),
+        'nodeHTMLTemplate' => null,
+      );
+
+      if ($ordering) {
+        $order_key = $ordering->getColumnOrderKey();
+
+        $vector = idx($vectors, $card_phid);
+        if ($vector !== null) {
+          $card['vectors'][$order_key] = $vector;
+        }
+
+        $header = idx($header_keys, $card_phid);
+        if ($header !== null) {
+          $card['headers'][$order_key] = $header;
+        }
+
+        $card['properties'] = array(
+          'points' => (double)$object->getPoints(),
+          'status' => $object->getStatus(),
+        );
+      }
+
+      if ($card_phid === $object_phid) {
+        $card['nodeHTMLTemplate'] = hsprintf('%s', $template);
+      }
+
+      $card['vectors'] = (object)$card['vectors'];
+      $card['headers'] = (object)$card['headers'];
+      $card['properties'] = (object)$card['properties'];
+
+      $cards[$card_phid] = $card;
+    }
+
     $payload = array(
       'objectPHID' => $object_phid,
-      'cardHTML' => $template,
       'columnMaps' => $natural,
-      'orderMaps' => $order_maps,
-      'propertyMaps' => array(
-        $object_phid => $object->getWorkboardProperties(),
-      ),
+      'cards' => $cards,
+      'headers' => $headers,
     );
 
     return id(new AphrontAjaxResponse())

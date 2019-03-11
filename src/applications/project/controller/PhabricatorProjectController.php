@@ -149,7 +149,11 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     return $this;
   }
 
-  protected function newCardResponse($board_phid, $object_phid) {
+  protected function newCardResponse(
+    $board_phid,
+    $object_phid,
+    PhabricatorProjectColumnOrder $ordering = null) {
+
     $viewer = $this->getViewer();
 
     $request = $this->getRequest();
@@ -158,12 +162,17 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       $visible_phids = array();
     }
 
-    return id(new PhabricatorBoardResponseEngine())
+    $engine = id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
       ->setObjectPHID($object_phid)
-      ->setVisiblePHIDs($visible_phids)
-      ->buildResponse();
+      ->setVisiblePHIDs($visible_phids);
+
+    if ($ordering) {
+      $engine->setOrdering($ordering);
+    }
+
+    return $engine->buildResponse();
   }
 
   public function renderHashtags(array $tags) {

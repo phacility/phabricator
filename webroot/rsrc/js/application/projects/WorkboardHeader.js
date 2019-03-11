@@ -27,12 +27,16 @@ JX.install('WorkboardHeader', {
     getNode: function() {
       if (!this._root) {
         var header_key = this.getHeaderKey();
-        var board = this.getColumn().getBoard();
-        var template = board.getHeaderTemplate(header_key).getTemplate();
-        this._root = JX.$H(template).getFragment().firstChild;
 
-        JX.Stratcom.getData(this._root).headerKey = header_key;
+        var root = this.getColumn().getBoard()
+          .getHeaderTemplate(header_key)
+          .newNode();
+
+        JX.Stratcom.getData(root).headerKey = header_key;
+
+        this._root = root;
       }
+
       return this._root;
     },
 

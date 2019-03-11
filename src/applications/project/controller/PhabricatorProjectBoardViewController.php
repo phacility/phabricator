@@ -614,48 +614,24 @@ final class PhabricatorProjectBoardViewController
       $board->addPanel($panel);
     }
 
-    // It's possible for tasks to have an invalid/unknown priority in the
-    // database. We still want to generate a header for these tasks so we
-    // don't break the workboard.
-    $priorities =
-      ManiphestTaskPriority::getTaskPriorityMap() +
-      mpull($all_tasks, null, 'getPriority');
-    $priorities = array_keys($priorities);
+    $order_key = $this->sortKey;
 
-    $headers = array();
-    foreach ($priorities as $priority) {
-      $header_key = sprintf('priority(%s)', $priority);
+    $ordering_map = PhabricatorProjectColumnOrder::getAllOrders();
+    $ordering = id(clone $ordering_map[$order_key])
+      ->setViewer($viewer);
 
-      $priority_name = ManiphestTaskPriority::getTaskPriorityName($priority);
-      $priority_color = ManiphestTaskPriority::getTaskPriorityColor($priority);
-      $priority_icon = ManiphestTaskPriority::getTaskPriorityIcon($priority);
+    $headers = $ordering->getHeadersForObjects($all_tasks);
+    $headers = mpull($headers, 'toDictionary');
 
-      $icon_view = id(new PHUIIconView())
-        ->setIcon("{$priority_icon} {$priority_color}");
-
-      $template = phutil_tag(
-        'li',
-        array(
-          'class' => 'workboard-group-header',
-        ),
-        array(
-          $icon_view,
-          $priority_name,
-        ));
-
-      $headers[] = array(
-        'order' => PhabricatorProjectColumn::ORDER_PRIORITY,
-        'key' => $header_key,
-        'template' => hsprintf('%s', $template),
-        'vector' => array(
-          (int)-$priority,
-          PhabricatorProjectColumn::NODETYPE_HEADER,
-        ),
-        'editProperties' => array(
-          PhabricatorProjectColumn::ORDER_PRIORITY => (int)$priority,
-        ),
-      );
+    $vectors = $ordering->getSortVectorsForObjects($all_tasks);
+    $vector_map = array();
+    foreach ($vectors as $task_phid => $vector) {
+      $vector_map[$task_phid][$order_key] = $vector;
     }
+
+    $header_keys = $ordering->getHeaderKeysForObjects($all_tasks);
+
+    $properties = array();
 
     $behavior_config = array(
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
@@ -667,10 +643,11 @@ final class PhabricatorProjectBoardViewController
       'boardPHID' => $project->getPHID(),
       'order' => $this->sortKey,
       'headers' => $headers,
+      'headerKeys' => $header_keys,
       'templateMap' => $templates,
       'columnMaps' => $column_maps,
-      'orderMaps' => mpull($all_tasks, 'getWorkboardOrderVectors'),
-      'propertyMaps' => mpull($all_tasks, 'getWorkboardProperties'),
+      'orderMaps' => $vector_map,
+      'propertyMaps' => $properties,
 
       'boardID' => $board_id,
       'projectPHID' => $project->getPHID(),
@@ -680,7 +657,8 @@ final class PhabricatorProjectBoardViewController
     $sort_menu = $this->buildSortMenu(
       $viewer,
       $project,
-      $this->sortKey);
+      $this->sortKey,
+      $ordering_map);
 
     $filter_menu = $this->buildFilterMenu(
       $viewer,
@@ -775,7 +753,7 @@ final class PhabricatorProjectBoardViewController
       return $default_sort;
     }
 
-    return PhabricatorProjectColumn::DEFAULT_ORDER;
+    return PhabricatorProjectColumnNaturalOrder::ORDERKEY;
   }
 
   private function getDefaultFilter(PhabricatorProject $project) {
@@ -789,41 +767,37 @@ final class PhabricatorProjectBoardViewController
   }
 
   private function isValidSort($sort) {
-    switch ($sort) {
-      case PhabricatorProjectColumn::ORDER_NATURAL:
-      case PhabricatorProjectColumn::ORDER_PRIORITY:
-        return true;
-    }
-
-    return false;
+    $map = PhabricatorProjectColumnOrder::getAllOrders();
+    return isset($map[$sort]);
   }
 
   private function buildSortMenu(
     PhabricatorUser $viewer,
     PhabricatorProject $project,
-    $sort_key) {
-
-    $sort_icon = id(new PHUIIconView())
-      ->setIcon('fa-sort-amount-asc bluegrey');
-
-    $named = array(
-      PhabricatorProjectColumn::ORDER_NATURAL => pht('Natural'),
-      PhabricatorProjectColumn::ORDER_PRIORITY => pht('Sort by Priority'),
-    );
+    $sort_key,
+    array $ordering_map) {
 
     $base_uri = $this->getURIWithState();
 
     $items = array();
-    foreach ($named as $key => $name) {
-      $is_selected = ($key == $sort_key);
+    foreach ($ordering_map as $key => $ordering) {
+      // TODO: It would be desirable to build a real "PHUIIconView" here, but
+      // the pathway for threading that through all the view classes ends up
+      // being fairly complex, since some callers read the icon out of other
+      // views. For now, just stick with a string.
+      $ordering_icon = $ordering->getMenuIconIcon();
+      $ordering_name = $ordering->getDisplayName();
+
+      $is_selected = ($key === $sort_key);
       if ($is_selected) {
-        $active_order = $name;
+        $active_name = $ordering_name;
+        $active_icon = $ordering_icon;
       }
 
       $item = id(new PhabricatorActionView())
-        ->setIcon('fa-sort-amount-asc')
+        ->setIcon($ordering_icon)
         ->setSelected($is_selected)
-        ->setName($name);
+        ->setName($ordering_name);
 
       $uri = $base_uri->alter('order', $key);
       $item->setHref($uri);
@@ -856,8 +830,8 @@ final class PhabricatorProjectBoardViewController
     }
 
     $sort_button = id(new PHUIListItemView())
-      ->setName($active_order)
-      ->setIcon('fa-sort-amount-asc')
+      ->setName($active_name)
+      ->setIcon($active_icon)
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(

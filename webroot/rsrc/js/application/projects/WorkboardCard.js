@@ -29,7 +29,8 @@ JX.install('WorkboardCard', {
     },
 
     getProperties: function() {
-      return this.getColumn().getBoard().getCardTemplate(this.getPHID())
+      return this.getColumn().getBoard()
+        .getCardTemplate(this.getPHID())
         .getObjectProperties();
     },
 
@@ -39,10 +40,6 @@ JX.install('WorkboardCard', {
 
     getStatus: function() {
       return this.getProperties().status;
-    },
-
-    getPriority: function(order) {
-      return this.getProperties().priority;
     },
 
     getNode: function() {
