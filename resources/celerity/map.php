@@ -411,7 +411,7 @@ return array(
     'rsrc/js/application/projects/WorkboardBoard.js' => 'fc1664ff',
     'rsrc/js/application/projects/WorkboardCard.js' => '0392a5d8',
     'rsrc/js/application/projects/WorkboardCardTemplate.js' => '2a61f8d4',
-    'rsrc/js/application/projects/WorkboardColumn.js' => '533dd592',
+    'rsrc/js/application/projects/WorkboardColumn.js' => 'fd4c2069',
     'rsrc/js/application/projects/WorkboardController.js' => '42c7a5a7',
     'rsrc/js/application/projects/WorkboardHeader.js' => '111bfd2d',
     'rsrc/js/application/projects/WorkboardHeaderTemplate.js' => 'b65351bd',
@@ -731,7 +731,7 @@ return array(
     'javelin-workboard-board' => 'fc1664ff',
     'javelin-workboard-card' => '0392a5d8',
     'javelin-workboard-card-template' => '2a61f8d4',
-    'javelin-workboard-column' => '533dd592',
+    'javelin-workboard-column' => 'fd4c2069',
     'javelin-workboard-controller' => '42c7a5a7',
     'javelin-workboard-header' => '111bfd2d',
     'javelin-workboard-header-template' => 'b65351bd',
@@ -1346,11 +1346,6 @@ return array(
       'javelin-install',
       'javelin-dom',
       'javelin-fx',
-    ),
-    '533dd592' => array(
-      'javelin-install',
-      'javelin-workboard-card',
-      'javelin-workboard-header',
     ),
     '534f1757' => array(
       'phui-oi-list-view-css',
@@ -2137,6 +2132,11 @@ return array(
     'fce5d170' => array(
       'javelin-magical-init',
       'javelin-util',
+    ),
+    'fd4c2069' => array(
+      'javelin-install',
+      'javelin-workboard-card',
+      'javelin-workboard-header',
     ),
     'fdc13e4e' => array(
       'javelin-install',

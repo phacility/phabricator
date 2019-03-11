@@ -220,6 +220,8 @@ JX.install('WorkboardColumn', {
         header_keys.reverse();
       }
 
+      var header_key;
+      var next;
       for (ii = 0; ii < list.length; ii++) {
         var card = list[ii];
 
@@ -229,12 +231,12 @@ JX.install('WorkboardColumn', {
         // cards in a column.
 
         if (has_headers) {
-          var header_key = board.getCardTemplate(card.getPHID())
+          header_key = board.getCardTemplate(card.getPHID())
              .getHeaderKey(order);
 
           if (!seen_headers[header_key]) {
             while (header_keys.length) {
-              var next = header_keys.pop();
+              next = header_keys.pop();
 
               var header = this.getHeader(next);
               objects.push(header);
@@ -248,6 +250,20 @@ JX.install('WorkboardColumn', {
         }
 
         objects.push(card);
+      }
+
+      // Add any leftover headers at the bottom of the column which don't have
+      // any cards in them. In particular, empty columns don't have any cards
+      // but should still have headers.
+
+      while (header_keys.length) {
+        next = header_keys.pop();
+
+        if (seen_headers[next]) {
+          continue;
+        }
+
+        objects.push(this.getHeader(next));
       }
 
       this._objects = objects;
@@ -431,9 +447,18 @@ JX.install('WorkboardColumn', {
 
       JX.DOM.setContent(content_node, display_value);
 
-      var is_empty = !this.getCardPHIDs().length;
+      // Only put the "empty" style on the column (which just adds some empty
+      // space so it's easier to drop cards into an empty column) if it has no
+      // cards and no headers.
+
+      var is_empty =
+        (!this.getCardPHIDs().length) &&
+        (!this._hasColumnHeaders());
+
       var panel = JX.DOM.findAbove(this.getRoot(), 'div', 'workpanel');
       JX.DOM.alterClass(panel, 'project-panel-empty', is_empty);
+
+
       JX.DOM.alterClass(panel, 'project-panel-over-limit', over_limit);
 
       var color_map = {
