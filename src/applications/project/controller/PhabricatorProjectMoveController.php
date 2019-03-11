@@ -43,6 +43,13 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
+    $cancel_uri = $this->getApplicationURI(
+      new PhutilURI(
+        urisprintf('board/%d/', $project->getID()),
+        array(
+          'order' => $order,
+        )));
+
     $board_phid = $project->getPHID();
 
     $object = id(new ManiphestTaskQuery())
@@ -107,7 +114,8 @@ final class PhabricatorProjectMoveController
       ->setActor($viewer)
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect(true)
-      ->setContentSourceFromRequest($request);
+      ->setContentSourceFromRequest($request)
+      ->setCancelURI($cancel_uri);
 
     $editor->applyTransactions($object, $xactions);
 
