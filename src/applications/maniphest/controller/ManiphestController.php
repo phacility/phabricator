@@ -37,29 +37,6 @@ abstract class ManiphestController extends PhabricatorController {
     return $crumbs;
   }
 
-  public function renderSingleTask(ManiphestTask $task) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $phids = $task->getProjectPHIDs();
-    if ($task->getOwnerPHID()) {
-      $phids[] = $task->getOwnerPHID();
-    }
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs($phids)
-      ->execute();
-
-    $view = id(new ManiphestTaskListView())
-      ->setUser($user)
-      ->setShowBatchControls(true)
-      ->setHandles($handles)
-      ->setTasks(array($task));
-
-    return $view;
-  }
-
   final protected function newTaskGraphDropdownMenu(
     ManiphestTask $task,
     $has_parents,
