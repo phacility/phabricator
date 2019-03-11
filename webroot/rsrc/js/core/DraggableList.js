@@ -43,7 +43,9 @@ JX.install('DraggableList', {
     isDropTargetHandler: null,
     canDragX: false,
     outerContainer: null,
-    hasInfiniteHeight: false
+    hasInfiniteHeight: false,
+    compareOnMove: false,
+    compareOnReorder: false
   },
 
   members : {
@@ -501,7 +503,26 @@ JX.install('DraggableList', {
 
       var cur_target = false;
       if (target_list) {
-        if (compare_handler && (target_list !== this)) {
+        // Determine if we're going to use the compare handler or not: the
+        // compare hander locks items into a specific place in the list. For
+        // example, on Workboards, some operations permit the user to drag
+        // items between lists, but not to reorder items within a list.
+
+        var should_compare = false;
+
+        var is_reorder = (target_list === this);
+        var is_move = (target_list !== this);
+
+        if (compare_handler) {
+          if (is_reorder && this.getCompareOnReorder()) {
+            should_compare = true;
+          }
+          if (is_move && this.getCompareOnMove()) {
+            should_compare = true;
+          }
+        }
+
+        if (should_compare) {
           cur_target = target_list._getOrderedTarget(this, this._dragging);
         } else {
           cur_target = target_list._getCurrentTarget(p);

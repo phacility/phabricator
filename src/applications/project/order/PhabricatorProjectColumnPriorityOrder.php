@@ -13,6 +13,14 @@ final class PhabricatorProjectColumnPriorityOrder
     return 'fa-sort-numeric-asc';
   }
 
+  public function getHasHeaders() {
+    return true;
+  }
+
+  public function getCanReorder() {
+    return true;
+  }
+
   protected function newHeaderKeyForObject($object) {
     return $this->newHeaderKeyForPriority($object->getPriority());
   }

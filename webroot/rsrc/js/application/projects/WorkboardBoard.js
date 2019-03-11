@@ -9,6 +9,7 @@
  *           javelin-workboard-column
  *           javelin-workboard-header-template
  *           javelin-workboard-card-template
+ *           javelin-workboard-order-template
  * @javelin
  */
 
@@ -21,6 +22,7 @@ JX.install('WorkboardBoard', {
 
     this._headers = {};
     this._cards = {};
+    this._orders = {};
 
     this._buildColumns();
   },
@@ -68,6 +70,14 @@ JX.install('WorkboardBoard', {
       }
 
       return this._headers[header_key];
+    },
+
+    getOrderTemplate: function(order_key) {
+      if (!this._orders[order_key]) {
+        this._orders[order_key] = new JX.WorkboardOrderTemplate(order_key);
+      }
+
+      return this._orders[order_key];
     },
 
     getHeaderTemplatesForOrder: function(order) {
@@ -134,6 +144,10 @@ JX.install('WorkboardBoard', {
     _setupDragHandlers: function() {
       var columns = this.getColumns();
 
+      var order_template = this.getOrderTemplate(this.getOrder());
+      var has_headers = order_template.getHasHeaders();
+      var can_reorder = order_template.getCanReorder();
+
       var lists = [];
       for (var k in columns) {
         var column = columns[k];
@@ -149,8 +163,21 @@ JX.install('WorkboardBoard', {
         list.setGhostHandler(
           JX.bind(column, column.handleDragGhost, default_handler));
 
-        if (this.getOrder() !== 'natural') {
-          list.setCompareHandler(JX.bind(column, column.compareHandler));
+        // The "compare handler" locks cards into a specific position in the
+        // column.
+        list.setCompareHandler(JX.bind(column, column.compareHandler));
+
+        // If the view has group headers, we lock cards into the right position
+        // when moving them between columns, but not within a column.
+        if (has_headers) {
+          list.setCompareOnMove(true);
+        }
+
+        // If we can't reorder cards, we always lock them into their current
+        // position.
+        if (!can_reorder) {
+          list.setCompareOnMove(true);
+          list.setCompareOnReorder(true);
         }
 
         list.listen('didDrop', JX.bind(this, this._onmovecard, list));

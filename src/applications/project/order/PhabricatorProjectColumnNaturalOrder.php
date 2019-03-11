@@ -9,4 +9,12 @@ final class PhabricatorProjectColumnNaturalOrder
     return pht('Natural');
   }
 
+  public function getHasHeaders() {
+    return false;
+  }
+
+  public function getCanReorder() {
+    return true;
+  }
+
 }

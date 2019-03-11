@@ -189,15 +189,7 @@ JX.install('WorkboardColumn', {
       var board = this.getBoard();
       var order = board.getOrder();
 
-      // TODO: This should be modularized into "ProjectColumnOrder" classes,
-      // but is currently hard-coded.
-
-      switch (order) {
-        case 'natural':
-          return false;
-      }
-
-      return true;
+      return board.getOrderTemplate(order).getHasHeaders();
     },
 
     redraw: function() {

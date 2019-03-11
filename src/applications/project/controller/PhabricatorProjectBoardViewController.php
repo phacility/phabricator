@@ -631,6 +631,9 @@ final class PhabricatorProjectBoardViewController
 
     $header_keys = $ordering->getHeaderKeysForObjects($all_tasks);
 
+    $order_maps = array();
+    $order_maps[] = $ordering->toDictionary();
+
     $properties = array();
 
     $behavior_config = array(
@@ -642,6 +645,7 @@ final class PhabricatorProjectBoardViewController
 
       'boardPHID' => $project->getPHID(),
       'order' => $this->sortKey,
+      'orders' => $order_maps,
       'headers' => $headers,
       'headerKeys' => $header_keys,
       'templateMap' => $templates,

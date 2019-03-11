@@ -13,6 +13,14 @@ final class PhabricatorProjectColumnOwnerOrder
     return 'fa-users';
   }
 
+  public function getHasHeaders() {
+    return true;
+  }
+
+  public function getCanReorder() {
+    return true;
+  }
+
   protected function newHeaderKeyForObject($object) {
     return $this->newHeaderKeyForOwnerPHID($object->getOwnerPHID());
   }

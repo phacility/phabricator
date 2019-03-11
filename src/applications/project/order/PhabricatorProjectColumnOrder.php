@@ -68,6 +68,8 @@ abstract class PhabricatorProjectColumnOrder
   }
 
   abstract public function getDisplayName();
+  abstract public function getHasHeaders();
+  abstract public function getCanReorder();
 
   protected function newColumnTransactions($object, array $header) {
     return array();
@@ -171,6 +173,14 @@ abstract class PhabricatorProjectColumnOrder
   final protected function newHeader() {
     return id(new PhabricatorProjectColumnHeader())
       ->setOrderKey($this->getColumnOrderKey());
+  }
+
+  final public function toDictionary() {
+    return array(
+      'orderKey' => $this->getColumnOrderKey(),
+      'hasHeaders' => $this->getHasHeaders(),
+      'canReorder' => $this->getCanReorder(),
+    );
   }
 
 }

@@ -87,11 +87,12 @@ JX.behavior('project-boards', function(config, statics) {
       .setNodeHTMLTemplate(templates[k]);
   }
 
+  var ii;
   var column_maps = config.columnMaps;
   for (var column_phid in column_maps) {
     var column = board.getColumn(column_phid);
     var column_map = column_maps[column_phid];
-    for (var ii = 0; ii < column_map.length; ii++) {
+    for (ii = 0; ii < column_map.length; ii++) {
       column.newCard(column_map[ii]);
     }
   }
@@ -111,14 +112,23 @@ JX.behavior('project-boards', function(config, statics) {
   }
 
   var headers = config.headers;
-  for (var jj = 0; jj < headers.length; jj++) {
-    var header = headers[jj];
+  for (ii = 0; ii < headers.length; ii++) {
+    var header = headers[ii];
 
     board.getHeaderTemplate(header.key)
       .setOrder(header.order)
       .setNodeHTMLTemplate(header.template)
       .setVector(header.vector)
       .setEditProperties(header.editProperties);
+  }
+
+  var orders = config.orders;
+  for (ii = 0; ii < orders.length; ii++) {
+    var order = orders[ii];
+
+    board.getOrderTemplate(order.orderKey)
+      .setHasHeaders(order.hasHeaders)
+      .setCanReorder(order.canReorder);
   }
 
   var header_keys = config.headerKeys;
