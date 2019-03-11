@@ -4056,6 +4056,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectColumnHideController' => 'applications/project/controller/PhabricatorProjectColumnHideController.php',
     'PhabricatorProjectColumnNaturalOrder' => 'applications/project/order/PhabricatorProjectColumnNaturalOrder.php',
     'PhabricatorProjectColumnOrder' => 'applications/project/order/PhabricatorProjectColumnOrder.php',
+    'PhabricatorProjectColumnOwnerOrder' => 'applications/project/order/PhabricatorProjectColumnOwnerOrder.php',
     'PhabricatorProjectColumnPHIDType' => 'applications/project/phid/PhabricatorProjectColumnPHIDType.php',
     'PhabricatorProjectColumnPosition' => 'applications/project/storage/PhabricatorProjectColumnPosition.php',
     'PhabricatorProjectColumnPositionQuery' => 'applications/project/query/PhabricatorProjectColumnPositionQuery.php',
@@ -10140,6 +10141,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectColumnHideController' => 'PhabricatorProjectBoardController',
     'PhabricatorProjectColumnNaturalOrder' => 'PhabricatorProjectColumnOrder',
     'PhabricatorProjectColumnOrder' => 'Phobject',
+    'PhabricatorProjectColumnOwnerOrder' => 'PhabricatorProjectColumnOrder',
     'PhabricatorProjectColumnPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorProjectColumnPosition' => array(
       'PhabricatorProjectDAO',
