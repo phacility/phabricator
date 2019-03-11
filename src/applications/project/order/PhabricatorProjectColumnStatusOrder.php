@@ -22,7 +22,7 @@ final class PhabricatorProjectColumnStatusOrder
   }
 
   public function getMenuOrder() {
-    return 3000;
+    return 4000;
   }
 
   protected function newHeaderKeyForObject($object) {

@@ -178,7 +178,7 @@ return array(
     'rsrc/css/phui/workboards/phui-workboard-color.css' => 'e86de308',
     'rsrc/css/phui/workboards/phui-workboard.css' => '74fc9d98',
     'rsrc/css/phui/workboards/phui-workcard.css' => '9e9eb0df',
-    'rsrc/css/phui/workboards/phui-workpanel.css' => 'bc16cf33',
+    'rsrc/css/phui/workboards/phui-workpanel.css' => 'c5b408ad',
     'rsrc/css/sprite-login.css' => '18b368a6',
     'rsrc/css/sprite-tokens.css' => 'f1896dc5',
     'rsrc/css/syntax/syntax-default.css' => '055fc231',
@@ -860,7 +860,7 @@ return array(
     'phui-workboard-color-css' => 'e86de308',
     'phui-workboard-view-css' => '74fc9d98',
     'phui-workcard-view-css' => '9e9eb0df',
-    'phui-workpanel-view-css' => 'bc16cf33',
+    'phui-workpanel-view-css' => 'c5b408ad',
     'phuix-action-list-view' => 'c68f183f',
     'phuix-action-view' => 'aaa08f3b',
     'phuix-autocomplete' => '8f139ef0',
@@ -1906,9 +1906,6 @@ return array(
       'javelin-uri',
       'phabricator-notification',
     ),
-    'bc16cf33' => array(
-      'phui-workcard-view-css',
-    ),
     'bdce4d78' => array(
       'javelin-install',
       'javelin-util',
@@ -1938,6 +1935,9 @@ return array(
       'javelin-aphlict',
       'phabricator-phtize',
       'javelin-dom',
+    ),
+    'c5b408ad' => array(
+      'phui-workcard-view-css',
     ),
     'c687e867' => array(
       'javelin-behavior',

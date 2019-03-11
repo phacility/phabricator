@@ -26,7 +26,7 @@ final class PhabricatorProjectColumnPointsOrder
   }
 
   public function getMenuOrder() {
-    return 4000;
+    return 6000;
   }
 
   protected function newSortVectorForObject($object) {

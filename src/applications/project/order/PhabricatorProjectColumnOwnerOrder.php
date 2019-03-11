@@ -108,6 +108,7 @@ final class PhabricatorProjectColumnOwnerOrder
       $owner_users = id(new PhabricatorPeopleQuery())
         ->setViewer($this->getViewer())
         ->withPHIDs($owner_phids)
+        ->needProfileImage(true)
         ->execute();
       $owner_users = mpull($owner_users, null, 'getPHID');
     } else {
@@ -120,6 +121,7 @@ final class PhabricatorProjectColumnOwnerOrder
     foreach ($owner_phids as $owner_phid) {
       $header_key = $this->newHeaderKeyForOwnerPHID($owner_phid);
 
+      $owner_image = null;
       if ($owner_phid === null) {
         $owner = null;
         $sort_vector = $this->newSortVectorForUnowned();
@@ -129,6 +131,7 @@ final class PhabricatorProjectColumnOwnerOrder
         if ($owner) {
           $sort_vector = $this->newSortVectorForOwner($owner);
           $owner_name = $owner->getUsername();
+          $owner_image = $owner->getProfileImageURI();
         } else {
           $sort_vector = $this->newSortVectorForOwnerPHID($owner_phid);
           $owner_name = pht('Unknown User ("%s")', $owner_phid);
@@ -138,8 +141,13 @@ final class PhabricatorProjectColumnOwnerOrder
       $owner_icon = 'fa-user';
       $owner_color = 'bluegrey';
 
-      $icon_view = id(new PHUIIconView())
-        ->setIcon($owner_icon, $owner_color);
+      $icon_view = id(new PHUIIconView());
+
+      if ($owner_image) {
+        $icon_view->setImage($owner_image);
+      } else {
+        $icon_view->setIcon($owner_icon, $owner_color);
+      }
 
       $header = $this->newHeader()
         ->setHeaderKey($header_key)

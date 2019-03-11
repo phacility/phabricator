@@ -85,7 +85,12 @@ final class PhabricatorProjectColumnHeader
       ),
       array(
         $icon_view,
-        $name,
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'workboard-group-header-name',
+          ),
+          $name),
       ));
 
     return $template;

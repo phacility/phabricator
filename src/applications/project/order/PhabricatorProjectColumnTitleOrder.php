@@ -1,16 +1,16 @@
 <?php
 
-final class PhabricatorProjectColumnCreatedOrder
+final class PhabricatorProjectColumnTitleOrder
   extends PhabricatorProjectColumnOrder {
 
-  const ORDERKEY = 'created';
+  const ORDERKEY = 'title';
 
   public function getDisplayName() {
-    return pht('Sort by Created Date');
+    return pht('Sort by Title');
   }
 
   protected function newMenuIconIcon() {
-    return 'fa-clock-o';
+    return 'fa-sort-alpha-asc';
   }
 
   public function getHasHeaders() {
@@ -22,13 +22,12 @@ final class PhabricatorProjectColumnCreatedOrder
   }
 
   public function getMenuOrder() {
-    return 5000;
+    return 7000;
   }
 
   protected function newSortVectorForObject($object) {
     return array(
-      -1 * (int)$object->getDateCreated(),
-      -1 * (int)$object->getID(),
+      $object->getTitle(),
     );
   }
 
