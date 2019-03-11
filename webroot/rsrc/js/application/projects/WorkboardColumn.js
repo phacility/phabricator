@@ -319,18 +319,21 @@ JX.install('WorkboardColumn', {
     },
 
     _getOrderVector: function(phid, order) {
+      var board = this.getBoard();
+
       if (!this._orderVectors) {
         this._orderVectors = {};
       }
 
       if (!this._orderVectors[order]) {
-        var board = this.getBoard();
         var cards = this.getCards();
         var vectors = {};
 
         for (var k in cards) {
           var card_phid = cards[k].getPHID();
-          var vector = board.getOrderVector(card_phid, order);
+          var vector = board.getCardTemplate(card_phid)
+            .getSortVector(order);
+
           vectors[card_phid] = [].concat(vector);
 
           // Push a "card" type, so cards always sort after headers; headers
@@ -352,7 +355,8 @@ JX.install('WorkboardColumn', {
         // In this case, we're comparing a card being dragged in from another
         // column to the cards already in this column. We're just going to
         // build a temporary vector for it.
-        var incoming_vector = this.getBoard().getOrderVector(phid, order);
+        var incoming_vector = board.getCardTemplate(phid)
+          .getSortVector(order);
         incoming_vector = [].concat(incoming_vector);
 
         // Add a "card" type to sort this after headers.

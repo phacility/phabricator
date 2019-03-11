@@ -83,7 +83,8 @@ JX.behavior('project-boards', function(config, statics) {
 
   var templates = config.templateMap;
   for (var k in templates) {
-    board.setCardTemplate(k, templates[k]);
+    board.getCardTemplate(k)
+      .setNodeHTMLTemplate(templates[k]);
   }
 
   var column_maps = config.columnMaps;
@@ -97,12 +98,16 @@ JX.behavior('project-boards', function(config, statics) {
 
   var order_maps = config.orderMaps;
   for (var object_phid in order_maps) {
-    board.setOrderMap(object_phid, order_maps[object_phid]);
+    var order_card = board.getCardTemplate(object_phid);
+    for (var order_key in order_maps[object_phid]) {
+      order_card.setSortVector(order_key, order_maps[object_phid][order_key]);
+    }
   }
 
   var property_maps = config.propertyMaps;
   for (var property_phid in property_maps) {
-    board.setObjectProperties(property_phid, property_maps[property_phid]);
+    board.getCardTemplate(property_phid)
+      .setObjectProperties(property_maps[property_phid]);
   }
 
   var headers = config.headers;

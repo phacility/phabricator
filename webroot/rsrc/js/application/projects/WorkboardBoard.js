@@ -8,6 +8,7 @@
  *           phabricator-draggable-list
  *           javelin-workboard-column
  *           javelin-workboard-header-template
+ *           javelin-workboard-card-template
  * @javelin
  */
 
@@ -18,10 +19,9 @@ JX.install('WorkboardBoard', {
     this._phid = phid;
     this._root = root;
 
-    this._templates = {};
-    this._orderMaps = {};
-    this._propertiesMap = {};
     this._headers = {};
+    this._cards = {};
+
     this._buildColumns();
   },
 
@@ -35,10 +35,8 @@ JX.install('WorkboardBoard', {
     _phid: null,
     _root: null,
     _columns: null,
-    _templates: null,
-    _orderMaps: null,
-    _propertiesMap: null,
     _headers: null,
+    _cards: null,
 
     getRoot: function() {
       return this._root;
@@ -56,9 +54,12 @@ JX.install('WorkboardBoard', {
       return this._phid;
     },
 
-    setCardTemplate: function(phid, template)  {
-      this._templates[phid] = template;
-      return this;
+    getCardTemplate: function(phid) {
+      if (!this._cards[phid]) {
+        this._cards[phid] = new JX.WorkboardCardTemplate(phid);
+      }
+
+      return this._cards[phid];
     },
 
     getHeaderTemplate: function(header_key) {
@@ -91,30 +92,8 @@ JX.install('WorkboardBoard', {
       return this.compareVectors(u.getVector(), v.getVector());
     },
 
-    setObjectProperties: function(phid, properties) {
-      this._propertiesMap[phid] = properties;
-      return this;
-    },
-
-    getObjectProperties: function(phid) {
-      return this._propertiesMap[phid];
-    },
-
-    getCardTemplate: function(phid) {
-      return this._templates[phid];
-    },
-
     getController: function() {
       return this._controller;
-    },
-
-    setOrderMap: function(phid, map) {
-      this._orderMaps[phid] = map;
-      return this;
-    },
-
-    getOrderVector: function(phid, key) {
-      return this._orderMaps[phid][key];
     },
 
     compareVectors: function(u_vec, v_vec) {
@@ -310,25 +289,29 @@ JX.install('WorkboardBoard', {
       var columns = this.getColumns();
 
       var phid = response.objectPHID;
+      var card = this.getCardTemplate(phid);
 
-      if (!this._templates[phid]) {
-        for (var add_phid in response.columnMaps) {
-          var target_column = this.getColumn(add_phid);
+      for (var add_phid in response.columnMaps) {
+        var target_column = this.getColumn(add_phid);
 
-          if (!target_column) {
-            // If the column isn't visible, don't try to add a card to it.
-            continue;
-          }
-
-          target_column.newCard(phid);
+        if (!target_column) {
+          // If the column isn't visible, don't try to add a card to it.
+          continue;
         }
+
+        target_column.newCard(phid);
       }
 
-      this.setCardTemplate(phid, response.cardHTML);
+      card.setNodeHTMLTemplate(response.cardHTML);
 
       var order_maps = response.orderMaps;
       for (var order_phid in order_maps) {
-        this.setOrderMap(order_phid, order_maps[order_phid]);
+        var card_template = this.getCardTemplate(order_phid);
+        for (var order_key in order_maps[order_phid]) {
+          card_template.setSortVector(
+            order_key,
+            order_maps[order_phid][order_key]);
+        }
       }
 
       var column_maps = response.columnMaps;
@@ -348,7 +331,8 @@ JX.install('WorkboardBoard', {
 
       var property_maps = response.propertyMaps;
       for (var property_phid in property_maps) {
-        this.setObjectProperties(property_phid, property_maps[property_phid]);
+        this.getCardTemplate(property_phid)
+          .setObjectProperties(property_maps[property_phid]);
       }
 
       for (var column_phid in columns) {

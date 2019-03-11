@@ -29,7 +29,8 @@ JX.install('WorkboardCard', {
     },
 
     getProperties: function() {
-      return this.getColumn().getBoard().getObjectProperties(this.getPHID());
+      return this.getColumn().getBoard().getCardTemplate(this.getPHID())
+        .getObjectProperties();
     },
 
     getPoints: function() {
@@ -47,11 +48,16 @@ JX.install('WorkboardCard', {
     getNode: function() {
       if (!this._root) {
         var phid = this.getPHID();
-        var template = this.getColumn().getBoard().getCardTemplate(phid);
-        this._root = JX.$H(template).getFragment().firstChild;
 
-        JX.Stratcom.getData(this._root).objectPHID = this.getPHID();
+        var root = this.getColumn().getBoard()
+          .getCardTemplate(phid)
+          .newNode();
+
+        JX.Stratcom.getData(root).objectPHID = phid;
+
+        this._root = root;
       }
+
       return this._root;
     },
 
