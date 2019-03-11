@@ -22,7 +22,20 @@ abstract class PhabricatorProjectColumnOrder
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getColumnOrderKey')
+      ->setSortMethod('getMenuOrder')
       ->execute();
+  }
+
+  final public static function getEnabledOrders() {
+    $map = self::getAllOrders();
+
+    foreach ($map as $key => $order) {
+      if (!$order->isEnabled()) {
+        unset($map[$key]);
+      }
+    }
+
+    return $map;
   }
 
   final public static function getOrderByKey($key) {
@@ -70,6 +83,14 @@ abstract class PhabricatorProjectColumnOrder
   abstract public function getDisplayName();
   abstract public function getHasHeaders();
   abstract public function getCanReorder();
+
+  public function getMenuOrder() {
+    return 9000;
+  }
+
+  public function isEnabled() {
+    return true;
+  }
 
   protected function newColumnTransactions($object, array $header) {
     return array();

@@ -21,6 +21,10 @@ final class PhabricatorProjectColumnPriorityOrder
     return true;
   }
 
+  public function getMenuOrder() {
+    return 1000;
+  }
+
   protected function newHeaderKeyForObject($object) {
     return $this->newHeaderKeyForPriority($object->getPriority());
   }
@@ -35,7 +39,7 @@ final class PhabricatorProjectColumnPriorityOrder
 
   private function newSortVectorForPriority($priority) {
     return array(
-      (int)-$priority,
+      -(int)$priority,
     );
   }
 

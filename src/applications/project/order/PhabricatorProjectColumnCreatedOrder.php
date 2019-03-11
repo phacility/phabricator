@@ -21,10 +21,14 @@ final class PhabricatorProjectColumnCreatedOrder
     return false;
   }
 
+  public function getMenuOrder() {
+    return 3000;
+  }
+
   protected function newSortVectorForObject($object) {
     return array(
-      (int)-$object->getDateCreated(),
-      (int)-$object->getID(),
+      -(int)$object->getDateCreated(),
+      -(int)$object->getID(),
     );
   }
 

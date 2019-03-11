@@ -17,4 +17,8 @@ final class PhabricatorProjectColumnNaturalOrder
     return true;
   }
 
+  public function getMenuOrder() {
+    return 0;
+  }
+
 }

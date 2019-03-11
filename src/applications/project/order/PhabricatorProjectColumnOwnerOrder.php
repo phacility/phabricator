@@ -21,6 +21,10 @@ final class PhabricatorProjectColumnOwnerOrder
     return true;
   }
 
+  public function getMenuOrder() {
+    return 2000;
+  }
+
   protected function newHeaderKeyForObject($object) {
     return $this->newHeaderKeyForOwnerPHID($object->getOwnerPHID());
   }

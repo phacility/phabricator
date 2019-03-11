@@ -616,7 +616,7 @@ final class PhabricatorProjectBoardViewController
 
     $order_key = $this->sortKey;
 
-    $ordering_map = PhabricatorProjectColumnOrder::getAllOrders();
+    $ordering_map = PhabricatorProjectColumnOrder::getEnabledOrders();
     $ordering = id(clone $ordering_map[$order_key])
       ->setViewer($viewer);
 
@@ -635,6 +635,12 @@ final class PhabricatorProjectBoardViewController
     $order_maps[] = $ordering->toDictionary();
 
     $properties = array();
+    foreach ($all_tasks as $task) {
+      $properties[$task->getPHID()] = array(
+        'points' => (double)$task->getPoints(),
+        'status' => $task->getStatus(),
+      );
+    }
 
     $behavior_config = array(
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
@@ -771,7 +777,7 @@ final class PhabricatorProjectBoardViewController
   }
 
   private function isValidSort($sort) {
-    $map = PhabricatorProjectColumnOrder::getAllOrders();
+    $map = PhabricatorProjectColumnOrder::getEnabledOrders();
     return isset($map[$sort]);
   }
 
@@ -819,6 +825,9 @@ final class PhabricatorProjectBoardViewController
       $viewer,
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
     $items[] = id(new PhabricatorActionView())
       ->setIcon('fa-floppy-o')
@@ -917,6 +926,9 @@ final class PhabricatorProjectBoardViewController
       $viewer,
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
     $items[] = id(new PhabricatorActionView())
       ->setIcon('fa-floppy-o')
