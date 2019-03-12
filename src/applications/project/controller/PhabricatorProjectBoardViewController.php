@@ -328,7 +328,7 @@ final class PhabricatorProjectBoardViewController
       $columns = null;
       $errors = array();
 
-      if ($request->isFormPost()) {
+      if ($request->isFormOrHiSecPost()) {
         $move_project_phid = head($request->getArr('moveProjectPHID'));
         if (!$move_project_phid) {
           $move_project_phid = $request->getStr('moveProjectPHID');
@@ -425,7 +425,8 @@ final class PhabricatorProjectBoardViewController
             ->setActor($viewer)
             ->setContinueOnMissingFields(true)
             ->setContinueOnNoEffect(true)
-            ->setContentSourceFromRequest($request);
+            ->setContentSourceFromRequest($request)
+            ->setCancelURI($cancel_uri);
 
           $editor->applyTransactions($move_task, $xactions);
         }
