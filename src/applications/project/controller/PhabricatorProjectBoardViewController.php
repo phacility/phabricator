@@ -1111,10 +1111,8 @@ final class PhabricatorProjectBoardViewController
           ));
     }
 
-    if (count($specs) > 1) {
-      $column_items[] = id(new PhabricatorActionView())
-        ->setType(PhabricatorActionView::TYPE_DIVIDER);
-    }
+    $column_items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
     $batch_edit_uri = $request->getRequestURI();
     $batch_edit_uri->replaceQueryParam('batch', $column->getID());
@@ -1172,6 +1170,40 @@ final class PhabricatorProjectBoardViewController
         ->setHref($hide_uri)
         ->setDisabled(!$can_hide)
         ->setWorkflow(true);
+    }
+
+    if ($column->canHaveTrigger()) {
+      $column_items[] = id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER);
+
+      $trigger = $column->getTrigger();
+      if (!$trigger) {
+        $set_uri = $this->getApplicationURI(
+          new PhutilURI(
+            'trigger/edit/',
+            array(
+              'columnPHID' => $column->getPHID(),
+            )));
+
+        $column_items[] = id(new PhabricatorActionView())
+          ->setIcon('fa-cogs')
+          ->setName(pht('New Trigger...'))
+          ->setHref($set_uri)
+          ->setDisabled(!$can_edit);
+      } else {
+        $column_items[] = id(new PhabricatorActionView())
+          ->setIcon('fa-cogs')
+          ->setName(pht('View Trigger'))
+          ->setHref($trigger->getURI())
+          ->setDisabled(!$can_edit);
+      }
+
+      $column_items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-times')
+        ->setName(pht('Remove Trigger'))
+        ->setHref('#')
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit || !$trigger);
     }
 
     $column_menu = id(new PhabricatorActionListView())

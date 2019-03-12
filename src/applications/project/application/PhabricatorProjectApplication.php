@@ -89,6 +89,14 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           'background/'
             => 'PhabricatorProjectBoardBackgroundController',
         ),
+        'trigger/' => array(
+          $this->getQueryRoutePattern() =>
+            'PhabricatorProjectTriggerListController',
+          '(?P<id>[1-9]\d*)/' =>
+            'PhabricatorProjectTriggerViewController',
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorProjectTriggerEditController',
+        ),
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
         'manage/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectManageController',

@@ -18,9 +18,11 @@ final class PhabricatorProjectColumn
   protected $proxyPHID;
   protected $sequence;
   protected $properties = array();
+  protected $triggerPHID;
 
   private $project = self::ATTACHABLE;
   private $proxy = self::ATTACHABLE;
+  private $trigger = self::ATTACHABLE;
 
   public static function initializeNewColumn(PhabricatorUser $user) {
     return id(new PhabricatorProjectColumn())
@@ -40,6 +42,7 @@ final class PhabricatorProjectColumn
         'status' => 'uint32',
         'sequence' => 'uint32',
         'proxyPHID' => 'phid?',
+        'triggerPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_status' => array(
@@ -51,6 +54,9 @@ final class PhabricatorProjectColumn
         'key_proxy' => array(
           'columns' => array('projectPHID', 'proxyPHID'),
           'unique' => true,
+        ),
+        'key_trigger' => array(
+          'columns' => array('triggerPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -179,6 +185,39 @@ final class PhabricatorProjectColumn
 
     return sprintf('%s%012d', $group, $sequence);
   }
+
+  public function attachTrigger(PhabricatorProjectTrigger $trigger = null) {
+    $this->trigger = $trigger;
+    return $this;
+  }
+
+  public function getTrigger() {
+    return $this->assertAttached($this->trigger);
+  }
+
+  public function canHaveTrigger() {
+    // Backlog columns and proxy (subproject / milestone) columns can't have
+    // triggers because cards routinely end up in these columns through tag
+    // edits rather than drag-and-drop and it would likely be confusing to
+    // have these triggers act only a small fraction of the time.
+
+    if ($this->isDefaultColumn()) {
+      return false;
+    }
+
+    if ($this->getProxy()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function getBoardURI() {
+    return urisprintf(
+      '/project/board/%d/',
+      $this->getProject()->getID());
+  }
+
 
 /* -(  PhabricatorConduitResultInterface  )---------------------------------- */
 

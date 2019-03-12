@@ -336,6 +336,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     $columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array_keys($boards))
+      ->needTriggers(true)
       ->execute();
     $columns = msort($columns, 'getOrderingKey');
     $columns = mpull($columns, null, 'getPHID');

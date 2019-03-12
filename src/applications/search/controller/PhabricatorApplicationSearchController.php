@@ -276,9 +276,10 @@ final class PhabricatorApplicationSearchController
             throw new Exception(
               pht(
                 'SearchEngines must render a "%s" object, but this engine '.
-                '(of class "%s") rendered something else.',
+                '(of class "%s") rendered something else ("%s").',
                 'PhabricatorApplicationSearchResultView',
-                get_class($engine)));
+                get_class($engine),
+                phutil_describe_type($list)));
           }
 
           if ($list->getObjectList()) {
