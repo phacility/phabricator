@@ -403,7 +403,7 @@ EOTEXT
     $info = pht(<<<EOTEXT
 Objects matching your query are returned as a list of dictionaries in the
 `data` property of the results. Each dictionary has some metadata and a
-`fields` key, which contains the information abou the object that most callers
+`fields` key, which contains the information about the object that most callers
 will be interested in.
 
 For example, the results may look something like this:
