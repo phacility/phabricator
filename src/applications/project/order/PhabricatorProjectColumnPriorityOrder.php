@@ -39,7 +39,7 @@ final class PhabricatorProjectColumnPriorityOrder
 
   private function newSortVectorForPriority($priority) {
     return array(
-      -(int)$priority,
+      -1 * (int)$priority,
     );
   }
 

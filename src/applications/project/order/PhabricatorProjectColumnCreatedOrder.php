@@ -27,8 +27,8 @@ final class PhabricatorProjectColumnCreatedOrder
 
   protected function newSortVectorForObject($object) {
     return array(
-      -(int)$object->getDateCreated(),
-      -(int)$object->getID(),
+      -1 * (int)$object->getDateCreated(),
+      -1 * (int)$object->getID(),
     );
   }
 
