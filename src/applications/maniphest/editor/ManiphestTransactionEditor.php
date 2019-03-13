@@ -134,10 +134,7 @@ final class ManiphestTransactionEditor
             $parent_xaction->setMetadataValue('blocker.new', true);
           }
 
-          id(new ManiphestTransactionEditor())
-            ->setActor($this->getActor())
-            ->setActingAsPHID($this->getActingAsPHID())
-            ->setContentSource($this->getContentSource())
+          $this->newSubEditor()
             ->setContinueOnNoEffect(true)
             ->setContinueOnMissingFields(true)
             ->applyTransactions($blocked_task, array($parent_xaction));
