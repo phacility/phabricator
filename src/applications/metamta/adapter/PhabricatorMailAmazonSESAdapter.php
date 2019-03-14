@@ -11,10 +11,6 @@ final class PhabricatorMailAmazonSESAdapter
     );
   }
 
-  public function supportsMessageIDHeader() {
-    return false;
-  }
-
   protected function validateOptions(array $options) {
     PhutilTypeSpec::checkMap(
       $options,
