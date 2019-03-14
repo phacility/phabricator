@@ -60,6 +60,11 @@ final class PhabricatorProjectTrigger
     return pht('Trigger %d', $this->getID());
   }
 
+  public function getRulesDescription() {
+    // TODO: Summarize the trigger rules in human-readable text.
+    return pht('Does things.');
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -102,7 +107,20 @@ final class PhabricatorProjectTrigger
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
-    $this->delete();
+
+    $this->openTransaction();
+      $conn = $this->establishConnection('w');
+
+      // Remove the reference to this trigger from any columns which use it.
+      queryfx(
+        $conn,
+        'UPDATE %R SET triggerPHID = null WHERE triggerPHID = %s',
+        new PhabricatorProjectColumn(),
+        $this->getPHID());
+
+      $this->delete();
+
+    $this->saveTransaction();
   }
 
 }

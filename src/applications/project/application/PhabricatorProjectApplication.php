@@ -89,6 +89,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           'background/'
             => 'PhabricatorProjectBoardBackgroundController',
         ),
+        'column/' => array(
+          'remove/(?P<id>\d+)/' =>
+            'PhabricatorProjectColumnRemoveTriggerController',
+        ),
         'trigger/' => array(
           $this->getQueryRoutePattern() =>
             'PhabricatorProjectTriggerListController',

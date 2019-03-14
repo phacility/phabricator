@@ -148,7 +148,7 @@ final class PhabricatorProjectColumnQuery
         $triggers = id(new PhabricatorProjectTriggerQuery())
           ->setViewer($this->getViewer())
           ->setParentQuery($this)
-          ->withPHIDs(array($this->getPHID()))
+          ->withPHIDs($trigger_phids)
           ->execute();
         $triggers = mpull($triggers, null, 'getPHID');
       } else {

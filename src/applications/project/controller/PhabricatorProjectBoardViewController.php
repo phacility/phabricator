@@ -574,6 +574,11 @@ final class PhabricatorProjectBoardViewController
       $column_menu = $this->buildColumnMenu($project, $column);
       $panel->addHeaderAction($column_menu);
 
+      if ($column->canHaveTrigger()) {
+        $trigger_menu = $this->buildTriggerMenu($column);
+        $panel->addHeaderAction($trigger_menu);
+      }
+
       $count_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
         ->setColor(PHUITagView::COLOR_BLUE)
@@ -1172,40 +1177,6 @@ final class PhabricatorProjectBoardViewController
         ->setWorkflow(true);
     }
 
-    if ($column->canHaveTrigger()) {
-      $column_items[] = id(new PhabricatorActionView())
-        ->setType(PhabricatorActionView::TYPE_DIVIDER);
-
-      $trigger = $column->getTrigger();
-      if (!$trigger) {
-        $set_uri = $this->getApplicationURI(
-          new PhutilURI(
-            'trigger/edit/',
-            array(
-              'columnPHID' => $column->getPHID(),
-            )));
-
-        $column_items[] = id(new PhabricatorActionView())
-          ->setIcon('fa-cogs')
-          ->setName(pht('New Trigger...'))
-          ->setHref($set_uri)
-          ->setDisabled(!$can_edit);
-      } else {
-        $column_items[] = id(new PhabricatorActionView())
-          ->setIcon('fa-cogs')
-          ->setName(pht('View Trigger'))
-          ->setHref($trigger->getURI())
-          ->setDisabled(!$can_edit);
-      }
-
-      $column_items[] = id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setName(pht('Remove Trigger'))
-        ->setHref('#')
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit || !$trigger);
-    }
-
     $column_menu = id(new PhabricatorActionListView())
       ->setUser($viewer);
     foreach ($column_items as $item) {
@@ -1213,7 +1184,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $column_button = id(new PHUIIconView())
-      ->setIcon('fa-caret-down')
+      ->setIcon('fa-pencil')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(
@@ -1224,6 +1195,85 @@ final class PhabricatorProjectBoardViewController
     return $column_button;
   }
 
+  private function buildTriggerMenu(PhabricatorProjectColumn $column) {
+    $viewer = $this->getViewer();
+    $trigger = $column->getTrigger();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $column,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $trigger_items = array();
+    if (!$trigger) {
+      $set_uri = $this->getApplicationURI(
+        new PhutilURI(
+          'trigger/edit/',
+          array(
+            'columnPHID' => $column->getPHID(),
+          )));
+
+      $trigger_items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-cogs')
+        ->setName(pht('New Trigger...'))
+        ->setHref($set_uri)
+        ->setDisabled(!$can_edit);
+    } else {
+      $trigger_items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-cogs')
+        ->setName(pht('View Trigger'))
+        ->setHref($trigger->getURI())
+        ->setDisabled(!$can_edit);
+    }
+
+    $remove_uri = $this->getApplicationURI(
+      new PhutilURI(
+        urisprintf(
+          'column/remove/%d/',
+          $column->getID())));
+
+    $trigger_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-times')
+      ->setName(pht('Remove Trigger'))
+      ->setHref($remove_uri)
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit || !$trigger);
+
+    $trigger_menu = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+    foreach ($trigger_items as $item) {
+      $trigger_menu->addAction($item);
+    }
+
+    if ($trigger) {
+      $trigger_icon = 'fa-cogs';
+    } else {
+      $trigger_icon = 'fa-cogs grey';
+    }
+
+    if ($trigger) {
+      $trigger_tip = array(
+        pht('%s: %s', $trigger->getObjectName(), $trigger->getDisplayName()),
+        $trigger->getRulesDescription(),
+      );
+      $trigger_tip = implode("\n", $trigger_tip);
+    } else {
+      $trigger_tip = pht('No column trigger.');
+    }
+
+    $trigger_button = id(new PHUIIconView())
+      ->setIcon($trigger_icon)
+      ->setHref('#')
+      ->addSigil('boards-dropdown-menu')
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'items' => hsprintf('%s', $trigger_menu),
+          'tip' => $trigger_tip,
+        ));
+
+    return $trigger_button;
+  }
 
   /**
    * Add current state parameters (like order and the visibility of hidden

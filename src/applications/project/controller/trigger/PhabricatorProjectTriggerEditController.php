@@ -93,13 +93,16 @@ final class PhabricatorProjectTriggerEditController
         if ($column) {
           $column_xactions = array();
 
-          // TODO: Modularize column transactions so we can change the column
-          // trigger here. For now, this does nothing.
+          $column_xactions[] = $column->getApplicationTransactionTemplate()
+            ->setTransactionType(
+              PhabricatorProjectColumnTriggerTransaction::TRANSACTIONTYPE)
+            ->setNewValue($trigger->getPHID());
 
           $column_editor = $column->getApplicationTransactionEditor()
             ->setActor($viewer)
             ->setContentSourceFromRequest($request)
-            ->setContinueOnNoEffect(true);
+            ->setContinueOnNoEffect(true)
+            ->setContinueOnMissingFields(true);
 
           $column_editor->applyTransactions($column, $column_xactions);
 
