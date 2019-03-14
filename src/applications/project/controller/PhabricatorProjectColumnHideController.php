@@ -82,7 +82,9 @@ final class PhabricatorProjectColumnHideController
           $new_status = PhabricatorProjectColumn::STATUS_HIDDEN;
         }
 
-        $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
+        $type_status =
+          PhabricatorProjectColumnStatusTransaction::TRANSACTIONTYPE;
+
         $xactions = array(
           id(new PhabricatorProjectColumnTransaction())
             ->setTransactionType($type_status)

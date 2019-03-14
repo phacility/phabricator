@@ -76,8 +76,8 @@ final class PhabricatorProjectColumnEditController
 
       $xactions = array();
 
-      $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
-      $type_limit = PhabricatorProjectColumnTransaction::TYPE_LIMIT;
+      $type_name = PhabricatorProjectColumnNameTransaction::TRANSACTIONTYPE;
+      $type_limit = PhabricatorProjectColumnLimitTransaction::TRANSACTIONTYPE;
 
       if (!$column->getProxy()) {
         $xactions[] = id(new PhabricatorProjectColumnTransaction())
@@ -93,7 +93,6 @@ final class PhabricatorProjectColumnEditController
         $editor = id(new PhabricatorProjectColumnTransactionEditor())
           ->setActor($viewer)
           ->setContinueOnNoEffect(true)
-          ->setContinueOnMissingFields(true)
           ->setContentSourceFromRequest($request)
           ->applyTransactions($column, $xactions);
         return id(new AphrontRedirectResponse())->setURI($view_uri);
