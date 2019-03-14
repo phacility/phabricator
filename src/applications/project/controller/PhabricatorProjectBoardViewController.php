@@ -1270,6 +1270,7 @@ final class PhabricatorProjectBoardViewController
         array(
           'items' => hsprintf('%s', $trigger_menu),
           'tip' => $trigger_tip,
+          'size' => 300,
         ));
 
     return $trigger_button;

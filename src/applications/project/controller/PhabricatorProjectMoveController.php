@@ -70,6 +70,7 @@ final class PhabricatorProjectMoveController
     $columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()))
+      ->needTriggers(true)
       ->execute();
 
     $columns = mpull($columns, null, 'getPHID');
@@ -108,6 +109,19 @@ final class PhabricatorProjectMoveController
       $edit_header);
     foreach ($header_xactions as $header_xaction) {
       $xactions[] = $header_xaction;
+    }
+
+    if ($column->canHaveTrigger()) {
+      $trigger = $column->getTrigger();
+      if ($trigger) {
+        $trigger_xactions = $trigger->newDropTransactions(
+          $viewer,
+          $column,
+          $object);
+        foreach ($trigger_xactions as $trigger_xaction) {
+          $xactions[] = $trigger_xaction;
+        }
+      }
     }
 
     $editor = id(new ManiphestTransactionEditor())
