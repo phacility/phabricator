@@ -137,4 +137,37 @@ abstract class PhabricatorMailAdapter
 
   abstract public function newDefaultOptions();
 
+  final protected function guessIfHostSupportsMessageID($config, $host) {
+    // See T13265. Mailers like "SMTP" and "sendmail" usually allow us to
+    // set the "Message-ID" header to a value we choose, but we may not be
+    // able to if the mailer is being used as API glue and the outbound
+    // pathway ends up routing to a service with an SMTP API that selects
+    // its own "Message-ID" header, like Amazon SES.
+
+    // If users configured a behavior explicitly, use that behavior.
+    if ($config !== null) {
+      return $config;
+    }
+
+    // If the server we're connecting to is part of a service that we know
+    // does not support "Message-ID", guess that we don't support "Message-ID".
+    if ($host !== null) {
+      $host_blocklist = array(
+        '/\.amazonaws\.com\z/',
+        '/\.postmarkapp\.com\z/',
+        '/\.sendgrid\.net\z/',
+      );
+
+      $host = phutil_utf8_strtolower($host);
+      foreach ($host_blocklist as $regexp) {
+        if (preg_match($regexp, $host)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+
 }

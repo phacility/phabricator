@@ -435,13 +435,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->priorities);
     }
 
-    if ($this->subpriorities !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority IN (%Lf)',
-        $this->subpriorities);
-    }
-
     if ($this->bridgedObjectPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
@@ -844,7 +837,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   public function getBuiltinOrders() {
     $orders = array(
       'priority' => array(
-        'vector' => array('priority', 'subpriority', 'id'),
+        'vector' => array('priority', 'id'),
         'name' => pht('Priority'),
         'aliases' => array(self::ORDER_PRIORITY),
       ),
@@ -919,11 +912,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         'type' => 'string',
         'reverse' => true,
       ),
-      'subpriority' => array(
-        'table' => 'task',
-        'column' => 'subpriority',
-        'type' => 'float',
-      ),
       'updated' => array(
         'table' => 'task',
         'column' => 'dateModified',
@@ -948,7 +936,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $map = array(
       'id' => $task->getID(),
       'priority' => $task->getPriority(),
-      'subpriority' => $task->getSubpriority(),
       'owner' => $task->getOwnerOrdering(),
       'status' => $task->getStatus(),
       'title' => $task->getTitle(),

@@ -137,3 +137,44 @@
 .phui-workpanel-view.project-panel-over-limit .phui-header-shell {
   border-color: {$red};
 }
+
+.phui-workpanel-view .phui-box-grey {
+  border: 1px solid transparent;
+}
+
+.phui-workpanel-view.workboard-column-drop-target .phui-box-grey {
+  border-color: {$lightblueborder};
+}
+
+.workboard-group-header {
+  background: rgba({$alphablue}, 0.10);
+  padding: 6px 8px;
+  margin: 0 0 8px -8px;
+  border-bottom: 1px solid {$lightgreyborder};
+  font-weight: bold;
+  color: {$darkgreytext};
+  position: relative;
+}
+
+.workboard-group-header .phui-icon-view {
+  position: absolute;
+  display: inline-block;
+  width: 24px;
+  padding: 5px 0 0 0;
+  height: 19px;
+  background-size: 100%;
+  border-radius: 3px;
+  background-repeat: no-repeat;
+  text-align: center;
+  background-color: {$lightgreybackground};
+  border: 1px solid {$lightgreybackground};
+}
+
+.workboard-group-header .workboard-group-header-name {
+  display: block;
+  position: relative;
+  height: 24px;
+  line-height: 24px;
+  margin-left: 36px;
+  overflow: hidden;
+}

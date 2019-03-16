@@ -2,6 +2,7 @@
  * @provides javelin-workboard-column
  * @requires javelin-install
  *           javelin-workboard-card
+ *           javelin-workboard-header
  * @javelin
  */
 
@@ -21,6 +22,8 @@ JX.install('WorkboardColumn', {
       'column-points-content');
 
     this._cards = {};
+    this._headers = {};
+    this._objects = [];
     this._naturalOrder = [];
   },
 
@@ -29,11 +32,14 @@ JX.install('WorkboardColumn', {
     _root: null,
     _board: null,
     _cards: null,
+    _headers: null,
     _naturalOrder: null,
+    _orderVectors: null,
     _panel: null,
     _pointsNode: null,
     _pointsContentNode: null,
     _dirty: true,
+    _objects: null,
 
     getPHID: function() {
       return this._phid;
@@ -47,6 +53,10 @@ JX.install('WorkboardColumn', {
       return this._cards;
     },
 
+    _getObjects: function() {
+      return this._objects;
+    },
+
     getCard: function(phid) {
       return this._cards[phid];
     },
@@ -57,6 +67,7 @@ JX.install('WorkboardColumn', {
 
     setNaturalOrder: function(order) {
       this._naturalOrder = order;
+      this._orderVectors = null;
       return this;
     },
 
@@ -77,6 +88,7 @@ JX.install('WorkboardColumn', {
 
       this._cards[phid] = card;
       this._naturalOrder.push(phid);
+      this._orderVectors = null;
 
       return card;
     },
@@ -88,6 +100,7 @@ JX.install('WorkboardColumn', {
       for (var ii = 0; ii < this._naturalOrder.length; ii++) {
         if (this._naturalOrder[ii] == phid) {
           this._naturalOrder.splice(ii, 1);
+          this._orderVectors = null;
           break;
         }
       }
@@ -118,15 +131,18 @@ JX.install('WorkboardColumn', {
         this._naturalOrder.splice(index, 0, phid);
       }
 
+      this._orderVectors = null;
+
       return this;
     },
 
-    getCardNodes: function() {
-      var cards = this.getCards();
+    getDropTargetNodes: function() {
+      var objects = this._getObjects();
 
       var nodes = [];
-      for (var k in cards) {
-        nodes.push(cards[k].getNode());
+      for (var ii = 0; ii < objects.length; ii++) {
+        var object = objects[ii];
+        nodes.push(object.getNode());
       }
 
       return nodes;
@@ -148,24 +164,108 @@ JX.install('WorkboardColumn', {
       return this._dirty;
     },
 
+    getHeader: function(key) {
+      if (!this._headers[key]) {
+        this._headers[key] = new JX.WorkboardHeader(this, key);
+      }
+      return this._headers[key];
+    },
+
+    handleDragGhost: function(default_handler, ghost, node) {
+      // If the column has headers, don't let the user drag a card above
+      // the topmost header: for example, you can't change a task to have
+      // a priority higher than the highest possible priority.
+
+      if (this._hasColumnHeaders()) {
+        if (!node) {
+          return false;
+        }
+      }
+
+      return default_handler(ghost, node);
+    },
+
+    _hasColumnHeaders: function() {
+      var board = this.getBoard();
+      var order = board.getOrder();
+
+      return board.getOrderTemplate(order).getHasHeaders();
+    },
+
     redraw: function() {
       var board = this.getBoard();
       var order = board.getOrder();
 
-      var list;
-      if (order == 'natural') {
-        list = this._getCardsSortedNaturally();
-      } else {
-        list = this._getCardsSortedByKey(order);
+      var list = this._getCardsSortedByKey(order);
+
+      var ii;
+      var objects = [];
+
+      var has_headers = this._hasColumnHeaders();
+      var header_keys = [];
+      var seen_headers = {};
+      if (has_headers) {
+        var header_templates = board.getHeaderTemplatesForOrder(order);
+        for (var k in header_templates) {
+          header_keys.push(header_templates[k].getHeaderKey());
+        }
+        header_keys.reverse();
       }
 
-      var content = [];
-      for (var ii = 0; ii < list.length; ii++) {
+      var header_key;
+      var next;
+      for (ii = 0; ii < list.length; ii++) {
         var card = list[ii];
 
-        var node = card.getNode();
-        content.push(node);
+        // If a column has a "High" priority card and a "Low" priority card,
+        // we need to add the "Normal" header in between them. This allows
+        // you to change priority to "Normal" even if there are no "Normal"
+        // cards in a column.
 
+        if (has_headers) {
+          header_key = board.getCardTemplate(card.getPHID())
+             .getHeaderKey(order);
+
+          if (!seen_headers[header_key]) {
+            while (header_keys.length) {
+              next = header_keys.pop();
+
+              var header = this.getHeader(next);
+              objects.push(header);
+              seen_headers[header_key] = true;
+
+              if (next === header_key) {
+                break;
+              }
+            }
+          }
+        }
+
+        objects.push(card);
+      }
+
+      // Add any leftover headers at the bottom of the column which don't have
+      // any cards in them. In particular, empty columns don't have any cards
+      // but should still have headers.
+
+      while (header_keys.length) {
+        next = header_keys.pop();
+
+        if (seen_headers[next]) {
+          continue;
+        }
+
+        objects.push(this.getHeader(next));
+      }
+
+      this._objects = objects;
+
+      var content = [];
+      for (ii = 0; ii < this._objects.length; ii++) {
+        var object = this._objects[ii];
+
+        var node = object.getNode();
+        content.push(node);
       }
 
       JX.DOM.setContent(this.getRoot(), content);
@@ -175,15 +275,30 @@ JX.install('WorkboardColumn', {
       this._dirty = false;
     },
 
-    _getCardsSortedNaturally: function() {
-      var list = [];
+    compareHandler: function(src_list, src_node, dst_list, dst_node) {
+      var board = this.getBoard();
+      var order = board.getOrder();
 
-      for (var ii = 0; ii < this._naturalOrder.length; ii++) {
-        var phid = this._naturalOrder[ii];
-        list.push(this.getCard(phid));
+      var u_vec = this._getNodeOrderVector(src_node, order);
+      var v_vec = this._getNodeOrderVector(dst_node, order);
+
+      return board.compareVectors(u_vec, v_vec);
+    },
+
+    _getNodeOrderVector: function(node, order) {
+      var board = this.getBoard();
+      var data = JX.Stratcom.getData(node);
+
+      if (data.objectPHID) {
+        return this._getOrderVector(data.objectPHID, order);
       }
 
-      return list;
+      return board.getHeaderTemplate(data.headerKey).getVector();
+    },
+
+    setIsDropTarget: function(is_target) {
+      var node = this.getWorkpanelNode();
+      JX.DOM.alterClass(node, 'workboard-column-drop-target', is_target);
     },
 
     _getCardsSortedByKey: function(order) {
@@ -200,20 +315,65 @@ JX.install('WorkboardColumn', {
     },
 
     _sortCards: function(order, u, v) {
-      var ud = this.getBoard().getOrderVector(u.getPHID(), order);
-      var vd = this.getBoard().getOrderVector(v.getPHID(), order);
+      var board = this.getBoard();
+      var u_vec = this._getOrderVector(u.getPHID(), order);
+      var v_vec = this._getOrderVector(v.getPHID(), order);
 
-      for (var ii = 0; ii < ud.length; ii++) {
-        if (ud[ii] > vd[ii]) {
-          return 1;
-        }
+      return board.compareVectors(u_vec, v_vec);
+    },
 
-        if (ud[ii] < vd[ii]) {
-          return -1;
-        }
+    _getOrderVector: function(phid, order) {
+      var board = this.getBoard();
+
+      if (!this._orderVectors) {
+        this._orderVectors = {};
       }
 
-      return 0;
+      if (!this._orderVectors[order]) {
+        var cards = this.getCards();
+        var vectors = {};
+
+        for (var k in cards) {
+          var card_phid = cards[k].getPHID();
+          var vector = board.getCardTemplate(card_phid)
+            .getSortVector(order);
+
+          vectors[card_phid] = [].concat(vector);
+
+          // Push a "card" type, so cards always sort after headers; headers
+          // have a "0" in this position.
+          vectors[card_phid].push(1);
+        }
+
+        for (var ii = 0; ii < this._naturalOrder.length; ii++) {
+          var natural_phid = this._naturalOrder[ii];
+          if (vectors[natural_phid]) {
+            vectors[natural_phid].push(ii);
+          }
+        }
+
+        this._orderVectors[order] = vectors;
+      }
+
+      if (!this._orderVectors[order][phid]) {
+        // In this case, we're comparing a card being dragged in from another
+        // column to the cards already in this column. We're just going to
+        // build a temporary vector for it.
+        var incoming_vector = board.getCardTemplate(phid)
+          .getSortVector(order);
+        incoming_vector = [].concat(incoming_vector);
+
+        // Add a "card" type to sort this after headers.
+        incoming_vector.push(1);
+
+        // Add a "0" for the natural ordering to put this on top. A new card
+        // has no natural ordering on a column it isn't part of yet.
+        incoming_vector.push(0);
+
+        return incoming_vector;
+      }
+
+      return this._orderVectors[order][phid];
     },
 
     _redrawFrame: function() {
@@ -279,9 +439,18 @@ JX.install('WorkboardColumn', {
 
       JX.DOM.setContent(content_node, display_value);
 
-      var is_empty = !this.getCardPHIDs().length;
+      // Only put the "empty" style on the column (which just adds some empty
+      // space so it's easier to drop cards into an empty column) if it has no
+      // cards and no headers.
+
+      var is_empty =
+        (!this.getCardPHIDs().length) &&
+        (!this._hasColumnHeaders());
+
       var panel = JX.DOM.findAbove(this.getRoot(), 'div', 'workpanel');
       JX.DOM.alterClass(panel, 'project-panel-empty', is_empty);
+
+
       JX.DOM.alterClass(panel, 'project-panel-over-limit', over_limit);
 
       var color_map = {

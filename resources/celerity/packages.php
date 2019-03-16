@@ -218,7 +218,6 @@ return array(
   ),
   'maniphest.pkg.js' => array(
     'javelin-behavior-maniphest-batch-selector',
-    'javelin-behavior-maniphest-subpriority-editor',
     'javelin-behavior-maniphest-list-editor',
   ),
 );

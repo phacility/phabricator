@@ -379,7 +379,10 @@ EODOCS
     $object,
     array $xactions) {
 
-    if ($request->isAjax()) {
+    $response_type = $request->getStr('responseType');
+    $is_card = ($response_type === 'card');
+
+    if ($is_card) {
       // Reload the task to make sure we pick up the final task state.
       $viewer = $this->getViewer();
       $task = id(new ManiphestTaskQuery())
@@ -389,27 +392,10 @@ EODOCS
         ->needProjectPHIDs(true)
         ->executeOne();
 
-      switch ($request->getStr('responseType')) {
-        case 'card':
-          return $this->buildCardResponse($task);
-        default:
-          return $this->buildListResponse($task);
-      }
-
+      return $this->buildCardResponse($task);
     }
 
     return parent::newEditResponse($request, $object, $xactions);
-  }
-
-  private function buildListResponse(ManiphestTask $task) {
-    $controller = $this->getController();
-
-    $payload = array(
-      'tasks' => $controller->renderSingleTask($task),
-      'data' => array(),
-    );
-
-    return id(new AphrontAjaxResponse())->setContent($payload);
   }
 
   private function buildCardResponse(ManiphestTask $task) {
@@ -435,12 +421,26 @@ EODOCS
     $board_phid = $column->getProjectPHID();
     $object_phid = $task->getPHID();
 
-    return id(new PhabricatorBoardResponseEngine())
+    $order = $request->getStr('order');
+    if ($order) {
+      $ordering = PhabricatorProjectColumnOrder::getOrderByKey($order);
+      $ordering = id(clone $ordering)
+        ->setViewer($viewer);
+    } else {
+      $ordering = null;
+    }
+
+    $engine = id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
       ->setObjectPHID($object_phid)
-      ->setVisiblePHIDs($visible_phids)
-      ->buildResponse();
+      ->setVisiblePHIDs($visible_phids);
+
+    if ($ordering) {
+      $engine->setOrdering($ordering);
+    }
+
+    return $engine->buildResponse();
   }
 
   private function getColumnMap(ManiphestTask $task) {

@@ -451,7 +451,6 @@ unselectable. */
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  opacity: 0.5;
 }
 
 .differential-diff.copy-l > tbody > tr > td:nth-child(2) {
@@ -459,7 +458,6 @@ unselectable. */
   -ms-user-select: auto;
   -webkit-user-select: auto;
   user-select: auto;
-  opacity: 1;
 }
 
 .differential-diff.copy-l > tbody > tr > td.show-more:nth-child(2) {
@@ -467,7 +465,6 @@ unselectable. */
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  opacity: 0.5;
 }
 
 .differential-diff.copy-r > tbody > tr > td:nth-child(5) {
@@ -475,7 +472,6 @@ unselectable. */
   -ms-user-select: auto;
   -webkit-user-select: auto;
   user-select: auto;
-  opacity: 1;
 }
 
 .differential-diff.copy-l > tbody > tr.inline > td,
@@ -484,5 +480,4 @@ unselectable. */
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  opacity: 0.5;
 }

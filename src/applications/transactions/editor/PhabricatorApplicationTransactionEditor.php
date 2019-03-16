@@ -1816,31 +1816,52 @@ abstract class PhabricatorApplicationTransactionEditor
       $users = mpull($users, null, 'getPHID');
 
       foreach ($phids as $key => $phid) {
-        // Do not subscribe mentioned users
-        // who do not have VIEW Permissions
-        if ($object instanceof PhabricatorPolicyInterface
-          && !PhabricatorPolicyFilter::hasCapability(
-          $users[$phid],
-          $object,
-          PhabricatorPolicyCapability::CAN_VIEW)
-        ) {
+        $user = idx($users, $phid);
+
+        // Don't subscribe invalid users.
+        if (!$user) {
           unset($phids[$key]);
-        } else {
-          if ($object->isAutomaticallySubscribed($phid)) {
+          continue;
+        }
+
+        // Don't subscribe bots that get mentioned. If users truly intend
+        // to subscribe them, they can add them explicitly, but it's generally
+        // not useful to subscribe bots to objects.
+        if ($user->getIsSystemAgent()) {
+          unset($phids[$key]);
+          continue;
+        }
+
+        // Do not subscribe mentioned users who do not have permission to see
+        // the object.
+        if ($object instanceof PhabricatorPolicyInterface) {
+          $can_view = PhabricatorPolicyFilter::hasCapability(
+            $user,
+            $object,
+            PhabricatorPolicyCapability::CAN_VIEW);
+          if (!$can_view) {
             unset($phids[$key]);
+            continue;
           }
         }
+
+        // Don't subscribe users who are already automatically subscribed.
+        if ($object->isAutomaticallySubscribed($phid)) {
+          unset($phids[$key]);
+          continue;
+        }
       }
+
       $phids = array_values($phids);
     }
-    // No else here to properly return null should we unset all subscriber
+
     if (!$phids) {
       return null;
     }
 
-    $xaction = newv(get_class(head($xactions)), array());
-    $xaction->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);
-    $xaction->setNewValue(array('+' => $phids));
+    $xaction = $object->getApplicationTransactionTemplate()
+      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+      ->setNewValue(array('+' => $phids));
 
     return $xaction;
   }
@@ -2874,6 +2895,24 @@ abstract class PhabricatorApplicationTransactionEditor
         // don't implicitly CC them.
         return $xactions;
       }
+    }
+
+    $actor = $this->getActor();
+
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($actor)
+      ->withPHIDs(array($actor_phid))
+      ->executeOne();
+    if (!$user) {
+      return $xactions;
+    }
+
+    // When a bot acts (usually via the API), don't automatically subscribe
+    // them as a side effect. They can always subscribe explicitly if they
+    // want, and bot subscriptions normally just clutter things up since bots
+    // usually do not read email.
+    if ($user->getIsSystemAgent()) {
+      return $xactions;
     }
 
     $xaction = newv(get_class(head($xactions)), array());

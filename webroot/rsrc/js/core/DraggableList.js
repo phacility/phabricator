@@ -39,9 +39,13 @@ JX.install('DraggableList', {
 
   properties : {
     findItemsHandler: null,
+    compareHandler: null,
+    isDropTargetHandler: null,
     canDragX: false,
     outerContainer: null,
-    hasInfiniteHeight: false
+    hasInfiniteHeight: false,
+    compareOnMove: false,
+    compareOnReorder: false
   },
 
   members : {
@@ -238,6 +242,7 @@ JX.install('DraggableList', {
       frame.appendChild(clone);
 
       document.body.appendChild(frame);
+      JX.DOM.alterClass(document.body, 'jx-dragging', true);
 
       this._dragging = drag;
       this._clone = clone;
@@ -317,7 +322,7 @@ JX.install('DraggableList', {
             }
           }
 
-          JX.DOM.alterClass(root, 'drag-target-list', is_target);
+          group[ii]._setIsDropTarget(is_target);
         }
       } else {
         target_list = this;
@@ -367,8 +372,41 @@ JX.install('DraggableList', {
       return this;
     },
 
+    _setIsDropTarget: function(is_target) {
+      var root = this.getRootNode();
+      JX.DOM.alterClass(root, 'drag-target-list', is_target);
+
+      var handler = this.getIsDropTargetHandler();
+      if (handler) {
+        handler(is_target);
+      }
+
+      return this;
+    },
+
+    _getOrderedTarget: function(src_list, src_node) {
+      var targets = this._getTargets();
+
+      // NOTE: The targets are ordered from the bottom of the column to the
+      // top, so we're looking for the first node that we sort below. If we
+      // don't find one, we'll sort to the head of the column.
+
+      for (var ii = 0; ii < targets.length; ii++) {
+        var target = targets[ii];
+        if (this._compareTargets(src_list, src_node, target.item) > 0) {
+          return target.item;
+        }
+      }
+
+      return null;
+    },
+
+    _compareTargets: function(src_list, src_node, dst_node) {
+      var dst_list = this;
+      return this.getCompareHandler()(src_list, src_node, dst_list, dst_node);
+    },
+
     _getCurrentTarget : function(p) {
-      var ghost = this.getGhostNode();
       var targets = this._getTargets();
       var dragging = this._dragging;
 
@@ -461,9 +499,34 @@ JX.install('DraggableList', {
       // Compute the size and position of the drop target indicator, because we
       // need to update our static position computations to account for it.
 
+      var compare_handler = this.getCompareHandler();
+
       var cur_target = false;
       if (target_list) {
-        cur_target = target_list._getCurrentTarget(p);
+        // Determine if we're going to use the compare handler or not: the
+        // compare hander locks items into a specific place in the list. For
+        // example, on Workboards, some operations permit the user to drag
+        // items between lists, but not to reorder items within a list.
+
+        var should_compare = false;
+
+        var is_reorder = (target_list === this);
+        var is_move = (target_list !== this);
+
+        if (compare_handler) {
+          if (is_reorder && this.getCompareOnReorder()) {
+            should_compare = true;
+          }
+          if (is_move && this.getCompareOnMove()) {
+            should_compare = true;
+          }
+        }
+
+        if (should_compare) {
+          cur_target = target_list._getOrderedTarget(this, this._dragging);
+        } else {
+          cur_target = target_list._getCurrentTarget(p);
+        }
       }
 
       // If we've selected a new target, update the UI to show where we're
@@ -577,6 +640,7 @@ JX.install('DraggableList', {
       this._autoscroller = null;
 
       JX.DOM.remove(this._frame);
+      JX.DOM.alterClass(document.body, 'jx-dragging', false);
       this._frame = null;
       this._clone = null;
 
@@ -605,7 +669,7 @@ JX.install('DraggableList', {
 
       var group = this._group;
       for (var ii = 0; ii < group.length; ii++) {
-        JX.DOM.alterClass(group[ii].getRootNode(), 'drag-target-list', false);
+        group[ii]._setIsDropTarget(false);
         group[ii]._clearTarget();
       }
 

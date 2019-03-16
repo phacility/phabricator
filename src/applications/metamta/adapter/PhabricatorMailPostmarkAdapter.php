@@ -11,10 +11,6 @@ final class PhabricatorMailPostmarkAdapter
     );
   }
 
-  public function supportsMessageIDHeader() {
-    return true;
-  }
-
   protected function validateOptions(array $options) {
     PhutilTypeSpec::checkMap(
       $options,

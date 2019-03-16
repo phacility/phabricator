@@ -328,7 +328,7 @@ final class PhabricatorProjectBoardViewController
       $columns = null;
       $errors = array();
 
-      if ($request->isFormPost()) {
+      if ($request->isFormOrHiSecPost()) {
         $move_project_phid = head($request->getArr('moveProjectPHID'));
         if (!$move_project_phid) {
           $move_project_phid = $request->getStr('moveProjectPHID');
@@ -425,7 +425,8 @@ final class PhabricatorProjectBoardViewController
             ->setActor($viewer)
             ->setContinueOnMissingFields(true)
             ->setContinueOnNoEffect(true)
-            ->setContentSourceFromRequest($request);
+            ->setContentSourceFromRequest($request)
+            ->setCancelURI($cancel_uri);
 
           $editor->applyTransactions($move_task, $xactions);
         }
@@ -522,13 +523,6 @@ final class PhabricatorProjectBoardViewController
         $column->getPHID());
 
       $column_tasks = array_select_keys($tasks, $task_phids);
-
-      // If we aren't using "natural" order, reorder the column by the original
-      // query order.
-      if ($this->sortKey != PhabricatorProjectColumn::ORDER_NATURAL) {
-        $column_tasks = array_select_keys($column_tasks, array_keys($tasks));
-      }
-
       $column_phid = $column->getPHID();
 
       $visible_columns[$column_phid] = $column;
@@ -621,6 +615,34 @@ final class PhabricatorProjectBoardViewController
       $board->addPanel($panel);
     }
 
+    $order_key = $this->sortKey;
+
+    $ordering_map = PhabricatorProjectColumnOrder::getEnabledOrders();
+    $ordering = id(clone $ordering_map[$order_key])
+      ->setViewer($viewer);
+
+    $headers = $ordering->getHeadersForObjects($all_tasks);
+    $headers = mpull($headers, 'toDictionary');
+
+    $vectors = $ordering->getSortVectorsForObjects($all_tasks);
+    $vector_map = array();
+    foreach ($vectors as $task_phid => $vector) {
+      $vector_map[$task_phid][$order_key] = $vector;
+    }
+
+    $header_keys = $ordering->getHeaderKeysForObjects($all_tasks);
+
+    $order_maps = array();
+    $order_maps[] = $ordering->toDictionary();
+
+    $properties = array();
+    foreach ($all_tasks as $task) {
+      $properties[$task->getPHID()] = array(
+        'points' => (double)$task->getPoints(),
+        'status' => $task->getStatus(),
+      );
+    }
+
     $behavior_config = array(
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
       'uploadURI' => '/file/dropupload/',
@@ -630,21 +652,24 @@ final class PhabricatorProjectBoardViewController
 
       'boardPHID' => $project->getPHID(),
       'order' => $this->sortKey,
+      'orders' => $order_maps,
+      'headers' => $headers,
+      'headerKeys' => $header_keys,
       'templateMap' => $templates,
       'columnMaps' => $column_maps,
-      'orderMaps' => mpull($all_tasks, 'getWorkboardOrderVectors'),
-      'propertyMaps' => mpull($all_tasks, 'getWorkboardProperties'),
+      'orderMaps' => $vector_map,
+      'propertyMaps' => $properties,
 
       'boardID' => $board_id,
       'projectPHID' => $project->getPHID(),
     );
     $this->initBehavior('project-boards', $behavior_config);
 
-
     $sort_menu = $this->buildSortMenu(
       $viewer,
       $project,
-      $this->sortKey);
+      $this->sortKey,
+      $ordering_map);
 
     $filter_menu = $this->buildFilterMenu(
       $viewer,
@@ -739,7 +764,7 @@ final class PhabricatorProjectBoardViewController
       return $default_sort;
     }
 
-    return PhabricatorProjectColumn::DEFAULT_ORDER;
+    return PhabricatorProjectColumnNaturalOrder::ORDERKEY;
   }
 
   private function getDefaultFilter(PhabricatorProject $project) {
@@ -753,41 +778,37 @@ final class PhabricatorProjectBoardViewController
   }
 
   private function isValidSort($sort) {
-    switch ($sort) {
-      case PhabricatorProjectColumn::ORDER_NATURAL:
-      case PhabricatorProjectColumn::ORDER_PRIORITY:
-        return true;
-    }
-
-    return false;
+    $map = PhabricatorProjectColumnOrder::getEnabledOrders();
+    return isset($map[$sort]);
   }
 
   private function buildSortMenu(
     PhabricatorUser $viewer,
     PhabricatorProject $project,
-    $sort_key) {
-
-    $sort_icon = id(new PHUIIconView())
-      ->setIcon('fa-sort-amount-asc bluegrey');
-
-    $named = array(
-      PhabricatorProjectColumn::ORDER_NATURAL => pht('Natural'),
-      PhabricatorProjectColumn::ORDER_PRIORITY => pht('Sort by Priority'),
-    );
+    $sort_key,
+    array $ordering_map) {
 
     $base_uri = $this->getURIWithState();
 
     $items = array();
-    foreach ($named as $key => $name) {
-      $is_selected = ($key == $sort_key);
+    foreach ($ordering_map as $key => $ordering) {
+      // TODO: It would be desirable to build a real "PHUIIconView" here, but
+      // the pathway for threading that through all the view classes ends up
+      // being fairly complex, since some callers read the icon out of other
+      // views. For now, just stick with a string.
+      $ordering_icon = $ordering->getMenuIconIcon();
+      $ordering_name = $ordering->getDisplayName();
+
+      $is_selected = ($key === $sort_key);
       if ($is_selected) {
-        $active_order = $name;
+        $active_name = $ordering_name;
+        $active_icon = $ordering_icon;
       }
 
       $item = id(new PhabricatorActionView())
-        ->setIcon('fa-sort-amount-asc')
+        ->setIcon($ordering_icon)
         ->setSelected($is_selected)
-        ->setName($name);
+        ->setName($ordering_name);
 
       $uri = $base_uri->alter('order', $key);
       $item->setHref($uri);
@@ -807,6 +828,9 @@ final class PhabricatorProjectBoardViewController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
+
+    $items[] = id(new PhabricatorActionView())
       ->setIcon('fa-floppy-o')
       ->setName(pht('Save as Default'))
       ->setHref($save_uri)
@@ -820,8 +844,8 @@ final class PhabricatorProjectBoardViewController
     }
 
     $sort_button = id(new PHUIListItemView())
-      ->setName($active_order)
-      ->setIcon('fa-sort-amount-asc')
+      ->setName($active_name)
+      ->setIcon($active_icon)
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(
@@ -903,6 +927,9 @@ final class PhabricatorProjectBoardViewController
       $viewer,
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
     $items[] = id(new PhabricatorActionView())
       ->setIcon('fa-floppy-o')

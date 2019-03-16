@@ -12,7 +12,9 @@ final class PhabricatorMailSMTPAdapter
   }
 
   public function supportsMessageIDHeader() {
-    return true;
+    return $this->guessIfHostSupportsMessageID(
+      $this->getOption('message-id'),
+      $this->getOption('host'));
   }
 
   protected function validateOptions(array $options) {
@@ -24,6 +26,7 @@ final class PhabricatorMailSMTPAdapter
         'user' => 'string|null',
         'password' => 'string|null',
         'protocol' => 'string|null',
+        'message-id' => 'bool|null',
       ));
   }
 
@@ -34,6 +37,7 @@ final class PhabricatorMailSMTPAdapter
       'user' => null,
       'password' => null,
       'protocol' => null,
+      'message-id' => null,
     );
   }
 

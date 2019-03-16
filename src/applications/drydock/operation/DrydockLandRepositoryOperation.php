@@ -401,7 +401,7 @@ final class DrydockLandRepositoryOperation
           'body' => pht(
             'When this diff was generated, the server was running an older '.
             'version of Phabricator which did not support staging areas for '.
-            'this version control system, so the chagne was not pushed to '.
+            'this version control system, so the change was not pushed to '.
             'staging. Changes must be pushed to staging before they can be '.
             'landed from the web.'),
         );

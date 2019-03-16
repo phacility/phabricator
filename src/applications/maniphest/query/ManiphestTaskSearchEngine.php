@@ -366,10 +366,8 @@ final class ManiphestTaskSearchEngine
     $viewer = $this->requireViewer();
 
     if ($this->isPanelContext()) {
-      $can_edit_priority = false;
       $can_bulk_edit = false;
     } else {
-      $can_edit_priority = true;
       $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $this->getApplication(),
@@ -380,7 +378,6 @@ final class ManiphestTaskSearchEngine
       ->setUser($viewer)
       ->setTasks($tasks)
       ->setSavedQuery($saved)
-      ->setCanEditPriority($can_edit_priority)
       ->setCanBatchEdit($can_bulk_edit)
       ->setShowBatchControls($this->showBatchControls);
 

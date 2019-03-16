@@ -5,7 +5,6 @@ final class PhabricatorMailSendmailAdapter
 
   const ADAPTERTYPE = 'sendmail';
 
-
   public function getSupportedMessageTypes() {
     return array(
       PhabricatorMailEmailMessage::MESSAGETYPE,
@@ -13,20 +12,22 @@ final class PhabricatorMailSendmailAdapter
   }
 
   public function supportsMessageIDHeader() {
-    return true;
+    return $this->guessIfHostSupportsMessageID(
+      $this->getOption('message-id'),
+      null);
   }
 
   protected function validateOptions(array $options) {
     PhutilTypeSpec::checkMap(
       $options,
       array(
-        'encoding' => 'string',
+        'message-id' => 'bool|null',
       ));
   }
 
   public function newDefaultOptions() {
     return array(
-      'encoding' => 'base64',
+      'message-id' => null,
     );
   }
 

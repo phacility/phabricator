@@ -12,10 +12,6 @@ final class PhabricatorProjectColumn
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
 
-  const DEFAULT_ORDER = 'natural';
-  const ORDER_NATURAL = 'natural';
-  const ORDER_PRIORITY = 'priority';
-
   protected $name;
   protected $status;
   protected $projectPHID;

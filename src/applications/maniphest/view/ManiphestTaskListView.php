@@ -5,7 +5,6 @@ final class ManiphestTaskListView extends ManiphestView {
   private $tasks;
   private $handles;
   private $showBatchControls;
-  private $showSubpriorityControls;
   private $noDataString;
 
   public function setTasks(array $tasks) {
@@ -22,11 +21,6 @@ final class ManiphestTaskListView extends ManiphestView {
 
   public function setShowBatchControls($show_batch_controls) {
     $this->showBatchControls = $show_batch_controls;
-    return $this;
-  }
-
-  public function setShowSubpriorityControls($show_subpriority_controls) {
-    $this->showSubpriorityControls = $show_subpriority_controls;
     return $this;
   }
 
@@ -102,10 +96,7 @@ final class ManiphestTaskListView extends ManiphestView {
           phabricator_datetime($task->getDateModified(), $this->getUser()));
       }
 
-      if ($this->showSubpriorityControls) {
-        $item->setGrippable(true);
-      }
-      if ($this->showSubpriorityControls || $this->showBatchControls) {
+      if ($this->showBatchControls) {
         $item->addSigil('maniphest-task');
       }
 
@@ -134,9 +125,6 @@ final class ManiphestTaskListView extends ManiphestView {
 
       if ($this->showBatchControls) {
         $href = new PhutilURI('/maniphest/task/edit/'.$task->getID().'/');
-        if (!$this->showSubpriorityControls) {
-          $href->replaceQueryParam('ungrippable', 'true');
-        }
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-pencil')

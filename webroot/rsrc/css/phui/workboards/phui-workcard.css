@@ -59,14 +59,6 @@
   vertical-align: top;
 }
 
-.phui-workcard.phui-oi-grippable .phui-oi-frame {
-  padding-left: 0;
-}
-
-.phui-workcard .phui-oi-grip {
-  display: none;
-}
-
 .device-desktop .phui-workcard .phui-list-item-icon {
   display: none;
 }
@@ -86,6 +78,33 @@
   .phui-list-item-href:hover {
     background: {$sh-bluebackground};
     opacity: 1;
+}
+
+.device-desktop .phui-workcard.draggable-card {
+  cursor: grab;
+}
+
+.jx-dragging .phui-workcard.draggable-card {
+  cursor: grabbing;
+}
+
+.device-desktop .phui-workcard.undraggable-card {
+  cursor: not-allowed;
+}
+
+.device-desktop .phui-workcard.phui-oi.not-editable:hover {
+  background: {$sh-redbackground};
+}
+
+.device-desktop .phui-workcard.phui-oi.not-editable:hover
+  .phui-list-item-href {
+  border-radius: 3px;
+  background: {$red};
+}
+
+.device-desktop .phui-workcard.phui-oi.not-editable:hover
+  .phui-list-item-href .phui-icon-view {
+  color: #fff;
 }
 
 .phui-workcard.phui-oi:hover .phui-list-item-icon {

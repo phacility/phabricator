@@ -339,9 +339,11 @@ document. If you can already send outbound email from the command line or know
 how to configure it, this option is straightforward. If you have no idea how to
 do any of this, strongly consider using Postmark or Mailgun instead.
 
-To use this mailer, set `type` to `sendmail`. There are no `options` to
-configure.
+To use this mailer, set `type` to `sendmail`, then configure these `options`:
 
+  - `message-id`: Optional bool. Set to `false` if Phabricator will not be
+    able to select a custom "Message-ID" header when sending mail via this
+    mailer. See "Message-ID Headers" below.
 
 Mailer: SMTP
 ============
@@ -361,6 +363,9 @@ To use this mailer, set `type` to `smtp`, then configure these `options`:
   - `password`: Optional string. Password for authentication.
   - `protocol`: Optional string. Set to `tls` or `ssl` if necessary. Use
     `ssl` for Gmail.
+  - `message-id`: Optional bool. Set to `false` if Phabricator will not be
+    able to select a custom "Message-ID" header when sending mail via this
+    mailer. See "Message-ID Headers" below.
 
 
 Disable Mail
@@ -444,6 +449,54 @@ example, there are no other priority groups.
 If it still hasn't sent the mail, Phabricator will try servers which are not
 in any priority group, in the configured order. In this example there is
 only one such server, so it will try to send via Mailgun.
+
+
+Message-ID Headers
+==================
+
+Email has a "Message-ID" header which is important for threading messages
+correctly in mail clients. Normally, Phabricator is free to select its own
+"Message-ID" header values for mail it sends.
+
+However, some mailers (including Amazon SES) do not allow selection of custom
+"Message-ID" values and will ignore or replace the "Message-ID" in mail that
+is submitted through them.
+
+When Phabricator adds other mail headers which affect threading, like
+"In-Reply-To", it needs to know if its "Message-ID" headers will be respected
+or not to select header values which will produce good threading behavior. If
+we guess wrong and think we can set a "Message-ID" header when we can't, you
+may get poor threading behavior in mail clients.
+
+For most mailers (like Postmark, Mailgun, and Amazon SES), the correct setting
+will be selected for you automatically, because the behavior of the mailer
+is knowable ahead of time. For example, we know Amazon SES will never respect
+our "Message-ID" headers.
+
+However, if you're sending mail indirectly through a mailer like SMTP or
+Sendmail, the mail might or might not be routing through some mail service
+which will ignore or replace the "Message-ID" header.
+
+For example, your local mailer might submit mail to Mailgun (so "Message-ID"
+will work), or to Amazon SES (so "Message-ID" will not work), or to some other
+mail service (which we may not know anything about). We can't make a reliable
+guess about whether "Message-ID" will be respected or not based only on
+the local mailer configuration.
+
+By default, we check if the mailer has a hostname we recognize as belonging
+to a service which does not allow us to set a "Message-ID" header. If we don't
+recognize the hostname (which is very common, since these services are most
+often configured against the localhost or some other local machine), we assume
+we can set a "Message-ID" header.
+
+If the outbound pathway does not actually allow selection of a "Message-ID"
+header, you can set the `message-id` option on the mailer to `false` to tell
+Phabricator that it should not assume it can select a value for this header.
+
+For example, if you are sending mail via a local Postfix server which then
+forwards the mail to Amazon SES (a service which does not allow selection of
+a "Message-ID" header), your `smtp` configuration in Phabricator should
+specify `"message-id": false`.
 
 
 Next Steps
