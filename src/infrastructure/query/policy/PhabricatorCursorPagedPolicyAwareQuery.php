@@ -538,7 +538,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildPagingClause(AphrontDatabaseConnection $conn) {
     $orderable = $this->getOrderableColumns();
-    $vector = $this->getOrderVector();
+    $vector = $this->getQueryableOrderVector();
 
     // If we don't have a cursor object yet, it means we're trying to load
     // the first result page. We may need to build a cursor object from the
@@ -1099,16 +1099,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         'table' => null,
         'column' => '_ft_rank',
         'type' => 'int',
+        'requires-ferret' => true,
       );
       $columns['fulltext-created'] = array(
         'table' => 'ft_doc',
         'column' => 'epochCreated',
         'type' => 'int',
+        'requires-ferret' => true,
       );
       $columns['fulltext-modified'] = array(
         'table' => 'ft_doc',
         'column' => 'epochModified',
         'type' => 'int',
+        'requires-ferret' => true,
       );
     }
 
@@ -1126,11 +1129,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $for_union = false) {
 
     $orderable = $this->getOrderableColumns();
-    $vector = $this->getOrderVector();
+    $vector = $this->getQueryableOrderVector();
 
     $parts = array();
     foreach ($vector as $order) {
       $part = $orderable[$order->getOrderKey()];
+
       if ($order->getIsReversed()) {
         $part['reverse'] = !idx($part, 'reverse', false);
       }
@@ -1140,6 +1144,31 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->formatOrderClause($conn, $parts, $for_union);
   }
 
+  /**
+   * @task order
+   */
+  private function getQueryableOrderVector() {
+    $vector = $this->getOrderVector();
+    $orderable = $this->getOrderableColumns();
+
+    $keep = array();
+    foreach ($vector as $order) {
+      $column = $orderable[$order->getOrderKey()];
+
+      // If this is a Ferret fulltext column but the query doesn't actually
+      // have a fulltext query, we'll skip most of the Ferret stuff and won't
+      // actually have the columns in the result set. Just skip them.
+      if (!empty($column['requires-ferret'])) {
+        if (!$this->getFerretTokens()) {
+          continue;
+        }
+      }
+
+      $keep[] = $order->getAsScalar();
+    }
+
+    return PhabricatorQueryOrderVector::newFromVector($keep);
+  }
 
   /**
    * @task order
