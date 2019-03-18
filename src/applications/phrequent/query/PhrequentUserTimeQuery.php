@@ -133,12 +133,11 @@ final class PhrequentUserTimeQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $usertime = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $usertime->getID(),
-      'start' => $usertime->getDateStarted(),
-      'end' => $usertime->getDateEnded(),
+      'id' => (int)$object->getID(),
+      'start' => (int)$object->getDateStarted(),
+      'end' => (int)$object->getDateEnded(),
     );
   }
 

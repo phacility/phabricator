@@ -130,12 +130,10 @@ final class ReleephProductQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $product = $this->loadCursorObject($cursor);
-
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $product->getID(),
-      'name' => $product->getName(),
+      'id' => (int)$object->getID(),
+      'name' => $object->getName(),
     );
   }
 

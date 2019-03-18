@@ -62,6 +62,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $object = $cursor->getObject();
 
+    return $this->newPagingMapFromPartialObject($object);
+  }
+
+  protected function newPagingMapFromPartialObject($object) {
     return array(
       'id' => (int)$object->getID(),
     );

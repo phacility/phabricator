@@ -81,9 +81,9 @@ final class PhluxVariableQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $object = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
+      'id' => (int)$object->getID(),
       'key' => $object->getVariableKey(),
     );
   }
