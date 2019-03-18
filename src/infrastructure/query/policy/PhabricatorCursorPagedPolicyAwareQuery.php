@@ -37,6 +37,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $ferretQuery;
   private $ferretMetadata = array();
 
+  const FULLTEXT_RANK = '_ft_rank';
+  const FULLTEXT_MODIFIED = '_ft_epochModified';
+  const FULLTEXT_CREATED = '_ft_epochCreated';
+
 /* -(  Cursors  )------------------------------------------------------------ */
 
   protected function newExternalCursorStringForResult($object) {
@@ -298,11 +302,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $metadata = id(new PhabricatorFerretMetadata())
           ->setPHID($phid)
           ->setEngine($this->ferretEngine)
-          ->setRelevance(idx($row, '_ft_rank'));
+          ->setRelevance(idx($row, self::FULLTEXT_RANK));
 
         $this->ferretMetadata[$phid] = $metadata;
 
-        unset($row['_ft_rank']);
+        unset($row[self::FULLTEXT_RANK]);
+        unset($row[self::FULLTEXT_MODIFIED]);
+        unset($row[self::FULLTEXT_CREATED]);
       }
     }
 
@@ -1097,19 +1103,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if ($this->supportsFerretEngine()) {
       $columns['rank'] = array(
         'table' => null,
-        'column' => '_ft_rank',
+        'column' => self::FULLTEXT_RANK,
         'type' => 'int',
         'requires-ferret' => true,
       );
       $columns['fulltext-created'] = array(
-        'table' => 'ft_doc',
-        'column' => 'epochCreated',
+        'table' => null,
+        'column' => self::FULLTEXT_CREATED,
         'type' => 'int',
         'requires-ferret' => true,
       );
       $columns['fulltext-modified'] = array(
-        'table' => 'ft_doc',
-        'column' => 'epochModified',
+        'table' => null,
+        'column' => self::FULLTEXT_MODIFIED,
         'type' => 'int',
         'requires-ferret' => true,
       );
@@ -1779,7 +1785,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     if (!$this->ferretEngine) {
-      $select[] = qsprintf($conn, '0 _ft_rank');
+      $select[] = qsprintf($conn, '0 AS %T', self::FULLTEXT_RANK);
       return $select;
     }
 
@@ -1858,8 +1864,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $select[] = qsprintf(
       $conn,
-      '%Q _ft_rank',
-      $sum);
+      '%Q AS %T',
+      $sum,
+      self::FULLTEXT_RANK);
+
+    // See D20297. We select these as real columns in the result set so that
+    // constructions like this will work:
+    //
+    //   ((SELECT ...) UNION (SELECT ...)) ORDER BY ...
+    //
+    // If the columns aren't part of the result set, the final "ORDER BY" can
+    // not act on them.
+
+    $select[] = qsprintf(
+      $conn,
+      'ft_doc.epochCreated AS %T',
+      self::FULLTEXT_CREATED);
+
+    $select[] = qsprintf(
+      $conn,
+      'ft_doc.epochModified AS %T',
+      self::FULLTEXT_MODIFIED);
 
     return $select;
   }
