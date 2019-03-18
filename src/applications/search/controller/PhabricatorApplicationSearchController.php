@@ -351,6 +351,8 @@ final class PhabricatorApplicationSearchController
         $exec_errors[] = $ex->getMessage();
       } catch (PhabricatorSearchConstraintException $ex) {
         $exec_errors[] = $ex->getMessage();
+      } catch (PhabricatorInvalidQueryCursorException $ex) {
+        $exec_errors[] = $ex->getMessage();
       }
 
       // The engine may have encountered additional errors during rendering;

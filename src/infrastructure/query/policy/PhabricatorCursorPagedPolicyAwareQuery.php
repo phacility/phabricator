@@ -99,9 +99,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   final protected function throwCursorException($message) {
-    // TODO: Raise a more tailored exception here and make the UI a little
-    // prettier?
-    throw new Exception($message);
+    throw new PhabricatorInvalidQueryCursorException($message);
   }
 
   protected function applyExternalCursorConstraintsToQuery(
