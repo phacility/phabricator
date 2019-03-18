@@ -147,17 +147,21 @@ final class PhabricatorFeedQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    return array(
-      'key' => $cursor,
-    );
+  protected function applyExternalCursorConstraintsToQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $subquery,
+    $cursor) {
+    $subquery->withChronologicalKeys(array($cursor));
   }
 
-  protected function getResultCursor($item) {
-    if ($item instanceof PhabricatorFeedStory) {
-      return $item->getChronologicalKey();
-    }
-    return $item['chronologicalKey'];
+  protected function newExternalCursorStringForResult($object) {
+    return $object->getChronologicalKey();
+  }
+
+  protected function newPagingMapFromPartialObject($object) {
+    // This query is unusual, and the "object" is a raw result row.
+    return array(
+      'key' => $object['chronologicalKey'],
+    );
   }
 
   protected function getPrimaryTableAlias() {

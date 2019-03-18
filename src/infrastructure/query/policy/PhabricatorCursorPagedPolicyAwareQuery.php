@@ -19,6 +19,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $externalCursorString;
   private $internalCursorObject;
   private $isQueryOrderReversed = false;
+  private $rawCursorRow;
 
   private $applicationSearchConstraints = array();
   private $internalPaging;
@@ -53,7 +54,60 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   protected function newInternalCursorFromExternalCursor($cursor) {
-    return $this->newInternalCursorObjectFromID($cursor);
+    $viewer = $this->getViewer();
+
+    $query = newv(get_class($this), array());
+
+    $query
+      ->setParentQuery($this)
+      ->setViewer($viewer);
+
+    // We're copying our order vector to the subquery so that the subquery
+    // knows it should generate any supplemental information required by the
+    // ordering.
+
+    // For example, Phriction documents may be ordered by title, but the title
+    // isn't a column in the "document" table: the query must JOIN the
+    // "content" table to perform the ordering. Passing the ordering to the
+    // subquery tells it that we need it to do that JOIN and attach relevant
+    // paging information to the internal cursor object.
+
+    // We only expect to load a single result, so the actual result order does
+    // not matter. We only want the internal cursor for that result to look
+    // like a cursor this parent query would generate.
+    $query->setOrderVector($this->getOrderVector());
+
+    $this->applyExternalCursorConstraintsToQuery($query, $cursor);
+
+    // We're executing the subquery normally to make sure the viewer can
+    // actually see the object, and that it's a completely valid object which
+    // passes all filtering and policy checks. You aren't allowed to use an
+    // object you can't see as a cursor, since this can leak information.
+    $result = $query->executeOne();
+    if (!$result) {
+      $this->throwCursorException(
+        pht(
+          'Cursor "%s" does not identify a valid object in query "%s".',
+          $cursor,
+          get_class($this)));
+    }
+
+    // Now that we made sure the viewer can actually see the object the
+    // external cursor  identifies, return the internal cursor the query
+    // generated as a side effect while loading the object.
+    return $query->getInternalCursorObject();
+  }
+
+  final protected function throwCursorException($message) {
+    // TODO: Raise a more tailored exception here and make the UI a little
+    // prettier?
+    throw new Exception($message);
+  }
+
+  protected function applyExternalCursorConstraintsToQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $subquery,
+    $cursor) {
+    $subquery->withIDs(array($cursor));
   }
 
   protected function newPagingMapFromCursorObject(
@@ -71,51 +125,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     );
   }
 
-  final protected function newInternalCursorObjectFromID($id) {
-    $viewer = $this->getViewer();
-
-    $query = newv(get_class($this), array());
-
-    $query
-      ->setParentQuery($this)
-      ->setViewer($viewer)
-      ->withIDs(array((int)$id));
-
-    // We're copying our order vector to the subquery so that the subquery
-    // knows it should generate any supplemental information required by the
-    // ordering.
-
-    // For example, Phriction documents may be ordered by title, but the title
-    // isn't a column in the "document" table: the query must JOIN the
-    // "content" table to perform the ordering. Passing the ordering to the
-    // subquery tells it that we need it to do that JOIN and attach relevant
-    // paging information to the internal cursor object.
-
-    // We only expect to load a single result, so the actual result order does
-    // not matter. We only want the internal cursor for that result to look
-    // like a cursor this parent query would generate.
-    $query->setOrderVector($this->getOrderVector());
-
-    // We're executing the subquery normally to make sure the viewer can
-    // actually see the object, and that it's a completely valid object which
-    // passes all filtering and policy checks. You aren't allowed to use an
-    // object you can't see as a cursor, since this can leak information.
-    $result = $query->executeOne();
-    if (!$result) {
-      // TODO: Raise a more tailored exception here and make the UI a little
-      // prettier?
-      throw new Exception(
-        pht(
-          'Cursor "%s" does not identify a valid object in query "%s".',
-          $id,
-          get_class($this)));
-    }
-
-    // Now that we made sure the viewer can actually see the object the
-    // external cursor  identifies, return the internal cursor the query
-    // generated as a side effect while loading the object.
-    return $query->getInternalCursorObject();
-  }
 
   final private function getExternalCursorStringForResult($object) {
     $cursor = $this->newExternalCursorStringForResult($object);
@@ -215,6 +224,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $cursor = id(new PhabricatorQueryCursor())
       ->setObject(last($page));
 
+    if ($this->rawCursorRow) {
+      $cursor->setRawRow($this->rawCursorRow);
+    }
+
     $this->setInternalCursorObject($cursor);
   }
 
@@ -295,46 +308,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    return $rows;
-  }
+    $this->rawCursorRow = last($rows);
 
-  /**
-   * Get the viewer for making cursor paging queries.
-   *
-   * NOTE: You should ONLY use this viewer to load cursor objects while
-   * building paging queries.
-   *
-   * Cursor paging can happen in two ways. First, the user can request a page
-   * like `/stuff/?after=33`, which explicitly causes paging. Otherwise, we
-   * can fall back to implicit paging if we filter some results out of a
-   * result list because the user can't see them and need to go fetch some more
-   * results to generate a large enough result list.
-   *
-   * In the first case, want to use the viewer's policies to load the object.
-   * This prevents an attacker from figuring out information about an object
-   * they can't see by executing queries like `/stuff/?after=33&order=name`,
-   * which would otherwise give them a hint about the name of the object.
-   * Generally, if a user can't see an object, they can't use it to page.
-   *
-   * In the second case, we need to load the object whether the user can see
-   * it or not, because we need to examine new results. For example, if a user
-   * loads `/stuff/` and we run a query for the first 100 items that they can
-   * see, but the first 100 rows in the database aren't visible, we need to
-   * be able to issue a query for the next 100 results. If we can't load the
-   * cursor object, we'll fail or issue the same query over and over again.
-   * So, generally, internal paging must bypass policy controls.
-   *
-   * This method returns the appropriate viewer, based on the context in which
-   * the paging is occurring.
-   *
-   * @return PhabricatorUser Viewer for executing paging queries.
-   */
-  final protected function getPagingViewer() {
-    if ($this->internalPaging) {
-      return PhabricatorUser::getOmnipotentUser();
-    } else {
-      return $this->getViewer();
-    }
+    return $rows;
   }
 
   final protected function buildLimitClause(AphrontDatabaseConnection $conn) {
@@ -590,6 +566,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     foreach ($vector as $order) {
       $keys[] = $order->getOrderKey();
     }
+    $keys = array_fuse($keys);
 
     $value_map = $this->getPagingMapFromCursorObject(
       $cursor_object,

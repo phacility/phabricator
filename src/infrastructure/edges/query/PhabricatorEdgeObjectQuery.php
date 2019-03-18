@@ -12,7 +12,6 @@ final class PhabricatorEdgeObjectQuery
   private $edgeTypes;
   private $destinationPHIDs;
 
-
   public function withSourcePHIDs(array $source_phids) {
     $this->sourcePHIDs = $source_phids;
     return $this;
@@ -85,18 +84,6 @@ final class PhabricatorEdgeObjectQuery
     return $result;
   }
 
-  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
-    $parts = parent::buildSelectClauseParts($conn);
-
-    // TODO: This is hacky, because we don't have real IDs on this table.
-    $parts[] = qsprintf(
-      $conn,
-      'CONCAT(dateCreated, %s, seq) AS id',
-      '_');
-
-    return $parts;
-  }
-
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $parts = parent::buildWhereClauseParts($conn);
 
@@ -151,13 +138,45 @@ final class PhabricatorEdgeObjectQuery
     return array('dateCreated', 'sequence');
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $parts = explode('_', $cursor);
+  protected function newInternalCursorFromExternalCursor($cursor) {
+    list($epoch, $sequence) = $this->parseCursor($cursor);
 
+    // Instead of actually loading an edge, we're just making a fake edge
+    // with the properties the cursor describes.
+
+    $edge_object = PhabricatorEdgeObject::newFromRow(
+      array(
+        'dateCreated' => $epoch,
+        'seq' => $sequence,
+      ));
+
+    return id(new PhabricatorQueryCursor())
+      ->setObject($edge_object);
+  }
+
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'dateCreated' => $parts[0],
-      'sequence' => $parts[1],
+      'dateCreated' => $object->getDateCreated(),
+      'sequence' => $object->getSequence(),
     );
+  }
+
+  protected function newExternalCursorStringForResult($object) {
+    return sprintf(
+      '%d_%d',
+      $object->getDateCreated(),
+      $object->getSequence());
+  }
+
+  private function parseCursor($cursor) {
+    if (!preg_match('/^\d+_\d+\z/', $cursor)) {
+      $this->throwCursorException(
+        pht(
+          'Expected edge cursor in the form "0123_6789", got "%s".',
+          $cursor));
+    }
+
+    return explode('_', $cursor);
   }
 
 }

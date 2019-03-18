@@ -8,14 +8,18 @@ final class PhabricatorEdgeObject
   private $src;
   private $dst;
   private $type;
+  private $dateCreated;
+  private $sequence;
 
   public static function newFromRow(array $row) {
     $edge = new self();
 
-    $edge->id = $row['id'];
-    $edge->src = $row['src'];
-    $edge->dst = $row['dst'];
-    $edge->type = $row['type'];
+    $edge->id = idx($row, 'id');
+    $edge->src = idx($row, 'src');
+    $edge->dst = idx($row, 'dst');
+    $edge->type = idx($row, 'type');
+    $edge->dateCreated = idx($row, 'dateCreated');
+    $edge->sequence = idx($row, 'seq');
 
     return $edge;
   }
@@ -39,6 +43,15 @@ final class PhabricatorEdgeObject
   public function getPHID() {
     return null;
   }
+
+  public function getDateCreated() {
+    return $this->dateCreated;
+  }
+
+  public function getSequence() {
+    return $this->sequence;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
