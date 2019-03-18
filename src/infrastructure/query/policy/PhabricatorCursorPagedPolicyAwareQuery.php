@@ -4,6 +4,7 @@
  * A query class which uses cursor-based paging. This paging is much more
  * performant than offset-based paging in the presence of policy filtering.
  *
+ * @task cursors Query Cursors
  * @task clauses Building Query Clauses
  * @task appsearch Integration with ApplicationSearch
  * @task customfield Integration with CustomField
@@ -15,8 +16,10 @@
 abstract class PhabricatorCursorPagedPolicyAwareQuery
   extends PhabricatorPolicyAwareQuery {
 
-  private $afterID;
-  private $beforeID;
+  private $externalCursorString;
+  private $internalCursorObject;
+  private $isQueryOrderReversed = false;
+
   private $applicationSearchConstraints = array();
   private $internalPaging;
   private $orderVector;
@@ -33,54 +36,182 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $ferretQuery;
   private $ferretMetadata = array();
 
-  protected function getPageCursors(array $page) {
+/* -(  Cursors  )------------------------------------------------------------ */
+
+  protected function newExternalCursorStringForResult($object) {
+    if (!($object instanceof LiskDAO)) {
+      throw new Exception(
+        pht(
+          'Expected to be passed a result object of class "LiskDAO" in '.
+          '"newExternalCursorStringForResult()", actually passed "%s". '.
+          'Return storage objects from "loadPage()" or override '.
+          '"newExternalCursorStringForResult()".',
+          phutil_describe_type($object)));
+    }
+
+    return (string)$object->getID();
+  }
+
+  protected function newInternalCursorFromExternalCursor($cursor) {
+    return $this->newInternalCursorObjectFromID($cursor);
+  }
+
+  protected function newPagingMapFromCursorObject(
+    PhabricatorQueryCursor $cursor,
+    array $keys) {
+
+    $object = $cursor->getObject();
+
     return array(
-      $this->getResultCursor(head($page)),
-      $this->getResultCursor(last($page)),
+      'id' => (int)$object->getID(),
     );
   }
 
-  protected function getResultCursor($object) {
-    if (!is_object($object)) {
+  final protected function newInternalCursorObjectFromID($id) {
+    $viewer = $this->getViewer();
+
+    $query = newv(get_class($this), array());
+
+    $query
+      ->setParentQuery($this)
+      ->setViewer($viewer)
+      ->withIDs(array((int)$id));
+
+    // We're copying our order vector to the subquery so that the subquery
+    // knows it should generate any supplemental information required by the
+    // ordering.
+
+    // For example, Phriction documents may be ordered by title, but the title
+    // isn't a column in the "document" table: the query must JOIN the
+    // "content" table to perform the ordering. Passing the ordering to the
+    // subquery tells it that we need it to do that JOIN and attach relevant
+    // paging information to the internal cursor object.
+
+    // We only expect to load a single result, so the actual result order does
+    // not matter. We only want the internal cursor for that result to look
+    // like a cursor this parent query would generate.
+    $query->setOrderVector($this->getOrderVector());
+
+    // We're executing the subquery normally to make sure the viewer can
+    // actually see the object, and that it's a completely valid object which
+    // passes all filtering and policy checks. You aren't allowed to use an
+    // object you can't see as a cursor, since this can leak information.
+    $result = $query->executeOne();
+    if (!$result) {
+      // TODO: Raise a more tailored exception here and make the UI a little
+      // prettier?
       throw new Exception(
         pht(
-          'Expected object, got "%s".',
-          gettype($object)));
+          'Cursor "%s" does not identify a valid object in query "%s".',
+          $id,
+          get_class($this)));
     }
 
-    return $object->getID();
+    // Now that we made sure the viewer can actually see the object the
+    // external cursor  identifies, return the internal cursor the query
+    // generated as a side effect while loading the object.
+    return $query->getInternalCursorObject();
   }
 
-  protected function nextPage(array $page) {
-    // See getPagingViewer() for a description of this flag.
-    $this->internalPaging = true;
+  final private function getExternalCursorStringForResult($object) {
+    $cursor = $this->newExternalCursorStringForResult($object);
 
-    if ($this->beforeID !== null) {
-      $page = array_reverse($page, $preserve_keys = true);
-      list($before, $after) = $this->getPageCursors($page);
-      $this->beforeID = $before;
-    } else {
-      list($before, $after) = $this->getPageCursors($page);
-      $this->afterID = $after;
+    if (!is_string($cursor)) {
+      throw new Exception(
+        pht(
+          'Expected "newExternalCursorStringForResult()"  in class "%s" to '.
+          'return a string, but got "%s".',
+          get_class($this),
+          phutil_describe_type($cursor)));
     }
+
+    return $cursor;
   }
 
-  final public function setAfterID($object_id) {
-    $this->afterID = $object_id;
+  final private function getExternalCursorString() {
+    return $this->externalCursorString;
+  }
+
+  final private function setExternalCursorString($external_cursor) {
+    $this->externalCursorString = $external_cursor;
     return $this;
   }
 
-  final protected function getAfterID() {
-    return $this->afterID;
+  final private function getIsQueryOrderReversed() {
+    return $this->isQueryOrderReversed;
   }
 
-  final public function setBeforeID($object_id) {
-    $this->beforeID = $object_id;
+  final private function setIsQueryOrderReversed($is_reversed) {
+    $this->isQueryOrderReversed = $is_reversed;
     return $this;
   }
 
-  final protected function getBeforeID() {
-    return $this->beforeID;
+  final private function getInternalCursorObject() {
+    return $this->internalCursorObject;
+  }
+
+  final private function setInternalCursorObject(
+    PhabricatorQueryCursor $cursor) {
+    $this->internalCursorObject = $cursor;
+    return $this;
+  }
+
+  final private function getInternalCursorFromExternalCursor(
+    $cursor_string) {
+
+    $cursor_object = $this->newInternalCursorFromExternalCursor($cursor_string);
+
+    if (!($cursor_object instanceof PhabricatorQueryCursor)) {
+      throw new Exception(
+        pht(
+          'Expected "newInternalCursorFromExternalCursor()" to return an '.
+          'object of class "PhabricatorQueryCursor", but got "%s" (in '.
+          'class "%s").',
+          phutil_describe_type($cursor_object),
+          get_class($this)));
+    }
+
+    return $cursor_object;
+  }
+
+  final private function getPagingMapFromCursorObject(
+    PhabricatorQueryCursor $cursor,
+    array $keys) {
+
+    $map = $this->newPagingMapFromCursorObject($cursor, $keys);
+
+    if (!is_array($map)) {
+      throw new Exception(
+        pht(
+          'Expected "newPagingMapFromCursorObject()" to return a map of '.
+          'paging values, but got "%s" (in class "%s").',
+          phutil_describe_type($map),
+          get_class($this)));
+    }
+
+    foreach ($keys as $key) {
+      if (!array_key_exists($key, $map)) {
+        throw new Exception(
+          pht(
+            'Map returned by "newPagingMapFromCursorObject()" in class "%s" '.
+            'omits required key "%s".',
+            get_class($this),
+            $key));
+      }
+    }
+
+    return $map;
+  }
+
+  final protected function nextPage(array $page) {
+    if (!$page) {
+      return;
+    }
+
+    $cursor = id(new PhabricatorQueryCursor())
+      ->setObject(last($page));
+
+    $this->setInternalCursorObject($cursor);
   }
 
   final public function getFerretMetadata() {
@@ -218,7 +349,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   final protected function didLoadResults(array $results) {
-    if ($this->beforeID) {
+    if ($this->getIsQueryOrderReversed()) {
       $results = array_reverse($results, $preserve_keys = true);
     }
 
@@ -230,10 +361,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $this->setLimit($limit + 1);
 
-    if ($pager->getAfterID()) {
-      $this->setAfterID($pager->getAfterID());
+    if (strlen($pager->getAfterID())) {
+      $this->setExternalCursorString($pager->getAfterID());
     } else if ($pager->getBeforeID()) {
-      $this->setBeforeID($pager->getBeforeID());
+      $this->setExternalCursorString($pager->getBeforeID());
+      $this->setIsQueryOrderReversed(true);
     }
 
     $results = $this->execute();
@@ -241,15 +373,22 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $sliced_results = $pager->sliceResults($results);
     if ($sliced_results) {
-      list($before, $after) = $this->getPageCursors($sliced_results);
+
+      // If we have results, generate external-facing cursors from the visible
+      // results. This stops us from leaking any internal details about objects
+      // which we loaded but which were not visible to the viewer.
 
       if ($pager->getBeforeID() || ($count > $limit)) {
-        $pager->setNextPageID($after);
+        $last_object = last($sliced_results);
+        $cursor = $this->getExternalCursorStringForResult($last_object);
+        $pager->setNextPageID($cursor);
       }
 
       if ($pager->getAfterID() ||
          ($pager->getBeforeID() && ($count > $limit))) {
-        $pager->setPrevPageID($before);
+        $head_object = head($sliced_results);
+        $cursor = $this->getExternalCursorStringForResult($head_object);
+        $pager->setPrevPageID($cursor);
       }
     }
 
@@ -423,37 +562,38 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $orderable = $this->getOrderableColumns();
     $vector = $this->getOrderVector();
 
-    if ($this->beforeID !== null) {
-      $cursor = $this->beforeID;
-      $reversed = true;
-    } else if ($this->afterID !== null) {
-      $cursor = $this->afterID;
-      $reversed = false;
-    } else {
-      // No paging is being applied to this query so we do not need to
-      // construct a paging clause.
+    // If we don't have a cursor object yet, it means we're trying to load
+    // the first result page. We may need to build a cursor object from the
+    // external string, or we may not need a paging clause yet.
+    $cursor_object = $this->getInternalCursorObject();
+    if (!$cursor_object) {
+      $external_cursor = $this->getExternalCursorString();
+      if ($external_cursor !== null) {
+        $cursor_object = $this->getInternalCursorFromExternalCursor(
+          $external_cursor);
+      }
+    }
+
+    // If we still don't have a cursor object, this is the first result page
+    // and we aren't paging it. We don't need to build a paging clause.
+    if (!$cursor_object) {
       return qsprintf($conn, '');
     }
+
+    $reversed = $this->getIsQueryOrderReversed();
 
     $keys = array();
     foreach ($vector as $order) {
       $keys[] = $order->getOrderKey();
     }
 
-    $value_map = $this->getPagingValueMap($cursor, $keys);
+    $value_map = $this->getPagingMapFromCursorObject(
+      $cursor_object,
+      $keys);
 
     $columns = array();
     foreach ($vector as $order) {
       $key = $order->getOrderKey();
-
-      if (!array_key_exists($key, $value_map)) {
-        throw new Exception(
-          pht(
-            'Query "%s" failed to return a value from getPagingValueMap() '.
-            'for column "%s".',
-            get_class($this),
-            $key));
-      }
 
       $column = $orderable[$key];
       $column['value'] = $value_map[$key];
@@ -473,48 +613,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       array(
         'reversed' => $reversed,
       ));
-  }
-
-
-  /**
-   * @task paging
-   */
-  protected function getPagingValueMap($cursor, array $keys) {
-    return array(
-      'id' => $cursor,
-    );
-  }
-
-
-  /**
-   * @task paging
-   */
-  protected function loadCursorObject($cursor) {
-    $query = newv(get_class($this), array())
-      ->setViewer($this->getPagingViewer())
-      ->withIDs(array((int)$cursor));
-
-    $this->willExecuteCursorQuery($query);
-
-    $object = $query->executeOne();
-    if (!$object) {
-      throw new Exception(
-        pht(
-          'Cursor "%s" does not identify a valid object in query "%s".',
-          $cursor,
-          get_class($this)));
-    }
-
-    return $object;
-  }
-
-
-  /**
-   * @task paging
-   */
-  protected function willExecuteCursorQuery(
-    PhabricatorCursorPagedPolicyAwareQuery $query) {
-    return;
   }
 
 
@@ -1072,10 +1170,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     array $parts,
     $for_union = false) {
 
-    $is_query_reversed = false;
-    if ($this->getBeforeID()) {
-      $is_query_reversed = !$is_query_reversed;
-    }
+    $is_query_reversed = $this->getIsQueryOrderReversed();
 
     $sql = array();
     foreach ($parts as $key => $part) {

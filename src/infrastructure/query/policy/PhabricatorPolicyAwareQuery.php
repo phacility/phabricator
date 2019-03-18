@@ -282,6 +282,13 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
       $this->didFilterResults($removed);
 
+      // NOTE: We call "nextPage()" before checking if we've found enough
+      // results because we want to build the internal cursor object even
+      // if we don't need to execute another query: the internal cursor may
+      // be used by a parent query that is using this query to translate an
+      // external cursor into an internal cursor.
+      $this->nextPage($page);
+
       foreach ($visible as $key => $result) {
         ++$count;
 
@@ -311,8 +318,6 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         // to load another page because we can deduce it would be empty.
         break;
       }
-
-      $this->nextPage($page);
 
       if ($overheat_limit && ($total_seen >= $overheat_limit)) {
         $this->isOverheated = true;
