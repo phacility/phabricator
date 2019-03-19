@@ -378,5 +378,4 @@ private function getFoodFacts() {
     return $facts[$seed % count($facts)];
   }
 
-
 }
