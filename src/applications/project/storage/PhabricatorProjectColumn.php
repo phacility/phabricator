@@ -218,6 +218,41 @@ final class PhabricatorProjectColumn
       $this->getProject()->getID());
   }
 
+  public function getDropEffects() {
+    $effects = array();
+
+    $proxy = $this->getProxy();
+    if ($proxy && $proxy->isMilestone()) {
+      $effects[] = id(new PhabricatorProjectDropEffect())
+        ->setIcon($proxy->getProxyColumnIcon())
+        ->setColor('violet')
+        ->setContent(
+          pht(
+            'Move to milestone %s.',
+            phutil_tag('strong', array(), $this->getDisplayName())));
+    } else {
+      $effects[] = id(new PhabricatorProjectDropEffect())
+        ->setIcon('fa-columns')
+        ->setColor('blue')
+        ->setContent(
+          pht(
+            'Move to column %s.',
+            phutil_tag('strong', array(), $this->getDisplayName())));
+    }
+
+
+    if ($this->canHaveTrigger()) {
+      $trigger = $this->getTrigger();
+      if ($trigger) {
+        foreach ($trigger->getDropEffects() as $trigger_effect) {
+          $effects[] = $trigger_effect;
+        }
+      }
+    }
+
+    return $effects;
+  }
+
 
 /* -(  PhabricatorConduitResultInterface  )---------------------------------- */
 

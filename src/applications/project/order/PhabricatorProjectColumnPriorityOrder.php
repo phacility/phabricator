@@ -65,6 +65,14 @@ final class PhabricatorProjectColumnPriorityOrder
       $icon_view = id(new PHUIIconView())
         ->setIcon($priority_icon, $priority_color);
 
+      $drop_effect = $this->newEffect()
+        ->setIcon($priority_icon)
+        ->setColor($priority_color)
+        ->setContent(
+          pht(
+            'Change priority to %s.',
+            phutil_tag('strong', array(), $priority_name)));
+
       $header = $this->newHeader()
         ->setHeaderKey($header_key)
         ->setSortVector($sort_vector)
@@ -73,7 +81,8 @@ final class PhabricatorProjectColumnPriorityOrder
         ->setEditProperties(
           array(
             'value' => (int)$priority,
-          ));
+          ))
+        ->addDropEffect($drop_effect);
 
       $headers[] = $header;
     }

@@ -170,6 +170,19 @@ final class PhabricatorProjectTrigger
     return $this->triggerRules;
   }
 
+  public function getDropEffects() {
+    $effects = array();
+
+    $rules = $this->getTriggerRules();
+    foreach ($rules as $rule) {
+      foreach ($rule->getDropEffects() as $effect) {
+        $effects[] = $effect;
+      }
+    }
+
+    return $effects;
+  }
+
   public function getRulesDescription() {
     $rules = $this->getTriggerRules();
     if (!$rules) {

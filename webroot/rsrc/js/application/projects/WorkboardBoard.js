@@ -39,6 +39,8 @@ JX.install('WorkboardBoard', {
     _columns: null,
     _headers: null,
     _cards: null,
+    _dropPreviewNode: null,
+    _dropPreviewListNode: null,
 
     getRoot: function() {
       return this._root;
@@ -180,6 +182,8 @@ JX.install('WorkboardBoard', {
           list.setCompareOnReorder(true);
         }
 
+        list.setTargetChangeHandler(JX.bind(this, this._didChangeDropTarget));
+
         list.listen('didDrop', JX.bind(this, this._onmovecard, list));
 
         lists.push(list);
@@ -190,23 +194,89 @@ JX.install('WorkboardBoard', {
       }
     },
 
+    _didChangeDropTarget: function(src_list, src_node, dst_list, dst_node) {
+      var node = this._getDropPreviewNode();
+
+      if (!dst_list) {
+        // The card is being dragged into a dead area, like the left menu.
+        JX.DOM.remove(node);
+        return;
+      }
+
+      if (dst_node === false) {
+        // The card is being dragged over itself, so dropping it won't
+        // affect anything.
+        JX.DOM.remove(node);
+        return;
+      }
+
+      var src_phid = JX.Stratcom.getData(src_list.getRootNode()).columnPHID;
+      var dst_phid = JX.Stratcom.getData(dst_list.getRootNode()).columnPHID;
+
+      var src_column = this.getColumn(src_phid);
+      var dst_column = this.getColumn(dst_phid);
+
+      var effects = [];
+
+      if (src_column !== dst_column) {
+        effects = effects.concat(dst_column.getDropEffects());
+      }
+
+      var context = this._getDropContext(dst_node);
+      if (context.headerKey) {
+        var header = this.getHeaderTemplate(context.headerKey);
+        effects = effects.concat(header.getDropEffects());
+      }
+
+      if (!effects.length) {
+        JX.DOM.remove(node);
+        return;
+      }
+
+      var items = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        var effect = effects[ii];
+        items.push(effect.newNode());
+      }
+
+      JX.DOM.setContent(this._getDropPreviewListNode(), items);
+
+      document.body.appendChild(node);
+    },
+
+    _getDropPreviewNode: function() {
+      if (!this._dropPreviewNode) {
+        var attributes = {
+          className: 'workboard-drop-preview'
+        };
+
+        var content = [
+          this._getDropPreviewListNode()
+        ];
+
+        this._dropPreviewNode = JX.$N('div', attributes, content);
+      }
+
+      return this._dropPreviewNode;
+    },
+
+    _getDropPreviewListNode: function() {
+      if (!this._dropPreviewListNode) {
+        var attributes = {};
+        this._dropPreviewListNode = JX.$N('ul', attributes);
+      }
+
+      return this._dropPreviewListNode;
+    },
+
     _findCardsInColumn: function(column_node) {
       return JX.DOM.scry(column_node, 'li', 'project-card');
     },
 
-    _onmovecard: function(list, item, after_node, src_list) {
-      list.lock();
-      JX.DOM.alterClass(item, 'drag-sending', true);
-
-      var src_phid = JX.Stratcom.getData(src_list.getRootNode()).columnPHID;
-      var dst_phid = JX.Stratcom.getData(list.getRootNode()).columnPHID;
-
-      var item_phid = JX.Stratcom.getData(item).objectPHID;
-      var data = {
-        objectPHID: item_phid,
-        columnPHID: dst_phid,
-        order: this.getOrder()
-      };
+    _getDropContext: function(after_node, item) {
+      var header_key;
+      var before_phid;
+      var after_phid;
 
       // We're going to send an "afterPHID" and a "beforePHID" if the card
       // was dropped immediately adjacent to another card. If a card was
@@ -231,26 +301,28 @@ JX.install('WorkboardBoard', {
 
       if (after_data) {
         if (after_data.objectPHID) {
-          data.afterPHID = after_data.objectPHID;
+          after_phid = after_data.objectPHID;
         }
       }
 
-      var before_data;
-      var before_card = item.nextSibling;
-      while (before_card) {
-        before_data = JX.Stratcom.getData(before_card);
-        if (before_data.objectPHID) {
-          break;
+      if (item) {
+        var before_data;
+        var before_card = item.nextSibling;
+        while (before_card) {
+          before_data = JX.Stratcom.getData(before_card);
+          if (before_data.objectPHID) {
+            break;
+          }
+          if (before_data.headerKey) {
+            break;
+          }
+          before_card = before_card.nextSibling;
         }
-        if (before_data.headerKey) {
-          break;
-        }
-        before_card = before_card.nextSibling;
-      }
 
-      if (before_data) {
-        if (before_data.objectPHID) {
-          data.beforePHID = before_data.objectPHID;
+        if (before_data) {
+          if (before_data.objectPHID) {
+            before_phid = before_data.objectPHID;
+          }
         }
       }
 
@@ -265,12 +337,44 @@ JX.install('WorkboardBoard', {
       }
 
       if (header_data) {
-        var header_key = header_data.headerKey;
-        if (header_key) {
-          var properties = this.getHeaderTemplate(header_key)
-            .getEditProperties();
-          data.header = JX.JSON.stringify(properties);
-        }
+        header_key = header_data.headerKey;
+      }
+
+      return {
+        headerKey: header_key,
+        afterPHID: after_phid,
+        beforePHID: before_phid
+      };
+    },
+
+    _onmovecard: function(list, item, after_node, src_list) {
+      list.lock();
+      JX.DOM.alterClass(item, 'drag-sending', true);
+
+      var src_phid = JX.Stratcom.getData(src_list.getRootNode()).columnPHID;
+      var dst_phid = JX.Stratcom.getData(list.getRootNode()).columnPHID;
+
+      var item_phid = JX.Stratcom.getData(item).objectPHID;
+      var data = {
+        objectPHID: item_phid,
+        columnPHID: dst_phid,
+        order: this.getOrder()
+      };
+
+      var context = this._getDropContext(after_node);
+
+      if (context.afterPHID) {
+        data.afterPHID = context.afterPHID;
+      }
+
+      if (context.beforePHID) {
+        data.beforePHID = context.beforePHID;
+      }
+
+      if (context.headerKey) {
+        var properties = this.getHeaderTemplate(context.headerKey)
+          .getEditProperties();
+        data.header = JX.JSON.stringify(properties);
       }
 
       var visible_phids = [];

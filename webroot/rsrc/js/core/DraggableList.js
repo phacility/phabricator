@@ -45,7 +45,8 @@ JX.install('DraggableList', {
     outerContainer: null,
     hasInfiniteHeight: false,
     compareOnMove: false,
-    compareOnReorder: false
+    compareOnReorder: false,
+    targetChangeHandler: null
   },
 
   members : {
@@ -53,6 +54,7 @@ JX.install('DraggableList', {
     _dragging : null,
     _locked : 0,
     _target : null,
+    _lastTarget: null,
     _targets : null,
     _ghostHandler : null,
     _ghostNode : null,
@@ -372,6 +374,19 @@ JX.install('DraggableList', {
       return this;
     },
 
+    _didChangeTarget: function(dst_list, dst_node) {
+      if (dst_node === this._lastTarget) {
+        return;
+      }
+
+      this._lastTarget = dst_node;
+
+      var handler = this.getTargetChangeHandler();
+      if (handler) {
+        handler(this, this._dragging, dst_list, dst_node);
+      }
+    },
+
     _setIsDropTarget: function(is_target) {
       var root = this.getRootNode();
       JX.DOM.alterClass(root, 'drag-target-list', is_target);
@@ -540,6 +555,8 @@ JX.install('DraggableList', {
         }
       }
 
+      this._didChangeTarget(target_list, cur_target);
+
       this._updateAutoscroll(this._cursorPosition);
 
       var f = JX.$V(this._frame);
@@ -672,6 +689,8 @@ JX.install('DraggableList', {
         group[ii]._setIsDropTarget(false);
         group[ii]._clearTarget();
       }
+
+      this._didChangeTarget(null, null);
 
       JX.DOM.alterClass(dragging, 'drag-dragging', false);
       JX.Tooltip.unlock();

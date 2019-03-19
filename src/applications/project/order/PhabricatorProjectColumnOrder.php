@@ -196,6 +196,10 @@ abstract class PhabricatorProjectColumnOrder
       ->setOrderKey($this->getColumnOrderKey());
   }
 
+  final protected function newEffect() {
+    return new PhabricatorProjectDropEffect();
+  }
+
   final public function toDictionary() {
     return array(
       'orderKey' => $this->getColumnOrderKey(),

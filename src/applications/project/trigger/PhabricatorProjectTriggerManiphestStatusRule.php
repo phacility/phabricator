@@ -38,4 +38,21 @@ final class PhabricatorProjectTriggerManiphestStatusRule
     );
   }
 
+  protected function newDropEffects($value) {
+    $status_name = ManiphestTaskStatus::getTaskStatusName($value);
+    $status_icon = ManiphestTaskStatus::getStatusIcon($value);
+    $status_color = ManiphestTaskStatus::getStatusColor($value);
+
+    $content = pht(
+      'Change status to %s.',
+      phutil_tag('strong', array(), $status_name));
+
+    return array(
+      $this->newEffect()
+        ->setIcon($status_icon)
+        ->setColor($status_color)
+        ->setContent($content),
+    );
+  }
+
 }

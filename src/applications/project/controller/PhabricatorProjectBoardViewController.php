@@ -540,8 +540,8 @@ final class PhabricatorProjectBoardViewController
       ->setExcludedProjectPHIDs($select_phids);
 
     $templates = array();
-    $column_maps = array();
     $all_tasks = array();
+    $column_templates = array();
     foreach ($visible_columns as $column_phid => $column) {
       $column_tasks = $column_phids[$column_phid];
 
@@ -606,18 +606,28 @@ final class PhabricatorProjectBoardViewController
             'pointLimit' => $column->getPointLimit(),
           ));
 
+      $card_phids = array();
       foreach ($column_tasks as $task) {
         $object_phid = $task->getPHID();
 
         $card = $rendering_engine->renderCard($object_phid);
         $templates[$object_phid] = hsprintf('%s', $card->getItem());
-        $column_maps[$column_phid][] = $object_phid;
+        $card_phids[] = $object_phid;
 
         $all_tasks[$object_phid] = $task;
       }
 
       $panel->setCards($cards);
       $board->addPanel($panel);
+
+      $drop_effects = $column->getDropEffects();
+      $drop_effects = mpull($drop_effects, 'toDictionary');
+
+      $column_templates[] = array(
+        'columnPHID' => $column_phid,
+        'effects' => $drop_effects,
+        'cardPHIDs' => $card_phids,
+      );
     }
 
     $order_key = $this->sortKey;
@@ -661,9 +671,9 @@ final class PhabricatorProjectBoardViewController
       'headers' => $headers,
       'headerKeys' => $header_keys,
       'templateMap' => $templates,
-      'columnMaps' => $column_maps,
       'orderMaps' => $vector_map,
       'propertyMaps' => $properties,
+      'columnTemplates' => $column_templates,
 
       'boardID' => $board_id,
       'projectPHID' => $project->getPHID(),

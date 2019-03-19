@@ -178,3 +178,39 @@
   margin-left: 36px;
   overflow: hidden;
 }
+
+.workboard-drop-preview {
+  pointer-events: none;
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 300px;
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border: 1px solid {$lightblueborder};
+  padding: 4px 0;
+}
+
+.workboard-drop-preview:hover {
+  opacity: 0.25;
+}
+
+.workboard-drop-preview li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 4px 8px;
+  color: {$greytext};
+}
+
+.workboard-drop-preview li .phui-icon-view {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  width: 24px;
+  height: 18px;
+  padding-top: 6px;
+  border-radius: 3px;
+  background: {$bluebackground};
+  margin-right: 6px;
+}

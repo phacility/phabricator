@@ -40,6 +40,7 @@ abstract class PhabricatorProjectTriggerRule
   abstract public function getDescription();
   abstract protected function assertValidRuleValue($value);
   abstract protected function newDropTransactions($object, $value);
+  abstract protected function newDropEffects($value);
 
   final public function getDropTransactions($object, $value) {
     return $this->newDropTransactions($object, $value);
@@ -84,6 +85,14 @@ abstract class PhabricatorProjectTriggerRule
 
   final protected function newTransaction() {
     return $this->getObject()->getApplicationTransactionTemplate();
+  }
+
+  final public function getDropEffects() {
+    return $this->newDropEffects($this->getValue());
+  }
+
+  final protected function newEffect() {
+    return new PhabricatorProjectDropEffect();
   }
 
 }

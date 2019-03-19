@@ -19,4 +19,8 @@ final class PhabricatorProjectTriggerUnknownRule
     return array();
   }
 
+  protected function newDropEffects($value) {
+    return array();
+  }
+
 }
