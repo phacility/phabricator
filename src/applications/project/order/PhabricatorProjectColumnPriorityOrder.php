@@ -68,6 +68,7 @@ final class PhabricatorProjectColumnPriorityOrder
       $drop_effect = $this->newEffect()
         ->setIcon($priority_icon)
         ->setColor($priority_color)
+        ->addCondition('priority', '!=', $priority)
         ->setContent(
           pht(
             'Change priority to %s.',

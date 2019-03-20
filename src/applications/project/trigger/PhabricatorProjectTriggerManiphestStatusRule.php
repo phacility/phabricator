@@ -51,6 +51,7 @@ final class PhabricatorProjectTriggerManiphestStatusRule
       $this->newEffect()
         ->setIcon($status_icon)
         ->setColor($status_color)
+        ->addCondition('status', '!=', $value)
         ->setContent($content),
     );
   }

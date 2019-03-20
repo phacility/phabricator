@@ -655,6 +655,8 @@ final class PhabricatorProjectBoardViewController
       $properties[$task->getPHID()] = array(
         'points' => (double)$task->getPoints(),
         'status' => $task->getStatus(),
+        'priority' => (int)$task->getPriority(),
+        'owner' => $task->getOwnerPHID(),
       );
     }
 

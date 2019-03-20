@@ -228,6 +228,17 @@ JX.install('WorkboardBoard', {
         effects = effects.concat(header.getDropEffects());
       }
 
+      var card_phid = JX.Stratcom.getData(src_node).objectPHID;
+      var card = src_column.getCard(card_phid);
+
+      var visible = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        if (effects[ii].isEffectVisibleForCard(card)) {
+          visible.push(effects[ii]);
+        }
+      }
+      effects = visible;
+
       if (!effects.length) {
         JX.DOM.remove(node);
         return;

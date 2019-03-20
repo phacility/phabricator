@@ -75,6 +75,7 @@ final class PhabricatorProjectColumnStatusOrder
       $drop_effect = $this->newEffect()
         ->setIcon($status_icon)
         ->setColor($status_color)
+        ->addCondition('status', '!=', $status_key)
         ->setContent(
           pht(
             'Change status to %s.',

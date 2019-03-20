@@ -171,6 +171,7 @@ final class PhabricatorProjectColumnOwnerOrder
           $this->newEffect()
             ->setIcon($owner_icon)
             ->setColor($owner_color)
+            ->addCondition('owner', '!=', $owner_phid)
             ->setContent($effect_content));
       }
 

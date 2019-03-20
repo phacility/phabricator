@@ -6,6 +6,7 @@ final class PhabricatorProjectDropEffect
   private $icon;
   private $color;
   private $content;
+  private $conditions = array();
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -39,7 +40,22 @@ final class PhabricatorProjectDropEffect
       'icon' => $this->getIcon(),
       'color' => $this->getColor(),
       'content' => hsprintf('%s', $this->getContent()),
+      'conditions' => $this->getConditions(),
     );
+  }
+
+  public function addCondition($field, $operator, $value) {
+    $this->conditions[] = array(
+      'field' => $field,
+      'operator' => $operator,
+      'value' => $value,
+    );
+
+    return $this;
+  }
+
+  public function getConditions() {
+    return $this->conditions;
   }
 
 }
