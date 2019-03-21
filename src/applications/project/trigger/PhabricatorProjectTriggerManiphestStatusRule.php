@@ -5,14 +5,6 @@ final class PhabricatorProjectTriggerManiphestStatusRule
 
   const TRIGGERTYPE = 'task.status';
 
-  public function getDescription() {
-    $value = $this->getValue();
-
-    return pht(
-      'Changes status to "%s".',
-      ManiphestTaskStatus::getTaskStatusName($value));
-  }
-
   public function getSelectControlName() {
     return pht('Change status to');
   }

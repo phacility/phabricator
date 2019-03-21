@@ -11,6 +11,8 @@ JX.install('WorkboardDropEffect', {
     icon: null,
     color: null,
     content: null,
+    isTriggerEffect: false,
+    isHeader: false,
     conditions: []
   },
 
@@ -20,6 +22,8 @@ JX.install('WorkboardDropEffect', {
         .setIcon(map.icon)
         .setColor(map.color)
         .setContent(JX.$H(map.content))
+        .setIsTriggerEffect(map.isTriggerEffect)
+        .setIsHeader(map.isHeader)
         .setConditions(map.conditions || []);
     }
   },
@@ -31,7 +35,13 @@ JX.install('WorkboardDropEffect', {
         .setColor(this.getColor())
         .getNode();
 
-      return JX.$N('li', {}, [icon, this.getContent()]);
+      var attributes = {};
+
+      if (this.getIsHeader()) {
+        attributes.className = 'workboard-drop-preview-header';
+      }
+
+      return JX.$N('li', attributes, [icon, this.getContent()]);
     },
 
     isEffectVisibleForCard: function(card) {

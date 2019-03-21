@@ -16,12 +16,6 @@ final class PhabricatorProjectTriggerInvalidRule
     return $this->exception;
   }
 
-  public function getDescription() {
-    return pht(
-      'Invalid rule (of type "%s").',
-      $this->getRecord()->getType());
-  }
-
   public function getSelectControlName() {
     return pht('(Invalid Rule)');
   }

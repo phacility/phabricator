@@ -201,6 +201,7 @@
   text-overflow: ellipsis;
   margin: 4px 8px;
   color: {$greytext};
+  border-radius: 3px;
 }
 
 .workboard-drop-preview li .phui-icon-view {
@@ -213,4 +214,14 @@
   border-radius: 3px;
   background: {$bluebackground};
   margin-right: 6px;
+}
+
+.workboard-drop-preview .workboard-drop-preview-header {
+  background: {$sky};
+  color: #fff;
+}
+
+.workboard-drop-preview .workboard-drop-preview-header .phui-icon-view {
+  background: {$blue};
+  color: #fff;
 }

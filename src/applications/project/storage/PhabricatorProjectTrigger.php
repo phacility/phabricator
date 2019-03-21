@@ -198,36 +198,6 @@ final class PhabricatorProjectTrigger
     return $effects;
   }
 
-  public function getRulesDescription() {
-    $rules = $this->getTriggerRules();
-    if (!$rules) {
-      return pht('Does nothing.');
-    }
-
-    $things = array();
-
-    $count = count($rules);
-    $limit = 3;
-
-    if ($count > $limit) {
-      $show_rules = array_slice($rules, 0, ($limit - 1));
-    } else {
-      $show_rules = $rules;
-    }
-
-    foreach ($show_rules as $rule) {
-      $things[] = $rule->getDescription();
-    }
-
-    if ($count > $limit) {
-      $things[] = pht(
-        '(Applies %s more actions.)',
-        new PhutilNumber($count - $limit));
-    }
-
-    return implode("\n", $things);
-  }
-
   public function newDropTransactions(
     PhabricatorUser $viewer,
     PhabricatorProjectColumn $column,
@@ -265,6 +235,15 @@ final class PhabricatorProjectTrigger
     return $trigger_xactions;
   }
 
+  public function getPreviewEffect() {
+    $header = pht('Trigger: %s', $this->getDisplayName());
+
+    return id(new PhabricatorProjectDropEffect())
+      ->setIcon('fa-cogs')
+      ->setColor('blue')
+      ->setIsHeader(true)
+      ->setContent($header);
+  }
 
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */

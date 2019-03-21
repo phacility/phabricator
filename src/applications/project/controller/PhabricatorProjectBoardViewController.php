@@ -623,10 +623,20 @@ final class PhabricatorProjectBoardViewController
       $drop_effects = $column->getDropEffects();
       $drop_effects = mpull($drop_effects, 'toDictionary');
 
+      $preview_effect = null;
+      if ($column->canHaveTrigger()) {
+        $trigger = $column->getTrigger();
+        if ($trigger) {
+          $preview_effect = $trigger->getPreviewEffect()
+            ->toDictionary();
+        }
+      }
+
       $column_templates[] = array(
         'columnPHID' => $column_phid,
         'effects' => $drop_effects,
         'cardPHIDs' => $card_phids,
+        'triggerPreviewEffect' => $preview_effect,
       );
     }
 
@@ -652,12 +662,8 @@ final class PhabricatorProjectBoardViewController
 
     $properties = array();
     foreach ($all_tasks as $task) {
-      $properties[$task->getPHID()] = array(
-        'points' => (double)$task->getPoints(),
-        'status' => $task->getStatus(),
-        'priority' => (int)$task->getPriority(),
-        'owner' => $task->getOwnerPHID(),
-      );
+      $properties[$task->getPHID()] =
+        PhabricatorBoardResponseEngine::newTaskProperties($task);
     }
 
     $behavior_config = array(
@@ -1263,26 +1269,15 @@ final class PhabricatorProjectBoardViewController
       $trigger_icon = 'fa-cogs grey';
     }
 
-    if ($trigger) {
-      $trigger_tip = array(
-        pht('%s: %s', $trigger->getObjectName(), $trigger->getDisplayName()),
-        $trigger->getRulesDescription(),
-      );
-      $trigger_tip = implode("\n", $trigger_tip);
-    } else {
-      $trigger_tip = pht('No column trigger.');
-    }
-
     $trigger_button = id(new PHUIIconView())
       ->setIcon($trigger_icon)
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
-      ->addSigil('has-tooltip')
+      ->addSigil('trigger-preview')
       ->setMetadata(
         array(
           'items' => hsprintf('%s', $trigger_menu),
-          'tip' => $trigger_tip,
-          'size' => 300,
+          'columnPHID' => $column->getPHID(),
         ));
 
     return $trigger_button;

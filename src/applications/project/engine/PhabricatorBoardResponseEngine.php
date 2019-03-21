@@ -131,10 +131,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
           $card['headers'][$order_key] = $header;
         }
 
-        $card['properties'] = array(
-          'points' => (double)$object->getPoints(),
-          'status' => $object->getStatus(),
-        );
+        $card['properties'] = self::newTaskProperties($object);
       }
 
       if ($card_phid === $object_phid) {
@@ -157,6 +154,15 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
     return id(new AphrontAjaxResponse())
       ->setContent($payload);
+  }
+
+  public static function newTaskProperties($task) {
+    return array(
+      'points' => (double)$task->getPoints(),
+      'status' => $task->getStatus(),
+      'priority' => (int)$task->getPriority(),
+      'owner' => $task->getOwnerPHID(),
+    );
   }
 
   private function buildTemplate($object) {

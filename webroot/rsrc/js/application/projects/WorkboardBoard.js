@@ -41,6 +41,8 @@ JX.install('WorkboardBoard', {
     _cards: null,
     _dropPreviewNode: null,
     _dropPreviewListNode: null,
+    _previewPHID: null,
+    _hidePreivew: false,
 
     getRoot: function() {
       return this._root;
@@ -141,6 +143,82 @@ JX.install('WorkboardBoard', {
 
         this._columns[phid] = new JX.WorkboardColumn(this, phid, node);
       }
+
+      var on_over = JX.bind(this, this._showTriggerPreview);
+      var on_out = JX.bind(this, this._hideTriggerPreview);
+      JX.Stratcom.listen('mouseover', 'trigger-preview', on_over);
+      JX.Stratcom.listen('mouseout', 'trigger-preview', on_out);
+    },
+
+    _showTriggerPreview: function(e) {
+      if (this._disablePreview) {
+        return;
+      }
+
+      var target = e.getTarget();
+      var node = e.getNode('trigger-preview');
+
+      if (target !== node) {
+        return;
+      }
+
+      var phid = JX.Stratcom.getData(node).columnPHID;
+      var column = this._columns[phid];
+
+      // Bail out if we don't know anything about this column.
+      if (!column) {
+        return;
+      }
+
+      if (phid === this._previewPHID) {
+        return;
+      }
+
+      this._previewPHID = phid;
+
+      var effects = column.getDropEffects();
+
+      var triggers = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        if (effects[ii].getIsTriggerEffect()) {
+          triggers.push(effects[ii]);
+        }
+      }
+
+      if (triggers.length) {
+        var header = column.getTriggerPreviewEffect();
+        triggers = [header].concat(triggers);
+      }
+
+      this._showEffects(triggers);
+    },
+
+    _hideTriggerPreview: function(e) {
+      if (this._disablePreview) {
+        return;
+      }
+
+      var target = e.getTarget();
+
+      if (target !== e.getNode('trigger-preview')) {
+        return;
+      }
+
+      this._removeTriggerPreview();
+    },
+
+    _removeTriggerPreview: function() {
+      this._showEffects([]);
+      this._previewPHID = null;
+    },
+
+    _beginDrag: function() {
+      this._disablePreview = true;
+      this._showEffects([]);
+    },
+
+    _endDrag: function() {
+      this._disablePreview = false;
     },
 
     _setupDragHandlers: function() {
@@ -186,6 +264,9 @@ JX.install('WorkboardBoard', {
 
         list.listen('didDrop', JX.bind(this, this._onmovecard, list));
 
+        list.listen('didBeginDrag', JX.bind(this, this._beginDrag));
+        list.listen('didEndDrag', JX.bind(this, this._endDrag));
+
         lists.push(list);
       }
 
@@ -195,18 +276,16 @@ JX.install('WorkboardBoard', {
     },
 
     _didChangeDropTarget: function(src_list, src_node, dst_list, dst_node) {
-      var node = this._getDropPreviewNode();
-
       if (!dst_list) {
         // The card is being dragged into a dead area, like the left menu.
-        JX.DOM.remove(node);
+        this._showEffects([]);
         return;
       }
 
       if (dst_node === false) {
         // The card is being dragged over itself, so dropping it won't
         // affect anything.
-        JX.DOM.remove(node);
+        this._showEffects([]);
         return;
       }
 
@@ -217,7 +296,6 @@ JX.install('WorkboardBoard', {
       var dst_column = this.getColumn(dst_phid);
 
       var effects = [];
-
       if (src_column !== dst_column) {
         effects = effects.concat(dst_column.getDropEffects());
       }
@@ -239,6 +317,12 @@ JX.install('WorkboardBoard', {
       }
       effects = visible;
 
+      this._showEffects(effects);
+    },
+
+    _showEffects: function(effects) {
+      var node = this._getDropPreviewNode();
+
       if (!effects.length) {
         JX.DOM.remove(node);
         return;
@@ -251,7 +335,6 @@ JX.install('WorkboardBoard', {
       }
 
       JX.DOM.setContent(this._getDropPreviewListNode(), items);
-
       document.body.appendChild(node);
     },
 

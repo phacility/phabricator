@@ -108,6 +108,12 @@ JX.behavior('project-boards', function(config, statics) {
     for (jj = 0; jj < spec.cardPHIDs.length; jj++) {
       column.newCard(spec.cardPHIDs[jj]);
     }
+
+    if (spec.triggerPreviewEffect) {
+      column.setTriggerPreviewEffect(
+        JX.WorkboardDropEffect.newFromDictionary(
+          spec.triggerPreviewEffect));
+    }
   }
 
   var order_maps = config.orderMaps;

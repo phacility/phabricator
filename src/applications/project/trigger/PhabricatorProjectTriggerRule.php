@@ -37,7 +37,6 @@ abstract class PhabricatorProjectTriggerRule
     return $this->getRecord()->getValue();
   }
 
-  abstract public function getDescription();
   abstract public function getSelectControlName();
   abstract public function getRuleViewLabel();
   abstract public function getRuleViewDescription($value);
@@ -111,7 +110,8 @@ abstract class PhabricatorProjectTriggerRule
   }
 
   final protected function newEffect() {
-    return new PhabricatorProjectDropEffect();
+    return id(new PhabricatorProjectDropEffect())
+      ->setIsTriggerEffect(true);
   }
 
   final public function toDictionary() {

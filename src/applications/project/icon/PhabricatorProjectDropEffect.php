@@ -7,6 +7,8 @@ final class PhabricatorProjectDropEffect
   private $color;
   private $content;
   private $conditions = array();
+  private $isTriggerEffect;
+  private $isHeader;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -40,6 +42,8 @@ final class PhabricatorProjectDropEffect
       'icon' => $this->getIcon(),
       'color' => $this->getColor(),
       'content' => hsprintf('%s', $this->getContent()),
+      'isTriggerEffect' => $this->getIsTriggerEffect(),
+      'isHeader' => $this->getIsHeader(),
       'conditions' => $this->getConditions(),
     );
   }
@@ -56,6 +60,24 @@ final class PhabricatorProjectDropEffect
 
   public function getConditions() {
     return $this->conditions;
+  }
+
+  public function setIsTriggerEffect($is_trigger_effect) {
+    $this->isTriggerEffect = $is_trigger_effect;
+    return $this;
+  }
+
+  public function getIsTriggerEffect() {
+    return $this->isTriggerEffect;
+  }
+
+  public function setIsHeader($is_header) {
+    $this->isHeader = $is_header;
+    return $this;
+  }
+
+  public function getIsHeader() {
+    return $this->isHeader;
   }
 
 }

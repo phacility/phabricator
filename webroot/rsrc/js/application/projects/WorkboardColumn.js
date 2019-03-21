@@ -28,6 +28,10 @@ JX.install('WorkboardColumn', {
     this._dropEffects = [];
   },
 
+  properties: {
+    triggerPreviewEffect: null
+  },
+
   members: {
     _phid: null,
     _root: null,

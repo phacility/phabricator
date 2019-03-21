@@ -5,12 +5,6 @@ final class PhabricatorProjectTriggerUnknownRule
 
   const TRIGGERTYPE = 'unknown';
 
-  public function getDescription() {
-    return pht(
-      'Unknown rule (of type "%s").',
-      $this->getRecord()->getType());
-  }
-
   public function getSelectControlName() {
     return pht('(Unknown Rule)');
   }
