@@ -55,6 +55,7 @@ final class PhabricatorProjectTriggerEditController
 
     $v_name = $trigger->getName();
     $v_edit = $trigger->getEditPolicy();
+    $v_rules = $trigger->getTriggerRules();
 
     $e_name = null;
     $e_edit = null;
@@ -65,8 +66,15 @@ final class PhabricatorProjectTriggerEditController
         $v_name = $request->getStr('name');
         $v_edit = $request->getStr('editPolicy');
 
-        $v_rules = $request->getStr('rules');
-        $v_rules = phutil_json_decode($v_rules);
+        // Read the JSON rules from the request and convert them back into
+        // "TriggerRule" objects so we can render the correct form state
+        // if the user is modifying the rules
+        $raw_rules = $request->getStr('rules');
+        $raw_rules = phutil_json_decode($raw_rules);
+
+        $copy = clone $trigger;
+        $copy->setRuleset($raw_rules);
+        $v_rules = $copy->getTriggerRules();
 
         $xactions = array();
         if (!$trigger->getID()) {
@@ -84,7 +92,10 @@ final class PhabricatorProjectTriggerEditController
           ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
           ->setNewValue($v_edit);
 
-        // TODO: Actually write the new rules to the database.
+        $xactions[] = $trigger->getApplicationTransactionTemplate()
+          ->setTransactionType(
+            PhabricatorProjectTriggerRulesetTransaction::TRANSACTIONTYPE)
+          ->setNewValue($raw_rules);
 
         $editor = $trigger->getApplicationTransactionEditor()
           ->setActor($viewer)
@@ -207,6 +218,7 @@ final class PhabricatorProjectTriggerEditController
 
     $this->setupEditorBehavior(
       $trigger,
+      $v_rules,
       $form_id,
       $table_id,
       $create_id,
@@ -250,12 +262,12 @@ final class PhabricatorProjectTriggerEditController
 
   private function setupEditorBehavior(
     PhabricatorProjectTrigger $trigger,
+    array $rule_list,
     $form_id,
     $table_id,
     $create_id,
     $input_id) {
 
-    $rule_list = $trigger->getTriggerRules();
     $rule_list = mpull($rule_list, 'toDictionary');
     $rule_list = array_values($rule_list);
 
