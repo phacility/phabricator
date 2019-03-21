@@ -77,4 +77,25 @@ final class PhabricatorProjectTriggerManiphestStatusRule
     );
   }
 
+  public function getRuleViewLabel() {
+    return pht('Change Status');
+  }
+
+  public function getRuleViewDescription($value) {
+    $status_name = ManiphestTaskStatus::getTaskStatusName($value);
+
+    return pht(
+      'Change task status to %s.',
+      phutil_tag('strong', array(), $status_name));
+  }
+
+  public function getRuleViewIcon($value) {
+    $status_icon = ManiphestTaskStatus::getStatusIcon($value);
+    $status_color = ManiphestTaskStatus::getStatusColor($value);
+
+    return id(new PHUIIconView())
+      ->setIcon($status_icon, $status_color);
+  }
+
+
 }

@@ -39,6 +39,9 @@ abstract class PhabricatorProjectTriggerRule
 
   abstract public function getDescription();
   abstract public function getSelectControlName();
+  abstract public function getRuleViewLabel();
+  abstract public function getRuleViewDescription($value);
+  abstract public function getRuleViewIcon($value);
   abstract protected function assertValidRuleValue($value);
   abstract protected function newDropTransactions($object, $value);
   abstract protected function newDropEffects($value);

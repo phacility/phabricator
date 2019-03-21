@@ -174,7 +174,8 @@ final class PhabricatorProjectTrigger
         }
 
         $rule = id(new PhabricatorProjectTriggerInvalidRule())
-          ->setRecord($record);
+          ->setRecord($record)
+          ->setException($ex);
       }
 
       $trigger_rules[] = $rule;

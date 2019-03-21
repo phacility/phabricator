@@ -58,4 +58,20 @@ final class PhabricatorProjectTriggerUnknownRule
     return null;
   }
 
+  public function getRuleViewLabel() {
+    return pht('Unknown Rule');
+  }
+
+  public function getRuleViewDescription($value) {
+    return pht(
+      'This is an unknown rule of type "%s". An administrator may have '.
+      'edited or removed an extension which implements this rule type.',
+      $this->getRecord()->getType());
+  }
+
+  public function getRuleViewIcon($value) {
+    return id(new PHUIIconView())
+      ->setIcon('fa-question-circle', 'yellow');
+  }
+
 }

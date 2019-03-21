@@ -21,6 +21,7 @@ final class PhabricatorProjectTriggerViewController
       return new Aphront404Response();
     }
 
+    $rules_view = $this->newRulesView($trigger);
     $columns_view = $this->newColumnsView($trigger);
 
     $title = $trigger->getObjectName();
@@ -40,6 +41,7 @@ final class PhabricatorProjectTriggerViewController
       ->setCurtain($curtain)
       ->setMainColumn(
         array(
+          $rules_view,
           $columns_view,
           $timeline,
         ));
@@ -139,6 +141,48 @@ final class PhabricatorProjectTriggerViewController
       ->setTable($table_view);
   }
 
+  private function newRulesView(PhabricatorProjectTrigger $trigger) {
+    $viewer = $this->getViewer();
+    $rules = $trigger->getTriggerRules();
+
+    $rows = array();
+    foreach ($rules as $rule) {
+      $value = $rule->getRecord()->getValue();
+
+      $rows[] = array(
+        $rule->getRuleViewIcon($value),
+        $rule->getRuleViewLabel(),
+        $rule->getRuleViewDescription($value),
+      );
+    }
+
+    $table_view = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('This trigger has no rules.'))
+      ->setHeaders(
+        array(
+          null,
+          pht('Rule'),
+          pht('Action'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'pri',
+          'wide',
+        ));
+
+    $header_view = id(new PHUIHeaderView())
+      ->setHeader(pht('Trigger Rules'))
+      ->setSubheader(
+        pht(
+          'When a card is dropped into a column that uses this trigger, '.
+          'these actions will be taken.'));
+
+    return id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setHeader($header_view)
+      ->setTable($table_view);
+  }
   private function newCurtain(PhabricatorProjectTrigger $trigger) {
     $viewer = $this->getViewer();
 
