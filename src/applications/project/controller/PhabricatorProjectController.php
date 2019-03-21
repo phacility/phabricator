@@ -152,7 +152,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   protected function newCardResponse(
     $board_phid,
     $object_phid,
-    PhabricatorProjectColumnOrder $ordering = null) {
+    PhabricatorProjectColumnOrder $ordering = null,
+    $sounds = array()) {
 
     $viewer = $this->getViewer();
 
@@ -166,7 +167,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
       ->setObjectPHID($object_phid)
-      ->setVisiblePHIDs($visible_phids);
+      ->setVisiblePHIDs($visible_phids)
+      ->setSounds($sounds);
 
     if ($ordering) {
       $engine->setOrdering($ordering);

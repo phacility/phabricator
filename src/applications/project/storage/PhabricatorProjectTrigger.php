@@ -245,6 +245,18 @@ final class PhabricatorProjectTrigger
       ->setContent($header);
   }
 
+  public function getSoundEffects() {
+    $sounds = array();
+
+    foreach ($this->getTriggerRules() as $rule) {
+      foreach ($rule->getSoundEffects() as $effect) {
+        $sounds[] = $effect;
+      }
+    }
+
+    return $sounds;
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

@@ -542,6 +542,7 @@ final class PhabricatorProjectBoardViewController
     $templates = array();
     $all_tasks = array();
     $column_templates = array();
+    $sounds = array();
     foreach ($visible_columns as $column_phid => $column) {
       $column_tasks = $column_phids[$column_phid];
 
@@ -629,6 +630,10 @@ final class PhabricatorProjectBoardViewController
         if ($trigger) {
           $preview_effect = $trigger->getPreviewEffect()
             ->toDictionary();
+
+          foreach ($trigger->getSoundEffects() as $sound) {
+            $sounds[] = $sound;
+          }
         }
       }
 
@@ -685,6 +690,7 @@ final class PhabricatorProjectBoardViewController
 
       'boardID' => $board_id,
       'projectPHID' => $project->getPHID(),
+      'preloadSounds' => $sounds,
     );
     $this->initBehavior('project-boards', $behavior_config);
 

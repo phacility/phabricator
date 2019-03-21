@@ -529,6 +529,11 @@ JX.install('WorkboardBoard', {
 
       this.updateCard(response);
 
+      var sounds = response.sounds || [];
+      for (var ii = 0; ii < sounds.length; ii++) {
+        JX.Sound.queue(sounds[ii]);
+      }
+
       list.unlock();
     },
 

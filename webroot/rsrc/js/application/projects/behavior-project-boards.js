@@ -166,4 +166,16 @@ JX.behavior('project-boards', function(config, statics) {
 
   board.start();
 
+  // In Safari, we can only play sounds that we've already loaded, and we can
+  // only load them in response to an explicit user interaction like a click.
+  var sounds = config.preloadSounds;
+  var listener = JX.Stratcom.listen('mousedown', null, function() {
+    for (var ii = 0; ii < sounds.length; ii++) {
+      JX.Sound.load(sounds[ii]);
+    }
+
+    // Remove this callback once it has run once.
+    listener.remove();
+  });
+
 });

@@ -111,6 +111,7 @@ final class PhabricatorProjectMoveController
       $xactions[] = $header_xaction;
     }
 
+    $sounds = array();
     if ($column->canHaveTrigger()) {
       $trigger = $column->getTrigger();
       if ($trigger) {
@@ -120,6 +121,10 @@ final class PhabricatorProjectMoveController
           $object);
         foreach ($trigger_xactions as $trigger_xaction) {
           $xactions[] = $trigger_xaction;
+        }
+
+        foreach ($trigger->getSoundEffects() as $effect) {
+          $sounds[] = $effect;
         }
       }
     }
@@ -133,7 +138,11 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    return $this->newCardResponse($board_phid, $object_phid, $ordering);
+    return $this->newCardResponse(
+      $board_phid,
+      $object_phid,
+      $ordering,
+      $sounds);
   }
 
 }

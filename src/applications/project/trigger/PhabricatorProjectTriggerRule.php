@@ -60,6 +60,10 @@ abstract class PhabricatorProjectTriggerRule
     return null;
   }
 
+  public function getSoundEffects() {
+    return array();
+  }
+
   final public function getDropTransactions($object, $value) {
     return $this->newDropTransactions($object, $value);
   }

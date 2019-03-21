@@ -7,6 +7,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
   private $objectPHID;
   private $visiblePHIDs;
   private $ordering;
+  private $sounds;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -51,6 +52,15 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
   public function getOrdering() {
     return $this->ordering;
+  }
+
+  public function setSounds(array $sounds) {
+    $this->sounds = $sounds;
+    return $this;
+  }
+
+  public function getSounds() {
+    return $this->sounds;
   }
 
   public function buildResponse() {
@@ -150,6 +160,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       'columnMaps' => $natural,
       'cards' => $cards,
       'headers' => $headers,
+      'sounds' => $this->getSounds(),
     );
 
     return id(new AphrontAjaxResponse())
