@@ -479,6 +479,17 @@ JX.install('WorkboardBoard', {
 
       data.visiblePHIDs = visible_phids.join(',');
 
+      // If the user cancels the workflow (for example, by hitting an MFA
+      // prompt that they click "Cancel" on), put the card back where it was
+      // and reset the UI state.
+      var on_revert = JX.bind(
+        this,
+        this._revertCard,
+        list,
+        item,
+        src_phid,
+        dst_phid);
+
       var onupdate = JX.bind(
         this,
         this._oncardupdate,
@@ -489,7 +500,21 @@ JX.install('WorkboardBoard', {
 
       new JX.Workflow(this.getController().getMoveURI(), data)
         .setHandler(onupdate)
+        .setCloseHandler(on_revert)
         .start();
+    },
+
+    _revertCard: function(list, item, src_phid, dst_phid) {
+      JX.DOM.alterClass(item, 'drag-sending', false);
+
+      var src_column = this.getColumn(src_phid);
+      var dst_column = this.getColumn(dst_phid);
+
+      src_column.markForRedraw();
+      dst_column.markForRedraw();
+      this._redrawColumns();
+
+      list.unlock();
     },
 
     _oncardupdate: function(list, src_phid, dst_phid, after_phid, response) {
