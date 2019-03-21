@@ -13,6 +13,10 @@ final class PhabricatorProjectTriggerManiphestStatusRule
       ManiphestTaskStatus::getTaskStatusName($value));
   }
 
+  public function getSelectControlName() {
+    return pht('Change status to');
+  }
+
   protected function assertValidRuleValue($value) {
     if (!is_string($value)) {
       throw new Exception(
@@ -53,6 +57,23 @@ final class PhabricatorProjectTriggerManiphestStatusRule
         ->setColor($status_color)
         ->addCondition('status', '!=', $value)
         ->setContent($content),
+    );
+  }
+
+  protected function getDefaultValue() {
+    return head_key(ManiphestTaskStatus::getTaskStatusMap());
+  }
+
+  protected function getPHUIXControlType() {
+    return 'select';
+  }
+
+  protected function getPHUIXControlSpecification() {
+    $map = ManiphestTaskStatus::getTaskStatusMap();
+
+    return array(
+      'options' => $map,
+      'order' => array_keys($map),
     );
   }
 

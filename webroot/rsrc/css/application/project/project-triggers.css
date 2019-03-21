@@ -1,0 +1,38 @@
+/**
+ * @provides project-triggers-css
+ */
+
+.trigger-rules-table {
+  margin: 16px 0;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+}
+
+.trigger-rules-table tr {
+  background: {$bluebackground};
+}
+
+.trigger-rules-table td {
+  padding: 6px 4px;
+  vertical-align: middle;
+}
+
+.trigger-rules-table td.type-cell {
+  padding-left: 6px;
+}
+
+.trigger-rules-table td.remove-column {
+  padding-right: 6px;
+}
+
+.trigger-rules-table td.invalid-cell {
+  padding-left: 12px;
+}
+
+.trigger-rules-table td.invalid-cell .phui-icon-view {
+  margin-right: 4px;
+}
+
+.trigger-rules-table td.value-cell {
+  width: 100%;
+}

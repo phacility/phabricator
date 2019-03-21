@@ -65,6 +65,9 @@ final class PhabricatorProjectTriggerEditController
         $v_name = $request->getStr('name');
         $v_edit = $request->getStr('editPolicy');
 
+        $v_rules = $request->getStr('rules');
+        $v_rules = phutil_json_decode($v_rules);
+
         $xactions = array();
         if (!$trigger->getID()) {
           $xactions[] = $trigger->getApplicationTransactionTemplate()
@@ -80,6 +83,8 @@ final class PhabricatorProjectTriggerEditController
         $xactions[] = $trigger->getApplicationTransactionTemplate()
           ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
           ->setNewValue($v_edit);
+
+        // TODO: Actually write the new rules to the database.
 
         $editor = $trigger->getApplicationTransactionEditor()
           ->setActor($viewer)
@@ -133,8 +138,14 @@ final class PhabricatorProjectTriggerEditController
       $header = pht('New Trigger');
     }
 
+    $form_id = celerity_generate_unique_node_id();
+    $table_id = celerity_generate_unique_node_id();
+    $create_id = celerity_generate_unique_node_id();
+    $input_id = celerity_generate_unique_node_id();
+
     $form = id(new AphrontFormView())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->setID($form_id);
 
     if ($column) {
       $form->addHiddenInput('columnPHID', $column->getPHID());
@@ -160,6 +171,46 @@ final class PhabricatorProjectTriggerEditController
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
         ->setPolicies($policies)
         ->setError($e_edit));
+
+    $form->appendChild(
+      phutil_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => 'rules',
+          'id' => $input_id,
+        )));
+
+    $form->appendChild(
+      id(new PHUIFormInsetView())
+        ->setTitle(pht('Rules'))
+        ->setDescription(
+          pht(
+            'When a card is dropped into a column which uses this trigger:'))
+        ->setRightButton(
+          javelin_tag(
+            'a',
+            array(
+              'href' => '#',
+              'class' => 'button button-green',
+              'id' => $create_id,
+              'mustcapture' => true,
+            ),
+            pht('New Rule')))
+        ->setContent(
+          javelin_tag(
+            'table',
+            array(
+              'id' => $table_id,
+              'class' => 'trigger-rules-table',
+            ))));
+
+    $this->setupEditorBehavior(
+      $trigger,
+      $form_id,
+      $table_id,
+      $create_id,
+      $input_id);
 
     $form->appendControl(
       id(new AphrontFormSubmitControl())
@@ -195,6 +246,36 @@ final class PhabricatorProjectTriggerEditController
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild($column_view);
+  }
+
+  private function setupEditorBehavior(
+    PhabricatorProjectTrigger $trigger,
+    $form_id,
+    $table_id,
+    $create_id,
+    $input_id) {
+
+    $rule_list = $trigger->getTriggerRules();
+    $rule_list = mpull($rule_list, 'toDictionary');
+    $rule_list = array_values($rule_list);
+
+    $type_list = PhabricatorProjectTriggerRule::getAllTriggerRules();
+    $type_list = mpull($type_list, 'newTemplate');
+    $type_list = array_values($type_list);
+
+    require_celerity_resource('project-triggers-css');
+
+    Javelin::initBehavior(
+      'trigger-rule-editor',
+      array(
+        'formNodeID' => $form_id,
+        'tableNodeID' => $table_id,
+        'createNodeID' => $create_id,
+        'inputNodeID' => $input_id,
+
+        'rules' => $rule_list,
+        'types' => $type_list,
+      ));
   }
 
 }

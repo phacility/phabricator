@@ -100,6 +100,7 @@ return array(
     'rsrc/css/application/policy/policy.css' => 'ceb56a08',
     'rsrc/css/application/ponder/ponder-view.css' => '05a09d0a',
     'rsrc/css/application/project/project-card-view.css' => '3b1f7b20',
+    'rsrc/css/application/project/project-triggers.css' => 'cb866c2d',
     'rsrc/css/application/project/project-view.css' => '567858b3',
     'rsrc/css/application/releeph/releeph-core.css' => 'f81ff2db',
     'rsrc/css/application/releeph/releeph-preview-branch.css' => '22db5c07',
@@ -432,6 +433,11 @@ return array(
     'rsrc/js/application/transactions/behavior-show-older-transactions.js' => '600f440c',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => '2bdadf1a',
     'rsrc/js/application/transactions/behavior-transaction-list.js' => '9cec214e',
+    'rsrc/js/application/trigger/TriggerRule.js' => 'e4a816a4',
+    'rsrc/js/application/trigger/TriggerRuleControl.js' => '5faf27b9',
+    'rsrc/js/application/trigger/TriggerRuleEditor.js' => 'b49fd60c',
+    'rsrc/js/application/trigger/TriggerRuleType.js' => '4feea7d3',
+    'rsrc/js/application/trigger/trigger-rule-editor.js' => '398fdf13',
     'rsrc/js/application/typeahead/behavior-typeahead-browse.js' => '70245195',
     'rsrc/js/application/typeahead/behavior-typeahead-search.js' => '7b139193',
     'rsrc/js/application/uiexample/gesture-example.js' => '242dedd0',
@@ -683,6 +689,7 @@ return array(
     'javelin-behavior-time-typeahead' => '5803b9e7',
     'javelin-behavior-toggle-class' => 'f5c78ae3',
     'javelin-behavior-toggle-widget' => '8f959ad0',
+    'javelin-behavior-trigger-rule-editor' => '398fdf13',
     'javelin-behavior-typeahead-browse' => '70245195',
     'javelin-behavior-typeahead-search' => '7b139193',
     'javelin-behavior-user-menu' => '60cd9241',
@@ -875,6 +882,7 @@ return array(
     'policy-transaction-detail-css' => 'c02b8384',
     'ponder-view-css' => '05a09d0a',
     'project-card-view-css' => '3b1f7b20',
+    'project-triggers-css' => 'cb866c2d',
     'project-view-css' => '567858b3',
     'releeph-core' => 'f81ff2db',
     'releeph-preview-branch' => '22db5c07',
@@ -886,6 +894,10 @@ return array(
     'syntax-default-css' => '055fc231',
     'syntax-highlighting-css' => '4234f572',
     'tokens-css' => 'ce5a50bd',
+    'trigger-rule' => 'e4a816a4',
+    'trigger-rule-control' => '5faf27b9',
+    'trigger-rule-editor' => 'b49fd60c',
+    'trigger-rule-type' => '4feea7d3',
     'typeahead-browse-css' => 'b7ed02d2',
     'unhandled-exception-css' => '9ecfc00d',
   ),
@@ -1217,6 +1229,12 @@ return array(
       'javelin-install',
       'javelin-dom',
     ),
+    '398fdf13' => array(
+      'javelin-behavior',
+      'trigger-rule-editor',
+      'trigger-rule',
+      'trigger-rule-type',
+    ),
     '3b4899b0' => array(
       'javelin-behavior',
       'phabricator-prefab',
@@ -1347,6 +1365,9 @@ return array(
       'javelin-sound',
       'phabricator-notification',
     ),
+    '4feea7d3' => array(
+      'trigger-rule-control',
+    ),
     '506aa3f4' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1431,6 +1452,9 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'phuix-dropdown-menu',
+    ),
+    '5faf27b9' => array(
+      'phuix-form-control-view',
     ),
     '600f440c' => array(
       'javelin-behavior',
@@ -1849,6 +1873,10 @@ return array(
     ),
     'b347a301' => array(
       'javelin-behavior',
+    ),
+    'b49fd60c' => array(
+      'multirow-row-manager',
+      'trigger-rule',
     ),
     'b517bfa0' => array(
       'phui-oi-list-view-css',

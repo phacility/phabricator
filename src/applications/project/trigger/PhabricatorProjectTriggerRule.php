@@ -38,9 +38,25 @@ abstract class PhabricatorProjectTriggerRule
   }
 
   abstract public function getDescription();
+  abstract public function getSelectControlName();
   abstract protected function assertValidRuleValue($value);
   abstract protected function newDropTransactions($object, $value);
   abstract protected function newDropEffects($value);
+  abstract protected function getDefaultValue();
+  abstract protected function getPHUIXControlType();
+  abstract protected function getPHUIXControlSpecification();
+
+  protected function isSelectableRule() {
+    return true;
+  }
+
+  protected function isValidRule() {
+    return true;
+  }
+
+  protected function newInvalidView() {
+    return null;
+  }
 
   final public function getDropTransactions($object, $value) {
     return $this->newDropTransactions($object, $value);
@@ -94,5 +110,37 @@ abstract class PhabricatorProjectTriggerRule
   final protected function newEffect() {
     return new PhabricatorProjectDropEffect();
   }
+
+  final public function toDictionary() {
+    $record = $this->getRecord();
+
+    $is_valid = $this->isValidRule();
+    if (!$is_valid) {
+      $invalid_view = hsprintf('%s', $this->newInvalidView());
+    } else {
+      $invalid_view = null;
+    }
+
+    return array(
+      'type' => $record->getType(),
+      'value' => $record->getValue(),
+      'isValidRule' => $is_valid,
+      'invalidView' => $invalid_view,
+    );
+  }
+
+  final public function newTemplate() {
+    return array(
+      'type' => $this->getTriggerType(),
+      'name' => $this->getSelectControlName(),
+      'selectable' => $this->isSelectableRule(),
+      'defaultValue' => $this->getDefaultValue(),
+      'control' => array(
+        'type' => $this->getPHUIXControlType(),
+        'specification' => $this->getPHUIXControlSpecification(),
+      ),
+    );
+  }
+
 
 }
