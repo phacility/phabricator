@@ -455,11 +455,15 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
   private function newBuildsView(HarbormasterBuildPlan $plan) {
     $viewer = $this->getViewer();
 
+    $limit = 10;
     $builds = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
       ->withBuildPlanPHIDs(array($plan->getPHID()))
-      ->setLimit(10)
+      ->setLimit($limit + 1)
       ->execute();
+
+    $more_results = (count($builds) > $limit);
+    $builds = array_slice($builds, 0, $limit);
 
     $list = id(new HarbormasterBuildView())
       ->setViewer($viewer)
@@ -471,6 +475,11 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
     $more_href = new PhutilURI(
       $this->getApplicationURI('/build/'),
       array('plan' => $plan->getPHID()));
+
+    if ($more_results) {
+      $list->newTailButton()
+        ->setHref($more_href);
+    }
 
     $more_link = id(new PHUIButtonView())
       ->setTag('a')
@@ -491,13 +500,17 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
   private function newRulesView(HarbormasterBuildPlan $plan) {
     $viewer = $this->getViewer();
 
+    $limit = 10;
     $rules = id(new HeraldRuleQuery())
       ->setViewer($viewer)
       ->withDisabled(false)
       ->withAffectedObjectPHIDs(array($plan->getPHID()))
       ->needValidateAuthors(true)
-      ->setLimit(10)
+      ->setLimit($limit + 1)
       ->execute();
+
+    $more_results = (count($rules) > $limit);
+    $rules = array_slice($rules, 0, $limit);
 
     $list = id(new HeraldRuleListView())
       ->setViewer($viewer)
@@ -509,6 +522,11 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
     $more_href = new PhutilURI(
       '/herald/',
       array('affectedPHID' => $plan->getPHID()));
+
+    if ($more_results) {
+      $list->newTailButton()
+        ->setHref($more_href);
+    }
 
     $more_link = id(new PHUIButtonView())
       ->setTag('a')
