@@ -153,4 +153,9 @@ final class PhabricatorStandardCustomFieldSelect
       ->setOptions($this->getOptions());
   }
 
+  protected function newExportFieldType() {
+    return id(new PhabricatorOptionExportField())
+      ->setOptions($this->getOptions());
+  }
+
 }
