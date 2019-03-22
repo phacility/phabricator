@@ -350,15 +350,19 @@ final class HarbormasterBuildPlanBehavior
         ->setKey(self::BEHAVIOR_RESTARTABLE)
         ->setEditInstructions(
           pht(
-            'Usually, builds may be restarted. This may be useful if you '.
-            'suspect a build has failed for environmental or circumstantial '.
-            'reasons unrelated to the actual code, and want to give it '.
-            'another chance at glory.'.
+            'Usually, builds may be restarted by users who have permission '.
+            'to edit the related build plan. (You can change who is allowed '.
+            'to restart a build by adjusting the "Runnable" behavior.)'.
+            "\n\n".
+            'Restarting a build may be useful if you suspect it has failed '.
+            'for environmental or circumstantial reasons unrelated to the '.
+            'actual code, and want to give it another chance at glory.'.
             "\n\n".
             'If you want to prevent a build from being restarted, you can '.
-            'change the behavior here. This may be useful to prevent '.
-            'accidents where a build with a dangerous side effect (like '.
-            'deployment) is restarted improperly.'))
+            'change when it may be restarted by adjusting this behavior. '.
+            'This may be useful to prevent accidents where a build with a '.
+            'dangerous side effect (like deployment) is restarted '.
+            'improperly.'))
         ->setName(pht('Restartable'))
         ->setOptions($restart_options),
       id(new self())
