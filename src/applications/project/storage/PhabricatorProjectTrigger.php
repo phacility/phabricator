@@ -5,6 +5,7 @@ final class PhabricatorProjectTrigger
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
+    PhabricatorIndexableInterface,
     PhabricatorDestructibleInterface {
 
   protected $name;
@@ -12,6 +13,7 @@ final class PhabricatorProjectTrigger
   protected $editPolicy;
 
   private $triggerRules;
+  private $usage = self::ATTACHABLE;
 
   public static function initializeNewTrigger() {
     $default_edit = PhabricatorPolicies::POLICY_USER;
@@ -257,6 +259,15 @@ final class PhabricatorProjectTrigger
     return $sounds;
   }
 
+  public function getUsage() {
+    return $this->assertAttached($this->usage);
+  }
+
+  public function attachUsage(PhabricatorProjectTriggerUsage $usage) {
+    $this->usage = $usage;
+    return $this;
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -308,6 +319,13 @@ final class PhabricatorProjectTrigger
         $conn,
         'UPDATE %R SET triggerPHID = null WHERE triggerPHID = %s',
         new PhabricatorProjectColumn(),
+        $this->getPHID());
+
+      // Remove the usage index row for this trigger, if one exists.
+      queryfx(
+        $conn,
+        'DELETE FROM %R WHERE triggerPHID = %s',
+        new PhabricatorProjectTriggerUsage(),
         $this->getPHID());
 
       $this->delete();

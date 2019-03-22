@@ -71,17 +71,23 @@ final class PhabricatorProjectTriggerViewController
     // so we load only the columns they can actually see, but have a list of
     // all the impacted column PHIDs.
 
+    // (We're also exposing the status of columns the user might not be able
+    // to see. This technically violates policy, but the trigger usage table
+    // hints at it anyway and it seems unlikely to ever have any security
+    // impact, but is useful in assessing whether a trigger is really in use
+    // or not.)
+
     $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
     $all_columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($omnipotent_viewer)
       ->withTriggerPHIDs(array($trigger->getPHID()))
       ->execute();
-    $column_phids = mpull($all_columns, 'getPHID');
+    $column_map = mpull($all_columns, 'getStatus', 'getPHID');
 
-    if ($column_phids) {
+    if ($column_map) {
       $visible_columns = id(new PhabricatorProjectColumnQuery())
         ->setViewer($viewer)
-        ->withPHIDs($column_phids)
+        ->withPHIDs(array_keys($column_map))
         ->execute();
       $visible_columns = mpull($visible_columns, null, 'getPHID');
     } else {
@@ -89,7 +95,7 @@ final class PhabricatorProjectTriggerViewController
     }
 
     $rows = array();
-    foreach ($column_phids as $column_phid) {
+    foreach ($column_map as $column_phid => $column_status) {
       $column = idx($visible_columns, $column_phid);
 
       if ($column) {
@@ -113,7 +119,18 @@ final class PhabricatorProjectTriggerViewController
         $column_name = phutil_tag('em', array(), pht('Restricted Column'));
       }
 
+      if ($column_status == PhabricatorProjectColumn::STATUS_ACTIVE) {
+        $status_icon = id(new PHUIIconView())
+          ->setIcon('fa-columns', 'blue')
+          ->setTooltip(pht('Active Column'));
+      } else {
+        $status_icon = id(new PHUIIconView())
+          ->setIcon('fa-eye-slash', 'grey')
+          ->setTooltip(pht('Hidden Column'));
+      }
+
       $rows[] = array(
+        $status_icon,
         $project_name,
         $column_name,
       );
@@ -123,11 +140,13 @@ final class PhabricatorProjectTriggerViewController
       ->setNoDataString(pht('This trigger is not used by any columns.'))
       ->setHeaders(
         array(
+          null,
           pht('Project'),
           pht('Column'),
         ))
       ->setColumnClasses(
         array(
+          null,
           null,
           'wide pri',
         ));

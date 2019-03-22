@@ -13,6 +13,25 @@ final class PhabricatorProjectColumnTriggerTransaction
     $object->setTriggerPHID($value);
   }
 
+  public function applyExternalEffects($object, $value) {
+    // After we change the trigger attached to a column, update the search
+    // indexes for the old and new triggers so we update the usage index.
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $column_phids = array();
+    if ($old) {
+      $column_phids[] = $old;
+    }
+    if ($new) {
+      $column_phids[] = $new;
+    }
+
+    foreach ($column_phids as $phid) {
+      PhabricatorSearchWorker::queueDocumentForIndexing($phid);
+    }
+  }
+
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
