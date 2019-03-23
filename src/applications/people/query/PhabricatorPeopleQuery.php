@@ -379,11 +379,10 @@ final class PhabricatorPeopleQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $user = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $user->getID(),
-      'username' => $user->getUsername(),
+      'id' => (int)$object->getID(),
+      'username' => $object->getUsername(),
     );
   }
 

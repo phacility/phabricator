@@ -79,11 +79,10 @@ final class AlmanacNamespaceQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $namespace = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $namespace->getID(),
-      'name' => $namespace->getName(),
+      'id' => (int)$object->getID(),
+      'name' => $object->getName(),
     );
   }
 

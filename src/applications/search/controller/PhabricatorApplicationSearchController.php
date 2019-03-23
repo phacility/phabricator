@@ -249,6 +249,8 @@ final class PhabricatorApplicationSearchController
         $pager = $engine->newPagerForSavedQuery($saved_query);
         $pager->readFromRequest($request);
 
+        $query->setReturnPartialResultsOnOverheat(true);
+
         $objects = $engine->executeQuery($query, $pager);
 
         $force_nux = $request->getBool('nux');
@@ -348,6 +350,8 @@ final class PhabricatorApplicationSearchController
       } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
         $exec_errors[] = $ex->getMessage();
       } catch (PhabricatorSearchConstraintException $ex) {
+        $exec_errors[] = $ex->getMessage();
+      } catch (PhabricatorInvalidQueryCursorException $ex) {
         $exec_errors[] = $ex->getMessage();
       }
 
@@ -798,6 +802,7 @@ final class PhabricatorApplicationSearchController
       $object = $query
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->setLimit(1)
+        ->setReturnPartialResultsOnOverheat(true)
         ->execute();
       if ($object) {
         return null;

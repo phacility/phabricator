@@ -122,11 +122,10 @@ final class AlmanacDeviceQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $device = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $device->getID(),
-      'name' => $device->getName(),
+      'id' => (int)$object->getID(),
+      'name' => $object->getName(),
     );
   }
 

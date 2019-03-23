@@ -168,10 +168,20 @@ final class PhrictionDocumentQuery
     return $documents;
   }
 
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $select = parent::buildSelectClauseParts($conn);
+
+    if ($this->shouldJoinContentTable()) {
+      $select[] = qsprintf($conn, 'c.title');
+    }
+
+    return $select;
+  }
+
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $joins = parent::buildJoinClauseParts($conn);
 
-    if ($this->getOrderVector()->containsKey('updated')) {
+    if ($this->shouldJoinContentTable()) {
       $content_dao = new PhrictionContent();
       $joins[] = qsprintf(
         $conn,
@@ -180,6 +190,14 @@ final class PhrictionDocumentQuery
     }
 
     return $joins;
+  }
+
+  private function shouldJoinContentTable() {
+    if ($this->getOrderVector()->containsKey('title')) {
+      return true;
+    }
+
+    return false;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -354,33 +372,23 @@ final class PhrictionDocumentQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $document = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromCursorObject(
+    PhabricatorQueryCursor $cursor,
+    array $keys) {
+
+    $document = $cursor->getObject();
 
     $map = array(
-      'id' => $document->getID(),
+      'id' => (int)$document->getID(),
       'depth' => $document->getDepth(),
-      'updated' => $document->getEditedEpoch(),
+      'updated' => (int)$document->getEditedEpoch(),
     );
 
-    foreach ($keys as $key) {
-      switch ($key) {
-        case 'title':
-          $map[$key] = $document->getContent()->getTitle();
-          break;
-      }
+    if (isset($keys['title'])) {
+      $map['title'] = $cursor->getRawRowProperty('title');
     }
 
     return $map;
-  }
-
-  protected function willExecuteCursorQuery(
-    PhabricatorCursorPagedPolicyAwareQuery $query) {
-    $vector = $this->getOrderVector();
-
-    if ($vector->containsKey('title')) {
-      $query->needContent(true);
-    }
   }
 
   protected function getPrimaryTableAlias() {

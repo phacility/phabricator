@@ -924,11 +924,10 @@ final class DiffusionCommitQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $commit = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $commit->getID(),
-      'epoch' => $commit->getEpoch(),
+      'id' => (int)$object->getID(),
+      'epoch' => (int)$object->getEpoch(),
     );
   }
 
