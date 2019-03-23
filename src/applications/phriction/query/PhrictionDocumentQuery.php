@@ -385,7 +385,7 @@ final class PhrictionDocumentQuery
     );
 
     if (isset($keys['title'])) {
-      $map['title'] = $cursor->getRawRowProperty('c.title');
+      $map['title'] = $cursor->getRawRowProperty('title');
     }
 
     return $map;
