@@ -193,7 +193,11 @@ final class PhrictionDocumentQuery
   }
 
   private function shouldJoinContentTable() {
-    return $this->getOrderVector()->containsKey('updated');
+    if ($this->getOrderVector()->containsKey('title')) {
+      return true;
+    }
+
+    return false;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
