@@ -285,23 +285,35 @@ final class ConpherenceThreadQuery
   }
 
   private function loadTransactionsAndHandles(array $conpherences) {
-    $query = id(new ConpherenceTransactionQuery())
-      ->setViewer($this->getViewer())
-      ->withObjectPHIDs(array_keys($conpherences))
-      ->needHandles(true);
+    // NOTE: This is older code which has been modernized to the minimum
+    // standard required by T13266. It probably isn't the best available
+    // approach to the problems it solves.
+
+    $limit = $this->getTransactionLimit();
+    if ($limit) {
+      // fetch an extra for "show older" scenarios
+      $limit = $limit + 1;
+    } else {
+      $limit = 0xFFFF;
+    }
+
+    $pager = id(new AphrontCursorPagerView())
+      ->setPageSize($limit);
 
     // We have to flip these for the underlying query class. The semantics of
     // paging are tricky business.
     if ($this->afterTransactionID) {
-      $query->setBeforeID($this->afterTransactionID);
+      $pager->setBeforeID($this->afterTransactionID);
     } else if ($this->beforeTransactionID) {
-      $query->setAfterID($this->beforeTransactionID);
+      $pager->setAfterID($this->beforeTransactionID);
     }
-    if ($this->getTransactionLimit()) {
-      // fetch an extra for "show older" scenarios
-      $query->setLimit($this->getTransactionLimit() + 1);
-    }
-    $transactions = $query->execute();
+
+    $transactions = id(new ConpherenceTransactionQuery())
+      ->setViewer($this->getViewer())
+      ->withObjectPHIDs(array_keys($conpherences))
+      ->needHandles(true)
+      ->executeWithCursorPager($pager);
+
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
       $current_transactions = idx($transactions, $phid, array());
