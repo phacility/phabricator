@@ -3,6 +3,7 @@
 abstract class PhabricatorApplicationTransactionQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $phids;
   private $objectPHIDs;
   private $authorPHIDs;
@@ -34,6 +35,11 @@ abstract class PhabricatorApplicationTransactionQuery
   }
 
   abstract public function getTemplateApplicationTransaction();
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
@@ -156,6 +162,13 @@ abstract class PhabricatorApplicationTransactionQuery
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'x.id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
