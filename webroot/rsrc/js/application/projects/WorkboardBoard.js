@@ -495,7 +495,7 @@ JX.install('WorkboardBoard', {
         order: this.getOrder()
       };
 
-      var context = this._getDropContext(after_node);
+      var context = this._getDropContext(after_node, item);
 
       if (context.afterPHID) {
         data.afterPHID = context.afterPHID;
