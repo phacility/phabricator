@@ -189,10 +189,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   border: 1px solid {$lightblueborder};
   padding: 4px 0;
-}
-
-.workboard-drop-preview:hover {
-  opacity: 0.25;
+  background: #fff;
 }
 
 .workboard-drop-preview li {
@@ -224,4 +221,19 @@
 .workboard-drop-preview .workboard-drop-preview-header .phui-icon-view {
   background: {$blue};
   color: #fff;
+}
+
+.workboard-drop-preview-fade {
+  animation: 0.1s workboard-drop-preview-fade-out;
+  opacity: 0.25;
+}
+
+@keyframes workboard-drop-preview-fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.25;
+  }
 }

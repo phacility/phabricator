@@ -43,6 +43,8 @@ JX.install('WorkboardBoard', {
     _dropPreviewListNode: null,
     _previewPHID: null,
     _hidePreivew: false,
+    _previewPositionVector: null,
+    _previewDimState: false,
 
     getRoot: function() {
       return this._root;
@@ -148,6 +150,39 @@ JX.install('WorkboardBoard', {
       var on_out = JX.bind(this, this._hideTriggerPreview);
       JX.Stratcom.listen('mouseover', 'trigger-preview', on_over);
       JX.Stratcom.listen('mouseout', 'trigger-preview', on_out);
+
+      var on_move = JX.bind(this, this._dimPreview);
+      JX.Stratcom.listen('mousemove', null, on_move);
+    },
+
+    _dimPreview: function(e) {
+      var p = this._previewPositionVector;
+      if (!p) {
+        return;
+      }
+
+      // When the mouse cursor gets near the drop preview element, fade it
+      // out so you can see through it. We can't do this with ":hover" because
+      // we disable cursor events.
+
+      var cursor = JX.$V(e);
+      var margin = 64;
+
+      var near_x = (cursor.x > (p.x - margin));
+      var near_y = (cursor.y > (p.y - margin));
+      var should_dim = (near_x && near_y);
+
+      this._setPreviewDimState(should_dim);
+    },
+
+    _setPreviewDimState: function(is_dim) {
+      if (is_dim === this._previewDimState) {
+        return;
+      }
+
+      this._previewDimState = is_dim;
+      var node = this._getDropPreviewNode();
+      JX.DOM.alterClass(node, 'workboard-drop-preview-fade', is_dim);
     },
 
     _showTriggerPreview: function(e) {
@@ -325,6 +360,7 @@ JX.install('WorkboardBoard', {
 
       if (!effects.length) {
         JX.DOM.remove(node);
+        this._previewPositionVector = null;
         return;
       }
 
@@ -336,6 +372,10 @@ JX.install('WorkboardBoard', {
 
       JX.DOM.setContent(this._getDropPreviewListNode(), items);
       document.body.appendChild(node);
+
+      // Undim the drop preview element if it was previously dimmed.
+      this._setPreviewDimState(false);
+      this._previewPositionVector = JX.$V(node);
     },
 
     _getDropPreviewNode: function() {
