@@ -12,18 +12,8 @@ final class PhabricatorProjectMoveController
     $column_phid = $request->getStr('columnPHID');
     $object_phid = $request->getStr('objectPHID');
 
-    $after_phid = $request->getStr('afterPHID');
-    $before_phid = $request->getStr('beforePHID');
-
-    $after_phids = array();
-    if ($after_phid) {
-      $after_phids[] = $after_phid;
-    }
-
-    $before_phids = array();
-    if ($before_phid) {
-      $before_phids[] = $before_phid;
-    }
+    $after_phids = $request->getStrList('afterPHIDs');
+    $before_phids = $request->getStrList('beforePHIDs');
 
     $order = $request->getStr('order');
     if (!strlen($order)) {
@@ -98,13 +88,10 @@ final class PhabricatorProjectMoveController
       ->setObjectPHIDs(array($object_phid))
       ->executeLayout();
 
-    $order_params = array();
-    if ($after_phid) {
-      $order_params['afterPHIDs'] = $after_phids;
-    }
-    if ($before_phid) {
-      $order_params['beforePHIDs'] = $before_phids;
-    }
+    $order_params = array(
+      'afterPHIDs' => $after_phids,
+      'beforePHIDs' => $before_phids,
+    );
 
     $xactions = array();
     $xactions[] = id(new ManiphestTransaction())

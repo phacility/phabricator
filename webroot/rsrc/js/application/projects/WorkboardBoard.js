@@ -409,8 +409,8 @@ JX.install('WorkboardBoard', {
 
     _getDropContext: function(after_node, item) {
       var header_key;
-      var before_phid;
-      var after_phid;
+      var after_phids = [];
+      var before_phids = [];
 
       // We're going to send an "afterPHID" and a "beforePHID" if the card
       // was dropped immediately adjacent to another card. If a card was
@@ -424,19 +424,16 @@ JX.install('WorkboardBoard', {
       var after_card = after_node;
       while (after_card) {
         after_data = JX.Stratcom.getData(after_card);
-        if (after_data.objectPHID) {
-          break;
-        }
+
         if (after_data.headerKey) {
           break;
         }
-        after_card = after_card.previousSibling;
-      }
 
-      if (after_data) {
         if (after_data.objectPHID) {
-          after_phid = after_data.objectPHID;
+          after_phids.push(after_data.objectPHID);
         }
+
+        after_card = after_card.previousSibling;
       }
 
       if (item) {
@@ -444,19 +441,16 @@ JX.install('WorkboardBoard', {
         var before_card = item.nextSibling;
         while (before_card) {
           before_data = JX.Stratcom.getData(before_card);
-          if (before_data.objectPHID) {
-            break;
-          }
+
           if (before_data.headerKey) {
             break;
           }
-          before_card = before_card.nextSibling;
-        }
 
-        if (before_data) {
           if (before_data.objectPHID) {
-            before_phid = before_data.objectPHID;
+            before_phids.push(before_data.objectPHID);
           }
+
+          before_card = before_card.nextSibling;
         }
       }
 
@@ -476,8 +470,8 @@ JX.install('WorkboardBoard', {
 
       return {
         headerKey: header_key,
-        afterPHID: after_phid,
-        beforePHID: before_phid
+        afterPHIDs: after_phids,
+        beforePHIDs: before_phids
       };
     },
 
@@ -496,14 +490,8 @@ JX.install('WorkboardBoard', {
       };
 
       var context = this._getDropContext(after_node, item);
-
-      if (context.afterPHID) {
-        data.afterPHID = context.afterPHID;
-      }
-
-      if (context.beforePHID) {
-        data.beforePHID = context.beforePHID;
-      }
+      data.afterPHIDs = context.afterPHIDs.join(',');
+      data.beforePHIDs = context.beforePHIDs.join(',');
 
       if (context.headerKey) {
         var properties = this.getHeaderTemplate(context.headerKey)
@@ -530,13 +518,18 @@ JX.install('WorkboardBoard', {
         src_phid,
         dst_phid);
 
+      var after_phid = null;
+      if (data.afterPHIDs.length) {
+        after_phid = data.afterPHIDs[0];
+      }
+
       var onupdate = JX.bind(
         this,
         this._oncardupdate,
         list,
         src_phid,
         dst_phid,
-        data.afterPHID);
+        after_phid);
 
       new JX.Workflow(this.getController().getMoveURI(), data)
         .setHandler(onupdate)
