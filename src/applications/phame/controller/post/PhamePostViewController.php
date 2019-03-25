@@ -304,6 +304,15 @@ final class PhamePostViewController
   private function loadAdjacentPosts(PhamePost $post) {
     $viewer = $this->getViewer();
 
+    $pager = id(new AphrontCursorPagerView())
+      ->setPageSize(1);
+
+    $prev_pager = id(clone $pager)
+      ->setAfterID($post->getID());
+
+    $next_pager = id(clone $pager)
+      ->setBeforeID($post->getID());
+
     $query = id(new PhamePostQuery())
       ->setViewer($viewer)
       ->withVisibility(array(PhameConstants::VISIBILITY_PUBLISHED))
@@ -311,12 +320,10 @@ final class PhamePostViewController
       ->setLimit(1);
 
     $prev = id(clone $query)
-      ->setAfterID($post->getID())
-      ->execute();
+      ->executeWithCursorPager($prev_pager);
 
     $next = id(clone $query)
-      ->setBeforeID($post->getID())
-      ->execute();
+      ->executeWithCursorPager($next_pager);
 
     return array(head($prev), head($next));
   }
