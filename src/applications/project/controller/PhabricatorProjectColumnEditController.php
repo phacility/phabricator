@@ -50,8 +50,7 @@ final class PhabricatorProjectColumnEditController
     $v_name = $column->getName();
 
     $validation_exception = null;
-    $base_uri = '/board/'.$project_id.'/';
-    $view_uri = $this->getApplicationURI($base_uri);
+    $view_uri = $project->getWorkboardURI();
 
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');

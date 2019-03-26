@@ -726,7 +726,7 @@ final class PhabricatorProjectBoardViewController
       ->setType(PHUIListItemView::TYPE_DIVIDER);
     $fullscreen = $this->buildFullscreenMenu();
 
-    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs = $this->newWorkboardCrumbs();
     $crumbs->addTextCrumb(pht('Workboard'));
     $crumbs->setBorder(true);
 

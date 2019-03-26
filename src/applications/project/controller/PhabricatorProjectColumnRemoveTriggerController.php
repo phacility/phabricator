@@ -20,7 +20,7 @@ final class PhabricatorProjectColumnRemoveTriggerController
       return new Aphront404Response();
     }
 
-    $done_uri = $column->getBoardURI();
+    $done_uri = $column->getWorkboardURI();
 
     if (!$column->getTriggerPHID()) {
       return $this->newDialog()

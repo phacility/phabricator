@@ -111,7 +111,7 @@ final class PhabricatorProjectTriggerViewController
         $column_name = phutil_tag(
           'a',
           array(
-            'href' => $column->getBoardURI(),
+            'href' => $column->getWorkboardURI(),
           ),
           $column->getDisplayName());
       } else {

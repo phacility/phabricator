@@ -243,8 +243,7 @@ final class ManiphestTransactionEditor
       foreach ($projects as $project) {
         $body->addLinkSection(
           pht('WORKBOARD'),
-          PhabricatorEnv::getProductionURI(
-            '/project/board/'.$project->getID().'/'));
+          PhabricatorEnv::getProductionURI($project->getWorkboardURI()));
       }
     }
 

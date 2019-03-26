@@ -212,10 +212,8 @@ final class PhabricatorProjectColumn
     return true;
   }
 
-  public function getBoardURI() {
-    return urisprintf(
-      '/project/board/%d/',
-      $this->getProject()->getID());
+  public function getWorkboardURI() {
+    return $this->getProject()->getWorkboardURI();
   }
 
   public function getDropEffects() {

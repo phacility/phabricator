@@ -39,7 +39,7 @@ final class PhabricatorProjectTriggerEditController
       if (!$column) {
         return new Aphront404Response();
       }
-      $board_uri = $column->getBoardURI();
+      $board_uri = $column->getWorkboardURI();
     } else {
       $column = null;
       $board_uri = null;
@@ -122,7 +122,7 @@ final class PhabricatorProjectTriggerEditController
 
           $column_editor->applyTransactions($column, $column_xactions);
 
-          $next_uri = $column->getBoardURI();
+          $next_uri = $column->getWorkboardURI();
         }
 
         return id(new AphrontRedirectResponse())->setURI($next_uri);

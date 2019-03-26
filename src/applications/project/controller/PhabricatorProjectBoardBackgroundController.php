@@ -55,7 +55,7 @@ final class PhabricatorProjectBoardBackgroundController
     $nav = $this->getProfileMenu();
 
     $crumbs = id($this->buildApplicationCrumbs())
-      ->addTextCrumb(pht('Workboard'), "/project/board/{$board_id}/")
+      ->addTextCrumb(pht('Workboard'), $board->getWorkboardURI())
       ->addTextCrumb(pht('Manage'), $manage_uri)
       ->addTextCrumb(pht('Background Color'));
 

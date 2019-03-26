@@ -34,7 +34,7 @@ final class PhabricatorProjectBoardManageController
     $curtain = $this->buildCurtainView($board);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Workboard'), "/project/board/{$board_id}/");
+    $crumbs->addTextCrumb(pht('Workboard'), $board->getWorkboardURI());
     $crumbs->addTextCrumb(pht('Manage'));
     $crumbs->setBorder(true);
 
