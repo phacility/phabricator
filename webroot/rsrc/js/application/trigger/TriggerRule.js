@@ -84,8 +84,8 @@ JX.install('TriggerRule', {
 
         control.value = this.getType();
 
-        var on_change = JX.bind(this, this._onTypeChange);
-        JX.DOM.listen(control, 'onchange', null, on_change);
+        var on_change = JX.bind(this, this._onTypeChange, control);
+        JX.DOM.listen(control, 'change', null, on_change);
 
         var attributes = {
           className: 'type-cell'
@@ -97,10 +97,8 @@ JX.install('TriggerRule', {
       return this._typeCell;
     },
 
-    _onTypeChange: function() {
-      var control = this._getTypeCell();
+    _onTypeChange: function(control) {
       this.setType(control.value);
-
       this._rebuildValueControl();
     },
 
