@@ -6,6 +6,7 @@ final class ProjectBoardTaskCard extends Phobject {
   private $projectHandles;
   private $task;
   private $owner;
+  private $showEditControls;
   private $canEdit;
   private $coverImageFile;
   private $hideArchivedProjects;
@@ -70,6 +71,15 @@ final class ProjectBoardTaskCard extends Phobject {
     return $this->canEdit;
   }
 
+  public function setShowEditControls($show_edit_controls) {
+    $this->showEditControls = $show_edit_controls;
+    return $this;
+  }
+
+  public function getShowEditControls() {
+    return $this->showEditControls;
+  }
+
   public function getItem() {
     $task = $this->getTask();
     $owner = $this->getOwner();
@@ -89,24 +99,26 @@ final class ProjectBoardTaskCard extends Phobject {
       ->setDisabled($task->isClosed())
       ->setBarColor($bar_color);
 
-    if ($can_edit) {
-      $card
-        ->addSigil('draggable-card')
-        ->addClass('draggable-card');
-      $edit_icon = 'fa-pencil';
-    } else {
-      $card
-        ->addClass('not-editable')
-        ->addClass('undraggable-card');
-      $edit_icon = 'fa-lock red';
-    }
+    if ($this->getShowEditControls()) {
+      if ($can_edit) {
+        $card
+          ->addSigil('draggable-card')
+          ->addClass('draggable-card');
+        $edit_icon = 'fa-pencil';
+      } else {
+        $card
+          ->addClass('not-editable')
+          ->addClass('undraggable-card');
+        $edit_icon = 'fa-lock red';
+      }
 
-    $card->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Edit'))
-        ->setIcon($edit_icon)
-        ->addSigil('edit-project-card')
-        ->setHref('/maniphest/task/edit/'.$task->getID().'/'));
+      $card->addAction(
+        id(new PHUIListItemView())
+          ->setName(pht('Edit'))
+          ->setIcon($edit_icon)
+          ->addSigil('edit-project-card')
+          ->setHref('/maniphest/task/edit/'.$task->getID().'/'));
+    }
 
     if ($owner) {
       $card->addHandleIcon($owner, $owner->getName());
