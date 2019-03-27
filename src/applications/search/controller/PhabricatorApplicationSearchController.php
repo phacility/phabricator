@@ -850,18 +850,30 @@ final class PhabricatorApplicationSearchController
         ));
   }
 
-  private function newOverheatedView(array $results) {
-    if ($results) {
+  public static function newOverheatedError($has_results) {
+    $overheated_link = phutil_tag(
+      'a',
+      array(
+        'href' => 'https://phurl.io/u/overheated',
+        'target' => '_blank',
+      ),
+      pht('Learn More'));
+
+    if ($has_results) {
       $message = pht(
-        'Most objects matching your query are not visible to you, so '.
-        'filtering results is taking a long time. Only some results are '.
-        'shown. Refine your query to find results more quickly.');
+        'This query took too long, so only some results are shown. %s',
+        $overheated_link);
     } else {
       $message = pht(
-        'Most objects matching your query are not visible to you, so '.
-        'filtering results is taking a long time. Refine your query to '.
-        'find results more quickly.');
+        'This query took too long. %s',
+        $overheated_link);
     }
+
+    return $message;
+  }
+
+  private function newOverheatedView(array $results) {
+    $message = self::newOverheatedError((bool)$results);
 
     return id(new PHUIInfoView())
       ->setSeverity(PHUIInfoView::SEVERITY_WARNING)

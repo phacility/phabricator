@@ -106,9 +106,37 @@ final class PhabricatorDashboardQueryPanelType
       }
     }
 
-    $results = $engine->executeQuery($query, $pager);
+    $query->setReturnPartialResultsOnOverheat(true);
 
-    return $engine->renderResults($results, $saved);
+    $results = $engine->executeQuery($query, $pager);
+    $results_view = $engine->renderResults($results, $saved);
+
+    $is_overheated = $query->getIsOverheated();
+    $overheated_view = null;
+    if ($is_overheated) {
+      $content = $results_view->getContent();
+
+      $overheated_message =
+        PhabricatorApplicationSearchController::newOverheatedError(
+          (bool)$results);
+
+      $overheated_warning = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setTitle(pht('Query Overheated'))
+        ->setErrors(
+          array(
+            $overheated_message,
+          ));
+
+      $overheated_box = id(new PHUIBoxView())
+        ->addClass('mmt mmb')
+        ->appendChild($overheated_warning);
+
+      $content = array($content, $overheated_box);
+      $results_view->setContent($content);
+    }
+
+    return $results_view;
   }
 
   public function adjustPanelHeader(
