@@ -917,14 +917,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $list->addItem($view);
     }
 
-    $action_view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
-
     $item_types = PhabricatorProfileMenuItem::getAllMenuItems();
     $object = $this->getProfileObject();
 
     $action_list = id(new PhabricatorActionListView())
       ->setViewer($viewer);
+
+    // See T12167. This makes the "Actions" dropdown button show up in the
+    // page header.
+    $action_list->setID(celerity_generate_unique_node_id());
 
     $action_list->addAction(
       id(new PhabricatorActionView())
@@ -969,9 +970,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setHeaderText(pht('Current Menu Items'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
-
-    $panel = id(new PHUICurtainPanelView())
-      ->appendChild($action_view);
 
     $curtain = id(new PHUICurtainView())
       ->setViewer($viewer)
