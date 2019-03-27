@@ -136,6 +136,33 @@ final class PhabricatorDashboardQueryPanelType
       $results_view->setContent($content);
     }
 
+    if ($pager->getHasMoreResults()) {
+      $item_list = $results_view->getObjectList();
+
+      $more_href = $engine->getQueryResultsPageURI($key);
+      if ($item_list) {
+        $item_list->newTailButton()
+          ->setHref($more_href);
+      } else {
+        // For search engines that do not return an object list, add a fake
+        // one to the end so we can render a "View All Results" button that
+        // looks like it does in normal applications. At time of writing,
+        // several major applications like Maniphest (which has group headers)
+        // and Feed (which uses custom rendering) don't return simple lists.
+
+        $content = $results_view->getContent();
+
+        $more_list = id(new PHUIObjectItemListView())
+          ->setAllowEmptyList(true);
+
+        $more_list->newTailButton()
+          ->setHref($more_href);
+
+        $content = array($content, $more_list);
+        $results_view->setContent($content);
+      }
+    }
+
     return $results_view;
   }
 
