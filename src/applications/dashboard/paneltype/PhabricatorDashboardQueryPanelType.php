@@ -120,10 +120,18 @@ final class PhabricatorDashboardQueryPanelType
     $search_engine = $this->getSearchEngine($panel);
     $key = $panel->getProperty('key');
     $href = $search_engine->getQueryResultsPageURI($key);
+
     $icon = id(new PHUIIconView())
-        ->setIcon('fa-search')
-        ->setHref($href);
-    $header->addActionItem($icon);
+      ->setIcon('fa-search');
+
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View All'))
+      ->setIcon($icon)
+      ->setHref($href)
+      ->setColor(PHUIButtonView::GREY);
+
+    $header->addActionLink($button);
 
     return $header;
   }
