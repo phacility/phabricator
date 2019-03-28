@@ -30,6 +30,12 @@ final class PhabricatorUserStatusField
     $user = $this->getObject();
     $viewer = $this->requireViewer();
 
+    // Don't show availability for disabled users, since this is vaguely
+    // misleading to say "Availability: Available" and probably not useful.
+    if ($user->getIsDisabled()) {
+      return null;
+    }
+
     return id(new PHUIUserAvailabilityView())
       ->setViewer($viewer)
       ->setAvailableUser($user);
