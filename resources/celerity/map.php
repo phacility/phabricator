@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
     'core.pkg.css' => '2dd936d6',
-    'core.pkg.js' => 'eb53fc5b',
+    'core.pkg.js' => 'a747b035',
     'differential.pkg.css' => '8d8360fb',
     'differential.pkg.js' => '67e02996',
     'diffusion.pkg.css' => '42c75c37',
@@ -498,7 +498,7 @@ return array(
     'rsrc/js/core/behavior-select-on-click.js' => '66365ee2',
     'rsrc/js/core/behavior-setup-check-https.js' => '01384686',
     'rsrc/js/core/behavior-time-typeahead.js' => '5803b9e7',
-    'rsrc/js/core/behavior-toggle-class.js' => 'f5c78ae3',
+    'rsrc/js/core/behavior-toggle-class.js' => '32db8374',
     'rsrc/js/core/behavior-tokenizer.js' => '3b4899b0',
     'rsrc/js/core/behavior-tooltip.js' => '73ecc1f8',
     'rsrc/js/core/behavior-user-menu.js' => '60cd9241',
@@ -687,7 +687,7 @@ return array(
     'javelin-behavior-stripe-payment-form' => '02cb4398',
     'javelin-behavior-test-payment-form' => '4a7fb02b',
     'javelin-behavior-time-typeahead' => '5803b9e7',
-    'javelin-behavior-toggle-class' => 'f5c78ae3',
+    'javelin-behavior-toggle-class' => '32db8374',
     'javelin-behavior-toggle-widget' => '8f959ad0',
     'javelin-behavior-trigger-rule-editor' => '398fdf13',
     'javelin-behavior-typeahead-browse' => '70245195',
@@ -1185,6 +1185,11 @@ return array(
     '32755edb' => array(
       'javelin-install',
       'javelin-util',
+    ),
+    '32db8374' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
     ),
     34450586 => array(
       'javelin-color',
@@ -2145,11 +2150,6 @@ return array(
       'phabricator-darkmessage',
     ),
     'f51e9c17' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-    ),
-    'f5c78ae3' => array(
       'javelin-behavior',
       'javelin-stratcom',
       'javelin-dom',
