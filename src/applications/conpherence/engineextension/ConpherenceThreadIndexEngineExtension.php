@@ -51,13 +51,16 @@ final class ConpherenceThreadIndexEngineExtension
     ConpherenceThread $thread,
     ConpherenceTransaction $xaction) {
 
-    $previous = id(new ConpherenceTransactionQuery())
+    $pager = id(new AphrontCursorPagerView())
+      ->setPageSize(1)
+      ->setAfterID($xaction->getID());
+
+    $previous_xactions = id(new ConpherenceTransactionQuery())
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array($thread->getPHID()))
       ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
-      ->setAfterID($xaction->getID())
-      ->setLimit(1)
-      ->executeOne();
+      ->executeWithCursorPager($pager);
+    $previous = head($previous_xactions);
 
     $index = id(new ConpherenceIndex())
       ->setThreadPHID($thread->getPHID())
