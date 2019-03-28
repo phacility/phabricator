@@ -1113,7 +1113,8 @@ abstract class PhabricatorApplicationTransactionEditor
       $comment_editor = id(new PhabricatorApplicationTransactionCommentEditor())
         ->setActor($actor)
         ->setActingAsPHID($this->getActingAsPHID())
-        ->setContentSource($this->getContentSource());
+        ->setContentSource($this->getContentSource())
+        ->setIsNewComment(true);
 
       if (!$transaction_open) {
         $object->openTransaction();
