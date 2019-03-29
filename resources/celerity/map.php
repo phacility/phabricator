@@ -14,7 +14,7 @@ return array(
     'differential.pkg.css' => '8d8360fb',
     'differential.pkg.js' => '67e02996',
     'diffusion.pkg.css' => '42c75c37',
-    'diffusion.pkg.js' => '91192d85',
+    'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
     'maniphest.pkg.js' => 'c9308721',
     'rsrc/audio/basic/alert.mp3' => '17889334',
@@ -384,7 +384,7 @@ return array(
     'rsrc/js/application/diffusion/DiffusionLocateFileSource.js' => '94243d89',
     'rsrc/js/application/diffusion/behavior-audit-preview.js' => 'b7b73831',
     'rsrc/js/application/diffusion/behavior-commit-branches.js' => '4b671572',
-    'rsrc/js/application/diffusion/behavior-commit-graph.js' => '1c88f154',
+    'rsrc/js/application/diffusion/behavior-commit-graph.js' => 'ef836bf2',
     'rsrc/js/application/diffusion/behavior-locate-file.js' => '87428eb2',
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'c715c123',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '6a85bc5a',
@@ -606,7 +606,7 @@ return array(
     'javelin-behavior-differential-diff-radios' => '925fe8cd',
     'javelin-behavior-differential-populate' => 'dfa1d313',
     'javelin-behavior-diffusion-commit-branches' => '4b671572',
-    'javelin-behavior-diffusion-commit-graph' => '1c88f154',
+    'javelin-behavior-diffusion-commit-graph' => 'ef836bf2',
     'javelin-behavior-diffusion-locate-file' => '87428eb2',
     'javelin-behavior-diffusion-pull-lastmodified' => 'c715c123',
     'javelin-behavior-document-engine' => '243d6c22',
@@ -1032,11 +1032,6 @@ return array(
     '1c850a26' => array(
       'javelin-install',
       'javelin-util',
-    ),
-    '1c88f154' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
     ),
     '1cab0e9a' => array(
       'javelin-behavior',
@@ -2122,6 +2117,11 @@ return array(
     'ee82cedb' => array(
       'javelin-behavior',
       'phabricator-keyboard-shortcut',
+      'javelin-stratcom',
+    ),
+    'ef836bf2' => array(
+      'javelin-behavior',
+      'javelin-dom',
       'javelin-stratcom',
     ),
     'f166c949' => array(
