@@ -57,6 +57,14 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
             => 'PhabricatorDashboardPanelArchiveController',
         ),
       ),
+      '/portal/' => array(
+        $this->getQueryRoutePattern() =>
+          'PhabricatorDashboardPortalListController',
+        $this->getEditRoutePattern('edit/') =>
+          'PhabricatorDashboardPortalEditController',
+        'view/(?P<id>\d)/' =>
+          'PhabricatorDashboardPortalViewController',
+      ),
     );
   }
 
