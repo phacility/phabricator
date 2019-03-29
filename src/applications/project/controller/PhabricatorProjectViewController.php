@@ -28,7 +28,7 @@ final class PhabricatorProjectViewController
       $default_key = PhabricatorProject::ITEM_MANAGE;
     }
 
-    switch ($default->getBuiltinKey()) {
+    switch ($default_key) {
       case PhabricatorProject::ITEM_WORKBOARD:
         $controller_object = new PhabricatorProjectBoardViewController();
         break;

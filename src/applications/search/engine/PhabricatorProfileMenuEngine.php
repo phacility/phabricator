@@ -6,7 +6,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $profileObject;
   private $customPHID;
   private $items;
-  private $defaultItem;
   private $controller;
   private $navigation;
   private $showNavigation = true;
@@ -79,8 +78,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   public function getDefaultItem() {
-    $this->getItems();
-    return $this->defaultItem;
+    return $this->pickDefaultItem($this->getItems());
   }
 
   public function setShowNavigation($show) {
@@ -154,30 +152,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $item_list = $this->getItems();
 
-    $selected_item = null;
-    if (strlen($item_id)) {
-      $item_id_int = (int)$item_id;
-      foreach ($item_list as $item) {
-        if ($item_id_int) {
-          if ((int)$item->getID() === $item_id_int) {
-            $selected_item = $item;
-            break;
-          }
-        }
-
-        $builtin_key = $item->getBuiltinKey();
-        if ($builtin_key === (string)$item_id) {
-          $selected_item = $item;
-          break;
-        }
-      }
-    }
-
-    if (!$selected_item) {
-      if ($is_view) {
-        $selected_item = $this->getDefaultItem();
-      }
-    }
+    $selected_item = $this->pickSelectedItem(
+      $item_list,
+      $item_id,
+      $is_view);
 
     switch ($item_action) {
       case 'view':
@@ -485,39 +463,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $items = $this->arrangeItems($items, $mode);
-
-    // Make sure exactly one valid item is marked as default.
-    $default = null;
-    $first = null;
-    foreach ($items as $item) {
-      if (!$item->canMakeDefault() || $item->isDisabled()) {
-        continue;
-      }
-
-      // If this engine doesn't support pinning items, don't respect any
-      // setting which might be present in the database.
-      if ($this->isMenuEnginePinnable()) {
-        if ($item->isDefault()) {
-          $default = $item;
-          break;
-        }
-      }
-
-      if ($first === null) {
-        $first = $item;
-      }
-    }
-
-    if (!$default) {
-      $default = $first;
-    }
-
-    if ($default) {
-      $this->setDefaultItem($default);
-    }
-
-    return $items;
+    return $this->arrangeItems($items, $mode);
   }
 
   private function loadBuiltinProfileItems($mode) {
@@ -1359,6 +1305,66 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->newEmptyView(
       pht('No Menu Items'),
       pht('There are no menu items.'));
+  }
+
+  private function pickDefaultItem(array $items) {
+    // Remove all the items which can not be the default item.
+    foreach ($items as $key => $item) {
+      if (!$item->canMakeDefault()) {
+        unset($items[$key]);
+        continue;
+      }
+
+      if ($item->isDisabled()) {
+        unset($items[$key]);
+        continue;
+      }
+    }
+
+    // If this engine supports pinning items and a valid item is pinned,
+    // pick that item as the default.
+    if ($this->isMenuEnginePinnable()) {
+      foreach ($items as $key => $item) {
+        if ($item->isDefault()) {
+          return $item;
+        }
+      }
+    }
+
+    // If we have some other valid items, pick the first one as the default.
+    if ($items) {
+      return head($items);
+    }
+
+    return null;
+  }
+
+  private function pickSelectedItem(array $items, $item_id, $is_view) {
+    if (strlen($item_id)) {
+      $item_id_int = (int)$item_id;
+      foreach ($items as $item) {
+        if ($item_id_int) {
+          if ((int)$item->getID() === $item_id_int) {
+            return $item;
+          }
+        }
+
+        $builtin_key = $item->getBuiltinKey();
+        if ($builtin_key === (string)$item_id) {
+          return $item;
+        }
+      }
+
+      // Nothing matches the selected item ID, so we don't have a valid
+      // selection.
+      return null;
+    }
+
+    if ($is_view) {
+      return $this->pickDefaultItem($items);
+    }
+
+    return null;
   }
 
 }
