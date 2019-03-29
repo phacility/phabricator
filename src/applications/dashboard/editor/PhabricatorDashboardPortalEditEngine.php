@@ -58,7 +58,11 @@ final class PhabricatorDashboardPortalEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    return $object->getURI();
+    if ($this->getIsCreate()) {
+      return $object->getURI();
+    } else {
+      return '/portal/view/'.$object->getID().'/view/manage/';
+    }
   }
 
   protected function getEditorURI() {

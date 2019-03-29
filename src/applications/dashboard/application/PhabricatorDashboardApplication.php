@@ -27,6 +27,9 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
   }
 
   public function getRoutes() {
+    $menu_rules = $this->getProfileMenuRouting(
+      'PhabricatorDashboardPortalViewController');
+
     return array(
       '/W(?P<id>\d+)' => 'PhabricatorDashboardPanelViewController',
       '/dashboard/' => array(
@@ -62,8 +65,10 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
           'PhabricatorDashboardPortalListController',
         $this->getEditRoutePattern('edit/') =>
           'PhabricatorDashboardPortalEditController',
-        'view/(?P<id>\d)/' =>
-          'PhabricatorDashboardPortalViewController',
+        'view/(?P<portalID>\d)/' => array(
+            '' => 'PhabricatorDashboardPortalViewController',
+          ) + $menu_rules,
+
       ),
     );
   }

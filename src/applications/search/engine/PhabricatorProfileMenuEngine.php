@@ -181,6 +181,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     switch ($item_action) {
       case 'view':
+        // If we were not able to select an item, we're still going to render
+        // a page state. For example, this happens when you create a new
+        // portal for the first time.
+        break;
       case 'info':
       case 'hide':
       case 'default':
@@ -231,24 +235,35 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
       $page_title = pht('Configure Menu');
     } else {
-      $page_title = $selected_item->getDisplayName();
+      if ($selected_item) {
+        $page_title = $selected_item->getDisplayName();
+      } else {
+        $page_title = pht('Empty');
+      }
     }
 
     switch ($item_action) {
       case 'view':
-        $navigation->selectFilter($selected_item->getDefaultMenuItemKey());
+        if ($selected_item) {
+          $navigation->selectFilter($selected_item->getDefaultMenuItemKey());
 
-        try {
-          $content = $this->buildItemViewContent($selected_item);
-        } catch (Exception $ex) {
-          $content = id(new PHUIInfoView())
-            ->setTitle(pht('Unable to Render Dashboard'))
-            ->setErrors(array($ex->getMessage()));
+          try {
+            $content = $this->buildItemViewContent($selected_item);
+          } catch (Exception $ex) {
+            $content = id(new PHUIInfoView())
+              ->setTitle(pht('Unable to Render Dashboard'))
+              ->setErrors(array($ex->getMessage()));
+          }
+
+          $crumbs->addTextCrumb($selected_item->getDisplayName());
+        } else {
+          $content = $this->newNoMenuItemsView();
         }
 
-        $crumbs->addTextCrumb($selected_item->getDisplayName());
         if (!$content) {
-          return new Aphront404Response();
+          $content = $this->newEmptyView(
+            pht('Empty'),
+            pht('There is nothing here.'));
         }
         break;
       case 'configure':
@@ -346,6 +361,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     if ($this->navigation) {
       return $this->navigation;
     }
+
     $nav = id(new AphrontSideNavFilterView())
       ->setIsProfileMenu(true)
       ->setBaseURI(new PhutilURI($this->getItemURI('')));
@@ -365,6 +381,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $first_item->willBuildNavigationItems($group);
     }
 
+    $has_items = false;
     foreach ($menu_items as $menu_item) {
       if ($menu_item->isDisabled()) {
         continue;
@@ -389,7 +406,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
       foreach ($items as $item) {
         $nav->addMenuItem($item);
+        $has_items = true;
       }
+    }
+
+    if (!$has_items) {
+      // If the navigation menu has no items, add an empty label item to
+      // force it to render something.
+      $empty_item = id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_LABEL);
+      $nav->addMenuItem($empty_item);
     }
 
     $nav->selectFilter(null);
@@ -1319,5 +1345,20 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $items;
   }
 
+  final protected function newEmptyView($title, $message) {
+    return id(new PHUIInfoView())
+      ->setTitle($title)
+      ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+      ->setErrors(
+        array(
+          $message,
+        ));
+  }
+
+  protected function newNoMenuItemsView() {
+    return $this->newEmptyView(
+      pht('No Menu Items'),
+      pht('There are no menu items.'));
+  }
 
 }

@@ -3,13 +3,24 @@
 final class PhabricatorDashboardPortalViewController
   extends PhabricatorDashboardPortalController {
 
+  private $portal;
+
+  public function setPortal(PhabricatorDashboardPortal $portal) {
+    $this->portal = $portal;
+    return $this;
+  }
+
+  public function getPortal() {
+    return $this->portal;
+  }
+
   public function shouldAllowPublic() {
     return true;
   }
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $id = $request->getURIData('id');
+    $id = $request->getURIData('portalID');
 
     $portal = id(new PhabricatorDashboardPortalQuery())
       ->setViewer($viewer)
@@ -19,16 +30,30 @@ final class PhabricatorDashboardPortalViewController
       return new Aphront404Response();
     }
 
-    $content = $portal->getObjectName();
+    $this->setPortal($portal);
 
-    return $this->newPage()
-      ->setTitle(
-        array(
-          pht('Portal'),
-          $portal->getName(),
-        ))
-      ->setPageObjectPHIDs(array($portal->getPHID()))
-      ->appendChild($content);
+    $engine = id(new PhabricatorDashboardPortalProfileMenuEngine())
+      ->setProfileObject($portal)
+      ->setController($this);
+
+    return $engine->buildResponse();
+  }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $portal = $this->getPortal();
+    if ($portal) {
+      $crumbs->addTextCrumb($portal->getName(), $portal->getURI());
+    }
+
+    return $crumbs;
+  }
+
+  public function newTimelineView() {
+    return $this->buildTransactionTimeline(
+      $this->getPortal(),
+      new PhabricatorDashboardPortalTransactionQuery());
   }
 
 }
