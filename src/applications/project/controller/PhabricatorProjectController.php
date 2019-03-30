@@ -97,11 +97,11 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     return $menu;
   }
 
-  protected function getProfileMenu() {
+  protected function getProfileMenu($default_item = null) {
     if (!$this->profileMenu) {
       $engine = $this->getProfileMenuEngine();
       if ($engine) {
-        $this->profileMenu = $engine->buildNavigation();
+        $this->profileMenu = $engine->buildNavigation($default_item);
       }
     }
 

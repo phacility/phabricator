@@ -183,7 +183,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         break;
     }
 
-    $navigation = $this->buildNavigation();
+    $navigation = $this->buildNavigation($selected_item);
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
@@ -223,8 +223,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     switch ($item_action) {
       case 'view':
         if ($selected_item) {
-          $navigation->selectFilter($selected_item->getDefaultMenuItemKey());
-
           try {
             $content = $this->buildItemViewContent($selected_item);
           } catch (Exception $ex) {
@@ -335,7 +333,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $page;
   }
 
-  public function buildNavigation() {
+  public function buildNavigation(
+    PhabricatorProfileMenuItemConfiguration $selected_item = null) {
+
     if ($this->navigation) {
       return $this->navigation;
     }
@@ -397,6 +397,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     $nav->selectFilter(null);
+
+    $navigation_items = $nav->getMenu()->getItems();
+    $select_key = $this->pickHighlightedMenuItem(
+      $navigation_items,
+      $selected_item);
+    $nav->selectFilter($select_key);
 
     $this->navigation = $nav;
     return $this->navigation;
@@ -1365,6 +1371,99 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     return null;
+  }
+
+  private function pickHighlightedMenuItem(
+    array $items,
+    PhabricatorProfileMenuItemConfiguration $selected_item = null) {
+
+    assert_instances_of($items, 'PHUIListItemView');
+
+    $default_key = null;
+    if ($selected_item) {
+      $default_key = $selected_item->getDefaultMenuItemKey();
+    }
+
+    $controller = $this->getController();
+
+    // In some rare cases, when like building the "Favorites" menu on a
+    // 404 page, we may not have a controller. Just accept whatever default
+    // behavior we'd otherwise end up with.
+    if (!$controller) {
+      return $default_key;
+    }
+
+    $request = $controller->getRequest();
+
+    // See T12949. If one of the menu items is a link to the same URI that
+    // the page was accessed with, we want to highlight that item. For example,
+    // this allows you to add links to a menu that apply filters to a
+    // workboard.
+
+    $matches = array();
+    foreach ($items as $item) {
+      $href = $item->getHref();
+      if ($this->isMatchForRequestURI($request, $href)) {
+        $matches[] = $item;
+      }
+    }
+
+    foreach ($matches as $match) {
+      if ($match->getKey() === $default_key) {
+        return $default_key;
+      }
+    }
+
+    if ($matches) {
+      return head($matches)->getKey();
+    }
+
+    return $default_key;
+  }
+
+  private function isMatchForRequestURI(AphrontRequest $request, $item_uri) {
+    $request_uri = $request->getAbsoluteRequestURI();
+    $item_uri = new PhutilURI($item_uri);
+
+    // If the request URI and item URI don't have matching paths, they
+    // do not match.
+    if ($request_uri->getPath() !== $item_uri->getPath()) {
+      return false;
+    }
+
+    // If the request URI and item URI don't have matching parameters, they
+    // also do not match. We're specifically trying to let "?filter=X" work
+    // on Workboards, among other use cases, so this is important.
+    $request_params = $request_uri->getQueryParamsAsPairList();
+    $item_params = $item_uri->getQueryParamsAsPairList();
+    if ($request_params !== $item_params) {
+      return false;
+    }
+
+    // If the paths and parameters match, the item domain must be: empty; or
+    // match the request domain; or match the production domain.
+
+    $request_domain = $request_uri->getDomain();
+
+    $production_uri = PhabricatorEnv::getProductionURI('/');
+    $production_domain = id(new PhutilURI($production_uri))
+      ->getDomain();
+
+    $allowed_domains = array(
+      '',
+      $request_domain,
+      $production_domain,
+    );
+    $allowed_domains = array_fuse($allowed_domains);
+
+    $item_domain = $item_uri->getDomain();
+    $item_domain = (string)$item_domain;
+
+    if (isset($allowed_domains[$item_domain])) {
+      return true;
+    }
+
+    return false;
   }
 
 }

@@ -54,6 +54,11 @@ final class PhabricatorFavoritesMainMenuBarExtension
       ->setProfileObject($favorites)
       ->setCustomPHID($viewer->getPHID());
 
+    $controller = $this->getController();
+    if ($controller) {
+      $menu_engine->setController($controller);
+    }
+
     $filter_view = $menu_engine->buildNavigation();
 
     $menu_view = $filter_view->getMenu();
