@@ -212,7 +212,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     if ($this->supportsFerretEngine()) {
-      if ($this->getFerretTokens()) {
+      if ($this->hasFerretOrder()) {
         $map += array(
           'rank' =>
             $cursor->getRawRowProperty(self::FULLTEXT_RANK),
@@ -1840,15 +1840,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return $select;
     }
 
-    $vector = $this->getOrderVector();
-    if (!$vector->containsKey('rank')) {
-      // We only need to SELECT the virtual "_ft_rank" column if we're
+    if (!$this->hasFerretOrder()) {
+      // We only need to SELECT the virtual rank/relevance columns if we're
       // actually sorting the results by rank.
       return $select;
     }
 
     if (!$this->ferretEngine) {
       $select[] = qsprintf($conn, '0 AS %T', self::FULLTEXT_RANK);
+      $select[] = qsprintf($conn, '0 AS %T', self::FULLTEXT_CREATED);
+      $select[] = qsprintf($conn, '0 AS %T', self::FULLTEXT_MODIFIED);
       return $select;
     }
 
@@ -3150,6 +3151,24 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         '%Q IS NULL',
         $col);
     }
+  }
+
+  private function hasFerretOrder() {
+    $vector = $this->getOrderVector();
+
+    if ($vector->containsKey('rank')) {
+      return true;
+    }
+
+    if ($vector->containsKey('fulltext-created')) {
+      return true;
+    }
+
+    if ($vector->containsKey('fulltext-modified')) {
+      return true;
+    }
+
+    return false;
   }
 
 }
