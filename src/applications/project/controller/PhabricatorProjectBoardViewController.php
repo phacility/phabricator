@@ -540,8 +540,9 @@ final class PhabricatorProjectBoardViewController
       ->setExcludedProjectPHIDs($select_phids);
 
     $templates = array();
-    $column_maps = array();
     $all_tasks = array();
+    $column_templates = array();
+    $sounds = array();
     foreach ($visible_columns as $column_phid => $column) {
       $column_tasks = $column_phids[$column_phid];
 
@@ -574,6 +575,11 @@ final class PhabricatorProjectBoardViewController
       $column_menu = $this->buildColumnMenu($project, $column);
       $panel->addHeaderAction($column_menu);
 
+      if ($column->canHaveTrigger()) {
+        $trigger_menu = $this->buildTriggerMenu($column);
+        $panel->addHeaderAction($trigger_menu);
+      }
+
       $count_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
         ->setColor(PHUITagView::COLOR_BLUE)
@@ -601,18 +607,42 @@ final class PhabricatorProjectBoardViewController
             'pointLimit' => $column->getPointLimit(),
           ));
 
+      $card_phids = array();
       foreach ($column_tasks as $task) {
         $object_phid = $task->getPHID();
 
         $card = $rendering_engine->renderCard($object_phid);
         $templates[$object_phid] = hsprintf('%s', $card->getItem());
-        $column_maps[$column_phid][] = $object_phid;
+        $card_phids[] = $object_phid;
 
         $all_tasks[$object_phid] = $task;
       }
 
       $panel->setCards($cards);
       $board->addPanel($panel);
+
+      $drop_effects = $column->getDropEffects();
+      $drop_effects = mpull($drop_effects, 'toDictionary');
+
+      $preview_effect = null;
+      if ($column->canHaveTrigger()) {
+        $trigger = $column->getTrigger();
+        if ($trigger) {
+          $preview_effect = $trigger->getPreviewEffect()
+            ->toDictionary();
+
+          foreach ($trigger->getSoundEffects() as $sound) {
+            $sounds[] = $sound;
+          }
+        }
+      }
+
+      $column_templates[] = array(
+        'columnPHID' => $column_phid,
+        'effects' => $drop_effects,
+        'cardPHIDs' => $card_phids,
+        'triggerPreviewEffect' => $preview_effect,
+      );
     }
 
     $order_key = $this->sortKey;
@@ -637,10 +667,8 @@ final class PhabricatorProjectBoardViewController
 
     $properties = array();
     foreach ($all_tasks as $task) {
-      $properties[$task->getPHID()] = array(
-        'points' => (double)$task->getPoints(),
-        'status' => $task->getStatus(),
-      );
+      $properties[$task->getPHID()] =
+        PhabricatorBoardResponseEngine::newTaskProperties($task);
     }
 
     $behavior_config = array(
@@ -656,12 +684,13 @@ final class PhabricatorProjectBoardViewController
       'headers' => $headers,
       'headerKeys' => $header_keys,
       'templateMap' => $templates,
-      'columnMaps' => $column_maps,
       'orderMaps' => $vector_map,
       'propertyMaps' => $properties,
+      'columnTemplates' => $column_templates,
 
       'boardID' => $board_id,
       'projectPHID' => $project->getPHID(),
+      'preloadSounds' => $sounds,
     );
     $this->initBehavior('project-boards', $behavior_config);
 
@@ -697,7 +726,7 @@ final class PhabricatorProjectBoardViewController
       ->setType(PHUIListItemView::TYPE_DIVIDER);
     $fullscreen = $this->buildFullscreenMenu();
 
-    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs = $this->newWorkboardCrumbs();
     $crumbs->addTextCrumb(pht('Workboard'));
     $crumbs->setBorder(true);
 
@@ -1111,10 +1140,8 @@ final class PhabricatorProjectBoardViewController
           ));
     }
 
-    if (count($specs) > 1) {
-      $column_items[] = id(new PhabricatorActionView())
-        ->setType(PhabricatorActionView::TYPE_DIVIDER);
-    }
+    $column_items[] = id(new PhabricatorActionView())
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
     $batch_edit_uri = $request->getRequestURI();
     $batch_edit_uri->replaceQueryParam('batch', $column->getID());
@@ -1181,7 +1208,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $column_button = id(new PHUIIconView())
-      ->setIcon('fa-caret-down')
+      ->setIcon('fa-pencil')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(
@@ -1192,6 +1219,75 @@ final class PhabricatorProjectBoardViewController
     return $column_button;
   }
 
+  private function buildTriggerMenu(PhabricatorProjectColumn $column) {
+    $viewer = $this->getViewer();
+    $trigger = $column->getTrigger();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $column,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $trigger_items = array();
+    if (!$trigger) {
+      $set_uri = $this->getApplicationURI(
+        new PhutilURI(
+          'trigger/edit/',
+          array(
+            'columnPHID' => $column->getPHID(),
+          )));
+
+      $trigger_items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-cogs')
+        ->setName(pht('New Trigger...'))
+        ->setHref($set_uri)
+        ->setDisabled(!$can_edit);
+    } else {
+      $trigger_items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-cogs')
+        ->setName(pht('View Trigger'))
+        ->setHref($trigger->getURI())
+        ->setDisabled(!$can_edit);
+    }
+
+    $remove_uri = $this->getApplicationURI(
+      new PhutilURI(
+        urisprintf(
+          'column/remove/%d/',
+          $column->getID())));
+
+    $trigger_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-times')
+      ->setName(pht('Remove Trigger'))
+      ->setHref($remove_uri)
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit || !$trigger);
+
+    $trigger_menu = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+    foreach ($trigger_items as $item) {
+      $trigger_menu->addAction($item);
+    }
+
+    if ($trigger) {
+      $trigger_icon = 'fa-cogs';
+    } else {
+      $trigger_icon = 'fa-cogs grey';
+    }
+
+    $trigger_button = id(new PHUIIconView())
+      ->setIcon($trigger_icon)
+      ->setHref('#')
+      ->addSigil('boards-dropdown-menu')
+      ->addSigil('trigger-preview')
+      ->setMetadata(
+        array(
+          'items' => hsprintf('%s', $trigger_menu),
+          'columnPHID' => $column->getPHID(),
+        ));
+
+    return $trigger_button;
+  }
 
   /**
    * Add current state parameters (like order and the visibility of hidden

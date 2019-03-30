@@ -11,8 +11,9 @@ final class PhabricatorProjectMoveController
 
     $column_phid = $request->getStr('columnPHID');
     $object_phid = $request->getStr('objectPHID');
-    $after_phid = $request->getStr('afterPHID');
-    $before_phid = $request->getStr('beforePHID');
+
+    $after_phids = $request->getStrList('afterPHIDs');
+    $before_phids = $request->getStrList('beforePHIDs');
 
     $order = $request->getStr('order');
     if (!strlen($order)) {
@@ -70,6 +71,7 @@ final class PhabricatorProjectMoveController
     $columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()))
+      ->needTriggers(true)
       ->execute();
 
     $columns = mpull($columns, null, 'getPHID');
@@ -86,12 +88,10 @@ final class PhabricatorProjectMoveController
       ->setObjectPHIDs(array($object_phid))
       ->executeLayout();
 
-    $order_params = array();
-    if ($after_phid) {
-      $order_params['afterPHID'] = $after_phid;
-    } else if ($before_phid) {
-      $order_params['beforePHID'] = $before_phid;
-    }
+    $order_params = array(
+      'afterPHIDs' => $after_phids,
+      'beforePHIDs' => $before_phids,
+    );
 
     $xactions = array();
     $xactions[] = id(new ManiphestTransaction())
@@ -110,6 +110,24 @@ final class PhabricatorProjectMoveController
       $xactions[] = $header_xaction;
     }
 
+    $sounds = array();
+    if ($column->canHaveTrigger()) {
+      $trigger = $column->getTrigger();
+      if ($trigger) {
+        $trigger_xactions = $trigger->newDropTransactions(
+          $viewer,
+          $column,
+          $object);
+        foreach ($trigger_xactions as $trigger_xaction) {
+          $xactions[] = $trigger_xaction;
+        }
+
+        foreach ($trigger->getSoundEffects() as $effect) {
+          $sounds[] = $effect;
+        }
+      }
+    }
+
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
       ->setContinueOnMissingFields(true)
@@ -119,7 +137,11 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    return $this->newCardResponse($board_phid, $object_phid, $ordering);
+    return $this->newCardResponse(
+      $board_phid,
+      $object_phid,
+      $ordering,
+      $sounds);
   }
 
 }

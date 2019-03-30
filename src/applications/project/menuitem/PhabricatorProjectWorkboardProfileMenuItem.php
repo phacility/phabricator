@@ -57,7 +57,7 @@ final class PhabricatorProjectWorkboardProfileMenuItem
     $project = $config->getProfileObject();
 
     $id = $project->getID();
-    $href = "/project/board/{$id}/";
+    $href = $project->getWorkboardURI();
     $name = $this->getDisplayName($config);
 
     $item = $this->newItem()

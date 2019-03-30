@@ -36,22 +36,36 @@
 }
 
 .project-card-view .project-card-image {
+  position: absolute;
   height: 140px;
   width: 140px;
-  margin: 6px;
+  top: 6px;
+  left: 6px;
   border-radius: 3px;
 }
 
 .project-card-view .project-card-image-href {
-  display: inline-block;
+  display: block;
 }
 
 .project-card-view .project-card-item div {
   display: inline;
 }
 
+.project-card-inner {
+  position: relative;
+}
+
+.people-card-view .project-card-inner {
+  padding: 6px;
+  min-height: 140px;
+}
+
 .project-card-view .project-card-item {
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .project-card-view .project-card-item-text {
@@ -63,9 +77,9 @@
 }
 
 .project-card-view .project-card-header {
-  position: absolute;
-  top: 12px;
-  left: 158px;
+  margin-top: 6px;
+  margin-left: 152px;
+  overflow: hidden;
 }
 
 .project-card-header .project-card-name {

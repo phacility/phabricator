@@ -9,6 +9,7 @@ final class PhabricatorProjectColumnHeader
   private $name;
   private $icon;
   private $editProperties;
+  private $dropEffects = array();
 
   public function setOrderKey($order_key) {
     $this->orderKey = $order_key;
@@ -64,6 +65,15 @@ final class PhabricatorProjectColumnHeader
     return $this->editProperties;
   }
 
+  public function addDropEffect(PhabricatorProjectDropEffect $effect) {
+    $this->dropEffects[] = $effect;
+    return $this;
+  }
+
+  public function getDropEffects() {
+    return $this->dropEffects;
+  }
+
   public function toDictionary() {
     return array(
       'order' => $this->getOrderKey(),
@@ -71,6 +81,7 @@ final class PhabricatorProjectColumnHeader
       'template' => hsprintf('%s', $this->newView()),
       'vector' => $this->getSortVector(),
       'editProperties' => $this->getEditProperties(),
+      'effects' => mpull($this->getDropEffects(), 'toDictionary'),
     );
   }
 

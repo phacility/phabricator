@@ -4,6 +4,7 @@ final class ManiphestTaskGraph
   extends PhabricatorObjectGraph {
 
   private $seedMaps = array();
+  private $isStandalone;
 
   protected function getEdgeTypes() {
     return array(
@@ -22,6 +23,15 @@ final class ManiphestTaskGraph
 
   protected function isClosed($object) {
     return $object->isClosed();
+  }
+
+  public function setIsStandalone($is_standalone) {
+    $this->isStandalone = $is_standalone;
+    return $this;
+  }
+
+  public function getIsStandalone() {
+    return $this->isStandalone;
   }
 
   protected function newTableRow($phid, $object, $trace) {
@@ -132,6 +142,14 @@ final class ManiphestTaskGraph
         array(
           true,
           !$this->getRenderOnlyAdjacentNodes(),
+        ))
+      ->setDeviceVisibility(
+        array(
+          true,
+
+          // On mobile, we only show the actual graph drawing if we're on the
+          // standalone page, since it can take over the screen otherwise.
+          $this->getIsStandalone(),
         ));
   }
 

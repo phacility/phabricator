@@ -57,11 +57,11 @@ final class PhabricatorTimezoneSetting
     $groups = array();
     foreach ($timezones as $timezone) {
       $zone = new DateTimeZone($timezone);
-      $offset = -($zone->getOffset($now) / (60 * 60));
+      $offset = ($zone->getOffset($now) / 60);
       $groups[$offset][] = $timezone;
     }
 
-    krsort($groups);
+    ksort($groups);
 
     $option_groups = array(
       array(
@@ -71,10 +71,13 @@ final class PhabricatorTimezoneSetting
     );
 
     foreach ($groups as $offset => $group) {
-      if ($offset >= 0) {
-        $label = pht('UTC-%d', $offset);
+      $hours = $offset / 60;
+      $minutes = abs($offset % 60);
+
+      if ($offset % 60) {
+        $label = pht('UTC%+d:%02d', $hours, $minutes);
       } else {
-        $label = pht('UTC+%d', -$offset);
+        $label = pht('UTC%+d', $hours);
       }
 
       sort($group);

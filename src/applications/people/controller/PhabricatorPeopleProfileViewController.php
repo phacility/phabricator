@@ -175,6 +175,12 @@ final class PhabricatorPeopleProfileViewController
       return null;
     }
 
+    // Don't show calendar information for disabled users, since it's probably
+    // not useful or accurate and may be misleading.
+    if ($user->getIsDisabled()) {
+      return null;
+    }
+
     $midnight = PhabricatorTime::getTodayMidnightDateTime($viewer);
     $week_end = clone $midnight;
     $week_end = $week_end->modify('+3 days');

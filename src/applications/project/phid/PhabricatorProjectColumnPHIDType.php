@@ -37,7 +37,7 @@ final class PhabricatorProjectColumnPHIDType extends PhabricatorPHIDType {
       $column = $objects[$phid];
 
       $handle->setName($column->getDisplayName());
-      $handle->setURI('/project/board/'.$column->getProject()->getID().'/');
+      $handle->setURI($column->getWorkboardURI());
 
       if ($column->isHidden()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);

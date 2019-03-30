@@ -7,6 +7,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
   private $objectPHID;
   private $visiblePHIDs;
   private $ordering;
+  private $sounds;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -51,6 +52,15 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
   public function getOrdering() {
     return $this->ordering;
+  }
+
+  public function setSounds(array $sounds) {
+    $this->sounds = $sounds;
+    return $this;
+  }
+
+  public function getSounds() {
+    return $this->sounds;
   }
 
   public function buildResponse() {
@@ -131,10 +141,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
           $card['headers'][$order_key] = $header;
         }
 
-        $card['properties'] = array(
-          'points' => (double)$object->getPoints(),
-          'status' => $object->getStatus(),
-        );
+        $card['properties'] = self::newTaskProperties($object);
       }
 
       if ($card_phid === $object_phid) {
@@ -153,10 +160,20 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       'columnMaps' => $natural,
       'cards' => $cards,
       'headers' => $headers,
+      'sounds' => $this->getSounds(),
     );
 
     return id(new AphrontAjaxResponse())
       ->setContent($payload);
+  }
+
+  public static function newTaskProperties($task) {
+    return array(
+      'points' => (double)$task->getPoints(),
+      'status' => $task->getStatus(),
+      'priority' => (int)$task->getPriority(),
+      'owner' => $task->getOwnerPHID(),
+    );
   }
 
   private function buildTemplate($object) {

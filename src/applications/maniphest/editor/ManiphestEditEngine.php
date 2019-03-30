@@ -123,22 +123,23 @@ information about the move, including an optional specific position within the
 column.
 
 The target column should be identified as `columnPHID`, and you may select a
-position by passing either `beforePHID` or `afterPHID`, specifying the PHID of
-a task currently in the column that you want to move this task before or after:
+position by passing either `beforePHIDs` or `afterPHIDs`, specifying the PHIDs
+of tasks currently in the column that you want to move this task before or
+after:
 
 ```lang=json
 [
   {
     "columnPHID": "PHID-PCOL-4444",
-    "beforePHID": "PHID-TASK-5555"
+    "beforePHIDs": ["PHID-TASK-5555"]
   }
 ]
 ```
 
-Note that this affects only the "natural" position of the task. The task
-position when the board is sorted by some other attribute (like priority)
-depends on that attribute value: change a task's priority to move it on
-priority-sorted boards.
+When you specify multiple PHIDs, the task will be moved adjacent to the first
+valid PHID found in either of the lists. This allows positional moves to
+generally work as users expect even if the client view of the board has fallen
+out of date and some of the nearby tasks have moved elsewhere.
 EODOCS
       );
 

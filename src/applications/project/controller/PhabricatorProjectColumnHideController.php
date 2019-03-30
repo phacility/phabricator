@@ -38,7 +38,7 @@ final class PhabricatorProjectColumnHideController
 
     $column_phid = $column->getPHID();
 
-    $view_uri = $this->getApplicationURI('/board/'.$project_id.'/');
+    $view_uri = $project->getWorkboardURI();
     $view_uri = new PhutilURI($view_uri);
     foreach ($request->getPassthroughRequestData() as $key => $value) {
       $view_uri->replaceQueryParam($key, $value);
@@ -82,7 +82,9 @@ final class PhabricatorProjectColumnHideController
           $new_status = PhabricatorProjectColumn::STATUS_HIDDEN;
         }
 
-        $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
+        $type_status =
+          PhabricatorProjectColumnStatusTransaction::TRANSACTIONTYPE;
+
         $xactions = array(
           id(new PhabricatorProjectColumnTransaction())
             ->setTransactionType($type_status)

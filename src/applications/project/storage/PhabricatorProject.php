@@ -392,6 +392,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return "/project/profile/{$id}/";
   }
 
+  public function getWorkboardURI() {
+    return urisprintf('/project/board/%d/', $this->getID());
+  }
+
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));

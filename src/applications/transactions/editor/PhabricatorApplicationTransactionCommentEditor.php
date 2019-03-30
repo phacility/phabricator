@@ -5,6 +5,9 @@ final class PhabricatorApplicationTransactionCommentEditor
 
   private $contentSource;
   private $actingAsPHID;
+  private $request;
+  private $cancelURI;
+  private $isNewComment;
 
   public function setActingAsPHID($acting_as_phid) {
     $this->actingAsPHID = $acting_as_phid;
@@ -27,6 +30,33 @@ final class PhabricatorApplicationTransactionCommentEditor
     return $this->contentSource;
   }
 
+  public function setRequest(AphrontRequest $request) {
+    $this->request = $request;
+    return $this;
+  }
+
+  public function getRequest() {
+    return $this->request;
+  }
+
+  public function setCancelURI($cancel_uri) {
+    $this->cancelURI = $cancel_uri;
+    return $this;
+  }
+
+  public function getCancelURI() {
+    return $this->cancelURI;
+  }
+
+  public function setIsNewComment($is_new) {
+    $this->isNewComment = $is_new;
+    return $this;
+  }
+
+  public function getIsNewComment() {
+    return $this->isNewComment;
+  }
+
   /**
    * Edit a transaction's comment. This method effects the required create,
    * update or delete to set the transaction's comment to the provided comment.
@@ -38,6 +68,8 @@ final class PhabricatorApplicationTransactionCommentEditor
     $this->validateEdit($xaction, $comment);
 
     $actor = $this->requireActor();
+
+    $this->applyMFAChecks($xaction, $comment);
 
     $comment->setContentSource($this->getContentSource());
     $comment->setAuthorPHID($this->getActingAsPHID());
@@ -160,5 +192,94 @@ final class PhabricatorApplicationTransactionCommentEditor
     }
   }
 
+  private function applyMFAChecks(
+    PhabricatorApplicationTransaction $xaction,
+    PhabricatorApplicationTransactionComment $comment) {
+    $actor = $this->requireActor();
+
+    // We don't do any MFA checks here when you're creating a comment for the
+    // first time (the parent editor handles them for us), so we can just bail
+    // out if this is the creation flow.
+    if ($this->getIsNewComment()) {
+      return;
+    }
+
+    $request = $this->getRequest();
+    if (!$request) {
+      throw new PhutilInvalidStateException('setRequest');
+    }
+
+    $cancel_uri = $this->getCancelURI();
+    if (!strlen($cancel_uri)) {
+      throw new PhutilInvalidStateException('setCancelURI');
+    }
+
+    // If you're deleting a comment, we try to prompt you for MFA if you have
+    // it configured, but do not require that you have it configured. In most
+    // cases, this is administrators removing content.
+
+    // See PHI1173. If you're editing a comment you authored and the original
+    // comment was signed with MFA, you MUST have MFA on your account and you
+    // MUST sign the edit with MFA. Otherwise, we can end up with an MFA badge
+    // on different content than what was signed.
+
+    $want_mfa = false;
+    $need_mfa = false;
+
+    if ($comment->getIsRemoved()) {
+      // Try to prompt on removal.
+      $want_mfa = true;
+    }
+
+    if ($xaction->getIsMFATransaction()) {
+      if ($actor->getPHID() === $xaction->getAuthorPHID()) {
+        // Strictly require MFA if the original transaction was signed and
+        // you're the author.
+        $want_mfa = true;
+        $need_mfa = true;
+      }
+    }
+
+    if (!$want_mfa) {
+      return;
+    }
+
+    if ($need_mfa) {
+      $factors = id(new PhabricatorAuthFactorConfigQuery())
+        ->setViewer($actor)
+        ->withUserPHIDs(array($this->getActingAsPHID()))
+        ->withFactorProviderStatuses(
+          array(
+            PhabricatorAuthFactorProviderStatus::STATUS_ACTIVE,
+            PhabricatorAuthFactorProviderStatus::STATUS_DEPRECATED,
+          ))
+        ->execute();
+      if (!$factors) {
+        $error = new PhabricatorApplicationTransactionValidationError(
+          $xaction->getTransactionType(),
+          pht('No MFA'),
+          pht(
+            'This comment was signed with MFA, so edits to it must also be '.
+            'signed with MFA. You do not have any MFA factors attached to '.
+            'your account, so you can not sign this edit. Add MFA to your '.
+            'account in Settings.'),
+          $xaction);
+
+        throw new PhabricatorApplicationTransactionValidationException(
+          array(
+            $error,
+          ));
+      }
+    }
+
+    $workflow_key = sprintf(
+      'comment.edit(%s, %d)',
+      $xaction->getPHID(),
+      $xaction->getComment()->getID());
+
+    $hisec_token = id(new PhabricatorAuthSessionEngine())
+      ->setWorkflowKey($workflow_key)
+      ->requireHighSecurityToken($actor, $request, $cancel_uri);
+  }
 
 }

@@ -14,7 +14,8 @@ JX.install('WorkboardHeaderTemplate', {
     template: null,
     order: null,
     vector: null,
-    editProperties: null
+    editProperties: null,
+    dropEffects: []
   },
 
   members: {

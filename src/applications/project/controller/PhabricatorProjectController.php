@@ -109,6 +109,14 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   }
 
   protected function buildApplicationCrumbs() {
+    return $this->newApplicationCrumbs('profile');
+  }
+
+  protected function newWorkboardCrumbs() {
+    return $this->newApplicationCrumbs('workboard');
+  }
+
+  private function newApplicationCrumbs($mode) {
     $crumbs = parent::buildApplicationCrumbs();
 
     $project = $this->getProject();
@@ -117,10 +125,24 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       $ancestors = array_reverse($ancestors);
       $ancestors[] = $project;
       foreach ($ancestors as $ancestor) {
-        $crumbs->addTextCrumb(
-          $ancestor->getName(),
-          $ancestor->getProfileURI()
-        );
+        if ($ancestor->getPHID() === $project->getPHID()) {
+          // Link the current project's crumb to its profile no matter what,
+          // since we're already on the right context page for it and linking
+          // to the current page isn't helpful.
+          $crumb_uri = $ancestor->getProfileURI();
+        } else {
+          switch ($mode) {
+            case 'workboard':
+              $crumb_uri = $ancestor->getWorkboardURI();
+              break;
+            case 'profile':
+            default:
+              $crumb_uri = $ancestor->getProfileURI();
+              break;
+          }
+        }
+
+        $crumbs->addTextCrumb($ancestor->getName(), $crumb_uri);
       }
     }
 
@@ -152,7 +174,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   protected function newCardResponse(
     $board_phid,
     $object_phid,
-    PhabricatorProjectColumnOrder $ordering = null) {
+    PhabricatorProjectColumnOrder $ordering = null,
+    $sounds = array()) {
 
     $viewer = $this->getViewer();
 
@@ -166,7 +189,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
       ->setObjectPHID($object_phid)
-      ->setVisiblePHIDs($visible_phids);
+      ->setVisiblePHIDs($visible_phids)
+      ->setSounds($sounds);
 
     if ($ordering) {
       $engine->setOrdering($ordering);

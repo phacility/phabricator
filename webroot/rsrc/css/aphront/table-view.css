@@ -229,7 +229,8 @@ span.single-display-line-content {
   word-wrap: break-word;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 0;
+  min-width: 320px;
+  max-width: 320px;
 }
 
 .aphront-table-view tr.closed td.object-link .object-name,

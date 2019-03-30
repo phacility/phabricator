@@ -7,6 +7,7 @@
  *           javelin-stratcom
  *           javelin-workflow
  *           javelin-workboard-controller
+ *           javelin-workboard-drop-effect
  */
 
 JX.behavior('project-boards', function(config, statics) {
@@ -88,12 +89,30 @@ JX.behavior('project-boards', function(config, statics) {
   }
 
   var ii;
-  var column_maps = config.columnMaps;
-  for (var column_phid in column_maps) {
-    var column = board.getColumn(column_phid);
-    var column_map = column_maps[column_phid];
-    for (ii = 0; ii < column_map.length; ii++) {
-      column.newCard(column_map[ii]);
+  var jj;
+  var effects;
+
+  for (ii = 0; ii < config.columnTemplates.length; ii++) {
+    var spec = config.columnTemplates[ii];
+
+    var column = board.getColumn(spec.columnPHID);
+
+    effects = [];
+    for (jj = 0; jj < spec.effects.length; jj++) {
+      effects.push(
+        JX.WorkboardDropEffect.newFromDictionary(
+          spec.effects[jj]));
+    }
+    column.setDropEffects(effects);
+
+    for (jj = 0; jj < spec.cardPHIDs.length; jj++) {
+      column.newCard(spec.cardPHIDs[jj]);
+    }
+
+    if (spec.triggerPreviewEffect) {
+      column.setTriggerPreviewEffect(
+        JX.WorkboardDropEffect.newFromDictionary(
+          spec.triggerPreviewEffect));
     }
   }
 
@@ -115,11 +134,19 @@ JX.behavior('project-boards', function(config, statics) {
   for (ii = 0; ii < headers.length; ii++) {
     var header = headers[ii];
 
+    effects = [];
+    for (jj = 0; jj < header.effects.length; jj++) {
+      effects.push(
+        JX.WorkboardDropEffect.newFromDictionary(
+          header.effects[jj]));
+    }
+
     board.getHeaderTemplate(header.key)
       .setOrder(header.order)
       .setNodeHTMLTemplate(header.template)
       .setVector(header.vector)
-      .setEditProperties(header.editProperties);
+      .setEditProperties(header.editProperties)
+      .setDropEffects(effects);
   }
 
   var orders = config.orders;
@@ -138,5 +165,17 @@ JX.behavior('project-boards', function(config, statics) {
   }
 
   board.start();
+
+  // In Safari, we can only play sounds that we've already loaded, and we can
+  // only load them in response to an explicit user interaction like a click.
+  var sounds = config.preloadSounds;
+  var listener = JX.Stratcom.listen('mousedown', null, function() {
+    for (var ii = 0; ii < sounds.length; ii++) {
+      JX.Sound.load(sounds[ii]);
+    }
+
+    // Remove this callback once it has run once.
+    listener.remove();
+  });
 
 });

@@ -55,11 +55,22 @@ final class LegalpadDocumentRequireSignatureTransaction
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
-    $is_admin = $this->getActor()->getIsAdmin();
+    $old = (bool)$object->getRequireSignature();
+    foreach ($xactions as $xaction) {
+      $new = (bool)$xaction->getNewValue();
 
-    if (!$is_admin) {
-      $errors[] = $this->newInvalidError(
-        pht('Only admins may require signature.'));
+      if ($old === $new) {
+        continue;
+      }
+
+      $is_admin = $this->getActor()->getIsAdmin();
+      if (!$is_admin) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'Only administrators may change whether a document '.
+            'requires a signature.'),
+          $xaction);
+      }
     }
 
     return $errors;

@@ -178,3 +178,77 @@
   margin-left: 36px;
   overflow: hidden;
 }
+
+.workboard-drop-preview {
+  pointer-events: none;
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 300px;
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border: 1px solid {$lightblueborder};
+  padding: 4px 0;
+  background: #fff;
+}
+
+.workboard-drop-preview li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 4px 8px;
+  color: {$greytext};
+  border-radius: 3px;
+}
+
+.workboard-drop-preview li .phui-icon-view {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  width: 24px;
+  height: 18px;
+  padding-top: 6px;
+  border-radius: 3px;
+  background: {$bluebackground};
+  margin-right: 6px;
+}
+
+.workboard-drop-preview .workboard-drop-preview-header {
+  background: {$sky};
+  color: #fff;
+}
+
+.workboard-drop-preview .workboard-drop-preview-header .phui-icon-view {
+  background: {$blue};
+  color: #fff;
+}
+
+.workboard-drop-preview-fade {
+  animation: 0.1s workboard-drop-preview-fade-out;
+  opacity: 0.25;
+}
+
+@keyframes workboard-drop-preview-fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.25;
+  }
+}
+
+.phui-workpanel-view .phui-header-action-item a.phui-icon-view {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 3px;
+  box-shadow: inset -1px -1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid {$lightgreyborder};
+  background: {$lightgreybackground};
+}
+
+.phui-workpanel-view .phui-header-action-item .phui-tag-view {
+  line-height: 24px;
+}

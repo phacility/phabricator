@@ -106,9 +106,64 @@ final class PhabricatorDashboardQueryPanelType
       }
     }
 
-    $results = $engine->executeQuery($query, $pager);
+    $query->setReturnPartialResultsOnOverheat(true);
 
-    return $engine->renderResults($results, $saved);
+    $results = $engine->executeQuery($query, $pager);
+    $results_view = $engine->renderResults($results, $saved);
+
+    $is_overheated = $query->getIsOverheated();
+    $overheated_view = null;
+    if ($is_overheated) {
+      $content = $results_view->getContent();
+
+      $overheated_message =
+        PhabricatorApplicationSearchController::newOverheatedError(
+          (bool)$results);
+
+      $overheated_warning = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setTitle(pht('Query Overheated'))
+        ->setErrors(
+          array(
+            $overheated_message,
+          ));
+
+      $overheated_box = id(new PHUIBoxView())
+        ->addClass('mmt mmb')
+        ->appendChild($overheated_warning);
+
+      $content = array($content, $overheated_box);
+      $results_view->setContent($content);
+    }
+
+    if ($pager->getHasMoreResults()) {
+      $item_list = $results_view->getObjectList();
+
+      $more_href = $engine->getQueryResultsPageURI($key);
+      if ($item_list) {
+        $item_list->newTailButton()
+          ->setHref($more_href);
+      } else {
+        // For search engines that do not return an object list, add a fake
+        // one to the end so we can render a "View All Results" button that
+        // looks like it does in normal applications. At time of writing,
+        // several major applications like Maniphest (which has group headers)
+        // and Feed (which uses custom rendering) don't return simple lists.
+
+        $content = $results_view->getContent();
+
+        $more_list = id(new PHUIObjectItemListView())
+          ->setAllowEmptyList(true);
+
+        $more_list->newTailButton()
+          ->setHref($more_href);
+
+        $content = array($content, $more_list);
+        $results_view->setContent($content);
+      }
+    }
+
+    return $results_view;
   }
 
   public function adjustPanelHeader(
@@ -120,10 +175,18 @@ final class PhabricatorDashboardQueryPanelType
     $search_engine = $this->getSearchEngine($panel);
     $key = $panel->getProperty('key');
     $href = $search_engine->getQueryResultsPageURI($key);
+
     $icon = id(new PHUIIconView())
-        ->setIcon('fa-search')
-        ->setHref($href);
-    $header->addActionItem($icon);
+      ->setIcon('fa-search');
+
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View All'))
+      ->setIcon($icon)
+      ->setHref($href)
+      ->setColor(PHUIButtonView::GREY);
+
+    $header->addActionLink($button);
 
     return $header;
   }

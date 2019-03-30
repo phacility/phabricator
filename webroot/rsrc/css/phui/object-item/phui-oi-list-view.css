@@ -720,3 +720,9 @@ ul.phui-oi-list-view .phui-oi-selectable
 .differential-revision-small .phui-icon-view {
   color: #6699ba;
 }
+
+.phui-oi-tail {
+  text-align: center;
+  padding: 8px 0;
+  background: linear-gradient({$lightbluebackground}, #fff 66%, #fff);
+}

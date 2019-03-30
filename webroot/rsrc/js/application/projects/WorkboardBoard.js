@@ -39,6 +39,12 @@ JX.install('WorkboardBoard', {
     _columns: null,
     _headers: null,
     _cards: null,
+    _dropPreviewNode: null,
+    _dropPreviewListNode: null,
+    _previewPHID: null,
+    _hidePreivew: false,
+    _previewPositionVector: null,
+    _previewDimState: false,
 
     getRoot: function() {
       return this._root;
@@ -139,6 +145,115 @@ JX.install('WorkboardBoard', {
 
         this._columns[phid] = new JX.WorkboardColumn(this, phid, node);
       }
+
+      var on_over = JX.bind(this, this._showTriggerPreview);
+      var on_out = JX.bind(this, this._hideTriggerPreview);
+      JX.Stratcom.listen('mouseover', 'trigger-preview', on_over);
+      JX.Stratcom.listen('mouseout', 'trigger-preview', on_out);
+
+      var on_move = JX.bind(this, this._dimPreview);
+      JX.Stratcom.listen('mousemove', null, on_move);
+    },
+
+    _dimPreview: function(e) {
+      var p = this._previewPositionVector;
+      if (!p) {
+        return;
+      }
+
+      // When the mouse cursor gets near the drop preview element, fade it
+      // out so you can see through it. We can't do this with ":hover" because
+      // we disable cursor events.
+
+      var cursor = JX.$V(e);
+      var margin = 64;
+
+      var near_x = (cursor.x > (p.x - margin));
+      var near_y = (cursor.y > (p.y - margin));
+      var should_dim = (near_x && near_y);
+
+      this._setPreviewDimState(should_dim);
+    },
+
+    _setPreviewDimState: function(is_dim) {
+      if (is_dim === this._previewDimState) {
+        return;
+      }
+
+      this._previewDimState = is_dim;
+      var node = this._getDropPreviewNode();
+      JX.DOM.alterClass(node, 'workboard-drop-preview-fade', is_dim);
+    },
+
+    _showTriggerPreview: function(e) {
+      if (this._disablePreview) {
+        return;
+      }
+
+      var target = e.getTarget();
+      var node = e.getNode('trigger-preview');
+
+      if (target !== node) {
+        return;
+      }
+
+      var phid = JX.Stratcom.getData(node).columnPHID;
+      var column = this._columns[phid];
+
+      // Bail out if we don't know anything about this column.
+      if (!column) {
+        return;
+      }
+
+      if (phid === this._previewPHID) {
+        return;
+      }
+
+      this._previewPHID = phid;
+
+      var effects = column.getDropEffects();
+
+      var triggers = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        if (effects[ii].getIsTriggerEffect()) {
+          triggers.push(effects[ii]);
+        }
+      }
+
+      if (triggers.length) {
+        var header = column.getTriggerPreviewEffect();
+        triggers = [header].concat(triggers);
+      }
+
+      this._showEffects(triggers);
+    },
+
+    _hideTriggerPreview: function(e) {
+      if (this._disablePreview) {
+        return;
+      }
+
+      var target = e.getTarget();
+
+      if (target !== e.getNode('trigger-preview')) {
+        return;
+      }
+
+      this._removeTriggerPreview();
+    },
+
+    _removeTriggerPreview: function() {
+      this._showEffects([]);
+      this._previewPHID = null;
+    },
+
+    _beginDrag: function() {
+      this._disablePreview = true;
+      this._showEffects([]);
+    },
+
+    _endDrag: function() {
+      this._disablePreview = false;
     },
 
     _setupDragHandlers: function() {
@@ -180,7 +295,12 @@ JX.install('WorkboardBoard', {
           list.setCompareOnReorder(true);
         }
 
+        list.setTargetChangeHandler(JX.bind(this, this._didChangeDropTarget));
+
         list.listen('didDrop', JX.bind(this, this._onmovecard, list));
+
+        list.listen('didBeginDrag', JX.bind(this, this._beginDrag));
+        list.listen('didEndDrag', JX.bind(this, this._endDrag));
 
         lists.push(list);
       }
@@ -190,8 +310,169 @@ JX.install('WorkboardBoard', {
       }
     },
 
+    _didChangeDropTarget: function(src_list, src_node, dst_list, dst_node) {
+      if (!dst_list) {
+        // The card is being dragged into a dead area, like the left menu.
+        this._showEffects([]);
+        return;
+      }
+
+      if (dst_node === false) {
+        // The card is being dragged over itself, so dropping it won't
+        // affect anything.
+        this._showEffects([]);
+        return;
+      }
+
+      var src_phid = JX.Stratcom.getData(src_list.getRootNode()).columnPHID;
+      var dst_phid = JX.Stratcom.getData(dst_list.getRootNode()).columnPHID;
+
+      var src_column = this.getColumn(src_phid);
+      var dst_column = this.getColumn(dst_phid);
+
+      var effects = [];
+      if (src_column !== dst_column) {
+        effects = effects.concat(dst_column.getDropEffects());
+      }
+
+      var context = this._getDropContext(dst_node);
+      if (context.headerKey) {
+        var header = this.getHeaderTemplate(context.headerKey);
+        effects = effects.concat(header.getDropEffects());
+      }
+
+      var card_phid = JX.Stratcom.getData(src_node).objectPHID;
+      var card = src_column.getCard(card_phid);
+
+      var visible = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        if (effects[ii].isEffectVisibleForCard(card)) {
+          visible.push(effects[ii]);
+        }
+      }
+      effects = visible;
+
+      this._showEffects(effects);
+    },
+
+    _showEffects: function(effects) {
+      var node = this._getDropPreviewNode();
+
+      if (!effects.length) {
+        JX.DOM.remove(node);
+        this._previewPositionVector = null;
+        return;
+      }
+
+      var items = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        var effect = effects[ii];
+        items.push(effect.newNode());
+      }
+
+      JX.DOM.setContent(this._getDropPreviewListNode(), items);
+      document.body.appendChild(node);
+
+      // Undim the drop preview element if it was previously dimmed.
+      this._setPreviewDimState(false);
+      this._previewPositionVector = JX.$V(node);
+    },
+
+    _getDropPreviewNode: function() {
+      if (!this._dropPreviewNode) {
+        var attributes = {
+          className: 'workboard-drop-preview'
+        };
+
+        var content = [
+          this._getDropPreviewListNode()
+        ];
+
+        this._dropPreviewNode = JX.$N('div', attributes, content);
+      }
+
+      return this._dropPreviewNode;
+    },
+
+    _getDropPreviewListNode: function() {
+      if (!this._dropPreviewListNode) {
+        var attributes = {};
+        this._dropPreviewListNode = JX.$N('ul', attributes);
+      }
+
+      return this._dropPreviewListNode;
+    },
+
     _findCardsInColumn: function(column_node) {
       return JX.DOM.scry(column_node, 'li', 'project-card');
+    },
+
+    _getDropContext: function(after_node, item) {
+      var header_key;
+      var after_phids = [];
+      var before_phids = [];
+
+      // We're going to send an "afterPHID" and a "beforePHID" if the card
+      // was dropped immediately adjacent to another card. If a card was
+      // dropped before or after a header, we don't send a PHID for the card
+      // on the other side of the header.
+
+      // If the view has headers, we always send the header the card was
+      // dropped under.
+
+      var after_data;
+      var after_card = after_node;
+      while (after_card) {
+        after_data = JX.Stratcom.getData(after_card);
+
+        if (after_data.headerKey) {
+          break;
+        }
+
+        if (after_data.objectPHID) {
+          after_phids.push(after_data.objectPHID);
+        }
+
+        after_card = after_card.previousSibling;
+      }
+
+      if (item) {
+        var before_data;
+        var before_card = item.nextSibling;
+        while (before_card) {
+          before_data = JX.Stratcom.getData(before_card);
+
+          if (before_data.headerKey) {
+            break;
+          }
+
+          if (before_data.objectPHID) {
+            before_phids.push(before_data.objectPHID);
+          }
+
+          before_card = before_card.nextSibling;
+        }
+      }
+
+      var header_data;
+      var header_node = after_node;
+      while (header_node) {
+        header_data = JX.Stratcom.getData(header_node);
+        if (header_data.headerKey) {
+          break;
+        }
+        header_node = header_node.previousSibling;
+      }
+
+      if (header_data) {
+        header_key = header_data.headerKey;
+      }
+
+      return {
+        headerKey: header_key,
+        afterPHIDs: after_phids,
+        beforePHIDs: before_phids
+      };
     },
 
     _onmovecard: function(list, item, after_node, src_list) {
@@ -208,69 +489,14 @@ JX.install('WorkboardBoard', {
         order: this.getOrder()
       };
 
-      // We're going to send an "afterPHID" and a "beforePHID" if the card
-      // was dropped immediately adjacent to another card. If a card was
-      // dropped before or after a header, we don't send a PHID for the card
-      // on the other side of the header.
+      var context = this._getDropContext(after_node, item);
+      data.afterPHIDs = context.afterPHIDs.join(',');
+      data.beforePHIDs = context.beforePHIDs.join(',');
 
-      // If the view has headers, we always send the header the card was
-      // dropped under.
-
-      var after_data;
-      var after_card = after_node;
-      while (after_card) {
-        after_data = JX.Stratcom.getData(after_card);
-        if (after_data.objectPHID) {
-          break;
-        }
-        if (after_data.headerKey) {
-          break;
-        }
-        after_card = after_card.previousSibling;
-      }
-
-      if (after_data) {
-        if (after_data.objectPHID) {
-          data.afterPHID = after_data.objectPHID;
-        }
-      }
-
-      var before_data;
-      var before_card = item.nextSibling;
-      while (before_card) {
-        before_data = JX.Stratcom.getData(before_card);
-        if (before_data.objectPHID) {
-          break;
-        }
-        if (before_data.headerKey) {
-          break;
-        }
-        before_card = before_card.nextSibling;
-      }
-
-      if (before_data) {
-        if (before_data.objectPHID) {
-          data.beforePHID = before_data.objectPHID;
-        }
-      }
-
-      var header_data;
-      var header_node = after_node;
-      while (header_node) {
-        header_data = JX.Stratcom.getData(header_node);
-        if (header_data.headerKey) {
-          break;
-        }
-        header_node = header_node.previousSibling;
-      }
-
-      if (header_data) {
-        var header_key = header_data.headerKey;
-        if (header_key) {
-          var properties = this.getHeaderTemplate(header_key)
-            .getEditProperties();
-          data.header = JX.JSON.stringify(properties);
-        }
+      if (context.headerKey) {
+        var properties = this.getHeaderTemplate(context.headerKey)
+          .getEditProperties();
+        data.header = JX.JSON.stringify(properties);
       }
 
       var visible_phids = [];
@@ -281,17 +507,47 @@ JX.install('WorkboardBoard', {
 
       data.visiblePHIDs = visible_phids.join(',');
 
+      // If the user cancels the workflow (for example, by hitting an MFA
+      // prompt that they click "Cancel" on), put the card back where it was
+      // and reset the UI state.
+      var on_revert = JX.bind(
+        this,
+        this._revertCard,
+        list,
+        item,
+        src_phid,
+        dst_phid);
+
+      var after_phid = null;
+      if (data.afterPHIDs.length) {
+        after_phid = data.afterPHIDs[0];
+      }
+
       var onupdate = JX.bind(
         this,
         this._oncardupdate,
         list,
         src_phid,
         dst_phid,
-        data.afterPHID);
+        after_phid);
 
       new JX.Workflow(this.getController().getMoveURI(), data)
         .setHandler(onupdate)
+        .setCloseHandler(on_revert)
         .start();
+    },
+
+    _revertCard: function(list, item, src_phid, dst_phid) {
+      JX.DOM.alterClass(item, 'drag-sending', false);
+
+      var src_column = this.getColumn(src_phid);
+      var dst_column = this.getColumn(dst_phid);
+
+      src_column.markForRedraw();
+      dst_column.markForRedraw();
+      this._redrawColumns();
+
+      list.unlock();
     },
 
     _oncardupdate: function(list, src_phid, dst_phid, after_phid, response) {
@@ -305,6 +561,11 @@ JX.install('WorkboardBoard', {
       dst_column.markForRedraw();
 
       this.updateCard(response);
+
+      var sounds = response.sounds || [];
+      for (var ii = 0; ii < sounds.length; ii++) {
+        JX.Sound.queue(sounds[ii]);
+      }
 
       list.unlock();
     },

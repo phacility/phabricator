@@ -83,6 +83,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $this->applyExternalCursorConstraintsToQuery($query, $cursor);
 
+    // If we have a Ferret fulltext query, copy it to the subquery so that we
+    // generate ranking columns appropriately, and compute the correct object
+    // ranking score for the current query.
+    if ($this->ferretEngine) {
+      $query->withFerretConstraint($this->ferretEngine, $this->ferretTokens);
+    }
+
     // We're executing the subquery normally to make sure the viewer can
     // actually see the object, and that it's a completely valid object which
     // passes all filtering and policy checks. You aren't allowed to use an
@@ -204,6 +211,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           get_class($this)));
     }
 
+    if ($this->supportsFerretEngine()) {
+      if ($this->getFerretTokens()) {
+        $map += array(
+          'rank' =>
+            $cursor->getRawRowProperty(self::FULLTEXT_RANK),
+          'fulltext-modified' =>
+            $cursor->getRawRowProperty(self::FULLTEXT_MODIFIED),
+          'fulltext-created' =>
+            $cursor->getRawRowProperty(self::FULLTEXT_CREATED),
+        );
+      }
+    }
+
     foreach ($keys as $key) {
       if (!array_key_exists($key, $map)) {
         throw new Exception(
@@ -295,6 +315,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   protected function didLoadRawRows(array $rows) {
+    $this->rawCursorRow = last($rows);
+
     if ($this->ferretEngine) {
       foreach ($rows as $row) {
         $phid = $row['phid'];
@@ -311,8 +333,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         unset($row[self::FULLTEXT_CREATED]);
       }
     }
-
-    $this->rawCursorRow = last($rows);
 
     return $rows;
   }
@@ -467,7 +487,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = array();
-    $where[] = $this->buildPagingClause($conn);
+    $where[] = $this->buildPagingWhereClause($conn);
     $where[] = $this->buildEdgeLogicWhereClause($conn);
     $where[] = $this->buildSpacesWhereClause($conn);
     $where[] = $this->buildNgramsWhereClause($conn);
@@ -482,6 +502,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   protected function buildHavingClause(AphrontDatabaseConnection $conn) {
     $having = $this->buildHavingClauseParts($conn);
+    $having[] = $this->buildPagingHavingClause($conn);
     return $this->formatHavingClause($conn, $having);
   }
 
@@ -538,6 +559,45 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 /* -(  Paging  )------------------------------------------------------------- */
 
+
+  private function buildPagingWhereClause(AphrontDatabaseConnection $conn) {
+    if ($this->shouldPageWithHavingClause()) {
+      return null;
+    }
+
+    return $this->buildPagingClause($conn);
+  }
+
+  private function buildPagingHavingClause(AphrontDatabaseConnection $conn) {
+    if (!$this->shouldPageWithHavingClause()) {
+      return null;
+    }
+
+    return $this->buildPagingClause($conn);
+  }
+
+  private function shouldPageWithHavingClause() {
+    // If any of the paging conditions reference dynamic columns, we need to
+    // put the paging conditions in a "HAVING" clause instead of a "WHERE"
+    // clause.
+
+    // For example, this happens when paging on the Ferret "rank" column,
+    // since the "rank" value is computed dynamically in the SELECT statement.
+
+    $orderable = $this->getOrderableColumns();
+    $vector = $this->getOrderVector();
+
+    foreach ($vector as $order) {
+      $key = $order->getOrderKey();
+      $column = $orderable[$key];
+
+      if (!empty($column['having'])) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   /**
    * @task paging
@@ -655,6 +715,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'reverse' => 'optional bool',
           'unique' => 'optional bool',
           'null' => 'optional string|null',
+          'requires-ferret' => 'optional bool',
+          'having' => 'optional bool',
         ));
     }
 
@@ -1106,6 +1168,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         'column' => self::FULLTEXT_RANK,
         'type' => 'int',
         'requires-ferret' => true,
+        'having' => true,
       );
       $columns['fulltext-created'] = array(
         'table' => null,

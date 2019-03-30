@@ -113,6 +113,11 @@ final class PhabricatorSettingsTimezoneController
   }
 
   private function formatOffset($offset) {
+    // This controller works with client-side (Javascript) offsets, which have
+    // the opposite sign we might expect -- for example "UTC-3" is a positive
+    // offset. Invert the sign before rendering the offset.
+    $offset = -1 * $offset;
+
     $hours = $offset / 60;
     // Non-integer number of hours off UTC?
     if ($offset % 60) {

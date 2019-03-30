@@ -72,6 +72,15 @@ final class PhabricatorProjectColumnStatusOrder
       $icon_view = id(new PHUIIconView())
         ->setIcon($status_icon, $status_color);
 
+      $drop_effect = $this->newEffect()
+        ->setIcon($status_icon)
+        ->setColor($status_color)
+        ->addCondition('status', '!=', $status_key)
+        ->setContent(
+          pht(
+            'Change status to %s.',
+            phutil_tag('strong', array(), $status_name)));
+
       $header = $this->newHeader()
         ->setHeaderKey($header_key)
         ->setSortVector($sort_vector)
@@ -80,7 +89,8 @@ final class PhabricatorProjectColumnStatusOrder
         ->setEditProperties(
           array(
             'value' => $status_key,
-          ));
+          ))
+        ->addDropEffect($drop_effect);
 
       $headers[] = $header;
     }

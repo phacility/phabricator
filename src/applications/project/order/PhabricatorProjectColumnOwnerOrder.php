@@ -122,16 +122,23 @@ final class PhabricatorProjectColumnOwnerOrder
       $header_key = $this->newHeaderKeyForOwnerPHID($owner_phid);
 
       $owner_image = null;
+      $effect_content = null;
       if ($owner_phid === null) {
         $owner = null;
         $sort_vector = $this->newSortVectorForUnowned();
         $owner_name = pht('Not Assigned');
+
+        $effect_content = pht('Remove task assignee.');
       } else {
         $owner = idx($owner_users, $owner_phid);
         if ($owner) {
           $sort_vector = $this->newSortVectorForOwner($owner);
           $owner_name = $owner->getUsername();
           $owner_image = $owner->getProfileImageURI();
+
+          $effect_content = pht(
+            'Assign task to %s.',
+            phutil_tag('strong', array(), $owner_name));
         } else {
           $sort_vector = $this->newSortVectorForOwnerPHID($owner_phid);
           $owner_name = pht('Unknown User ("%s")', $owner_phid);
@@ -158,6 +165,15 @@ final class PhabricatorProjectColumnOwnerOrder
           array(
             'value' => $owner_phid,
           ));
+
+      if ($effect_content !== null) {
+        $header->addDropEffect(
+          $this->newEffect()
+            ->setIcon($owner_icon)
+            ->setColor($owner_color)
+            ->addCondition('owner', '!=', $owner_phid)
+            ->setContent($effect_content));
+      }
 
       $headers[] = $header;
     }

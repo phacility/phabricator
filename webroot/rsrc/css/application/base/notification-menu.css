@@ -15,6 +15,7 @@
 
 .phabricator-notification {
   padding: 8px 12px;
+  color: {$darkgreytext};
 }
 
 .phabricator-notification-menu-loading {
@@ -114,7 +115,7 @@
 }
 
 .phabricator-notification-header a {
-  color: {$darkgreytext};
+  color: {$anchor};
 }
 
 .phabricator-notification-header a:hover {
@@ -161,4 +162,9 @@
 
 .aphlict-connection-status .connection-status-text {
   margin-left: 12px;
+}
+
+.phabricator-notification .phui-timeline-value {
+  font-style: italic;
+  color: #000;
 }

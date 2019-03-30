@@ -25,6 +25,11 @@ JX.install('WorkboardColumn', {
     this._headers = {};
     this._objects = [];
     this._naturalOrder = [];
+    this._dropEffects = [];
+  },
+
+  properties: {
+    triggerPreviewEffect: null
   },
 
   members: {
@@ -40,6 +45,7 @@ JX.install('WorkboardColumn', {
     _pointsContentNode: null,
     _dirty: true,
     _objects: null,
+    _dropEffects: null,
 
     getPHID: function() {
       return this._phid;
@@ -69,6 +75,15 @@ JX.install('WorkboardColumn', {
       this._naturalOrder = order;
       this._orderVectors = null;
       return this;
+    },
+
+    setDropEffects: function(effects) {
+      this._dropEffects = effects;
+      return this;
+    },
+
+    getDropEffects: function() {
+      return this._dropEffects;
     },
 
     getPointsNode: function() {

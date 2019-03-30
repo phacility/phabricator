@@ -243,8 +243,7 @@ final class ManiphestTransactionEditor
       foreach ($projects as $project) {
         $body->addLinkSection(
           pht('WORKBOARD'),
-          PhabricatorEnv::getProductionURI(
-            '/project/board/'.$project->getID().'/'));
+          PhabricatorEnv::getProductionURI($project->getWorkboardURI()));
       }
     }
 
@@ -428,6 +427,7 @@ final class ManiphestTransactionEditor
   private function buildMoveTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
+    $actor = $this->getActor();
 
     $new = $xaction->getNewValue();
     if (!is_array($new)) {
@@ -435,7 +435,7 @@ final class ManiphestTransactionEditor
       $new = array($new);
     }
 
-    $nearby_phids = array();
+    $relative_phids = array();
     foreach ($new as $key => $value) {
       if (!is_array($value)) {
         $this->validateColumnPHID($value);
@@ -448,35 +448,83 @@ final class ManiphestTransactionEditor
         $value,
         array(
           'columnPHID' => 'string',
+          'beforePHIDs' => 'optional list<string>',
+          'afterPHIDs' => 'optional list<string>',
+
+          // Deprecated older variations of "beforePHIDs" and "afterPHIDs".
           'beforePHID' => 'optional string',
           'afterPHID' => 'optional string',
         ));
 
-      $new[$key] = $value;
+      $value = $value + array(
+        'beforePHIDs' => array(),
+        'afterPHIDs' => array(),
+      );
 
-      if (!empty($value['beforePHID'])) {
-        $nearby_phids[] = $value['beforePHID'];
-      }
-
+      // Normalize the legacy keys "beforePHID" and "afterPHID" keys to the
+      // modern format.
       if (!empty($value['afterPHID'])) {
-        $nearby_phids[] = $value['afterPHID'];
+        if ($value['afterPHIDs']) {
+          throw new Exception(
+            pht(
+              'Transaction specifies both "afterPHID" and "afterPHIDs". '.
+              'Specify only "afterPHIDs".'));
+        }
+        $value['afterPHIDs'] = array($value['afterPHID']);
+        unset($value['afterPHID']);
       }
+
+      if (isset($value['beforePHID'])) {
+        if ($value['beforePHIDs']) {
+          throw new Exception(
+            pht(
+              'Transaction specifies both "beforePHID" and "beforePHIDs". '.
+              'Specify only "beforePHIDs".'));
+        }
+        $value['beforePHIDs'] = array($value['beforePHID']);
+        unset($value['beforePHID']);
+      }
+
+      foreach ($value['beforePHIDs'] as $phid) {
+        $relative_phids[] = $phid;
+      }
+
+      foreach ($value['afterPHIDs'] as $phid) {
+        $relative_phids[] = $phid;
+      }
+
+      $new[$key] = $value;
     }
 
-    if ($nearby_phids) {
-      $nearby_objects = id(new PhabricatorObjectQuery())
-        ->setViewer($this->getActor())
-        ->withPHIDs($nearby_phids)
+    // We require that objects you specify in "beforePHIDs" or "afterPHIDs"
+    // are real objects which exist and which you have permission to view.
+    // If you provide other objects, we remove them from the specification.
+
+    if ($relative_phids) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($actor)
+        ->withPHIDs($relative_phids)
         ->execute();
-      $nearby_objects = mpull($nearby_objects, null, 'getPHID');
+      $objects = mpull($objects, null, 'getPHID');
     } else {
-      $nearby_objects = array();
+      $objects = array();
+    }
+
+    foreach ($new as $key => $value) {
+      $value['afterPHIDs'] = $this->filterValidPHIDs(
+        $value['afterPHIDs'],
+        $objects);
+      $value['beforePHIDs'] = $this->filterValidPHIDs(
+        $value['beforePHIDs'],
+        $objects);
+
+      $new[$key] = $value;
     }
 
     $column_phids = ipull($new, 'columnPHID');
     if ($column_phids) {
       $columns = id(new PhabricatorProjectColumnQuery())
-        ->setViewer($this->getActor())
+        ->setViewer($actor)
         ->withPHIDs($column_phids)
         ->execute();
       $columns = mpull($columns, null, 'getPHID');
@@ -487,10 +535,9 @@ final class ManiphestTransactionEditor
     $board_phids = mpull($columns, 'getProjectPHID');
     $object_phid = $object->getPHID();
 
-    $object_phids = $nearby_phids;
-
     // Note that we may not have an object PHID if we're creating a new
     // object.
+    $object_phids = array();
     if ($object_phid) {
       $object_phids[] = $object_phid;
     }
@@ -517,49 +564,6 @@ final class ManiphestTransactionEditor
 
       $board_phid = $column->getProjectPHID();
 
-      $nearby = array();
-
-      if (!empty($spec['beforePHID'])) {
-        $nearby['beforePHID'] = $spec['beforePHID'];
-      }
-
-      if (!empty($spec['afterPHID'])) {
-        $nearby['afterPHID'] = $spec['afterPHID'];
-      }
-
-      if (count($nearby) > 1) {
-        throw new Exception(
-          pht(
-            'Column move transaction moves object to multiple positions. '.
-            'Specify only "beforePHID" or "afterPHID", not both.'));
-      }
-
-      foreach ($nearby as $where => $nearby_phid) {
-        if (empty($nearby_objects[$nearby_phid])) {
-          throw new Exception(
-            pht(
-              'Column move transaction specifies object "%s" as "%s", but '.
-              'there is no corresponding object with this PHID.',
-              $object_phid,
-              $where));
-        }
-
-        $nearby_columns = $layout_engine->getObjectColumns(
-          $board_phid,
-          $nearby_phid);
-        $nearby_columns = mpull($nearby_columns, null, 'getPHID');
-
-        if (empty($nearby_columns[$column_phid])) {
-          throw new Exception(
-            pht(
-              'Column move transaction specifies object "%s" as "%s" in '.
-              'column "%s", but this object is not in that column!',
-              $nearby_phid,
-              $where,
-              $column_phid));
-        }
-      }
-
       if ($object_phid) {
         $old_columns = $layout_engine->getObjectColumns(
           $board_phid,
@@ -578,8 +582,8 @@ final class ManiphestTransactionEditor
       // We can just drop this column change if it has no effect.
       $from_map = array_fuse($spec['fromColumnPHIDs']);
       $already_here = isset($from_map[$column_phid]);
-      $is_reordering = (bool)$nearby;
 
+      $is_reordering = ($spec['afterPHIDs'] || $spec['beforePHIDs']);
       if ($already_here && !$is_reordering) {
         unset($new[$key]);
       } else {
@@ -677,8 +681,9 @@ final class ManiphestTransactionEditor
   private function applyBoardMove($object, array $move) {
     $board_phid = $move['boardPHID'];
     $column_phid = $move['columnPHID'];
-    $before_phid = idx($move, 'beforePHID');
-    $after_phid = idx($move, 'afterPHID');
+
+    $before_phids = $move['beforePHIDs'];
+    $after_phids = $move['afterPHIDs'];
 
     $object_phid = $object->getPHID();
 
@@ -730,24 +735,12 @@ final class ManiphestTransactionEditor
         $object_phid);
     }
 
-    if ($before_phid) {
-      $engine->queueAddPositionBefore(
-        $board_phid,
-        $column_phid,
-        $object_phid,
-        $before_phid);
-    } else if ($after_phid) {
-      $engine->queueAddPositionAfter(
-        $board_phid,
-        $column_phid,
-        $object_phid,
-        $after_phid);
-    } else {
-      $engine->queueAddPosition(
-        $board_phid,
-        $column_phid,
-        $object_phid);
-    }
+    $engine->queueAddPosition(
+      $board_phid,
+      $column_phid,
+      $object_phid,
+      $after_phids,
+      $before_phids);
 
     $engine->applyPositionUpdates();
   }
@@ -847,6 +840,18 @@ final class ManiphestTransactionEditor
     }
 
     return $errors;
+  }
+
+  private function filterValidPHIDs($phid_list, array $object_map) {
+    foreach ($phid_list as $key => $phid) {
+      if (isset($object_map[$phid])) {
+        continue;
+      }
+
+      unset($phid_list[$key]);
+    }
+
+    return array_values($phid_list);
   }
 
 }

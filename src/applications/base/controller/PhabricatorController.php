@@ -608,6 +608,7 @@ abstract class PhabricatorController extends AphrontController {
     $this->setCurrentApplication($application);
 
     $controller = new LegalpadDocumentSignController();
+    $controller->setIsSessionGate(true);
     return $this->delegateToController($controller);
   }
 

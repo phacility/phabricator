@@ -17,7 +17,7 @@
 JX.behavior('toggle-class', function(config, statics) {
   function install() {
     JX.Stratcom.listen(
-      ['touchstart', 'mousedown'],
+      'click',
       'jx-toggle-class',
       function(e) {
         e.kill();
@@ -27,15 +27,6 @@ JX.behavior('toggle-class', function(config, statics) {
         for (var k in t.map) {
           JX.DOM.alterClass(JX.$(k), t.map[k], t.state);
         }
-      });
-
-    // Swallow the regular click handler event so e.g. Quicksand
-    // click handler doesn't get a hold of it
-    JX.Stratcom.listen(
-      ['click'],
-      'jx-toggle-class',
-      function(e) {
-        e.kill();
       });
 
     return true;

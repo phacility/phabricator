@@ -3,6 +3,12 @@
 final class PhabricatorAuthChallengeStatusController
   extends PhabricatorAuthController {
 
+  public function shouldAllowPartialSessions() {
+    // We expect that users may request the status of an MFA challenge when
+    // they hit the session upgrade gate on login.
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
