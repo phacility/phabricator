@@ -460,6 +460,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         // stored config: it corresponds to an out-of-date or uninstalled
         // item.
         if (isset($items[$builtin_key])) {
+          $builtin_item = $items[$builtin_key];
+
+          // Copy runtime properties from the builtin item to the stored item.
+          $stored_item->setIsHeadItem($builtin_item->getIsHeadItem());
+          $stored_item->setIsTailItem($builtin_item->getIsTailItem());
+
           $items[$builtin_key] = $stored_item;
         } else {
           continue;
@@ -802,6 +808,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setID($list_id)
       ->setNoDataString(pht('This menu currently has no items.'));
 
+    $any_draggable = false;
     foreach ($items as $item) {
       $id = $item->getID();
       $builtin_key = $item->getBuiltinKey();
@@ -822,14 +829,25 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $view->setHeader($name);
       $view->addAttribute($type);
 
+      $icon = $item->getMenuItem()->getMenuItemTypeIcon();
+      if ($icon !== null) {
+        $view->setStatusIcon($icon);
+      }
+
       if ($can_edit) {
-        $view
-          ->setGrippable(true)
-          ->addSigil('profile-menu-item')
-          ->setMetadata(
-            array(
-              'key' => nonempty($id, $builtin_key),
-            ));
+        $can_move = (!$item->getIsHeadItem() && !$item->getIsTailItem());
+        if ($can_move) {
+          $view
+            ->setGrippable(true)
+            ->addSigil('profile-menu-item')
+            ->setMetadata(
+              array(
+                'key' => nonempty($id, $builtin_key),
+              ));
+          $any_draggable = true;
+        } else {
+          $view->setGrippable(false);
+        }
 
         if ($id) {
           $default_uri = $this->getItemURI("default/{$id}/");
@@ -944,8 +962,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setHeader(pht('Menu Items'))
       ->setHeaderIcon('fa-list');
 
+    $list_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Current Menu Items'));
+
+    if ($any_draggable) {
+      $list_header->setSubheader(
+        pht('Drag items in this list to reorder them.'));
+    }
+
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Current Menu Items'))
+      ->setHeader($list_header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
@@ -1190,7 +1216,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   protected function newManageItem() {
     return $this->newItem()
       ->setBuiltinKey(self::ITEM_MANAGE)
-      ->setMenuItemKey(PhabricatorManageProfileMenuItem::MENUITEMKEY);
+      ->setMenuItemKey(PhabricatorManageProfileMenuItem::MENUITEMKEY)
+      ->setIsTailItem(true);
   }
 
   public function adjustDefault($key) {

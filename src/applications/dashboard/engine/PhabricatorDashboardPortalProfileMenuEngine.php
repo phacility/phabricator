@@ -24,7 +24,8 @@ final class PhabricatorDashboardPortalProfileMenuEngine
 
     $items[] = $this->newItem()
       ->setMenuItemKey(PhabricatorDashboardPortalMenuItem::MENUITEMKEY)
-      ->setBuiltinKey('manage');
+      ->setBuiltinKey('manage')
+      ->setIsTailItem(true);
 
     return $items;
   }

@@ -13,6 +13,10 @@ final class PhabricatorHomeLauncherProfileMenuItem
     return pht('More Applications');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-ellipsis-h';
+  }
+
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return false;
@@ -50,7 +54,7 @@ final class PhabricatorHomeLauncherProfileMenuItem
     $viewer = $this->getViewer();
 
     $name = $this->getDisplayName($config);
-    $icon = 'fa-globe';
+    $icon = 'fa-ellipsis-h';
     $href = '/applications/';
 
     $item = $this->newItem()

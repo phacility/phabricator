@@ -13,6 +13,10 @@ final class PhabricatorHomeProfileMenuItem
     return pht('Home');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-home';
+  }
+
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;

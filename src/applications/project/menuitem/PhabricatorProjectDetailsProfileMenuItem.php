@@ -13,6 +13,10 @@ final class PhabricatorProjectDetailsProfileMenuItem
     return pht('Project Details');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-file-text-o';
+  }
+
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return false;

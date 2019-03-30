@@ -13,6 +13,10 @@ final class PhabricatorProjectWorkboardProfileMenuItem
     return pht('Workboard');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-columns';
+  }
+
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;

@@ -13,6 +13,10 @@ final class PhabricatorManageProfileMenuItem
     return pht('Edit Menu');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-pencil';
+  }
+
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return false;

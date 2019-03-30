@@ -6,7 +6,7 @@ final class PhabricatorDashboardPortalMenuItem
   const MENUITEMKEY = 'portal';
 
   public function getMenuItemTypeIcon() {
-    return 'fa-compass';
+    return 'fa-pencil';
   }
 
   public function getDefaultName() {

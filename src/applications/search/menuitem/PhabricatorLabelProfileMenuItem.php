@@ -7,7 +7,7 @@ final class PhabricatorLabelProfileMenuItem
   const FIELD_NAME = 'name';
 
   public function getMenuItemTypeIcon() {
-    return 'fa-map-signs';
+    return 'fa-tag';
   }
 
   public function getMenuItemTypeName() {

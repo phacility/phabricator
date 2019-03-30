@@ -17,6 +17,8 @@ final class PhabricatorProfileMenuItemConfiguration
 
   private $profileObject = self::ATTACHABLE;
   private $menuItem = self::ATTACHABLE;
+  private $isHeadItem = false;
+  private $isTailItem = false;
 
   const VISIBILITY_DEFAULT = 'default';
   const VISIBILITY_VISIBLE = 'visible';
@@ -158,6 +160,15 @@ final class PhabricatorProfileMenuItemConfiguration
       $is_global = 1;
     }
 
+    // Sort "head" items above other items and "tail" items after other items.
+    if ($this->getIsHeadItem()) {
+      $force_position = 0;
+    } else if ($this->getIsTailItem()) {
+      $force_position = 2;
+    } else {
+      $force_position = 1;
+    }
+
     // Sort items with an explicit order above items without an explicit order,
     // so any newly created builtins go to the bottom.
     $order = $this->getMenuItemOrder();
@@ -169,6 +180,7 @@ final class PhabricatorProfileMenuItemConfiguration
 
     return id(new PhutilSortVector())
       ->addInt($is_global)
+      ->addInt($force_position)
       ->addInt($has_order)
       ->addInt((int)$order)
       ->addInt((int)$this->getID());
@@ -206,6 +218,25 @@ final class PhabricatorProfileMenuItemConfiguration
   public function newPageContent() {
     return $this->getMenuItem()->newPageContent($this);
   }
+
+  public function setIsHeadItem($is_head_item) {
+    $this->isHeadItem = $is_head_item;
+    return $this;
+  }
+
+  public function getIsHeadItem() {
+    return $this->isHeadItem;
+  }
+
+  public function setIsTailItem($is_tail_item) {
+    $this->isTailItem = $is_tail_item;
+    return $this;
+  }
+
+  public function getIsTailItem() {
+    return $this->isTailItem;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -22,7 +22,8 @@ final class PhabricatorProjectProfileMenuEngine
 
     $items[] = $this->newItem()
       ->setBuiltinKey(PhabricatorProject::ITEM_PICTURE)
-      ->setMenuItemKey(PhabricatorProjectPictureProfileMenuItem::MENUITEMKEY);
+      ->setMenuItemKey(PhabricatorProjectPictureProfileMenuItem::MENUITEMKEY)
+      ->setIsHeadItem(true);
 
     $items[] = $this->newItem()
       ->setBuiltinKey(PhabricatorProject::ITEM_PROFILE)
@@ -47,7 +48,8 @@ final class PhabricatorProjectProfileMenuEngine
 
     $items[] = $this->newItem()
       ->setBuiltinKey(PhabricatorProject::ITEM_MANAGE)
-      ->setMenuItemKey(PhabricatorProjectManageProfileMenuItem::MENUITEMKEY);
+      ->setMenuItemKey(PhabricatorProjectManageProfileMenuItem::MENUITEMKEY)
+      ->setIsTailItem(true);
 
     return $items;
   }

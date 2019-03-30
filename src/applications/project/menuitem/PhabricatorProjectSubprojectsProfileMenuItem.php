@@ -13,6 +13,10 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
     return pht('Subprojects');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-sitemap';
+  }
+
   public function shouldEnableForObject($object) {
     if ($object->isMilestone()) {
       return false;

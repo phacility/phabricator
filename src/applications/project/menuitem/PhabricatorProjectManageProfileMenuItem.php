@@ -13,6 +13,10 @@ final class PhabricatorProjectManageProfileMenuItem
     return pht('Manage');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-cog';
+  }
+
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return false;
