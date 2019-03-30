@@ -29,7 +29,9 @@ final class PhabricatorApplicationTransactionCommentEditController
     $handles = $viewer->loadHandles(array($phid));
     $obj_handle = $handles[$phid];
 
-    if ($request->isDialogFormPost()) {
+    $done_uri = $obj_handle->getURI();
+
+    if ($request->isFormOrHisecPost()) {
       $text = $request->getStr('text');
 
       $comment = $xaction->getApplicationTransactionCommentObject();
@@ -41,13 +43,26 @@ final class PhabricatorApplicationTransactionCommentEditController
       $editor = id(new PhabricatorApplicationTransactionCommentEditor())
         ->setActor($viewer)
         ->setContentSource(PhabricatorContentSource::newFromRequest($request))
+        ->setRequest($request)
+        ->setCancelURI($done_uri)
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {
         return id(new AphrontAjaxResponse())->setContent(array());
       } else {
-        return id(new AphrontReloadResponse())->setURI($obj_handle->getURI());
+        return id(new AphrontReloadResponse())->setURI($done_uri);
       }
+    }
+
+    $errors = array();
+    if ($xaction->getIsMFATransaction()) {
+      $message = pht(
+        'This comment was signed with MFA, so you will be required to '.
+        'provide MFA credentials to make changes.');
+
+      $errors[] = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_MFA)
+        ->setErrors(array($message));
     }
 
     $form = id(new AphrontFormView())
@@ -55,15 +70,15 @@ final class PhabricatorApplicationTransactionCommentEditController
       ->setFullWidth(true)
       ->appendControl(
         id(new PhabricatorRemarkupControl())
-        ->setName('text')
-        ->setValue($xaction->getComment()->getContent()));
+          ->setName('text')
+          ->setValue($xaction->getComment()->getContent()));
 
     return $this->newDialog()
       ->setTitle(pht('Edit Comment'))
-      ->addHiddenInput('anchor', $request->getStr('anchor'))
+      ->appendChild($errors)
       ->appendForm($form)
       ->addSubmitButton(pht('Save Changes'))
-      ->addCancelButton($obj_handle->getURI());
+      ->addCancelButton($done_uri);
   }
 
 }

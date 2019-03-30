@@ -56,6 +56,7 @@ final class PhabricatorBoardRenderingEngine extends Phobject {
     $card = id(new ProjectBoardTaskCard())
       ->setViewer($viewer)
       ->setTask($object)
+      ->setShowEditControls(true)
       ->setCanEdit($this->getCanEdit($phid));
 
     $owner_phid = $object->getOwnerPHID();

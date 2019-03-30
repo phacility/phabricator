@@ -55,7 +55,7 @@ final class PhabricatorProjectsCurtainExtension
           $column_link = phutil_tag(
             'a',
             array(
-              'href' => "/project/board/{$project_id}/",
+              'href' => $column->getWorkboardURI(),
               'class' => 'maniphest-board-link',
             ),
             $column_name);

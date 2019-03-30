@@ -25,6 +25,8 @@ final class PhabricatorQueryIterator extends PhutilBufferedIterator {
     $pager = clone $this->pager;
     $query = clone $this->query;
 
+    $query->setDisableOverheating(true);
+
     $results = $query->executeWithCursorPager($pager);
 
     // If we got less than a full page of results, this was the last set of

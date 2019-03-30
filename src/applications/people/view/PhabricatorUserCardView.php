@@ -95,14 +95,17 @@ final class PhabricatorUserCardView extends AphrontTagView {
       'fa-user-plus',
       phabricator_date($user->getDateCreated(), $viewer));
 
-    if (PhabricatorApplication::isClassInstalledForViewer(
-        'PhabricatorCalendarApplication',
-        $viewer)) {
-      $body[] = $this->addItem(
-        'fa-calendar-o',
-        id(new PHUIUserAvailabilityView())
-          ->setViewer($viewer)
-          ->setAvailableUser($user));
+    $has_calendar = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorCalendarApplication',
+      $viewer);
+    if ($has_calendar) {
+      if (!$user->getIsDisabled()) {
+        $body[] = $this->addItem(
+          'fa-calendar-o',
+          id(new PHUIUserAvailabilityView())
+            ->setViewer($viewer)
+            ->setAvailableUser($user));
+      }
     }
 
     $classes[] = 'project-card-image';
@@ -150,8 +153,8 @@ final class PhabricatorUserCardView extends AphrontTagView {
         'class' => 'project-card-inner',
       ),
       array(
-        $image,
         $header,
+        $image,
       ));
 
     return $card;

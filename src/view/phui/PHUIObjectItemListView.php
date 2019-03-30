@@ -12,6 +12,7 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $drag;
   private $allowEmptyList;
   private $itemClass = 'phui-oi-standard';
+  private $tail = array();
 
   public function setAllowEmptyList($allow_empty_list) {
     $this->allowEmptyList = $allow_empty_list;
@@ -70,6 +71,18 @@ final class PHUIObjectItemListView extends AphrontTagView {
 
   protected function getTagName() {
     return 'ul';
+  }
+
+  public function newTailButton() {
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setColor(PHUIButtonView::GREY)
+      ->setIcon('fa-chevron-down')
+      ->setText(pht('View All Results'));
+
+    $this->tail[] = $button;
+
+    return $button;
   }
 
   protected function getTagAttributes() {
@@ -149,9 +162,20 @@ final class PHUIObjectItemListView extends AphrontTagView {
       $pager = $this->pager;
     }
 
+    $tail = array();
+    foreach ($this->tail as $tail_item) {
+      $tail[] = phutil_tag(
+        'li',
+        array(
+          'class' => 'phui-oi-tail',
+        ),
+        $tail_item);
+    }
+
     return array(
       $header,
       $items,
+      $tail,
       $pager,
       $this->renderChildren(),
     );

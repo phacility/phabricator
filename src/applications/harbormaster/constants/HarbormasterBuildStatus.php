@@ -52,6 +52,10 @@ final class HarbormasterBuildStatus extends Phobject {
     return ($this->key === self::STATUS_PASSED);
   }
 
+  public function isFailed() {
+    return ($this->key === self::STATUS_FAILED);
+  }
+
 
   /**
    * Get a human readable name for a build status constant.

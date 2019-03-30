@@ -12,19 +12,17 @@ final class PhabricatorProjectColumn
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
 
-  const DEFAULT_ORDER = 'natural';
-  const ORDER_NATURAL = 'natural';
-  const ORDER_PRIORITY = 'priority';
-
   protected $name;
   protected $status;
   protected $projectPHID;
   protected $proxyPHID;
   protected $sequence;
   protected $properties = array();
+  protected $triggerPHID;
 
   private $project = self::ATTACHABLE;
   private $proxy = self::ATTACHABLE;
+  private $trigger = self::ATTACHABLE;
 
   public static function initializeNewColumn(PhabricatorUser $user) {
     return id(new PhabricatorProjectColumn())
@@ -44,6 +42,7 @@ final class PhabricatorProjectColumn
         'status' => 'uint32',
         'sequence' => 'uint32',
         'proxyPHID' => 'phid?',
+        'triggerPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_status' => array(
@@ -55,6 +54,9 @@ final class PhabricatorProjectColumn
         'key_proxy' => array(
           'columns' => array('projectPHID', 'proxyPHID'),
           'unique' => true,
+        ),
+        'key_trigger' => array(
+          'columns' => array('triggerPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -183,6 +185,72 @@ final class PhabricatorProjectColumn
 
     return sprintf('%s%012d', $group, $sequence);
   }
+
+  public function attachTrigger(PhabricatorProjectTrigger $trigger = null) {
+    $this->trigger = $trigger;
+    return $this;
+  }
+
+  public function getTrigger() {
+    return $this->assertAttached($this->trigger);
+  }
+
+  public function canHaveTrigger() {
+    // Backlog columns and proxy (subproject / milestone) columns can't have
+    // triggers because cards routinely end up in these columns through tag
+    // edits rather than drag-and-drop and it would likely be confusing to
+    // have these triggers act only a small fraction of the time.
+
+    if ($this->isDefaultColumn()) {
+      return false;
+    }
+
+    if ($this->getProxy()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function getWorkboardURI() {
+    return $this->getProject()->getWorkboardURI();
+  }
+
+  public function getDropEffects() {
+    $effects = array();
+
+    $proxy = $this->getProxy();
+    if ($proxy && $proxy->isMilestone()) {
+      $effects[] = id(new PhabricatorProjectDropEffect())
+        ->setIcon($proxy->getProxyColumnIcon())
+        ->setColor('violet')
+        ->setContent(
+          pht(
+            'Move to milestone %s.',
+            phutil_tag('strong', array(), $this->getDisplayName())));
+    } else {
+      $effects[] = id(new PhabricatorProjectDropEffect())
+        ->setIcon('fa-columns')
+        ->setColor('blue')
+        ->setContent(
+          pht(
+            'Move to column %s.',
+            phutil_tag('strong', array(), $this->getDisplayName())));
+    }
+
+
+    if ($this->canHaveTrigger()) {
+      $trigger = $this->getTrigger();
+      if ($trigger) {
+        foreach ($trigger->getDropEffects() as $trigger_effect) {
+          $effects[] = $trigger_effect;
+        }
+      }
+    }
+
+    return $effects;
+  }
+
 
 /* -(  PhabricatorConduitResultInterface  )---------------------------------- */
 

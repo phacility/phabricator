@@ -127,9 +127,9 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     // This is suppressing "added <address> to the list of known hosts"
     // messages, which are confusing and irrelevant when they arise from
     // proxied requests. It might also be suppressing lots of useful errors,
-    // of course. Ideally, we would enforce host keys eventually.
+    // of course. Ideally, we would enforce host keys eventually. See T13121.
     $options[] = '-o';
-    $options[] = 'LogLevel=quiet';
+    $options[] = 'LogLevel=ERROR';
 
     // NOTE: We prefix the command with "@username", which the far end of the
     // connection will parse in order to act as the specified user. This

@@ -186,15 +186,16 @@ abstract class HeraldAdapter extends Phobject {
     return $this->appliedTransactions;
   }
 
-  public function queueTransaction($transaction) {
+  final public function queueTransaction(
+    PhabricatorApplicationTransaction $transaction) {
     $this->queuedTransactions[] = $transaction;
   }
 
-  public function getQueuedTransactions() {
+  final public function getQueuedTransactions() {
     return $this->queuedTransactions;
   }
 
-  public function newTransaction() {
+  final public function newTransaction() {
     $object = $this->newObject();
 
     if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
@@ -205,7 +206,19 @@ abstract class HeraldAdapter extends Phobject {
           'PhabricatorApplicationTransactionInterface'));
     }
 
-    return $object->getApplicationTransactionTemplate();
+    $xaction = $object->getApplicationTransactionTemplate();
+
+    if (!($xaction instanceof PhabricatorApplicationTransaction)) {
+      throw new Exception(
+        pht(
+          'Expected object (of class "%s") to return a transaction template '.
+          '(of class "%s"), but it returned something else ("%s").',
+          get_class($object),
+          'PhabricatorApplicationTransaction',
+          phutil_describe_type($xaction)));
+    }
+
+    return $xaction;
   }
 
 

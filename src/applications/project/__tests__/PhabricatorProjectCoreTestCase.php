@@ -1008,29 +1008,32 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $task2->getPHID(),
       $task1->getPHID(),
     );
-    $this->assertTasksInColumn($expect, $user, $board, $column);
+    $label = pht('Simple move');
+    $this->assertTasksInColumn($expect, $user, $board, $column, $label);
 
     // Move the second task after the first task.
     $options = array(
-      'afterPHID' => $task1->getPHID(),
+      'afterPHIDs' => array($task1->getPHID()),
     );
     $this->moveToColumn($user, $board, $task2, $column, $column, $options);
     $expect = array(
       $task1->getPHID(),
       $task2->getPHID(),
     );
-    $this->assertTasksInColumn($expect, $user, $board, $column);
+    $label = pht('With afterPHIDs');
+    $this->assertTasksInColumn($expect, $user, $board, $column, $label);
 
     // Move the second task before the first task.
     $options = array(
-      'beforePHID' => $task1->getPHID(),
+      'beforePHIDs' => array($task1->getPHID()),
     );
     $this->moveToColumn($user, $board, $task2, $column, $column, $options);
     $expect = array(
       $task2->getPHID(),
       $task1->getPHID(),
     );
-    $this->assertTasksInColumn($expect, $user, $board, $column);
+    $label = pht('With beforePHIDs');
+    $this->assertTasksInColumn($expect, $user, $board, $column, $label);
   }
 
   public function testMilestoneMoves() {
@@ -1333,7 +1336,8 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     array $expect,
     PhabricatorUser $viewer,
     PhabricatorProject $board,
-    PhabricatorProjectColumn $column) {
+    PhabricatorProjectColumn $column,
+    $label = null) {
 
     $engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
@@ -1346,7 +1350,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $column->getPHID());
     $object_phids = array_values($object_phids);
 
-    $this->assertEqual($expect, $object_phids);
+    $this->assertEqual($expect, $object_phids, $label);
   }
 
   private function addColumn(

@@ -133,11 +133,10 @@ final class HarbormasterBuildPlanQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $plan = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $plan->getID(),
-      'name' => $plan->getName(),
+      'id' => (int)$object->getID(),
+      'name' => $object->getName(),
     );
   }
 

@@ -31,7 +31,7 @@ final class HeraldDisableController extends HeraldController {
 
     if ($request->isFormPost()) {
       $xaction = id(new HeraldRuleTransaction())
-        ->setTransactionType(HeraldRuleTransaction::TYPE_DISABLE)
+        ->setTransactionType(HeraldRuleDisableTransaction::TRANSACTIONTYPE)
         ->setNewValue($is_disable);
 
       id(new HeraldRuleEditor())

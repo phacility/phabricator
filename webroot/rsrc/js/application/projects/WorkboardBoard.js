@@ -7,6 +7,9 @@
  *           javelin-workflow
  *           phabricator-draggable-list
  *           javelin-workboard-column
+ *           javelin-workboard-header-template
+ *           javelin-workboard-card-template
+ *           javelin-workboard-order-template
  * @javelin
  */
 
@@ -17,9 +20,10 @@ JX.install('WorkboardBoard', {
     this._phid = phid;
     this._root = root;
 
-    this._templates = {};
-    this._orderMaps = {};
-    this._propertiesMap = {};
+    this._headers = {};
+    this._cards = {};
+    this._orders = {};
+
     this._buildColumns();
   },
 
@@ -33,9 +37,14 @@ JX.install('WorkboardBoard', {
     _phid: null,
     _root: null,
     _columns: null,
-    _templates: null,
-    _orderMaps: null,
-    _propertiesMap: null,
+    _headers: null,
+    _cards: null,
+    _dropPreviewNode: null,
+    _dropPreviewListNode: null,
+    _previewPHID: null,
+    _hidePreivew: false,
+    _previewPositionVector: null,
+    _previewDimState: false,
 
     getRoot: function() {
       return this._root;
@@ -53,35 +62,68 @@ JX.install('WorkboardBoard', {
       return this._phid;
     },
 
-    setCardTemplate: function(phid, template)  {
-      this._templates[phid] = template;
-      return this;
-    },
-
-    setObjectProperties: function(phid, properties) {
-      this._propertiesMap[phid] = properties;
-      return this;
-    },
-
-    getObjectProperties: function(phid) {
-      return this._propertiesMap[phid];
-    },
-
     getCardTemplate: function(phid) {
-      return this._templates[phid];
+      if (!this._cards[phid]) {
+        this._cards[phid] = new JX.WorkboardCardTemplate(phid);
+      }
+
+      return this._cards[phid];
+    },
+
+    getHeaderTemplate: function(header_key) {
+      if (!this._headers[header_key]) {
+        this._headers[header_key] = new JX.WorkboardHeaderTemplate(header_key);
+      }
+
+      return this._headers[header_key];
+    },
+
+    getOrderTemplate: function(order_key) {
+      if (!this._orders[order_key]) {
+        this._orders[order_key] = new JX.WorkboardOrderTemplate(order_key);
+      }
+
+      return this._orders[order_key];
+    },
+
+    getHeaderTemplatesForOrder: function(order) {
+      var templates = [];
+
+      for (var k in this._headers) {
+        var header = this._headers[k];
+
+        if (header.getOrder() !== order) {
+          continue;
+        }
+
+        templates.push(header);
+      }
+
+      templates.sort(JX.bind(this, this._sortHeaderTemplates));
+
+      return templates;
+    },
+
+    _sortHeaderTemplates: function(u, v) {
+      return this.compareVectors(u.getVector(), v.getVector());
     },
 
     getController: function() {
       return this._controller;
     },
 
-    setOrderMap: function(phid, map) {
-      this._orderMaps[phid] = map;
-      return this;
-    },
+    compareVectors: function(u_vec, v_vec) {
+      for (var ii = 0; ii < u_vec.length; ii++) {
+        if (u_vec[ii] > v_vec[ii]) {
+          return 1;
+        }
 
-    getOrderVector: function(phid, key) {
-      return this._orderMaps[phid][key];
+        if (u_vec[ii] < v_vec[ii]) {
+          return -1;
+        }
+      }
+
+      return 0;
     },
 
     start: function() {
@@ -103,22 +145,162 @@ JX.install('WorkboardBoard', {
 
         this._columns[phid] = new JX.WorkboardColumn(this, phid, node);
       }
+
+      var on_over = JX.bind(this, this._showTriggerPreview);
+      var on_out = JX.bind(this, this._hideTriggerPreview);
+      JX.Stratcom.listen('mouseover', 'trigger-preview', on_over);
+      JX.Stratcom.listen('mouseout', 'trigger-preview', on_out);
+
+      var on_move = JX.bind(this, this._dimPreview);
+      JX.Stratcom.listen('mousemove', null, on_move);
+    },
+
+    _dimPreview: function(e) {
+      var p = this._previewPositionVector;
+      if (!p) {
+        return;
+      }
+
+      // When the mouse cursor gets near the drop preview element, fade it
+      // out so you can see through it. We can't do this with ":hover" because
+      // we disable cursor events.
+
+      var cursor = JX.$V(e);
+      var margin = 64;
+
+      var near_x = (cursor.x > (p.x - margin));
+      var near_y = (cursor.y > (p.y - margin));
+      var should_dim = (near_x && near_y);
+
+      this._setPreviewDimState(should_dim);
+    },
+
+    _setPreviewDimState: function(is_dim) {
+      if (is_dim === this._previewDimState) {
+        return;
+      }
+
+      this._previewDimState = is_dim;
+      var node = this._getDropPreviewNode();
+      JX.DOM.alterClass(node, 'workboard-drop-preview-fade', is_dim);
+    },
+
+    _showTriggerPreview: function(e) {
+      if (this._disablePreview) {
+        return;
+      }
+
+      var target = e.getTarget();
+      var node = e.getNode('trigger-preview');
+
+      if (target !== node) {
+        return;
+      }
+
+      var phid = JX.Stratcom.getData(node).columnPHID;
+      var column = this._columns[phid];
+
+      // Bail out if we don't know anything about this column.
+      if (!column) {
+        return;
+      }
+
+      if (phid === this._previewPHID) {
+        return;
+      }
+
+      this._previewPHID = phid;
+
+      var effects = column.getDropEffects();
+
+      var triggers = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        if (effects[ii].getIsTriggerEffect()) {
+          triggers.push(effects[ii]);
+        }
+      }
+
+      if (triggers.length) {
+        var header = column.getTriggerPreviewEffect();
+        triggers = [header].concat(triggers);
+      }
+
+      this._showEffects(triggers);
+    },
+
+    _hideTriggerPreview: function(e) {
+      if (this._disablePreview) {
+        return;
+      }
+
+      var target = e.getTarget();
+
+      if (target !== e.getNode('trigger-preview')) {
+        return;
+      }
+
+      this._removeTriggerPreview();
+    },
+
+    _removeTriggerPreview: function() {
+      this._showEffects([]);
+      this._previewPHID = null;
+    },
+
+    _beginDrag: function() {
+      this._disablePreview = true;
+      this._showEffects([]);
+    },
+
+    _endDrag: function() {
+      this._disablePreview = false;
     },
 
     _setupDragHandlers: function() {
       var columns = this.getColumns();
 
+      var order_template = this.getOrderTemplate(this.getOrder());
+      var has_headers = order_template.getHasHeaders();
+      var can_reorder = order_template.getCanReorder();
+
       var lists = [];
       for (var k in columns) {
         var column = columns[k];
 
-        var list = new JX.DraggableList('project-card', column.getRoot())
+        var list = new JX.DraggableList('draggable-card', column.getRoot())
           .setOuterContainer(this.getRoot())
-          .setFindItemsHandler(JX.bind(column, column.getCardNodes))
+          .setFindItemsHandler(JX.bind(column, column.getDropTargetNodes))
           .setCanDragX(true)
-          .setHasInfiniteHeight(true);
+          .setHasInfiniteHeight(true)
+          .setIsDropTargetHandler(JX.bind(column, column.setIsDropTarget));
+
+        var default_handler = list.getGhostHandler();
+        list.setGhostHandler(
+          JX.bind(column, column.handleDragGhost, default_handler));
+
+        // The "compare handler" locks cards into a specific position in the
+        // column.
+        list.setCompareHandler(JX.bind(column, column.compareHandler));
+
+        // If the view has group headers, we lock cards into the right position
+        // when moving them between columns, but not within a column.
+        if (has_headers) {
+          list.setCompareOnMove(true);
+        }
+
+        // If we can't reorder cards, we always lock them into their current
+        // position.
+        if (!can_reorder) {
+          list.setCompareOnMove(true);
+          list.setCompareOnReorder(true);
+        }
+
+        list.setTargetChangeHandler(JX.bind(this, this._didChangeDropTarget));
 
         list.listen('didDrop', JX.bind(this, this._onmovecard, list));
+
+        list.listen('didBeginDrag', JX.bind(this, this._beginDrag));
+        list.listen('didEndDrag', JX.bind(this, this._endDrag));
 
         lists.push(list);
       }
@@ -128,8 +310,169 @@ JX.install('WorkboardBoard', {
       }
     },
 
+    _didChangeDropTarget: function(src_list, src_node, dst_list, dst_node) {
+      if (!dst_list) {
+        // The card is being dragged into a dead area, like the left menu.
+        this._showEffects([]);
+        return;
+      }
+
+      if (dst_node === false) {
+        // The card is being dragged over itself, so dropping it won't
+        // affect anything.
+        this._showEffects([]);
+        return;
+      }
+
+      var src_phid = JX.Stratcom.getData(src_list.getRootNode()).columnPHID;
+      var dst_phid = JX.Stratcom.getData(dst_list.getRootNode()).columnPHID;
+
+      var src_column = this.getColumn(src_phid);
+      var dst_column = this.getColumn(dst_phid);
+
+      var effects = [];
+      if (src_column !== dst_column) {
+        effects = effects.concat(dst_column.getDropEffects());
+      }
+
+      var context = this._getDropContext(dst_node);
+      if (context.headerKey) {
+        var header = this.getHeaderTemplate(context.headerKey);
+        effects = effects.concat(header.getDropEffects());
+      }
+
+      var card_phid = JX.Stratcom.getData(src_node).objectPHID;
+      var card = src_column.getCard(card_phid);
+
+      var visible = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        if (effects[ii].isEffectVisibleForCard(card)) {
+          visible.push(effects[ii]);
+        }
+      }
+      effects = visible;
+
+      this._showEffects(effects);
+    },
+
+    _showEffects: function(effects) {
+      var node = this._getDropPreviewNode();
+
+      if (!effects.length) {
+        JX.DOM.remove(node);
+        this._previewPositionVector = null;
+        return;
+      }
+
+      var items = [];
+      for (var ii = 0; ii < effects.length; ii++) {
+        var effect = effects[ii];
+        items.push(effect.newNode());
+      }
+
+      JX.DOM.setContent(this._getDropPreviewListNode(), items);
+      document.body.appendChild(node);
+
+      // Undim the drop preview element if it was previously dimmed.
+      this._setPreviewDimState(false);
+      this._previewPositionVector = JX.$V(node);
+    },
+
+    _getDropPreviewNode: function() {
+      if (!this._dropPreviewNode) {
+        var attributes = {
+          className: 'workboard-drop-preview'
+        };
+
+        var content = [
+          this._getDropPreviewListNode()
+        ];
+
+        this._dropPreviewNode = JX.$N('div', attributes, content);
+      }
+
+      return this._dropPreviewNode;
+    },
+
+    _getDropPreviewListNode: function() {
+      if (!this._dropPreviewListNode) {
+        var attributes = {};
+        this._dropPreviewListNode = JX.$N('ul', attributes);
+      }
+
+      return this._dropPreviewListNode;
+    },
+
     _findCardsInColumn: function(column_node) {
       return JX.DOM.scry(column_node, 'li', 'project-card');
+    },
+
+    _getDropContext: function(after_node, item) {
+      var header_key;
+      var after_phids = [];
+      var before_phids = [];
+
+      // We're going to send an "afterPHID" and a "beforePHID" if the card
+      // was dropped immediately adjacent to another card. If a card was
+      // dropped before or after a header, we don't send a PHID for the card
+      // on the other side of the header.
+
+      // If the view has headers, we always send the header the card was
+      // dropped under.
+
+      var after_data;
+      var after_card = after_node;
+      while (after_card) {
+        after_data = JX.Stratcom.getData(after_card);
+
+        if (after_data.headerKey) {
+          break;
+        }
+
+        if (after_data.objectPHID) {
+          after_phids.push(after_data.objectPHID);
+        }
+
+        after_card = after_card.previousSibling;
+      }
+
+      if (item) {
+        var before_data;
+        var before_card = item.nextSibling;
+        while (before_card) {
+          before_data = JX.Stratcom.getData(before_card);
+
+          if (before_data.headerKey) {
+            break;
+          }
+
+          if (before_data.objectPHID) {
+            before_phids.push(before_data.objectPHID);
+          }
+
+          before_card = before_card.nextSibling;
+        }
+      }
+
+      var header_data;
+      var header_node = after_node;
+      while (header_node) {
+        header_data = JX.Stratcom.getData(header_node);
+        if (header_data.headerKey) {
+          break;
+        }
+        header_node = header_node.previousSibling;
+      }
+
+      if (header_data) {
+        header_key = header_data.headerKey;
+      }
+
+      return {
+        headerKey: header_key,
+        afterPHIDs: after_phids,
+        beforePHIDs: before_phids
+      };
     },
 
     _onmovecard: function(list, item, after_node, src_list) {
@@ -146,16 +489,14 @@ JX.install('WorkboardBoard', {
         order: this.getOrder()
       };
 
-      if (after_node) {
-        data.afterPHID = JX.Stratcom.getData(after_node).objectPHID;
-      }
+      var context = this._getDropContext(after_node, item);
+      data.afterPHIDs = context.afterPHIDs.join(',');
+      data.beforePHIDs = context.beforePHIDs.join(',');
 
-      var before_node = item.nextSibling;
-      if (before_node) {
-        var before_phid = JX.Stratcom.getData(before_node).objectPHID;
-        if (before_phid) {
-          data.beforePHID = before_phid;
-        }
+      if (context.headerKey) {
+        var properties = this.getHeaderTemplate(context.headerKey)
+          .getEditProperties();
+        data.header = JX.JSON.stringify(properties);
       }
 
       var visible_phids = [];
@@ -166,17 +507,47 @@ JX.install('WorkboardBoard', {
 
       data.visiblePHIDs = visible_phids.join(',');
 
+      // If the user cancels the workflow (for example, by hitting an MFA
+      // prompt that they click "Cancel" on), put the card back where it was
+      // and reset the UI state.
+      var on_revert = JX.bind(
+        this,
+        this._revertCard,
+        list,
+        item,
+        src_phid,
+        dst_phid);
+
+      var after_phid = null;
+      if (data.afterPHIDs.length) {
+        after_phid = data.afterPHIDs[0];
+      }
+
       var onupdate = JX.bind(
         this,
         this._oncardupdate,
         list,
         src_phid,
         dst_phid,
-        data.afterPHID);
+        after_phid);
 
       new JX.Workflow(this.getController().getMoveURI(), data)
         .setHandler(onupdate)
+        .setCloseHandler(on_revert)
         .start();
+    },
+
+    _revertCard: function(list, item, src_phid, dst_phid) {
+      JX.DOM.alterClass(item, 'drag-sending', false);
+
+      var src_column = this.getColumn(src_phid);
+      var dst_column = this.getColumn(dst_phid);
+
+      src_column.markForRedraw();
+      dst_column.markForRedraw();
+      this._redrawColumns();
+
+      list.unlock();
     },
 
     _oncardupdate: function(list, src_phid, dst_phid, after_phid, response) {
@@ -191,6 +562,11 @@ JX.install('WorkboardBoard', {
 
       this.updateCard(response);
 
+      var sounds = response.sounds || [];
+      for (var ii = 0; ii < sounds.length; ii++) {
+        JX.Sound.queue(sounds[ii]);
+      }
+
       list.unlock();
     },
 
@@ -202,24 +578,15 @@ JX.install('WorkboardBoard', {
 
       var phid = response.objectPHID;
 
-      if (!this._templates[phid]) {
-        for (var add_phid in response.columnMaps) {
-          var target_column = this.getColumn(add_phid);
+      for (var add_phid in response.columnMaps) {
+        var target_column = this.getColumn(add_phid);
 
-          if (!target_column) {
-            // If the column isn't visible, don't try to add a card to it.
-            continue;
-          }
-
-          target_column.newCard(phid);
+        if (!target_column) {
+          // If the column isn't visible, don't try to add a card to it.
+          continue;
         }
-      }
 
-      this.setCardTemplate(phid, response.cardHTML);
-
-      var order_maps = response.orderMaps;
-      for (var order_phid in order_maps) {
-        this.setOrderMap(order_phid, order_maps[order_phid]);
+        target_column.newCard(phid);
       }
 
       var column_maps = response.columnMaps;
@@ -237,9 +604,37 @@ JX.install('WorkboardBoard', {
         natural_column.setNaturalOrder(column_maps[natural_phid]);
       }
 
-      var property_maps = response.propertyMaps;
-      for (var property_phid in property_maps) {
-        this.setObjectProperties(property_phid, property_maps[property_phid]);
+      for (var card_phid in response.cards) {
+        var card_data = response.cards[card_phid];
+        var card_template = this.getCardTemplate(card_phid);
+
+        if (card_data.nodeHTMLTemplate) {
+          card_template.setNodeHTMLTemplate(card_data.nodeHTMLTemplate);
+        }
+
+        var order;
+        for (order in card_data.vectors) {
+          card_template.setSortVector(order, card_data.vectors[order]);
+        }
+
+        for (order in card_data.headers) {
+          card_template.setHeaderKey(order, card_data.headers[order]);
+        }
+
+        for (var key in card_data.properties) {
+          card_template.setObjectProperty(key, card_data.properties[key]);
+        }
+      }
+
+      var headers = response.headers;
+      for (var jj = 0; jj < headers.length; jj++) {
+        var header = headers[jj];
+
+        this.getHeaderTemplate(header.key)
+          .setOrder(header.order)
+          .setNodeHTMLTemplate(header.template)
+          .setVector(header.vector)
+          .setEditProperties(header.editProperties);
       }
 
       for (var column_phid in columns) {

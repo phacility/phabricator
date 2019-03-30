@@ -13,7 +13,12 @@
 }
 
 .phui-oi-list-big .phui-oi-image-icon {
-  margin: 8px 2px 12px;
+  margin: 12px 2px 12px;
+  text-align: center;
+}
+
+.phui-oi-list-big .phui-oi-image-icon .phui-icon-view {
+  position: relative;
 }
 
 .phui-oi-list-big a.phui-oi-link {
@@ -31,7 +36,7 @@
 }
 
 .device-desktop .phui-oi-list-big .phui-oi {
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .phui-oi-list-big .phui-oi-col0 {
@@ -60,13 +65,28 @@
   border-radius: 3px;
 }
 
+.phui-oi-list-big .phui-oi-frame {
+  padding: 2px 8px;
+}
+
+.phui-oi-list-big .phui-oi-linked-container {
+  border: 1px solid {$lightblueborder};
+  border-radius: 4px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.035);
+}
+
+.phui-oi-list-big .phui-oi-disabled {
+  border-radius: 4px;
+  background: {$lightgreybackground};
+}
+
 .device-desktop .phui-oi-linked-container {
   cursor: pointer;
 }
 
 .device-desktop .phui-oi-linked-container:hover {
   background-color: {$hoverblue};
-  border-radius: 3px;
+  border-color: {$blueborder};
 }
 
 .device-desktop .phui-oi-linked-container a:hover {

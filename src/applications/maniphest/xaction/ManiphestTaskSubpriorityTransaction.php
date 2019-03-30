@@ -6,16 +6,17 @@ final class ManiphestTaskSubpriorityTransaction
   const TRANSACTIONTYPE = 'subpriority';
 
   public function generateOldValue($object) {
-    return $object->getSubpriority();
+    return null;
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setSubpriority($value);
+    // This transaction is obsolete, but we're keeping the class around so it
+    // is hidden from timelines until we destroy the actual transaction data.
+    throw new PhutilMethodNotImplementedException();
   }
 
   public function shouldHide() {
     return true;
   }
-
 
 }

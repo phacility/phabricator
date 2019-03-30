@@ -30,8 +30,11 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
     $full_command = call_user_func_array('csprintf', $argv);
 
     $flags = array();
+
+    // See T13121. Attempt to suppress the "Permanently added X to list of
+    // known hosts" message without suppressing anything important.
     $flags[] = '-o';
-    $flags[] = 'LogLevel=quiet';
+    $flags[] = 'LogLevel=ERROR';
 
     $flags[] = '-o';
     $flags[] = 'StrictHostKeyChecking=no';

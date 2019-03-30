@@ -108,11 +108,11 @@ final class PhabricatorBadgesQuery
     ) + parent::getOrderableColumns();
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $badge = $this->loadCursorObject($cursor);
+
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'quality' => $badge->getQuality(),
-      'id' => $badge->getID(),
+      'id' => (int)$object->getID(),
+      'quality' => $object->getQuality(),
     );
   }
 

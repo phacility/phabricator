@@ -8,15 +8,58 @@ final class TransactionSearchConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return pht('Read transactions for an object.');
+    return pht('Read transactions and comments for an object.');
   }
 
-  public function getMethodStatus() {
-    return self::METHOD_STATUS_UNSTABLE;
-  }
+  public function getMethodDocumentation() {
+    $markup = pht(<<<EOREMARKUP
+When an object (like a task) is edited, Phabricator creates a "transaction"
+and applies it. This list of transactions on each object is the basis for
+essentially all edits and comments in Phabricator. Reviewing the transaction
+record allows you to see who edited an object, when, and how their edit changed
+things.
 
-  public function getMethodStatusDescription() {
-    return pht('This method is new and experimental.');
+One common reason to call this method is that you're implmenting a webhook and
+just received a notification that an object has changed. See the Webhooks
+documentation for more detailed discussion of this use case.
+
+Constraints
+===========
+
+These constraints are supported:
+
+  - `phids` //Optional list<phid>.// Find specific transactions by PHID. This
+    is most likely to be useful if you're responding to a webhook notification
+    and want to inspect only the related events.
+  - `authorPHIDs` //Optional list<phid>.// Find transactions with particular
+    authors.
+
+Transaction Format
+==================
+
+Each transaction has custom data describing what the transaction did. The
+format varies from transaction to transaction. The easiest way to figure out
+exactly what a particular transaction looks like is to make the associated kind
+of edit to a test object, then query that object.
+
+Not all transactions have data: by default, transactions have a `null` "type"
+and no additional data. This API does not expose raw transaction data because
+some of it is internal, oddly named, misspelled, confusing, not useful, or
+could create security or policy problems to expose directly.
+
+New transactions are exposed (with correctly spelled, comprehensible types and
+useful, reasonable fields) as we become aware of use cases for them.
+
+EOREMARKUP
+      );
+
+    $markup = $this->newRemarkupDocumentationView($markup);
+
+    return id(new PHUIObjectBoxView())
+      ->setCollapsed(true)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setHeaderText(pht('Method Details'))
+      ->appendChild($markup);
   }
 
   protected function defineParamTypes() {
@@ -73,24 +116,8 @@ final class TransactionSearchConduitAPIMethod
       ->setViewer($viewer);
 
     $constraints = $request->getValue('constraints', array());
-    PhutilTypeSpec::checkMap(
-      $constraints,
-      array(
-        'phids' => 'optional list<string>',
-      ));
 
-    $with_phids = idx($constraints, 'phids');
-
-    if ($with_phids === array()) {
-      throw new Exception(
-        pht(
-          'Constraint "phids" to "transaction.search" requires nonempty list, '.
-          'empty list provided.'));
-    }
-
-    if ($with_phids) {
-      $xaction_query->withPHIDs($with_phids);
-    }
+    $xaction_query = $this->applyConstraints($constraints, $xaction_query);
 
     $xactions = $xaction_query->executeWithCursorPager($pager);
 
@@ -218,6 +245,14 @@ final class TransactionSearchConduitAPIMethod
           case PhabricatorTransactions::TYPE_CREATE:
             $type = 'create';
             break;
+          case PhabricatorTransactions::TYPE_EDGE:
+            switch ($xaction->getMetadataValue('edge:type')) {
+              case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
+                $type = 'projects';
+                $fields = $this->newEdgeTransactionFields($xaction);
+                break;
+            }
+            break;
         }
       }
 
@@ -240,4 +275,69 @@ final class TransactionSearchConduitAPIMethod
 
     return $this->addPagerResults($results, $pager);
   }
+
+  private function applyConstraints(
+    array $constraints,
+    PhabricatorApplicationTransactionQuery $query) {
+
+    PhutilTypeSpec::checkMap(
+      $constraints,
+      array(
+        'phids' => 'optional list<string>',
+        'authorPHIDs' => 'optional list<string>',
+      ));
+
+    $with_phids = idx($constraints, 'phids');
+
+    if ($with_phids === array()) {
+      throw new Exception(
+        pht(
+          'Constraint "phids" to "transaction.search" requires nonempty list, '.
+          'empty list provided.'));
+    }
+
+    if ($with_phids) {
+      $query->withPHIDs($with_phids);
+    }
+
+    $with_authors = idx($constraints, 'authorPHIDs');
+    if ($with_authors === array()) {
+      throw new Exception(
+        pht(
+          'Constraint "authorPHIDs" to "transaction.search" requires '.
+          'nonempty list, empty list provided.'));
+    }
+
+    if ($with_authors) {
+      $query->withAuthorPHIDs($with_authors);
+    }
+
+    return $query;
+  }
+
+  private function newEdgeTransactionFields(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $record = PhabricatorEdgeChangeRecord::newFromTransaction($xaction);
+
+    $operations = array();
+    foreach ($record->getAddedPHIDs() as $phid) {
+      $operations[] = array(
+        'operation' => 'add',
+        'phid' => $phid,
+      );
+    }
+
+    foreach ($record->getRemovedPHIDs() as $phid) {
+      $operations[] = array(
+        'operation' => 'remove',
+        'phid' => $phid,
+      );
+    }
+
+    return array(
+      'operations' => $operations,
+    );
+  }
+
 }

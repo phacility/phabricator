@@ -135,52 +135,12 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     return $this;
   }
 
-  public function queueAddPositionBefore(
-    $board_phid,
-    $column_phid,
-    $object_phid,
-    $before_phid) {
-
-    return $this->queueAddPositionRelative(
-      $board_phid,
-      $column_phid,
-      $object_phid,
-      $before_phid,
-      true);
-  }
-
-  public function queueAddPositionAfter(
-    $board_phid,
-    $column_phid,
-    $object_phid,
-    $after_phid) {
-
-    return $this->queueAddPositionRelative(
-      $board_phid,
-      $column_phid,
-      $object_phid,
-      $after_phid,
-      false);
-  }
-
   public function queueAddPosition(
     $board_phid,
     $column_phid,
-    $object_phid) {
-    return $this->queueAddPositionRelative(
-      $board_phid,
-      $column_phid,
-      $object_phid,
-      null,
-      true);
-  }
-
-  private function queueAddPositionRelative(
-    $board_phid,
-    $column_phid,
     $object_phid,
-    $relative_phid,
-    $is_before) {
+    array $after_phids,
+    array $before_phids) {
 
     $board_layout = idx($this->boardLayout, $board_phid, array());
     $positions = idx($board_layout, $column_phid, array());
@@ -196,52 +156,74 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
         ->setObjectPHID($object_phid);
     }
 
-    $found = false;
     if (!$positions) {
       $object_position->setSequence(0);
     } else {
-      foreach ($positions as $position) {
-        if (!$found) {
-          if ($relative_phid === null) {
-            $is_match = true;
-          } else {
-            $position_phid = $position->getObjectPHID();
-            $is_match = ($relative_phid == $position_phid);
+      // The user's view of the board may fall out of date, so they might
+      // try to drop a card under a different card which is no longer where
+      // they thought it was.
+
+      // When this happens, we perform the move anyway, since this is almost
+      // certainly what users want when interacting with the UI. We'l try to
+      // fall back to another nearby card if the client provided us one. If
+      // we don't find any of the cards the client specified in the column,
+      // we'll just move the card to the default position.
+
+      $search_phids = array();
+      foreach ($after_phids as $after_phid) {
+        $search_phids[] = array($after_phid, false);
+      }
+
+      foreach ($before_phids as $before_phid) {
+        $search_phids[] = array($before_phid, true);
+      }
+
+      // This makes us fall back to the default position if we fail every
+      // candidate position. The default position counts as a "before" position
+      // because we want to put the new card at the top of the column.
+      $search_phids[] = array(null, true);
+
+      $found = false;
+      foreach ($search_phids as $search_position) {
+        list($relative_phid, $is_before) = $search_position;
+        foreach ($positions as $position) {
+          if (!$found) {
+            if ($relative_phid === null) {
+              $is_match = true;
+            } else {
+              $position_phid = $position->getObjectPHID();
+              $is_match = ($relative_phid === $position_phid);
+            }
+
+            if ($is_match) {
+              $found = true;
+
+              $sequence = $position->getSequence();
+
+              if (!$is_before) {
+                $sequence++;
+              }
+
+              $object_position->setSequence($sequence++);
+
+              if (!$is_before) {
+                // If we're inserting after this position, continue the loop so
+                // we don't update it.
+                continue;
+              }
+            }
           }
 
-          if ($is_match) {
-            $found = true;
-
-            $sequence = $position->getSequence();
-
-            if (!$is_before) {
-              $sequence++;
-            }
-
-            $object_position->setSequence($sequence++);
-
-            if (!$is_before) {
-              // If we're inserting after this position, continue the loop so
-              // we don't update it.
-              continue;
-            }
+          if ($found) {
+            $position->setSequence($sequence++);
+            $this->addQueue[] = $position;
           }
         }
 
         if ($found) {
-          $position->setSequence($sequence++);
-          $this->addQueue[] = $position;
+          break;
         }
       }
-    }
-
-    if ($relative_phid && !$found) {
-      throw new Exception(
-        pht(
-          'Unable to find object "%s" in column "%s" on board "%s".',
-          $relative_phid,
-          $column_phid,
-          $board_phid));
     }
 
     $this->addQueue[] = $object_position;
@@ -336,6 +318,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     $columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array_keys($boards))
+      ->needTriggers(true)
       ->execute();
     $columns = msort($columns, 'getOrderingKey');
     $columns = mpull($columns, null, 'getPHID');

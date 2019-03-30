@@ -123,22 +123,23 @@ information about the move, including an optional specific position within the
 column.
 
 The target column should be identified as `columnPHID`, and you may select a
-position by passing either `beforePHID` or `afterPHID`, specifying the PHID of
-a task currently in the column that you want to move this task before or after:
+position by passing either `beforePHIDs` or `afterPHIDs`, specifying the PHIDs
+of tasks currently in the column that you want to move this task before or
+after:
 
 ```lang=json
 [
   {
     "columnPHID": "PHID-PCOL-4444",
-    "beforePHID": "PHID-TASK-5555"
+    "beforePHIDs": ["PHID-TASK-5555"]
   }
 ]
 ```
 
-Note that this affects only the "natural" position of the task. The task
-position when the board is sorted by some other attribute (like priority)
-depends on that attribute value: change a task's priority to move it on
-priority-sorted boards.
+When you specify multiple PHIDs, the task will be moved adjacent to the first
+valid PHID found in either of the lists. This allows positional moves to
+generally work as users expect even if the client view of the board has fallen
+out of date and some of the nearby tasks have moved elsewhere.
 EODOCS
       );
 
@@ -379,7 +380,10 @@ EODOCS
     $object,
     array $xactions) {
 
-    if ($request->isAjax()) {
+    $response_type = $request->getStr('responseType');
+    $is_card = ($response_type === 'card');
+
+    if ($is_card) {
       // Reload the task to make sure we pick up the final task state.
       $viewer = $this->getViewer();
       $task = id(new ManiphestTaskQuery())
@@ -389,27 +393,10 @@ EODOCS
         ->needProjectPHIDs(true)
         ->executeOne();
 
-      switch ($request->getStr('responseType')) {
-        case 'card':
-          return $this->buildCardResponse($task);
-        default:
-          return $this->buildListResponse($task);
-      }
-
+      return $this->buildCardResponse($task);
     }
 
     return parent::newEditResponse($request, $object, $xactions);
-  }
-
-  private function buildListResponse(ManiphestTask $task) {
-    $controller = $this->getController();
-
-    $payload = array(
-      'tasks' => $controller->renderSingleTask($task),
-      'data' => array(),
-    );
-
-    return id(new AphrontAjaxResponse())->setContent($payload);
   }
 
   private function buildCardResponse(ManiphestTask $task) {
@@ -435,12 +422,26 @@ EODOCS
     $board_phid = $column->getProjectPHID();
     $object_phid = $task->getPHID();
 
-    return id(new PhabricatorBoardResponseEngine())
+    $order = $request->getStr('order');
+    if ($order) {
+      $ordering = PhabricatorProjectColumnOrder::getOrderByKey($order);
+      $ordering = id(clone $ordering)
+        ->setViewer($viewer);
+    } else {
+      $ordering = null;
+    }
+
+    $engine = id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
       ->setObjectPHID($object_phid)
-      ->setVisiblePHIDs($visible_phids)
-      ->buildResponse();
+      ->setVisiblePHIDs($visible_phids);
+
+    if ($ordering) {
+      $engine->setOrdering($ordering);
+    }
+
+    return $engine->buildResponse();
   }
 
   private function getColumnMap(ManiphestTask $task) {

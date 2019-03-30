@@ -70,7 +70,11 @@ final class PhabricatorWorkerTriggerQuery
   protected function nextPage(array $page) {
     // NOTE: We don't implement paging because we don't currently ever need
     // it and paging ORDER_EXECUTION is a hassle.
-    throw new PhutilMethodNotImplementedException();
+
+    // (Before T13266, we raised an exception here, but since "nextPage()" is
+    // now called even if we don't page we can't do that anymore. Just do
+    // nothing instead.)
+    return null;
   }
 
   protected function loadPage() {

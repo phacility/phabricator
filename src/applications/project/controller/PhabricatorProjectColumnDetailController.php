@@ -47,7 +47,7 @@ final class PhabricatorProjectColumnDetailController
     $properties = $this->buildPropertyView($column);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Workboard'), "/project/board/{$project_id}/");
+    $crumbs->addTextCrumb(pht('Workboard'), $project->getWorkboardURI());
     $crumbs->addTextCrumb(pht('Column: %s', $title));
     $crumbs->setBorder(true);
 

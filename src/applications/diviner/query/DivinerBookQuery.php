@@ -181,11 +181,10 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $book = $this->loadCursorObject($cursor);
-
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'name' => $book->getName(),
+      'id' => (int)$object->getID(),
+      'name' => $object->getName(),
     );
   }
 

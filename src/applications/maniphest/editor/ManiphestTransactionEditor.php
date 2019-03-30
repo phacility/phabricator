@@ -134,10 +134,7 @@ final class ManiphestTransactionEditor
             $parent_xaction->setMetadataValue('blocker.new', true);
           }
 
-          id(new ManiphestTransactionEditor())
-            ->setActor($this->getActor())
-            ->setActingAsPHID($this->getActingAsPHID())
-            ->setContentSource($this->getContentSource())
+          $this->newSubEditor()
             ->setContinueOnNoEffect(true)
             ->setContinueOnMissingFields(true)
             ->applyTransactions($blocked_task, array($parent_xaction));
@@ -246,8 +243,7 @@ final class ManiphestTransactionEditor
       foreach ($projects as $project) {
         $body->addLinkSection(
           pht('WORKBOARD'),
-          PhabricatorEnv::getProductionURI(
-            '/project/board/'.$project->getID().'/'));
+          PhabricatorEnv::getProductionURI($project->getWorkboardURI()));
       }
     }
 
@@ -295,251 +291,6 @@ final class ManiphestTransactionEditor
     }
 
     return $copy;
-  }
-
-  /**
-   * Get priorities for moving a task to a new priority.
-   */
-  public static function getEdgeSubpriority(
-    $priority,
-    $is_end) {
-
-    $query = id(new ManiphestTaskQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPriorities(array($priority))
-      ->setLimit(1);
-
-    if ($is_end) {
-      $query->setOrderVector(array('-priority', '-subpriority', '-id'));
-    } else {
-      $query->setOrderVector(array('priority', 'subpriority', 'id'));
-    }
-
-    $result = $query->executeOne();
-    $step = (double)(2 << 32);
-
-    if ($result) {
-      $base = $result->getSubpriority();
-      if ($is_end) {
-        $sub = ($base - $step);
-      } else {
-        $sub = ($base + $step);
-      }
-    } else {
-      $sub = 0;
-    }
-
-    return array($priority, $sub);
-  }
-
-
-  /**
-   * Get priorities for moving a task before or after another task.
-   */
-  public static function getAdjacentSubpriority(
-    ManiphestTask $dst,
-    $is_after) {
-
-    $query = id(new ManiphestTaskQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
-      ->withPriorities(array($dst->getPriority()))
-      ->setLimit(1);
-
-    if ($is_after) {
-      $query->setAfterID($dst->getID());
-    } else {
-      $query->setBeforeID($dst->getID());
-    }
-
-    $adjacent = $query->executeOne();
-
-    $base = $dst->getSubpriority();
-    $step = (double)(2 << 32);
-
-    // If we find an adjacent task, we average the two subpriorities and
-    // return the result.
-    if ($adjacent) {
-      $epsilon = 1.0;
-
-      // If the adjacent task has a subpriority that is identical or very
-      // close to the task we're looking at, we're going to spread out all
-      // the nearby tasks.
-
-      $adjacent_sub = $adjacent->getSubpriority();
-      if ((abs($adjacent_sub - $base) < $epsilon)) {
-        $base = self::disperseBlock(
-          $dst,
-          $epsilon * 2);
-        if ($is_after) {
-          $sub = $base - $epsilon;
-        } else {
-          $sub = $base + $epsilon;
-        }
-      } else {
-        $sub = ($adjacent_sub + $base) / 2;
-      }
-    } else {
-      // Otherwise, we take a step away from the target's subpriority and
-      // use that.
-      if ($is_after) {
-        $sub = ($base - $step);
-      } else {
-        $sub = ($base + $step);
-      }
-    }
-
-    return array($dst->getPriority(), $sub);
-  }
-
-  /**
-   * Distribute a cluster of tasks with similar subpriorities.
-   */
-  private static function disperseBlock(
-    ManiphestTask $task,
-    $spacing) {
-
-    $conn = $task->establishConnection('w');
-
-    // Find a block of subpriority space which is, on average, sparse enough
-    // to hold all the tasks that are inside it with a reasonable level of
-    // separation between them.
-
-    // We'll start by looking near the target task for a range of numbers
-    // which has more space available than tasks. For example, if the target
-    // task has subpriority 33 and we want to separate each task by at least 1,
-    // we might start by looking in the range [23, 43].
-
-    // If we find fewer than 20 tasks there, we have room to reassign them
-    // with the desired level of separation. We space them out, then we're
-    // done.
-
-    // However: if we find more than 20 tasks, we don't have enough room to
-    // distribute them. We'll widen our search and look in a bigger range,
-    // maybe [13, 53]. This range has more space, so if we find fewer than
-    // 40 tasks in this range we can spread them out. If we still find too
-    // many tasks, we keep widening the search.
-
-    $base = $task->getSubpriority();
-
-    $scale = 4.0;
-    while (true) {
-      $range = ($spacing * $scale) / 2.0;
-      $min = ($base - $range);
-      $max = ($base + $range);
-
-      $result = queryfx_one(
-        $conn,
-        'SELECT COUNT(*) N FROM %T WHERE priority = %d AND
-          subpriority BETWEEN %f AND %f',
-        $task->getTableName(),
-        $task->getPriority(),
-        $min,
-        $max);
-
-      $count = $result['N'];
-      if ($count < $scale) {
-        // We have found a block which we can make sparse enough, so bail and
-        // continue below with our selection.
-        break;
-      }
-
-      // This block had too many tasks for its size, so try again with a
-      // bigger block.
-      $scale *= 2.0;
-    }
-
-    $rows = queryfx_all(
-      $conn,
-      'SELECT id FROM %T WHERE priority = %d AND
-        subpriority BETWEEN %f AND %f
-        ORDER BY priority, subpriority, id',
-      $task->getTableName(),
-      $task->getPriority(),
-      $min,
-      $max);
-
-    $task_id = $task->getID();
-    $result = null;
-
-    // NOTE: In strict mode (which we encourage enabling) we can't structure
-    // this bulk update as an "INSERT ... ON DUPLICATE KEY UPDATE" unless we
-    // provide default values for ALL of the columns that don't have defaults.
-
-    // This is gross, but we may be moving enough rows that individual
-    // queries are unreasonably slow. An alternate construction which might
-    // be worth evaluating is to use "CASE". Another approach is to disable
-    // strict mode for this query.
-
-    $default_str = qsprintf($conn, '%s', '');
-    $default_int = qsprintf($conn, '%d', 0);
-
-    $extra_columns = array(
-      'phid' => $default_str,
-      'authorPHID' => $default_str,
-      'status' => $default_str,
-      'priority' => $default_int,
-      'title' => $default_str,
-      'description' => $default_str,
-      'dateCreated' => $default_int,
-      'dateModified' => $default_int,
-      'mailKey' => $default_str,
-      'viewPolicy' => $default_str,
-      'editPolicy' => $default_str,
-      'ownerOrdering' => $default_str,
-      'spacePHID' => $default_str,
-      'bridgedObjectPHID' => $default_str,
-      'properties' => $default_str,
-      'points' => $default_int,
-      'subtype' => $default_str,
-    );
-
-    $sql = array();
-    $offset = 0;
-
-    // Often, we'll have more room than we need in the range. Distribute the
-    // tasks evenly over the whole range so that we're less likely to end up
-    // with tasks spaced exactly the minimum distance apart, which may
-    // get shifted again later. We have one fewer space to distribute than we
-    // have tasks.
-    $divisor = (double)(count($rows) - 1.0);
-    if ($divisor > 0) {
-      $available_distance = (($max - $min) / $divisor);
-    } else {
-      $available_distance = 0.0;
-    }
-
-    foreach ($rows as $row) {
-      $subpriority = $min + ($offset * $available_distance);
-
-      // If this is the task that we're spreading out relative to, keep track
-      // of where it is ending up so we can return the new subpriority.
-      $id = $row['id'];
-      if ($id == $task_id) {
-        $result = $subpriority;
-      }
-
-      $sql[] = qsprintf(
-        $conn,
-        '(%d, %LQ, %f)',
-        $id,
-        $extra_columns,
-        $subpriority);
-
-      $offset++;
-    }
-
-    foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
-      queryfx(
-        $conn,
-        'INSERT INTO %T (id, %LC, subpriority) VALUES %LQ
-          ON DUPLICATE KEY UPDATE subpriority = VALUES(subpriority)',
-        $task->getTableName(),
-        array_keys($extra_columns),
-        $chunk);
-    }
-
-    return $result;
   }
 
   protected function validateAllTransactions(
@@ -676,6 +427,7 @@ final class ManiphestTransactionEditor
   private function buildMoveTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
+    $actor = $this->getActor();
 
     $new = $xaction->getNewValue();
     if (!is_array($new)) {
@@ -683,7 +435,7 @@ final class ManiphestTransactionEditor
       $new = array($new);
     }
 
-    $nearby_phids = array();
+    $relative_phids = array();
     foreach ($new as $key => $value) {
       if (!is_array($value)) {
         $this->validateColumnPHID($value);
@@ -696,35 +448,83 @@ final class ManiphestTransactionEditor
         $value,
         array(
           'columnPHID' => 'string',
+          'beforePHIDs' => 'optional list<string>',
+          'afterPHIDs' => 'optional list<string>',
+
+          // Deprecated older variations of "beforePHIDs" and "afterPHIDs".
           'beforePHID' => 'optional string',
           'afterPHID' => 'optional string',
         ));
 
-      $new[$key] = $value;
+      $value = $value + array(
+        'beforePHIDs' => array(),
+        'afterPHIDs' => array(),
+      );
 
-      if (!empty($value['beforePHID'])) {
-        $nearby_phids[] = $value['beforePHID'];
-      }
-
+      // Normalize the legacy keys "beforePHID" and "afterPHID" keys to the
+      // modern format.
       if (!empty($value['afterPHID'])) {
-        $nearby_phids[] = $value['afterPHID'];
+        if ($value['afterPHIDs']) {
+          throw new Exception(
+            pht(
+              'Transaction specifies both "afterPHID" and "afterPHIDs". '.
+              'Specify only "afterPHIDs".'));
+        }
+        $value['afterPHIDs'] = array($value['afterPHID']);
+        unset($value['afterPHID']);
       }
+
+      if (isset($value['beforePHID'])) {
+        if ($value['beforePHIDs']) {
+          throw new Exception(
+            pht(
+              'Transaction specifies both "beforePHID" and "beforePHIDs". '.
+              'Specify only "beforePHIDs".'));
+        }
+        $value['beforePHIDs'] = array($value['beforePHID']);
+        unset($value['beforePHID']);
+      }
+
+      foreach ($value['beforePHIDs'] as $phid) {
+        $relative_phids[] = $phid;
+      }
+
+      foreach ($value['afterPHIDs'] as $phid) {
+        $relative_phids[] = $phid;
+      }
+
+      $new[$key] = $value;
     }
 
-    if ($nearby_phids) {
-      $nearby_objects = id(new PhabricatorObjectQuery())
-        ->setViewer($this->getActor())
-        ->withPHIDs($nearby_phids)
+    // We require that objects you specify in "beforePHIDs" or "afterPHIDs"
+    // are real objects which exist and which you have permission to view.
+    // If you provide other objects, we remove them from the specification.
+
+    if ($relative_phids) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($actor)
+        ->withPHIDs($relative_phids)
         ->execute();
-      $nearby_objects = mpull($nearby_objects, null, 'getPHID');
+      $objects = mpull($objects, null, 'getPHID');
     } else {
-      $nearby_objects = array();
+      $objects = array();
+    }
+
+    foreach ($new as $key => $value) {
+      $value['afterPHIDs'] = $this->filterValidPHIDs(
+        $value['afterPHIDs'],
+        $objects);
+      $value['beforePHIDs'] = $this->filterValidPHIDs(
+        $value['beforePHIDs'],
+        $objects);
+
+      $new[$key] = $value;
     }
 
     $column_phids = ipull($new, 'columnPHID');
     if ($column_phids) {
       $columns = id(new PhabricatorProjectColumnQuery())
-        ->setViewer($this->getActor())
+        ->setViewer($actor)
         ->withPHIDs($column_phids)
         ->execute();
       $columns = mpull($columns, null, 'getPHID');
@@ -735,10 +535,9 @@ final class ManiphestTransactionEditor
     $board_phids = mpull($columns, 'getProjectPHID');
     $object_phid = $object->getPHID();
 
-    $object_phids = $nearby_phids;
-
     // Note that we may not have an object PHID if we're creating a new
     // object.
+    $object_phids = array();
     if ($object_phid) {
       $object_phids[] = $object_phid;
     }
@@ -765,49 +564,6 @@ final class ManiphestTransactionEditor
 
       $board_phid = $column->getProjectPHID();
 
-      $nearby = array();
-
-      if (!empty($spec['beforePHID'])) {
-        $nearby['beforePHID'] = $spec['beforePHID'];
-      }
-
-      if (!empty($spec['afterPHID'])) {
-        $nearby['afterPHID'] = $spec['afterPHID'];
-      }
-
-      if (count($nearby) > 1) {
-        throw new Exception(
-          pht(
-            'Column move transaction moves object to multiple positions. '.
-            'Specify only "beforePHID" or "afterPHID", not both.'));
-      }
-
-      foreach ($nearby as $where => $nearby_phid) {
-        if (empty($nearby_objects[$nearby_phid])) {
-          throw new Exception(
-            pht(
-              'Column move transaction specifies object "%s" as "%s", but '.
-              'there is no corresponding object with this PHID.',
-              $object_phid,
-              $where));
-        }
-
-        $nearby_columns = $layout_engine->getObjectColumns(
-          $board_phid,
-          $nearby_phid);
-        $nearby_columns = mpull($nearby_columns, null, 'getPHID');
-
-        if (empty($nearby_columns[$column_phid])) {
-          throw new Exception(
-            pht(
-              'Column move transaction specifies object "%s" as "%s" in '.
-              'column "%s", but this object is not in that column!',
-              $nearby_phid,
-              $where,
-              $column_phid));
-        }
-      }
-
       if ($object_phid) {
         $old_columns = $layout_engine->getObjectColumns(
           $board_phid,
@@ -826,8 +582,8 @@ final class ManiphestTransactionEditor
       // We can just drop this column change if it has no effect.
       $from_map = array_fuse($spec['fromColumnPHIDs']);
       $already_here = isset($from_map[$column_phid]);
-      $is_reordering = (bool)$nearby;
 
+      $is_reordering = ($spec['afterPHIDs'] || $spec['beforePHIDs']);
       if ($already_here && !$is_reordering) {
         unset($new[$key]);
       } else {
@@ -925,8 +681,9 @@ final class ManiphestTransactionEditor
   private function applyBoardMove($object, array $move) {
     $board_phid = $move['boardPHID'];
     $column_phid = $move['columnPHID'];
-    $before_phid = idx($move, 'beforePHID');
-    $after_phid = idx($move, 'afterPHID');
+
+    $before_phids = $move['beforePHIDs'];
+    $after_phids = $move['afterPHIDs'];
 
     $object_phid = $object->getPHID();
 
@@ -978,24 +735,12 @@ final class ManiphestTransactionEditor
         $object_phid);
     }
 
-    if ($before_phid) {
-      $engine->queueAddPositionBefore(
-        $board_phid,
-        $column_phid,
-        $object_phid,
-        $before_phid);
-    } else if ($after_phid) {
-      $engine->queueAddPositionAfter(
-        $board_phid,
-        $column_phid,
-        $object_phid,
-        $after_phid);
-    } else {
-      $engine->queueAddPosition(
-        $board_phid,
-        $column_phid,
-        $object_phid);
-    }
+    $engine->queueAddPosition(
+      $board_phid,
+      $column_phid,
+      $object_phid,
+      $after_phids,
+      $before_phids);
 
     $engine->applyPositionUpdates();
   }
@@ -1095,6 +840,18 @@ final class ManiphestTransactionEditor
     }
 
     return $errors;
+  }
+
+  private function filterValidPHIDs($phid_list, array $object_map) {
+    foreach ($phid_list as $key => $phid) {
+      if (isset($object_map[$phid])) {
+        continue;
+      }
+
+      unset($phid_list[$key]);
+    }
+
+    return array_values($phid_list);
   }
 
 }

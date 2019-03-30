@@ -30,20 +30,24 @@ final class PhabricatorApplicationTransactionCommentRemoveController
       ->withPHIDs(array($obj_phid))
       ->executeOne();
 
-    if ($request->isDialogFormPost()) {
+    $done_uri = $obj_handle->getURI();
+
+    if ($request->isFormOrHisecPost()) {
       $comment = $xaction->getApplicationTransactionCommentObject()
         ->setContent('')
         ->setIsRemoved(true);
 
       $editor = id(new PhabricatorApplicationTransactionCommentEditor())
         ->setActor($viewer)
+        ->setRequest($request)
+        ->setCancelURI($done_uri)
         ->setContentSource(PhabricatorContentSource::newFromRequest($request))
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {
         return id(new AphrontAjaxResponse())->setContent(array());
       } else {
-        return id(new AphrontReloadResponse())->setURI($obj_handle->getURI());
+        return id(new AphrontReloadResponse())->setURI($done_uri);
       }
     }
 
@@ -54,7 +58,6 @@ final class PhabricatorApplicationTransactionCommentRemoveController
       ->setTitle(pht('Remove Comment'));
 
     $dialog
-      ->addHiddenInput('anchor', $request->getStr('anchor'))
       ->appendParagraph(
         pht(
           "Removing a comment prevents anyone (including you) from reading ".
@@ -65,7 +68,7 @@ final class PhabricatorApplicationTransactionCommentRemoveController
 
     $dialog
       ->addSubmitButton(pht('Remove Comment'))
-      ->addCancelButton($obj_handle->getURI());
+      ->addCancelButton($done_uri);
 
     return $dialog;
   }

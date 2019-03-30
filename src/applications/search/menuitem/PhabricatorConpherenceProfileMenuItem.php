@@ -17,6 +17,12 @@ final class PhabricatorConpherenceProfileMenuItem
   }
 
   public function canAddToObject($object) {
+    $application = new PhabricatorConpherenceApplication();
+
+    if (!$application->isInstalled()) {
+      return false;
+    }
+
     return true;
   }
 

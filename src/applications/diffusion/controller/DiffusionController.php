@@ -512,8 +512,7 @@ abstract class DiffusionController extends PhabricatorController {
         ->setIcon('fa-code')
         ->setHref($drequest->generateURI(
           array(
-            'action' => 'branch',
-            'path' => '/',
+            'action' => 'browse',
           )))
         ->setSelected($key == 'code'));
 

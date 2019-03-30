@@ -82,17 +82,35 @@ final class ManiphestTaskCoverImageTransaction
 
       if (!$file) {
         $errors[] = $this->newInvalidError(
-          pht('"%s" is not a valid file PHID.',
-          $file_phid));
-      } else {
-        if (!$file->isViewableImage()) {
-          $mime_type = $file->getMimeType();
-          $errors[] = $this->newInvalidError(
-            pht('File mime type of "%s" is not a valid viewable image.',
-            $mime_type));
-        }
+          pht(
+            'File PHID ("%s") is invalid, or you do not have permission '.
+            'to view it.',
+            $file_phid),
+          $xaction);
+        continue;
       }
 
+      if (!$file->isViewableImage()) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'File ("%s", with MIME type "%s") is not a viewable image file.',
+            $file_phid,
+            $file->getMimeType()),
+          $xaction);
+        continue;
+      }
+
+      if (!$file->isTransformableImage()) {
+        $errors[] = $this->newInvalidError(
+          pht(
+            'File ("%s", with MIME type "%s") can not be transformed into '.
+            'a thumbnail. You may be missing support for this file type in '.
+            'the "GD" extension.',
+            $file_phid,
+            $file->getMimeType()),
+          $xaction);
+        continue;
+      }
     }
 
     return $errors;

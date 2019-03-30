@@ -215,13 +215,17 @@ final class DiffusionHistoryQueryConduitAPIMethod
       return array();
     }
 
-    $filter_query = '';
+    $filter_query = qsprintf($conn_r, '');
     if ($need_direct_changes) {
       if ($need_child_changes) {
-        $type = DifferentialChangeType::TYPE_CHILD;
-        $filter_query = 'AND (isDirect = 1 OR changeType = '.$type.')';
+        $filter_query = qsprintf(
+          $conn_r,
+          'AND (isDirect = 1 OR changeType = %s)',
+          DifferentialChangeType::TYPE_CHILD);
       } else {
-        $filter_query = 'AND (isDirect = 1)';
+        $filter_query = qsprintf(
+          $conn_r,
+          'AND (isDirect = 1)');
       }
     }
 

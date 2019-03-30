@@ -45,6 +45,8 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   private $raisePolicyExceptions;
   private $isOverheated;
+  private $returnPartialResultsOnOverheat;
+  private $disableOverheating;
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -127,6 +129,16 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   final public function requireCapabilities(array $capabilities) {
     $this->capabilities = $capabilities;
+    return $this;
+  }
+
+  final public function setReturnPartialResultsOnOverheat($bool) {
+    $this->returnPartialResultsOnOverheat = $bool;
+    return $this;
+  }
+
+  final public function setDisableOverheating($disable_overheating) {
+    $this->disableOverheating = $disable_overheating;
     return $this;
   }
 
@@ -282,6 +294,13 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
       $this->didFilterResults($removed);
 
+      // NOTE: We call "nextPage()" before checking if we've found enough
+      // results because we want to build the internal cursor object even
+      // if we don't need to execute another query: the internal cursor may
+      // be used by a parent query that is using this query to translate an
+      // external cursor into an internal cursor.
+      $this->nextPage($page);
+
       foreach ($visible as $key => $result) {
         ++$count;
 
@@ -312,11 +331,22 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         break;
       }
 
-      $this->nextPage($page);
+      if (!$this->disableOverheating) {
+        if ($overheat_limit && ($total_seen >= $overheat_limit)) {
+          $this->isOverheated = true;
 
-      if ($overheat_limit && ($total_seen >= $overheat_limit)) {
-        $this->isOverheated = true;
-        break;
+          if (!$this->returnPartialResultsOnOverheat) {
+            throw new Exception(
+              pht(
+                'Query (of class "%s") overheated: examined more than %s '.
+                'raw rows without finding %s visible objects.',
+                get_class($this),
+                new PhutilNumber($overheat_limit),
+                new PhutilNumber($need)));
+          }
+
+          break;
+        }
       }
     } while (true);
 

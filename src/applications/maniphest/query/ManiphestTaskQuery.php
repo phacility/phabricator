@@ -27,6 +27,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $closedEpochMax;
   private $closerPHIDs;
   private $columnPHIDs;
+  private $specificGroupByProjectPHID;
 
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
@@ -224,6 +225,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withColumnPHIDs(array $column_phids) {
     $this->columnPHIDs = $column_phids;
+    return $this;
+  }
+
+  public function withSpecificGroupByProjectPHID($project_phid) {
+    $this->specificGroupByProjectPHID = $project_phid;
     return $this;
   }
 
@@ -435,13 +441,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->priorities);
     }
 
-    if ($this->subpriorities !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority IN (%Lf)',
-        $this->subpriorities);
-    }
-
     if ($this->bridgedObjectPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
@@ -540,6 +539,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         'task.phid IN (%Ls)',
         $select_phids);
     }
+
+    if ($this->specificGroupByProjectPHID !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'projectGroupName.indexedObjectPHID = %s',
+        $this->specificGroupByProjectPHID);
+      }
 
     return $where;
   }
@@ -831,20 +837,10 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return array_mergev($phids);
   }
 
-  protected function getResultCursor($result) {
-    $id = $result->getID();
-
-    if ($this->groupBy == self::GROUP_PROJECT) {
-      return rtrim($id.'.'.$result->getGroupByProjectPHID(), '.');
-    }
-
-    return $id;
-  }
-
   public function getBuiltinOrders() {
     $orders = array(
       'priority' => array(
-        'vector' => array('priority', 'subpriority', 'id'),
+        'vector' => array('priority', 'id'),
         'name' => pht('Priority'),
         'aliases' => array(self::ORDER_PRIORITY),
       ),
@@ -919,11 +915,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         'type' => 'string',
         'reverse' => true,
       ),
-      'subpriority' => array(
-        'table' => 'task',
-        'column' => 'subpriority',
-        'type' => 'float',
-      ),
       'updated' => array(
         'table' => 'task',
         'column' => 'dateModified',
@@ -938,40 +929,37 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $cursor_parts = explode('.', $cursor, 2);
-    $task_id = $cursor_parts[0];
-    $group_id = idx($cursor_parts, 1);
+  protected function newPagingMapFromCursorObject(
+    PhabricatorQueryCursor $cursor,
+    array $keys) {
 
-    $task = $this->loadCursorObject($task_id);
+    $task = $cursor->getObject();
 
     $map = array(
-      'id' => $task->getID(),
-      'priority' => $task->getPriority(),
-      'subpriority' => $task->getSubpriority(),
+      'id' => (int)$task->getID(),
+      'priority' => (int)$task->getPriority(),
       'owner' => $task->getOwnerOrdering(),
       'status' => $task->getStatus(),
       'title' => $task->getTitle(),
-      'updated' => $task->getDateModified(),
+      'updated' => (int)$task->getDateModified(),
       'closed' => $task->getClosedEpoch(),
     );
 
-    foreach ($keys as $key) {
-      switch ($key) {
-        case 'project':
-          $value = null;
-          if ($group_id) {
-            $paging_projects = id(new PhabricatorProjectQuery())
-              ->setViewer($this->getViewer())
-              ->withPHIDs(array($group_id))
-              ->execute();
-            if ($paging_projects) {
-              $value = head($paging_projects)->getName();
-            }
-          }
-          $map[$key] = $value;
-          break;
+    if (isset($keys['project'])) {
+      $value = null;
+
+      $group_phid = $task->getGroupByProjectPHID();
+      if ($group_phid) {
+        $paging_projects = id(new PhabricatorProjectQuery())
+          ->setViewer($this->getViewer())
+          ->withPHIDs(array($group_phid))
+          ->execute();
+        if ($paging_projects) {
+          $value = head($paging_projects)->getName();
+        }
       }
+
+      $map['project'] = $value;
     }
 
     foreach ($keys as $key) {
@@ -982,6 +970,77 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     return $map;
+  }
+
+  protected function newExternalCursorStringForResult($object) {
+    $id = $object->getID();
+
+    if ($this->groupBy == self::GROUP_PROJECT) {
+      return rtrim($id.'.'.$object->getGroupByProjectPHID(), '.');
+    }
+
+    return $id;
+  }
+
+  protected function newInternalCursorFromExternalCursor($cursor) {
+    list($task_id, $group_phid) = $this->parseCursor($cursor);
+
+    $cursor_object = parent::newInternalCursorFromExternalCursor($cursor);
+
+    if ($group_phid !== null) {
+      $project = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(array($group_phid))
+        ->execute();
+
+      if (!$project) {
+        $this->throwCursorException(
+          pht(
+            'Group PHID ("%s") component of cursor ("%s") is not valid.',
+            $group_phid,
+            $cursor));
+      }
+
+      $cursor_object->getObject()->attachGroupByProjectPHID($group_phid);
+    }
+
+    return $cursor_object;
+  }
+
+  protected function applyExternalCursorConstraintsToQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $subquery,
+    $cursor) {
+    list($task_id, $group_phid) = $this->parseCursor($cursor);
+
+    $subquery->withIDs(array($task_id));
+
+    if ($group_phid) {
+      $subquery->setGroupBy(self::GROUP_PROJECT);
+
+      // The subquery needs to return exactly one result. If a task is in
+      // several projects, the query may naturally return several results.
+      // Specify that we want only the particular instance of the task in
+      // the specified project.
+      $subquery->withSpecificGroupByProjectPHID($group_phid);
+    }
+  }
+
+
+  private function parseCursor($cursor) {
+    // Split a "123.PHID-PROJ-abcd" cursor into a "Task ID" part and a
+    // "Project PHID" part.
+
+    $parts = explode('.', $cursor, 2);
+
+    if (count($parts) < 2) {
+      $parts[] = null;
+    }
+
+    if (!strlen($parts[1])) {
+      $parts[1] = null;
+    }
+
+    return $parts;
   }
 
   protected function getPrimaryTableAlias() {

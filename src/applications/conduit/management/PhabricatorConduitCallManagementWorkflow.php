@@ -58,6 +58,10 @@ final class PhabricatorConduitCallManagementWorkflow
             'No such user "%s" exists.',
             $as));
       }
+
+      // Allow inline generation of user caches for the user we're acting
+      // as, since some calls may read user preferences.
+      $actor->setAllowInlineCacheGeneration(true);
     } else {
       $actor = $viewer;
     }

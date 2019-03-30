@@ -1,11 +1,3 @@
 <?php
 
-$table = new PhabricatorPhurlURL();
-
-foreach (new LiskMigrationIterator($table) as $url) {
-  PhabricatorSearchWorker::queueDocumentForIndexing(
-    $url->getPHID(),
-    array(
-      'force' => true,
-    ));
-}
+// This was an old reindexing migration that has been obsoleted. See T13253.

@@ -14,7 +14,6 @@ final class PhabricatorManiphestTaskTestDataGenerator
     $author = id(new PhabricatorUser())
       ->loadOneWhere('phid = %s', $author_phid);
     $task = ManiphestTask::initializeNewTask($author)
-      ->setSubPriority($this->generateTaskSubPriority())
       ->setTitle($this->generateTitle());
 
     $content_source = $this->getLipsumContentSource();
@@ -104,10 +103,6 @@ final class PhabricatorManiphestTaskTestDataGenerator
     $keyword_map = ManiphestTaskPriority::getTaskPriorityKeywordsMap();
     $keyword = head(idx($keyword_map, $pri));
     return $keyword;
-  }
-
-  public function generateTaskSubPriority() {
-    return rand(2 << 16, 2 << 32);
   }
 
   public function generateTaskStatus() {

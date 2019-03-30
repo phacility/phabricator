@@ -30,6 +30,7 @@ final class ManiphestTaskGraphController
       ->setViewer($viewer)
       ->setSeedPHID($task->getPHID())
       ->setLimit($graph_limit)
+      ->setIsStandalone(true)
       ->loadGraph();
     if (!$task_graph->isEmpty()) {
       $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;

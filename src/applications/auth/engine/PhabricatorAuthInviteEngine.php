@@ -147,7 +147,7 @@ final class PhabricatorAuthInviteEngine extends Phobject {
         // no address. Users can use password recovery to access the other
         // account if they really control the address.
         throw id(new PhabricatorAuthInviteAccountException(
-          pht('Wrong Acount'),
+          pht('Wrong Account'),
           pht(
             'You are logged in as %s, but the email address you just '.
             'clicked a link from is already the primary email address '.

@@ -800,11 +800,10 @@ final class DifferentialRevisionQuery
     ) + parent::getOrderableColumns();
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $revision = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $revision->getID(),
-      'updated' => $revision->getDateModified(),
+      'id' => (int)$object->getID(),
+      'updated' => (int)$object->getDateModified(),
     );
   }
 

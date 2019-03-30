@@ -591,15 +591,11 @@ final class AphrontRequest extends Phobject {
   }
 
   public function getRequestURI() {
-    $request_uri = idx($_SERVER, 'REQUEST_URI', '/');
+    $uri_path = phutil_escape_uri($this->getPath());
+    $uri_query = idx($_SERVER, 'QUERY_STRING', '');
 
-    $uri = new PhutilURI($request_uri);
-    $uri->removeQueryParam('__path__');
-
-    $path = phutil_escape_uri($this->getPath());
-    $uri->setPath($path);
-
-    return $uri;
+    return id(new PhutilURI($uri_path.'?'.$uri_query))
+      ->removeQueryParam('__path__');
   }
 
   public function getAbsoluteRequestURI() {

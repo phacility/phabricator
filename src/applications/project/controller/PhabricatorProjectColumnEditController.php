@@ -50,8 +50,7 @@ final class PhabricatorProjectColumnEditController
     $v_name = $column->getName();
 
     $validation_exception = null;
-    $base_uri = '/board/'.$project_id.'/';
-    $view_uri = $this->getApplicationURI($base_uri);
+    $view_uri = $project->getWorkboardURI();
 
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
@@ -76,8 +75,8 @@ final class PhabricatorProjectColumnEditController
 
       $xactions = array();
 
-      $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
-      $type_limit = PhabricatorProjectColumnTransaction::TYPE_LIMIT;
+      $type_name = PhabricatorProjectColumnNameTransaction::TRANSACTIONTYPE;
+      $type_limit = PhabricatorProjectColumnLimitTransaction::TRANSACTIONTYPE;
 
       if (!$column->getProxy()) {
         $xactions[] = id(new PhabricatorProjectColumnTransaction())
@@ -93,7 +92,6 @@ final class PhabricatorProjectColumnEditController
         $editor = id(new PhabricatorProjectColumnTransactionEditor())
           ->setActor($viewer)
           ->setContinueOnNoEffect(true)
-          ->setContinueOnMissingFields(true)
           ->setContentSourceFromRequest($request)
           ->applyTransactions($column, $xactions);
         return id(new AphrontRedirectResponse())->setURI($view_uri);

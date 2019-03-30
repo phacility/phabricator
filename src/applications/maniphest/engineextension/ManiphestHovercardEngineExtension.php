@@ -47,8 +47,7 @@ final class ManiphestHovercardEngineExtension
 
     $card = id(new ProjectBoardTaskCard())
       ->setViewer($viewer)
-      ->setTask($task)
-      ->setCanEdit(false);
+      ->setTask($task);
 
     $owner_phid = $task->getOwnerPHID();
     if ($owner_phid) {

@@ -140,11 +140,10 @@ final class PhabricatorCalendarEventQuery
     ) + parent::getOrderableColumns();
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $event = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'start' => $event->getStartDateTimeEpoch(),
-      'id' => $event->getID(),
+      'id' => (int)$object->getID(),
+      'start' => (int)$object->getStartDateTimeEpoch(),
     );
   }
 

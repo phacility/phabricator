@@ -10,13 +10,15 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     PhabricatorSubscribableInterface,
     PhabricatorNgramsInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorPolicyCodexInterface {
 
   protected $name;
   protected $planStatus;
   protected $planAutoKey;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $properties = array();
 
   const STATUS_ACTIVE   = 'active';
   const STATUS_DISABLED = 'disabled';
@@ -45,6 +47,9 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort128',
         'planStatus' => 'text32',
@@ -84,6 +89,25 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return ($this->getPlanStatus() == self::STATUS_DISABLED);
   }
 
+  public function getURI() {
+    return urisprintf(
+      '/harbormaster/plan/%s/',
+      $this->getID());
+  }
+
+  public function getObjectName() {
+    return pht('Plan %d', $this->getID());
+  }
+
+  public function getPlanProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setPlanProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
 
 /* -(  Autoplans  )---------------------------------------------------------- */
 
@@ -110,7 +134,6 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return true;
   }
 
-
   public function getName() {
     $autoplan = $this->getAutoplan();
     if ($autoplan) {
@@ -118,6 +141,38 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     }
 
     return parent::getName();
+  }
+
+  public function hasRunCapability(PhabricatorUser $viewer) {
+    try {
+      $this->assertHasRunCapability($viewer);
+      return true;
+    } catch (PhabricatorPolicyException $ex) {
+      return false;
+    }
+  }
+
+  public function canRunWithoutEditCapability() {
+    $runnable = HarbormasterBuildPlanBehavior::BEHAVIOR_RUNNABLE;
+    $if_viewable = HarbormasterBuildPlanBehavior::RUNNABLE_IF_VIEWABLE;
+
+    $option = HarbormasterBuildPlanBehavior::getBehavior($runnable)
+      ->getPlanOption($this);
+
+    return ($option->getKey() === $if_viewable);
+  }
+
+  public function assertHasRunCapability(PhabricatorUser $viewer) {
+    if ($this->canRunWithoutEditCapability()) {
+      $capability = PhabricatorPolicyCapability::CAN_VIEW;
+    } else {
+      $capability = PhabricatorPolicyCapability::CAN_EDIT;
+    }
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $this,
+      $capability);
   }
 
 
@@ -210,20 +265,44 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
         ->setKey('status')
         ->setType('map<string, wild>')
         ->setDescription(pht('The current status of this build plan.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('behaviors')
+        ->setType('map<string, string>')
+        ->setDescription(pht('Behavior configuration for the build plan.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $behavior_map = array();
+
+    $behaviors = HarbormasterBuildPlanBehavior::newPlanBehaviors();
+    foreach ($behaviors as $behavior) {
+      $option = $behavior->getPlanOption($this);
+
+      $behavior_map[$behavior->getKey()] = array(
+        'value' => $option->getKey(),
+      );
+    }
+
     return array(
       'name' => $this->getName(),
       'status' => array(
         'value' => $this->getPlanStatus(),
       ),
+      'behaviors' => $behavior_map,
     );
   }
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
+
+
+  public function newPolicyCodex() {
+    return new HarbormasterBuildPlanPolicyCodex();
   }
 
 }

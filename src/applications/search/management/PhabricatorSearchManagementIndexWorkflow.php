@@ -136,7 +136,13 @@ final class PhabricatorSearchManagementIndexWorkflow
 
         if ($track_skips) {
           $new_versions = $this->loadIndexVersions($phid);
-          if ($old_versions !== $new_versions) {
+
+          if (!$old_versions && !$new_versions) {
+            // If the document doesn't use an index version, both the lists
+            // of versions will be empty. We still rebuild the index in this
+            // case.
+            $count_updated++;
+          } else if ($old_versions !== $new_versions) {
             $count_updated++;
           } else {
             $count_skipped++;

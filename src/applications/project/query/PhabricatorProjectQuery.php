@@ -201,12 +201,11 @@ final class PhabricatorProjectQuery
     );
   }
 
-  protected function getPagingValueMap($cursor, array $keys) {
-    $project = $this->loadCursorObject($cursor);
+  protected function newPagingMapFromPartialObject($object) {
     return array(
-      'id' => $project->getID(),
-      'name' => $project->getName(),
-      'status' => $project->getStatus(),
+      'id' => (int)$object->getID(),
+      'name' => $object->getName(),
+      'status' => $object->getStatus(),
     );
   }
 
