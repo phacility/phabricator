@@ -71,16 +71,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->controller;
   }
 
-  private function setDefaultItem(
-    PhabricatorProfileMenuItemConfiguration $default_item) {
-    $this->defaultItem = $default_item;
-    return $this;
-  }
-
-  public function getDefaultItem() {
-    return $this->pickDefaultItem($this->getItems());
-  }
-
   public function setShowNavigation($show) {
     $this->showNavigation = $show;
     return $this;
@@ -150,10 +140,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $item_id = $request->getURIData('id');
     }
 
-    $item_list = $this->getItems();
+    $view_list = $this->newProfileMenuItemViewList();
 
-    $selected_item = $this->pickSelectedItem(
-      $item_list,
+    $selected_item = $this->selectItem(
+      $view_list,
       $item_id,
       $is_view);
 
@@ -183,8 +173,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         break;
     }
 
-    $navigation = $this->buildNavigation($selected_item);
-
+    $navigation = $view_list->newNavigationView();
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
     if (!$is_view) {
@@ -288,9 +277,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         if (!$this->isMenuEnginePinnable()) {
           return new Aphront404Response();
         }
-        $content = $this->buildItemDefaultContent(
-          $selected_item,
-          $item_list);
+        $content = $this->buildItemDefaultContent($selected_item);
         break;
       case 'edit':
         $content = $this->buildItemEditContent();
@@ -333,80 +320,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $page;
   }
 
-  public function buildNavigation(
-    PhabricatorProfileMenuItemConfiguration $selected_item = null) {
 
-    if ($this->navigation) {
-      return $this->navigation;
-    }
-
-    $nav = id(new AphrontSideNavFilterView())
-      ->setIsProfileMenu(true)
-      ->setBaseURI(new PhutilURI($this->getItemURI('')));
-
-    $menu_items = $this->getItems();
-
-    $filtered_items = array();
-    foreach ($menu_items as $menu_item) {
-      if ($menu_item->isDisabled()) {
-        continue;
-      }
-      $filtered_items[] = $menu_item;
-    }
-    $filtered_groups = mgroup($filtered_items, 'getMenuItemKey');
-    foreach ($filtered_groups as $group) {
-      $first_item = head($group);
-      $first_item->willBuildNavigationItems($group);
-    }
-
-    $has_items = false;
-    foreach ($menu_items as $menu_item) {
-      if ($menu_item->isDisabled()) {
-        continue;
-      }
-
-      $items = $menu_item->buildNavigationMenuItems();
-      foreach ($items as $item) {
-        $this->validateNavigationMenuItem($item);
-      }
-
-      // If the item produced only a single item which does not otherwise
-      // have a key, try to automatically assign it a reasonable key. This
-      // makes selecting the correct item simpler.
-
-      if (count($items) == 1) {
-        $item = head($items);
-        if ($item->getKey() === null) {
-          $default_key = $menu_item->getDefaultMenuItemKey();
-          $item->setKey($default_key);
-        }
-      }
-
-      foreach ($items as $item) {
-        $nav->addMenuItem($item);
-        $has_items = true;
-      }
-    }
-
-    if (!$has_items) {
-      // If the navigation menu has no items, add an empty label item to
-      // force it to render something.
-      $empty_item = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL);
-      $nav->addMenuItem($empty_item);
-    }
-
-    $nav->selectFilter(null);
-
-    $navigation_items = $nav->getMenu()->getItems();
-    $select_key = $this->pickHighlightedMenuItem(
-      $navigation_items,
-      $selected_item);
-    $nav->selectFilter($select_key);
-
-    $this->navigation = $nav;
-    return $this->navigation;
-  }
 
   private function getItems() {
     if ($this->items === null) {
@@ -715,7 +629,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
    *
    * @return bool True if items may be pinned as default items.
    */
-  protected function isMenuEnginePinnable() {
+  public function isMenuEnginePinnable() {
     return !$this->isMenuEnginePersonalizable();
   }
 
@@ -779,7 +693,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $filtered_groups = mgroup($items, 'getMenuItemKey');
     foreach ($filtered_groups as $group) {
       $first_item = head($group);
-      $first_item->willBuildNavigationItems($group);
+      $first_item->willGetMenuItemViewList($group);
     }
 
     // Users only need to be able to edit the object which this menu appears
@@ -1153,8 +1067,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   private function buildItemDefaultContent(
-    PhabricatorProfileMenuItemConfiguration $configuration,
-    array $items) {
+    PhabricatorProfileMenuItemConfiguration $configuration) {
 
     $controller = $this->getController();
     $request = $controller->getRequest();
@@ -1218,6 +1131,17 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setBuiltinKey(self::ITEM_MANAGE)
       ->setMenuItemKey(PhabricatorManageProfileMenuItem::MENUITEMKEY)
       ->setIsTailItem(true);
+  }
+
+  public function getDefaultMenuItemConfiguration() {
+    $configs = $this->getItems();
+    foreach ($configs as $config) {
+      if ($config->isDefault()) {
+        return $config;
+      }
+    }
+
+    return null;
   }
 
   public function adjustDefault($key) {
@@ -1340,157 +1264,74 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       pht('There are no menu items.'));
   }
 
-  private function pickDefaultItem(array $items) {
-    // Remove all the items which can not be the default item.
-    foreach ($items as $key => $item) {
-      if (!$item->canMakeDefault()) {
-        unset($items[$key]);
-        continue;
-      }
 
+  final public function newProfileMenuItemViewList() {
+    $items = $this->getItems();
+
+    // Throw away disabled items: they are not allowed to build any views for
+    // the menu.
+    foreach ($items as $key => $item) {
       if ($item->isDisabled()) {
         unset($items[$key]);
         continue;
       }
     }
 
-    // If this engine supports pinning items and a valid item is pinned,
-    // pick that item as the default.
-    if ($this->isMenuEnginePinnable()) {
-      foreach ($items as $key => $item) {
-        if ($item->isDefault()) {
-          return $item;
-        }
-      }
+    // Give each item group a callback so it can load data it needs to render
+    // views.
+    $groups = mgroup($items, 'getMenuItemKey');
+    foreach ($groups as $group) {
+      $item = head($group);
+      $item->willGetMenuItemViewList($group);
     }
 
-    // If we have some other valid items, pick the first one as the default.
-    if ($items) {
-      return head($items);
-    }
+    $view_list = id(new PhabricatorProfileMenuItemViewList())
+      ->setProfileMenuEngine($this);
 
-    return null;
-  }
-
-  private function pickSelectedItem(array $items, $item_id, $is_view) {
-    if (strlen($item_id)) {
-      $item_id_int = (int)$item_id;
-      foreach ($items as $item) {
-        if ($item_id_int) {
-          if ((int)$item->getID() === $item_id_int) {
-            return $item;
-          }
-        }
-
-        $builtin_key = $item->getBuiltinKey();
-        if ($builtin_key === (string)$item_id) {
-          return $item;
-        }
-      }
-
-      // Nothing matches the selected item ID, so we don't have a valid
-      // selection.
-      return null;
-    }
-
-    if ($is_view) {
-      return $this->pickDefaultItem($items);
-    }
-
-    return null;
-  }
-
-  private function pickHighlightedMenuItem(
-    array $items,
-    PhabricatorProfileMenuItemConfiguration $selected_item = null) {
-
-    assert_instances_of($items, 'PHUIListItemView');
-
-    $default_key = null;
-    if ($selected_item) {
-      $default_key = $selected_item->getDefaultMenuItemKey();
-    }
-
-    $controller = $this->getController();
-
-    // In some rare cases, when like building the "Favorites" menu on a
-    // 404 page, we may not have a controller. Just accept whatever default
-    // behavior we'd otherwise end up with.
-    if (!$controller) {
-      return $default_key;
-    }
-
-    $request = $controller->getRequest();
-
-    // See T12949. If one of the menu items is a link to the same URI that
-    // the page was accessed with, we want to highlight that item. For example,
-    // this allows you to add links to a menu that apply filters to a
-    // workboard.
-
-    $matches = array();
     foreach ($items as $item) {
-      $href = $item->getHref();
-      if ($this->isMatchForRequestURI($request, $href)) {
-        $matches[] = $item;
+      $views = $item->getMenuItemViewList();
+      foreach ($views as $view) {
+        $view_list->addItemView($view);
       }
     }
 
-    foreach ($matches as $match) {
-      if ($match->getKey() === $default_key) {
-        return $default_key;
+    return $view_list;
+  }
+
+  private function selectItem(
+    PhabricatorProfileMenuItemViewList $view_list,
+    $item_id,
+    $want_default) {
+
+    // Figure out which view's content we're going to render. In most cases,
+    // the URI tells us. If we don't have an identifier in the URI, we'll
+    // render the default view instead if this is a workflow that falls back
+    // to default rendering.
+
+    $selected_view = null;
+    if (strlen($item_id)) {
+      $item_views = $view_list->getViewsWithItemIdentifier($item_id);
+      if ($item_views) {
+        $selected_view = head($item_views);
+      }
+    } else {
+      if ($want_default) {
+        $default_views = $view_list->getDefaultViews();
+        if ($default_views) {
+          $selected_view = head($default_views);
+        }
       }
     }
 
-    if ($matches) {
-      return head($matches)->getKey();
+    if ($selected_view) {
+      $view_list->setSelectedView($selected_view);
+      $selected_item = $selected_view->getMenuItemConfiguration();
+    } else {
+      $selected_item = null;
     }
 
-    return $default_key;
+    return $selected_item;
   }
 
-  private function isMatchForRequestURI(AphrontRequest $request, $item_uri) {
-    $request_uri = $request->getAbsoluteRequestURI();
-    $item_uri = new PhutilURI($item_uri);
-
-    // If the request URI and item URI don't have matching paths, they
-    // do not match.
-    if ($request_uri->getPath() !== $item_uri->getPath()) {
-      return false;
-    }
-
-    // If the request URI and item URI don't have matching parameters, they
-    // also do not match. We're specifically trying to let "?filter=X" work
-    // on Workboards, among other use cases, so this is important.
-    $request_params = $request_uri->getQueryParamsAsPairList();
-    $item_params = $item_uri->getQueryParamsAsPairList();
-    if ($request_params !== $item_params) {
-      return false;
-    }
-
-    // If the paths and parameters match, the item domain must be: empty; or
-    // match the request domain; or match the production domain.
-
-    $request_domain = $request_uri->getDomain();
-
-    $production_uri = PhabricatorEnv::getProductionURI('/');
-    $production_domain = id(new PhutilURI($production_uri))
-      ->getDomain();
-
-    $allowed_domains = array(
-      '',
-      $request_domain,
-      $production_domain,
-    );
-    $allowed_domains = array_fuse($allowed_domains);
-
-    $item_domain = $item_uri->getDomain();
-    $item_domain = (string)$item_domain;
-
-    if (isset($allowed_domains[$item_domain])) {
-      return true;
-    }
-
-    return false;
-  }
 
 }

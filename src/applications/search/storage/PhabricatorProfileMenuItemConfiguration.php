@@ -100,10 +100,6 @@ final class PhabricatorProfileMenuItemConfiguration
     return idx($this->menuItemProperties, $key, $default);
   }
 
-  public function buildNavigationMenuItems() {
-    return $this->getMenuItem()->buildNavigationMenuItems($this);
-  }
-
   public function getMenuItemTypeName() {
     return $this->getMenuItem()->getMenuItemTypeName();
   }
@@ -124,8 +120,12 @@ final class PhabricatorProfileMenuItemConfiguration
     return $this->getMenuItem()->shouldEnableForObject($object);
   }
 
-  public function willBuildNavigationItems(array $items) {
-    return $this->getMenuItem()->willBuildNavigationItems($items);
+  public function willGetMenuItemViewList(array $items) {
+    return $this->getMenuItem()->willGetMenuItemViewList($items);
+  }
+
+  public function getMenuItemViewList() {
+    return $this->getMenuItem()->getMenuItemViewList($this);
   }
 
   public function validateTransactions(array $map) {

@@ -4056,6 +4056,8 @@ phutil_register_library_map(array(
     'PhabricatorProfileMenuItemConfigurationTransactionQuery' => 'applications/search/query/PhabricatorProfileMenuItemConfigurationTransactionQuery.php',
     'PhabricatorProfileMenuItemIconSet' => 'applications/search/menuitem/PhabricatorProfileMenuItemIconSet.php',
     'PhabricatorProfileMenuItemPHIDType' => 'applications/search/phidtype/PhabricatorProfileMenuItemPHIDType.php',
+    'PhabricatorProfileMenuItemView' => 'applications/search/engine/PhabricatorProfileMenuItemView.php',
+    'PhabricatorProfileMenuItemViewList' => 'applications/search/engine/PhabricatorProfileMenuItemViewList.php',
     'PhabricatorProject' => 'applications/project/storage/PhabricatorProject.php',
     'PhabricatorProjectAddHeraldAction' => 'applications/project/herald/PhabricatorProjectAddHeraldAction.php',
     'PhabricatorProjectApplication' => 'applications/project/application/PhabricatorProjectApplication.php',
@@ -10184,6 +10186,8 @@ phutil_register_library_map(array(
     'PhabricatorProfileMenuItemConfigurationTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorProfileMenuItemIconSet' => 'PhabricatorIconSet',
     'PhabricatorProfileMenuItemPHIDType' => 'PhabricatorPHIDType',
+    'PhabricatorProfileMenuItemView' => 'Phobject',
+    'PhabricatorProfileMenuItemViewList' => 'Phobject',
     'PhabricatorProject' => array(
       'PhabricatorProjectDAO',
       'PhabricatorApplicationTransactionInterface',
