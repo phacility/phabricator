@@ -227,14 +227,7 @@ final class PhabricatorEditEngineConfiguration
   public function getCreateURI() {
     $form_key = $this->getIdentifier();
     $engine = $this->getEngine();
-
-    try {
-      $create_uri = $engine->getEditURI(null, "form/{$form_key}/");
-    } catch (Exception $ex) {
-      $create_uri = null;
-    }
-
-    return $create_uri;
+    return $engine->getCreateURI($form_key);
   }
 
   public function getIdentifier() {
