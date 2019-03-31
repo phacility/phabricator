@@ -70,7 +70,7 @@ final class PhabricatorMotivatorProfileMenuItem
       ->setName($fact_name)
       ->setIcon($fact_icon)
       ->setTooltip($fact_text)
-      ->setHref('#');
+      ->setURI('#');
 
     return array(
       $item,

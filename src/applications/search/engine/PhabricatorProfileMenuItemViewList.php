@@ -62,34 +62,15 @@ final class PhabricatorProfileMenuItemViewList
   public function getViewsWithItemIdentifier($identifier) {
     $views = $this->getItemViews();
 
-    if (!strlen($identifier)) {
-      return array();
-    }
-
-    if (ctype_digit($identifier)) {
-      $identifier_int = (int)$identifier;
-    } else {
-      $identifier_int = null;
-    }
-
-    $identifier_str = (string)$identifier;
-
     $results = array();
     foreach ($views as $view) {
       $config = $view->getMenuItemConfiguration();
 
-      if ($identifier_int !== null) {
-        $config_id = (int)$config->getID();
-        if ($config_id === $identifier_int) {
-          $results[] = $view;
-          continue;
-        }
-      }
-
-      if ($config->getBuiltinKey() === $identifier_str) {
-        $results[] = $view;
+      if (!$config->matchesIdentifier($identifier)) {
         continue;
       }
+
+      $results[] = $view;
     }
 
     return $results;
@@ -109,6 +90,13 @@ final class PhabricatorProfileMenuItemViewList
       if (!$config->canMakeDefault()) {
         unset($views[$key]);
         continue;
+      }
+    }
+
+    // Remove disabled views.
+    foreach ($views as $key => $view) {
+      if ($view->getDisabled()) {
+        unset($views[$key]);
       }
     }
 

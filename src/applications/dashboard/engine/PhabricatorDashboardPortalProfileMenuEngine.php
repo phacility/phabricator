@@ -30,10 +30,21 @@ final class PhabricatorDashboardPortalProfileMenuEngine
     return $items;
   }
 
-  protected function newNoMenuItemsView() {
-    return $this->newEmptyView(
-      pht('New Portal'),
-      pht('Use "Edit Menu" to add menu items to this portal.'));
+  protected function newNoMenuItemsView(array $items) {
+    $object = $this->getProfileObject();
+    $builtins = $this->getBuiltinProfileItems($object);
+
+    if (count($items) <= count($builtins)) {
+      return $this->newEmptyView(
+        pht('New Portal'),
+        pht('Use "Edit Menu" to add menu items to this portal.'));
+    } else {
+      return $this->newEmptyValue(
+        pht('No Portal Content'),
+        pht(
+          'None of the visible menu items in this portal can render any '.
+          'content.'));
+    }
   }
 
 }

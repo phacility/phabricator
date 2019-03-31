@@ -142,10 +142,14 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $view_list = $this->newProfileMenuItemViewList();
 
-    $selected_item = $this->selectItem(
-      $view_list,
-      $item_id,
-      $is_view);
+    if ($is_view) {
+      $selected_item = $this->selectViewItem($view_list, $item_id);
+    } else {
+      if (!strlen($item_id)) {
+        $item_id = self::ITEM_MANAGE;
+      }
+      $selected_item = $this->selectEditItem($view_list, $item_id);
+    }
 
     switch ($item_action) {
       case 'view':
@@ -177,8 +181,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
     if (!$is_view) {
-      $navigation->selectFilter(self::ITEM_MANAGE);
-
       if ($selected_item) {
         if ($selected_item->getCustomPHID()) {
           $edit_mode = 'custom';
@@ -222,7 +224,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
           $crumbs->addTextCrumb($selected_item->getDisplayName());
         } else {
-          $content = $this->newNoMenuItemsView();
+          $content = $this->newNoContentView($this->getItems());
         }
 
         if (!$content) {
@@ -319,8 +321,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     return $page;
   }
-
-
 
   private function getItems() {
     if ($this->items === null) {
@@ -1258,10 +1258,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         ));
   }
 
-  protected function newNoMenuItemsView() {
+  protected function newNoContentView(array $items) {
     return $this->newEmptyView(
-      pht('No Menu Items'),
-      pht('There are no menu items.'));
+      pht('No Content'),
+      pht('No visible menu items can render content.'));
   }
 
 
@@ -1298,15 +1298,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $view_list;
   }
 
-  private function selectItem(
+  private function selectViewItem(
     PhabricatorProfileMenuItemViewList $view_list,
-    $item_id,
-    $want_default) {
+    $item_id) {
 
     // Figure out which view's content we're going to render. In most cases,
     // the URI tells us. If we don't have an identifier in the URI, we'll
-    // render the default view instead if this is a workflow that falls back
-    // to default rendering.
+    // render the default view instead.
 
     $selected_view = null;
     if (strlen($item_id)) {
@@ -1315,11 +1313,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         $selected_view = head($item_views);
       }
     } else {
-      if ($want_default) {
-        $default_views = $view_list->getDefaultViews();
-        if ($default_views) {
-          $selected_view = head($default_views);
-        }
+      $default_views = $view_list->getDefaultViews();
+      if ($default_views) {
+        $selected_view = head($default_views);
       }
     }
 
@@ -1331,6 +1327,33 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     return $selected_item;
+  }
+
+  private function selectEditItem(
+    PhabricatorProfileMenuItemViewList $view_list,
+    $item_id) {
+
+    // First, try to select a visible item using the normal view selection
+    // pathway. If this works, it also highlights the menu properly.
+
+    if ($item_id) {
+      $selected_item = $this->selectViewItem($view_list, $item_id);
+      if ($selected_item) {
+        return $selected_item;
+      }
+    }
+
+    // If we didn't find an item in the view list, we may be enabling an item
+    // which is currently disabled or editing an item which is not generating
+    // any actual items in the menu.
+
+    foreach ($this->getItems() as $item) {
+      if ($item->matchesIdentifier($item_id)) {
+        return $item;
+      }
+    }
+
+    return null;
   }
 
 

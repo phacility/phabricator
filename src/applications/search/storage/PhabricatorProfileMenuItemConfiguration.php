@@ -237,6 +237,24 @@ final class PhabricatorProfileMenuItemConfiguration
     return $this->isTailItem;
   }
 
+  public function matchesIdentifier($identifier) {
+    if (!strlen($identifier)) {
+      return false;
+    }
+
+    if (ctype_digit($identifier)) {
+      if ((int)$this->getID() === (int)$identifier) {
+        return true;
+      }
+    }
+
+    if ((string)$this->getBuiltinKey() === (string)$identifier) {
+      return true;
+    }
+
+    return false;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
