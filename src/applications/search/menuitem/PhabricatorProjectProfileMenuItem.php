@@ -35,7 +35,7 @@ final class PhabricatorProjectProfileMenuItem
     return $project;
   }
 
-  public function willBuildNavigationItems(array $items) {
+  public function willGetMenuItemViewList(array $items) {
     $viewer = $this->getViewer();
     $project_phids = array();
     foreach ($items as $item) {
@@ -90,7 +90,7 @@ final class PhabricatorProjectProfileMenuItem
     return $config->getMenuItemProperty('name');
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $project = $this->getProject();
@@ -100,12 +100,12 @@ final class PhabricatorProjectProfileMenuItem
 
     $picture = $project->getProfileImageURI();
     $name = $this->getDisplayName($config);
-    $href = $project->getURI();
+    $uri = $project->getURI();
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
-      ->setProfileImage($picture);
+      ->setIconImage($picture);
 
     return array(
       $item,

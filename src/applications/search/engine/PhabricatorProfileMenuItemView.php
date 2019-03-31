@@ -7,6 +7,7 @@ final class PhabricatorProfileMenuItemView
   private $uri;
   private $name;
   private $icon;
+  private $iconImage;
   private $disabled;
   private $tooltip;
   private $actions = array();
@@ -51,6 +52,15 @@ final class PhabricatorProfileMenuItemView
 
   public function getIcon() {
     return $this->icon;
+  }
+
+  public function setIconImage($icon_image) {
+    $this->iconImage = $icon_image;
+    return $this;
+  }
+
+  public function getIconImage() {
+    return $this->iconImage;
   }
 
   public function setDisabled($disabled) {
@@ -146,6 +156,11 @@ final class PhabricatorProfileMenuItemView
       $view->setIcon($icon);
     }
 
+    $icon_image = $this->getIconImage();
+    if ($icon_image) {
+      $view->setProfileImage($icon_image);
+    }
+
     if ($this->getDisabled()) {
       $view->setDisabled(true);
     }
@@ -158,6 +173,11 @@ final class PhabricatorProfileMenuItemView
       $view
         ->setType(PHUIListItemView::TYPE_DIVIDER)
         ->addClass('phui-divider');
+    }
+
+    $tooltip = $this->getTooltip();
+    if (strlen($tooltip)) {
+      $view->setTooltip($tooltip);
     }
 
     if ($this->images) {

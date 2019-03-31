@@ -49,16 +49,16 @@ final class PhabricatorHomeLauncherProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
     $name = $this->getDisplayName($config);
     $icon = 'fa-ellipsis-h';
-    $href = '/applications/';
+    $uri = '/applications/';
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon);
 

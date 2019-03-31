@@ -52,7 +52,7 @@ final class PhabricatorProjectPointsProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
     $project = $config->getProfileObject();
@@ -165,8 +165,8 @@ final class PhabricatorProjectPointsProfileMenuItem
       ),
       $bar);
 
-    $item = $this->newItem()
-      ->appendChild($bar);
+    $item = $this->newItemView()
+      ->newProgressBar($bar);
 
     return array(
       $item,

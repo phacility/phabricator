@@ -39,14 +39,14 @@ final class PhabricatorLabelProfileMenuItem
     return $config->getMenuItemProperty('name');
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $name = $this->getLabelName($config);
 
-    $item = $this->newItem()
+    $item = $this->newItemView()
       ->setName($name)
-      ->setType(PHUIListItemView::TYPE_LABEL);
+      ->setIsLabel(true);
 
     return array(
       $item,

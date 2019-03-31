@@ -50,7 +50,7 @@ final class PhabricatorMotivatorProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $source = $config->getMenuItemProperty('source');
@@ -66,7 +66,7 @@ final class PhabricatorMotivatorProfileMenuItem
 
     $fact_text = $this->selectFact($facts);
 
-    $item = $this->newItem()
+    $item = $this->newItemView()
       ->setName($fact_name)
       ->setIcon($fact_icon)
       ->setTooltip($fact_text)

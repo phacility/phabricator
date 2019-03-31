@@ -34,12 +34,11 @@ final class PhabricatorDividerProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
-    $item = $this->newItem()
-      ->setType(PHUIListItemView::TYPE_DIVIDER)
-      ->addClass('phui-divider');
+    $item = $this->newItemView()
+      ->setIsDivider(true);
 
     return array(
       $item,

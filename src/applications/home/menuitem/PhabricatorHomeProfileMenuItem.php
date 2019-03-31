@@ -52,16 +52,16 @@ final class PhabricatorHomeProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
     $name = $this->getDisplayName($config);
     $icon = 'fa-home';
-    $href = $this->getItemViewURI($config);
+    $uri = $this->getItemViewURI($config);
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon);
 

@@ -56,16 +56,16 @@ final class PhabricatorProjectWorkboardProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $project = $config->getProfileObject();
 
     $id = $project->getID();
-    $href = $project->getWorkboardURI();
+    $uri = $project->getWorkboardURI();
     $name = $this->getDisplayName($config);
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon('fa-columns');
 

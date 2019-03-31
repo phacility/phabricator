@@ -28,52 +28,18 @@ final class PhabricatorPeoplePictureProfileMenuItem
     return array();
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $user = $config->getProfileObject();
-    require_celerity_resource('people-picture-menu-item-css');
 
     $picture = $user->getProfileImageURI();
     $name = $user->getUsername();
 
-    $classes = array();
-    $classes[] = 'people-menu-image';
-    if ($user->getIsDisabled()) {
-      $classes[] = 'phui-image-disabled';
-    }
+    $item = $this->newItemView()
+      ->setDisabled($user->getIsDisabled());
 
-    $href = urisprintf(
-      '/p/%s/',
-      $user->getUsername());
-
-    $photo = phutil_tag(
-      'img',
-      array(
-        'src' => $picture,
-        'class' => implode(' ', $classes),
-      ));
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $this->getViewer(),
-      $user,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    if ($can_edit) {
-      $id = $user->getID();
-      $href = "/people/picture/{$id}/";
-    }
-
-    $view = phutil_tag_div('people-menu-image-container', $photo);
-    $view = phutil_tag(
-      'a',
-      array(
-        'href' => $href,
-      ),
-      $view);
-
-    $item = $this->newItem()
-      ->appendChild($view);
+    $item->newProfileImage($picture);
 
     return array(
       $item,

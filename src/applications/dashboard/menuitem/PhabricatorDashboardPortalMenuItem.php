@@ -49,7 +49,7 @@ final class PhabricatorDashboardPortalMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
@@ -57,12 +57,12 @@ final class PhabricatorDashboardPortalMenuItem
       return array();
     }
 
-    $href = $this->getItemViewURI($config);
+    $uri = $this->getItemViewURI($config);
     $name = $this->getDisplayName($config);
     $icon = 'fa-pencil';
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon);
 

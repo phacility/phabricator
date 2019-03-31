@@ -68,7 +68,7 @@ final class PhabricatorApplicationProfileMenuItem
     return head($apps);
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
     $app = $this->getApplication($config);
@@ -83,8 +83,8 @@ final class PhabricatorApplicationProfileMenuItem
       return array();
     }
 
-    $item = $this->newItem()
-      ->setHref($app->getApplicationURI())
+    $item = $this->newItemView()
+      ->setURI($app->getApplicationURI())
       ->setName($this->getDisplayName($config))
       ->setIcon($app->getIcon());
 
