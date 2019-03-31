@@ -872,7 +872,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       // mobile navigation menu from.
       $application_menu = $controller->buildApplicationMenu();
       if (!$application_menu) {
-        $application_menu = $this->getNavigation()->getMenu();
+        $navigation = $this->getNavigation();
+        if ($navigation) {
+          $application_menu = $navigation->getMenu();
+        }
       }
       $this->applicationMenu = $application_menu;
 

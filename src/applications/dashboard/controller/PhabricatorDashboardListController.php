@@ -28,9 +28,6 @@ final class PhabricatorDashboardListController
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
 
-    $nav->addLabel(pht('Panels'));
-    $nav->addFilter('panel/', pht('Manage Panels'));
-
     $nav->selectFilter(null);
 
     return $nav;

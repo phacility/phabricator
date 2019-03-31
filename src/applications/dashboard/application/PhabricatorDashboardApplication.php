@@ -10,6 +10,10 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     return '/dashboard/';
   }
 
+  public function getTypeaheadURI() {
+    return '/dashboard/console/';
+  }
+
   public function getShortDescription() {
     return pht('Create Custom Pages');
   }
@@ -42,6 +46,7 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
         'create/' => 'PhabricatorDashboardEditController',
         'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardEditController',
         'install/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardInstallController',
+        'console/' => 'PhabricatorDashboardConsoleController',
         'addpanel/(?P<id>\d+)/' => 'PhabricatorDashboardAddPanelController',
         'movepanel/(?P<id>\d+)/' => 'PhabricatorDashboardMovePanelController',
         'removepanel/(?P<id>\d+)/'
