@@ -30,8 +30,9 @@ final class PhabricatorPeopleProfileBadgesController
     $crumbs->addTextCrumb(pht('Badges'));
     $crumbs->setBorder(true);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_BADGES);
+    $nav = $this->newNavigation(
+      $user,
+      PhabricatorPeopleProfileMenuEngine::ITEM_BADGES);
 
     // Best option?
     $badges = id(new PhabricatorBadgesQuery())

@@ -77,8 +77,9 @@ final class PhabricatorProjectSubprojectsController
       $milestones,
       $subprojects);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::ITEM_SUBPROJECTS);
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_SUBPROJECTS);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Subprojects'));

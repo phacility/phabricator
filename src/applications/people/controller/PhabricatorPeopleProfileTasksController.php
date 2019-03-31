@@ -32,8 +32,9 @@ final class PhabricatorPeopleProfileTasksController
     $crumbs->addTextCrumb(pht('Assigned Tasks'));
     $crumbs->setBorder(true);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_TASKS);
+    $nav = $this->newNavigation(
+      $user,
+      PhabricatorPeopleProfileMenuEngine::ITEM_TASKS);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

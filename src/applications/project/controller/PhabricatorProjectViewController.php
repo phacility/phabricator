@@ -18,7 +18,7 @@ final class PhabricatorProjectViewController
     $project = $this->getProject();
 
     $engine = $this->getProfileMenuEngine();
-    $default = $engine->getDefaultItem();
+    $default = $engine->getDefaultMenuItemConfiguration();
 
     // If defaults are broken somehow, serve the manage page. See T13033 for
     // discussion.

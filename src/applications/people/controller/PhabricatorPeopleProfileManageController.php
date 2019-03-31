@@ -29,8 +29,9 @@ final class PhabricatorPeopleProfileManageController
     $properties = $this->buildPropertyView($user);
     $name = $user->getUsername();
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
+    $nav = $this->newNavigation(
+      $user,
+      PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Manage'));

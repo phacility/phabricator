@@ -172,7 +172,9 @@ final class PhabricatorProjectBoardViewController
         return $content;
       }
 
-      $nav = $this->newWorkboardProfileMenu();
+      $nav = $this->newNavigation(
+        $project,
+        PhabricatorProject::ITEM_WORKBOARD);
 
       $crumbs = $this->buildApplicationCrumbs();
       $crumbs->addTextCrumb(pht('Workboard'));
@@ -719,7 +721,9 @@ final class PhabricatorProjectBoardViewController
       ->appendChild($board)
       ->addClass('project-board-wrapper');
 
-    $nav = $this->newWorkboardProfileMenu();
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_WORKBOARD);
 
     $divider = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_DIVIDER);
@@ -1501,17 +1505,6 @@ final class PhabricatorProjectBoardViewController
           'to enable it. Only users who can edit this project can restore '.
           'the workboard.'))
       ->addCancelButton($profile_uri);
-  }
-
-  private function newWorkboardProfileMenu() {
-    $default_item = id(new PhabricatorProfileMenuItemConfiguration())
-      ->setBuiltinKey(PhabricatorProject::ITEM_WORKBOARD);
-
-    $menu = parent::getProfileMenu($default_item);
-
-    $menu->addClass('project-board-nav');
-
-    return $menu;
   }
 
 }

@@ -64,15 +64,16 @@ final class PhabricatorPeopleProfileViewController
           $calendar,
         ));
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_PROFILE);
+    $navigation = $this->newNavigation(
+      $user,
+      PhabricatorPeopleProfileMenuEngine::ITEM_PROFILE);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
 
     return $this->newPage()
       ->setTitle($user->getUsername())
-      ->setNavigation($nav)
+      ->setNavigation($navigation)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(
         array(

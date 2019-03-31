@@ -32,18 +32,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     return $this->showFooter;
   }
 
-  public function setApplicationMenu($application_menu) {
-    // NOTE: For now, this can either be a PHUIListView or a
-    // PHUIApplicationMenuView.
-
-    $this->applicationMenu = $application_menu;
-    return $this;
-  }
-
-  public function getApplicationMenu() {
-    return $this->applicationMenu;
-  }
-
   public function setApplicationName($application_name) {
     $this->applicationName = $application_name;
     return $this;
@@ -345,7 +333,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       $menu->setController($this->getController());
     }
 
-    $application_menu = $this->getApplicationMenu();
+    $application_menu = $this->applicationMenu;
     if ($application_menu) {
       if ($application_menu instanceof PHUIApplicationMenuView) {
         $crumbs = $this->getCrumbs();
@@ -865,13 +853,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
   public function produceAphrontResponse() {
     $controller = $this->getController();
 
-    if (!$this->getApplicationMenu()) {
-      $application_menu = $controller->buildApplicationMenu();
-      if ($application_menu) {
-        $this->setApplicationMenu($application_menu);
-      }
-    }
-
     $viewer = $this->getUser();
     if ($viewer && $viewer->getPHID()) {
       $object_phids = $this->pageObjects;
@@ -887,6 +868,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       $response = id(new AphrontAjaxResponse())
         ->setContent($content);
     } else {
+      // See T13247. Try to find some navigational menu items to create a
+      // mobile navigation menu from.
+      $application_menu = $controller->buildApplicationMenu();
+      if (!$application_menu) {
+        $application_menu = $this->getNavigation()->getMenu();
+      }
+      $this->applicationMenu = $application_menu;
+
       $content = $this->render();
 
       $response = id(new AphrontWebpageResponse())

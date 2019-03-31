@@ -20,7 +20,7 @@ final class PhabricatorFavoritesMainMenuBarExtension
 
     $dropdown = $this->newDropdown($viewer);
     if (!$dropdown) {
-      return null;
+      return array();
     }
 
     $favorites_menu = id(new PHUIButtonView())
@@ -59,7 +59,8 @@ final class PhabricatorFavoritesMainMenuBarExtension
       $menu_engine->setController($controller);
     }
 
-    $filter_view = $menu_engine->buildNavigation();
+    $filter_view = $menu_engine->newProfileMenuItemViewList()
+      ->newNavigationView();
 
     $menu_view = $filter_view->getMenu();
     $item_views = $menu_view->getItems();
