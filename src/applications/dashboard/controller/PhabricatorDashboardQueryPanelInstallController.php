@@ -75,7 +75,7 @@ final class PhabricatorDashboardQueryPanelInstallController
       }
 
       if (!$errors) {
-        $redirect_uri = "/dashboard/arrange/{$v_dashboard}/";
+        $redirect_uri = "/dashboard/view/{$v_dashboard}/";
 
         $panel_type = id(new PhabricatorDashboardQueryPanelType())
           ->getPanelTypeKey();

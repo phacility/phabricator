@@ -20,7 +20,7 @@ final class PhabricatorDashboardArchiveController
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+    $view_uri = $dashboard->getURI();
 
     if ($request->isFormPost()) {
       if ($dashboard->isArchived()) {

@@ -14,10 +14,6 @@ abstract class PhabricatorDashboardProfileController
     return $this->dashboard;
   }
 
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView()->getMenu();
-  }
-
   protected function buildHeaderView() {
     $viewer = $this->getViewer();
     $dashboard = $this->getDashboard();
@@ -49,50 +45,10 @@ abstract class PhabricatorDashboardProfileController
 
     $dashboard = $this->getDashboard();
     if ($dashboard) {
-      $id = $dashboard->getID();
-      $dashboard_uri = $this->getApplicationURI("/view/{$id}/");
-      $crumbs->addTextCrumb($dashboard->getName(), $dashboard_uri);
+      $crumbs->addTextCrumb($dashboard->getName(), $dashboard->getURI());
     }
 
     return $crumbs;
-  }
-
-  protected function buildSideNavView($filter = null) {
-    $viewer = $this->getViewer();
-    $dashboard = $this->getDashboard();
-    $id = $dashboard->getID();
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $dashboard,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $nav = id(new AphrontSideNavFilterView())
-      ->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    $nav->addLabel(pht('Dashboard'));
-
-    $nav->addFilter(
-      'view',
-      pht('View Dashboard'),
-      $this->getApplicationURI("/view/{$id}/"),
-      'fa-dashboard');
-
-    $nav->addFilter(
-      'arrange',
-      pht('Arrange Panels'),
-      $this->getApplicationURI("/arrange/{$id}/"),
-      'fa-columns');
-
-    $nav->addFilter(
-      'manage',
-      pht('Manage Dashboard'),
-      $this->getApplicationURI("/manage/{$id}/"),
-      'fa-gears');
-
-    $nav->selectFilter($filter);
-
-    return $nav;
   }
 
 }

@@ -55,8 +55,7 @@ final class PhabricatorDashboardEditController
 
       $crumbs->addTextCrumb(pht('Create Dashboard'));
     } else {
-      $id = $dashboard->getID();
-      $cancel_uri = $this->getApplicationURI('manage/'.$id.'/');
+      $cancel_uri = $dashboard->getURI();
 
       $title = pht('Edit Dashboard: %s', $dashboard->getName());
       $header_icon = 'fa-pencil';
@@ -117,9 +116,7 @@ final class PhabricatorDashboardEditController
           ->setContentSourceFromRequest($request)
           ->applyTransactions($dashboard, $xactions);
 
-        $uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
-
-        return id(new AphrontRedirectResponse())->setURI($uri);
+        return id(new AphrontRedirectResponse())->setURI($dashboard->getURI());
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
@@ -346,10 +343,8 @@ final class PhabricatorDashboardEditController
       ->setContentSourceFromRequest($request)
       ->applyTransactions($dashboard, $xactions);
 
-    $manage_uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
-
     return id(new AphrontRedirectResponse())
-      ->setURI($manage_uri);
+      ->setURI($dashboard->getURI());
   }
 
   private function newPanel(

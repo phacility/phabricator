@@ -153,7 +153,7 @@ final class PhabricatorDashboardProfileMenuItem
         $icon = $dashboard->getIcon();
         $name = $this->getDisplayName($config);
         $is_disabled = false;
-        $action_uri = '/dashboard/arrange/'.$dashboard->getID().'/';
+        $action_uri = $dashboard->getURI();
       }
     } else {
       $icon = 'fa-ban';

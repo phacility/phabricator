@@ -15,8 +15,7 @@ final class PhabricatorDashboardInstallController
       return new Aphront404Response();
     }
 
-    $cancel_uri = $this->getApplicationURI(
-      'view/'.$dashboard->getID().'/');
+    $cancel_uri = $dashboard->getURI();
 
     $home_app = new PhabricatorHomeApplication();
 

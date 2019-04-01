@@ -123,15 +123,14 @@ final class PhabricatorDashboardSearchEngine
     $handles = $viewer->loadHandles($phids);
 
     $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
+      ->setViewer($viewer);
 
     foreach ($dashboards as $dashboard) {
-      $id = $dashboard->getID();
-
       $item = id(new PHUIObjectItemView())
-        ->setUser($viewer)
+        ->setViewer($viewer)
+        ->setObjectName($dashboard->getObjectName())
         ->setHeader($dashboard->getName())
-        ->setHref($this->getApplicationURI("view/{$id}/"))
+        ->setHref($dashboard->getURI())
         ->setObject($dashboard);
 
       $bg_color = 'bg-dark';
