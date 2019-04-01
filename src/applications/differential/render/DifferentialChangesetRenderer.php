@@ -684,7 +684,12 @@ abstract class DifferentialChangesetRenderer extends Phobject {
       // If this change is missing context, don't try to identify scopes, since
       // we won't really be able to get anywhere.
       $has_multiple_hunks = (count($hunk_starts) > 1);
-      $has_offset_hunks = (head_key($hunk_starts) != 1);
+
+      $has_offset_hunks = false;
+      if ($hunk_starts) {
+        $has_offset_hunks = (head_key($hunk_starts) != 1);
+      }
+
       $missing_context = ($has_multiple_hunks || $has_offset_hunks);
 
       if ($missing_context) {
