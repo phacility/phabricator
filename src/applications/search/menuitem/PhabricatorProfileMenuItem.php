@@ -5,7 +5,6 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
   private $viewer;
   private $engine;
 
-
   public function getMenuItemTypeIcon() {
     return null;
   }

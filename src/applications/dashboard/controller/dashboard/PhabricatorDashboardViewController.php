@@ -83,7 +83,7 @@ final class PhabricatorDashboardViewController
 
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Install Dashboard'))
+        ->setName(pht('Add Dashboard to Menu'))
         ->setIcon('fa-wrench')
         ->setHref($this->getApplicationURI("/install/{$id}/"))
         ->setWorkflow(true));

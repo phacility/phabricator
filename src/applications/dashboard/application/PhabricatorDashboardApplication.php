@@ -43,7 +43,10 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
         'archive/(?P<id>\d+)/' => 'PhabricatorDashboardArchiveController',
         'create/' => 'PhabricatorDashboardEditController',
         'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardEditController',
-        'install/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardInstallController',
+        'install/(?P<id>\d+)/'.
+          '(?:(?P<workflowKey>[^/]+)/'.
+          '(?:(?P<modeKey>[^/]+)/)?)?' =>
+          'PhabricatorDashboardInstallController',
         'console/' => 'PhabricatorDashboardConsoleController',
         'addpanel/(?P<id>\d+)/' => 'PhabricatorDashboardAddPanelController',
         'movepanel/(?P<id>\d+)/' => 'PhabricatorDashboardMovePanelController',

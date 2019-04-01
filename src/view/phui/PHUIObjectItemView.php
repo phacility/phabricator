@@ -299,6 +299,8 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->disabled) {
       $item_classes[] = 'phui-oi-disabled';
+    } else {
+      $item_classes[] = 'phui-oi-enabled';
     }
 
     switch ($this->effect) {

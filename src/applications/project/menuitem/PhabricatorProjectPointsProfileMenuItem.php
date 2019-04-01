@@ -165,8 +165,9 @@ final class PhabricatorProjectPointsProfileMenuItem
       ),
       $bar);
 
-    $item = $this->newItemView()
-      ->newProgressBar($bar);
+    $item = $this->newItemView();
+
+    $item->newProgressBar($bar);
 
     return array(
       $item,

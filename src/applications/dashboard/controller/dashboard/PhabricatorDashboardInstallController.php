@@ -3,6 +3,17 @@
 final class PhabricatorDashboardInstallController
   extends PhabricatorDashboardController {
 
+  private $dashboard;
+
+  public function setDashboard(PhabricatorDashboard $dashboard) {
+    $this->dashboard = $dashboard;
+    return $this;
+  }
+
+  public function getDashboard() {
+    return $this->dashboard;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -15,126 +26,50 @@ final class PhabricatorDashboardInstallController
       return new Aphront404Response();
     }
 
+    $this->setDashboard($dashboard);
     $cancel_uri = $dashboard->getURI();
 
-    $home_app = new PhabricatorHomeApplication();
+    $workflow_key = $request->getURIData('workflowKey');
 
-    $options = array();
-    $options['home'] = array(
-      'personal' =>
-        array(
-          'capability' => PhabricatorPolicyCapability::CAN_VIEW,
-          'application' => $home_app,
-          'name' => pht('Personal Dashboard'),
-          'value' => 'personal',
-          'description' => pht('Places this dashboard as a menu item on home '.
-            'as a personal menu item. It will only be on your personal '.
-            'home.'),
-        ),
-      'global' =>
-        array(
-          'capability' => PhabricatorPolicyCapability::CAN_EDIT,
-          'application' => $home_app,
-          'name' => pht('Global Dashboard'),
-          'value' => 'global',
-          'description' => pht('Places this dashboard as a menu item on home '.
-            'as a global menu item. It will be available to all users.'),
-        ),
-    );
-
-
-    $errors = array();
-    $v_name = null;
-    if ($request->isFormPost()) {
-      $menuitem = new PhabricatorDashboardProfileMenuItem();
-      $dashboard_phid = $dashboard->getPHID();
-      $home = new PhabricatorHomeApplication();
-      $v_name = $request->getStr('name');
-      $v_home = $request->getStr('home');
-
-      if ($v_home) {
-        $application = $options['home'][$v_home]['application'];
-        $capability = $options['home'][$v_home]['capability'];
-
-        $can_edit_home = PhabricatorPolicyFilter::hasCapability(
-          $viewer,
-          $application,
-          $capability);
-
-        if (!$can_edit_home) {
-          $errors[] = pht(
-            'You do not have permission to install a dashboard on home.');
-        }
-      } else {
-          $errors[] = pht(
-            'You must select a destination to install this dashboard.');
-      }
-
-      $v_phid = $viewer->getPHID();
-      if ($v_home == 'global') {
-        $v_phid = null;
-      }
-
-      if (!$errors) {
-        $install = PhabricatorProfileMenuItemConfiguration::initializeNewItem(
-          $home,
-          $menuitem,
-          $v_phid);
-
-        $install->setMenuItemProperty('dashboardPHID', $dashboard_phid);
-        $install->setMenuItemProperty('name', $v_name);
-        $install->setMenuItemOrder(1);
-
-        $xactions = array();
-
-        $editor = id(new PhabricatorProfileMenuEditor())
-          ->setActor($viewer)
-          ->setContinueOnNoEffect(true)
-          ->setContinueOnMissingFields(true)
-          ->setContentSourceFromRequest($request);
-
-        $editor->applyTransactions($install, $xactions);
-
-        $view_uri = '/home/menu/view/'.$install->getID().'/';
-
-        return id(new AphrontRedirectResponse())->setURI($view_uri);
-      }
+    $workflows = PhabricatorDashboardInstallWorkflow::getAllWorkflows();
+    if (!isset($workflows[$workflow_key])) {
+      return $this->newWorkflowDialog($dashboard, $workflows);
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Menu Label'))
-          ->setName('name')
-          ->setValue($v_name));
+    return id(clone $workflows[$workflow_key])
+      ->setRequest($request)
+      ->setViewer($viewer)
+      ->setDashboard($dashboard)
+      ->setMode($request->getURIData('modeKey'))
+      ->handleRequest($request);
+  }
 
-    $radio = id(new AphrontFormRadioButtonControl())
-      ->setLabel(pht('Home Menu'))
-      ->setName('home');
+  private function newWorkflowDialog(
+    PhabricatorDashboard $dashboard,
+    array $workflows) {
+    $viewer = $this->getViewer();
+    $cancel_uri = $dashboard->getURI();
 
-    foreach ($options['home'] as $type => $option) {
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $option['application'],
-        $option['capability']);
-      if ($can_edit) {
-        $radio->addButton(
-          $option['value'],
-          $option['name'],
-          $option['description']);
-      }
+    $menu = id(new PHUIObjectItemListView())
+      ->setViewer($viewer)
+      ->setFlush(true)
+      ->setBig(true);
+
+    foreach ($workflows as $key => $workflow) {
+      $item = $workflow->getWorkflowMenuItem();
+
+      $item_href = urisprintf('install/%d/%s/', $dashboard->getID(), $key);
+      $item_href = $this->getApplicationURI($item_href);
+      $item->setHref($item_href);
+
+      $menu->addItem($item);
     }
-
-    $form->appendChild($radio);
 
     return $this->newDialog()
-      ->setTitle(pht('Install Dashboard'))
-      ->setErrors($errors)
+      ->setTitle(pht('Add Dashboard to Menu'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendChild($form->buildLayoutView())
-      ->addCancelButton($cancel_uri)
-      ->addSubmitButton(pht('Install Dashboard'));
+      ->appendChild($menu)
+      ->addCancelButton($cancel_uri);
   }
 
 }
