@@ -21,12 +21,14 @@ final class PhabricatorDashboardTextPanelType
       'context.');
   }
 
-  public function getFieldSpecifications() {
+  protected function newEditEngineFields(PhabricatorDashboardPanel $panel) {
     return array(
-      'text' => array(
-        'name' => pht('Text'),
-        'type' => 'remarkup',
-      ),
+      id(new PhabricatorRemarkupEditField())
+        ->setKey('text')
+        ->setLabel(pht('Text'))
+        ->setTransactionType(
+          PhabricatorDashboardTextPanelTextTransaction::TRANSACTIONTYPE)
+        ->setValue($panel->getProperty('text', '')),
     );
   }
 

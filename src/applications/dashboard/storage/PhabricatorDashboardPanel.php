@@ -8,7 +8,6 @@ final class PhabricatorDashboardPanel
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
     PhabricatorNgramsInterface {
@@ -20,8 +19,6 @@ final class PhabricatorDashboardPanel
   protected $authorPHID;
   protected $isArchived = 0;
   protected $properties = array();
-
-  private $customFields = self::ATTACHABLE;
 
   public static function initializeNewPanel(PhabricatorUser $actor) {
     return id(new PhabricatorDashboardPanel())
@@ -105,6 +102,10 @@ final class PhabricatorDashboardPanel
     return $impl;
   }
 
+  public function getEditEngineFields() {
+    return $this->requireImplementation()->getEditEngineFields($this);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -139,27 +140,6 @@ final class PhabricatorDashboardPanel
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
-  }
-
-
-/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
-
-
-  public function getCustomFieldSpecificationForRole($role) {
-    return array();
-  }
-
-  public function getCustomFieldBaseClass() {
-    return 'PhabricatorDashboardPanelCustomField';
-  }
-
-  public function getCustomFields() {
-    return $this->assertAttached($this->customFields);
-  }
-
-  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
-    $this->customFields = $fields;
-    return $this;
   }
 
 

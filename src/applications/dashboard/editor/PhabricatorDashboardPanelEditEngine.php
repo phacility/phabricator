@@ -98,7 +98,7 @@ final class PhabricatorDashboardPanelEditEngine
       return $dashboard->getURI();
     }
 
-    return parent::getEffectiveObjectDoneURI($object);
+    return parent::getEffectiveObjectEditDoneURI($object);
   }
 
   protected function getObjectEditTitleText($object) {
@@ -138,7 +138,7 @@ final class PhabricatorDashboardPanelEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    return array(
+    $fields = array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
@@ -150,6 +150,13 @@ final class PhabricatorDashboardPanelEditEngine
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );
+
+    $panel_fields = $object->getEditEngineFields();
+    foreach ($panel_fields as $panel_field) {
+      $fields[] = $panel_field;
+    }
+
+    return $fields;
   }
 
 }

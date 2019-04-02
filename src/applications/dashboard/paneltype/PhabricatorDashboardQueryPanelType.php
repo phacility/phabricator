@@ -21,23 +21,9 @@ final class PhabricatorDashboardQueryPanelType
       'revisions you need to review.');
   }
 
-  public function getFieldSpecifications() {
-    return array(
-      'class' => array(
-        'name' => pht('Search For'),
-        'type' => 'search.application',
-      ),
-      'key' => array(
-        'name' => pht('Query'),
-        'type' => 'search.query',
-        'control.application' => 'class',
-      ),
-      'limit' => array(
-        'name' => pht('Limit'),
-        'caption' => pht('Leave this blank for the default number of items.'),
-        'type' => 'text',
-      ),
-    );
+  protected function newEditEngineFields(PhabricatorDashboardPanel $panel) {
+    // TODO: Restore this using EditEngine instead of CustomField.
+    return array();
   }
 
   public function initializeFieldsFromRequest(

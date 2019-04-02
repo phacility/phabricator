@@ -19,13 +19,9 @@ final class PhabricatorDashboardTabsPanelType
     return pht('Use tabs to switch between several other panels.');
   }
 
-  public function getFieldSpecifications() {
-    return array(
-      'config' => array(
-        'name' => pht('Tabs'),
-        'type' => 'dashboard.tabs',
-      ),
-    );
+  protected function newEditEngineFields(PhabricatorDashboardPanel $panel) {
+    // TODO: Restore this using EditEngine instead of CustomField.
+    return array();
   }
 
   public function shouldRenderAsync() {
