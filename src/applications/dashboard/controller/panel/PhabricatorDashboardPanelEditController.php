@@ -112,7 +112,7 @@ final class PhabricatorDashboardPanelEditController
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
 
-      $type_name = PhabricatorDashboardPanelTransaction::TYPE_NAME;
+      $type_name = PhabricatorDashboardPanelNameTransaction::TRANSACTIONTYPE;
       $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
 

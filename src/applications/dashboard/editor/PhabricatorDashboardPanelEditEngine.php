@@ -91,7 +91,8 @@ final class PhabricatorDashboardPanelEditEngine
         ->setDescription(pht('Name of the panel.'))
         ->setConduitDescription(pht('Rename the panel.'))
         ->setConduitTypeDescription(pht('New panel name.'))
-        ->setTransactionType(PhabricatorDashboardPanelTransaction::TYPE_NAME)
+        ->setTransactionType(
+          PhabricatorDashboardPanelNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
     );

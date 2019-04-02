@@ -198,7 +198,8 @@ final class PhabricatorDashboardEditController
     $xactions = array();
 
     $xactions[] = id(new PhabricatorDashboardPanelTransaction())
-      ->setTransactionType(PhabricatorDashboardPanelTransaction::TYPE_NAME)
+      ->setTransactionType(
+        PhabricatorDashboardPanelNameTransaction::TRANSACTIONTYPE)
       ->setNewValue($name);
 
     $editor = id(new PhabricatorDashboardPanelTransactionEditor())

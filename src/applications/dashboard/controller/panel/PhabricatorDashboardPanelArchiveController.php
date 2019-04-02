@@ -25,7 +25,8 @@ final class PhabricatorDashboardPanelArchiveController
     if ($request->isFormPost()) {
       $xactions = array();
       $xactions[] = id(new PhabricatorDashboardPanelTransaction())
-        ->setTransactionType(PhabricatorDashboardPanelTransaction::TYPE_ARCHIVE)
+        ->setTransactionType(
+          PhabricatorDashboardPanelStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue((int)!$panel->getIsArchived());
 
       id(new PhabricatorDashboardPanelTransactionEditor())

@@ -98,7 +98,8 @@ final class PhabricatorDashboardQueryPanelInstallController
         $xactions = array();
 
         $xactions[] = id(new PhabricatorDashboardPanelTransaction())
-          ->setTransactionType(PhabricatorDashboardPanelTransaction::TYPE_NAME)
+          ->setTransactionType(
+            PhabricatorDashboardPanelNameTransaction::TRANSACTIONTYPE)
           ->setNewValue($v_name);
 
         $xactions[] = id(new PhabricatorDashboardPanelTransaction())
