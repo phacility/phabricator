@@ -79,7 +79,8 @@ final class PhabricatorDashboardViewController
         ->setName(pht('Edit Dashboard'))
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("edit/{$id}/"))
-        ->setDisabled(!$can_edit));
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -95,7 +96,7 @@ final class PhabricatorDashboardViewController
           ->setIcon('fa-check')
           ->setHref($this->getApplicationURI("archive/{$id}/"))
           ->setDisabled(!$can_edit)
-          ->setWorkflow($can_edit));
+          ->setWorkflow(true));
     } else {
       $curtain->addAction(
         id(new PhabricatorActionView())
@@ -103,7 +104,7 @@ final class PhabricatorDashboardViewController
           ->setIcon('fa-ban')
           ->setHref($this->getApplicationURI("archive/{$id}/"))
           ->setDisabled(!$can_edit)
-          ->setWorkflow($can_edit));
+          ->setWorkflow(true));
     }
 
     return $curtain;
