@@ -101,6 +101,15 @@ final class PhabricatorDashboardPanelEditEngine
     return parent::getEffectiveObjectEditDoneURI($object);
   }
 
+  protected function getObjectEditCancelURI($object) {
+    $dashboard = $this->getDashboard();
+    if ($dashboard) {
+      return $dashboard->getURI();
+    }
+
+    return parent::getObjectEditCancelURI($object);
+  }
+
   protected function getObjectEditTitleText($object) {
     return pht('Edit Panel: %s', $object->getName());
   }

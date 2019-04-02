@@ -9,27 +9,34 @@ final class PhabricatorDashboardPanelEditController
     $engine = id(new PhabricatorDashboardPanelEditEngine())
       ->setController($this);
 
+    // We can create or edit a panel in the context of a dashboard. If we
+    // started on a dashboard, we want to return to that dashboard when we're
+    // done editing.
+    $dashboard_id = $request->getStr('dashboardID');
+    if (strlen($dashboard_id)) {
+      $dashboard = id(new PhabricatorDashboardQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($dashboard_id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$dashboard) {
+        return new Aphront404Response();
+      }
+
+      $engine
+        ->setDashboard($dashboard)
+        ->addContextParameter('dashboardID', $dashboard_id);
+    } else {
+      $dashboard = null;
+    }
+
     $id = $request->getURIData('id');
     if (!$id) {
-      $dashboard_id = $request->getStr('dashboardID');
       $column_id = $request->getStr('columnID');
-
-      if (strlen($dashboard_id)) {
-        $dashboard = id(new PhabricatorDashboardQuery())
-          ->setViewer($viewer)
-          ->withIDs(array($dashboard_id))
-          ->requireCapabilities(
-            array(
-              PhabricatorPolicyCapability::CAN_VIEW,
-              PhabricatorPolicyCapability::CAN_EDIT,
-            ))
-          ->executeOne();
-        if (!$dashboard) {
-          return new Aphront404Response();
-        }
-      } else {
-        $dashboard = null;
-      }
 
       if ($dashboard) {
         $cancel_uri = $dashboard->getURI();
@@ -45,10 +52,8 @@ final class PhabricatorDashboardPanelEditController
 
       $engine
         ->addContextParameter('panelType', $panel_type)
-        ->addContextParameter('dashboardID', $dashboard_id)
         ->addContextParameter('columnID', $column_id)
         ->setPanelType($panel_type)
-        ->setDashboard($dashboard)
         ->setColumnID($column_id);
     }
 

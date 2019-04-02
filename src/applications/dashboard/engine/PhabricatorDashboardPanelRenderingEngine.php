@@ -277,9 +277,12 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
   private function addPanelHeaderActions(
     PHUIHeaderView $header) {
-    $panel = $this->getPanel();
 
+    $viewer = $this->getViewer();
+    $panel = $this->getPanel();
     $dashboard_id = $this->getDashboardID();
+
+    $actions = array();
 
     if ($panel) {
       $panel_id = $panel->getID();
@@ -290,12 +293,10 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $edit_uri->replaceQueryParam('dashboardID', $dashboard_id);
       }
 
-      $action_edit = id(new PHUIIconView())
+      $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
-        ->setWorkflow(true)
+        ->setName(pht('Edit Panel'))
         ->setHref((string)$edit_uri);
-
-      $header->addActionItem($action_edit);
     }
 
     if ($dashboard_id) {
@@ -305,13 +306,27 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       $remove_uri = id(new PhutilURI($remove_uri))
         ->replaceQueryParam('panelPHID', $panel_phid);
 
-      $action_remove = id(new PHUIIconView())
-        ->setIcon('fa-trash-o')
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-times')
         ->setHref((string)$remove_uri)
+        ->setName(pht('Remove Panel'))
         ->setWorkflow(true);
-
-      $header->addActionItem($action_remove);
     }
+
+    $dropdown_menu = id(new PhabricatorActionListView())
+      ->setViewer($viewer);
+
+    foreach ($actions as $action) {
+      $dropdown_menu->addAction($action);
+    }
+
+    $action_menu = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-cog')
+      ->setText(pht('Manage Panel'))
+      ->setDropdownMenu($dropdown_menu);
+
+    $header->addActionLink($action_menu);
 
     return $header;
   }

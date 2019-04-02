@@ -42,8 +42,7 @@ final class PhabricatorDashboardRemovePanelController
       return new Aphront404Response();
     }
 
-    $redirect_uri = $this->getApplicationURI(
-      'arrange/'.$dashboard->getID().'/');
+    $redirect_uri = $dashboard->getURI();
     $layout_config = $dashboard->getLayoutConfigObject();
 
     if ($request->isFormPost()) {
