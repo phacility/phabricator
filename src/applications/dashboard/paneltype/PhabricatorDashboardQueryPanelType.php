@@ -136,7 +136,16 @@ final class PhabricatorDashboardQueryPanelType
       $results_view->setContent($content);
     }
 
-    if ($pager->getHasMoreResults()) {
+    // TODO: A small number of queries, including "Notifications" and "Search",
+    // use an offset pager which has a slightly different API. Some day, we
+    // should unify these.
+    if ($pager instanceof PHUIPagerView) {
+      $has_more = $pager->getHasMorePages();
+    } else {
+      $has_more = $pager->getHasMoreResults();
+    }
+
+    if ($has_more) {
       $item_list = $results_view->getObjectList();
 
       $more_href = $engine->getQueryResultsPageURI($key);
