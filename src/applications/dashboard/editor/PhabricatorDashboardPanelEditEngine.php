@@ -6,6 +6,8 @@ final class PhabricatorDashboardPanelEditEngine
   const ENGINECONST = 'dashboard.panel';
 
   private $panelType;
+  private $dashboard;
+  private $columnID;
 
   public function setPanelType($panel_type) {
     $this->panelType = $panel_type;
@@ -14,6 +16,24 @@ final class PhabricatorDashboardPanelEditEngine
 
   public function getPanelType() {
     return $this->panelType;
+  }
+
+  public function setDashboard(PhabricatorDashboard $dashboard) {
+    $this->dashboard = $dashboard;
+    return $this;
+  }
+
+  public function getDashboard() {
+    return $this->dashboard;
+  }
+
+  public function setColumnID($column_id) {
+    $this->columnID = $column_id;
+    return $this;
+  }
+
+  public function getColumnID() {
+    return $this->columnID;
   }
 
   public function isEngineConfigurable() {
@@ -63,6 +83,24 @@ final class PhabricatorDashboardPanelEditEngine
     return pht('Create Panel');
   }
 
+  protected function getObjectCreateCancelURI($object) {
+    $dashboard = $this->getDashboard();
+    if ($dashboard) {
+      return $dashboard->getURI();
+    }
+
+    return parent::getObjectCreateCancelURI($object);
+  }
+
+  public function getEffectiveObjectEditDoneURI($object) {
+    $dashboard = $this->getDashboard();
+    if ($dashboard) {
+      return $dashboard->getURI();
+    }
+
+    return parent::getEffectiveObjectDoneURI($object);
+  }
+
   protected function getObjectEditTitleText($object) {
     return pht('Edit Panel: %s', $object->getName());
   }
@@ -81,6 +119,22 @@ final class PhabricatorDashboardPanelEditEngine
 
   protected function getObjectViewURI($object) {
     return $object->getURI();
+  }
+
+  protected function didApplyTransactions($object, array $xactions) {
+    $dashboard = $this->getDashboard();
+    if ($dashboard) {
+      $viewer = $this->getViewer();
+      $controller = $this->getController();
+      $request = $controller->getRequest();
+
+      PhabricatorDashboardTransactionEditor::addPanelToDashboard(
+        $viewer,
+        PhabricatorContentSource::newFromRequest($request),
+        $object,
+        $dashboard,
+        (int)$this->getColumnID());
+    }
   }
 
   protected function buildCustomEditFields($object) {

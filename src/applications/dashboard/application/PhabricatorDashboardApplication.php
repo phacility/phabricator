@@ -57,10 +57,8 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
             'PhabricatorDashboardQueryPanelInstallController',
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorDashboardPanelListController',
-          'create/' => 'PhabricatorDashboardPanelEditController',
-          $this->getEditRoutePattern('editpro/')
-            => 'PhabricatorDashboardPanelEditproController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardPanelEditController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhabricatorDashboardPanelEditController',
           'render/(?P<id>\d+)/' => 'PhabricatorDashboardPanelRenderController',
           'archive/(?P<id>\d+)/'
             => 'PhabricatorDashboardPanelArchiveController',

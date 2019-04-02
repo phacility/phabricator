@@ -12,7 +12,7 @@ final class PhabricatorDashboardTabsPanelType
   }
 
   public function getIcon() {
-    return 'fa-window-maximize';
+    return 'fa-columns';
   }
 
   public function getPanelTypeDescription() {

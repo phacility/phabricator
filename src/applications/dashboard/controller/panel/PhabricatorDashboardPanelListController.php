@@ -43,7 +43,7 @@ final class PhabricatorDashboardPanelListController
       id(new PHUIListItemView())
         ->setIcon('fa-plus-square')
         ->setName(pht('Create Panel'))
-        ->setHref($this->getApplicationURI().'panel/create/'));
+        ->setHref($this->getApplicationURI().'panel/edit/'));
 
     return $crumbs;
   }
@@ -52,7 +52,7 @@ final class PhabricatorDashboardPanelListController
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Create a Panel'))
-      ->setHref('/dashboard/panel/create/')
+      ->setHref('/dashboard/panel/edit/')
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getIcon();
