@@ -224,12 +224,12 @@ final class ConpherenceLayoutView extends AphrontTagView {
   private function buildNUXView() {
     $viewer = $this->getViewer();
 
-    $engine = new ConpherenceThreadSearchEngine();
-    $engine->setViewer($viewer);
+    $engine = id(new ConpherenceThreadSearchEngine())
+      ->setViewer($viewer);
     $saved = $engine->buildSavedQueryFromBuiltin('all');
     $query = $engine->buildQueryFromSavedQuery($saved);
-    $pager = $engine->newPagerForSavedQuery($saved);
-    $pager->setPageSize(10);
+    $pager = $engine->newPagerForSavedQuery($saved)
+      ->setPageSize(10);
     $results = $engine->executeQuery($query, $pager);
     $view = $engine->renderResults($results, $saved);
 
