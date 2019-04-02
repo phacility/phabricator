@@ -35,6 +35,10 @@ final class PhabricatorFavoritesProfileMenuEngine
       }
     }
 
+    $items[] = $this->newDividerItem('tail');
+    $items[] = $this->newManageItem()
+      ->setMenuItemProperty('name', pht('Edit Favorites'));
+
     return $items;
   }
 

@@ -26,7 +26,7 @@ final class PhabricatorFavoritesMainMenuBarExtension
     $favorites_menu = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref('#')
-      ->setIcon('fa-star')
+      ->setIcon('fa-bookmark')
       ->addClass('phabricator-core-user-menu')
       ->setNoCSS(true)
       ->setDropdown(true)
@@ -71,18 +71,9 @@ final class PhabricatorFavoritesMainMenuBarExtension
       $action = id(new PhabricatorActionView())
         ->setName($item->getName())
         ->setHref($item->getHref())
+        ->setIcon($item->getIcon())
         ->setType($item->getType());
       $view->addAction($action);
-    }
-
-    if ($viewer->isLoggedIn()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setType(PhabricatorActionView::TYPE_DIVIDER));
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Edit Favorites'))
-          ->setHref('/favorites/menu/configure/'));
     }
 
     return $view;

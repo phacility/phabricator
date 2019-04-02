@@ -20,6 +20,8 @@ final class PhabricatorDashboardPortalProfileMenuEngine
   protected function getBuiltinProfileItems($object) {
     $items = array();
 
+    $items[] = $this->newDividerItem('tail');
+
     $items[] = $this->newManageItem();
 
     $items[] = $this->newItem()

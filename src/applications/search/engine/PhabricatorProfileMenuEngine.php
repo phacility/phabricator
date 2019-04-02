@@ -8,7 +8,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $items;
   private $controller;
   private $navigation;
-  private $showNavigation = true;
   private $editMode;
   private $pageClasses = array();
   private $showContentCrumbs = true;
@@ -69,15 +68,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   public function getController() {
     return $this->controller;
-  }
-
-  public function setShowNavigation($show) {
-    $this->showNavigation = $show;
-    return $this;
-  }
-
-  public function getShowNavigation() {
-    return $this->showNavigation;
   }
 
   public function addContentPageClass($class) {
@@ -181,13 +171,19 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
     if (!$is_view) {
+      $edit_mode = null;
+
       if ($selected_item) {
-        if ($selected_item->getCustomPHID()) {
-          $edit_mode = 'custom';
-        } else {
-          $edit_mode = 'global';
+        if ($selected_item->getBuiltinKey() !== self::ITEM_MANAGE) {
+          if ($selected_item->getCustomPHID()) {
+            $edit_mode = 'custom';
+          } else {
+            $edit_mode = 'global';
+          }
         }
-      } else {
+      }
+
+      if ($edit_mode === null) {
         $edit_mode = $request->getURIData('itemEditMode');
       }
 
@@ -309,9 +305,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $page->setCrumbs($crumbs);
     }
 
-    if ($this->getShowNavigation()) {
-      $page->setNavigation($navigation);
-    }
+    $page->setNavigation($navigation);
 
     if ($is_view) {
       foreach ($this->pageClasses as $class) {
@@ -1130,6 +1124,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->newItem()
       ->setBuiltinKey(self::ITEM_MANAGE)
       ->setMenuItemKey(PhabricatorManageProfileMenuItem::MENUITEMKEY)
+      ->setIsTailItem(true);
+  }
+
+  protected function newDividerItem($key) {
+    return $this->newItem()
+      ->setBuiltinKey($key)
+      ->setMenuItemKey(PhabricatorDividerProfileMenuItem::MENUITEMKEY)
       ->setIsTailItem(true);
   }
 
