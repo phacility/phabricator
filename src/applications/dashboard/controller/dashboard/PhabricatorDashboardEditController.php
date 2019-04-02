@@ -27,19 +27,6 @@ final class PhabricatorDashboardEditController
       $v_projects = array_reverse($v_projects);
       $is_new = false;
     } else {
-      if (!$request->getStr('edit')) {
-        if ($request->isFormPost()) {
-          switch ($request->getStr('template')) {
-            case 'empty':
-              break;
-            default:
-              return $this->processBuildTemplateRequest($request);
-          }
-        } else {
-          return $this->processTemplateRequest($request);
-        }
-      }
-
       $dashboard = PhabricatorDashboard::initializeNewDashboard($viewer);
       $v_projects = array();
       $is_new = true;
@@ -197,156 +184,6 @@ final class PhabricatorDashboardEditController
       ->appendChild($view);
   }
 
-  private function processTemplateRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-
-    $template_control = id(new AphrontFormRadioButtonControl())
-      ->setName(pht('template'))
-      ->setValue($request->getStr('template', 'empty'))
-      ->addButton(
-        'empty',
-        pht('Empty'),
-        pht('Start with a blank canvas.'))
-      ->addButton(
-        'simple',
-        pht('Simple Template'),
-        pht(
-          'Start with a simple dashboard with a welcome message, a feed of '.
-          'recent events, and a few starter panels.'));
-
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendRemarkupInstructions(
-        pht('Choose a dashboard template to start with.'))
-      ->appendChild($template_control);
-
-    return $this->newDialog()
-      ->setTitle(pht('Create Dashboard'))
-      ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendChild($form->buildLayoutView())
-      ->addCancelButton('/dashboard/')
-      ->addSubmitButton(pht('Continue'));
-  }
-
-  private function processBuildTemplateRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $template = $request->getStr('template');
-
-    $bare_panel = PhabricatorDashboardPanel::initializeNewPanel($viewer);
-    $panel_phids = array();
-
-    switch ($template) {
-      case 'simple':
-        $v_name = pht("%s's Dashboard", $viewer->getUsername());
-
-        $welcome_panel = $this->newPanel(
-          $request,
-          $viewer,
-          'text',
-          pht('Welcome'),
-          array(
-            'text' => pht(
-              "This is a simple template dashboard. You can edit this panel ".
-              "to change this text and replace it with a welcome message, or ".
-              "leave this placeholder text as-is to give your dashboard a ".
-              "rustic, authentic feel.\n\n".
-              "You can drag, remove, add, and edit panels to customize the ".
-              "rest of this dashboard to show the information you want.\n\n".
-              "To install this dashboard on the home page, edit your personal ".
-              "or global menu on the homepage and click Dashboard under ".
-              "New Menu Item on the right."),
-          ));
-        $panel_phids[] = $welcome_panel->getPHID();
-
-        $feed_panel = $this->newPanel(
-          $request,
-          $viewer,
-          'query',
-          pht('Recent Activity'),
-          array(
-            'class' => 'PhabricatorFeedSearchEngine',
-            'key' => 'all',
-          ));
-        $panel_phids[] = $feed_panel->getPHID();
-
-        $revision_panel = $this->newPanel(
-          $request,
-          $viewer,
-          'query',
-          pht('Active Revisions'),
-          array(
-            'class' => 'DifferentialRevisionSearchEngine',
-            'key' => 'active',
-          ));
-        $panel_phids[] = $revision_panel->getPHID();
-
-        $task_panel = $this->newPanel(
-          $request,
-          $viewer,
-          'query',
-          pht('Assigned Tasks'),
-          array(
-            'class' => 'ManiphestTaskSearchEngine',
-            'key' => 'assigned',
-          ));
-        $panel_phids[] = $task_panel->getPHID();
-
-        $commit_panel = $this->newPanel(
-          $request,
-          $viewer,
-          'query',
-          pht('Recent Commits'),
-          array(
-            'class' => 'PhabricatorCommitSearchEngine',
-            'key' => 'all',
-          ));
-        $panel_phids[] = $commit_panel->getPHID();
-
-        $mode_2_and_1 = PhabricatorDashboardLayoutConfig::MODE_THIRDS_AND_THIRD;
-        $layout = id(new PhabricatorDashboardLayoutConfig())
-          ->setLayoutMode($mode_2_and_1)
-          ->setPanelLocation(0, $welcome_panel->getPHID())
-          ->setPanelLocation(0, $revision_panel->getPHID())
-          ->setPanelLocation(0, $task_panel->getPHID())
-          ->setPanelLocation(0, $commit_panel->getPHID())
-          ->setPanelLocation(1, $feed_panel->getPHID());
-
-        break;
-      default:
-        throw new Exception(pht('Unknown dashboard template %s!', $template));
-    }
-
-    // Create the dashboard.
-
-    $dashboard = PhabricatorDashboard::initializeNewDashboard($viewer)
-      ->setLayoutConfigFromObject($layout);
-
-    $xactions = array();
-
-    $xactions[] = id(new PhabricatorDashboardTransaction())
-      ->setTransactionType(PhabricatorDashboardTransaction::TYPE_NAME)
-      ->setNewValue($v_name);
-
-    $xactions[] = id(new PhabricatorDashboardTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue(
-        'edge:type',
-        PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST)
-      ->setNewValue(
-        array(
-          '+' => array_fuse($panel_phids),
-        ));
-
-    $editor = id(new PhabricatorDashboardTransactionEditor())
-      ->setActor($viewer)
-      ->setContinueOnNoEffect(true)
-      ->setContentSourceFromRequest($request)
-      ->applyTransactions($dashboard, $xactions);
-
-    return id(new AphrontRedirectResponse())
-      ->setURI($dashboard->getURI());
-  }
-
   private function newPanel(
     AphrontRequest $request,
     PhabricatorUser $viewer,
@@ -372,6 +209,5 @@ final class PhabricatorDashboardEditController
 
     return $panel;
   }
-
 
 }
