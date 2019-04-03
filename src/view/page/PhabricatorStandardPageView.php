@@ -304,6 +304,12 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         ));
     }
 
+    // If we aren't showing the page chrome, skip rendering DarkConsole and the
+    // main menu, since they won't be visible on the page.
+    if (!$this->getShowChrome()) {
+      return;
+    }
+
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
 
@@ -346,6 +352,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
       $menu->setApplicationMenu($application_menu);
     }
+
 
     $this->menuContent = $menu->render();
   }

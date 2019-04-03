@@ -24,7 +24,7 @@ final class PhamePostViewController
 
     $hero = $this->buildPhamePostHeader($post);
 
-    if (!$is_external) {
+    if (!$is_external && $viewer->isLoggedIn()) {
       $actions = $this->renderActions($post);
       $header->setPolicyObject($post);
       $header->setActionList($actions);
@@ -136,7 +136,7 @@ final class PhamePostViewController
       ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
     $timeline->setQuoteRef($monogram);
 
-    if ($is_external) {
+    if ($is_external || !$viewer->isLoggedIn()) {
       $add_comment = null;
     } else {
       $add_comment = $this->buildCommentForm($post, $timeline);

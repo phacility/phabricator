@@ -284,6 +284,7 @@
   text-align: center;
   background: {$page.content};
   padding: 16px 0 24px;
+  border-top: 1px solid {$document.border};
 }
 
 .device-phone .phame-mega-header {
