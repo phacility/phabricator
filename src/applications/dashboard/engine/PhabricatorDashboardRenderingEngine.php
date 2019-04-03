@@ -41,6 +41,14 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NORMAL;
     }
 
+    $panel_phids = array();
+    foreach ($panel_grid_locations as $panel_column_locations) {
+      foreach ($panel_column_locations as $panel_phid) {
+        $panel_phids[] = $panel_phid;
+      }
+    }
+    $handles = $viewer->loadHandles($panel_phids);
+
     foreach ($panel_grid_locations as $column => $panel_column_locations) {
       $panel_phids = $panel_column_locations;
 
@@ -57,7 +65,8 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
           ->setEnableAsyncRendering(true)
           ->setPanelPHID($panel_phid)
           ->setParentPanelPHIDs(array())
-          ->setHeaderMode($h_mode);
+          ->setHeaderMode($h_mode)
+          ->setPanelHandle($handles[$panel_phid]);
 
         $panel = idx($panels, $panel_phid);
         if ($panel) {
