@@ -275,8 +275,11 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
+        // In edit mode, include the panel monogram to make managing boards
+        // a little easier.
+        $header_text = pht('%s %s', $panel->getMonogram(), $panel->getName());
         $header = id(new PHUIHeaderView())
-          ->setHeader($panel->getName());
+          ->setHeader($header_text);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
@@ -316,6 +319,11 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Panel'))
         ->setHref((string)$edit_uri);
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-window-maximize')
+        ->setName(pht('View Panel Details'))
+        ->setHref($panel->getURI());
     }
 
     if ($dashboard_id) {

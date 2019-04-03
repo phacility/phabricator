@@ -11,9 +11,17 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     return $this;
   }
 
+  public function getViewer() {
+    return $this->viewer;
+  }
+
   public function setDashboard(PhabricatorDashboard $dashboard) {
     $this->dashboard = $dashboard;
     return $this;
+  }
+
+  public function getDashboard() {
+    return $this->dashboard;
   }
 
   public function setArrangeMode($mode) {
@@ -26,6 +34,8 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $dashboard = $this->dashboard;
     $viewer = $this->viewer;
 
+    $is_editable = $this->arrangeMode;
+
     $layout_config = $dashboard->getLayoutConfigObject();
     $panel_grid_locations = $layout_config->getPanelLocations();
     $panels = mpull($dashboard->getPanels(), null, 'getPHID');
@@ -35,7 +45,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
 
-    if ($this->arrangeMode) {
+    if ($is_editable) {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_EDIT;
     } else {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NORMAL;
@@ -77,8 +87,8 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       }
       $column_class = $layout_config->getColumnClass(
         $column,
-        $this->arrangeMode);
-      if ($this->arrangeMode) {
+        $is_editable);
+      if ($is_editable) {
         $column_result[] = $this->renderAddPanelPlaceHolder($column);
         $column_result[] = $this->renderAddPanelUI($column);
       }
@@ -89,7 +99,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
         $metadata = array('columnID' => $column));
     }
 
-    if ($this->arrangeMode) {
+    if ($is_editable) {
       Javelin::initBehavior(
         'dashboard-move-panels',
         array(
@@ -100,7 +110,10 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
     $view = id(new PHUIBoxView())
       ->addClass('dashboard-view')
-      ->appendChild($result);
+      ->appendChild(
+        array(
+          $result,
+        ));
 
     return $view;
   }
