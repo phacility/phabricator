@@ -577,6 +577,11 @@ final class PhabricatorProjectBoardViewController
       $panel->addHeaderAction($column_menu);
 
       if ($column->canHaveTrigger()) {
+        $trigger = $column->getTrigger();
+        if ($trigger) {
+          $trigger->setViewer($viewer);
+        }
+
         $trigger_menu = $this->buildTriggerMenu($column);
         $panel->addHeaderAction($trigger_menu);
       }

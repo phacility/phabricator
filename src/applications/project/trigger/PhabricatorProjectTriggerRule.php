@@ -37,6 +37,10 @@ abstract class PhabricatorProjectTriggerRule
     return $this->getRecord()->getValue();
   }
 
+  protected function getValueForEditorField() {
+    return $this->getValue();
+  }
+
   abstract public function getSelectControlName();
   abstract public function getRuleViewLabel();
   abstract public function getRuleViewDescription($value);
@@ -130,7 +134,7 @@ abstract class PhabricatorProjectTriggerRule
 
     return array(
       'type' => $record->getType(),
-      'value' => $record->getValue(),
+      'value' => $this->getValueForEditorField(),
       'isValidRule' => $is_valid,
       'invalidView' => $invalid_view,
     );

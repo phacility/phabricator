@@ -28,7 +28,8 @@ final class PhabricatorProjectTriggerRulesetTransaction
       try {
         PhabricatorProjectTrigger::newTriggerRulesFromRuleSpecifications(
           $ruleset,
-          $allow_invalid = false);
+          $allow_invalid = false,
+          $xaction->getViewer());
       } catch (PhabricatorProjectTriggerCorruptionException $ex) {
         $errors[] = $this->newInvalidError(
           pht(
