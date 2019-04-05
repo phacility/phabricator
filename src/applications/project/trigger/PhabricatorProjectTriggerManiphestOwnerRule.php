@@ -66,7 +66,7 @@ final class PhabricatorProjectTriggerManiphestOwnerRule
     return 'tokenizer';
   }
 
-  protected function getDatasource() {
+  private function getDatasource() {
     $datasource = id(new ManiphestAssigneeDatasource())
       ->setLimit(1);
 
