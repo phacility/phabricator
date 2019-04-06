@@ -54,10 +54,20 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
     $future = id(new ExecFuture('%C', $command))
       ->setEnv($this->getEnvironment());
 
+    $log = $this->newProtocolLog($is_proxy);
+    if ($log) {
+      $this->setProtocolLog($log);
+      $log->didStartSession($command);
+    }
+
     $err = $this->newPassthruCommand()
       ->setIOChannel($this->getIOChannel())
       ->setCommandChannelFromExecFuture($future)
       ->execute();
+
+    if ($log) {
+      $log->didEndSession();
+    }
 
     if ($err) {
       $pull_event

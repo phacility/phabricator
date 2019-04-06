@@ -28,7 +28,8 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
       ->setRepository($repository)
       ->setLog($this);
 
-    if ($this->shouldProxy()) {
+    $is_proxy = $this->shouldProxy();
+    if ($is_proxy) {
       $command = $this->getProxyCommand(true);
       $did_write = false;
 
@@ -51,11 +52,21 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
       }
     }
 
+    $log = $this->newProtocolLog($is_proxy);
+    if ($log) {
+      $this->setProtocolLog($log);
+      $log->didStartSession($command);
+    }
+
     $caught = null;
     try {
       $err = $this->executeRepositoryCommand($command);
     } catch (Exception $ex) {
       $caught = $ex;
+    }
+
+    if ($log) {
+      $log->didEndSession();
     }
 
     // We've committed the write (or rejected it), so we can release the lock

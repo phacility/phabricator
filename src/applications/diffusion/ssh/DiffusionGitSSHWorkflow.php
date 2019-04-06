@@ -5,6 +5,7 @@ abstract class DiffusionGitSSHWorkflow
   implements DiffusionRepositoryClusterEngineLogInterface {
 
   private $engineLogProperties = array();
+  private $protocolLog;
 
   protected function writeError($message) {
     // Git assumes we'll add our own newlines.
@@ -53,6 +54,56 @@ abstract class DiffusionGitSSHWorkflow
         'interact with this repository.',
         $repository->getDisplayName(),
         $repository->getVersionControlSystem()));
+  }
+
+  protected function newPassthruCommand() {
+    return parent::newPassthruCommand()
+      ->setWillWriteCallback(array($this, 'willWriteMessageCallback'))
+      ->setWillReadCallback(array($this, 'willReadMessageCallback'));
+  }
+
+  protected function newProtocolLog($is_proxy) {
+    if ($is_proxy) {
+      return null;
+    }
+
+    // While developing, do this to write a full protocol log to disk:
+    //
+    // return new PhabricatorProtocolLog('/tmp/git-protocol.log');
+
+    return null;
+  }
+
+  protected function getProtocolLog() {
+    return $this->protocolLog;
+  }
+
+  protected function setProtocolLog(PhabricatorProtocolLog $log) {
+    $this->protocolLog = $log;
+  }
+
+  public function willWriteMessageCallback(
+    PhabricatorSSHPassthruCommand $command,
+    $message) {
+
+    $log = $this->getProtocolLog();
+    if ($log) {
+      $log->didWriteBytes($message);
+    }
+
+    return $message;
+  }
+
+  public function willReadMessageCallback(
+    PhabricatorSSHPassthruCommand $command,
+    $message) {
+
+    $log = $this->getProtocolLog();
+    if ($log) {
+      $log->didReadBytes($message);
+    }
+
+    return $message;
   }
 
 }
