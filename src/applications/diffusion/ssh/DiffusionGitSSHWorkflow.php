@@ -7,6 +7,8 @@ abstract class DiffusionGitSSHWorkflow
   private $engineLogProperties = array();
   private $protocolLog;
 
+  private $wireProtocol;
+
   protected function writeError($message) {
     // Git assumes we'll add our own newlines.
     return parent::writeError($message."\n");
@@ -74,12 +76,22 @@ abstract class DiffusionGitSSHWorkflow
     return null;
   }
 
-  protected function getProtocolLog() {
+  final protected function getProtocolLog() {
     return $this->protocolLog;
   }
 
-  protected function setProtocolLog(PhabricatorProtocolLog $log) {
+  final protected function setProtocolLog(PhabricatorProtocolLog $log) {
     $this->protocolLog = $log;
+  }
+
+  final protected function getWireProtocol() {
+    return $this->wireProtocol;
+  }
+
+  final protected function setWireProtocol(
+    DiffusionGitWireProtocol $protocol) {
+    $this->wireProtocol = $protocol;
+    return $this;
   }
 
   public function willWriteMessageCallback(
@@ -89,6 +101,11 @@ abstract class DiffusionGitSSHWorkflow
     $log = $this->getProtocolLog();
     if ($log) {
       $log->didWriteBytes($message);
+    }
+
+    $protocol = $this->getWireProtocol();
+    if ($protocol) {
+      $message = $protocol->willWriteBytes($message);
     }
 
     return $message;
@@ -101,6 +118,11 @@ abstract class DiffusionGitSSHWorkflow
     $log = $this->getProtocolLog();
     if ($log) {
       $log->didReadBytes($message);
+    }
+
+    $protocol = $this->getWireProtocol();
+    if ($protocol) {
+      $message = $protocol->willReadBytes($message);
     }
 
     return $message;

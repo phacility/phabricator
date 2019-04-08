@@ -41,6 +41,26 @@ final class PhabricatorProtocolLog
     $this->buffer[] = $bytes;
   }
 
+  public function didReadFrame($frame) {
+    $this->writeFrame('<*', $frame);
+  }
+
+  public function didWriteFrame($frame) {
+    $this->writeFrame('>*', $frame);
+  }
+
+  private function writeFrame($header, $frame) {
+    $this->flush();
+
+    $frame = explode("\n", $frame);
+    foreach ($frame as $key => $line) {
+      $frame[$key] = $header.'  '.$this->escapeBytes($line);
+    }
+    $frame = implode("\n", $frame)."\n\n";
+
+    $this->writeMessage($frame);
+  }
+
   private function setMode($mode) {
     if ($this->mode === $mode) {
       return $this;
