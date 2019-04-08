@@ -22,8 +22,29 @@ final class PhabricatorDashboardQueryPanelType
   }
 
   protected function newEditEngineFields(PhabricatorDashboardPanel $panel) {
-    // TODO: Restore this using EditEngine instead of CustomField.
-    return array();
+    $application_field =
+      id(new PhabricatorDashboardQueryPanelApplicationEditField())
+        ->setKey('class')
+        ->setLabel(pht('Search For'))
+        ->setTransactionType(
+          PhabricatorDashboardQueryPanelApplicationTransaction::TRANSACTIONTYPE)
+        ->setValue($panel->getProperty('class', ''));
+
+    $application_id = $application_field->getControlID();
+
+    $query_field =
+      id(new PhabricatorDashboardQueryPanelQueryEditField())
+        ->setKey('key')
+        ->setLabel(pht('Query'))
+        ->setApplicationControlID($application_id)
+        ->setTransactionType(
+          PhabricatorDashboardQueryPanelQueryTransaction::TRANSACTIONTYPE)
+        ->setValue($panel->getProperty('key', ''));
+
+    return array(
+      $application_field,
+      $query_field,
+    );
   }
 
   public function initializeFieldsFromRequest(
