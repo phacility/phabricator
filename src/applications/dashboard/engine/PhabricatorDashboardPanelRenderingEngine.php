@@ -43,6 +43,10 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     return $this->panelHandle;
   }
 
+  public function isEditMode() {
+    return ($this->getHeaderMode() === self::HEADER_MODE_EDIT);
+  }
+
   /**
    * Allow the engine to render the panel via Ajax.
    */

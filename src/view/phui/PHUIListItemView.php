@@ -35,6 +35,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $actionIconHref;
   private $count;
   private $rel;
+  private $hasDropdown;
 
   public function setOpenInNewWindow($open_in_new_window) {
     $this->openInNewWindow = $open_in_new_window;
@@ -68,6 +69,7 @@ final class PHUIListItemView extends AphrontTagView {
 
     $this->addSigil('phui-dropdown-menu');
     $this->setMetadata($actions->getDropdownMenuMetadata());
+    $this->hasDropdown = true;
 
     return $this;
   }
@@ -235,6 +237,10 @@ final class PHUIListItemView extends AphrontTagView {
       $classes[] = 'phui-list-item-has-action-icon';
     }
 
+    if ($this->hasDropdown) {
+      $classes[] = 'dropdown';
+    }
+
     return array(
       'class' => implode(' ', $classes),
     );
@@ -363,6 +369,12 @@ final class PHUIListItemView extends AphrontTagView {
         $this->count);
     }
 
+    if ($this->hasDropdown) {
+      $caret = phutil_tag('span', array('class' => 'caret'), '');
+    } else {
+      $caret = null;
+    }
+
     $icons = $this->getIcons();
 
     $list_item = javelin_tag(
@@ -381,6 +393,7 @@ final class PHUIListItemView extends AphrontTagView {
         $icons,
         $this->renderChildren(),
         $name,
+        $caret,
         $count,
       ));
 

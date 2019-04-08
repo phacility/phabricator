@@ -62,6 +62,8 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
           'render/(?P<id>\d+)/' => 'PhabricatorDashboardPanelRenderController',
           'archive/(?P<id>\d+)/'
             => 'PhabricatorDashboardPanelArchiveController',
+          'tabs/(?P<id>\d+)/(?P<op>add|move|remove|rename)/'
+            => 'PhabricatorDashboardPanelTabsController',
         ),
       ),
       '/portal/' => array(

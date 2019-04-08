@@ -213,3 +213,14 @@
   .phabricator-action-view-item .phui-icon-view {
     color: {$sky};
 }
+
+.phui-list-item-view.dropdown .phui-list-item-href {
+  padding-right: 28px;
+}
+
+.phui-list-item-view .caret {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  border-top: 7px solid {$greytext};
+}
