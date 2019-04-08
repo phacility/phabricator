@@ -198,7 +198,35 @@ JX.install('PHUIXDropdownMenu', {
       var v = JX.$V(this._node);
       var d = JX.Vector.getDim(this._node);
 
-      switch (this.getAlign()) {
+      var alignments = ['right', 'left'];
+      var disallow = {};
+      var margin = 8;
+
+      // If "right" alignment would leave us with the dropdown near or off the
+      // left side of the screen, disallow it.
+      var x_min = ((v.x + d.x) - m.x);
+      if (x_min < margin) {
+        disallow.right = true;
+      }
+
+      var align = this.getAlign();
+
+      // If the position disallows the configured alignment, try the next
+      // best alignment instead.
+
+      // If no alignment is allowed, we'll stick with the original alignment
+      // and accept that it isn't going to render very nicely. This can happen
+      // if the browser window is very, very small.
+      if (align in disallow) {
+        for (var ii = 0; ii < alignments.length; ii++) {
+          if (!(alignments[ii] in disallow)) {
+            align = alignments[ii];
+            break;
+          }
+        }
+      }
+
+      switch (align) {
         case 'right':
           v = v.add(d)
                .add(JX.$V(-m.x, 0));
