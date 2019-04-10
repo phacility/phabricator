@@ -28,4 +28,8 @@ final class PhabricatorDashboardPortalEditor
     return $types;
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

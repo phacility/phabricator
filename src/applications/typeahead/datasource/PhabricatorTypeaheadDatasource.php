@@ -604,4 +604,38 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     return mpull($tokens, 'getWireFormat', 'getPHID');
   }
 
+  final protected function applyFerretConstraints(
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    PhabricatorFerretEngine $engine,
+    $ferret_function,
+    $raw_query) {
+
+    $compiler = id(new PhutilSearchQueryCompiler())
+      ->setEnableFunctions(true);
+
+    $raw_tokens = $compiler->newTokens($raw_query);
+
+    $fulltext_tokens = array();
+    foreach ($raw_tokens as $raw_token) {
+      // This is a little hacky and could maybe be cleaner. We're treating
+      // every search term as though the user had entered "title:dog" instead
+      // of "dog".
+
+      $alternate_token = PhutilSearchQueryToken::newFromDictionary(
+        array(
+          'quoted' => $raw_token->isQuoted(),
+          'value' => $raw_token->getValue(),
+          'operator' => PhutilSearchQueryCompiler::OPERATOR_SUBSTRING,
+          'function' => $ferret_function,
+        ));
+
+      $fulltext_token = id(new PhabricatorFulltextToken())
+        ->setToken($alternate_token);
+      $fulltext_tokens[] = $fulltext_token;
+    }
+
+    $query->withFerretConstraint($engine, $fulltext_tokens);
+  }
+
+
 }

@@ -36,21 +36,21 @@ final class PhabricatorDashboardPortalQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'portal.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'portal.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'portal.status IN (%Ls)',
         $this->statuses);
     }
 
@@ -59,6 +59,10 @@ final class PhabricatorDashboardPortalQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDashboardApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'portal';
   }
 
 }

@@ -27,7 +27,11 @@ final class PhabricatorDashboardPortalDatasource
   public function buildResults() {
     $query = new PhabricatorDashboardPortalQuery();
 
-    // TODO: Actually query by name so this scales past 100 portals.
+    $this->applyFerretConstraints(
+      $query,
+      id(new PhabricatorDashboardPortal())->newFerretEngine(),
+      'title',
+      $this->getRawQuery());
 
     $portals = $this->executeQuery($query);
 

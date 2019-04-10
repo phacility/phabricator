@@ -5,7 +5,10 @@ final class PhabricatorDashboardPortal
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorProjectInterface,
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface {
 
   protected $name;
   protected $viewPolicy;
@@ -55,6 +58,11 @@ final class PhabricatorDashboardPortal
     return '/portal/view/'.$this->getID().'/';
   }
 
+  public function isArchived() {
+    $status_archived = PhabricatorDashboardPortalStatus::STATUS_ARCHIVED;
+    return ($this->getStatus() === $status_archived);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -100,5 +108,16 @@ final class PhabricatorDashboardPortal
     $this->delete();
   }
 
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+  public function newFulltextEngine() {
+    return new PhabricatorDashboardPortalFulltextEngine();
+  }
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+  public function newFerretEngine() {
+    return new PhabricatorDashboardPortalFerretEngine();
+  }
 
 }

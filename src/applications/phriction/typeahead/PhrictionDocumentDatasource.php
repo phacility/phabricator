@@ -18,41 +18,17 @@ final class PhrictionDocumentDatasource
   public function loadResults() {
     $viewer = $this->getViewer();
 
-    $raw_query = $this->getRawQuery();
-
-    $engine = id(new PhrictionDocument())
-      ->newFerretEngine();
-
-    $compiler = id(new PhutilSearchQueryCompiler())
-      ->setEnableFunctions(true);
-
-    $raw_tokens = $compiler->newTokens($raw_query);
-
-    $fulltext_tokens = array();
-    foreach ($raw_tokens as $raw_token) {
-
-      // This is a little hacky and could maybe be cleaner. We're treating
-      // every search term as though the user had entered "title:dog" insead
-      // of "dog".
-
-      $alternate_token = PhutilSearchQueryToken::newFromDictionary(
-        array(
-          'quoted' => $raw_token->isQuoted(),
-          'value' => $raw_token->getValue(),
-          'operator' => PhutilSearchQueryCompiler::OPERATOR_SUBSTRING,
-          'function' => 'title',
-        ));
-
-      $fulltext_token = id(new PhabricatorFulltextToken())
-        ->setToken($alternate_token);
-      $fulltext_tokens[] = $fulltext_token;
-    }
-
-    $documents = id(new PhrictionDocumentQuery())
+    $query = id(new PhrictionDocumentQuery())
       ->setViewer($viewer)
-      ->withFerretConstraint($engine, $fulltext_tokens)
-      ->needContent(true)
-      ->execute();
+      ->needContent(true);
+
+    $this->applyFerretConstraints(
+      $query,
+      id(new PhrictionDocument())->newFerretEngine(),
+      'title',
+      $this->getRawQuery());
+
+    $documents = $query->execute();
 
     $results = array();
     foreach ($documents as $document) {
