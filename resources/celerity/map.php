@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
-    'core.pkg.css' => '671b9fae',
+    'core.pkg.css' => 'dacb981b',
     'core.pkg.js' => 'c783d8f6',
     'differential.pkg.css' => '8d8360fb',
     'differential.pkg.js' => '67e02996',
@@ -37,7 +37,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => '8779483d',
     'rsrc/css/application/almanac/almanac.css' => '2e050f4f',
     'rsrc/css/application/auth/auth.css' => 'add92fd8',
-    'rsrc/css/application/base/main-menu-view.css' => '8e2d9a28',
+    'rsrc/css/application/base/main-menu-view.css' => '17b71bbc',
     'rsrc/css/application/base/notification-menu.css' => '4df1ee30',
     'rsrc/css/application/base/phui-theme.css' => '35883b37',
     'rsrc/css/application/base/standard-page-view.css' => '8a295cb9',
@@ -134,7 +134,7 @@ return array(
     'rsrc/css/phui/object-item/phui-oi-flush-ui.css' => '490e2e2e',
     'rsrc/css/phui/object-item/phui-oi-list-view.css' => 'f14f2422',
     'rsrc/css/phui/object-item/phui-oi-simple-ui.css' => '6a30fa46',
-    'rsrc/css/phui/phui-action-list.css' => 'c34af376',
+    'rsrc/css/phui/phui-action-list.css' => '8862282e',
     'rsrc/css/phui/phui-action-panel.css' => '6c386cbf',
     'rsrc/css/phui/phui-badge.css' => '666e25ad',
     'rsrc/css/phui/phui-basic-nav-view.css' => '56ebd66d',
@@ -757,7 +757,7 @@ return array(
     'path-typeahead' => 'ad486db3',
     'people-picture-menu-item-css' => 'fe8e07cf',
     'people-profile-css' => '2ea2daa1',
-    'phabricator-action-list-view-css' => 'c34af376',
+    'phabricator-action-list-view-css' => '8862282e',
     'phabricator-busy' => '5202e831',
     'phabricator-chatlog-css' => 'abdc76ee',
     'phabricator-content-source-view-css' => 'cdf0d579',
@@ -779,7 +779,7 @@ return array(
     'phabricator-flag-css' => '2b77be8d',
     'phabricator-keyboard-shortcut' => 'c9749dcd',
     'phabricator-keyboard-shortcut-manager' => '37b8a04a',
-    'phabricator-main-menu-view' => '8e2d9a28',
+    'phabricator-main-menu-view' => '17b71bbc',
     'phabricator-nav-view-css' => 'f8a0c1bf',
     'phabricator-notification' => 'a9b91e3f',
     'phabricator-notification-css' => '30240bd2',
@@ -1028,6 +1028,9 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-util',
+    ),
+    '17b71bbc' => array(
+      'phui-theme-css',
     ),
     '1b6acc2a' => array(
       'javelin-magical-init',
@@ -1644,9 +1647,6 @@ return array(
     '8e0aa661' => array(
       'javelin-install',
       'javelin-dom',
-    ),
-    '8e2d9a28' => array(
-      'phui-theme-css',
     ),
     '8f959ad0' => array(
       'javelin-behavior',

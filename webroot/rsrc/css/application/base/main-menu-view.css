@@ -650,6 +650,7 @@ ul.phabricator-core-user-profile-object .phui-oi-content,
 ul.phabricator-core-user-profile-object .phui-oi-subhead {
   padding: 0;
   margin: 0;
+  background: transparent;
 }
 
 ul.phabricator-core-user-profile-object.phui-oi-list-simple .phui-oi-image {
