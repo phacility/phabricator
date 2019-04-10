@@ -311,19 +311,22 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       );
 
       if ($all_from_repo && !$force_local) {
-        foreach ($classes as $class) {
-          PhabricatorWorker::scheduleTask(
-            $class,
-            $spec,
-            array(
-              'priority' => PhabricatorWorker::PRIORITY_IMPORT,
-            ));
-        }
+        $background = true;
       } else {
-        foreach ($classes as $class) {
-          $worker = newv($class, array($spec));
-          $worker->executeTask();
-        }
+        $background = false;
+      }
+
+      if (!$background) {
+        PhabricatorWorker::setRunAllTasksInProcess(true);
+      }
+
+      foreach ($classes as $class) {
+        PhabricatorWorker::scheduleTask(
+          $class,
+          $spec,
+          array(
+            'priority' => PhabricatorWorker::PRIORITY_IMPORT,
+          ));
       }
 
       $progress->update(1);

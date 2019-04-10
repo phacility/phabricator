@@ -315,6 +315,7 @@ final class DifferentialDiffExtractionEngine extends Phobject {
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)
       ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true)
       ->setContentSource($content_source)
       ->setChangedPriorToCommitURI($changed_uri)
       ->setIsCloseByCommit(true);
@@ -324,14 +325,7 @@ final class DifferentialDiffExtractionEngine extends Phobject {
       $editor->setActingAsPHID($author_phid);
     }
 
-    try {
-      $editor->applyTransactions($revision, $xactions);
-    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-      // NOTE: We've marked transactions other than the CLOSE transaction
-      // as ignored when they don't have an effect, so this means that we
-      // lost a race to close the revision. That's perfectly fine, we can
-      // just continue normally.
-    }
+    $editor->applyTransactions($revision, $xactions);
   }
 
   private function loadConcerningBuilds(DifferentialRevision $revision) {
