@@ -22,6 +22,7 @@ final class PhabricatorAuthSetupCheck extends PhabricatorSetupCheck {
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->execute();
 
+    $did_warn = false;
     if (!$configs) {
       $message = pht(
         'You have not configured any authentication providers yet. You '.
@@ -35,6 +36,42 @@ final class PhabricatorAuthSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('No Authentication Providers Configured'))
         ->setMessage($message)
         ->addLink('/auth/', pht('Auth Application'));
+
+      $did_warn = true;
+    }
+
+    // This check is meant for new administrators, but we don't want to
+    // show both this warning and the "No Auth Providers" warning.  Also,
+    // show this as a reminder to go back and do a `bin/auth lock` after
+    // they make their desired changes.
+    $is_locked = PhabricatorEnv::getEnvConfig('auth.lock-config');
+    if (!$is_locked && !$did_warn) {
+      $message = pht(
+        'Your authentication provider configuration is unlocked. Once you '.
+        'finish setting up or modifying authentication, you should lock the '.
+        'configuration to prevent unauthorized changes.'.
+        "\n\n".
+        'Leaving your authentication provider configuration unlocked '.
+        'increases the damage that a compromised administrator account can '.
+        'do to your install, by, for example, changing the authentication '.
+        'provider to a server they control and intercepting usernames and '.
+        'passwords.'.
+        "\n\n".
+        'To prevent this attack, you should configure your authentication '.
+        'providers, and then lock the configuration by doing `%s` '.
+        'from the command line. This will prevent changing the '.
+        'authentication provider config without first doing `%s`.',
+        'bin/auth lock',
+        'bin/auth unlock');
+      $this
+        ->newIssue('auth.config-unlocked')
+        ->setShortName(pht('Auth Config Unlocked'))
+        ->setName(pht('Authenticaton Provider Configuration Unlocked'))
+        ->setMessage($message)
+        ->addRelatedPhabricatorConfig('auth.lock-config')
+        ->addCommand(
+          hsprintf(
+            '<tt>phabricator/ $</tt> ./bin/auth lock'));
     }
   }
 }
