@@ -34,6 +34,7 @@ final class PhabricatorDashboardPortalPHIDType
       $portal = $objects[$phid];
 
       $handle
+        ->setIcon('fa-compass')
         ->setName($portal->getName())
         ->setURI($portal->getURI());
     }

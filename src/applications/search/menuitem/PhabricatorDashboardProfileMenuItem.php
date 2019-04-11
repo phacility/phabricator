@@ -36,11 +36,19 @@ final class PhabricatorDashboardProfileMenuItem
     return $this->dashboard;
   }
 
+  public function getAffectedObjectPHIDs(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return array(
+      $this->getDashboardPHID($config),
+    );
+  }
+
+
   public function newPageContent(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
-    $dashboard_phid = $config->getMenuItemProperty('dashboardPHID');
+    $dashboard_phid = $this->getDashboardPHID($config);
 
     // Reload the dashboard to attach panels, which we need for rendering.
     $dashboard = id(new PhabricatorDashboardQuery())
@@ -71,7 +79,7 @@ final class PhabricatorDashboardProfileMenuItem
     $viewer = $this->getViewer();
     $dashboard_phids = array();
     foreach ($items as $item) {
-      $dashboard_phids[] = $item->getMenuItemProperty('dashboardPHID');
+      $dashboard_phids[] = $this->getDashboardPHID($item);
     }
 
     $dashboards = id(new PhabricatorDashboardQuery())
@@ -83,7 +91,7 @@ final class PhabricatorDashboardProfileMenuItem
 
     $dashboards = mpull($dashboards, null, 'getPHID');
     foreach ($items as $item) {
-      $dashboard_phid = $item->getMenuItemProperty('dashboardPHID');
+      $dashboard_phid = $this->getDashboardPHID($item);
       $dashboard = idx($dashboards, $dashboard_phid, null);
 
       $menu_item = $item->getMenuItem();
@@ -125,7 +133,7 @@ final class PhabricatorDashboardProfileMenuItem
         ->setLabel(pht('Dashboard'))
         ->setIsRequired(true)
         ->setDatasource(new PhabricatorDashboardDatasource())
-        ->setSingleValue($config->getMenuItemProperty('dashboardPHID')),
+        ->setSingleValue($this->getDashboardPHID($config)),
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
@@ -224,6 +232,11 @@ final class PhabricatorDashboardProfileMenuItem
     }
 
     return $errors;
+  }
+
+  private function getDashboardPHID(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $config->getMenuItemProperty('dashboardPHID');
   }
 
   private function getDashboardHandle() {

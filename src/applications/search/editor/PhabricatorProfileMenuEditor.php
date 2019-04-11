@@ -121,5 +121,8 @@ final class PhabricatorProfileMenuEditor
     return $errors;
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
 
 }

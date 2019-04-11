@@ -159,4 +159,9 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
         ));
   }
 
+  public function getAffectedObjectPHIDs(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return array();
+  }
+
 }

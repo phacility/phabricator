@@ -5,7 +5,8 @@ final class PhabricatorProfileMenuItemConfiguration
   implements
     PhabricatorPolicyInterface,
     PhabricatorExtendedPolicyInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorIndexableInterface {
 
   protected $profilePHID;
   protected $menuItemKey;
@@ -253,6 +254,49 @@ final class PhabricatorProfileMenuItemConfiguration
     }
 
     return false;
+  }
+
+  public function getAffectedObjectPHIDs() {
+    return $this->getMenuItem()->getAffectedObjectPHIDs($this);
+  }
+
+  public function getProfileMenuTypeDescription() {
+    $profile_phid = $this->getProfilePHID();
+
+    $home_phid = id(new PhabricatorHomeApplication())->getPHID();
+    if ($profile_phid === $home_phid) {
+      return pht('Home Menu');
+    }
+
+    $favorites_phid = id(new PhabricatorFavoritesApplication())->getPHID();
+    if ($profile_phid === $favorites_phid) {
+      return pht('Favorites Menu');
+    }
+
+    switch (phid_get_type($profile_phid)) {
+      case PhabricatorProjectProjectPHIDType::TYPECONST:
+        return pht('Project Menu');
+      case PhabricatorDashboardPortalPHIDType::TYPECONST:
+        return pht('Portal Menu');
+    }
+
+    return pht('Profile Menu');
+  }
+
+  public function newUsageSortVector() {
+    // Used to sort items in contexts where we're showing the usage of an
+    // object in menus, like "Dashboard Used By" on Dashboard pages.
+
+    // Sort usage as a custom item after usage as a global item.
+    if ($this->getCustomPHID()) {
+      $is_personal = 1;
+    } else {
+      $is_personal = 0;
+    }
+
+    return id(new PhutilSortVector())
+      ->addInt($is_personal)
+      ->addInt($this->getID());
   }
 
 

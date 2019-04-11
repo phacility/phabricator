@@ -32,6 +32,8 @@ final class PhabricatorDashboardViewController
 
     $curtain = $this->buildCurtainView($dashboard);
 
+    $usage_box = $this->newUsageView($dashboard);
+
     $timeline = $this->buildTransactionTimeline(
       $dashboard,
       new PhabricatorDashboardTransactionQuery());
@@ -53,6 +55,7 @@ final class PhabricatorDashboardViewController
       ->setMainColumn(
         array(
           $dashboard_box,
+          $usage_box,
           $timeline,
         ));
 
@@ -108,6 +111,90 @@ final class PhabricatorDashboardViewController
     }
 
     return $curtain;
+  }
+
+  private function newUsageView(PhabricatorDashboard $dashboard) {
+    $viewer = $this->getViewer();
+
+    $custom_phids = array();
+    if ($viewer->getPHID()) {
+      $custom_phids[] = $viewer->getPHID();
+    }
+
+    $items = id(new PhabricatorProfileMenuItemConfigurationQuery())
+      ->setViewer($viewer)
+      ->withAffectedObjectPHIDs(
+        array(
+          $dashboard->getPHID(),
+        ))
+      ->withCustomPHIDs($custom_phids, $include_global = true)
+      ->execute();
+
+    $handle_phids = array();
+    foreach ($items as $item) {
+      $handle_phids[] = $item->getProfilePHID();
+      $custom_phid = $item->getCustomPHID();
+      if ($custom_phid) {
+        $handle_phids[] = $custom_phid;
+      }
+    }
+
+    if ($handle_phids) {
+      $handles = $viewer->loadHandles($handle_phids);
+    } else {
+      $handles = array();
+    }
+
+    $items = msortv($items, 'newUsageSortVector');
+
+    $rows = array();
+    foreach ($items as $item) {
+      $profile_phid = $item->getProfilePHID();
+      $custom_phid = $item->getCustomPHID();
+
+      $profile = $handles[$profile_phid]->renderLink();
+      $profile_icon = $handles[$profile_phid]->getIcon();
+
+      if ($custom_phid) {
+        $custom = $handles[$custom_phid]->renderLink();
+      } else {
+        $custom = pht('Global');
+      }
+
+      $type = $item->getProfileMenuTypeDescription();
+
+      $rows[] = array(
+        id(new PHUIIconView())->setIcon($profile_icon),
+        $type,
+        $profile,
+        $custom,
+      );
+    }
+
+    $usage_table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          null,
+          pht('Type'),
+          pht('Menu'),
+          pht('Global/Personal'),
+        ))
+      ->setColumnClasses(
+        array(
+          'center',
+          null,
+          'pri',
+          'wide',
+        ));
+
+    $header_view = id(new PHUIHeaderView())
+      ->setHeader(pht('Dashboard Used By'));
+
+    $usage_box = id(new PHUIObjectBoxView())
+      ->setTable($usage_table)
+      ->setHeader($header_view);
+
+    return $usage_box;
   }
 
 
