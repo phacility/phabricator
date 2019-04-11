@@ -41,8 +41,8 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
           => 'PhabricatorDashboardListController',
         'view/(?P<id>\d+)/' => 'PhabricatorDashboardViewController',
         'archive/(?P<id>\d+)/' => 'PhabricatorDashboardArchiveController',
-        'create/' => 'PhabricatorDashboardEditController',
-        'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardEditController',
+        $this->getEditRoutePattern('edit/') =>
+          'PhabricatorDashboardEditController',
         'install/(?P<id>\d+)/'.
           '(?:(?P<workflowKey>[^/]+)/'.
           '(?:(?P<modeKey>[^/]+)/)?)?' =>

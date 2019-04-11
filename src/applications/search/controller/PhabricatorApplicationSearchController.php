@@ -196,9 +196,6 @@ final class PhabricatorApplicationSearchController
       $submit->addButton($save_button);
     }
 
-    // TODO: A "Create Dashboard Panel" action goes here somewhere once
-    // we sort out T5307.
-
     $form->appendChild($submit);
     $body = array();
 

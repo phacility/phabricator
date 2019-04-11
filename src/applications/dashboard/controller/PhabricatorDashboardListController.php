@@ -36,11 +36,9 @@ final class PhabricatorDashboardListController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setIcon('fa-plus-square')
-        ->setName(pht('Create Dashboard'))
-        ->setHref($this->getApplicationURI().'create/'));
+    id(new PhabricatorDashboardEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }
