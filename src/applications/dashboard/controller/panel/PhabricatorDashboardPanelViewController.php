@@ -42,6 +42,7 @@ final class PhabricatorDashboardPanelViewController
     $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
       ->setPanel($panel)
+      ->setContextObject($panel)
       ->setPanelPHID($panel->getPHID())
       ->setParentPanelPHIDs(array())
       ->setEditMode(true)
@@ -69,18 +70,11 @@ final class PhabricatorDashboardPanelViewController
     $viewer = $this->getViewer();
     $id = $panel->getID();
 
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('View Panel'))
-      ->setIcon('fa-columns')
-      ->setHref($this->getApplicationURI("panel/render/{$id}/"));
-
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($panel->getName())
       ->setPolicyObject($panel)
-      ->setHeaderIcon('fa-columns')
-      ->addActionLink($button);
+      ->setHeaderIcon('fa-window-maximize');
 
     if (!$panel->getIsArchived()) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));

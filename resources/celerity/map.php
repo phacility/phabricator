@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
     'core.pkg.css' => '9d654dff',
-    'core.pkg.js' => '350acda5',
+    'core.pkg.js' => '794952ae',
     'differential.pkg.css' => '8d8360fb',
     'differential.pkg.js' => '67e02996',
     'diffusion.pkg.css' => '42c75c37',
@@ -374,7 +374,7 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => '09ecf50c',
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => '076bd092',
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '1e413dc9',
-    'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '8d4490a2',
+    'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '0116d3e8',
     'rsrc/js/application/diff/DiffChangeset.js' => 'd0a85a85',
     'rsrc/js/application/diff/DiffChangesetList.js' => '04023d82',
     'rsrc/js/application/diff/DiffInline.js' => 'a4a14a94',
@@ -597,7 +597,7 @@ return array(
     'javelin-behavior-dashboard-async-panel' => '09ecf50c',
     'javelin-behavior-dashboard-move-panels' => '076bd092',
     'javelin-behavior-dashboard-query-panel-select' => '1e413dc9',
-    'javelin-behavior-dashboard-tab-panel' => '8d4490a2',
+    'javelin-behavior-dashboard-tab-panel' => '0116d3e8',
     'javelin-behavior-day-view' => '727a5a61',
     'javelin-behavior-desktop-notifications-control' => '070679fe',
     'javelin-behavior-detect-timezone' => '78bc5d94',
@@ -902,6 +902,11 @@ return array(
     'unhandled-exception-css' => '9ecfc00d',
   ),
   'requires' => array(
+    '0116d3e8' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+    ),
     '01384686' => array(
       'javelin-behavior',
       'javelin-uri',
@@ -1643,11 +1648,6 @@ return array(
       'phabricator-title',
       'phabricator-shaped-request',
       'conpherence-thread-manager',
-    ),
-    '8d4490a2' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
     ),
     '8e0aa661' => array(
       'javelin-install',

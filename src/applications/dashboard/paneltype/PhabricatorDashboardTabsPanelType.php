@@ -51,13 +51,15 @@ final class PhabricatorDashboardTabsPanelType
     $is_edit = $engine->isEditMode();
     $config = $this->getPanelConfiguration($panel);
 
+    $context_object = $engine->getContextObject();
+    if (!$context_object) {
+      $context_object = $panel;
+    }
+
+    $context_phid = $context_object->getPHID();
+
     $list = id(new PHUIListView())
       ->setType(PHUIListView::NAVBAR_LIST);
-
-    $node_ids = array();
-    foreach ($config as $idx => $tab_spec) {
-      $node_ids[$idx] = celerity_generate_unique_node_id();
-    }
 
     $ids = ipull($config, 'panelID');
     if ($ids) {
@@ -72,13 +74,16 @@ final class PhabricatorDashboardTabsPanelType
     $id = $panel->getID();
 
     $add_uri = urisprintf('/dashboard/panel/tabs/%d/add/', $id);
-    $add_uri = new PhutilURI($add_uri);
+    $add_uri = id(new PhutilURI($add_uri))
+      ->replaceQueryParam('contextPHID', $context_phid);
 
     $remove_uri = urisprintf('/dashboard/panel/tabs/%d/remove/', $id);
-    $remove_uri = new PhutilURI($remove_uri);
+    $remove_uri = id(new PhutilURI($remove_uri))
+      ->replaceQueryParam('contextPHID', $context_phid);
 
     $rename_uri = urisprintf('/dashboard/panel/tabs/%d/rename/', $id);
-    $rename_uri = new PhutilURI($rename_uri);
+    $rename_uri = id(new PhutilURI($rename_uri))
+      ->replaceQueryParam('contextPHID', $context_phid);
 
     $selected = 0;
 
@@ -102,7 +107,7 @@ final class PhabricatorDashboardTabsPanelType
         ->setHref('#')
         ->setSelected($idx == $selected)
         ->addSigil('dashboard-tab-panel-tab')
-        ->setMetadata(array('idx' => $idx))
+        ->setMetadata(array('panelKey' => $idx))
         ->setName($name);
 
       if ($is_edit) {
@@ -212,6 +217,7 @@ final class PhabricatorDashboardTabsPanelType
     // remains selected across page loads.
 
     $content = array();
+    $panel_list = array();
     $no_headers = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NONE;
     foreach ($config as $idx => $tab_spec) {
       $panel_id = idx($tab_spec, 'panelID');
@@ -221,6 +227,7 @@ final class PhabricatorDashboardTabsPanelType
         $panel_content = id(new PhabricatorDashboardPanelRenderingEngine())
           ->setViewer($viewer)
           ->setEnableAsyncRendering(true)
+          ->setContextObject($context_object)
           ->setParentPanelPHIDs($parent_phids)
           ->setPanel($subpanel)
           ->setPanelPHID($subpanel->getPHID())
@@ -231,13 +238,20 @@ final class PhabricatorDashboardTabsPanelType
         $panel_content = pht('(Invalid Panel)');
       }
 
+      $content_id = celerity_generate_unique_node_id();
+
       $content[] = phutil_tag(
         'div',
         array(
-          'id' => $node_ids[$idx],
+          'id' => $content_id,
           'style' => ($idx == $selected) ? null : 'display: none',
         ),
         $panel_content);
+
+      $panel_list[] = array(
+        'panelKey' => (string)$idx,
+        'panelContentID' => $content_id,
+      );
     }
 
     if (!$content) {
@@ -269,7 +283,7 @@ final class PhabricatorDashboardTabsPanelType
       array(
         'sigil' => 'dashboard-tab-panel-container',
         'meta' => array(
-          'panels' => $node_ids,
+          'panels' => $panel_list,
         ),
       ),
       array(

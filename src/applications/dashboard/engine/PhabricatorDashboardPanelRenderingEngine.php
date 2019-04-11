@@ -16,6 +16,16 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   private $movable = true;
   private $panelHandle;
   private $editMode;
+  private $contextObject;
+
+  public function setContextObject($object) {
+    $this->contextObject = $object;
+    return $this;
+  }
+
+  public function getContextObject() {
+    return $this->contextObject;
+  }
 
   public function setDashboardID($id) {
     $this->dashboardID = $id;

@@ -3,6 +3,17 @@
 final class PhabricatorDashboardPanelTabsController
   extends PhabricatorDashboardController {
 
+  private $contextObject;
+
+  private function setContextObject($context_object) {
+    $this->contextObject = $context_object;
+    return $this;
+  }
+
+  private function getContextObject() {
+    return $this->contextObject;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
@@ -84,6 +95,43 @@ final class PhabricatorDashboardPanelTabsController
               $target))
           ->addCancelButton($cancel_uri);
       }
+    }
+
+    // Tab panels may be edited from the panel page, or from the context of
+    // a dashboard. If we're editing from a dashboard, we want to redirect
+    // back to the dashboard after making changes.
+
+    $context_phid = $request->getStr('contextPHID');
+    $context = null;
+    if (strlen($context_phid)) {
+      $context = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($context_phid))
+        ->executeOne();
+      if (!$context) {
+        return new Aphront404Response();
+      }
+
+      switch (phid_get_type($context_phid)) {
+        case PhabricatorDashboardDashboardPHIDType::TYPECONST:
+          $cancel_uri = $context->getURI();
+          break;
+        case PhabricatorDashboardPanelPHIDType::TYPECONST:
+          $cancel_uri = $context->getURI();
+          break;
+        default:
+          return $this->newDialog()
+            ->setTitle(pht('Context Object Unsupported'))
+            ->appendParagraph(
+              pht(
+                'Context object ("%s") has unsupported type. Panels should '.
+                'be rendered from the context of a dashboard or another '.
+                'panel.',
+                $context_phid))
+            ->addCancelButton($cancel_uri);
+      }
+
+      $this->setContextObject($context);
     }
 
     switch ($op) {
@@ -176,10 +224,9 @@ final class PhabricatorDashboardPanelTabsController
           ->setLabel(pht('Panel'))
           ->setValue($v_panel));
 
-    return $this->newDialog()
+    return $this->newEditDialog()
       ->setTitle(pht('Choose Dashboard Panel'))
       ->setErrors($errors)
-      ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->addHiddenInput('after', $after)
       ->appendForm($form)
       ->addCancelButton($cancel_uri)
@@ -205,7 +252,7 @@ final class PhabricatorDashboardPanelTabsController
       return id(new AphrontRedirectResponse())->setURI($cancel_uri);
     }
 
-    return $this->newDialog()
+    return $this->newEditDialog()
       ->setTitle(pht('Remove tab?'))
       ->addHiddenInput('target', $target)
       ->appendParagraph(pht('Really remove this tab?'))
@@ -243,7 +290,7 @@ final class PhabricatorDashboardPanelTabsController
           ->setName('name')
           ->setLabel(pht('Tab Name')));
 
-    return $this->newDialog()
+    return $this->newEditDialog()
       ->setTitle(pht('Rename Panel'))
       ->addHiddenInput('target', $target)
       ->appendForm($form)
@@ -290,6 +337,18 @@ final class PhabricatorDashboardPanelTabsController
   private function renamePanel(array $config, $target, $name) {
     $config[$target]['name'] = $name;
     return $config;
+  }
+
+  protected function newEditDialog() {
+    $dialog = $this->newDialog()
+      ->setWidth(AphrontDialogView::WIDTH_FORM);
+
+    $context = $this->getContextObject();
+    if ($context) {
+      $dialog->addHiddenInput('contextPHID', $context->getPHID());
+    }
+
+    return $dialog;
   }
 
 }
