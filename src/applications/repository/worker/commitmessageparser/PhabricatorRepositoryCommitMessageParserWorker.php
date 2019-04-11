@@ -278,17 +278,13 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
           $content_source = $this->newContentSource();
 
-          $update_data = $extraction_engine->updateRevisionWithCommit(
+          $extraction_engine->updateRevisionWithCommit(
             $revision,
             $commit,
             array(
               $commit_close_xaction,
             ),
             $content_source);
-
-          foreach ($update_data as $key => $value) {
-            $data->setCommitDetail($key, $value);
-          }
         }
       }
     }

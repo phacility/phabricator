@@ -243,8 +243,6 @@ final class DifferentialDiffExtractionEngine extends Phobject {
     PhabricatorContentSource $content_source) {
 
     $viewer = $this->getViewer();
-    $result_data = array();
-
     $new_diff = $this->newDiffFromCommit($commit);
 
     $old_diff = $revision->getActiveDiff();
@@ -261,8 +259,6 @@ final class DifferentialDiffExtractionEngine extends Phobject {
           $old_diff,
           $new_diff);
         if ($has_changed) {
-          $result_data['vsDiff'] = $old_diff->getID();
-
           $revision_monogram = $revision->getMonogram();
           $old_id = $old_diff->getID();
           $new_id = $new_diff->getID();
@@ -336,8 +332,6 @@ final class DifferentialDiffExtractionEngine extends Phobject {
       // lost a race to close the revision. That's perfectly fine, we can
       // just continue normally.
     }
-
-    return $result_data;
   }
 
   private function loadConcerningBuilds(DifferentialRevision $revision) {
