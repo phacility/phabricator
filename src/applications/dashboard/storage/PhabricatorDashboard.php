@@ -10,7 +10,8 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
-    PhabricatorNgramsInterface {
+    PhabricatorNgramsInterface,
+    PhabricatorDashboardPanelContainerInterface {
 
   protected $name;
   protected $authorPHID;
@@ -189,6 +190,14 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       id(new PhabricatorDashboardNgrams())
         ->setValue($this->getName()),
     );
+  }
+
+/* -(  PhabricatorDashboardPanelContainerInterface  )------------------------ */
+
+  public function getDashboardPanelContainerPanelPHIDs() {
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getPHID(),
+      PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST);
   }
 
 }

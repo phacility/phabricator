@@ -105,7 +105,7 @@ final class PhabricatorDashboardTabsPanelType
 
       $tab_view = id(new PHUIListItemView())
         ->setHref('#')
-        ->setSelected($idx == $selected)
+        ->setSelected((string)$idx === (string)$selected)
         ->addSigil('dashboard-tab-panel-tab')
         ->setMetadata(array('panelKey' => $idx))
         ->setName($name);
@@ -290,6 +290,26 @@ final class PhabricatorDashboardTabsPanelType
         $list,
         $content,
       ));
+  }
+
+  public function getSubpanelPHIDs(PhabricatorDashboardPanel $panel) {
+    $config = $this->getPanelConfiguration($panel);
+
+    $panel_ids = array();
+    foreach ($config as $tab_key => $tab_spec) {
+      $panel_ids[] = $tab_spec['panelID'];
+    }
+
+    if ($panel_ids) {
+      $panels = id(new PhabricatorDashboardPanelQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withIDs($panel_ids)
+        ->execute();
+    } else {
+      $panels = array();
+    }
+
+    return mpull($panels, 'getPHID');
   }
 
 }

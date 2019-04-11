@@ -10,7 +10,8 @@ final class PhabricatorDashboardPanel
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorNgramsInterface {
+    PhabricatorNgramsInterface,
+    PhabricatorDashboardPanelContainerInterface {
 
   protected $name;
   protected $panelType;
@@ -163,6 +164,12 @@ final class PhabricatorDashboardPanel
       id(new PhabricatorDashboardPanelNgrams())
         ->setValue($this->getName()),
     );
+  }
+
+/* -(  PhabricatorDashboardPanelContainerInterface  )------------------------ */
+
+  public function getDashboardPanelContainerPanelPHIDs() {
+    return $this->requireImplementation()->getSubpanelPHIDs($this);
   }
 
 }

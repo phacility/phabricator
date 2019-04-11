@@ -172,6 +172,8 @@ final class PhabricatorDashboardViewController
     }
 
     $usage_table = id(new AphrontTableView($rows))
+      ->setNoDataString(
+        pht('This dashboard has not been added to any menus.'))
       ->setHeaders(
         array(
           null,

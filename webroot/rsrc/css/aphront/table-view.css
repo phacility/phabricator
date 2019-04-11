@@ -160,6 +160,9 @@ th.aphront-table-view-sortable-selected {
   vertical-align: top;
 }
 
+/* Apply this rule to both "<th />" and "<td />" so that the header widths
+   are correct if the table has no rows. */
+.aphront-table-view th.wide,
 .aphront-table-view td.wide {
   white-space: normal;
   width: 100%;

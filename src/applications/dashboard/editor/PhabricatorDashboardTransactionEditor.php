@@ -178,5 +178,8 @@ final class PhabricatorDashboardTransactionEditor
     return $errors;
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
 
 }

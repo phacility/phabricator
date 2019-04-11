@@ -21,4 +21,8 @@ final class PhabricatorDashboardPanelTransactionEditor
     return $types;
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

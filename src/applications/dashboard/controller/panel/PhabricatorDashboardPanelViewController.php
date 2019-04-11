@@ -35,6 +35,8 @@ final class PhabricatorDashboardPanelViewController
     $header = $this->buildHeaderView($panel);
     $curtain = $this->buildCurtainView($panel);
 
+    $usage_box = $this->newUsageView($panel);
+
     $timeline = $this->buildTransactionTimeline(
       $panel,
       new PhabricatorDashboardPanelTransactionQuery());
@@ -57,6 +59,7 @@ final class PhabricatorDashboardPanelViewController
       ->setCurtain($curtain)
       ->setMainColumn(array(
         $rendered_panel,
+        $usage_box,
         $timeline,
       ));
 
@@ -122,4 +125,51 @@ final class PhabricatorDashboardPanelViewController
     return $curtain;
   }
 
+  private function newUsageView(PhabricatorDashboardPanel $panel) {
+    $viewer = $this->getViewer();
+
+    $object_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $panel->getPHID(),
+      PhabricatorDashboardPanelUsedByObjectEdgeType::EDGECONST);
+
+    if ($object_phids) {
+      $handles = $viewer->loadHandles($object_phids);
+    } else {
+      $handles = array();
+    }
+
+    $rows = array();
+    foreach ($object_phids as $object_phid) {
+      $handle = $handles[$object_phid];
+
+      $icon = $handle->getIcon();
+
+      $rows[] = array(
+        id(new PHUIIconView())->setIcon($icon),
+        $handle->getTypeName(),
+        $handle->renderLink(),
+      );
+    }
+
+    $usage_table = id(new AphrontTableView($rows))
+      ->setNoDataString(
+        pht(
+          'This panel is not used on any dashboard or inside any other '.
+          'panel container.'))
+      ->setColumnClasses(
+        array(
+          'center',
+          '',
+          'pri wide',
+        ));
+
+    $header_view = id(new PHUIHeaderView())
+      ->setHeader(pht('Panel Used By'));
+
+    $usage_box = id(new PHUIObjectBoxView())
+      ->setTable($usage_table)
+      ->setHeader($header_view);
+
+    return $usage_box;
+  }
 }

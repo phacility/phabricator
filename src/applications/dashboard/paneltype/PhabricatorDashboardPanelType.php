@@ -59,4 +59,8 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
   abstract protected function newEditEngineFields(
     PhabricatorDashboardPanel $panel);
 
+  public function getSubpanelPHIDs(PhabricatorDashboardPanel $panel) {
+    return array();
+  }
+
 }
