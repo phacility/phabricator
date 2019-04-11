@@ -85,13 +85,13 @@ final class PhabricatorAuthenticationConfigOptions
             'configuration from the CLI before it can be edited.'))
         ->setDescription(
           pht(
-            'Normally, administrators configure authentication providers only '.
-            'once, immediately after instance creation. To further secure '.
-            'your instance, you can set this configuration option to `true`, '.
-            'which will require an adminstrator with CLI access to run '.
-            '`bin/auth unlock` to make any later changes to authentication '.
-            "provider configuration.\n\nAfter changing the config, you should ".
-            'run `bin/auth lock` again from the CLI.'))
+            'When set to `true`, the authentication provider configuration '.
+            'for this instance can not be modified without first running '.
+            '`bin/auth unlock` from the command line. This is to reduce '.
+            'the security impact of a compromised administrator account. '.
+            "\n\n".
+            'After running `bin/auth unlock` and making your changes to the '.
+            'authentication provider config, you should run `bin/auth lock`.'))
         ->setLocked(true),
       $this->newOption('account.editable', 'bool', true)
         ->setBoolOptions(
