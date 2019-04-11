@@ -107,33 +107,6 @@ final class PhabricatorDashboardLayoutConfig extends Phobject {
     return $class;
   }
 
-  public function isMultiColumnLayout() {
-    return $this->getLayoutMode() != self::MODE_FULL;
-  }
-
-  public function getColumnSelectOptions() {
-    $options = array();
-
-    switch ($this->getLayoutMode()) {
-      case self::MODE_HALF_AND_HALF:
-      case self::MODE_THIRD_AND_THIRDS:
-      case self::MODE_THIRDS_AND_THIRD:
-        return array(
-          0 => pht('Left'),
-          1 => pht('Right'),
-        );
-        break;
-      case self::MODE_FULL:
-        throw new Exception(pht('There is only one column in mode full.'));
-        break;
-      default:
-        throw new Exception(pht('Unknown layout mode!'));
-        break;
-    }
-
-    return $options;
-  }
-
   public static function getLayoutModeSelectOptions() {
     return array(
       self::MODE_FULL             => pht('One full-width column'),

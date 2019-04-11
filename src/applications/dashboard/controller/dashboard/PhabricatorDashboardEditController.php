@@ -54,7 +54,7 @@ final class PhabricatorDashboardEditController
 
     $v_name = $dashboard->getName();
     $v_icon = $dashboard->getIcon();
-    $v_layout_mode = $dashboard->getLayoutConfigObject()->getLayoutMode();
+    $v_layout_mode = $dashboard->getRawLayoutMode();
     $e_name = true;
 
     $validation_exception = null;
@@ -68,9 +68,10 @@ final class PhabricatorDashboardEditController
 
       $xactions = array();
 
-      $type_name = PhabricatorDashboardTransaction::TYPE_NAME;
-      $type_icon = PhabricatorDashboardTransaction::TYPE_ICON;
-      $type_layout_mode = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
+      $type_name = PhabricatorDashboardNameTransaction::TRANSACTIONTYPE;
+      $type_icon = PhabricatorDashboardIconTransaction::TRANSACTIONTYPE;
+      $type_layout_mode =
+        PhabricatorDashboardLayoutTransaction::TRANSACTIONTYPE;
       $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -182,33 +183,6 @@ final class PhabricatorDashboardEditController
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild($view);
-  }
-
-  private function newPanel(
-    AphrontRequest $request,
-    PhabricatorUser $viewer,
-    $type,
-    $name,
-    array $properties) {
-
-    $panel = PhabricatorDashboardPanel::initializeNewPanel($viewer)
-      ->setPanelType($type)
-      ->setProperties($properties);
-
-    $xactions = array();
-
-    $xactions[] = id(new PhabricatorDashboardPanelTransaction())
-      ->setTransactionType(
-        PhabricatorDashboardPanelNameTransaction::TRANSACTIONTYPE)
-      ->setNewValue($name);
-
-    $editor = id(new PhabricatorDashboardPanelTransactionEditor())
-      ->setActor($viewer)
-      ->setContinueOnNoEffect(true)
-      ->setContentSourceFromRequest($request)
-      ->applyTransactions($panel, $xactions);
-
-    return $panel;
   }
 
 }

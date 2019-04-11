@@ -32,7 +32,8 @@ final class PhabricatorDashboardArchiveController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorDashboardTransaction())
-        ->setTransactionType(PhabricatorDashboardTransaction::TYPE_STATUS)
+        ->setTransactionType(
+          PhabricatorDashboardStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PhabricatorDashboardTransactionEditor())

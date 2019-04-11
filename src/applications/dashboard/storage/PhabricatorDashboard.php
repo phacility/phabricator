@@ -68,6 +68,27 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       PhabricatorDashboardDashboardPHIDType::TYPECONST);
   }
 
+  public function getRawLayoutMode() {
+    $config = $this->getRawLayoutConfig();
+    return idx($config, 'layoutMode');
+  }
+
+  public function setRawLayoutMode($mode) {
+    $config = $this->getRawLayoutConfig();
+    $config['layoutMode'] = $mode;
+    return $this->setLayoutConfig($config);
+  }
+
+  private function getRawLayoutConfig() {
+    $config = $this->getLayoutConfig();
+
+    if (!is_array($config)) {
+      $config = array();
+    }
+
+    return $config;
+  }
+
   public function getLayoutConfigObject() {
     return PhabricatorDashboardLayoutConfig::newFromDictionary(
       $this->getLayoutConfig());
