@@ -15,6 +15,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   private $dashboardID;
   private $movable = true;
   private $panelHandle;
+  private $editMode;
 
   public function setDashboardID($id) {
     $this->dashboardID = $id;
@@ -44,7 +45,12 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   }
 
   public function isEditMode() {
-    return ($this->getHeaderMode() === self::HEADER_MODE_EDIT);
+    return $this->editMode;
+  }
+
+  public function setEditMode($mode) {
+    $this->editMode = $mode;
+    return $this;
   }
 
   /**

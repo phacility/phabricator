@@ -76,6 +76,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
           ->setPanelPHID($panel_phid)
           ->setParentPanelPHIDs(array())
           ->setHeaderMode($h_mode)
+          ->setEditMode($is_editable)
           ->setPanelHandle($handles[$panel_phid]);
 
         $panel = idx($panels, $panel_phid);

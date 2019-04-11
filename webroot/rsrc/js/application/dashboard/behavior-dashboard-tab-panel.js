@@ -8,6 +8,14 @@
 JX.behavior('dashboard-tab-panel', function() {
 
   JX.Stratcom.listen('click', 'dashboard-tab-panel-tab', function(e) {
+    // On dashboard panels in edit mode, the user may click the dropdown caret
+    // within a tab to open the context menu. If they do, this click should
+    // just open the menu, not select the tab. For now, pass the event here
+    // to let the menu handler act on it.
+    if (JX.Stratcom.pass(e)) {
+      return;
+    }
+
     e.kill();
 
     var ii;

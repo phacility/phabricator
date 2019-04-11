@@ -35,7 +35,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $actionIconHref;
   private $count;
   private $rel;
-  private $hasDropdown;
+  private $dropdownMenu;
 
   public function setOpenInNewWindow($open_in_new_window) {
     $this->openInNewWindow = $open_in_new_window;
@@ -65,11 +65,19 @@ final class PHUIListItemView extends AphrontTagView {
   }
 
   public function setDropdownMenu(PhabricatorActionListView $actions) {
-    Javelin::initBehavior('phui-dropdown-menu');
 
-    $this->addSigil('phui-dropdown-menu');
-    $this->setMetadata($actions->getDropdownMenuMetadata());
-    $this->hasDropdown = true;
+    $this->dropdownMenu = $actions;
+
+    // TODO: "PHUICrumbsView" currently creates a bad copy of list items
+    // by reading some of their properties. To survive this copy step, we
+    // need to mutate "$this" immediately or the "Create Object" dropdown
+    // when multiple create forms exist breaks.
+
+    if (!$this->actionIcon) {
+      Javelin::initBehavior('phui-dropdown-menu');
+      $this->addSigil('phui-dropdown-menu');
+      $this->setMetadata($actions->getDropdownMenuMetadata());
+    }
 
     return $this;
   }
@@ -237,12 +245,19 @@ final class PHUIListItemView extends AphrontTagView {
       $classes[] = 'phui-list-item-has-action-icon';
     }
 
-    if ($this->hasDropdown) {
+    if ($this->dropdownMenu) {
       $classes[] = 'dropdown';
+      if (!$this->actionIcon) {
+        throw new Exception(
+          pht(
+            'List item views can not currently render a dropdown without '.
+            'an action icon, because no application uses one. Clean up '.
+            'PHUICrumbsView, then add this capability.'));
+      }
     }
 
     return array(
-      'class' => implode(' ', $classes),
+      'class' => $classes,
     );
   }
 
@@ -345,19 +360,7 @@ final class PHUIListItemView extends AphrontTagView {
       $classes[] = 'phui-list-item-indented';
     }
 
-    $action_link = null;
-    if ($this->actionIcon) {
-      $action_icon = id(new PHUIIconView())
-        ->setIcon($this->actionIcon)
-        ->addClass('phui-list-item-action-icon');
-      $action_link = phutil_tag(
-        'a',
-        array(
-          'href' => $this->actionIconHref,
-          'class' => 'phui-list-item-action-href',
-        ),
-        $action_icon);
-    }
+    $action_link = $this->newActionIconView();
 
     $count = null;
     if ($this->count) {
@@ -367,12 +370,6 @@ final class PHUIListItemView extends AphrontTagView {
           'class' => 'phui-list-item-count',
         ),
         $this->count);
-    }
-
-    if ($this->hasDropdown) {
-      $caret = phutil_tag('span', array('class' => 'caret'), '');
-    } else {
-      $caret = null;
     }
 
     $icons = $this->getIcons();
@@ -393,11 +390,42 @@ final class PHUIListItemView extends AphrontTagView {
         $icons,
         $this->renderChildren(),
         $name,
-        $caret,
         $count,
       ));
 
     return array($list_item, $action_link);
+  }
+
+  private function newActionIconView() {
+    $action_icon = $this->actionIcon;
+    $action_href = $this->actionIconHref;
+
+    if ($action_icon === null) {
+      return null;
+    }
+
+    $icon_view = id(new PHUIIconView())
+      ->setIcon($action_icon)
+      ->addClass('phui-list-item-action-icon');
+
+    if ($this->dropdownMenu) {
+      Javelin::initBehavior('phui-dropdown-menu');
+      $sigil = 'phui-dropdown-menu';
+      $metadata = $this->dropdownMenu->getDropdownMenuMetadata();
+    } else {
+      $sigil = null;
+      $metadata = null;
+    }
+
+    return javelin_tag(
+      'a',
+      array(
+        'href' => $action_href,
+        'class' => 'phui-list-item-action-href',
+        'sigil' => $sigil,
+        'meta' => $metadata,
+      ),
+      $icon_view);
   }
 
 }

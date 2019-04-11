@@ -166,7 +166,9 @@ final class PhabricatorDashboardTabsPanelType
             ->setHref($details_uri)
             ->setDisabled(!$subpanel));
 
-        $tab_view->setDropdownMenu($dropdown_menu);
+        $tab_view
+          ->setActionIcon('fa-caret-down', '#')
+          ->setDropdownMenu($dropdown_menu);
       }
 
       $list->addMenuItem($tab_view);
@@ -193,8 +195,10 @@ final class PhabricatorDashboardTabsPanelType
       $list->addMenuItem(
         id(new PHUIListItemView())
           ->setHref('#')
+          ->setDisabled(true)
           ->setSelected(false)
-          ->setName(pht('Add Tab...'))
+          ->setName(pht("\xC2\xB7 \xC2\xB7 \xC2\xB7"))
+          ->setActionIcon('fa-caret-down', '#')
           ->setDropdownMenu($actions));
     }
 

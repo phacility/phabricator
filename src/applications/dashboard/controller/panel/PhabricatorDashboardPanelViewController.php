@@ -19,6 +19,11 @@ final class PhabricatorDashboardPanelViewController
       return new Aphront404Response();
     }
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $panel,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $title = $panel->getMonogram().' '.$panel->getName();
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
@@ -29,7 +34,6 @@ final class PhabricatorDashboardPanelViewController
 
     $header = $this->buildHeaderView($panel);
     $curtain = $this->buildCurtainView($panel);
-    $properties = $this->buildPropertyView($panel);
 
     $timeline = $this->buildTransactionTimeline(
       $panel,
@@ -40,6 +44,7 @@ final class PhabricatorDashboardPanelViewController
       ->setPanel($panel)
       ->setPanelPHID($panel->getPHID())
       ->setParentPanelPHIDs(array())
+      ->setEditMode(true)
       ->renderPanel();
 
     $preview = id(new PHUIBoxView())
@@ -50,10 +55,9 @@ final class PhabricatorDashboardPanelViewController
       ->setHeader($header)
       ->setCurtain($curtain)
       ->setMainColumn(array(
-        $properties,
+        $rendered_panel,
         $timeline,
-      ))
-      ->setFooter($rendered_panel);
+      ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -122,53 +126,6 @@ final class PhabricatorDashboardPanelViewController
         ->setWorkflow(true));
 
     return $curtain;
-  }
-
-  private function buildPropertyView(PhabricatorDashboardPanel $panel) {
-    $viewer = $this->getViewer();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer);
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $panel);
-
-    $panel_type = $panel->getImplementation();
-    if ($panel_type) {
-      $type_name = $panel_type->getPanelTypeName();
-    } else {
-      $type_name = phutil_tag(
-        'em',
-        array(),
-        nonempty($panel->getPanelType(), pht('null')));
-    }
-
-    $properties->addProperty(
-      pht('Panel Type'),
-      $type_name);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
-    $dashboard_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $panel->getPHID(),
-      PhabricatorDashboardPanelHasDashboardEdgeType::EDGECONST);
-
-    $does_not_appear = pht(
-      'This panel does not appear on any dashboards.');
-
-    $properties->addProperty(
-      pht('Appears On'),
-      $dashboard_phids
-        ? $viewer->renderHandleList($dashboard_phids)
-        : phutil_tag('em', array(), $does_not_appear));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Details'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($properties);
   }
 
 }

@@ -214,13 +214,26 @@
     color: {$sky};
 }
 
-.phui-list-navbar .phui-list-item-view.dropdown .phui-list-item-href {
-  padding-right: 28px;
+.phui-list-navbar .phui-list-item-href {
+  display: inline-block;
 }
 
-.phui-list-navbar .phui-list-item-view .caret {
-  position: absolute;
-  top: 6px;
-  right: 12px;
-  border-top: 7px solid {$greytext};
+.phui-list-navbar .phui-list-item-disabled .phui-list-item-href {
+  color: {$lightgreytext};
+}
+
+.phui-list-navbar .phui-list-item-action-href {
+  display: inline-block;
+  padding: 8px 16px;
+  line-height: 16px;
+}
+
+.phui-list-navbar .phui-list-item-action-href .phui-icon-view {
+  color: {$darkgreytext};
+}
+
+.device-desktop
+  .phui-list-navbar .phui-list-item-action-href:hover {
+  background-color: rgba({$alphablue}, 0.07);
+  color: {$sky};
 }
