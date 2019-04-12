@@ -611,11 +611,6 @@ ul.phui-oi-list-view .phui-oi-selected
    border-top: none;
  }
 
-.dashboard-pane .phui-oi-empty .phui-info-view {
-  border: none;
-  margin: 0;
-}
-
 .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
  .aphront-multi-column-column-outer.third .phui-oi-col2 {
    display: none;

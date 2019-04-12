@@ -111,6 +111,43 @@ final class PhabricatorDashboardPanelRefList
     return null;
   }
 
+  public function movePanelRef(
+    PhabricatorDashboardPanelRef $target,
+    $column_key,
+    PhabricatorDashboardPanelRef $after = null) {
+
+    $target->setColumnKey($column_key);
+
+    $results = array();
+
+    if (!$after) {
+      $results[] = $target;
+    }
+
+    foreach ($this->refs as $ref) {
+      if ($ref->getPanelKey() === $target->getPanelKey()) {
+        continue;
+      }
+
+      $results[] = $ref;
+
+      if ($after) {
+        if ($ref->getPanelKey() === $after->getPanelKey()) {
+          $results[] = $target;
+        }
+      }
+    }
+
+    $this->refs = $results;
+
+    $column_map = mgroup($results, 'getColumnKey');
+    foreach ($this->columns as $column_key => $column) {
+      $column->setPanelRefs(idx($column_map, $column_key, array()));
+    }
+
+    return $ref;
+  }
+
   private function newPanelKey() {
     return Filesystem::readRandomCharacters(8);
   }

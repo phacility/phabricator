@@ -111,11 +111,16 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     }
 
     if ($is_editable) {
+      $params = array(
+        'contextPHID' => $dashboard->getPHID(),
+      );
+      $move_uri = new PhutilURI('/dashboard/adjust/move/', $params);
+
       Javelin::initBehavior(
         'dashboard-move-panels',
         array(
-          'dashboardID' => $dashboard_id,
-          'moveURI' => '/dashboard/movepanel/'.$dashboard->getID().'/',
+          'dashboardNodeID' => $dashboard_id,
+          'moveURI' => (string)$move_uri,
         ));
     }
 

@@ -280,11 +280,11 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     if ($panel) {
       $box->setMetadata(
         array(
-          'objectPHID' => $panel->getPHID(),
+          'panelKey' => $this->getPanelKey(),
         ));
     }
 
-    return phutil_tag_div('dashboard-pane', $box);
+    return $box;
   }
 
 

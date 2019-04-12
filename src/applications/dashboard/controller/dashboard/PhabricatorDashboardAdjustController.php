@@ -39,8 +39,6 @@ final class PhabricatorDashboardAdjustController
       }
 
       $this->panelKey = $panel_key;
-    } else {
-      $panel_ref = null;
     }
 
     $column_key = $request->getStr('columnKey');
@@ -52,6 +50,15 @@ final class PhabricatorDashboardAdjustController
       $this->columnKey = $column_key;
     }
 
+    $after_ref = null;
+    $after_key = $request->getStr('afterKey');
+    if (strlen($after_key)) {
+      $after_ref = $ref_list->getPanelRef($after_key);
+      if (!$after_ref) {
+        return new Aphront404Response();
+      }
+    }
+
     switch ($request->getURIData('op')) {
       case 'add':
         return $this->handleAddRequest($dashboard, $done_uri);
@@ -60,6 +67,8 @@ final class PhabricatorDashboardAdjustController
           return new Aphront404Response();
         }
         return $this->handleRemoveRequest($dashboard, $panel_ref, $done_uri);
+      case 'move':
+        return $this->handleMoveRequest($dashboard, $panel_ref, $after_ref);
     }
   }
 
@@ -191,6 +200,38 @@ final class PhabricatorDashboardAdjustController
       ->addCancelButton($done_uri)
       ->addSubmitButton(pht('Remove Panel'));
   }
+
+  private function handleMoveRequest(
+    PhabricatorDashboard $dashboard,
+    PhabricatorDashboardPanelRef $panel_ref,
+    PhabricatorDashboardPanelRef $after_ref = null) {
+
+    $request = $this->getRequest();
+    $request->validateCSRF();
+    $viewer = $this->getViewer();
+
+    $xactions = array();
+
+    $ref_list = clone $dashboard->getPanelRefList();
+    $ref_list->movePanelRef($panel_ref, $this->columnKey, $after_ref);
+    $new_panels = $ref_list->toDictionary();
+
+    $xactions[] = $dashboard->getApplicationTransactionTemplate()
+      ->setTransactionType(
+        PhabricatorDashboardPanelsTransaction::TRANSACTIONTYPE)
+      ->setNewValue($new_panels);
+
+    $editor = $dashboard->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $editor->applyTransactions($dashboard, $xactions);
+
+    return id(new AphrontAjaxResponse())->setContent(array());
+  }
+
 
   private function newEditDialog() {
     return $this->newDialog()

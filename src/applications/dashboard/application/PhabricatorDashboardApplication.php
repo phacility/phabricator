@@ -48,8 +48,7 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
           '(?:(?P<modeKey>[^/]+)/)?)?' =>
           'PhabricatorDashboardInstallController',
         'console/' => 'PhabricatorDashboardConsoleController',
-        'movepanel/(?P<id>\d+)/' => 'PhabricatorDashboardMovePanelController',
-        'adjust/(?P<op>remove|add)/'
+        'adjust/(?P<op>remove|add|move)/'
           => 'PhabricatorDashboardAdjustController',
         'panel/' => array(
           'install/(?P<engineKey>[^/]+)/(?:(?P<queryKey>[^/]+)/)?' =>
