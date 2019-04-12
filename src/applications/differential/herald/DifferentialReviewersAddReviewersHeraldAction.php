@@ -29,4 +29,8 @@ final class DifferentialReviewersAddReviewersHeraldAction
     return pht('Add reviewers: %s.', $this->renderHandleList($value));
   }
 
+  public function getPHIDsAffectedByAction(HeraldActionRecord $record) {
+    return $record->getTarget();
+  }
+
 }

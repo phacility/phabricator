@@ -30,4 +30,8 @@ final class DiffusionAuditorsAddAuditorsHeraldAction
     return pht('Add auditors: %s.', $this->renderHandleList($value));
   }
 
+  public function getPHIDsAffectedByAction(HeraldActionRecord $record) {
+    return $record->getTarget();
+  }
+
 }

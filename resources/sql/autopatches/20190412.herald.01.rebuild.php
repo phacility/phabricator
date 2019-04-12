@@ -1,0 +1,3 @@
+<?php
+
+PhabricatorRebuildIndexesWorker::rebuildObjectsWithQuery('HeraldRuleQuery');

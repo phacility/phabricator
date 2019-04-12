@@ -144,6 +144,8 @@ final class PhabricatorOwnersDetailController
     $crumbs->addTextCrumb($package->getMonogram());
     $crumbs->setBorder(true);
 
+    $rules_view = $this->newRulesView($package);
+
     $timeline = $this->buildTransactionTimeline(
       $package,
       new PhabricatorOwnersPackageTransactionQuery());
@@ -154,6 +156,7 @@ final class PhabricatorOwnersDetailController
       ->setCurtain($curtain)
       ->setMainColumn(array(
         $this->renderPathsTable($paths, $repositories),
+        $rules_view,
         $commit_panels,
         $timeline,
       ))
@@ -343,6 +346,57 @@ final class PhabricatorOwnersDetailController
       ->setTable($table);
 
     return $box;
+  }
+
+  private function newRulesView(PhabricatorOwnersPackage $package) {
+    $viewer = $this->getViewer();
+
+    $limit = 10;
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer($viewer)
+      ->withDisabled(false)
+      ->withAffectedObjectPHIDs(array($package->getPHID()))
+      ->needValidateAuthors(true)
+      ->setLimit($limit + 1)
+      ->execute();
+
+    $more_results = (count($rules) > $limit);
+    $rules = array_slice($rules, 0, $limit);
+
+    $list = id(new HeraldRuleListView())
+      ->setViewer($viewer)
+      ->setRules($rules)
+      ->newObjectList();
+
+    $list->setNoDataString(
+      pht(
+        'No active Herald rules add this package as an auditor, reviewer, '.
+        'or subscriber.'));
+
+    $more_href = new PhutilURI(
+      '/herald/',
+      array('affectedPHID' => $package->getPHID()));
+
+    if ($more_results) {
+      $list->newTailButton()
+        ->setHref($more_href);
+    }
+
+    $more_link = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-list-ul')
+      ->setText(pht('View All Rules'))
+      ->setHref($more_href);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Affected By Herald Rules'))
+      ->setHeaderIcon(id(new PhabricatorHeraldApplication())->getIcon())
+      ->addActionLink($more_link);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($list);
   }
 
 }
