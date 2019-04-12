@@ -67,6 +67,8 @@ final class PhabricatorDashboardEditEngine
   }
 
   protected function buildCustomEditFields($object) {
+    $layout_options = PhabricatorDashboardLayoutMode::getLayoutModeMap();
+
     $fields = array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -96,8 +98,7 @@ final class PhabricatorDashboardEditEngine
         ->setConduitTypeDescription(pht('New dashboard layout mode.'))
         ->setTransactionType(
           PhabricatorDashboardLayoutTransaction::TRANSACTIONTYPE)
-        ->setOptions(
-          PhabricatorDashboardLayoutConfig::getLayoutModeSelectOptions())
+        ->setOptions($layout_options)
         ->setValue($object->getRawLayoutMode()),
     );
 

@@ -107,15 +107,6 @@ final class PhabricatorDashboardLayoutConfig extends Phobject {
     return $class;
   }
 
-  public static function getLayoutModeSelectOptions() {
-    return array(
-      self::MODE_FULL             => pht('One full-width column'),
-      self::MODE_HALF_AND_HALF    => pht('Two columns, 1/2 and 1/2'),
-      self::MODE_THIRD_AND_THIRDS => pht('Two columns, 1/3 and 2/3'),
-      self::MODE_THIRDS_AND_THIRD => pht('Two columns, 2/3 and 1/3'),
-    );
-  }
-
   public static function newFromDictionary(array $dict) {
     $layout_config = id(new PhabricatorDashboardLayoutConfig())
       ->setLayoutMode(idx($dict, 'layoutMode', self::MODE_FULL));

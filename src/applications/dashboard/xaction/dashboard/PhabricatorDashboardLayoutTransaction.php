@@ -26,7 +26,7 @@ final class PhabricatorDashboardLayoutTransaction
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
-    $mode_map = PhabricatorDashboardLayoutConfig::getLayoutModeSelectOptions();
+    $mode_map = PhabricatorDashboardLayoutMode::getLayoutModeMap();
 
     $old_value = $object->getRawLayoutMode();
     foreach ($xactions as $xaction) {
