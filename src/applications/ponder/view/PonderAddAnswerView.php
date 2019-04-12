@@ -78,7 +78,7 @@ final class PonderAddAnswerView extends AphrontView {
 
     $box = id(new PHUIObjectBoxView())
       ->appendChild($form)
-      ->setHeaderText('Answer')
+      ->setHeaderText(pht('Answer'))
       ->addClass('ponder-add-answer-view');
 
     if ($info_panel) {
