@@ -9,9 +9,6 @@ final class PhabricatorDashboardQuery
   private $authorPHIDs;
   private $canEdit;
 
-  private $needPanels;
-  private $needProjects;
-
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -29,16 +26,6 @@ final class PhabricatorDashboardQuery
 
   public function withAuthorPHIDs(array $authors) {
     $this->authorPHIDs = $authors;
-    return $this;
-  }
-
-  public function needPanels($need_panels) {
-    $this->needPanels = $need_panels;
-    return $this;
-  }
-
-  public function needProjects($need_projects) {
-    $this->needProjects = $need_projects;
     return $this;
   }
 
@@ -72,58 +59,6 @@ final class PhabricatorDashboardQuery
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
         ->apply($dashboards);
-    }
-
-    if ($this->needPanels) {
-      $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs($phids)
-        ->withEdgeTypes(
-          array(
-            PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST,
-          ));
-      $edge_query->execute();
-
-      $panel_phids = $edge_query->getDestinationPHIDs();
-      if ($panel_phids) {
-        // NOTE: We explicitly disable policy exceptions when loading panels.
-        // If a particular panel is invalid or not visible to the viewer,
-        // we'll still render the dashboard, just not that panel.
-
-        $panels = id(new PhabricatorDashboardPanelQuery())
-          ->setParentQuery($this)
-          ->setRaisePolicyExceptions(false)
-          ->setViewer($this->getViewer())
-          ->withPHIDs($panel_phids)
-          ->execute();
-        $panels = mpull($panels, null, 'getPHID');
-      } else {
-        $panels = array();
-      }
-
-      foreach ($dashboards as $dashboard) {
-        $dashboard_phids = $edge_query->getDestinationPHIDs(
-          array($dashboard->getPHID()));
-        $dashboard_panels = array_select_keys($panels, $dashboard_phids);
-
-        $dashboard->attachPanelPHIDs($dashboard_phids);
-        $dashboard->attachPanels($dashboard_panels);
-      }
-    }
-
-    if ($this->needProjects) {
-      $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs($phids)
-        ->withEdgeTypes(
-          array(
-            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-          ));
-      $edge_query->execute();
-
-      foreach ($dashboards as $dashboard) {
-        $project_phids = $edge_query->getDestinationPHIDs(
-          array($dashboard->getPHID()));
-        $dashboard->attachProjectPHIDs($project_phids);
-      }
     }
 
     return $dashboards;

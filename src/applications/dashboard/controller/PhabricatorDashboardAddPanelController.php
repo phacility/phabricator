@@ -10,7 +10,6 @@ final class PhabricatorDashboardAddPanelController
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needPanels(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

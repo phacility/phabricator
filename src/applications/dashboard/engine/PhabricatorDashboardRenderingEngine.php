@@ -31,19 +31,10 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
   public function renderDashboard() {
     require_celerity_resource('phabricator-dashboard-css');
-    $dashboard = $this->dashboard;
-    $viewer = $this->viewer;
+    $dashboard = $this->getDashboard();
+    $viewer = $this->getViewer();
 
     $is_editable = $this->arrangeMode;
-
-    $layout_config = $dashboard->getLayoutConfigObject();
-    $panel_grid_locations = $layout_config->getPanelLocations();
-    $panels = mpull($dashboard->getPanels(), null, 'getPHID');
-    $dashboard_id = celerity_generate_unique_node_id();
-    $result = id(new AphrontMultiColumnView())
-      ->setID($dashboard_id)
-      ->setFluidLayout(true)
-      ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
 
     if ($is_editable) {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_EDIT;
@@ -51,24 +42,35 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NORMAL;
     }
 
-    $panel_phids = array();
-    foreach ($panel_grid_locations as $panel_column_locations) {
-      foreach ($panel_column_locations as $panel_phid) {
-        $panel_phids[] = $panel_phid;
-      }
+    $panel_phids = $dashboard->getPanelPHIDs();
+    if ($panel_phids) {
+      $panels = id(new PhabricatorDashboardPanelQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($panel_phids)
+        ->execute();
+      $panels = mpull($panels, null, 'getPHID');
+
+      $handles = $viewer->loadHandles($panel_phids);
+    } else {
+      $panels = array();
+      $handles = array();
     }
-    $handles = $viewer->loadHandles($panel_phids);
 
-    foreach ($panel_grid_locations as $column => $panel_column_locations) {
-      $panel_phids = $panel_column_locations;
+    $ref_list = $dashboard->getPanelRefList();
+    $columns = $ref_list->getColumns();
 
-      // TODO: This list may contain duplicates when the dashboard itself
-      // does not? Perhaps this is related to T10612. For now, just unique
-      // the list before moving on.
-      $panel_phids = array_unique($panel_phids);
+    $dashboard_id = celerity_generate_unique_node_id();
 
-      $column_result = array();
-      foreach ($panel_phids as $panel_phid) {
+    $result = id(new AphrontMultiColumnView())
+      ->setID($dashboard_id)
+      ->setFluidLayout(true)
+      ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
+
+    foreach ($columns as $column) {
+      $column_views = array();
+      foreach ($column->getPanelRefs() as $panel_ref) {
+        $panel_phid = $panel_ref->getPanelPHID();
+
         $panel_engine = id(new PhabricatorDashboardPanelRenderingEngine())
           ->setViewer($viewer)
           ->setDashboardID($dashboard->getID())
@@ -85,18 +87,19 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
           $panel_engine->setPanel($panel);
         }
 
-        $column_result[] = $panel_engine->renderPanel();
+        $column_views[] = $panel_engine->renderPanel();
       }
-      $column_class = $layout_config->getColumnClass(
-        $column,
-        $is_editable);
+
+      $column_classes = $column->getClasses();
+
       if ($is_editable) {
-        $column_result[] = $this->renderAddPanelPlaceHolder($column);
-        $column_result[] = $this->renderAddPanelUI($column);
+        $column_views[] = $this->renderAddPanelPlaceHolder();
+        $column_views[] = $this->renderAddPanelUI($column->getColumnKey());
       }
+
       $result->addColumn(
-        $column_result,
-        $column_class,
+        $column_views,
+        implode(' ', $column_classes),
         $sigil = 'dashboard-column',
         $metadata = array('columnID' => $column));
     }
@@ -120,10 +123,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     return $view;
   }
 
-  private function renderAddPanelPlaceHolder($column) {
-    $dashboard = $this->dashboard;
-    $panels = $dashboard->getPanels();
-
+  private function renderAddPanelPlaceHolder() {
     return javelin_tag(
       'span',
       array(

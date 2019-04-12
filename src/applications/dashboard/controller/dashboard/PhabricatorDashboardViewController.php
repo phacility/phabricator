@@ -14,7 +14,6 @@ final class PhabricatorDashboardViewController
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needPanels(true)
       ->executeOne();
     if (!$dashboard) {
       return new Aphront404Response();

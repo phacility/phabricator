@@ -12,8 +12,7 @@ final class PhabricatorDashboardSearchEngine
   }
 
   public function newQuery() {
-    return id(new PhabricatorDashboardQuery())
-      ->needPanels(true);
+    return id(new PhabricatorDashboardQuery());
   }
 
   public function canUseInPanelContext() {
@@ -137,16 +136,6 @@ final class PhabricatorDashboardSearchEngine
       if ($dashboard->isArchived()) {
         $item->setDisabled(true);
         $bg_color = 'bg-grey';
-      }
-
-      $panels = $dashboard->getPanels();
-      foreach ($panels as $panel) {
-        $item->addAttribute($panel->getName());
-      }
-
-      if (empty($panels)) {
-        $empty = phutil_tag('em', array(), pht('No panels.'));
-        $item->addAttribute($empty);
       }
 
       $icon = id(new PHUIIconView())

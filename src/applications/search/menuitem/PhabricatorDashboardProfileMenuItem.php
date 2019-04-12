@@ -54,7 +54,6 @@ final class PhabricatorDashboardProfileMenuItem
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($dashboard_phid))
-      ->needPanels(true)
       ->executeOne();
     if (!$dashboard) {
       return $this->newEmptyView(

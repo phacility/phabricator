@@ -15,7 +15,6 @@ final class PhabricatorDashboardMovePanelController
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needPanels(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

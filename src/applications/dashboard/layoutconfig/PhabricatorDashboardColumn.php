@@ -5,6 +5,7 @@ final class PhabricatorDashboardColumn
 
   private $columnKey;
   private $classes = array();
+  private $refs = array();
 
   public function setColumnKey($column_key) {
     $this->columnKey = $column_key;
@@ -22,6 +23,15 @@ final class PhabricatorDashboardColumn
 
   public function getClasses() {
     return $this->classes;
+  }
+
+  public function addPanelRef(PhabricatorDashboardPanelRef $ref) {
+    $this->refs[] = $ref;
+    return $this;
+  }
+
+  public function getPanelRefs() {
+    return $this->refs;
   }
 
 }

@@ -47,17 +47,6 @@ final class PhabricatorDashboardRemovePanelController
 
     if ($request->isFormPost()) {
       $xactions = array();
-      $xactions[] = id(new PhabricatorDashboardTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue(
-          'edge:type',
-          PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST)
-          ->setNewValue(
-            array(
-              '-' => array(
-                $v_panel => $v_panel,
-              ),
-            ));
 
       $layout_config->removePanel($v_panel);
       $dashboard->setLayoutConfigFromObject($layout_config);

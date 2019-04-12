@@ -24,10 +24,10 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';
 
-  private $panelPHIDs = self::ATTACHABLE;
   private $panels = self::ATTACHABLE;
   private $edgeProjectPHIDs = self::ATTACHABLE;
 
+  private $panelRefList;
 
   public static function initializeNewDashboard(PhabricatorUser $actor) {
     return id(new PhabricatorDashboard())
@@ -37,8 +37,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       ->setEditPolicy($actor->getPHID())
       ->setStatus(self::STATUS_ACTIVE)
       ->setAuthorPHID($actor->getPHID())
-      ->attachPanels(array())
-      ->attachPanelPHIDs(array());
+      ->attachPanels(array());
   }
 
   public static function getStatusNameMap() {
@@ -76,6 +75,10 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   public function setRawLayoutMode($mode) {
     $config = $this->getRawLayoutConfig();
     $config['layoutMode'] = $mode;
+
+    // If a cached panel ref list exists, clear it.
+    $this->panelRefList = null;
+
     return $this->setLayoutConfig($config);
   }
 
@@ -89,53 +92,6 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return $config;
   }
 
-  public function getLayoutConfigObject() {
-    return PhabricatorDashboardLayoutConfig::newFromDictionary(
-      $this->getLayoutConfig());
-  }
-
-  public function setLayoutConfigFromObject(
-    PhabricatorDashboardLayoutConfig $object) {
-
-    $this->setLayoutConfig($object->toDictionary());
-
-    // See PHI385. Dashboard panel mutations rely on changes to the Dashboard
-    // object persisting when transactions are applied, but this assumption is
-    // no longer valid after T13054. For now, just save the dashboard
-    // explicitly.
-    $this->save();
-
-    return $this;
-  }
-
-  public function getProjectPHIDs() {
-    return $this->assertAttached($this->edgeProjectPHIDs);
-  }
-
-  public function attachProjectPHIDs(array $phids) {
-    $this->edgeProjectPHIDs = $phids;
-    return $this;
-  }
-
-  public function attachPanelPHIDs(array $phids) {
-    $this->panelPHIDs = $phids;
-    return $this;
-  }
-
-  public function getPanelPHIDs() {
-    return $this->assertAttached($this->panelPHIDs);
-  }
-
-  public function attachPanels(array $panels) {
-    assert_instances_of($panels, 'PhabricatorDashboardPanel');
-    $this->panels = $panels;
-    return $this;
-  }
-
-  public function getPanels() {
-    return $this->assertAttached($this->panels);
-  }
-
   public function isArchived() {
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
@@ -146,6 +102,24 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
 
   public function getObjectName() {
     return pht('Dashboard %d', $this->getID());
+  }
+
+  public function getPanelRefList() {
+    if (!$this->panelRefList) {
+      $this->panelRefList = $this->newPanelRefList();
+    }
+    return $this->panelRefList;
+  }
+
+  private function newPanelRefList() {
+    $raw_config = $this->getLayoutConfig();
+    return PhabricatorDashboardPanelRefList::newFromDictionary($raw_config);
+  }
+
+  public function getPanelPHIDs() {
+    $ref_list = $this->getPanelRefList();
+    $phids = mpull($ref_list->getPanelRefs(), 'getPanelPHID');
+    return array_unique($phids);
   }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
@@ -216,9 +190,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
 /* -(  PhabricatorDashboardPanelContainerInterface  )------------------------ */
 
   public function getDashboardPanelContainerPanelPHIDs() {
-    return PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getPHID(),
-      PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST);
+    return $this->getPanelPHIDs();
   }
 
 }

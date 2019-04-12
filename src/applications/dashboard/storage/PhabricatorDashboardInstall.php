@@ -43,7 +43,6 @@ final class PhabricatorDashboardInstall
       $dashboard = id(new PhabricatorDashboardQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($dashboard_install->getDashboardPHID()))
-        ->needPanels(true)
         ->executeOne();
     }
 
