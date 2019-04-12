@@ -36,6 +36,7 @@ final class PhabricatorDashboardPanelRenderController
       ->setPanel($panel)
       ->setPanelPHID($panel->getPHID())
       ->setParentPanelPHIDs($parent_phids)
+      ->setMovable($request->getBool('movable'))
       ->setHeaderMode($request->getStr('headerMode'))
       ->setPanelKey($request->getStr('panelKey'));
 

@@ -40,6 +40,7 @@ final class PhabricatorDashboardPanelViewController
     $timeline = $this->buildTransactionTimeline(
       $panel,
       new PhabricatorDashboardPanelTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)

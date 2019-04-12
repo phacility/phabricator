@@ -245,19 +245,22 @@ final class PHUIListItemView extends AphrontTagView {
       $classes[] = 'phui-list-item-has-action-icon';
     }
 
+    $sigil = null;
+    $metadata = null;
     if ($this->dropdownMenu) {
       $classes[] = 'dropdown';
       if (!$this->actionIcon) {
-        throw new Exception(
-          pht(
-            'List item views can not currently render a dropdown without '.
-            'an action icon, because no application uses one. Clean up '.
-            'PHUICrumbsView, then add this capability.'));
+        $classes[] = 'dropdown-with-caret';
+        Javelin::initBehavior('phui-dropdown-menu');
+        $sigil = 'phui-dropdown-menu';
+        $metadata = $this->dropdownMenu->getDropdownMenuMetadata();
       }
     }
 
     return array(
       'class' => $classes,
+      'sigil' => $sigil,
+      'meta' => $metadata,
     );
   }
 
@@ -372,6 +375,12 @@ final class PHUIListItemView extends AphrontTagView {
         $this->count);
     }
 
+    $caret = null;
+    if ($this->dropdownMenu && !$this->actionIcon) {
+      $caret = id(new PHUIIconView())
+        ->setIcon('fa-caret-down');
+    }
+
     $icons = $this->getIcons();
 
     $list_item = javelin_tag(
@@ -391,6 +400,7 @@ final class PHUIListItemView extends AphrontTagView {
         $this->renderChildren(),
         $name,
         $count,
+        $caret,
       ));
 
     return array($list_item, $action_link);

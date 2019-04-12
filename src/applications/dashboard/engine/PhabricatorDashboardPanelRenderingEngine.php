@@ -12,7 +12,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   private $enableAsyncRendering;
   private $parentPanelPHIDs;
   private $headerMode = self::HEADER_MODE_NORMAL;
-  private $movable = true;
+  private $movable;
   private $panelHandle;
   private $editMode;
   private $contextObject;
@@ -195,6 +195,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         'headerMode' => $this->getHeaderMode(),
         'contextPHID' => $context_phid,
         'panelKey' => $this->getPanelKey(),
+        'movable' => $this->getMovable(),
         'uri' => '/dashboard/panel/render/'.$panel->getID().'/',
       ));
 

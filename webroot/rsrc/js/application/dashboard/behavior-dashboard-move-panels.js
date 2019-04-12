@@ -17,7 +17,7 @@ JX.behavior('dashboard-move-panels', function(config) {
   }
 
   function markcolempty(col, toggle) {
-    JX.DOM.alterClass(col, 'dashboard-column-empty', toggle);
+    JX.DOM.alterClass(col.parentNode, 'dashboard-column-empty', toggle);
   }
 
   function onupdate(col) {

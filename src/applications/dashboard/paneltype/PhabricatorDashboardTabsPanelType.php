@@ -200,10 +200,8 @@ final class PhabricatorDashboardTabsPanelType
       $list->addMenuItem(
         id(new PHUIListItemView())
           ->setHref('#')
-          ->setDisabled(true)
           ->setSelected(false)
-          ->setName(pht("\xC2\xB7 \xC2\xB7 \xC2\xB7"))
-          ->setActionIcon('fa-caret-down', '#')
+          ->setName(pht('Add Tab...'))
           ->setDropdownMenu($actions));
     }
 
@@ -232,7 +230,6 @@ final class PhabricatorDashboardTabsPanelType
           ->setPanel($subpanel)
           ->setPanelPHID($subpanel->getPHID())
           ->setHeaderMode($no_headers)
-          ->setMovable(false)
           ->renderPanel();
       } else {
         $panel_content = pht('(Invalid Panel)');
@@ -257,7 +254,7 @@ final class PhabricatorDashboardTabsPanelType
     if (!$content) {
       if ($is_edit) {
         $message = pht(
-          'This tab panel does not have any tabs yet. Use "Add Tab" to '.
+          'This tab panel does not have any tabs yet. Use "Add Tab..." to '.
           'create or place a tab.');
       } else {
         $message = pht(

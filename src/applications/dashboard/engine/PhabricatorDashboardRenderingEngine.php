@@ -80,6 +80,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
           ->setParentPanelPHIDs(array())
           ->setHeaderMode($h_mode)
           ->setEditMode($is_editable)
+          ->setMovable(true)
           ->setPanelHandle($handles[$panel_phid]);
 
         $panel = idx($panels, $panel_phid);
@@ -92,9 +93,10 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
       $column_classes = $column->getClasses();
 
+      $column_tail = array();
       if ($is_editable) {
-        $column_views[] = $this->renderAddPanelPlaceHolder();
-        $column_views[] = $this->renderAddPanelUI($column);
+        $column_tail[] = $this->renderAddPanelPlaceHolder();
+        $column_tail[] = $this->renderAddPanelUI($column);
       }
 
       $sigil = 'dashboard-column';
@@ -103,11 +105,20 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
         'columnKey' => $column->getColumnKey(),
       );
 
+      $column_view = javelin_tag(
+        'div',
+        array(
+          'sigil' => $sigil,
+          'meta' => $metadata,
+        ),
+        $column_views);
+
       $result->addColumn(
-        $column_views,
-        implode(' ', $column_classes),
-        $sigil,
-        $metadata);
+        array(
+          $column_view,
+          $column_tail,
+        ),
+        implode(' ', $column_classes));
     }
 
     if ($is_editable) {
@@ -159,6 +170,8 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref($create_uri)
+      ->setIcon('fa-plus')
+      ->setColor(PHUIButtonView::GREY)
       ->setWorkflow(true)
       ->setText(pht('Create Panel'))
       ->addClass(PHUI::MARGIN_MEDIUM);
@@ -166,6 +179,8 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $add_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref($add_uri)
+      ->setIcon('fa-window-maximize')
+      ->setColor(PHUIButtonView::GREY)
       ->setWorkflow(true)
       ->setText(pht('Add Existing Panel'))
       ->addClass(PHUI::MARGIN_MEDIUM);

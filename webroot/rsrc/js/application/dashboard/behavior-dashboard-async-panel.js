@@ -13,6 +13,7 @@ JX.behavior('dashboard-async-panel', function(config) {
     parentPanelPHIDs: config.parentPanelPHIDs.join(','),
     headerMode: config.headerMode,
     contextPHID: config.contextPHID,
+    movable: config.movable,
     panelKey: config.panelKey
   };
 
