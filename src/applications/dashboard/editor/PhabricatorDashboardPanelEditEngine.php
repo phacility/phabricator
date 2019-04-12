@@ -6,8 +6,8 @@ final class PhabricatorDashboardPanelEditEngine
   const ENGINECONST = 'dashboard.panel';
 
   private $panelType;
-  private $dashboard;
-  private $columnID;
+  private $contextObject;
+  private $columnKey;
 
   public function setPanelType($panel_type) {
     $this->panelType = $panel_type;
@@ -18,22 +18,22 @@ final class PhabricatorDashboardPanelEditEngine
     return $this->panelType;
   }
 
-  public function setDashboard(PhabricatorDashboard $dashboard) {
-    $this->dashboard = $dashboard;
+  public function setContextObject($context) {
+    $this->contextObject = $context;
     return $this;
   }
 
-  public function getDashboard() {
-    return $this->dashboard;
+  public function getContextObject() {
+    return $this->contextObject;
   }
 
-  public function setColumnID($column_id) {
-    $this->columnID = $column_id;
+  public function setColumnKey($column_key) {
+    $this->columnKey = $column_key;
     return $this;
   }
 
-  public function getColumnID() {
-    return $this->columnID;
+  public function getColumnKey() {
+    return $this->columnKey;
   }
 
   public function isEngineConfigurable() {
@@ -84,27 +84,27 @@ final class PhabricatorDashboardPanelEditEngine
   }
 
   protected function getObjectCreateCancelURI($object) {
-    $dashboard = $this->getDashboard();
-    if ($dashboard) {
-      return $dashboard->getURI();
+    $context = $this->getContextObject();
+    if ($context) {
+      return $context->getURI();
     }
 
     return parent::getObjectCreateCancelURI($object);
   }
 
   public function getEffectiveObjectEditDoneURI($object) {
-    $dashboard = $this->getDashboard();
-    if ($dashboard) {
-      return $dashboard->getURI();
+    $context = $this->getContextObject();
+    if ($context) {
+      return $context->getURI();
     }
 
     return parent::getEffectiveObjectEditDoneURI($object);
   }
 
   protected function getObjectEditCancelURI($object) {
-    $dashboard = $this->getDashboard();
-    if ($dashboard) {
-      return $dashboard->getURI();
+    $context = $this->getContextObject();
+    if ($context) {
+      return $context->getURI();
     }
 
     return parent::getObjectEditCancelURI($object);
@@ -131,18 +131,34 @@ final class PhabricatorDashboardPanelEditEngine
   }
 
   protected function didApplyTransactions($object, array $xactions) {
-    $dashboard = $this->getDashboard();
-    if ($dashboard) {
+    $context = $this->getContextObject();
+
+    if ($context instanceof PhabricatorDashboard) {
       $viewer = $this->getViewer();
       $controller = $this->getController();
       $request = $controller->getRequest();
 
-      PhabricatorDashboardTransactionEditor::addPanelToDashboard(
-        $viewer,
-        PhabricatorContentSource::newFromRequest($request),
-        $object,
-        $dashboard,
-        (int)$this->getColumnID());
+      $dashboard = $context;
+
+      $xactions = array();
+
+      $ref_list = clone $dashboard->getPanelRefList();
+
+      $ref_list->newPanelRef($object, $this->getColumnKey());
+      $new_panels = $ref_list->toDictionary();
+
+      $xactions[] = $dashboard->getApplicationTransactionTemplate()
+        ->setTransactionType(
+          PhabricatorDashboardPanelsTransaction::TRANSACTIONTYPE)
+        ->setNewValue($new_panels);
+
+      $editor = $dashboard->getApplicationTransactionEditor()
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
+
+      $editor->applyTransactions($dashboard, $xactions);
     }
   }
 

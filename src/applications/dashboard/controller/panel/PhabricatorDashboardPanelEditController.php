@@ -9,37 +9,43 @@ final class PhabricatorDashboardPanelEditController
     $engine = id(new PhabricatorDashboardPanelEditEngine())
       ->setController($this);
 
-    // We can create or edit a panel in the context of a dashboard. If we
-    // started on a dashboard, we want to return to that dashboard when we're
-    // done editing.
-    $dashboard_id = $request->getStr('dashboardID');
-    if (strlen($dashboard_id)) {
-      $dashboard = id(new PhabricatorDashboardQuery())
+    // We can create or edit a panel in the context of a dashboard or
+    // container panel, like a tab panel. If we started this flow on some
+    // container object, we want to return to that container when we're done
+    // editing.
+
+    $context_phid = $request->getStr('contextPHID');
+    if (strlen($context_phid)) {
+      $context = id(new PhabricatorObjectQuery())
         ->setViewer($viewer)
-        ->withIDs(array($dashboard_id))
+        ->withPHIDs(array($context_phid))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
-      if (!$dashboard) {
+      if (!$context) {
+        return new Aphront404Response();
+      }
+
+      if (!($context instanceof PhabricatorDashboardPanelContainerInterface)) {
         return new Aphront404Response();
       }
 
       $engine
-        ->setDashboard($dashboard)
-        ->addContextParameter('dashboardID', $dashboard_id);
+        ->setContextObject($context)
+        ->addContextParameter('contextPHID', $context_phid);
     } else {
-      $dashboard = null;
+      $context = null;
     }
 
     $id = $request->getURIData('id');
     if (!$id) {
-      $column_id = $request->getStr('columnID');
+      $column_key = $request->getStr('columnKey');
 
-      if ($dashboard) {
-        $cancel_uri = $dashboard->getURI();
+      if ($context) {
+        $cancel_uri = $context->getURI();
       } else {
         $cancel_uri = $this->getApplicationURI('panel/');
       }
@@ -52,9 +58,9 @@ final class PhabricatorDashboardPanelEditController
 
       $engine
         ->addContextParameter('panelType', $panel_type)
-        ->addContextParameter('columnID', $column_id)
+        ->addContextParameter('columnKey', $column_key)
         ->setPanelType($panel_type)
-        ->setColumnID($column_id);
+        ->setColumnKey($column_key);
     }
 
     return $engine->buildResponse();

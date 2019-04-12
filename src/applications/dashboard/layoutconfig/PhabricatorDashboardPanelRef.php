@@ -34,4 +34,12 @@ final class PhabricatorDashboardPanelRef
     return $this->panelKey;
   }
 
+  public function toDictionary() {
+    return array(
+      'panelKey' => $this->getPanelKey(),
+      'panelPHID' => $this->getPanelPHID(),
+      'columnKey' => $this->getColumnKey(),
+    );
+  }
+
 }

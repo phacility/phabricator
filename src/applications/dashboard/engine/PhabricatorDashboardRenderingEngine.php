@@ -73,9 +73,9 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
         $panel_engine = id(new PhabricatorDashboardPanelRenderingEngine())
           ->setViewer($viewer)
-          ->setDashboardID($dashboard->getID())
           ->setEnableAsyncRendering(true)
           ->setContextObject($dashboard)
+          ->setPanelKey($panel_ref->getPanelKey())
           ->setPanelPHID($panel_phid)
           ->setParentPanelPHIDs(array())
           ->setHeaderMode($h_mode)
@@ -94,14 +94,20 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
       if ($is_editable) {
         $column_views[] = $this->renderAddPanelPlaceHolder();
-        $column_views[] = $this->renderAddPanelUI($column->getColumnKey());
+        $column_views[] = $this->renderAddPanelUI($column);
       }
+
+      $sigil = 'dashboard-column';
+
+      $metadata = array(
+        'columnKey' => $column->getColumnKey(),
+      );
 
       $result->addColumn(
         $column_views,
         implode(' ', $column_classes),
-        $sigil = 'dashboard-column',
-        $metadata = array('columnID' => $column));
+        $sigil,
+        $metadata);
     }
 
     if ($is_editable) {
@@ -133,15 +139,17 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       pht('This column does not have any panels yet.'));
   }
 
-  private function renderAddPanelUI($column) {
-    $dashboard_id = $this->dashboard->getID();
+  private function renderAddPanelUI(PhabricatorDashboardColumn $column) {
+    $dashboard = $this->getDashboard();
+    $column_key = $column->getColumnKey();
 
     $create_uri = id(new PhutilURI('/dashboard/panel/edit/'))
-      ->replaceQueryParam('dashboardID', $dashboard_id)
-      ->replaceQueryParam('columnID', $column);
+      ->replaceQueryParam('contextPHID', $dashboard->getPHID())
+      ->replaceQueryParam('columnKey', $column_key);
 
-    $add_uri = id(new PhutilURI('/dashboard/addpanel/'.$dashboard_id.'/'))
-      ->replaceQueryParam('columnID', $column);
+    $add_uri = id(new PhutilURI('/dashboard/adjust/add/'))
+      ->replaceQueryParam('contextPHID', $dashboard->getPHID())
+      ->replaceQueryParam('columnKey', $column_key);
 
     $create_button = id(new PHUIButtonView())
       ->setTag('a')

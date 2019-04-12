@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
     'core.pkg.css' => '294e365c',
-    'core.pkg.js' => '794952ae',
+    'core.pkg.js' => '69247edd',
     'differential.pkg.css' => '8d8360fb',
     'differential.pkg.js' => '67e02996',
     'diffusion.pkg.css' => '42c75c37',
@@ -371,7 +371,7 @@ return array(
     'rsrc/js/application/conpherence/behavior-toggle-widget.js' => '8f959ad0',
     'rsrc/js/application/countdown/timer.js' => '6a162524',
     'rsrc/js/application/daemon/behavior-bulk-job-reload.js' => '3829a3cf',
-    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => '09ecf50c',
+    'rsrc/js/application/dashboard/behavior-dashboard-async-panel.js' => 'a871fe00',
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => '076bd092',
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '1e413dc9',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '0116d3e8',
@@ -594,7 +594,7 @@ return array(
     'javelin-behavior-conpherence-search' => '91befbcc',
     'javelin-behavior-countdown-timer' => '6a162524',
     'javelin-behavior-dark-console' => 'f39d968b',
-    'javelin-behavior-dashboard-async-panel' => '09ecf50c',
+    'javelin-behavior-dashboard-async-panel' => 'a871fe00',
     'javelin-behavior-dashboard-move-panels' => '076bd092',
     'javelin-behavior-dashboard-query-panel-select' => '1e413dc9',
     'javelin-behavior-dashboard-tab-panel' => '0116d3e8',
@@ -981,11 +981,6 @@ return array(
     '0922e81d' => array(
       'herald-rule-editor',
       'javelin-behavior',
-    ),
-    '09ecf50c' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-workflow',
     ),
     '0ad8d31f' => array(
       'javelin-behavior',
@@ -1793,6 +1788,11 @@ return array(
     'a5257c4e' => array(
       'javelin-install',
       'javelin-dom',
+    ),
+    'a871fe00' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-workflow',
     ),
     'a9942052' => array(
       'javelin-behavior',

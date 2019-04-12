@@ -31,14 +31,27 @@ final class PhabricatorDashboardPanelRenderController
       $parent_phids = array();
     }
 
-    $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
+    $engine = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
       ->setPanel($panel)
       ->setPanelPHID($panel->getPHID())
       ->setParentPanelPHIDs($parent_phids)
       ->setHeaderMode($request->getStr('headerMode'))
-      ->setDashboardID($request->getInt('dashboardID'))
-      ->renderPanel();
+      ->setPanelKey($request->getStr('panelKey'));
+
+    $context_phid = $request->getStr('contextPHID');
+    if ($context_phid) {
+      $context = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($context_phid))
+        ->executeOne();
+      if (!$context) {
+        return new Aphront404Response();
+      }
+      $engine->setContextObject($context);
+    }
+
+    $rendered_panel = $engine->renderPanel();
 
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())

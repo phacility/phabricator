@@ -24,9 +24,6 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';
 
-  private $panels = self::ATTACHABLE;
-  private $edgeProjectPHIDs = self::ATTACHABLE;
-
   private $panelRefList;
 
   public static function initializeNewDashboard(PhabricatorUser $actor) {
@@ -36,8 +33,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->setEditPolicy($actor->getPHID())
       ->setStatus(self::STATUS_ACTIVE)
-      ->setAuthorPHID($actor->getPHID())
-      ->attachPanels(array());
+      ->setAuthorPHID($actor->getPHID());
   }
 
   public static function getStatusNameMap() {
@@ -62,9 +58,8 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorDashboardDashboardPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhabricatorDashboardDashboardPHIDType::TYPECONST;
   }
 
   public function getRawLayoutMode() {
@@ -75,11 +70,18 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   public function setRawLayoutMode($mode) {
     $config = $this->getRawLayoutConfig();
     $config['layoutMode'] = $mode;
+    return $this->setRawLayoutConfig($config);
+  }
 
-    // If a cached panel ref list exists, clear it.
-    $this->panelRefList = null;
+  public function getRawPanels() {
+    $config = $this->getRawLayoutConfig();
+    return idx($config, 'panels');
+  }
 
-    return $this->setLayoutConfig($config);
+  public function setRawPanels(array $panels) {
+    $config = $this->getRawLayoutConfig();
+    $config['panels'] = $panels;
+    return $this->setRawLayoutConfig($config);
   }
 
   private function getRawLayoutConfig() {
@@ -90,6 +92,13 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     }
 
     return $config;
+  }
+
+  private function setRawLayoutConfig(array $config) {
+    // If a cached panel ref list exists, clear it.
+    $this->panelRefList = null;
+
+    return $this->setLayoutConfig($config);
   }
 
   public function isArchived() {

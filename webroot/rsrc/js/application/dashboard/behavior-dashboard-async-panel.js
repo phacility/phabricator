@@ -12,7 +12,8 @@ JX.behavior('dashboard-async-panel', function(config) {
   var data = {
     parentPanelPHIDs: config.parentPanelPHIDs.join(','),
     headerMode: config.headerMode,
-    dashboardID: config.dashboardID
+    contextPHID: config.contextPHID,
+    panelKey: config.panelKey
   };
 
   new JX.Workflow(config.uri)
