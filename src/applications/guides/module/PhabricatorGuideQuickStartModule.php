@@ -103,33 +103,6 @@ final class PhabricatorGuideQuickStartModule extends PhabricatorGuideModule {
       ->setDescription($description);
     $guide_items->addItem($item);
 
-    $title = pht('Build a Dashboard');
-    $have_dashboard = (bool)PhabricatorDashboardInstall::getDashboard(
-      $viewer,
-      PhabricatorHomeApplication::DASHBOARD_DEFAULT,
-      'PhabricatorHomeApplication');
-    $href = PhabricatorEnv::getURI('/dashboard/');
-    if ($have_dashboard) {
-      $icon = 'fa-check';
-      $icon_bg = 'bg-green';
-      $description = pht(
-        "You've created at least one dashboard.");
-    } else {
-      $icon = 'fa-dashboard';
-      $icon_bg = 'bg-sky';
-      $description =
-        pht('Customize the default homepage layout and items.');
-    }
-
-    $item = id(new PhabricatorGuideItemView())
-      ->setTitle($title)
-      ->setHref($href)
-      ->setIcon($icon)
-      ->setIconBackground($icon_bg)
-      ->setDescription($description);
-    $guide_items->addItem($item);
-
-
     $title = pht('Personalize your Install');
     $wordmark = PhabricatorEnv::getEnvConfig('ui.logo');
     $href = PhabricatorEnv::getURI('/config/edit/ui.logo/');

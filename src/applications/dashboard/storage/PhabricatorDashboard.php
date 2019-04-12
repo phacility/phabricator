@@ -172,17 +172,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
-
-    $this->openTransaction();
-      $installs = id(new PhabricatorDashboardInstall())->loadAllWhere(
-        'dashboardPHID = %s',
-        $this->getPHID());
-      foreach ($installs as $install) {
-        $install->delete();
-      }
-
-      $this->delete();
-    $this->saveTransaction();
+    $this->delete();
   }
 
 
