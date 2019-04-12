@@ -21,10 +21,6 @@ final class PhabricatorDashboardSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchTextField())
-        ->setLabel(pht('Name Contains'))
-        ->setKey('name')
-        ->setDescription(pht('Search for dashboards by name substring.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Authored By'))
         ->setKey('authorPHIDs')
@@ -93,10 +89,6 @@ final class PhabricatorDashboardSearchEngine
       $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    if ($map['name'] !== null) {
-      $query->withNameNgrams($map['name']);
-    }
-
     if ($map['editable'] !== null) {
       $query->withCanEdit($map['editable']);
     }
@@ -121,6 +113,17 @@ final class PhabricatorDashboardSearchEngine
 
     $handles = $viewer->loadHandles($phids);
 
+    if ($dashboards) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($dashboards, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+
+      $edge_query->execute();
+    }
+
     $list = id(new PHUIObjectItemListView())
       ->setViewer($viewer);
 
@@ -132,10 +135,11 @@ final class PhabricatorDashboardSearchEngine
         ->setHref($dashboard->getURI())
         ->setObject($dashboard);
 
-      $bg_color = 'bg-dark';
       if ($dashboard->isArchived()) {
         $item->setDisabled(true);
         $bg_color = 'bg-grey';
+      } else {
+        $bg_color = 'bg-dark';
       }
 
       $icon = id(new PHUIIconView())
@@ -148,6 +152,17 @@ final class PhabricatorDashboardSearchEngine
       $author_name = $handles[$author_phid]->renderLink();
       $item->addByline(pht('Author: %s', $author_name));
 
+      $phid = $dashboard->getPHID();
+      $project_phids = $edge_query->getDestinationPHIDs(array($phid));
+      $project_handles = $viewer->loadHandles($project_phids);
+
+      $item->addAttribute(
+        id(new PHUIHandleTagListView())
+          ->setLimit(4)
+          ->setNoDataString(pht('No Tags'))
+          ->setSlim(true)
+          ->setHandles($project_handles));
+
       $list->addItem($item);
     }
 
@@ -156,26 +171,6 @@ final class PhabricatorDashboardSearchEngine
     $result->setNoDataString(pht('No dashboards found.'));
 
     return $result;
-  }
-
-  protected function getNewUserBody() {
-    $create_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Create a Dashboard'))
-      ->setHref('/dashboard/create/')
-      ->setColor(PHUIButtonView::GREEN);
-
-    $icon = $this->getApplication()->getIcon();
-    $app_name =  $this->getApplication()->getName();
-    $view = id(new PHUIBigInfoView())
-      ->setIcon($icon)
-      ->setTitle(pht('Welcome to %s', $app_name))
-      ->setDescription(
-        pht('Customize your homepage with different panels and '.
-            'search queries.'))
-      ->addAction($create_button);
-
-      return $view;
   }
 
 }

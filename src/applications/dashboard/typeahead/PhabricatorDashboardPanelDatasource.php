@@ -33,7 +33,11 @@ final class PhabricatorDashboardPanelDatasource
       $id = (int)$id;
       $query->withIDs(array($id));
     } else {
-      $query->withNameNgrams($raw_query);
+      $this->applyFerretConstraints(
+        $query,
+        id(new PhabricatorDashboardPanel())->newFerretEngine(),
+        'title',
+        $this->getRawQuery());
     }
 
     $panels = $this->executeQuery($query);

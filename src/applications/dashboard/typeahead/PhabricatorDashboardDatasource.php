@@ -18,6 +18,12 @@ final class PhabricatorDashboardDatasource
   public function loadResults() {
     $query = id(new PhabricatorDashboardQuery());
 
+    $this->applyFerretConstraints(
+      $query,
+      id(new PhabricatorDashboard())->newFerretEngine(),
+      'title',
+      $this->getRawQuery());
+
     $dashboards = $this->executeQuery($query);
     $results = array();
     foreach ($dashboards as $dashboard) {

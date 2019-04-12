@@ -34,12 +34,6 @@ final class PhabricatorDashboardPanelQuery
     return $this;
   }
 
-  public function withNameNgrams($ngrams) {
-    return $this->withNgramsConstraint(
-      id(new PhabricatorDashboardPanelNgrams()),
-      $ngrams);
-  }
-
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
   }

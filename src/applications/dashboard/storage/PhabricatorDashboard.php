@@ -10,7 +10,8 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
-    PhabricatorNgramsInterface,
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorDashboardPanelContainerInterface {
 
   protected $name;
@@ -175,21 +176,22 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     $this->delete();
   }
 
-
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
-
-
-  public function newNgrams() {
-    return array(
-      id(new PhabricatorDashboardNgrams())
-        ->setValue($this->getName()),
-    );
-  }
-
 /* -(  PhabricatorDashboardPanelContainerInterface  )------------------------ */
 
   public function getDashboardPanelContainerPanelPHIDs() {
     return $this->getPanelPHIDs();
+  }
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+  public function newFulltextEngine() {
+    return new PhabricatorDashboardFulltextEngine();
+  }
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+  public function newFerretEngine() {
+    return new PhabricatorDashboardFerretEngine();
   }
 
 }

@@ -34,12 +34,6 @@ final class PhabricatorDashboardQuery
     return $this;
   }
 
-  public function withNameNgrams($ngrams) {
-    return $this->withNgramsConstraint(
-      id(new PhabricatorDashboardNgrams()),
-      $ngrams);
-  }
-
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
   }
@@ -70,28 +64,28 @@ final class PhabricatorDashboardQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'dashboard.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'dashboard.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'dashboard.status IN (%Ls)',
         $this->statuses);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'authorPHID IN (%Ls)',
+        'dashboard.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 

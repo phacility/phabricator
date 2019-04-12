@@ -10,7 +10,8 @@ final class PhabricatorDashboardPanel
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorNgramsInterface,
+    PhabricatorFulltextInterface,
+    PhabricatorFerretInterface,
     PhabricatorDashboardPanelContainerInterface {
 
   protected $name;
@@ -155,21 +156,22 @@ final class PhabricatorDashboardPanel
     $this->saveTransaction();
   }
 
-
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
-
-
-  public function newNgrams() {
-    return array(
-      id(new PhabricatorDashboardPanelNgrams())
-        ->setValue($this->getName()),
-    );
-  }
-
 /* -(  PhabricatorDashboardPanelContainerInterface  )------------------------ */
 
   public function getDashboardPanelContainerPanelPHIDs() {
     return $this->requireImplementation()->getSubpanelPHIDs($this);
+  }
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+  public function newFulltextEngine() {
+    return new PhabricatorDashboardPanelFulltextEngine();
+  }
+
+/* -(  PhabricatorFerretInterface  )----------------------------------------- */
+
+  public function newFerretEngine() {
+    return new PhabricatorDashboardPanelFerretEngine();
   }
 
 }
