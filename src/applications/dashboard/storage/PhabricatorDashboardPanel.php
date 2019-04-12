@@ -45,9 +45,8 @@ final class PhabricatorDashboardPanel
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorDashboardPanelPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhabricatorDashboardPanelPHIDType::TYPECONST;
   }
 
   public function getProperty($key, $default = null) {

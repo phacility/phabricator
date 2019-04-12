@@ -87,7 +87,14 @@ final class PhabricatorDashboardPanelRefList
     return array_values(mpull($this->getPanelRefs(), 'toDictionary'));
   }
 
-  public function newPanelRef(PhabricatorDashboardPanel $panel, $column_key) {
+  public function newPanelRef(
+    PhabricatorDashboardPanel $panel,
+    $column_key = null) {
+
+    if ($column_key === null) {
+      $column_key = head_key($this->columns);
+    }
+
     $ref = id(new PhabricatorDashboardPanelRef())
       ->setPanelKey($this->newPanelKey())
       ->setPanelPHID($panel->getPHID())
