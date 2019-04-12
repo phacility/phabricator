@@ -8,6 +8,20 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     );
   }
 
+  protected function willRunOneTest($test) {
+    parent::willRunOneTest($test);
+
+    // Before we run these test cases, clear the queue. After D20412, we may
+    // have queued tasks from migrations.
+    $task_table = new PhabricatorWorkerActiveTask();
+    $conn = $task_table->establishConnection('w');
+
+    queryfx(
+      $conn,
+      'TRUNCATE %R',
+      $task_table);
+  }
+
   public function testLeaseTask() {
     $task = $this->scheduleTask();
     $this->expectNextLease($task, pht('Leasing should work.'));
