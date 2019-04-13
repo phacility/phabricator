@@ -54,7 +54,7 @@ final class PhabricatorProjectTriggerManiphestPriorityRule
   }
 
   protected function getDefaultValue() {
-    return head_key(ManiphestTaskPriority::getTaskPriorityMap());
+    return ManiphestTaskPriority::getDefaultPriority();
   }
 
   protected function getPHUIXControlType() {

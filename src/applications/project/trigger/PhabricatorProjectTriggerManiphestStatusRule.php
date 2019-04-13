@@ -53,7 +53,7 @@ final class PhabricatorProjectTriggerManiphestStatusRule
   }
 
   protected function getDefaultValue() {
-    return head_key(ManiphestTaskStatus::getTaskStatusMap());
+    return ManiphestTaskStatus::getDefaultClosedStatus();
   }
 
   protected function getPHUIXControlType() {
