@@ -13,7 +13,7 @@ final class PhabricatorProjectTriggerUnknownRule
     return false;
   }
 
-  protected function assertValidRuleValue($value) {
+  protected function assertValidRuleRecordFormat($value) {
     return;
   }
 

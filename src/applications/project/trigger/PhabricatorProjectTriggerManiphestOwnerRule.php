@@ -21,20 +21,42 @@ final class PhabricatorProjectTriggerManiphestOwnerRule
     return $value;
   }
 
-  protected function assertValidRuleValue($value) {
+  protected function assertValidRuleRecordFormat($value) {
     if (!is_array($value)) {
       throw new Exception(
         pht(
           'Owner rule value should be a list, but is not (value is "%s").',
           phutil_describe_type($value)));
     }
+  }
 
-    if (count($value) != 1) {
+  protected function assertValidRuleRecordValue($value) {
+    if (!$value) {
       throw new Exception(
         pht(
-          'Owner rule value should be a list of exactly one user PHID, or the '.
-          'token "none()" (value is "%s").',
+          'Owner rule value is required. Specify a user to assign tasks '.
+          'to, or the token "none()" to unassign tasks.'));
+    }
+
+    if (count($value) > 1) {
+      throw new Exception(
+        pht(
+          'Owner rule value must have only one elmement (value is "%s").',
           implode(', ', $value)));
+    }
+
+    $owner_phid = $this->convertTokenizerValueToOwner($value);
+    if ($owner_phid !== null) {
+      $user = id(new PhabricatorPeopleQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(array($owner_phid))
+        ->executeOne();
+      if (!$user) {
+        throw new Exception(
+          pht(
+            'User PHID ("%s") is not a valid user.',
+            $owner_phid));
+      }
     }
   }
 

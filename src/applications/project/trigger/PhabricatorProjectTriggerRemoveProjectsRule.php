@@ -5,21 +5,29 @@ final class PhabricatorProjectTriggerRemoveProjectsRule
 
   const TRIGGERTYPE = 'task.projects.remove';
 
-  public function getSelectControLname() {
-    return pht('Remove projects');
+  public function getSelectControlname() {
+    return pht('Remove project tags');
   }
 
   protected function getValueForEditorField() {
     return $this->getDatasource()->getWireTokens($this->getValue());
   }
 
-  protected function assertValidRuleValue($value) {
+  protected function assertValidRuleRecordFormat($value) {
     if (!is_array($value)) {
       throw new Exception(
         pht(
           'Remove project rule value should be a list, but is not '.
           '(value is "%s").',
           phutil_describe_type($value)));
+    }
+  }
+
+  protected function assertValidRuleRecordValue($value) {
+    if (!$value) {
+      throw new Exception(
+        pht(
+          'You must select at least one project tag to remove.'));
     }
   }
 
@@ -78,12 +86,12 @@ final class PhabricatorProjectTriggerRemoveProjectsRule
   }
 
   public function getRuleViewLabel() {
-    return pht('Remove Projects');
+    return pht('Remove Project Tags');
   }
 
   public function getRuleViewDescription($value) {
     return pht(
-      'Remove projects: %s.',
+      'Remove project tags: %s.',
       phutil_tag(
         'strong',
         array(),

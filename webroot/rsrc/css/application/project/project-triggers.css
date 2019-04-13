@@ -27,6 +27,7 @@
 
 .trigger-rules-table td.invalid-cell {
   padding-left: 12px;
+  width: 100%;
 }
 
 .trigger-rules-table td.invalid-cell .phui-icon-view {

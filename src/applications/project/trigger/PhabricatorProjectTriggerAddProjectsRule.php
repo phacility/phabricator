@@ -5,21 +5,29 @@ final class PhabricatorProjectTriggerAddProjectsRule
 
   const TRIGGERTYPE = 'task.projects.add';
 
-  public function getSelectControLname() {
-    return pht('Add projects');
+  public function getSelectControlName() {
+    return pht('Add project tags');
   }
 
   protected function getValueForEditorField() {
     return $this->getDatasource()->getWireTokens($this->getValue());
   }
 
-  protected function assertValidRuleValue($value) {
+  protected function assertValidRuleRecordFormat($value) {
     if (!is_array($value)) {
       throw new Exception(
         pht(
           'Add project rule value should be a list, but is not '.
           '(value is "%s").',
           phutil_describe_type($value)));
+    }
+  }
+
+  protected function assertValidRuleRecordValue($value) {
+    if (!$value) {
+      throw new Exception(
+        pht(
+          'You must select at least one project tag to add.'));
     }
   }
 
@@ -78,12 +86,12 @@ final class PhabricatorProjectTriggerAddProjectsRule
   }
 
   public function getRuleViewLabel() {
-    return pht('Add Projects');
+    return pht('Add Project Tags');
   }
 
   public function getRuleViewDescription($value) {
     return pht(
-      'Add projects: %s.',
+      'Add project tags: %s.',
       phutil_tag(
         'strong',
         array(),

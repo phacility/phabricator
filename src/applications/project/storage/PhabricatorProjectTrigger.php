@@ -104,9 +104,9 @@ final class PhabricatorProjectTrigger
     $allow_invalid,
     PhabricatorUser $viewer) {
 
-    // NOTE: With "$allow_invalid" set, we're  trying to preserve the database
+    // NOTE: With "$allow_invalid" set, we're trying to preserve the database
     // state in the rule structure, even if it includes rule types we don't
-    // ha ve implementations for, or rules with invalid rule values.
+    // have implementations for, or rules with invalid rule values.
 
     // If an administrator adds or removes extensions which add rules, or
     // an upgrade affects rule validity, existing rules may become invalid.

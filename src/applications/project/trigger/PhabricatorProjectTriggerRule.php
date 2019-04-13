@@ -23,7 +23,7 @@ abstract class PhabricatorProjectTriggerRule
   final public function setRecord(PhabricatorProjectTriggerRuleRecord $record) {
     $value = $record->getValue();
 
-    $this->assertValidRuleValue($value);
+    $this->assertValidRuleRecordFormat($value);
 
     $this->record = $record;
     return $this;
@@ -45,7 +45,22 @@ abstract class PhabricatorProjectTriggerRule
   abstract public function getRuleViewLabel();
   abstract public function getRuleViewDescription($value);
   abstract public function getRuleViewIcon($value);
-  abstract protected function assertValidRuleValue($value);
+  abstract protected function assertValidRuleRecordFormat($value);
+
+  final public function getRuleRecordValueValidationException() {
+    try {
+      $this->assertValidRuleRecordValue($this->getRecord()->getValue());
+    } catch (Exception $ex) {
+      return $ex;
+    }
+
+    return null;
+  }
+
+  protected function assertValidRuleRecordValue($value) {
+    return;
+  }
+
   abstract protected function newDropTransactions($object, $value);
   abstract protected function newDropEffects($value);
   abstract protected function getDefaultValue();

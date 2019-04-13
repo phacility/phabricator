@@ -9,20 +9,24 @@ final class PhabricatorProjectTriggerManiphestPriorityRule
     return pht('Change priority to');
   }
 
-  protected function assertValidRuleValue($value) {
+  protected function assertValidRuleRecordFormat($value) {
     if (!is_string($value)) {
       throw new Exception(
         pht(
           'Priority rule value should be a string, but is not (value is "%s").',
           phutil_describe_type($value)));
     }
+  }
 
+  protected function assertValidRuleRecordValue($value) {
     $map = ManiphestTaskPriority::getTaskPriorityMap();
     if (!isset($map[$value])) {
       throw new Exception(
         pht(
-          'Rule value ("%s") is not a valid task priority.',
-          $value));
+          'Task priority value ("%s") is not a valid task priority. '.
+          'Valid priorities are: %s.',
+          $value,
+          implode(', ', array_keys($map))));
     }
   }
 
