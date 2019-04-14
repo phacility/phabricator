@@ -24,6 +24,7 @@ final class DiffusionPreCommitRefTypeHeraldField
     $types = array(
       PhabricatorRepositoryPushLog::REFTYPE_BRANCH => pht('branch (git/hg)'),
       PhabricatorRepositoryPushLog::REFTYPE_TAG => pht('tag (git)'),
+      PhabricatorRepositoryPushLog::REFTYPE_REF => pht('ref (git)'),
       PhabricatorRepositoryPushLog::REFTYPE_BOOKMARK => pht('bookmark (hg)'),
     );
 

@@ -149,6 +149,10 @@ final class PhabricatorRepositoryPushMailWorker
           $type_name = pht('bookmark');
           $type_prefix = pht('bookmark:');
           break;
+        case PhabricatorRepositoryPushLog::REFTYPE_REF:
+          $type_name = pht('ref');
+          $type_prefix = pht('ref:');
+          break;
         case PhabricatorRepositoryPushLog::REFTYPE_COMMIT:
         default:
           break;
