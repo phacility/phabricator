@@ -468,20 +468,7 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Configure how changes are published.'))
         ->setConduitDescription(pht('Change publishing options.'))
         ->setConduitTypeDescription(pht('New notification setting.'))
-        ->setValue(!$object->getDetail('herald-disabled')),
-      id(new PhabricatorBoolEditField())
-        ->setKey('autoclose')
-        ->setLabel(pht('Autoclose'))
-        ->setTransactionType(
-          PhabricatorRepositoryAutocloseTransaction::TRANSACTIONTYPE)
-        ->setIsCopyable(true)
-        ->setOptions(
-          pht('Disable Autoclose'),
-          pht('Enable Autoclose'))
-        ->setDescription(pht('Stop or resume autoclosing in this repository.'))
-        ->setConduitDescription(pht('Change autoclose setting.'))
-        ->setConduitTypeDescription(pht('New autoclose setting.'))
-        ->setValue(!$object->getDetail('disable-autoclose')),
+        ->setValue(!$object->isPublishingDisabled()),
       id(new PhabricatorPolicyEditField())
         ->setKey('policy.push')
         ->setLabel(pht('Push Policy'))

@@ -1,12 +1,12 @@
 <?php
 
-final class DiffusionRepositoryActionsManagementPanel
+final class DiffusionRepositoryPublishingManagementPanel
   extends DiffusionRepositoryManagementPanel {
 
-  const PANELKEY = 'actions';
+  const PANELKEY = 'publishing';
 
   public function getManagementPanelLabel() {
-    return pht('Actions');
+    return pht('Publishing');
   }
 
   public function getManagementPanelOrder() {
@@ -16,12 +16,7 @@ final class DiffusionRepositoryActionsManagementPanel
   public function getManagementPanelIcon() {
     $repository = $this->getRepository();
 
-    $has_any =
-      $repository->getDetail('herald-disabled') ||
-      $repository->getDetail('disable-autoclose');
-
-    // NOTE: Any value here really means something is disabled, so try to
-    // hint that a little bit with the icon.
+    $has_any = $repository->isPublishingDisabled();
 
     if ($has_any) {
       return 'fa-flash';
@@ -33,7 +28,6 @@ final class DiffusionRepositoryActionsManagementPanel
   protected function getEditEngineFieldKeys() {
     return array(
       'publish',
-      'autoclose',
     );
   }
 
@@ -47,13 +41,13 @@ final class DiffusionRepositoryActionsManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions_uri = $this->getEditPageURI();
+    $publishing_uri = $this->getEditPageURI();
 
     $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
-        ->setName(pht('Edit Actions'))
-        ->setHref($actions_uri)
+        ->setName(pht('Edit Publishing'))
+        ->setHref($publishing_uri)
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -68,19 +62,13 @@ final class DiffusionRepositoryActionsManagementPanel
     $view = id(new PHUIPropertyListView())
       ->setViewer($viewer);
 
-    $notify = $repository->getDetail('herald-disabled')
+    $notify = $repository->isPublishingDisabled()
       ? pht('Off')
       : pht('On');
     $notify = phutil_tag('em', array(), $notify);
-    $view->addProperty(pht('Publish/Notify'), $notify);
+    $view->addProperty(pht('Publishing'), $notify);
 
-    $autoclose = $repository->getDetail('disable-autoclose')
-      ? pht('Off')
-      : pht('On');
-    $autoclose = phutil_tag('em', array(), $autoclose);
-    $view->addProperty(pht('Autoclose'), $autoclose);
-
-    return $this->newBox(pht('Actions'), $view);
+    return $this->newBox(pht('Publishing'), $view);
   }
 
 }

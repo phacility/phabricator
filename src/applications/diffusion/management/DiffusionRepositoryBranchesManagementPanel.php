@@ -96,24 +96,23 @@ final class DiffusionRepositoryBranchesManagementPanel
       phutil_tag('em', array(), pht('Track All Branches')));
     $view->addProperty(pht('Track Only'), $track_only);
 
-    $autoclose_rules = $repository->getAutocloseOnlyRules();
-    $autoclose_rules = implode(', ', $autoclose_rules);
-    $autoclose_only = nonempty(
-      $autoclose_rules,
-      phutil_tag('em', array(), pht('All Branches')));
 
-    $autoclose_disabled = false;
-    if ($repository->getDetail('disable-autoclose')) {
-      $autoclose_disabled = true;
-      $autoclose_only =
-        phutil_tag('em', array(), pht('Autoclose has been disabled'));
+    $publishing_disabled = $repository->isPublishingDisabled();
+    if ($publishing_disabled) {
+      $permanent_display =
+        phutil_tag('em', array(), pht('Publishing Disabled'));
+    } else {
+      $permanent_rules = $repository->getAutocloseOnlyRules();
+      if ($permanent_rules) {
+        $permanent_display = implode(', ', $permanent_rules);
+      } else {
+        $permanent_display = phutil_tag('em', array(), pht('All Branches'));
+      }
     }
-
-    $view->addProperty(pht('Permanent Refs'), $autoclose_only);
+    $view->addProperty(pht('Permanent Refs'), $permanent_display);
 
     $content[] = $this->newBox(pht('Branches'), $view);
 
-    // Branch Autoclose Table
     if (!$repository->isImporting()) {
       $request = $this->getRequest();
       $pager = id(new PHUIPagerView())
@@ -153,10 +152,14 @@ final class DiffusionRepositoryBranchesManagementPanel
           $status = pht('Open');
         }
 
-        if ($autoclose_disabled) {
-          $autoclose_status = pht('Disabled (Repository)');
+        if ($publishing_disabled) {
+          $permanent_status = pht('Publishing Disabled');
         } else {
-          $autoclose_status = pht('Not Permanent');
+          if ($permanent) {
+            $permanent_status = pht('Permanent');
+          } else {
+            $permanent_status = pht('Not Permanent');
+          }
         }
 
         $rows[] = array(
@@ -164,7 +167,7 @@ final class DiffusionRepositoryBranchesManagementPanel
           $branch_name,
           $status,
           $tracking ? pht('Tracking') : pht('Off'),
-          $permanent ? pht('Permanent') : $autoclose_status,
+          $permanent_status,
         );
       }
       $branch_table = new AphrontTableView($rows);

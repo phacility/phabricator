@@ -120,10 +120,10 @@ final class DiffusionCommitEditEngine
           $desc = pht('No, Repository Importing');
           break;
         case PhabricatorRepository::BECAUSE_AUTOCLOSE_DISABLED:
-          $desc = pht('No, Autoclose Disabled');
+          $desc = pht('No, Repository Publishing Disabled');
           break;
         case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
-          $desc = pht('No, Not On Autoclose Branch');
+          $desc = pht('No, Not Reachable from Permanent Ref');
           break;
         case PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED:
           $desc = pht('Yes, Forced Via bin/repository CLI Tool.');

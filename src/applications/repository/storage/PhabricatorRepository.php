@@ -1048,11 +1048,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
-    if ($this->getDetail('herald-disabled')) {
+    if ($this->isPublishingDisabled()) {
       return false;
     }
 
     return true;
+  }
+
+  public function isPublishingDisabled() {
+    return $this->getDetail('herald-disabled');
   }
 
   public function shouldPublishCommit(PhabricatorRepositoryCommit $commit) {
@@ -1186,7 +1190,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return self::BECAUSE_REPOSITORY_IMPORTING;
     }
 
-    if ($this->getDetail('disable-autoclose', false)) {
+    if ($this->isPublishingDisabled()) {
       return self::BECAUSE_AUTOCLOSE_DISABLED;
     }
 

@@ -60,7 +60,7 @@ final class DiffusionBranchTableView extends DiffusionView {
           break;
         case PhabricatorRepository::BECAUSE_AUTOCLOSE_DISABLED:
           $icon = 'fa-times bluegrey';
-          $tip = pht('Repository Autoclose Disabled');
+          $tip = pht('Repository Publishing Disabled');
           break;
         case PhabricatorRepository::BECAUSE_BRANCH_UNTRACKED:
           $icon = 'fa-times bluegrey';
@@ -68,11 +68,11 @@ final class DiffusionBranchTableView extends DiffusionView {
           break;
         case PhabricatorRepository::BECAUSE_BRANCH_NOT_AUTOCLOSE:
           $icon = 'fa-times bluegrey';
-          $tip = pht('Branch Autoclose Disabled');
+          $tip = pht('Branch Not Permanent');
           break;
         case null:
           $icon = 'fa-check bluegrey';
-          $tip = pht('Autoclose Enabled');
+          $tip = pht('Permanent Branch');
           break;
         default:
           $icon = 'fa-question';

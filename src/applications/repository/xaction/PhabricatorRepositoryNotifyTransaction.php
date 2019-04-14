@@ -22,11 +22,11 @@ final class PhabricatorRepositoryNotifyTransaction
 
     if ($new) {
       return pht(
-        '%s enabled notifications and publishing for this repository.',
+        '%s enabled publishing for this repository.',
         $this->renderAuthor());
     } else {
       return pht(
-        '%s disabled notifications and publishing for this repository.',
+        '%s disabled publishing for this repository.',
         $this->renderAuthor());
     }
   }
