@@ -36,6 +36,7 @@ final class DiffusionRepositoryBranchesManagementPanel
   protected function getEditEngineFieldKeys() {
     return array(
       'defaultBranch',
+      'fetchRefs',
       'trackOnly',
       'autocloseOnly',
     );
@@ -77,6 +78,16 @@ final class DiffusionRepositoryBranchesManagementPanel
       $repository->getDetail('default-branch'),
       phutil_tag('em', array(), $repository->getDefaultBranch()));
     $view->addProperty(pht('Default Branch'), $default_branch);
+
+    if ($repository->supportsFetchRules()) {
+      $fetch_only = $repository->getFetchRules();
+      if ($fetch_only) {
+        $fetch_display = implode(', ', $fetch_only);
+      } else {
+        $fetch_display = phutil_tag('em', array(), pht('Fetch All Refs'));
+      }
+      $view->addProperty(pht('Fetch Refs'), $fetch_display);
+    }
 
     $track_only_rules = $repository->getTrackOnlyRules();
     $track_only_rules = implode(', ', $track_only_rules);

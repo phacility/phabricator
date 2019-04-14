@@ -1213,6 +1213,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this;
   }
 
+  public function supportsFetchRules() {
+    if ($this->isGit()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public function getFetchRules() {
+    return $this->getDetail('fetch-rules', array());
+  }
+
+  public function setFetchRules(array $rules) {
+    return $this->setDetail('fetch-rules', $rules);
+  }
+
 
 /* -(  Repository URI Management  )------------------------------------------ */
 

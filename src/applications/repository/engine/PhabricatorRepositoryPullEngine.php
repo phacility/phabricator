@@ -339,8 +339,17 @@ final class PhabricatorRepositoryPullEngine
       throw new Exception($message);
     }
 
-    $remote_refs = $this->loadGitRemoteRefs($repository);
-    $local_refs = $this->loadGitLocalRefs($repository);
+    // Load the refs we're planning to fetch from the remote repository.
+    $remote_refs = $this->loadGitRemoteRefs(
+      $repository,
+      $repository->getRemoteURIEnvelope());
+
+    // Load the refs we're planning to fetch from the local repository, by
+    // using the local working copy path as the "remote" repository URI.
+    $local_refs = $this->loadGitRemoteRefs(
+      $repository,
+      new PhutilOpaqueEnvelope($path));
+
     if ($remote_refs === $local_refs) {
       $this->log(
         pht(
@@ -351,16 +360,49 @@ final class PhabricatorRepositoryPullEngine
 
     $this->logRefDifferences($remote_refs, $local_refs);
 
+    $fetch_rules = $this->getGitFetchRules($repository);
+
     $future = $repository->getRemoteCommandFuture(
-      'fetch %P %s --prune',
+      'fetch --prune -- %P %Ls',
       $repository->getRemoteURIEnvelope(),
-      '+refs/*:refs/*');
+      $fetch_rules);
 
     $future
       ->setCWD($path)
       ->resolvex();
   }
 
+  private function getGitRefRules(PhabricatorRepository $repository) {
+    $ref_rules = $repository->getFetchRules($repository);
+
+    if (!$ref_rules) {
+      $ref_rules = array(
+        'refs/*',
+      );
+    }
+
+    return $ref_rules;
+  }
+
+  private function getGitFetchRules(PhabricatorRepository $repository) {
+    $ref_rules = $this->getGitRefRules($repository);
+
+    // Rewrite each ref rule "X" into "+X:X".
+
+    // The "X" means "fetch ref X".
+    // The "...:X" means "...and copy it into local ref X".
+    // The "+..." means "...and overwrite the local ref if it already exists".
+
+    $fetch_rules = array();
+    foreach ($ref_rules as $key => $ref_rule) {
+      $fetch_rules[] = sprintf(
+        '+%s:%s',
+        $ref_rule,
+        $ref_rule);
+    }
+
+    return $fetch_rules;
+  }
 
   /**
    * @task git
@@ -378,15 +420,30 @@ final class PhabricatorRepositoryPullEngine
     $this->installHook($root.$path);
   }
 
-  private function loadGitRemoteRefs(PhabricatorRepository $repository) {
-    $remote_envelope = $repository->getRemoteURIEnvelope();
+  private function loadGitRemoteRefs(
+    PhabricatorRepository $repository,
+    PhutilOpaqueEnvelope $remote_envelope) {
+
+    $ref_rules = $this->getGitRefRules($repository);
 
     // NOTE: "git ls-remote" does not support "--" until circa January 2016.
-    // See T12416. None of the flags to "ls-remote" appear dangerous, and
-    // other checks make it difficult to configure a suspicious remote URI.
+    // See T12416. None of the flags to "ls-remote" appear dangerous, but
+    // refuse to list any refs beginning with "-" just in case.
+
+    foreach ($ref_rules as $ref_rule) {
+      if (preg_match('/^-/', $ref_rule)) {
+        throw new Exception(
+          pht(
+            'Refusing to list potentially dangerous ref ("%s") beginning '.
+            'with "-".',
+            $ref_rule));
+      }
+    }
+
     list($stdout) = $repository->execxRemoteCommand(
-      'ls-remote %P',
-      $remote_envelope);
+      'ls-remote %P %Ls',
+      $remote_envelope,
+      $ref_rules);
 
     // Empty repositories don't have any refs.
     if (!strlen(rtrim($stdout))) {

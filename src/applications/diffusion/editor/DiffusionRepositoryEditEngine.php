@@ -212,6 +212,7 @@ final class DiffusionRepositoryEditEngine
       ->setObject($object)
       ->execute();
 
+    $fetch_value = $object->getFetchRules();
     $track_value = $object->getTrackOnlyRules();
     $autoclose_value = $object->getAutocloseOnlyRules();
 
@@ -364,6 +365,17 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Set the default branch name.'))
         ->setConduitTypeDescription(pht('New default branch name.'))
         ->setValue($object->getDetail('default-branch')),
+      id(new PhabricatorTextAreaEditField())
+        ->setIsStringList(true)
+        ->setKey('fetchRefs')
+        ->setLabel(pht('Fetch Refs'))
+        ->setTransactionType(
+          PhabricatorRepositoryFetchRefsTransaction::TRANSACTIONTYPE)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Fetch only these refs.'))
+        ->setConduitDescription(pht('Set the fetched refs.'))
+        ->setConduitTypeDescription(pht('New fetched refs.'))
+        ->setValue($fetch_value),
       id(new PhabricatorTextAreaEditField())
         ->setIsStringList(true)
         ->setKey('trackOnly')
