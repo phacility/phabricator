@@ -240,6 +240,19 @@ final class DiffusionCommitController extends DiffusionController {
             'reachable from any branch, tag, or ref.');
         }
       }
+      if (!$commit->isPermanentCommit()) {
+        $nonpermanent_tag = id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setName(pht('Not Permanent'))
+          ->setColor(PHUITagView::COLOR_ORANGE);
+
+        $header->addTag($nonpermanent_tag);
+
+        $this->commitErrors[] = pht(
+          'This commit is not reachable from any permanent branch, tag, '.
+          'or ref.');
+      }
+
 
       if ($this->getCommitErrors()) {
         $error_panel = id(new PHUIInfoView())

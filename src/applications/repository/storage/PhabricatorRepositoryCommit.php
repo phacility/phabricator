@@ -496,6 +496,10 @@ final class PhabricatorRepositoryCommit
     return $this->getAuditStatusObject()->isAudited();
   }
 
+  public function isPermanentCommit() {
+    return (bool)$this->isPartiallyImported(self::IMPORTED_CLOSEABLE);
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
   public function getCapabilities() {

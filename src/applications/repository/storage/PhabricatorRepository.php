@@ -1055,6 +1055,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return true;
   }
 
+  public function shouldPublishCommit(PhabricatorRepositoryCommit $commit) {
+    if (!$this->shouldPublish()) {
+      return false;
+    }
+
+    if (!$commit->isPermanentCommit()) {
+      return false;
+    }
+
+    return true;
+  }
+
 
 /* -(  Autoclose  )---------------------------------------------------------- */
 
@@ -1152,8 +1164,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         throw new Exception(pht('Unrecognized version control system.'));
     }
 
-    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
-    if (!$commit->isPartiallyImported($closeable_flag)) {
+    if (!$commit->isPermanentCommit()) {
       return self::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH;
     }
 
