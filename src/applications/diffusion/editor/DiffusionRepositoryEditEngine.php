@@ -214,7 +214,7 @@ final class DiffusionRepositoryEditEngine
 
     $fetch_value = $object->getFetchRules();
     $track_value = $object->getTrackOnlyRules();
-    $autoclose_value = $object->getAutocloseOnlyRules();
+    $permanent_value = $object->getAutocloseOnlyRules();
 
     $automation_instructions = pht(
       "Configure **Repository Automation** to allow Phabricator to ".
@@ -389,15 +389,15 @@ final class DiffusionRepositoryEditEngine
         ->setValue($track_value),
       id(new PhabricatorTextAreaEditField())
         ->setIsStringList(true)
-        ->setKey('autocloseOnly')
-        ->setLabel(pht('Autoclose Only'))
+        ->setKey('permanentRefs')
+        ->setLabel(pht('Permanent Refs'))
         ->setTransactionType(
           PhabricatorRepositoryAutocloseOnlyTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
-        ->setDescription(pht('Autoclose commits on only these branches.'))
-        ->setConduitDescription(pht('Set the autoclose branches.'))
-        ->setConduitTypeDescription(pht('New default tracked branches.'))
-        ->setValue($autoclose_value),
+        ->setDescription(pht('Only these refs are considered permanent.'))
+        ->setConduitDescription(pht('Set the permanent refs.'))
+        ->setConduitTypeDescription(pht('New permanent ref rules.'))
+        ->setValue($permanent_value),
       id(new PhabricatorTextEditField())
         ->setKey('importOnly')
         ->setLabel(pht('Import Only'))

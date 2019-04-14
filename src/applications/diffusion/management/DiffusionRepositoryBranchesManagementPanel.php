@@ -38,7 +38,7 @@ final class DiffusionRepositoryBranchesManagementPanel
       'defaultBranch',
       'fetchRefs',
       'trackOnly',
-      'autocloseOnly',
+      'permanentRefs',
     );
   }
 
@@ -100,7 +100,7 @@ final class DiffusionRepositoryBranchesManagementPanel
     $autoclose_rules = implode(', ', $autoclose_rules);
     $autoclose_only = nonempty(
       $autoclose_rules,
-      phutil_tag('em', array(), pht('Autoclose On All Branches')));
+      phutil_tag('em', array(), pht('All Branches')));
 
     $autoclose_disabled = false;
     if ($repository->getDetail('disable-autoclose')) {
@@ -109,7 +109,7 @@ final class DiffusionRepositoryBranchesManagementPanel
         phutil_tag('em', array(), pht('Autoclose has been disabled'));
     }
 
-    $view->addProperty(pht('Autoclose Only'), $autoclose_only);
+    $view->addProperty(pht('Permanent Refs'), $autoclose_only);
 
     $content[] = $this->newBox(pht('Branches'), $view);
 
@@ -136,7 +136,7 @@ final class DiffusionRepositoryBranchesManagementPanel
       foreach ($branches as $branch) {
         $branch_name = $branch->getShortName();
         $tracking = $repository->shouldTrackBranch($branch_name);
-        $autoclosing = $repository->shouldAutocloseBranch($branch_name);
+        $permanent = $repository->shouldAutocloseBranch($branch_name);
 
         $default = $repository->getDefaultBranch();
         $icon = null;
@@ -156,7 +156,7 @@ final class DiffusionRepositoryBranchesManagementPanel
         if ($autoclose_disabled) {
           $autoclose_status = pht('Disabled (Repository)');
         } else {
-          $autoclose_status = pht('Off');
+          $autoclose_status = pht('Not Permanent');
         }
 
         $rows[] = array(
@@ -164,7 +164,7 @@ final class DiffusionRepositoryBranchesManagementPanel
           $branch_name,
           $status,
           $tracking ? pht('Tracking') : pht('Off'),
-          $autoclosing ? pht('Autoclose On') : $autoclose_status,
+          $permanent ? pht('Permanent') : $autoclose_status,
         );
       }
       $branch_table = new AphrontTableView($rows);
@@ -174,7 +174,7 @@ final class DiffusionRepositoryBranchesManagementPanel
           pht('Branch'),
           pht('Status'),
           pht('Track'),
-          pht('Autoclose'),
+          pht('Permanent'),
         ));
       $branch_table->setColumnClasses(
         array(
@@ -199,8 +199,10 @@ final class DiffusionRepositoryBranchesManagementPanel
     } else {
       $content[] = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild(pht('Branch status in unavailable while the repository '.
-          'is still importing.'));
+        ->appendChild(
+          pht(
+            'Branch status is unavailable while the repository is still '.
+            'importing.'));
     }
 
     return $content;

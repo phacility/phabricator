@@ -6,7 +6,7 @@ final class DiffusionCommitAutocloseHeraldField
   const FIELDCONST = 'diffusion.commit.autoclose';
 
   public function getHeraldFieldName() {
-    return pht('Commit is on autoclose branch');
+    return pht('Commit is on permanent branch');
   }
 
   public function getHeraldFieldValue($object) {

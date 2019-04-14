@@ -19,16 +19,16 @@ final class PhabricatorRepositoryAutocloseOnlyTransaction
 
     if (!$new) {
       return pht(
-        '%s set this repository to autoclose on all branches.',
+        '%s marked all branches in this repository as permanent.',
         $this->renderAuthor());
     } else if (!$old) {
       return pht(
-        '%s set this repository to autoclose on branches: %s.',
+        '%s set the permanent refs for this repository to: %s.',
         $this->renderAuthor(),
         $this->renderValue(implode(', ', $new)));
     } else {
       return pht(
-        '%s changed autoclose branches from %s to %s.',
+        '%s changed permanent refs for this repository from %s to %s.',
         $this->renderAuthor(),
         $this->renderValue(implode(', ', $old)),
         $this->renderValue(implode(', ', $new)));
