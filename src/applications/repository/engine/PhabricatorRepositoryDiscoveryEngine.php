@@ -128,10 +128,6 @@ final class PhabricatorRepositoryDiscoveryEngine
   private function discoverGitCommits() {
     $repository = $this->getRepository();
 
-    if (!$repository->isHosted()) {
-      $this->verifyGitOrigin($repository);
-    }
-
     $heads = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
       ->execute();

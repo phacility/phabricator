@@ -122,7 +122,6 @@ final class PhabricatorRepositoryPullEngine
             $repository->getDisplayName()));
 
         if ($is_git) {
-          $this->verifyGitOrigin($repository);
           $this->executeGitUpdate();
         } else if ($is_hg) {
           $this->executeMercurialUpdate();
@@ -352,20 +351,10 @@ final class PhabricatorRepositoryPullEngine
 
     $this->logRefDifferences($remote_refs, $local_refs);
 
-    // Force the "origin" URI to the configured value.
-    $repository->execxLocalCommand(
-      'remote set-url origin -- %P',
-      $repository->getRemoteURIEnvelope());
-
-    if ($repository->isWorkingCopyBare()) {
-      // For bare working copies, we need this magic incantation.
-      $future = $repository->getRemoteCommandFuture(
-        'fetch origin %s --prune',
-        '+refs/*:refs/*');
-    } else {
-      $future = $repository->getRemoteCommandFuture(
-        'fetch --all --prune');
-    }
+    $future = $repository->getRemoteCommandFuture(
+      'fetch %P %s --prune',
+      $repository->getRemoteURIEnvelope(),
+      '+refs/*:refs/*');
 
     $future
       ->setCWD($path)
