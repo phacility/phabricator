@@ -31,7 +31,8 @@ final class DiffusionBranchTableView extends DiffusionView {
 
     Javelin::initBehavior('phabricator-tooltips');
 
-    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: Autoclose');
+    $doc_href = PhabricatorEnv::getDoclink(
+      'Diffusion User Guide: Permanent Refs');
 
     $rows = array();
     $rowc = array();

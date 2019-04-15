@@ -136,7 +136,8 @@ final class DiffusionCommitEditEngine
           break;
       }
 
-      $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: Autoclose');
+      $doc_href = PhabricatorEnv::getDoclink(
+        'Diffusion User Guide: Permanent Refs');
       $doc_link = phutil_tag(
         'a',
         array(
@@ -146,7 +147,7 @@ final class DiffusionCommitEditEngine
         pht('Learn More'));
 
         $fields[] = id(new PhabricatorStaticEditField())
-          ->setLabel(pht('Autoclose?'))
+          ->setLabel(pht('Published?'))
           ->setValue(array($desc, " \xC2\xB7 ", $doc_link));
     }
 

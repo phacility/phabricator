@@ -32,7 +32,6 @@ final class DiffusionBranchListView extends DiffusionView {
 
     Javelin::initBehavior('phabricator-tooltips');
 
-    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: Autoclose');
     $list = id(new PHUIObjectItemListView())
       ->setFlush(true)
       ->addClass('diffusion-history-list')

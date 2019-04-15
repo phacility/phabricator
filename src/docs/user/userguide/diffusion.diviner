@@ -86,8 +86,8 @@ Continue by:
 If you're having trouble getting things working, these topic guides may be
 helpful:
 
-  - get details about automatically closing tasks and revisions in response
-    to commits in @{article:Diffusion User Guide: Autoclose}; or
+  - get details about automatically taking actions in response to commits in
+    @{article:Diffusion User Guide: Permanent Refs}; or
   - understand how Phabricator updates repositories with
     @{article:Diffusion User Guide: Repository Updates}; or
   - fix issues with repository imports with
