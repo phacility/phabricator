@@ -1142,6 +1142,12 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     $constraints = $request->getValue('constraints', array());
+    if (!is_array($constraints)) {
+      throw new Exception(
+        pht(
+          'Parameter "constraints" must be a map of constraints, got "%s".',
+          phutil_describe_type($constraints)));
+    }
 
     $fields = $this->getSearchFieldsForConduit();
 
