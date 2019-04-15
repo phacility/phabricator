@@ -214,7 +214,7 @@ final class DiffusionRepositoryEditEngine
 
     $fetch_value = $object->getFetchRules();
     $track_value = $object->getTrackOnlyRules();
-    $permanent_value = $object->getAutocloseOnlyRules();
+    $permanent_value = $object->getPermanentRefRules();
 
     $automation_instructions = pht(
       "Configure **Repository Automation** to allow Phabricator to ".
@@ -392,7 +392,7 @@ final class DiffusionRepositoryEditEngine
         ->setKey('permanentRefs')
         ->setLabel(pht('Permanent Refs'))
         ->setTransactionType(
-          PhabricatorRepositoryAutocloseOnlyTransaction::TRANSACTIONTYPE)
+          PhabricatorRepositoryPermanentRefsTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setDescription(pht('Only these refs are considered permanent.'))
         ->setConduitDescription(pht('Set the permanent refs.'))

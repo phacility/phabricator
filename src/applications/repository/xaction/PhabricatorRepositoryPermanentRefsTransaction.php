@@ -1,16 +1,16 @@
 <?php
 
-final class PhabricatorRepositoryAutocloseOnlyTransaction
+final class PhabricatorRepositoryPermanentRefsTransaction
   extends PhabricatorRepositoryTransactionType {
 
   const TRANSACTIONTYPE = 'repo:autoclose-only';
 
   public function generateOldValue($object) {
-    return $object->getAutocloseOnlyRules();
+    return $object->getPermanentRefRules();
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setAutocloseOnlyRules($value);
+    $object->setPermanentRefRules($value);
   }
 
   public function getTitle() {

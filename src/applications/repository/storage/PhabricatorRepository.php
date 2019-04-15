@@ -1197,11 +1197,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return null;
   }
 
-  public function getAutocloseOnlyRules() {
+  public function getPermanentRefRules() {
     return array_keys($this->getDetail('close-commits-filter', array()));
   }
 
-  public function setAutocloseOnlyRules(array $rules) {
+  public function setPermanentRefRules(array $rules) {
     $rules = array_fill_keys($rules, true);
     $this->setDetail('close-commits-filter', $rules);
     return $this;
@@ -2846,7 +2846,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function getFieldValuesForConduit() {
     $fetch_rules = $this->getFetchRules();
     $track_rules = $this->getTrackOnlyRules();
-    $permanent_rules = $this->getAutocloseOnlyRules();
+    $permanent_rules = $this->getPermanentRefRules();
 
     $fetch_rules = $this->getStringListForConduit($fetch_rules);
     $track_rules = $this->getStringListForConduit($track_rules);

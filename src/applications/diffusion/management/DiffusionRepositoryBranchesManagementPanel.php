@@ -24,7 +24,7 @@ final class DiffusionRepositoryBranchesManagementPanel
     $has_any =
       $repository->getDetail('default-branch') ||
       $repository->getTrackOnlyRules() ||
-      $repository->getAutocloseOnlyRules();
+      $repository->getPermanentRefRules();
 
     if ($has_any) {
       return 'fa-code-fork';
@@ -102,7 +102,7 @@ final class DiffusionRepositoryBranchesManagementPanel
       $permanent_display =
         phutil_tag('em', array(), pht('Publishing Disabled'));
     } else {
-      $permanent_rules = $repository->getAutocloseOnlyRules();
+      $permanent_rules = $repository->getPermanentRefRules();
       if ($permanent_rules) {
         $permanent_display = implode(', ', $permanent_rules);
       } else {
