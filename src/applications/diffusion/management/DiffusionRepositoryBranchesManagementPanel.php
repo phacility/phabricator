@@ -37,8 +37,8 @@ final class DiffusionRepositoryBranchesManagementPanel
     return array(
       'defaultBranch',
       'fetchRefs',
-      'trackOnly',
       'permanentRefs',
+      'trackOnly',
     );
   }
 
@@ -90,12 +90,10 @@ final class DiffusionRepositoryBranchesManagementPanel
     }
 
     $track_only_rules = $repository->getTrackOnlyRules();
-    $track_only_rules = implode(', ', $track_only_rules);
-    $track_only = nonempty(
-      $track_only_rules,
-      phutil_tag('em', array(), pht('Track All Branches')));
-    $view->addProperty(pht('Track Only'), $track_only);
-
+    if ($track_only_rules) {
+      $track_only_rules = implode(', ', $track_only_rules);
+      $view->addProperty(pht('Track Only'), $track_only_rules);
+    }
 
     $publishing_disabled = $repository->isPublishingDisabled();
     if ($publishing_disabled) {
@@ -134,7 +132,6 @@ final class DiffusionRepositoryBranchesManagementPanel
       $rows = array();
       foreach ($branches as $branch) {
         $branch_name = $branch->getShortName();
-        $tracking = $repository->shouldTrackBranch($branch_name);
         $permanent = $repository->shouldAutocloseBranch($branch_name);
 
         $default = $repository->getDefaultBranch();
@@ -166,7 +163,6 @@ final class DiffusionRepositoryBranchesManagementPanel
           $icon,
           $branch_name,
           $status,
-          $tracking ? pht('Tracking') : pht('Off'),
           $permanent_status,
         );
       }
@@ -176,14 +172,12 @@ final class DiffusionRepositoryBranchesManagementPanel
           '',
           pht('Branch'),
           pht('Status'),
-          pht('Track'),
           pht('Permanent'),
         ));
       $branch_table->setColumnClasses(
         array(
           '',
           'pri',
-          'narrow',
           'narrow',
           'wide',
         ));
@@ -192,7 +186,6 @@ final class DiffusionRepositoryBranchesManagementPanel
           true,
           true,
           $can_close_branches,
-          true,
           true,
         ));
 

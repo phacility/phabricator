@@ -253,6 +253,11 @@ final class DiffusionRepositoryEditEngine
       }
     }
 
+    $track_instructions = pht(
+      'WARNING: The "Track Only" feature is deprecated. Use "Fetch Refs" '.
+      'and "Permanent Refs" instead. This feature will be removed in a '.
+      'future version of Phabricator.');
+
     return array(
       id(new PhabricatorSelectEditField())
         ->setKey('vcs')
@@ -378,17 +383,6 @@ final class DiffusionRepositoryEditEngine
         ->setValue($fetch_value),
       id(new PhabricatorTextAreaEditField())
         ->setIsStringList(true)
-        ->setKey('trackOnly')
-        ->setLabel(pht('Track Only'))
-        ->setTransactionType(
-          PhabricatorRepositoryTrackOnlyTransaction::TRANSACTIONTYPE)
-        ->setIsCopyable(true)
-        ->setDescription(pht('Track only these branches.'))
-        ->setConduitDescription(pht('Set the tracked branches.'))
-        ->setConduitTypeDescription(pht('New tracked branches.'))
-        ->setValue($track_value),
-      id(new PhabricatorTextAreaEditField())
-        ->setIsStringList(true)
         ->setKey('permanentRefs')
         ->setLabel(pht('Permanent Refs'))
         ->setTransactionType(
@@ -398,6 +392,18 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Set the permanent refs.'))
         ->setConduitTypeDescription(pht('New permanent ref rules.'))
         ->setValue($permanent_value),
+      id(new PhabricatorTextAreaEditField())
+        ->setIsStringList(true)
+        ->setKey('trackOnly')
+        ->setLabel(pht('Track Only'))
+        ->setTransactionType(
+          PhabricatorRepositoryTrackOnlyTransaction::TRANSACTIONTYPE)
+        ->setIsCopyable(true)
+        ->setControlInstructions($track_instructions)
+        ->setDescription(pht('Track only these branches.'))
+        ->setConduitDescription(pht('Set the tracked branches.'))
+        ->setConduitTypeDescription(pht('New tracked branches.'))
+        ->setValue($track_value),
       id(new PhabricatorTextEditField())
         ->setKey('importOnly')
         ->setLabel(pht('Import Only'))
