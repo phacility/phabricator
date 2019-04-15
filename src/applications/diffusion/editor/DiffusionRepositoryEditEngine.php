@@ -236,6 +236,22 @@ final class DiffusionRepositoryEditEngine
       'you can set a path in **Import Only**. Phabricator will ignore '.
       'commits which do not affect this path.');
 
+    $filesize_warning = null;
+    if ($object->isGit()) {
+      $git_binary = PhutilBinaryAnalyzer::getForBinary('git');
+      $git_version = $git_binary->getBinaryVersion();
+      $filesize_version = '1.8.4';
+      if (version_compare($git_version, $filesize_version, '<')) {
+        $filesize_warning = pht(
+          '(WARNING) {icon exclamation-triangle} The version of "git" ("%s") '.
+          'installed on this server does not support '.
+          '"--batch-check=<format>", a feature required to enforce filesize '.
+          'limits. Upgrade to "git" %s or newer to use this feature.',
+          $git_version,
+          $filesize_version);
+      }
+    }
+
     return array(
       id(new PhabricatorSelectEditField())
         ->setKey('vcs')
@@ -477,6 +493,7 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Maximum permitted file size.'))
         ->setConduitDescription(pht('Change the filesize limit.'))
         ->setConduitTypeDescription(pht('New repository filesize limit.'))
+        ->setControlInstructions($filesize_warning)
         ->setValue($object->getFilesizeLimit()),
       id(new PhabricatorTextEditField())
         ->setKey('copyTimeLimit')
