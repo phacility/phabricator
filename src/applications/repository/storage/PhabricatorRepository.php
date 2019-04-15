@@ -2834,10 +2834,24 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           pht(
             'The Almanac Service that hosts this repository, if the '.
             'repository is clustered.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('refRules')
+        ->setType('map<string, list<string>>')
+        ->setDescription(
+          pht(
+            'The "Fetch" and "Permanent Ref" rules for this repository.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $fetch_rules = $this->getFetchRules();
+    $track_rules = $this->getTrackOnlyRules();
+    $permanent_rules = $this->getAutocloseOnlyRules();
+
+    $fetch_rules = $this->getStringListForConduit($fetch_rules);
+    $track_rules = $this->getStringListForConduit($track_rules);
+    $permanent_rules = $this->getStringListForConduit($permanent_rules);
+
     return array(
       'name' => $this->getName(),
       'vcs' => $this->getVersionControlSystem(),
@@ -2846,7 +2860,27 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'status' => $this->getStatus(),
       'isImporting' => (bool)$this->isImporting(),
       'almanacServicePHID' => $this->getAlmanacServicePHID(),
+      'refRules' => array(
+        'fetchRules' => $fetch_rules,
+        'trackRules' => $track_rules,
+        'permanentRefRules' => $permanent_rules,
+      ),
     );
+  }
+
+  private function getStringListForConduit($list) {
+    if (!is_array($list)) {
+      $list = array();
+    }
+
+    foreach ($list as $key => $value) {
+      $value = (string)$value;
+      if (!strlen($value)) {
+        unset($list[$key]);
+      }
+    }
+
+    return array_values($list);
   }
 
   public function getConduitSearchAttachments() {
