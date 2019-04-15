@@ -455,7 +455,7 @@ final class PhabricatorRepositoryRefEngine
 
     $all_commits = queryfx_all(
       $conn_w,
-      'SELECT id, commitIdentifier, importStatus FROM %T
+      'SELECT id, phid, commitIdentifier, importStatus FROM %T
         WHERE repositoryID = %d AND commitIdentifier IN (%Ls)',
       $commit_table->getTableName(),
       $repository->getID(),
@@ -485,10 +485,15 @@ final class PhabricatorRepositoryRefEngine
 
         $data = array(
           'commitID' => $row['id'],
-          'only' => true,
         );
 
-        PhabricatorWorker::scheduleTask($class, $data);
+        PhabricatorWorker::scheduleTask(
+          $class,
+          $data,
+          array(
+            'priority' => PhabricatorWorker::PRIORITY_COMMIT,
+            'objectPHID' => $row['phid'],
+          ));
       }
     }
 
