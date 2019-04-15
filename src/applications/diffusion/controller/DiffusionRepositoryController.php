@@ -334,6 +334,8 @@ final class DiffusionRepositoryController extends DiffusionController {
         'fa-clock-o',
         'indigo',
         pht('Importing (%s)...', $percentage));
+    } else if ($repository->isPublishingDisabled()) {
+      $header->setStatus('fa-minus', 'bluegrey', pht('Publishing Disabled'));
     } else {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     }
