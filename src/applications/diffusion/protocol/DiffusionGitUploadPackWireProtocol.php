@@ -166,13 +166,17 @@ final class DiffusionGitUploadPackWireProtocol
     $head_key = head_key($frames);
     $last_key = last_key($frames);
 
-    $output = array();
+    $capabilities = null;
+    $last_frame = null;
+
+    $refs = array();
     foreach ($frames as $key => $frame) {
       $is_last = ($key === $last_key);
       if ($is_last) {
-        $output[] = $frame;
         // This is a "0000" frame at the end of the list of refs, so we pass
-        // it through unmodified.
+        // it through unmodified after we figure out what the rest of the
+        // frames should look like, below.
+        $last_frame = $frame;
         continue;
       }
 
@@ -230,41 +234,68 @@ final class DiffusionGitUploadPackWireProtocol
 
       $hash = $matches['hash'];
       $name = $matches['name'];
-      $capabilities = idx($matches, 'capabilities');
 
-      $ref = array(
-        'hash' => $hash,
-        'name' => $name,
-        'capabilities' => $capabilities,
-      );
-
-      $old_ref = $ref;
-
-      $ref = $this->willReadRef($ref);
-
-      $new_ref = $ref;
-
-      $this->didRewriteRef($old_ref, $new_ref);
-
-      if ($ref === null) {
-        continue;
+      if ($is_first) {
+        $capabilities = $matches['capabilities'];
       }
 
-      if (isset($ref['capabilities'])) {
+      $refs[] = array(
+        'hash' => $hash,
+        'name' => $name,
+      );
+    }
+
+    $capabilities = DiffusionGitWireProtocolCapabilities::newFromWireFormat(
+      $capabilities);
+
+    $ref_list = id(new DiffusionGitWireProtocolRefList())
+      ->setCapabilities($capabilities);
+
+    foreach ($refs as $ref) {
+      $ref_list->addRef(
+        id(new DiffusionGitWireProtocolRef())
+          ->setName($ref['name'])
+          ->setHash($ref['hash']));
+    }
+
+    // TODO: Here, we have a structured list of refs. In a future change,
+    // we are free to mutate the structure before flattening it back into
+    // wire format.
+
+    $refs = $ref_list->getRefs();
+
+    // Before we write the ref list, sort it for consistency with native
+    // Git output. We may have added, removed, or renamed refs and ended up
+    // with an out-of-order list.
+
+    $refs = msortv($refs, 'newSortVector');
+
+    // The first ref we send back includes the capabilities data. Note that if
+    // we send back no refs, we also don't send back capabilities! This is
+    // a little surprising, but is consistent with the native behavior of the
+    // protocol.
+
+    $output = array();
+    $is_first = true;
+    foreach ($refs as $ref) {
+      if ($is_first) {
         $result = sprintf(
           "%s %s\0%s\n",
-          $ref['hash'],
-          $ref['name'],
-          $ref['capabilities']);
+          $ref->getHash(),
+          $ref->getName(),
+          $ref_list->getCapabilities()->toWireFormat());
       } else {
         $result = sprintf(
           "%s %s\n",
-          $ref['hash'],
-          $ref['name']);
+          $ref->getHash(),
+          $ref->getName());
       }
 
       $output[] = $this->newProtocolFrame('data', $result);
+      $is_first = false;
     }
+
+    $output[] = $last_frame;
 
     return $this->newProtocolDataMessage($output);
   }
@@ -289,47 +320,6 @@ final class DiffusionGitUploadPackWireProtocol
     $message = implode('', $message);
 
     return $message;
-  }
-
-  private function willReadRef(array $ref) {
-    return $ref;
-  }
-
-  private function didRewriteRef($old_ref, $new_ref) {
-    $log = $this->getProtocolLog();
-    if (!$log) {
-      return;
-    }
-
-    if (!$old_ref) {
-      $old_name = null;
-    } else {
-      $old_name = $old_ref['name'];
-    }
-
-    if (!$new_ref) {
-      $new_name = null;
-    } else {
-      $new_name = $new_ref['name'];
-    }
-
-    if ($old_name === $new_name) {
-      return;
-    }
-
-    if ($old_name === null) {
-      $old_name = '<null>';
-    }
-
-    if ($new_name === null) {
-      $new_name = '<null>';
-    }
-
-    $log->didWriteFrame(
-      pht(
-        'Rewrite Ref: %s -> %s',
-        $old_name,
-        $new_name));
   }
 
 }
