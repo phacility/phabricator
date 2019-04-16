@@ -142,6 +142,10 @@ final class PhabricatorRepositoryPullEngine
         }
       }
 
+      if ($is_git) {
+        $this->updateGitWorkingCopyConfiguration();
+      }
+
     } catch (Exception $ex) {
       $this->abortPull(
         pht(
@@ -418,6 +422,43 @@ final class PhabricatorRepositoryPullEngine
     }
 
     $this->installHook($root.$path);
+  }
+
+  private function updateGitWorkingCopyConfiguration() {
+    $repository = $this->getRepository();
+
+    // See T5963. When you "git clone" from a remote with no "master", the
+    // client warns you that it isn't sure what it should check out as an
+    // initial state:
+
+    //   warning: remote HEAD refers to nonexistent ref, unable to checkout
+
+    // We can tell the client what it should check out by making "HEAD"
+    // point somewhere. However:
+    //
+    // (1) If we don't set "receive.denyDelteCurrent" to "ignore" and a user
+    // tries to delete the default branch, Git raises an error and refuses.
+    // We want to allow this; we already have sufficient protections around
+    // dangerous changes and do not need to special case the default branch.
+    //
+    // (2) A repository may have a nonexistent default branch configured.
+    // For now, we just respect configuration. This will raise a warning when
+    // users clone the repository.
+    //
+    // In any case, these changes are both advisory, so ignore any errors we
+    // may encounter.
+
+    // We do this for both hosted and observed repositories. Although it is
+    // not terribly common to clone from Phabricator's copy of an observed
+    // repository, it works fine and makes sense occasionally.
+
+    if ($repository->isWorkingCopyBare()) {
+      $repository->execLocalCommand(
+        'config -- receive.denyDeleteCurrent ignore');
+      $repository->execLocalCommand(
+        'symbolic-ref HEAD %s',
+        'refs/heads/'.$repository->getDefaultBranch());
+    }
   }
 
   private function loadGitRemoteRefs(
