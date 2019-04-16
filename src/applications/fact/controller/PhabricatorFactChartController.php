@@ -74,6 +74,8 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'hardpoint' => $id,
       'x' => array($x),
       'y' => array($y),
+      'yMax' => max(0, max($y)),
+      'yMin' => min(0, min($y)),
       'xformat' => 'epoch',
       'colors' => array('#0000ff'),
     ));
@@ -82,8 +84,9 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       ->setHeaderText(pht('Count of %s', $fact->getName()))
       ->appendChild($chart);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Chart'));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Chart'))
+      ->setBorder(true);
 
     $title = pht('Chart');
 

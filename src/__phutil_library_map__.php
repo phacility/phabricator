@@ -3201,6 +3201,7 @@ phutil_register_library_map(array(
     'PhabricatorFact' => 'applications/fact/fact/PhabricatorFact.php',
     'PhabricatorFactAggregate' => 'applications/fact/storage/PhabricatorFactAggregate.php',
     'PhabricatorFactApplication' => 'applications/fact/application/PhabricatorFactApplication.php',
+    'PhabricatorFactChart' => 'applications/fact/storage/PhabricatorFactChart.php',
     'PhabricatorFactChartController' => 'applications/fact/controller/PhabricatorFactChartController.php',
     'PhabricatorFactController' => 'applications/fact/controller/PhabricatorFactController.php',
     'PhabricatorFactCursor' => 'applications/fact/storage/PhabricatorFactCursor.php',
@@ -9229,6 +9230,10 @@ phutil_register_library_map(array(
     'PhabricatorFact' => 'Phobject',
     'PhabricatorFactAggregate' => 'PhabricatorFactDAO',
     'PhabricatorFactApplication' => 'PhabricatorApplication',
+    'PhabricatorFactChart' => array(
+      'PhabricatorFactDAO',
+      'PhabricatorPolicyInterface',
+    ),
     'PhabricatorFactChartController' => 'PhabricatorFactController',
     'PhabricatorFactController' => 'PhabricatorController',
     'PhabricatorFactCursor' => 'PhabricatorFactDAO',

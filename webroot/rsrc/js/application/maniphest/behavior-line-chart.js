@@ -8,7 +8,7 @@
 
 JX.behavior('line-chart', function(config) {
 
-  function fn(n) {
+  function css_function(n) {
     return n + '(' + JX.$A(arguments).slice(1).join(', ') + ')';
   }
 
@@ -50,7 +50,7 @@ JX.behavior('line-chart', function(config) {
     .attr('class', 'chart');
 
   var g = svg.append('g')
-      .attr('transform', fn('translate', padding.left, padding.top));
+      .attr('transform', css_function('translate', padding.left, padding.top));
 
   g.append('rect')
       .attr('class', 'inner')
@@ -73,9 +73,7 @@ JX.behavior('line-chart', function(config) {
   x.domain(d3.extent(data, function(d) { return d.date; }));
 
   var yex = d3.extent(data, function(d) { return d.count; });
-  yex[0] = 0;
-  yex[1] = yex[1] * 1.05;
-  y.domain(yex);
+  y.domain([config.yMin, config.yMax]);
 
   g.append('path')
     .datum(data)
@@ -84,12 +82,12 @@ JX.behavior('line-chart', function(config) {
 
   g.append('g')
     .attr('class', 'x axis')
-    .attr('transform', fn('translate', 0, size.height))
+    .attr('transform', css_function('translate', 0, size.height))
     .call(xAxis);
 
   g.append('g')
     .attr('class', 'y axis')
-    .attr('transform', fn('translate', 0, 0))
+    .attr('transform', css_function('translate', 0, 0))
     .call(yAxis);
 
   var div = d3.select('body')
