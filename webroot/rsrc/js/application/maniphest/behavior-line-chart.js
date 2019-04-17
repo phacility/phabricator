@@ -57,28 +57,61 @@ JX.behavior('line-chart', function(config) {
       .attr('width', size.width)
       .attr('height', size.height);
 
-  var line = d3.svg.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.count); });
-
-  var data = [];
-  for (var ii = 0; ii < config.x[0].length; ii++) {
-    data.push(
-      {
-        date: new Date(config.x[0][ii] * 1000),
-        count: +config.y[0][ii]
-      });
+  function as_date(value) {
+    return new Date(value * 1000);
   }
 
-  x.domain(d3.extent(data, function(d) { return d.date; }));
-
-  var yex = d3.extent(data, function(d) { return d.count; });
+  x.domain([as_date(config.xMin), as_date(config.xMax)]);
   y.domain([config.yMin, config.yMax]);
 
-  g.append('path')
-    .datum(data)
-    .attr('class', 'line')
-    .attr('d', line);
+  for (var idx = 0; idx < config.datasets.length; idx++) {
+    var dataset = config.datasets[idx];
+
+    var line = d3.svg.line()
+      .x(function(d) { return x(d.xvalue); })
+      .y(function(d) { return y(d.yvalue); });
+
+    var data = [];
+    for (var ii = 0; ii < dataset.x.length; ii++) {
+      data.push(
+        {
+          xvalue: as_date(dataset.x[ii]),
+          yvalue: dataset.y[ii]
+        });
+    }
+
+    g.append('path')
+      .datum(data)
+      .attr('class', 'line')
+      .style('stroke', dataset.color)
+      .attr('d', line);
+
+    g.selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('class', 'point')
+      .attr('r', 3)
+      .attr('cx', function(d) { return x(d.xvalue); })
+      .attr('cy', function(d) { return y(d.yvalue); })
+      .on('mouseover', function(d) {
+        var d_y = d.xvalue.getFullYear();
+
+        // NOTE: Javascript months are zero-based. See PHI1017.
+        var d_m = d.xvalue.getMonth() + 1;
+
+        var d_d = d.xvalue.getDate();
+
+        div
+          .html(d_y + '-' + d_m + '-' + d_d + ': ' + d.yvalue)
+          .style('opacity', 0.9)
+          .style('left', (d3.event.pageX - 60) + 'px')
+          .style('top', (d3.event.pageY - 38) + 'px');
+        })
+      .on('mouseout', function() {
+        div.style('opacity', 0);
+      });
+  }
 
   g.append('g')
     .attr('class', 'x axis')
@@ -94,31 +127,5 @@ JX.behavior('line-chart', function(config) {
     .append('div')
     .attr('class', 'chart-tooltip')
     .style('opacity', 0);
-
-  g.selectAll('dot')
-    .data(data)
-    .enter()
-    .append('circle')
-    .attr('class', 'point')
-    .attr('r', 3)
-    .attr('cx', function(d) { return x(d.date); })
-    .attr('cy', function(d) { return y(d.count); })
-    .on('mouseover', function(d) {
-      var d_y = d.date.getFullYear();
-
-      // NOTE: Javascript months are zero-based. See PHI1017.
-      var d_m = d.date.getMonth() + 1;
-
-      var d_d = d.date.getDate();
-
-      div
-        .html(d_y + '-' + d_m + '-' + d_d + ': ' + d.count)
-        .style('opacity', 0.9)
-        .style('left', (d3.event.pageX - 60) + 'px')
-        .style('top', (d3.event.pageY - 38) + 'px');
-      })
-    .on('mouseout', function() {
-      div.style('opacity', 0);
-    });
 
 });

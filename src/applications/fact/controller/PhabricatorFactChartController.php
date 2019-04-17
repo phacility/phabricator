@@ -55,8 +55,29 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       }
     }
 
-    $x = array_keys($points);
-    $y = array_values($points);
+    $datasets = array();
+
+    $datasets[] = array(
+      'x' => array_keys($points),
+      'y' => array_values($points),
+      'color' => '#ff0000',
+    );
+
+
+    // Add a dummy "y = x" dataset to prove we can draw multiple datasets.
+    $x_min = min(array_keys($points));
+    $x_max = max(array_keys($points));
+    $x_range = ($x_max - $x_min) / 4;
+    $linear = array();
+    foreach ($points as $x => $y) {
+      $linear[$x] = count($points) * (($x - $x_min) / $x_range);
+    }
+    $datasets[] = array(
+      'x' => array_keys($linear),
+      'y' => array_values($linear),
+      'color' => '#0000ff',
+    );
+
 
     $id = celerity_generate_unique_node_id();
     $chart = phutil_tag(
@@ -70,15 +91,38 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
 
     require_celerity_resource('d3');
 
-    Javelin::initBehavior('line-chart', array(
-      'hardpoint' => $id,
-      'x' => array($x),
-      'y' => array($y),
-      'yMax' => max(0, max($y)),
-      'yMin' => min(0, min($y)),
-      'xformat' => 'epoch',
-      'colors' => array('#0000ff'),
-    ));
+    $y_min = 0;
+    $y_max = 0;
+    $x_min = null;
+    $x_max = 0;
+    foreach ($datasets as $dataset) {
+      if (!$dataset['y']) {
+        continue;
+      }
+
+      $y_min = min($y_min, min($dataset['y']));
+      $y_max = max($y_max, max($dataset['y']));
+
+      if ($x_min === null) {
+        $x_min = min($dataset['x']);
+      } else {
+        $x_min = min($x_min, min($dataset['x']));
+      }
+
+      $x_max = max($x_max, max($dataset['x']));
+    }
+
+    Javelin::initBehavior(
+      'line-chart',
+      array(
+        'hardpoint' => $id,
+        'datasets' => $datasets,
+        'xMin' => $x_min,
+        'xMax' => $x_max,
+        'yMin' => $y_min,
+        'yMax' => $y_max,
+        'xformat' => 'epoch',
+      ));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Count of %s', $fact->getName()))
