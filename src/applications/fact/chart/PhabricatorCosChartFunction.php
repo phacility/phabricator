@@ -1,9 +1,9 @@
 <?php
 
-final class PhabricatorSinChartFunction
+final class PhabricatorCosChartFunction
   extends PhabricatorChartFunction {
 
-  const FUNCTIONKEY = 'sin';
+  const FUNCTIONKEY = 'cos';
 
   protected function newArguments() {
     return array(
@@ -19,7 +19,7 @@ final class PhabricatorSinChartFunction
   }
 
   protected function evaluateFunction($x) {
-    return sin(deg2rad($x));
+    return cos(deg2rad($x));
   }
 
 }

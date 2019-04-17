@@ -5,9 +5,9 @@ abstract class PhabricatorChartFunction
 
   private $xAxis;
   private $yAxis;
-  private $limit;
 
   private $argumentParser;
+  private $sourceFunction;
 
   final public function getFunctionKey() {
     return $this->getPhobjectClassConstant('FUNCTIONKEY', 32);
@@ -44,6 +44,12 @@ abstract class PhabricatorChartFunction
     $parser->setHaveAllArguments(true);
     $parser->parseArguments();
 
+    $source_argument = $parser->getSourceFunctionArgument();
+    if ($source_argument) {
+      $source_function = $this->getArgument($source_argument->getName());
+      $this->setSourceFunction($source_function);
+    }
+
     return $this;
   }
 
@@ -71,6 +77,15 @@ abstract class PhabricatorChartFunction
     return;
   }
 
+  protected function setSourceFunction(PhabricatorChartFunction $source) {
+    $this->sourceFunction = $source;
+    return $this;
+  }
+
+  protected function getSourceFunction() {
+    return $this->sourceFunction;
+  }
+
   final public function setXAxis(PhabricatorChartAxis $x_axis) {
     $this->xAxis = $x_axis;
     return $this;
@@ -87,6 +102,67 @@ abstract class PhabricatorChartFunction
 
   final public function getYAxis() {
     return $this->yAxis;
+  }
+
+  protected function canEvaluateFunction() {
+    return false;
+  }
+
+  protected function evaluateFunction($x) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function hasDomain() {
+    if ($this->canEvaluateFunction()) {
+      return false;
+    }
+
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function getDatapoints(PhabricatorChartDataQuery $query) {
+    if ($this->canEvaluateFunction()) {
+      $points = $this->newSourceDatapoints($query);
+      foreach ($points as $key => $point) {
+        $y = $point['y'];
+        $y = $this->evaluateFunction($y);
+        $points[$key]['y'] = $y;
+      }
+
+      return $points;
+    }
+
+    return $this->newDatapoints($query);
+  }
+
+  protected function newDatapoints(PhabricatorChartDataQuery $query) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function newSourceDatapoints(PhabricatorChartDataQuery $query) {
+    $source = $this->getSourceFunction();
+    if ($source) {
+      return $source->getDatapoints($query);
+    }
+
+    return $this->newDefaultDatapoints($query);
+  }
+
+  protected function newDefaultDatapoints(PhabricatorChartDataQuery $query) {
+    $x_min = $query->getMinimumValue();
+    $x_max = $query->getMaximumValue();
+    $limit = $query->getLimit();
+
+    $points = array();
+    $steps = $this->newLinearSteps($x_min, $x_max, $limit);
+    foreach ($steps as $step) {
+      $points[] = array(
+        'x' => $step,
+        'y' => $step,
+      );
+    }
+
+    return $points;
   }
 
   protected function newLinearSteps($src, $dst, $count) {

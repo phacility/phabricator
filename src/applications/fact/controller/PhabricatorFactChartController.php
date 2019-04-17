@@ -29,6 +29,27 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $functions[] = id(new PhabricatorSinChartFunction())
       ->setArguments(array($x_function));
 
+    $cos_function = id(new PhabricatorCosChartFunction())
+      ->setArguments(array($x_function));
+
+    $functions[] = id(new PhabricatorShiftChartFunction())
+      ->setArguments(
+        array(
+          array(
+            'scale',
+            array(
+              'cos',
+              array(
+                'scale',
+                array('x'),
+                0.001,
+              ),
+            ),
+            10,
+          ),
+          200,
+        ));
+
     list($domain_min, $domain_max) = $this->getDomain($functions);
 
     $axis = id(new PhabricatorChartAxis())
@@ -83,6 +104,9 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'yMax' => $y_max,
     );
 
+    // TODO: Move this back up, it's just down here for now to make
+    // debugging easier so the main page throws a more visible exception when
+    // something goes wrong.
     if ($is_chart_mode) {
       return $this->newChartResponse();
     }

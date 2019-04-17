@@ -151,4 +151,43 @@ final class PhabricatorChartFunctionArgumentParser
       implode(', ', $argument_list));
   }
 
+  public function getSourceFunctionArgument() {
+    $required_type = 'function';
+
+    $sources = array();
+    foreach ($this->argumentMap as $key => $argument) {
+      if (!$argument->getIsSourceFunction()) {
+        continue;
+      }
+
+      if ($argument->getType() !== $required_type) {
+        throw new Exception(
+          pht(
+            'Function "%s" defines an argument "%s" which is marked as a '.
+            'source function, but the type of this argument is not "%s".',
+            $this->getFunctionArgumentSignature(),
+            $argument->getName(),
+            $required_type));
+      }
+
+      $sources[$key] = $argument;
+    }
+
+    if (!$sources) {
+      return null;
+    }
+
+    if (count($sources) > 1) {
+      throw new Exception(
+        pht(
+          'Function "%s" defines more than one argument as a source '.
+          'function (arguments: %s). Functions must have zero or one '.
+          'source function.',
+          $this->getFunctionArgumentSignature(),
+          implode(', ', array_keys($sources))));
+    }
+
+    return head($sources);
+  }
+
 }

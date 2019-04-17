@@ -9,25 +9,12 @@ final class PhabricatorXChartFunction
     return array();
   }
 
-  public function getDatapoints(PhabricatorChartDataQuery $query) {
-    $x_min = $query->getMinimumValue();
-    $x_max = $query->getMaximumValue();
-    $limit = $query->getLimit();
-
-    $points = array();
-    $steps = $this->newLinearSteps($x_min, $x_max, $limit);
-    foreach ($steps as $step) {
-      $points[] = array(
-        'x' => $step,
-        'y' => $step,
-      );
-    }
-
-    return $points;
+  protected function canEvaluateFunction() {
+    return true;
   }
 
-  public function hasDomain() {
-    return false;
+  protected function evaluateFunction($x) {
+    return $x;
   }
 
 }
