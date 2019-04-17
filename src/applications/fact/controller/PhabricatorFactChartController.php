@@ -20,9 +20,11 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $functions[] = id(new PhabricatorFactChartFunction())
       ->setArguments(array('tasks.open-count.create'));
 
-    if ($is_chart_mode) {
-      return $this->newChartResponse();
-    }
+    $functions[] = id(new PhabricatorConstantChartFunction())
+      ->setArguments(array(256));
+
+    $functions[] = id(new PhabricatorXChartFunction())
+      ->setArguments(array());
 
     list($domain_min, $domain_max) = $this->getDomain($functions);
 
@@ -72,6 +74,10 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'yMin' => $y_min,
       'yMax' => $y_max,
     );
+
+    if ($is_chart_mode) {
+      return $this->newChartResponse();
+    }
 
     return id(new AphrontAjaxResponse())->setContent($chart_data);
   }
