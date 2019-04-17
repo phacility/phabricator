@@ -24,8 +24,16 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       return $this->newChartResponse();
     }
 
+    list($domain_min, $domain_max) = $this->getDomain($functions);
+
+    $axis = id(new PhabricatorChartAxis())
+      ->setMinimumValue($domain_min)
+      ->setMaximumValue($domain_max);
+
     $datasets = array();
     foreach ($functions as $function) {
+      $function->setXAxis($axis);
+
       $function->loadData();
 
       $points = $function->getDatapoints(2000);
@@ -45,10 +53,9 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       );
     }
 
+
     $y_min = 0;
     $y_max = 0;
-    $x_min = null;
-    $x_max = 0;
     foreach ($datasets as $dataset) {
       if (!$dataset['y']) {
         continue;
@@ -56,20 +63,12 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
 
       $y_min = min($y_min, min($dataset['y']));
       $y_max = max($y_max, max($dataset['y']));
-
-      if ($x_min === null) {
-        $x_min = min($dataset['x']);
-      } else {
-        $x_min = min($x_min, min($dataset['x']));
-      }
-
-      $x_max = max($x_max, max($dataset['x']));
     }
 
     $chart_data = array(
       'datasets' => $datasets,
-      'xMin' => $x_min,
-      'xMax' => $x_max,
+      'xMin' => $domain_min,
+      'xMax' => $domain_max,
       'yMin' => $y_min,
       'yMax' => $y_max,
     );
@@ -116,5 +115,50 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       ->appendChild($box);
 
   }
+
+  private function getDomain(array $functions) {
+    $domain_min_list = null;
+    $domain_max_list = null;
+    foreach ($functions as $function) {
+      if ($function->hasDomain()) {
+        $domain = $function->getDomain();
+
+        list($domain_min, $domain_max) = $domain;
+
+        if ($domain_min !== null) {
+          $domain_min_list[] = $domain_min;
+        }
+
+        if ($domain_max !== null) {
+          $domain_max_list[] = $domain_max;
+        }
+      }
+    }
+
+    $domain_min = null;
+    $domain_max = null;
+
+    if ($domain_min_list) {
+      $domain_min = min($domain_min_list);
+    }
+
+    if ($domain_max_list) {
+      $domain_max = max($domain_max_list);
+    }
+
+    // If we don't have any domain data from the actual functions, pick a
+    // plausible domain automatically.
+
+    if ($domain_max === null) {
+      $domain_max = PhabricatorTime::getNow();
+    }
+
+    if ($domain_min === null) {
+      $domain_min = $domain_max - phutil_units('365 days in seconds');
+    }
+
+    return array($domain_min, $domain_max);
+  }
+
 
 }

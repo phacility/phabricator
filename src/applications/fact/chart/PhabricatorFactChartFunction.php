@@ -83,6 +83,26 @@ final class PhabricatorFactChartFunction
       return array();
     }
 
+    $axis = $this->getXAxis();
+    $x_min = $axis->getMinimumValue();
+    $x_max = $axis->getMaximumValue();
+
+    if ($x_min !== null) {
+      foreach ($points as $key => $point) {
+        if ($point['x'] < $x_min) {
+          unset($points[$key]);
+        }
+      }
+    }
+
+    if ($x_max !== null) {
+      foreach ($points as $key => $point) {
+        if ($point['x'] > $x_max) {
+          unset($points[$key]);
+        }
+      }
+    }
+
     // If we have too many data points, throw away some of the data.
     $count = count($points);
     if ($count > $limit) {
@@ -97,6 +117,17 @@ final class PhabricatorFactChartFunction
     }
 
     return $points;
+  }
+
+  public function hasDomain() {
+    return true;
+  }
+
+  public function getDomain() {
+    // TODO: We can examine the data to fit a better domain.
+
+    $now = PhabricatorTime::getNow();
+    return array($now - phutil_units('90 days in seconds'), $now);
   }
 
 }

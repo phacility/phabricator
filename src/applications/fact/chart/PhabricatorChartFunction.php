@@ -3,6 +3,10 @@
 abstract class PhabricatorChartFunction
   extends Phobject {
 
+  private $xAxis;
+  private $yAxis;
+  private $limit;
+
   final public function getFunctionKey() {
     return $this->getPhobjectClassConstant('FUNCTIONKEY', 32);
   }
@@ -20,5 +24,23 @@ abstract class PhabricatorChartFunction
   }
 
   abstract protected function newArguments(array $arguments);
+
+  final public function setXAxis(PhabricatorChartAxis $x_axis) {
+    $this->xAxis = $x_axis;
+    return $this;
+  }
+
+  final public function getXAxis() {
+    return $this->xAxis;
+  }
+
+  final public function setYAxis(PhabricatorChartAxis $y_axis) {
+    $this->yAxis = $y_axis;
+    return $this;
+  }
+
+  final public function getYAxis() {
+    return $this->yAxis;
+  }
 
 }
