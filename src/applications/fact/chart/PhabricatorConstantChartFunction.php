@@ -27,10 +27,9 @@ final class PhabricatorConstantChartFunction
     $this->value = $arguments[0];
   }
 
-  public function getDatapoints($limit) {
-    $axis = $this->getXAxis();
-    $x_min = $axis->getMinimumValue();
-    $x_max = $axis->getMaximumValue();
+  public function getDatapoints(PhabricatorChartDataQuery $query) {
+    $x_min = $query->getMinimumValue();
+    $x_max = $query->getMaximumValue();
 
     $points = array();
     $steps = $this->newLinearSteps($x_min, $x_max, 2);

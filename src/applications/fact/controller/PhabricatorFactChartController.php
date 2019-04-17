@@ -20,11 +20,11 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $functions[] = id(new PhabricatorFactChartFunction())
       ->setArguments(array('tasks.open-count.create'));
 
-    $functions[] = id(new PhabricatorConstantChartFunction())
-      ->setArguments(array(256));
-
-    $functions[] = id(new PhabricatorXChartFunction())
+    $x_function = id(new PhabricatorXChartFunction())
       ->setArguments(array());
+
+    $functions[] = id(new PhabricatorSinChartFunction())
+      ->setArguments(array($x_function));
 
     list($domain_min, $domain_max) = $this->getDomain($functions);
 
@@ -32,13 +32,18 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       ->setMinimumValue($domain_min)
       ->setMaximumValue($domain_max);
 
+    $data_query = id(new PhabricatorChartDataQuery())
+      ->setMinimumValue($domain_min)
+      ->setMaximumValue($domain_max)
+      ->setLimit(2000);
+
     $datasets = array();
     foreach ($functions as $function) {
       $function->setXAxis($axis);
 
       $function->loadData();
 
-      $points = $function->getDatapoints(2000);
+      $points = $function->getDatapoints($data_query);
 
       $x = array();
       $y = array();

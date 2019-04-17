@@ -77,15 +77,15 @@ final class PhabricatorFactChartFunction
     $this->datapoints = $points;
   }
 
-  public function getDatapoints($limit) {
+  public function getDatapoints(PhabricatorChartDataQuery $query) {
     $points = $this->datapoints;
     if (!$points) {
       return array();
     }
 
-    $axis = $this->getXAxis();
-    $x_min = $axis->getMinimumValue();
-    $x_max = $axis->getMaximumValue();
+    $x_min = $query->getMinimumValue();
+    $x_max = $query->getMaximumValue();
+    $limit = $query->getLimit();
 
     if ($x_min !== null) {
       foreach ($points as $key => $point) {
@@ -104,14 +104,16 @@ final class PhabricatorFactChartFunction
     }
 
     // If we have too many data points, throw away some of the data.
-    $count = count($points);
-    if ($count > $limit) {
-      $ii = 0;
-      $every = ceil($count / $limit);
-      foreach ($points as $key => $point) {
-        $ii++;
-        if (($ii % $every) && ($ii != $count)) {
-          unset($points[$key]);
+    if ($limit !== null) {
+      $count = count($points);
+      if ($count > $limit) {
+        $ii = 0;
+        $every = ceil($count / $limit);
+        foreach ($points as $key => $point) {
+          $ii++;
+          if (($ii % $every) && ($ii != $count)) {
+            unset($points[$key]);
+          }
         }
       }
     }
