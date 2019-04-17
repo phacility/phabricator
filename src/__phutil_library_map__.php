@@ -2652,6 +2652,8 @@ phutil_register_library_map(array(
     'PhabricatorChartAxis' => 'applications/fact/chart/PhabricatorChartAxis.php',
     'PhabricatorChartDataQuery' => 'applications/fact/chart/PhabricatorChartDataQuery.php',
     'PhabricatorChartFunction' => 'applications/fact/chart/PhabricatorChartFunction.php',
+    'PhabricatorChartFunctionArgument' => 'applications/fact/chart/PhabricatorChartFunctionArgument.php',
+    'PhabricatorChartFunctionArgumentParser' => 'applications/fact/chart/PhabricatorChartFunctionArgumentParser.php',
     'PhabricatorChatLogApplication' => 'applications/chatlog/application/PhabricatorChatLogApplication.php',
     'PhabricatorChatLogChannel' => 'applications/chatlog/storage/PhabricatorChatLogChannel.php',
     'PhabricatorChatLogChannelListController' => 'applications/chatlog/controller/PhabricatorChatLogChannelListController.php',
@@ -8629,6 +8631,8 @@ phutil_register_library_map(array(
     'PhabricatorChartAxis' => 'Phobject',
     'PhabricatorChartDataQuery' => 'Phobject',
     'PhabricatorChartFunction' => 'Phobject',
+    'PhabricatorChartFunctionArgument' => 'Phobject',
+    'PhabricatorChartFunctionArgumentParser' => 'Phobject',
     'PhabricatorChatLogApplication' => 'PhabricatorApplication',
     'PhabricatorChatLogChannel' => array(
       'PhabricatorChatLogDAO',

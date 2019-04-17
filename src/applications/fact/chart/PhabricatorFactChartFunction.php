@@ -5,40 +5,21 @@ final class PhabricatorFactChartFunction
 
   const FUNCTIONKEY = 'fact';
 
-  private $factKey;
   private $fact;
   private $datapoints;
 
-  protected function newArguments(array $arguments) {
-    if (count($arguments) !== 1) {
-      throw new Exception(
-        pht(
-          'Chart function "fact(...)" expects one argument, got %s. '.
-          'Pass the key for a fact.',
-          count($arguments)));
-    }
+  protected function newArguments() {
+    $key_argument = $this->newArgument()
+      ->setName('fact-key')
+      ->setType('fact-key');
 
-    if (!is_string($arguments[0])) {
-      throw new Exception(
-        pht(
-          'First argument for "fact(...)" is invalid: expected string, '.
-          'got %s.',
-          phutil_describe_type($arguments[0])));
-    }
+    $parser = $this->getArgumentParser();
+    $parser->parseArgument($key_argument);
 
-    $facts = PhabricatorFact::getAllFacts();
-    $fact = idx($facts, $arguments[0]);
-
-    if (!$fact) {
-      throw new Exception(
-        pht(
-          'Argument to "fact(...)" is invalid: "%s" is not a known fact '.
-          'key.',
-          $arguments[0]));
-    }
-
-    $this->factKey = $arguments[0];
+    $fact = $this->getArgument('fact-key');
     $this->fact = $fact;
+
+    return $fact->getFunctionArguments();
   }
 
   public function loadData() {

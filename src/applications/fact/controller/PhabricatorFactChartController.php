@@ -23,6 +23,9 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $x_function = id(new PhabricatorXChartFunction())
       ->setArguments(array());
 
+    $functions[] = id(new PhabricatorConstantChartFunction())
+      ->setArguments(array(360));
+
     $functions[] = id(new PhabricatorSinChartFunction())
       ->setArguments(array($x_function));
 

@@ -7,6 +7,8 @@ abstract class PhabricatorChartFunction
   private $yAxis;
   private $limit;
 
+  private $argumentParser;
+
   final public function getFunctionKey() {
     return $this->getPhobjectClassConstant('FUNCTIONKEY', 32);
   }
@@ -19,11 +21,51 @@ abstract class PhabricatorChartFunction
   }
 
   final public function setArguments(array $arguments) {
-    $this->newArguments($arguments);
+    $parser = $this->getArgumentParser();
+    $parser->setRawArguments($arguments);
+
+    $specs = $this->newArguments();
+
+    if (!is_array($specs)) {
+      throw new Exception(
+        pht(
+          'Expected "newArguments()" in class "%s" to return a list of '.
+          'argument specifications, got %s.',
+          get_class($this),
+          phutil_describe_type($specs)));
+    }
+
+    assert_instances_of($specs, 'PhabricatorChartFunctionArgument');
+
+    foreach ($specs as $spec) {
+      $parser->addArgument($spec);
+    }
+
+    $parser->setHaveAllArguments(true);
+    $parser->parseArguments();
+
     return $this;
   }
 
-  abstract protected function newArguments(array $arguments);
+  abstract protected function newArguments();
+
+  final protected function newArgument() {
+    return new PhabricatorChartFunctionArgument();
+  }
+
+  final protected function getArgument($key) {
+    return $this->getArgumentParser()->getArgumentValue($key);
+  }
+
+  final protected function getArgumentParser() {
+    if (!$this->argumentParser) {
+      $parser = id(new PhabricatorChartFunctionArgumentParser())
+        ->setFunction($this);
+
+      $this->argumentParser = $parser;
+    }
+    return $this->argumentParser;
+  }
 
   public function loadData() {
     return;

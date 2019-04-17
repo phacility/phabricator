@@ -5,30 +5,20 @@ final class PhabricatorSinChartFunction
 
   const FUNCTIONKEY = 'sin';
 
-  private $argument;
+  protected function newArguments() {
+    return array(
+      $this->newArgument()
+        ->setName('x')
+        ->setType('function'),
+    );
+  }
 
-  protected function newArguments(array $arguments) {
-    if (count($arguments) !== 1) {
-      throw new Exception(
-        pht(
-          'Chart function "sin(..)" expects one argument, got %s.',
-          count($arguments)));
-    }
-
-    $argument = $arguments[0];
-
-    if (!($argument instanceof PhabricatorChartFunction)) {
-      throw new Exception(
-        pht(
-          'Argument to chart function should be a function, got %s.',
-          phutil_describe_type($argument)));
-    }
-
-    $this->argument = $argument;
+  protected function assignArguments(array $arguments) {
+    $this->argument = $arguments[0];
   }
 
   public function getDatapoints(PhabricatorChartDataQuery $query) {
-    $points = $this->argument->getDatapoints($query);
+    $points = $this->getArgument('x')->getDatapoints($query);
 
     foreach ($points as $key => $point) {
       $points[$key]['y'] = sin(deg2rad($points[$key]['y']));

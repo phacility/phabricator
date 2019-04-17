@@ -5,13 +5,8 @@ final class PhabricatorXChartFunction
 
   const FUNCTIONKEY = 'x';
 
-  protected function newArguments(array $arguments) {
-    if (count($arguments) !== 0) {
-      throw new Exception(
-        pht(
-          'Chart function "x()" expects zero arguments, got %s.',
-          count($arguments)));
-    }
+  protected function newArguments() {
+    return array();
   }
 
   public function getDatapoints(PhabricatorChartDataQuery $query) {
