@@ -12,81 +12,38 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $is_chart_mode = ($mode === 'chart');
     $is_draw_mode = ($mode === 'draw');
 
-    $series = $request->getStr('y1');
+    $functions = array();
 
-    $facts = PhabricatorFact::getAllFacts();
-    $fact = idx($facts, $series);
+    $functions[] = id(new PhabricatorFactChartFunction())
+      ->setArguments(array('tasks.count.create'));
 
-    if (!$fact) {
-      return new Aphront404Response();
-    }
-
-    $key_id = id(new PhabricatorFactKeyDimension())
-      ->newDimensionID($fact->getKey());
-    if (!$key_id) {
-      return new Aphront404Response();
-    }
+    $functions[] = id(new PhabricatorFactChartFunction())
+      ->setArguments(array('tasks.open-count.create'));
 
     if ($is_chart_mode) {
       return $this->newChartResponse();
     }
 
-    $table = $fact->newDatapoint();
-    $conn_r = $table->establishConnection('r');
-    $table_name = $table->getTableName();
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT value, epoch FROM %T WHERE keyID = %d ORDER BY epoch ASC',
-      $table_name,
-      $key_id);
-
-    $points = array();
-    $sum = 0;
-    foreach ($data as $key => $row) {
-      $sum += (int)$row['value'];
-      $points[(int)$row['epoch']] = $sum;
-    }
-
-    if (!$points) {
-      throw new Exception('No data to show!');
-    }
-
-    // Limit amount of data passed to browser.
-    $count = count($points);
-    $limit = 2000;
-    if ($count > $limit) {
-      $i = 0;
-      $every = ceil($count / $limit);
-      foreach ($points as $epoch => $sum) {
-        $i++;
-        if ($i % $every && $i != $count) {
-          unset($points[$epoch]);
-        }
-      }
-    }
-
     $datasets = array();
+    foreach ($functions as $function) {
+      $function->loadData();
 
-    $datasets[] = array(
-      'x' => array_keys($points),
-      'y' => array_values($points),
-      'color' => '#ff0000',
-    );
+      $points = $function->getDatapoints(2000);
 
-    // Add a dummy "y = x" dataset to prove we can draw multiple datasets.
-    $x_min = min(array_keys($points));
-    $x_max = max(array_keys($points));
-    $x_range = ($x_max - $x_min) / 4;
-    $linear = array();
-    foreach ($points as $x => $y) {
-      $linear[$x] = round(count($points) * (($x - $x_min) / $x_range));
+      $x = array();
+      $y = array();
+
+      foreach ($points as $point) {
+        $x[] = $point['x'];
+        $y[] = $point['y'];
+      }
+
+      $datasets[] = array(
+        'x' => $x,
+        'y' => $y,
+        'color' => '#ff00ff',
+      );
     }
-    $datasets[] = array(
-      'x' => array_keys($linear),
-      'y' => array_values($linear),
-      'color' => '#0000ff',
-    );
 
     $y_min = 0;
     $y_max = 0;
