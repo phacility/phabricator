@@ -389,6 +389,7 @@ return array(
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'c715c123',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '6a85bc5a',
     'rsrc/js/application/drydock/drydock-live-operation-status.js' => '47a0728b',
+    'rsrc/js/application/fact/Chart.js' => 'fcb0c07d',
     'rsrc/js/application/files/behavior-document-engine.js' => '243d6c22',
     'rsrc/js/application/files/behavior-icon-composer.js' => '38a6cedb',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => 'a17b84f1',
@@ -397,7 +398,7 @@ return array(
     'rsrc/js/application/herald/PathTypeahead.js' => 'ad486db3',
     'rsrc/js/application/herald/herald-rule-editor.js' => '0922e81d',
     'rsrc/js/application/maniphest/behavior-batch-selector.js' => '139ef688',
-    'rsrc/js/application/maniphest/behavior-line-chart.js' => '495cf14d',
+    'rsrc/js/application/maniphest/behavior-line-chart.js' => 'ad258e28',
     'rsrc/js/application/maniphest/behavior-list-edit.js' => 'c687e867',
     'rsrc/js/application/owners/OwnersPathEditor.js' => '2a8b62d9',
     'rsrc/js/application/owners/owners-path-editor.js' => 'ff688a7a',
@@ -625,7 +626,7 @@ return array(
     'javelin-behavior-icon-composer' => '38a6cedb',
     'javelin-behavior-launch-icon-composer' => 'a17b84f1',
     'javelin-behavior-lightbox-attachments' => 'c7e748bf',
-    'javelin-behavior-line-chart' => '495cf14d',
+    'javelin-behavior-line-chart' => 'ad258e28',
     'javelin-behavior-linked-container' => '74446546',
     'javelin-behavior-maniphest-batch-selector' => '139ef688',
     'javelin-behavior-maniphest-list-editor' => 'c687e867',
@@ -695,6 +696,7 @@ return array(
     'javelin-behavior-user-menu' => '60cd9241',
     'javelin-behavior-view-placeholder' => 'a9942052',
     'javelin-behavior-workflow' => '9623adc1',
+    'javelin-chart' => 'fcb0c07d',
     'javelin-color' => '78f811c9',
     'javelin-cookie' => '05d290ef',
     'javelin-diffusion-locate-file-source' => '94243d89',
@@ -1319,12 +1321,6 @@ return array(
     '490e2e2e' => array(
       'phui-oi-list-view-css',
     ),
-    '495cf14d' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-vector',
-      'phui-chart-css',
-    ),
     '4a7fb02b' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1861,6 +1857,11 @@ return array(
       'javelin-request',
       'javelin-router',
     ),
+    'ad258e28' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-chart',
+    ),
     'ad486db3' => array(
       'javelin-install',
       'javelin-typeahead',
@@ -2178,6 +2179,10 @@ return array(
     ),
     'fa74cc35' => array(
       'phui-oi-list-view-css',
+    ),
+    'fcb0c07d' => array(
+      'phui-chart-css',
+      'd3',
     ),
     'fdc13e4e' => array(
       'javelin-install',

@@ -30,7 +30,7 @@ final class PhabricatorFactApplication extends PhabricatorApplication {
     return array(
       '/fact/' => array(
         '' => 'PhabricatorFactHomeController',
-        'chart/' => 'PhabricatorFactChartController',
+        '(?<mode>chart|draw)/' => 'PhabricatorFactChartController',
         'object/(?<phid>[^/]+)/' => 'PhabricatorFactObjectController',
       ),
     );
