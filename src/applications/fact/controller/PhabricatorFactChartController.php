@@ -12,43 +12,50 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $is_chart_mode = ($mode === 'chart');
     $is_draw_mode = ($mode === 'draw');
 
+    $argvs = array();
+
+    $argvs[] = array('fact', 'tasks.count.create');
+
+    $argvs[] = array('constant', 360);
+
+    $argvs[] = array('fact', 'tasks.open-count.create');
+
+    $argvs[] = array(
+      'sum',
+      array(
+        'accumulate',
+        array('fact', 'tasks.count.create'),
+      ),
+      array(
+        'accumulate',
+        array('fact', 'tasks.open-count.create'),
+      ),
+    );
+
+    $argvs[] = array(
+      'compose',
+      array('scale', 0.001),
+      array('cos'),
+      array('scale', 100),
+      array('shift', 800),
+    );
+
     $functions = array();
+    foreach ($argvs as $argv) {
+      $functions[] = id(new PhabricatorComposeChartFunction())
+        ->setArguments(array($argv));
+    }
 
-    $functions[] = id(new PhabricatorFactChartFunction())
-      ->setArguments(array('tasks.count.create'));
+    $subfunctions = array();
+    foreach ($functions as $function) {
+      foreach ($function->getSubfunctions() as $subfunction) {
+        $subfunctions[] = $subfunction;
+      }
+    }
 
-    $functions[] = id(new PhabricatorFactChartFunction())
-      ->setArguments(array('tasks.open-count.create'));
-
-    $x_function = id(new PhabricatorXChartFunction())
-      ->setArguments(array());
-
-    $functions[] = id(new PhabricatorConstantChartFunction())
-      ->setArguments(array(360));
-
-    $functions[] = id(new PhabricatorSinChartFunction())
-      ->setArguments(array($x_function));
-
-    $cos_function = id(new PhabricatorCosChartFunction())
-      ->setArguments(array($x_function));
-
-    $functions[] = id(new PhabricatorShiftChartFunction())
-      ->setArguments(
-        array(
-          array(
-            'scale',
-            array(
-              'cos',
-              array(
-                'scale',
-                array('x'),
-                0.001,
-              ),
-            ),
-            10,
-          ),
-          200,
-        ));
+    foreach ($subfunctions as $subfunction) {
+      $subfunction->loadData();
+    }
 
     list($domain_min, $domain_max) = $this->getDomain($functions);
 
@@ -63,11 +70,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
 
     $datasets = array();
     foreach ($functions as $function) {
-      $function->setXAxis($axis);
-
-      $function->loadData();
-
-      $points = $function->getDatapoints($data_query);
+      $points = $function->newDatapoints($data_query);
 
       $x = array();
       $y = array();
@@ -157,19 +160,18 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
   private function getDomain(array $functions) {
     $domain_min_list = null;
     $domain_max_list = null;
+
     foreach ($functions as $function) {
-      if ($function->hasDomain()) {
-        $domain = $function->getDomain();
+      $domain = $function->getDomain();
 
-        list($domain_min, $domain_max) = $domain;
+      list($function_min, $function_max) = $domain;
 
-        if ($domain_min !== null) {
-          $domain_min_list[] = $domain_min;
-        }
+      if ($function_min !== null) {
+        $domain_min_list[] = $function_min;
+      }
 
-        if ($domain_max !== null) {
-          $domain_max_list[] = $domain_max;
-        }
+      if ($function_max !== null) {
+        $domain_max_list[] = $function_max;
       }
     }
 

@@ -13,12 +13,16 @@ final class PhabricatorConstantChartFunction
     );
   }
 
-  protected function canEvaluateFunction() {
-    return true;
-  }
+  public function evaluateFunction(array $xv) {
+    $n = $this->getArgument('n');
 
-  protected function evaluateFunction($x) {
-    return $this->getArgument('n');
+    $yv = array();
+
+    foreach ($xv as $x) {
+      $yv[] = $n;
+    }
+
+    return $yv;
   }
 
 }

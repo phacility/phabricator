@@ -8,21 +8,21 @@ final class PhabricatorShiftChartFunction
   protected function newArguments() {
     return array(
       $this->newArgument()
-        ->setName('x')
-        ->setType('function')
-        ->setIsSourceFunction(true),
-      $this->newArgument()
         ->setName('shift')
         ->setType('number'),
     );
   }
 
-  protected function canEvaluateFunction() {
-    return true;
-  }
+  public function evaluateFunction(array $xv) {
+    $shift = $this->getArgument('shift');
 
-  protected function evaluateFunction($x) {
-    return $x * $this->getArgument('shift');
+    $yv = array();
+
+    foreach ($xv as $x) {
+      $yv[] = $x + $shift;
+    }
+
+    return $yv;
   }
 
 }

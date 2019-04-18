@@ -5,7 +5,7 @@ final class PhabricatorChartFunctionArgument
 
   private $name;
   private $type;
-  private $isSourceFunction;
+  private $repeatable;
 
   public function setName($name) {
     $this->name = $name;
@@ -14,6 +14,15 @@ final class PhabricatorChartFunctionArgument
 
   public function getName() {
     return $this->name;
+  }
+
+  public function setRepeatable($repeatable) {
+    $this->repeatable = $repeatable;
+    return $this;
+  }
+
+  public function getRepeatable() {
+    return $this->repeatable;
   }
 
   public function setType($type) {
@@ -38,15 +47,6 @@ final class PhabricatorChartFunctionArgument
 
   public function getType() {
     return $this->type;
-  }
-
-  public function setIsSourceFunction($is_source_function) {
-    $this->isSourceFunction = $is_source_function;
-    return $this;
-  }
-
-  public function getIsSourceFunction() {
-    return $this->isSourceFunction;
   }
 
   public function newValue($value) {

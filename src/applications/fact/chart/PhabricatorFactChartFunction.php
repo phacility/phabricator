@@ -6,7 +6,7 @@ final class PhabricatorFactChartFunction
   const FUNCTIONKEY = 'fact';
 
   private $fact;
-  private $datapoints;
+  private $map;
 
   protected function newArguments() {
     $key_argument = $this->newArgument()
@@ -44,73 +44,46 @@ final class PhabricatorFactChartFunction
       return;
     }
 
-    $points = array();
+    $map = array();
+    foreach ($data as $row) {
+      $value = (int)$row['value'];
+      $epoch = (int)$row['epoch'];
 
-    $sum = 0;
-    foreach ($data as $key => $row) {
-      $sum += (int)$row['value'];
-      $points[] = array(
-        'x' => (int)$row['epoch'],
-        'y' => $sum,
-      );
-    }
-
-    $this->datapoints = $points;
-  }
-
-  public function getDatapoints(PhabricatorChartDataQuery $query) {
-    $points = $this->datapoints;
-    if (!$points) {
-      return array();
-    }
-
-    $x_min = $query->getMinimumValue();
-    $x_max = $query->getMaximumValue();
-    $limit = $query->getLimit();
-
-    if ($x_min !== null) {
-      foreach ($points as $key => $point) {
-        if ($point['x'] < $x_min) {
-          unset($points[$key]);
-        }
+      if (!isset($map[$epoch])) {
+        $map[$epoch] = 0;
       }
+
+      $map[$epoch] += $value;
     }
 
-    if ($x_max !== null) {
-      foreach ($points as $key => $point) {
-        if ($point['x'] > $x_max) {
-          unset($points[$key]);
-        }
-      }
-    }
-
-    // If we have too many data points, throw away some of the data.
-    if ($limit !== null) {
-      $count = count($points);
-      if ($count > $limit) {
-        $ii = 0;
-        $every = ceil($count / $limit);
-        foreach ($points as $key => $point) {
-          $ii++;
-          if (($ii % $every) && ($ii != $count)) {
-            unset($points[$key]);
-          }
-        }
-      }
-    }
-
-    return $points;
-  }
-
-  public function hasDomain() {
-    return true;
+    $this->map = $map;
   }
 
   public function getDomain() {
-    // TODO: We can examine the data to fit a better domain.
+    return array(
+      head_key($this->map),
+      last_key($this->map),
+    );
+  }
 
-    $now = PhabricatorTime::getNow();
-    return array($now - phutil_units('90 days in seconds'), $now);
+  public function newInputValues(PhabricatorChartDataQuery $query) {
+    return array_keys($this->map);
+  }
+
+  public function evaluateFunction(array $xv) {
+    $map = $this->map;
+
+    $yv = array();
+
+    foreach ($xv as $x) {
+      if (isset($map[$x])) {
+        $yv[] = $map[$x];
+      } else {
+        $yv[] = null;
+      }
+    }
+
+    return $yv;
   }
 
 }

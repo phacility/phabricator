@@ -3,11 +3,7 @@
 abstract class PhabricatorChartFunction
   extends Phobject {
 
-  private $xAxis;
-  private $yAxis;
-
   private $argumentParser;
-  private $sourceFunction;
 
   final public function getFunctionKey() {
     return $this->getPhobjectClassConstant('FUNCTIONKEY', 32);
@@ -44,13 +40,73 @@ abstract class PhabricatorChartFunction
     $parser->setHaveAllArguments(true);
     $parser->parseArguments();
 
-    $source_argument = $parser->getSourceFunctionArgument();
-    if ($source_argument) {
-      $source_function = $this->getArgument($source_argument->getName());
-      $this->setSourceFunction($source_function);
+    return $this;
+  }
+
+  public function getSubfunctions() {
+    $result = array();
+    $result[] = $this;
+
+    foreach ($this->getFunctionArguments() as $argument) {
+      foreach ($argument->getSubfunctions() as $subfunction) {
+        $result[] = $subfunction;
+      }
     }
 
-    return $this;
+    return $result;
+  }
+
+  public function getFunctionArguments() {
+    $results = array();
+
+    $parser = $this->getArgumentParser();
+    foreach ($parser->getAllArguments() as $argument) {
+      if ($argument->getType() !== 'function') {
+        continue;
+      }
+
+      $name = $argument->getName();
+      $value = $this->getArgument($name);
+
+      if (!is_array($value)) {
+        $results[] = $value;
+      } else {
+        foreach ($value as $arg_value) {
+          $results[] = $arg_value;
+        }
+      }
+    }
+
+    return $results;
+  }
+
+  public function newDatapoints(PhabricatorChartDataQuery $query) {
+    $xv = $this->newInputValues($query);
+
+    if ($xv === null) {
+      $xv = $this->newDefaultInputValues($query);
+    }
+
+    $xv = $query->selectInputValues($xv);
+
+    $n = count($xv);
+    $yv = $this->evaluateFunction($xv);
+
+    $points = array();
+    for ($ii = 0; $ii < $n; $ii++) {
+      $y = $yv[$ii];
+
+      if ($y === null) {
+        continue;
+      }
+
+      $points[] = array(
+        'x' => $xv[$ii],
+        'y' => $y,
+      );
+    }
+
+    return $points;
   }
 
   abstract protected function newArguments();
@@ -73,96 +129,26 @@ abstract class PhabricatorChartFunction
     return $this->argumentParser;
   }
 
+  abstract public function evaluateFunction(array $xv);
+
+  public function getDomain() {
+    return null;
+  }
+
+  public function newInputValues(PhabricatorChartDataQuery $query) {
+    return null;
+  }
+
   public function loadData() {
     return;
   }
 
-  protected function setSourceFunction(PhabricatorChartFunction $source) {
-    $this->sourceFunction = $source;
-    return $this;
-  }
-
-  protected function getSourceFunction() {
-    return $this->sourceFunction;
-  }
-
-  final public function setXAxis(PhabricatorChartAxis $x_axis) {
-    $this->xAxis = $x_axis;
-    return $this;
-  }
-
-  final public function getXAxis() {
-    return $this->xAxis;
-  }
-
-  final public function setYAxis(PhabricatorChartAxis $y_axis) {
-    $this->yAxis = $y_axis;
-    return $this;
-  }
-
-  final public function getYAxis() {
-    return $this->yAxis;
-  }
-
-  protected function canEvaluateFunction() {
-    return false;
-  }
-
-  protected function evaluateFunction($x) {
-    throw new PhutilMethodNotImplementedException();
-  }
-
-  public function hasDomain() {
-    if ($this->canEvaluateFunction()) {
-      return false;
-    }
-
-    throw new PhutilMethodNotImplementedException();
-  }
-
-  public function getDatapoints(PhabricatorChartDataQuery $query) {
-    if ($this->canEvaluateFunction()) {
-      $points = $this->newSourceDatapoints($query);
-      foreach ($points as $key => $point) {
-        $y = $point['y'];
-        $y = $this->evaluateFunction($y);
-        $points[$key]['y'] = $y;
-      }
-
-      return $points;
-    }
-
-    return $this->newDatapoints($query);
-  }
-
-  protected function newDatapoints(PhabricatorChartDataQuery $query) {
-    throw new PhutilMethodNotImplementedException();
-  }
-
-  protected function newSourceDatapoints(PhabricatorChartDataQuery $query) {
-    $source = $this->getSourceFunction();
-    if ($source) {
-      return $source->getDatapoints($query);
-    }
-
-    return $this->newDefaultDatapoints($query);
-  }
-
-  protected function newDefaultDatapoints(PhabricatorChartDataQuery $query) {
+  protected function newDefaultInputValues(PhabricatorChartDataQuery $query) {
     $x_min = $query->getMinimumValue();
     $x_max = $query->getMaximumValue();
     $limit = $query->getLimit();
 
-    $points = array();
-    $steps = $this->newLinearSteps($x_min, $x_max, $limit);
-    foreach ($steps as $step) {
-      $points[] = array(
-        'x' => $step,
-        'y' => $step,
-      );
-    }
-
-    return $points;
+    return $this->newLinearSteps($x_min, $x_max, $limit);
   }
 
   protected function newLinearSteps($src, $dst, $count) {
@@ -213,5 +199,4 @@ abstract class PhabricatorChartFunction
 
     return $steps;
   }
-
 }
