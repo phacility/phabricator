@@ -41,7 +41,10 @@ final class PhabricatorProjectColumnNameTransaction
     if ($this->isEmptyTextTransaction($object->getName(), $xactions)) {
       // The default "Backlog" column is allowed to be unnamed, which
       // means we use the default name.
-      if (!$object->isDefaultColumn()) {
+
+      // Proxy columns can't have a name, so don't raise an error here.
+
+      if (!$object->isDefaultColumn() && !$object->getProxy()) {
         $errors[] = $this->newRequiredError(
           pht('Columns must have a name.'));
       }
