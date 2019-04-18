@@ -33,15 +33,8 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
 
     $prefixes = array();
 
-    if ($repository->isWorkingCopyBare()) {
-      $branch_prefix = 'refs/heads/';
-    } else {
-      $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
-      $branch_prefix = 'refs/remotes/'.$remote.'/';
-    }
-
+    $branch_prefix = 'refs/heads/';
     $tag_prefix = 'refs/tags/';
-
 
     if ($with_refs || count($ref_types) > 1) {
       // If we're loading refs or more than one type of ref, just query

@@ -366,8 +366,12 @@ final class PhabricatorRepositoryPullEngine
 
     $fetch_rules = $this->getGitFetchRules($repository);
 
+    // For very old non-bare working copies, we need to use "--update-head-ok"
+    // to tell Git that it is allowed to overwrite whatever is currently
+    // checked out. See T13280.
+
     $future = $repository->getRemoteCommandFuture(
-      'fetch --prune -- %P %Ls',
+      'fetch --prune --update-head-ok -- %P %Ls',
       $repository->getRemoteURIEnvelope(),
       $fetch_rules);
 
