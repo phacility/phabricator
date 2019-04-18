@@ -8,6 +8,7 @@ final class PhabricatorDashboardProfileMenuItem
   const FIELD_DASHBOARD = 'dashboardPHID';
 
   private $dashboard;
+  private $dashboardHandle;
 
   public function getMenuItemTypeIcon() {
     return 'fa-dashboard';
@@ -26,37 +27,44 @@ final class PhabricatorDashboardProfileMenuItem
     return true;
   }
 
-  public function attachDashboard($dashboard) {
+  private function attachDashboard(PhabricatorDashboard $dashboard = null) {
     $this->dashboard = $dashboard;
     return $this;
   }
 
-  public function getDashboard() {
-    $dashboard = $this->dashboard;
-
-    if (!$dashboard) {
-      return null;
-    } else if ($dashboard->isArchived()) {
-      return null;
-    }
-
-    return $dashboard;
+  private function getDashboard() {
+    return $this->dashboard;
   }
+
+  public function getAffectedObjectPHIDs(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return array(
+      $this->getDashboardPHID($config),
+    );
+  }
+
 
   public function newPageContent(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
-    $dashboard_phid = $config->getMenuItemProperty('dashboardPHID');
+    $dashboard_phid = $this->getDashboardPHID($config);
 
     // Reload the dashboard to attach panels, which we need for rendering.
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($dashboard_phid))
-      ->needPanels(true)
       ->executeOne();
     if (!$dashboard) {
-      return null;
+      return $this->newEmptyView(
+        pht('Invalid Dashboard'),
+        pht('This dashboard is invalid and could not be loaded.'));
+    }
+
+    if ($dashboard->isArchived()) {
+      return $this->newEmptyView(
+        pht('Archived Dashboard'),
+        pht('This dashboard has been archived.'));
     }
 
     $engine = id(new PhabricatorDashboardRenderingEngine())
@@ -66,11 +74,11 @@ final class PhabricatorDashboardProfileMenuItem
     return $engine->renderDashboard();
   }
 
-  public function willBuildNavigationItems(array $items) {
+  public function willGetMenuItemViewList(array $items) {
     $viewer = $this->getViewer();
     $dashboard_phids = array();
     foreach ($items as $item) {
-      $dashboard_phids[] = $item->getMenuItemProperty('dashboardPHID');
+      $dashboard_phids[] = $this->getDashboardPHID($item);
     }
 
     $dashboards = id(new PhabricatorDashboardQuery())
@@ -78,11 +86,18 @@ final class PhabricatorDashboardProfileMenuItem
       ->withPHIDs($dashboard_phids)
       ->execute();
 
+    $handles = $viewer->loadHandles($dashboard_phids);
+
     $dashboards = mpull($dashboards, null, 'getPHID');
     foreach ($items as $item) {
-      $dashboard_phid = $item->getMenuItemProperty('dashboardPHID');
+      $dashboard_phid = $this->getDashboardPHID($item);
       $dashboard = idx($dashboards, $dashboard_phid, null);
-      $item->getMenuItem()->attachDashboard($dashboard);
+
+      $menu_item = $item->getMenuItem();
+
+      $menu_item
+        ->attachDashboard($dashboard)
+        ->setDashboardHandle($handles[$dashboard_phid]);
     }
   }
 
@@ -91,7 +106,15 @@ final class PhabricatorDashboardProfileMenuItem
     $dashboard = $this->getDashboard();
 
     if (!$dashboard) {
-      return pht('(Restricted/Invalid Dashboard)');
+      if ($this->getDashboardHandle()->getPolicyFiltered()) {
+        return pht('Restricted Dashboard');
+      } else {
+        return pht('Invalid Dashboard');
+      }
+    }
+
+    if ($dashboard->isArchived()) {
+      return pht('Archived Dashboard');
     }
 
     if (strlen($this->getName($config))) {
@@ -109,7 +132,7 @@ final class PhabricatorDashboardProfileMenuItem
         ->setLabel(pht('Dashboard'))
         ->setIsRequired(true)
         ->setDatasource(new PhabricatorDashboardDatasource())
-        ->setSingleValue($config->getMenuItemProperty('dashboardPHID')),
+        ->setSingleValue($this->getDashboardPHID($config)),
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
@@ -122,24 +145,43 @@ final class PhabricatorDashboardProfileMenuItem
     return $config->getMenuItemProperty('name');
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
+    $is_disabled = true;
+    $action_uri = null;
+
     $dashboard = $this->getDashboard();
-    if (!$dashboard) {
-      return array();
+    if ($dashboard) {
+      if ($dashboard->isArchived()) {
+        $icon = 'fa-ban';
+        $name = $this->getDisplayName($config);
+      } else {
+        $icon = $dashboard->getIcon();
+        $name = $this->getDisplayName($config);
+        $is_disabled = false;
+        $action_uri = $dashboard->getURI();
+      }
+    } else {
+      $icon = 'fa-ban';
+      if ($this->getDashboardHandle()->getPolicyFiltered()) {
+        $name = pht('Restricted Dashboard');
+      } else {
+        $name = pht('Invalid Dashboard');
+      }
     }
 
-    $icon = $dashboard->getIcon();
-    $name = $this->getDisplayName($config);
-    $href = $this->getItemViewURI($config);
-    $action_href = '/dashboard/arrange/'.$dashboard->getID().'/';
+    $uri = $this->getItemViewURI($config);
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon)
-      ->setActionIcon('fa-pencil', $action_href);
+      ->setDisabled($is_disabled);
+
+    if ($action_uri) {
+      $item->newAction($action_uri);
+    }
 
     return array(
       $item,
@@ -189,6 +231,20 @@ final class PhabricatorDashboardProfileMenuItem
     }
 
     return $errors;
+  }
+
+  private function getDashboardPHID(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $config->getMenuItemProperty('dashboardPHID');
+  }
+
+  private function getDashboardHandle() {
+    return $this->dashboardHandle;
+  }
+
+  private function setDashboardHandle(PhabricatorObjectHandle $handle) {
+    $this->dashboardHandle = $handle;
+    return $this;
   }
 
 }

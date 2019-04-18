@@ -11,9 +11,17 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     return $this;
   }
 
+  public function getViewer() {
+    return $this->viewer;
+  }
+
   public function setDashboard(PhabricatorDashboard $dashboard) {
     $this->dashboard = $dashboard;
     return $this;
+  }
+
+  public function getDashboard() {
+    return $this->dashboard;
   }
 
   public function setArrangeMode($mode) {
@@ -23,83 +31,121 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
   public function renderDashboard() {
     require_celerity_resource('phabricator-dashboard-css');
-    $dashboard = $this->dashboard;
-    $viewer = $this->viewer;
+    $dashboard = $this->getDashboard();
+    $viewer = $this->getViewer();
 
-    $layout_config = $dashboard->getLayoutConfigObject();
-    $panel_grid_locations = $layout_config->getPanelLocations();
-    $panels = mpull($dashboard->getPanels(), null, 'getPHID');
-    $dashboard_id = celerity_generate_unique_node_id();
-    $result = id(new AphrontMultiColumnView())
-      ->setID($dashboard_id)
-      ->setFluidLayout(true)
-      ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
+    $is_editable = $this->arrangeMode;
 
-    if ($this->arrangeMode) {
+    if ($is_editable) {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_EDIT;
     } else {
       $h_mode = PhabricatorDashboardPanelRenderingEngine::HEADER_MODE_NORMAL;
     }
 
-    foreach ($panel_grid_locations as $column => $panel_column_locations) {
-      $panel_phids = $panel_column_locations;
+    $panel_phids = $dashboard->getPanelPHIDs();
+    if ($panel_phids) {
+      $panels = id(new PhabricatorDashboardPanelQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($panel_phids)
+        ->execute();
+      $panels = mpull($panels, null, 'getPHID');
 
-      // TODO: This list may contain duplicates when the dashboard itself
-      // does not? Perhaps this is related to T10612. For now, just unique
-      // the list before moving on.
-      $panel_phids = array_unique($panel_phids);
+      $handles = $viewer->loadHandles($panel_phids);
+    } else {
+      $panels = array();
+      $handles = array();
+    }
 
-      $column_result = array();
-      foreach ($panel_phids as $panel_phid) {
+    $ref_list = $dashboard->getPanelRefList();
+    $columns = $ref_list->getColumns();
+
+    $dashboard_id = celerity_generate_unique_node_id();
+
+    $result = id(new AphrontMultiColumnView())
+      ->setID($dashboard_id)
+      ->setFluidLayout(true)
+      ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
+
+    foreach ($columns as $column) {
+      $column_views = array();
+      foreach ($column->getPanelRefs() as $panel_ref) {
+        $panel_phid = $panel_ref->getPanelPHID();
+
         $panel_engine = id(new PhabricatorDashboardPanelRenderingEngine())
           ->setViewer($viewer)
-          ->setDashboardID($dashboard->getID())
           ->setEnableAsyncRendering(true)
+          ->setContextObject($dashboard)
+          ->setPanelKey($panel_ref->getPanelKey())
           ->setPanelPHID($panel_phid)
           ->setParentPanelPHIDs(array())
-          ->setHeaderMode($h_mode);
+          ->setHeaderMode($h_mode)
+          ->setEditMode($is_editable)
+          ->setMovable(true)
+          ->setPanelHandle($handles[$panel_phid]);
 
         $panel = idx($panels, $panel_phid);
         if ($panel) {
           $panel_engine->setPanel($panel);
         }
 
-        $column_result[] = $panel_engine->renderPanel();
+        $column_views[] = $panel_engine->renderPanel();
       }
-      $column_class = $layout_config->getColumnClass(
-        $column,
-        $this->arrangeMode);
-      if ($this->arrangeMode) {
-        $column_result[] = $this->renderAddPanelPlaceHolder($column);
-        $column_result[] = $this->renderAddPanelUI($column);
+
+      $column_classes = $column->getClasses();
+
+      $column_tail = array();
+      if ($is_editable) {
+        $column_tail[] = $this->renderAddPanelPlaceHolder();
+        $column_tail[] = $this->renderAddPanelUI($column);
       }
+
+      $sigil = 'dashboard-column';
+
+      $metadata = array(
+        'columnKey' => $column->getColumnKey(),
+      );
+
+      $column_view = javelin_tag(
+        'div',
+        array(
+          'sigil' => $sigil,
+          'meta' => $metadata,
+        ),
+        $column_views);
+
       $result->addColumn(
-        $column_result,
-        $column_class,
-        $sigil = 'dashboard-column',
-        $metadata = array('columnID' => $column));
+        array(
+          $column_view,
+          $column_tail,
+        ),
+        implode(' ', $column_classes));
     }
 
-    if ($this->arrangeMode) {
+    if ($is_editable) {
+      $params = array(
+        'contextPHID' => $dashboard->getPHID(),
+      );
+      $move_uri = new PhutilURI('/dashboard/adjust/move/', $params);
+
       Javelin::initBehavior(
         'dashboard-move-panels',
         array(
-          'dashboardID' => $dashboard_id,
-          'moveURI' => '/dashboard/movepanel/'.$dashboard->getID().'/',
+          'dashboardNodeID' => $dashboard_id,
+          'moveURI' => (string)$move_uri,
         ));
     }
 
     $view = id(new PHUIBoxView())
       ->addClass('dashboard-view')
-      ->appendChild($result);
+      ->appendChild(
+        array(
+          $result,
+        ));
 
     return $view;
   }
 
-  private function renderAddPanelPlaceHolder($column) {
-    $dashboard = $this->dashboard;
-    $panels = $dashboard->getPanels();
-
+  private function renderAddPanelPlaceHolder() {
     return javelin_tag(
       'span',
       array(
@@ -109,19 +155,23 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       pht('This column does not have any panels yet.'));
   }
 
-  private function renderAddPanelUI($column) {
-    $dashboard_id = $this->dashboard->getID();
+  private function renderAddPanelUI(PhabricatorDashboardColumn $column) {
+    $dashboard = $this->getDashboard();
+    $column_key = $column->getColumnKey();
 
-    $create_uri = id(new PhutilURI('/dashboard/panel/create/'))
-      ->replaceQueryParam('dashboardID', $dashboard_id)
-      ->replaceQueryParam('column', $column);
+    $create_uri = id(new PhutilURI('/dashboard/panel/edit/'))
+      ->replaceQueryParam('contextPHID', $dashboard->getPHID())
+      ->replaceQueryParam('columnKey', $column_key);
 
-    $add_uri = id(new PhutilURI('/dashboard/addpanel/'.$dashboard_id.'/'))
-      ->replaceQueryParam('column', $column);
+    $add_uri = id(new PhutilURI('/dashboard/adjust/add/'))
+      ->replaceQueryParam('contextPHID', $dashboard->getPHID())
+      ->replaceQueryParam('columnKey', $column_key);
 
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref($create_uri)
+      ->setIcon('fa-plus')
+      ->setColor(PHUIButtonView::GREY)
       ->setWorkflow(true)
       ->setText(pht('Create Panel'))
       ->addClass(PHUI::MARGIN_MEDIUM);
@@ -129,6 +179,8 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $add_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref($add_uri)
+      ->setIcon('fa-window-maximize')
+      ->setColor(PHUIButtonView::GREY)
       ->setWorkflow(true)
       ->setText(pht('Add Existing Panel'))
       ->addClass(PHUI::MARGIN_MEDIUM);

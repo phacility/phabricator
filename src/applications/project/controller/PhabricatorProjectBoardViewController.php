@@ -172,8 +172,9 @@ final class PhabricatorProjectBoardViewController
         return $content;
       }
 
-      $nav = $this->getProfileMenu();
-      $nav->selectFilter(PhabricatorProject::ITEM_WORKBOARD);
+      $nav = $this->newNavigation(
+        $project,
+        PhabricatorProject::ITEM_WORKBOARD);
 
       $crumbs = $this->buildApplicationCrumbs();
       $crumbs->addTextCrumb(pht('Workboard'));
@@ -576,6 +577,11 @@ final class PhabricatorProjectBoardViewController
       $panel->addHeaderAction($column_menu);
 
       if ($column->canHaveTrigger()) {
+        $trigger = $column->getTrigger();
+        if ($trigger) {
+          $trigger->setViewer($viewer);
+        }
+
         $trigger_menu = $this->buildTriggerMenu($column);
         $panel->addHeaderAction($trigger_menu);
       }
@@ -720,7 +726,9 @@ final class PhabricatorProjectBoardViewController
       ->appendChild($board)
       ->addClass('project-board-wrapper');
 
-    $nav = $this->getProfileMenu();
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_WORKBOARD);
 
     $divider = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_DIVIDER);

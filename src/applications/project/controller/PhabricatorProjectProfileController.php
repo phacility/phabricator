@@ -74,8 +74,9 @@ final class PhabricatorProjectProfileController
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getWatcherPHIDs());
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::ITEM_PROFILE);
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_PROFILE);
 
     $stories = id(new PhabricatorFeedQuery())
       ->setViewer($viewer)

@@ -38,7 +38,9 @@ final class PhabricatorProjectBoardManageController
     $crumbs->addTextCrumb(pht('Manage'));
     $crumbs->setBorder(true);
 
-    $nav = $this->getProfileMenu();
+    $nav = $this->newNavigation(
+      $board,
+      PhabricatorProject::ITEM_WORKBOARD);
     $columns_list = $this->buildColumnsList($board, $columns);
 
     require_celerity_resource('project-view-css');

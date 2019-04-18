@@ -9,20 +9,24 @@ final class PhabricatorProjectTriggerManiphestStatusRule
     return pht('Change status to');
   }
 
-  protected function assertValidRuleValue($value) {
+  protected function assertValidRuleRecordFormat($value) {
     if (!is_string($value)) {
       throw new Exception(
         pht(
           'Status rule value should be a string, but is not (value is "%s").',
           phutil_describe_type($value)));
     }
+  }
 
+  protected function assertValidRuleRecordValue($value) {
     $map = ManiphestTaskStatus::getTaskStatusMap();
     if (!isset($map[$value])) {
       throw new Exception(
         pht(
-          'Rule value ("%s") is not a valid task status.',
-          $value));
+          'Task status value ("%s") is not a valid task status. '.
+          'Valid statues are: %s.',
+          $value,
+          implode(', ', array_keys($map))));
     }
   }
 
@@ -53,7 +57,7 @@ final class PhabricatorProjectTriggerManiphestStatusRule
   }
 
   protected function getDefaultValue() {
-    return head_key(ManiphestTaskStatus::getTaskStatusMap());
+    return ManiphestTaskStatus::getDefaultClosedStatus();
   }
 
   protected function getPHUIXControlType() {

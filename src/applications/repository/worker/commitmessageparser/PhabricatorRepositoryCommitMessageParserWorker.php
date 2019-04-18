@@ -244,24 +244,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
           $commit_close_xaction = id(new DifferentialTransaction())
             ->setTransactionType($type_close)
-            ->setNewValue(true)
-            ->setMetadataValue('isCommitClose', true);
+            ->setNewValue(true);
 
           $commit_close_xaction->setMetadataValue(
             'commitPHID',
             $commit->getPHID());
-          $commit_close_xaction->setMetadataValue(
-            'committerPHID',
-            $committer_phid);
-          $commit_close_xaction->setMetadataValue(
-            'committerName',
-            $data->getCommitDetail('committer'));
-          $commit_close_xaction->setMetadataValue(
-            'authorPHID',
-            $author_phid);
-          $commit_close_xaction->setMetadataValue(
-            'authorName',
-            $data->getAuthorName());
 
           if ($low_level_query) {
             $commit_close_xaction->setMetadataValue(
@@ -278,17 +265,13 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
           $content_source = $this->newContentSource();
 
-          $update_data = $extraction_engine->updateRevisionWithCommit(
+          $extraction_engine->updateRevisionWithCommit(
             $revision,
             $commit,
             array(
               $commit_close_xaction,
             ),
             $content_source);
-
-          foreach ($update_data as $key => $value) {
-            $data->setCommitDetail($key, $value);
-          }
         }
       }
     }

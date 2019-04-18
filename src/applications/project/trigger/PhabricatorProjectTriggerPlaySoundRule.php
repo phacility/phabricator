@@ -9,20 +9,21 @@ final class PhabricatorProjectTriggerPlaySoundRule
     return pht('Play sound');
   }
 
-  protected function assertValidRuleValue($value) {
+  protected function assertValidRuleRecordFormat($value) {
     if (!is_string($value)) {
       throw new Exception(
         pht(
           'Status rule value should be a string, but is not (value is "%s").',
           phutil_describe_type($value)));
     }
+  }
 
+  protected function assertValidRuleRecordValue($value) {
     $map = self::getSoundMap();
-
     if (!isset($map[$value])) {
       throw new Exception(
         pht(
-          'Rule value ("%s") is not a valid sound.',
+          'Sound ("%s") is not a valid sound.',
           $value));
     }
   }

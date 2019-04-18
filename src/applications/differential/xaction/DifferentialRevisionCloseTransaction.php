@@ -83,49 +83,41 @@ final class DifferentialRevisionCloseTransaction
   }
 
   public function getTitle() {
-    if (!$this->getMetadataValue('isCommitClose')) {
+    $commit_phid = $this->getMetadataValue('commitPHID');
+    if ($commit_phid) {
+      $commit = id(new DiffusionCommitQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(array($commit_phid))
+        ->needIdentities(true)
+        ->executeOne();
+    } else {
+      $commit = null;
+    }
+
+    if (!$commit) {
       return pht(
         '%s closed this revision.',
         $this->renderAuthor());
     }
 
-    $commit_phid = $this->getMetadataValue('commitPHID');
-    $committer_phid = $this->getMetadataValue('committerPHID');
-    $author_phid = $this->getMetadataValue('authorPHID');
+    $author_phid = $commit->getAuthorDisplayPHID();
+    $committer_phid = $commit->getCommitterDisplayPHID();
 
-    if ($committer_phid) {
-      $committer_name = $this->renderHandle($committer_phid);
-    } else {
-      $committer_name = $this->getMetadataValue('committerName');
-    }
-
-    if ($author_phid) {
-      $author_name = $this->renderHandle($author_phid);
-    } else {
-      $author_name = $this->getMetadatavalue('authorName');
-    }
-
-    $same_phid =
-      strlen($committer_phid) &&
-      strlen($author_phid) &&
-      ($committer_phid == $author_phid);
-
-    $same_name =
-      !strlen($committer_phid) &&
-      !strlen($author_phid) &&
-      ($committer_name == $author_name);
-
-    if ($same_name || $same_phid) {
+    if (!$author_phid) {
+      return pht(
+        'Closed by commit %s.',
+        $this->renderHandle($commit_phid));
+    } else if (!$committer_phid || ($committer_phid === $author_phid)) {
       return pht(
         'Closed by commit %s (authored by %s).',
         $this->renderHandle($commit_phid),
-        $author_name);
+        $this->renderHandle($author_phid));
     } else {
       return pht(
         'Closed by commit %s (authored by %s, committed by %s).',
         $this->renderHandle($commit_phid),
-        $author_name,
-        $committer_name);
+        $this->renderHandle($author_phid),
+        $this->renderHandle($committer_phid));
     }
   }
 

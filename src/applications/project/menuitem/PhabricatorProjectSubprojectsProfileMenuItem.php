@@ -13,6 +13,10 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
     return pht('Subprojects');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-sitemap';
+  }
+
   public function shouldEnableForObject($object) {
     if ($object->isMilestone()) {
       return false;
@@ -43,7 +47,7 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $project = $config->getProfileObject();
@@ -51,10 +55,10 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
 
     $name = $this->getDisplayName($config);
     $icon = 'fa-sitemap';
-    $href = "/project/subprojects/{$id}/";
+    $uri = "/project/subprojects/{$id}/";
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon);
 

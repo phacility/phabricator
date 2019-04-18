@@ -21,22 +21,29 @@ final class PhabricatorDashboardQueryPanelType
       'revisions you need to review.');
   }
 
-  public function getFieldSpecifications() {
+  protected function newEditEngineFields(PhabricatorDashboardPanel $panel) {
+    $application_field =
+      id(new PhabricatorDashboardQueryPanelApplicationEditField())
+        ->setKey('class')
+        ->setLabel(pht('Search For'))
+        ->setTransactionType(
+          PhabricatorDashboardQueryPanelApplicationTransaction::TRANSACTIONTYPE)
+        ->setValue($panel->getProperty('class', ''));
+
+    $application_id = $application_field->getControlID();
+
+    $query_field =
+      id(new PhabricatorDashboardQueryPanelQueryEditField())
+        ->setKey('key')
+        ->setLabel(pht('Query'))
+        ->setApplicationControlID($application_id)
+        ->setTransactionType(
+          PhabricatorDashboardQueryPanelQueryTransaction::TRANSACTIONTYPE)
+        ->setValue($panel->getProperty('key', ''));
+
     return array(
-      'class' => array(
-        'name' => pht('Search For'),
-        'type' => 'search.application',
-      ),
-      'key' => array(
-        'name' => pht('Query'),
-        'type' => 'search.query',
-        'control.application' => 'class',
-      ),
-      'limit' => array(
-        'name' => pht('Limit'),
-        'caption' => pht('Leave this blank for the default number of items.'),
-        'type' => 'text',
-      ),
+      $application_field,
+      $query_field,
     );
   }
 

@@ -5,7 +5,6 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
   abstract public function getPanelTypeKey();
   abstract public function getPanelTypeName();
   abstract public function getPanelTypeDescription();
-  abstract public function getFieldSpecifications();
   abstract public function getIcon();
 
   abstract public function renderPanelContent(
@@ -51,6 +50,17 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getPanelTypeKey')
       ->execute();
+  }
+
+  final public function getEditEngineFields(PhabricatorDashboardPanel $panel) {
+    return $this->newEditEngineFields($panel);
+  }
+
+  abstract protected function newEditEngineFields(
+    PhabricatorDashboardPanel $panel);
+
+  public function getSubpanelPHIDs(PhabricatorDashboardPanel $panel) {
+    return array();
   }
 
 }

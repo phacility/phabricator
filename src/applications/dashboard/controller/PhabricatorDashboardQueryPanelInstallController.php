@@ -7,185 +7,160 @@ final class PhabricatorDashboardQueryPanelInstallController
     $viewer = $request->getViewer();
 
     $v_dashboard = null;
-    $v_name = null;
-    $v_column = 0;
-    $v_engine = $request->getURIData('engineKey');
-    $v_query = $request->getURIData('queryKey');
+    $e_dashboard = null;
 
+    $v_name = null;
     $e_name = true;
 
-    // Validate Engines
+    $v_engine = $request->getStr('engine');
+    if (!strlen($v_engine)) {
+      $v_engine = $request->getURIData('engineKey');
+    }
+
+    $v_query = $request->getStr('query');
+    if (!strlen($v_query)) {
+      $v_query = $request->getURIData('queryKey');
+    }
+
     $engines = PhabricatorApplicationSearchEngine::getAllEngines();
-    foreach ($engines as $name => $engine) {
-      if (!$engine->canUseInPanelContext()) {
-        unset($engines[$name]);
-      }
-    }
-    if (!in_array($v_engine, array_keys($engines))) {
-      return new Aphront404Response();
-    }
+    $engine = idx($engines, $v_engine);
+    if ($engine) {
+      $engine = id(clone $engine)
+        ->setViewer($viewer);
 
-    // Validate Queries
-    $engine = $engines[$v_engine];
-    $engine->setViewer($viewer);
-    $good_query = false;
-    if ($engine->isBuiltinQuery($v_query)) {
-      $good_query = true;
+      $redirect_uri = $engine->getQueryResultsPageURI($v_query);
+
+      $named_query = idx($engine->loadEnabledNamedQueries(), $v_query);
+      if ($named_query) {
+        $v_name = $named_query->getQueryName();
+      }
     } else {
-      $saved_query = id(new PhabricatorSavedQueryQuery())
-        ->setViewer($viewer)
-        ->withEngineClassNames(array($v_engine))
-        ->withQueryKeys(array($v_query))
-        ->executeOne();
-      if ($saved_query) {
-        $good_query = true;
-      }
-    }
-    if (!$good_query) {
-      return new Aphront404Response();
-    }
-
-    $named_query = idx($engine->loadEnabledNamedQueries(), $v_query);
-    if ($named_query) {
-      $v_name = $named_query->getQueryName();
+      $redirect_uri = '/';
     }
 
     $errors = array();
 
+    $xaction_name = PhabricatorDashboardPanelNameTransaction::TRANSACTIONTYPE;
+    $xaction_engine =
+      PhabricatorDashboardQueryPanelApplicationTransaction::TRANSACTIONTYPE;
+    $xaction_query =
+      PhabricatorDashboardQueryPanelQueryTransaction::TRANSACTIONTYPE;
+
     if ($request->isFormPost()) {
-      $v_dashboard = $request->getInt('dashboardID');
       $v_name = $request->getStr('name');
       if (!$v_name) {
         $errors[] = pht('You must provide a name for this panel.');
         $e_name = pht('Required');
       }
 
-      $dashboard = id(new PhabricatorDashboardQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($v_dashboard))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
+      $v_dashboard = head($request->getArr('dashboardPHIDs'));
+      if (!$v_dashboard) {
+        $errors[] = pht('You must select a dashboard.');
+        $e_dashboard = pht('Required');
+      } else {
+        $dashboard = id(new PhabricatorDashboardQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($v_dashboard))
+          ->executeOne();
+        if (!$dashboard) {
+          $errors[] = pht('You must select a valid dashboard.');
+          $e_dashboard = pht('Invalid');
+        }
 
-      if (!$dashboard) {
-        $errors[] = pht('Please select a valid dashboard.');
+        $can_edit = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          $dashboard,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        if (!$can_edit) {
+          $errors[] = pht(
+            'You must select a dashboard you have permission to edit.');
+        }
       }
 
       if (!$errors) {
-        $redirect_uri = "/dashboard/arrange/{$v_dashboard}/";
+        $done_uri = $dashboard->getURI();
+
+        // First, create a new panel.
 
         $panel_type = id(new PhabricatorDashboardQueryPanelType())
           ->getPanelTypeKey();
-        $panel = PhabricatorDashboardPanel::initializeNewPanel($viewer);
-        $panel->setPanelType($panel_type);
 
-        $field_list = PhabricatorCustomField::getObjectFields(
-          $panel,
-          PhabricatorCustomField::ROLE_EDIT);
-
-        $field_list
-          ->setViewer($viewer)
-          ->readFieldsFromStorage($panel);
-
-        $panel->requireImplementation()->initializeFieldsFromRequest(
-          $panel,
-          $field_list,
-          $request);
+        $panel = PhabricatorDashboardPanel::initializeNewPanel($viewer)
+          ->setPanelType($panel_type);
 
         $xactions = array();
 
-        $xactions[] = id(new PhabricatorDashboardPanelTransaction())
-          ->setTransactionType(PhabricatorDashboardPanelTransaction::TYPE_NAME)
-          ->setNewValue($v_name);
-
-        $xactions[] = id(new PhabricatorDashboardPanelTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
-          ->setMetadataValue('customfield:key', 'std:dashboard:core:class')
-          ->setOldValue(null)
+        $xactions[] = $panel->getApplicationTransactionTemplate()
+          ->setTransactionType($xaction_engine)
           ->setNewValue($v_engine);
 
-        $xactions[] = id(new PhabricatorDashboardPanelTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
-          ->setMetadataValue('customfield:key', 'std:dashboard:core:key')
-          ->setOldValue(null)
+        $xactions[] = $panel->getApplicationTransactionTemplate()
+          ->setTransactionType($xaction_query)
           ->setNewValue($v_query);
 
-        $editor = id(new PhabricatorDashboardPanelTransactionEditor())
+        $xactions[] = $panel->getApplicationTransactionTemplate()
+          ->setTransactionType($xaction_name)
+          ->setNewValue($v_name);
+
+        $editor = $panel->getApplicationTransactionEditor()
           ->setActor($viewer)
-          ->setContinueOnNoEffect(true)
           ->setContentSourceFromRequest($request)
           ->applyTransactions($panel, $xactions);
 
-        PhabricatorDashboardTransactionEditor::addPanelToDashboard(
-          $viewer,
-          PhabricatorContentSource::newFromRequest($request),
-          $panel,
-          $dashboard,
-          $request->getInt('column', 0));
+        // Now that we've created a panel, add it to the dashboard.
 
-        return id(new AphrontRedirectResponse())->setURI($redirect_uri);
+        $xactions = array();
+
+        $ref_list = clone $dashboard->getPanelRefList();
+        $ref_list->newPanelRef($panel);
+        $new_panels = $ref_list->toDictionary();
+
+        $xactions[] = $dashboard->getApplicationTransactionTemplate()
+          ->setTransactionType(
+            PhabricatorDashboardPanelsTransaction::TRANSACTIONTYPE)
+          ->setNewValue($new_panels);
+
+        $editor = $dashboard->getApplicationTransactionEditor()
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true)
+          ->applyTransactions($dashboard, $xactions);
+
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
     }
 
-    // Make this a select for now, as we don't expect someone to have
-    // edit access to a vast number of dashboards.
-    // Can add optiongroup if needed down the road.
-    $dashboards = id(new PhabricatorDashboardQuery())
-      ->setViewer($viewer)
-      ->withStatuses(array(
-        PhabricatorDashboard::STATUS_ACTIVE,
-      ))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->execute();
-    $options = mpull($dashboards, 'getName', 'getID');
-    asort($options);
-
-    $redirect_uri = $engine->getQueryResultsPageURI($v_query);
-
-    if (!$options) {
-      $notice = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild(pht('You do not have access to any dashboards. To '.
-        'continue, please create a dashboard first.'));
-
-      return $this->newDialog()
-        ->setTitle(pht('No Dashboards'))
-        ->setWidth(AphrontDialogView::WIDTH_FORM)
-        ->appendChild($notice)
-        ->addCancelButton($redirect_uri);
+    if ($v_dashboard) {
+      $dashboard_phids = array($v_dashboard);
+    } else {
+      $dashboard_phids = array();
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->addHiddenInput('engine', $v_engine)
-      ->addHiddenInput('query', $v_query)
-      ->addHiddenInput('column', $v_column)
-      ->appendChild(
+      ->setViewer($viewer)
+      ->appendControl(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($v_name)
           ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setUser($this->getViewer())
-          ->setValue($v_dashboard)
-          ->setName('dashboardID')
-          ->setOptions($options)
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setValue($dashboard_phids)
+          ->setError($e_dashboard)
+          ->setName('dashboardPHIDs')
+          ->setLimit(1)
+          ->setDatasource(new PhabricatorDashboardDatasource())
           ->setLabel(pht('Dashboard')));
 
     return $this->newDialog()
       ->setTitle(pht('Add Panel to Dashboard'))
       ->setErrors($errors)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendChild($form->buildLayoutView())
+      ->addHiddenInput('engine', $v_engine)
+      ->addHiddenInput('query', $v_query)
+      ->appendForm($form)
       ->addCancelButton($redirect_uri)
       ->addSubmitButton(pht('Add Panel'));
 

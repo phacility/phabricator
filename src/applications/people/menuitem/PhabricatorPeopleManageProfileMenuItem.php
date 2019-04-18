@@ -40,14 +40,14 @@ final class PhabricatorPeopleManageProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $user = $config->getProfileObject();
     $id = $user->getID();
 
-    $item = $this->newItem()
-      ->setHref("/people/manage/{$id}/")
+    $item = $this->newItemView()
+      ->setURI("/people/manage/{$id}/")
       ->setName($this->getDisplayName($config))
       ->setIcon('fa-gears');
 

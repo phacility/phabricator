@@ -238,6 +238,7 @@ final class CelerityDefaultPostprocessor
       'grey.button.gradient' => 'linear-gradient(to bottom, #ffffff, #f1f0f1)',
       'grey.button.hover' => 'linear-gradient(to bottom, #ffffff, #eeebec)',
 
+      'document.border' => '#dedee1',
 
     );
   }

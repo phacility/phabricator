@@ -566,6 +566,18 @@ abstract class PhabricatorEditEngine
     return $this->getObjectViewURI($object);
   }
 
+  /**
+   * @task uri
+   */
+  public function getCreateURI($form_key) {
+    try {
+      $create_uri = $this->getEditURI(null, "form/{$form_key}/");
+    } catch (Exception $ex) {
+      $create_uri = null;
+    }
+
+    return $create_uri;
+  }
 
   /**
    * @task uri

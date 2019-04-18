@@ -110,10 +110,6 @@
   border-right: 1px solid {$thinblueborder};
 }
 
-.phui-list-view.phui-list-navbar > li > * {
-  display: block;
-}
-
 .phui-list-navbar .phui-list-item-href {
   color: {$bluetext};
   padding: 8px 16px;
@@ -265,7 +261,8 @@
 
 /* - Action Icon ----------------------------------------------------------- */
 
-.phui-list-item-has-action-icon .phui-list-item-action-href {
+.phabricator-nav-local .phui-list-item-has-action-icon
+  .phui-list-item-action-href {
   position: absolute;
   width: 28px;
   top: 0;
@@ -277,26 +274,30 @@
   display: none;
 }
 
-.phui-list-item-has-action-icon.phui-list-item-selected .phui-list-item-href {
+.phabricator-nav-local .phui-list-item-has-action-icon.phui-list-item-selected
+  .phui-list-item-href {
   padding-right: 32px;
 }
 
-.phui-list-item-has-action-icon.phui-list-item-selected
+.phabricator-nav-local .phui-list-item-has-action-icon.phui-list-item-selected
   .phui-list-item-action-href {
     display: block;
 }
 
-.phui-list-item-has-action-icon .phui-list-item-action-href:hover {
+.phabricator-nav-local .phui-list-item-has-action-icon
+  .phui-list-item-action-href:hover {
   background-color: rgba({$alphablack},.05);
 }
 
-.phui-list-item-has-action-icon .phui-list-item-action-icon {
+.phabricator-nav-local .phui-list-item-has-action-icon
+  .phui-list-item-action-icon {
   opacity: 0.5;
 }
 
-.phui-list-item-has-action-icon .phui-list-item-action-href:hover
+.phabricator-nav-local .phui-list-item-has-action-icon
+  .phui-list-item-action-href:hover
   .phui-list-item-action-icon {
-    opacity: 1;
+  opacity: 1;
 }
 
 /* - Item Counts ----------------------------------------------------------- */

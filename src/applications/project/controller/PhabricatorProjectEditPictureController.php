@@ -273,8 +273,9 @@ final class PhabricatorProjectEditPictureController
       ->setHeaderText(pht('Upload New Picture'))
       ->setForm($upload_form);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::ITEM_MANAGE);
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_MANAGE);
 
     return $this->newPage()
       ->setTitle($title)

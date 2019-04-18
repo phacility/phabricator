@@ -13,6 +13,10 @@ final class PhabricatorProjectMembersProfileMenuItem
     return pht('Members');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-users';
+  }
+
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
     $name = $config->getMenuItemProperty('name');
@@ -35,7 +39,7 @@ final class PhabricatorProjectMembersProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $project = $config->getProfileObject();
@@ -44,10 +48,10 @@ final class PhabricatorProjectMembersProfileMenuItem
 
     $name = $this->getDisplayName($config);
     $icon = 'fa-group';
-    $href = "/project/members/{$id}/";
+    $uri = "/project/members/{$id}/";
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon);
 

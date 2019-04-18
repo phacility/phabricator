@@ -4,7 +4,6 @@ abstract class PhabricatorPeopleProfileController
   extends PhabricatorPeopleController {
 
   private $user;
-  private $profileMenu;
 
   public function shouldRequireAdmin() {
     return false;
@@ -17,34 +16,6 @@ abstract class PhabricatorPeopleProfileController
 
   public function getUser() {
     return $this->user;
-  }
-
-  public function buildApplicationMenu() {
-    $menu = $this->newApplicationMenu();
-
-    $profile_menu = $this->getProfileMenu();
-    if ($profile_menu) {
-      $menu->setProfileMenu($profile_menu);
-    }
-
-    return $menu;
-  }
-
-  protected function getProfileMenu() {
-    if (!$this->profileMenu) {
-      $user = $this->getUser();
-      if ($user) {
-        $viewer = $this->getViewer();
-
-        $engine = id(new PhabricatorPeopleProfileMenuEngine())
-          ->setViewer($viewer)
-          ->setProfileObject($user);
-
-        $this->profileMenu = $engine->buildNavigation();
-      }
-    }
-
-    return $this->profileMenu;
   }
 
   protected function buildApplicationCrumbs() {
@@ -136,6 +107,26 @@ abstract class PhabricatorPeopleProfileController
     }
 
     return $header;
+  }
+
+  final protected function newNavigation(
+    PhabricatorUser $user,
+    $item_identifier) {
+
+    $viewer = $this->getViewer();
+
+    $engine = id(new PhabricatorPeopleProfileMenuEngine())
+      ->setViewer($viewer)
+      ->setController($this)
+      ->setProfileObject($user);
+
+    $view_list = $engine->newProfileMenuItemViewList();
+
+    $view_list->setSelectedViewWithItemIdentifier($item_identifier);
+
+    $navigation = $view_list->newNavigationView();
+
+    return $navigation;
   }
 
 }

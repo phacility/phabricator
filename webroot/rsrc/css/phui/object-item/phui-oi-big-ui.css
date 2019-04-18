@@ -70,21 +70,29 @@
 }
 
 .phui-oi-list-big .phui-oi-linked-container {
-  border: 1px solid {$lightblueborder};
+  border-width: 1px;
+  border-style: solid;
   border-radius: 4px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.035);
 }
 
-.phui-oi-list-big .phui-oi-disabled {
-  border-radius: 4px;
-  background: {$lightgreybackground};
+.phui-oi-list-big .phui-oi-enabled.phui-oi-linked-container {
+  border-color: {$lightblueborder};
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.phui-oi-list-big .phui-oi-disabled.phui-oi-linked-container {
+  border-color: {$greybackground};
+}
+
+.phui-oi-list-big .phui-oi-disabled .phui-oi-image-icon .phui-icon-view {
+  color: {$darkgreybackground};
 }
 
 .device-desktop .phui-oi-linked-container {
   cursor: pointer;
 }
 
-.device-desktop .phui-oi-linked-container:hover {
+.device-desktop .phui-oi-enabled.phui-oi-linked-container:hover {
   background-color: {$hoverblue};
   border-color: {$blueborder};
 }

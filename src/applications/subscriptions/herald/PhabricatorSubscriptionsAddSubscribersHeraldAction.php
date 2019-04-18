@@ -29,4 +29,8 @@ final class PhabricatorSubscriptionsAddSubscribersHeraldAction
     return pht('Add subscribers: %s.', $this->renderHandleList($value));
   }
 
+  public function getPHIDsAffectedByAction(HeraldActionRecord $record) {
+    return $record->getTarget();
+  }
+
 }

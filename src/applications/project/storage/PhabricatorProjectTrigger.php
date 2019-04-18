@@ -13,6 +13,7 @@ final class PhabricatorProjectTrigger
   protected $editPolicy;
 
   private $triggerRules;
+  private $viewer;
   private $usage = self::ATTACHABLE;
 
   public static function initializeNewTrigger() {
@@ -39,6 +40,15 @@ final class PhabricatorProjectTrigger
 
   public function getPHIDType() {
     return PhabricatorProjectTriggerPHIDType::TYPECONST;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
+
+  public function setViewer(PhabricatorUser $user) {
+    $this->viewer = $user;
+    return $this;
   }
 
   public function getDisplayName() {
@@ -72,11 +82,16 @@ final class PhabricatorProjectTrigger
     parent::setRuleset($ruleset);
   }
 
-  public function getTriggerRules() {
+  public function getTriggerRules($viewer = null) {
     if ($this->triggerRules === null) {
+      if (!$viewer) {
+        $viewer = $this->getViewer();
+      }
+
       $trigger_rules = self::newTriggerRulesFromRuleSpecifications(
         $this->getRuleset(),
-        $allow_invalid = true);
+        $allow_invalid = true,
+        $viewer);
 
       $this->triggerRules = $trigger_rules;
     }
@@ -86,11 +101,12 @@ final class PhabricatorProjectTrigger
 
   public static function newTriggerRulesFromRuleSpecifications(
     array $list,
-    $allow_invalid) {
+    $allow_invalid,
+    PhabricatorUser $viewer) {
 
-    // NOTE: With "$allow_invalid" set, we're  trying to preserve the database
+    // NOTE: With "$allow_invalid" set, we're trying to preserve the database
     // state in the rule structure, even if it includes rule types we don't
-    // ha ve implementations for, or rules with invalid rule values.
+    // have implementations for, or rules with invalid rule values.
 
     // If an administrator adds or removes extensions which add rules, or
     // an upgrade affects rule validity, existing rules may become invalid.
@@ -124,7 +140,7 @@ final class PhabricatorProjectTrigger
       if (!is_array($rule)) {
         throw new PhabricatorProjectTriggerCorruptionException(
           pht(
-            'Trigger ruleset is corrupt: rule (with key "%s") should be a '.
+            'Trigger ruleset is corrupt: rule (at index "%s") should be a '.
             'rule specification, but is actually "%s".',
             $key,
             phutil_describe_type($rule)));
@@ -140,7 +156,7 @@ final class PhabricatorProjectTrigger
       } catch (PhutilTypeCheckException $ex) {
         throw new PhabricatorProjectTriggerCorruptionException(
           pht(
-            'Trigger ruleset is corrupt: rule (with key "%s") is not a '.
+            'Trigger ruleset is corrupt: rule (at index "%s") is not a '.
             'valid rule specification: %s',
             $key,
             $ex->getMessage()));
@@ -179,6 +195,7 @@ final class PhabricatorProjectTrigger
           ->setRecord($record)
           ->setException($ex);
       }
+      $rule->setViewer($viewer);
 
       $trigger_rules[] = $rule;
     }
@@ -206,9 +223,8 @@ final class PhabricatorProjectTrigger
     $object) {
 
     $trigger_xactions = array();
-    foreach ($this->getTriggerRules() as $rule) {
+    foreach ($this->getTriggerRules($viewer) as $rule) {
       $rule
-        ->setViewer($viewer)
         ->setTrigger($this)
         ->setColumn($column)
         ->setObject($object);

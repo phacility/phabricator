@@ -71,21 +71,13 @@ final class PhabricatorLinkProfileMenuItem
     return $config->getMenuItemProperty('tooltip');
   }
 
-  private function isValidLinkURI($uri) {
-    return PhabricatorEnv::isValidURIForLink($uri);
-  }
-
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $icon = $this->getLinkIcon($config);
     $name = $this->getLinkName($config);
-    $href = $this->getLinkURI($config);
+    $uri = $this->getLinkURI($config);
     $tooltip = $this->getLinkTooltip($config);
-
-    if (!$this->isValidLinkURI($href)) {
-      $href = '#';
-    }
 
     $icon_object = id(new PhabricatorProfileMenuItemIconSet())
       ->getIcon($icon);
@@ -95,12 +87,12 @@ final class PhabricatorLinkProfileMenuItem
       $icon_class = 'fa-link';
     }
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon_class)
       ->setTooltip($tooltip)
-      ->setRel('noreferrer');
+      ->setIsExternalLink(true);
 
     return array(
       $item,
@@ -142,7 +134,7 @@ final class PhabricatorLinkProfileMenuItem
           continue;
         }
 
-        if (!$this->isValidLinkURI($new)) {
+        if (!PhabricatorEnv::isValidURIForLink($new)) {
           $errors[] = $this->newInvalidError(
             pht(
               'URI "%s" is not a valid link URI. It should be a full, valid '.

@@ -20,6 +20,7 @@ final class PhabricatorProjectTriggerViewController
     if (!$trigger) {
       return new Aphront404Response();
     }
+    $trigger->setViewer($viewer);
 
     $rules_view = $this->newRulesView($trigger);
     $columns_view = $this->newColumnsView($trigger);

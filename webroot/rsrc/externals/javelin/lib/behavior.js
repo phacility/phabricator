@@ -91,7 +91,14 @@ JX.initBehaviors = function(map) {
       configs = [null];
     }
     for (var ii = 0; ii < configs.length; ii++) {
-      JX.behavior._behaviors[name](configs[ii], JX.behavior._statics[name]);
+      try {
+        JX.behavior._behaviors[name](configs[ii], JX.behavior._statics[name]);
+      } catch (behavior_exception) {
+        JX.log(
+          'JX.initBehaviors(...): behavior "%s" raised an error during setup.',
+          name);
+        JX.log(behavior_exception);
+      }
     }
     JX.behavior._initialized[name] = true;
   }

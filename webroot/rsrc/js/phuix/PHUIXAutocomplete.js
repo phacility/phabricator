@@ -555,6 +555,13 @@ JX.install('PHUIXAutocomplete', {
       if (prefix) {
         var pattern = new RegExp(prefix);
         if (!trim.match(pattern)) {
+          // If the prefix pattern can not match the text, deactivate. (This
+          // check might need to be more careful if we have a more varied
+          // set of prefixes in the future, but for now they're all a single
+          // prefix character.)
+          if (trim.length) {
+            this._deactivate();
+          }
           return;
         }
         trim = trim.replace(pattern, '');

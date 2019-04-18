@@ -25,6 +25,8 @@ final class PhabricatorProjectTriggerEditController
       $trigger = PhabricatorProjectTrigger::initializeNewTrigger();
     }
 
+    $trigger->setViewer($viewer);
+
     $column_phid = $request->getStr('columnPHID');
     if ($column_phid) {
       $column = id(new PhabricatorProjectColumnQuery())
@@ -272,6 +274,10 @@ final class PhabricatorProjectTriggerEditController
     $rule_list = array_values($rule_list);
 
     $type_list = PhabricatorProjectTriggerRule::getAllTriggerRules();
+
+    foreach ($type_list as $rule) {
+      $rule->setViewer($this->getViewer());
+    }
     $type_list = mpull($type_list, 'newTemplate');
     $type_list = array_values($type_list);
 

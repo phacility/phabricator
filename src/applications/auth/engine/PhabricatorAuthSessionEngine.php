@@ -389,7 +389,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * appropriate for one-time checks.
    *
    * @param PhabricatorUser User whose session needs to be in high security.
-   * @param AphrontReqeust  Current request.
+   * @param AphrontRequest  Current request.
    * @param string          URI to return the user to if they cancel.
    * @return PhabricatorAuthHighSecurityToken Security token.
    * @task hisec
@@ -421,7 +421,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * use @{method:requireHighSecurityToken}.
    *
    * @param PhabricatorUser User whose session needs to be in high security.
-   * @param AphrontReqeust  Current request.
+   * @param AphrontRequest  Current request.
    * @param string          URI to return the user to if they cancel.
    * @param bool            True to jump partial sessions directly into high
    *                        security instead of just upgrading them to full

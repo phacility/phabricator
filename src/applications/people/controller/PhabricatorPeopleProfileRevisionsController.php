@@ -32,8 +32,9 @@ final class PhabricatorPeopleProfileRevisionsController
     $crumbs->addTextCrumb(pht('Recent Revisions'));
     $crumbs->setBorder(true);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_REVISIONS);
+    $nav = $this->newNavigation(
+      $user,
+      PhabricatorPeopleProfileMenuEngine::ITEM_REVISIONS);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

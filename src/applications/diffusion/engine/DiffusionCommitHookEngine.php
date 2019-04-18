@@ -459,10 +459,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         $ref_type = PhabricatorRepositoryPushLog::REFTYPE_TAG;
         $ref_raw = substr($ref_raw, strlen('refs/tags/'));
       } else {
-        throw new Exception(
-          pht(
-            "Unable to identify the reftype of '%s'. Rejecting push.",
-            $ref_raw));
+        $ref_type = PhabricatorRepositoryPushLog::REFTYPE_REF;
       }
 
       $ref_update = $this->newPushLog()

@@ -266,8 +266,9 @@ final class PhabricatorPeopleProfilePictureController
     $crumbs->addTextCrumb(pht('Edit Profile Picture'));
     $crumbs->setBorder(true);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
+    $nav = $this->newNavigation(
+      $user,
+      PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
     $header = $this->buildProfileHeader();
 

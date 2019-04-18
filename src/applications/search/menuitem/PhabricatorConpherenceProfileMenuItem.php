@@ -41,7 +41,7 @@ final class PhabricatorConpherenceProfileMenuItem
     return $conpherence;
   }
 
-  public function willBuildNavigationItems(array $items) {
+  public function willGetMenuItemViewList(array $items) {
     $viewer = $this->getViewer();
     $room_phids = array();
     foreach ($items as $item) {
@@ -98,7 +98,7 @@ final class PhabricatorConpherenceProfileMenuItem
     return $config->getMenuItemProperty('name');
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
     $room = $this->getConpherence($config);
@@ -114,21 +114,14 @@ final class PhabricatorConpherenceProfileMenuItem
       $unread_count = $data['unread_count'];
     }
 
-    $count = null;
-    if ($unread_count) {
-      $count = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-list-item-count',
-        ),
-        $unread_count);
-    }
-
-    $item = $this->newItem()
-      ->setHref('/'.$room->getMonogram())
+    $item = $this->newItemView()
+      ->setURI('/'.$room->getMonogram())
       ->setName($this->getDisplayName($config))
-      ->setIcon('fa-comments')
-      ->appendChild($count);
+      ->setIcon('fa-comments');
+
+    if ($unread_count) {
+      $item->newCount($unread_count);
+    }
 
     return array(
       $item,

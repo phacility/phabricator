@@ -50,9 +50,15 @@ final class PHUICrumbsView extends AphrontView {
 
     $action_view = null;
     if ($this->actions) {
+      // TODO: This block of code takes "PHUIListItemView" objects and turns
+      // them into some weird abomination by reading most of their properties
+      // out. Some day, this workflow should render the items and CSS should
+      // resytle them in place without needing a wholly separate set of
+      // DOM nodes.
+
       $actions = array();
       foreach ($this->actions as $action) {
-      if ($action->getType() == PHUIListItemView::TYPE_DIVIDER) {
+        if ($action->getType() == PHUIListItemView::TYPE_DIVIDER) {
           $actions[] = phutil_tag(
             'span',
             array(

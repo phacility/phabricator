@@ -20,15 +20,18 @@ final class PhabricatorProjectTriggerRulesetTransaction
   }
 
   public function validateTransactions($object, array $xactions) {
+    $actor = $this->getActor();
     $errors = array();
 
     foreach ($xactions as $xaction) {
       $ruleset = $xaction->getNewValue();
 
       try {
-        PhabricatorProjectTrigger::newTriggerRulesFromRuleSpecifications(
-          $ruleset,
-          $allow_invalid = false);
+        $rules =
+          PhabricatorProjectTrigger::newTriggerRulesFromRuleSpecifications(
+            $ruleset,
+            $allow_invalid = false,
+            $actor);
       } catch (PhabricatorProjectTriggerCorruptionException $ex) {
         $errors[] = $this->newInvalidError(
           pht(
@@ -36,6 +39,19 @@ final class PhabricatorProjectTriggerRulesetTransaction
             $ex->getMessage()),
           $xaction);
         continue;
+      }
+
+      foreach ($rules as $rule) {
+        $exception = $rule->getRuleRecordValueValidationException();
+        if ($exception) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'Value for "%s" rule is invalid: %s',
+              $rule->getSelectControlName(),
+              $exception->getMessage()),
+            $xaction);
+          continue;
+        }
       }
     }
 

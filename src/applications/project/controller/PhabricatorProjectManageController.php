@@ -37,8 +37,9 @@ final class PhabricatorProjectManageController
       new PhabricatorProjectTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::ITEM_MANAGE);
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_MANAGE);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Manage'));

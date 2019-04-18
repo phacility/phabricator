@@ -32,8 +32,9 @@ final class PhabricatorPeopleProfileCommitsController
     $crumbs->addTextCrumb(pht('Recent Commits'));
     $crumbs->setBorder(true);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_COMMITS);
+    $nav = $this->newNavigation(
+      $user,
+      PhabricatorPeopleProfileMenuEngine::ITEM_COMMITS);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

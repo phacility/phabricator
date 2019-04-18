@@ -657,7 +657,6 @@ abstract class PhabricatorApplicationTransaction
           case PhabricatorMutedEdgeType::EDGECONST:
           case PhabricatorMutedByEdgeType::EDGECONST:
             return true;
-            break;
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
             $record = PhabricatorEdgeChangeRecord::newFromTransaction($this);
             $add = $record->getAddedPHIDs();
@@ -700,6 +699,10 @@ abstract class PhabricatorApplicationTransaction
         switch ($edge_type) {
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
+          case DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST:
+          case DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST:
+          case ManiphestTaskHasCommitEdgeType::EDGECONST:
+          case DiffusionCommitHasTaskEdgeType::EDGECONST:
             return true;
           case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
             // When an object is first created, we hide any corresponding
@@ -755,8 +758,11 @@ abstract class PhabricatorApplicationTransaction
         switch ($edge_type) {
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
+          case DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST:
+          case DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST:
+          case ManiphestTaskHasCommitEdgeType::EDGECONST:
+          case DiffusionCommitHasTaskEdgeType::EDGECONST:
             return true;
-            break;
           default:
             break;
         }

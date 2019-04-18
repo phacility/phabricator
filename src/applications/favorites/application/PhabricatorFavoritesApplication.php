@@ -15,12 +15,13 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
   }
 
   public function getIcon() {
-    return 'fa-star';
+    return 'fa-bookmark';
   }
 
   public function getRoutes() {
     return array(
       '/favorites/' => array(
+        '' => 'PhabricatorFavoritesMenuItemController',
         'menu/' => $this->getProfileMenuRouting(
           'PhabricatorFavoritesMenuItemController'),
       ),

@@ -441,6 +441,12 @@ a.phui-tag-view:hover.phui-tag-disabled .phui-tag-core {
   border-color: {$sh-disabledborder};
 }
 
+.phui-tag-placeholder .phui-tag-core {
+  border-color: transparent;
+  background-color: {$sh-disabledbackground};
+  opacity: 0.5;
+}
+
 /* - Outline Tags --------------------------------------------------------------
 
   Basic Tag with a bold border and white background

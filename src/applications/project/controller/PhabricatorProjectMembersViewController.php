@@ -36,8 +36,9 @@ final class PhabricatorProjectMembersViewController
       ->setUserPHIDs($project->getWatcherPHIDs())
       ->setShowNote(true);
 
-    $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::ITEM_MEMBERS);
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_MEMBERS);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Members'));

@@ -110,6 +110,19 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $connection = $replica->newApplicationConnection($database);
       $connection->setReadOnly(true);
       if ($replica->isReachable($connection)) {
+        if ($master_exception) {
+          // If we ended up here as the result of a failover, log the
+          // exception. This is seriously bad news even if we are able
+          // to recover from it.
+          $proxy_exception = new PhutilProxyException(
+            pht(
+              'Failed to connect to master database ("%s"), failing over '.
+              'into read-only mode.',
+              $database),
+            $master_exception);
+          phlog($proxy_exception);
+        }
+
         return $connection;
       }
     }

@@ -90,19 +90,7 @@ set -x
 
 ROOT=`pwd` # You can hard-code the path here instead.
 
-### UPDATE WORKING COPIES ######################################################
-
-cd $ROOT/libphutil
-git pull
-
-cd $ROOT/arcanist
-git pull
-
-cd $ROOT/phabricator
-git pull
-
-
-### CYCLE WEB SERVER AND DAEMONS ###############################################
+### STOP WEB SERVER AND DAEMONS ###############################################
 
 # Stop daemons.
 $ROOT/phabricator/bin/phd stop
@@ -117,6 +105,16 @@ $ROOT/phabricator/bin/phd stop
 
 sudo /etc/init.d/httpd stop
 
+### UPDATE WORKING COPIES ######################################################
+
+cd $ROOT/libphutil
+git pull
+
+cd $ROOT/arcanist
+git pull
+
+cd $ROOT/phabricator
+git pull
 
 # Upgrade the database schema. You may want to add the "--force" flag to allow
 # this script to run noninteractively.
