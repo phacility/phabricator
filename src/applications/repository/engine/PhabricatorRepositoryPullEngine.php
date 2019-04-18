@@ -436,7 +436,7 @@ final class PhabricatorRepositoryPullEngine
     // We can tell the client what it should check out by making "HEAD"
     // point somewhere. However:
     //
-    // (1) If we don't set "receive.denyDelteCurrent" to "ignore" and a user
+    // (1) If we don't set "receive.denyDeleteCurrent" to "ignore" and a user
     // tries to delete the default branch, Git raises an error and refuses.
     // We want to allow this; we already have sufficient protections around
     // dangerous changes and do not need to special case the default branch.
