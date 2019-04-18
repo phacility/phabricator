@@ -121,6 +121,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'phabricator.uninstalled-applications',
         'phabricator.application-settings',
         'config.ignore-issues',
+        'auth.lock-config',
       );
       $soft_locks = array_fuse($soft_locks);
       if (isset($soft_locks[$key])) {
@@ -146,7 +147,7 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'that it was previously not locked, you set it using the web UI, '.
         'and it later became locked.'.
         "\n\n".
-        'You should copy this configuration value in a local configuration '.
+        'You should copy this configuration value to a local configuration '.
         'source (usually by using %s) and then remove it from the database '.
         'with the command below.'.
         "\n\n".
