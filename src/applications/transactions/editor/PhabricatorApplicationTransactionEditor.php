@@ -977,91 +977,20 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $this->object = $object;
-    $this->xactions = $xactions;
-    $this->isNewObject = ($object->getPHID() === null);
-
-    $this->validateEditParameters($object, $xactions);
-    $xactions = $this->newMFATransactions($object, $xactions);
-
-    $actor = $this->requireActor();
-
-    // NOTE: Some transaction expansion requires that the edited object be
-    // attached.
-    foreach ($xactions as $xaction) {
-      $xaction->attachObject($object);
-      $xaction->attachViewer($actor);
-    }
-
-    $xactions = $this->expandTransactions($object, $xactions);
-    $xactions = $this->expandSupportTransactions($object, $xactions);
-    $xactions = $this->combineTransactions($xactions);
-
-    foreach ($xactions as $xaction) {
-      $xaction = $this->populateTransaction($object, $xaction);
-    }
+    $is_new = ($object->getPHID() === null);
+    $this->isNewObject = $is_new;
 
     $is_preview = $this->getIsPreview();
     $read_locking = false;
     $transaction_open = false;
 
-    if (!$is_preview) {
-      $errors = array();
-      $type_map = mgroup($xactions, 'getTransactionType');
-      foreach ($this->getTransactionTypes() as $type) {
-        $type_xactions = idx($type_map, $type, array());
-        $errors[] = $this->validateTransaction($object, $type, $type_xactions);
-      }
-
-      $errors[] = $this->validateAllTransactions($object, $xactions);
-      $errors[] = $this->validateTransactionsWithExtensions($object, $xactions);
-      $errors = array_mergev($errors);
-
-      $continue_on_missing = $this->getContinueOnMissingFields();
-      foreach ($errors as $key => $error) {
-        if ($continue_on_missing && $error->getIsMissingFieldError()) {
-          unset($errors[$key]);
-        }
-      }
-
-      if ($errors) {
-        throw new PhabricatorApplicationTransactionValidationException($errors);
-      }
-
-      if ($this->raiseWarnings) {
-        $warnings = array();
-        foreach ($xactions as $xaction) {
-          if ($this->hasWarnings($object, $xaction)) {
-            $warnings[] = $xaction;
-          }
-        }
-        if ($warnings) {
-          throw new PhabricatorApplicationTransactionWarningException(
-            $warnings);
-        }
-      }
-    }
-
-    foreach ($xactions as $xaction) {
-      $this->adjustTransactionValues($object, $xaction);
-    }
-
-    // Now that we've merged and combined transactions, check for required
-    // capabilities. Note that we're doing this before filtering
-    // transactions: if you try to apply an edit which you do not have
-    // permission to apply, we want to give you a permissions error even
-    // if the edit would have no effect.
-    $this->applyCapabilityChecks($object, $xactions);
-
-    $xactions = $this->filterTransactions($object, $xactions);
+    // If we're attempting to apply transactions, lock and reload the object
+    // before we go anywhere. If we don't do this at the very beginning, we
+    // may be looking at an older version of the object when we populate and
+    // filter the transactions. See PHI1165 for an example.
 
     if (!$is_preview) {
-      $this->hasRequiredMFA = true;
-      if ($this->getShouldRequireMFA()) {
-        $this->requireMFA($object, $xactions);
-      }
-
-      if ($object->getID()) {
+      if (!$is_new) {
         $this->buildOldRecipientLists($object, $xactions);
 
         $object->openTransaction();
@@ -1072,16 +1001,102 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $object->reload();
       }
-
-      if ($this->shouldApplyInitialEffects($object, $xactions)) {
-        if (!$transaction_open) {
-          $object->openTransaction();
-          $transaction_open = true;
-        }
-      }
     }
 
     try {
+      $this->object = $object;
+      $this->xactions = $xactions;
+
+      $this->validateEditParameters($object, $xactions);
+      $xactions = $this->newMFATransactions($object, $xactions);
+
+      $actor = $this->requireActor();
+
+      // NOTE: Some transaction expansion requires that the edited object be
+      // attached.
+      foreach ($xactions as $xaction) {
+        $xaction->attachObject($object);
+        $xaction->attachViewer($actor);
+      }
+
+      $xactions = $this->expandTransactions($object, $xactions);
+      $xactions = $this->expandSupportTransactions($object, $xactions);
+      $xactions = $this->combineTransactions($xactions);
+
+      foreach ($xactions as $xaction) {
+        $xaction = $this->populateTransaction($object, $xaction);
+      }
+
+      if (!$is_preview) {
+        $errors = array();
+        $type_map = mgroup($xactions, 'getTransactionType');
+        foreach ($this->getTransactionTypes() as $type) {
+          $type_xactions = idx($type_map, $type, array());
+          $errors[] = $this->validateTransaction(
+            $object,
+            $type,
+            $type_xactions);
+        }
+
+        $errors[] = $this->validateAllTransactions($object, $xactions);
+        $errors[] = $this->validateTransactionsWithExtensions(
+          $object,
+          $xactions);
+        $errors = array_mergev($errors);
+
+        $continue_on_missing = $this->getContinueOnMissingFields();
+        foreach ($errors as $key => $error) {
+          if ($continue_on_missing && $error->getIsMissingFieldError()) {
+            unset($errors[$key]);
+          }
+        }
+
+        if ($errors) {
+          throw new PhabricatorApplicationTransactionValidationException(
+            $errors);
+        }
+
+        if ($this->raiseWarnings) {
+          $warnings = array();
+          foreach ($xactions as $xaction) {
+            if ($this->hasWarnings($object, $xaction)) {
+              $warnings[] = $xaction;
+            }
+          }
+          if ($warnings) {
+            throw new PhabricatorApplicationTransactionWarningException(
+              $warnings);
+          }
+        }
+      }
+
+      foreach ($xactions as $xaction) {
+        $this->adjustTransactionValues($object, $xaction);
+      }
+
+      // Now that we've merged and combined transactions, check for required
+      // capabilities. Note that we're doing this before filtering
+      // transactions: if you try to apply an edit which you do not have
+      // permission to apply, we want to give you a permissions error even
+      // if the edit would have no effect.
+      $this->applyCapabilityChecks($object, $xactions);
+
+      $xactions = $this->filterTransactions($object, $xactions);
+
+      if (!$is_preview) {
+        $this->hasRequiredMFA = true;
+        if ($this->getShouldRequireMFA()) {
+          $this->requireMFA($object, $xactions);
+        }
+
+        if ($this->shouldApplyInitialEffects($object, $xactions)) {
+          if (!$transaction_open) {
+            $object->openTransaction();
+            $transaction_open = true;
+          }
+        }
+      }
+
       if ($this->shouldApplyInitialEffects($object, $xactions)) {
         $this->applyInitialEffects($object, $xactions);
       }
