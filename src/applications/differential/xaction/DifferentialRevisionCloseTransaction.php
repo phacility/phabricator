@@ -100,8 +100,17 @@ final class DifferentialRevisionCloseTransaction
         $this->renderAuthor());
     }
 
-    $author_phid = $commit->getAuthorDisplayPHID();
-    $committer_phid = $commit->getCommitterDisplayPHID();
+    $author_phid = null;
+    if ($commit->hasAuthorIdentity()) {
+      $identity = $commit->getAuthorIdentity();
+      $author_phid = $identity->getIdentityDisplayPHID();
+    }
+
+    $committer_phid = null;
+    if ($commit->hasCommitterIdentity()) {
+      $identity = $commit->getCommitterIdentity();
+      $committer_phid = $identity->getIdentityDisplayPHID();
+    }
 
     if (!$author_phid) {
       return pht(
