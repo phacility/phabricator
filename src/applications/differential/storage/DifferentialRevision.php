@@ -41,7 +41,7 @@ final class DifferentialRevision extends DifferentialDAO
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
   protected $properties = array();
 
-  private $commits = self::ATTACHABLE;
+  private $commitPHIDs = self::ATTACHABLE;
   private $activeDiff = self::ATTACHABLE;
   private $diffIDs = self::ATTACHABLE;
   private $hashes = self::ATTACHABLE;
@@ -158,23 +158,8 @@ final class DifferentialRevision extends DifferentialDAO
     return '/'.$this->getMonogram();
   }
 
-  public function loadCommitPHIDs() {
-    if (!$this->getID()) {
-      return ($this->commits = array());
-    }
-
-    $commits = queryfx_all(
-      $this->establishConnection('r'),
-      'SELECT commitPHID FROM %T WHERE revisionID = %d',
-      self::TABLE_COMMIT,
-      $this->getID());
-    $commits = ipull($commits, 'commitPHID');
-
-    return ($this->commits = $commits);
-  }
-
   public function getCommitPHIDs() {
-    return $this->assertAttached($this->commits);
+    return $this->assertAttached($this->commitPHIDs);
   }
 
   public function getActiveDiff() {
@@ -202,7 +187,7 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function attachCommitPHIDs(array $phids) {
-    $this->commits = array_values($phids);
+    $this->commitPHIDs = $phids;
     return $this;
   }
 
