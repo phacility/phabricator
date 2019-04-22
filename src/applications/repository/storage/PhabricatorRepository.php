@@ -2,7 +2,7 @@
 
 /**
  * @task uri        Repository URI Management
- * @task autoclose  Autoclose
+ * @task publishing Publishing
  * @task sync       Cluster Synchronization
  */
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
@@ -41,12 +41,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
   const TABLE_PARENTS = 'repository_parents';
   const TABLE_COVERAGE = 'repository_coverage';
-
-  const BECAUSE_REPOSITORY_IMPORTING = 'auto/importing';
-  const BECAUSE_AUTOCLOSE_DISABLED = 'auto/disabled';
-  const BECAUSE_NOT_ON_AUTOCLOSE_BRANCH = 'auto/nobranch';
-  const BECAUSE_BRANCH_UNTRACKED = 'auto/notrack';
-  const BECAUSE_BRANCH_NOT_AUTOCLOSE = 'auto/noclose';
 
   const STATUS_ACTIVE = 'active';
   const STATUS_INACTIVE = 'inactive';
@@ -952,6 +946,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->isBranchInFilter($branch, 'branch-filter');
   }
 
+  public function isBranchPermanentRef($branch) {
+    return $this->isBranchInFilter($branch, 'close-commits-filter');
+  }
+
   public function formatCommitName($commit_identifier, $local = false) {
     $vcs = $this->getVersionControlSystem();
 
@@ -1036,164 +1034,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $ratio;
   }
 
-  /**
-   * Should this repository publish feed, notifications, audits, and email?
-   *
-   * We do not publish information about repositories during initial import,
-   * or if the repository has been set not to publish.
-   */
-  public function shouldPublish() {
-    if ($this->isImporting()) {
-      return false;
-    }
+/* -(  Publishing  )--------------------------------------------------------- */
 
-    if ($this->isPublishingDisabled()) {
-      return false;
-    }
-
-    return true;
+  public function newPublisher() {
+    return id(new PhabricatorRepositoryPublisher())
+      ->setRepository($this);
   }
 
   public function isPublishingDisabled() {
     return $this->getDetail('herald-disabled');
-  }
-
-  public function shouldPublishCommit(PhabricatorRepositoryCommit $commit) {
-    if (!$this->shouldPublish()) {
-      return false;
-    }
-
-    if (!$commit->isPermanentCommit()) {
-      return false;
-    }
-
-    return true;
-  }
-
-
-/* -(  Autoclose  )---------------------------------------------------------- */
-
-
-  public function shouldAutocloseRef(DiffusionRepositoryRef $ref) {
-    if (!$ref->isBranch()) {
-      return false;
-    }
-
-    return $this->shouldAutocloseBranch($ref->getShortName());
-  }
-
-  /**
-   * Determine if autoclose is active for a branch.
-   *
-   * For more details about why, use @{method:shouldSkipAutocloseBranch}.
-   *
-   * @param string Branch name to check.
-   * @return bool True if autoclose is active for the branch.
-   * @task autoclose
-   */
-  public function shouldAutocloseBranch($branch) {
-    return ($this->shouldSkipAutocloseBranch($branch) === null);
-  }
-
-  /**
-   * Determine if autoclose is active for a commit.
-   *
-   * For more details about why, use @{method:shouldSkipAutocloseCommit}.
-   *
-   * @param PhabricatorRepositoryCommit Commit to check.
-   * @return bool True if autoclose is active for the commit.
-   * @task autoclose
-   */
-  public function shouldAutocloseCommit(PhabricatorRepositoryCommit $commit) {
-    return ($this->shouldSkipAutocloseCommit($commit) === null);
-  }
-
-
-  /**
-   * Determine why autoclose should be skipped for a branch.
-   *
-   * This method gives a detailed reason why autoclose will be skipped. To
-   * perform a simple test, use @{method:shouldAutocloseBranch}.
-   *
-   * @param string Branch name to check.
-   * @return const|null Constant identifying reason to skip this branch, or null
-   *   if autoclose is active.
-   * @task autoclose
-   */
-  public function shouldSkipAutocloseBranch($branch) {
-    $all_reason = $this->shouldSkipAllAutoclose();
-    if ($all_reason) {
-      return $all_reason;
-    }
-
-    if (!$this->shouldTrackBranch($branch)) {
-      return self::BECAUSE_BRANCH_UNTRACKED;
-    }
-
-    if (!$this->isBranchInFilter($branch, 'close-commits-filter')) {
-      return self::BECAUSE_BRANCH_NOT_AUTOCLOSE;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Determine why autoclose should be skipped for a commit.
-   *
-   * This method gives a detailed reason why autoclose will be skipped. To
-   * perform a simple test, use @{method:shouldAutocloseCommit}.
-   *
-   * @param PhabricatorRepositoryCommit Commit to check.
-   * @return const|null Constant identifying reason to skip this commit, or null
-   *   if autoclose is active.
-   * @task autoclose
-   */
-  public function shouldSkipAutocloseCommit(
-    PhabricatorRepositoryCommit $commit) {
-
-    $all_reason = $this->shouldSkipAllAutoclose();
-    if ($all_reason) {
-      return $all_reason;
-    }
-
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return null;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        break;
-      default:
-        throw new Exception(pht('Unrecognized version control system.'));
-    }
-
-    if (!$commit->isPermanentCommit()) {
-      return self::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Determine why all autoclose operations should be skipped for this
-   * repository.
-   *
-   * @return const|null Constant identifying reason to skip all autoclose
-   *   operations, or null if autoclose operations are not blocked at the
-   *   repository level.
-   * @task autoclose
-   */
-  private function shouldSkipAllAutoclose() {
-    if ($this->isImporting()) {
-      return self::BECAUSE_REPOSITORY_IMPORTING;
-    }
-
-    if ($this->isPublishingDisabled()) {
-      return self::BECAUSE_AUTOCLOSE_DISABLED;
-    }
-
-    return null;
   }
 
   public function getPermanentRefRules() {

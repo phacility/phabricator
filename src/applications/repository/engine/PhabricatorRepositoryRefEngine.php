@@ -347,7 +347,7 @@ final class PhabricatorRepositoryRefEngine
       return false;
     }
 
-    return $this->getRepository()->shouldAutocloseBranch($ref_name);
+    return $this->getRepository()->isBranchPermanentRef($ref_name);
   }
 
   /**

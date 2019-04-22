@@ -113,28 +113,14 @@ final class DiffusionCommitEditEngine
       ->setConduitTypeDescription(pht('New auditors.'))
       ->setValue($object->getAuditorPHIDsForEdit());
 
-    $reason = $data->getCommitDetail('autocloseReason', false);
-    if ($reason !== false) {
-      switch ($reason) {
-        case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:
-          $desc = pht('No, Repository Importing');
-          break;
-        case PhabricatorRepository::BECAUSE_AUTOCLOSE_DISABLED:
-          $desc = pht('No, Repository Publishing Disabled');
-          break;
-        case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
-          $desc = pht('No, Not Reachable from Permanent Ref');
-          break;
-        // Old commits which were manually reparsed with "--force-autoclose"
-        // may have this constant. This flag is no longer supported.
-        case 'auto/forced':
-        case null:
-          $desc = pht('Yes');
-          break;
-        default:
-          $desc = pht('Unknown');
-          break;
+    $holds = $data->getPublisherHoldReasons();
+    if ($holds) {
+      $hold_names = array();
+      foreach ($holds as $hold) {
+        $hold_names[] = id(new PhabricatorRepositoryPublisher())
+          ->getHoldName($hold);
       }
+      $desc = implode('; ', $hold_names);
 
       $doc_href = PhabricatorEnv::getDoclink(
         'Diffusion User Guide: Permanent Refs');
@@ -147,7 +133,7 @@ final class DiffusionCommitEditEngine
         pht('Learn More'));
 
         $fields[] = id(new PhabricatorStaticEditField())
-          ->setLabel(pht('Published?'))
+          ->setLabel(pht('Unpublished'))
           ->setValue(array($desc, " \xC2\xB7 ", $doc_link));
     }
 

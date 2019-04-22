@@ -129,10 +129,12 @@ final class DiffusionRepositoryBranchesManagementPanel
       $branches = $pager->sliceResults($branches);
       $can_close_branches = ($repository->isHg());
 
+      $publisher = $repository->newPublisher();
+
       $rows = array();
       foreach ($branches as $branch) {
         $branch_name = $branch->getShortName();
-        $permanent = $repository->shouldAutocloseBranch($branch_name);
+        $permanent = $publisher->shouldPublishRef($branch);
 
         $default = $repository->getDefaultBranch();
         $icon = null;

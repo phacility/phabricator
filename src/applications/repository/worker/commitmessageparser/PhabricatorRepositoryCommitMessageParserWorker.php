@@ -157,19 +157,18 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $commit->setSummary($data->getSummary());
     $commit->save();
 
-    // Figure out if we're going to try to "autoclose" related objects (e.g.,
-    // close linked tasks and related revisions) and, if not, record why we
-    // aren't. Autoclose can be disabled for various reasons at the repository
-    // or commit levels.
+    // If we're publishing this commit, we're going to queue tasks to update
+    // referenced objects (like tasks and revisions). Otherwise, record some
+    // details about why we are not publishing it yet.
 
-    $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
-    $data->setCommitDetail('autocloseReason', $autoclose_reason);
-    $should_autoclose = $repository->shouldAutocloseCommit($commit);
-
-    if ($should_autoclose) {
+    $publisher = $repository->newPublisher();
+    if ($publisher->shouldPublishCommit($commit)) {
       $actor = PhabricatorUser::getOmnipotentUser();
       $this->closeRevisions($actor, $ref, $commit, $data);
       $this->closeTasks($actor, $ref, $commit, $data);
+    } else {
+      $hold_reasons = $publisher->getCommitHoldReasons($commit);
+      $data->setCommitDetail('holdReasons', $hold_reasons);
     }
 
     $data->save();

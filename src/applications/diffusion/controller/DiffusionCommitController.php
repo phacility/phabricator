@@ -243,7 +243,7 @@ final class DiffusionCommitController extends DiffusionController {
       if (!$commit->isPermanentCommit()) {
         $nonpermanent_tag = id(new PHUITagView())
           ->setType(PHUITagView::TYPE_SHADE)
-          ->setName(pht('Not Permanent'))
+          ->setName(pht('Unpublished'))
           ->setColor(PHUITagView::COLOR_ORANGE);
 
         $header->addTag($nonpermanent_tag);

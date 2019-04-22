@@ -30,7 +30,8 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepositoryCommit $commit) {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
-    if (!$repository->shouldPublishCommit($commit)) {
+    $publisher = $repository->newPublisher();
+    if (!$publisher->shouldPublishCommit($commit)) {
       return;
     }
 

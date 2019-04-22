@@ -718,7 +718,8 @@ final class PhabricatorAuditEditor
       switch ($xaction->getTransactionType()) {
         case PhabricatorAuditTransaction::TYPE_COMMIT:
           $repository = $object->getRepository();
-          if (!$repository->shouldPublishCommit($object)) {
+          $publisher = $repository->newPublisher();
+          if (!$publisher->shouldPublishCommit($object)) {
             return false;
           }
           return true;
@@ -779,7 +780,8 @@ final class PhabricatorAuditEditor
     // TODO: They should, and then we should simplify this.
     $repository = $object->getRepository($assert_attached = false);
     if ($repository != PhabricatorLiskDAO::ATTACHABLE) {
-      if (!$repository->shouldPublishCommit($object)) {
+      $publisher = $repository->newPublisher();
+      if (!$publisher->shouldPublishCommit($object)) {
         return false;
       }
     }
