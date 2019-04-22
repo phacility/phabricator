@@ -169,19 +169,6 @@ abstract class DiffusionView extends AphrontView {
       $detail);
   }
 
-  final public static function linkRevision($id) {
-    if (!$id) {
-      return null;
-    }
-
-    return phutil_tag(
-      'a',
-      array(
-        'href' => "/D{$id}",
-      ),
-      "D{$id}");
-  }
-
   final public static function renderName($name) {
     $email = new PhutilEmailAddress($name);
     if ($email->getDisplayName() && $email->getDomainName()) {

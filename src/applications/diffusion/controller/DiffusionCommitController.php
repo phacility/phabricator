@@ -807,8 +807,6 @@ final class DiffusionCommitController extends DiffusionController {
       ->setDiffusionRequest($drequest)
       ->setHistory($merges);
 
-    $history_table->loadRevisions();
-
     $panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Merged Changes'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
