@@ -53,10 +53,10 @@ final class PhabricatorNotificationQuery
 
     $data = queryfx_all(
       $conn,
-      'SELECT story.*, notif.hasViewed FROM %R notif
-         JOIN %R story ON notif.chronologicalKey = story.chronologicalKey
+      'SELECT story.*, notification.hasViewed FROM %R notification
+         JOIN %R story ON notification.chronologicalKey = story.chronologicalKey
          %Q
-         ORDER BY notif.chronologicalKey DESC
+         ORDER BY notification.chronologicalKey DESC
          %Q',
       $notification_table,
       $story_table,
@@ -82,21 +82,21 @@ final class PhabricatorNotificationQuery
     if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'notif.userPHID IN (%Ls)',
+        'notification.userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
     if ($this->unread !== null) {
       $where[] = qsprintf(
         $conn,
-        'notif.hasViewed = %d',
+        'notification.hasViewed = %d',
         (int)!$this->unread);
     }
 
     if ($this->keys !== null) {
       $where[] = qsprintf(
         $conn,
-        'notif.chronologicalKey IN (%Ls)',
+        'notification.chronologicalKey IN (%Ls)',
         $this->keys);
     }
 
@@ -113,8 +113,53 @@ final class PhabricatorNotificationQuery
     return $stories;
   }
 
-  protected function getResultCursor($item) {
-    return $item->getChronologicalKey();
+  protected function getDefaultOrderVector() {
+    return array('key');
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'newest' => array(
+        'vector' => array('key'),
+        'name' => pht('Creation (Newest First)'),
+        'aliases' => array('created'),
+      ),
+      'oldest' => array(
+        'vector' => array('-key'),
+        'name' => pht('Creation (Oldest First)'),
+      ),
+    );
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'key' => array(
+        'table' => 'notification',
+        'column' => 'chronologicalKey',
+        'type' => 'string',
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function applyExternalCursorConstraintsToQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $subquery,
+    $cursor) {
+    $subquery->withKeys(array($cursor));
+  }
+
+  protected function newExternalCursorStringForResult($object) {
+    return $object->getChronologicalKey();
+  }
+
+  protected function newPagingMapFromPartialObject($object) {
+    return array(
+      'key' => $object->getChronologicalKey(),
+    );
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'notification';
   }
 
   public function getQueryApplicationClass() {

@@ -46,8 +46,4 @@ final class PhabricatorEditEngineQuery
     return 'PhabricatorTransactionsApplication';
   }
 
-  protected function getResultCursor($object) {
-    return null;
-  }
-
 }
