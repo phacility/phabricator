@@ -36,27 +36,7 @@ final class DiffusionBlameController extends DiffusionController {
 
     $commit_map = mpull($commits, 'getCommitIdentifier', 'getPHID');
 
-    $revisions = array();
-    $revision_map = array();
-    if ($commits) {
-      $revision_ids = id(new DifferentialRevision())
-        ->loadIDsByCommitPHIDs(array_keys($commit_map));
-      if ($revision_ids) {
-        $revisions = id(new DifferentialRevisionQuery())
-          ->setViewer($viewer)
-          ->withIDs($revision_ids)
-          ->execute();
-        $revisions = mpull($revisions, null, 'getID');
-      }
-
-      foreach ($revision_ids as $commit_phid => $revision_id) {
-        // If the viewer can't actually see this revision, skip it.
-        if (!isset($revisions[$revision_id])) {
-          continue;
-        }
-        $revision_map[$commit_map[$commit_phid]] = $revision_id;
-      }
-    }
+    $revision_map = $this->loadRevisionsForCommits($commits);
 
     $base_href = (string)$drequest->generateURI(
       array(
@@ -75,8 +55,10 @@ final class DiffusionBlameController extends DiffusionController {
       $handle_phids[] = $commit->getAuthorDisplayPHID();
     }
 
-    foreach ($revisions as $revision) {
-      $handle_phids[] = $revision->getAuthorPHID();
+    foreach ($revision_map as $revisions) {
+      foreach ($revisions as $revision) {
+        $handle_phids[] = $revision->getAuthorPHID();
+      }
     }
 
     $handles = $viewer->loadHandles($handle_phids);
@@ -84,13 +66,6 @@ final class DiffusionBlameController extends DiffusionController {
     $map = array();
     $epochs = array();
     foreach ($identifiers as $identifier) {
-      $revision_id = idx($revision_map, $identifier);
-      if ($revision_id) {
-        $revision = idx($revisions, $revision_id);
-      } else {
-        $revision = null;
-      }
-
       $skip_href = $base_href.'?before='.$identifier;
 
       $skip_link = javelin_tag(
@@ -114,6 +89,17 @@ final class DiffusionBlameController extends DiffusionController {
       // doesn't correspond to a real commit.
 
       $commit = idx($commits, $identifier);
+
+      $revision = null;
+      if ($commit) {
+        $revisions = idx($revision_map, $commit->getPHID());
+
+        // There may be multiple edges between this commit and revisions in the
+        // database. If there are, just pick one arbitrarily.
+        if ($revisions) {
+          $revision = head($revisions);
+        }
+      }
 
       $author_phid = null;
 
@@ -279,6 +265,47 @@ final class DiffusionBlameController extends DiffusionController {
     } else {
       return "{$summary}\n{$date}";
     }
+  }
+
+  private function loadRevisionsForCommits(array $commits) {
+    if (!$commits) {
+      return array();
+    }
+
+    $commit_phids = mpull($commits, 'getPHID');
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($commit_phids)
+      ->withEdgeTypes(
+        array(
+          DiffusionCommitHasRevisionEdgeType::EDGECONST,
+        ));
+    $edge_query->execute();
+
+    $revision_phids = $edge_query->getDestinationPHIDs();
+    if (!$revision_phids) {
+      return array();
+    }
+
+    $viewer = $this->getViewer();
+
+    $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($revision_phids)
+      ->execute();
+    $revisions = mpull($revisions, null, 'getPHID');
+
+    $map = array();
+    foreach ($commit_phids as $commit_phid) {
+      $revision_phids = $edge_query->getDestinationPHIDs(
+        array(
+          $commit_phid,
+        ));
+
+      $map[$commit_phid] = array_select_keys($revisions, $revision_phids);
+    }
+
+    return $map;
   }
 
 }
