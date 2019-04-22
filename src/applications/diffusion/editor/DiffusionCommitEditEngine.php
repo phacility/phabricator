@@ -125,9 +125,9 @@ final class DiffusionCommitEditEngine
         case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
           $desc = pht('No, Not Reachable from Permanent Ref');
           break;
-        case PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED:
-          $desc = pht('Yes, Forced Via bin/repository CLI Tool.');
-          break;
+        // Old commits which were manually reparsed with "--force-autoclose"
+        // may have this constant. This flag is no longer supported.
+        case 'auto/forced':
         case null:
           $desc = pht('Yes');
           break;

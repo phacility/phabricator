@@ -88,13 +88,6 @@ final class PhabricatorRepositoryManagementReparseWorkflow
             'help' => pht(
               'Reparse all steps which have not yet completed.'),
           ),
-          array(
-            'name'    => 'force-autoclose',
-            'help'    => pht(
-              'Only used with __%s__, use this to make sure any '.
-              'pertinent diffs are closed regardless of configuration.',
-              '--message'),
-          ),
         ));
 
   }
@@ -307,7 +300,6 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       $spec = array(
         'commitID'  => $commit->getID(),
         'only'      => !$importing,
-        'forceAutoclose' => $args->getArg('force-autoclose'),
       );
 
       if ($all_from_repo && !$force_local) {

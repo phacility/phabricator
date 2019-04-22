@@ -162,20 +162,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     // aren't. Autoclose can be disabled for various reasons at the repository
     // or commit levels.
 
-    $force_autoclose = idx($this->getTaskData(), 'forceAutoclose', false);
-    if ($force_autoclose) {
-      $autoclose_reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
-    } else {
-      $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
-    }
+    $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
     $data->setCommitDetail('autocloseReason', $autoclose_reason);
-    $should_autoclose = $force_autoclose ||
-                        $repository->shouldAutocloseCommit($commit);
-
-    // When updating related objects, we'll act under an omnipotent user to
-    // ensure we can see them, but take actions as either the committer or
-    // author (if we recognize their accounts) or the Diffusion application
-    // (if we do not).
+    $should_autoclose = $repository->shouldAutocloseCommit($commit);
 
     if ($should_autoclose) {
       $actor = PhabricatorUser::getOmnipotentUser();
