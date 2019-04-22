@@ -231,13 +231,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
           ->save();
 
-        queryfx(
-          $conn_w,
-          'INSERT IGNORE INTO %T (revisionID, commitPHID) VALUES (%d, %s)',
-          DifferentialRevision::TABLE_COMMIT,
-          $revision->getID(),
-          $commit->getPHID());
-
         $should_close = !$revision->isPublished() && $should_autoclose;
         if ($should_close) {
           $type_close = DifferentialRevisionCloseTransaction::TRANSACTIONTYPE;

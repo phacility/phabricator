@@ -53,8 +53,6 @@ final class DifferentialRevision extends DifferentialDAO
   private $flags = array();
   private $forceMap = array();
 
-  const TABLE_COMMIT          = 'differential_commit';
-
   const RELATION_REVIEWER     = 'revw';
   const RELATION_SUBSCRIBED   = 'subd';
 
@@ -1020,12 +1018,6 @@ final class DifferentialRevision extends DifferentialDAO
       }
 
       $conn_w = $this->establishConnection('w');
-
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
-        self::TABLE_COMMIT,
-        $this->getID());
 
       // we have to do paths a little differently as they do not have
       // an id or phid column for delete() to act on
