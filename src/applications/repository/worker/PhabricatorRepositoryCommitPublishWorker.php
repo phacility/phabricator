@@ -1,10 +1,15 @@
 <?php
 
-final class PhabricatorRepositoryCommitOwnersWorker
+final class PhabricatorRepositoryCommitPublishWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
   protected function getImportStepFlag() {
-    return PhabricatorRepositoryCommit::IMPORTED_OWNERS;
+    return PhabricatorRepositoryCommit::IMPORTED_PUBLISH;
+  }
+
+  public function getRequiredLeaseTime() {
+    // Herald rules may take a long time to process.
+    return phutil_units('4 hours in seconds');
   }
 
   protected function parseCommit(
@@ -12,20 +17,15 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepositoryCommit $commit) {
 
     if (!$this->shouldSkipImportStep()) {
-      $this->triggerOwnerAudits($repository, $commit);
+      $this->publishCommit($repository, $commit);
       $commit->writeImportStatusFlag($this->getImportStepFlag());
     }
 
-    if ($this->shouldQueueFollowupTasks()) {
-      $this->queueTask(
-        'PhabricatorRepositoryCommitHeraldWorker',
-        array(
-          'commitID' => $commit->getID(),
-        ));
-    }
+    // This is the last task in the sequence, so we don't need to queue any
+    // followup workers.
   }
 
-  private function triggerOwnerAudits(
+  private function publishCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
     $viewer = PhabricatorUser::getOmnipotentUser();
@@ -34,6 +34,88 @@ final class PhabricatorRepositoryCommitOwnersWorker
     if (!$publisher->shouldPublishCommit($commit)) {
       return;
     }
+
+    $commit_phid = $commit->getPHID();
+
+    // Reload the commit to get the commit data, identities, and any
+    // outstanding audit requests.
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($commit_phid))
+      ->needCommitData(true)
+      ->needIdentities(true)
+      ->needAuditRequests(true)
+      ->executeOne();
+    if (!$commit) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht(
+          'Failed to reload commit "%s".',
+          $commit_phid));
+    }
+
+    $xactions = array(
+      $this->newAuditTransactions($commit),
+      $this->newPublishTransactions($commit),
+    );
+    $xactions = array_mergev($xactions);
+
+    $acting_phid = $this->getPublishAsPHID($commit);
+    $content_source = $this->newContentSource();
+
+    $editor = $commit->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setActingAsPHID($acting_phid)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true)
+      ->setContentSource($content_source);
+
+    try {
+      $raw_patch = $this->loadRawPatchText($repository, $commit);
+    } catch (Exception $ex) {
+      $raw_patch = pht('Unable to generate patch: %s', $ex->getMessage());
+    }
+    $editor->setRawPatch($raw_patch);
+
+    $editor->applyTransactions($commit, $xactions);
+  }
+
+  private function getPublishAsPHID(PhabricatorRepositoryCommit $commit) {
+    if ($commit->hasCommitterIdentity()) {
+      return $commit->getCommitterIdentity()->getIdentityDisplayPHID();
+    }
+
+    if ($commit->hasAuthorIdentity()) {
+      return $commit->getAuthorIdentity()->getIdentityDisplayPHID();
+    }
+
+    return id(new PhabricatorDiffusionApplication())->getPHID();
+  }
+
+  private function newPublishTransactions(PhabricatorRepositoryCommit $commit) {
+    $data = $commit->getCommitData();
+
+    $xactions = array();
+
+    $xactions[] = $commit->getApplicationTransactionTemplate()
+      ->setTransactionType(PhabricatorAuditTransaction::TYPE_COMMIT)
+      ->setDateCreated($commit->getEpoch())
+      ->setNewValue(
+        array(
+          'description'   => $data->getCommitMessage(),
+          'summary'       => $data->getSummary(),
+          'authorName'    => $data->getAuthorName(),
+          'authorPHID'    => $commit->getAuthorPHID(),
+          'committerName' => $data->getCommitDetail('committer'),
+          'committerPHID' => $data->getCommitDetail('committerPHID'),
+        ));
+
+    return $xactions;
+  }
+
+  private function newAuditTransactions(PhabricatorRepositoryCommit $commit) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $repository = $commit->getRepository();
 
     $affected_paths = PhabricatorOwnerPathQuery::loadAffectedPaths(
       $repository,
@@ -47,17 +129,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $commit->writeOwnersEdges(mpull($affected_packages, 'getPHID'));
 
     if (!$affected_packages) {
-      return;
-    }
-
-    $commit = id(new DiffusionCommitQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($commit->getPHID()))
-      ->needCommitData(true)
-      ->needAuditRequests(true)
-      ->executeOne();
-    if (!$commit) {
-      return;
+      return array();
     }
 
     $data = $commit->getCommitData();
@@ -99,15 +171,10 @@ final class PhabricatorRepositoryCommitOwnersWorker
 
     // If none of the packages are triggering audits, we're all done.
     if (!$auditor_phids) {
-      return;
+      return array();
     }
 
     $audit_type = DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE;
-
-    $owners_phid = id(new PhabricatorOwnersApplication())
-      ->getPHID();
-
-    $content_source = $this->newContentSource();
 
     $xactions = array();
     $xactions[] = $commit->getApplicationTransactionTemplate()
@@ -117,14 +184,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
           '+' => array_fuse($auditor_phids),
         ));
 
-    $editor = $commit->getApplicationTransactionEditor()
-      ->setActor($viewer)
-      ->setActingAsPHID($owners_phid)
-      ->setContinueOnNoEffect(true)
-      ->setContinueOnMissingFields(true)
-      ->setContentSource($content_source);
-
-    $editor->applyTransactions($commit, $xactions);
+    return $xactions;
   }
 
   private function shouldTriggerAudit(
@@ -253,4 +313,66 @@ final class PhabricatorRepositoryCommitOwnersWorker
     return false;
   }
 
+  private function loadRawPatchText(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $identifier = $commit->getCommitIdentifier();
+
+    $drequest = DiffusionRequest::newFromDictionary(
+      array(
+        'user' => $viewer,
+        'repository' => $repository,
+      ));
+
+    $time_key = 'metamta.diffusion.time-limit';
+    $byte_key = 'metamta.diffusion.byte-limit';
+    $time_limit = PhabricatorEnv::getEnvConfig($time_key);
+    $byte_limit = PhabricatorEnv::getEnvConfig($byte_key);
+
+    $diff_info = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      $drequest,
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $identifier,
+        'linesOfContext' => 3,
+        'timeout' => $time_limit,
+        'byteLimit' => $byte_limit,
+      ));
+
+    if ($diff_info['tooSlow']) {
+      throw new Exception(
+        pht(
+          'Patch generation took longer than configured limit ("%s") of '.
+          '%s second(s).',
+          $time_key,
+          new PhutilNumber($time_limit)));
+    }
+
+    if ($diff_info['tooHuge']) {
+      $pretty_limit = phutil_format_bytes($byte_limit);
+      throw new Exception(
+        pht(
+          'Patch size exceeds configured byte size limit ("%s") of %s.',
+          $byte_key,
+          $pretty_limit));
+    }
+
+    $file_phid = $diff_info['filePHID'];
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to load file ("%s") returned by "%s".',
+          $file_phid,
+          'diffusion.rawdiffquery'));
+    }
+
+    return $file->loadFileData();
+  }
 }

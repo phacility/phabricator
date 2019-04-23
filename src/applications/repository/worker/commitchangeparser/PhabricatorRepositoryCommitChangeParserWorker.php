@@ -102,7 +102,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $commit = $this->commit;
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(
-        'PhabricatorRepositoryCommitOwnersWorker',
+        'PhabricatorRepositoryCommitPublishWorker',
         array(
           'commitID' => $commit->getID(),
         ));

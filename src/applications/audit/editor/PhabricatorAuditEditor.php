@@ -184,7 +184,7 @@ final class PhabricatorAuditEditor
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorAuditTransaction::TYPE_COMMIT:
-          $import_status_flag = PhabricatorRepositoryCommit::IMPORTED_HERALD;
+          $import_status_flag = PhabricatorRepositoryCommit::IMPORTED_PUBLISH;
           break;
       }
     }

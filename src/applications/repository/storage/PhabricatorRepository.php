@@ -1003,7 +1003,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $done = 0;
     $total = 0;
     foreach ($progress as $row) {
-      $total += $row['N'] * 4;
+      $total += $row['N'] * 3;
       $status = $row['importStatus'];
       if ($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE) {
         $done += $row['N'];
@@ -1011,10 +1011,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       if ($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE) {
         $done += $row['N'];
       }
-      if ($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS) {
-        $done += $row['N'];
-      }
-      if ($status & PhabricatorRepositoryCommit::IMPORTED_HERALD) {
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_PUBLISH) {
         $done += $row['N'];
       }
     }

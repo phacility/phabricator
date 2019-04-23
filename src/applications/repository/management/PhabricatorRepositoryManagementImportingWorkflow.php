@@ -67,11 +67,8 @@ final class PhabricatorRepositoryManagementImportingWorkflow
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE)) {
             $need[] = pht('Change');
           }
-          if (!($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS)) {
-            $need[] = pht('Owners');
-          }
-          if (!($status & PhabricatorRepositoryCommit::IMPORTED_HERALD)) {
-            $need[] = pht('Herald');
+          if (!($status & PhabricatorRepositoryCommit::IMPORTED_PUBLISH)) {
+            $need[] = pht('Publish');
           }
 
           $console->writeOut(' %s', implode(', ', $need));

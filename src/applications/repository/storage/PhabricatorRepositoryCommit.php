@@ -33,9 +33,8 @@ final class PhabricatorRepositoryCommit
 
   const IMPORTED_MESSAGE = 1;
   const IMPORTED_CHANGE = 2;
-  const IMPORTED_OWNERS = 4;
-  const IMPORTED_HERALD = 8;
-  const IMPORTED_ALL = 15;
+  const IMPORTED_PUBLISH = 8;
+  const IMPORTED_ALL = 11;
 
   const IMPORTED_CLOSEABLE = 1024;
   const IMPORTED_UNREACHABLE = 2048;
