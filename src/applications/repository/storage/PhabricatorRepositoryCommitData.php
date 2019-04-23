@@ -68,7 +68,7 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
       ->loadFromArray($dict);
   }
 
-  public function getPublisherHoldReasons() {
+  public function newPublisherHoldReasons() {
     $holds = $this->getCommitDetail('holdReasons');
 
     // Look for the legacy "autocloseReason" if we don't have a modern list
@@ -84,7 +84,12 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
       $holds = array();
     }
 
-    return $holds;
+    foreach ($holds as $key => $reason) {
+      $holds[$key] = PhabricatorRepositoryPublisherHoldReason::newForHoldKey(
+        $reason);
+    }
+
+    return array_values($holds);
   }
 
 }

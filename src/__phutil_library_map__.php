@@ -4408,6 +4408,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryParsedChange' => 'applications/repository/data/PhabricatorRepositoryParsedChange.php',
     'PhabricatorRepositoryPermanentRefsTransaction' => 'applications/repository/xaction/PhabricatorRepositoryPermanentRefsTransaction.php',
     'PhabricatorRepositoryPublisher' => 'applications/repository/query/PhabricatorRepositoryPublisher.php',
+    'PhabricatorRepositoryPublisherHoldReason' => 'applications/repository/query/PhabricatorRepositoryPublisherHoldReason.php',
     'PhabricatorRepositoryPullEngine' => 'applications/repository/engine/PhabricatorRepositoryPullEngine.php',
     'PhabricatorRepositoryPullEvent' => 'applications/repository/storage/PhabricatorRepositoryPullEvent.php',
     'PhabricatorRepositoryPullEventPHIDType' => 'applications/repository/phid/PhabricatorRepositoryPullEventPHIDType.php',
@@ -10690,6 +10691,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryParsedChange' => 'Phobject',
     'PhabricatorRepositoryPermanentRefsTransaction' => 'PhabricatorRepositoryTransactionType',
     'PhabricatorRepositoryPublisher' => 'Phobject',
+    'PhabricatorRepositoryPublisherHoldReason' => 'Phobject',
     'PhabricatorRepositoryPullEngine' => 'PhabricatorRepositoryEngine',
     'PhabricatorRepositoryPullEvent' => array(
       'PhabricatorRepositoryDAO',

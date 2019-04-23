@@ -98,6 +98,13 @@ abstract class DiffusionHistoryView extends DiffusionView {
     foreach ($history as $item) {
       $commit = $item->getCommit();
       if ($commit) {
+
+        // NOTE: The "commit" objects in the history list may be undiscovered,
+        // and thus not yet have PHIDs. Only load data for commits with PHIDs.
+        if (!$commit->getPHID()) {
+          continue;
+        }
+
         $commits[] = $commit;
       }
     }

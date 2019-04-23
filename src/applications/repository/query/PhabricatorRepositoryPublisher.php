@@ -89,32 +89,4 @@ final class PhabricatorRepositoryPublisher
     return $reasons;
   }
 
-/* -(  Rendering  )---------------------------------------------------------- */
-
-  public function getHoldName($hold) {
-    $map = array(
-      self::HOLD_IMPORTING => array(
-        'name' => pht('Repository Importing'),
-      ),
-      self::HOLD_PUBLISHING_DISABLED => array(
-        'name' => pht('Repository Publishing Disabled'),
-      ),
-      self::HOLD_REF_NOT_BRANCH => array(
-        'name' => pht('Not a Branch'),
-      ),
-      self::HOLD_NOT_REACHABLE_FROM_PERMANENT_REF => array(
-        'name' => pht('Not Reachable from Permanent Ref'),
-      ),
-      self::HOLD_UNTRACKED => array(
-        'name' => pht('Untracked Ref'),
-      ),
-      self::HOLD_NOT_PERMANENT_REF => array(
-        'name' => pht('Not a Permanent Ref'),
-      ),
-    );
-
-    $spec = idx($map, $hold, array());
-    return idx($spec, 'name', pht('Unknown ("%s")', $hold));
-  }
-
 }

@@ -113,30 +113,6 @@ final class DiffusionCommitEditEngine
       ->setConduitTypeDescription(pht('New auditors.'))
       ->setValue($object->getAuditorPHIDsForEdit());
 
-    $holds = $data->getPublisherHoldReasons();
-    if ($holds) {
-      $hold_names = array();
-      foreach ($holds as $hold) {
-        $hold_names[] = id(new PhabricatorRepositoryPublisher())
-          ->getHoldName($hold);
-      }
-      $desc = implode('; ', $hold_names);
-
-      $doc_href = PhabricatorEnv::getDoclink(
-        'Diffusion User Guide: Permanent Refs');
-      $doc_link = phutil_tag(
-        'a',
-        array(
-          'href' => $doc_href,
-          'target' => '_blank',
-        ),
-        pht('Learn More'));
-
-        $fields[] = id(new PhabricatorStaticEditField())
-          ->setLabel(pht('Unpublished'))
-          ->setValue(array($desc, " \xC2\xB7 ", $doc_link));
-    }
-
     $actions = DiffusionCommitActionTransaction::loadAllActions();
     $actions = msortv($actions, 'getCommitActionOrderVector');
 
