@@ -832,21 +832,13 @@ final class DifferentialTransactionEditor
     }
 
     if ($revert_monograms) {
-      $revert_objects = id(new PhabricatorObjectQuery())
-        ->setViewer($this->getActor())
-        ->withNames($revert_monograms)
-        ->withTypes(
-          array(
-            DifferentialRevisionPHIDType::TYPECONST,
-            PhabricatorRepositoryCommitPHIDType::TYPECONST,
-          ))
-        ->execute();
+      $revert_objects = DiffusionCommitRevisionQuery::loadRevertedObjects(
+        $this->getActor(),
+        $object,
+        $revert_monograms,
+        null);
 
       $revert_phids = mpull($revert_objects, 'getPHID', 'getPHID');
-
-      // Don't let an object revert itself, although other silly stuff like
-      // cycles of objects reverting each other is not prevented.
-      unset($revert_phids[$object->getPHID()]);
 
       $revert_type = DiffusionCommitRevertsCommitEdgeType::EDGECONST;
       $edges[$revert_type] = $revert_phids;
