@@ -13,6 +13,10 @@ final class DifferentialRevisionWrongBuildsTransaction
     return $value;
   }
 
+  public function applyInternalEffects($object, $value) {
+    $object->setProperty(DifferentialRevision::PROPERTY_WRONG_BUILDS, true);
+  }
+
   public function getIcon() {
     return 'fa-exclamation';
   }
