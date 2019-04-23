@@ -46,4 +46,23 @@ final class DiffusionCommitRevisionQuery
     return $map;
   }
 
+  public static function loadRevisionForCommit(
+    PhabricatorUser $viewer,
+    PhabricatorRepositoryCommit $commit) {
+
+    $data = $commit->getCommitData();
+
+    $revision_id = $data->getCommitDetail('differential.revisionID');
+    if (!$revision_id) {
+      return null;
+    }
+
+    return id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($revision_id))
+      ->needReviewers(true)
+      ->executeOne();
+  }
+
+
 }

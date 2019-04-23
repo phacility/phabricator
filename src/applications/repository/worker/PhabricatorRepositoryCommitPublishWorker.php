@@ -135,16 +135,10 @@ final class PhabricatorRepositoryCommitPublishWorker
     $data = $commit->getCommitData();
 
     $author_phid = $data->getCommitDetail('authorPHID');
-    $revision_id = $data->getCommitDetail('differential.revisionID');
-    if ($revision_id) {
-      $revision = id(new DifferentialRevisionQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($revision_id))
-        ->needReviewers(true)
-        ->executeOne();
-    } else {
-      $revision = null;
-    }
+
+    $revision = DiffusionCommitRevisionQuery::loadRevisionForCommit(
+      $viewer,
+      $commit);
 
     $requests = $commit->getAudits();
     $requests = mpull($requests, null, 'getAuditorPHID');
