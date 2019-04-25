@@ -140,7 +140,7 @@ final class PhabricatorDashboardPanelTabsController
       case 'remove':
         return $this->handleRemoveOperation($panel, $target, $cancel_uri);
       case 'move':
-        break;
+        return $this->handleMoveOperation($panel, $target, $after, $cancel_uri);
       case 'rename':
         return $this->handleRenameOperation($panel, $target, $cancel_uri);
     }
@@ -298,6 +298,89 @@ final class PhabricatorDashboardPanelTabsController
       ->addSubmitButton(pht('Rename Tab'));
   }
 
+  private function handleMoveOperation(
+    PhabricatorDashboardPanel $panel,
+    $target,
+    $after,
+    $cancel_uri) {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $move = $request->getStr('move');
+
+    $impl = $panel->getImplementation();
+    $old_config = $impl->getPanelConfiguration($panel);
+
+    $is_next = ($move === 'next');
+    if ($target === $after) {
+      return $this->newDialog()
+        ->setTitle(pht('Impossible!'))
+        ->appendParagraph(
+          pht(
+            'You can not move a tab relative to itself.'))
+        ->addCancelButton($cancel_uri);
+    } else if ($is_next && ((string)last_key($old_config) === $target)) {
+      return $this->newDialog()
+        ->setTitle(pht('Impossible!'))
+        ->appendParagraph(
+          pht(
+            'This is already the last tab. It can not move any farther to '.
+            'the right.'))
+        ->addCancelButton($cancel_uri);
+    } else if ((string)head_key($old_config) === $target) {
+      return $this->newDialog()
+        ->setTitle(pht('Impossible!'))
+        ->appendParagraph(
+          pht(
+            'This is already the first tab. It can not move any farther to '.
+            'the left.'))
+        ->addCancelButton($cancel_uri);
+    }
+
+    if ($request->hasCSRF()) {
+      $new_config = array();
+      foreach ($old_config as $old_key => $old_spec) {
+        $old_key = (string)$old_key;
+
+        $is_after = ($old_key === $after);
+
+        if (!$is_after) {
+          if ($old_key === $target) {
+            continue;
+          }
+        }
+
+        if ($is_after && !$is_next) {
+          $new_config[$target] = $old_config[$target];
+        }
+
+        $new_config[$old_key] = $old_spec;
+
+        if ($is_after && $is_next) {
+          $new_config[$target] = $old_config[$target];
+        }
+      }
+
+      $this->writePanelConfig($panel, $new_config);
+
+      return id(new AphrontRedirectResponse())->setURI($cancel_uri);
+    }
+
+    if ($is_next) {
+      $prompt = pht('Move this tab to the right?');
+    } else {
+      $prompt = pht('Move this tab to the left?');
+    }
+
+    return $this->newEditDialog()
+      ->setTitle(pht('Move Tab'))
+      ->addHiddenInput('target', $target)
+      ->addHiddenInput('after', $after)
+      ->addHiddenInput('move', $move)
+      ->appendParagraph($prompt)
+      ->addCancelButton($cancel_uri)
+      ->addSubmitButton(pht('Move Tab'));
+  }
 
   private function writePanelConfig(
     PhabricatorDashboardPanel $panel,

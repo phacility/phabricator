@@ -10,12 +10,7 @@ final class PhabricatorNotificationClearController
     if ($request->isDialogFormPost()) {
       $should_clear = true;
     } else {
-      try {
-        $request->validateCSRF();
-        $should_clear = true;
-      } catch (AphrontMalformedRequestException $ex) {
-        $should_clear = false;
-      }
+      $should_clear = $request->hasCSRF();
     }
 
     if ($should_clear) {
