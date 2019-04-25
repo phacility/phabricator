@@ -80,6 +80,10 @@ final class PhabricatorApplicationSearchController
       return $this->processExportRequest();
     }
 
+    if ($query_action === 'customize') {
+      return $this->processCustomizeRequest();
+    }
+
     $key = $this->getQueryKey();
     if ($key == 'edit') {
       return $this->processEditRequest();
@@ -985,4 +989,106 @@ final class PhabricatorApplicationSearchController
     $editor->applyTransactions($preferences, $xactions);
   }
 
+  private function processCustomizeRequest() {
+    $viewer = $this->getViewer();
+    $engine = $this->getSearchEngine();
+    $request = $this->getRequest();
+
+    $object_phid = $request->getStr('search.objectPHID');
+    $context_phid = $request->getStr('search.contextPHID');
+
+    // For now, the object can only be a dashboard panel, so just use a panel
+    // query explicitly.
+    $object = id(new PhabricatorDashboardPanelQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($object_phid))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$object) {
+      return new Aphront404Response();
+    }
+
+    $object_name = pht('%s %s', $object->getMonogram(), $object->getName());
+
+    // Likewise, the context object can only be a dashboard.
+    if (strlen($context_phid)) {
+      $context = id(new PhabricatorDashboardQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($context_phid))
+        ->executeOne();
+      if (!$context) {
+        return new Aphront404Response();
+      }
+    } else {
+      $context = $object;
+    }
+
+    $done_uri = $context->getURI();
+
+    if ($request->isFormPost()) {
+      $saved_query = $engine->buildSavedQueryFromRequest($request);
+      $engine->saveQuery($saved_query);
+      $query_key = $saved_query->getQueryKey();
+    } else {
+      $query_key = $this->getQueryKey();
+      if ($engine->isBuiltinQuery($query_key)) {
+        $saved_query = $engine->buildSavedQueryFromBuiltin($query_key);
+      } else if ($query_key) {
+        $saved_query = id(new PhabricatorSavedQueryQuery())
+          ->setViewer($viewer)
+          ->withQueryKeys(array($query_key))
+          ->executeOne();
+      } else {
+        $saved_query = null;
+      }
+    }
+
+    if (!$saved_query) {
+      return new Aphront404Response();
+    }
+
+    $form = id(new AphrontFormView())
+      ->setViewer($viewer)
+      ->addHiddenInput('search.objectPHID', $object_phid)
+      ->addHiddenInput('search.contextPHID', $context_phid)
+      ->setAction($request->getPath());
+
+    $engine->buildSearchForm($form, $saved_query);
+
+    $errors = $engine->getErrors();
+    if ($request->isFormPost()) {
+      if (!$errors) {
+        $xactions = array();
+
+        // Since this workflow is currently used only by dashboard panels,
+        // we can hard-code how the edit works.
+        $xactions[] = $object->getApplicationTransactionTemplate()
+          ->setTransactionType(
+            PhabricatorDashboardQueryPanelQueryTransaction::TRANSACTIONTYPE)
+          ->setNewValue($query_key);
+
+        $editor = $object->getApplicationTransactionEditor()
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true);
+
+        $editor->applyTransactions($object, $xactions);
+
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
+      }
+    }
+
+    return $this->newDialog()
+      ->setTitle(pht('Customize Query: %s', $object_name))
+      ->setErrors($errors)
+      ->setWidth(AphrontDialogView::WIDTH_FULL)
+      ->appendForm($form)
+      ->addCancelButton($done_uri)
+      ->addSubmitButton(pht('Save Changes'));
+  }
 }

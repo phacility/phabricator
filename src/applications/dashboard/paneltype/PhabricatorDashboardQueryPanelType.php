@@ -236,4 +236,26 @@ final class PhabricatorDashboardQueryPanelType
     return $engine;
   }
 
+  public function newHeaderEditActions(
+    PhabricatorDashboardPanel $panel,
+    PhabricatorUser $viewer,
+    $context_phid) {
+    $actions = array();
+
+    $engine = $this->getSearchEngine($panel);
+
+    $customize_uri = $engine->getCustomizeURI(
+      $panel->getProperty('key'),
+      $panel->getPHID(),
+      $context_phid);
+
+    $actions[] = id(new PhabricatorActionView())
+      ->setIcon('fa-pencil-square-o')
+      ->setName(pht('Customize Query'))
+      ->setWorkflow(true)
+      ->setHref($customize_uri);
+
+    return $actions;
+  }
+
 }
