@@ -41,9 +41,17 @@ final class PhabricatorDashboardQueryPanelType
           PhabricatorDashboardQueryPanelQueryTransaction::TRANSACTIONTYPE)
         ->setValue($panel->getProperty('key', ''));
 
+    $limit_field = id(new PhabricatorIntEditField())
+      ->setKey('limit')
+      ->setLabel(pht('Limit'))
+      ->setTransactionType(
+        PhabricatorDashboardQueryPanelLimitTransaction::TRANSACTIONTYPE)
+      ->setValue($panel->getProperty('limit'));
+
     return array(
       $application_field,
       $query_field,
+      $limit_field,
     );
   }
 

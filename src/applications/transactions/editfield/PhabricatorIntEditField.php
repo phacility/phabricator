@@ -7,6 +7,10 @@ final class PhabricatorIntEditField
     return new AphrontFormTextControl();
   }
 
+  protected function newHTTPParameterType() {
+    return new AphrontIntHTTPParameterType();
+  }
+
   protected function newConduitParameterType() {
     return new ConduitIntParameterType();
   }
