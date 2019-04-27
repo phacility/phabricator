@@ -35,9 +35,11 @@ final class PhabricatorDashboardPanelPHIDType extends PhabricatorPHIDType {
       $name = $panel->getName();
       $monogram = $panel->getMonogram();
 
-      $handle->setName($panel->getMonogram());
-      $handle->setFullName("{$monogram} {$name}");
-      $handle->setURI("/{$monogram}");
+      $handle
+        ->setIcon('fa-window-maximize')
+        ->setName($name)
+        ->setFullName("{$monogram} {$name}")
+        ->setURI($panel->getURI());
 
       if ($panel->getIsArchived()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);

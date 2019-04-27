@@ -5,16 +5,6 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
   private $viewer;
   private $engine;
 
-  final public function buildNavigationMenuItems(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return $this->newNavigationMenuItems($config);
-  }
-
-  abstract protected function newNavigationMenuItems(
-    PhabricatorProfileMenuItemConfiguration $config);
-
-  public function willBuildNavigationItems(array $items) {}
-
   public function getMenuItemTypeIcon() {
     return null;
   }
@@ -76,9 +66,37 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
       ->execute();
   }
 
-  protected function newItem() {
-    return new PHUIListItemView();
+  final protected function newItemView() {
+    return new PhabricatorProfileMenuItemView();
   }
+
+  public function willGetMenuItemViewList(array $items) {}
+
+  final public function getMenuItemViewList(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $list = $this->newMenuItemViewList($config);
+
+    if (!is_array($list)) {
+      throw new Exception(
+        pht(
+          'Expected "newMenuItemViewList()" to return a list (in class "%s"), '.
+          'but it returned something else ("%s").',
+          get_class($this),
+          phutil_describe_type($list)));
+    }
+
+    assert_instances_of($list, 'PhabricatorProfileMenuItemView');
+
+    foreach ($list as $view) {
+      $view->setMenuItemConfiguration($config);
+    }
+
+    return $list;
+  }
+
+  abstract protected function newMenuItemViewList(
+    PhabricatorProfileMenuItemConfiguration $config);
+
 
   public function newPageContent(
     PhabricatorProfileMenuItemConfiguration $config) {
@@ -129,6 +147,21 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
 
   final protected function newInvalidError($message, $xaction = null) {
     return $this->newError(pht('Invalid'), $message, $xaction);
+  }
+
+  final protected function newEmptyView($title, $message) {
+    return id(new PHUIInfoView())
+      ->setTitle($title)
+      ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+      ->setErrors(
+        array(
+          $message,
+        ));
+  }
+
+  public function getAffectedObjectPHIDs(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return array();
   }
 
 }

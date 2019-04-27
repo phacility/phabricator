@@ -241,15 +241,13 @@ final class PhabricatorRepositoryManagementUnpublishWorkflow
       if ($xactions) {
         foreach ($xactions as $xaction) {
           $metadata = $xaction->getMetadata();
-          if (idx($metadata, 'isCommitClose')) {
-            if (idx($metadata, 'commitPHID') === $src->getPHID()) {
-              echo tsprintf(
-                "%s\n",
-                pht(
-                  'MANUAL Revision "%s" was likely closed improperly by "%s".',
-                  $dst->getMonogram(),
-                  $src->getMonogram()));
-            }
+          if (idx($metadata, 'commitPHID') === $src->getPHID()) {
+            echo tsprintf(
+              "%s\n",
+              pht(
+                'MANUAL Revision "%s" was likely closed improperly by "%s".',
+                $dst->getMonogram(),
+                $src->getMonogram()));
           }
         }
       }

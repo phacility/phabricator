@@ -73,6 +73,26 @@ final class PhabricatorAuthenticationConfigOptions
         ->addExample(
           "yourcompany.com\nmail.yourcompany.com",
           pht('Valid Setting')),
+      $this->newOption('auth.lock-config', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Auth provider config must be unlocked before editing'),
+            pht('Auth provider config can be edited without unlocking'),
+          ))
+        ->setSummary(
+          pht(
+            'Require administrators to unlock the authentication provider '.
+            'configuration from the CLI before it can be edited.'))
+        ->setDescription(
+          pht(
+            'When set to `true`, the authentication provider configuration '.
+            'for this instance can not be modified without first running '.
+            '`bin/auth unlock` from the command line. This is to reduce '.
+            'the security impact of a compromised administrator account. '.
+            "\n\n".
+            'After running `bin/auth unlock` and making your changes to the '.
+            'authentication provider config, you should run `bin/auth lock`.'))
+        ->setLocked(true),
       $this->newOption('account.editable', 'bool', true)
         ->setBoolOptions(
           array(

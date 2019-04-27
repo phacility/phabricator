@@ -20,13 +20,13 @@ final class PhabricatorFavoritesMainMenuBarExtension
 
     $dropdown = $this->newDropdown($viewer);
     if (!$dropdown) {
-      return null;
+      return array();
     }
 
     $favorites_menu = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref('#')
-      ->setIcon('fa-star')
+      ->setIcon('fa-bookmark')
       ->addClass('phabricator-core-user-menu')
       ->setNoCSS(true)
       ->setDropdown(true)
@@ -54,7 +54,13 @@ final class PhabricatorFavoritesMainMenuBarExtension
       ->setProfileObject($favorites)
       ->setCustomPHID($viewer->getPHID());
 
-    $filter_view = $menu_engine->buildNavigation();
+    $controller = $this->getController();
+    if ($controller) {
+      $menu_engine->setController($controller);
+    }
+
+    $filter_view = $menu_engine->newProfileMenuItemViewList()
+      ->newNavigationView();
 
     $menu_view = $filter_view->getMenu();
     $item_views = $menu_view->getItems();
@@ -65,18 +71,9 @@ final class PhabricatorFavoritesMainMenuBarExtension
       $action = id(new PhabricatorActionView())
         ->setName($item->getName())
         ->setHref($item->getHref())
+        ->setIcon($item->getIcon())
         ->setType($item->getType());
       $view->addAction($action);
-    }
-
-    if ($viewer->isLoggedIn()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setType(PhabricatorActionView::TYPE_DIVIDER));
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Edit Favorites'))
-          ->setHref('/favorites/menu/configure/'));
     }
 
     return $view;

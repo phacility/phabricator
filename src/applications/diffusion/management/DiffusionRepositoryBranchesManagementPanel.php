@@ -24,7 +24,7 @@ final class DiffusionRepositoryBranchesManagementPanel
     $has_any =
       $repository->getDetail('default-branch') ||
       $repository->getTrackOnlyRules() ||
-      $repository->getAutocloseOnlyRules();
+      $repository->getPermanentRefRules();
 
     if ($has_any) {
       return 'fa-code-fork';
@@ -36,8 +36,9 @@ final class DiffusionRepositoryBranchesManagementPanel
   protected function getEditEngineFieldKeys() {
     return array(
       'defaultBranch',
+      'fetchRefs',
+      'permanentRefs',
       'trackOnly',
-      'autocloseOnly',
     );
   }
 
@@ -78,31 +79,38 @@ final class DiffusionRepositoryBranchesManagementPanel
       phutil_tag('em', array(), $repository->getDefaultBranch()));
     $view->addProperty(pht('Default Branch'), $default_branch);
 
-    $track_only_rules = $repository->getTrackOnlyRules();
-    $track_only_rules = implode(', ', $track_only_rules);
-    $track_only = nonempty(
-      $track_only_rules,
-      phutil_tag('em', array(), pht('Track All Branches')));
-    $view->addProperty(pht('Track Only'), $track_only);
-
-    $autoclose_rules = $repository->getAutocloseOnlyRules();
-    $autoclose_rules = implode(', ', $autoclose_rules);
-    $autoclose_only = nonempty(
-      $autoclose_rules,
-      phutil_tag('em', array(), pht('Autoclose On All Branches')));
-
-    $autoclose_disabled = false;
-    if ($repository->getDetail('disable-autoclose')) {
-      $autoclose_disabled = true;
-      $autoclose_only =
-        phutil_tag('em', array(), pht('Autoclose has been disabled'));
+    if ($repository->supportsFetchRules()) {
+      $fetch_only = $repository->getFetchRules();
+      if ($fetch_only) {
+        $fetch_display = implode(', ', $fetch_only);
+      } else {
+        $fetch_display = phutil_tag('em', array(), pht('Fetch All Refs'));
+      }
+      $view->addProperty(pht('Fetch Refs'), $fetch_display);
     }
 
-    $view->addProperty(pht('Autoclose Only'), $autoclose_only);
+    $track_only_rules = $repository->getTrackOnlyRules();
+    if ($track_only_rules) {
+      $track_only_rules = implode(', ', $track_only_rules);
+      $view->addProperty(pht('Track Only'), $track_only_rules);
+    }
+
+    $publishing_disabled = $repository->isPublishingDisabled();
+    if ($publishing_disabled) {
+      $permanent_display =
+        phutil_tag('em', array(), pht('Publishing Disabled'));
+    } else {
+      $permanent_rules = $repository->getPermanentRefRules();
+      if ($permanent_rules) {
+        $permanent_display = implode(', ', $permanent_rules);
+      } else {
+        $permanent_display = phutil_tag('em', array(), pht('All Branches'));
+      }
+    }
+    $view->addProperty(pht('Permanent Refs'), $permanent_display);
 
     $content[] = $this->newBox(pht('Branches'), $view);
 
-    // Branch Autoclose Table
     if (!$repository->isImporting()) {
       $request = $this->getRequest();
       $pager = id(new PHUIPagerView())
@@ -121,11 +129,12 @@ final class DiffusionRepositoryBranchesManagementPanel
       $branches = $pager->sliceResults($branches);
       $can_close_branches = ($repository->isHg());
 
+      $publisher = $repository->newPublisher();
+
       $rows = array();
       foreach ($branches as $branch) {
         $branch_name = $branch->getShortName();
-        $tracking = $repository->shouldTrackBranch($branch_name);
-        $autoclosing = $repository->shouldAutocloseBranch($branch_name);
+        $permanent = $publisher->shouldPublishRef($branch);
 
         $default = $repository->getDefaultBranch();
         $icon = null;
@@ -142,18 +151,21 @@ final class DiffusionRepositoryBranchesManagementPanel
           $status = pht('Open');
         }
 
-        if ($autoclose_disabled) {
-          $autoclose_status = pht('Disabled (Repository)');
+        if ($publishing_disabled) {
+          $permanent_status = pht('Publishing Disabled');
         } else {
-          $autoclose_status = pht('Off');
+          if ($permanent) {
+            $permanent_status = pht('Permanent');
+          } else {
+            $permanent_status = pht('Not Permanent');
+          }
         }
 
         $rows[] = array(
           $icon,
           $branch_name,
           $status,
-          $tracking ? pht('Tracking') : pht('Off'),
-          $autoclosing ? pht('Autoclose On') : $autoclose_status,
+          $permanent_status,
         );
       }
       $branch_table = new AphrontTableView($rows);
@@ -162,14 +174,12 @@ final class DiffusionRepositoryBranchesManagementPanel
           '',
           pht('Branch'),
           pht('Status'),
-          pht('Track'),
-          pht('Autoclose'),
+          pht('Permanent'),
         ));
       $branch_table->setColumnClasses(
         array(
           '',
           'pri',
-          'narrow',
           'narrow',
           'wide',
         ));
@@ -179,7 +189,6 @@ final class DiffusionRepositoryBranchesManagementPanel
           true,
           $can_close_branches,
           true,
-          true,
         ));
 
       $box = $this->newBox(pht('Branch Status'), $branch_table);
@@ -188,8 +197,10 @@ final class DiffusionRepositoryBranchesManagementPanel
     } else {
       $content[] = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild(pht('Branch status in unavailable while the repository '.
-          'is still importing.'));
+        ->appendChild(
+          pht(
+            'Branch status is unavailable while the repository is still '.
+            'importing.'));
     }
 
     return $content;

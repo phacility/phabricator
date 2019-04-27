@@ -213,3 +213,32 @@
   .phabricator-action-view-item .phui-icon-view {
     color: {$sky};
 }
+
+.phui-list-navbar .phui-list-item-href {
+  display: inline-block;
+}
+
+.phui-list-navbar .phui-list-item-disabled .phui-list-item-href {
+  color: {$lightgreytext};
+}
+
+.phui-list-navbar .phui-list-item-action-href {
+  display: inline-block;
+  padding: 8px 16px;
+  line-height: 16px;
+}
+
+.phui-list-navbar .phui-list-item-action-href .phui-icon-view {
+  color: {$darkgreytext};
+}
+
+.device-desktop
+  .phui-list-navbar .phui-list-item-action-href:hover {
+  background-color: rgba({$alphablue}, 0.07);
+  color: {$sky};
+}
+
+.phui-list-navbar .dropdown-with-caret .phui-list-item-href
+   .phui-icon-view {
+  margin-left: 12px;
+}

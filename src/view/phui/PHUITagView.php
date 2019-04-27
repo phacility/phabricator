@@ -24,6 +24,7 @@ final class PHUITagView extends AphrontTagView {
   const COLOR_BLUEGREY      = 'bluegrey';
   const COLOR_CHECKERED     = 'checkered';
   const COLOR_DISABLED      = 'disabled';
+  const COLOR_PLACEHOLDER = 'placeholder';
 
   const COLOR_OBJECT        = 'object';
   const COLOR_PERSON        = 'person';

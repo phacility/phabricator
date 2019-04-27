@@ -54,7 +54,7 @@
 }
 
 .grippable .aphront-multi-column-column .dashboard-box.phui-object-box:hover {
-  box-shadow: {$dropshadow};
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
 }
 
 .grippable .aphront-multi-column-column .dashboard-box.phui-object-box:hover

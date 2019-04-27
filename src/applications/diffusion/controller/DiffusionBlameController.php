@@ -36,27 +36,9 @@ final class DiffusionBlameController extends DiffusionController {
 
     $commit_map = mpull($commits, 'getCommitIdentifier', 'getPHID');
 
-    $revisions = array();
-    $revision_map = array();
-    if ($commits) {
-      $revision_ids = id(new DifferentialRevision())
-        ->loadIDsByCommitPHIDs(array_keys($commit_map));
-      if ($revision_ids) {
-        $revisions = id(new DifferentialRevisionQuery())
-          ->setViewer($viewer)
-          ->withIDs($revision_ids)
-          ->execute();
-        $revisions = mpull($revisions, null, 'getID');
-      }
-
-      foreach ($revision_ids as $commit_phid => $revision_id) {
-        // If the viewer can't actually see this revision, skip it.
-        if (!isset($revisions[$revision_id])) {
-          continue;
-        }
-        $revision_map[$commit_map[$commit_phid]] = $revision_id;
-      }
-    }
+    $revision_map = DiffusionCommitRevisionQuery::loadRevisionMapForCommits(
+      $viewer,
+      $commits);
 
     $base_href = (string)$drequest->generateURI(
       array(
@@ -75,8 +57,10 @@ final class DiffusionBlameController extends DiffusionController {
       $handle_phids[] = $commit->getAuthorDisplayPHID();
     }
 
-    foreach ($revisions as $revision) {
-      $handle_phids[] = $revision->getAuthorPHID();
+    foreach ($revision_map as $revisions) {
+      foreach ($revisions as $revision) {
+        $handle_phids[] = $revision->getAuthorPHID();
+      }
     }
 
     $handles = $viewer->loadHandles($handle_phids);
@@ -84,13 +68,6 @@ final class DiffusionBlameController extends DiffusionController {
     $map = array();
     $epochs = array();
     foreach ($identifiers as $identifier) {
-      $revision_id = idx($revision_map, $identifier);
-      if ($revision_id) {
-        $revision = idx($revisions, $revision_id);
-      } else {
-        $revision = null;
-      }
-
       $skip_href = $base_href.'?before='.$identifier;
 
       $skip_link = javelin_tag(
@@ -114,6 +91,17 @@ final class DiffusionBlameController extends DiffusionController {
       // doesn't correspond to a real commit.
 
       $commit = idx($commits, $identifier);
+
+      $revision = null;
+      if ($commit) {
+        $revisions = idx($revision_map, $commit->getPHID());
+
+        // There may be multiple edges between this commit and revisions in the
+        // database. If there are, just pick one arbitrarily.
+        if ($revisions) {
+          $revision = head($revisions);
+        }
+      }
 
       $author_phid = null;
 

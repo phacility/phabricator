@@ -33,7 +33,11 @@ final class PhabricatorDashboardPanelDatasource
       $id = (int)$id;
       $query->withIDs(array($id));
     } else {
-      $query->withNameNgrams($raw_query);
+      $this->applyFerretConstraints(
+        $query,
+        id(new PhabricatorDashboardPanel())->newFerretEngine(),
+        'title',
+        $this->getRawQuery());
     }
 
     $panels = $this->executeQuery($query);
@@ -48,13 +52,13 @@ final class PhabricatorDashboardPanelDatasource
         $type_text = nonempty($panel->getPanelType(), pht('Unknown Type'));
         $icon = 'fa-question';
       }
-      $id = $panel->getID();
+      $phid = $panel->getPHID();
       $monogram = $panel->getMonogram();
       $properties = $panel->getProperties();
 
       $result = id(new PhabricatorTypeaheadResult())
         ->setName($monogram.' '.$panel->getName())
-        ->setPHID($id)
+        ->setPHID($phid)
         ->setIcon($icon)
         ->addAttribute($type_text);
 
@@ -66,7 +70,7 @@ final class PhabricatorDashboardPanelDatasource
         $result->setClosed(pht('Archived'));
       }
 
-      $results[$id] = $result;
+      $results[$phid] = $result;
     }
 
     return $results;

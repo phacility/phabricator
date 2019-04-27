@@ -149,5 +149,19 @@ final class PhabricatorEditEngineConfigurationTransaction
     return parent::getIcon();
   }
 
+  protected function newRemarkupChanges() {
+    $changes = array();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case self::TYPE_PREAMBLE:
+        $changes[] = $this->newRemarkupChange()
+          ->setOldValue($this->getOldValue())
+          ->setNewValue($this->getNewValue());
+        break;
+    }
+
+    return $changes;
+  }
 
 }

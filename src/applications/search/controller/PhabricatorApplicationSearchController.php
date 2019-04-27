@@ -196,9 +196,6 @@ final class PhabricatorApplicationSearchController
       $submit->addButton($save_button);
     }
 
-    // TODO: A "Create Dashboard Panel" action goes here somewhere once
-    // we sort out T5307.
-
     $form->appendChild($submit);
     $body = array();
 
@@ -387,7 +384,6 @@ final class PhabricatorApplicationSearchController
     require_celerity_resource('application-search-view-css');
 
     return $this->newPage()
-      ->setApplicationMenu($this->buildApplicationMenu())
       ->setTitle(pht('Query: %s', $title))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
@@ -611,7 +607,6 @@ final class PhabricatorApplicationSearchController
       ->setFooter($lists);
 
     return $this->newPage()
-      ->setApplicationMenu($this->buildApplicationMenu())
       ->setTitle(pht('Saved Queries'))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)

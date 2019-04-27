@@ -132,11 +132,15 @@ ul.phui-oi-list-view {
   background: url('/rsrc/image/texture/grip.png') center center no-repeat;
 }
 
+.phui-oi-ungrippable .phui-oi-grip {
+  opacity: 0.25;
+}
+
 .device .phui-oi-grip {
   display: none;
 }
 
-.phui-oi-grippable .phui-oi-frame {
+.phui-oi-has-grip .phui-oi-frame {
   padding-left: 16px;
 }
 
@@ -606,11 +610,6 @@ ul.phui-oi-list-view .phui-oi-selected
 .phui-object-box .phui-object-box-hidden-content + .phui-oi-list-header {
    border-top: none;
  }
-
-.dashboard-pane .phui-oi-empty .phui-info-view {
-  border: none;
-  margin: 0;
-}
 
 .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
  .aphront-multi-column-column-outer.third .phui-oi-col2 {

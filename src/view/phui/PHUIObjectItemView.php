@@ -299,6 +299,8 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->disabled) {
       $item_classes[] = 'phui-oi-disabled';
+    } else {
+      $item_classes[] = 'phui-oi-enabled';
     }
 
     switch ($this->effect) {
@@ -330,8 +332,14 @@ final class PHUIObjectItemView extends AphrontTagView {
       Javelin::initBehavior('phui-selectable-list');
     }
 
-    if ($this->getGrippable()) {
-      $item_classes[] = 'phui-oi-grippable';
+    $is_grippable = $this->getGrippable();
+    if ($is_grippable !== null) {
+      $item_classes[] = 'phui-oi-has-grip';
+      if ($is_grippable) {
+        $item_classes[] = 'phui-oi-grippable';
+      } else {
+        $item_classes[] = 'phui-oi-ungrippable';
+      }
     }
 
     if ($this->getImageURI()) {
@@ -580,7 +588,7 @@ final class PHUIObjectItemView extends AphrontTagView {
     }
 
     $grippable = null;
-    if ($this->getGrippable()) {
+    if ($this->getGrippable() !== null) {
       $grippable = phutil_tag(
         'div',
         array(

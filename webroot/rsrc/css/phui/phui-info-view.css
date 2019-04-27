@@ -74,8 +74,8 @@ h1.phui-info-view-head {
 }
 
 .phui-info-view-list {
-  margin: 0;
-  list-style: none;
+  margin-left: 30px;
+  list-style: disc;
   line-height: 1.6em;
 }
 

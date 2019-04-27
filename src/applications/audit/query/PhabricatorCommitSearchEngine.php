@@ -54,6 +54,10 @@ final class PhabricatorCommitSearchEngine
       $query->withUnreachable($map['unreachable']);
     }
 
+    if ($map['unpublished'] !== null) {
+      $query->withUnpublished($map['unpublished']);
+    }
+
     if ($map['ancestorsOf']) {
       $query->withAncestorsOf($map['ancestorsOf']);
     }
@@ -127,6 +131,17 @@ final class PhabricatorCommitSearchEngine
           pht(
             'Find or exclude unreachable commits which are not ancestors of '.
             'any branch, tag, or ref.')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Unpublished'))
+        ->setKey('unpublished')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Unpublished Commits'),
+          pht('Hide Unpublished Commits'))
+        ->setDescription(
+          pht(
+            'Find or exclude unpublished commits which are not ancestors of '.
+            'any permanent branch, tag, or ref.')),
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Ancestors Of'))
         ->setKey('ancestorsOf')

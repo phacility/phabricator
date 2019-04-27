@@ -51,7 +51,9 @@ final class PhabricatorProjectColumnDetailController
     $crumbs->addTextCrumb(pht('Column: %s', $title));
     $crumbs->setBorder(true);
 
-    $nav = $this->getProfileMenu();
+    $nav = $this->newNavigation(
+      $project,
+      PhabricatorProject::ITEM_WORKBOARD);
     require_celerity_resource('project-view-css');
 
     $view = id(new PHUITwoColumnView())

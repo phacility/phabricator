@@ -17,6 +17,7 @@ final class PhabricatorRepositoryPushLog
   const REFTYPE_TAG = 'tag';
   const REFTYPE_BOOKMARK = 'bookmark';
   const REFTYPE_COMMIT = 'commit';
+  const REFTYPE_REF = 'ref';
 
   const CHANGEFLAG_ADD = 1;
   const CHANGEFLAG_DELETE = 2;

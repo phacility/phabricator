@@ -136,7 +136,7 @@ final class ConpherenceThreadQuery
 
   protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->participantPHIDs !== null || strlen($this->fulltext)) {
-      return 'GROUP BY thread.id';
+      return qsprintf($conn_r, 'GROUP BY thread.id');
     } else {
       return $this->buildApplicationSearchGroupClause($conn_r);
     }
@@ -192,18 +192,24 @@ final class ConpherenceThreadQuery
     if ($can_optimize) {
       $members_policy = id(new ConpherenceThreadMembersPolicyRule())
         ->getObjectPolicyFullKey();
+      $policies = array(
+        $members_policy,
+        PhabricatorPolicies::POLICY_USER,
+        PhabricatorPolicies::POLICY_ADMIN,
+        PhabricatorPolicies::POLICY_NOONE,
+      );
 
       if ($viewer->isLoggedIn()) {
         $where[] = qsprintf(
           $conn,
-          'thread.viewPolicy != %s OR vp.participantPHID = %s',
-          $members_policy,
+          'thread.viewPolicy NOT IN (%Ls) OR vp.participantPHID = %s',
+          $policies,
           $viewer->getPHID());
       } else {
         $where[] = qsprintf(
           $conn,
-          'thread.viewPolicy != %s',
-          $members_policy);
+          'thread.viewPolicy NOT IN (%Ls)',
+          $policies);
       }
     }
 

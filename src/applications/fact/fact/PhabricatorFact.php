@@ -37,4 +37,8 @@ abstract class PhabricatorFact extends Phobject {
 
   abstract protected function newTemplateDatapoint();
 
+  final public function getFunctionArguments() {
+    return array();
+  }
+
 }

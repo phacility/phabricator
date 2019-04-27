@@ -34,12 +34,6 @@ final class PhabricatorDashboardPanelQuery
     return $this;
   }
 
-  public function withNameNgrams($ngrams) {
-    return $this->withNgramsConstraint(
-      id(new PhabricatorDashboardPanelNgrams()),
-      $ngrams);
-  }
-
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
   }
@@ -62,35 +56,35 @@ final class PhabricatorDashboardPanelQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'panel.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'panel.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->archived !== null) {
       $where[] = qsprintf(
         $conn,
-        'isArchived = %d',
+        'panel.isArchived = %d',
         (int)$this->archived);
     }
 
     if ($this->panelTypes !== null) {
       $where[] = qsprintf(
         $conn,
-        'panelType IN (%Ls)',
+        'panel.panelType IN (%Ls)',
         $this->panelTypes);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'authorPHID IN (%Ls)',
+        'panel.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
@@ -102,7 +96,7 @@ final class PhabricatorDashboardPanelQuery
   }
 
   protected function getPrimaryTableAlias() {
-    return 'dashboard_panel';
+    return 'panel';
   }
 
 }

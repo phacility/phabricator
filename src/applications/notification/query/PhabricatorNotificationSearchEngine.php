@@ -134,8 +134,4 @@ final class PhabricatorNotificationSearchEngine
     return $result;
   }
 
-  public function shouldUseOffsetPaging() {
-    return true;
-  }
-
 }

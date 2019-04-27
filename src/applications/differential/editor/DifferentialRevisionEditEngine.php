@@ -63,6 +63,10 @@ final class DifferentialRevisionEditEngine
     return $object->getMonogram();
   }
 
+  public function getCreateURI($form_key) {
+    return '/differential/diff/create/';
+  }
+
   protected function getObjectCreateShortText() {
     return pht('Create Revision');
   }

@@ -137,6 +137,19 @@ can not prevent dangerous changes in a remote repository it is merely
 observing.
 
 
+Basics: Disable Publishing
+==========================
+
+You can disable publishing for a repository. For more details on what this
+means, see @{article:Diffusion User Guide: Permanent Refs}.
+
+This is primarily useful if you need to perform major maintenance on a
+repository (like rewriting a large part of the repository history) and you
+don't want the maintenance to generate a large volume of email and
+notifications. You can disable publishing, apply major changes, wait for the
+new changes to import, and then reactivate publishing.
+
+
 Basics: Deactivate Repository
 =============================
 
@@ -287,13 +300,40 @@ branches.
 This panel is not available for Subversion repositories, because Subversion
 does not have formal branches.
 
-You can configure **Default Branch**. This controls which branch is shown by
+You can configure a **Default Branch**. This controls which branch is shown by
 default in the UI. If no branch is provided, Phabricator will use `master` in
 Git and `default` in Mercurial.
 
-If you want Diffusion to ignore some branches in the repository, you can
-configure **Track Only**. Other branches will be ignored. If you do not specify
-any branches, all branches are tracked.
+**Fetch Refs**: In Git, if you are observing a remote repository, you can
+specify that you only want to fetch a subset of refs using "Fetch Refs".
+
+Normally, all refs (`refs/*`) are fetched. This means all branches, all tags,
+and all other refs.
+
+If you want to fetch only a few specific branches, you can list only those
+branches. For example, this will fetch only the branch "master":
+
+```
+refs/heads/master
+```
+
+You can fetch all branches and tags (but ignore other refs) like this:
+
+```
+refs/heads/*
+refs/tags/*
+```
+
+This may be useful if the remote is on a service like GitHub, GitLab, or
+Gerrit and uses custom refs (like `refs/pull/` or `refs/changes/`) to store
+metadata that you don't want to bring into Phabricator.
+
+**Permanent Refs**: To learn more about permanent refs, see:
+
+  - @{article:Diffusion User Guide: Permanent Refs}
+
+By default, Phabricator considers all branches to be permanent refs. If you
+only want some branches to be treated as permanent refs, specify them here.
 
 When specifying branches, you should enter one branch name per line. You can
 use regular expressions to match branches by wrapping an expression in
@@ -301,24 +341,9 @@ use regular expressions to match branches by wrapping an expression in
 
 | Example | Effect |
 |---------|--------|
-| `master` | Track only `master`.
-| `regexp(/^release-/)` | Track all branches which start with `release-`.
-| `regexp(/^(?!temp-)/)` | Do not track branches which start with `temp-`.
-
-
-Actions
-======
-
-The **Actions** panel can configure notifications and publishing behavior.
-
-Normally, Phabricator publishes notifications when it discovers new commits.
-You can disable publishing for a repository by turning off **Publish/Notify**.
-This will disable notifications, feed, and Herald (including audits and build
-plans) for this repository.
-
-When Phabricator discovers a new commit, it can automatically close associated
-revisions and tasks. If you don't want Phabricator to close objects when it
-discovers new commits, disable **Autoclose** for the repository.
+| `master` | Only the `master` branch is a permanent ref.
+| `regexp(/^release-/)` | Branches are permanent if they start with `release-`.
+| `regexp(/^(?!temp-)/)` | Branches named `temp-` are not permanent.
 
 
 Staging Area

@@ -40,14 +40,14 @@ final class PhabricatorPeopleTasksProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $user = $config->getProfileObject();
     $id = $user->getID();
 
-    $item = $this->newItem()
-      ->setHref("/people/tasks/{$id}/")
+    $item = $this->newItemView()
+      ->setURI("/people/tasks/{$id}/")
       ->setName($this->getDisplayName($config))
       ->setIcon('fa-anchor');
 

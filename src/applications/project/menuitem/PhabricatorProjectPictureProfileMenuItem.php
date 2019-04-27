@@ -13,6 +13,10 @@ final class PhabricatorProjectPictureProfileMenuItem
     return pht('Project Picture');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-image';
+  }
+
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return false;
@@ -28,38 +32,16 @@ final class PhabricatorProjectPictureProfileMenuItem
     return array();
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $project = $config->getProfileObject();
-    require_celerity_resource('people-picture-menu-item-css');
-
     $picture = $project->getProfileImageURI();
-    $href = $project->getProfileURI();
 
-    $classes = array();
-    $classes[] = 'people-menu-image';
-    if ($project->isArchived()) {
-      $classes[] = 'phui-image-disabled';
-    }
+    $item = $this->newItemView()
+      ->setDisabled($project->isArchived());
 
-    $photo = phutil_tag(
-      'img',
-      array(
-        'src' => $picture,
-        'class' => implode(' ', $classes),
-      ));
-
-    $view = phutil_tag_div('people-menu-image-container', $photo);
-    $view = phutil_tag(
-      'a',
-      array(
-        'href' => $href,
-      ),
-      $view);
-
-    $item = $this->newItem()
-      ->appendChild($view);
+    $item->newProfileImage($picture);
 
     return array(
       $item,

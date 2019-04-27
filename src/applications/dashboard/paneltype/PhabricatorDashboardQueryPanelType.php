@@ -21,22 +21,29 @@ final class PhabricatorDashboardQueryPanelType
       'revisions you need to review.');
   }
 
-  public function getFieldSpecifications() {
+  protected function newEditEngineFields(PhabricatorDashboardPanel $panel) {
+    $application_field =
+      id(new PhabricatorDashboardQueryPanelApplicationEditField())
+        ->setKey('class')
+        ->setLabel(pht('Search For'))
+        ->setTransactionType(
+          PhabricatorDashboardQueryPanelApplicationTransaction::TRANSACTIONTYPE)
+        ->setValue($panel->getProperty('class', ''));
+
+    $application_id = $application_field->getControlID();
+
+    $query_field =
+      id(new PhabricatorDashboardQueryPanelQueryEditField())
+        ->setKey('key')
+        ->setLabel(pht('Query'))
+        ->setApplicationControlID($application_id)
+        ->setTransactionType(
+          PhabricatorDashboardQueryPanelQueryTransaction::TRANSACTIONTYPE)
+        ->setValue($panel->getProperty('key', ''));
+
     return array(
-      'class' => array(
-        'name' => pht('Search For'),
-        'type' => 'search.application',
-      ),
-      'key' => array(
-        'name' => pht('Query'),
-        'type' => 'search.query',
-        'control.application' => 'class',
-      ),
-      'limit' => array(
-        'name' => pht('Limit'),
-        'caption' => pht('Leave this blank for the default number of items.'),
-        'type' => 'text',
-      ),
+      $application_field,
+      $query_field,
     );
   }
 
@@ -136,7 +143,16 @@ final class PhabricatorDashboardQueryPanelType
       $results_view->setContent($content);
     }
 
-    if ($pager->getHasMoreResults()) {
+    // TODO: A small number of queries, including "Notifications" and "Search",
+    // use an offset pager which has a slightly different API. Some day, we
+    // should unify these.
+    if ($pager instanceof PHUIPagerView) {
+      $has_more = $pager->getHasMorePages();
+    } else {
+      $has_more = $pager->getHasMoreResults();
+    }
+
+    if ($has_more) {
       $item_list = $results_view->getObjectList();
 
       $more_href = $engine->getQueryResultsPageURI($key);

@@ -12,16 +12,28 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   private $enableAsyncRendering;
   private $parentPanelPHIDs;
   private $headerMode = self::HEADER_MODE_NORMAL;
-  private $dashboardID;
-  private $movable = true;
+  private $movable;
+  private $panelHandle;
+  private $editMode;
+  private $contextObject;
+  private $panelKey;
 
-  public function setDashboardID($id) {
-    $this->dashboardID = $id;
+  public function setContextObject($object) {
+    $this->contextObject = $object;
     return $this;
   }
 
-  public function getDashboardID() {
-    return $this->dashboardID;
+  public function getContextObject() {
+    return $this->contextObject;
+  }
+
+  public function setPanelKey($panel_key) {
+    $this->panelKey = $panel_key;
+    return $this;
+  }
+
+  public function getPanelKey() {
+    return $this->panelKey;
   }
 
   public function setHeaderMode($header_mode) {
@@ -31,6 +43,24 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
   public function getHeaderMode() {
     return $this->headerMode;
+  }
+
+  public function setPanelHandle(PhabricatorObjectHandle $panel_handle) {
+    $this->panelHandle = $panel_handle;
+    return $this;
+  }
+
+  public function getPanelHandle() {
+    return $this->panelHandle;
+  }
+
+  public function isEditMode() {
+    return $this->editMode;
+  }
+
+  public function setEditMode($mode) {
+    $this->editMode = $mode;
+    return $this;
   }
 
   /**
@@ -90,11 +120,19 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     $panel = $this->getPanel();
 
     if (!$panel) {
-      return $this->renderErrorPanel(
-        pht('Missing or Restricted Panel'),
-        pht(
-          'This panel does not exist, or you do not have permission '.
-          'to see it.'));
+      $handle = $this->getPanelHandle();
+      if ($handle->getPolicyFiltered()) {
+        return $this->renderErrorPanel(
+          pht('Restricted Panel'),
+          pht(
+            'You do not have permission to see this panel.'));
+      } else {
+        return $this->renderErrorPanel(
+          pht('Invalid Panel'),
+          pht(
+            'This panel is invalid or does not exist. It may have been '.
+            'deleted.'));
+      }
     }
 
     $panel_type = $panel->getImplementation();
@@ -144,10 +182,10 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
 
   private function renderAsyncPanel() {
+    $context_phid = $this->getContextPHID();
     $panel = $this->getPanel();
 
     $panel_id = celerity_generate_unique_node_id();
-    $dashboard_id = $this->getDashboardID();
 
     Javelin::initBehavior(
       'dashboard-async-panel',
@@ -155,7 +193,9 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         'panelID' => $panel_id,
         'parentPanelPHIDs' => $this->getParentPanelPHIDs(),
         'headerMode' => $this->getHeaderMode(),
-        'dashboardID' => $dashboard_id,
+        'contextPHID' => $context_phid,
+        'panelKey' => $this->getPanelKey(),
+        'movable' => $this->getMovable(),
         'uri' => '/dashboard/panel/render/'.$panel->getID().'/',
       ));
 
@@ -185,12 +225,13 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
           ->setHeader($title);
         break;
     }
+
     $icon = id(new PHUIIconView())
       ->setIcon('fa-warning red msr');
 
     $content = id(new PHUIBoxView())
       ->addClass('dashboard-box')
-      ->addMargin(PHUI::MARGIN_MEDIUM)
+      ->addMargin(PHUI::MARGIN_LARGE)
       ->appendChild($icon)
       ->appendChild($body);
 
@@ -240,11 +281,11 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     if ($panel) {
       $box->setMetadata(
         array(
-          'objectPHID' => $panel->getPHID(),
+          'panelKey' => $this->getPanelKey(),
         ));
     }
 
-    return phutil_tag_div('dashboard-pane', $box);
+    return $box;
   }
 
 
@@ -256,8 +297,11 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
+        // In edit mode, include the panel monogram to make managing boards
+        // a little easier.
+        $header_text = pht('%s %s', $panel->getMonogram(), $panel->getName());
         $header = id(new PHUIHeaderView())
-          ->setHeader($panel->getName());
+          ->setHeader($header_text);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
@@ -277,41 +321,64 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
   private function addPanelHeaderActions(
     PHUIHeaderView $header) {
-    $panel = $this->getPanel();
 
-    $dashboard_id = $this->getDashboardID();
+    $viewer = $this->getViewer();
+    $panel = $this->getPanel();
+    $context_phid = $this->getContextPHID();
+
+    $actions = array();
 
     if ($panel) {
       $panel_id = $panel->getID();
 
       $edit_uri = "/dashboard/panel/edit/{$panel_id}/";
-      $edit_uri = new PhutilURI($edit_uri);
-      if ($dashboard_id) {
-        $edit_uri->replaceQueryParam('dashboardID', $dashboard_id);
-      }
+      $params = array(
+        'contextPHID' => $context_phid,
+      );
+      $edit_uri = new PhutilURI($edit_uri, $params);
 
-      $action_edit = id(new PHUIIconView())
+      $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
-        ->setWorkflow(true)
-        ->setHref((string)$edit_uri);
+        ->setName(pht('Edit Panel'))
+        ->setHref($edit_uri);
 
-      $header->addActionItem($action_edit);
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-window-maximize')
+        ->setName(pht('View Panel Details'))
+        ->setHref($panel->getURI());
     }
 
-    if ($dashboard_id) {
+    if ($context_phid) {
       $panel_phid = $this->getPanelPHID();
 
-      $remove_uri = "/dashboard/removepanel/{$dashboard_id}/";
-      $remove_uri = id(new PhutilURI($remove_uri))
-        ->replaceQueryParam('panelPHID', $panel_phid);
+      $remove_uri = urisprintf('/dashboard/adjust/remove/');
+      $params = array(
+        'contextPHID' => $context_phid,
+        'panelKey' => $this->getPanelKey(),
+      );
+      $remove_uri = new PhutilURI($remove_uri, $params);
 
-      $action_remove = id(new PHUIIconView())
-        ->setIcon('fa-trash-o')
-        ->setHref((string)$remove_uri)
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-times')
+        ->setHref($remove_uri)
+        ->setName(pht('Remove Panel'))
         ->setWorkflow(true);
-
-      $header->addActionItem($action_remove);
     }
+
+    $dropdown_menu = id(new PhabricatorActionListView())
+      ->setViewer($viewer);
+
+    foreach ($actions as $action) {
+      $dropdown_menu->addAction($action);
+    }
+
+    $action_menu = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-cog')
+      ->setText(pht('Manage Panel'))
+      ->setDropdownMenu($dropdown_menu);
+
+    $header->addActionLink($action_menu);
 
     return $header;
   }
@@ -353,5 +420,14 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     }
   }
 
+  private function getContextPHID() {
+    $context = $this->getContextObject();
+
+    if ($context) {
+      return $context->getPHID();
+    }
+
+    return null;
+  }
 
 }

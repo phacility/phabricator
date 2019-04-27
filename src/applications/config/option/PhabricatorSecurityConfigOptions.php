@@ -163,14 +163,26 @@ EOTEXT
           'mailto' => true,
         ))
         ->setSummary(
-          pht('Determines which URI protocols are auto-linked.'))
+          pht(
+            'Determines which URI protocols are valid for links and '.
+            'redirects.'))
         ->setDescription(
           pht(
-            "When users write comments which have URIs, they'll be ".
-            "automatically linked if the protocol appears in this set. This ".
-            "whitelist is primarily to prevent security issues like ".
-            "%s URIs.",
-            'javascript://'))
+            'When users write comments which have URIs, they will be '.
+            'automatically turned into clickable links if the URI protocol '.
+            'appears in this set.'.
+            "\n\n".
+            'This set of allowed protocols is primarily intended to prevent '.
+            'security issues with "javascript:" and other potentially '.
+            'dangerous URI handlers.'.
+            "\n\n".
+            'This set is also used to enforce valid redirect URIs. '.
+            'Phabricator will refuse to issue a HTTP "Location" redirect to a '.
+            'URI with a protocol not on this set.'.
+            "\n\n".
+            'Usually, "http" and "https" should be present in this set. If '.
+            'you remove one or both protocols, some Phabricator features '.
+            'which rely on links or redirects may not work.'))
         ->addExample("http\nhttps", pht('Valid Setting'))
         ->setLocked(true),
       $this->newOption(

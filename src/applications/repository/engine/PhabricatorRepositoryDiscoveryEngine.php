@@ -127,10 +127,7 @@ final class PhabricatorRepositoryDiscoveryEngine
    */
   private function discoverGitCommits() {
     $repository = $this->getRepository();
-
-    if (!$repository->isHosted()) {
-      $this->verifyGitOrigin($repository);
-    }
+    $publisher = $repository->newPublisher();
 
     $heads = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
@@ -189,7 +186,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       $head_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
         $commit,
-        $repository->shouldAutocloseRef($ref));
+        $publisher->shouldPublishRef($ref));
 
       $this->didDiscoverRefs($head_refs);
 
@@ -518,11 +515,12 @@ final class PhabricatorRepositoryDiscoveryEngine
    */
   private function sortRefs(array $refs) {
     $repository = $this->getRepository();
+    $publisher = $repository->newPublisher();
 
     $head_refs = array();
     $tail_refs = array();
     foreach ($refs as $ref) {
-      if ($repository->shouldAutocloseRef($ref)) {
+      if ($publisher->shouldPublishRef($ref)) {
         $head_refs[] = $ref;
       } else {
         $tail_refs[] = $ref;

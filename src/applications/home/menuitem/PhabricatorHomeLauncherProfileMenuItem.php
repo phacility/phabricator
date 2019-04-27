@@ -13,6 +13,10 @@ final class PhabricatorHomeLauncherProfileMenuItem
     return pht('More Applications');
   }
 
+  public function getMenuItemTypeIcon() {
+    return 'fa-ellipsis-h';
+  }
+
   public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return false;
@@ -45,16 +49,16 @@ final class PhabricatorHomeLauncherProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
     $name = $this->getDisplayName($config);
-    $icon = 'fa-globe';
-    $href = '/applications/';
+    $icon = 'fa-ellipsis-h';
+    $uri = '/applications/';
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon);
 

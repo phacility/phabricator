@@ -68,4 +68,28 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
       ->loadFromArray($dict);
   }
 
+  public function newPublisherHoldReasons() {
+    $holds = $this->getCommitDetail('holdReasons');
+
+    // Look for the legacy "autocloseReason" if we don't have a modern list
+    // of hold reasons.
+    if (!$holds) {
+      $old_hold = $this->getCommitDetail('autocloseReason');
+      if ($old_hold) {
+        $holds = array($old_hold);
+      }
+    }
+
+    if (!$holds) {
+      $holds = array();
+    }
+
+    foreach ($holds as $key => $reason) {
+      $holds[$key] = PhabricatorRepositoryPublisherHoldReason::newForHoldKey(
+        $reason);
+    }
+
+    return array_values($holds);
+  }
+
 }

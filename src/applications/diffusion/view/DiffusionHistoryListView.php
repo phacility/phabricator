@@ -104,16 +104,17 @@ final class DiffusionHistoryListView extends DiffusionHistoryView {
 
       $diff_tag = null;
       if ($show_revisions && $commit) {
-        $d_id = idx($this->getRevisions(), $commit->getPHID());
-        if ($d_id) {
+        $revisions = $this->getRevisionsForCommit($commit);
+        if ($revisions) {
+          $revision = head($revisions);
           $diff_tag = id(new PHUITagView())
-            ->setName('D'.$d_id)
+            ->setName($revision->getMonogram())
             ->setType(PHUITagView::TYPE_SHADE)
             ->setColor(PHUITagView::COLOR_BLUE)
-            ->setHref('/D'.$d_id)
+            ->setHref($revision->getURI())
             ->setBorder(PHUITagView::BORDER_NONE)
             ->setSlimShady(true);
-          }
+        }
       }
 
       $build_view = null;

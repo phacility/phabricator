@@ -295,9 +295,69 @@ if (!window.console || !window.console.log) {
  * @return void
  */
 JX.log = function(message) {
+  // "JX.log()" accepts "Error" in addition to "string". Only try to
+  // treat the argument as a "sprintf()" pattern if it's a string.
+  if (typeof message === 'string') {
+    message = JX.sprintf.apply(null, arguments);
+  }
   window.console.log(message);
 };
 
+JX.sprintf = function(pattern) {
+  var argv = Array.prototype.slice.call(arguments);
+  argv.reverse();
+
+  // Pop off the pattern argument.
+  argv.pop();
+
+  var len = pattern.length;
+  var output = '';
+  for (var ii = 0; ii < len; ii++) {
+    var c = pattern.charAt(ii);
+
+    if (c !== '%') {
+      output += c;
+      continue;
+    }
+
+    ii++;
+
+    var next = pattern.charAt(ii);
+    if (next === '%') {
+      // This is "%%" (that is, an escaped "%" symbol), so just add a literal
+      // "%" to the result.
+      output += '%';
+      continue;
+    }
+
+    if (next === 's') {
+      if (!argv.length) {
+        throw new Error(
+          'Too few arguments to "JX.sprintf(...)" for pattern: ' + pattern);
+      }
+
+      output += '' + argv.pop();
+
+      continue;
+    }
+
+    if (next === '') {
+      throw new Error(
+        'Pattern passed to "JX.sprintf(...)" ends with "%": ' + pattern);
+    }
+
+    throw new Error(
+      'Unknown conversion "%' + c + '" passed to "JX.sprintf(...)" in ' +
+      'pattern: ' + pattern);
+  }
+
+  if (argv.length) {
+    throw new Error(
+      'Too many arguments to "JX.sprintf()" for pattern: ' + pattern);
+  }
+
+  return output;
+};
 
 if (__DEV__) {
   window.alert = (function(native_alert) {

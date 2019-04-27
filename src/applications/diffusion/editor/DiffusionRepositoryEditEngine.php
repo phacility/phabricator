@@ -212,8 +212,9 @@ final class DiffusionRepositoryEditEngine
       ->setObject($object)
       ->execute();
 
+    $fetch_value = $object->getFetchRules();
     $track_value = $object->getTrackOnlyRules();
-    $autoclose_value = $object->getAutocloseOnlyRules();
+    $permanent_value = $object->getPermanentRefRules();
 
     $automation_instructions = pht(
       "Configure **Repository Automation** to allow Phabricator to ".
@@ -235,6 +236,27 @@ final class DiffusionRepositoryEditEngine
       'If you want to import only part of a repository, like `trunk/`, '.
       'you can set a path in **Import Only**. Phabricator will ignore '.
       'commits which do not affect this path.');
+
+    $filesize_warning = null;
+    if ($object->isGit()) {
+      $git_binary = PhutilBinaryAnalyzer::getForBinary('git');
+      $git_version = $git_binary->getBinaryVersion();
+      $filesize_version = '1.8.4';
+      if (version_compare($git_version, $filesize_version, '<')) {
+        $filesize_warning = pht(
+          '(WARNING) {icon exclamation-triangle} The version of "git" ("%s") '.
+          'installed on this server does not support '.
+          '"--batch-check=<format>", a feature required to enforce filesize '.
+          'limits. Upgrade to "git" %s or newer to use this feature.',
+          $git_version,
+          $filesize_version);
+      }
+    }
+
+    $track_instructions = pht(
+      'WARNING: The "Track Only" feature is deprecated. Use "Fetch Refs" '.
+      'and "Permanent Refs" instead. This feature will be removed in a '.
+      'future version of Phabricator.');
 
     return array(
       id(new PhabricatorSelectEditField())
@@ -350,26 +372,38 @@ final class DiffusionRepositoryEditEngine
         ->setValue($object->getDetail('default-branch')),
       id(new PhabricatorTextAreaEditField())
         ->setIsStringList(true)
+        ->setKey('fetchRefs')
+        ->setLabel(pht('Fetch Refs'))
+        ->setTransactionType(
+          PhabricatorRepositoryFetchRefsTransaction::TRANSACTIONTYPE)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Fetch only these refs.'))
+        ->setConduitDescription(pht('Set the fetched refs.'))
+        ->setConduitTypeDescription(pht('New fetched refs.'))
+        ->setValue($fetch_value),
+      id(new PhabricatorTextAreaEditField())
+        ->setIsStringList(true)
+        ->setKey('permanentRefs')
+        ->setLabel(pht('Permanent Refs'))
+        ->setTransactionType(
+          PhabricatorRepositoryPermanentRefsTransaction::TRANSACTIONTYPE)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Only these refs are considered permanent.'))
+        ->setConduitDescription(pht('Set the permanent refs.'))
+        ->setConduitTypeDescription(pht('New permanent ref rules.'))
+        ->setValue($permanent_value),
+      id(new PhabricatorTextAreaEditField())
+        ->setIsStringList(true)
         ->setKey('trackOnly')
         ->setLabel(pht('Track Only'))
         ->setTransactionType(
           PhabricatorRepositoryTrackOnlyTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
+        ->setControlInstructions($track_instructions)
         ->setDescription(pht('Track only these branches.'))
         ->setConduitDescription(pht('Set the tracked branches.'))
         ->setConduitTypeDescription(pht('New tracked branches.'))
         ->setValue($track_value),
-      id(new PhabricatorTextAreaEditField())
-        ->setIsStringList(true)
-        ->setKey('autocloseOnly')
-        ->setLabel(pht('Autoclose Only'))
-        ->setTransactionType(
-          PhabricatorRepositoryAutocloseOnlyTransaction::TRANSACTIONTYPE)
-        ->setIsCopyable(true)
-        ->setDescription(pht('Autoclose commits on only these branches.'))
-        ->setConduitDescription(pht('Set the autoclose branches.'))
-        ->setConduitTypeDescription(pht('New default tracked branches.'))
-        ->setValue($autoclose_value),
       id(new PhabricatorTextEditField())
         ->setKey('importOnly')
         ->setLabel(pht('Import Only'))
@@ -440,20 +474,7 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Configure how changes are published.'))
         ->setConduitDescription(pht('Change publishing options.'))
         ->setConduitTypeDescription(pht('New notification setting.'))
-        ->setValue(!$object->getDetail('herald-disabled')),
-      id(new PhabricatorBoolEditField())
-        ->setKey('autoclose')
-        ->setLabel(pht('Autoclose'))
-        ->setTransactionType(
-          PhabricatorRepositoryAutocloseTransaction::TRANSACTIONTYPE)
-        ->setIsCopyable(true)
-        ->setOptions(
-          pht('Disable Autoclose'),
-          pht('Enable Autoclose'))
-        ->setDescription(pht('Stop or resume autoclosing in this repository.'))
-        ->setConduitDescription(pht('Change autoclose setting.'))
-        ->setConduitTypeDescription(pht('New autoclose setting.'))
-        ->setValue(!$object->getDetail('disable-autoclose')),
+        ->setValue(!$object->isPublishingDisabled()),
       id(new PhabricatorPolicyEditField())
         ->setKey('policy.push')
         ->setLabel(pht('Push Policy'))
@@ -477,6 +498,7 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Maximum permitted file size.'))
         ->setConduitDescription(pht('Change the filesize limit.'))
         ->setConduitTypeDescription(pht('New repository filesize limit.'))
+        ->setControlInstructions($filesize_warning)
         ->setValue($object->getFilesizeLimit()),
       id(new PhabricatorTextEditField())
         ->setKey('copyTimeLimit')

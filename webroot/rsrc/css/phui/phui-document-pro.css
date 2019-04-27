@@ -56,7 +56,7 @@
 .phui-document-container {
   background-color: {$page.content};
   position: relative;
-  border-bottom: 1px solid #dedee1;
+  border-bottom: 1px solid {$document.border};
 }
 
 .phui-document-view-pro-box,

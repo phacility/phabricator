@@ -34,7 +34,7 @@ final class PhabricatorEditEngineProfileMenuItem
     return $form;
   }
 
-  public function willBuildNavigationItems(array $items) {
+  public function willGetMenuItemViewList(array $items) {
     $viewer = $this->getViewer();
     $engines = PhabricatorEditEngine::getAllEditEngines();
     $engine_keys = array_keys($engines);
@@ -99,7 +99,7 @@ final class PhabricatorEditEngineProfileMenuItem
     return $config->getMenuItemProperty('name');
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $form = $this->getForm();
@@ -110,13 +110,13 @@ final class PhabricatorEditEngineProfileMenuItem
     $icon = $form->getIcon();
     $name = $this->getDisplayName($config);
 
-    $href = $form->getCreateURI();
-    if ($href === null) {
+    $uri = $form->getCreateURI();
+    if ($uri === null) {
       return array();
     }
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName($name)
       ->setIcon($icon);
 

@@ -84,30 +84,6 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     return null;
   }
 
-  public function buildApplicationMenu() {
-    $menu = $this->newApplicationMenu();
-
-    $profile_menu = $this->getProfileMenu();
-    if ($profile_menu) {
-      $menu->setProfileMenu($profile_menu);
-    }
-
-    $menu->setSearchEngine(new PhabricatorProjectSearchEngine());
-
-    return $menu;
-  }
-
-  protected function getProfileMenu() {
-    if (!$this->profileMenu) {
-      $engine = $this->getProfileMenuEngine();
-      if ($engine) {
-        $this->profileMenu = $engine->buildNavigation();
-      }
-    }
-
-    return $this->profileMenu;
-  }
-
   protected function buildApplicationCrumbs() {
     return $this->newApplicationCrumbs('profile');
   }
@@ -205,6 +181,25 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       $result[] = '#'.$tag;
     }
     return implode(', ', $result);
+  }
+
+  final protected function newNavigation(
+    PhabricatorProject $project,
+    $item_identifier) {
+
+    $engine = $this->getProfileMenuEngine();
+
+    $view_list = $engine->newProfileMenuItemViewList();
+
+    $view_list->setSelectedViewWithItemIdentifier($item_identifier);
+
+    $navigation = $view_list->newNavigationView();
+
+    if ($item_identifier === PhabricatorProject::ITEM_WORKBOARD) {
+      $navigation->addClass('project-board-nav');
+    }
+
+    return $navigation;
   }
 
 }

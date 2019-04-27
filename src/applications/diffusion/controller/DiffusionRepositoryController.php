@@ -334,6 +334,8 @@ final class DiffusionRepositoryController extends DiffusionController {
         'fa-clock-o',
         'indigo',
         pht('Importing (%s)...', $percentage));
+    } else if ($repository->isPublishingDisabled()) {
+      $header->setStatus('fa-minus', 'bluegrey', pht('Publishing Disabled'));
     } else {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     }
@@ -438,16 +440,12 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table = id(new DiffusionHistoryTableView())
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
-      ->setHistory($history);
-
-    // TODO: Super sketchy.
-    $history_table->loadRevisions();
+      ->setHistory($history)
+      ->setIsHead(true);
 
     if ($history_results) {
       $history_table->setParents($history_results['parents']);
     }
-
-    $history_table->setIsHead(true);
 
     $panel = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)

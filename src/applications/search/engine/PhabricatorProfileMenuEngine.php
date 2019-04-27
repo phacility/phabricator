@@ -6,10 +6,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $profileObject;
   private $customPHID;
   private $items;
-  private $defaultItem;
   private $controller;
   private $navigation;
-  private $showNavigation = true;
   private $editMode;
   private $pageClasses = array();
   private $showContentCrumbs = true;
@@ -72,26 +70,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->controller;
   }
 
-  private function setDefaultItem(
-    PhabricatorProfileMenuItemConfiguration $default_item) {
-    $this->defaultItem = $default_item;
-    return $this;
-  }
-
-  public function getDefaultItem() {
-    $this->getItems();
-    return $this->defaultItem;
-  }
-
-  public function setShowNavigation($show) {
-    $this->showNavigation = $show;
-    return $this;
-  }
-
-  public function getShowNavigation() {
-    return $this->showNavigation;
-  }
-
   public function addContentPageClass($class) {
     $this->pageClasses[] = $class;
     return $this;
@@ -152,35 +130,23 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $item_id = $request->getURIData('id');
     }
 
-    $item_list = $this->getItems();
+    $view_list = $this->newProfileMenuItemViewList();
 
-    $selected_item = null;
-    if (strlen($item_id)) {
-      $item_id_int = (int)$item_id;
-      foreach ($item_list as $item) {
-        if ($item_id_int) {
-          if ((int)$item->getID() === $item_id_int) {
-            $selected_item = $item;
-            break;
-          }
-        }
-
-        $builtin_key = $item->getBuiltinKey();
-        if ($builtin_key === (string)$item_id) {
-          $selected_item = $item;
-          break;
-        }
+    if ($is_view) {
+      $selected_item = $this->selectViewItem($view_list, $item_id);
+    } else {
+      if (!strlen($item_id)) {
+        $item_id = self::ITEM_MANAGE;
       }
-    }
-
-    if (!$selected_item) {
-      if ($is_view) {
-        $selected_item = $this->getDefaultItem();
-      }
+      $selected_item = $this->selectEditItem($view_list, $item_id);
     }
 
     switch ($item_action) {
       case 'view':
+        // If we were not able to select an item, we're still going to render
+        // a page state. For example, this happens when you create a new
+        // portal for the first time.
+        break;
       case 'info':
       case 'hide':
       case 'default':
@@ -201,20 +167,23 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         break;
     }
 
-    $navigation = $this->buildNavigation();
-
+    $navigation = $view_list->newNavigationView();
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
     if (!$is_view) {
-      $navigation->selectFilter(self::ITEM_MANAGE);
+      $edit_mode = null;
 
       if ($selected_item) {
-        if ($selected_item->getCustomPHID()) {
-          $edit_mode = 'custom';
-        } else {
-          $edit_mode = 'global';
+        if ($selected_item->getBuiltinKey() !== self::ITEM_MANAGE) {
+          if ($selected_item->getCustomPHID()) {
+            $edit_mode = 'custom';
+          } else {
+            $edit_mode = 'global';
+          }
         }
-      } else {
+      }
+
+      if ($edit_mode === null) {
         $edit_mode = $request->getURIData('itemEditMode');
       }
 
@@ -231,24 +200,33 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
       $page_title = pht('Configure Menu');
     } else {
-      $page_title = $selected_item->getDisplayName();
+      if ($selected_item) {
+        $page_title = $selected_item->getDisplayName();
+      } else {
+        $page_title = pht('Empty');
+      }
     }
 
     switch ($item_action) {
       case 'view':
-        $navigation->selectFilter($selected_item->getDefaultMenuItemKey());
+        if ($selected_item) {
+          try {
+            $content = $this->buildItemViewContent($selected_item);
+          } catch (Exception $ex) {
+            $content = id(new PHUIInfoView())
+              ->setTitle(pht('Unable to Render Dashboard'))
+              ->setErrors(array($ex->getMessage()));
+          }
 
-        try {
-          $content = $this->buildItemViewContent($selected_item);
-        } catch (Exception $ex) {
-          $content = id(new PHUIInfoView())
-            ->setTitle(pht('Unable to Render Dashboard'))
-            ->setErrors(array($ex->getMessage()));
+          $crumbs->addTextCrumb($selected_item->getDisplayName());
+        } else {
+          $content = $this->newNoContentView($this->getItems());
         }
 
-        $crumbs->addTextCrumb($selected_item->getDisplayName());
         if (!$content) {
-          return new Aphront404Response();
+          $content = $this->newEmptyView(
+            pht('Empty'),
+            pht('There is nothing here.'));
         }
         break;
       case 'configure':
@@ -297,9 +275,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         if (!$this->isMenuEnginePinnable()) {
           return new Aphront404Response();
         }
-        $content = $this->buildItemDefaultContent(
-          $selected_item,
-          $item_list);
+        $content = $this->buildItemDefaultContent($selected_item);
         break;
       case 'edit':
         $content = $this->buildItemEditContent();
@@ -329,9 +305,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $page->setCrumbs($crumbs);
     }
 
-    if ($this->getShowNavigation()) {
-      $page->setNavigation($navigation);
-    }
+    $page->setNavigation($navigation);
 
     if ($is_view) {
       foreach ($this->pageClasses as $class) {
@@ -340,62 +314,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     return $page;
-  }
-
-  public function buildNavigation() {
-    if ($this->navigation) {
-      return $this->navigation;
-    }
-    $nav = id(new AphrontSideNavFilterView())
-      ->setIsProfileMenu(true)
-      ->setBaseURI(new PhutilURI($this->getItemURI('')));
-
-    $menu_items = $this->getItems();
-
-    $filtered_items = array();
-    foreach ($menu_items as $menu_item) {
-      if ($menu_item->isDisabled()) {
-        continue;
-      }
-      $filtered_items[] = $menu_item;
-    }
-    $filtered_groups = mgroup($filtered_items, 'getMenuItemKey');
-    foreach ($filtered_groups as $group) {
-      $first_item = head($group);
-      $first_item->willBuildNavigationItems($group);
-    }
-
-    foreach ($menu_items as $menu_item) {
-      if ($menu_item->isDisabled()) {
-        continue;
-      }
-
-      $items = $menu_item->buildNavigationMenuItems();
-      foreach ($items as $item) {
-        $this->validateNavigationMenuItem($item);
-      }
-
-      // If the item produced only a single item which does not otherwise
-      // have a key, try to automatically assign it a reasonable key. This
-      // makes selecting the correct item simpler.
-
-      if (count($items) == 1) {
-        $item = head($items);
-        if ($item->getKey() === null) {
-          $default_key = $menu_item->getDefaultMenuItemKey();
-          $item->setKey($default_key);
-        }
-      }
-
-      foreach ($items as $item) {
-        $nav->addMenuItem($item);
-      }
-    }
-
-    $nav->selectFilter(null);
-
-    $this->navigation = $nav;
-    return $this->navigation;
   }
 
   private function getItems() {
@@ -450,6 +368,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         // stored config: it corresponds to an out-of-date or uninstalled
         // item.
         if (isset($items[$builtin_key])) {
+          $builtin_item = $items[$builtin_key];
+
+          // Copy runtime properties from the builtin item to the stored item.
+          $stored_item->setIsHeadItem($builtin_item->getIsHeadItem());
+          $stored_item->setIsTailItem($builtin_item->getIsTailItem());
+
           $items[$builtin_key] = $stored_item;
         } else {
           continue;
@@ -459,39 +383,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $items = $this->arrangeItems($items, $mode);
-
-    // Make sure exactly one valid item is marked as default.
-    $default = null;
-    $first = null;
-    foreach ($items as $item) {
-      if (!$item->canMakeDefault() || $item->isDisabled()) {
-        continue;
-      }
-
-      // If this engine doesn't support pinning items, don't respect any
-      // setting which might be present in the database.
-      if ($this->isMenuEnginePinnable()) {
-        if ($item->isDefault()) {
-          $default = $item;
-          break;
-        }
-      }
-
-      if ($first === null) {
-        $first = $item;
-      }
-    }
-
-    if (!$default) {
-      $default = $first;
-    }
-
-    if ($default) {
-      $this->setDefaultItem($default);
-    }
-
-    return $items;
+    return $this->arrangeItems($items, $mode);
   }
 
   private function loadBuiltinProfileItems($mode) {
@@ -731,7 +623,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
    *
    * @return bool True if items may be pinned as default items.
    */
-  protected function isMenuEnginePinnable() {
+  public function isMenuEnginePinnable() {
     return !$this->isMenuEnginePersonalizable();
   }
 
@@ -795,7 +687,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $filtered_groups = mgroup($items, 'getMenuItemKey');
     foreach ($filtered_groups as $group) {
       $first_item = head($group);
-      $first_item->willBuildNavigationItems($group);
+      $first_item->willGetMenuItemViewList($group);
     }
 
     // Users only need to be able to edit the object which this menu appears
@@ -824,6 +716,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setID($list_id)
       ->setNoDataString(pht('This menu currently has no items.'));
 
+    $any_draggable = false;
     foreach ($items as $item) {
       $id = $item->getID();
       $builtin_key = $item->getBuiltinKey();
@@ -844,14 +737,25 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $view->setHeader($name);
       $view->addAttribute($type);
 
+      $icon = $item->getMenuItem()->getMenuItemTypeIcon();
+      if ($icon !== null) {
+        $view->setStatusIcon($icon);
+      }
+
       if ($can_edit) {
-        $view
-          ->setGrippable(true)
-          ->addSigil('profile-menu-item')
-          ->setMetadata(
-            array(
-              'key' => nonempty($id, $builtin_key),
-            ));
+        $can_move = (!$item->getIsHeadItem() && !$item->getIsTailItem());
+        if ($can_move) {
+          $view
+            ->setGrippable(true)
+            ->addSigil('profile-menu-item')
+            ->setMetadata(
+              array(
+                'key' => nonempty($id, $builtin_key),
+              ));
+          $any_draggable = true;
+        } else {
+          $view->setGrippable(false);
+        }
 
         if ($id) {
           $default_uri = $this->getItemURI("default/{$id}/");
@@ -966,8 +870,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setHeader(pht('Menu Items'))
       ->setHeaderIcon('fa-list');
 
+    $list_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Current Menu Items'));
+
+    if ($any_draggable) {
+      $list_header->setSubheader(
+        pht('Drag items in this list to reorder them.'));
+    }
+
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Current Menu Items'))
+      ->setHeader($list_header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
@@ -1149,8 +1061,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   private function buildItemDefaultContent(
-    PhabricatorProfileMenuItemConfiguration $configuration,
-    array $items) {
+    PhabricatorProfileMenuItemConfiguration $configuration) {
 
     $controller = $this->getController();
     $request = $controller->getRequest();
@@ -1212,7 +1123,26 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   protected function newManageItem() {
     return $this->newItem()
       ->setBuiltinKey(self::ITEM_MANAGE)
-      ->setMenuItemKey(PhabricatorManageProfileMenuItem::MENUITEMKEY);
+      ->setMenuItemKey(PhabricatorManageProfileMenuItem::MENUITEMKEY)
+      ->setIsTailItem(true);
+  }
+
+  protected function newDividerItem($key) {
+    return $this->newItem()
+      ->setBuiltinKey($key)
+      ->setMenuItemKey(PhabricatorDividerProfileMenuItem::MENUITEMKEY)
+      ->setIsTailItem(true);
+  }
+
+  public function getDefaultMenuItemConfiguration() {
+    $configs = $this->getItems();
+    foreach ($configs as $config) {
+      if ($config->isDefault()) {
+        return $config;
+      }
+    }
+
+    return null;
   }
 
   public function adjustDefault($key) {
@@ -1317,6 +1247,114 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $items = array_values($items);
 
     return $items;
+  }
+
+  final protected function newEmptyView($title, $message) {
+    return id(new PHUIInfoView())
+      ->setTitle($title)
+      ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+      ->setErrors(
+        array(
+          $message,
+        ));
+  }
+
+  protected function newNoContentView(array $items) {
+    return $this->newEmptyView(
+      pht('No Content'),
+      pht('No visible menu items can render content.'));
+  }
+
+
+  final public function newProfileMenuItemViewList() {
+    $items = $this->getItems();
+
+    // Throw away disabled items: they are not allowed to build any views for
+    // the menu.
+    foreach ($items as $key => $item) {
+      if ($item->isDisabled()) {
+        unset($items[$key]);
+        continue;
+      }
+    }
+
+    // Give each item group a callback so it can load data it needs to render
+    // views.
+    $groups = mgroup($items, 'getMenuItemKey');
+    foreach ($groups as $group) {
+      $item = head($group);
+      $item->willGetMenuItemViewList($group);
+    }
+
+    $view_list = id(new PhabricatorProfileMenuItemViewList())
+      ->setProfileMenuEngine($this);
+
+    foreach ($items as $item) {
+      $views = $item->getMenuItemViewList();
+      foreach ($views as $view) {
+        $view_list->addItemView($view);
+      }
+    }
+
+    return $view_list;
+  }
+
+  private function selectViewItem(
+    PhabricatorProfileMenuItemViewList $view_list,
+    $item_id) {
+
+    // Figure out which view's content we're going to render. In most cases,
+    // the URI tells us. If we don't have an identifier in the URI, we'll
+    // render the default view instead.
+
+    $selected_view = null;
+    if (strlen($item_id)) {
+      $item_views = $view_list->getViewsWithItemIdentifier($item_id);
+      if ($item_views) {
+        $selected_view = head($item_views);
+      }
+    } else {
+      $default_views = $view_list->getDefaultViews();
+      if ($default_views) {
+        $selected_view = head($default_views);
+      }
+    }
+
+    if ($selected_view) {
+      $view_list->setSelectedView($selected_view);
+      $selected_item = $selected_view->getMenuItemConfiguration();
+    } else {
+      $selected_item = null;
+    }
+
+    return $selected_item;
+  }
+
+  private function selectEditItem(
+    PhabricatorProfileMenuItemViewList $view_list,
+    $item_id) {
+
+    // First, try to select a visible item using the normal view selection
+    // pathway. If this works, it also highlights the menu properly.
+
+    if ($item_id) {
+      $selected_item = $this->selectViewItem($view_list, $item_id);
+      if ($selected_item) {
+        return $selected_item;
+      }
+    }
+
+    // If we didn't find an item in the view list, we may be enabling an item
+    // which is currently disabled or editing an item which is not generating
+    // any actual items in the menu.
+
+    foreach ($this->getItems() as $item) {
+      if ($item->matchesIdentifier($item_id)) {
+        return $item;
+      }
+    }
+
+    return null;
   }
 
 

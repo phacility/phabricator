@@ -29,4 +29,8 @@ final class PhabricatorSubscriptionsRemoveSubscribersHeraldAction
     return pht('Remove subscribers: %s.', $this->renderHandleList($value));
   }
 
+  public function getPHIDsAffectedByAction(HeraldActionRecord $record) {
+    return $record->getTarget();
+  }
+
 }

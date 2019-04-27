@@ -35,16 +35,16 @@ final class PhabricatorPeopleDetailsProfileMenuItem
     );
   }
 
-  protected function newNavigationMenuItems(
+  protected function newMenuItemViewList(
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $user = $config->getProfileObject();
-    $href = urisprintf(
+    $uri = urisprintf(
       '/p/%s/',
       $user->getUsername());
 
-    $item = $this->newItem()
-      ->setHref($href)
+    $item = $this->newItemView()
+      ->setURI($uri)
       ->setName(pht('Profile'))
       ->setIcon('fa-user');
 

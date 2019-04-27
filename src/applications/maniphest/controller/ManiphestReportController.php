@@ -382,7 +382,7 @@ final class ManiphestReportController extends ManiphestController {
     require_celerity_resource('d3');
     require_celerity_resource('phui-chart-css');
 
-    Javelin::initBehavior('line-chart', array(
+    Javelin::initBehavior('line-chart-legacy', array(
       'hardpoint' => $id,
       'x' => array(
         $burn_x,

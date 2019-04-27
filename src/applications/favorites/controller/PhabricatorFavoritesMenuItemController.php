@@ -16,8 +16,7 @@ final class PhabricatorFavoritesMenuItemController
     $engine = id(new PhabricatorFavoritesProfileMenuEngine())
       ->setProfileObject($favorites)
       ->setCustomPHID($viewer->getPHID())
-      ->setController($this)
-      ->setShowNavigation(false);
+      ->setController($this);
 
     return $engine->buildResponse();
   }

@@ -46,22 +46,12 @@ final class DiffusionBranchQueryConduitAPIMethod
 
       // NOTE: We can't use DiffusionLowLevelGitRefQuery here because
       // `git for-each-ref` does not support `--contains`.
-      if ($repository->isWorkingCopyBare()) {
-        list($stdout) = $repository->execxLocalCommand(
-          'branch --verbose --no-abbrev --contains %s -- %Ls',
-          $contains,
-          $patterns_argv);
-        $ref_map = DiffusionGitBranch::parseLocalBranchOutput(
-          $stdout);
-      } else {
-        list($stdout) = $repository->execxLocalCommand(
-          'branch -r --verbose --no-abbrev --contains %s -- %Ls',
-          $contains,
-          $patterns_argv);
-        $ref_map = DiffusionGitBranch::parseRemoteBranchOutput(
-          $stdout,
-          DiffusionGitBranch::DEFAULT_GIT_REMOTE);
-      }
+      list($stdout) = $repository->execxLocalCommand(
+        'branch --verbose --no-abbrev --contains %s -- %Ls',
+        $contains,
+        $patterns_argv);
+      $ref_map = DiffusionGitBranch::parseLocalBranchOutput(
+        $stdout);
 
       $refs = array();
       foreach ($ref_map as $ref => $commit) {

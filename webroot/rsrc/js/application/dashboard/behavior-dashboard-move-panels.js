@@ -17,7 +17,7 @@ JX.behavior('dashboard-move-panels', function(config) {
   }
 
   function markcolempty(col, toggle) {
-    JX.DOM.alterClass(col, 'dashboard-column-empty', toggle);
+    JX.DOM.alterClass(col.parentNode, 'dashboard-column-empty', toggle);
   }
 
   function onupdate(col) {
@@ -33,40 +33,16 @@ JX.behavior('dashboard-move-panels', function(config) {
     list.lock();
     JX.DOM.alterClass(item, 'drag-sending', true);
 
-    var item_phid = JX.Stratcom.getData(item).objectPHID;
     var data = {
-      objectPHID: item_phid,
-      columnID: JX.Stratcom.getData(list.getRootNode()).columnID
+      panelKey: JX.Stratcom.getData(item).panelKey,
+      columnKey: JX.Stratcom.getData(list.getRootNode()).columnKey
     };
 
-    var after_phid = null;
-    var items = finditems(list.getRootNode());
     if (after) {
-      after_phid = JX.Stratcom.getData(after).objectPHID;
-      data.afterPHID = after_phid;
-    }
-    var ii;
-    var ii_item;
-    var ii_item_phid;
-    var ii_prev_item_phid = null;
-    var before_phid = null;
-    for (ii = 0; ii < items.length; ii++) {
-      ii_item = items[ii];
-      ii_item_phid = JX.Stratcom.getData(ii_item).objectPHID;
-      if (ii_item_phid == item_phid) {
-        // skip the item we just dropped
-        continue;
+      var after_data = JX.Stratcom.getData(after);
+      if (after_data.panelKey) {
+        data.afterKey = after_data.panelKey;
       }
-      // note this handles when there is no after phid - we are at the top of
-      // the list - quite nicely
-      if (ii_prev_item_phid == after_phid) {
-        before_phid = ii_item_phid;
-        break;
-      }
-      ii_prev_item_phid = ii_item_phid;
-    }
-    if (before_phid) {
-      data.beforePHID = before_phid;
     }
 
     var workflow = new JX.Workflow(config.moveURI, data)
@@ -77,23 +53,24 @@ JX.behavior('dashboard-move-panels', function(config) {
     workflow.start();
   }
 
-  var lists = [];
-  var ii;
-  var cols = JX.DOM.scry(JX.$(config.dashboardID), 'div', 'dashboard-column');
-  var col = null;
+  var dashboard_node = JX.$(config.dashboardNodeID);
 
+  var lists = [];
+  var cols = JX.DOM.scry(dashboard_node, 'div', 'dashboard-column');
+
+  var ii;
   for (ii = 0; ii < cols.length; ii++) {
-    col = cols[ii];
+    var col = cols[ii];
     var list = new JX.DraggableList(itemSigil, col)
       .setFindItemsHandler(JX.bind(null, finditems, col))
       .setCanDragX(true);
 
     list.listen('didSend', JX.bind(list, onupdate, col));
     list.listen('didReceive', JX.bind(list, onupdate, col));
-
     list.listen('didDrop', JX.bind(null, ondrop, list));
 
     lists.push(list);
+
     markcolempty(col, finditems(col).length === 0);
   }
 

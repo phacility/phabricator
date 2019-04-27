@@ -22,7 +22,9 @@ final class PhabricatorRepositoryPushMailWorker
       ->executeOne();
 
     $repository = $event->getRepository();
-    if (!$repository->shouldPublish()) {
+
+    $publisher = $repository->newPublisher();
+    if (!$publisher->shouldPublishRepository()) {
       // If the repository is still importing, don't send email.
       return;
     }
@@ -148,6 +150,10 @@ final class PhabricatorRepositoryPushMailWorker
         case PhabricatorRepositoryPushLog::REFTYPE_BOOKMARK:
           $type_name = pht('bookmark');
           $type_prefix = pht('bookmark:');
+          break;
+        case PhabricatorRepositoryPushLog::REFTYPE_REF:
+          $type_name = pht('ref');
+          $type_prefix = pht('ref:');
           break;
         case PhabricatorRepositoryPushLog::REFTYPE_COMMIT:
         default:

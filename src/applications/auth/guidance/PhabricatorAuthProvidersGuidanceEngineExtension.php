@@ -92,6 +92,25 @@ final class PhabricatorAuthProvidersGuidanceEngineExtension
         ->setMessage($message);
     }
 
+    $locked_config_key = 'auth.lock-config';
+    $is_locked = PhabricatorEnv::getEnvConfig($locked_config_key);
+    if ($is_locked) {
+      $message = pht(
+        'Authentication provider configuration is locked, and can not be '.
+        'changed without being unlocked. See the configuration setting %s '.
+        'for details.',
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/config/edit/'.$locked_config_key,
+          ),
+          $locked_config_key));
+
+      $results[] = $this->newWarning('auth.locked-config')
+        ->setPriority(500)
+        ->setMessage($message);
+    }
+
     return $results;
   }
 

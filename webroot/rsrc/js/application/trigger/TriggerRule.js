@@ -98,7 +98,24 @@ JX.install('TriggerRule', {
     },
 
     _onTypeChange: function(control) {
-      this.setType(control.value);
+      var new_type = control.value;
+
+      this.setType(new_type);
+
+      // Before we build a new control, change the rule value to be appropriate
+      // for the new rule type.
+
+      // TODO: Currently, we set the rule value to the default value for the
+      // type. This works most of the time, but if the user selects type "A",
+      // makes a change to the value, selects type "B", then changes back to
+      // type "A", it would be better to retain their edit. This is currently
+      // difficult because of tokenizers: if you save their value, you get a
+      // list of PHIDs which do not restore cleanly into tokens later.
+
+      var editor = this.getEditor();
+      var type = editor.getType(new_type);
+      this.setValue(type.getDefaultValue());
+
       this._rebuildValueControl();
     },
 
