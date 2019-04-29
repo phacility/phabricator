@@ -10,16 +10,13 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       return $this->newDemoChart();
     }
 
-    $chart = id(new PhabricatorFactChart())->loadOneWhere(
-      'chartKey = %s',
-      $chart_key);
+    $engine = id(new PhabricatorChartEngine())
+      ->setViewer($viewer);
+
+    $chart = $engine->loadChart($chart_key);
     if (!$chart) {
       return new Aphront404Response();
     }
-
-    $engine = id(new PhabricatorChartEngine())
-      ->setViewer($viewer)
-      ->setChart($chart);
 
     // When drawing a chart, we send down a placeholder piece of HTML first,
     // then fetch the data via async request. Determine if we're drawing

@@ -25,6 +25,24 @@ final class PhabricatorChartEngine
     return $this->chart;
   }
 
+  public function loadChart($chart_key) {
+    $chart = id(new PhabricatorFactChart())->loadOneWhere(
+      'chartKey = %s',
+      $chart_key);
+
+    if ($chart) {
+      $this->setChart($chart);
+    }
+
+    return $chart;
+  }
+
+  public static function getChartURI($chart_key) {
+    return id(new PhabricatorFactChart())
+      ->setChartKey($chart_key)
+      ->getURI();
+  }
+
   public function getStoredChart() {
     if (!$this->storedChart) {
       $chart = $this->getChart();
