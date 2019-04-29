@@ -977,7 +977,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $is_new = ($object->getPHID() === null);
+    $is_new = ($object->getID() === null);
     $this->isNewObject = $is_new;
 
     $is_preview = $this->getIsPreview();
