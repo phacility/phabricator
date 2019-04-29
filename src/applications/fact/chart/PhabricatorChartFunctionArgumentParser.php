@@ -103,6 +103,10 @@ final class PhabricatorChartFunctionArgumentParser
     return array_values($this->argumentMap);
   }
 
+  public function getRawArguments() {
+    return $this->rawArguments;
+  }
+
   public function parseArguments() {
     $have_count = count($this->rawArguments);
     $want_count = count($this->argumentMap);

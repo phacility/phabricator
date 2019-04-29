@@ -7,6 +7,8 @@ final class PhabricatorFactChart
   protected $chartKey;
   protected $chartParameters = array();
 
+  private $datasets;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
@@ -33,6 +35,12 @@ final class PhabricatorFactChart
     return idx($this->chartParameters, $key, $default);
   }
 
+  public function newChartKey() {
+    $digest = serialize($this->chartParameters);
+    $digest = PhabricatorHash::digestForIndex($digest);
+    return $digest;
+  }
+
   public function save() {
     if ($this->getID()) {
       throw new Exception(
@@ -41,12 +49,44 @@ final class PhabricatorFactChart
           'overwrite an existing chart configuration.'));
     }
 
-    $digest = serialize($this->chartParameters);
-    $digest = PhabricatorHash::digestForIndex($digest);
-
-    $this->chartKey = $digest;
+    $this->chartKey = $this->newChartKey();
 
     return parent::save();
+  }
+
+  public function setDatasets(array $datasets) {
+    assert_instances_of($datasets, 'PhabricatorChartDataset');
+
+    $dataset_list = array();
+    foreach ($datasets as $dataset) {
+      $dataset_list[] = $dataset->toDictionary();
+    }
+
+    $this->setChartParameter('datasets', $dataset_list);
+    $this->datasets = null;
+
+    return $this;
+  }
+
+  public function getDatasets() {
+    if ($this->datasets === null) {
+      $this->datasets = $this->newDatasets();
+    }
+    return $this->datasets;
+  }
+
+  private function newDatasets() {
+    $datasets = $this->getChartParameter('datasets', array());
+
+    foreach ($datasets as $key => $dataset) {
+      $datasets[$key] = PhabricatorChartDataset::newFromDictionary($dataset);
+    }
+
+    return $datasets;
+  }
+
+  public function getURI() {
+    return urisprintf('/fact/chart/%s/', $this->getChartKey());
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

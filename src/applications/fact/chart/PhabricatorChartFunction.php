@@ -43,6 +43,10 @@ abstract class PhabricatorChartFunction
     return $this;
   }
 
+  public function toDictionary() {
+    return $this->getArgumentParser()->getRawArguments();
+  }
+
   public function getSubfunctions() {
     $result = array();
     $result[] = $this;
