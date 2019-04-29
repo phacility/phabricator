@@ -337,7 +337,8 @@ final class ManiphestReportController extends ManiphestController {
         'the project recently, it is counted on the day it was '.
         'opened, not the day it was categorized. If a task was part '.
         'of this project in the past but no longer is, it is not '.
-        'counted at all.');
+        'counted at all. This table may not agree exactly with the chart '.
+        'above.');
       $header = pht('Task Burn Rate for Project %s', $handle->renderLink());
       $caption = phutil_tag('p', array(), $inst);
     } else {
@@ -379,26 +380,62 @@ final class ManiphestReportController extends ManiphestController {
 
     list($burn_x, $burn_y) = $this->buildSeries($data);
 
-    require_celerity_resource('d3');
-    require_celerity_resource('phui-chart-css');
+    if ($project_phid) {
+      $argv = array(
+        'sum',
+        array(
+          'accumulate',
+          array('fact', 'tasks.open-count.create.project', $project_phid),
+        ),
+        array(
+          'accumulate',
+          array('fact', 'tasks.open-count.status.project', $project_phid),
+        ),
+        array(
+          'accumulate',
+          array('fact', 'tasks.open-count.assign.project', $project_phid),
+        ),
+      );
+    } else {
+      $argv = array(
+        'sum',
+        array('accumulate', array('fact', 'tasks.open-count.create')),
+        array('accumulate', array('fact', 'tasks.open-count.status')),
+      );
+    }
 
-    Javelin::initBehavior('line-chart-legacy', array(
-      'hardpoint' => $id,
-      'x' => array(
-        $burn_x,
-      ),
-      'y' => array(
-        $burn_y,
-      ),
-      'xformat' => 'epoch',
-      'yformat' => 'int',
-    ));
+    $function = id(new PhabricatorComposeChartFunction())
+      ->setArguments(array($argv));
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Burnup Rate'))
-      ->appendChild($chart);
+    $datasets = array(
+      id(new PhabricatorChartDataset())
+        ->setFunction($function),
+    );
 
-    return array($filter, $box, $panel);
+    $chart = id(new PhabricatorFactChart())
+      ->setDatasets($datasets);
+
+    $engine = id(new PhabricatorChartEngine())
+      ->setViewer($viewer)
+      ->setChart($chart);
+
+    $chart = $engine->getStoredChart();
+
+    $panel_type = id(new PhabricatorDashboardChartPanelType())
+      ->getPanelTypeKey();
+
+    $chart_panel = id(new PhabricatorDashboardPanel())
+      ->setPanelType($panel_type)
+      ->setName(pht('Burnup Rate'))
+      ->setProperty('chartKey', $chart->getChartKey());
+
+    $chart_view = id(new PhabricatorDashboardPanelRenderingEngine())
+      ->setViewer($viewer)
+      ->setPanel($chart_panel)
+      ->setParentPanelPHIDs(array())
+      ->renderPanel();
+
+    return array($filter, $chart_view, $panel);
   }
 
   private function renderReportFilters(array $tokens, $has_window) {

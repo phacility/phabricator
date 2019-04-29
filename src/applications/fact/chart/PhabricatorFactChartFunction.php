@@ -35,25 +35,38 @@ final class PhabricatorFactChartFunction
     $conn = $table->establishConnection('r');
     $table_name = $table->getTableName();
 
-    $data = queryfx_all(
+    $where = array();
+
+    $where[] = qsprintf(
       $conn,
-      'SELECT value, epoch FROM %T WHERE keyID = %d ORDER BY epoch ASC',
-      $table_name,
+      'keyID = %d',
       $key_id);
-    if (!$data) {
-      return;
+
+    $parser = $this->getArgumentParser();
+
+    $parts = $fact->buildWhereClauseParts($conn, $parser);
+    foreach ($parts as $part) {
+      $where[] = $part;
     }
 
+    $data = queryfx_all(
+      $conn,
+      'SELECT value, epoch FROM %T WHERE %LA ORDER BY epoch ASC',
+      $table_name,
+      $where);
+
     $map = array();
-    foreach ($data as $row) {
-      $value = (int)$row['value'];
-      $epoch = (int)$row['epoch'];
+    if ($data) {
+      foreach ($data as $row) {
+        $value = (int)$row['value'];
+        $epoch = (int)$row['epoch'];
 
-      if (!isset($map[$epoch])) {
-        $map[$epoch] = 0;
+        if (!isset($map[$epoch])) {
+          $map[$epoch] = 0;
+        }
+
+        $map[$epoch] += $value;
       }
-
-      $map[$epoch] += $value;
     }
 
     $this->map = $map;

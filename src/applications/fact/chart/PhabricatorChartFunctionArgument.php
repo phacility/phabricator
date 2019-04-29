@@ -30,6 +30,7 @@ final class PhabricatorChartFunctionArgument
       'fact-key' => true,
       'function' => true,
       'number' => true,
+      'phid' => true,
     );
 
     if (!isset($types[$type])) {
@@ -51,6 +52,10 @@ final class PhabricatorChartFunctionArgument
 
   public function newValue($value) {
     switch ($this->getType()) {
+      case 'phid':
+        // TODO: This could be validated better, but probably should not be
+        // a primitive type.
+        return $value;
       case 'fact-key':
         if (!is_string($value)) {
           throw new Exception(

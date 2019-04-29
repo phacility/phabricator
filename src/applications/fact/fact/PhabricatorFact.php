@@ -38,7 +38,46 @@ abstract class PhabricatorFact extends Phobject {
   abstract protected function newTemplateDatapoint();
 
   final public function getFunctionArguments() {
-    return array();
+    $key = $this->getKey();
+
+    $argv = array();
+
+    if (preg_match('/\.project\z/', $key)) {
+      $argv[] = id(new PhabricatorChartFunctionArgument())
+        ->setName('phid')
+        ->setType('phid');
+    }
+
+    if (preg_match('/\.owner\z/', $key)) {
+      $argv[] = id(new PhabricatorChartFunctionArgument())
+        ->setName('phid')
+        ->setType('phid');
+    }
+
+    return $argv;
   }
+
+  final public function buildWhereClauseParts(
+    AphrontDatabaseConnection $conn,
+    PhabricatorChartFunctionArgumentParser $arguments) {
+    $where = array();
+
+    $has_phid = $this->getFunctionArguments();
+
+    if ($has_phid) {
+      $phid = $arguments->getArgumentValue('phid');
+
+      $dimension_id = id(new PhabricatorFactObjectDimension())
+        ->newDimensionID($phid);
+
+      $where[] = qsprintf(
+        $conn,
+        'dimensionID = %d',
+        $dimension_id);
+    }
+
+    return $where;
+  }
+
 
 }

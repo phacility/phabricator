@@ -9,6 +9,11 @@ final class PhabricatorChartDataset
     return $this->function;
   }
 
+  public function setFunction(PhabricatorComposeChartFunction $function) {
+    $this->function = $function;
+    return $this;
+  }
+
   public static function newFromDictionary(array $map) {
     PhutilTypeSpec::checkMap(
       $map,
