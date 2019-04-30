@@ -10,8 +10,12 @@ abstract class PhabricatorHigherOrderChartFunction
       $domain = $function->getDomain();
       if ($domain !== null) {
         list($min, $max) = $domain;
-        $minv[] = $min;
-        $maxv[] = $max;
+        if ($min !== null) {
+          $minv[] = $min;
+        }
+        if ($max !== null) {
+          $maxv[] = $max;
+        }
       }
     }
 
