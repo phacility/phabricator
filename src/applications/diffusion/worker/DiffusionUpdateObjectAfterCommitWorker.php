@@ -167,7 +167,7 @@ final class DiffusionUpdateObjectAfterCommitWorker
     $xactions[] = $this->newEdgeTransaction(
       $revision,
       $commit,
-      DiffusionCommitHasRevisionEdgeType::EDGECONST);
+      DifferentialRevisionHasCommitEdgeType::EDGECONST);
 
     $match_data = $this->getUpdateProperty('revisionMatchData');
 
