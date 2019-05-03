@@ -37,6 +37,12 @@ final class DiffusionBranchTableController extends DiffusionController {
 
     $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
 
+    // If there is one page of results or fewer, sort branches so the default
+    // branch is on top and permanent branches are below it.
+    if (!$pager->getOffset() && !$pager->getHasMorePages()) {
+      $branches = $this->sortBranches($repository, $branches);
+    }
+
     $content = null;
     if (!$branches) {
       $content = $this->renderStatusMessage(
@@ -95,6 +101,40 @@ final class DiffusionBranchTableController extends DiffusionController {
         ))
       ->setCrumbs($crumbs)
       ->appendChild($view);
+  }
+
+  private function sortBranches(
+    PhabricatorRepository $repository,
+    array $branches) {
+
+    $publisher = $repository->newPublisher();
+    $default_branch = $repository->getDefaultBranch();
+
+    $vectors = array();
+    foreach ($branches as $key => $branch) {
+      $short_name = $branch->getShortName();
+
+      if ($short_name === $default_branch) {
+        $order_default = 0;
+      } else {
+        $order_default = 1;
+      }
+
+      if ($publisher->shouldPublishRef($branch)) {
+        $order_permanent = 0;
+      } else {
+        $order_permanent = 1;
+      }
+
+      $vectors[$key] = id(new PhutilSortVector())
+        ->addInt($order_default)
+        ->addInt($order_permanent)
+        ->addString($short_name);
+    }
+
+    $vectors = msortv($vectors, 'getSelf');
+
+    return array_select_keys($branches, array_keys($vectors));
   }
 
 }
