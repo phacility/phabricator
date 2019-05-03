@@ -703,6 +703,8 @@ abstract class PhabricatorApplicationTransaction
           case DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST:
           case ManiphestTaskHasCommitEdgeType::EDGECONST:
           case DiffusionCommitHasTaskEdgeType::EDGECONST:
+          case DiffusionCommitHasRevisionEdgeType::EDGECONST:
+          case DifferentialRevisionHasCommitEdgeType::EDGECONST:
             return true;
           case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
             // When an object is first created, we hide any corresponding
@@ -762,6 +764,8 @@ abstract class PhabricatorApplicationTransaction
           case DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST:
           case ManiphestTaskHasCommitEdgeType::EDGECONST:
           case DiffusionCommitHasTaskEdgeType::EDGECONST:
+          case DiffusionCommitHasRevisionEdgeType::EDGECONST:
+          case DifferentialRevisionHasCommitEdgeType::EDGECONST:
             return true;
           default:
             break;
