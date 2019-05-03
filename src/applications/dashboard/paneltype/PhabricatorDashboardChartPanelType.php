@@ -37,7 +37,7 @@ final class PhabricatorDashboardChartPanelType
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine) {
 
-    $engine = id(new PhabricatorChartEngine())
+    $engine = id(new PhabricatorChartRenderingEngine())
       ->setViewer($viewer);
 
     $chart = $engine->loadChart($panel->getProperty('chartKey'));
@@ -55,7 +55,7 @@ final class PhabricatorDashboardChartPanelType
     PHUIHeaderView $header) {
 
     $key = $panel->getProperty('chartKey');
-    $uri = PhabricatorChartEngine::getChartURI($key);
+    $uri = PhabricatorChartRenderingEngine::getChartURI($key);
 
     $icon = id(new PHUIIconView())
       ->setIcon('fa-area-chart');

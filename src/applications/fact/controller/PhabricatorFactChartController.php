@@ -10,7 +10,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       return $this->newDemoChart();
     }
 
-    $engine = id(new PhabricatorChartEngine())
+    $engine = id(new PhabricatorChartRenderingEngine())
       ->setViewer($viewer);
 
     $chart = $engine->loadChart($chart_key);
@@ -95,7 +95,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $chart = id(new PhabricatorFactChart())
       ->setDatasets($datasets);
 
-    $engine = id(new PhabricatorChartEngine())
+    $engine = id(new PhabricatorChartRenderingEngine())
       ->setViewer($viewer)
       ->setChart($chart);
 

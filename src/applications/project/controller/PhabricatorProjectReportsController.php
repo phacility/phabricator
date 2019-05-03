@@ -31,48 +31,12 @@ final class PhabricatorProjectReportsController
     $crumbs->addTextCrumb(pht('Reports'));
     $crumbs->setBorder(true);
 
-    $project_phid = $project->getPHID();
-
-    $argv = array(
-      'sum',
-      array(
-        'accumulate',
-        array('fact', 'tasks.open-count.create.project', $project_phid),
-      ),
-      array(
-        'accumulate',
-        array('fact', 'tasks.open-count.status.project', $project_phid),
-      ),
-      array(
-        'accumulate',
-        array('fact', 'tasks.open-count.assign.project', $project_phid),
-      ),
-    );
-
-    $function = id(new PhabricatorComposeChartFunction())
-      ->setArguments(array($argv));
-
-    $datasets = array(
-      id(new PhabricatorChartDataset())
-        ->setFunction($function),
-    );
-
-    $chart = id(new PhabricatorFactChart())
-      ->setDatasets($datasets);
-
-    $engine = id(new PhabricatorChartEngine())
+    $chart_panel = id(new PhabricatorProjectBurndownChartEngine())
       ->setViewer($viewer)
-      ->setChart($chart);
+      ->setProjects(array($project))
+      ->buildChartPanel();
 
-    $chart = $engine->getStoredChart();
-
-    $panel_type = id(new PhabricatorDashboardChartPanelType())
-      ->getPanelTypeKey();
-
-    $chart_panel = id(new PhabricatorDashboardPanel())
-      ->setPanelType($panel_type)
-      ->setName(pht('%s: Burndown', $project->getName()))
-      ->setProperty('chartKey', $chart->getChartKey());
+    $chart_panel->setName(pht('%s: Burndown', $project->getName()));
 
     $chart_view = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)

@@ -381,53 +381,20 @@ final class ManiphestReportController extends ManiphestController {
     list($burn_x, $burn_y) = $this->buildSeries($data);
 
     if ($project_phid) {
-      $argv = array(
-        'sum',
-        array(
-          'accumulate',
-          array('fact', 'tasks.open-count.create.project', $project_phid),
-        ),
-        array(
-          'accumulate',
-          array('fact', 'tasks.open-count.status.project', $project_phid),
-        ),
-        array(
-          'accumulate',
-          array('fact', 'tasks.open-count.assign.project', $project_phid),
-        ),
-      );
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($project_phid))
+        ->execute();
     } else {
-      $argv = array(
-        'sum',
-        array('accumulate', array('fact', 'tasks.open-count.create')),
-        array('accumulate', array('fact', 'tasks.open-count.status')),
-      );
+      $projects = array();
     }
 
-    $function = id(new PhabricatorComposeChartFunction())
-      ->setArguments(array($argv));
-
-    $datasets = array(
-      id(new PhabricatorChartDataset())
-        ->setFunction($function),
-    );
-
-    $chart = id(new PhabricatorFactChart())
-      ->setDatasets($datasets);
-
-    $engine = id(new PhabricatorChartEngine())
+    $panel = id(new PhabricatorProjectBurndownChartEngine())
       ->setViewer($viewer)
-      ->setChart($chart);
+      ->setProjects($projects)
+      ->buildChartPanel();
 
-    $chart = $engine->getStoredChart();
-
-    $panel_type = id(new PhabricatorDashboardChartPanelType())
-      ->getPanelTypeKey();
-
-    $chart_panel = id(new PhabricatorDashboardPanel())
-      ->setPanelType($panel_type)
-      ->setName(pht('Burnup Rate'))
-      ->setProperty('chartKey', $chart->getChartKey());
+    $chart_panel = $panel->setName(pht('Burnup Rate'));
 
     $chart_view = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
