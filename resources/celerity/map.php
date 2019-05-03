@@ -389,7 +389,7 @@ return array(
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'c715c123',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => '6a85bc5a',
     'rsrc/js/application/drydock/drydock-live-operation-status.js' => '47a0728b',
-    'rsrc/js/application/fact/Chart.js' => 'fcb0c07d',
+    'rsrc/js/application/fact/Chart.js' => 'a3516cea',
     'rsrc/js/application/files/behavior-document-engine.js' => '243d6c22',
     'rsrc/js/application/files/behavior-icon-composer.js' => '38a6cedb',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => 'a17b84f1',
@@ -696,7 +696,7 @@ return array(
     'javelin-behavior-user-menu' => '60cd9241',
     'javelin-behavior-view-placeholder' => 'a9942052',
     'javelin-behavior-workflow' => '9623adc1',
-    'javelin-chart' => 'fcb0c07d',
+    'javelin-chart' => 'a3516cea',
     'javelin-color' => '78f811c9',
     'javelin-cookie' => '05d290ef',
     'javelin-diffusion-locate-file-source' => '94243d89',
@@ -1767,6 +1767,10 @@ return array(
       'javelin-workflow',
       'phabricator-draggable-list',
     ),
+    'a3516cea' => array(
+      'phui-chart-css',
+      'd3',
+    ),
     'a4356cde' => array(
       'javelin-install',
       'javelin-dom',
@@ -2179,10 +2183,6 @@ return array(
     ),
     'fa74cc35' => array(
       'phui-oi-list-view-css',
-    ),
-    'fcb0c07d' => array(
-      'phui-chart-css',
-      'd3',
     ),
     'fdc13e4e' => array(
       'javelin-install',

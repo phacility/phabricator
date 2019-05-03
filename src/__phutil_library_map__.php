@@ -2669,6 +2669,7 @@ phutil_register_library_map(array(
     'PhabricatorChartFunctionArgument' => 'applications/fact/chart/PhabricatorChartFunctionArgument.php',
     'PhabricatorChartFunctionArgumentParser' => 'applications/fact/chart/PhabricatorChartFunctionArgumentParser.php',
     'PhabricatorChartRenderingEngine' => 'applications/fact/engine/PhabricatorChartRenderingEngine.php',
+    'PhabricatorChartStackedAreaDataset' => 'applications/fact/chart/PhabricatorChartStackedAreaDataset.php',
     'PhabricatorChatLogApplication' => 'applications/chatlog/application/PhabricatorChatLogApplication.php',
     'PhabricatorChatLogChannel' => 'applications/chatlog/storage/PhabricatorChatLogChannel.php',
     'PhabricatorChatLogChannelListController' => 'applications/chatlog/controller/PhabricatorChatLogChannelListController.php',
@@ -8683,6 +8684,7 @@ phutil_register_library_map(array(
     'PhabricatorChartFunctionArgument' => 'Phobject',
     'PhabricatorChartFunctionArgumentParser' => 'Phobject',
     'PhabricatorChartRenderingEngine' => 'Phobject',
+    'PhabricatorChartStackedAreaDataset' => 'PhabricatorChartDataset',
     'PhabricatorChatLogApplication' => 'PhabricatorApplication',
     'PhabricatorChatLogChannel' => array(
       'PhabricatorChatLogDAO',

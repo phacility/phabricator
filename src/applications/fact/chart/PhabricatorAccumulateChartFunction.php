@@ -35,8 +35,9 @@ final class PhabricatorAccumulateChartFunction
 
     $datasource_xv = $datasource->newInputValues($empty_query);
     if (!$datasource_xv) {
-      // TODO: Maybe this should just be an error?
-      $datasource_xv = $xv;
+      // When the datasource has no datapoints, we can't evaluate the function
+      // anywhere.
+      return array_fill(0, count($xv), null);
     }
 
     $yv = $datasource->evaluateFunction($datasource_xv);

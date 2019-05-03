@@ -1,42 +1,77 @@
 <?php
 
-final class PhabricatorChartDataset
+abstract class PhabricatorChartDataset
   extends Phobject {
 
-  private $function;
+  private $functions;
 
-  public function getFunction() {
-    return $this->function;
+  final public function getDatasetTypeKey() {
+    return $this->getPhobjectClassConstant('DATASETKEY', 32);
   }
 
-  public function setFunction(PhabricatorComposeChartFunction $function) {
-    $this->function = $function;
+  final public function getFunctions() {
+    return $this->functions;
+  }
+
+  final public function setFunctions(array $functions) {
+    assert_instances_of($functions, 'PhabricatorComposeChartFunction');
+
+    $this->functions = $functions;
+
     return $this;
   }
 
-  public static function newFromDictionary(array $map) {
+  final public static function getAllDatasetTypes() {
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getDatasetTypeKey')
+      ->execute();
+  }
+
+  final public static function newFromDictionary(array $map) {
     PhutilTypeSpec::checkMap(
       $map,
       array(
-        'function' => 'list<wild>',
+        'type' => 'string',
+        'functions' => 'list<wild>',
       ));
 
-    $dataset = new self();
+    $types = self::getAllDatasetTypes();
 
-    $dataset->function = id(new PhabricatorComposeChartFunction())
-      ->setArguments(array($map['function']));
+    $dataset_type = $map['type'];
+    if (!isset($types[$dataset_type])) {
+      throw new Exception(
+        pht(
+          'Trying to construct a dataset of type "%s", but this type is '.
+          'unknown. Supported types are: %s.',
+          $dataset_type,
+          implode(', ', array_keys($types))));
+    }
+
+    $dataset = id(clone $types[$dataset_type]);
+
+    $functions = array();
+    foreach ($map['functions'] as $map) {
+      $functions[] = PhabricatorChartFunction::newFromDictionary($map);
+    }
+    $dataset->setFunctions($functions);
 
     return $dataset;
   }
 
-  public function toDictionary() {
-    // Since we wrap the raw value in a "compose(...)", when deserializing,
-    // we need to unwrap it when serializing.
-    $function_raw = head($this->getFunction()->toDictionary());
-
+  final public function toDictionary() {
     return array(
-      'function' => $function_raw,
+      'type' => $this->getDatasetTypeKey(),
+      'functions' => mpull($this->getFunctions(), 'toDictionary'),
     );
   }
+
+  final public function getWireFormat(PhabricatorChartDataQuery $data_query) {
+    return $this->newWireFormat($data_query);
+  }
+
+  abstract protected function newWireFormat(
+    PhabricatorChartDataQuery $data_query);
+
 
 }

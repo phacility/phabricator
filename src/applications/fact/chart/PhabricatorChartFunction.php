@@ -43,8 +43,37 @@ abstract class PhabricatorChartFunction
     return $this;
   }
 
+  final public static function newFromDictionary(array $map) {
+    PhutilTypeSpec::checkMap(
+      $map,
+      array(
+        'function' => 'string',
+        'arguments' => 'list<wild>',
+      ));
+
+    $functions = self::getAllFunctions();
+
+    $function_name = $map['function'];
+    if (!isset($functions[$function_name])) {
+      throw new Exception(
+        pht(
+          'Attempting to build function "%s" from dictionary, but that '.
+          'function is unknown. Known functions are: %s.',
+          $function_name,
+          implode(', ', array_keys($functions))));
+    }
+
+    $function = id(clone $functions[$function_name])
+      ->setArguments($map['arguments']);
+
+    return $function;
+  }
+
   public function toDictionary() {
-    return $this->getArgumentParser()->getRawArguments();
+    return array(
+      'function' => $this->getFunctionKey(),
+      'arguments' => $this->getArgumentParser()->getRawArguments(),
+    );
   }
 
   public function getSubfunctions() {

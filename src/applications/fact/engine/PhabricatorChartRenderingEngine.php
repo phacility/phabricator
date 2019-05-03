@@ -119,7 +119,9 @@ final class PhabricatorChartRenderingEngine
 
     $functions = array();
     foreach ($datasets as $dataset) {
-      $functions[] = $dataset->getFunction();
+      foreach ($dataset->getFunctions() as $function) {
+        $functions[] = $function;
+      }
     }
 
     $subfunctions = array();
@@ -144,39 +146,17 @@ final class PhabricatorChartRenderingEngine
       ->setMaximumValue($domain_max)
       ->setLimit(2000);
 
-    $datasets = array();
-    foreach ($functions as $function) {
-      $points = $function->newDatapoints($data_query);
-
-      $x = array();
-      $y = array();
-
-      foreach ($points as $point) {
-        $x[] = $point['x'];
-        $y[] = $point['y'];
-      }
-
-      $datasets[] = array(
-        'x' => $x,
-        'y' => $y,
-        'color' => '#ff00ff',
-      );
-    }
-
-
-    $y_min = 0;
-    $y_max = 0;
+    $wire_datasets = array();
     foreach ($datasets as $dataset) {
-      if (!$dataset['y']) {
-        continue;
-      }
-
-      $y_min = min($y_min, min($dataset['y']));
-      $y_max = max($y_max, max($dataset['y']));
+      $wire_datasets[] = $dataset->getWireFormat($data_query);
     }
+
+    // TODO: Figure these out from the datasets again.
+    $y_min = -2;
+    $y_max = 20;
 
     $chart_data = array(
-      'datasets' => $datasets,
+      'datasets' => $wire_datasets,
       'xMin' => $domain_min,
       'xMax' => $domain_max,
       'yMin' => $y_min,
