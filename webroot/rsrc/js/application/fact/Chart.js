@@ -2,6 +2,7 @@
  * @provides javelin-chart
  * @requires phui-chart-css
  *           d3
+ *           javelin-chart-curtain-view
  */
 JX.install('Chart', {
 
@@ -14,6 +15,8 @@ JX.install('Chart', {
   members: {
     _rootNode: null,
     _data: null,
+    _chartContainerNode: null,
+    _curtain: null,
 
     setData: function(blob) {
       this._data = blob;
@@ -26,23 +29,42 @@ JX.install('Chart', {
       }
 
       var hardpoint = this._rootNode;
+      var curtain = this._getCurtain();
+      var container_node = this._getChartContainerNode();
+
+      var content = [
+        container_node,
+        curtain.getNode(),
+      ];
+
+      JX.DOM.setContent(hardpoint, content);
 
       // Remove the old chart (if one exists) before drawing the new chart.
-      JX.DOM.setContent(hardpoint, []);
+      JX.DOM.setContent(container_node, []);
 
-      var viewport = JX.Vector.getDim(hardpoint);
+      var viewport = JX.Vector.getDim(container_node);
       var config = this._data;
 
       function css_function(n) {
         return n + '(' + JX.$A(arguments).slice(1).join(', ') + ')';
       }
 
-      var padding = {
-        top: 24,
-        left: 48,
-        bottom: 48,
-        right: 32
-      };
+      var padding = {};
+      if (JX.Device.isDesktop()) {
+        padding = {
+          top: 24,
+          left: 48,
+          bottom: 48,
+          right: 12
+        };
+      } else {
+        padding = {
+          top: 12,
+          left: 36,
+          bottom: 24,
+          right: 4
+        };
+      }
 
       var size = {
         frameWidth: viewport.x,
@@ -61,20 +83,20 @@ JX.install('Chart', {
       var xAxis = d3.axisBottom(x);
       var yAxis = d3.axisLeft(y);
 
-      var svg = d3.select('#' + hardpoint.id).append('svg')
+      var svg = d3.select(container_node).append('svg')
         .attr('width', size.frameWidth)
         .attr('height', size.frameHeight)
         .attr('class', 'chart');
 
       var g = svg.append('g')
-          .attr(
-            'transform',
-            css_function('translate', padding.left, padding.top));
+        .attr(
+          'transform',
+          css_function('translate', padding.left, padding.top));
 
       g.append('rect')
-          .attr('class', 'inner')
-          .attr('width', size.width)
-          .attr('height', size.height);
+        .attr('class', 'inner')
+        .attr('width', size.width)
+        .attr('height', size.height);
 
       x.domain([this._newDate(config.xMin), this._newDate(config.xMax)]);
       y.domain([config.yMin, config.yMax]);
@@ -84,15 +106,19 @@ JX.install('Chart', {
         .attr('class', 'chart-tooltip')
         .style('opacity', 0);
 
+      curtain.reset();
+
       for (var idx = 0; idx < config.datasets.length; idx++) {
         var dataset = config.datasets[idx];
 
         switch (dataset.type) {
           case 'stacked-area':
-            this._newStackedArea(g, dataset, x, y, div);
+            this._newStackedArea(g, dataset, x, y, div, curtain);
             break;
         }
       }
+
+      curtain.redraw();
 
       g.append('g')
         .attr('class', 'x axis')
@@ -105,7 +131,7 @@ JX.install('Chart', {
         .call(yAxis);
     },
 
-    _newStackedArea: function(g, dataset, x, y, div) {
+    _newStackedArea: function(g, dataset, x, y, div, curtain) {
       var to_date = JX.bind(this, this._newDate);
 
       var area = d3.area()
@@ -155,11 +181,30 @@ JX.install('Chart', {
             div.style('opacity', 0);
           });
 
+        curtain.addFunctionLabel('Important Data');
       }
     },
 
     _newDate: function(epoch) {
       return new Date(epoch * 1000);
+    },
+
+    _getCurtain: function() {
+      if (!this._curtain) {
+        this._curtain = new JX.ChartCurtainView();
+      }
+      return this._curtain;
+    },
+
+    _getChartContainerNode: function() {
+      if (!this._chartContainerNode) {
+        var attrs = {
+          className: 'chart-container'
+        };
+
+        this._chartContainerNode = JX.$N('div', attrs);
+      }
+      return this._chartContainerNode;
     }
 
   }

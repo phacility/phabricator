@@ -94,10 +94,8 @@ final class PhabricatorChartRenderingEngine
       'div',
       array(
         'id' => $chart_node_id,
-        'style' => 'background: #ffffff; '.
-                   'height: 480px; ',
-      ),
-      '');
+        'class' => 'chart-hardpoint',
+      ));
 
     $data_uri = urisprintf('/fact/chart/%s/draw/', $chart_key);
 
