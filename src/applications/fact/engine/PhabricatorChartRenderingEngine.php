@@ -113,6 +113,10 @@ final class PhabricatorChartRenderingEngine
     $chart = $this->getStoredChart();
     $chart_key = $chart->getChartKey();
 
+    $chart_engine = PhabricatorChartEngine::newFromChart($chart)
+      ->setViewer($this->getViewer());
+    $chart_engine->buildChart($chart);
+
     $datasets = $chart->getDatasets();
 
     $functions = array();

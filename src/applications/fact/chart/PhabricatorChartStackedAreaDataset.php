@@ -148,9 +148,6 @@ final class PhabricatorChartStackedAreaDataset
     $wire_labels = array();
     foreach ($functions as $function_key => $function) {
       $label = $function->getFunctionLabel();
-
-      $label->setName(pht('Important Data %s', $function_key));
-
       $wire_labels[] = $label->toWireFormat();
     }
 

@@ -5,52 +5,89 @@ final class PhabricatorProjectBurndownChartEngine
 
   const CHARTENGINEKEY = 'project.burndown';
 
-  private $projects;
-
   public function setProjects(array $projects) {
     assert_instances_of($projects, 'PhabricatorProject');
-
-    $this->projects = $projects;
-
-    return $this;
+    $project_phids = mpull($projects, 'getPHID');
+    return $this->setEngineParameter('projectPHIDs', $project_phids);
   }
 
-  public function getProjects() {
-    return $this->projects;
-  }
+  protected function newChart(PhabricatorFactChart $chart, array $map) {
+    $viewer = $this->getViewer();
 
-  protected function newChart() {
-    if ($this->projects !== null) {
-      $project_phids = mpull($this->projects, 'getPHID');
-    } else {
-      $project_phids = null;
-    }
+    $map = $map + array(
+      'projectPHIDs' => array(),
+    );
 
-    $argvs = array();
-    if ($project_phids) {
-      foreach ($project_phids as $project_phid) {
-        $argvs[] = array(
-          'accumulate',
-          array('fact', 'tasks.open-count.create.project', $project_phid),
-        );
-        $argvs[] = array(
-          'accumulate',
-          array('fact', 'tasks.open-count.status.project', $project_phid),
-        );
-        $argvs[] = array(
-          'accumulate',
-          array('fact', 'tasks.open-count.assign.project', $project_phid),
-        );
-      }
+    if ($map['projectPHIDs']) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($map['projectPHIDs'])
+        ->execute();
+      $project_phids = mpull($projects, 'getPHID');
     } else {
-      $argvs[] = array('accumulate', array('fact', 'tasks.open-count.create'));
-      $argvs[] = array('accumulate', array('fact', 'tasks.open-count.status'));
+      $project_phids = array();
     }
 
     $functions = array();
-    foreach ($argvs as $argv) {
-      $functions[] = id(new PhabricatorComposeChartFunction())
-        ->setArguments(array($argv));
+    if ($project_phids) {
+      foreach ($project_phids as $project_phid) {
+        $function = $this->newFunction(
+          'accumulate',
+          array('fact', 'tasks.open-count.create.project', $project_phid));
+
+        $function->getFunctionLabel()
+          ->setName(pht('Tasks Created'))
+          ->setColor('rgba(0, 0, 200, 1)')
+          ->setFillColor('rgba(0, 0, 200, 0.15)');
+
+        $functions[] = $function;
+
+
+        $function = $this->newFunction(
+          'accumulate',
+          array('fact', 'tasks.open-count.status.project', $project_phid));
+
+        $function->getFunctionLabel()
+          ->setName(pht('Tasks Closed / Reopened'))
+          ->setColor('rgba(200, 0, 200, 1)')
+          ->setFillColor('rgba(200, 0, 200, 0.15)');
+
+        $functions[] = $function;
+
+
+        $function = $this->newFunction(
+          'accumulate',
+          array('fact', 'tasks.open-count.assign.project', $project_phid));
+
+        $function->getFunctionLabel()
+          ->setName(pht('Tasks Rescoped'))
+          ->setColor('rgba(0, 200, 200, 1)')
+          ->setFillColor('rgba(0, 200, 200, 0.15)');
+
+        $functions[] = $function;
+      }
+    } else {
+      $function = $this->newFunction(
+        'accumulate',
+        array('fact', 'tasks.open-count.create'));
+
+      $function->getFunctionLabel()
+        ->setName(pht('Tasks Created'))
+        ->setColor('rgba(0, 200, 200, 1)')
+        ->setFillColor('rgba(0, 200, 200, 0.15)');
+
+      $functions[] = $function;
+
+      $function = $this->newFunction(
+        'accumulate',
+        array('fact', 'tasks.open-count.status'));
+
+      $function->getFunctionLabel()
+        ->setName(pht('Tasks Closed / Reopened'))
+        ->setColor('rgba(200, 0, 200, 1)')
+        ->setFillColor('rgba(200, 0, 200, 0.15)');
+
+      $functions[] = $function;
     }
 
     $datasets = array();
@@ -58,10 +95,7 @@ final class PhabricatorProjectBurndownChartEngine
     $datasets[] = id(new PhabricatorChartStackedAreaDataset())
       ->setFunctions($functions);
 
-    $chart = id(new PhabricatorFactChart())
-      ->setDatasets($datasets);
-
-    return $chart;
+    $chart->attachDatasets($datasets);
   }
 
 }
