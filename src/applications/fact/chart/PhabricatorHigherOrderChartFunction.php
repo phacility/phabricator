@@ -4,37 +4,12 @@ abstract class PhabricatorHigherOrderChartFunction
   extends PhabricatorChartFunction {
 
   public function getDomain() {
-    $minv = array();
-    $maxv = array();
+    $domains = array();
     foreach ($this->getFunctionArguments() as $function) {
-      $domain = $function->getDomain();
-      if ($domain !== null) {
-        list($min, $max) = $domain;
-        if ($min !== null) {
-          $minv[] = $min;
-        }
-        if ($max !== null) {
-          $maxv[] = $max;
-        }
-      }
+      $domains[] = $function->getDomain();
     }
 
-    if (!$minv && !$maxv) {
-      return null;
-    }
-
-    $min = null;
-    $max = null;
-
-    if ($minv) {
-      $min = min($minv);
-    }
-
-    if ($maxv) {
-      $max = max($maxv);
-    }
-
-    return array($min, $max);
+    return PhabricatorChartInterval::newFromIntervalList($domains);
   }
 
   public function newInputValues(PhabricatorChartDataQuery $query) {

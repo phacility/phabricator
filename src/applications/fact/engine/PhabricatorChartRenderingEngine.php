@@ -133,15 +133,15 @@ final class PhabricatorChartRenderingEngine
       $subfunction->loadData();
     }
 
-    list($domain_min, $domain_max) = $this->getDomain($functions);
+    $domain = $this->getDomain($functions);
 
     $axis = id(new PhabricatorChartAxis())
-      ->setMinimumValue($domain_min)
-      ->setMaximumValue($domain_max);
+      ->setMinimumValue($domain->getMin())
+      ->setMaximumValue($domain->getMax());
 
     $data_query = id(new PhabricatorChartDataQuery())
-      ->setMinimumValue($domain_min)
-      ->setMaximumValue($domain_max)
+      ->setMinimumValue($domain->getMin())
+      ->setMaximumValue($domain->getMax())
       ->setLimit(2000);
 
     $wire_datasets = array();
@@ -155,8 +155,8 @@ final class PhabricatorChartRenderingEngine
 
     $chart_data = array(
       'datasets' => $wire_datasets,
-      'xMin' => $domain_min,
-      'xMax' => $domain_max,
+      'xMin' => $domain->getMin(),
+      'xMax' => $domain->getMax(),
       'yMin' => $y_min,
       'yMax' => $y_max,
     );
@@ -165,46 +165,25 @@ final class PhabricatorChartRenderingEngine
   }
 
   private function getDomain(array $functions) {
-    $domain_min_list = null;
-    $domain_max_list = null;
-
+    $domains = array();
     foreach ($functions as $function) {
-      $domain = $function->getDomain();
-
-      list($function_min, $function_max) = $domain;
-
-      if ($function_min !== null) {
-        $domain_min_list[] = $function_min;
-      }
-
-      if ($function_max !== null) {
-        $domain_max_list[] = $function_max;
-      }
+      $domains[] = $function->getDomain();
     }
 
-    $domain_min = null;
-    $domain_max = null;
-
-    if ($domain_min_list) {
-      $domain_min = min($domain_min_list);
-    }
-
-    if ($domain_max_list) {
-      $domain_max = max($domain_max_list);
-    }
+    $domain = PhabricatorChartInterval::newFromIntervalList($domains);
 
     // If we don't have any domain data from the actual functions, pick a
     // plausible domain automatically.
 
-    if ($domain_max === null) {
-      $domain_max = PhabricatorTime::getNow();
+    if ($domain->getMax() === null) {
+      $domain->setMax(PhabricatorTime::getNow());
     }
 
-    if ($domain_min === null) {
-      $domain_min = $domain_max - phutil_units('365 days in seconds');
+    if ($domain->getMin() === null) {
+      $domain->setMin($domain->getMax() - phutil_units('365 days in seconds'));
     }
 
-    return array($domain_min, $domain_max);
+    return $domain;
   }
 
 }

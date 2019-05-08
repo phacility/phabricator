@@ -73,10 +73,10 @@ final class PhabricatorFactChartFunction
   }
 
   public function getDomain() {
-    return array(
-      head_key($this->map),
-      last_key($this->map),
-    );
+    $min = head_key($this->map);
+    $max = last_key($this->map);
+
+    return new PhabricatorChartInterval($min, $max);
   }
 
   public function newInputValues(PhabricatorChartDataQuery $query) {
