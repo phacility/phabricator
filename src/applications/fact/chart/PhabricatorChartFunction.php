@@ -4,6 +4,7 @@ abstract class PhabricatorChartFunction
   extends Phobject {
 
   private $argumentParser;
+  private $functionLabel;
 
   final public function getFunctionKey() {
     return $this->getPhobjectClassConstant('FUNCTIONKEY', 32);
@@ -41,6 +42,22 @@ abstract class PhabricatorChartFunction
     $parser->parseArguments();
 
     return $this;
+  }
+
+  public function setFunctionLabel(PhabricatorChartFunctionLabel $label) {
+    $this->functionLabel = $label;
+    return $this;
+  }
+
+  public function getFunctionLabel() {
+    if (!$this->functionLabel) {
+      $this->functionLabel = id(new PhabricatorChartFunctionLabel())
+        ->setName(pht('Unlabeled Function'))
+        ->setColor('rgba(255, 0, 0, 1)')
+        ->setFillColor('rgba(255, 0, 0, 0.15)');
+    }
+
+    return $this->functionLabel;
   }
 
   final public static function newFromDictionary(array $map) {

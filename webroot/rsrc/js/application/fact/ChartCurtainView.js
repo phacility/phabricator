@@ -64,17 +64,21 @@ JX.install('ChartCurtainView', {
       return this._labelsNode;
     },
 
-    _newFunctionLabelItem: function(item) {
+    _newFunctionLabelItem: function(label) {
       var item_attrs = {
         className: 'chart-function-label-list-item'
       };
 
       var icon = new JX.PHUIXIconView()
-        .setIcon('fa-circle');
+        .setIcon(label.getIcon());
+
+      // Charts may use custom colors, so we can't rely on the CSS classes
+      // which only provide standard colors like "red" and "blue".
+      icon.getNode().style.color = label.getColor();
 
       var content = [
         icon.getNode(),
-        item
+        label.getName()
       ];
 
       return JX.$N('li', item_attrs, content);

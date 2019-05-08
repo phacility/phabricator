@@ -3,6 +3,7 @@
  * @requires phui-chart-css
  *           d3
  *           javelin-chart-curtain-view
+ *           javelin-chart-function-label
  */
 JX.install('Chart', {
 
@@ -144,13 +145,19 @@ JX.install('Chart', {
         .y(function(d) { return y(d.y1); });
 
       for (var ii = 0; ii < dataset.data.length; ii++) {
+        var label = new JX.ChartFunctionLabel(dataset.labels[ii]);
+
+        var fill_color = label.getFillColor() || label.getColor();
+
         g.append('path')
-          .style('fill', dataset.color[ii % dataset.color.length])
-          .style('opacity', '0.15')
+          .style('fill', fill_color)
           .attr('d', area(dataset.data[ii]));
+
+        var stroke_color = label.getColor();
 
         g.append('path')
           .attr('class', 'line')
+          .style('stroke', stroke_color)
           .attr('d', line(dataset.data[ii]));
 
         g.selectAll('dot')
@@ -181,7 +188,7 @@ JX.install('Chart', {
             div.style('opacity', 0);
           });
 
-        curtain.addFunctionLabel('Important Data');
+        curtain.addFunctionLabel(label);
       }
     },
 
