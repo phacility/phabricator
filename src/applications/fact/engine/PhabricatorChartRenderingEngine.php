@@ -145,20 +145,22 @@ final class PhabricatorChartRenderingEngine
       ->setLimit(2000);
 
     $wire_datasets = array();
+    $ranges = array();
     foreach ($datasets as $dataset) {
-      $wire_datasets[] = $dataset->getWireFormat($data_query);
+      $display_data = $dataset->getChartDisplayData($data_query);
+
+      $ranges[] = $display_data->getRange();
+      $wire_datasets[] = $display_data->getWireData();
     }
 
-    // TODO: Figure these out from the datasets again.
-    $y_min = -2;
-    $y_max = 20;
+    $range = $this->getRange($ranges);
 
     $chart_data = array(
       'datasets' => $wire_datasets,
       'xMin' => $domain->getMin(),
       'xMax' => $domain->getMax(),
-      'yMin' => $y_min,
-      'yMax' => $y_max,
+      'yMin' => $range->getMin(),
+      'yMax' => $range->getMax(),
     );
 
     return $chart_data;
@@ -184,6 +186,24 @@ final class PhabricatorChartRenderingEngine
     }
 
     return $domain;
+  }
+
+  private function getRange(array $ranges) {
+    $range = PhabricatorChartInterval::newFromIntervalList($ranges);
+
+    // Start the Y axis at 0 unless the chart has negative values.
+    $min = $range->getMin();
+    if ($min === null || $min >= 0) {
+      $range->setMin(0);
+    }
+
+    // If there's no maximum value, just pick a plausible default.
+    $max = $range->getMax();
+    if ($max === null) {
+      $range->setMax($range->getMin() + 100);
+    }
+
+    return $range;
   }
 
 }

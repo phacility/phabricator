@@ -66,11 +66,12 @@ abstract class PhabricatorChartDataset
     );
   }
 
-  final public function getWireFormat(PhabricatorChartDataQuery $data_query) {
-    return $this->newWireFormat($data_query);
+  final public function getChartDisplayData(
+    PhabricatorChartDataQuery $data_query) {
+    return $this->newChartDisplayData($data_query);
   }
 
-  abstract protected function newWireFormat(
+  abstract protected function newChartDisplayData(
     PhabricatorChartDataQuery $data_query);
 
 

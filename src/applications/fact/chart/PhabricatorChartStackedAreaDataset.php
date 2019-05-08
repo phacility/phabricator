@@ -5,7 +5,8 @@ final class PhabricatorChartStackedAreaDataset
 
   const DATASETKEY = 'stacked-area';
 
-  protected function newWireFormat(PhabricatorChartDataQuery $data_query) {
+  protected function newChartDisplayData(
+    PhabricatorChartDataQuery $data_query) {
     $functions = $this->getFunctions();
 
     $function_points = array();
@@ -93,6 +94,9 @@ final class PhabricatorChartStackedAreaDataset
       ksort($function_points[$function_idx]);
     }
 
+    $range_min = null;
+    $range_max = null;
+
     $series = array();
     $baseline = array();
     foreach ($function_points as $function_idx => $points) {
@@ -117,6 +121,16 @@ final class PhabricatorChartStackedAreaDataset
         if (isset($raw_points[$function_idx][$x])) {
           $raw_points[$function_idx][$x]['y1'] = $y1;
         }
+
+        if ($range_min === null) {
+          $range_min = $y0;
+        }
+        $range_min = min($range_min, $y0, $y1);
+
+        if ($range_max === null) {
+          $range_max = $y1;
+        }
+        $range_max = max($range_max, $y0, $y1);
       }
 
       $series[] = $bounds;
@@ -147,7 +161,9 @@ final class PhabricatorChartStackedAreaDataset
       'labels' => $wire_labels,
     );
 
-    return $result;
+    return id(new PhabricatorChartDisplayData())
+      ->setWireData($result)
+      ->setRange(new PhabricatorChartInterval($range_min, $range_max));
   }
 
 
