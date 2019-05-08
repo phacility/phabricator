@@ -9,8 +9,10 @@ final class PhabricatorChartStackedAreaDataset
     PhabricatorChartDataQuery $data_query) {
     $functions = $this->getFunctions();
 
+    $reversed_functions = array_reverse($functions, true);
+
     $function_points = array();
-    foreach ($functions as $function_idx => $function) {
+    foreach ($reversed_functions as $function_idx => $function) {
       $function_points[$function_idx] = array();
 
       $datapoints = $function->newDatapoints($data_query);
@@ -36,7 +38,7 @@ final class PhabricatorChartStackedAreaDataset
     }
     ksort($must_define);
 
-    foreach ($functions as $function_idx => $function) {
+    foreach ($reversed_functions as $function_idx => $function) {
       $missing = array();
       foreach ($must_define as $x) {
         if (!isset($function_points[$function_idx][$x])) {
@@ -135,6 +137,8 @@ final class PhabricatorChartStackedAreaDataset
 
       $series[] = $bounds;
     }
+
+    $series = array_reverse($series);
 
     $events = array();
     foreach ($raw_points as $function_idx => $points) {

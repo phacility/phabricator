@@ -32,37 +32,62 @@ final class PhabricatorProjectBurndownChartEngine
     if ($project_phids) {
       foreach ($project_phids as $project_phid) {
         $function = $this->newFunction(
-          'accumulate',
-          array('fact', 'tasks.open-count.create.project', $project_phid));
+          'min',
+          array(
+            'accumulate',
+            array('fact', 'tasks.open-count.assign.project', $project_phid),
+          ),
+          0);
 
         $function->getFunctionLabel()
-          ->setName(pht('Tasks Created'))
-          ->setColor('rgba(0, 0, 200, 1)')
-          ->setFillColor('rgba(0, 0, 200, 0.15)');
+          ->setName(pht('Tasks Moved Into Project'))
+          ->setColor('rgba(0, 200, 200, 1)')
+          ->setFillColor('rgba(0, 200, 200, 0.15)');
 
         $functions[] = $function;
 
-
         $function = $this->newFunction(
-          'accumulate',
-          array('fact', 'tasks.open-count.status.project', $project_phid));
+          'min',
+          array(
+            'accumulate',
+            array('fact', 'tasks.open-count.status.project', $project_phid),
+          ),
+          0);
 
         $function->getFunctionLabel()
-          ->setName(pht('Tasks Closed / Reopened'))
+          ->setName(pht('Tasks Reopened'))
           ->setColor('rgba(200, 0, 200, 1)')
           ->setFillColor('rgba(200, 0, 200, 0.15)');
 
         $functions[] = $function;
 
-
         $function = $this->newFunction(
-          'accumulate',
-          array('fact', 'tasks.open-count.assign.project', $project_phid));
+          'sum',
+          array(
+            'accumulate',
+            array('fact', 'tasks.open-count.create.project', $project_phid),
+          ),
+          array(
+            'max',
+            array(
+              'accumulate',
+              array('fact', 'tasks.open-count.status.project', $project_phid),
+            ),
+            0,
+          ),
+          array(
+            'max',
+            array(
+              'accumulate',
+              array('fact', 'tasks.open-count.assign.project', $project_phid),
+            ),
+            0,
+          ));
 
         $function->getFunctionLabel()
-          ->setName(pht('Tasks Rescoped'))
-          ->setColor('rgba(0, 200, 200, 1)')
-          ->setFillColor('rgba(0, 200, 200, 0.15)');
+          ->setName(pht('Tasks Created'))
+          ->setColor('rgba(0, 0, 200, 1)')
+          ->setFillColor('rgba(0, 0, 200, 0.15)');
 
         $functions[] = $function;
       }
