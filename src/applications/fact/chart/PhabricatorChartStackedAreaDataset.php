@@ -17,8 +17,8 @@ final class PhabricatorChartStackedAreaDataset
 
       $datapoints = $function->newDatapoints($data_query);
       foreach ($datapoints as $point) {
-        $x = $point['x'];
-        $function_points[$function_idx][$x] = $point;
+        $x_value = $point['x'];
+        $function_points[$function_idx][$x_value] = $point;
       }
     }
 
@@ -140,12 +140,67 @@ final class PhabricatorChartStackedAreaDataset
 
     $series = array_reverse($series);
 
+    // We're going to group multiple events into a single point if they have
+    // X values that are very close to one another.
+    //
+    // If the Y values are also close to one another (these points are near
+    // one another in a horizontal line), it can be hard to select any
+    // individual point with the mouse.
+    //
+    // Even if the Y values are not close together (the points are on a
+    // fairly steep slope up or down), it's usually better to be able to
+    // mouse over a single point at the top or bottom of the slope and get
+    // a summary of what's going on.
+
+    $domain_max = $data_query->getMaximumValue();
+    $domain_min = $data_query->getMinimumValue();
+    $resolution = ($domain_max - $domain_min) / 100;
+
     $events = array();
     foreach ($raw_points as $function_idx => $points) {
       $event_list = array();
+
+      $event_group = array();
+      $head_event = null;
       foreach ($points as $point) {
-        $event_list[] = $point;
+        $x = $point['x'];
+
+        if ($head_event === null) {
+          // We don't have any points yet, so start a new group.
+          $head_event = $x;
+          $event_group[] = $point;
+        } else if (($x - $head_event) <= $resolution) {
+          // This point is close to the first point in this group, so
+          // add it to the existing group.
+          $event_group[] = $point;
+        } else {
+          // This point is not close to the first point in the group,
+          // so create a new group.
+          $event_list[] = $event_group;
+          $head_event = $x;
+          $event_group = array($point);
+        }
       }
+
+      if ($event_group) {
+        $event_list[] = $event_group;
+      }
+
+      $event_spec = array();
+      foreach ($event_list as $key => $event_points) {
+        // NOTE: We're using the last point as the representative point so
+        // that you can learn about a section of a chart by hovering over
+        // the point to right of the section, which is more intuitive than
+        // other points.
+        $event = last($event_points);
+
+        $event = $event + array(
+          'n' => count($event_points),
+        );
+
+        $event_list[$key] = $event;
+      }
+
       $events[] = $event_list;
     }
 
