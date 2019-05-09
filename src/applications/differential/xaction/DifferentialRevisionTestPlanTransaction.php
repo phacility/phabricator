@@ -75,4 +75,15 @@ final class DifferentialRevisionTestPlanTransaction
     return $errors;
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'testPlan';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array(
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
+    );
+  }
+
 }

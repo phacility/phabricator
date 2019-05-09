@@ -61,4 +61,15 @@ final class DifferentialRevisionSummaryTransaction
       pht('Summary'));
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'summary';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array(
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
+    );
+  }
+
 }

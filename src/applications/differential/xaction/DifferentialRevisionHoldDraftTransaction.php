@@ -55,4 +55,15 @@ final class DifferentialRevisionHoldDraftTransaction
     }
   }
 
+  public function getTransactionTypeForConduit($xaction) {
+    return 'draft';
+  }
+
+  public function getFieldValuesForConduit($xaction, $data) {
+    return array(
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
+    );
+  }
+
 }
