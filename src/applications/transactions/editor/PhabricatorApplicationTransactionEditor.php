@@ -1164,7 +1164,10 @@ abstract class PhabricatorApplicationTransactionEditor
 
       foreach ($xactions as $xaction) {
         if ($was_locked) {
-          $xaction->setIsLockOverrideTransaction(true);
+          $is_override = $this->isLockOverrideTransaction($xaction);
+          if ($is_override) {
+            $xaction->setIsLockOverrideTransaction(true);
+          }
         }
 
         $xaction->setObjectPHID($object->getPHID());
@@ -5202,6 +5205,55 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $xaction->getBodyForMail();
+  }
+
+  private function isLockOverrideTransaction(
+    PhabricatorApplicationTransaction $xaction) {
+
+    // See PHI1209. When an object is locked, certain types of transactions
+    // can still be applied without requiring a policy check, like subscribing
+    // or unsubscribing. We don't want these transactions to show the "Lock
+    // Override" icon in the transaction timeline.
+
+    // We could test if a transaction did no direct policy checks, but it may
+    // have done additional policy checks during validation, so this is not a
+    // reliable test (and could cause false negatives, where edits which did
+    // override a lock are not marked properly).
+
+    // For now, do this in a narrow way and just check against a hard-coded
+    // list of non-override transaction situations. Some day, this should
+    // likely be modularized.
+
+
+    // Inverse edge edits don't interact with locks.
+    if ($this->getIsInverseEdgeEditor()) {
+      return false;
+    }
+
+    // For now, all edits other than subscribes always override locks.
+    $type = $xaction->getTransactionType();
+    if ($type !== PhabricatorTransactions::TYPE_SUBSCRIBERS) {
+      return true;
+    }
+
+    // Subscribes override locks if they affect any users other than the
+    // acting user.
+
+    $acting_phid = $this->getActingAsPHID();
+
+    $old = array_fuse($xaction->getOldValue());
+    $new = array_fuse($xaction->getNewValue());
+    $add = array_diff_key($new, $old);
+    $rem = array_diff_key($old, $new);
+
+    $all = $add + $rem;
+    foreach ($all as $phid) {
+      if ($phid !== $acting_phid) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 
