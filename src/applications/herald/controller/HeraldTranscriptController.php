@@ -20,6 +20,8 @@ final class HeraldTranscriptController extends HeraldController {
       return new Aphront404Response();
     }
 
+    $object = $xscript->getObject();
+
     require_celerity_resource('herald-test-css');
     $content = array();
 
@@ -72,6 +74,9 @@ final class HeraldTranscriptController extends HeraldController {
       $content[] = array(
         $this->buildActionTranscriptPanel($xscript),
         $this->buildObjectTranscriptPanel($xscript),
+        $this->buildTransactionsTranscriptPanel(
+          $object,
+          $xscript),
       );
     }
 
@@ -500,6 +505,95 @@ final class HeraldTranscriptController extends HeraldController {
     $box->appendChild($property_list);
 
     return $box;
+  }
+
+  private function buildTransactionsTranscriptPanel(
+    $object,
+    HeraldTranscript $xscript) {
+    $viewer = $this->getViewer();
+
+    $object_xscript = $xscript->getObjectTranscript();
+
+    $xaction_phids = $object_xscript->getAppliedTransactionPHIDs();
+
+    // If the value is "null", this is an older transcript or this adapter
+    // does not use transactions. We render nothing.
+    //
+    // If the value is "array()", this is a modern transcript which uses
+    // transactions, there just weren't any applied. Below, we'll render a
+    // "No Transactions Applied" state.
+    if ($xaction_phids === null) {
+      return null;
+    }
+
+    // If this object doesn't implement the right interface, we won't be
+    // able to load the transactions. Just bail.
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      return null;
+    }
+
+    $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
+      $object);
+
+    if ($xaction_phids) {
+      $xactions = $query
+        ->setViewer($viewer)
+        ->withPHIDs($xaction_phids)
+        ->execute();
+      $xactions = mpull($xactions, null, 'getPHID');
+    } else {
+      $xactions = array();
+    }
+
+    $rows = array();
+    foreach ($xaction_phids as $xaction_phid) {
+      $xaction = idx($xactions, $xaction_phid);
+
+      $xaction_identifier = $xaction_phid;
+      $xaction_date = null;
+      $xaction_display = null;
+      if ($xaction) {
+        $xaction_identifier = $xaction->getID();
+        $xaction_date = phabricator_datetime(
+          $xaction->getDateCreated(),
+          $viewer);
+
+        // Since we don't usually render transactions outside of the context
+        // of objects, some of them might depend on missing object data. Out of
+        // an abundance of caution, catch any rendering issues.
+        try {
+          $xaction_display = $xaction->getTitle();
+        } catch (Exception $ex) {
+          $xaction_display = $ex->getMessage();
+        }
+      }
+
+      $rows[] = array(
+        $xaction_identifier,
+        $xaction_display,
+        $xaction_date,
+      );
+    }
+
+    $table_view = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('ID'),
+          pht('Transaction'),
+          pht('Date'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'wide',
+          null,
+        ));
+
+    $box_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Transactions'))
+      ->setTable($table_view);
+
+    return $box_view;
   }
 
 

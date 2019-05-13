@@ -6,6 +6,7 @@ final class HeraldObjectTranscript extends Phobject {
   protected $type;
   protected $name;
   protected $fields;
+  protected $appliedTransactionPHIDs;
 
   public function setPHID($phid) {
     $this->phid = $phid;
@@ -45,6 +46,15 @@ final class HeraldObjectTranscript extends Phobject {
 
   public function getFields() {
     return $this->fields;
+  }
+
+  public function setAppliedTransactionPHIDs($phids) {
+    $this->appliedTransactionPHIDs = $phids;
+    return $this;
+  }
+
+  public function getAppliedTransactionPHIDs() {
+    return $this->appliedTransactionPHIDs;
   }
 
   private static function truncateValue($value, $length) {
