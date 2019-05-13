@@ -202,4 +202,20 @@ abstract class HeraldField extends Phobject {
       ->execute();
   }
 
+  final protected function hasAppliedTransactionOfType($type) {
+    $xactions = $this->getAdapter()->getAppliedTransactions();
+
+    if (!$xactions) {
+      return false;
+    }
+
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() === $type) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 }
