@@ -46,6 +46,11 @@ final class HeraldTestConsoleController extends HeraldController {
       ->setActingAsPHID($viewer->getPHID())
       ->setViewer($viewer);
 
+    $applied_xactions = $this->loadAppliedTransactions($object);
+    if ($applied_xactions !== null) {
+      $adapter->setAppliedTransactions($applied_xactions);
+    }
+
     $rules = id(new HeraldRuleQuery())
       ->setViewer($viewer)
       ->withContentTypes(array($adapter->getAdapterContentType()))
@@ -243,6 +248,40 @@ final class HeraldTestConsoleController extends HeraldController {
 
     $request = $this->getRequest();
     return PhabricatorContentSource::newFromRequest($request);
+  }
+
+  private function loadAppliedTransactions($object) {
+    $viewer = $this->getViewer();
+
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      return null;
+    }
+
+    $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
+      $object);
+
+    $xactions = $query
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->setViewer($viewer)
+      ->setLimit(100)
+      ->execute();
+
+    $applied = array();
+
+    // Pick the most recent group of transactions. This may not be exactly the
+    // same as what Herald acted on: for example, we may select a single group
+    // of transactions here which were really applied across two or more edits.
+    // Since this is relatively rare and we show you what we picked, it's okay
+    // that we just do roughly the right thing.
+    foreach ($xactions as $xaction) {
+      if (!$xaction->shouldDisplayGroupWith($applied)) {
+        break;
+      }
+      $applied[] = $xaction;
+    }
+
+    return $applied;
+
   }
 
 }
