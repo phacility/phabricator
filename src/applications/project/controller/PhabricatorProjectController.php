@@ -109,7 +109,11 @@ abstract class PhabricatorProjectController extends PhabricatorController {
         } else {
           switch ($mode) {
             case 'workboard':
-              $crumb_uri = $ancestor->getWorkboardURI();
+              if ($ancestor->getHasWorkboard()) {
+                $crumb_uri = $ancestor->getWorkboardURI();
+              } else {
+                $crumb_uri = $ancestor->getProfileURI();
+              }
               break;
             case 'profile':
             default:
