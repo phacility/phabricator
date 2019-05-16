@@ -1162,6 +1162,8 @@ abstract class PhabricatorApplicationTransactionEditor
         throw $ex;
       }
 
+      $group_id = Filesystem::readRandomCharacters(32);
+
       foreach ($xactions as $xaction) {
         if ($was_locked) {
           $is_override = $this->isLockOverrideTransaction($xaction);
@@ -1171,6 +1173,8 @@ abstract class PhabricatorApplicationTransactionEditor
         }
 
         $xaction->setObjectPHID($object->getPHID());
+        $xaction->setTransactionGroupID($group_id);
+
         if ($xaction->getComment()) {
           $xaction->setPHID($xaction->generatePHID());
           $comment_editor->applyEdit($xaction, $xaction->getComment());

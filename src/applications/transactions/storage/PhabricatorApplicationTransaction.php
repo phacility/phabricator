@@ -177,6 +177,14 @@ abstract class PhabricatorApplicationTransaction
     return (bool)$this->getMetadataValue('core.lock-override', false);
   }
 
+  public function setTransactionGroupID($group_id) {
+    return $this->setMetadataValue('core.groupID', $group_id);
+  }
+
+  public function getTransactionGroupID() {
+    return $this->getMetadataValue('core.groupID', null);
+  }
+
   public function attachComment(
     PhabricatorApplicationTransactionComment $comment) {
     $this->comment = $comment;
