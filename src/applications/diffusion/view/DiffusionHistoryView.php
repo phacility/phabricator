@@ -9,6 +9,7 @@ abstract class DiffusionHistoryView extends DiffusionView {
   private $isTail;
   private $parents;
   private $filterParents;
+  private $revisionMap;
 
   public function setHistory(array $history) {
     assert_instances_of($history, 'DiffusionPathChange');
@@ -18,24 +19,6 @@ abstract class DiffusionHistoryView extends DiffusionView {
 
   public function getHistory() {
     return $this->history;
-  }
-
-  public function loadRevisions() {
-    $commit_phids = array();
-    foreach ($this->history as $item) {
-      if ($item->getCommit()) {
-        $commit_phids[] = $item->getCommit()->getPHID();
-      }
-    }
-
-    // TODO: Get rid of this.
-    $this->revisions = id(new DifferentialRevision())
-      ->loadIDsByCommitPHIDs($commit_phids);
-    return $this;
-  }
-
-  public function getRevisions() {
-    return $this->revisions;
   }
 
   public function setHandles(array $handles) {
@@ -97,5 +80,38 @@ abstract class DiffusionHistoryView extends DiffusionView {
   }
 
   public function render() {}
+
+  final protected function getRevisionsForCommit(
+    PhabricatorRepositoryCommit $commit) {
+
+    if ($this->revisionMap === null) {
+      $this->revisionMap = $this->newRevisionMap();
+    }
+
+    return idx($this->revisionMap, $commit->getPHID(), array());
+  }
+
+  private function newRevisionMap() {
+    $history = $this->history;
+
+    $commits = array();
+    foreach ($history as $item) {
+      $commit = $item->getCommit();
+      if ($commit) {
+
+        // NOTE: The "commit" objects in the history list may be undiscovered,
+        // and thus not yet have PHIDs. Only load data for commits with PHIDs.
+        if (!$commit->getPHID()) {
+          continue;
+        }
+
+        $commits[] = $commit;
+      }
+    }
+
+    return DiffusionCommitRevisionQuery::loadRevisionMapForCommits(
+      $this->getViewer(),
+      $commits);
+  }
 
 }

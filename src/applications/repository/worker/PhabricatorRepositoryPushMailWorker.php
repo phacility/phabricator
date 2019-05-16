@@ -22,7 +22,9 @@ final class PhabricatorRepositoryPushMailWorker
       ->executeOne();
 
     $repository = $event->getRepository();
-    if (!$repository->shouldPublish()) {
+
+    $publisher = $repository->newPublisher();
+    if (!$publisher->shouldPublishRepository()) {
       // If the repository is still importing, don't send email.
       return;
     }

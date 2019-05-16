@@ -134,6 +134,12 @@ final class PhabricatorDashboardPanelEditEngine
     $context = $this->getContextObject();
 
     if ($context instanceof PhabricatorDashboard) {
+      // Only add the panel to the dashboard when we're creating a new panel,
+      // not if we're editing an existing panel.
+      if (!$this->getIsCreate()) {
+        return;
+      }
+
       $viewer = $this->getViewer();
       $controller = $this->getController();
       $request = $controller->getRequest();

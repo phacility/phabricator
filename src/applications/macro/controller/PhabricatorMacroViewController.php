@@ -136,7 +136,12 @@ final class PhabricatorMacroViewController
     $image_uri = $handles[$author_phid]->getImageURI();
     $image_href = $handles[$author_phid]->getURI();
 
-    $content = pht('Masterfully imagined by %s on %s.', $author, $date);
+    if (!$date) {
+      $content = pht(
+        'Masterfully imagined by %s in ages long past.', $author);
+    } else {
+      $content = pht('Masterfully imagined by %s on %s.', $author, $date);
+    }
 
     return id(new PHUIHeadThingView())
       ->setImage($image_uri)

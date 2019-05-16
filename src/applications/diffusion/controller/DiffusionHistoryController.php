@@ -40,7 +40,6 @@ final class DiffusionHistoryController extends DiffusionController {
       ->setDiffusionRequest($drequest)
       ->setHistory($history);
 
-    $history_list->loadRevisions();
     $header = $this->buildHeader($drequest);
 
     $crumbs = $this->buildCrumbs(

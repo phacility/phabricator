@@ -107,6 +107,15 @@ final class PhabricatorDashboardPanel
     return $this->requireImplementation()->getEditEngineFields($this);
   }
 
+  public function newHeaderEditActions(
+    PhabricatorUser $viewer,
+    $context_phid) {
+    return $this->requireImplementation()->newHeaderEditActions(
+      $this,
+      $viewer,
+      $context_phid);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

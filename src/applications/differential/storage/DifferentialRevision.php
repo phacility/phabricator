@@ -41,7 +41,7 @@ final class DifferentialRevision extends DifferentialDAO
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
   protected $properties = array();
 
-  private $commits = self::ATTACHABLE;
+  private $commitPHIDs = self::ATTACHABLE;
   private $activeDiff = self::ATTACHABLE;
   private $diffIDs = self::ATTACHABLE;
   private $hashes = self::ATTACHABLE;
@@ -53,8 +53,6 @@ final class DifferentialRevision extends DifferentialDAO
   private $flags = array();
   private $forceMap = array();
 
-  const TABLE_COMMIT          = 'differential_commit';
-
   const RELATION_REVIEWER     = 'revw';
   const RELATION_SUBSCRIBED   = 'subd';
 
@@ -64,6 +62,7 @@ final class DifferentialRevision extends DifferentialDAO
   const PROPERTY_LINES_ADDED = 'lines.added';
   const PROPERTY_LINES_REMOVED = 'lines.removed';
   const PROPERTY_BUILDABLES = 'buildables';
+  const PROPERTY_WRONG_BUILDS = 'wrong.builds';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -158,35 +157,8 @@ final class DifferentialRevision extends DifferentialDAO
     return '/'.$this->getMonogram();
   }
 
-  public function loadIDsByCommitPHIDs($phids) {
-    if (!$phids) {
-      return array();
-    }
-    $revision_ids = queryfx_all(
-      $this->establishConnection('r'),
-      'SELECT * FROM %T WHERE commitPHID IN (%Ls)',
-      self::TABLE_COMMIT,
-      $phids);
-    return ipull($revision_ids, 'revisionID', 'commitPHID');
-  }
-
-  public function loadCommitPHIDs() {
-    if (!$this->getID()) {
-      return ($this->commits = array());
-    }
-
-    $commits = queryfx_all(
-      $this->establishConnection('r'),
-      'SELECT commitPHID FROM %T WHERE revisionID = %d',
-      self::TABLE_COMMIT,
-      $this->getID());
-    $commits = ipull($commits, 'commitPHID');
-
-    return ($this->commits = $commits);
-  }
-
   public function getCommitPHIDs() {
-    return $this->assertAttached($this->commits);
+    return $this->assertAttached($this->commitPHIDs);
   }
 
   public function getActiveDiff() {
@@ -214,7 +186,7 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function attachCommitPHIDs(array $phids) {
-    $this->commits = array_values($phids);
+    $this->commitPHIDs = $phids;
     return $this;
   }
 
@@ -1047,12 +1019,6 @@ final class DifferentialRevision extends DifferentialDAO
       }
 
       $conn_w = $this->establishConnection('w');
-
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
-        self::TABLE_COMMIT,
-        $this->getID());
 
       // we have to do paths a little differently as they do not have
       // an id or phid column for delete() to act on

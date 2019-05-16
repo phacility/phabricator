@@ -1,0 +1,81 @@
+@title Diffusion User Guide: Permanent Refs
+@group userguide
+
+Explains when Diffusion will take actions in response to discovering commits.
+
+Overview
+========
+
+Diffusion can close tasks and revisions and take other actions when commits
+appear in a repository (either because they were pushed to Phabricator, or
+because they were pushed to some remote which Phabricator is observing).
+
+This document explains when Diffusion acts on commits and how to configure this
+behavior.
+
+
+Publishing Commits
+==================
+
+Diffusion distinguishes between "pushed" and "published" commits.
+
+Not all commits that are pushed to a repository are destined for greatness:
+for example, many tools push temporary commits to secret places like
+`refs/pull/123`, `refs/notes/*`, or `refs/changes/12/345678/1`.
+
+Sometimes, human users intentionally push changes to branches like
+"tmp-hack-ignore-123". This is formally discouraged by Phabricator, but the
+practice is so widespread that we've given up trying to stop anyone from doing
+it.
+
+Phabricator will import these commits and create pages for them so you can view
+them in the web UI and link to them, but does not take any other actions until
+they are "published".
+
+A commit is "published" when it becomes reachable from a permanent ref. By
+default, all branches are permanent refs, so pushing a commit to "master" will
+publish it, but pushing a commit to `refs/pull/123` (either directly, or by
+using a tool like GitHub) will not.
+
+Usually, commits are published by pushing them directly to a permanent branch
+like "master", or by merging a temporary branch into a permanent branch.
+
+When a commit is published, Phabricator acts on it and:
+
+  - sends email;
+  - delivers notifications;
+  - publishes a feed story;
+  - triggers Audits;
+  - runs Herald rules;
+  - updates mentioned objects;
+  - closes referenced tasks; and
+  - closes associated revisions.
+
+
+Configuring Repositories
+========================
+
+You can control publishing behavior in two primary ways: by configuring
+which refs are considered to be permanent refs, and by disabling publishing
+entirely.
+
+By default, all branches are considered permanent refs and all other refs
+(including tags and other arbitrary custom refs) are considered nonpermanent.
+This means that, by default, pushing commits to a branch like
+"tmp-hack-ignore-123" will publish those commits.
+
+If you want to be free to push commits to temporary branches like this and
+only want commits on certain branches (like "master") to be published,
+configure which refs are treated as permanent by editing
+{nav Branches > Permanent Refs} from the "Manage" page of the repository.
+
+To disable publishing entirely, select {nav Basics > Disable Publishing}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - troubleshooting in greater depth with
+    @{article:Troubleshooting Repository Imports}.

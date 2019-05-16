@@ -393,6 +393,11 @@ JX.install('Request', {
       var uri = [];
       for (var ii = 0; ii < list_of_pairs.length; ii++) {
         var pair = list_of_pairs[ii];
+
+        if (pair[1] === null) {
+          continue;
+        }
+
         var name = encodeURIComponent(pair[0]);
         var value = encodeURIComponent(pair[1]);
         uri.push(name + '=' + value);

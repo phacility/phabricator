@@ -126,11 +126,18 @@ final class HeraldEngine extends Phobject {
       }
     }
 
-    $object_transcript = new HeraldObjectTranscript();
-    $object_transcript->setPHID($object->getPHID());
-    $object_transcript->setName($object->getHeraldName());
-    $object_transcript->setType($object->getAdapterContentType());
-    $object_transcript->setFields($this->fieldCache);
+    $xaction_phids = null;
+    $xactions = $object->getAppliedTransactions();
+    if ($xactions !== null) {
+      $xaction_phids = mpull($xactions, 'getPHID');
+    }
+
+    $object_transcript = id(new HeraldObjectTranscript())
+      ->setPHID($object->getPHID())
+      ->setName($object->getHeraldName())
+      ->setType($object->getAdapterContentType())
+      ->setFields($this->fieldCache)
+      ->setAppliedTransactionPHIDs($xaction_phids);
 
     $this->transcript->setObjectTranscript($object_transcript);
 

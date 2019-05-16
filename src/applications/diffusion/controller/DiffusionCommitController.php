@@ -116,6 +116,7 @@ final class DiffusionCommitController extends DiffusionController {
     $commit_data = $commit->getCommitData();
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
     $error_panel = null;
+    $unpublished_panel = null;
 
     $hard_limit = 1000;
 
@@ -240,6 +241,51 @@ final class DiffusionCommitController extends DiffusionController {
             'reachable from any branch, tag, or ref.');
         }
       }
+      if (!$commit->isPermanentCommit()) {
+        $nonpermanent_tag = id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setName(pht('Unpublished'))
+          ->setColor(PHUITagView::COLOR_ORANGE);
+
+        $header->addTag($nonpermanent_tag);
+
+        $holds = $commit_data->newPublisherHoldReasons();
+
+        $reasons = array();
+        foreach ($holds as $hold) {
+          $reasons[] = array(
+            phutil_tag('strong', array(), pht('%s:', $hold->getName())),
+            ' ',
+            $hold->getSummary(),
+          );
+        }
+
+        if (!$holds) {
+          $reasons[] = pht('No further details are available.');
+        }
+
+        $doc_href = PhabricatorEnv::getDoclink(
+          'Diffusion User Guide: Permanent Refs');
+        $doc_link = phutil_tag(
+          'a',
+          array(
+            'href' => $doc_href,
+            'target' => '_blank',
+          ),
+          pht('Learn More'));
+
+        $title = array(
+          pht('Unpublished Commit'),
+          pht(" \xC2\xB7 "),
+          $doc_link,
+        );
+
+        $unpublished_panel = id(new PHUIInfoView())
+          ->setTitle($title)
+          ->setErrors($reasons)
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING);
+      }
+
 
       if ($this->getCommitErrors()) {
         $error_panel = id(new PHUIInfoView())
@@ -432,23 +478,36 @@ final class DiffusionCommitController extends DiffusionController {
         ->setWidth((int)$width);
     }
 
+    $description_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Description'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($detail_list);
+
+    $detail_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($details);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
-      ->setMainColumn(array(
-        $error_panel,
-        $timeline,
-        $merge_table,
-        $info_panel,
-      ))
-      ->setFooter(array(
-        $change_table,
-        $change_list,
-        $add_comment,
-      ))
-      ->addPropertySection(pht('Description'), $detail_list)
-      ->addPropertySection(pht('Details'), $details)
-      ->setCurtain($curtain);
+      ->setCurtain($curtain)
+      ->setMainColumn(
+        array(
+          $unpublished_panel,
+          $error_panel,
+          $description_box,
+          $detail_box,
+          $timeline,
+          $merge_table,
+          $info_panel,
+        ))
+      ->setFooter(
+        array(
+          $change_table,
+          $change_list,
+          $add_comment,
+        ));
 
     $page = $this->newPage()
       ->setTitle($commit->getDisplayName())
@@ -793,8 +852,6 @@ final class DiffusionCommitController extends DiffusionController {
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
       ->setHistory($merges);
-
-    $history_table->loadRevisions();
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Merged Changes'))

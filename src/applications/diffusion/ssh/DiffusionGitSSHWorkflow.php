@@ -5,6 +5,9 @@ abstract class DiffusionGitSSHWorkflow
   implements DiffusionRepositoryClusterEngineLogInterface {
 
   private $engineLogProperties = array();
+  private $protocolLog;
+
+  private $wireProtocol;
 
   protected function writeError($message) {
     // Git assumes we'll add our own newlines.
@@ -53,6 +56,76 @@ abstract class DiffusionGitSSHWorkflow
         'interact with this repository.',
         $repository->getDisplayName(),
         $repository->getVersionControlSystem()));
+  }
+
+  protected function newPassthruCommand() {
+    return parent::newPassthruCommand()
+      ->setWillWriteCallback(array($this, 'willWriteMessageCallback'))
+      ->setWillReadCallback(array($this, 'willReadMessageCallback'));
+  }
+
+  protected function newProtocolLog($is_proxy) {
+    if ($is_proxy) {
+      return null;
+    }
+
+    // While developing, do this to write a full protocol log to disk:
+    //
+    // return new PhabricatorProtocolLog('/tmp/git-protocol.log');
+
+    return null;
+  }
+
+  final protected function getProtocolLog() {
+    return $this->protocolLog;
+  }
+
+  final protected function setProtocolLog(PhabricatorProtocolLog $log) {
+    $this->protocolLog = $log;
+  }
+
+  final protected function getWireProtocol() {
+    return $this->wireProtocol;
+  }
+
+  final protected function setWireProtocol(
+    DiffusionGitWireProtocol $protocol) {
+    $this->wireProtocol = $protocol;
+    return $this;
+  }
+
+  public function willWriteMessageCallback(
+    PhabricatorSSHPassthruCommand $command,
+    $message) {
+
+    $log = $this->getProtocolLog();
+    if ($log) {
+      $log->didWriteBytes($message);
+    }
+
+    $protocol = $this->getWireProtocol();
+    if ($protocol) {
+      $message = $protocol->willWriteBytes($message);
+    }
+
+    return $message;
+  }
+
+  public function willReadMessageCallback(
+    PhabricatorSSHPassthruCommand $command,
+    $message) {
+
+    $log = $this->getProtocolLog();
+    if ($log) {
+      $log->didReadBytes($message);
+    }
+
+    $protocol = $this->getWireProtocol();
+    if ($protocol) {
+      $message = $protocol->willReadBytes($message);
+    }
+
+    return $message;
   }
 
 }

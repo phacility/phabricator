@@ -12,14 +12,12 @@ final class PhabricatorRepositoryManagementReparseWorkflow
           '**reparse** __what__ __which_parts__ [--trace] [--force]'."\n\n".
           'Rerun the Diffusion parser on specific commits and repositories. '.
           'Mostly useful for debugging changes to Diffusion.'."\n\n".
-          'e.g. enqueue reparse owners in the TEST repo for all commits:'."\n".
-          'repository reparse --all TEST --owners'."\n\n".
           'e.g. do same but exclude before yesterday (local time):'."\n".
-          'repository reparse --all TEST --owners --min-date yesterday'."\n".
-          'repository reparse --all TEST --owners --min-date "today -1 day".'.
+          'repository reparse --all TEST --change --min-date yesterday'."\n".
+          'repository reparse --all TEST --change --min-date "today -1 day".'.
           "\n\n".
           'e.g. do same but exclude before 03/31/2013 (local time):'."\n".
-          'repository reparse --all TEST --owners --min-date "03/31/2013"'))
+          'repository reparse --all TEST --change --min-date "03/31/2013"'))
       ->setArguments(
         array(
           array(
@@ -30,11 +28,7 @@ final class PhabricatorRepositoryManagementReparseWorkflow
             'name'     => 'all',
             'param'    => 'repository',
             'help'     => pht(
-              'Reparse all commits in the specified repository. This mode '.
-              'queues parsers into the task queue; you must run taskmasters '.
-              'to actually do the parses. Use with __%s__ to run '.
-              'the tasks locally instead of with taskmasters.',
-              '--force-local'),
+              'Reparse all commits in the specified repository.'),
           ),
           array(
             'name'     => 'min-date',
@@ -57,19 +51,13 @@ final class PhabricatorRepositoryManagementReparseWorkflow
           ),
           array(
             'name'     => 'change',
-            'help'     => pht('Reparse changes.'),
+            'help'     => pht('Reparse source changes.'),
           ),
           array(
-            'name'     => 'herald',
+            'name'     => 'publish',
             'help'     => pht(
-              'Reevaluate Herald rules (may send huge amounts of email!)'),
-          ),
-          array(
-            'name'     => 'owners',
-            'help'     => pht(
-              'Reevaluate related commits for owners packages (may delete '.
-              'existing relationship entries between your package and some '.
-              'old commits!)'),
+              'Publish changes: send email, publish Feed stories, run '.
+              'Herald rules, etc.'),
           ),
           array(
             'name'     => 'force',
@@ -77,23 +65,14 @@ final class PhabricatorRepositoryManagementReparseWorkflow
             'help'     => pht('Act noninteractively, without prompting.'),
           ),
           array(
-            'name'     => 'force-local',
+            'name'     => 'background',
             'help'     => pht(
-              'Only used with __%s__, use this to run the tasks locally '.
-              'instead of deferring them to taskmaster daemons.',
-              '--all'),
+              'Queue tasks for the daemons instead of running them in the '.
+              'foreground.'),
           ),
           array(
             'name' => 'importing',
-            'help' => pht(
-              'Reparse all steps which have not yet completed.'),
-          ),
-          array(
-            'name'    => 'force-autoclose',
-            'help'    => pht(
-              'Only used with __%s__, use this to make sure any '.
-              'pertinent diffs are closed regardless of configuration.',
-              '--message'),
+            'help' => pht('Reparse all steps which have not yet completed.'),
           ),
         ));
 
@@ -105,11 +84,10 @@ final class PhabricatorRepositoryManagementReparseWorkflow
     $all_from_repo = $args->getArg('all');
     $reparse_message = $args->getArg('message');
     $reparse_change = $args->getArg('change');
-    $reparse_herald = $args->getArg('herald');
-    $reparse_owners = $args->getArg('owners');
+    $reparse_publish = $args->getArg('publish');
     $reparse_what = $args->getArg('revision');
     $force = $args->getArg('force');
-    $force_local = $args->getArg('force-local');
+    $background = $args->getArg('background');
     $min_date = $args->getArg('min-date');
     $importing = $args->getArg('importing');
 
@@ -129,17 +107,13 @@ final class PhabricatorRepositoryManagementReparseWorkflow
           $commits));
     }
 
-    $any_step = ($reparse_message ||
-      $reparse_change ||
-      $reparse_herald ||
-      $reparse_owners);
+    $any_step = ($reparse_message || $reparse_change || $reparse_publish);
 
     if ($any_step && $importing) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Choosing steps with %s conflicts with flags which select '.
-          'specific steps.',
-          '--importing'));
+          'Choosing steps with "--importing" conflicts with flags which '.
+          'select specific steps.'));
     } else if ($any_step) {
       // OK.
     } else if ($importing) {
@@ -147,12 +121,8 @@ final class PhabricatorRepositoryManagementReparseWorkflow
     } else if (!$any_step && !$importing) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify which steps to reparse with %s, or %s, %s, %s, or %s.',
-          '--importing',
-          '--message',
-          '--change',
-          '--herald',
-          '--owners'));
+          'Specify which steps to reparse with "--message", "--change", '.
+          'and/or "--publish"; or "--importing" to run all missing steps.'));
     }
 
     $min_timestamp = false;
@@ -162,9 +132,7 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       if (!$all_from_repo) {
         throw new PhutilArgumentUsageException(
           pht(
-            "You must use --all if you specify --min-date\n".
-            "e.g.\n".
-            "  repository reparse --all TEST --owners --min-date yesterday"));
+            'You must use "--all" if you specify "--min-date".'));
       }
 
       // previous to PHP 5.1.0 you would compare with -1, instead of false
@@ -174,19 +142,6 @@ final class PhabricatorRepositoryManagementReparseWorkflow
             "Supplied --min-date is not valid. See help for valid examples.\n".
             "Supplied value: '%s'\n",
             $min_date));
-      }
-    }
-
-    if ($reparse_owners && !$force) {
-      $console->writeOut(
-        "%s\n",
-        pht(
-          'You are about to recreate the relationship entries between the '.
-          'commits and the packages they touch. This might delete some '.
-          'existing relationship entries for some old commits.'));
-
-      if (!phutil_console_confirm(pht('Are you ready to continue?'))) {
-        throw new PhutilArgumentUsageException(pht('Cancelled.'));
       }
     }
 
@@ -226,14 +181,8 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       $commits = $this->loadNamedCommits($reparse_what);
     }
 
-    if ($all_from_repo && !$force_local) {
-      $console->writeOut("%s\n", pht(
-        "**NOTE**: This script will queue tasks to reparse the data. Once the ".
-        "tasks have been queued, you need to run Taskmaster daemons to ".
-        "execute them.\n\n%s",
-        pht(
-          'QUEUEING TASKS (%s Commit(s)):',
-          phutil_count($commits))));
+    if (!$background) {
+      PhabricatorWorker::setRunAllTasksInProcess(true);
     }
 
     $progress = new PhutilConsoleProgressBar();
@@ -248,16 +197,13 @@ final class PhabricatorRepositoryManagementReparseWorkflow
         // Find the first missing import step and queue that up.
         $reparse_message = false;
         $reparse_change = false;
-        $reparse_owners = false;
-        $reparse_herald = false;
+        $reparse_publish = false;
         if (!($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE)) {
           $reparse_message = true;
         } else if (!($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE)) {
           $reparse_change = true;
-        } else if (!($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS)) {
-          $reparse_owners = true;
-        } else if (!($status & PhabricatorRepositoryCommit::IMPORTED_HERALD)) {
-          $reparse_herald = true;
+        } else if (!($status & PhabricatorRepositoryCommit::IMPORTED_PUBLISH)) {
+          $reparse_publish = true;
         } else {
           continue;
         }
@@ -292,12 +238,8 @@ final class PhabricatorRepositoryManagementReparseWorkflow
         break;
       }
 
-      if ($reparse_herald) {
-        $classes[] = 'PhabricatorRepositoryCommitHeraldWorker';
-      }
-
-      if ($reparse_owners) {
-        $classes[] = 'PhabricatorRepositoryCommitOwnersWorker';
+      if ($reparse_publish) {
+        $classes[] = 'PhabricatorRepositoryCommitPublishWorker';
       }
 
       // NOTE: With "--importing", we queue the first unparsed step and let
@@ -305,25 +247,17 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       // all the requested steps explicitly.
 
       $spec = array(
-        'commitID'  => $commit->getID(),
-        'only'      => !$importing,
-        'forceAutoclose' => $args->getArg('force-autoclose'),
+        'commitID' => $commit->getID(),
+        'only' => !$importing,
       );
 
-      if ($all_from_repo && !$force_local) {
-        foreach ($classes as $class) {
-          PhabricatorWorker::scheduleTask(
-            $class,
-            $spec,
-            array(
-              'priority' => PhabricatorWorker::PRIORITY_IMPORT,
-            ));
-        }
-      } else {
-        foreach ($classes as $class) {
-          $worker = newv($class, array($spec));
-          $worker->executeTask();
-        }
+      foreach ($classes as $class) {
+        PhabricatorWorker::scheduleTask(
+          $class,
+          $spec,
+          array(
+            'priority' => PhabricatorWorker::PRIORITY_IMPORT,
+          ));
       }
 
       $progress->update(1);

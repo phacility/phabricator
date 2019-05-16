@@ -122,7 +122,6 @@ final class PhabricatorRepositoryPullEngine
             $repository->getDisplayName()));
 
         if ($is_git) {
-          $this->verifyGitOrigin($repository);
           $this->executeGitUpdate();
         } else if ($is_hg) {
           $this->executeMercurialUpdate();
@@ -141,6 +140,10 @@ final class PhabricatorRepositoryPullEngine
         foreach ($repository->getHookDirectories() as $directory) {
           $this->installHookDirectory($directory);
         }
+      }
+
+      if ($is_git) {
+        $this->updateGitWorkingCopyConfiguration();
       }
 
     } catch (Exception $ex) {
@@ -340,8 +343,17 @@ final class PhabricatorRepositoryPullEngine
       throw new Exception($message);
     }
 
-    $remote_refs = $this->loadGitRemoteRefs($repository);
-    $local_refs = $this->loadGitLocalRefs($repository);
+    // Load the refs we're planning to fetch from the remote repository.
+    $remote_refs = $this->loadGitRemoteRefs(
+      $repository,
+      $repository->getRemoteURIEnvelope());
+
+    // Load the refs we're planning to fetch from the local repository, by
+    // using the local working copy path as the "remote" repository URI.
+    $local_refs = $this->loadGitRemoteRefs(
+      $repository,
+      new PhutilOpaqueEnvelope($path));
+
     if ($remote_refs === $local_refs) {
       $this->log(
         pht(
@@ -352,26 +364,53 @@ final class PhabricatorRepositoryPullEngine
 
     $this->logRefDifferences($remote_refs, $local_refs);
 
-    // Force the "origin" URI to the configured value.
-    $repository->execxLocalCommand(
-      'remote set-url origin -- %P',
-      $repository->getRemoteURIEnvelope());
+    $fetch_rules = $this->getGitFetchRules($repository);
 
-    if ($repository->isWorkingCopyBare()) {
-      // For bare working copies, we need this magic incantation.
-      $future = $repository->getRemoteCommandFuture(
-        'fetch origin %s --prune',
-        '+refs/*:refs/*');
-    } else {
-      $future = $repository->getRemoteCommandFuture(
-        'fetch --all --prune');
-    }
+    // For very old non-bare working copies, we need to use "--update-head-ok"
+    // to tell Git that it is allowed to overwrite whatever is currently
+    // checked out. See T13280.
+
+    $future = $repository->getRemoteCommandFuture(
+      'fetch --prune --update-head-ok -- %P %Ls',
+      $repository->getRemoteURIEnvelope(),
+      $fetch_rules);
 
     $future
       ->setCWD($path)
       ->resolvex();
   }
 
+  private function getGitRefRules(PhabricatorRepository $repository) {
+    $ref_rules = $repository->getFetchRules($repository);
+
+    if (!$ref_rules) {
+      $ref_rules = array(
+        'refs/*',
+      );
+    }
+
+    return $ref_rules;
+  }
+
+  private function getGitFetchRules(PhabricatorRepository $repository) {
+    $ref_rules = $this->getGitRefRules($repository);
+
+    // Rewrite each ref rule "X" into "+X:X".
+
+    // The "X" means "fetch ref X".
+    // The "...:X" means "...and copy it into local ref X".
+    // The "+..." means "...and overwrite the local ref if it already exists".
+
+    $fetch_rules = array();
+    foreach ($ref_rules as $key => $ref_rule) {
+      $fetch_rules[] = sprintf(
+        '+%s:%s',
+        $ref_rule,
+        $ref_rule);
+    }
+
+    return $fetch_rules;
+  }
 
   /**
    * @task git
@@ -389,15 +428,67 @@ final class PhabricatorRepositoryPullEngine
     $this->installHook($root.$path);
   }
 
-  private function loadGitRemoteRefs(PhabricatorRepository $repository) {
-    $remote_envelope = $repository->getRemoteURIEnvelope();
+  private function updateGitWorkingCopyConfiguration() {
+    $repository = $this->getRepository();
+
+    // See T5963. When you "git clone" from a remote with no "master", the
+    // client warns you that it isn't sure what it should check out as an
+    // initial state:
+
+    //   warning: remote HEAD refers to nonexistent ref, unable to checkout
+
+    // We can tell the client what it should check out by making "HEAD"
+    // point somewhere. However:
+    //
+    // (1) If we don't set "receive.denyDeleteCurrent" to "ignore" and a user
+    // tries to delete the default branch, Git raises an error and refuses.
+    // We want to allow this; we already have sufficient protections around
+    // dangerous changes and do not need to special case the default branch.
+    //
+    // (2) A repository may have a nonexistent default branch configured.
+    // For now, we just respect configuration. This will raise a warning when
+    // users clone the repository.
+    //
+    // In any case, these changes are both advisory, so ignore any errors we
+    // may encounter.
+
+    // We do this for both hosted and observed repositories. Although it is
+    // not terribly common to clone from Phabricator's copy of an observed
+    // repository, it works fine and makes sense occasionally.
+
+    if ($repository->isWorkingCopyBare()) {
+      $repository->execLocalCommand(
+        'config -- receive.denyDeleteCurrent ignore');
+      $repository->execLocalCommand(
+        'symbolic-ref HEAD %s',
+        'refs/heads/'.$repository->getDefaultBranch());
+    }
+  }
+
+  private function loadGitRemoteRefs(
+    PhabricatorRepository $repository,
+    PhutilOpaqueEnvelope $remote_envelope) {
+
+    $ref_rules = $this->getGitRefRules($repository);
 
     // NOTE: "git ls-remote" does not support "--" until circa January 2016.
-    // See T12416. None of the flags to "ls-remote" appear dangerous, and
-    // other checks make it difficult to configure a suspicious remote URI.
+    // See T12416. None of the flags to "ls-remote" appear dangerous, but
+    // refuse to list any refs beginning with "-" just in case.
+
+    foreach ($ref_rules as $ref_rule) {
+      if (preg_match('/^-/', $ref_rule)) {
+        throw new Exception(
+          pht(
+            'Refusing to list potentially dangerous ref ("%s") beginning '.
+            'with "-".',
+            $ref_rule));
+      }
+    }
+
     list($stdout) = $repository->execxRemoteCommand(
-      'ls-remote %P',
-      $remote_envelope);
+      'ls-remote %P %Ls',
+      $remote_envelope,
+      $ref_rules);
 
     // Empty repositories don't have any refs.
     if (!strlen(rtrim($stdout))) {

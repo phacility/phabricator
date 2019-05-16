@@ -40,7 +40,6 @@ final class DiffusionGraphController extends DiffusionController {
       ->setDiffusionRequest($drequest)
       ->setHistory($history);
 
-    $graph->loadRevisions();
     $show_graph = !strlen($drequest->getPath());
     if ($show_graph) {
       $graph->setParents($history_results['parents']);

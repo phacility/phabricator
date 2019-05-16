@@ -109,7 +109,11 @@ abstract class PhabricatorProjectController extends PhabricatorController {
         } else {
           switch ($mode) {
             case 'workboard':
-              $crumb_uri = $ancestor->getWorkboardURI();
+              if ($ancestor->getHasWorkboard()) {
+                $crumb_uri = $ancestor->getWorkboardURI();
+              } else {
+                $crumb_uri = $ancestor->getProfileURI();
+              }
               break;
             case 'profile':
             default:
@@ -191,7 +195,13 @@ abstract class PhabricatorProjectController extends PhabricatorController {
 
     $view_list = $engine->newProfileMenuItemViewList();
 
-    $view_list->setSelectedViewWithItemIdentifier($item_identifier);
+    // See PHI1247. If the "Workboard" item is removed from the menu, we will
+    // not be able to select it. This can happen if a user removes the item,
+    // then manually navigate to the workboard URI (or follows an older link).
+    // In this case, just render the menu with no selected item.
+    if ($view_list->getViewsWithItemIdentifier($item_identifier)) {
+      $view_list->setSelectedViewWithItemIdentifier($item_identifier);
+    }
 
     $navigation = $view_list->newNavigationView();
 

@@ -253,6 +253,10 @@ EOREMARKUP
                 break;
             }
             break;
+          case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+            $type = 'subscribers';
+            $fields = $this->newEdgeTransactionFields($xaction);
+            break;
         }
       }
 

@@ -225,12 +225,12 @@ final class DifferentialRevisionUpdateTransaction
     return 'update';
   }
 
-  public function getFieldValuesForConduit($object, $data) {
-    $commit_phids = $object->getMetadataValue('commitPHIDs', array());
+  public function getFieldValuesForConduit($xaction, $data) {
+    $commit_phids = $xaction->getMetadataValue('commitPHIDs', array());
 
     return array(
-      'old' => $object->getOldValue(),
-      'new' => $object->getNewValue(),
+      'old' => $xaction->getOldValue(),
+      'new' => $xaction->getNewValue(),
       'commitPHIDs' => $commit_phids,
     );
   }

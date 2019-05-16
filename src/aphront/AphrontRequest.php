@@ -383,6 +383,15 @@ final class AphrontRequest extends Phobject {
     return $this->validateCSRF();
   }
 
+  public function hasCSRF() {
+    try {
+      $this->validateCSRF();
+      return true;
+    } catch (AphrontMalformedRequestException $ex) {
+      return false;
+    }
+  }
+
   public function isFormOrHisecPost() {
     $post = $this->getExists(self::TYPE_FORM) &&
             $this->isHTTPPost();

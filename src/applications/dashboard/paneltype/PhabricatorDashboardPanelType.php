@@ -63,4 +63,11 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
     return array();
   }
 
+  public function newHeaderEditActions(
+    PhabricatorDashboardPanel $panel,
+    PhabricatorUser $viewer,
+    $context_phid) {
+    return array();
+  }
+
 }

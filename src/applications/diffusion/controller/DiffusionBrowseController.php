@@ -1106,11 +1106,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $history_table = id(new DiffusionHistoryTableView())
       ->setViewer($viewer)
       ->setDiffusionRequest($drequest)
-      ->setHistory($history);
-
-    $history_table->loadRevisions();
-
-    $history_table
+      ->setHistory($history)
       ->setParents($results['parents'])
       ->setFilterParents(true)
       ->setIsHead(true)

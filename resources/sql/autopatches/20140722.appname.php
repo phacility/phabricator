@@ -81,21 +81,8 @@ foreach ($applications as $application) {
 
 /* -(  Dashboard installs  )------------------------------------------------- */
 
-echo pht('Migrating dashboard installs...')."\n";
-$table = new PhabricatorDashboardInstall();
-$conn_w = $table->establishConnection('w');
-
-foreach (new LiskMigrationIterator($table) as $dashboard_install) {
-  $application = $dashboard_install->getApplicationClass();
-
-  queryfx(
-    $conn_w,
-    'UPDATE %T SET applicationClass = %s WHERE id = %d',
-    $table->getTableName(),
-    idx($map, $application, $application),
-    $dashboard_install->getID());
-}
-
+// This originally migrated dashboard install locations, but was removed
+// after about 5 years.
 
 /* -(  Phabricator configuration  )------------------------------------------ */
 

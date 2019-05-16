@@ -30,9 +30,9 @@ updates in @{article:Diffusion User Guide: Repository Updates}.
 
 After commits are discovered, background tasks are queued to actually import
 commits. These tasks do things like look at commit messages, trigger mentions
-and autoclose rules, cache changes, trigger Herald, publish feed stories and
-email, and apply Owners rules. You can learn more about some of these steps in
-@{article:Diffusion User Guide: Autoclose}.
+and update related objects, cache changes, trigger Herald, publish feed stories
+and email, and apply Owners rules. You can learn more about some of these steps
+in @{article:Diffusion User Guide: Permanent Refs}.
 
 Specifically, the import pipeline has four steps:
 

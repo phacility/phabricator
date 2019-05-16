@@ -147,7 +147,7 @@ final class PHUIInfoView extends AphrontTagView {
     }
 
     $title = $this->title;
-    if (strlen($title)) {
+    if ($title || strlen($title)) {
       $title = phutil_tag(
         'h1',
         array(

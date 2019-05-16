@@ -425,6 +425,19 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $this->getURI('query/'.$query_key.'/export/');
   }
 
+  public function getCustomizeURI($query_key, $object_phid, $context_phid) {
+    $params = array(
+      'search.objectPHID' => $object_phid,
+      'search.contextPHID' => $context_phid,
+    );
+
+    $uri = $this->getURI('query/'.$query_key.'/customize/');
+    $uri = new PhutilURI($uri, $params);
+
+    return phutil_string_cast($uri);
+  }
+
+
 
   /**
    * Return the URI to a path within the application. Used to construct default

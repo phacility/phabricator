@@ -51,6 +51,7 @@ final class DifferentialRevisionViewController
       ->setViewer($viewer)
       ->needReviewers(true)
       ->needReviewerAuthority(true)
+      ->needCommitPHIDs(true)
       ->executeOne();
     if (!$revision) {
       return new Aphront404Response();
@@ -146,7 +147,7 @@ final class DifferentialRevisionViewController
     $object_phids = array_merge(
       $revision->getReviewerPHIDs(),
       $subscriber_phids,
-      $revision->loadCommitPHIDs(),
+      $revision->getCommitPHIDs(),
       array(
         $revision->getAuthorPHID(),
         $viewer->getPHID(),

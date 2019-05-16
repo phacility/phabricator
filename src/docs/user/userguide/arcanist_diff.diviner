@@ -167,11 +167,10 @@ You can use `arc help <command>` for detailed help with any of these.
 Differential will make a guess about a next step on accepted revisions, but it
 may not be the best next step for your workflow.
 
-Phabricator will also automatically close revisions, if the changes are pushed
+Phabricator will also automatically close revisions if the changes are pushed
 to a repository that is tracked in Diffusion. Specifically, it will close
 revisions based on commit and tree hashes, and `Differential Revision`
-identifiers in commit messages. (You can disable this feature by disabling
-"Autoclose" in the Repository configuration.)
+identifiers in commit messages.
 
 If you push to an untracked repository (or `arc` can't figure out that it's
 tracked), `arc land`, `arc amend` and `arc commit` will implicitly run

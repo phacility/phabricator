@@ -26,9 +26,12 @@ final class DifferentialSchemaSpec extends PhabricatorConfigSchemaSpec {
         'persistence' => PhabricatorConfigTableSchema::PERSISTENCE_CACHE,
       ));
 
+    // TODO: All readers and writers for this table were removed in April
+    // 2019. Destroy this table once we're sure we won't miss it.
+
     $this->buildRawSchema(
       id(new DifferentialRevision())->getApplicationName(),
-      DifferentialRevision::TABLE_COMMIT,
+      'differential_commit',
       array(
         'revisionID' => 'id',
         'commitPHID' => 'phid',

@@ -148,25 +148,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $author_phid);
     }
 
-    $differential_app = 'PhabricatorDifferentialApplication';
-    $revision_id = null;
-    $low_level_query = null;
-    if (PhabricatorApplication::isClassInstalled($differential_app)) {
-      $low_level_query = id(new DiffusionLowLevelCommitFieldsQuery())
-        ->setRepository($repository)
-        ->withCommitRef($ref);
-      $field_values = $low_level_query->execute();
-      $revision_id = idx($field_values, 'revisionID');
-
-      if (!empty($field_values['reviewedByPHIDs'])) {
-        $data->setCommitDetail(
-          'reviewerPHID',
-          reset($field_values['reviewedByPHIDs']));
-      }
-
-      $data->setCommitDetail('differential.revisionID', $revision_id);
-    }
-
     if ($author_phid != $commit->getAuthorPHID()) {
       $commit->setAuthorPHID($author_phid);
     }
@@ -176,114 +157,18 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $commit->setSummary($data->getSummary());
     $commit->save();
 
-    // Figure out if we're going to try to "autoclose" related objects (e.g.,
-    // close linked tasks and related revisions) and, if not, record why we
-    // aren't. Autoclose can be disabled for various reasons at the repository
-    // or commit levels.
+    // If we're publishing this commit, we're going to queue tasks to update
+    // referenced objects (like tasks and revisions). Otherwise, record some
+    // details about why we are not publishing it yet.
 
-    $force_autoclose = idx($this->getTaskData(), 'forceAutoclose', false);
-    if ($force_autoclose) {
-      $autoclose_reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
+    $publisher = $repository->newPublisher();
+    if ($publisher->shouldPublishCommit($commit)) {
+      $actor = PhabricatorUser::getOmnipotentUser();
+      $this->closeRevisions($actor, $ref, $commit, $data);
+      $this->closeTasks($actor, $ref, $commit, $data);
     } else {
-      $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
-    }
-    $data->setCommitDetail('autocloseReason', $autoclose_reason);
-    $should_autoclose = $force_autoclose ||
-                        $repository->shouldAutocloseCommit($commit);
-
-
-    // When updating related objects, we'll act under an omnipotent user to
-    // ensure we can see them, but take actions as either the committer or
-    // author (if we recognize their accounts) or the Diffusion application
-    // (if we do not).
-
-    $actor = PhabricatorUser::getOmnipotentUser();
-    $acting_as_phid = nonempty(
-      $committer_phid,
-      $author_phid,
-      id(new PhabricatorDiffusionApplication())->getPHID());
-
-    $acting_user = $this->loadActingUser($actor, $acting_as_phid);
-
-    $conn_w = id(new DifferentialRevision())->establishConnection('w');
-
-    // NOTE: The `differential_commit` table has a unique ID on `commitPHID`,
-    // preventing more than one revision from being associated with a commit.
-    // Generally this is good and desirable, but with the advent of hash
-    // tracking we may end up in a situation where we match several different
-    // revisions. We just kind of ignore this and pick one, we might want to
-    // revisit this and do something differently. (If we match several revisions
-    // someone probably did something very silly, though.)
-
-    $revision = null;
-    if ($revision_id) {
-      $revision_query = id(new DifferentialRevisionQuery())
-        ->withIDs(array($revision_id))
-        ->setViewer($actor)
-        ->needReviewers(true)
-        ->needActiveDiffs(true);
-
-      $revision = $revision_query->executeOne();
-
-      if ($revision) {
-        $commit_drev = DiffusionCommitHasRevisionEdgeType::EDGECONST;
-        id(new PhabricatorEdgeEditor())
-          ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
-          ->save();
-
-        queryfx(
-          $conn_w,
-          'INSERT IGNORE INTO %T (revisionID, commitPHID) VALUES (%d, %s)',
-          DifferentialRevision::TABLE_COMMIT,
-          $revision->getID(),
-          $commit->getPHID());
-
-        $should_close = !$revision->isPublished() && $should_autoclose;
-        if ($should_close) {
-          $type_close = DifferentialRevisionCloseTransaction::TRANSACTIONTYPE;
-
-          $commit_close_xaction = id(new DifferentialTransaction())
-            ->setTransactionType($type_close)
-            ->setNewValue(true);
-
-          $commit_close_xaction->setMetadataValue(
-            'commitPHID',
-            $commit->getPHID());
-
-          if ($low_level_query) {
-            $commit_close_xaction->setMetadataValue(
-              'revisionMatchData',
-              $low_level_query->getRevisionMatchData());
-            $data->setCommitDetail(
-              'revisionMatchData',
-              $low_level_query->getRevisionMatchData());
-          }
-
-          $extraction_engine = id(new DifferentialDiffExtractionEngine())
-            ->setViewer($actor)
-            ->setAuthorPHID($acting_as_phid);
-
-          $content_source = $this->newContentSource();
-
-          $extraction_engine->updateRevisionWithCommit(
-            $revision,
-            $commit,
-            array(
-              $commit_close_xaction,
-            ),
-            $content_source);
-        }
-      }
-    }
-
-    if ($should_autoclose) {
-      $this->closeTasks(
-        $actor,
-        $acting_as_phid,
-        $repository,
-        $commit,
-        $message,
-        $acting_user);
+      $hold_reasons = $publisher->getCommitHoldReasons($commit);
+      $data->setCommitDetail('holdReasons', $hold_reasons);
     }
 
     $data->save();
@@ -302,27 +187,63 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->execute();
   }
 
+  private function closeRevisions(
+    PhabricatorUser $actor,
+    DiffusionCommitRef $ref,
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
+
+    $differential = 'PhabricatorDifferentialApplication';
+    if (!PhabricatorApplication::isClassInstalled($differential)) {
+      return;
+    }
+
+    $repository = $commit->getRepository();
+
+    $field_query = id(new DiffusionLowLevelCommitFieldsQuery())
+      ->setRepository($repository)
+      ->withCommitRef($ref);
+
+    $field_values = $field_query->execute();
+
+    $revision_id = idx($field_values, 'revisionID');
+    if (!$revision_id) {
+      return;
+    }
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($actor)
+      ->withIDs(array($revision_id))
+      ->executeOne();
+    if (!$revision) {
+      return;
+    }
+
+    // NOTE: This is very old code from when revisions had a single reviewer.
+    // It still powers the "Reviewer (Deprecated)" field in Herald, but should
+    // be removed.
+    if (!empty($field_values['reviewedByPHIDs'])) {
+      $data->setCommitDetail(
+        'reviewerPHID',
+        head($field_values['reviewedByPHIDs']));
+    }
+
+    $match_data = $field_query->getRevisionMatchData();
+
+    $data->setCommitDetail('differential.revisionID', $revision_id);
+    $data->setCommitDetail('revisionMatchData', $match_data);
+
+    $properties = array(
+      'revisionMatchData' => $match_data,
+    );
+    $this->queueObjectUpdate($commit, $revision, $properties);
+  }
+
   private function closeTasks(
     PhabricatorUser $actor,
-    $acting_as,
-    PhabricatorRepository $repository,
+    DiffusionCommitRef $ref,
     PhabricatorRepositoryCommit $commit,
-    $message,
-    PhabricatorUser $acting_user = null) {
-
-    // If we we were able to identify an author for the commit, we try to act
-    // as that user when loading tasks marked with "Fixes Txxx". This prevents
-    // mistakes where a user accidentally writes the wrong task IDs and affects
-    // tasks they can't see (and thus can't undo the status changes for).
-
-    // This is just a guard rail, not a security measure. An attacker can still
-    // forge another user's identity trivially by forging author or committer
-    // emails. We also let commits with unrecognized authors act on any task to
-    // make behavior less confusing for new installs.
-
-    if (!$acting_user) {
-      $acting_user = $actor;
-    }
+    PhabricatorRepositoryCommitData $data) {
 
     $maniphest = 'PhabricatorManiphestApplication';
     if (!PhabricatorApplication::isClassInstalled($maniphest)) {
@@ -331,11 +252,12 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $prefixes = ManiphestTaskStatus::getStatusPrefixMap();
     $suffixes = ManiphestTaskStatus::getStatusSuffixMap();
+    $message = $data->getCommitMessage();
 
     $matches = id(new ManiphestCustomFieldStatusParser())
       ->parseCorpus($message);
 
-    $task_statuses = array();
+    $task_map = array();
     foreach ($matches as $match) {
       $prefix = phutil_utf8_strtolower($match['prefix']);
       $suffix = phutil_utf8_strtolower($match['suffix']);
@@ -347,89 +269,44 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
       foreach ($match['monograms'] as $task_monogram) {
         $task_id = (int)trim($task_monogram, 'tT');
-        $task_statuses[$task_id] = $status;
+        $task_map[$task_id] = $status;
       }
     }
 
-    if (!$task_statuses) {
+    if (!$task_map) {
       return;
     }
 
     $tasks = id(new ManiphestTaskQuery())
-      ->setViewer($acting_user)
-      ->withIDs(array_keys($task_statuses))
-      ->needProjectPHIDs(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
+      ->setViewer($actor)
+      ->withIDs(array_keys($task_map))
       ->execute();
-
     foreach ($tasks as $task_id => $task) {
-      $xactions = array();
+      $status = $task_map[$task_id];
 
-      $edge_type = ManiphestTaskHasCommitEdgeType::EDGECONST;
-      $edge_xaction = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $edge_type)
-        ->setNewValue(
-          array(
-            '+' => array(
-              $commit->getPHID() => $commit->getPHID(),
-            ),
-          ));
+      $properties = array(
+        'status' => $status,
+      );
 
-      $status = $task_statuses[$task_id];
-      if ($status) {
-        if ($task->getStatus() != $status) {
-          $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(
-              ManiphestTaskStatusTransaction::TRANSACTIONTYPE)
-            ->setMetadataValue('commitPHID', $commit->getPHID())
-            ->setNewValue($status);
-
-          $edge_xaction->setMetadataValue('commitPHID', $commit->getPHID());
-        }
-      }
-
-      $xactions[] = $edge_xaction;
-
-      $content_source = $this->newContentSource();
-
-      $editor = id(new ManiphestTransactionEditor())
-        ->setActor($actor)
-        ->setActingAsPHID($acting_as)
-        ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true)
-        ->setUnmentionablePHIDMap(
-          array($commit->getPHID() => $commit->getPHID()))
-        ->setContentSource($content_source);
-
-      $editor->applyTransactions($task, $xactions);
+      $this->queueObjectUpdate($commit, $task, $properties);
     }
   }
 
-  private function loadActingUser(PhabricatorUser $viewer, $user_phid) {
-    if (!$user_phid) {
-      return null;
-    }
+  private function queueObjectUpdate(
+    PhabricatorRepositoryCommit $commit,
+    $object,
+    array $properties) {
 
-    $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
-    if (phid_get_type($user_phid) != $user_type) {
-      return null;
-    }
-
-    $user = id(new PhabricatorPeopleQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($user_phid))
-      ->executeOne();
-    if (!$user) {
-      return null;
-    }
-
-    return $user;
+    $this->queueTask(
+      'DiffusionUpdateObjectAfterCommitWorker',
+      array(
+        'commitPHID' => $commit->getPHID(),
+        'objectPHID' => $object->getPHID(),
+        'properties' => $properties,
+      ),
+      array(
+        'priority' => PhabricatorWorker::PRIORITY_DEFAULT,
+      ));
   }
-
 
 }
