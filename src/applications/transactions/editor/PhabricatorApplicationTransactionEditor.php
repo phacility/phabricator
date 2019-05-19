@@ -3048,6 +3048,8 @@ abstract class PhabricatorApplicationTransactionEditor
     // Set this explicitly before we start swapping out the effective actor.
     $this->setActingAsPHID($this->getActingAsPHID());
 
+    $xaction_phids = mpull($xactions, 'getPHID');
+
     $messages = array();
     foreach ($targets as $target) {
       $original_actor = $this->getActor();
@@ -3059,10 +3061,25 @@ abstract class PhabricatorApplicationTransactionEditor
       $caught = null;
       $mail = null;
       try {
-        // Reload handles for the new viewer.
-        $this->loadHandles($xactions);
+        // Reload the transactions for the current viewer.
+        if ($xaction_phids) {
+          $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
+            $object);
 
-        $mail = $this->buildMailForTarget($object, $xactions, $target);
+          $mail_xactions = $query
+            ->setViewer($viewer)
+            ->withObjectPHIDs(array($object->getPHID()))
+            ->withPHIDs($xaction_phids)
+            ->execute();
+        } else {
+          $mail_xactions = array();
+        }
+
+        // Reload handles for the current viewer. This covers older code which
+        // emits a list of handle PHIDs upfront.
+        $this->loadHandles($mail_xactions);
+
+        $mail = $this->buildMailForTarget($object, $mail_xactions, $target);
 
         if ($mail) {
           if ($this->mustEncrypt) {
