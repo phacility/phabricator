@@ -1,10 +1,8 @@
 <?php
 
-final class PhabricatorJIRAAuthProvider extends PhabricatorOAuth1AuthProvider {
-
-  public function getJIRABaseURI() {
-    return $this->getProviderConfig()->getProperty(self::PROPERTY_JIRA_URI);
-  }
+final class PhabricatorJIRAAuthProvider
+  extends PhabricatorOAuth1AuthProvider
+  implements DoorkeeperRemarkupURIInterface {
 
   public function getProviderName() {
     return pht('JIRA');
@@ -330,6 +328,35 @@ final class PhabricatorJIRAAuthProvider extends PhabricatorOAuth1AuthProvider {
   public function shouldCreateJIRAComment() {
     $config = $this->getProviderConfig();
     return $config->getProperty(self::PROPERTY_REPORT_COMMENT, true);
+  }
+
+/* -(  DoorkeeperRemarkupURIInterface  )------------------------------------- */
+
+  public function getDoorkeeperURIRef(PhutilURI $uri) {
+    $uri_string = phutil_string_cast($uri);
+
+    $pattern = '((https?://\S+?)/browse/([A-Z]+-[1-9]\d*))';
+    $matches = null;
+    if (!preg_match($pattern, $uri_string, $matches)) {
+      return null;
+    }
+
+    $domain = $matches[1];
+    $issue = $matches[2];
+
+    $config = $this->getProviderConfig();
+    $base_uri = $config->getProperty(self::PROPERTY_JIRA_URI);
+
+    if ($domain !== rtrim($base_uri, '/')) {
+      return null;
+    }
+
+    return id(new DoorkeeperURIRef())
+      ->setURI($uri)
+      ->setApplicationType(DoorkeeperBridgeJIRA::APPTYPE_JIRA)
+      ->setApplicationDomain($this->getProviderDomain())
+      ->setObjectType(DoorkeeperBridgeJIRA::OBJTYPE_ISSUE)
+      ->setObjectID($issue);
   }
 
 }

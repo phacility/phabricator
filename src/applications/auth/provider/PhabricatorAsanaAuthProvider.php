@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorAsanaAuthProvider extends PhabricatorOAuth2AuthProvider {
+final class PhabricatorAsanaAuthProvider
+  extends PhabricatorOAuth2AuthProvider
+  implements DoorkeeperRemarkupURIInterface {
 
   public function getProviderName() {
     return pht('Asana');
@@ -44,6 +46,28 @@ final class PhabricatorAsanaAuthProvider extends PhabricatorOAuth2AuthProvider {
     }
 
     return null;
+  }
+
+/* -(  DoorkeeperRemarkupURIInterface  )------------------------------------- */
+
+  public function getDoorkeeperURIRef(PhutilURI $uri) {
+    $uri_string = phutil_string_cast($uri);
+
+    $pattern = '(https://app\\.asana\\.com/0/(\\d+)/(\\d+))';
+    $matches = null;
+    if (!preg_match($pattern, $uri_string, $matches)) {
+      return null;
+    }
+
+    $context_id = $matches[1];
+    $task_id = $matches[2];
+
+    return id(new DoorkeeperURIRef())
+      ->setURI($uri)
+      ->setApplicationType(DoorkeeperBridgeAsana::APPTYPE_ASANA)
+      ->setApplicationDomain(DoorkeeperBridgeAsana::APPDOMAIN_ASANA)
+      ->setObjectType(DoorkeeperBridgeAsana::OBJTYPE_TASK)
+      ->setObjectID($task_id);
   }
 
 }
