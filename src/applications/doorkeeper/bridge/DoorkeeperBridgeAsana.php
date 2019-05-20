@@ -62,6 +62,11 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
     $template = id(new PhutilAsanaFuture())
       ->setAccessToken($token);
 
+    $timeout = $this->getTimeout();
+    if ($timeout !== null) {
+      $template->setTimeout($timeout);
+    }
+
     $futures = array();
     foreach ($id_map as $key => $id) {
       $futures[$key] = id(clone $template)
