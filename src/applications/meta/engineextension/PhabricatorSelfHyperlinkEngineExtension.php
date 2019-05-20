@@ -53,10 +53,12 @@ final class PhabricatorSelfHyperlinkEngineExtension
     }
 
     if ($object_map) {
-      $handles = $viewer->loadHandles(mpull($object_map, 'getPHID'));
+      $object_phids = mpull($object_map, 'getPHID');
     } else {
-      $handles = array();
+      $object_phids = array();
     }
+
+    $handles = $viewer->loadHandles($object_phids);
 
     foreach ($object_names as $key => $object_name) {
       $object = idx($object_map, $object_name);
@@ -83,6 +85,13 @@ final class PhabricatorSelfHyperlinkEngineExtension
 
       unset($self_links[$key]);
     }
+
+    $key_mentioned = PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS;
+    $mentioned_phids = $engine->getTextMetadata($key_mentioned, array());
+    foreach ($object_phids as $object_phid) {
+      $mentioned_phids[$object_phid] = $object_phid;
+    }
+    $engine->setTextMetadata($key_mentioned, $mentioned_phids);
   }
 
 }
