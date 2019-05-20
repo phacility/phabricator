@@ -1711,6 +1711,12 @@ abstract class PhabricatorApplicationTransaction
     return array($done, $undone);
   }
 
+  public function newGlobalSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt(-$this->getDateCreated())
+      ->addString($this->getPHID());
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
