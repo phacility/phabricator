@@ -3249,7 +3249,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function getStrongestAction(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return last(msort($xactions, 'getActionStrength'));
+    return head(msort($xactions, 'newActionStrengthSortVector'));
   }
 
 
@@ -3718,8 +3718,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $xactions = msort($xactions, 'getActionStrength');
-    $xactions = array_reverse($xactions);
+    $xactions = msortv($xactions, 'newActionStrengthSortVector');
 
     return array(
       'objectPHID'        => $object->getPHID(),

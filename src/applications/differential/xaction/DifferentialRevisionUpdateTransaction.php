@@ -99,7 +99,7 @@ final class DifferentialRevisionUpdateTransaction
   }
 
   public function getActionStrength() {
-    return 2;
+    return 200;
   }
 
   public function getTitle() {

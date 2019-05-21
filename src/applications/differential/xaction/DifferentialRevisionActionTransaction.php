@@ -40,7 +40,7 @@ abstract class DifferentialRevisionActionTransaction
   }
 
   public function getActionStrength() {
-    return 3;
+    return 300;
   }
 
   public function getRevisionActionOrderVector() {

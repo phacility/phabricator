@@ -1363,35 +1363,35 @@ abstract class PhabricatorApplicationTransaction
 
   public function getActionStrength() {
     if ($this->isInlineCommentTransaction()) {
-      return 0.25;
+      return 250;
     }
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-        return 0.5;
+        return 500;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         if ($this->isSelfSubscription()) {
           // Make this weaker than TYPE_COMMENT.
-          return 0.25;
+          return 250;
         }
 
         if ($this->isApplicationAuthor()) {
           // When applications (most often: Herald) change subscriptions it
           // is very uninteresting.
-          return 0.000000001;
+          return 1;
         }
 
         // In other cases, subscriptions are more interesting than comments
         // (which are shown anyway) but less interesting than any other type of
         // transaction.
-        return 0.75;
+        return 750;
       case PhabricatorTransactions::TYPE_MFA:
         // We want MFA signatures to render at the top of transaction groups,
         // on top of the things they signed.
-        return 10;
+        return 10000;
     }
 
-    return 1.0;
+    return 1000;
   }
 
   public function isCommentTransaction() {
@@ -1715,6 +1715,11 @@ abstract class PhabricatorApplicationTransaction
     return id(new PhutilSortVector())
       ->addInt(-$this->getDateCreated())
       ->addString($this->getPHID());
+  }
+
+  public function newActionStrengthSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt(-$this->getActionStrength());
   }
 
 

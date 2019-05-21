@@ -19,7 +19,7 @@ final class PhrictionDocumentDeleteTransaction
   }
 
   public function getActionStrength() {
-    return 1.5;
+    return 150;
   }
 
   public function getActionName() {

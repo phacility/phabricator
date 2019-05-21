@@ -31,7 +31,7 @@ final class ManiphestTaskOwnerTransaction
   }
 
   public function getActionStrength() {
-    return 1.2;
+    return 120;
   }
 
   public function getActionName() {
