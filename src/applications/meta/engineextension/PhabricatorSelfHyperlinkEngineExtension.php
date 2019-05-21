@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorSelfHyperlinkEngineExtension
-  extends PhutilRemarkupHyperlinkEngineExtension {
+  extends PhabricatorRemarkupHyperlinkEngineExtension {
 
   const LINKENGINEKEY = 'phabricator-self';
 
@@ -15,15 +15,7 @@ final class PhabricatorSelfHyperlinkEngineExtension
       return;
     }
 
-    // Find links which point to resources on the Phabricator install itself.
-    // We're going to try to enhance these.
-    $self_links = array();
-    foreach ($hyperlinks as $link) {
-      $uri = $link->getURI();
-      if (PhabricatorEnv::isSelfURI($uri)) {
-        $self_links[] = $link;
-      }
-    }
+    $self_links = $this->getSelfLinks($hyperlinks);
 
     // For links in the form "/X123", we can reasonably guess that they are
     // fairly likely to be object names. Try to look them up.

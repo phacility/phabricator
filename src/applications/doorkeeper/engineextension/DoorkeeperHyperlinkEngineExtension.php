@@ -1,7 +1,7 @@
 <?php
 
 final class DoorkeeperHyperlinkEngineExtension
-  extends PhutilRemarkupHyperlinkEngineExtension {
+  extends PhabricatorRemarkupHyperlinkEngineExtension {
 
   const LINKENGINEKEY = 'doorkeeper';
 
