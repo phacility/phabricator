@@ -151,4 +151,80 @@ final class PhabricatorFeedTransactionSearchEngine
       ->setTable($table);
   }
 
+  protected function newExportFields() {
+    $fields = array(
+      id(new PhabricatorPHIDExportField())
+        ->setKey('authorPHID')
+        ->setLabel(pht('Author PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('author')
+        ->setLabel(pht('Author')),
+      id(new PhabricatorStringExportField())
+        ->setKey('objectType')
+        ->setLabel(pht('Object Type')),
+      id(new PhabricatorPHIDExportField())
+        ->setKey('objectPHID')
+        ->setLabel(pht('Object PHID')),
+      id(new PhabricatorStringExportField())
+        ->setKey('objectName')
+        ->setLabel(pht('Object Name')),
+      id(new PhabricatorStringExportField())
+        ->setKey('description')
+        ->setLabel(pht('Description')),
+    );
+
+    return $fields;
+  }
+
+  protected function newExportData(array $xactions) {
+    $viewer = $this->requireViewer();
+
+    $phids = array();
+    foreach ($xactions as $xaction) {
+      $phids[] = $xaction->getAuthorPHID();
+      $phids[] = $xaction->getObjectPHID();
+    }
+    $handles = $viewer->loadHandles($phids);
+
+    $export = array();
+    foreach ($xactions as $xaction) {
+      $xaction_phid = $xaction->getPHID();
+
+      $author_phid = $xaction->getAuthorPHID();
+      if ($author_phid) {
+        $author_name = $handles[$author_phid]->getName();
+      } else {
+        $author_name = null;
+      }
+
+      $object_phid = $xaction->getObjectPHID();
+      if ($object_phid) {
+        $object_name = $handles[$object_phid]->getName();
+      } else {
+        $object_name = null;
+      }
+
+      $old_target = $xaction->getRenderingTarget();
+      try {
+        $description = $xaction
+          ->setRenderingTarget(PhabricatorApplicationTransaction::TARGET_TEXT)
+          ->getTitle();
+      } catch (Exception $ex) {
+        $description = null;
+      }
+      $xaction->setRenderingTarget($old_target);
+
+      $export[] = array(
+        'authorPHID' => $author_phid,
+        'author' => $author_name,
+        'objectType' => phid_get_subtype($xaction_phid),
+        'objectPHID' => $object_phid,
+        'objectName' => $object_name,
+        'description' => $description,
+      );
+    }
+
+    return $export;
+  }
+
 }

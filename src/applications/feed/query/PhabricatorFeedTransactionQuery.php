@@ -30,6 +30,14 @@ final class PhabricatorFeedTransactionQuery
     return $this;
   }
 
+  public function newResultObject() {
+    // Return an arbitrary valid transaction object. The actual query may
+    // return objects of any subclass of "ApplicationTransaction" when it is
+    // executed, but we need to pick something concrete here to make some
+    // integrations work (like automatic handling of PHIDs in data export).
+    return new PhabricatorUserTransaction();
+  }
+
   protected function loadPage() {
     $queries = $this->newTransactionQueries();
 
