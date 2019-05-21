@@ -40,6 +40,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
       new DiffusionCommitRemarkupRule(),
       new DiffusionRepositoryRemarkupRule(),
       new DiffusionRepositoryByIDRemarkupRule(),
+      new DiffusionSourceLinkRemarkupRule(),
     );
   }
 
