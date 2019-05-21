@@ -4,11 +4,17 @@ final class PhabricatorFeedTransactionQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $phids;
+  private $authorPHIDs;
   private $createdMin;
   private $createdMax;
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withAuthorPHIDs(array $phids) {
+    $this->authorPHIDs = $phids;
     return $this;
   }
 
@@ -59,12 +65,17 @@ final class PhabricatorFeedTransactionQuery
     $created_max = $this->createdMax;
 
     $xaction_phids = $this->phids;
+    $author_phids = $this->authorPHIDs;
 
     foreach ($queries as $query) {
       $query->withDateCreatedBetween($created_min, $created_max);
 
       if ($xaction_phids !== null) {
         $query->withPHIDs($xaction_phids);
+      }
+
+      if ($author_phids !== null) {
+        $query->withAuthorPHIDs($author_phids);
       }
 
       if ($limit !== null) {

@@ -16,11 +16,43 @@ final class PhabricatorFeedTransactionSearchEngine
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Authors'))
+        ->setKey('authorPHIDs')
+        ->setAliases(array('author', 'authors')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created After'))
+        ->setKey('createdStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created Before'))
+        ->setKey('createdEnd'),
+    );
   }
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
+
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    $created_min = $map['createdStart'];
+    $created_max = $map['createdEnd'];
+
+    if ($created_min && $created_max) {
+      if ($created_min > $created_max) {
+        throw new PhabricatorSearchConstraintException(
+          pht(
+            'The specified "Created Before" date is earlier in time than the '.
+            'specified "Created After" date, so this query can never match '.
+            'any results.'));
+      }
+    }
+
+    if ($created_min || $created_max) {
+      $query->withDateCreatedBetween($created_min, $created_max);
+    }
 
     return $query;
   }
@@ -93,7 +125,7 @@ final class PhabricatorFeedTransactionSearchEngine
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
-          pht('Actor'),
+          pht('Author'),
           pht('Object'),
           pht('Transaction'),
           pht('Date'),
