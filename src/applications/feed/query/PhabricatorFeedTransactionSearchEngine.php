@@ -21,6 +21,11 @@ final class PhabricatorFeedTransactionSearchEngine
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
         ->setAliases(array('author', 'authors')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Object Types'))
+        ->setKey('objectTypes')
+        ->setAliases(array('objectType'))
+        ->setDatasource(new PhabricatorTransactionsObjectTypeDatasource()),
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Created After'))
         ->setKey('createdStart'),
@@ -35,6 +40,10 @@ final class PhabricatorFeedTransactionSearchEngine
 
     if ($map['authorPHIDs']) {
       $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    if ($map['objectTypes']) {
+      $query->withObjectTypes($map['objectTypes']);
     }
 
     $created_min = $map['createdStart'];

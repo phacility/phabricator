@@ -5,6 +5,7 @@ final class PhabricatorFeedTransactionQuery
 
   private $phids;
   private $authorPHIDs;
+  private $objectTypes;
   private $createdMin;
   private $createdMax;
 
@@ -15,6 +16,11 @@ final class PhabricatorFeedTransactionQuery
 
   public function withAuthorPHIDs(array $phids) {
     $this->authorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withObjectTypes(array $types) {
+    $this->objectTypes = $types;
     return $this;
   }
 
@@ -158,12 +164,24 @@ final class PhabricatorFeedTransactionQuery
       }
     }
 
+    $object_types = $this->objectTypes;
+    if ($object_types) {
+      $object_types = array_fuse($object_types);
+    }
+
     $results = array();
     foreach ($queries as $query) {
+      $query_type = $query->getTemplateApplicationTransaction()
+        ->getApplicationTransactionType();
+
       if ($type_map) {
-        $type = $query->getTemplateApplicationTransaction()
-          ->getApplicationTransactionType();
-        if (!isset($type_map[$type])) {
+        if (!isset($type_map[$query_type])) {
+          continue;
+        }
+      }
+
+      if ($object_types) {
+        if (!isset($object_types[$query_type])) {
           continue;
         }
       }
