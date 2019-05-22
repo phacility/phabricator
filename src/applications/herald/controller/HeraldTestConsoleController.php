@@ -271,6 +271,16 @@ final class HeraldTestConsoleController extends HeraldController {
     $recent_id = null;
     $hard_limit = 1000;
     foreach ($xactions as $xaction) {
+
+      // If this transaction has Herald transcript metadata, it was applied by
+      // Herald. Exclude it from the list because the Herald rule engine always
+      // runs before Herald transactions apply, so there's no way that real
+      // rules would have seen this transaction.
+      $transcript_id = $xaction->getMetadataValue('herald:transcriptID');
+      if ($transcript_id !== null) {
+        continue;
+      }
+
       $group_id = $xaction->getTransactionGroupID();
 
       // If this is the first transaction, save the group ID: we want to
