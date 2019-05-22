@@ -54,6 +54,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $heraldTranscript;
   private $subscribers;
   private $unmentionablePHIDMap = array();
+  private $transactionGroupID;
   private $applicationEmail;
 
   private $isPreview;
@@ -975,6 +976,14 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->cancelURI;
   }
 
+  protected function getTransactionGroupID() {
+    if ($this->transactionGroupID === null) {
+      $this->transactionGroupID = Filesystem::readRandomCharacters(32);
+    }
+
+    return $this->transactionGroupID;
+  }
+
   final public function applyTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -1164,7 +1173,7 @@ abstract class PhabricatorApplicationTransactionEditor
         throw $ex;
       }
 
-      $group_id = Filesystem::readRandomCharacters(32);
+      $group_id = $this->getTransactionGroupID();
 
       foreach ($xactions as $xaction) {
         if ($was_locked) {
@@ -4666,6 +4675,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $editor->mustEncrypt = $this->mustEncrypt;
+    $editor->transactionGroupID = $this->getTransactionGroupID();
 
     return $editor;
   }
