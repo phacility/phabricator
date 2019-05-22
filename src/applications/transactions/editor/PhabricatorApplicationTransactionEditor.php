@@ -260,12 +260,14 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->isHeraldEditor;
   }
 
-  public function setUnmentionablePHIDMap(array $map) {
-    $this->unmentionablePHIDMap = $map;
+  public function addUnmentionablePHIDs(array $phids) {
+    foreach ($phids as $phid) {
+      $this->unmentionablePHIDMap[$phid] = true;
+    }
     return $this;
   }
 
-  public function getUnmentionablePHIDMap() {
+  private function getUnmentionablePHIDMap() {
     return $this->unmentionablePHIDMap;
   }
 
@@ -2090,12 +2092,14 @@ abstract class PhabricatorApplicationTransactionEditor
       ->withPHIDs($mentioned_phids)
       ->execute();
 
+    $unmentionable_map = $this->getUnmentionablePHIDMap();
+
     $mentionable_phids = array();
     if ($this->shouldEnableMentions($object, $xactions)) {
       foreach ($mentioned_objects as $mentioned_object) {
         if ($mentioned_object instanceof PhabricatorMentionableInterface) {
           $mentioned_phid = $mentioned_object->getPHID();
-          if (idx($this->getUnmentionablePHIDMap(), $mentioned_phid)) {
+          if (isset($unmentionable_map[$mentioned_phid])) {
             continue;
           }
           // don't let objects mention themselves

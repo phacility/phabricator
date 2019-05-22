@@ -846,13 +846,9 @@ final class DifferentialTransactionEditor
       $revert_phids = array();
     }
 
-    // See PHI574. Respect any unmentionable PHIDs which were set on the
-    // Editor by the caller.
-    $unmentionable_map = $this->getUnmentionablePHIDMap();
-    $unmentionable_map += $task_phids;
-    $unmentionable_map += $rev_phids;
-    $unmentionable_map += $revert_phids;
-    $this->setUnmentionablePHIDMap($unmentionable_map);
+    $this->addUnmentionablePHIDs($task_phids);
+    $this->addUnmentionablePHIDs($rev_phids);
+    $this->addUnmentionablePHIDs($revert_phids);
 
     $result = array();
     foreach ($edges as $type => $specs) {
