@@ -189,6 +189,10 @@ final class PhabricatorApplicationTransactionCommentEditor
         $actor,
         $xaction,
         PhabricatorPolicyCapability::CAN_EDIT);
+      PhabricatorPolicyFilter::requireCapability(
+        $actor,
+        $xaction->getObject(),
+        PhabricatorPolicyCapability::CAN_INTERACT);
     }
   }
 
