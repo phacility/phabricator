@@ -2535,7 +2535,7 @@ abstract class PhabricatorApplicationTransactionEditor
     // If none of the transactions have an effect, the meta-transactions also
     // have no effect. Add them to the "no effect" list so we get a full set
     // of errors for everything.
-    if (!$any_effect) {
+    if (!$any_effect && !$has_comment) {
       $no_effect += $meta_xactions;
     }
 

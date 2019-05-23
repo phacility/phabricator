@@ -663,7 +663,7 @@ final class AphrontRequest extends Phobject {
   }
 
   public function isContinueRequest() {
-    return $this->isFormPost() && $this->getStr('__continue__');
+    return $this->isFormOrHisecPost() && $this->getStr('__continue__');
   }
 
   public function isPreviewRequest() {
