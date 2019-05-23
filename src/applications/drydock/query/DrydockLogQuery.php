@@ -2,10 +2,16 @@
 
 final class DrydockLogQuery extends DrydockQuery {
 
+  private $ids;
   private $blueprintPHIDs;
   private $resourcePHIDs;
   private $leasePHIDs;
   private $operationPHIDs;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withBlueprintPHIDs(array $phids) {
     $this->blueprintPHIDs = $phids;
@@ -125,6 +131,13 @@ final class DrydockLogQuery extends DrydockQuery {
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'id IN (%Ls)',
+        $this->ids);
+    }
 
     if ($this->blueprintPHIDs !== null) {
       $where[] = qsprintf(

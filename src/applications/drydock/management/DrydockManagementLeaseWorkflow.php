@@ -151,13 +151,15 @@ final class DrydockManagementLeaseWorkflow
     while (!$is_active) {
       $lease->reload();
 
+      $pager = id(new AphrontCursorPagerView())
+        ->setBeforeID($log_cursor);
+
       // While we're waiting, show the user any logs which the daemons have
       // generated to give them some clue about what's going on.
       $logs = id(new DrydockLogQuery())
         ->setViewer($viewer)
         ->withLeasePHIDs(array($lease->getPHID()))
-        ->setBeforeID($log_cursor)
-        ->execute();
+        ->executeWithCursorPager($pager);
       if ($logs) {
         $logs = mpull($logs, null, 'getID');
         ksort($logs);
