@@ -36,10 +36,9 @@ final class PhabricatorApplicationTransactionCommentEditController
     // auditing, and editing comments serves neither goal.
 
     $object = $xaction->getObject();
-    $can_interact = PhabricatorPolicyFilter::hasCapability(
+    $can_interact = PhabricatorPolicyFilter::canInteract(
       $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_INTERACT);
+      $object);
     if (!$can_interact) {
       return $this->newDialog()
         ->setTitle(pht('Conversation Locked'))

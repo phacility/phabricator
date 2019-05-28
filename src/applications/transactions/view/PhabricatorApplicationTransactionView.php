@@ -513,10 +513,9 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         }
       }
 
-      $can_interact = PhabricatorPolicyFilter::hasCapability(
+      $can_interact = PhabricatorPolicyFilter::canInteract(
         $viewer,
-        $xaction->getObject(),
-        PhabricatorPolicyCapability::CAN_INTERACT);
+        $xaction->getObject());
       $event->setCanInteract($can_interact);
     }
 
