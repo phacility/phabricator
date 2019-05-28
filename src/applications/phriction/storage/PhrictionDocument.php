@@ -78,10 +78,13 @@ final class PhrictionDocument extends PhrictionDAO
     }
 
     if ($parent_doc) {
+      $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID(
+        $parent_doc);
+
       $document
         ->setViewPolicy($parent_doc->getViewPolicy())
         ->setEditPolicy($parent_doc->getEditPolicy())
-        ->setSpacePHID($parent_doc->getSpacePHID());
+        ->setSpacePHID($space_phid);
     } else {
       $default_view_policy = PhabricatorPolicies::getMostOpenPolicy();
       $document

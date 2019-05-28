@@ -10,6 +10,26 @@ final class DifferentialRevisionUpdateTransaction
     return $object->getActiveDiffPHID();
   }
 
+  public function generateNewValue($object, $value) {
+    // See T13290. If we're updating the revision in response to a commit but
+    // the revision is already closed, return the old value so we no-op this
+    // transaction. We don't want to attach more than one commit-diff to a
+    // revision.
+
+    // Although we can try to bail out earlier so we don't generate this
+    // transaction in the first place, we may race another worker and end up
+    // trying to apply it anyway. Here, we have a lock on the object and can
+    // be certain about the object state.
+
+    if ($this->isCommitUpdate()) {
+      if ($object->isClosed()) {
+        return $this->generateOldValue($object);
+      }
+    }
+
+    return $value;
+  }
+
   public function applyInternalEffects($object, $value) {
     $should_review = $this->shouldRequestReviewAfterUpdate($object);
     if ($should_review) {
@@ -99,7 +119,7 @@ final class DifferentialRevisionUpdateTransaction
   }
 
   public function getActionStrength() {
-    return 2;
+    return 200;
   }
 
   public function getTitle() {

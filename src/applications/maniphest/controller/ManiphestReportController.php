@@ -337,7 +337,8 @@ final class ManiphestReportController extends ManiphestController {
         'the project recently, it is counted on the day it was '.
         'opened, not the day it was categorized. If a task was part '.
         'of this project in the past but no longer is, it is not '.
-        'counted at all.');
+        'counted at all. This table may not agree exactly with the chart '.
+        'above.');
       $header = pht('Task Burn Rate for Project %s', $handle->renderLink());
       $caption = phutil_tag('p', array(), $inst);
     } else {
@@ -379,26 +380,29 @@ final class ManiphestReportController extends ManiphestController {
 
     list($burn_x, $burn_y) = $this->buildSeries($data);
 
-    require_celerity_resource('d3');
-    require_celerity_resource('phui-chart-css');
+    if ($project_phid) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($project_phid))
+        ->execute();
+    } else {
+      $projects = array();
+    }
 
-    Javelin::initBehavior('line-chart-legacy', array(
-      'hardpoint' => $id,
-      'x' => array(
-        $burn_x,
-      ),
-      'y' => array(
-        $burn_y,
-      ),
-      'xformat' => 'epoch',
-      'yformat' => 'int',
-    ));
+    $panel = id(new PhabricatorProjectBurndownChartEngine())
+      ->setViewer($viewer)
+      ->setProjects($projects)
+      ->buildChartPanel();
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Burnup Rate'))
-      ->appendChild($chart);
+    $chart_panel = $panel->setName(pht('Burnup Rate'));
 
-    return array($filter, $box, $panel);
+    $chart_view = id(new PhabricatorDashboardPanelRenderingEngine())
+      ->setViewer($viewer)
+      ->setPanel($chart_panel)
+      ->setParentPanelPHIDs(array())
+      ->renderPanel();
+
+    return array($filter, $chart_view, $panel);
   }
 
   private function renderReportFilters(array $tokens, $has_window) {

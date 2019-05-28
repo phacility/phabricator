@@ -54,6 +54,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $heraldTranscript;
   private $subscribers;
   private $unmentionablePHIDMap = array();
+  private $transactionGroupID;
   private $applicationEmail;
 
   private $isPreview;
@@ -260,12 +261,14 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->isHeraldEditor;
   }
 
-  public function setUnmentionablePHIDMap(array $map) {
-    $this->unmentionablePHIDMap = $map;
+  public function addUnmentionablePHIDs(array $phids) {
+    foreach ($phids as $phid) {
+      $this->unmentionablePHIDMap[$phid] = true;
+    }
     return $this;
   }
 
-  public function getUnmentionablePHIDMap() {
+  private function getUnmentionablePHIDMap() {
     return $this->unmentionablePHIDMap;
   }
 
@@ -973,6 +976,14 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->cancelURI;
   }
 
+  protected function getTransactionGroupID() {
+    if ($this->transactionGroupID === null) {
+      $this->transactionGroupID = Filesystem::readRandomCharacters(32);
+    }
+
+    return $this->transactionGroupID;
+  }
+
   final public function applyTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -1162,6 +1173,8 @@ abstract class PhabricatorApplicationTransactionEditor
         throw $ex;
       }
 
+      $group_id = $this->getTransactionGroupID();
+
       foreach ($xactions as $xaction) {
         if ($was_locked) {
           $is_override = $this->isLockOverrideTransaction($xaction);
@@ -1171,6 +1184,8 @@ abstract class PhabricatorApplicationTransactionEditor
         }
 
         $xaction->setObjectPHID($object->getPHID());
+        $xaction->setTransactionGroupID($group_id);
+
         if ($xaction->getComment()) {
           $xaction->setPHID($xaction->generatePHID());
           $comment_editor->applyEdit($xaction, $xaction->getComment());
@@ -2086,12 +2101,14 @@ abstract class PhabricatorApplicationTransactionEditor
       ->withPHIDs($mentioned_phids)
       ->execute();
 
+    $unmentionable_map = $this->getUnmentionablePHIDMap();
+
     $mentionable_phids = array();
     if ($this->shouldEnableMentions($object, $xactions)) {
       foreach ($mentioned_objects as $mentioned_object) {
         if ($mentioned_object instanceof PhabricatorMentionableInterface) {
           $mentioned_phid = $mentioned_object->getPHID();
-          if (idx($this->getUnmentionablePHIDMap(), $mentioned_phid)) {
+          if (isset($unmentionable_map[$mentioned_phid])) {
             continue;
           }
           // don't let objects mention themselves
@@ -2518,7 +2535,7 @@ abstract class PhabricatorApplicationTransactionEditor
     // If none of the transactions have an effect, the meta-transactions also
     // have no effect. Add them to the "no effect" list so we get a full set
     // of errors for everything.
-    if (!$any_effect) {
+    if (!$any_effect && !$has_comment) {
       $no_effect += $meta_xactions;
     }
 
@@ -3044,6 +3061,8 @@ abstract class PhabricatorApplicationTransactionEditor
     // Set this explicitly before we start swapping out the effective actor.
     $this->setActingAsPHID($this->getActingAsPHID());
 
+    $xaction_phids = mpull($xactions, 'getPHID');
+
     $messages = array();
     foreach ($targets as $target) {
       $original_actor = $this->getActor();
@@ -3055,10 +3074,25 @@ abstract class PhabricatorApplicationTransactionEditor
       $caught = null;
       $mail = null;
       try {
-        // Reload handles for the new viewer.
-        $this->loadHandles($xactions);
+        // Reload the transactions for the current viewer.
+        if ($xaction_phids) {
+          $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
+            $object);
 
-        $mail = $this->buildMailForTarget($object, $xactions, $target);
+          $mail_xactions = $query
+            ->setViewer($viewer)
+            ->withObjectPHIDs(array($object->getPHID()))
+            ->withPHIDs($xaction_phids)
+            ->execute();
+        } else {
+          $mail_xactions = array();
+        }
+
+        // Reload handles for the current viewer. This covers older code which
+        // emits a list of handle PHIDs upfront.
+        $this->loadHandles($mail_xactions);
+
+        $mail = $this->buildMailForTarget($object, $mail_xactions, $target);
 
         if ($mail) {
           if ($this->mustEncrypt) {
@@ -3228,7 +3262,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function getStrongestAction(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return last(msort($xactions, 'getActionStrength'));
+    return head(msort($xactions, 'newActionStrengthSortVector'));
   }
 
 
@@ -3697,8 +3731,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $xactions = msort($xactions, 'getActionStrength');
-    $xactions = array_reverse($xactions);
+    $xactions = msortv($xactions, 'newActionStrengthSortVector');
 
     return array(
       'objectPHID'        => $object->getPHID(),
@@ -4642,6 +4675,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $editor->mustEncrypt = $this->mustEncrypt;
+    $editor->transactionGroupID = $this->getTransactionGroupID();
 
     return $editor;
   }

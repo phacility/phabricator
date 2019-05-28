@@ -239,7 +239,7 @@ final class PhabricatorAuditEditor
           $object);
         if ($request) {
           $xactions[] = $request;
-          $this->setUnmentionablePHIDMap($request->getNewValue());
+          $this->addUnmentionablePHIDs($request->getNewValue());
         }
         break;
       default:
@@ -360,7 +360,6 @@ final class PhabricatorAuditEditor
     $flat_blocks = mpull($changes, 'getNewValue');
     $huge_block = implode("\n\n", $flat_blocks);
     $phid_map = array();
-    $phid_map[] = $this->getUnmentionablePHIDMap();
     $monograms = array();
 
     $task_refs = id(new ManiphestCustomFieldStatusParser())
@@ -385,7 +384,6 @@ final class PhabricatorAuditEditor
       ->execute();
     $phid_map[] = mpull($objects, 'getPHID', 'getPHID');
 
-
     $reverts_refs = id(new DifferentialCustomFieldRevertsParser())
       ->parseCorpus($huge_block);
     $reverts = array_mergev(ipull($reverts_refs, 'monograms'));
@@ -408,7 +406,7 @@ final class PhabricatorAuditEditor
     }
 
     $phid_map = array_mergev($phid_map);
-    $this->setUnmentionablePHIDMap($phid_map);
+    $this->addUnmentionablePHIDs($phid_map);
 
     return $result;
   }

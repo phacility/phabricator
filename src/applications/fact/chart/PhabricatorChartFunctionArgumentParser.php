@@ -11,6 +11,7 @@ final class PhabricatorChartFunctionArgumentParser
   private $argumentMap = array();
   private $argumentPosition = 0;
   private $argumentValues = array();
+  private $repeatableArgument = null;
 
   public function setFunction(PhabricatorChartFunction $function) {
     $this->function = $function;
@@ -55,6 +56,32 @@ final class PhabricatorChartFunctionArgumentParser
           $name));
     }
 
+    if ($this->repeatableArgument) {
+      if ($spec->getRepeatable()) {
+        throw new Exception(
+          pht(
+            'Chart function "%s" emitted multiple repeatable argument '.
+            'specifications ("%s" and "%s"). Only one argument may be '.
+            'repeatable and it must be the last argument.',
+            $this->getFunctionArgumentSignature(),
+            $name,
+            $this->repeatableArgument->getName()));
+      } else {
+        throw new Exception(
+          pht(
+            'Chart function "%s" emitted a repeatable argument ("%s"), then '.
+            'another argument ("%s"). No arguments are permitted after a '.
+            'repeatable argument.',
+            $this->getFunctionArgumentSignature(),
+            $this->repeatableArgument->getName(),
+            $name));
+      }
+    }
+
+    if ($spec->getRepeatable()) {
+      $this->repeatableArgument = $spec;
+    }
+
     $this->argumentMap[$name] = $spec;
     $this->unparsedArguments[] = $spec;
 
@@ -72,12 +99,30 @@ final class PhabricatorChartFunctionArgumentParser
     return $this;
   }
 
+  public function getAllArguments() {
+    return array_values($this->argumentMap);
+  }
+
+  public function getRawArguments() {
+    return $this->rawArguments;
+  }
+
   public function parseArguments() {
     $have_count = count($this->rawArguments);
     $want_count = count($this->argumentMap);
 
     if ($this->haveAllArguments) {
-      if ($want_count !== $have_count) {
+      if ($this->repeatableArgument) {
+        if ($want_count > $have_count) {
+          throw new Exception(
+            pht(
+              'Function "%s" expects %s or more argument(s), but only %s '.
+              'argument(s) were provided.',
+              $this->getFunctionArgumentSignature(),
+              $want_count,
+              $have_count));
+        }
+      } else if ($want_count !== $have_count) {
         throw new Exception(
           pht(
             'Function "%s" expects %s argument(s), but %s argument(s) were '.
@@ -105,6 +150,14 @@ final class PhabricatorChartFunctionArgumentParser
       $raw_argument = array_shift($this->unconsumedArguments);
       $this->argumentPosition++;
 
+      $is_repeatable = $argument->getRepeatable();
+
+      // If this argument is repeatable and we have more arguments, add it
+      // back to the end of the list so we can continue parsing.
+      if ($is_repeatable && $this->unconsumedArguments) {
+        $this->unparsedArguments[] = $argument;
+      }
+
       try {
         $value = $argument->newValue($raw_argument);
       } catch (Exception $ex) {
@@ -118,7 +171,14 @@ final class PhabricatorChartFunctionArgumentParser
             $ex->getMessage()));
       }
 
-      $this->argumentValues[$name] = $value;
+      if ($is_repeatable) {
+        if (!isset($this->argumentValues[$name])) {
+          $this->argumentValues[$name] = array();
+        }
+        $this->argumentValues[$name][] = $value;
+      } else {
+        $this->argumentValues[$name] = $value;
+      }
     }
   }
 
@@ -141,7 +201,7 @@ final class PhabricatorChartFunctionArgumentParser
       $argument_list[] = $key;
     }
 
-    if (!$this->haveAllArguments) {
+    if (!$this->haveAllArguments || $this->repeatableArgument) {
       $argument_list[] = '...';
     }
 
@@ -149,45 +209,6 @@ final class PhabricatorChartFunctionArgumentParser
       '%s(%s)',
       $this->getFunction()->getFunctionKey(),
       implode(', ', $argument_list));
-  }
-
-  public function getSourceFunctionArgument() {
-    $required_type = 'function';
-
-    $sources = array();
-    foreach ($this->argumentMap as $key => $argument) {
-      if (!$argument->getIsSourceFunction()) {
-        continue;
-      }
-
-      if ($argument->getType() !== $required_type) {
-        throw new Exception(
-          pht(
-            'Function "%s" defines an argument "%s" which is marked as a '.
-            'source function, but the type of this argument is not "%s".',
-            $this->getFunctionArgumentSignature(),
-            $argument->getName(),
-            $required_type));
-      }
-
-      $sources[$key] = $argument;
-    }
-
-    if (!$sources) {
-      return null;
-    }
-
-    if (count($sources) > 1) {
-      throw new Exception(
-        pht(
-          'Function "%s" defines more than one argument as a source '.
-          'function (arguments: %s). Functions must have zero or one '.
-          'source function.',
-          $this->getFunctionArgumentSignature(),
-          implode(', ', array_keys($sources))));
-    }
-
-    return head($sources);
   }
 
 }

@@ -260,6 +260,13 @@ EOREMARKUP
         }
       }
 
+      $group_id = $xaction->getTransactionGroupID();
+      if (!strlen($group_id)) {
+        $group_id = null;
+      } else {
+        $group_id = (string)$group_id;
+      }
+
       $data[] = array(
         'id' => (int)$xaction->getID(),
         'phid' => (string)$xaction->getPHID(),
@@ -268,6 +275,7 @@ EOREMARKUP
         'objectPHID' => (string)$xaction->getObjectPHID(),
         'dateCreated' => (int)$xaction->getDateCreated(),
         'dateModified' => (int)$xaction->getDateModified(),
+        'groupID' => $group_id,
         'comments' => $comment_data,
         'fields' => $fields,
       );

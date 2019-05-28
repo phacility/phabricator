@@ -2,6 +2,8 @@
  * @provides javelin-chart
  * @requires phui-chart-css
  *           d3
+ *           javelin-chart-curtain-view
+ *           javelin-chart-function-label
  */
 JX.install('Chart', {
 
@@ -14,6 +16,8 @@ JX.install('Chart', {
   members: {
     _rootNode: null,
     _data: null,
+    _chartContainerNode: null,
+    _curtain: null,
 
     setData: function(blob) {
       this._data = blob;
@@ -26,19 +30,42 @@ JX.install('Chart', {
       }
 
       var hardpoint = this._rootNode;
-      var viewport = JX.Vector.getDim(hardpoint);
+      var curtain = this._getCurtain();
+      var container_node = this._getChartContainerNode();
+
+      var content = [
+        container_node,
+        curtain.getNode(),
+      ];
+
+      JX.DOM.setContent(hardpoint, content);
+
+      // Remove the old chart (if one exists) before drawing the new chart.
+      JX.DOM.setContent(container_node, []);
+
+      var viewport = JX.Vector.getDim(container_node);
       var config = this._data;
 
       function css_function(n) {
         return n + '(' + JX.$A(arguments).slice(1).join(', ') + ')';
       }
 
-      var padding = {
-        top: 24,
-        left: 48,
-        bottom: 48,
-        right: 32
-      };
+      var padding = {};
+      if (JX.Device.isDesktop()) {
+        padding = {
+          top: 24,
+          left: 48,
+          bottom: 48,
+          right: 12
+        };
+      } else {
+        padding = {
+          top: 12,
+          left: 36,
+          bottom: 24,
+          right: 4
+        };
+      }
 
       var size = {
         frameWidth: viewport.x,
@@ -48,43 +75,31 @@ JX.install('Chart', {
       size.width = size.frameWidth - padding.left - padding.right;
       size.height = size.frameHeight - padding.top - padding.bottom;
 
-      var x = d3.time.scale()
+      var x = d3.scaleTime()
         .range([0, size.width]);
 
-      var y = d3.scale.linear()
+      var y = d3.scaleLinear()
         .range([size.height, 0]);
 
-      var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient('bottom');
+      var xAxis = d3.axisBottom(x);
+      var yAxis = d3.axisLeft(y);
 
-      var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient('left');
-
-      // Remove the old chart (if one exists) before drawing the new chart.
-      JX.DOM.setContent(hardpoint, []);
-
-      var svg = d3.select('#' + hardpoint.id).append('svg')
+      var svg = d3.select(container_node).append('svg')
         .attr('width', size.frameWidth)
         .attr('height', size.frameHeight)
         .attr('class', 'chart');
 
       var g = svg.append('g')
-          .attr(
-            'transform',
-            css_function('translate', padding.left, padding.top));
+        .attr(
+          'transform',
+          css_function('translate', padding.left, padding.top));
 
       g.append('rect')
-          .attr('class', 'inner')
-          .attr('width', size.width)
-          .attr('height', size.height);
+        .attr('class', 'inner')
+        .attr('width', size.width)
+        .attr('height', size.height);
 
-      function as_date(value) {
-        return new Date(value * 1000);
-      }
-
-      x.domain([as_date(config.xMin), as_date(config.xMax)]);
+      x.domain([this._newDate(config.xMin), this._newDate(config.xMax)]);
       y.domain([config.yMin, config.yMax]);
 
       var div = d3.select('body')
@@ -92,54 +107,19 @@ JX.install('Chart', {
         .attr('class', 'chart-tooltip')
         .style('opacity', 0);
 
+      curtain.reset();
+
       for (var idx = 0; idx < config.datasets.length; idx++) {
         var dataset = config.datasets[idx];
 
-        var line = d3.svg.line()
-          .x(function(d) { return x(d.xvalue); })
-          .y(function(d) { return y(d.yvalue); });
-
-        var data = [];
-        for (var ii = 0; ii < dataset.x.length; ii++) {
-          data.push(
-            {
-              xvalue: as_date(dataset.x[ii]),
-              yvalue: dataset.y[ii]
-            });
+        switch (dataset.type) {
+          case 'stacked-area':
+            this._newStackedArea(g, dataset, x, y, div, curtain);
+            break;
         }
-
-        g.append('path')
-          .datum(data)
-          .attr('class', 'line')
-          .style('stroke', dataset.color)
-          .attr('d', line);
-
-        g.selectAll('dot')
-          .data(data)
-          .enter()
-          .append('circle')
-          .attr('class', 'point')
-          .attr('r', 3)
-          .attr('cx', function(d) { return x(d.xvalue); })
-          .attr('cy', function(d) { return y(d.yvalue); })
-          .on('mouseover', function(d) {
-            var d_y = d.xvalue.getFullYear();
-
-            // NOTE: Javascript months are zero-based. See PHI1017.
-            var d_m = d.xvalue.getMonth() + 1;
-
-            var d_d = d.xvalue.getDate();
-
-            div
-              .html(d_y + '-' + d_m + '-' + d_d + ': ' + d.yvalue)
-              .style('opacity', 0.9)
-              .style('left', (d3.event.pageX - 60) + 'px')
-              .style('top', (d3.event.pageY - 38) + 'px');
-            })
-          .on('mouseout', function() {
-            div.style('opacity', 0);
-          });
       }
+
+      curtain.redraw();
 
       g.append('g')
         .attr('class', 'x axis')
@@ -150,7 +130,90 @@ JX.install('Chart', {
         .attr('class', 'y axis')
         .attr('transform', css_function('translate', 0, 0))
         .call(yAxis);
+    },
+
+    _newStackedArea: function(g, dataset, x, y, div, curtain) {
+      var to_date = JX.bind(this, this._newDate);
+
+      var area = d3.area()
+        .x(function(d) { return x(to_date(d.x)); })
+        .y0(function(d) { return y(d.y0); })
+        .y1(function(d) { return y(d.y1); });
+
+      var line = d3.line()
+        .x(function(d) { return x(to_date(d.x)); })
+        .y(function(d) { return y(d.y1); });
+
+      for (var ii = 0; ii < dataset.data.length; ii++) {
+        var label = new JX.ChartFunctionLabel(dataset.labels[ii]);
+
+        var fill_color = label.getFillColor() || label.getColor();
+
+        g.append('path')
+          .style('fill', fill_color)
+          .attr('d', area(dataset.data[ii]));
+
+        var stroke_color = label.getColor();
+
+        g.append('path')
+          .attr('class', 'line')
+          .style('stroke', stroke_color)
+          .attr('d', line(dataset.data[ii]));
+
+        g.selectAll('dot')
+          .data(dataset.events[ii])
+          .enter()
+          .append('circle')
+          .attr('class', 'point')
+          .attr('r', 3)
+          .attr('cx', function(d) { return x(to_date(d.x)); })
+          .attr('cy', function(d) { return y(d.y1); })
+          .on('mouseover', function(d) {
+            var dd = to_date(d.x);
+
+            var d_y = dd.getFullYear();
+
+            // NOTE: Javascript months are zero-based. See PHI1017.
+            var d_m = dd.getMonth() + 1;
+
+            var d_d = dd.getDate();
+
+            div
+              .html(d_y + '-' + d_m + '-' + d_d + ': ' + d.y1)
+              .style('opacity', 0.9)
+              .style('left', (d3.event.pageX - 60) + 'px')
+              .style('top', (d3.event.pageY - 38) + 'px');
+            })
+          .on('mouseout', function() {
+            div.style('opacity', 0);
+          });
+
+        curtain.addFunctionLabel(label);
+      }
+    },
+
+    _newDate: function(epoch) {
+      return new Date(epoch * 1000);
+    },
+
+    _getCurtain: function() {
+      if (!this._curtain) {
+        this._curtain = new JX.ChartCurtainView();
+      }
+      return this._curtain;
+    },
+
+    _getChartContainerNode: function() {
+      if (!this._chartContainerNode) {
+        var attrs = {
+          className: 'chart-container'
+        };
+
+        this._chartContainerNode = JX.$N('div', attrs);
+      }
+      return this._chartContainerNode;
     }
+
   }
 
 });

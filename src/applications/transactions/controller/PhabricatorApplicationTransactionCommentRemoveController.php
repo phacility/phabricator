@@ -32,6 +32,26 @@ final class PhabricatorApplicationTransactionCommentRemoveController
 
     $done_uri = $obj_handle->getURI();
 
+    // We allow administrative removal of comments even if an object is locked,
+    // so you can lock a flamewar and then go clean it up. Locked threads may
+    // not otherwise be edited, and non-administrators can not remove comments
+    // from locked threads.
+
+    $object = $xaction->getObject();
+    $can_interact = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_INTERACT);
+    if (!$can_interact && !$viewer->getIsAdmin()) {
+      return $this->newDialog()
+        ->setTitle(pht('Conversation Locked'))
+        ->appendParagraph(
+          pht(
+            'You can not remove this comment because the conversation is '.
+            'locked.'))
+        ->addCancelButton($done_uri);
+    }
+
     if ($request->isFormOrHisecPost()) {
       $comment = $xaction->getApplicationTransactionCommentObject()
         ->setContent('')

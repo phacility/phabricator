@@ -75,7 +75,7 @@ final class DiffusionReadmeView extends DiffusionView {
         $engine = $markup_object->newMarkupEngine($markup_field);
 
         $readme_content = $content;
-        $class = null;
+        $class = 'ml';
         break;
       case 'rainbow':
         $content = id(new PhutilRainbowSyntaxHighlighter())
@@ -93,10 +93,12 @@ final class DiffusionReadmeView extends DiffusionView {
         break;
     }
 
-    $readme_content = phutil_tag_div($class, $readme_content);
-    $document = id(new PHUIDocumentView())
-      ->setFluid(true)
-      ->appendChild($readme_content);
+    $readme_content = phutil_tag(
+      'div',
+      array(
+        'class' => $class,
+      ),
+      $readme_content);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($readme_name)
@@ -106,7 +108,7 @@ final class DiffusionReadmeView extends DiffusionView {
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addClass('diffusion-mobile-view')
-      ->appendChild($document)
+      ->appendChild($readme_content)
       ->addClass('diffusion-readme-view');
   }
 

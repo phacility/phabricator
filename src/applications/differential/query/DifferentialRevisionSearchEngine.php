@@ -73,7 +73,7 @@ final class DifferentialRevisionSearchEngine
         ->setLabel(pht('Reviewers'))
         ->setKey('reviewerPHIDs')
         ->setAliases(array('reviewer', 'reviewers', 'reviewerPHID'))
-        ->setDatasource(new DiffusionAuditorFunctionDatasource())
+        ->setDatasource(new DifferentialReviewerFunctionDatasource())
         ->setDescription(
           pht('Find revisions with specific reviewers.')),
       id(new PhabricatorSearchDatasourceField())

@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorSelfHyperlinkEngineExtension
-  extends PhutilRemarkupHyperlinkEngineExtension {
+  extends PhabricatorRemarkupHyperlinkEngineExtension {
 
   const LINKENGINEKEY = 'phabricator-self';
 
@@ -15,15 +15,7 @@ final class PhabricatorSelfHyperlinkEngineExtension
       return;
     }
 
-    // Find links which point to resources on the Phabricator install itself.
-    // We're going to try to enhance these.
-    $self_links = array();
-    foreach ($hyperlinks as $link) {
-      $uri = $link->getURI();
-      if (PhabricatorEnv::isSelfURI($uri)) {
-        $self_links[] = $link;
-      }
-    }
+    $self_links = $this->getSelfLinks($hyperlinks);
 
     // For links in the form "/X123", we can reasonably guess that they are
     // fairly likely to be object names. Try to look them up.
@@ -53,10 +45,12 @@ final class PhabricatorSelfHyperlinkEngineExtension
     }
 
     if ($object_map) {
-      $handles = $viewer->loadHandles(mpull($object_map, 'getPHID'));
+      $object_phids = mpull($object_map, 'getPHID');
     } else {
-      $handles = array();
+      $object_phids = array();
     }
+
+    $handles = $viewer->loadHandles($object_phids);
 
     foreach ($object_names as $key => $object_name) {
       $object = idx($object_map, $object_name);
@@ -83,6 +77,13 @@ final class PhabricatorSelfHyperlinkEngineExtension
 
       unset($self_links[$key]);
     }
+
+    $key_mentioned = PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS;
+    $mentioned_phids = $engine->getTextMetadata($key_mentioned, array());
+    foreach ($object_phids as $object_phid) {
+      $mentioned_phids[$object_phid] = $object_phid;
+    }
+    $engine->setTextMetadata($key_mentioned, $mentioned_phids);
   }
 
 }

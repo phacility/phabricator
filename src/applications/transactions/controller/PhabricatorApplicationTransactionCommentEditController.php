@@ -31,6 +31,24 @@ final class PhabricatorApplicationTransactionCommentEditController
 
     $done_uri = $obj_handle->getURI();
 
+    // If an object is locked, you can't edit comments on it. Two reasons to
+    // lock threads are to calm contentious issues and to freeze state for
+    // auditing, and editing comments serves neither goal.
+
+    $object = $xaction->getObject();
+    $can_interact = PhabricatorPolicyFilter::canInteract(
+      $viewer,
+      $object);
+    if (!$can_interact) {
+      return $this->newDialog()
+        ->setTitle(pht('Conversation Locked'))
+        ->appendParagraph(
+          pht(
+            'You can not edit this comment because the conversation is '.
+            'locked.'))
+        ->addCancelButton($done_uri);
+    }
+
     if ($request->isFormOrHisecPost()) {
       $text = $request->getStr('text');
 

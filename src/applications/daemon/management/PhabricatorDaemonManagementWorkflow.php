@@ -369,6 +369,10 @@ abstract class PhabricatorDaemonManagementWorkflow
         'label' => 'trigger',
       ),
       array(
+        'class' => 'PhabricatorFactDaemon',
+        'label' => 'fact',
+      ),
+      array(
         'class' => 'PhabricatorTaskmasterDaemon',
         'label' => 'task',
         'pool' => PhabricatorEnv::getEnvConfig('phd.taskmasters'),

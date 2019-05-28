@@ -1,34 +1,7 @@
 <?php
 
+// See T11741. Long ago, in T11922, we switched from "MyISAM FULLTEXT" to
+// "InnoDB FULLTEXT". This migration prompted installs to rebuild the index.
 
-$use_mysql = false;
-
-$services = PhabricatorSearchService::getAllServices();
-foreach ($services as $service) {
-  $engine = $service->getEngine();
-  if ($engine instanceof PhabricatorMySQLFulltextStorageEngine) {
-    $use_mysql = true;
-  }
-}
-
-if ($use_mysql) {
-  $field = new PhabricatorSearchDocumentField();
-  $conn = $field->establishConnection('r');
-
-  // We're only going to require this if the index isn't empty: if you're on a
-  // fresh install, you don't have to do anything.
-  $any_documents = queryfx_one(
-    $conn,
-    'SELECT * FROM %T LIMIT 1',
-    $field->getTableName());
-
-  if ($any_documents) {
-    try {
-      id(new PhabricatorConfigManualActivity())
-        ->setActivityType(PhabricatorConfigManualActivity::TYPE_REINDEX)
-        ->save();
-    } catch (AphrontDuplicateKeyQueryException $ex) {
-      // If we've already noted that this activity is required, just move on.
-    }
-  }
-}
+// Later, in T12974, we switched from "InnoDB FULLTEXT" to "Ferret", mostly
+// mooting this. The underlying tables and engines were later removed entirely.

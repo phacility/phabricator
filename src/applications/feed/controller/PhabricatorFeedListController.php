@@ -1,20 +1,27 @@
 <?php
 
-final class PhabricatorFeedListController extends PhabricatorFeedController {
+final class PhabricatorFeedListController
+  extends PhabricatorFeedController {
 
   public function shouldAllowPublic() {
     return true;
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $querykey = $request->getURIData('queryKey');
+    $navigation = array();
 
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($querykey)
-      ->setSearchEngine(new PhabricatorFeedSearchEngine())
-      ->setNavigation($this->buildSideNavView());
+    $navigation[] = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LABEL)
+      ->setName(pht('Transactions'));
 
-    return $this->delegateToController($controller);
+    $navigation[] = id(new PHUIListItemView())
+      ->setName(pht('Transaction Logs'))
+      ->setHref($this->getApplicationURI('transactions/'));
+
+    return id(new PhabricatorFeedSearchEngine())
+      ->setController($this)
+      ->setNavigationItems($navigation)
+      ->buildResponse();
   }
 
 }

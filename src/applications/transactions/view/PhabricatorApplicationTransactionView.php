@@ -505,12 +505,18 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         if ($has_edit_capability && !$has_removed_comment) {
           $event->setIsEditable(true);
         }
+
         if ($has_edit_capability || $viewer->getIsAdmin()) {
           if (!$has_removed_comment) {
             $event->setIsRemovable(true);
           }
         }
       }
+
+      $can_interact = PhabricatorPolicyFilter::canInteract(
+        $viewer,
+        $xaction->getObject());
+      $event->setCanInteract($can_interact);
     }
 
     $comment = $this->renderTransactionContent($xaction);

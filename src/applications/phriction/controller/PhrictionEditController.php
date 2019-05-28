@@ -97,6 +97,10 @@ final class PhrictionEditController
     $content_text = $content->getContent();
     $is_draft_mode = ($document->getContent()->getVersion() != $max_version);
 
+    $default_view = $document->getViewPolicy();
+    $default_edit = $document->getEditPolicy();
+    $default_space = $document->getSpacePHID();
+
     if ($request->isFormPost()) {
       if ($is_new) {
         $save_as_draft = false;
@@ -122,6 +126,11 @@ final class PhrictionEditController
 
       $xactions = array();
 
+      if ($is_new) {
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+      }
+
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhrictionDocumentTitleTransaction::TRANSACTIONTYPE)
         ->setNewValue($title);
@@ -130,13 +139,16 @@ final class PhrictionEditController
         ->setNewValue($content_text);
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-        ->setNewValue($v_view);
+        ->setNewValue($v_view)
+        ->setIsDefaultTransaction($is_new && ($v_view === $default_view));
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-        ->setNewValue($v_edit);
+        ->setNewValue($v_edit)
+        ->setIsDefaultTransaction($is_new && ($v_edit === $default_edit));
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
-        ->setNewValue($v_space);
+        ->setNewValue($v_space)
+        ->setIsDefaultTransaction($is_new && ($v_space === $default_space));
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
         ->setNewValue(array('=' => $v_cc));

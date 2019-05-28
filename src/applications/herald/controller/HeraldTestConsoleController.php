@@ -260,24 +260,58 @@ final class HeraldTestConsoleController extends HeraldController {
     $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
       $object);
 
-    $xactions = $query
+    $query
       ->withObjectPHIDs(array($object->getPHID()))
-      ->setViewer($viewer)
-      ->setLimit(100)
-      ->execute();
+      ->setViewer($viewer);
+
+    $xactions = new PhabricatorQueryIterator($query);
 
     $applied = array();
 
-    // Pick the most recent group of transactions. This may not be exactly the
-    // same as what Herald acted on: for example, we may select a single group
-    // of transactions here which were really applied across two or more edits.
-    // Since this is relatively rare and we show you what we picked, it's okay
-    // that we just do roughly the right thing.
+    $recent_id = null;
+    $hard_limit = 1000;
     foreach ($xactions as $xaction) {
-      if (!$xaction->shouldDisplayGroupWith($applied)) {
+
+      // If this transaction has Herald transcript metadata, it was applied by
+      // Herald. Exclude it from the list because the Herald rule engine always
+      // runs before Herald transactions apply, so there's no way that real
+      // rules would have seen this transaction.
+      $transcript_id = $xaction->getMetadataValue('herald:transcriptID');
+      if ($transcript_id !== null) {
+        continue;
+      }
+
+      $group_id = $xaction->getTransactionGroupID();
+
+      // If this is the first transaction, save the group ID: we want to
+      // select all transactions in the same group.
+      if (!$applied) {
+        $recent_id = $group_id;
+        if ($recent_id === null) {
+          // If the first transaction has no group ID, it is likely an older
+          // transaction from before the introduction of group IDs. In this
+          // case, select only the most recent transaction and bail out.
+          $applied[] = $xaction;
+          break;
+        }
+      }
+
+      // If this transaction is from a different transaction group, we've
+      // found all the transactions applied in the most recent group.
+      if ($group_id !== $recent_id) {
         break;
       }
+
       $applied[] = $xaction;
+
+      if (count($applied) > $hard_limit) {
+        throw new Exception(
+          pht(
+            'This object ("%s") has more than %s transactions in its most '.
+            'recent transaction group; this is too many.',
+            $object->getPHID(),
+            new PhutilNumber($hard_limit)));
+      }
     }
 
     return $applied;

@@ -26,6 +26,7 @@ final class DifferentialRevisionQuery
   private $isOpen;
   private $createdEpochMin;
   private $createdEpochMax;
+  private $noReviewers;
 
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
@@ -98,7 +99,31 @@ final class DifferentialRevisionQuery
    * @task config
    */
   public function withReviewers(array $reviewer_phids) {
-    $this->reviewers = $reviewer_phids;
+    if ($reviewer_phids === array()) {
+      throw new Exception(
+        pht(
+          'Empty "withReviewers()" constraint is invalid. Provide one or '.
+          'more values, or remove the constraint.'));
+    }
+
+    $with_none = false;
+
+    foreach ($reviewer_phids as $key => $phid) {
+      switch ($phid) {
+        case DifferentialNoReviewersDatasource::FUNCTION_TOKEN:
+          $with_none = true;
+          unset($reviewer_phids[$key]);
+          break;
+        default:
+          break;
+      }
+    }
+
+    $this->noReviewers = $with_none;
+    if ($reviewer_phids) {
+      $this->reviewers = array_values($reviewer_phids);
+    }
+
     return $this;
   }
 
@@ -572,12 +597,21 @@ final class DifferentialRevisionQuery
     if ($this->reviewers) {
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T reviewer ON reviewer.revisionPHID = r.phid
+        'LEFT JOIN %T reviewer ON reviewer.revisionPHID = r.phid
           AND reviewer.reviewerStatus != %s
           AND reviewer.reviewerPHID in (%Ls)',
         id(new DifferentialReviewer())->getTableName(),
         DifferentialReviewerStatus::STATUS_RESIGNED,
         $this->reviewers);
+    }
+
+    if ($this->noReviewers) {
+      $joins[] = qsprintf(
+        $conn,
+        'LEFT JOIN %T no_reviewer ON no_reviewer.revisionPHID = r.phid
+          AND no_reviewer.reviewerStatus != %s',
+        id(new DifferentialReviewer())->getTableName(),
+        DifferentialReviewerStatus::STATUS_RESIGNED);
     }
 
     if ($this->draftAuthors) {
@@ -715,6 +749,24 @@ final class DifferentialRevisionQuery
         $statuses);
     }
 
+    $reviewer_subclauses = array();
+
+    if ($this->noReviewers) {
+      $reviewer_subclauses[] = qsprintf(
+        $conn,
+        'no_reviewer.reviewerPHID IS NULL');
+    }
+
+    if ($this->reviewers) {
+      $reviewer_subclauses[] = qsprintf(
+        $conn,
+        'reviewer.reviewerPHID IS NOT NULL');
+    }
+
+    if ($reviewer_subclauses) {
+      $where[] = qsprintf($conn, '%LO', $reviewer_subclauses);
+    }
+
     $where[] = $this->buildWhereClauseParts($conn);
 
     return $this->formatWhereClause($conn, $where);
@@ -732,6 +784,10 @@ final class DifferentialRevisionQuery
       $this->reviewers);
 
     if (count($join_triggers) > 1) {
+      return true;
+    }
+
+    if ($this->noReviewers) {
       return true;
     }
 

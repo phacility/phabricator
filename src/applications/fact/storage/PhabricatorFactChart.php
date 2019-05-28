@@ -7,6 +7,8 @@ final class PhabricatorFactChart
   protected $chartKey;
   protected $chartParameters = array();
 
+  private $datasets = self::ATTACHABLE;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
@@ -33,6 +35,12 @@ final class PhabricatorFactChart
     return idx($this->chartParameters, $key, $default);
   }
 
+  public function newChartKey() {
+    $digest = serialize($this->chartParameters);
+    $digest = PhabricatorHash::digestForIndex($digest);
+    return $digest;
+  }
+
   public function save() {
     if ($this->getID()) {
       throw new Exception(
@@ -41,12 +49,23 @@ final class PhabricatorFactChart
           'overwrite an existing chart configuration.'));
     }
 
-    $digest = serialize($this->chartParameters);
-    $digest = PhabricatorHash::digestForIndex($digest);
-
-    $this->chartKey = $digest;
+    $this->chartKey = $this->newChartKey();
 
     return parent::save();
+  }
+
+  public function attachDatasets(array $datasets) {
+    assert_instances_of($datasets, 'PhabricatorChartDataset');
+    $this->datasets = $datasets;
+    return $this;
+  }
+
+  public function getDatasets() {
+    return $this->assertAttached($this->datasets);
+  }
+
+  public function getURI() {
+    return urisprintf('/fact/chart/%s/', $this->getChartKey());
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

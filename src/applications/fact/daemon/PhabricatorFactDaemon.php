@@ -15,7 +15,7 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
       }
 
       $this->log(pht('Zzz...'));
-      $this->sleep(60 * 5);
+      $this->sleep(15);
     }
   }
 

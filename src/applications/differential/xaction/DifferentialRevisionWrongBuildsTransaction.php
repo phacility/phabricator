@@ -26,7 +26,7 @@ final class DifferentialRevisionWrongBuildsTransaction
   }
 
   public function getActionStrength() {
-    return 4;
+    return 400;
   }
 
   public function getTitle() {

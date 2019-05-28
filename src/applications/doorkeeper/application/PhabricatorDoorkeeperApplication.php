@@ -22,13 +22,6 @@ final class PhabricatorDoorkeeperApplication extends PhabricatorApplication {
     return pht('Connect to Other Software');
   }
 
-  public function getRemarkupRules() {
-    return array(
-      new DoorkeeperAsanaRemarkupRule(),
-      new DoorkeeperJIRARemarkupRule(),
-    );
-  }
-
   public function getRoutes() {
     return array(
       '/doorkeeper/' => array(

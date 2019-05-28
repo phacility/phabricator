@@ -90,6 +90,29 @@ final class PhabricatorPolicyFilter extends Phobject {
     PhabricatorUser $user,
     PhabricatorPolicyInterface $object) {
 
+    $capabilities = self::getRequiredInteractCapabilities($object);
+
+    foreach ($capabilities as $capability) {
+      if (!self::hasCapability($user, $object, $capability)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public static function requireCanInteract(
+    PhabricatorUser $user,
+    PhabricatorPolicyInterface $object) {
+
+    $capabilities = self::getRequiredInteractCapabilities($object);
+    foreach ($capabilities as $capability) {
+      self::requireCapability($user, $object, $capability);
+    }
+  }
+
+  private static function getRequiredInteractCapabilities(
+    PhabricatorPolicyInterface $object) {
     $capabilities = $object->getCapabilities();
     $capabilities = array_fuse($capabilities);
 
@@ -107,13 +130,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       $require[] = $can_interact;
     }
 
-    foreach ($require as $capability) {
-      if (!self::hasCapability($user, $object, $capability)) {
-        return false;
-      }
-    }
-
-    return true;
+    return $require;
   }
 
   public function setViewer(PhabricatorUser $user) {

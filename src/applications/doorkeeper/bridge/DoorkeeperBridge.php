@@ -5,6 +5,16 @@ abstract class DoorkeeperBridge extends Phobject {
   private $viewer;
   private $context = array();
   private $throwOnMissingLink;
+  private $timeout;
+
+  public function setTimeout($timeout) {
+    $this->timeout = $timeout;
+    return $this;
+  }
+
+  public function getTimeout() {
+    return $this->timeout;
+  }
 
   public function setThrowOnMissingLink($throw_on_missing_link) {
     $this->throwOnMissingLink = $throw_on_missing_link;
