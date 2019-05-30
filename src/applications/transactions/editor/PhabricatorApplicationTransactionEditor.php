@@ -3084,6 +3084,11 @@ abstract class PhabricatorApplicationTransactionEditor
             ->withObjectPHIDs(array($object->getPHID()))
             ->withPHIDs($xaction_phids)
             ->execute();
+
+          // Sort the mail transactions in the input order.
+          $mail_xactions = mpull($mail_xactions, null, 'getPHID');
+          $mail_xactions = array_select_keys($mail_xactions, $xaction_phids);
+          $mail_xactions = array_values($mail_xactions);
         } else {
           $mail_xactions = array();
         }
