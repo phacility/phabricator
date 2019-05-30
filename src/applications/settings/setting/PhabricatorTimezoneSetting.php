@@ -81,9 +81,16 @@ final class PhabricatorTimezoneSetting
       }
 
       sort($group);
+
+      $group_map = array();
+      foreach ($group as $identifier) {
+        $name = PhabricatorTime::getTimezoneDisplayName($identifier);
+        $group_map[$identifier] = $name;
+      }
+
       $option_groups[] = array(
         'label' => $label,
-        'options' => array_fuse($group),
+        'options' => $group_map,
       );
     }
 
