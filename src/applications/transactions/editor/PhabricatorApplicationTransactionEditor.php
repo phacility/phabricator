@@ -3417,12 +3417,17 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setViewer($this->requireActor())
       ->setContextObject($object);
 
-    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $button_label = $this->getObjectLinkButtonLabelForMail($object);
+
+    $this->addHeadersAndCommentsToMailBody($body, $xactions, $button_label);
     $this->addCustomFieldsToMailBody($body, $object, $xactions);
 
     return $body;
   }
 
+  protected function getObjectLinkButtonLabelForMail() {
+    return null;
+  }
 
   /**
    * @task mail

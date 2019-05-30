@@ -601,6 +601,10 @@ final class DifferentialTransactionEditor
     return $xactions;
   }
 
+  protected function getObjectLinkButtonLabelForMail() {
+    return pht('View Revision');
+  }
+
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -617,7 +621,7 @@ final class DifferentialTransactionEditor
     $this->addHeadersAndCommentsToMailBody(
       $body,
       $xactions,
-      pht('View Revision'),
+      $this->getObjectLinkButtonLabelForMail($object),
       $revision_uri);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
