@@ -80,7 +80,7 @@ foreach ($parser->getAttachments() as $attachment) {
   $file = PhabricatorFile::newFromFileData(
     $attachment->getContent(),
     array(
-      'name' => $attachment->getFilename(),
+      'name' => phutil_decode_mime_header($attachment->getFilename()),
       'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
     ));
   $attachments[] = $file->getPHID();
