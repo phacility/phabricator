@@ -16,6 +16,9 @@ final class HeraldEngine extends Phobject {
   private $forbiddenActions = array();
   private $skipEffects = array();
 
+  private $profilerStack = array();
+  private $profilerFrames = array();
+
   public function setDryRun($dry_run) {
     $this->dryRun = $dry_run;
     return $this;
@@ -137,7 +140,8 @@ final class HeraldEngine extends Phobject {
       ->setName($object->getHeraldName())
       ->setType($object->getAdapterContentType())
       ->setFields($this->fieldCache)
-      ->setAppliedTransactionPHIDs($xaction_phids);
+      ->setAppliedTransactionPHIDs($xaction_phids)
+      ->setProfile($this->getProfile());
 
     $this->transcript->setObjectTranscript($object_transcript);
 
@@ -329,7 +333,36 @@ final class HeraldEngine extends Phobject {
           break;
         }
 
-        $match = $this->doesConditionMatch($rule, $condition, $object);
+        // Here, we're profiling the cost to match the condition value against
+        // whatever test is configured. Normally, this cost should be very
+        // small (<<1ms) since it amounts to a single comparison:
+        //
+        //   [ Task author ][ is any of ][ alice ]
+        //
+        // However, it may be expensive in some cases, particularly if you
+        // write a rule with a very creative regular expression that backtracks
+        // explosively.
+        //
+        // At time of writing, the "Another Herald Rule" field is also
+        // evaluated inside the matching function. This may be arbitrarily
+        // expensive (it can prompt us to execute any finite number of other
+        // Herald rules), although we'll push the profiler stack appropriately
+        // so we don't count the evaluation time against this rule in the final
+        // profile.
+
+        $caught = null;
+
+        $this->pushProfilerRule($rule);
+        try {
+          $match = $this->doesConditionMatch($rule, $condition, $object);
+        } catch (Exception $ex) {
+          $caught = $ex;
+        }
+        $this->popProfilerRule($rule);
+
+        if ($caught) {
+          throw $ex;
+        }
 
         if (!$all && $match) {
           $reason = pht('Any condition matched.');
@@ -421,7 +454,25 @@ final class HeraldEngine extends Phobject {
 
   public function getObjectFieldValue($field) {
     if (!array_key_exists($field, $this->fieldCache)) {
-      $this->fieldCache[$field] = $this->object->getHeraldField($field);
+      $adapter = $this->object;
+
+      $adapter->willGetHeraldField($field);
+
+      $caught = null;
+
+      $this->pushProfilerField($field);
+      try {
+        $value = $adapter->getHeraldField($field);
+      } catch (Exception $ex) {
+        $caught = $ex;
+      }
+      $this->popProfilerField($field);
+
+      if ($caught) {
+        throw $caught;
+      }
+
+      $this->fieldCache[$field] = $value;
     }
 
     return $this->fieldCache[$field];
@@ -636,5 +687,99 @@ final class HeraldEngine extends Phobject {
 
     return $is_forbidden;
   }
+
+/* -(  Profiler  )----------------------------------------------------------- */
+
+  private function pushProfilerField($field_key) {
+    return $this->pushProfilerStack('field', $field_key);
+  }
+
+  private function popProfilerField($field_key) {
+    return $this->popProfilerStack('field', $field_key);
+  }
+
+  private function pushProfilerRule(HeraldRule $rule) {
+    return $this->pushProfilerStack('rule', $rule->getPHID());
+  }
+
+  private function popProfilerRule(HeraldRule $rule) {
+    return $this->popProfilerStack('rule', $rule->getPHID());
+  }
+
+  private function pushProfilerStack($type, $key) {
+    $this->profilerStack[] = array(
+      'type' => $type,
+      'key' => $key,
+      'start' => microtime(true),
+    );
+
+    return $this;
+  }
+
+  private function popProfilerStack($type, $key) {
+    if (!$this->profilerStack) {
+      throw new Exception(
+        pht(
+          'Unable to pop profiler stack: profiler stack is empty.'));
+    }
+
+    $frame = last($this->profilerStack);
+    if (($frame['type'] !== $type) || ($frame['key'] !== $key)) {
+      throw new Exception(
+        pht(
+          'Unable to pop profiler stack: expected frame of type "%s" with '.
+          'key "%s", but found frame of type "%s" with key "%s".',
+          $type,
+          $key,
+          $frame['type'],
+          $frame['key']));
+    }
+
+    // Accumulate the new timing information into the existing profile. If this
+    // is the first time we've seen this particular rule or field, we'll
+    // create a new empty frame first.
+
+    $elapsed = microtime(true) - $frame['start'];
+    $frame_key = sprintf('%s/%s', $type, $key);
+
+    if (!isset($this->profilerFrames[$frame_key])) {
+      $current = array(
+        'type' => $type,
+        'key' => $key,
+        'elapsed' => 0,
+        'count' => 0,
+      );
+    } else {
+      $current = $this->profilerFrames[$frame_key];
+    }
+
+    $current['elapsed'] += $elapsed;
+    $current['count']++;
+
+    $this->profilerFrames[$frame_key] = $current;
+
+    array_pop($this->profilerStack);
+  }
+
+  private function getProfile() {
+    if ($this->profilerStack) {
+      $frame = last($this->profilerStack);
+      $frame_type = $frame['type'];
+      $frame_key = $frame['key'];
+      $frame_count = count($this->profilerStack);
+
+      throw new Exception(
+        pht(
+          'Unable to retrieve profile: profiler stack is not empty. The '.
+          'stack has %s frame(s); the final frame has type "%s" and key '.
+          '"%s".',
+          new PhutilNumber($frame_count),
+          $frame_type,
+          $frame_key));
+    }
+
+    return array_values($this->profilerFrames);
+  }
+
 
 }

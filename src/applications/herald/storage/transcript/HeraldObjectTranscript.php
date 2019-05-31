@@ -7,6 +7,7 @@ final class HeraldObjectTranscript extends Phobject {
   protected $name;
   protected $fields;
   protected $appliedTransactionPHIDs;
+  protected $profile;
 
   public function setPHID($phid) {
     $this->phid = $phid;
@@ -46,6 +47,15 @@ final class HeraldObjectTranscript extends Phobject {
 
   public function getFields() {
     return $this->fields;
+  }
+
+  public function setProfile(array $profile) {
+    $this->profile = $profile;
+    return $this;
+  }
+
+  public function getProfile() {
+    return $this->profile;
   }
 
   public function setAppliedTransactionPHIDs($phids) {
