@@ -19,6 +19,7 @@ final class PhabricatorFileQuery
   private $needTransforms;
   private $builtinKeys;
   private $isBuiltin;
+  private $storageEngines;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -135,6 +136,11 @@ final class PhabricatorFileQuery
     return $this->withNgramsConstraint(
       id(new PhabricatorFileNameNgrams()),
       $ngrams);
+  }
+
+  public function withStorageEngines(array $engines) {
+    $this->storageEngines = $engines;
+    return $this;
   }
 
   public function showOnlyExplicitUploads($explicit_uploads) {
@@ -467,6 +473,13 @@ final class PhabricatorFileQuery
           $conn,
           'builtinKey IS NULL');
       }
+    }
+
+    if ($this->storageEngines !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'storageEngine IN (%Ls)',
+        $this->storageEngines);
     }
 
     return $where;
