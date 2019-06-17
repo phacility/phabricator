@@ -466,6 +466,18 @@ final class PhabricatorRepositoryCommit
     return $data->getCommitDetail('authorPHID');
   }
 
+  public function getEffectiveAuthorPHID() {
+    if ($this->hasAuthorIdentity()) {
+      $identity = $this->getAuthorIdentity();
+      if ($identity->hasEffectiveUser()) {
+        return $identity->getCurrentEffectiveUserPHID();
+      }
+    }
+
+    $data = $this->getCommitData();
+    return $data->getCommitDetail('authorPHID');
+  }
+
   public function getAuditStatusObject() {
     $status = $this->getAuditStatus();
     return DiffusionCommitAuditStatus::newForStatus($status);
