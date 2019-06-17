@@ -1033,12 +1033,6 @@ final class DifferentialRevisionViewController
   }
 
 
-  /**
-   * Note this code is somewhat similar to the buildPatch method in
-   * @{class:DifferentialReviewRequestMail}.
-   *
-   * @return @{class:AphrontRedirectResponse}
-   */
   private function buildRawDiffResponse(
     DifferentialRevision $revision,
     array $changesets,
@@ -1100,15 +1094,17 @@ final class DifferentialRevisionViewController
     }
     $file_name .= 'diff';
 
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file = PhabricatorFile::newFromFileData(
-        $raw_diff,
-        array(
-          'name' => $file_name,
-          'ttl.relative' => phutil_units('24 hours in seconds'),
-          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-        ));
+    $iterator = new ArrayIterator(array($raw_diff));
 
+    $source = id(new PhabricatorIteratorFileUploadSource())
+      ->setName($file_name)
+      ->setMIMEType('text/plain')
+      ->setRelativeTTL(phutil_units('24 hours in seconds'))
+      ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+      ->setIterator($iterator);
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file = $source->uploadFile();
       $file->attachToObject($revision->getPHID());
     unset($unguarded);
 
