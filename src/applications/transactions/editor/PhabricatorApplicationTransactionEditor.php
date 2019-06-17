@@ -3267,7 +3267,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function getStrongestAction(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return head(msort($xactions, 'newActionStrengthSortVector'));
+    return head(msortv($xactions, 'newActionStrengthSortVector'));
   }
 
 
