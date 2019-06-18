@@ -485,7 +485,8 @@ final class PhabricatorAuditEditor
     return $phids;
   }
 
-  protected function getObjectLinkButtonLabelForMail() {
+  protected function getObjectLinkButtonLabelForMail(
+    PhabricatorLiskDAO $object) {
     return pht('View Commit');
   }
 
