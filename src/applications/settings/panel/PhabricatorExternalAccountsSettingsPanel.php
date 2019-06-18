@@ -94,7 +94,7 @@ final class PhabricatorExternalAccountsSettingsPanel
       ->setViewer($viewer)
       ->withIsEnabled(true)
       ->execute();
-    $configs = msort($configs, 'getSortVector');
+    $configs = msortv($configs, 'getSortVector');
 
     $account_map = mgroup($accounts, 'getProviderConfigPHID');
 
