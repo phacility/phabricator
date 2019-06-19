@@ -104,24 +104,43 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   }
 
   public function loadAllRecipientPHIDs() {
-    $addresses = array_merge(
-      $this->getToAddresses(),
-      $this->getCCAddresses());
+    $addresses = $this->newTargetAddresses();
 
-    return $this->loadPHIDsFromAddresses($addresses);
-  }
+    // See T13317. Don't allow reserved addresses (like "noreply@...") to
+    // match user PHIDs.
+    foreach ($addresses as $key => $address) {
+      if (PhabricatorMailUtil::isReservedAddress($address)) {
+        unset($addresses[$key]);
+      }
+    }
 
-  public function loadCCPHIDs() {
-    return $this->loadPHIDsFromAddresses($this->getCCAddresses());
-  }
-
-  private function loadPHIDsFromAddresses(array $addresses) {
-    if (empty($addresses)) {
+    if (!$addresses) {
       return array();
     }
-    $users = id(new PhabricatorUserEmail())
-      ->loadAllWhere('address IN (%Ls)', $addresses);
-    return mpull($users, 'getUserPHID');
+
+    $address_strings = array();
+    foreach ($addresses as $address) {
+      $address_strings[] = phutil_string_cast($address->getAddress());
+    }
+
+    // See T13317. If a verified email address is in the "To" or "Cc" line,
+    // we'll count the user who owns that address as a recipient.
+
+    // We require the address be verified because we'll trigger behavior (like
+    // adding subscribers) based on the recipient list, and don't want to add
+    // Alice as a subscriber if she adds an unverified "internal-bounces@"
+    // address to her account and this address gets caught in the crossfire.
+    // In the best case this is confusing; in the worst case it could
+    // some day give her access to objects she can't see.
+
+    $recipients = id(new PhabricatorUserEmail())
+      ->loadAllWhere(
+        'address IN (%Ls) AND isVerified = 1',
+        $address_strings);
+
+    $recipient_phids = mpull($recipients, 'getUserPHID');
+
+    return $recipient_phids;
   }
 
   public function processReceivedMail() {
