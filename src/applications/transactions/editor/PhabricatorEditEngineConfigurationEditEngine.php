@@ -99,14 +99,14 @@ final class PhabricatorEditEngineConfigurationEditEngine
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the form.'))
         ->setTransactionType(
-          PhabricatorEditEngineConfigurationTransaction::TYPE_NAME)
+          PhabricatorEditEngineNameTransaction::TRANSACTIONTYPE)
         ->setValue($object->getName()),
       id(new PhabricatorRemarkupEditField())
         ->setKey('preamble')
         ->setLabel(pht('Preamble'))
         ->setDescription(pht('Optional instructions, shown above the form.'))
         ->setTransactionType(
-          PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE)
+          PhabricatorEditEnginePreambleTransaction::TRANSACTIONTYPE)
         ->setValue($object->getPreamble()),
     );
   }
