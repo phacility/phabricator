@@ -104,7 +104,7 @@ JX.install('Workflow', {
       var link = event.getNode('tag:a');
 
       // If the link is an anchor, or does not go anywhere, ignore the event.
-      var href = '' + link.href;
+      var href = '' + link.getAttribute('href');
       if (!href.length || href[0] === '#') {
         return;
       }
