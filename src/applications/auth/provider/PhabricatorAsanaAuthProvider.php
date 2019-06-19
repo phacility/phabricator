@@ -59,6 +59,14 @@ final class PhabricatorAsanaAuthProvider
       return null;
     }
 
+    if (strlen($uri->getFragment())) {
+     return null;
+    }
+
+    if ($uri->getQueryParamsAsPairList()) {
+     return null;
+    }
+
     $context_id = $matches[1];
     $task_id = $matches[2];
 
