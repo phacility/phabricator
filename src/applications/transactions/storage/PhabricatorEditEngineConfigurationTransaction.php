@@ -58,10 +58,23 @@ final class PhabricatorEditEngineConfigurationTransaction
           $this->renderHandleLink($author_phid));
       case self::TYPE_DEFAULT:
         $key = $this->getMetadataValue('field.key');
+
+        $object = $this->getObject();
+        $engine = $object->getEngine();
+        $fields = $engine->getFieldsForConfig($object);
+
+        $field = idx($fields, $key);
+        if (!$field) {
+          return pht(
+            '%s changed the default value for field "%s".',
+            $this->renderHandleLink($author_phid),
+            $key);
+        }
+
         return pht(
           '%s changed the default value for field "%s".',
           $this->renderHandleLink($author_phid),
-          $key);
+          $field->getLabel());
       case self::TYPE_LOCKS:
         return pht(
           '%s changed locked and hidden fields.',
@@ -162,6 +175,51 @@ final class PhabricatorEditEngineConfigurationTransaction
     }
 
     return $changes;
+  }
+
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DEFAULT:
+        return true;
+    }
+
+    return parent::hasChangeDetails();
+  }
+
+  public function renderChangeDetails(PhabricatorUser $viewer) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DEFAULT:
+        $old_value = $this->getOldValue();
+        $new_value = $this->getNewValue();
+
+        $old_value = $this->renderDefaultValueAsFallbackText($old_value);
+        $new_value = $this->renderDefaultValueAsFallbackText($new_value);
+
+        return $this->renderTextCorpusChangeDetails(
+          $viewer,
+          $old_value,
+          $new_value);
+    }
+
+    return parent::renderChangeDetails($viewer);
+  }
+
+  private function renderDefaultValueAsFallbackText($default_value) {
+    // See T13319. When rendering an "alice changed the default value for
+    // field X." story on custom forms, we may fall back to a generic
+    // rendering. Try to present the value change in a comprehensible way
+    // even if it isn't especially human readable (for example, it may
+    // contain PHIDs or other internal identifiers).
+
+    if (is_scalar($default_value) || is_null($default_value)) {
+      return $default_value;
+    }
+
+    if (phutil_is_natural_list($default_value)) {
+      return id(new PhutilJSON())->encodeAsList($default_value);
+    }
+
+    return id(new PhutilJSON())->encodeAsObject($default_value);
   }
 
 }
