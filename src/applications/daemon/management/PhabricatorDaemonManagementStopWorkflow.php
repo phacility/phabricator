@@ -42,7 +42,6 @@ final class PhabricatorDaemonManagementStopWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     return $this->executeStopCommand(
-      $args->getArg('pids'),
       array(
         'graceful' => $args->getArg('graceful'),
         'force' => $args->getArg('force'),

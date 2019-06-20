@@ -386,78 +386,86 @@ abstract class PhabricatorDaemonManagementWorkflow
     return 0;
   }
 
-  final protected function executeStopCommand(
-    array $pids,
-    array $options) {
-
-    $console = PhutilConsole::getConsole();
-
+  final protected function executeStopCommand(array $options) {
     $grace_period = idx($options, 'graceful', 15);
     $force = idx($options, 'force');
-    $gently = idx($options, 'gently');
 
-    if ($gently && $force) {
-      throw new PhutilArgumentUsageException(
+    $query = id(new PhutilProcessQuery())
+      ->withIsOverseer(true);
+
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if ($instance !== null && !$force) {
+      $query->withInstances(array($instance));
+    }
+
+    try {
+      $process_refs = $query->execute();
+    } catch (Exception $ex) {
+      // See T13321. If this fails for some reason, just continue for now so
+      // that daemon management still works. In the long run, we don't expect
+      // this to fail, but I don't want to break this workflow while we iron
+      // bugs out.
+
+      // See T12827. Particularly, this is likely to fail on Solaris.
+
+      phlog($ex);
+
+      $process_refs = array();
+    }
+
+    if (!$process_refs) {
+      if ($instance !== null && !$force) {
+        $this->logInfo(
+          pht('NO DAEMONS'),
+          pht(
+            'There are no running daemons for the current instance ("%s"). '.
+            'Use "--force" to stop daemons for all instances.',
+            $instance));
+      } else {
+        $this->logInfo(
+          pht('NO DAEMONS'),
+          pht('There are no running daemons.'));
+      }
+
+      return 0;
+    }
+
+    $process_refs = mpull($process_refs, null, 'getPID');
+
+    $stop_pids = array_keys($process_refs);
+    $live_pids = $this->sendStopSignals($stop_pids, $grace_period);
+
+    $stop_pids = array_fuse($stop_pids);
+    $live_pids = array_fuse($live_pids);
+
+    $dead_pids = array_diff_key($stop_pids, $live_pids);
+
+    foreach ($dead_pids as $dead_pid) {
+      $dead_ref = $process_refs[$dead_pid];
+      $this->logOkay(
+        pht('STOP'),
         pht(
-          'You can not specify conflicting options %s and %s together.',
-          '--gently',
-          '--force'));
+          'Stopped PID %d ("%s")',
+          $dead_pid,
+          $dead_ref->getCommand()));
     }
 
-    $daemons = $this->loadRunningDaemons();
-    if (!$daemons) {
-      $survivors = array();
-      if (!$pids && !$gently) {
-        $survivors = $this->processRogueDaemons(
-          $grace_period,
-          $warn = true,
-          $force);
-      }
-      if (!$survivors) {
-        $console->writeErr(
-          "%s\n",
-          pht('There are no running Phabricator daemons.'));
-      }
-      return 0;
+    foreach ($live_pids as $live_pid) {
+      $live_ref = $process_refs[$live_pid];
+      $this->logFail(
+        pht('SURVIVED'),
+        pht(
+          'Unable to stop PID %d ("%s").',
+          $live_pid,
+          $live_ref->getCommand()));
     }
 
-    $stop_pids = $this->selectDaemonPIDs($daemons, $pids);
-
-    if (!$stop_pids) {
-      $console->writeErr("%s\n", pht('No daemons to kill.'));
-      return 0;
-    }
-
-    $survivors = $this->sendStopSignals($stop_pids, $grace_period);
-
-    // Try to clean up PID files for daemons we killed.
-    $remove = array();
-    foreach ($daemons as $daemon) {
-      $pid = $daemon->getPID();
-      if (empty($stop_pids[$pid])) {
-        // We did not try to stop this overseer.
-        continue;
-      }
-
-      if (isset($survivors[$pid])) {
-        // We weren't able to stop this overseer.
-        continue;
-      }
-
-      if (!$daemon->getPIDFile()) {
-        // We don't know where the PID file is.
-        continue;
-      }
-
-      $remove[] = $daemon->getPIDFile();
-    }
-
-    foreach (array_unique($remove) as $remove_file) {
-      Filesystem::remove($remove_file);
-    }
-
-    if (!$gently) {
-      $this->processRogueDaemons($grace_period, !$pids, $force);
+    if ($live_pids) {
+      $this->logWarn(
+        pht('SURVIVORS'),
+        pht(
+          'Unable to stop all daemon processes. You may need to run this '.
+          'command as root with "sudo".'));
     }
 
     return 0;
@@ -490,42 +498,6 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     return 0;
-  }
-
-  private function processRogueDaemons($grace_period, $warn, $force_stop) {
-    $console = PhutilConsole::getConsole();
-
-    $rogue_daemons = PhutilDaemonOverseer::findRunningDaemons();
-    if ($rogue_daemons) {
-      if ($force_stop) {
-        $rogue_pids = ipull($rogue_daemons, 'pid');
-        $survivors = $this->sendStopSignals($rogue_pids, $grace_period);
-        if ($survivors) {
-          $console->writeErr(
-            "%s\n",
-            pht(
-              'Unable to stop processes running without PID files. '.
-              'Try running this command again with sudo.'));
-        }
-      } else if ($warn) {
-        $console->writeErr("%s\n", $this->getForceStopHint($rogue_daemons));
-      }
-    }
-
-    return $rogue_daemons;
-  }
-
-  private function getForceStopHint($rogue_daemons) {
-    $debug_output = '';
-    foreach ($rogue_daemons as $rogue) {
-      $debug_output .= $rogue['pid'].' '.$rogue['command']."\n";
-    }
-    return pht(
-      "There are processes running that look like Phabricator daemons but ".
-      "have no corresponding PID files:\n\n%s\n\n".
-      "Stop these processes by re-running this command with the %s parameter.",
-      $debug_output,
-      '--force');
   }
 
   private function sendStopSignals($pids, $grace_period) {

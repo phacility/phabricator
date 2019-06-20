@@ -35,7 +35,6 @@ final class PhabricatorDaemonManagementRestartWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $err = $this->executeStopCommand(
-      array(),
       array(
         'graceful' => $args->getArg('graceful'),
         'force' => $args->getArg('force'),
