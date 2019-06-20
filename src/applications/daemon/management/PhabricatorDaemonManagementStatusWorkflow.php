@@ -10,16 +10,10 @@ final class PhabricatorDaemonManagementStatusWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $query = id(new PhutilProcessQuery())
-      ->withIsOverseer(true);
+    $process_refs = $this->getOverseerProcessRefs();
 
-    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if ($instance !== null) {
-      $query->withInstances(array($instance));
-    }
-
-    $process_refs = $query->execute();
     if (!$process_refs) {
+      $instance = $this->getInstance();
       if ($instance !== null) {
         $this->logInfo(
           pht('NO DAEMONS'),

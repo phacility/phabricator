@@ -41,20 +41,6 @@ abstract class PhabricatorDaemonManagementWorkflow
     return $path;
   }
 
-  final protected function loadRunningDaemons() {
-    $daemons = array();
-
-    $pid_dir = $this->getPIDDirectory();
-    $pid_files = Filesystem::listDirectory($pid_dir);
-
-    foreach ($pid_files as $pid_file) {
-      $path = $pid_dir.'/'.$pid_file;
-      $daemons[] = PhabricatorDaemonReference::loadReferencesFromFile($path);
-    }
-
-    return array_mergev($daemons);
-  }
-
   private function findDaemonClass($substring) {
     $symbols = $this->loadAvailableDaemonClasses();
 
@@ -144,7 +130,7 @@ abstract class PhabricatorDaemonManagementWorkflow
       $flags[] = '--verbose';
     }
 
-    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    $instance = $this->getInstance();
     if ($instance) {
       $flags[] = '-l';
       $flags[] = $instance;
@@ -299,28 +285,31 @@ abstract class PhabricatorDaemonManagementWorkflow
     $console = PhutilConsole::getConsole();
 
     if (!idx($options, 'force')) {
-      $running = $this->loadRunningDaemons();
+      $process_refs = $this->getOverseerProcessRefs();
+      if ($process_refs) {
+        $this->logWarn(
+          pht('RUNNING DAEMONS'),
+          pht('Daemons are already running:'));
 
-      // This may include daemons which were launched but which are no longer
-      // running; check that we actually have active daemons before failing.
-      foreach ($running as $daemon) {
-        if ($daemon->isRunning()) {
-          $message = pht(
-            "phd start: Unable to start daemons because daemons are already ".
-            "running.\n\n".
-            "You can view running daemons with '%s'.\n".
-            "You can stop running daemons with '%s'.\n".
-            "You can use '%s' to stop all daemons before starting ".
-            "new daemons.\n".
-            "You can force daemons to start anyway with %s.",
-            'phd status',
-            'phd stop',
-            'phd restart',
-            '--force');
-
-          $console->writeErr("%s\n", $message);
-          exit(1);
+        fprintf(STDERR, '%s', "\n");
+        foreach ($process_refs as $process_ref) {
+          fprintf(
+            STDERR,
+            '%s',
+            tsprintf(
+              "        %s %s\n",
+              $process_ref->getPID(),
+              $process_ref->getCommand()));
         }
+        fprintf(STDERR, '%s', "\n");
+
+        $this->logFail(
+          pht('RUNNING DAEMONS'),
+          pht(
+            'Use "phd stop" to stop daemons, "phd restart" to restart '.
+            'daemons, or "phd start --force" to ignore running processes.'));
+
+        exit(1);
       }
     }
 
@@ -368,7 +357,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     $query = id(new PhutilProcessQuery())
       ->withIsOverseer(true);
 
-    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    $instance = $this->getInstance();
     if ($instance !== null && !$force) {
       $query->withInstances(array($instance));
     }
@@ -447,28 +436,23 @@ abstract class PhabricatorDaemonManagementWorkflow
   }
 
   final protected function executeReloadCommand(array $pids) {
-    $console = PhutilConsole::getConsole();
+    $process_refs = $this->getOverseerProcessRefs();
 
-    $daemons = $this->loadRunningDaemons();
-    if (!$daemons) {
-      $console->writeErr(
-        "%s\n",
-        pht('There are no running daemons to reload.'));
+    if (!$process_refs) {
+      $this->logInfo(
+        pht('NO DAEMONS'),
+        pht('There are no running daemon processes to reload.'));
+
       return 0;
     }
 
-    $reload_pids = $this->selectDaemonPIDs($daemons, $pids);
-    if (!$reload_pids) {
-      $console->writeErr(
-        "%s\n",
-        pht('No daemons to reload.'));
-      return 0;
-    }
+    foreach ($process_refs as $process_ref) {
+      $pid = $process_ref->getPID();
 
-    foreach ($reload_pids as $pid) {
-      $console->writeOut(
-        "%s\n",
+      $this->logInfo(
+        pht('RELOAD'),
         pht('Reloading process %d...', $pid));
+
       posix_kill($pid, SIGHUP);
     }
 
@@ -620,5 +604,22 @@ abstract class PhabricatorDaemonManagementWorkflow
 
     return $select_pids;
   }
+
+  protected function getOverseerProcessRefs() {
+    $query = id(new PhutilProcessQuery())
+      ->withIsOverseer(true);
+
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if ($instance !== null) {
+      $query->withInstances(array($instance));
+    }
+
+    return $query->execute();
+  }
+
+  protected function getInstance() {
+    return PhabricatorEnv::getEnvConfig('cluster.instance');
+  }
+
 
 }
