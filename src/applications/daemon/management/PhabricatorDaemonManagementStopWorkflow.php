@@ -6,11 +6,7 @@ final class PhabricatorDaemonManagementStopWorkflow
   protected function didConstruct() {
     $this
       ->setName('stop')
-      ->setSynopsis(
-        pht(
-          'Stop all running daemons, or specific daemons identified by PIDs. '.
-          'Use **%s** to find PIDs.',
-          'phd status'))
+      ->setSynopsis(pht('Stop daemon processes on this host.'))
       ->setArguments(
         array(
           array(
@@ -24,18 +20,12 @@ final class PhabricatorDaemonManagementStopWorkflow
           array(
             'name' => 'force',
             'help' => pht(
-              'Also stop running processes that look like daemons but do '.
-              'not have corresponding PID files.'),
+              'Stop all daemon processes on this host, even if they belong '.
+              'to another Phabricator instance.'),
           ),
           array(
             'name' => 'gently',
-            'help' => pht(
-              'Ignore running processes that look like daemons but do not '.
-              'have corresponding PID files.'),
-          ),
-          array(
-            'name' => 'pids',
-            'wildcard' => true,
+            'help' => pht('Deprecated. Has no effect.'),
           ),
         ));
   }
@@ -45,7 +35,6 @@ final class PhabricatorDaemonManagementStopWorkflow
       array(
         'graceful' => $args->getArg('graceful'),
         'force' => $args->getArg('force'),
-        'gently' => $args->getArg('gently'),
       ));
   }
 
