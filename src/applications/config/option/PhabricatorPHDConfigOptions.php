@@ -21,10 +21,6 @@ final class PhabricatorPHDConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('phd.pid-directory', 'string', '/var/tmp/phd/pid')
-        ->setLocked(true)
-        ->setDescription(
-          pht('Directory that phd should use to track running daemons.')),
       $this->newOption('phd.log-directory', 'string', '/var/tmp/phd/log')
         ->setLocked(true)
         ->setDescription(

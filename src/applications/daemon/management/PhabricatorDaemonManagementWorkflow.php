@@ -12,11 +12,6 @@ abstract class PhabricatorDaemonManagementWorkflow
       ->selectSymbolsWithoutLoading();
   }
 
-  final protected function getPIDDirectory() {
-    $path = PhabricatorEnv::getEnvConfig('phd.pid-directory');
-    return $this->getControlDirectory($path);
-  }
-
   final protected function getLogDirectory() {
     $path = PhabricatorEnv::getEnvConfig('phd.log-directory');
     return $this->getControlDirectory($path);
@@ -30,11 +25,10 @@ abstract class PhabricatorDaemonManagementWorkflow
           pht(
             "%s requires the directory '%s' to exist, but it does not exist ".
             "and could not be created. Create this directory or update ".
-            "'%s' / '%s' in your configuration to point to an existing ".
+            "'%s' in your configuration to point to an existing ".
             "directory.",
             'phd',
             $path,
-            'phd.pid-directory',
             'phd.log-directory'));
       }
     }
@@ -146,14 +140,6 @@ abstract class PhabricatorDaemonManagementWorkflow
       $config['log'] = $this->getLogDirectory().'/daemons.log';
     }
 
-    $pid_dir = $this->getPIDDirectory();
-
-    // TODO: This should be a much better user experience.
-    Filesystem::assertExists($pid_dir);
-    Filesystem::assertIsDirectory($pid_dir);
-    Filesystem::assertWritable($pid_dir);
-
-    $config['piddir'] = $pid_dir;
     $config['daemons'] = $daemons;
 
     $command = csprintf('./phd-daemon %Ls', $flags);
