@@ -25,8 +25,7 @@ final class HarbormasterBuildGraph extends AbstractDirectedGraph {
     $graph = id(new HarbormasterBuildGraph($steps_by_phid))
       ->addNodes($step_phids);
 
-    $raw_results =
-      $graph->getBestEffortTopographicallySortedNodes();
+    $raw_results = $graph->getNodesInRoughTopologicalOrder();
 
     $results = array();
     foreach ($raw_results as $node) {

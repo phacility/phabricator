@@ -398,7 +398,7 @@ final class PhabricatorRepositoryDiscoveryEngine
       }
     }
 
-    // Now, sort them topographically.
+    // Now, sort them topologically.
     $commits = $this->reduceGraph($graph);
 
     $refs = array();
@@ -437,7 +437,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     $graph = new PhutilDirectedScalarGraph();
     $graph->addNodes($edges);
 
-    $commits = $graph->getTopographicallySortedNodes();
+    $commits = $graph->getNodesInTopologicalOrder();
 
     // NOTE: We want the most ancestral nodes first, so we need to reverse the
     // list we get out of AbstractDirectedGraph.
