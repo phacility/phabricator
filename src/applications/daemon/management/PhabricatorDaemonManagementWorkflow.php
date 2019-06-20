@@ -55,31 +55,6 @@ abstract class PhabricatorDaemonManagementWorkflow
     return array_mergev($daemons);
   }
 
-  final protected function loadAllRunningDaemons() {
-    $local_daemons = $this->loadRunningDaemons();
-
-    $local_ids = array();
-    foreach ($local_daemons as $daemon) {
-      $daemon_log = $daemon->getDaemonLog();
-
-      if ($daemon_log) {
-        $local_ids[] = $daemon_log->getID();
-      }
-    }
-
-    $daemon_query = id(new PhabricatorDaemonLogQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE);
-
-    if ($local_ids) {
-      $daemon_query->withoutIDs($local_ids);
-    }
-
-    $remote_daemons = $daemon_query->execute();
-
-    return array_merge($local_daemons, $remote_daemons);
-  }
-
   private function findDaemonClass($substring) {
     $symbols = $this->loadAvailableDaemonClasses();
 
