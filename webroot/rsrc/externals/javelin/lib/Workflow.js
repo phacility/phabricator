@@ -75,6 +75,7 @@ JX.install('Workflow', {
       var workflow = new JX.Workflow(link.href);
       return workflow;
     },
+
     _push : function(workflow) {
       JX.Mask.show();
       JX.Workflow._stack.push(workflow);
@@ -85,16 +86,40 @@ JX.install('Workflow', {
       dialog._destroy();
       JX.Mask.hide();
     },
-    disable : function() {
-      JX.Workflow._disabled = true;
+    _onlink: function(event) {
+      // See T13302. When a user clicks a link in a dialog and that link
+      // triggers a navigation event, we want to close the dialog as though
+      // they had pressed a button.
+
+      // When Quicksand is enabled, this is particularly relevant because
+      // the dialog will stay in the foreground while the page content changes
+      // in the background if we do not dismiss the dialog.
+
+      // If this is a Command-Click, the link will open in a new window.
+      var is_command = !!event.getRawEvent().metaKey;
+      if (is_command) {
+        return;
+      }
+
+      var link = event.getNode('tag:a');
+
+      // If the link is an anchor, or does not go anywhere, ignore the event.
+      var href = '' + link.getAttribute('href');
+      if (!href.length || href[0] === '#') {
+        return;
+      }
+
+      // This link will open in a new window.
+      if (link.target === '_blank') {
+        return;
+      }
+
+      // Close the dialog.
+      JX.Workflow._pop();
     },
     _onbutton : function(event) {
 
       if (JX.Stratcom.pass()) {
-        return;
-      }
-
-      if (JX.Workflow._disabled) {
         return;
       }
 
@@ -122,9 +147,6 @@ JX.install('Workflow', {
     },
     _onsyntheticsubmit : function(e) {
       if (JX.Stratcom.pass()) {
-        return;
-      }
-      if (JX.Workflow._disabled) {
         return;
       }
       e.prevent();
@@ -313,6 +335,9 @@ JX.install('Workflow', {
           [],
           JX.Workflow._onsyntheticsubmit);
 
+        var onlink = JX.Workflow._onlink;
+        JX.DOM.listen(this._root, 'click', 'tag:a', onlink);
+
         JX.DOM.listen(
           this._root,
           'mousedown',
@@ -468,11 +493,6 @@ JX.install('Workflow', {
     function close_dialog_when_user_presses_escape(e) {
       if (e.getSpecialKey() != 'esc') {
         // Some key other than escape.
-        return;
-      }
-
-      if (JX.Workflow._disabled) {
-        // Workflows are disabled on this page.
         return;
       }
 

@@ -54,6 +54,20 @@ production instance were both in operation.
 EOREMARKUP
       ));
 
+    $timezone_description = $this->deformat(pht(<<<EOREMARKUP
+PHP date functions will emit a warning if they are called when no default
+server timezone is configured.
+
+Usually, you configure a default timezone in `php.ini` by setting the
+configuration value `date.timezone`.
+
+If you prefer, you can configure a default timezone here instead. To configure
+a default timezone, select a timezone from the
+[[ %s | PHP List of Supported Timezones ]].
+EOREMARKUP
+,
+      'https://php.net/manual/timezones.php'));
+
 
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
@@ -96,14 +110,7 @@ EOREMARKUP
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
           pht('The timezone Phabricator should use.'))
-        ->setDescription(
-          pht(
-            "PHP requires that you set a timezone in your php.ini before ".
-            "using date functions, or it will emit a warning. If this isn't ".
-            "possible (for instance, because you are using HPHP) you can set ".
-            "some valid constant for %s here and Phabricator will set it on ".
-            "your behalf, silencing the warning.",
-            'date_default_timezone_set()'))
+        ->setDescription($timezone_description)
         ->addExample('America/New_York', pht('US East (EDT)'))
         ->addExample('America/Chicago', pht('US Central (CDT)'))
         ->addExample('America/Boise', pht('US Mountain (MDT)'))
@@ -302,12 +309,10 @@ EOREMARKUP
       if (!$ok) {
         throw new PhabricatorConfigValidationException(
           pht(
-            "Config option '%s' is invalid. The timezone identifier must ".
-            "be a valid timezone identifier recognized by PHP, like '%s'. "."
-            You can find a list of valid identifiers here: %s",
+            'Config option "%s" is invalid. The timezone identifier must '.
+            'be a valid timezone identifier recognized by PHP, like "%s".',
             $key,
-            'America/Los_Angeles',
-            'http://php.net/manual/timezones.php'));
+            'America/Los_Angeles'));
       }
     }
   }

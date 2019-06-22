@@ -15,8 +15,7 @@ final class PhabricatorEditEngineConfigurationIsEditController
     $key = $config->getIdentifier();
     $cancel_uri = "/transactions/editengine/{$engine_key}/view/{$key}/";
 
-    $type = PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT;
-
+    $type = PhabricatorEditEngineIsEditTransaction::TRANSACTIONTYPE;
     if ($request->isFormPost()) {
       $xactions = array();
 

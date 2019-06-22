@@ -51,24 +51,59 @@ final class PhabricatorStorageManagementDumpWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
+    $output_file = $args->getArg('output');
+    $is_compress = $args->getArg('compress');
+    $is_overwrite = $args->getArg('overwrite');
+
+    if ($is_compress) {
+      if ($output_file === null) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'The "--compress" flag can only be used alongside "--output".'));
+      }
+
+      if (!function_exists('gzopen')) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'The "--compress" flag requires the PHP "zlib" extension, but '.
+            'that extension is not available. Install the extension or '.
+            'omit the "--compress" option.'));
+      }
+    }
+
+    if ($is_overwrite) {
+      if ($output_file === null) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'The "--overwrite" flag can only be used alongside "--output".'));
+      }
+    }
+
+    if ($output_file !== null) {
+      if (Filesystem::pathExists($output_file)) {
+        if (!$is_overwrite) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Output file "%s" already exists. Use "--overwrite" '.
+              'to overwrite.',
+              $output_file));
+        }
+      }
+    }
+
     $api = $this->getSingleAPI();
     $patches = $this->getPatches();
-
-    $console = PhutilConsole::getConsole();
 
     $with_indexes = !$args->getArg('no-indexes');
 
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
-      $namespace = $api->getNamespace();
-      $console->writeErr(
+      throw new PhutilArgumentUsageException(
         pht(
-          '**Storage Not Initialized**: There is no database storage '.
-          'initialized in this storage namespace ("%s"). Use '.
-          '**%s** to initialize storage.',
-          $namespace,
-          './bin/storage upgrade'));
-      return 1;
+          'There is no database storage initialized in the current storage '.
+          'namespace ("%s"). Use "bin/storage upgrade" to initialize '.
+          'storage or use "--namespace" to choose a different namespace.',
+          $api->getNamespace()));
     }
 
     $ref = $api->getRef();
@@ -138,38 +173,6 @@ final class PhabricatorStorageManagementDumpWorkflow
     if ($password) {
       if (strlen($password->openEnvelope())) {
         $has_password = true;
-      }
-    }
-
-    $output_file = $args->getArg('output');
-    $is_compress = $args->getArg('compress');
-    $is_overwrite = $args->getArg('overwrite');
-
-    if ($is_compress) {
-      if ($output_file === null) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'The "--compress" flag can only be used alongside "--output".'));
-      }
-    }
-
-    if ($is_overwrite) {
-      if ($output_file === null) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'The "--overwrite" flag can only be used alongside "--output".'));
-      }
-    }
-
-    if ($output_file !== null) {
-      if (Filesystem::pathExists($output_file)) {
-        if (!$is_overwrite) {
-          throw new PhutilArgumentUsageException(
-            pht(
-              'Output file "%s" already exists. Use "--overwrite" '.
-              'to overwrite.',
-              $output_file));
-        }
       }
     }
 

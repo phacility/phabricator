@@ -147,7 +147,7 @@ final class PhabricatorRepositoryCommitPublishWorker
 
     $data = $commit->getCommitData();
 
-    $author_phid = $data->getCommitDetail('authorPHID');
+    $author_phid = $commit->getEffectiveAuthorPHID();
 
     $revision = DiffusionCommitRevisionQuery::loadRevisionForCommit(
       $viewer,
@@ -223,13 +223,22 @@ final class PhabricatorRepositoryCommitPublishWorker
 
     // If auditing is configured to trigger on unreviewed changes, check if
     // the revision was "Accepted" when it landed. If not, trigger an audit.
+
+    // We may be running before the revision actually closes, so we'll count
+    // either an "Accepted" or a "Closed, Previously Accepted" revision as
+    // good enough.
+
     if ($audit_unreviewed) {
       $commit_unreviewed = true;
       if ($revision) {
-        $was_accepted = DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED;
-        if ($revision->isPublished()) {
-          if ($revision->getProperty($was_accepted)) {
-            $commit_unreviewed = false;
+        if ($revision->isAccepted()) {
+          $commit_unreviewed = false;
+        } else {
+          $was_accepted = DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED;
+          if ($revision->isPublished()) {
+            if ($revision->getProperty($was_accepted)) {
+              $commit_unreviewed = false;
+            }
           }
         }
       }

@@ -189,7 +189,7 @@ abstract class PhabricatorObjectGraph
 
     $order = id(new PhutilDirectedScalarGraph())
       ->addNodes($ancestry)
-      ->getTopographicallySortedNodes();
+      ->getNodesInTopologicalOrder();
 
     $ancestry = array_select_keys($ancestry, $order);
 

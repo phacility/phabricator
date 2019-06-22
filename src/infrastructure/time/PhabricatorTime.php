@@ -78,4 +78,14 @@ final class PhabricatorTime extends Phobject {
     return $datetime;
   }
 
+  public static function getTimezoneDisplayName($raw_identifier) {
+
+    // Internal identifiers have names like "America/Los_Angeles", but this is
+    // just an implementation detail and we can render them in a more human
+    // readable format with spaces.
+    $name = str_replace('_', ' ', $raw_identifier);
+
+    return $name;
+  }
+
 }

@@ -35,9 +35,7 @@ final class PhabricatorEditEngineConfigurationSubtypeController
       $xactions = array();
 
       $subtype = $request->getStr('subtype');
-      $type_subtype =
-        PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE;
-
+      $type_subtype = PhabricatorEditEngineSubtypeTransaction::TRANSACTIONTYPE;
       $xactions[] = id(new PhabricatorEditEngineConfigurationTransaction())
         ->setTransactionType($type_subtype)
         ->setNewValue($subtype);

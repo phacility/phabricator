@@ -56,7 +56,7 @@ final class DifferentialActionEmailCommand
 
   public function getCommandObjects() {
     $actions = DifferentialRevisionActionTransaction::loadAllActions();
-    $actions = msort($actions, 'getRevisionActionOrderVector');
+    $actions = msortv($actions, 'getRevisionActionOrderVector');
 
     $objects = array();
     foreach ($actions as $action) {

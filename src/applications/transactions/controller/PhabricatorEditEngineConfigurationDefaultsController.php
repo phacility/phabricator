@@ -52,7 +52,7 @@ final class PhabricatorEditEngineConfigurationDefaultsController
         $field->readValueFromSubmit($request);
       }
 
-      $type = PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT;
+      $type = PhabricatorEditEngineDefaultTransaction::TRANSACTIONTYPE;
 
       $xactions = array();
       foreach ($fields as $field) {

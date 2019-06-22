@@ -485,7 +485,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // change the order of prompts for users, but the alternative is that the
     // Settings panel order disagrees with the prompt order, which seems more
     // disruptive.
-    $factors = msort($factors, 'newSortVector');
+    $factors = msortv($factors, 'newSortVector');
 
     // If the account has no associated multi-factor auth, just issue a token
     // without putting the session into high security mode. This is generally

@@ -70,10 +70,10 @@ final class PhabricatorEditEngineConfigurationSortController
 
         if ($is_create) {
           $xaction_type =
-            PhabricatorEditEngineConfigurationTransaction::TYPE_CREATEORDER;
+            PhabricatorEditEngineCreateOrderTransaction::TRANSACTIONTYPE;
         } else {
           $xaction_type =
-            PhabricatorEditEngineConfigurationTransaction::TYPE_EDITORDER;
+            PhabricatorEditEngineEditOrderTransaction::TRANSACTIONTYPE;
         }
 
         $xactions[] = id(new PhabricatorEditEngineConfigurationTransaction())

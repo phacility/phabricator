@@ -77,6 +77,7 @@ final class HeraldTranscriptController extends HeraldController {
         $this->buildTransactionsTranscriptPanel(
           $object,
           $xscript),
+        $this->buildProfilerTranscriptPanel($xscript),
       );
     }
 
@@ -596,5 +597,99 @@ final class HeraldTranscriptController extends HeraldController {
     return $box_view;
   }
 
+
+  private function buildProfilerTranscriptPanel(HeraldTranscript $xscript) {
+    $viewer = $this->getViewer();
+
+    $object_xscript = $xscript->getObjectTranscript();
+
+    $profile = $object_xscript->getProfile();
+
+    // If this is an older transcript without profiler information, don't
+    // show anything.
+    if ($profile === null) {
+      return null;
+    }
+
+    $profile = isort($profile, 'elapsed');
+    $profile = array_reverse($profile);
+
+    $phids = array();
+    foreach ($profile as $frame) {
+      if ($frame['type'] === 'rule') {
+        $phids[] = $frame['key'];
+      }
+    }
+    $handles = $viewer->loadHandles($phids);
+
+    $field_map = HeraldField::getAllFields();
+
+    $rows = array();
+    foreach ($profile as $frame) {
+      $cost = $frame['elapsed'];
+      $cost = 1000000 * $cost;
+      $cost = pht('%sus', new PhutilNumber($cost));
+
+      $type = $frame['type'];
+      switch ($type) {
+        case 'rule':
+          $type_display = pht('Rule');
+          break;
+        case 'field':
+          $type_display = pht('Field');
+          break;
+        default:
+          $type_display = $type;
+          break;
+      }
+
+      $key = $frame['key'];
+      switch ($type) {
+        case 'field':
+          $field_object = idx($field_map, $key);
+          if ($field_object) {
+            $key_display = $field_object->getHeraldFieldName();
+          } else {
+            $key_display = $key;
+          }
+          break;
+        case 'rule':
+          $key_display = $handles[$key]->renderLink();
+          break;
+        default:
+          $key_display = $key;
+          break;
+      }
+
+      $rows[] = array(
+        $type_display,
+        $key_display,
+        $cost,
+        pht('%s', new PhutilNumber($frame['count'])),
+      );
+    }
+
+    $table_view = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Type'),
+          pht('What'),
+          pht('Cost'),
+          pht('Count'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'wide',
+          'right',
+          'right',
+        ));
+
+    $box_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Profile'))
+      ->setTable($table_view);
+
+    return $box_view;
+  }
 
 }

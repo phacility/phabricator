@@ -127,7 +127,19 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function hasComment() {
-    return $this->getComment() && strlen($this->getComment()->getContent());
+    if (!$this->getComment()) {
+      return false;
+    }
+
+    $content = $this->getComment()->getContent();
+
+    // If the content is empty or consists of only whitespace, don't count
+    // this as comment.
+    if (!strlen(trim($content))) {
+      return false;
+    }
+
+    return true;
   }
 
   public function getComment() {

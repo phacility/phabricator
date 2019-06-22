@@ -4,23 +4,48 @@ abstract class PhabricatorFilesManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
   protected function buildIterator(PhutilArgumentParser $args) {
+    $viewer = $this->getViewer();
     $names = $args->getArg('names');
 
-    if ($args->getArg('all')) {
-      if ($names) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'Specify either a list of files or `%s`, but not both.',
-            '--all'));
-      }
-      return new LiskMigrationIterator(new PhabricatorFile());
+    $is_all = $args->getArg('all');
+    $from_engine = $args->getArg('from-engine');
+
+    $any_constraint = ($from_engine || $names);
+
+    if (!$is_all && !$any_constraint) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Use "--all" to migrate all files, or choose files to migrate '.
+          'with "--names" or "--from-engine".'));
     }
 
+    if ($is_all && $any_constraint) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'You can not migrate all files with "--all" and also migrate only '.
+          'a subset of files with "--from-engine" or "--names".'));
+    }
+
+    // If we're migrating specific named files, convert the names into IDs
+    // first.
+    $ids = null;
     if ($names) {
-      return $this->loadFilesWithNames($names);
+      $files = $this->loadFilesWithNames($names);
+      $ids = mpull($files, 'getID');
     }
 
-    return null;
+    $query = id(new PhabricatorFileQuery())
+      ->setViewer($viewer);
+
+    if ($ids) {
+      $query->withIDs($ids);
+    }
+
+    if ($from_engine) {
+      $query->withStorageEngines(array($from_engine));
+    }
+
+    return new PhabricatorQueryIterator($query);
   }
 
   protected function loadFilesWithNames(array $names) {
@@ -36,7 +61,7 @@ abstract class PhabricatorFilesManagementWorkflow
       if (empty($files[$name])) {
         throw new PhutilArgumentUsageException(
           pht(
-            "No file '%s' exists!",
+            'No file "%s" exists.',
             $name));
       }
     }

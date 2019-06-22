@@ -341,6 +341,14 @@ final class PhabricatorJIRAAuthProvider
       return null;
     }
 
+    if (strlen($uri->getFragment())) {
+     return null;
+    }
+
+    if ($uri->getQueryParamsAsPairList()) {
+     return null;
+    }
+
     $domain = $matches[1];
     $issue = $matches[2];
 

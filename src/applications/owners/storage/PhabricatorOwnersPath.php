@@ -79,14 +79,26 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
   public static function getSetFromTransactionValue(array $v) {
     $set = array();
     foreach ($v as $ref) {
-      $set[$ref['repositoryPHID']][$ref['path']][$ref['excluded']] = true;
+      $key = self::getScalarKeyForRef($ref);
+      $set[$key] = true;
     }
     return $set;
   }
 
   public static function isRefInSet(array $ref, array $set) {
-    return isset($set[$ref['repositoryPHID']][$ref['path']][$ref['excluded']]);
+    $key = self::getScalarKeyForRef($ref);
+    return isset($set[$key]);
   }
+
+  private static function getScalarKeyForRef(array $ref) {
+    return sprintf(
+      'repository=%s path=%s display=%s excluded=%d',
+      $ref['repositoryPHID'],
+      $ref['path'],
+      $ref['display'],
+      $ref['excluded']);
+  }
+
 
   /**
    * Get the number of directory matches between this path specification and

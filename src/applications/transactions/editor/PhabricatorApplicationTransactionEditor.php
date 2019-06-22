@@ -3084,6 +3084,11 @@ abstract class PhabricatorApplicationTransactionEditor
             ->withObjectPHIDs(array($object->getPHID()))
             ->withPHIDs($xaction_phids)
             ->execute();
+
+          // Sort the mail transactions in the input order.
+          $mail_xactions = mpull($mail_xactions, null, 'getPHID');
+          $mail_xactions = array_select_keys($mail_xactions, $xaction_phids);
+          $mail_xactions = array_values($mail_xactions);
         } else {
           $mail_xactions = array();
         }
@@ -3262,7 +3267,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function getStrongestAction(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return head(msort($xactions, 'newActionStrengthSortVector'));
+    return head(msortv($xactions, 'newActionStrengthSortVector'));
   }
 
 
@@ -3417,12 +3422,39 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setViewer($this->requireActor())
       ->setContextObject($object);
 
-    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $button_label = $this->getObjectLinkButtonLabelForMail($object);
+    $button_uri = $this->getObjectLinkButtonURIForMail($object);
+
+    $this->addHeadersAndCommentsToMailBody(
+      $body,
+      $xactions,
+      $button_label,
+      $button_uri);
+
     $this->addCustomFieldsToMailBody($body, $object, $xactions);
 
     return $body;
   }
 
+  protected function getObjectLinkButtonLabelForMail(
+    PhabricatorLiskDAO $object) {
+    return null;
+  }
+
+  protected function getObjectLinkButtonURIForMail(
+    PhabricatorLiskDAO $object) {
+
+    // Most objects define a "getURI()" method which does what we want, but
+    // this isn't formally part of an interface at time of writing. Try to
+    // call the method, expecting an exception if it does not exist.
+
+    try {
+      $uri = $object->getURI();
+      return PhabricatorEnv::getProductionURI($uri);
+    } catch (Exception $ex) {
+      return null;
+    }
+  }
 
   /**
    * @task mail
@@ -3445,7 +3477,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorMetaMTAMailBody $body,
     array $xactions,
     $object_label = null,
-    $object_href = null) {
+    $object_uri = null) {
 
     // First, remove transactions which shouldn't be rendered in mail.
     foreach ($xactions as $key => $xaction) {
@@ -3511,7 +3543,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $headers_html = phutil_implode_html(phutil_tag('br'), $headers_html);
 
     $header_button = null;
-    if ($object_label !== null) {
+    if ($object_label !== null && $object_uri !== null) {
       $button_style = array(
         'text-decoration: none;',
         'padding: 4px 8px;',
@@ -3530,7 +3562,7 @@ abstract class PhabricatorApplicationTransactionEditor
         'a',
         array(
           'style' => implode(' ', $button_style),
-          'href' => $object_href,
+          'href' => $object_uri,
         ),
         $object_label);
     }

@@ -601,6 +601,11 @@ final class DifferentialTransactionEditor
     return $xactions;
   }
 
+  protected function getObjectLinkButtonLabelForMail(
+    PhabricatorLiskDAO $object) {
+    return pht('View Revision');
+  }
+
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -610,14 +615,13 @@ final class DifferentialTransactionEditor
     $body = id(new PhabricatorMetaMTAMailBody())
       ->setViewer($viewer);
 
-    $revision_uri = $object->getURI();
-    $revision_uri = PhabricatorEnv::getProductionURI($revision_uri);
+    $revision_uri = $this->getObjectLinkButtonURIForMail($object);
     $new_uri = $revision_uri.'/new/';
 
     $this->addHeadersAndCommentsToMailBody(
       $body,
       $xactions,
-      pht('View Revision'),
+      $this->getObjectLinkButtonLabelForMail($object),
       $revision_uri);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
