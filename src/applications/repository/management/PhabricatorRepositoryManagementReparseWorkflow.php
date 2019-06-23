@@ -252,12 +252,24 @@ final class PhabricatorRepositoryManagementReparseWorkflow
       );
 
       foreach ($classes as $class) {
-        PhabricatorWorker::scheduleTask(
-          $class,
-          $spec,
-          array(
-            'priority' => PhabricatorWorker::PRIORITY_IMPORT,
-          ));
+        try {
+          PhabricatorWorker::scheduleTask(
+            $class,
+            $spec,
+            array(
+              'priority' => PhabricatorWorker::PRIORITY_IMPORT,
+            ));
+        } catch (PhabricatorWorkerPermanentFailureException $ex) {
+          // See T13315. We expect some reparse steps to occasionally raise
+          // permanent failures: for example, because they are no longer
+          // reachable. This is a routine condition, not a catastrophic
+          // failure, so let the user know something happened but continue
+          // reparsing any remaining commits.
+          echo tsprintf(
+            "<bg:yellow>** %s **</bg> %s\n",
+            pht('WARN'),
+            $ex->getMessage());
+        }
       }
 
       $progress->update(1);

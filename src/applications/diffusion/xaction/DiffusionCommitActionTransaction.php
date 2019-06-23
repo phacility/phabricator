@@ -63,7 +63,7 @@ abstract class DiffusionCommitActionTransaction
       return false;
     }
 
-    return ($viewer->getPHID() === $commit->getAuthorPHID());
+    return ($viewer->getPHID() === $commit->getEffectiveAuthorPHID());
   }
 
   public function newEditField(

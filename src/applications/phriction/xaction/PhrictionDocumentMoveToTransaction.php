@@ -37,7 +37,7 @@ final class PhrictionDocumentMoveToTransaction
   }
 
   public function getActionStrength() {
-    return 1.0;
+    return 100;
   }
 
   public function getActionName() {

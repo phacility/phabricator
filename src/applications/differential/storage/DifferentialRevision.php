@@ -62,6 +62,7 @@ final class DifferentialRevision extends DifferentialDAO
   const PROPERTY_LINES_ADDED = 'lines.added';
   const PROPERTY_LINES_REMOVED = 'lines.removed';
   const PROPERTY_BUILDABLES = 'buildables';
+  const PROPERTY_WRONG_BUILDS = 'wrong.builds';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())

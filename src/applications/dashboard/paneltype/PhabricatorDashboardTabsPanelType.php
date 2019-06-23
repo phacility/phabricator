@@ -87,7 +87,15 @@ final class PhabricatorDashboardTabsPanelType
 
     $selected = 0;
 
-    $last_idx = null;
+    $key_list = array_keys($config);
+
+    $next_keys = array();
+    $prev_keys = array();
+    for ($ii = 0; $ii < count($key_list); $ii++) {
+      $next_keys[$key_list[$ii]] = idx($key_list, $ii + 1);
+      $prev_keys[$key_list[$ii]] = idx($key_list, $ii - 1);
+    }
+
     foreach ($config as $idx => $tab_spec) {
       $panel_id = idx($tab_spec, 'panelID');
       $subpanel = idx($panels, $panel_id);
@@ -145,6 +153,42 @@ final class PhabricatorDashboardTabsPanelType
             ->setHref($rename_tab_uri)
             ->setWorkflow(true));
 
+        $move_uri = urisprintf('/dashboard/panel/tabs/%d/move/', $id);
+
+        $prev_key = $prev_keys[$idx];
+        $prev_params = array(
+          'target' => $idx,
+          'after' => $prev_key,
+          'move' => 'prev',
+          'contextPHID' => $context_phid,
+        );
+        $prev_uri = new PhutilURI($move_uri, $prev_params);
+
+        $next_key = $next_keys[$idx];
+        $next_params = array(
+          'target' => $idx,
+          'after' => $next_key,
+          'move' => 'next',
+          'contextPHID' => $context_phid,
+        );
+        $next_uri = new PhutilURI($move_uri, $next_params);
+
+        $dropdown_menu->addAction(
+          id(new PhabricatorActionView())
+            ->setName(pht('Move Tab Left'))
+            ->setIcon('fa-chevron-left')
+            ->setHref($prev_uri)
+            ->setWorkflow(true)
+            ->setDisabled(($prev_key === null) || !$can_edit));
+
+        $dropdown_menu->addAction(
+          id(new PhabricatorActionView())
+            ->setName(pht('Move Tab Right'))
+            ->setIcon('fa-chevron-right')
+            ->setHref($next_uri)
+            ->setWorkflow(true)
+            ->setDisabled(($next_key === null) || !$can_edit));
+
         $dropdown_menu->addAction(
           id(new PhabricatorActionView())
             ->setName(pht('Remove Tab'))
@@ -177,15 +221,16 @@ final class PhabricatorDashboardTabsPanelType
       }
 
       $list->addMenuItem($tab_view);
-
-      $last_idx = $idx;
     }
+
 
     if ($is_edit) {
       $actions = id(new PhabricatorActionListView())
         ->setViewer($viewer);
 
       $add_last_uri = clone $add_uri;
+
+      $last_idx = last_key($config);
       if ($last_idx) {
         $add_last_uri->replaceQueryParam('after', $last_idx);
       }

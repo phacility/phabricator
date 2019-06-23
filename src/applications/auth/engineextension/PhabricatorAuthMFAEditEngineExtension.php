@@ -38,6 +38,7 @@ final class PhabricatorAuthMFAEditEngineExtension
       ->setLabel(pht('MFA'))
       ->setIsFormField(false)
       ->setCommentActionLabel(pht('Sign With MFA'))
+      ->setCanApplyWithoutEditCapability(true)
       ->setCommentActionOrder(12000)
       ->setActionDescription(
         pht('You will be prompted to provide MFA when you submit.'))

@@ -47,12 +47,20 @@ final class DoorkeeperBridgeJIRA extends DoorkeeperBridge {
     // (by querying all instances). For now, just query the one instance.
     $account = head($accounts);
 
+    $timeout = $this->getTimeout();
+
     $futures = array();
     foreach ($id_map as $key => $id) {
-      $futures[$key] = $provider->newJIRAFuture(
+      $future = $provider->newJIRAFuture(
         $account,
         'rest/api/2/issue/'.phutil_escape_uri($id),
         'GET');
+
+      if ($timeout !== null) {
+        $future->setTimeout($timeout);
+      }
+
+      $futures[$key] = $future;
     }
 
     $results = array();

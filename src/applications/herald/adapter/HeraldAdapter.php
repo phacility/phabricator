@@ -130,6 +130,14 @@ abstract class HeraldAdapter extends Phobject {
 
   abstract public function getHeraldName();
 
+  final public function willGetHeraldField($field_key) {
+    // This method is called during rule evaluation, before we engage the
+    // Herald profiler. We make sure we have a concrete implementation so time
+    // spent loading fields out of the classmap is not mistakenly attributed to
+    // whichever field happens to evaluate first.
+    $this->requireFieldImplementation($field_key);
+  }
+
   public function getHeraldField($field_key) {
     return $this->requireFieldImplementation($field_key)
       ->getHeraldFieldValue($this->getObject());

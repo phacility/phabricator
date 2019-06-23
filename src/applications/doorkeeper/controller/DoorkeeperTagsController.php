@@ -26,6 +26,7 @@ final class DoorkeeperTagsController extends PhabricatorController {
     $refs = id(new DoorkeeperImportEngine())
       ->setViewer($viewer)
       ->setRefs($refs)
+      ->setTimeout(15)
       ->execute();
 
     $results = array();

@@ -32,6 +32,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $isSilent;
   private $isMFA;
   private $isLockOverride;
+  private $canInteract;
 
   public function setAuthorPHID($author_phid) {
     $this->authorPHID = $author_phid;
@@ -112,6 +113,15 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function getIsEditable() {
     return $this->isEditable;
+  }
+
+  public function setCanInteract($can_interact) {
+    $this->canInteract = $can_interact;
+    return $this;
+  }
+
+  public function getCanInteract() {
+    return $this->canInteract;
   }
 
   public function setIsRemovable($is_removable) {
@@ -650,6 +660,10 @@ final class PHUITimelineEventView extends AphrontView {
   private function getMenuItems($anchor) {
     $xaction_phid = $this->getTransactionPHID();
 
+    $can_interact = $this->getCanInteract();
+    $viewer = $this->getViewer();
+    $is_admin = $viewer->getIsAdmin();
+
     $items = array();
 
     if ($this->getIsEditable()) {
@@ -658,6 +672,7 @@ final class PHUITimelineEventView extends AphrontView {
         ->setHref('/transactions/edit/'.$xaction_phid.'/')
         ->setName(pht('Edit Comment'))
         ->addSigil('transaction-edit')
+        ->setDisabled(!$can_interact)
         ->setMetadata(
           array(
             'anchor' => $anchor,
@@ -727,17 +742,23 @@ final class PHUITimelineEventView extends AphrontView {
       $items[] = id(new PhabricatorActionView())
         ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
-      $items[] = id(new PhabricatorActionView())
+      $remove_item = id(new PhabricatorActionView())
         ->setIcon('fa-trash-o')
         ->setHref('/transactions/remove/'.$xaction_phid.'/')
         ->setName(pht('Remove Comment'))
-        ->setColor(PhabricatorActionView::RED)
         ->addSigil('transaction-remove')
         ->setMetadata(
           array(
             'anchor' => $anchor,
           ));
 
+      if (!$is_admin && !$can_interact) {
+        $remove_item->setDisabled(!$is_admin && !$can_interact);
+      } else {
+        $remove_item->setColor(PhabricatorActionView::RED);
+      }
+
+      $items[] = $remove_item;
     }
 
     return $items;

@@ -174,40 +174,29 @@
   list-style-type: none;
 }
 
-.phabricator-remarkup h1.remarkup-header {
-  font-size: 24px;
-  line-height: 1.625em;
-  margin: 24px 0 4px;
-}
-
 .phabricator-remarkup h2.remarkup-header {
-  font-size: 20px;
-  line-height: 1.5em;
-  margin: 20px 0 4px;
+  font-size: 28px;
+  margin: 1em 0 0.75em;
 }
 
 .phabricator-remarkup h3.remarkup-header {
-  font-size: 18px;
-  line-height: 1.375em;
-  margin: 20px 0 4px;
+  font-size: 24px;
+  margin: 1em 0 0.75em;
 }
 
 .phabricator-remarkup h4.remarkup-header {
-  font-size: 16px;
-  line-height: 1.25em;
-  margin: 12px 0 4px;
+  font-size: 22px;
+  margin: 1em 0 0.75em;
 }
 
 .phabricator-remarkup h5.remarkup-header {
-  font-size: 15px;
-  line-height: 1.125em;
-  margin: 8px 0 4px;
+  font-size: 18px;
+  margin: 1em 0 0.75em;
 }
 
 .phabricator-remarkup h6.remarkup-header {
-  font-size: 14px;
-  line-height: 1em;
-  margin: 4px 0;
+  font-size: 16px;
+  margin: 1em 0 0.75em;
 }
 
 .phabricator-remarkup blockquote {

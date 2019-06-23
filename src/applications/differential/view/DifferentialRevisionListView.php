@@ -60,6 +60,16 @@ final class DifferentialRevisionListView extends AphrontView {
     $handle_phids = array();
     foreach ($this->revisions as $key => $revision) {
       $reviewers = $revision->getReviewers();
+
+      // Don't show reviewers who have resigned. The "Reviewers" constraint
+      // does not respect these reviewers and they largely don't count as
+      // reviewers.
+      foreach ($reviewers as $reviewer_key => $reviewer) {
+        if ($reviewer->isResigned()) {
+          unset($reviewers[$reviewer_key]);
+        }
+      }
+
       if (count($reviewers) > $reviewer_limit) {
         $reviewers = array_slice($reviewers, 0, $reviewer_limit);
         $reviewer_more[$key] = true;

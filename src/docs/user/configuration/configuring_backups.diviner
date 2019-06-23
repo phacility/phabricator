@@ -42,7 +42,7 @@ but will only dump databases Phabricator owns.
 Since most of this data is compressible, it may be helpful to run it through
 gzip prior to storage. For example:
 
-  phabricator/ $ ./bin/storage dump | gzip > backup.sql.gz
+  phabricator/ $ ./bin/storage dump --compress --output backup.sql.gz
 
 Then store the backup somewhere safe, like in a box buried under an old tree
 stump. No one will ever think to look for it there.

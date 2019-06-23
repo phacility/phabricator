@@ -10,7 +10,7 @@ final class PholioMockNameTransaction
   }
 
   public function getActionStrength() {
-    return 1.4;
+    return 140;
   }
 
   public function applyInternalEffects($object, $value) {

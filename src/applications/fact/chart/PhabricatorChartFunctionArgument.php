@@ -5,7 +5,7 @@ final class PhabricatorChartFunctionArgument
 
   private $name;
   private $type;
-  private $isSourceFunction;
+  private $repeatable;
 
   public function setName($name) {
     $this->name = $name;
@@ -16,11 +16,21 @@ final class PhabricatorChartFunctionArgument
     return $this->name;
   }
 
+  public function setRepeatable($repeatable) {
+    $this->repeatable = $repeatable;
+    return $this;
+  }
+
+  public function getRepeatable() {
+    return $this->repeatable;
+  }
+
   public function setType($type) {
     $types = array(
       'fact-key' => true,
       'function' => true,
       'number' => true,
+      'phid' => true,
     );
 
     if (!isset($types[$type])) {
@@ -40,17 +50,12 @@ final class PhabricatorChartFunctionArgument
     return $this->type;
   }
 
-  public function setIsSourceFunction($is_source_function) {
-    $this->isSourceFunction = $is_source_function;
-    return $this;
-  }
-
-  public function getIsSourceFunction() {
-    return $this->isSourceFunction;
-  }
-
   public function newValue($value) {
     switch ($this->getType()) {
+      case 'phid':
+        // TODO: This could be validated better, but probably should not be
+        // a primitive type.
+        return $value;
       case 'fact-key':
         if (!is_string($value)) {
           throw new Exception(

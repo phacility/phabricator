@@ -28,7 +28,10 @@ abstract class DiffusionRequest extends Phobject {
   private $branchObject = false;
   private $refAlternatives;
 
-  abstract public function supportsBranches();
+  final public function supportsBranches() {
+    return $this->getRepository()->supportsRefs();
+  }
+
   abstract protected function isStableCommit($symbol);
 
   protected function didInitialize() {

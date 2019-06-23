@@ -2040,6 +2040,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return true;
   }
 
+
+  public function supportsRefs() {
+    if ($this->isSVN()) {
+      return false;
+    }
+
+    return true;
+  }
+
   public function getAlmanacServiceCacheKey() {
     $service_phid = $this->getAlmanacServicePHID();
     if (!$service_phid) {

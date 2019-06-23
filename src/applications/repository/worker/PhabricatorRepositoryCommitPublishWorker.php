@@ -62,12 +62,25 @@ final class PhabricatorRepositoryCommitPublishWorker
     $acting_phid = $this->getPublishAsPHID($commit);
     $content_source = $this->newContentSource();
 
+    $revision = DiffusionCommitRevisionQuery::loadRevisionForCommit(
+      $viewer,
+      $commit);
+
+    // Prevent the commit from generating a mention of the associated
+    // revision, if one exists, so we don't double up because of the URI
+    // in the commit message.
+    $unmentionable_phids = array();
+    if ($revision) {
+      $unmentionable_phids[] = $revision->getPHID();
+    }
+
     $editor = $commit->getApplicationTransactionEditor()
       ->setActor($viewer)
       ->setActingAsPHID($acting_phid)
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
-      ->setContentSource($content_source);
+      ->setContentSource($content_source)
+      ->addUnmentionablePHIDs($unmentionable_phids);
 
     try {
       $raw_patch = $this->loadRawPatchText($repository, $commit);
@@ -134,17 +147,11 @@ final class PhabricatorRepositoryCommitPublishWorker
 
     $data = $commit->getCommitData();
 
-    $author_phid = $data->getCommitDetail('authorPHID');
-    $revision_id = $data->getCommitDetail('differential.revisionID');
-    if ($revision_id) {
-      $revision = id(new DifferentialRevisionQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($revision_id))
-        ->needReviewers(true)
-        ->executeOne();
-    } else {
-      $revision = null;
-    }
+    $author_phid = $commit->getEffectiveAuthorPHID();
+
+    $revision = DiffusionCommitRevisionQuery::loadRevisionForCommit(
+      $viewer,
+      $commit);
 
     $requests = $commit->getAudits();
     $requests = mpull($requests, null, 'getAuditorPHID');
@@ -216,13 +223,22 @@ final class PhabricatorRepositoryCommitPublishWorker
 
     // If auditing is configured to trigger on unreviewed changes, check if
     // the revision was "Accepted" when it landed. If not, trigger an audit.
+
+    // We may be running before the revision actually closes, so we'll count
+    // either an "Accepted" or a "Closed, Previously Accepted" revision as
+    // good enough.
+
     if ($audit_unreviewed) {
       $commit_unreviewed = true;
       if ($revision) {
-        $was_accepted = DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED;
-        if ($revision->isPublished()) {
-          if ($revision->getProperty($was_accepted)) {
-            $commit_unreviewed = false;
+        if ($revision->isAccepted()) {
+          $commit_unreviewed = false;
+        } else {
+          $was_accepted = DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED;
+          if ($revision->isPublished()) {
+            if ($revision->getProperty($was_accepted)) {
+              $commit_unreviewed = false;
+            }
           }
         }
       }

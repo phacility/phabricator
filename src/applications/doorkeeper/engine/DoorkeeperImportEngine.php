@@ -8,6 +8,7 @@ final class DoorkeeperImportEngine extends Phobject {
   private $localOnly;
   private $throwOnMissingLink;
   private $context = array();
+  private $timeout;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -41,6 +42,15 @@ final class DoorkeeperImportEngine extends Phobject {
   public function setContextProperty($key, $value) {
     $this->context[$key] = $value;
     return $this;
+  }
+
+  public function setTimeout($timeout) {
+    $this->timeout = $timeout;
+    return $this;
+  }
+
+  public function getTimeout() {
+    return $this->timeout;
   }
 
   /**
@@ -98,10 +108,16 @@ final class DoorkeeperImportEngine extends Phobject {
         ->setFilterMethod('isEnabled')
         ->execute();
 
+      $timeout = $this->getTimeout();
       foreach ($bridges as $key => $bridge) {
-        $bridge->setViewer($viewer);
-        $bridge->setThrowOnMissingLink($this->throwOnMissingLink);
-        $bridge->setContext($this->context);
+        $bridge
+          ->setViewer($viewer)
+          ->setThrowOnMissingLink($this->throwOnMissingLink)
+          ->setContext($this->context);
+
+        if ($timeout !== null) {
+          $bridge->setTimeout($timeout);
+        }
       }
 
       $working_set = $refs;

@@ -6,20 +6,17 @@ final class PhabricatorSinChartFunction
   const FUNCTIONKEY = 'sin';
 
   protected function newArguments() {
-    return array(
-      $this->newArgument()
-        ->setName('x')
-        ->setType('function')
-        ->setIsSourceFunction(true),
-    );
+    return array();
   }
 
-  protected function canEvaluateFunction() {
-    return true;
-  }
+  public function evaluateFunction(array $xv) {
+    $yv = array();
 
-  protected function evaluateFunction($x) {
-    return sin(deg2rad($x));
+    foreach ($xv as $x) {
+      $yv[] = sin(deg2rad($x));
+    }
+
+    return $yv;
   }
 
 }

@@ -27,7 +27,7 @@ final class ManiphestTaskPriorityTransaction
   }
 
   public function getActionStrength() {
-    return 1.1;
+    return 110;
   }
 
   public function getActionName() {

@@ -33,9 +33,10 @@ final class DiffusionBranchListView extends DiffusionView {
     Javelin::initBehavior('phabricator-tooltips');
 
     $list = id(new PHUIObjectItemListView())
-      ->setFlush(true)
       ->addClass('diffusion-history-list')
       ->addClass('diffusion-branch-list');
+
+    $publisher = $repository->newPublisher();
 
     foreach ($this->branches as $branch) {
       $build_view = null;
@@ -116,8 +117,16 @@ final class DiffusionBranchListView extends DiffusionView {
         ));
 
       if ($branch->getShortName() == $repository->getDefaultBranch()) {
-        $item->setStatusIcon('fa-code-fork', pht('Default Branch'));
+        $item->setStatusIcon('fa-star', pht('Default Branch'));
+      } else {
+        if ($publisher->shouldPublishRef($branch)) {
+          $item->setStatusIcon('fa-code-fork', pht('Permanent Ref'));
+        } else {
+          $item->setStatusIcon(
+            'fa-folder-open-o grey', pht('Not a Permanent Ref'));
+        }
       }
+
       $item->addAttribute(array($datetime));
 
       if ($can_close_branches) {

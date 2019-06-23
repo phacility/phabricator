@@ -187,61 +187,76 @@ final class DiffusionGitUploadPackWireProtocol
       //   <hash> <ref-name>\0<capabilities>
       //   <hash> <ref-name>
       //   ...
+      //
+      // See T13309. The end of this list (which may be empty if a repository
+      // does not have any refs) has a list of zero or more of these:
+      //
+      //   shallow <hash>
+      //
+      // These entries are present if the repository is a shallow clone
+      // which was made with the "--depth" flag.
+      //
+      // Note that "shallow" frames do not advertise capabilities, and if
+      // a repository has only "shallow" frames, capabilities are never
+      // advertised.
 
       $bytes = $frame['bytes'];
       $matches = array();
       if ($is_first) {
-        $ok = preg_match(
-          '('.
-            '^'.
-            '(?P<hash>[0-9a-f]{40})'.
-            ' '.
-            '(?P<name>[^\0\n]+)'.
-            '\0'.
-            '(?P<capabilities>[^\n]+)'.
-            '\n'.
-            '\z'.
-          ')',
-          $bytes,
-          $matches);
-        if (!$ok) {
+        $capabilities_pattern = '\0(?P<capabilities>[^\n]+)';
+      } else {
+        $capabilities_pattern = '';
+      }
+
+      $ok = preg_match(
+        '('.
+          '^'.
+          '(?:'.
+            '(?P<hash>[0-9a-f]{40}) (?P<name>[^\0\n]+)'.$capabilities_pattern.
+            '|'.
+            'shallow (?P<shallow>[0-9a-f]{40})'.
+          ')'.
+          '\n'.
+          '\z'.
+        ')',
+        $bytes,
+        $matches);
+
+      if (!$ok) {
+        if ($is_first) {
           throw new Exception(
             pht(
               'Unexpected "git upload-pack" initial protocol frame: expected '.
-              '"<hash> <name>\0<capabilities>\n", got "%s".',
+              '"<hash> <name>\0<capabilities>\n", or '.
+              '"shallow <hash>\n", got "%s".',
               $bytes));
-        }
-      } else {
-        $ok = preg_match(
-          '('.
-            '^'.
-            '(?P<hash>[0-9a-f]{40})'.
-            ' '.
-            '(?P<name>[^\0\n]+)'.
-            '\n'.
-            '\z'.
-          ')',
-          $bytes,
-          $matches);
-        if (!$ok) {
+        } else {
           throw new Exception(
             pht(
               'Unexpected "git upload-pack" protocol frame: expected '.
-              '"<hash> <name>\n", got "%s".',
+              '"<hash> <name>\n", or "shallow <hash>\n", got "%s".',
               $bytes));
         }
       }
 
-      $hash = $matches['hash'];
-      $name = $matches['name'];
+      if (isset($matches['shallow'])) {
+        $name = null;
+        $hash = $matches['shallow'];
+        $is_shallow = true;
+      } else {
+        $name = $matches['name'];
+        $hash = $matches['hash'];
+        $is_shallow = false;
+      }
 
-      if ($is_first) {
+      if (isset($matches['capabilities'])) {
         $capabilities = $matches['capabilities'];
       }
 
       $refs[] = array(
         'hash' => $hash,
         'name' => $name,
+        'shallow' => $is_shallow,
       );
     }
 
@@ -252,10 +267,16 @@ final class DiffusionGitUploadPackWireProtocol
       ->setCapabilities($capabilities);
 
     foreach ($refs as $ref) {
-      $ref_list->addRef(
-        id(new DiffusionGitWireProtocolRef())
-          ->setName($ref['name'])
-          ->setHash($ref['hash']));
+      $wire_ref = id(new DiffusionGitWireProtocolRef())
+        ->setHash($ref['hash']);
+
+      if ($ref['shallow']) {
+        $wire_ref->setIsShallow(true);
+      } else {
+        $wire_ref->setName($ref['name']);
+      }
+
+      $ref_list->addRef($wire_ref);
     }
 
     // TODO: Here, we have a structured list of refs. In a future change,
@@ -275,10 +296,19 @@ final class DiffusionGitUploadPackWireProtocol
     // a little surprising, but is consistent with the native behavior of the
     // protocol.
 
+    // Likewise, we don't send back any capabilities if we're sending only
+    // "shallow" frames.
+
     $output = array();
     $is_first = true;
     foreach ($refs as $ref) {
-      if ($is_first) {
+      $is_shallow = $ref->getIsShallow();
+
+      if ($is_shallow) {
+        $result = sprintf(
+          "shallow %s\n",
+          $ref->getHash());
+      } else if ($is_first) {
         $result = sprintf(
           "%s %s\0%s\n",
           $ref->getHash(),

@@ -127,7 +127,19 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function hasComment() {
-    return $this->getComment() && strlen($this->getComment()->getContent());
+    if (!$this->getComment()) {
+      return false;
+    }
+
+    $content = $this->getComment()->getContent();
+
+    // If the content is empty or consists of only whitespace, don't count
+    // this as comment.
+    if (!strlen(trim($content))) {
+      return false;
+    }
+
+    return true;
   }
 
   public function getComment() {
@@ -175,6 +187,14 @@ abstract class PhabricatorApplicationTransaction
 
   public function getIsLockOverrideTransaction() {
     return (bool)$this->getMetadataValue('core.lock-override', false);
+  }
+
+  public function setTransactionGroupID($group_id) {
+    return $this->setMetadataValue('core.groupID', $group_id);
+  }
+
+  public function getTransactionGroupID() {
+    return $this->getMetadataValue('core.groupID', null);
   }
 
   public function attachComment(
@@ -703,6 +723,8 @@ abstract class PhabricatorApplicationTransaction
           case DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST:
           case ManiphestTaskHasCommitEdgeType::EDGECONST:
           case DiffusionCommitHasTaskEdgeType::EDGECONST:
+          case DiffusionCommitHasRevisionEdgeType::EDGECONST:
+          case DifferentialRevisionHasCommitEdgeType::EDGECONST:
             return true;
           case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
             // When an object is first created, we hide any corresponding
@@ -762,6 +784,8 @@ abstract class PhabricatorApplicationTransaction
           case DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST:
           case ManiphestTaskHasCommitEdgeType::EDGECONST:
           case DiffusionCommitHasTaskEdgeType::EDGECONST:
+          case DiffusionCommitHasRevisionEdgeType::EDGECONST:
+          case DifferentialRevisionHasCommitEdgeType::EDGECONST:
             return true;
           default:
             break;
@@ -1351,35 +1375,35 @@ abstract class PhabricatorApplicationTransaction
 
   public function getActionStrength() {
     if ($this->isInlineCommentTransaction()) {
-      return 0.25;
+      return 250;
     }
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-        return 0.5;
+        return 500;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         if ($this->isSelfSubscription()) {
           // Make this weaker than TYPE_COMMENT.
-          return 0.25;
+          return 250;
         }
 
         if ($this->isApplicationAuthor()) {
           // When applications (most often: Herald) change subscriptions it
           // is very uninteresting.
-          return 0.000000001;
+          return 1;
         }
 
         // In other cases, subscriptions are more interesting than comments
         // (which are shown anyway) but less interesting than any other type of
         // transaction.
-        return 0.75;
+        return 750;
       case PhabricatorTransactions::TYPE_MFA:
         // We want MFA signatures to render at the top of transaction groups,
         // on top of the things they signed.
-        return 10;
+        return 10000;
     }
 
-    return 1.0;
+    return 1000;
   }
 
   public function isCommentTransaction() {
@@ -1697,6 +1721,17 @@ abstract class PhabricatorApplicationTransaction
     }
 
     return array($done, $undone);
+  }
+
+  public function newGlobalSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt(-$this->getDateCreated())
+      ->addString($this->getPHID());
+  }
+
+  public function newActionStrengthSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt(-$this->getActionStrength());
   }
 
 

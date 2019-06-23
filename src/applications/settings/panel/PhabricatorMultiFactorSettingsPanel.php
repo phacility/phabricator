@@ -54,7 +54,7 @@ final class PhabricatorMultiFactorSettingsPanel
       ->setViewer($viewer)
       ->withUserPHIDs(array($user->getPHID()))
       ->execute();
-    $factors = msort($factors, 'newSortVector');
+    $factors = msortv($factors, 'newSortVector');
 
     $rows = array();
     $rowc = array();

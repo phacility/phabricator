@@ -29,6 +29,12 @@ final class PhabricatorMailManagementReceiveTestWorkflow
             'param'   => 'object',
             'help'    => pht('Simulate mail delivery "To:" the given object.'),
           ),
+          array(
+            'name' => 'cc',
+            'param' => 'address',
+            'help' => pht('Simulate a mail delivery "Cc:" address.'),
+            'repeat' => true,
+          ),
         ));
   }
 
@@ -84,6 +90,8 @@ final class PhabricatorMailManagementReceiveTestWorkflow
       $from = $user->loadPrimaryEmail()->getAddress();
     }
 
+    $cc = $args->getArg('cc');
+
     $console->writeErr("%s\n", pht('Reading message body from stdin...'));
     $body = file_get_contents('php://stdin');
 
@@ -91,6 +99,7 @@ final class PhabricatorMailManagementReceiveTestWorkflow
     $header_content = array(
       'Message-ID' => Filesystem::readRandomCharacters(12),
       'From'       => $from,
+      'Cc' => implode(', ', $cc),
     );
 
     if (preg_match('/.+@.+/', $to)) {

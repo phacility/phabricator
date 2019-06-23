@@ -281,7 +281,11 @@ final class DifferentialDiffExtractionEngine extends Phobject {
         ->setNewValue($revision->getModernRevisionStatus());
     }
 
-    $concerning_builds = $this->loadConcerningBuilds($revision);
+    $concerning_builds = self::loadConcerningBuilds(
+      $this->getViewer(),
+      $revision,
+      $strict = false);
+
     if ($concerning_builds) {
       $build_list = array();
       foreach ($concerning_builds as $build) {
@@ -328,8 +332,11 @@ final class DifferentialDiffExtractionEngine extends Phobject {
     $editor->applyTransactions($revision, $xactions);
   }
 
-  private function loadConcerningBuilds(DifferentialRevision $revision) {
-    $viewer = $this->getViewer();
+  public static function loadConcerningBuilds(
+    PhabricatorUser $viewer,
+    DifferentialRevision $revision,
+    $strict) {
+
     $diff = $revision->getActiveDiff();
 
     $buildables = id(new HarbormasterBuildableQuery())
@@ -341,7 +348,6 @@ final class DifferentialDiffExtractionEngine extends Phobject {
     if (!$buildables) {
       return array();
     }
-
 
     $land_key = HarbormasterBuildPlanBehavior::BEHAVIOR_LANDWARNING;
     $behavior = HarbormasterBuildPlanBehavior::getBehavior($land_key);
@@ -391,7 +397,13 @@ final class DifferentialDiffExtractionEngine extends Phobject {
           // cases where the repository is observed and the fetch pipeline
           // stalls for a while.
 
-          continue;
+          // If we're in strict mode (from a pre-commit content hook), we do
+          // not ignore these, since we're doing an instantaneous check against
+          // the current state.
+
+          if (!$strict) {
+            continue;
+          }
         }
 
         if ($build->isPassed()) {

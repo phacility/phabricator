@@ -104,7 +104,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     // Now that we made sure the viewer can actually see the object the
-    // external cursor  identifies, return the internal cursor the query
+    // external cursor identifies, return the internal cursor the query
     // generated as a side effect while loading the object.
     return $query->getInternalCursorObject();
   }
@@ -134,7 +134,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     );
   }
 
-
   final private function getExternalCursorStringForResult($object) {
     $cursor = $this->newExternalCursorStringForResult($object);
 
@@ -150,7 +149,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $cursor;
   }
 
-  final private function getExternalCursorString() {
+  final protected function getExternalCursorString() {
     return $this->externalCursorString;
   }
 
@@ -159,11 +158,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this;
   }
 
-  final private function getIsQueryOrderReversed() {
+  final protected function getIsQueryOrderReversed() {
     return $this->isQueryOrderReversed;
   }
 
-  final private function setIsQueryOrderReversed($is_reversed) {
+  final protected function setIsQueryOrderReversed($is_reversed) {
     $this->isQueryOrderReversed = $is_reversed;
     return $this;
   }

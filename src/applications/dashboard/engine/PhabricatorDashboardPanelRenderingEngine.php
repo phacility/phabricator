@@ -329,6 +329,18 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     $actions = array();
 
     if ($panel) {
+      $panel_actions = $panel->newHeaderEditActions(
+        $viewer,
+        $context_phid);
+
+      if ($panel_actions) {
+        foreach ($panel_actions as $panel_action) {
+          $actions[] = $panel_action;
+        }
+        $actions[] = id(new PhabricatorActionView())
+          ->setType(PhabricatorActionView::TYPE_DIVIDER);
+      }
+
       $panel_id = $panel->getID();
 
       $edit_uri = "/dashboard/panel/edit/{$panel_id}/";

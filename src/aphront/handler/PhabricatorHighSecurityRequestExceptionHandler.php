@@ -120,6 +120,13 @@ final class PhabricatorHighSecurityRequestExceptionHandler
       $dialog->addHiddenInput($key, $value);
     }
 
+    // See T13289. If the user hit a "some transactions have no effect" dialog
+    // and elected to continue, we want to pass that flag through the MFA
+    // dialog even though it is not normally a passthrough request parameter.
+    if ($request->isContinueRequest()) {
+      $dialog->addHiddenInput(AphrontRequest::TYPE_CONTINUE, 1);
+    }
+
     return $dialog;
   }
 

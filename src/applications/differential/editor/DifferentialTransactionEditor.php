@@ -601,6 +601,11 @@ final class DifferentialTransactionEditor
     return $xactions;
   }
 
+  protected function getObjectLinkButtonLabelForMail(
+    PhabricatorLiskDAO $object) {
+    return pht('View Revision');
+  }
+
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -610,14 +615,13 @@ final class DifferentialTransactionEditor
     $body = id(new PhabricatorMetaMTAMailBody())
       ->setViewer($viewer);
 
-    $revision_uri = $object->getURI();
-    $revision_uri = PhabricatorEnv::getProductionURI($revision_uri);
+    $revision_uri = $this->getObjectLinkButtonURIForMail($object);
     $new_uri = $revision_uri.'/new/';
 
     $this->addHeadersAndCommentsToMailBody(
       $body,
       $xactions,
-      pht('View Revision'),
+      $this->getObjectLinkButtonLabelForMail($object),
       $revision_uri);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
@@ -832,21 +836,13 @@ final class DifferentialTransactionEditor
     }
 
     if ($revert_monograms) {
-      $revert_objects = id(new PhabricatorObjectQuery())
-        ->setViewer($this->getActor())
-        ->withNames($revert_monograms)
-        ->withTypes(
-          array(
-            DifferentialRevisionPHIDType::TYPECONST,
-            PhabricatorRepositoryCommitPHIDType::TYPECONST,
-          ))
-        ->execute();
+      $revert_objects = DiffusionCommitRevisionQuery::loadRevertedObjects(
+        $this->getActor(),
+        $object,
+        $revert_monograms,
+        null);
 
       $revert_phids = mpull($revert_objects, 'getPHID', 'getPHID');
-
-      // Don't let an object revert itself, although other silly stuff like
-      // cycles of objects reverting each other is not prevented.
-      unset($revert_phids[$object->getPHID()]);
 
       $revert_type = DiffusionCommitRevertsCommitEdgeType::EDGECONST;
       $edges[$revert_type] = $revert_phids;
@@ -854,13 +850,9 @@ final class DifferentialTransactionEditor
       $revert_phids = array();
     }
 
-    // See PHI574. Respect any unmentionable PHIDs which were set on the
-    // Editor by the caller.
-    $unmentionable_map = $this->getUnmentionablePHIDMap();
-    $unmentionable_map += $task_phids;
-    $unmentionable_map += $rev_phids;
-    $unmentionable_map += $revert_phids;
-    $this->setUnmentionablePHIDMap($unmentionable_map);
+    $this->addUnmentionablePHIDs($task_phids);
+    $this->addUnmentionablePHIDs($rev_phids);
+    $this->addUnmentionablePHIDs($revert_phids);
 
     $result = array();
     foreach ($edges as $type => $specs) {

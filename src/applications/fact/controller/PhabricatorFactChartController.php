@@ -5,138 +5,38 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
+    $chart_key = $request->getURIData('chartKey');
+    if ($chart_key === null) {
+      return $this->newDemoChart();
+    }
+
+    $engine = id(new PhabricatorChartRenderingEngine())
+      ->setViewer($viewer);
+
+    $chart = $engine->loadChart($chart_key);
+    if (!$chart) {
+      return new Aphront404Response();
+    }
+
     // When drawing a chart, we send down a placeholder piece of HTML first,
     // then fetch the data via async request. Determine if we're drawing
     // the structure or actually pulling the data.
     $mode = $request->getURIData('mode');
-    $is_chart_mode = ($mode === 'chart');
     $is_draw_mode = ($mode === 'draw');
 
-    $functions = array();
+    // TODO: For now, always pull the data. We'll throw it away if we're just
+    // drawing the frame, but this makes errors easier to debug.
+    $chart_data = $engine->newChartData();
 
-    $functions[] = id(new PhabricatorFactChartFunction())
-      ->setArguments(array('tasks.count.create'));
-
-    $functions[] = id(new PhabricatorFactChartFunction())
-      ->setArguments(array('tasks.open-count.create'));
-
-    $x_function = id(new PhabricatorXChartFunction())
-      ->setArguments(array());
-
-    $functions[] = id(new PhabricatorConstantChartFunction())
-      ->setArguments(array(360));
-
-    $functions[] = id(new PhabricatorSinChartFunction())
-      ->setArguments(array($x_function));
-
-    $cos_function = id(new PhabricatorCosChartFunction())
-      ->setArguments(array($x_function));
-
-    $functions[] = id(new PhabricatorShiftChartFunction())
-      ->setArguments(
-        array(
-          array(
-            'scale',
-            array(
-              'cos',
-              array(
-                'scale',
-                array('x'),
-                0.001,
-              ),
-            ),
-            10,
-          ),
-          200,
-        ));
-
-    list($domain_min, $domain_max) = $this->getDomain($functions);
-
-    $axis = id(new PhabricatorChartAxis())
-      ->setMinimumValue($domain_min)
-      ->setMaximumValue($domain_max);
-
-    $data_query = id(new PhabricatorChartDataQuery())
-      ->setMinimumValue($domain_min)
-      ->setMaximumValue($domain_max)
-      ->setLimit(2000);
-
-    $datasets = array();
-    foreach ($functions as $function) {
-      $function->setXAxis($axis);
-
-      $function->loadData();
-
-      $points = $function->getDatapoints($data_query);
-
-      $x = array();
-      $y = array();
-
-      foreach ($points as $point) {
-        $x[] = $point['x'];
-        $y[] = $point['y'];
-      }
-
-      $datasets[] = array(
-        'x' => $x,
-        'y' => $y,
-        'color' => '#ff00ff',
-      );
+    if ($is_draw_mode) {
+      return id(new AphrontAjaxResponse())->setContent($chart_data);
     }
 
-
-    $y_min = 0;
-    $y_max = 0;
-    foreach ($datasets as $dataset) {
-      if (!$dataset['y']) {
-        continue;
-      }
-
-      $y_min = min($y_min, min($dataset['y']));
-      $y_max = max($y_max, max($dataset['y']));
-    }
-
-    $chart_data = array(
-      'datasets' => $datasets,
-      'xMin' => $domain_min,
-      'xMax' => $domain_max,
-      'yMin' => $y_min,
-      'yMax' => $y_max,
-    );
-
-    // TODO: Move this back up, it's just down here for now to make
-    // debugging easier so the main page throws a more visible exception when
-    // something goes wrong.
-    if ($is_chart_mode) {
-      return $this->newChartResponse();
-    }
-
-    return id(new AphrontAjaxResponse())->setContent($chart_data);
+    $chart_view = $engine->newChartView();
+    return $this->newChartResponse($chart_view);
   }
 
-  private function newChartResponse() {
-    $request = $this->getRequest();
-    $chart_node_id = celerity_generate_unique_node_id();
-
-    $chart_view = phutil_tag(
-      'div',
-      array(
-        'id' => $chart_node_id,
-        'style' => 'background: #ffffff; '.
-                   'height: 480px; ',
-      ),
-      '');
-
-    $data_uri = $request->getRequestURI();
-    $data_uri->setPath('/fact/draw/');
-
-    Javelin::initBehavior(
-      'line-chart',
-      array(
-        'chartNodeID' => $chart_node_id,
-        'dataURI' => (string)$data_uri,
-      ));
-
+  private function newChartResponse($chart_view) {
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Chart'))
       ->appendChild($chart_view);
@@ -151,52 +51,57 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild($box);
-
   }
 
-  private function getDomain(array $functions) {
-    $domain_min_list = null;
-    $domain_max_list = null;
-    foreach ($functions as $function) {
-      if ($function->hasDomain()) {
-        $domain = $function->getDomain();
+  private function newDemoChart() {
+    $viewer = $this->getViewer();
 
-        list($domain_min, $domain_max) = $domain;
+    $argvs = array();
 
-        if ($domain_min !== null) {
-          $domain_min_list[] = $domain_min;
-        }
+    $argvs[] = array('fact', 'tasks.count.create');
 
-        if ($domain_max !== null) {
-          $domain_max_list[] = $domain_max;
-        }
-      }
+    $argvs[] = array('constant', 360);
+
+    $argvs[] = array('fact', 'tasks.open-count.create');
+
+    $argvs[] = array(
+      'sum',
+      array(
+        'accumulate',
+        array('fact', 'tasks.count.create'),
+      ),
+      array(
+        'accumulate',
+        array('fact', 'tasks.open-count.create'),
+      ),
+    );
+
+    $argvs[] = array(
+      'compose',
+      array('scale', 0.001),
+      array('cos'),
+      array('scale', 100),
+      array('shift', 800),
+    );
+
+    $datasets = array();
+    foreach ($argvs as $argv) {
+      $datasets[] = PhabricatorChartDataset::newFromDictionary(
+        array(
+          'function' => $argv,
+        ));
     }
 
-    $domain_min = null;
-    $domain_max = null;
+    $chart = id(new PhabricatorFactChart())
+      ->setDatasets($datasets);
 
-    if ($domain_min_list) {
-      $domain_min = min($domain_min_list);
-    }
+    $engine = id(new PhabricatorChartRenderingEngine())
+      ->setViewer($viewer)
+      ->setChart($chart);
 
-    if ($domain_max_list) {
-      $domain_max = max($domain_max_list);
-    }
+    $chart = $engine->getStoredChart();
 
-    // If we don't have any domain data from the actual functions, pick a
-    // plausible domain automatically.
-
-    if ($domain_max === null) {
-      $domain_max = PhabricatorTime::getNow();
-    }
-
-    if ($domain_min === null) {
-      $domain_min = $domain_max - phutil_units('365 days in seconds');
-    }
-
-    return array($domain_min, $domain_max);
+    return id(new AphrontRedirectResponse())->setURI($chart->getURI());
   }
-
 
 }

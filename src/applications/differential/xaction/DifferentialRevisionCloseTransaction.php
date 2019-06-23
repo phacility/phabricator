@@ -44,6 +44,11 @@ final class DifferentialRevisionCloseTransaction
     $object->setProperty(
       DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED,
       $was_accepted);
+
+    // See T13300. When a revision is closed, we promote it out of "Draft"
+    // immediately. This usually happens when a user creates a draft revision
+    // and then lands the associated commit before the revision leaves draft.
+    $object->setShouldBroadcast(true);
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {

@@ -239,7 +239,7 @@ final class PhabricatorAuditEditor
           $object);
         if ($request) {
           $xactions[] = $request;
-          $this->setUnmentionablePHIDMap($request->getNewValue());
+          $this->addUnmentionablePHIDs($request->getNewValue());
         }
         break;
       default:
@@ -360,7 +360,6 @@ final class PhabricatorAuditEditor
     $flat_blocks = mpull($changes, 'getNewValue');
     $huge_block = implode("\n\n", $flat_blocks);
     $phid_map = array();
-    $phid_map[] = $this->getUnmentionablePHIDMap();
     $monograms = array();
 
     $task_refs = id(new ManiphestCustomFieldStatusParser())
@@ -385,35 +384,17 @@ final class PhabricatorAuditEditor
       ->execute();
     $phid_map[] = mpull($objects, 'getPHID', 'getPHID');
 
-
     $reverts_refs = id(new DifferentialCustomFieldRevertsParser())
       ->parseCorpus($huge_block);
     $reverts = array_mergev(ipull($reverts_refs, 'monograms'));
     if ($reverts) {
-      // Only allow commits to revert other commits in the same repository.
-      $reverted_commits = id(new DiffusionCommitQuery())
-        ->setViewer($actor)
-        ->withRepository($object->getRepository())
-        ->withIdentifiers($reverts)
-        ->execute();
+      $reverted_objects = DiffusionCommitRevisionQuery::loadRevertedObjects(
+        $actor,
+        $object,
+        $reverts,
+        $object->getRepository());
 
-      $reverted_revisions = id(new PhabricatorObjectQuery())
-        ->setViewer($actor)
-        ->withNames($reverts)
-        ->withTypes(
-          array(
-            DifferentialRevisionPHIDType::TYPECONST,
-          ))
-        ->execute();
-
-      $reverted_phids =
-        mpull($reverted_commits, 'getPHID', 'getPHID') +
-        mpull($reverted_revisions, 'getPHID', 'getPHID');
-
-      // NOTE: Skip any write attempts if a user cleverly implies a commit
-      // reverts itself, although this would be exceptionally clever in Git
-      // or Mercurial.
-      unset($reverted_phids[$object->getPHID()]);
+      $reverted_phids = mpull($reverted_objects, 'getPHID', 'getPHID');
 
       $reverts_edge = DiffusionCommitRevertsCommitEdgeType::EDGECONST;
       $result[] = id(new PhabricatorAuditTransaction())
@@ -425,7 +406,7 @@ final class PhabricatorAuditEditor
     }
 
     $phid_map = array_mergev($phid_map);
-    $this->setUnmentionablePHIDMap($phid_map);
+    $this->addUnmentionablePHIDs($phid_map);
 
     return $result;
   }
@@ -502,6 +483,11 @@ final class PhabricatorAuditEditor
     }
 
     return $phids;
+  }
+
+  protected function getObjectLinkButtonLabelForMail(
+    PhabricatorLiskDAO $object) {
+    return pht('View Commit');
   }
 
   protected function buildMailBody(

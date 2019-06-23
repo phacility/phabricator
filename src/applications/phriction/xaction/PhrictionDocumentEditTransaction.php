@@ -32,7 +32,7 @@ abstract class PhrictionDocumentEditTransaction
   }
 
   public function getActionStrength() {
-    return 1.3;
+    return 130;
   }
 
   public function getActionName() {

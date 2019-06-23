@@ -12,10 +12,31 @@ final class PhabricatorOwnersPackagePathsTransaction
 
   public function generateNewValue($object, $value) {
     $new = $value;
+
     foreach ($new as $key => $info) {
-      $new[$key]['excluded'] = (int)idx($info, 'excluded');
+      $info['excluded'] = (int)idx($info, 'excluded');
+
+      // The input has one "path" key with the display path.
+      // Move it to "display", then normalize the value in "path".
+
+      $display_path = $info['path'];
+      $raw_path = rtrim($display_path, '/').'/';
+
+      $info['path'] = $raw_path;
+      $info['display'] = $display_path;
+
+      $new[$key] = $info;
     }
+
     return $new;
+  }
+
+  public function getTransactionHasEffect($object, $old, $new) {
+    list($add, $rem) = PhabricatorOwnersPath::getTransactionValueChanges(
+      $old,
+      $new);
+
+    return ($add || $rem);
   }
 
   public function validateTransactions($object, array $xactions) {
@@ -110,8 +131,8 @@ final class PhabricatorOwnersPackagePathsTransaction
     $display_map = array();
     $seen_map = array();
     foreach ($new as $key => $spec) {
-      $display_path = $spec['path'];
-      $raw_path = rtrim($display_path, '/').'/';
+      $raw_path = $spec['path'];
+      $display_path = $spec['display'];
 
       // If the user entered two paths in the same repository which normalize
       // to the same value (like "src/main.c" and "src/main.c/"), discard the
@@ -193,11 +214,18 @@ final class PhabricatorOwnersPackagePathsTransaction
     $rowc = array();
     foreach ($rows as $key => $row) {
       $rowc[] = $row['class'];
+
+      if (array_key_exists('display', $row)) {
+        $display_path = $row['display'];
+      } else {
+        $display_path = $row['path'];
+      }
+
       $rows[$key] = array(
         $row['change'],
         $row['excluded'] ? pht('Exclude') : pht('Include'),
         $this->renderHandle($row['repositoryPHID']),
-        $row['path'],
+        $display_path,
       );
     }
 

@@ -1456,9 +1456,10 @@ final class DifferentialChangesetParser extends Phobject {
 
     $line = phutil_string_cast($line);
 
-    if (strpos($line, "\t") !== false) {
-      $line = $this->replaceTabsWithSpaces($line);
-    }
+    // TODO: This should be flexible, eventually.
+    $tab_width = 2;
+
+    $line = self::replaceTabsWithSpaces($line, $tab_width);
     $line = str_replace($search, $replace, $line);
 
     if ($is_html) {
@@ -1543,13 +1544,9 @@ final class DifferentialChangesetParser extends Phobject {
     return $rules;
   }
 
-  private function replaceTabsWithSpaces($line) {
-    // TODO: This should be flexible, eventually.
-    $tab_width = 2;
-
-    static $tags;
-    if ($tags === null) {
-      $tags = array();
+  public static function replaceTabsWithSpaces($line, $tab_width) {
+    static $tags = array();
+    if (empty($tags[$tab_width])) {
       for ($ii = 1; $ii <= $tab_width; $ii++) {
         $tag = phutil_tag(
           'span',
@@ -1562,42 +1559,120 @@ final class DifferentialChangesetParser extends Phobject {
       }
     }
 
-    // If the line is particularly long, don't try to vectorize it. Use a
-    // faster approximation of the correct tabstop expansion instead. This
-    // usually still arrives at the right result.
-    if (strlen($line) > 256) {
-      return str_replace("\t", $tags[$tab_width], $line);
+    // Expand all prefix tabs until we encounter any non-tab character. This
+    // is cheap and often immediately produces the correct result with no
+    // further work (and, particularly, no need to handle any unicode cases).
+
+    $len = strlen($line);
+
+    $head = 0;
+    for ($head = 0; $head < $len; $head++) {
+      $char = $line[$head];
+      if ($char !== "\t") {
+        break;
+      }
     }
 
-    $line = phutil_utf8v_combined($line);
+    if ($head) {
+      if (empty($tags[$tab_width * $head])) {
+        $tags[$tab_width * $head] = str_repeat($tags[$tab_width], $head);
+      }
+      $prefix = $tags[$tab_width * $head];
+      $line = substr($line, $head);
+    } else {
+      $prefix = '';
+    }
+
+    // If we have no remaining tabs elsewhere in the string after taking care
+    // of all the prefix tabs, we're done.
+    if (strpos($line, "\t") === false) {
+      return $prefix.$line;
+    }
+
+    $len = strlen($line);
+
+    // If the line is particularly long, don't try to do anything special with
+    // it. Use a faster approximation of the correct tabstop expansion instead.
+    // This usually still arrives at the right result.
+    if ($len > 256) {
+      return $prefix.str_replace("\t", $tags[$tab_width], $line);
+    }
+
     $in_tag = false;
     $pos = 0;
-    foreach ($line as $key => $char) {
-      if ($char === '<') {
-        $in_tag = true;
-        continue;
+
+    // See PHI1210. If the line only has single-byte characters, we don't need
+    // to vectorize it and can avoid an expensive UTF8 call.
+
+    $fast_path = preg_match('/^[\x01-\x7F]*\z/', $line);
+    if ($fast_path) {
+      $replace = array();
+      for ($ii = 0; $ii < $len; $ii++) {
+        $char = $line[$ii];
+        if ($char === '>') {
+          $in_tag = false;
+          continue;
+        }
+
+        if ($in_tag) {
+          continue;
+        }
+
+        if ($char === '<') {
+          $in_tag = true;
+          continue;
+        }
+
+        if ($char === "\t") {
+          $count = $tab_width - ($pos % $tab_width);
+          $pos += $count;
+          $replace[$ii] = $tags[$count];
+          continue;
+        }
+
+        $pos++;
       }
 
-      if ($char === '>') {
-        $in_tag = false;
-        continue;
+      if ($replace) {
+        // Apply replacements starting at the end of the string so they
+        // don't mess up the offsets for following replacements.
+        $replace = array_reverse($replace, true);
+
+        foreach ($replace as $replace_pos => $replacement) {
+          $line = substr_replace($line, $replacement, $replace_pos, 1);
+        }
+      }
+    } else {
+      $line = phutil_utf8v_combined($line);
+      foreach ($line as $key => $char) {
+        if ($char === '>') {
+          $in_tag = false;
+          continue;
+        }
+
+        if ($in_tag) {
+          continue;
+        }
+
+        if ($char === '<') {
+          $in_tag = true;
+          continue;
+        }
+
+        if ($char === "\t") {
+          $count = $tab_width - ($pos % $tab_width);
+          $pos += $count;
+          $line[$key] = $tags[$count];
+          continue;
+        }
+
+        $pos++;
       }
 
-      if ($in_tag) {
-        continue;
-      }
-
-      if ($char === "\t") {
-        $count = $tab_width - ($pos % $tab_width);
-        $pos += $count;
-        $line[$key] = $tags[$count];
-        continue;
-      }
-
-      $pos++;
+      $line = implode('', $line);
     }
 
-    return implode('', $line);
+    return $prefix.$line;
   }
 
 }

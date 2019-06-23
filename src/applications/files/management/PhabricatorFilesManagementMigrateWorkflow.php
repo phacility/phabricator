@@ -46,10 +46,44 @@ final class PhabricatorFilesManagementMigrateWorkflow
             'name'      => 'names',
             'wildcard'  => true,
           ),
+          array(
+            'name' => 'from-engine',
+            'param' => 'engine',
+            'help' => pht('Migrate files from the named storage engine.'),
+          ),
+          array(
+            'name' => 'local-disk-source',
+            'param' => 'path',
+            'help' => pht(
+              'When migrating from a local disk source, use the specified '.
+              'path as the root directory.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
+
+    // See T13306. This flag allows you to import files from a backup of
+    // local disk storage into some other engine. When the caller provides
+    // the flag, we override the local disk engine configuration and treat
+    // it as though it is configured to use the specified location.
+
+    $local_disk_source = $args->getArg('local-disk-source');
+    if (strlen($local_disk_source)) {
+      $path = Filesystem::resolvePath($local_disk_source);
+      try {
+        Filesystem::assertIsDirectory($path);
+      } catch (FilesystemException $ex) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'The "--local-disk-source" argument must point to a valid, '.
+            'readable directory on local disk.'));
+      }
+
+      $env = PhabricatorEnv::beginScopedEnv();
+      $env->overrideEnvConfig('storage.local-disk.path', $path);
+    }
+
     $target_key = $args->getArg('engine');
     if (!$target_key) {
       throw new PhutilArgumentUsageException(

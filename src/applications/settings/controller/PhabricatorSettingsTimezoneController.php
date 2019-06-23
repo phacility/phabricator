@@ -20,7 +20,8 @@ final class PhabricatorSettingsTimezoneController
       $zone = new DateTimeZone($identifier);
       $offset = -($zone->getOffset($now) / 60);
       if ($offset == $client_offset) {
-        $options[$identifier] = $identifier;
+        $name = PhabricatorTime::getTimezoneDisplayName($identifier);
+        $options[$identifier] = $name;
       }
     }
 

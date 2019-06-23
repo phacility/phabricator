@@ -81,10 +81,20 @@ final class HeraldTranscriptQuery
       ->execute();
 
     foreach ($transcripts as $key => $transcript) {
-      if (empty($objects[$transcript->getObjectPHID()])) {
+      $object_phid = $transcript->getObjectPHID();
+
+      if (!$object_phid) {
+        $transcript->attachObject(null);
+        continue;
+      }
+
+      $object = idx($objects, $object_phid);
+      if (!$object) {
         $this->didRejectResult($transcript);
         unset($transcripts[$key]);
       }
+
+      $transcript->attachObject($object);
     }
 
     return $transcripts;

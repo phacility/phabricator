@@ -139,10 +139,7 @@ final class DiffusionUpdateObjectAfterCommitWorker
       ->setContentSource($content_source)
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
-      ->setUnmentionablePHIDMap(
-        array(
-          $commit_phid => $commit_phid,
-        ));
+      ->addUnmentionablePHIDs(array($commit_phid));
 
     $editor->applyTransactions($task, $xactions);
   }
@@ -167,7 +164,7 @@ final class DiffusionUpdateObjectAfterCommitWorker
     $xactions[] = $this->newEdgeTransaction(
       $revision,
       $commit,
-      DiffusionCommitHasRevisionEdgeType::EDGECONST);
+      DifferentialRevisionHasCommitEdgeType::EDGECONST);
 
     $match_data = $this->getUpdateProperty('revisionMatchData');
 

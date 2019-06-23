@@ -83,6 +83,12 @@ final class PhabricatorDiffScopeEngine
         continue;
       }
 
+      // Don't match context lines which are too deeply indented, since they
+      // are very unlikely to be symbol definitions.
+      if ($depth > 2) {
+        continue;
+      }
+
       // The depth is the same as (or greater than) the depth we started with,
       // so this isn't a possible match.
       if ($depth >= $line_depth) {
@@ -109,11 +115,14 @@ final class PhabricatorDiffScopeEngine
     return $this->lineDepthMap;
   }
 
+  private function getTabWidth() {
+    // TODO: This should be configurable once we handle tab widths better.
+    return 2;
+  }
+
   private function newLineDepthMap() {
     $text_map = $this->getLineTextMap();
-
-    // TODO: This should be configurable once we handle tab widths better.
-    $tab_width = 2;
+    $tab_width = $this->getTabWidth();
 
     $depth_map = array();
     foreach ($text_map as $line_number => $line_text) {
@@ -143,9 +152,8 @@ final class PhabricatorDiffScopeEngine
       }
 
       // Round down to cheat our way through the " *" parts of docblock
-      // comments. This is generally a reasonble heuristic because odd tab
-      // widths are exceptionally rare.
-      $depth = ($count >> 1);
+      // comments.
+      $depth = (int)floor($count / $tab_width);
 
       $depth_map[$line_number] = $depth;
     }

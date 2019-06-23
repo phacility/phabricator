@@ -206,6 +206,11 @@ final class ManiphestTransactionEditor
       ->setSubject("T{$id}: {$title}");
   }
 
+  protected function getObjectLinkButtonLabelForMail(
+    PhabricatorLiskDAO $object) {
+    return pht('View Task');
+  }
+
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {

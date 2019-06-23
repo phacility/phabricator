@@ -28,7 +28,11 @@ final class PhabricatorAuthMessagePHIDType extends PhabricatorPHIDType {
     PhabricatorHandleQuery $query,
     array $handles,
     array $objects) {
-    return;
+
+    foreach ($handles as $phid => $handle) {
+      $message = $objects[$phid];
+      $handle->setURI($message->getURI());
+    }
   }
 
 }

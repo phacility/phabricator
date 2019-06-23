@@ -40,17 +40,10 @@ final class HeraldRuleEditTransaction
   public function newChangeDetailView() {
     $viewer = $this->getViewer();
 
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    $json = new PhutilJSON();
-    $old_json = $json->encodeFormatted($old);
-    $new_json = $json->encodeFormatted($new);
-
-    return id(new PhabricatorApplicationTransactionTextDiffDetailView())
+    return id(new PhabricatorApplicationTransactionJSONDiffDetailView())
       ->setViewer($viewer)
-      ->setOldText($old_json)
-      ->setNewText($new_json);
+      ->setOld($this->getOldValue())
+      ->setNew($this->getNewValue());
   }
 
 }

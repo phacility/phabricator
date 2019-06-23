@@ -4,7 +4,25 @@ final class PhabricatorLogoutController
   extends PhabricatorAuthController {
 
   public function shouldRequireLogin() {
-    return true;
+    // See T13310. We allow access to the "Logout" controller even if you are
+    // not logged in: otherwise, users who do not have access to any Spaces can
+    // not log out.
+
+    // When you try to access a controller which requires you be logged in,
+    // and you do not have access to any Spaces, an access check fires first
+    // and prevents access with a "No Access to Spaces" error. If this
+    // controller requires users be logged in, users who are trying to log out
+    // and also have no access to Spaces get the error instead of a logout
+    // workflow and are trapped.
+
+    // By permitting access to this controller even if you are not logged in,
+    // we bypass the Spaces check and allow users who have no access to Spaces
+    // to log out.
+
+    // This incidentally allows users who are already logged out to access the
+    // controller, but this is harmless: we just no-op these requests.
+
+    return false;
   }
 
   public function shouldRequireEmailVerification() {

@@ -41,37 +41,18 @@ final class PhabricatorDashboardQueryPanelType
           PhabricatorDashboardQueryPanelQueryTransaction::TRANSACTIONTYPE)
         ->setValue($panel->getProperty('key', ''));
 
+    $limit_field = id(new PhabricatorIntEditField())
+      ->setKey('limit')
+      ->setLabel(pht('Limit'))
+      ->setTransactionType(
+        PhabricatorDashboardQueryPanelLimitTransaction::TRANSACTIONTYPE)
+      ->setValue($panel->getProperty('limit'));
+
     return array(
       $application_field,
       $query_field,
+      $limit_field,
     );
-  }
-
-  public function initializeFieldsFromRequest(
-    PhabricatorDashboardPanel $panel,
-    PhabricatorCustomFieldList $field_list,
-    AphrontRequest $request) {
-
-    $map = array();
-    if (strlen($request->getStr('engine'))) {
-      $map['class'] = $request->getStr('engine');
-    }
-
-    if (strlen($request->getStr('query'))) {
-      $map['key'] = $request->getStr('query');
-    }
-
-    $full_map = array();
-    foreach ($map as $key => $value) {
-      $full_map["std:dashboard:core:{$key}"] = $value;
-    }
-
-    foreach ($field_list->getFields() as $field) {
-      $field_key = $field->getFieldKey();
-      if (isset($full_map[$field_key])) {
-        $field->setValueFromStorage($full_map[$field_key]);
-      }
-    }
   }
 
   public function renderPanelContent(
@@ -226,6 +207,28 @@ final class PhabricatorDashboardQueryPanelType
     }
 
     return $engine;
+  }
+
+  public function newHeaderEditActions(
+    PhabricatorDashboardPanel $panel,
+    PhabricatorUser $viewer,
+    $context_phid) {
+    $actions = array();
+
+    $engine = $this->getSearchEngine($panel);
+
+    $customize_uri = $engine->getCustomizeURI(
+      $panel->getProperty('key'),
+      $panel->getPHID(),
+      $context_phid);
+
+    $actions[] = id(new PhabricatorActionView())
+      ->setIcon('fa-pencil-square-o')
+      ->setName(pht('Customize Query'))
+      ->setWorkflow(true)
+      ->setHref($customize_uri);
+
+    return $actions;
   }
 
 }

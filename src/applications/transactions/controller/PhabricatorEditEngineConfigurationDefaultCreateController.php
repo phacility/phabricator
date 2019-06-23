@@ -15,7 +15,7 @@ final class PhabricatorEditEngineConfigurationDefaultCreateController
     $key = $config->getIdentifier();
     $cancel_uri = "/transactions/editengine/{$engine_key}/view/{$key}/";
 
-    $type = PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE;
+    $type = PhabricatorEditEngineDefaultCreateTransaction::TRANSACTIONTYPE;
 
     if ($request->isFormPost()) {
       $xactions = array();
