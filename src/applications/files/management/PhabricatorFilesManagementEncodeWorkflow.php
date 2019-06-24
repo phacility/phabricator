@@ -4,47 +4,36 @@ final class PhabricatorFilesManagementEncodeWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
   protected function didConstruct() {
+    $arguments = $this->newIteratorArguments();
+
+    $arguments[] = array(
+      'name' => 'as',
+      'param' => 'format',
+      'help' => pht('Select the storage format to use.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'key',
+      'param' => 'keyname',
+      'help' => pht('Select a specific storage key.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'force',
+      'help' => pht(
+        'Re-encode files which are already stored in the target '.
+        'encoding.'),
+    );
+
     $this
       ->setName('encode')
       ->setSynopsis(
         pht('Change the storage encoding of files.'))
-      ->setArguments(
-        array(
-          array(
-            'name' => 'as',
-            'param' => 'format',
-            'help' => pht('Select the storage format to use.'),
-          ),
-          array(
-            'name' => 'key',
-            'param' => 'keyname',
-            'help' => pht('Select a specific storage key.'),
-          ),
-          array(
-            'name' => 'all',
-            'help' => pht('Change encoding for all files.'),
-          ),
-          array(
-            'name' => 'force',
-            'help' => pht(
-              'Re-encode files which are already stored in the target '.
-              'encoding.'),
-          ),
-          array(
-            'name' => 'names',
-            'wildcard' => true,
-          ),
-        ));
+      ->setArguments($arguments);
   }
 
   public function execute(PhutilArgumentParser $args) {
     $iterator = $this->buildIterator($args);
-    if (!$iterator) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Either specify a list of files to encode, or use --all to '.
-          'encode all files.'));
-    }
 
     $force = (bool)$args->getArg('force');
 
