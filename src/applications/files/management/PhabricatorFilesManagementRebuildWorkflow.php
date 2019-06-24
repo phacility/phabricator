@@ -4,45 +4,33 @@ final class PhabricatorFilesManagementRebuildWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
   protected function didConstruct() {
+    $arguments = $this->newIteratorArguments();
+
+    $arguments[] = array(
+      'name' => 'dry-run',
+      'help' => pht('Show what would be updated.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'rebuild-mime',
+      'help' => pht('Rebuild MIME information.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'rebuild-dimensions',
+      'help' => pht('Rebuild image dimension information.'),
+    );
+
     $this
       ->setName('rebuild')
       ->setSynopsis(pht('Rebuild metadata of old files.'))
-      ->setArguments(
-        array(
-          array(
-            'name'      => 'all',
-            'help'      => pht('Update all files.'),
-          ),
-          array(
-            'name'      => 'dry-run',
-            'help'      => pht('Show what would be updated.'),
-          ),
-          array(
-            'name'      => 'rebuild-mime',
-            'help'      => pht('Rebuild MIME information.'),
-          ),
-          array(
-            'name'      => 'rebuild-dimensions',
-            'help'      => pht('Rebuild image dimension information.'),
-          ),
-          array(
-            'name'      => 'names',
-            'wildcard'  => true,
-          ),
-        ));
+      ->setArguments($arguments);
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
     $iterator = $this->buildIterator($args);
-    if (!$iterator) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Either specify a list of files to update, or use `%s` '.
-          'to update all files.',
-          '--all'));
-    }
 
     $update = array(
       'mime'          => $args->getArg('rebuild-mime'),

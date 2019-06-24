@@ -3,11 +3,30 @@
 abstract class PhabricatorFilesManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
+  protected function newIteratorArguments() {
+    return array(
+      array(
+        'name' => 'all',
+        'help' => pht('Operate on all files.'),
+      ),
+      array(
+        'name' => 'names',
+        'wildcard' => true,
+      ),
+      array(
+        'name' => 'from-engine',
+        'param' => 'storage-engine',
+        'help' => pht('Operate on files stored in a specified engine.'),
+      ),
+    );
+  }
+
   protected function buildIterator(PhutilArgumentParser $args) {
     $viewer = $this->getViewer();
-    $names = $args->getArg('names');
 
     $is_all = $args->getArg('all');
+
+    $names = $args->getArg('names');
     $from_engine = $args->getArg('from-engine');
 
     $any_constraint = ($from_engine || $names);
@@ -15,15 +34,16 @@ abstract class PhabricatorFilesManagementWorkflow
     if (!$is_all && !$any_constraint) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Use "--all" to migrate all files, or choose files to migrate '.
-          'with "--names" or "--from-engine".'));
+          'Specify which files to operate on, or use "--all" to operate on '.
+          'all files.'));
     }
 
     if ($is_all && $any_constraint) {
       throw new PhutilArgumentUsageException(
         pht(
-          'You can not migrate all files with "--all" and also migrate only '.
-          'a subset of files with "--from-engine" or "--names".'));
+          'You can not operate on all files with "--all" and also operate '.
+          'on a subset of files by naming them explicitly or using '.
+          'constraint flags like "--from-engine".'));
     }
 
     // If we're migrating specific named files, convert the names into IDs

@@ -4,52 +4,50 @@ final class PhabricatorFilesManagementIntegrityWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
   protected function didConstruct() {
+    $arguments = $this->newIteratorArguments();
+
+    $arguments[] = array(
+      'name' => 'strip',
+      'help' => pht(
+        'DANGEROUS. Strip integrity hashes from files. This makes '.
+        'files vulnerable to corruption or tampering.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'corrupt',
+      'help' => pht(
+        'Corrupt integrity hashes for given files. This is intended '.
+        'for debugging.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'compute',
+      'help' => pht(
+        'Compute and update integrity hashes for files which do not '.
+        'yet have them.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'overwrite',
+      'help' => pht(
+        'DANGEROUS. Recompute and update integrity hashes, overwriting '.
+        'invalid hashes. This may mark corrupt or dangerous files as '.
+        'valid.'),
+    );
+
+    $arguments[] = array(
+      'name' => 'force',
+      'short' => 'f',
+      'help' => pht(
+        'Execute dangerous operations without prompting for '.
+        'confirmation.'),
+    );
+
+
     $this
       ->setName('integrity')
       ->setSynopsis(pht('Verify or recalculate file integrity hashes.'))
-      ->setArguments(
-        array(
-          array(
-            'name'      => 'all',
-            'help'      => pht('Affect all files.'),
-          ),
-          array(
-            'name' => 'strip',
-            'help' => pht(
-              'DANGEROUS. Strip integrity hashes from files. This makes '.
-              'files vulnerable to corruption or tampering.'),
-          ),
-          array(
-            'name' => 'corrupt',
-            'help' => pht(
-              'Corrupt integrity hashes for given files. This is intended '.
-              'for debugging.'),
-          ),
-          array(
-            'name' => 'compute',
-            'help' => pht(
-              'Compute and update integrity hashes for files which do not '.
-              'yet have them.'),
-          ),
-          array(
-            'name' => 'overwrite',
-            'help' => pht(
-              'DANGEROUS. Recompute and update integrity hashes, overwriting '.
-              'invalid hashes. This may mark corrupt or dangerous files as '.
-              'valid.'),
-          ),
-          array(
-            'name' => 'force',
-            'short' => 'f',
-            'help' => pht(
-              'Execute dangerous operations without prompting for '.
-              'confirmation.'),
-          ),
-          array(
-            'name'      => 'names',
-            'wildcard'  => true,
-          ),
-        ));
+      ->setArguments($arguments);
   }
 
   public function execute(PhutilArgumentParser $args) {
@@ -120,12 +118,6 @@ final class PhabricatorFilesManagementIntegrityWorkflow
     }
 
     $iterator = $this->buildIterator($args);
-    if (!$iterator) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Either specify a list of files to affect, or use "--all" to '.
-          'affect all files.'));
-    }
 
     $failure_count = 0;
     $total_count = 0;

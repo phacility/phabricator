@@ -4,41 +4,25 @@ final class PhabricatorFilesManagementCompactWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
   protected function didConstruct() {
+    $arguments = $this->newIteratorArguments();
+    $arguments[] = array(
+      'name' => 'dry-run',
+      'help' => pht('Show what would be compacted.'),
+    );
+
     $this
       ->setName('compact')
       ->setSynopsis(
         pht(
           'Merge identical files to share the same storage. In some cases, '.
           'this can repair files with missing data.'))
-      ->setArguments(
-        array(
-          array(
-            'name'      => 'dry-run',
-            'help'      => pht('Show what would be compacted.'),
-          ),
-          array(
-            'name'      => 'all',
-            'help'      => pht('Compact all files.'),
-          ),
-          array(
-            'name'      => 'names',
-            'wildcard'  => true,
-          ),
-        ));
+      ->setArguments($arguments);
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
     $iterator = $this->buildIterator($args);
-    if (!$iterator) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Either specify a list of files to compact, or use `%s` '.
-          'to compact all files.',
-          '--all'));
-    }
-
     $is_dry_run = $args->getArg('dry-run');
 
     foreach ($iterator as $file) {

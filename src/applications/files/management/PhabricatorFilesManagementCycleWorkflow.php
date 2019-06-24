@@ -4,36 +4,22 @@ final class PhabricatorFilesManagementCycleWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
   protected function didConstruct() {
+    $arguments = $this->newIteratorArguments();
+    $arguments[] = array(
+      'name' => 'key',
+      'param' => 'keyname',
+      'help' => pht('Select a specific storage key to cycle to.'),
+    );
+
     $this
       ->setName('cycle')
       ->setSynopsis(
         pht('Cycle master key for encrypted files.'))
-      ->setArguments(
-        array(
-          array(
-            'name' => 'key',
-            'param' => 'keyname',
-            'help' => pht('Select a specific storage key to cycle to.'),
-          ),
-          array(
-            'name' => 'all',
-            'help' => pht('Change encoding for all files.'),
-          ),
-          array(
-            'name' => 'names',
-            'wildcard' => true,
-          ),
-        ));
+      ->setArguments($arguments);
   }
 
   public function execute(PhutilArgumentParser $args) {
     $iterator = $this->buildIterator($args);
-    if (!$iterator) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Either specify a list of files to cycle, or use --all to cycle '.
-          'all files.'));
-    }
 
     $format_map = PhabricatorFileStorageFormat::getAllFormats();
     $engines = PhabricatorFileStorageEngine::loadAllEngines();
