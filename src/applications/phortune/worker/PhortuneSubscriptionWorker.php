@@ -48,12 +48,15 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
       ->withPHIDs($account->getMemberPHIDs())
       ->execute();
     $actor = null;
+
+    $any_disabled = false;
     foreach ($members as $member) {
 
       // Don't act as a disabled user. If all of the users on the account are
       // disabled this means we won't charge the subscription, but that's
       // probably correct since it means no one can cancel or pay it anyway.
       if ($member->getIsDisabled()) {
+        $any_disabled = true;
         continue;
       }
 
@@ -63,7 +66,26 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
     }
 
     if (!$actor) {
-      throw new Exception(pht('Failed to load actor to bill subscription!'));
+      if ($any_disabled) {
+        $message = pht(
+          'All members of the account ("%s") for this subscription ("%s") '.
+          'are disabled.',
+          $account->getPHID(),
+          $subscription->getPHID());
+      } else if ($account->getMemberPHIDs()) {
+        $message = pht(
+          'Unable to load any of the members of the account ("%s") for this '.
+          'subscription ("%s").',
+          $account->getPHID(),
+          $subscription->getPHID());
+      } else {
+        $message = pht(
+          'The account ("%s") for this subscription ("%s") has no '.
+          'members.',
+          $account->getPHID(),
+          $subscription->getPHID());
+      }
+      throw new PhabricatorWorkerPermanentFailureException($message);
     }
 
     $cart = $account->newCart($actor, $cart_implementation, $merchant);
