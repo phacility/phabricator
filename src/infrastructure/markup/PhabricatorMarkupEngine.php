@@ -42,7 +42,7 @@ final class PhabricatorMarkupEngine extends Phobject {
   private $objects = array();
   private $viewer;
   private $contextObject;
-  private $version = 18;
+  private $version = 19;
   private $engineCaches = array();
   private $auxiliaryConfig = array();
 
