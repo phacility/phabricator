@@ -285,10 +285,13 @@ final class PhabricatorStorageManagementDumpWorkflow
         $preamble = implode('', $preamble);
         $this->writeData($preamble, $file, $is_compress, $output_file);
 
-        $future = new ExecFuture('%C', $spec['command']);
+        // See T13328. The "mysql" command may produce output very quickly.
+        // Don't buffer more than a fixed amount.
+        $future = id(new ExecFuture('%C', $spec['command']))
+          ->setReadBufferSize(32 * 1024 * 1024);
 
         $iterator = id(new FutureIterator(array($future)))
-          ->setUpdateInterval(0.100);
+          ->setUpdateInterval(0.010);
         foreach ($iterator as $ready) {
           list($stdout, $stderr) = $future->read();
           $future->discardBuffers();
