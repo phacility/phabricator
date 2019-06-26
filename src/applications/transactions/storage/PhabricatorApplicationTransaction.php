@@ -1375,16 +1375,16 @@ abstract class PhabricatorApplicationTransaction
 
   public function getActionStrength() {
     if ($this->isInlineCommentTransaction()) {
-      return 250;
+      return 25;
     }
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-        return 500;
+        return 50;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         if ($this->isSelfSubscription()) {
           // Make this weaker than TYPE_COMMENT.
-          return 250;
+          return 25;
         }
 
         if ($this->isApplicationAuthor()) {
@@ -1396,14 +1396,14 @@ abstract class PhabricatorApplicationTransaction
         // In other cases, subscriptions are more interesting than comments
         // (which are shown anyway) but less interesting than any other type of
         // transaction.
-        return 750;
+        return 75;
       case PhabricatorTransactions::TYPE_MFA:
         // We want MFA signatures to render at the top of transaction groups,
         // on top of the things they signed.
-        return 10000;
+        return 1000;
     }
 
-    return 1000;
+    return 100;
   }
 
   public function isCommentTransaction() {
