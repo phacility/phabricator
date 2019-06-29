@@ -6,101 +6,52 @@ final class PhabricatorDaemonManagementStatusWorkflow
   protected function didConstruct() {
     $this
       ->setName('status')
-      ->setSynopsis(pht('Show status of running daemons.'))
-      ->setArguments(
-        array(
-          array(
-            'name' => 'local',
-            'help' => pht('Show only local daemons.'),
-          ),
-        ));
+      ->setSynopsis(pht('Show daemon processes on this host.'));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
+    $process_refs = $this->getOverseerProcessRefs();
 
-    if ($args->getArg('local')) {
-      $daemons = $this->loadRunningDaemons();
-    } else {
-      $daemons = $this->loadAllRunningDaemons();
-    }
+    if (!$process_refs) {
+      $instance = $this->getInstance();
+      if ($instance !== null) {
+        $this->logInfo(
+          pht('NO DAEMONS'),
+          pht(
+            'There are no running daemon processes for the current '.
+            'instance ("%s").',
+            $instance));
+      } else {
+        $this->writeInfo(
+          pht('NO DAEMONS'),
+          pht('There are no running daemon processes.'));
+      }
 
-    if (!$daemons) {
-      $console->writeErr(
-        "%s\n",
-        pht('There are no running Phabricator daemons.'));
       return 1;
     }
 
-    $status = 0;
-
     $table = id(new PhutilConsoleTable())
-      ->addColumns(array(
-        'id' => array(
-          'title' => pht('Log'),
-        ),
-        'daemonID' => array(
-          'title' => pht('Daemon'),
-        ),
-        'host' => array(
-          'title' => pht('Host'),
-        ),
-        'pid' => array(
-          'title' => pht('Overseer'),
-        ),
-        'started' => array(
-          'title' => pht('Started'),
-        ),
-        'daemon' => array(
-          'title' => pht('Class'),
-        ),
-        'argv' => array(
-          'title' => pht('Arguments'),
-        ),
-      ));
-
-    foreach ($daemons as $daemon) {
-      if ($daemon instanceof PhabricatorDaemonLog) {
-        $table->addRow(array(
-          'id'      => $daemon->getID(),
-          'daemonID' => $daemon->getDaemonID(),
-          'host'    => $daemon->getHost(),
-          'pid'     => $daemon->getPID(),
-          'started' => date('M j Y, g:i:s A', $daemon->getDateCreated()),
-          'daemon'  => $daemon->getDaemon(),
-          'argv'    => csprintf('%LR', $daemon->getExplicitArgv()),
+      ->addColumns(
+        array(
+          'pid' => array(
+            'title' => pht('PID'),
+          ),
+          'command' => array(
+            'title' => pht('Command'),
+          ),
         ));
-      } else if ($daemon instanceof PhabricatorDaemonReference) {
-        $name = $daemon->getName();
-        if (!$daemon->isRunning()) {
-          $daemon->updateStatus(PhabricatorDaemonLog::STATUS_DEAD);
-          $status = 2;
-          $name = pht('<DEAD> %s', $name);
-        }
 
-        $daemon_log = $daemon->getDaemonLog();
-        $id = null;
-        $daemon_id = null;
-        if ($daemon_log) {
-          $id = $daemon_log->getID();
-          $daemon_id = $daemon_log->getDaemonID();
-        }
-
-        $table->addRow(array(
-          'id'      => $id,
-          'daemonID' => $daemon_id,
-          'host'    => 'localhost',
-          'pid'     => $daemon->getPID(),
-          'started' => $daemon->getEpochStarted()
-            ? date('M j Y, g:i:s A', $daemon->getEpochStarted())
-            : null,
-          'daemon'  => $name,
-          'argv'    => csprintf('%LR', $daemon->getArgv()),
+    foreach ($process_refs as $process_ref) {
+      $table->addRow(
+        array(
+          'pid' => $process_ref->getPID(),
+          'command' => $process_ref->getCommand(),
         ));
-      }
     }
 
     $table->draw();
+
+    return 0;
   }
 
 }
