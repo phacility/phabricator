@@ -5,10 +5,6 @@ final class PhabricatorProjectBoardViewController
 
   const BATCH_EDIT_ALL = 'all';
 
-  private $queryKey;
-  private $sortKey;
-  private $showHidden;
-
   public function shouldAllowPublic() {
     return true;
   }
@@ -22,10 +18,8 @@ final class PhabricatorProjectBoardViewController
     }
 
     $project = $this->getProject();
-
-    $this->readRequestState();
-
-    $board_uri = $this->getApplicationURI('board/'.$project->getID().'/');
+    $state = $this->getViewState();
+    $board_uri = $project->getWorkboardURI();
 
     $search_engine = id(new ManiphestTaskSearchEngine())
       ->setViewer($viewer)
@@ -51,24 +45,15 @@ final class PhabricatorProjectBoardViewController
           ->addSubmitButton(pht('Apply Filter'))
           ->addCancelButton($board_uri);
       }
-      return id(new AphrontRedirectResponse())->setURI(
-        $this->getURIWithState(
-          $search_engine->getQueryResultsPageURI($saved->getQueryKey())));
+
+      $query_key = $saved->getQueryKey();
+      $results_uri = $search_engine->getQueryResultsPageURI($query_key);
+      $results_uri = $state->newURI($results_uri);
+
+      return id(new AphrontRedirectResponse())->setURI($results_uri);
     }
 
-    $query_key = $this->getDefaultFilter($project);
-
-    $request_query = $request->getStr('filter');
-    if (strlen($request_query)) {
-      $query_key = $request_query;
-    }
-
-    $uri_query = $request->getURIData('queryKey');
-    if (strlen($uri_query)) {
-      $query_key = $uri_query;
-    }
-
-    $this->queryKey = $query_key;
+    $query_key = $state->getQueryKey();
 
     $custom_query = null;
     if ($search_engine->isBuiltinQuery($query_key)) {
@@ -260,7 +245,7 @@ final class PhabricatorProjectBoardViewController
       }
 
       if (!$batch_tasks) {
-        $cancel_uri = $this->getURIWithState($board_uri);
+        $cancel_uri = $state->newWorkboardURI();
         return $this->newDialog()
           ->setTitle(pht('No Editable Tasks'))
           ->appendParagraph(
@@ -308,7 +293,7 @@ final class PhabricatorProjectBoardViewController
       }
 
       $move_tasks = array_select_keys($tasks, $move_task_phids);
-      $cancel_uri = $this->getURIWithState($board_uri);
+      $cancel_uri = $state->newWorkboardURI();
 
       if (!$move_tasks) {
         return $this->newDialog()
@@ -504,7 +489,7 @@ final class PhabricatorProjectBoardViewController
     $column_phids = array();
     $visible_phids = array();
     foreach ($columns as $column) {
-      if (!$this->showHidden) {
+      if (!$state->getShowHidden()) {
         if ($column->isHidden()) {
           continue;
         }
@@ -649,7 +634,7 @@ final class PhabricatorProjectBoardViewController
       );
     }
 
-    $order_key = $this->sortKey;
+    $order_key = $state->getOrder();
 
     $ordering_map = PhabricatorProjectColumnOrder::getEnabledOrders();
     $ordering = id(clone $ordering_map[$order_key])
@@ -683,7 +668,7 @@ final class PhabricatorProjectBoardViewController
       'pointsEnabled' => ManiphestTaskPoints::getIsEnabled(),
 
       'boardPHID' => $project->getPHID(),
-      'order' => $this->sortKey,
+      'order' => $state->getOrder(),
       'orders' => $order_maps,
       'headers' => $headers,
       'headerKeys' => $header_keys,
@@ -701,7 +686,7 @@ final class PhabricatorProjectBoardViewController
     $sort_menu = $this->buildSortMenu(
       $viewer,
       $project,
-      $this->sortKey,
+      $state->getOrder(),
       $ordering_map);
 
     $filter_menu = $this->buildFilterMenu(
@@ -711,7 +696,7 @@ final class PhabricatorProjectBoardViewController
       $search_engine,
       $query_key);
 
-    $manage_menu = $this->buildManageMenu($project, $this->showHidden);
+    $manage_menu = $this->buildManageMenu($project, $state->getShowHidden());
 
     $header_link = phutil_tag(
       'a',
@@ -775,54 +760,14 @@ final class PhabricatorProjectBoardViewController
     return $page;
   }
 
-  private function readRequestState() {
-    $request = $this->getRequest();
-    $project = $this->getProject();
-
-    $this->showHidden = $request->getBool('hidden');
-
-    $sort_key = $this->getDefaultSort($project);
-
-    $request_sort = $request->getStr('order');
-    if ($this->isValidSort($request_sort)) {
-      $sort_key = $request_sort;
-    }
-
-    $this->sortKey = $sort_key;
-  }
-
-  private function getDefaultSort(PhabricatorProject $project) {
-    $default_sort = $project->getDefaultWorkboardSort();
-
-    if ($this->isValidSort($default_sort)) {
-      return $default_sort;
-    }
-
-    return PhabricatorProjectColumnNaturalOrder::ORDERKEY;
-  }
-
-  private function getDefaultFilter(PhabricatorProject $project) {
-    $default_filter = $project->getDefaultWorkboardFilter();
-
-    if (strlen($default_filter)) {
-      return $default_filter;
-    }
-
-    return 'open';
-  }
-
-  private function isValidSort($sort) {
-    $map = PhabricatorProjectColumnOrder::getEnabledOrders();
-    return isset($map[$sort]);
-  }
-
   private function buildSortMenu(
     PhabricatorUser $viewer,
     PhabricatorProject $project,
     $sort_key,
     array $ordering_map) {
 
-    $base_uri = $this->getURIWithState();
+    $state = $this->getViewState();
+    $base_uri = $state->newWorkboardURI();
 
     $items = array();
     foreach ($ordering_map as $key => $ordering) {
@@ -997,6 +942,7 @@ final class PhabricatorProjectBoardViewController
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
+    $state = $this->getViewState();
 
     $id = $project->getID();
 
@@ -1026,12 +972,12 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true);
 
     if ($show_hidden) {
-      $hidden_uri = $this->getURIWithState()
+      $hidden_uri = $state->newWorkboardURI()
         ->removeQueryParam('hidden');
       $hidden_icon = 'fa-eye-slash';
       $hidden_text = pht('Hide Hidden Columns');
     } else {
-      $hidden_uri = $this->getURIWithState()
+      $hidden_uri = $state->newWorkboardURI()
         ->replaceQueryParam('hidden', 'true');
       $hidden_icon = 'fa-eye';
       $hidden_text = pht('Show Hidden Columns');
@@ -1307,41 +1253,11 @@ final class PhabricatorProjectBoardViewController
    * @return PhutilURI URI with state parameters.
    */
   private function getURIWithState($base = null, $force = false) {
-    $project = $this->getProject();
-
     if ($base === null) {
-      $base = $this->getRequest()->getPath();
+      $base = $this->getProject()->getWorkboardURI();
     }
 
-    $base = new PhutilURI($base);
-
-    if ($force || ($this->sortKey != $this->getDefaultSort($project))) {
-      if ($this->sortKey !== null) {
-        $base->replaceQueryParam('order', $this->sortKey);
-      } else {
-        $base->removeQueryParam('order');
-      }
-    } else {
-      $base->removeQueryParam('order');
-    }
-
-    if ($force || ($this->queryKey != $this->getDefaultFilter($project))) {
-      if ($this->queryKey !== null) {
-        $base->replaceQueryParam('filter', $this->queryKey);
-      } else {
-        $base->removeQueryParam('filter');
-      }
-    } else {
-      $base->removeQueryParam('filter');
-    }
-
-    if ($this->showHidden) {
-      $base->replaceQueryParam('hidden', 'true');
-    } else {
-      $base->removeQueryParam('hidden');
-    }
-
-    return $base;
+    return $this->getViewState()->newURI($base, $force);
   }
 
   private function buildInitializeContent(PhabricatorProject $project) {
