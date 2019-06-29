@@ -6,7 +6,6 @@ final class PhabricatorProjectBoardViewController
   const BATCH_EDIT_ALL = 'all';
 
   private $id;
-  private $slug;
   private $queryKey;
   private $sortKey;
   private $showHidden;
