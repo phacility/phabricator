@@ -5,7 +5,6 @@ final class PhabricatorProjectBoardViewController
 
   const BATCH_EDIT_ALL = 'all';
 
-  private $id;
   private $queryKey;
   private $sortKey;
   private $showHidden;
@@ -284,7 +283,7 @@ final class PhabricatorProjectBoardViewController
       $query_key = $saved_query->getQueryKey();
 
       $bulk_uri = new PhutilURI("/maniphest/bulk/query/{$query_key}/");
-      $bulk_uri->replaceQueryParam('board', $this->id);
+      $bulk_uri->replaceQueryParam('board', $project->getID());
 
       return id(new AphrontRedirectResponse())
         ->setURI($bulk_uri);
@@ -781,7 +780,6 @@ final class PhabricatorProjectBoardViewController
     $project = $this->getProject();
 
     $this->showHidden = $request->getBool('hidden');
-    $this->id = $project->getID();
 
     $sort_key = $this->getDefaultSort($project);
 
@@ -931,7 +929,7 @@ final class PhabricatorProjectBoardViewController
 
       if ($is_custom) {
         $uri = $this->getApplicationURI(
-          'board/'.$this->id.'/filter/query/'.$key.'/');
+          'board/'.$project->getID().'/filter/query/'.$key.'/');
         $item->setWorkflow(true);
       } else {
         $uri = $engine->getQueryResultsPageURI($key);
@@ -1179,7 +1177,7 @@ final class PhabricatorProjectBoardViewController
       ->setIcon('fa-search')
       ->setHref($query_uri);
 
-    $edit_uri = 'board/'.$this->id.'/edit/'.$column->getID().'/';
+    $edit_uri = 'board/'.$project->getID().'/edit/'.$column->getID().'/';
     $column_items[] = id(new PhabricatorActionView())
       ->setName(pht('Edit Column'))
       ->setIcon('fa-pencil')
@@ -1188,7 +1186,7 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true);
 
     $can_hide = ($can_edit && !$column->isDefaultColumn());
-    $hide_uri = 'board/'.$this->id.'/hide/'.$column->getID().'/';
+    $hide_uri = 'board/'.$project->getID().'/hide/'.$column->getID().'/';
     $hide_uri = $this->getApplicationURI($hide_uri);
     $hide_uri = $this->getURIWithState($hide_uri);
 
