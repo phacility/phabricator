@@ -13,13 +13,24 @@ abstract class PhabricatorProjectBoardController
     return $this->viewState;
   }
 
-  final private function newViewState() {
+  private function newViewState() {
     $project = $this->getProject();
     $request = $this->getRequest();
 
     return id(new PhabricatorWorkboardViewState())
       ->setProject($project)
       ->readFromRequest($request);
+  }
+
+  final protected function newBoardDialog() {
+    $dialog = $this->newDialog();
+
+    $state = $this->getViewState();
+    foreach ($state->getQueryParameters() as $key => $value) {
+      $dialog->addHiddenInput($key, $value);
+    }
+
+    return $dialog;
   }
 
 }

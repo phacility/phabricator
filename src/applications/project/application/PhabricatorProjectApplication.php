@@ -90,6 +90,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardManageController',
           'background/'
             => 'PhabricatorProjectBoardBackgroundController',
+          'default/(?P<target>[^/]+)/'
+            => 'PhabricatorProjectBoardDefaultController',
         ),
         'column/' => array(
           'remove/(?P<id>\d+)/' =>
@@ -112,8 +114,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectSilenceController',
         'warning/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectWarningController',
-        'default/(?P<projectID>[1-9]\d*)/(?P<target>[^/]+)/'
-          => 'PhabricatorProjectDefaultController',
       ),
       '/tag/' => array(
         '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',

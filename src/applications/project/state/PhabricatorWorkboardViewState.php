@@ -147,4 +147,8 @@ final class PhabricatorWorkboardViewState
     return 'open';
   }
 
+  public function getQueryParameters() {
+    return $this->requestState;
+  }
+
 }

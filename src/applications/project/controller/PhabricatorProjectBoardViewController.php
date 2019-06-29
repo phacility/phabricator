@@ -797,9 +797,7 @@ final class PhabricatorProjectBoardViewController
 
     $id = $project->getID();
 
-    $save_uri = "default/{$id}/sort/";
-    $save_uri = $this->getApplicationURI($save_uri);
-    $save_uri = $this->getURIWithState($save_uri, $force = true);
+    $save_uri = $state->newWorkboardURI('default/sort/');
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -841,6 +839,8 @@ final class PhabricatorProjectBoardViewController
     $custom_query,
     PhabricatorApplicationSearchEngine $engine,
     $query_key) {
+
+    $state = $this->getViewState();
 
     $named = array(
       'open' => pht('Open Tasks'),
@@ -898,9 +898,7 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true)
       ->setName(pht('Advanced Filter...'));
 
-    $save_uri = "default/{$id}/filter/";
-    $save_uri = $this->getApplicationURI($save_uri);
-    $save_uri = $this->getURIWithState($save_uri, $force = true);
+    $save_uri = $state->newWorkboardURI('default/filter/');
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
