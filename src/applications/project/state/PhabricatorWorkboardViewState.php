@@ -3,8 +3,11 @@
 final class PhabricatorWorkboardViewState
   extends Phobject {
 
+  private $viewer;
   private $project;
   private $requestState = array();
+  private $savedQuery;
+  private $searchEngine;
 
   public function setProject(PhabricatorProject $project) {
     $this->project = $project;
@@ -40,7 +43,60 @@ final class PhabricatorWorkboardViewState
       $this->requestState['filter'] = $request->getURIData('queryKey');
     }
 
+    $this->viewer = $request->getViewer();
+
     return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
+
+  public function getSavedQuery() {
+    if ($this->savedQuery === null) {
+      $this->savedQuery = $this->newSavedQuery();
+    }
+
+    return $this->savedQuery;
+  }
+
+  private function newSavedQuery() {
+    $search_engine = $this->getSearchEngine();
+    $query_key = $this->getQueryKey();
+    $viewer = $this->getViewer();
+
+    if ($search_engine->isBuiltinQuery($query_key)) {
+      $saved_query = $search_engine->buildSavedQueryFromBuiltin($query_key);
+    } else {
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($viewer)
+        ->withQueryKeys(array($query_key))
+        ->executeOne();
+    }
+
+    return $saved_query;
+  }
+
+  public function getSearchEngine() {
+    if ($this->searchEngine === null) {
+      $this->searchEngine = $this->newSearchEngine();
+    }
+
+    return $this->searchEngine;
+  }
+
+  private function newSearchEngine() {
+    $viewer = $this->getViewer();
+
+    // TODO: This URI is not fully state-preserving, because "SearchEngine"
+    // does not preserve URI parameters when constructing some URIs at time of
+    // writing.
+    $board_uri = $this->getProject()->getWorkboardURI();
+
+    return id(new ManiphestTaskSearchEngine())
+      ->setViewer($viewer)
+      ->setBaseURI($board_uri)
+      ->setIsBoardView(true);
   }
 
   public function newWorkboardURI($path = null) {
@@ -116,6 +172,11 @@ final class PhabricatorWorkboardViewState
     }
 
     return $this->getDefaultQueryKey();
+  }
+
+  public function setQueryKey($query_key) {
+    $this->requestState['filter'] = $query_key;
+    return $this;
   }
 
   private function isValidOrder($order) {

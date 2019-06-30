@@ -22,7 +22,7 @@ abstract class PhabricatorProjectBoardController
       ->readFromRequest($request);
   }
 
-  final protected function newBoardDialog() {
+  final protected function newWorkboardDialog() {
     $dialog = $this->newDialog();
 
     $state = $this->getViewState();

@@ -72,7 +72,7 @@ final class PhabricatorProjectBoardDefaultController
       return id(new AphrontRedirectResponse())->setURI($board_uri);
     }
 
-    return $this->newBoardDialog()
+    return $this->newWorkboardDialog()
       ->setTitle($title)
       ->appendChild($body)
       ->addCancelButton($board_uri)

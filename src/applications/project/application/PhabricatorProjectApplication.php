@@ -66,7 +66,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'subprojects/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectsController',
         'board/(?P<id>[1-9]\d*)/'.
-          '(?P<filter>filter/)?'.
           '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorProjectBoardViewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectMoveController',
@@ -92,6 +91,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardBackgroundController',
           'default/(?P<target>[^/]+)/'
             => 'PhabricatorProjectBoardDefaultController',
+          'filter/(?:query/(?P<queryKey>[^/]+)/)?'
+            => 'PhabricatorProjectBoardFilterController',
         ),
         'column/' => array(
           'remove/(?P<id>\d+)/' =>

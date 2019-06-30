@@ -21,68 +21,17 @@ final class PhabricatorProjectBoardViewController
     $state = $this->getViewState();
     $board_uri = $project->getWorkboardURI();
 
-    $search_engine = id(new ManiphestTaskSearchEngine())
-      ->setViewer($viewer)
-      ->setBaseURI($board_uri)
-      ->setIsBoardView(true);
-
-    if ($request->isFormPost()
-      && !$request->getBool('initialize')
-      && !$request->getStr('move')
-      && !$request->getStr('queryColumnID')) {
-      $saved = $search_engine->buildSavedQueryFromRequest($request);
-      $search_engine->saveQuery($saved);
-      $filter_form = id(new AphrontFormView())
-        ->setUser($viewer);
-      $search_engine->buildSearchForm($filter_form, $saved);
-      if ($search_engine->getErrors()) {
-        return $this->newDialog()
-          ->setWidth(AphrontDialogView::WIDTH_FULL)
-          ->setTitle(pht('Advanced Filter'))
-          ->appendChild($filter_form->buildLayoutView())
-          ->setErrors($search_engine->getErrors())
-          ->setSubmitURI($board_uri)
-          ->addSubmitButton(pht('Apply Filter'))
-          ->addCancelButton($board_uri);
-      }
-
-      $query_key = $saved->getQueryKey();
-      $results_uri = $search_engine->getQueryResultsPageURI($query_key);
-      $results_uri = $state->newURI($results_uri);
-
-      return id(new AphrontRedirectResponse())->setURI($results_uri);
-    }
-
+    $search_engine = $state->getSearchEngine();
     $query_key = $state->getQueryKey();
-
-    $custom_query = null;
-    if ($search_engine->isBuiltinQuery($query_key)) {
-      $saved = $search_engine->buildSavedQueryFromBuiltin($query_key);
-    } else {
-      $saved = id(new PhabricatorSavedQueryQuery())
-        ->setViewer($viewer)
-        ->withQueryKeys(array($query_key))
-        ->executeOne();
-
-      if (!$saved) {
-        return new Aphront404Response();
-      }
-
-      $custom_query = $saved;
+    $saved = $state->getSavedQuery();
+    if (!$saved) {
+      return new Aphront404Response();
     }
 
-    if ($request->getURIData('filter')) {
-      $filter_form = id(new AphrontFormView())
-        ->setUser($viewer);
-      $search_engine->buildSearchForm($filter_form, $saved);
-
-      return $this->newDialog()
-        ->setWidth(AphrontDialogView::WIDTH_FULL)
-        ->setTitle(pht('Advanced Filter'))
-        ->appendChild($filter_form->buildLayoutView())
-        ->setSubmitURI($board_uri)
-        ->addSubmitButton(pht('Apply Filter'))
-        ->addCancelButton($board_uri);
+    if ($saved->getID()) {
+      $custom_query = $saved;
+    } else {
+      $custom_query = null;
     }
 
     $task_query = $search_engine->buildQueryFromSavedQuery($saved);
