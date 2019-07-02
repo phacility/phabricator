@@ -4198,6 +4198,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectColumnTransactionQuery' => 'applications/project/query/PhabricatorProjectColumnTransactionQuery.php',
     'PhabricatorProjectColumnTransactionType' => 'applications/project/xaction/column/PhabricatorProjectColumnTransactionType.php',
     'PhabricatorProjectColumnTriggerTransaction' => 'applications/project/xaction/column/PhabricatorProjectColumnTriggerTransaction.php',
+    'PhabricatorProjectColumnViewQueryController' => 'applications/project/controller/PhabricatorProjectColumnViewQueryController.php',
     'PhabricatorProjectConfigOptions' => 'applications/project/config/PhabricatorProjectConfigOptions.php',
     'PhabricatorProjectConfiguredCustomField' => 'applications/project/customfield/PhabricatorProjectConfiguredCustomField.php',
     'PhabricatorProjectController' => 'applications/project/controller/PhabricatorProjectController.php',
@@ -10473,6 +10474,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectColumnTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorProjectColumnTransactionType' => 'PhabricatorModularTransactionType',
     'PhabricatorProjectColumnTriggerTransaction' => 'PhabricatorProjectColumnTransactionType',
+    'PhabricatorProjectColumnViewQueryController' => 'PhabricatorProjectBoardController',
     'PhabricatorProjectConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorProjectConfiguredCustomField' => array(
       'PhabricatorProjectStandardCustomField',

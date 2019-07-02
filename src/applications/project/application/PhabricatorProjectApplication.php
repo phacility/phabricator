@@ -79,6 +79,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectColumnHideController',
           'column/(?:(?P<id>\d+)/)?'
             => 'PhabricatorProjectColumnDetailController',
+          'viewquery/(?P<columnID>\d+)/'
+            => 'PhabricatorProjectColumnViewQueryController',
           'import/'
             => 'PhabricatorProjectBoardImportController',
           'reorder/'
