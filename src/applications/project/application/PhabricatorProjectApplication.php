@@ -83,6 +83,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectColumnViewQueryController',
           'bulk/(?P<columnID>\d+)/'
             => 'PhabricatorProjectColumnBulkEditController',
+          'bulkmove/(?P<columnID>\d+)/(?P<mode>project|column)/'
+            => 'PhabricatorProjectColumnBulkMoveController',
           'import/'
             => 'PhabricatorProjectBoardImportController',
           'reorder/'
