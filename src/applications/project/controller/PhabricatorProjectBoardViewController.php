@@ -3,8 +3,6 @@
 final class PhabricatorProjectBoardViewController
   extends PhabricatorProjectBoardController {
 
-  const BATCH_EDIT_ALL = 'all';
-
   public function shouldAllowPublic() {
     return true;
   }
@@ -34,42 +32,9 @@ final class PhabricatorProjectBoardViewController
       $custom_query = null;
     }
 
-    $task_query = $search_engine->buildQueryFromSavedQuery($saved);
-
-    $select_phids = array($project->getPHID());
-    if ($project->getHasSubprojects() || $project->getHasMilestones()) {
-      $descendants = id(new PhabricatorProjectQuery())
-        ->setViewer($viewer)
-        ->withAncestorProjectPHIDs($select_phids)
-        ->execute();
-      foreach ($descendants as $descendant) {
-        $select_phids[] = $descendant->getPHID();
-      }
-    }
-
-    $tasks = $task_query
-      ->withEdgeLogicPHIDs(
-        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-        PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
-        array($select_phids))
-      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
-      ->setViewer($viewer)
-      ->execute();
-    $tasks = mpull($tasks, null, 'getPHID');
+    $layout_engine = $state->getLayoutEngine();
 
     $board_phid = $project->getPHID();
-
-    // Regardless of display order, pass tasks to the layout engine in ID order
-    // so layout is consistent.
-    $board_tasks = msort($tasks, 'getID');
-
-    $layout_engine = id(new PhabricatorBoardLayoutEngine())
-      ->setViewer($viewer)
-      ->setBoardPHIDs(array($board_phid))
-      ->setObjectPHIDs(array_keys($board_tasks))
-      ->setFetchAllBoards(true)
-      ->executeLayout();
-
     $columns = $layout_engine->getColumns($board_phid);
     if (!$columns || !$project->getHasWorkboard()) {
       $has_normal_columns = false;
@@ -122,66 +87,12 @@ final class PhabricatorProjectBoardViewController
         ->appendChild($content);
     }
 
+    $tasks = $state->getObjects();
+
     $task_can_edit_map = id(new PhabricatorPolicyFilter())
       ->setViewer($viewer)
       ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
       ->apply($tasks);
-
-    // If this is a batch edit, select the editable tasks in the chosen column
-    // and ship the user into the batch editor.
-    $batch_edit = $request->getStr('batch');
-    if ($batch_edit) {
-      if ($batch_edit !== self::BATCH_EDIT_ALL) {
-        $column_id_map = mpull($columns, null, 'getID');
-        $batch_column = idx($column_id_map, $batch_edit);
-        if (!$batch_column) {
-          return new Aphront404Response();
-        }
-
-        $batch_task_phids = $layout_engine->getColumnObjectPHIDs(
-          $board_phid,
-          $batch_column->getPHID());
-
-        foreach ($batch_task_phids as $key => $batch_task_phid) {
-          if (empty($task_can_edit_map[$batch_task_phid])) {
-            unset($batch_task_phids[$key]);
-          }
-        }
-
-        $batch_tasks = array_select_keys($tasks, $batch_task_phids);
-      } else {
-        $batch_tasks = $task_can_edit_map;
-      }
-
-      if (!$batch_tasks) {
-        $cancel_uri = $state->newWorkboardURI();
-        return $this->newDialog()
-          ->setTitle(pht('No Editable Tasks'))
-          ->appendParagraph(
-            pht(
-              'The selected column contains no visible tasks which you '.
-              'have permission to edit.'))
-          ->addCancelButton($board_uri);
-      }
-
-      // Create a saved query to hold the working set. This allows us to get
-      // around URI length limitations with a long "?ids=..." query string.
-      // For details, see T10268.
-      $search_engine = id(new ManiphestTaskSearchEngine())
-        ->setViewer($viewer);
-
-      $saved_query = $search_engine->newSavedQuery();
-      $saved_query->setParameter('ids', mpull($batch_tasks, 'getID'));
-      $search_engine->saveQuery($saved_query);
-
-      $query_key = $saved_query->getQueryKey();
-
-      $bulk_uri = new PhutilURI("/maniphest/bulk/query/{$query_key}/");
-      $bulk_uri->replaceQueryParam('board', $project->getID());
-
-      return id(new AphrontRedirectResponse())
-        ->setURI($bulk_uri);
-    }
 
     $move_id = $request->getStr('move');
     if (strlen($move_id)) {
@@ -426,11 +337,13 @@ final class PhabricatorProjectBoardViewController
       }
     }
 
+    $container_phids = $state->getBoardContainerPHIDs();
+
     $rendering_engine = id(new PhabricatorBoardRenderingEngine())
       ->setViewer($viewer)
       ->setObjects(array_select_keys($tasks, $visible_phids))
       ->setEditMap($task_can_edit_map)
-      ->setExcludedProjectPHIDs($select_phids);
+      ->setExcludedProjectPHIDs($container_phids);
 
     $templates = array();
     $all_tasks = array();
@@ -912,13 +825,6 @@ final class PhabricatorProjectBoardViewController
       ->setName(pht('Manage Workboard'))
       ->setHref($manage_uri);
 
-    $batch_edit_uri = $request->getRequestURI();
-    $batch_edit_uri->replaceQueryParam('batch', self::BATCH_EDIT_ALL);
-    $can_batch_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      PhabricatorApplication::getByClass('PhabricatorManiphestApplication'),
-      ManiphestBulkEditCapability::CAPABILITY);
-
     $manage_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
     foreach ($manage_items as $item) {
@@ -1002,9 +908,12 @@ final class PhabricatorProjectBoardViewController
     $column_items[] = id(new PhabricatorActionView())
       ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
-    $batch_edit_uri = $request->getRequestURI();
-    $batch_edit_uri->replaceQueryParam('batch', $column->getID());
-    $can_batch_edit = PhabricatorPolicyFilter::hasCapability(
+    $bulk_edit_uri = $state->newWorkboardURI(
+      urisprintf(
+        'bulk/%d/',
+        $column->getID()));
+
+    $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       PhabricatorApplication::getByClass('PhabricatorManiphestApplication'),
       ManiphestBulkEditCapability::CAPABILITY);
@@ -1012,8 +921,8 @@ final class PhabricatorProjectBoardViewController
     $column_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-list-ul')
       ->setName(pht('Bulk Edit Tasks...'))
-      ->setHref($batch_edit_uri)
-      ->setDisabled(!$can_batch_edit);
+      ->setHref($bulk_edit_uri)
+      ->setDisabled(!$can_bulk_edit);
 
     $batch_move_uri = $request->getRequestURI();
     $batch_move_uri->replaceQueryParam('move', $column->getID());

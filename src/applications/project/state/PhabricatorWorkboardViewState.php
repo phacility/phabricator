@@ -8,6 +8,8 @@ final class PhabricatorWorkboardViewState
   private $requestState = array();
   private $savedQuery;
   private $searchEngine;
+  private $layoutEngine;
+  private $objects;
 
   public function setProject(PhabricatorProject $project) {
     $this->project = $project;
@@ -210,6 +212,80 @@ final class PhabricatorWorkboardViewState
 
   public function getQueryParameters() {
     return $this->requestState;
+  }
+
+  public function getLayoutEngine() {
+    if ($this->layoutEngine === null) {
+      $this->layoutEngine = $this->newLayoutEngine();
+    }
+    return $this->layoutEngine;
+  }
+
+  private function newLayoutEngine() {
+    $project = $this->getProject();
+    $viewer = $this->getViewer();
+
+    $board_phid = $project->getPHID();
+    $objects = $this->getObjects();
+
+    // Regardless of display order, pass tasks to the layout engine in ID order
+    // so layout is consistent.
+    $objects = msort($objects, 'getID');
+
+    $layout_engine = id(new PhabricatorBoardLayoutEngine())
+      ->setViewer($viewer)
+      ->setObjectPHIDs(array_keys($objects))
+      ->setBoardPHIDs(array($board_phid))
+      ->setFetchAllBoards(true)
+      ->executeLayout();
+
+    return $layout_engine;
+  }
+
+  public function getBoardContainerPHIDs() {
+    $project = $this->getProject();
+    $viewer = $this->getViewer();
+
+    $container_phids = array($project->getPHID());
+    if ($project->getHasSubprojects() || $project->getHasMilestones()) {
+      $descendants = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withAncestorProjectPHIDs($container_phids)
+        ->execute();
+      foreach ($descendants as $descendant) {
+        $container_phids[] = $descendant->getPHID();
+      }
+    }
+
+    return $container_phids;
+  }
+
+  public function getObjects() {
+    if ($this->objects === null) {
+      $this->objects = $this->newObjects();
+    }
+
+    return $this->objects;
+  }
+
+  private function newObjects() {
+    $viewer = $this->getViewer();
+    $saved_query = $this->getSavedQuery();
+    $search_engine = $this->getSearchEngine();
+
+    $container_phids = $this->getBoardContainerPHIDs();
+
+    $task_query = $search_engine->buildQueryFromSavedQuery($saved_query)
+      ->setViewer($viewer)
+      ->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
+        array($container_phids));
+
+    $tasks = $task_query->execute();
+    $tasks = mpull($tasks, null, 'getPHID');
+
+    return $tasks;
   }
 
 }
