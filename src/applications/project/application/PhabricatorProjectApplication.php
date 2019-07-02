@@ -99,6 +99,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardDefaultController',
           'filter/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorProjectBoardFilterController',
+          'reload/'
+            => 'PhabricatorProjectBoardReloadController',
         ),
         'column/' => array(
           'remove/(?P<id>\d+)/' =>

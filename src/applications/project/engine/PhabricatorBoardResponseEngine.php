@@ -6,6 +6,7 @@ final class PhabricatorBoardResponseEngine extends Phobject {
   private $boardPHID;
   private $objectPHID;
   private $visiblePHIDs;
+  private $updatePHIDs = array();
   private $ordering;
   private $sounds;
 
@@ -45,6 +46,15 @@ final class PhabricatorBoardResponseEngine extends Phobject {
     return $this->visiblePHIDs;
   }
 
+  public function setUpdatePHIDs(array $update_phids) {
+    $this->updatePHIDs = $update_phids;
+    return $this;
+  }
+
+  public function getUpdatePHIDs() {
+    return $this->updatePHIDs;
+  }
+
   public function setOrdering(PhabricatorProjectColumnOrder $ordering) {
     $this->ordering = $ordering;
     return $this;
@@ -71,36 +81,41 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
     // Load all the other tasks that are visible in the affected columns and
     // perform layout for them.
-    $visible_phids = $this->getAllVisiblePHIDs();
+    $all_phids = $this->getAllVisiblePHIDs();
 
     $layout_engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
       ->setBoardPHIDs(array($board_phid))
-      ->setObjectPHIDs($visible_phids)
+      ->setObjectPHIDs($all_phids)
       ->executeLayout();
 
-    $object_columns = $layout_engine->getObjectColumns(
-      $board_phid,
-      $object_phid);
-
     $natural = array();
-    foreach ($object_columns as $column_phid => $column) {
+
+    $update_phids = $this->getAllUpdatePHIDs();
+    $update_columns = array();
+    foreach ($update_phids as $update_phid) {
+      $update_columns += $layout_engine->getObjectColumns(
+        $board_phid,
+        $update_phid);
+    }
+
+    foreach ($update_columns as $column_phid => $column) {
       $column_object_phids = $layout_engine->getColumnObjectPHIDs(
         $board_phid,
         $column_phid);
       $natural[$column_phid] = array_values($column_object_phids);
     }
 
-    $all_visible = id(new ManiphestTaskQuery())
+    $all_objects = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
-      ->withPHIDs($visible_phids)
+      ->withPHIDs($all_phids)
       ->execute();
-    $all_visible = mpull($all_visible, null, 'getPHID');
+    $all_objects = mpull($all_objects, null, 'getPHID');
 
     if ($ordering) {
-      $vectors = $ordering->getSortVectorsForObjects($all_visible);
-      $header_keys = $ordering->getHeaderKeysForObjects($all_visible);
-      $headers = $ordering->getHeadersForObjects($all_visible);
+      $vectors = $ordering->getSortVectorsForObjects($all_objects);
+      $header_keys = $ordering->getHeaderKeysForObjects($all_objects);
+      $headers = $ordering->getHeadersForObjects($all_objects);
       $headers = mpull($headers, 'toDictionary');
     } else {
       $vectors = array();
@@ -108,19 +123,10 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       $headers = array();
     }
 
-    $object = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($object_phid))
-      ->needProjectPHIDs(true)
-      ->executeOne();
-    if (!$object) {
-      return new Aphront404Response();
-    }
-
-    $template = $this->buildTemplate($object);
+    $templates = $this->newCardTemplates();
 
     $cards = array();
-    foreach ($all_visible as $card_phid => $object) {
+    foreach ($all_objects as $card_phid => $object) {
       $card = array(
         'vectors' => array(),
         'headers' => array(),
@@ -144,8 +150,11 @@ final class PhabricatorBoardResponseEngine extends Phobject {
         $card['properties'] = self::newTaskProperties($object);
       }
 
-      if ($card_phid === $object_phid) {
-        $card['nodeHTMLTemplate'] = hsprintf('%s', $template);
+      if (isset($templates[$card_phid])) {
+        $card['nodeHTMLTemplate'] = hsprintf('%s', $templates[$card_phid]);
+        $card['update'] = true;
+      } else {
+        $card['update'] = false;
       }
 
       $card['vectors'] = (object)$card['vectors'];
@@ -156,7 +165,6 @@ final class PhabricatorBoardResponseEngine extends Phobject {
     }
 
     $payload = array(
-      'objectPHID' => $object_phid,
       'columnMaps' => $natural,
       'cards' => $cards,
       'headers' => $headers,
@@ -174,22 +182,6 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       'priority' => (int)$task->getPriority(),
       'owner' => $task->getOwnerPHID(),
     );
-  }
-
-  private function buildTemplate($object) {
-    $viewer = $this->getViewer();
-    $object_phid = $this->getObjectPHID();
-
-    $excluded_phids = $this->loadExcludedProjectPHIDs();
-
-    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
-      ->setViewer($viewer)
-      ->setObjects(array($object))
-      ->setExcludedProjectPHIDs($excluded_phids);
-
-    $card = $rendering_engine->renderCard($object_phid);
-
-    return hsprintf('%s', $card->getItem());
   }
 
   private function loadExcludedProjectPHIDs() {
@@ -211,10 +203,67 @@ final class PhabricatorBoardResponseEngine extends Phobject {
   }
 
   private function getAllVisiblePHIDs() {
-    $visible_phids = $this->getVisiblePHIDs();
-    $visible_phids[] = $this->getObjectPHID();
-    $visible_phids = array_fuse($visible_phids);
-    return $visible_phids;
+    $phids = $this->getAllUpdatePHIDs();
+
+    foreach ($this->getVisiblePHIDs() as $phid) {
+      $phids[] = $phid;
+    }
+
+    $phids = array_fuse($phids);
+
+    return $phids;
+  }
+
+  private function getAllUpdatePHIDs() {
+    $phids = $this->getUpdatePHIDs();
+
+    $object_phid = $this->getObjectPHID();
+    if ($object_phid) {
+      $phids[] = $object_phid;
+    }
+
+    $phids = array_fuse($phids);
+
+    return $phids;
+  }
+
+  private function newCardTemplates() {
+    $viewer = $this->getViewer();
+
+    $update_phids = $this->getAllUpdatePHIDs();
+    if (!$update_phids) {
+      return array();
+    }
+
+    $objects = id(new ManiphestTaskQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($update_phids)
+      ->needProjectPHIDs(true)
+      ->execute();
+
+    if (!$objects) {
+      return array();
+    }
+
+    $excluded_phids = $this->loadExcludedProjectPHIDs();
+
+    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
+      ->setViewer($viewer)
+      ->setObjects($objects)
+      ->setExcludedProjectPHIDs($excluded_phids);
+
+    $templates = array();
+    foreach ($objects as $object) {
+      $object_phid = $object->getPHID();
+
+      $card = $rendering_engine->renderCard($object_phid);
+      $item = $card->getItem();
+      $template = hsprintf('%s', $item);
+
+      $templates[$object_phid] = $template;
+    }
+
+    return $templates;
   }
 
 }

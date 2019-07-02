@@ -286,6 +286,7 @@ final class PhabricatorProjectBoardViewController
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
       'uploadURI' => '/file/dropupload/',
       'coverURI' => $this->getApplicationURI('cover/'),
+      'reloadURI' => phutil_string_cast($state->newWorkboardURI('reload/')),
       'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
       'pointsEnabled' => ManiphestTaskPoints::getIsEnabled(),
 

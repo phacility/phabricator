@@ -21,6 +21,7 @@ JX.install('WorkboardController', {
     uploadURI: null,
     coverURI: null,
     moveURI: null,
+    reloadURI: null,
     chunkThreshold: null
   },
 
