@@ -107,13 +107,13 @@ final class PhabricatorWorkboardViewState
     return $this->newURI($uri);
   }
 
-  public function newURI($path, $force = false) {
+  public function newURI($path) {
     $project = $this->getProject();
     $uri = new PhutilURI($path);
 
     $request_order = $this->getOrder();
     $default_order = $this->getDefaultOrder();
-    if ($force || ($request_order !== $default_order)) {
+    if ($request_order !== $default_order) {
       $request_value = idx($this->requestState, 'order');
       if ($request_value !== null) {
         $uri->replaceQueryParam('order', $request_value);
@@ -126,7 +126,7 @@ final class PhabricatorWorkboardViewState
 
     $request_query = $this->getQueryKey();
     $default_query = $this->getDefaultQueryKey();
-    if ($force || ($request_query !== $default_query)) {
+    if ($request_query !== $default_query) {
       $request_value = idx($this->requestState, 'filter');
       if ($request_value !== null) {
         $uri->replaceQueryParam('filter', $request_value);

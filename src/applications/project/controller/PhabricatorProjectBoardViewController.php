@@ -495,24 +495,26 @@ final class PhabricatorProjectBoardViewController
         ->setName($name);
 
       if ($is_custom) {
-        $uri = $this->getApplicationURI(
-          'board/'.$project->getID().'/filter/query/'.$key.'/');
+        // When you're using a custom filter already and you select "Custom
+        // Filter", you get a dialog back to let you edit the filter. This is
+        // equivalent to selecting "Advanced Filter..." to configure a new
+        // filter.
+        $filter_uri = $state->newWorkboardURI('filter/');
         $item->setWorkflow(true);
       } else {
-        $uri = $engine->getQueryResultsPageURI($key);
+        $filter_uri = urisprintf('query/%s/', $key);
+        $filter_uri = $state->newWorkboardURI($filter_uri);
+        $filter_uri->removeQueryParam('filter');
       }
 
-      $uri = $this->getURIWithState($uri)
-        ->removeQueryParam('filter');
-      $item->setHref($uri);
+      $item->setHref($filter_uri);
 
       $items[] = $item;
     }
 
     $id = $project->getID();
 
-    $filter_uri = $this->getApplicationURI("board/{$id}/filter/");
-    $filter_uri = $this->getURIWithState($filter_uri, $force = true);
+    $filter_uri = $state->newWorkboardURI('filter/');
 
     $items[] = id(new PhabricatorActionView())
       ->setIcon('fa-cog')
@@ -716,10 +718,8 @@ final class PhabricatorProjectBoardViewController
       ->setIcon('fa-search')
       ->setHref($query_uri);
 
-    $column_move_uri = $state->newWorkboardURI(
-      urisprintf(
-        'bulkmove/%d/column/',
-        $column->getID()));
+    $column_move_uri = urisprintf('bulkmove/%d/column/', $column->getID());
+    $column_move_uri = $state->newWorkboardURI($column_move_uri);
 
     $column_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-arrows-h')
@@ -727,10 +727,8 @@ final class PhabricatorProjectBoardViewController
       ->setHref($column_move_uri)
       ->setWorkflow(true);
 
-    $project_move_uri = $state->newWorkboardURI(
-      urisprintf(
-        'bulkmove/%d/project/',
-        $column->getID()));
+    $project_move_uri = urisprintf('bulkmove/%d/project/', $column->getID());
+    $project_move_uri = $state->newWorkboardURI($project_move_uri);
 
     $column_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-arrows')
@@ -738,10 +736,8 @@ final class PhabricatorProjectBoardViewController
       ->setHref($project_move_uri)
       ->setWorkflow(true);
 
-    $bulk_edit_uri = $state->newWorkboardURI(
-      urisprintf(
-        'bulk/%d/',
-        $column->getID()));
+    $bulk_edit_uri = urisprintf('bulk/%d/', $column->getID());
+    $bulk_edit_uri = $state->newWorkboardURI($bulk_edit_uri);
 
     $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -767,9 +763,9 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true);
 
     $can_hide = ($can_edit && !$column->isDefaultColumn());
-    $hide_uri = 'board/'.$project->getID().'/hide/'.$column->getID().'/';
-    $hide_uri = $this->getApplicationURI($hide_uri);
-    $hide_uri = $this->getURIWithState($hide_uri);
+
+    $hide_uri = urisprintf('hide/%d/', $column->getID());
+    $hide_uri = $state->newWorkboardURI($hide_uri);
 
     if (!$column->isHidden()) {
       $column_items[] = id(new PhabricatorActionView())
@@ -873,26 +869,6 @@ final class PhabricatorProjectBoardViewController
         ));
 
     return $trigger_button;
-  }
-
-  /**
-   * Add current state parameters (like order and the visibility of hidden
-   * columns) to a URI.
-   *
-   * This allows actions which toggle or adjust one piece of state to keep
-   * the rest of the board state persistent. If no URI is provided, this method
-   * starts with the request URI.
-   *
-   * @param string|null URI to add state parameters to.
-   * @param bool True to explicitly include all state.
-   * @return PhutilURI URI with state parameters.
-   */
-  private function getURIWithState($base = null, $force = false) {
-    if ($base === null) {
-      $base = $this->getProject()->getWorkboardURI();
-    }
-
-    return $this->getViewState()->newURI($base, $force);
   }
 
   private function buildInitializeContent(PhabricatorProject $project) {
