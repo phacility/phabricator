@@ -570,10 +570,7 @@ JX.install('WorkboardBoard', {
       list.unlock();
     },
 
-    updateCard: function(response, options) {
-      options = options || {};
-      options.dirtyColumns = options.dirtyColumns || {};
-
+    updateCard: function(response) {
       var columns = this.getColumns();
 
       var phid = response.objectPHID;
