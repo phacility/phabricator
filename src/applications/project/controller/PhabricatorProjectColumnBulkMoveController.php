@@ -11,25 +11,30 @@ final class PhabricatorProjectColumnBulkMoveController
       return $response;
     }
 
-    $project = $this->getProject();
+    // See T13316. If we're operating in "column" mode, we're going to skip
+    // the prompt for a project and just have the user select a target column.
+    // In "project" mode, we prompt them for a project first.
+    $is_column_mode = ($request->getURIData('mode') === 'column');
+
+    $src_project = $this->getProject();
     $state = $this->getViewState();
     $board_uri = $state->newWorkboardURI();
 
     $layout_engine = $state->getLayoutEngine();
 
-    $board_phid = $project->getPHID();
+    $board_phid = $src_project->getPHID();
     $columns = $layout_engine->getColumns($board_phid);
     $columns = mpull($columns, null, 'getID');
 
     $column_id = $request->getURIData('columnID');
-    $move_column = idx($columns, $column_id);
-    if (!$move_column) {
+    $src_column = idx($columns, $column_id);
+    if (!$src_column) {
       return new Aphront404Response();
     }
 
     $move_task_phids = $layout_engine->getColumnObjectPHIDs(
       $board_phid,
-      $move_column->getPHID());
+      $src_column->getPHID());
 
     $tasks = $state->getObjects();
 
@@ -50,170 +55,210 @@ final class PhabricatorProjectColumnBulkMoveController
         ->addCancelButton($board_uri);
     }
 
-    $move_project_phid = $project->getPHID();
-    $move_column_phid = null;
-    $move_project = null;
-    $move_column = null;
-    $columns = null;
-    $errors = array();
-
-    if ($request->isFormOrHiSecPost()) {
-      $move_project_phid = head($request->getArr('moveProjectPHID'));
-      if (!$move_project_phid) {
-        $move_project_phid = $request->getStr('moveProjectPHID');
-      }
-
-      if (!$move_project_phid) {
-        if ($request->getBool('hasProject')) {
-          $errors[] = pht('Choose a project to move tasks to.');
-        }
-      } else {
-        $target_project = id(new PhabricatorProjectQuery())
-          ->setViewer($viewer)
-          ->withPHIDs(array($move_project_phid))
-          ->executeOne();
-        if (!$target_project) {
-          $errors[] = pht('You must choose a valid project.');
-        } else if (!$project->getHasWorkboard()) {
-          $errors[] = pht(
-            'You must choose a project with a workboard.');
-        } else {
-          $move_project = $target_project;
-        }
-      }
-
-      if ($move_project) {
-        $move_engine = id(new PhabricatorBoardLayoutEngine())
-          ->setViewer($viewer)
-          ->setBoardPHIDs(array($move_project->getPHID()))
-          ->setFetchAllBoards(true)
-          ->executeLayout();
-
-        $columns = $move_engine->getColumns($move_project->getPHID());
-        $columns = mpull($columns, null, 'getPHID');
-
-        foreach ($columns as $key => $column) {
-          if ($column->isHidden()) {
-            unset($columns[$key]);
-          }
-        }
-
-        $move_column_phid = $request->getStr('moveColumnPHID');
-        if (!$move_column_phid) {
-          if ($request->getBool('hasColumn')) {
-            $errors[] = pht('Choose a column to move tasks to.');
-          }
-        } else {
-          if (empty($columns[$move_column_phid])) {
-            $errors[] = pht(
-              'Choose a valid column on the target workboard to move '.
-              'tasks to.');
-          } else if ($columns[$move_column_phid]->getID() == $column_id) {
-            $errors[] = pht(
-              'You can not move tasks from a column to itself.');
-          } else {
-            $move_column = $columns[$move_column_phid];
+    $dst_project_phid = null;
+    $dst_project = null;
+    $has_project = false;
+    if ($is_column_mode) {
+      $has_project = true;
+      $dst_project_phid = $src_project->getPHID();
+    } else {
+      if ($request->isFormOrHiSecPost()) {
+        $has_project = $request->getStr('hasProject');
+        if ($has_project) {
+          // We may read this from a tokenizer input as an array, or from a
+          // hidden input as a string.
+          $dst_project_phid = head($request->getArr('dstProjectPHID'));
+          if (!$dst_project_phid) {
+            $dst_project_phid = $request->getStr('dstProjectPHID');
           }
         }
       }
     }
 
-    if ($move_column && $move_project) {
-      foreach ($move_tasks as $move_task) {
-        $xactions = array();
+    $errors = array();
+    $hidden = array();
 
-        // If we're switching projects, get out of the old project first
-        // and move to the new project.
-        if ($move_project->getID() != $project->getID()) {
+    if ($has_project) {
+      if (!$dst_project_phid) {
+        $errors[] = pht('Choose a project to move tasks to.');
+      } else {
+        $dst_project = id(new PhabricatorProjectQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($dst_project_phid))
+          ->executeOne();
+        if (!$dst_project) {
+          $errors[] = pht('Choose a valid project to move tasks to.');
+        }
+
+        if (!$dst_project->getHasWorkboard()) {
+          $errors[] = pht('You must choose a project with a workboard.');
+          $dst_project = null;
+        }
+      }
+    }
+
+    if ($dst_project) {
+      $same_project = ($src_project->getID() === $dst_project->getID());
+
+      $layout_engine = id(new PhabricatorBoardLayoutEngine())
+        ->setViewer($viewer)
+        ->setBoardPHIDs(array($dst_project->getPHID()))
+        ->setFetchAllBoards(true)
+        ->executeLayout();
+
+      $dst_columns = $layout_engine->getColumns($dst_project->getPHID());
+      $dst_columns = mpull($columns, null, 'getPHID');
+
+      $has_column = false;
+      $dst_column = null;
+
+      // If we're performing a move on the same board, default the
+      // control value to the current column.
+      if ($same_project) {
+        $dst_column_phid = $src_column->getPHID();
+      } else {
+        $dst_column_phid = null;
+      }
+
+      if ($request->isFormOrHiSecPost()) {
+        $has_column = $request->getStr('hasColumn');
+        if ($has_column) {
+          $dst_column_phid = $request->getStr('dstColumnPHID');
+        }
+      }
+
+      if ($has_column) {
+        $dst_column = idx($dst_columns, $dst_column_phid);
+        if (!$dst_column) {
+          $errors[] = pht('Choose a column to move tasks to.');
+        } else {
+          if ($dst_column->isHidden()) {
+            $errors[] = pht('You can not move tasks to a hidden column.');
+            $dst_column = null;
+          } else if ($dst_column->getPHID() === $src_column->getPHID()) {
+            $errors[] = pht('You can not move tasks from a column to itself.');
+            $dst_column = null;
+          }
+        }
+      }
+
+      if ($dst_column) {
+        foreach ($move_tasks as $move_task) {
+          $xactions = array();
+
+          // If we're switching projects, get out of the old project first
+          // and move to the new project.
+          if (!$same_project) {
+            $xactions[] = id(new ManiphestTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+              ->setMetadataValue(
+                'edge:type',
+                PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+              ->setNewValue(
+                array(
+                  '-' => array(
+                    $src_project->getPHID() => $src_project->getPHID(),
+                  ),
+                  '+' => array(
+                    $dst_project->getPHID() => $dst_project->getPHID(),
+                  ),
+                ));
+          }
+
           $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-            ->setMetadataValue(
-              'edge:type',
-              PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+            ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
             ->setNewValue(
               array(
-                '-' => array(
-                  $project->getPHID() => $project->getPHID(),
-                ),
-                '+' => array(
-                  $move_project->getPHID() => $move_project->getPHID(),
+                array(
+                  'columnPHID' => $dst_column->getPHID(),
                 ),
               ));
+
+          $editor = id(new ManiphestTransactionEditor())
+            ->setActor($viewer)
+            ->setContinueOnMissingFields(true)
+            ->setContinueOnNoEffect(true)
+            ->setContentSourceFromRequest($request)
+            ->setCancelURI($board_uri);
+
+          $editor->applyTransactions($move_task, $xactions);
         }
 
-        $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
-          ->setNewValue(
-            array(
-              array(
-                'columnPHID' => $move_column->getPHID(),
-              ),
-            ));
+        // If we did a move on the same workboard, redirect and preserve the
+        // state parameters. If we moved to a different workboard, go there
+        // with clean default state.
+        if ($same_project) {
+          $done_uri = $board_uri;
+        } else {
+          $done_uri = $dst_project->getWorkboardURI();
+        }
 
-        $editor = id(new ManiphestTransactionEditor())
-          ->setActor($viewer)
-          ->setContinueOnMissingFields(true)
-          ->setContinueOnNoEffect(true)
-          ->setContentSourceFromRequest($request)
-          ->setCancelURI($board_uri);
-
-        $editor->applyTransactions($move_task, $xactions);
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
 
-      return id(new AphrontRedirectResponse())
-        ->setURI($board_uri);
-    }
+      $title = pht('Move Tasks to Column');
 
-    if ($move_project) {
-      $column_form = id(new AphrontFormView())
+      $form = id(new AphrontFormView())
+        ->setViewer($viewer);
+
+      // If we're moving between projects, add a reminder about which project
+      // you selected in the previous step.
+      if (!$is_column_mode) {
+        $form->appendControl(
+          id(new AphrontFormStaticControl())
+            ->setLabel(pht('Project'))
+            ->setValue($dst_project->getDisplayName()));
+      }
+
+      $form->appendControl(
+          id(new AphrontFormSelectControl())
+            ->setName('dstColumnPHID')
+            ->setLabel(pht('Move to Column'))
+            ->setValue($dst_column_phid)
+            ->setOptions(mpull($dst_columns, 'getDisplayName', 'getPHID')));
+
+      $submit = pht('Move Tasks');
+
+      $hidden['dstProjectPHID'] = $dst_project->getPHID();
+      $hidden['hasColumn'] = true;
+      $hidden['hasProject'] = true;
+    } else {
+      $title = pht('Move Tasks to Project');
+
+      if ($dst_project_phid) {
+        $dst_project_phid_value = array($dst_project_phid);
+      } else {
+        $dst_project_phid_value = array();
+      }
+
+      $form = id(new AphrontFormView())
         ->setViewer($viewer)
         ->appendControl(
-          id(new AphrontFormSelectControl())
-            ->setName('moveColumnPHID')
-            ->setLabel(pht('Move to Column'))
-            ->setValue($move_column_phid)
-            ->setOptions(mpull($columns, 'getDisplayName', 'getPHID')));
+          id(new AphrontFormTokenizerControl())
+            ->setName('dstProjectPHID')
+            ->setLimit(1)
+            ->setLabel(pht('Move to Project'))
+            ->setValue($dst_project_phid_value)
+            ->setDatasource(new PhabricatorProjectDatasource()));
 
-      return $this->newWorkboardDialog()
-        ->setTitle(pht('Move Tasks'))
-        ->setWidth(AphrontDialogView::WIDTH_FORM)
-        ->setErrors($errors)
-        ->addHiddenInput('moveProjectPHID', $move_project->getPHID())
-        ->addHiddenInput('hasColumn', true)
-        ->addHiddenInput('hasProject', true)
-        ->appendParagraph(
-          pht(
-            'Choose a column on the %s workboard to move tasks to:',
-            $viewer->renderHandle($move_project->getPHID())))
-        ->appendForm($column_form)
-        ->addSubmitButton(pht('Move Tasks'))
-        ->addCancelButton($board_uri);
+      $submit = pht('Continue');
+
+      $hidden['hasProject'] = true;
     }
 
-    if ($move_project_phid) {
-      $move_project_phid_value = array($move_project_phid);
-    } else {
-      $move_project_phid_value = array();
-    }
-
-    $project_form = id(new AphrontFormView())
-      ->setViewer($viewer)
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setName('moveProjectPHID')
-          ->setLimit(1)
-          ->setLabel(pht('Move to Project'))
-          ->setValue($move_project_phid_value)
-          ->setDatasource(new PhabricatorProjectDatasource()));
-
-    return $this->newWorkboardDialog()
-      ->setTitle(pht('Move Tasks'))
+    $dialog = $this->newWorkboardDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setTitle($title)
       ->setErrors($errors)
-      ->addHiddenInput('hasProject', true)
-      ->appendForm($project_form)
-      ->addSubmitButton(pht('Continue'))
+      ->appendForm($form)
+      ->addSubmitButton($submit)
       ->addCancelButton($board_uri);
+
+    foreach ($hidden as $key => $value) {
+      $dialog->addHiddenInput($key, $value);
+    }
+
+    return $dialog;
   }
 
 }

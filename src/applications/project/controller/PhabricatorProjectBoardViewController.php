@@ -708,6 +708,36 @@ final class PhabricatorProjectBoardViewController
     $column_items[] = id(new PhabricatorActionView())
       ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
+    $query_uri = urisprintf('viewquery/%d/', $column->getID());
+    $query_uri = $state->newWorkboardURI($query_uri);
+
+    $column_items[] = id(new PhabricatorActionView())
+      ->setName(pht('View Tasks as Query'))
+      ->setIcon('fa-search')
+      ->setHref($query_uri);
+
+    $column_move_uri = $state->newWorkboardURI(
+      urisprintf(
+        'bulkmove/%d/column/',
+        $column->getID()));
+
+    $column_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-arrows-h')
+      ->setName(pht('Move Tasks to Column...'))
+      ->setHref($column_move_uri)
+      ->setWorkflow(true);
+
+    $project_move_uri = $state->newWorkboardURI(
+      urisprintf(
+        'bulkmove/%d/project/',
+        $column->getID()));
+
+    $column_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-arrows')
+      ->setName(pht('Move Tasks to Project...'))
+      ->setHref($project_move_uri)
+      ->setWorkflow(true);
+
     $bulk_edit_uri = $state->newWorkboardURI(
       urisprintf(
         'bulk/%d/',
@@ -719,29 +749,14 @@ final class PhabricatorProjectBoardViewController
       ManiphestBulkEditCapability::CAPABILITY);
 
     $column_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-list-ul')
+      ->setIcon('fa-pencil-square-o')
       ->setName(pht('Bulk Edit Tasks...'))
       ->setHref($bulk_edit_uri)
       ->setDisabled(!$can_bulk_edit);
 
-    $project_move_uri = $state->newWorkboardURI(
-      urisprintf(
-        'bulkmove/%d/project/',
-        $column->getID()));
-
     $column_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-arrow-right')
-      ->setName(pht('Move Tasks to Column...'))
-      ->setHref($project_move_uri)
-      ->setWorkflow(true);
+      ->setType(PhabricatorActionView::TYPE_DIVIDER);
 
-    $query_uri = urisprintf('viewquery/%d/', $column->getID());
-    $query_uri = $state->newWorkboardURI($query_uri);
-
-    $column_items[] = id(new PhabricatorActionView())
-      ->setName(pht('View as Query'))
-      ->setIcon('fa-search')
-      ->setHref($query_uri);
 
     $edit_uri = 'board/'.$project->getID().'/edit/'.$column->getID().'/';
     $column_items[] = id(new PhabricatorActionView())
