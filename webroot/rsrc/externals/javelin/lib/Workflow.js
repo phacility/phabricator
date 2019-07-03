@@ -118,6 +118,11 @@ JX.install('Workflow', {
         return;
       }
 
+      // This link is really a dialog button which we'll handle elsewhere.
+      if (JX.Stratcom.hasSigil(link, 'jx-workflow-button')) {
+        return;
+      }
+
       // Close the dialog.
       JX.Workflow._pop();
     },
