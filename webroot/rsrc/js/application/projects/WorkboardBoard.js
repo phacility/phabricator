@@ -734,7 +734,20 @@ JX.install('WorkboardBoard', {
     },
 
     _reloadCards: function() {
-      var data = {};
+      var state = {};
+
+      var columns = this.getColumns();
+      for (var column_phid in columns) {
+        var cards = columns[column_phid].getCards();
+        for (var card_phid in cards) {
+          state[card_phid] = this.getCardTemplate(card_phid).getVersion();
+        }
+      }
+
+      var data = {
+        state: JX.JSON.stringify(state),
+      };
+
       var on_reload = JX.bind(this, this._onReloadResponse);
 
       new JX.Request(this.getController().getReloadURI(), on_reload)
