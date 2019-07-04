@@ -103,7 +103,7 @@ final class PhabricatorWorkboardViewState
 
   public function newWorkboardURI($path = null) {
     $project = $this->getProject();
-    $uri = urisprintf('%p%p', $project->getWorkboardURI(), $path);
+    $uri = urisprintf('%s%s', $project->getWorkboardURI(), $path);
     return $this->newURI($uri);
   }
 
