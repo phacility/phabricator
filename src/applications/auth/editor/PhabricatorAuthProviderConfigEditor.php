@@ -125,4 +125,25 @@ final class PhabricatorAuthProviderConfigEditor
     return parent::mergeTransactions($u, $v);
   }
 
+  protected function validateAllTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $errors = parent::validateAllTransactions($object, $xactions);
+
+    $locked_config_key = 'auth.lock-config';
+    $is_locked = PhabricatorEnv::getEnvConfig($locked_config_key);
+
+    if ($is_locked) {
+      $errors[] = new PhabricatorApplicationTransactionValidationError(
+        null,
+        pht('Config Locked'),
+        pht('Authentication provider configuration is locked, and can not be '.
+            'changed without being unlocked.'),
+        null);
+    }
+
+    return $errors;
+  }
+
 }

@@ -79,6 +79,7 @@ final class PhabricatorAuthEditController
     }
 
     $errors = array();
+    $validation_exception = null;
 
     $v_login = $config->getShouldAllowLogin();
     $v_registration = $config->getShouldAllowRegistration();
@@ -153,12 +154,16 @@ final class PhabricatorAuthEditController
         $editor = id(new PhabricatorAuthProviderConfigEditor())
           ->setActor($viewer)
           ->setContentSourceFromRequest($request)
-          ->setContinueOnNoEffect(true)
-          ->applyTransactions($config, $xactions);
+          ->setContinueOnNoEffect(true);
 
-        $next_uri = $config->getURI();
+        try {
+          $editor->applyTransactions($config, $xactions);
+          $next_uri = $config->getURI();
 
-        return id(new AphrontRedirectResponse())->setURI($next_uri);
+          return id(new AphrontRedirectResponse())->setURI($next_uri);
+        } catch (Exception $ex) {
+          $validation_exception = $ex;
+        }
       }
     } else {
       $properties = $provider->readFormValuesFromProvider();
@@ -325,11 +330,34 @@ final class PhabricatorAuthEditController
 
     $provider->extendEditForm($request, $form, $properties, $issues);
 
+    $locked_config_key = 'auth.lock-config';
+    $is_locked = PhabricatorEnv::getEnvConfig($locked_config_key);
+
+    $locked_warning = null;
+    if ($is_locked && !$validation_exception) {
+      $message = pht(
+        'Authentication provider configuration is locked, and can not be '.
+        'changed without being unlocked. See the configuration setting %s '.
+        'for details.',
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/config/edit/'.$locked_config_key,
+          ),
+          $locked_config_key));
+      $locked_warning = id(new PHUIInfoView())
+        ->setViewer($viewer)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(array($message));
+    }
+
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
+          ->setDisabled($is_locked)
           ->setValue($button));
+
 
     $help = $provider->getConfigurationHelp();
     if ($help) {
@@ -346,12 +374,16 @@ final class PhabricatorAuthEditController
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Provider'))
       ->setFormErrors($errors)
+      ->setValidationException($validation_exception)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(array(
+        $locked_warning,
         $form_box,
         $footer,
       ));
