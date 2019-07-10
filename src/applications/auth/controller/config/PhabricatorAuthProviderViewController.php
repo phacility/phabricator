@@ -114,6 +114,86 @@ final class PhabricatorAuthProviderViewController
       pht('Provider Type'),
       $config->getProvider()->getProviderName());
 
+    $status = $this->buildStatus($config);
+    $view->addProperty(pht('Status'), $status);
+
     return $view;
   }
+
+  private function buildStatus(PhabricatorAuthProviderConfig $config) {
+    $viewer = $this->getViewer();
+    $view = id(new PHUIStatusListView())
+      ->setViewer($viewer);
+
+    $icon_enabled = PHUIStatusItemView::ICON_ACCEPT;
+    $icon_disabled = PHUIStatusItemView::ICON_REJECT;
+
+    $icon_map = array(
+      true => $icon_enabled,
+      false => $icon_disabled,
+    );
+
+    $color_map = array(
+      true => 'green',
+      false => 'red',
+    );
+
+    $provider = $config->getProvider();
+
+    $view->addItem(
+      id(new PHUIStatusItemView())
+        ->setIcon(
+          $icon_map[$config->getIsEnabled()],
+          $color_map[$config->getIsEnabled()])
+        ->setTarget(pht('Provider Enabled')));
+
+    $view->addItem(
+      id(new PHUIStatusItemView())
+        ->setIcon(
+          $icon_map[$config->getShouldAllowLogin()],
+          $color_map[$config->getShouldAllowLogin()])
+        ->setTarget(pht('Allow Logins')));
+
+    $view->addItem(
+      id(new PHUIStatusItemView())
+        ->setIcon(
+          $icon_map[$config->getShouldAllowRegistration()],
+          $color_map[$config->getShouldAllowRegistration()])
+        ->setTarget(pht('Allow Registration')));
+
+    $view->addItem(
+      id(new PHUIStatusItemView())
+        ->setIcon(
+          $icon_map[$config->getShouldAllowLink()],
+          $color_map[$config->getShouldAllowLink()])
+        ->setTarget(pht('Allow Account Linking')));
+
+    $view->addItem(
+      id(new PHUIStatusItemView())
+        ->setIcon(
+          $icon_map[$config->getShouldAllowUnlink()],
+          $color_map[$config->getShouldAllowUnlink()])
+        ->setTarget(pht('Allow Account Unlinking')));
+
+    if ($provider->shouldAllowEmailTrustConfiguration()) {
+      $view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(
+            $icon_map[$config->getShouldTrustEmails()],
+            $color_map[$config->getShouldTrustEmails()])
+          ->setTarget(pht('Trust Email Addresses')));
+    }
+
+    if ($provider->supportsAutoLogin()) {
+      $view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(
+            $icon_map[$config->getShouldAutoLogin()],
+            $color_map[$config->getShouldAutoLogin()])
+          ->setTarget(pht('Allow Auto Login')));
+    }
+
+    return $view;
+  }
+
 }
