@@ -103,7 +103,7 @@ final class PholioMockImagesView extends AphrontView {
         'width' => $x,
         'height' => $y,
         'title' => $image->getName(),
-        'descriptionMarkup' => $description,
+        'descriptionMarkup' => hsprintf('%s', $description),
         'isObsolete' => (bool)$image->getIsObsolete(),
         'isImage' => $file->isViewableImage(),
         'isViewable' => $file->isViewableInBrowser(),
