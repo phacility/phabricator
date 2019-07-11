@@ -38,10 +38,9 @@ final class PhabricatorApplicationTransactionCommentRemoveController
     // from locked threads.
 
     $object = $xaction->getObject();
-    $can_interact = PhabricatorPolicyFilter::hasCapability(
+    $can_interact = PhabricatorPolicyFilter::canInteract(
       $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_INTERACT);
+      $object);
     if (!$can_interact && !$viewer->getIsAdmin()) {
       return $this->newDialog()
         ->setTitle(pht('Conversation Locked'))
