@@ -22,7 +22,7 @@ final class PhabricatorDaemonManagementStatusWorkflow
             'instance ("%s").',
             $instance));
       } else {
-        $this->writeInfo(
+        $this->logInfo(
           pht('NO DAEMONS'),
           pht('There are no running daemon processes.'));
       }
