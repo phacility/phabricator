@@ -136,6 +136,36 @@ JX.install('WorkboardBoard', {
         .setHandler(on_reload)
         .register();
 
+      var board_phid = this.getPHID();
+
+      JX.Stratcom.listen('aphlict-server-message', null, function(e) {
+        var message = e.getData();
+
+        if (message.type != 'workboards') {
+          return;
+        }
+
+        // Check if this update notification is about the currently visible
+        // board. If it is, update the board state.
+
+        var found_board = false;
+        for (var ii = 0; ii < message.subscribers.length; ii++) {
+          var subscriber_phid = message.subscribers[ii];
+          if (subscriber_phid === board_phid) {
+            found_board = true;
+            break;
+          }
+        }
+
+        if (found_board) {
+          on_reload();
+        }
+      });
+
+      JX.Stratcom.listen('aphlict-reconnect', null, function(e) {
+        on_reload();
+      });
+
       for (var k in this._columns) {
         this._columns[k].redraw();
       }

@@ -859,4 +859,33 @@ final class ManiphestTransactionEditor
     return array_values($phid_list);
   }
 
+
+  protected function didApplyTransactions($object, array $xactions) {
+    // TODO: This should include projects which the object was previously
+    // associated with but no longer is (so it can be removed from those
+    // boards) but currently does not.
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array($object->getPHID()))
+      ->withEdgeTypes(
+        array(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        ));
+
+    $edge_query->execute();
+
+    $project_phids = $edge_query->getDestinationPHIDs();
+
+    if ($project_phids) {
+      $data = array(
+        'type' => 'workboards',
+        'subscribers' => $project_phids,
+      );
+
+      PhabricatorNotificationClient::tryToPostMessage($data);
+    }
+
+    return $xactions;
+  }
+
 }
