@@ -25,6 +25,7 @@ final class PhabricatorProjectBoardReloadController
     $engine = id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
+      ->setObjects($objects)
       ->setUpdatePHIDs($object_phids);
 
     // TODO: We don't currently process "order" properly. If a user is viewing

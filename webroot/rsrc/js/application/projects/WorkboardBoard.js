@@ -611,10 +611,35 @@ JX.install('WorkboardBoard', {
         }
       }
 
+      // Process card removals. These are cases where the client still sees
+      // a particular card on a board but it has been removed on the server.
+      for (card_phid in response.cards) {
+        card_data = response.cards[card_phid];
+
+        if (!card_data.remove) {
+          continue;
+        }
+
+        for (column_phid in columns) {
+          var column = columns[column_phid];
+
+          var card = column.getCard(card_phid);
+          if (card) {
+            column.removeCard(card_phid);
+            column.markForRedraw();
+          }
+        }
+      }
+
       // Process partial updates for cards. This is supplemental data which
       // we can just merge in without any special handling.
       for (card_phid in response.cards) {
         card_data = response.cards[card_phid];
+
+        if (card_data.remove) {
+          continue;
+        }
+
         var card_template = this.getCardTemplate(card_phid);
 
         if (card_data.nodeHTMLTemplate) {
@@ -634,7 +659,6 @@ JX.install('WorkboardBoard', {
           card_template.setObjectProperty(key, card_data.properties[key]);
         }
       }
-
 
       // Process full updates for cards which we have a full update for. This
       // may involve moving them between columns.

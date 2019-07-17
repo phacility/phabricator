@@ -3,9 +3,9 @@
 final class PhabricatorBoardResponseEngine extends Phobject {
 
   private $viewer;
+  private $objects;
   private $boardPHID;
-  private $objectPHID;
-  private $visiblePHIDs;
+  private $visiblePHIDs = array();
   private $updatePHIDs = array();
   private $ordering;
   private $sounds;
@@ -28,13 +28,13 @@ final class PhabricatorBoardResponseEngine extends Phobject {
     return $this->boardPHID;
   }
 
-  public function setObjectPHID($object_phid) {
-    $this->objectPHID = $object_phid;
+  public function setObjects(array $objects) {
+    $this->objects = $objects;
     return $this;
   }
 
-  public function getObjectPHID() {
-    return $this->objectPHID;
+  public function getObjects() {
+    return $this->objects;
   }
 
   public function setVisiblePHIDs(array $visible_phids) {
@@ -75,13 +75,30 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
   public function buildResponse() {
     $viewer = $this->getViewer();
-    $object_phid = $this->getObjectPHID();
     $board_phid = $this->getBoardPHID();
     $ordering = $this->getOrdering();
 
+    $update_phids = $this->getUpdatePHIDs();
+    $update_phids = array_fuse($update_phids);
+
+    $visible_phids = $this->getVisiblePHIDs();
+    $visible_phids = array_fuse($visible_phids);
+
+    $all_phids = $update_phids + $visible_phids;
+
     // Load all the other tasks that are visible in the affected columns and
     // perform layout for them.
-    $all_phids = $this->getAllVisiblePHIDs();
+
+    if ($this->objects !== null) {
+      $all_objects = $this->getObjects();
+      $all_objects = mpull($all_objects, null, 'getPHID');
+    } else {
+      $all_objects = id(new ManiphestTaskQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($all_phids)
+        ->execute();
+      $all_objects = mpull($all_objects, null, 'getPHID');
+    }
 
     $layout_engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
@@ -91,7 +108,6 @@ final class PhabricatorBoardResponseEngine extends Phobject {
 
     $natural = array();
 
-    $update_phids = $this->getAllUpdatePHIDs();
     $update_columns = array();
     foreach ($update_phids as $update_phid) {
       $update_columns += $layout_engine->getObjectColumns(
@@ -105,12 +121,6 @@ final class PhabricatorBoardResponseEngine extends Phobject {
         $column_phid);
       $natural[$column_phid] = array_values($column_object_phids);
     }
-
-    $all_objects = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($all_phids)
-      ->execute();
-    $all_objects = mpull($all_objects, null, 'getPHID');
 
     if ($ordering) {
       $vectors = $ordering->getSortVectorsForObjects($all_objects);
@@ -164,6 +174,17 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       $cards[$card_phid] = $card;
     }
 
+    // Mark cards which are currently visible on the client but not visible
+    // on the board on the server for removal from the client view of the
+    // board state.
+    foreach ($visible_phids as $card_phid) {
+      if (!isset($cards[$card_phid])) {
+        $cards[$card_phid] = array(
+          'remove' => true,
+        );
+      }
+    }
+
     $payload = array(
       'columnMaps' => $natural,
       'cards' => $cards,
@@ -202,44 +223,26 @@ final class PhabricatorBoardResponseEngine extends Phobject {
     return array_fuse($exclude_phids);
   }
 
-  private function getAllVisiblePHIDs() {
-    $phids = $this->getAllUpdatePHIDs();
-
-    foreach ($this->getVisiblePHIDs() as $phid) {
-      $phids[] = $phid;
-    }
-
-    $phids = array_fuse($phids);
-
-    return $phids;
-  }
-
-  private function getAllUpdatePHIDs() {
-    $phids = $this->getUpdatePHIDs();
-
-    $object_phid = $this->getObjectPHID();
-    if ($object_phid) {
-      $phids[] = $object_phid;
-    }
-
-    $phids = array_fuse($phids);
-
-    return $phids;
-  }
-
   private function newCardTemplates() {
     $viewer = $this->getViewer();
 
-    $update_phids = $this->getAllUpdatePHIDs();
+    $update_phids = $this->getUpdatePHIDs();
     if (!$update_phids) {
       return array();
     }
+    $update_phids = array_fuse($update_phids);
 
-    $objects = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($update_phids)
-      ->needProjectPHIDs(true)
-      ->execute();
+    if ($this->objects === null) {
+      $objects = id(new ManiphestTaskQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($update_phids)
+        ->needProjectPHIDs(true)
+        ->execute();
+    } else {
+      $objects = $this->getObjects();
+      $objects = mpull($objects, null, 'getPHID');
+      $objects = array_select_keys($objects, $update_phids);
+    }
 
     if (!$objects) {
       return array();
