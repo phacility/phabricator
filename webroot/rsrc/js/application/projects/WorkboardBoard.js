@@ -746,6 +746,7 @@ JX.install('WorkboardBoard', {
 
       var data = {
         state: JX.JSON.stringify(state),
+        order: this.getOrder()
       };
 
       var on_reload = JX.bind(this, this._onReloadResponse);

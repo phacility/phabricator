@@ -11,6 +11,15 @@ final class PhabricatorProjectBoardReloadController
       return $response;
     }
 
+    $order = $request->getStr('order');
+    if (!strlen($order)) {
+      $order = PhabricatorProjectColumnNaturalOrder::ORDERKEY;
+    }
+
+    $ordering = PhabricatorProjectColumnOrder::getOrderByKey($order);
+    $ordering = id(clone $ordering)
+      ->setViewer($viewer);
+
     $project = $this->getProject();
     $state = $this->getViewState();
     $board_uri = $state->newWorkboardURI();
@@ -53,14 +62,10 @@ final class PhabricatorProjectBoardReloadController
     $engine = id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
+      ->setOrdering($ordering)
       ->setObjects($objects)
       ->setUpdatePHIDs($update_phids)
       ->setVisiblePHIDs($visible_phids);
-
-    // TODO: We don't currently process "order" properly. If a user is viewing
-    // a board grouped by "Owner", and another user changes a task to be owned
-    // by a user who currently owns nothing on the board, the new header won't
-    // generate correctly if the first user presses "R".
 
     return $engine->buildResponse();
   }
