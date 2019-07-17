@@ -5023,6 +5023,7 @@ phutil_register_library_map(array(
     'PhabricatorXHProfSampleQuery' => 'applications/xhprof/query/PhabricatorXHProfSampleQuery.php',
     'PhabricatorXHProfSampleSearchEngine' => 'applications/xhprof/query/PhabricatorXHProfSampleSearchEngine.php',
     'PhabricatorYoutubeRemarkupRule' => 'infrastructure/markup/rule/PhabricatorYoutubeRemarkupRule.php',
+    'PhabricatorZipSetupCheck' => 'applications/config/check/PhabricatorZipSetupCheck.php',
     'Phame404Response' => 'applications/phame/site/Phame404Response.php',
     'PhameBlog' => 'applications/phame/storage/PhameBlog.php',
     'PhameBlog404Controller' => 'applications/phame/controller/blog/PhameBlog404Controller.php',
@@ -11449,6 +11450,7 @@ phutil_register_library_map(array(
     'PhabricatorXHProfSampleQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorXHProfSampleSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorYoutubeRemarkupRule' => 'PhutilRemarkupRule',
+    'PhabricatorZipSetupCheck' => 'PhabricatorSetupCheck',
     'Phame404Response' => 'AphrontHTMLResponse',
     'PhameBlog' => array(
       'PhameDAO',

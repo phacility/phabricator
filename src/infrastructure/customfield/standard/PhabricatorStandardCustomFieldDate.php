@@ -242,4 +242,8 @@ final class PhabricatorStandardCustomFieldDate
     return new ConduitEpochParameterType();
   }
 
+  protected function newExportFieldType() {
+    return new PhabricatorEpochExportField();
+  }
+
 }
