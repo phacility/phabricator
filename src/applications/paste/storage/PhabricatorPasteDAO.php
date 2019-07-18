@@ -3,7 +3,7 @@
 abstract class PhabricatorPasteDAO extends PhabricatorLiskDAO {
 
   public function getApplicationName() {
-    return 'pastebin';
+    return 'paste';
   }
 
 }
