@@ -44,6 +44,7 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         $this->getQueryRoutePattern() => 'PhabricatorPeopleListController',
         'logs/' => array(
           $this->getQueryRoutePattern() => 'PhabricatorPeopleLogsController',
+          '(?P<id>\d+)/' => 'PhabricatorPeopleLogViewController',
         ),
         'invite/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?'

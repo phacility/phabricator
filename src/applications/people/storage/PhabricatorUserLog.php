@@ -100,6 +100,43 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
     ) + parent::getConfiguration();
   }
 
+  public function getURI() {
+    return urisprintf('/people/logs/%s/', $this->getID());
+  }
+
+  public function getObjectName() {
+    return pht('Activity Log %d', $this->getID());
+  }
+
+  public function getRemoteAddressForViewer(PhabricatorUser $viewer) {
+    $viewer_phid = $viewer->getPHID();
+    $actor_phid = $this->getActorPHID();
+    $user_phid = $this->getUserPHID();
+
+    if (!$viewer_phid) {
+      $can_see_ip = false;
+    } else if ($viewer->getIsAdmin()) {
+      $can_see_ip = true;
+    } else if ($viewer_phid == $actor_phid) {
+      // You can see the address if you took the action.
+      $can_see_ip = true;
+    } else if (!$actor_phid && ($viewer_phid == $user_phid)) {
+      // You can see the address if it wasn't authenticated and applied
+      // to you (partial login).
+      $can_see_ip = true;
+    } else {
+      // You can't see the address when an administrator disables your
+      // account, since it's their address.
+      $can_see_ip = false;
+    }
+
+    if (!$can_see_ip) {
+      return null;
+    }
+
+    return $this->getRemoteAddr();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
