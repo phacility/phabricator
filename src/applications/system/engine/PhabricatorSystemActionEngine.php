@@ -198,4 +198,8 @@ final class PhabricatorSystemActionEngine extends Phobject {
     return $conn_w->getAffectedRows();
   }
 
+  public static function newActorFromRequest(AphrontRequest $request) {
+    return $request->getRemoteAddress();
+  }
+
 }

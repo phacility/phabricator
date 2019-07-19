@@ -53,6 +53,14 @@ final class PhabricatorEmailLoginController
         // it expensive to fish for valid email addresses while giving the user
         // a better error if they goof their email.
 
+        $action_actor = PhabricatorSystemActionEngine::newActorFromRequest(
+          $request);
+
+        PhabricatorSystemActionEngine::willTakeAction(
+          array($action_actor),
+          new PhabricatorAuthTryEmailLoginAction(),
+          1);
+
         $target_email = id(new PhabricatorUserEmail())->loadOneWhere(
           'address = %s',
           $v_email);
