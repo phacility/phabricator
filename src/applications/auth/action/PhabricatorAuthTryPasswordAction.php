@@ -5,10 +5,6 @@ final class PhabricatorAuthTryPasswordAction
 
   const TYPECONST = 'auth.password';
 
-  public function getActionConstant() {
-    return self::TYPECONST;
-  }
-
   public function getScoreThreshold() {
     return 100 / phutil_units('1 hour in seconds');
   }

@@ -4,10 +4,6 @@ final class PhabricatorAuthEmailLoginAction extends PhabricatorSystemAction {
 
   const TYPECONST = 'mail.login';
 
-  public function getActionConstant() {
-    return self::TYPECONST;
-  }
-
   public function getScoreThreshold() {
     return 3 / phutil_units('1 hour in seconds');
   }

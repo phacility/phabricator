@@ -5,10 +5,6 @@ final class PhabricatorAuthTryEmailLoginAction
 
   const TYPECONST = 'mail.try-login';
 
-  public function getActionConstant() {
-    return self::TYPECONST;
-  }
-
   public function getScoreThreshold() {
     return 20 / phutil_units('1 hour in seconds');
   }

@@ -5,10 +5,6 @@ final class PhabricatorFilesOutboundRequestAction
 
   const TYPECONST = 'files.outbound';
 
-  public function getActionConstant() {
-    return self::TYPECONST;
-  }
-
   public function getScoreThreshold() {
     return 60 / phutil_units('1 hour in seconds');
   }
