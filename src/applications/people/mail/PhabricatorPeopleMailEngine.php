@@ -90,7 +90,10 @@ abstract class PhabricatorPeopleMailEngine
       ->setConfig('uri.base', PhabricatorEnv::getProductionURI('/'))
       ->setMode(PhutilRemarkupEngine::MODE_TEXT);
 
-    return $engine->markupText($text);
+    $rendered_text = $engine->markupText($text);
+    $rendered_text = rtrim($rendered_text, "\n");
+
+    return $rendered_text;
   }
 
 }

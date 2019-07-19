@@ -97,20 +97,35 @@ final class PhabricatorAuthMessageViewController
   private function buildPropertiesView(PhabricatorAuthMessage $message) {
     $viewer = $this->getViewer();
 
+    $message_type = $message->getMessageType();
+
     $view = id(new PHUIPropertyListView())
       ->setViewer($viewer);
 
-    $view->addProperty(
-      pht('Description'),
-      $message->getMessageType()->getShortDescription());
+    $full_description = $message_type->getFullDescription();
+    if (strlen($full_description)) {
+      $view->addTextContent(new PHUIRemarkupView($viewer, $full_description));
+    } else {
+      $short_description = $message_type->getShortDescription();
+      $view->addProperty(pht('Description'), $short_description);
+    }
 
-    if (strlen($message->getMessageText())) {
+    $message_text = $message->getMessageText();
+    if (strlen($message_text)) {
       $view->addSectionHeader(
         pht('Message Preview'),
         PHUIPropertyListView::ICON_SUMMARY);
 
-      $view->addTextContent(
-        new PHUIRemarkupView($viewer, $message->getMessageText()));
+      $view->addTextContent(new PHUIRemarkupView($viewer, $message_text));
+    }
+
+    $default_text = $message_type->getDefaultMessageText();
+    if (strlen($default_text)) {
+      $view->addSectionHeader(
+        pht('Default Message'),
+        PHUIPropertyListView::ICON_SUMMARY);
+
+      $view->addTextContent(new PHUIRemarkupView($viewer, $default_text));
     }
 
     return $view;
