@@ -6,6 +6,7 @@ abstract class PhabricatorPeopleMailEngine
   private $sender;
   private $recipient;
   private $recipientAddress;
+  private $activityLog;
 
   final public function setSender(PhabricatorUser $sender) {
     $this->sender = $sender;
@@ -47,6 +48,15 @@ abstract class PhabricatorPeopleMailEngine
     return ($this->recipientAddress !== null);
   }
 
+  final public function setActivityLog(PhabricatorUserLog $activity_log) {
+    $this->activityLog = $activity_log;
+    return $this;
+  }
+
+  final public function getActivityLog() {
+    return $this->activityLog;
+  }
+
   final public function canSendMail() {
     try {
       $this->validateMail();
@@ -66,6 +76,18 @@ abstract class PhabricatorPeopleMailEngine
     } else {
       $recipient = $this->getRecipient();
       $mail->addTos(array($recipient->getPHID()));
+    }
+
+    $activity_log = $this->getActivityLog();
+    if ($activity_log) {
+      $activity_log->save();
+
+      $body = array();
+      $body[] = rtrim($mail->getBody(), "\n");
+      $body[] = pht('Activity Log ID: #%d', $activity_log->getID());
+      $body = implode("\n\n", $body)."\n";
+
+      $mail->setBody($body);
     }
 
     $mail

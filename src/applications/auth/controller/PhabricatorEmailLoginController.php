@@ -104,10 +104,16 @@ final class PhabricatorEmailLoginController
         if (!$errors) {
           $target_address = new PhutilEmailAddress($target_email->getAddress());
 
+          $user_log = PhabricatorUserLog::initializeNewLog(
+            $viewer,
+            $target_user->getPHID(),
+            PhabricatorEmailLoginUserLogType::LOGTYPE);
+
           $mail_engine = id(new PhabricatorPeopleEmailLoginMailEngine())
             ->setSender($viewer)
             ->setRecipient($target_user)
-            ->setRecipientAddress($target_address);
+            ->setRecipientAddress($target_address)
+            ->setActivityLog($user_log);
 
           try {
             $mail_engine->validateMail();
