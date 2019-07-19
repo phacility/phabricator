@@ -318,7 +318,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
         $log = PhabricatorUserLog::initializeNewLog(
           null,
           $log_user ? $log_user->getPHID() : null,
-          PhabricatorUserLog::ACTION_LOGIN_FAILURE);
+          PhabricatorLoginFailureUserLogType::LOGTYPE);
         $log->save();
       }
 

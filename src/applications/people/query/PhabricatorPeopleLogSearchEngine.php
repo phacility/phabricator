@@ -64,6 +64,9 @@ final class PhabricatorPeopleLogSearchEngine
   }
 
   protected function buildCustomSearchFields() {
+    $types = PhabricatorUserLogType::getAllLogTypes();
+    $types = mpull($types, 'getLogTypeName', 'getLogTypeKey');
+
     return array(
       id(new PhabricatorUsersSearchField())
         ->setKey('userPHIDs')
@@ -79,7 +82,7 @@ final class PhabricatorPeopleLogSearchEngine
         ->setKey('actions')
         ->setLabel(pht('Actions'))
         ->setDescription(pht('Search for particular types of activity.'))
-        ->setOptions(PhabricatorUserLog::getActionTypeMap()),
+        ->setOptions($types),
       id(new PhabricatorSearchTextField())
         ->setKey('ip')
         ->setLabel(pht('Filter IP'))
@@ -194,7 +197,8 @@ final class PhabricatorPeopleLogSearchEngine
     }
     $handles = $viewer->loadHandles($phids);
 
-    $action_map = PhabricatorUserLog::getActionTypeMap();
+    $types = PhabricatorUserLogType::getAllLogTypes();
+    $types = mpull($types, 'getLogTypeName', 'getLogTypeKey');
 
     $export = array();
     foreach ($logs as $log) {
@@ -214,7 +218,7 @@ final class PhabricatorPeopleLogSearchEngine
       }
 
       $action = $log->getAction();
-      $action_name = idx($action_map, $action, pht('Unknown ("%s")', $action));
+      $action_name = idx($types, $action, pht('Unknown ("%s")', $action));
 
       $map = array(
         'actorPHID' => $actor_phid,

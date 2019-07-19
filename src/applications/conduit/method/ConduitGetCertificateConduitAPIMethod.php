@@ -41,7 +41,7 @@ final class ConduitGetCertificateConduitAPIMethod extends ConduitAPIMethod {
 
   protected function execute(ConduitAPIRequest $request) {
     $failed_attempts = PhabricatorUserLog::loadRecentEventsFromThisIP(
-      PhabricatorUserLog::ACTION_CONDUIT_CERTIFICATE_FAILURE,
+      PhabricatorConduitCertificateFailureUserLogType::LOGTYPE,
       60 * 5);
 
     if (count($failed_attempts) > 5) {
@@ -61,7 +61,7 @@ final class ConduitGetCertificateConduitAPIMethod extends ConduitAPIMethod {
       $log = PhabricatorUserLog::initializeNewLog(
           $request->getUser(),
           $info->getUserPHID(),
-          PhabricatorUserLog::ACTION_CONDUIT_CERTIFICATE)
+          PhabricatorConduitCertificateUserLogType::LOGTYPE)
         ->save();
     }
 
@@ -85,7 +85,7 @@ final class ConduitGetCertificateConduitAPIMethod extends ConduitAPIMethod {
     $log = PhabricatorUserLog::initializeNewLog(
         $request->getUser(),
         $info ? $info->getUserPHID() : '-',
-        PhabricatorUserLog::ACTION_CONDUIT_CERTIFICATE_FAILURE)
+        PhabricatorConduitCertificateFailureUserLogType::LOGTYPE)
       ->save();
   }
 

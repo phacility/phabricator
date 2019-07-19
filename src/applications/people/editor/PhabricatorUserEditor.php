@@ -78,7 +78,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $log = PhabricatorUserLog::initializeNewLog(
           $this->requireActor(),
           $user->getPHID(),
-          PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+          PhabricatorReassignEmailUserLogType::LOGTYPE);
         $log->setNewValue($email->getAddress());
         $log->save();
       }
@@ -195,7 +195,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $log = PhabricatorUserLog::initializeNewLog(
           $actor,
           $user->getPHID(),
-          PhabricatorUserLog::ACTION_EMAIL_ADD);
+          PhabricatorAddEmailUserLogType::LOGTYPE);
         $log->setNewValue($email->getAddress());
         $log->save();
 
@@ -246,7 +246,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $log = PhabricatorUserLog::initializeNewLog(
           $actor,
           $user->getPHID(),
-          PhabricatorUserLog::ACTION_EMAIL_REMOVE);
+          PhabricatorRemoveEmailUserLogType::LOGTYPE);
         $log->setOldValue($email->getAddress());
         $log->save();
 
@@ -312,7 +312,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $log = PhabricatorUserLog::initializeNewLog(
           $actor,
           $user->getPHID(),
-          PhabricatorUserLog::ACTION_EMAIL_PRIMARY);
+          PhabricatorPrimaryEmailUserLogType::LOGTYPE);
         $log->setOldValue($old_primary ? $old_primary->getAddress() : null);
         $log->setNewValue($email->getAddress());
 
@@ -371,7 +371,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
           $log = PhabricatorUserLog::initializeNewLog(
             $actor,
             $user->getPHID(),
-            PhabricatorUserLog::ACTION_EMAIL_VERIFY);
+            PhabricatorVerifyEmailUserLogType::LOGTYPE);
           $log->setNewValue($email->getAddress());
           $log->save();
         }
@@ -433,7 +433,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
           $log = PhabricatorUserLog::initializeNewLog(
             $actor,
             $user->getPHID(),
-            PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+            PhabricatorReassignEmailUserLogType::LOGTYPE);
           $log->setNewValue($email->getAddress());
           $log->save();
         }

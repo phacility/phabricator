@@ -27,7 +27,9 @@ final class PhabricatorUserLogView extends AphrontView {
     }
     $handles = $viewer->loadHandles($phids);
 
-    $action_map = PhabricatorUserLog::getActionTypeMap();
+    $types = PhabricatorUserLogType::getAllLogTypes();
+    $types = mpull($types, 'getLogTypeName', 'getLogTypeKey');
+
     $base_uri = $this->searchBaseURI;
 
     $viewer_phid = $viewer->getPHID();
@@ -69,7 +71,7 @@ final class PhabricatorUserLogView extends AphrontView {
       }
 
       $action = $log->getAction();
-      $action_name = idx($action_map, $action, $action);
+      $action_name = idx($types, $action, $action);
 
       if ($actor_phid) {
         $actor_name = $handles[$actor_phid]->renderLink();
