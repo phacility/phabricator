@@ -28,5 +28,6 @@ abstract class PhabricatorAuthMessageType
   }
 
   abstract public function getDisplayName();
+  abstract public function getShortDescription();
 
 }

@@ -43,19 +43,34 @@ final class PhabricatorPeopleEmailLoginMailEngine
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $have_passwords = $this->isPasswordAuthEnabled();
 
+    $body = array();
+
+    if ($is_set_password) {
+      $message_key = PhabricatorAuthEmailSetPasswordMessageType::MESSAGEKEY;
+    } else {
+      $message_key = PhabricatorAuthEmailLoginMessageType::MESSAGEKEY;
+    }
+
+    $message_body = PhabricatorAuthMessage::loadMessageText(
+      $recipient,
+      $message_key);
+    if (strlen($message_body)) {
+      $body[] = $this->newRemarkupText($message_body);
+    }
+
     if ($have_passwords) {
       if ($is_set_password) {
-        $body = pht(
+        $body[] = pht(
           'You can use this link to set a password on your account:'.
           "\n\n  %s\n",
           $login_uri);
       } else if ($is_serious) {
-        $body = pht(
+        $body[] = pht(
           "You can use this link to reset your Phabricator password:".
           "\n\n  %s\n",
           $login_uri);
       } else {
-        $body = pht(
+        $body[] = pht(
           "Condolences on forgetting your password. You can use this ".
           "link to reset it:\n\n".
           "  %s\n\n".
@@ -68,13 +83,15 @@ final class PhabricatorPeopleEmailLoginMailEngine
 
       }
     } else {
-      $body = pht(
+      $body[] = pht(
         "You can use this login link to regain access to your Phabricator ".
         "account:".
         "\n\n".
         "  %s\n",
         $login_uri);
     }
+
+    $body = implode("\n\n", $body);
 
     return id(new PhabricatorMetaMTAMail())
       ->setSubject($subject)

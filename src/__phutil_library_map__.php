@@ -2265,6 +2265,8 @@ phutil_register_library_map(array(
     'PhabricatorAuthDisableController' => 'applications/auth/controller/config/PhabricatorAuthDisableController.php',
     'PhabricatorAuthDowngradeSessionController' => 'applications/auth/controller/PhabricatorAuthDowngradeSessionController.php',
     'PhabricatorAuthEditController' => 'applications/auth/controller/config/PhabricatorAuthEditController.php',
+    'PhabricatorAuthEmailLoginMessageType' => 'applications/auth/message/PhabricatorAuthEmailLoginMessageType.php',
+    'PhabricatorAuthEmailSetPasswordMessageType' => 'applications/auth/message/PhabricatorAuthEmailSetPasswordMessageType.php',
     'PhabricatorAuthFactor' => 'applications/auth/factor/PhabricatorAuthFactor.php',
     'PhabricatorAuthFactorConfig' => 'applications/auth/storage/PhabricatorAuthFactorConfig.php',
     'PhabricatorAuthFactorConfigQuery' => 'applications/auth/query/PhabricatorAuthFactorConfigQuery.php',
@@ -8220,6 +8222,8 @@ phutil_register_library_map(array(
     'PhabricatorAuthDisableController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthDowngradeSessionController' => 'PhabricatorAuthController',
     'PhabricatorAuthEditController' => 'PhabricatorAuthProviderConfigController',
+    'PhabricatorAuthEmailLoginMessageType' => 'PhabricatorAuthMessageType',
+    'PhabricatorAuthEmailSetPasswordMessageType' => 'PhabricatorAuthMessageType',
     'PhabricatorAuthFactor' => 'Phobject',
     'PhabricatorAuthFactorConfig' => array(
       'PhabricatorAuthDAO',
