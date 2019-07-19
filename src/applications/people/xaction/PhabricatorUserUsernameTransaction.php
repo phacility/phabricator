@@ -24,11 +24,6 @@ final class PhabricatorUserUsernameTransaction
     $old_username = $this->getOldValue();
     $new_username = $this->getNewValue();
 
-    $this->newUserLog(PhabricatorUserLog::ACTION_CHANGE_USERNAME)
-      ->setOldValue($old_username)
-      ->setNewValue($new_username)
-      ->save();
-
     // The SSH key cache currently includes usernames, so dirty it. See T12554
     // for discussion.
     PhabricatorAuthSSHKeyQuery::deleteSSHKeyCache();

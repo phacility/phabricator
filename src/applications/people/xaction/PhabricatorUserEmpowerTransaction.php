@@ -17,15 +17,6 @@ final class PhabricatorUserEmpowerTransaction
     $object->setIsAdmin((int)$value);
   }
 
-  public function applyExternalEffects($object, $value) {
-    $user = $object;
-
-    $this->newUserLog(PhabricatorUserLog::ACTION_ADMIN)
-      ->setOldValue($this->getOldValue())
-      ->setNewValue($value)
-      ->save();
-  }
-
   public function validateTransactions($object, array $xactions) {
     $user = $object;
     $actor = $this->getActor();

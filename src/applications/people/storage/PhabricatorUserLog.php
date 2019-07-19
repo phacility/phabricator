@@ -11,16 +11,6 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
   const ACTION_LOGIN_LEGALPAD = 'login-legalpad';
   const ACTION_RESET_PASSWORD = 'reset-pass';
 
-  const ACTION_CREATE         = 'create';
-  const ACTION_EDIT           = 'edit';
-
-  const ACTION_ADMIN          = 'admin';
-  const ACTION_SYSTEM_AGENT   = 'system-agent';
-  const ACTION_MAILING_LIST   = 'mailing-list';
-  const ACTION_DISABLE        = 'disable';
-  const ACTION_APPROVE        = 'approve';
-  const ACTION_DELETE         = 'delete';
-
   const ACTION_CONDUIT_CERTIFICATE = 'conduit-cert';
   const ACTION_CONDUIT_CERTIFICATE_FAILURE = 'conduit-cert-fail';
 
@@ -31,7 +21,6 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
   const ACTION_EMAIL_REASSIGN   = 'email-reassign';
 
   const ACTION_CHANGE_PASSWORD  = 'change-password';
-  const ACTION_CHANGE_USERNAME  = 'change-username';
 
   const ACTION_ENTER_HISEC = 'hisec-enter';
   const ACTION_EXIT_HISEC = 'hisec-exit';
@@ -59,14 +48,6 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
         pht('Login: Signed Required Legalpad Documents'),
       self::ACTION_LOGOUT => pht('Logout'),
       self::ACTION_RESET_PASSWORD => pht('Reset Password'),
-      self::ACTION_CREATE => pht('Create Account'),
-      self::ACTION_EDIT => pht('Edit Account'),
-      self::ACTION_ADMIN => pht('Add/Remove Administrator'),
-      self::ACTION_SYSTEM_AGENT => pht('Add/Remove System Agent'),
-      self::ACTION_MAILING_LIST => pht('Add/Remove Mailing List'),
-      self::ACTION_DISABLE => pht('Enable/Disable'),
-      self::ACTION_APPROVE => pht('Approve Registration'),
-      self::ACTION_DELETE => pht('Delete User'),
       self::ACTION_CONDUIT_CERTIFICATE
         => pht('Conduit: Read Certificate'),
       self::ACTION_CONDUIT_CERTIFICATE_FAILURE
@@ -77,7 +58,6 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
       self::ACTION_EMAIL_VERIFY => pht('Email: Verify'),
       self::ACTION_EMAIL_REASSIGN => pht('Email: Reassign'),
       self::ACTION_CHANGE_PASSWORD => pht('Change Password'),
-      self::ACTION_CHANGE_USERNAME => pht('Change Username'),
       self::ACTION_ENTER_HISEC => pht('Hisec: Enter'),
       self::ACTION_EXIT_HISEC => pht('Hisec: Exit'),
       self::ACTION_FAIL_HISEC => pht('Hisec: Failed Attempt'),
