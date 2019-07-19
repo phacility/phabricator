@@ -5,6 +5,7 @@ abstract class PhabricatorPeopleMailEngine
 
   private $sender;
   private $recipient;
+  private $recipientAddress;
 
   final public function setSender(PhabricatorUser $sender) {
     $this->sender = $sender;
@@ -30,6 +31,22 @@ abstract class PhabricatorPeopleMailEngine
     return $this->recipient;
   }
 
+  final public function setRecipientAddress(PhutilEmailAddress $address) {
+    $this->recipientAddress = $address;
+    return $this;
+  }
+
+  final public function getRecipientAddress() {
+    if (!$this->recipientAddress) {
+      throw new PhutilInvalidStateException('recipientAddress');
+    }
+    return $this->recipientAddress;
+  }
+
+  final public function hasRecipientAddress() {
+    return ($this->recipientAddress !== null);
+  }
+
   final public function canSendMail() {
     try {
       $this->validateMail();
@@ -43,6 +60,14 @@ abstract class PhabricatorPeopleMailEngine
     $this->validateMail();
     $mail = $this->newMail();
 
+    if ($this->hasRecipientAddress()) {
+      $recipient_address = $this->getRecipientAddress();
+      $mail->addRawTos(array($recipient_address->getAddress()));
+    } else {
+      $recipient = $this->getRecipient();
+      $mail->addTos(array($recipient->getPHID()));
+    }
+
     $mail
       ->setForceDelivery(true)
       ->save();
@@ -52,7 +77,6 @@ abstract class PhabricatorPeopleMailEngine
 
   abstract public function validateMail();
   abstract protected function newMail();
-
 
   final protected function throwValidationException($title, $body) {
     throw new PhabricatorPeopleMailEngineException($title, $body);

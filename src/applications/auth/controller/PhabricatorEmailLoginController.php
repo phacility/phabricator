@@ -94,28 +94,33 @@ final class PhabricatorEmailLoginController
         }
 
         if (!$errors) {
-          $body = $this->newAccountLoginMailBody(
-            $target_user,
-            $is_logged_in);
+          $target_address = new PhutilEmailAddress($target_email->getAddress());
+
+          $mail_engine = id(new PhabricatorPeopleEmailLoginMailEngine())
+            ->setSender($viewer)
+            ->setRecipient($target_user)
+            ->setRecipientAddress($target_address);
+
+          try {
+            $mail_engine->validateMail();
+          } catch (PhabricatorPeopleMailEngineException $ex) {
+            return $this->newDialog()
+              ->setTitle($ex->getTitle())
+              ->appendParagraph($ex->getBody())
+              ->addCancelButton('/auth/start/', pht('Done'));
+          }
+
+          $mail_engine->sendMail();
 
           if ($is_logged_in) {
-            $subject = pht('[Phabricator] Account Password Link');
             $instructions = pht(
               'An email has been sent containing a link you can use to set '.
               'a password for your account.');
           } else {
-            $subject = pht('[Phabricator] Account Login Link');
             $instructions = pht(
               'An email has been sent containing a link you can use to log '.
               'in to your account.');
           }
-
-          $mail = id(new PhabricatorMetaMTAMail())
-            ->setSubject($subject)
-            ->setForceDelivery(true)
-            ->addRawTos(array($target_email->getAddress()))
-            ->setBody($body)
-            ->saveAndSend();
 
           return $this->newDialog()
             ->setTitle(pht('Check Your Email'))
@@ -180,55 +185,6 @@ final class PhabricatorEmailLoginController
       ->appendForm($form)
       ->addCancelButton('/auth/start/')
       ->addSubmitButton(pht('Send Email'));
-  }
-
-  private function newAccountLoginMailBody(
-    PhabricatorUser $user,
-    $is_logged_in) {
-
-    $engine = new PhabricatorAuthSessionEngine();
-    $uri = $engine->getOneTimeLoginURI(
-      $user,
-      null,
-      PhabricatorAuthSessionEngine::ONETIME_RESET);
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-    $have_passwords = $this->isPasswordAuthEnabled();
-
-    if ($have_passwords) {
-      if ($is_logged_in) {
-        $body = pht(
-          'You can use this link to set a password on your account:'.
-          "\n\n  %s\n",
-          $uri);
-      } else if ($is_serious) {
-        $body = pht(
-          "You can use this link to reset your Phabricator password:".
-          "\n\n  %s\n",
-          $uri);
-      } else {
-        $body = pht(
-          "Condolences on forgetting your password. You can use this ".
-          "link to reset it:\n\n".
-          "  %s\n\n".
-          "After you set a new password, consider writing it down on a ".
-          "sticky note and attaching it to your monitor so you don't ".
-          "forget again! Choosing a very short, easy-to-remember password ".
-          "like \"cat\" or \"1234\" might also help.\n\n".
-          "Best Wishes,\nPhabricator\n",
-          $uri);
-
-      }
-    } else {
-      $body = pht(
-        "You can use this login link to regain access to your Phabricator ".
-        "account:".
-        "\n\n".
-        "  %s\n",
-        $uri);
-    }
-
-    return $body;
   }
 
   private function isPasswordAuthEnabled() {
