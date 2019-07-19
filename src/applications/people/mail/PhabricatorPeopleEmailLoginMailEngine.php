@@ -34,6 +34,12 @@ final class PhabricatorPeopleEmailLoginMailEngine
     }
 
     $recipient = $this->getRecipient();
+
+    PhabricatorSystemActionEngine::willTakeAction(
+      array($recipient->getPHID()),
+      new PhabricatorAuthEmailLoginAction(),
+      1);
+
     $engine = new PhabricatorAuthSessionEngine();
     $login_uri = $engine->getOneTimeLoginURI(
       $recipient,
