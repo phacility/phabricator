@@ -78,11 +78,11 @@ final class PhabricatorPeopleLogSearchEngine
         ->setAliases(array('actors', 'actor', 'actorPHID'))
         ->setLabel(pht('Actors'))
         ->setDescription(pht('Search for activity by specific users.')),
-      id(new PhabricatorSearchCheckboxesField())
+      id(new PhabricatorSearchDatasourceField())
         ->setKey('actions')
         ->setLabel(pht('Actions'))
         ->setDescription(pht('Search for particular types of activity.'))
-        ->setOptions($types),
+        ->setDatasource(new PhabricatorUserLogTypeDatasource()),
       id(new PhabricatorSearchTextField())
         ->setKey('ip')
         ->setLabel(pht('Filter IP'))
