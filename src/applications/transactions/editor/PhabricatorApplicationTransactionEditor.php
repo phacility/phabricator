@@ -1801,6 +1801,11 @@ abstract class PhabricatorApplicationTransactionEditor
         // you don't need permissions. If you can eventually mute an object
         // for other users, this would need to be revisited.
         return null;
+      case PhabricatorProjectSilencedEdgeType::EDGECONST:
+        // At time of writing, you can only write this edge for yourself, so
+        // you don't need permissions. If you can eventually silence project
+        // for other users, this would need to be revisited.
+        return null;
       case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
         return null;
       case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
