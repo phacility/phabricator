@@ -100,10 +100,17 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       $all_objects = mpull($all_objects, null, 'getPHID');
     }
 
+    // NOTE: The board layout engine is sensitive to PHID input order, and uses
+    // the input order as a component of the "natural" column ordering if no
+    // explicit ordering is specified. Rearrange the PHIDs in ID order.
+
+    $all_objects = msort($all_objects, 'getID');
+    $ordered_phids = mpull($all_objects, 'getPHID');
+
     $layout_engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
       ->setBoardPHIDs(array($board_phid))
-      ->setObjectPHIDs($all_phids)
+      ->setObjectPHIDs($ordered_phids)
       ->executeLayout();
 
     $natural = array();
