@@ -711,7 +711,7 @@ JX.install('WorkboardBoard', {
           // Compare the server state to the client state, and add or remove
           // cards on the client as necessary to synchronize them.
 
-          if (update_map[card_phid][column_phid]) {
+          if (update_map[card_phid] && update_map[card_phid][column_phid]) {
             if (!card) {
               column.newCard(card_phid);
               column.markForRedraw();
