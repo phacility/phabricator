@@ -27,8 +27,14 @@ final class SlowvoteInfoConduitAPIMethod extends SlowvoteConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $this->getViewer();
+
     $poll_id = $request->getValue('poll_id');
-    $poll = id(new PhabricatorSlowvotePoll())->load($poll_id);
+
+    $poll = id(new PhabricatorSlowvoteQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($poll_id))
+      ->executeOne();
     if (!$poll) {
       throw new ConduitException('ERR_BAD_POLL');
     }
