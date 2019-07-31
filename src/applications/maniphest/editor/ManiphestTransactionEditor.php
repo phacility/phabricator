@@ -879,34 +879,36 @@ final class ManiphestTransactionEditor
       $project_phids = array_fuse($old_phids) + array_fuse($new_phids);
       $project_phids = array_keys($project_phids);
 
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs($project_phids)
-        ->execute();
+      if ($project_phids) {
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($project_phids)
+          ->execute();
 
-      $notify_projects = array();
-      foreach ($projects as $project) {
-        $notify_projects[$project->getPHID()] = $project;
-        foreach ($project->getAncestorProjects() as $ancestor) {
-          $notify_projects[$ancestor->getPHID()] = $ancestor;
+        $notify_projects = array();
+        foreach ($projects as $project) {
+          $notify_projects[$project->getPHID()] = $project;
+          foreach ($project->getAncestorProjects() as $ancestor) {
+            $notify_projects[$ancestor->getPHID()] = $ancestor;
+          }
         }
-      }
 
-      foreach ($notify_projects as $key => $project) {
-        if (!$project->getHasWorkboard()) {
-          unset($notify_projects[$key]);
+        foreach ($notify_projects as $key => $project) {
+          if (!$project->getHasWorkboard()) {
+            unset($notify_projects[$key]);
+          }
         }
-      }
 
-      $notify_phids = array_keys($notify_projects);
+        $notify_phids = array_keys($notify_projects);
 
-      if ($notify_phids) {
-        $data = array(
-          'type' => 'workboards',
-          'subscribers' => $notify_phids,
-        );
+        if ($notify_phids) {
+          $data = array(
+            'type' => 'workboards',
+            'subscribers' => $notify_phids,
+          );
 
-        PhabricatorNotificationClient::tryToPostMessage($data);
+          PhabricatorNotificationClient::tryToPostMessage($data);
+        }
       }
     }
 
