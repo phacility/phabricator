@@ -45,7 +45,7 @@ final class PhabricatorAuthMessage
   }
 
   public function getURI() {
-    return urisprintf('/auth/message/%s', $this->getID());
+    return urisprintf('/auth/message/%s/', $this->getID());
   }
 
   public function attachMessageType(PhabricatorAuthMessageType $type) {
@@ -75,12 +75,16 @@ final class PhabricatorAuthMessage
     $message_key) {
 
     $message = self::loadMessage($viewer, $message_key);
-
-    if (!$message) {
-      return null;
+    if ($message) {
+      $message_text = $message->getMessageText();
+      if (strlen($message_text)) {
+        return $message_text;
+      }
     }
 
-    return $message->getMessageText();
+    $message_type = PhabricatorAuthMessageType::newFromKey($message_key);
+
+    return $message_type->getDefaultMessageText();
   }
 
 

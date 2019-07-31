@@ -6,6 +6,14 @@ final class SlowvoteInfoConduitAPIMethod extends SlowvoteConduitAPIMethod {
     return 'slowvote.info';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Replaced by "slowvote.poll.search".');
+  }
+
   public function getMethodDescription() {
     return pht('Retrieve an array of information about a poll.');
   }
@@ -27,8 +35,14 @@ final class SlowvoteInfoConduitAPIMethod extends SlowvoteConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $viewer = $this->getViewer();
+
     $poll_id = $request->getValue('poll_id');
-    $poll = id(new PhabricatorSlowvotePoll())->load($poll_id);
+
+    $poll = id(new PhabricatorSlowvoteQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($poll_id))
+      ->executeOne();
     if (!$poll) {
       throw new ConduitException('ERR_BAD_POLL');
     }

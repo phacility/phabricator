@@ -28,5 +28,14 @@ abstract class PhabricatorAuthMessageType
   }
 
   abstract public function getDisplayName();
+  abstract public function getShortDescription();
+
+  public function getFullDescription() {
+    return null;
+  }
+
+  public function getDefaultMessageText() {
+    return null;
+  }
 
 }

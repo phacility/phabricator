@@ -19,11 +19,14 @@ final class PhabricatorAuthMessageListController
     $list = new PHUIObjectItemListView();
     foreach ($types as $type) {
       $message = idx($messages, $type->getMessageTypeKey());
+
       if ($message) {
         $href = $message->getURI();
         $name = $message->getMessageTypeDisplayName();
       } else {
-        $href = '/auth/message/edit/?messageKey='.$type->getMessageTypeKey();
+        $href = urisprintf(
+          '/auth/message/%s/',
+          $type->getMessageTypeKey());
         $name = $type->getDisplayName();
       }
 

@@ -28,6 +28,11 @@ JX.install('WorkboardCardTemplate', {
       return this._phid;
     },
 
+    getVersion: function() {
+      // TODO: For now, just return a constant version number.
+      return 1;
+    },
+
     setNodeHTMLTemplate: function(html) {
       this._html = html;
       return this;

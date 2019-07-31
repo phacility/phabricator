@@ -64,6 +64,9 @@ final class PhabricatorPeopleLogSearchEngine
   }
 
   protected function buildCustomSearchFields() {
+    $types = PhabricatorUserLogType::getAllLogTypes();
+    $types = mpull($types, 'getLogTypeName', 'getLogTypeKey');
+
     return array(
       id(new PhabricatorUsersSearchField())
         ->setKey('userPHIDs')
@@ -75,11 +78,11 @@ final class PhabricatorPeopleLogSearchEngine
         ->setAliases(array('actors', 'actor', 'actorPHID'))
         ->setLabel(pht('Actors'))
         ->setDescription(pht('Search for activity by specific users.')),
-      id(new PhabricatorSearchCheckboxesField())
+      id(new PhabricatorSearchDatasourceField())
         ->setKey('actions')
         ->setLabel(pht('Actions'))
         ->setDescription(pht('Search for particular types of activity.'))
-        ->setOptions(PhabricatorUserLog::getActionTypeMap()),
+        ->setDatasource(new PhabricatorUserLogTypeDatasource()),
       id(new PhabricatorSearchTextField())
         ->setKey('ip')
         ->setLabel(pht('Filter IP'))
@@ -194,7 +197,8 @@ final class PhabricatorPeopleLogSearchEngine
     }
     $handles = $viewer->loadHandles($phids);
 
-    $action_map = PhabricatorUserLog::getActionTypeMap();
+    $types = PhabricatorUserLogType::getAllLogTypes();
+    $types = mpull($types, 'getLogTypeName', 'getLogTypeKey');
 
     $export = array();
     foreach ($logs as $log) {
@@ -214,7 +218,7 @@ final class PhabricatorPeopleLogSearchEngine
       }
 
       $action = $log->getAction();
-      $action_name = idx($action_map, $action, pht('Unknown ("%s")', $action));
+      $action_name = idx($types, $action, pht('Unknown ("%s")', $action));
 
       $map = array(
         'actorPHID' => $actor_phid,

@@ -315,7 +315,7 @@ final class PhabricatorMultiFactorSettingsPanel
       $log = PhabricatorUserLog::initializeNewLog(
         $viewer,
         $user->getPHID(),
-        PhabricatorUserLog::ACTION_MULTI_ADD);
+        PhabricatorAddMultifactorUserLogType::LOGTYPE);
       $log->save();
 
       $user->updateMultiFactorEnrollment();
@@ -423,7 +423,7 @@ final class PhabricatorMultiFactorSettingsPanel
       $log = PhabricatorUserLog::initializeNewLog(
         $viewer,
         $user->getPHID(),
-        PhabricatorUserLog::ACTION_MULTI_REMOVE);
+        PhabricatorRemoveMultifactorUserLogType::LOGTYPE);
       $log->save();
 
       $user->updateMultiFactorEnrollment();

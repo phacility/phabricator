@@ -129,6 +129,43 @@ JX.install('WorkboardBoard', {
     start: function() {
       this._setupDragHandlers();
 
+      // TODO: This is temporary code to make it easier to debug this workflow
+      // by pressing the "R" key.
+      var on_reload = JX.bind(this, this._reloadCards);
+      new JX.KeyboardShortcut('R', 'Reload Card State (Prototype)')
+        .setHandler(on_reload)
+        .register();
+
+      var board_phid = this.getPHID();
+
+      JX.Stratcom.listen('aphlict-server-message', null, function(e) {
+        var message = e.getData();
+
+        if (message.type != 'workboards') {
+          return;
+        }
+
+        // Check if this update notification is about the currently visible
+        // board. If it is, update the board state.
+
+        var found_board = false;
+        for (var ii = 0; ii < message.subscribers.length; ii++) {
+          var subscriber_phid = message.subscribers[ii];
+          if (subscriber_phid === board_phid) {
+            found_board = true;
+            break;
+          }
+        }
+
+        if (found_board) {
+          on_reload();
+        }
+      });
+
+      JX.Stratcom.listen('aphlict-reconnect', null, function(e) {
+        on_reload();
+      });
+
       for (var k in this._columns) {
         this._columns[k].redraw();
       }
@@ -551,15 +588,6 @@ JX.install('WorkboardBoard', {
     },
 
     _oncardupdate: function(list, src_phid, dst_phid, after_phid, response) {
-      var src_column = this.getColumn(src_phid);
-      var dst_column = this.getColumn(dst_phid);
-
-      var card = src_column.removeCard(response.objectPHID);
-      dst_column.addCard(card, after_phid);
-
-      src_column.markForRedraw();
-      dst_column.markForRedraw();
-
       this.updateCard(response);
 
       var sounds = response.sounds || [];
@@ -570,42 +598,78 @@ JX.install('WorkboardBoard', {
       list.unlock();
     },
 
-    updateCard: function(response, options) {
-      options = options || {};
-      options.dirtyColumns = options.dirtyColumns || {};
-
+    updateCard: function(response) {
       var columns = this.getColumns();
+      var column_phid;
+      var card_phid;
+      var card_data;
 
-      var phid = response.objectPHID;
+      // The server may send us a full or partial update for a card. If we've
+      // received a full update, we're going to redraw the entire card and may
+      // need to change which columns it appears in.
 
-      for (var add_phid in response.columnMaps) {
-        var target_column = this.getColumn(add_phid);
+      // For a partial update, we've just received supplemental sorting or
+      // property information and do not need to perform a full redraw.
+
+      // When we reload card state, edit a card, or move a card, we get a full
+      // update for the card.
+
+      // Ween we move a card in a column, we may get a partial update for other
+      // visible cards in the column.
+
+
+      // Figure out which columns each card now appears in. For cards that
+      // have received a full update, we'll use this map to move them into
+      // the correct columns.
+      var update_map = {};
+      for (column_phid in response.columnMaps) {
+        var target_column = this.getColumn(column_phid);
 
         if (!target_column) {
           // If the column isn't visible, don't try to add a card to it.
           continue;
         }
 
-        target_column.newCard(phid);
+        var column_map = response.columnMaps[column_phid];
+
+        for (var ii = 0; ii < column_map.length; ii++) {
+          card_phid = column_map[ii];
+          if (!update_map[card_phid]) {
+            update_map[card_phid] = {};
+          }
+          update_map[card_phid][column_phid] = true;
+        }
       }
 
-      var column_maps = response.columnMaps;
-      var natural_column;
-      for (var natural_phid in column_maps) {
-        natural_column = this.getColumn(natural_phid);
-        if (!natural_column) {
-          // Our view of the board may be out of date, so we might get back
-          // information about columns that aren't visible. Just ignore the
-          // position information for any columns we aren't displaying on the
-          // client.
+      // Process card removals. These are cases where the client still sees
+      // a particular card on a board but it has been removed on the server.
+      for (card_phid in response.cards) {
+        card_data = response.cards[card_phid];
+
+        if (!card_data.remove) {
           continue;
         }
 
-        natural_column.setNaturalOrder(column_maps[natural_phid]);
+        for (column_phid in columns) {
+          var column = columns[column_phid];
+
+          var card = column.getCard(card_phid);
+          if (card) {
+            column.removeCard(card_phid);
+            column.markForRedraw();
+          }
+        }
       }
 
-      for (var card_phid in response.cards) {
-        var card_data = response.cards[card_phid];
+      // Process partial updates for cards. This is supplemental data which
+      // we can just merge in without any special handling.
+      for (card_phid in response.cards) {
+        card_data = response.cards[card_phid];
+
+        if (card_data.remove) {
+          continue;
+        }
+
         var card_template = this.getCardTemplate(card_phid);
 
         if (card_data.nodeHTMLTemplate) {
@@ -626,6 +690,56 @@ JX.install('WorkboardBoard', {
         }
       }
 
+      // Process full updates for cards which we have a full update for. This
+      // may involve moving them between columns.
+      for (card_phid in response.cards) {
+        card_data = response.cards[card_phid];
+
+        if (!card_data.update) {
+          continue;
+        }
+
+        for (column_phid in columns) {
+          var column = columns[column_phid];
+          var card = column.getCard(card_phid);
+
+          if (card) {
+            card.redraw();
+            column.markForRedraw();
+          }
+
+          // Compare the server state to the client state, and add or remove
+          // cards on the client as necessary to synchronize them.
+
+          if (update_map[card_phid] && update_map[card_phid][column_phid]) {
+            if (!card) {
+              column.newCard(card_phid);
+              column.markForRedraw();
+            }
+          } else {
+            if (card) {
+              column.removeCard(card_phid);
+              column.markForRedraw();
+            }
+          }
+        }
+      }
+
+      var column_maps = response.columnMaps;
+      var natural_column;
+      for (var natural_phid in column_maps) {
+        natural_column = this.getColumn(natural_phid);
+        if (!natural_column) {
+          // Our view of the board may be out of date, so we might get back
+          // information about columns that aren't visible. Just ignore the
+          // position information for any columns we aren't displaying on the
+          // client.
+          continue;
+        }
+
+        natural_column.setNaturalOrder(column_maps[natural_phid]);
+      }
+
       var headers = response.headers;
       for (var jj = 0; jj < headers.length; jj++) {
         var header = headers[jj];
@@ -635,22 +749,6 @@ JX.install('WorkboardBoard', {
           .setNodeHTMLTemplate(header.template)
           .setVector(header.vector)
           .setEditProperties(header.editProperties);
-      }
-
-      for (var column_phid in columns) {
-        var column = columns[column_phid];
-
-        var cards = column.getCards();
-        for (var object_phid in cards) {
-          if (object_phid !== phid) {
-            continue;
-          }
-
-          var card = cards[object_phid];
-          card.redraw();
-
-          column.markForRedraw();
-        }
       }
 
       this._redrawColumns();
@@ -663,6 +761,33 @@ JX.install('WorkboardBoard', {
           columns[k].redraw();
         }
       }
+    },
+
+    _reloadCards: function() {
+      var state = {};
+
+      var columns = this.getColumns();
+      for (var column_phid in columns) {
+        var cards = columns[column_phid].getCards();
+        for (var card_phid in cards) {
+          state[card_phid] = this.getCardTemplate(card_phid).getVersion();
+        }
+      }
+
+      var data = {
+        state: JX.JSON.stringify(state),
+        order: this.getOrder()
+      };
+
+      var on_reload = JX.bind(this, this._onReloadResponse);
+
+      new JX.Request(this.getController().getReloadURI(), on_reload)
+        .setData(data)
+        .send();
+    },
+
+    _onReloadResponse: function(response) {
+      this.updateCard(response);
     }
 
   }

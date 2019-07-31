@@ -24,26 +24,27 @@ final class HarbormasterBuildableActionController
 
     $issuable = array();
 
-    foreach ($buildable->getBuilds() as $build) {
+    $builds = $buildable->getBuilds();
+    foreach ($builds as $key => $build) {
       switch ($action) {
         case HarbormasterBuildCommand::COMMAND_RESTART:
           if ($build->canRestartBuild()) {
-            $issuable[] = $build;
+            $issuable[$key] = $build;
           }
           break;
         case HarbormasterBuildCommand::COMMAND_PAUSE:
           if ($build->canPauseBuild()) {
-            $issuable[] = $build;
+            $issuable[$key] = $build;
           }
           break;
         case HarbormasterBuildCommand::COMMAND_RESUME:
           if ($build->canResumeBuild()) {
-            $issuable[] = $build;
+            $issuable[$key] = $build;
           }
           break;
         case HarbormasterBuildCommand::COMMAND_ABORT:
           if ($build->canAbortBuild()) {
-            $issuable[] = $build;
+            $issuable[$key] = $build;
           }
           break;
         default:
@@ -56,6 +57,14 @@ final class HarbormasterBuildableActionController
       if (!$build->canIssueCommand($viewer, $action)) {
         $restricted = true;
         unset($issuable[$key]);
+      }
+    }
+
+    $building = false;
+    foreach ($issuable as $key => $build) {
+      if ($build->isBuilding()) {
+        $building = true;
+        break;
       }
     }
 
@@ -89,34 +98,137 @@ final class HarbormasterBuildableActionController
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 
+    $width = AphrontDialogView::WIDTH_DEFAULT;
+
     switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
+        // See T13348. The "Restart Builds" action may restart only a subset
+        // of builds, so show the user a preview of which builds will actually
+        // restart.
+
+        $body = array();
+
         if ($issuable) {
-          $title = pht('Really restart builds?');
-
-          if ($restricted) {
-            $body = pht(
-              'You only have permission to restart some builds. Progress '.
-              'on builds you have permission to restart will be discarded '.
-              'and they will restart. Side effects of these builds will '.
-              'occur again. Really restart all builds?');
-          } else {
-            $body = pht(
-              'Progress on all builds will be discarded, and all builds will '.
-              'restart. Side effects of the builds will occur again. Really '.
-              'restart all builds?');
-          }
-
+          $title = pht('Restart Builds');
           $submit = pht('Restart Builds');
         } else {
           $title = pht('Unable to Restart Builds');
+        }
+
+        if ($builds) {
+          $width = AphrontDialogView::WIDTH_FORM;
+
+          $body[] = pht('Builds for this buildable:');
+
+          $rows = array();
+          foreach ($builds as $key => $build) {
+            if (isset($issuable[$key])) {
+              $icon = id(new PHUIIconView())
+                ->setIcon('fa-repeat green');
+              $build_note = pht('Will Restart');
+            } else {
+              $icon = null;
+
+              try {
+                $build->assertCanRestartBuild();
+              } catch (HarbormasterRestartException $ex) {
+                $icon = id(new PHUIIconView())
+                  ->setIcon('fa-times red');
+                $build_note = pht(
+                  '%s: %s',
+                  phutil_tag('strong', array(), pht('Not Restartable')),
+                  $ex->getTitle());
+              }
+
+              if (!$icon) {
+                try {
+                  $build->assertCanIssueCommand($viewer, $action);
+                } catch (PhabricatorPolicyException $ex) {
+                  $icon = id(new PHUIIconView())
+                    ->setIcon('fa-lock red');
+                  $build_note = pht(
+                    '%s: %s',
+                    phutil_tag('strong', array(), pht('Not Restartable')),
+                    pht('You do not have permission to restart this build.'));
+                }
+              }
+
+              if (!$icon) {
+                $icon = id(new PHUIIconView())
+                  ->setIcon('fa-times red');
+                $build_note = pht('Will Not Restart');
+              }
+            }
+
+            $build_name = phutil_tag(
+              'a',
+              array(
+                'href' => $build->getURI(),
+                'target' => '_blank',
+              ),
+              pht('%s %s', $build->getObjectName(), $build->getName()));
+
+            $rows[] = array(
+              $icon,
+              $build_name,
+              $build_note,
+            );
+          }
+
+          $table = id(new AphrontTableView($rows))
+            ->setHeaders(
+              array(
+                null,
+                pht('Build'),
+                pht('Action'),
+              ))
+            ->setColumnClasses(
+              array(
+                null,
+                'pri',
+                'wide',
+              ));
+
+          $table = phutil_tag(
+            'div',
+            array(
+              'class' => 'mlt mlb',
+            ),
+            $table);
+
+          $body[] = $table;
+        }
+
+        if ($issuable) {
+          $warnings = array();
 
           if ($restricted) {
-            $body = pht('You do not have permission to restart any builds.');
+            $warnings[] = pht(
+              'You only have permission to restart some builds.');
+          }
+
+          if ($building) {
+            $warnings[] = pht(
+              'Progress on running builds will be discarded.');
+          }
+
+          $warnings[] = pht(
+            'When a build is restarted, side effects associated with '.
+            'the build may occur again.');
+
+          $body[] = id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+            ->setErrors($warnings);
+
+          $body[] = pht('Really restart builds?');
+        } else {
+          if ($restricted) {
+            $body[] = pht('You do not have permission to restart any builds.');
           } else {
-            $body = pht('No builds can be restarted.');
+            $body[] = pht('No builds can be restarted.');
           }
         }
+
         break;
       case HarbormasterBuildCommand::COMMAND_PAUSE:
         if ($issuable) {
@@ -193,6 +305,7 @@ final class HarbormasterBuildableActionController
 
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
+      ->setWidth($width)
       ->setTitle($title)
       ->appendChild($body)
       ->addCancelButton($return_uri);

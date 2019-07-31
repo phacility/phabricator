@@ -6,6 +6,10 @@ final class PhabricatorEpochExportField
   private $zone;
 
   public function getTextValue($value) {
+    if ($value === null) {
+      return '';
+    }
+
     if (!isset($this->zone)) {
       $this->zone = new DateTimeZone('UTC');
     }
@@ -21,11 +25,19 @@ final class PhabricatorEpochExportField
   }
 
   public function getNaturalValue($value) {
+    if ($value === null) {
+      return $value;
+    }
+
     return (int)$value;
   }
 
   public function getPHPExcelValue($value) {
     $epoch = $this->getNaturalValue($value);
+
+    if ($epoch === null) {
+      return null;
+    }
 
     $seconds_per_day = phutil_units('1 day in seconds');
     $offset = ($seconds_per_day * 25569);

@@ -78,12 +78,14 @@ final class PhabricatorAuthListController
       ->setGuidanceContext($guidance_context)
       ->newInfoView();
 
+    $is_disabled = (!$can_manage || $is_locked);
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setButtonType(PHUIButtonView::BUTTONTYPE_SIMPLE)
-      ->setHref($this->getApplicationURI('config/new/'))
       ->setIcon('fa-plus')
-      ->setDisabled(!$can_manage || $is_locked)
+      ->setDisabled($is_disabled)
+      ->setWorkflow($is_disabled)
+      ->setHref($this->getApplicationURI('config/new/'))
       ->setText(pht('Add Provider'));
 
     $list->setFlush(true);

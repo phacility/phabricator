@@ -9,7 +9,8 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface {
 
   const RESPONSES_VISIBLE = 0;
   const RESPONSES_VOTERS  = 1;
@@ -202,10 +203,36 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     $this->saveTransaction();
   }
 
-  /* -(  PhabricatorSpacesInterface  )--------------------------------------- */
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the poll.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('string')
+        ->setDescription(pht('The author of the poll.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getQuestion(),
+      'authorPHID' => $this->getAuthorPHID(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }

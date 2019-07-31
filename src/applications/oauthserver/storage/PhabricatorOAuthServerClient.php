@@ -59,6 +59,12 @@ final class PhabricatorOAuthServerClient
       PhabricatorOAuthServerClientPHIDType::TYPECONST);
   }
 
+  public function getURI() {
+    return urisprintf(
+      '/oauthserver/client/view/%d/',
+      $this->getID());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -294,8 +294,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         null,
         $identity_phid,
         ($partial
-          ? PhabricatorUserLog::ACTION_LOGIN_PARTIAL
-          : PhabricatorUserLog::ACTION_LOGIN));
+          ? PhabricatorPartialLoginUserLogType::LOGTYPE
+          : PhabricatorLoginUserLogType::LOGTYPE));
 
       $log->setDetails(
         array(
@@ -366,7 +366,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $log = PhabricatorUserLog::initializeNewLog(
       $user,
       $user->getPHID(),
-      PhabricatorUserLog::ACTION_LOGOUT);
+      PhabricatorLogoutUserLogType::LOGTYPE);
     $log->save();
 
     $extensions = PhabricatorAuthSessionEngineExtension::getAllExtensions();
@@ -688,13 +688,13 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           $log = PhabricatorUserLog::initializeNewLog(
             $viewer,
             $viewer->getPHID(),
-            PhabricatorUserLog::ACTION_ENTER_HISEC);
+            PhabricatorEnterHisecUserLogType::LOGTYPE);
           $log->save();
         } else {
           $log = PhabricatorUserLog::initializeNewLog(
             $viewer,
             $viewer->getPHID(),
-            PhabricatorUserLog::ACTION_FAIL_HISEC);
+            PhabricatorFailHisecUserLogType::LOGTYPE);
           $log->save();
         }
       }
@@ -831,7 +831,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $log = PhabricatorUserLog::initializeNewLog(
       $viewer,
       $viewer->getPHID(),
-      PhabricatorUserLog::ACTION_EXIT_HISEC);
+      PhabricatorExitHisecUserLogType::LOGTYPE);
     $log->save();
   }
 
@@ -872,7 +872,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $log = PhabricatorUserLog::initializeNewLog(
         $viewer,
         $viewer->getPHID(),
-        PhabricatorUserLog::ACTION_LOGIN_FULL);
+        PhabricatorFullLoginUserLogType::LOGTYPE);
       $log->save();
     unset($unguarded);
   }
@@ -917,7 +917,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         $log = PhabricatorUserLog::initializeNewLog(
           $viewer,
           $viewer->getPHID(),
-          PhabricatorUserLog::ACTION_LOGIN_LEGALPAD);
+          PhabricatorSignDocumentsUserLogType::LOGTYPE);
         $log->save();
       }
     unset($unguarded);

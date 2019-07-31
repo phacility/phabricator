@@ -71,6 +71,7 @@ JX.behavior('project-boards', function(config, statics) {
       .setUploadURI(config.uploadURI)
       .setCoverURI(config.coverURI)
       .setMoveURI(config.moveURI)
+      .setReloadURI(config.reloadURI)
       .setChunkThreshold(config.chunkThreshold)
       .start();
   }

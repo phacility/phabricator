@@ -5,10 +5,6 @@ final class PhortuneAddPaymentMethodAction
 
   const TYPECONST = 'phortune.payment-method.add';
 
-  public function getActionConstant() {
-    return self::TYPECONST;
-  }
-
   public function getScoreThreshold() {
     return 60 / phutil_units('1 hour in seconds');
   }

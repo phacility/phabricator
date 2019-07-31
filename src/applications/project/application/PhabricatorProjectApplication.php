@@ -66,7 +66,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'subprojects/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectsController',
         'board/(?P<id>[1-9]\d*)/'.
-          '(?P<filter>filter/)?'.
           '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorProjectBoardViewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectMoveController',
@@ -80,6 +79,12 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectColumnHideController',
           'column/(?:(?P<id>\d+)/)?'
             => 'PhabricatorProjectColumnDetailController',
+          'viewquery/(?P<columnID>\d+)/'
+            => 'PhabricatorProjectColumnViewQueryController',
+          'bulk/(?P<columnID>\d+)/'
+            => 'PhabricatorProjectColumnBulkEditController',
+          'bulkmove/(?P<columnID>\d+)/(?P<mode>project|column)/'
+            => 'PhabricatorProjectColumnBulkMoveController',
           'import/'
             => 'PhabricatorProjectBoardImportController',
           'reorder/'
@@ -90,6 +95,12 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardManageController',
           'background/'
             => 'PhabricatorProjectBoardBackgroundController',
+          'default/(?P<target>[^/]+)/'
+            => 'PhabricatorProjectBoardDefaultController',
+          'filter/(?:query/(?P<queryKey>[^/]+)/)?'
+            => 'PhabricatorProjectBoardFilterController',
+          'reload/'
+            => 'PhabricatorProjectBoardReloadController',
         ),
         'column/' => array(
           'remove/(?P<id>\d+)/' =>
@@ -112,8 +123,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectSilenceController',
         'warning/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectWarningController',
-        'default/(?P<projectID>[1-9]\d*)/(?P<target>[^/]+)/'
-          => 'PhabricatorProjectDefaultController',
       ),
       '/tag/' => array(
         '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',

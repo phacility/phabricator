@@ -1825,6 +1825,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $table_map['rank'] = array(
       'alias' => 'ft_rank',
       'key' => PhabricatorSearchDocumentFieldType::FIELD_TITLE,
+
+      // See T13345. Not every document has a title, so we want to LEFT JOIN
+      // this table to avoid excluding documents with no title that match
+      // the query in other fields.
+      'optional' => true,
     );
 
     $this->ferretTables = $table_map;
@@ -2103,10 +2108,17 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     foreach ($this->ferretTables as $table) {
       $alias = $table['alias'];
 
+      if (empty($table['optional'])) {
+        $join_type = qsprintf($conn, 'JOIN');
+      } else {
+        $join_type = qsprintf($conn, 'LEFT JOIN');
+      }
+
       $joins[] = qsprintf(
         $conn,
-        'JOIN %T %T ON ft_doc.id = %T.documentID
+        '%Q %T %T ON ft_doc.id = %T.documentID
           AND %T.fieldKey = %s',
+        $join_type,
         $field_table,
         $alias,
         $alias,

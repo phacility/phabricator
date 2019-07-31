@@ -229,7 +229,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     $this->addQueue[] = $object_position;
 
     $positions[$object_phid] = $object_position;
-    $positions = msort($positions, 'getOrderingKey');
+    $positions = msortv($positions, 'newColumnPositionOrderVector');
 
     $this->boardLayout[$board_phid][$column_phid] = $positions;
 
@@ -404,7 +404,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       ->withBoardPHIDs(array_keys($boards))
       ->withObjectPHIDs($object_phids)
       ->execute();
-    $positions = msort($positions, 'getOrderingKey');
+    $positions = msortv($positions, 'newColumnPositionOrderVector');
     $positions = mgroup($positions, 'getBoardPHID');
 
     return $positions;
@@ -581,7 +581,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     }
 
     foreach ($layout as $column_phid => $map) {
-      $map = msort($map, 'getOrderingKey');
+      $map = msortv($map, 'newColumnPositionOrderVector');
       $layout[$column_phid] = $map;
 
       foreach ($map as $object_phid => $position) {

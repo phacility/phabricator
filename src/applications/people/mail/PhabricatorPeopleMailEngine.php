@@ -5,6 +5,8 @@ abstract class PhabricatorPeopleMailEngine
 
   private $sender;
   private $recipient;
+  private $recipientAddress;
+  private $activityLog;
 
   final public function setSender(PhabricatorUser $sender) {
     $this->sender = $sender;
@@ -30,6 +32,31 @@ abstract class PhabricatorPeopleMailEngine
     return $this->recipient;
   }
 
+  final public function setRecipientAddress(PhutilEmailAddress $address) {
+    $this->recipientAddress = $address;
+    return $this;
+  }
+
+  final public function getRecipientAddress() {
+    if (!$this->recipientAddress) {
+      throw new PhutilInvalidStateException('recipientAddress');
+    }
+    return $this->recipientAddress;
+  }
+
+  final public function hasRecipientAddress() {
+    return ($this->recipientAddress !== null);
+  }
+
+  final public function setActivityLog(PhabricatorUserLog $activity_log) {
+    $this->activityLog = $activity_log;
+    return $this;
+  }
+
+  final public function getActivityLog() {
+    return $this->activityLog;
+  }
+
   final public function canSendMail() {
     try {
       $this->validateMail();
@@ -43,6 +70,26 @@ abstract class PhabricatorPeopleMailEngine
     $this->validateMail();
     $mail = $this->newMail();
 
+    if ($this->hasRecipientAddress()) {
+      $recipient_address = $this->getRecipientAddress();
+      $mail->addRawTos(array($recipient_address->getAddress()));
+    } else {
+      $recipient = $this->getRecipient();
+      $mail->addTos(array($recipient->getPHID()));
+    }
+
+    $activity_log = $this->getActivityLog();
+    if ($activity_log) {
+      $activity_log->save();
+
+      $body = array();
+      $body[] = rtrim($mail->getBody(), "\n");
+      $body[] = pht('Activity Log ID: #%d', $activity_log->getID());
+      $body = implode("\n\n", $body)."\n";
+
+      $mail->setBody($body);
+    }
+
     $mail
       ->setForceDelivery(true)
       ->save();
@@ -52,7 +99,6 @@ abstract class PhabricatorPeopleMailEngine
 
   abstract public function validateMail();
   abstract protected function newMail();
-
 
   final protected function throwValidationException($title, $body) {
     throw new PhabricatorPeopleMailEngineException($title, $body);
@@ -66,7 +112,10 @@ abstract class PhabricatorPeopleMailEngine
       ->setConfig('uri.base', PhabricatorEnv::getProductionURI('/'))
       ->setMode(PhutilRemarkupEngine::MODE_TEXT);
 
-    return $engine->markupText($text);
+    $rendered_text = $engine->markupText($text);
+    $rendered_text = rtrim($rendered_text, "\n");
+
+    return $rendered_text;
   }
 
 }

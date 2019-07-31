@@ -32,7 +32,9 @@ final class PhabricatorOAuthServerClientPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $client = $objects[$phid];
 
-      $handle->setName($client->getName());
+      $handle
+        ->setName($client->getName())
+        ->setURI($client->getURI());
     }
   }
 

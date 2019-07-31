@@ -46,7 +46,7 @@ final class PhabricatorProjectColumnPosition extends PhabricatorProjectDAO
     return $this;
   }
 
-  public function getOrderingKey() {
+  public function newColumnPositionOrderVector() {
     // We're ordering both real positions and "virtual" positions which we have
     // created but not saved yet.
 
@@ -61,11 +61,10 @@ final class PhabricatorProjectColumnPosition extends PhabricatorProjectDAO
 
     // Broadly, this collectively makes newly added stuff float to the top.
 
-    return sprintf(
-      '~%012d%012d%012d',
-      $this->getSequence(),
-      ((1 << 31) - $this->viewSequence),
-      ((1 << 31) - $this->getID()));
+    return id(new PhutilSortVector())
+      ->addInt($this->getSequence())
+      ->addInt(-1 * $this->viewSequence)
+      ->addInt(-1 * $this->getID());
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

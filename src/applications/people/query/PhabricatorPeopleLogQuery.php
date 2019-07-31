@@ -3,6 +3,7 @@
 final class PhabricatorPeopleLogQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $actorPHIDs;
   private $userPHIDs;
   private $relatedPHIDs;
@@ -11,6 +12,11 @@ final class PhabricatorPeopleLogQuery
   private $remoteAddressPrefix;
   private $dateCreatedMin;
   private $dateCreatedMax;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withActorPHIDs(array $actor_phids) {
     $this->actorPHIDs = $actor_phids;
@@ -58,6 +64,13 @@ final class PhabricatorPeopleLogQuery
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->actorPHIDs !== null) {
       $where[] = qsprintf(

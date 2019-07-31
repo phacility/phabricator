@@ -7,17 +7,6 @@ abstract class DiffusionQueryConduitAPIMethod
     return true;
   }
 
-  public function getMethodStatus() {
-    return self::METHOD_STATUS_UNSTABLE;
-  }
-
-  public function getMethodStatusDescription() {
-    return pht(
-      'See T2784 - migrating Diffusion working copy calls to conduit methods. '.
-      'Until that task is completed (and possibly after) these methods are '.
-      'unstable.');
-  }
-
   private $diffusionRequest;
   private $repository;
 

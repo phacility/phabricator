@@ -3,43 +3,6 @@
 final class PhabricatorUserLog extends PhabricatorUserDAO
   implements PhabricatorPolicyInterface {
 
-  const ACTION_LOGIN          = 'login';
-  const ACTION_LOGIN_PARTIAL  = 'login-partial';
-  const ACTION_LOGIN_FULL     = 'login-full';
-  const ACTION_LOGOUT         = 'logout';
-  const ACTION_LOGIN_FAILURE  = 'login-fail';
-  const ACTION_LOGIN_LEGALPAD = 'login-legalpad';
-  const ACTION_RESET_PASSWORD = 'reset-pass';
-
-  const ACTION_CREATE         = 'create';
-  const ACTION_EDIT           = 'edit';
-
-  const ACTION_ADMIN          = 'admin';
-  const ACTION_SYSTEM_AGENT   = 'system-agent';
-  const ACTION_MAILING_LIST   = 'mailing-list';
-  const ACTION_DISABLE        = 'disable';
-  const ACTION_APPROVE        = 'approve';
-  const ACTION_DELETE         = 'delete';
-
-  const ACTION_CONDUIT_CERTIFICATE = 'conduit-cert';
-  const ACTION_CONDUIT_CERTIFICATE_FAILURE = 'conduit-cert-fail';
-
-  const ACTION_EMAIL_PRIMARY    = 'email-primary';
-  const ACTION_EMAIL_REMOVE     = 'email-remove';
-  const ACTION_EMAIL_ADD        = 'email-add';
-  const ACTION_EMAIL_VERIFY     = 'email-verify';
-  const ACTION_EMAIL_REASSIGN   = 'email-reassign';
-
-  const ACTION_CHANGE_PASSWORD  = 'change-password';
-  const ACTION_CHANGE_USERNAME  = 'change-username';
-
-  const ACTION_ENTER_HISEC = 'hisec-enter';
-  const ACTION_EXIT_HISEC = 'hisec-exit';
-  const ACTION_FAIL_HISEC = 'hisec-fail';
-
-  const ACTION_MULTI_ADD = 'multi-add';
-  const ACTION_MULTI_REMOVE = 'multi-remove';
-
   protected $actorPHID;
   protected $userPHID;
   protected $action;
@@ -48,44 +11,6 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
   protected $details = array();
   protected $remoteAddr;
   protected $session;
-
-  public static function getActionTypeMap() {
-    return array(
-      self::ACTION_LOGIN => pht('Login'),
-      self::ACTION_LOGIN_PARTIAL => pht('Login: Partial Login'),
-      self::ACTION_LOGIN_FULL => pht('Login: Upgrade to Full'),
-      self::ACTION_LOGIN_FAILURE => pht('Login: Failure'),
-      self::ACTION_LOGIN_LEGALPAD =>
-        pht('Login: Signed Required Legalpad Documents'),
-      self::ACTION_LOGOUT => pht('Logout'),
-      self::ACTION_RESET_PASSWORD => pht('Reset Password'),
-      self::ACTION_CREATE => pht('Create Account'),
-      self::ACTION_EDIT => pht('Edit Account'),
-      self::ACTION_ADMIN => pht('Add/Remove Administrator'),
-      self::ACTION_SYSTEM_AGENT => pht('Add/Remove System Agent'),
-      self::ACTION_MAILING_LIST => pht('Add/Remove Mailing List'),
-      self::ACTION_DISABLE => pht('Enable/Disable'),
-      self::ACTION_APPROVE => pht('Approve Registration'),
-      self::ACTION_DELETE => pht('Delete User'),
-      self::ACTION_CONDUIT_CERTIFICATE
-        => pht('Conduit: Read Certificate'),
-      self::ACTION_CONDUIT_CERTIFICATE_FAILURE
-        => pht('Conduit: Read Certificate Failure'),
-      self::ACTION_EMAIL_PRIMARY => pht('Email: Change Primary'),
-      self::ACTION_EMAIL_ADD => pht('Email: Add Address'),
-      self::ACTION_EMAIL_REMOVE => pht('Email: Remove Address'),
-      self::ACTION_EMAIL_VERIFY => pht('Email: Verify'),
-      self::ACTION_EMAIL_REASSIGN => pht('Email: Reassign'),
-      self::ACTION_CHANGE_PASSWORD => pht('Change Password'),
-      self::ACTION_CHANGE_USERNAME => pht('Change Username'),
-      self::ACTION_ENTER_HISEC => pht('Hisec: Enter'),
-      self::ACTION_EXIT_HISEC => pht('Hisec: Exit'),
-      self::ACTION_FAIL_HISEC => pht('Hisec: Failed Attempt'),
-      self::ACTION_MULTI_ADD => pht('Multi-Factor: Add Factor'),
-      self::ACTION_MULTI_REMOVE => pht('Multi-Factor: Remove Factor'),
-    );
-  }
-
 
   public static function initializeNewLog(
     PhabricatorUser $actor = null,
@@ -173,6 +98,43 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getURI() {
+    return urisprintf('/people/logs/%s/', $this->getID());
+  }
+
+  public function getObjectName() {
+    return pht('Activity Log %d', $this->getID());
+  }
+
+  public function getRemoteAddressForViewer(PhabricatorUser $viewer) {
+    $viewer_phid = $viewer->getPHID();
+    $actor_phid = $this->getActorPHID();
+    $user_phid = $this->getUserPHID();
+
+    if (!$viewer_phid) {
+      $can_see_ip = false;
+    } else if ($viewer->getIsAdmin()) {
+      $can_see_ip = true;
+    } else if ($viewer_phid == $actor_phid) {
+      // You can see the address if you took the action.
+      $can_see_ip = true;
+    } else if (!$actor_phid && ($viewer_phid == $user_phid)) {
+      // You can see the address if it wasn't authenticated and applied
+      // to you (partial login).
+      $can_see_ip = true;
+    } else {
+      // You can't see the address when an administrator disables your
+      // account, since it's their address.
+      $can_see_ip = false;
+    }
+
+    if (!$can_see_ip) {
+      return null;
+    }
+
+    return $this->getRemoteAddr();
   }
 
 

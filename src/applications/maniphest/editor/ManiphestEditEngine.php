@@ -434,7 +434,7 @@ EODOCS
     $engine = id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
-      ->setObjectPHID($object_phid)
+      ->setUpdatePHIDs(array($object_phid))
       ->setVisiblePHIDs($visible_phids);
 
     if ($ordering) {

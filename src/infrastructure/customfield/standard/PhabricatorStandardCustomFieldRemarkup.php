@@ -107,4 +107,8 @@ final class PhabricatorStandardCustomFieldRemarkup
     return new ConduitStringParameterType();
   }
 
+  protected function newExportFieldType() {
+    return new PhabricatorStringExportField();
+  }
+
 }

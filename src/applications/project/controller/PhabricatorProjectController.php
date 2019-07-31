@@ -16,6 +16,21 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   }
 
   protected function loadProject() {
+    return $this->loadProjectWithCapabilities(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+      ));
+  }
+
+  protected function loadProjectForEdit() {
+    return $this->loadProjectWithCapabilities(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ));
+  }
+
+  private function loadProjectWithCapabilities(array $capabilities) {
     $viewer = $this->getViewer();
     $request = $this->getRequest();
 
@@ -35,6 +50,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
 
     $query = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
+      ->requireCapabilities($capabilities)
       ->needMembers(true)
       ->needWatchers(true)
       ->needImages(true)
@@ -168,7 +184,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $engine = id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
       ->setBoardPHID($board_phid)
-      ->setObjectPHID($object_phid)
+      ->setUpdatePHIDs(array($object_phid))
       ->setVisiblePHIDs($visible_phids)
       ->setSounds($sounds);
 
