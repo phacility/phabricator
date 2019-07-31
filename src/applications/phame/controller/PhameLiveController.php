@@ -93,10 +93,6 @@ abstract class PhameLiveController extends PhameController {
         ->needHeaderImage(true)
         ->withIDs(array($post_id));
 
-      if ($blog) {
-        $post_query->withBlogPHIDs(array($blog->getPHID()));
-      }
-
       // Only show published posts on external domains.
       if ($is_external) {
         $post_query->withVisibility(
@@ -123,10 +119,15 @@ abstract class PhameLiveController extends PhameController {
     $this->post = $post;
 
     // If we have a post, canonicalize the URI to the post's current slug and
-    // redirect the user if it isn't correct.
+    // redirect the user if it isn't correct. Likewise, canonicalize the URI
+    // if the blog ID is wrong. See T13353.
     if ($post) {
       $slug = $request->getURIData('slug');
-      if ($post->getSlug() != $slug) {
+
+      $wrong_slug = ($post->getSlug() !== $slug);
+      $wrong_blog = ($post->getBlog()->getID() !== $blog->getID());
+
+      if ($wrong_slug || $wrong_blog) {
         if ($is_live) {
           if ($is_external) {
             $uri = $post->getExternalLiveURI();
