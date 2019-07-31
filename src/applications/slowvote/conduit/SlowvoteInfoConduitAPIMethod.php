@@ -6,6 +6,14 @@ final class SlowvoteInfoConduitAPIMethod extends SlowvoteConduitAPIMethod {
     return 'slowvote.info';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Replaced by "slowvote.poll.search".');
+  }
+
   public function getMethodDescription() {
     return pht('Retrieve an array of information about a poll.');
   }
