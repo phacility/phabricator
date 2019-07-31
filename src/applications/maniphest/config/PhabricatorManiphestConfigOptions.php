@@ -451,15 +451,20 @@ You can choose the default priority for newly created tasks with
 EOTEXT
       ));
 
+    $fields_description = $this->deformat(pht(<<<EOTEXT
+List of custom fields for Maniphest tasks.
+
+For details on adding custom fields to Maniphest, see [[ %s | %s ]] in the
+documentation.
+EOTEXT
+      ,
+      PhabricatorEnv::getDoclink('Configuring Custom Fields'),
+      pht('Configuring Custom Fields')));
 
     return array(
       $this->newOption('maniphest.custom-field-definitions', 'wild', array())
         ->setSummary(pht('Custom Maniphest fields.'))
-        ->setDescription(
-          pht(
-            'Array of custom fields for Maniphest tasks. For details on '.
-            'adding custom fields to Maniphest, see "Configuring Custom '.
-            'Fields" in the documentation.'))
+        ->setDescription($fields_description)
         ->addExample($fields_json, pht('Valid setting')),
       $this->newOption('maniphest.fields', $custom_field_type, $default_fields)
         ->setCustomData(id(new ManiphestTask())->getCustomFieldBaseClass())
