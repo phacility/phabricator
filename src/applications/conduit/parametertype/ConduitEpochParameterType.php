@@ -3,8 +3,24 @@
 final class ConduitEpochParameterType
   extends ConduitParameterType {
 
+  private $allowNull;
+
+  public function setAllowNull($allow_null) {
+    $this->allowNull = $allow_null;
+    return $this;
+  }
+
+  public function getAllowNull() {
+    return $this->allowNull;
+  }
+
   protected function getParameterValue(array $request, $key, $strict) {
     $value = parent::getParameterValue($request, $key, $strict);
+
+    if ($this->allowNull && ($value === null)) {
+      return $value;
+    }
+
     $value = $this->parseIntValue($request, $key, $value, $strict);
 
     if ($value <= 0) {
