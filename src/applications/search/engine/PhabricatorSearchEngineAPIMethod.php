@@ -198,6 +198,7 @@ EOTEXT
       $label = $field->getLabel();
 
       $constants = $field->newConduitConstants();
+      $show_table = false;
 
       $type_object = $field->getConduitParameterType();
       if ($type_object) {
@@ -209,6 +210,7 @@ EOTEXT
             ' ',
             phutil_tag('em', array(), pht('(See table below.)')),
           );
+          $show_table = true;
         }
       } else {
         $type = null;
@@ -222,11 +224,11 @@ EOTEXT
         $description,
       );
 
-      if ($constants) {
+      if ($show_table) {
         $constant_lists[] = $this->newRemarkupDocumentationView(
           pht(
             'Constants supported by the `%s` constraint:',
-            'statuses'));
+            $key));
 
         $constants_rows = array();
         foreach ($constants as $constant) {
