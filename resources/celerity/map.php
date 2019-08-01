@@ -12,7 +12,7 @@ return array(
     'core.pkg.css' => 'af983028',
     'core.pkg.js' => '73a06a9f',
     'differential.pkg.css' => '8d8360fb',
-    'differential.pkg.js' => '67e02996',
+    'differential.pkg.js' => '0b037a4f',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
@@ -484,7 +484,7 @@ return array(
     'rsrc/js/core/behavior-line-linker.js' => 'e15c8b1f',
     'rsrc/js/core/behavior-linked-container.js' => '74446546',
     'rsrc/js/core/behavior-more.js' => '506aa3f4',
-    'rsrc/js/core/behavior-object-selector.js' => 'a4af0b4a',
+    'rsrc/js/core/behavior-object-selector.js' => '98ef467f',
     'rsrc/js/core/behavior-oncopy.js' => 'ff7b3f22',
     'rsrc/js/core/behavior-phabricator-nav.js' => 'f166c949',
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => '2f80333f',
@@ -645,7 +645,7 @@ return array(
     'javelin-behavior-phabricator-line-linker' => 'e15c8b1f',
     'javelin-behavior-phabricator-nav' => 'f166c949',
     'javelin-behavior-phabricator-notification-example' => '29819b75',
-    'javelin-behavior-phabricator-object-selector' => 'a4af0b4a',
+    'javelin-behavior-phabricator-object-selector' => '98ef467f',
     'javelin-behavior-phabricator-oncopy' => 'ff7b3f22',
     'javelin-behavior-phabricator-remarkup-assist' => '2f80333f',
     'javelin-behavior-phabricator-reveal-content' => 'b105a3a6',
@@ -1730,6 +1730,12 @@ return array(
       'javelin-dom',
       'javelin-router',
     ),
+    '98ef467f' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-request',
+      'javelin-util',
+    ),
     '9aae2b66' => array(
       'javelin-install',
       'javelin-util',
@@ -1789,12 +1795,6 @@ return array(
     'a4aa75c4' => array(
       'phui-button-css',
       'phui-button-simple-css',
-    ),
-    'a4af0b4a' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-request',
-      'javelin-util',
     ),
     'a5257c4e' => array(
       'javelin-install',
