@@ -80,7 +80,17 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
               '' => 'PhortuneAccountManagersController',
               'add/' => 'PhortuneAccountAddManagerController',
             ),
+            'addresses/' => array(
+              '' => 'PhortuneAccountEmailAddressesController',
+              $this->getEditRoutePattern('edit/')
+                => 'PhortuneAccountEmailEditController',
+            ),
           ),
+        ),
+        'address/' => array(
+          '(?P<id>\d+)/' => 'PhortuneAccountEmailViewController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhortuneAccountEmailEditController',
         ),
         'product/' => array(
           '' => 'PhortuneProductListController',

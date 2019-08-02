@@ -82,6 +82,12 @@ abstract class PhortuneAccountProfileController
       $this->getApplicationURI("/account/{$id}/managers/"),
       'fa-group');
 
+    $nav->addFilter(
+      'addresses',
+      pht('Email Addresses'),
+      $this->getApplicationURI("/account/{$id}/addresses/"),
+      'fa-envelope-o');
+
     $nav->selectFilter($filter);
 
     return $nav;

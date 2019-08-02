@@ -109,6 +109,12 @@ final class PhortuneAccount extends PhortuneDAO
       $this->getID());
   }
 
+  public function getEmailAddressesURI() {
+    return urisprintf(
+      '/phortune/account/%d/addresses/',
+      $this->getID());
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

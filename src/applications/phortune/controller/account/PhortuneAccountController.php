@@ -9,6 +9,11 @@ abstract class PhortuneAccountController
     return $this->account;
   }
 
+  protected function setAccount(PhortuneAccount $account) {
+    $this->account = $account;
+    return $this;
+  }
+
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
@@ -28,7 +33,6 @@ abstract class PhortuneAccountController
     // too, just with less information.
     return $this->loadAccountForEdit();
   }
-
 
   protected function loadAccountForEdit() {
     $viewer = $this->getViewer();
