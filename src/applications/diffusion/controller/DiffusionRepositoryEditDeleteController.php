@@ -17,32 +17,31 @@ final class DiffusionRepositoryEditDeleteController
       ->setRepository($repository)
       ->getPanelURI();
 
-    $dialog = new AphrontDialogView();
-    $text_1 = pht(
-      'If you really want to delete the repository, run this command from '.
-      'the command line:');
-    $command = csprintf(
-      'phabricator/ $ ./bin/remove destroy %R',
-      $repository->getMonogram());
-    $text_2 = pht(
-      'Repositories touch many objects and as such deletes are '.
-      'prohibitively expensive to run from the web UI.');
-    $body = phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-remarkup',
-      ),
-      array(
-        phutil_tag('p', array(), $text_1),
-        phutil_tag('p', array(),
-          phutil_tag('tt', array(), $command)),
-        phutil_tag('p', array(), $text_2),
-      ));
+    $doc_uri = PhabricatorEnv::getDoclink(
+      'Permanently Destroying Data');
 
     return $this->newDialog()
-      ->setTitle(pht('Really want to delete the repository?'))
-      ->appendChild($body)
-      ->addCancelButton($panel_uri, pht('Okay'));
+      ->setTitle(pht('Delete Repository'))
+      ->appendParagraph(
+        pht(
+          'To permanently destroy this repository, run this command from '.
+          'the command line:'))
+      ->appendCommand(
+        csprintf(
+          'phabricator/ $ ./bin/remove destroy %R',
+          $repository->getMonogram()))
+      ->appendParagraph(
+        pht(
+          'Repositories can not be permanently destroyed from the web '.
+          'interface. See %s in the documentation for more information.',
+          phutil_tag(
+            'a',
+            array(
+              'href' => $doc_uri,
+              'target' => '_blank',
+            ),
+            pht('Permanently Destroying Data'))))
+      ->addCancelButton($panel_uri, pht('Close'));
   }
 
 }

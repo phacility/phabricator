@@ -169,8 +169,8 @@ start working normally.
 Basics: Delete Repository
 =========================
 
-Repositories can not be deleted from the web UI, so this option is always
-disabled. Clicking it gives you information about how to delete a repository.
+Repositories can not be deleted from the web UI, so this option only gives you
+information about how to delete a repository.
 
 Repositories can only be deleted from the command line, with `bin/remove`:
 
@@ -178,9 +178,8 @@ Repositories can only be deleted from the command line, with `bin/remove`:
 $ ./bin/remove destroy <repository>
 ```
 
-WARNING: This command will issue you a dire warning about the severity of the
-action you are taking. Heed this warning. You are **strongly discouraged** from
-destroying repositories. Instead, deactivate them.
+This command will permanently destroy the repository. For more information
+about destroying things, see @{article:Permanently Destroying Data}.
 
 
 Policies

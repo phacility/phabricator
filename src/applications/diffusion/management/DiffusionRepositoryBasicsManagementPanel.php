@@ -155,8 +155,6 @@ final class DiffusionRepositoryBasicsManagementPanel
         ->setName(pht('Delete Repository'))
         ->setHref($delete_uri)
         ->setIcon('fa-times')
-        ->setColor(PhabricatorActionView::RED)
-        ->setDisabled(true)
         ->setWorkflow(true));
 
     return $this->newCurtainView()
