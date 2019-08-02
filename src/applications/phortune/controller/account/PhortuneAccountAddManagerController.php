@@ -4,7 +4,7 @@ final class PhortuneAccountAddManagerController extends PhortuneController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+    $id = $request->getURIData('accountID');
 
     $account = id(new PhortuneAccountQuery())
       ->setViewer($viewer)
@@ -21,7 +21,7 @@ final class PhortuneAccountAddManagerController extends PhortuneController {
 
     $v_managers = array();
     $e_managers = null;
-    $account_uri = $this->getApplicationURI("/account/manager/{$id}/");
+    $account_uri = $this->getApplicationURI("/account/{$id}/managers/");
 
     if ($request->isFormPost()) {
       $xactions = array();
@@ -64,11 +64,11 @@ final class PhortuneAccountAddManagerController extends PhortuneController {
           ->setError($e_managers));
 
     return $this->newDialog()
-      ->setTitle(pht('Add New Manager'))
+      ->setTitle(pht('Add New Managers'))
       ->appendForm($form)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->addCancelButton($account_uri)
-      ->addSubmitButton(pht('Add Manager'));
+      ->addSubmitButton(pht('Add Managers'));
 
   }
 

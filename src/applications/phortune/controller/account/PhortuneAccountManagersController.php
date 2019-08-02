@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneAccountManagerController
+final class PhortuneAccountManagersController
   extends PhortuneAccountProfileController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -46,11 +46,11 @@ final class PhortuneAccountManagerController
 
     $add = id(new PHUIButtonView())
       ->setTag('a')
-      ->setText(pht('New Manager'))
+      ->setText(pht('Add Managers'))
       ->setIcon('fa-plus')
       ->setWorkflow(true)
       ->setDisabled(!$can_edit)
-      ->setHref("/phortune/account/manager/add/{$id}/");
+      ->setHref("/phortune/account/{$id}/managers/add/");
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Account Managers'))

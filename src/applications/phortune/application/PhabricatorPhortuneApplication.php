@@ -35,7 +35,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
       '/phortune/' => array(
         '' => 'PhortuneLandingController',
         '(?P<accountID>\d+)/' => array(
-          '' => 'PhortuneAccountViewController',
+          '' => 'PhortuneAccountOverviewController',
           'card/' => array(
             'new/' => 'PhortunePaymentMethodCreateController',
           ),
@@ -69,15 +69,17 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '' => 'PhortuneAccountListController',
           $this->getEditRoutePattern('edit/')
             => 'PhortuneAccountEditController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneAccountEditController',
-          'add/manager/(?:(?P<id>\d+)/)?'
-            => 'PhortuneAccountAddManagerController',
-          'billing/(?:(?P<id>\d+)/)?' => 'PhortuneAccountBillingController',
-          'subscription/(?:(?P<id>\d+)/)?'
-            => 'PhortuneAccountSubscriptionController',
-          'manager/' => array(
-            '(?:(?P<id>\d+)/)?' => 'PhortuneAccountManagerController',
-            'add/(?:(?P<id>\d+)/)?' => 'PhortuneAccountAddManagerController',
+
+          '(?P<accountID>\d+)/' => array(
+            'details/' => 'PhortuneAccountDetailsController',
+            'methods/' => 'PhortuneAccountPaymentMethodsController',
+            'orders/' => 'PhortuneAccountOrdersController',
+            'charges/' => 'PhortuneAccountChargesController',
+            'subscriptions/' => 'PhortuneAccountSubscriptionController',
+            'managers/' => array(
+              '' => 'PhortuneAccountManagersController',
+              'add/' => 'PhortuneAccountAddManagerController',
+            ),
           ),
         ),
         'product/' => array(

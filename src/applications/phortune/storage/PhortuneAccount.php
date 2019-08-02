@@ -103,6 +103,12 @@ final class PhortuneAccount extends PhortuneDAO
     return '/phortune/'.$this->getID().'/';
   }
 
+  public function getDetailsURI() {
+    return urisprintf(
+      '/phortune/account/%d/details/',
+      $this->getID());
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneAccountViewController
+final class PhortuneAccountOverviewController
   extends PhortuneAccountProfileController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -26,25 +26,18 @@ final class PhortuneAccountViewController
 
     $header = $this->buildHeaderView();
 
-    $curtain = $this->buildCurtainView($account);
     $status = $this->buildStatusView($account, $invoices);
     $invoices = $this->buildInvoicesSection($account, $invoices);
-    $purchase_history = $this->buildPurchaseHistorySection($account);
-
-    $timeline = $this->buildTransactionTimeline(
-      $account,
-      new PhortuneAccountTransactionQuery());
-    $timeline->setShouldTerminate(true);
+    $purchase_history = $this->newRecentOrdersView($account, 10);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $status,
-        $invoices,
-        $purchase_history,
-        $timeline,
-      ));
+      ->setFooter(
+        array(
+          $status,
+          $invoices,
+          $purchase_history,
+        ));
 
     $navigation = $this->buildSideNavView('overview');
 
@@ -53,7 +46,6 @@ final class PhortuneAccountViewController
       ->setCrumbs($crumbs)
       ->setNavigation($navigation)
       ->appendChild($view);
-
   }
 
   private function buildStatusView(PhortuneAccount $account, $invoices) {
@@ -65,51 +57,6 @@ final class PhortuneAccountViewController
         ->appendChild(idx($item, 'note'));
     }
     return $view;
-  }
-
-  private function buildCurtainView(PhortuneAccount $account) {
-    $viewer = $this->getViewer();
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $account,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $edit_uri = $this->getApplicationURI('account/edit/'.$account->getID().'/');
-
-    $curtain = $this->newCurtainView($account);
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Account'))
-        ->setIcon('fa-pencil')
-        ->setHref($edit_uri)
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $member_phids = $account->getMemberPHIDs();
-    $handles = $viewer->loadHandles($member_phids);
-
-    $member_list = id(new PHUIObjectItemListView())
-      ->setSimple(true);
-
-    foreach ($member_phids as $member_phid) {
-      $image_uri = $handles[$member_phid]->getImageURI();
-      $image_href = $handles[$member_phid]->getURI();
-      $person = $handles[$member_phid];
-
-      $member = id(new PHUIObjectItemView())
-        ->setImageURI($image_uri)
-        ->setHref($image_href)
-        ->setHeader($person->getFullName());
-
-      $member_list->addItem($member);
-    }
-
-    $curtain->newPanel()
-      ->setHeaderText(pht('Managers'))
-      ->appendChild($member_list);
-
-    return $curtain;
   }
 
   private function buildInvoicesSection(
@@ -137,55 +84,6 @@ final class PhortuneAccountViewController
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Invoices Due'));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
-  }
-
-  private function buildPurchaseHistorySection(PhortuneAccount $account) {
-    $viewer = $this->getViewer();
-
-    $carts = id(new PhortuneCartQuery())
-      ->setViewer($viewer)
-      ->withAccountPHIDs(array($account->getPHID()))
-      ->needPurchases(true)
-      ->withStatuses(
-        array(
-          PhortuneCart::STATUS_PURCHASING,
-          PhortuneCart::STATUS_CHARGED,
-          PhortuneCart::STATUS_HOLD,
-          PhortuneCart::STATUS_REVIEW,
-          PhortuneCart::STATUS_PURCHASED,
-        ))
-      ->setLimit(10)
-      ->execute();
-
-    $phids = array();
-    foreach ($carts as $cart) {
-      $phids[] = $cart->getPHID();
-      foreach ($cart->getPurchases() as $purchase) {
-        $phids[] = $purchase->getPHID();
-      }
-    }
-    $handles = $this->loadViewerHandles($phids);
-
-    $orders_uri = $this->getApplicationURI($account->getID().'/order/');
-
-    $table = id(new PhortuneOrderTableView())
-      ->setUser($viewer)
-      ->setCarts($carts)
-      ->setHandles($handles);
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recent Orders'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setIcon('fa-list')
-          ->setHref($orders_uri)
-          ->setText(pht('View All Orders')));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

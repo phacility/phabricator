@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneAccountBillingController
+final class PhortuneAccountPaymentMethodsController
   extends PhortuneAccountProfileController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -13,20 +13,19 @@ final class PhortuneAccountBillingController
     $title = $account->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Billing'));
+    $crumbs->addTextCrumb(pht('Payment Methods'));
 
     $header = $this->buildHeaderView();
     $methods = $this->buildPaymentMethodsSection($account);
-    $charge_history = $this->buildChargeHistorySection($account);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $methods,
-        $charge_history,
-      ));
+      ->setFooter(
+        array(
+          $methods,
+        ));
 
-    $navigation = $this->buildSideNavView('billing');
+    $navigation = $this->buildSideNavView('methods');
 
     return $this->newPage()
       ->setTitle($title)
@@ -60,7 +59,7 @@ final class PhortuneAccountBillingController
       ->setUser($viewer)
       ->setFlush(true)
       ->setNoDataString(
-        pht('No payment methods associated with this account.'));
+        pht('There are no payment methods associated with this account.'));
 
     $methods = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
@@ -114,48 +113,6 @@ final class PhortuneAccountBillingController
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
-  }
-
-  private function buildChargeHistorySection(PhortuneAccount $account) {
-    $viewer = $this->getViewer();
-
-    $charges = id(new PhortuneChargeQuery())
-      ->setViewer($viewer)
-      ->withAccountPHIDs(array($account->getPHID()))
-      ->needCarts(true)
-      ->setLimit(10)
-      ->execute();
-
-    $phids = array();
-    foreach ($charges as $charge) {
-      $phids[] = $charge->getProviderPHID();
-      $phids[] = $charge->getCartPHID();
-      $phids[] = $charge->getMerchantPHID();
-      $phids[] = $charge->getPaymentMethodPHID();
-    }
-
-    $handles = $this->loadViewerHandles($phids);
-
-    $charges_uri = $this->getApplicationURI($account->getID().'/charge/');
-
-    $table = id(new PhortuneChargeTableView())
-      ->setUser($viewer)
-      ->setCharges($charges)
-      ->setHandles($handles);
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Charge History'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setIcon('fa-list')
-          ->setHref($charges_uri)
-          ->setText(pht('View All Charges')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
   }
 
 }
