@@ -188,8 +188,8 @@ final class PhortuneCartEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
 
-    // Reload the cart to pull merchant and account information, in case we
-    // just created the object.
+    // Reload the cart to pull account information, in case we just created the
+    // object.
     $cart = id(new PhortuneCartQuery())
       ->setViewer($this->requireActor())
       ->withPHIDs(array($object->getPHID()))
@@ -197,10 +197,6 @@ final class PhortuneCartEditor
 
     foreach ($cart->getAccount()->getMemberPHIDs() as $account_member) {
       $phids[] = $account_member;
-    }
-
-    foreach ($cart->getMerchant()->getMemberPHIDs() as $merchant_member) {
-      $phids[] = $merchant_member;
     }
 
     return $phids;
