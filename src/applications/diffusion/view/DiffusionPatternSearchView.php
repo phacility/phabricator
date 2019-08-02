@@ -47,7 +47,7 @@ final class DiffusionPatternSearchView extends DiffusionView {
           $offset = $match[1];
           if ($cursor != $offset) {
             $output[] = array(
-              'text' => substr($string, $cursor, $offset),
+              'text' => substr($string, $cursor, ($offset - $cursor)),
               'highlight' => false,
             );
           }
