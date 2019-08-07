@@ -109,6 +109,15 @@ final class PhabricatorProjectColumnBulkMoveController
       $dst_columns = $layout_engine->getColumns($dst_project->getPHID());
       $dst_columns = mpull($dst_columns, null, 'getPHID');
 
+      // Prevent moves to milestones or subprojects by selecting their
+      // columns, since the implications aren't obvious and this doesn't
+      // work the same way as normal column moves.
+      foreach ($dst_columns as $key => $dst_column) {
+        if ($dst_column->getProxyPHID()) {
+          unset($dst_columns[$key]);
+        }
+      }
+
       $has_column = false;
       $dst_column = null;
 
