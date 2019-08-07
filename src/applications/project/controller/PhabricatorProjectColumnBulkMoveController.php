@@ -107,7 +107,7 @@ final class PhabricatorProjectColumnBulkMoveController
         ->executeLayout();
 
       $dst_columns = $layout_engine->getColumns($dst_project->getPHID());
-      $dst_columns = mpull($columns, null, 'getPHID');
+      $dst_columns = mpull($dst_columns, null, 'getPHID');
 
       $has_column = false;
       $dst_column = null;
