@@ -219,12 +219,40 @@ final class PhabricatorProjectColumnBulkMoveController
             ->setValue($dst_project->getDisplayName()));
       }
 
+      $column_options = array(
+        'visible' => array(),
+        'hidden' => array(),
+      );
+
+      $any_hidden = false;
+      foreach ($dst_columns as $column) {
+        if (!$column->isHidden()) {
+          $group = 'visible';
+        } else {
+          $group = 'hidden';
+        }
+
+        $phid = $column->getPHID();
+        $display_name = $column->getDisplayName();
+
+        $column_options[$group][$phid] = $display_name;
+      }
+
+      if ($column_options['hidden']) {
+        $column_options = array(
+          pht('Visible Columns') => $column_options['visible'],
+          pht('Hidden Columns') => $column_options['hidden'],
+        );
+      } else {
+        $column_options = $column_options['visible'];
+      }
+
       $form->appendControl(
-          id(new AphrontFormSelectControl())
-            ->setName('dstColumnPHID')
-            ->setLabel(pht('Move to Column'))
-            ->setValue($dst_column_phid)
-            ->setOptions(mpull($dst_columns, 'getDisplayName', 'getPHID')));
+        id(new AphrontFormSelectControl())
+          ->setName('dstColumnPHID')
+          ->setLabel(pht('Move to Column'))
+          ->setValue($dst_column_phid)
+          ->setOptions($column_options));
 
       $submit = pht('Move Tasks');
 
