@@ -34,20 +34,6 @@ final class PhabricatorPeopleProfileBadgesController
       $user,
       PhabricatorPeopleProfileMenuEngine::ITEM_BADGES);
 
-    // Best option?
-    $badges = id(new PhabricatorBadgesQuery())
-      ->setViewer($viewer)
-      ->withStatuses(array(
-        PhabricatorBadgesBadge::STATUS_ACTIVE,
-      ))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->setLimit(1)
-      ->execute();
-
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setIcon('fa-plus')
@@ -55,17 +41,16 @@ final class PhabricatorPeopleProfileBadgesController
       ->setWorkflow(true)
       ->setHref('/badges/award/'.$user->getID().'/');
 
-    if ($badges) {
-      $header->addActionLink($button);
-    }
+    $header->addActionLink($button);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->addClass('project-view-home')
       ->addClass('project-view-people-home')
-      ->setFooter(array(
-        $this->buildBadgesView($user)
-      ));
+      ->setFooter(
+        array(
+          $badges,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
