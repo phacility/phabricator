@@ -194,6 +194,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
       $control = id(new PHUIFormNumberControl())
         ->setName($name)
         ->setDisableAutocomplete(true)
+        ->setAutofocus(true)
         ->setValue($value)
         ->setError($error);
     }
