@@ -1,6 +1,6 @@
 <?php
 $root = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
-require_once $root.'/externals/html2text/src/Html2Text.php';
+require_once $root.'/externals/html2text/html2text.php';
 require_once $root.'/externals/html2text/src/Html2TextException.php';
 
 final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
@@ -348,7 +348,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
   public function getParsedHTMLBody() {
       try {
-          $html_parsed_body = \Soundasleep\Html2Text::convert(idx($this->bodies, 'html'));
+          $html_parsed_body = convert_html_to_text(idx($this->bodies, 'html'),true);
       } catch (\Soundasleep\Html2TextException $e) {
           return idx($this->bodies, 'text');
       }
