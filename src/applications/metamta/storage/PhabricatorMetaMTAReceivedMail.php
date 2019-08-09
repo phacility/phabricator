@@ -1,6 +1,8 @@
 <?php
-require("./phabricator/externals/html2text/src/Html2Text.php");
-require("./phabricator/externals/html2text/src/Html2TextException.php");
+$root = dirname(dirname(dirname(__FILE__)));
+require_once $root.'/externals/html2text/src/Html2Text.php';
+require_once $root.'/externals/html2text/src/Html2TextException.php';
+
 final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
   protected $headers = array();
