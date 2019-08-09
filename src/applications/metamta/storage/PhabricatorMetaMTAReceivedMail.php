@@ -1,5 +1,5 @@
 <?php
-$root = dirname(dirname(dirname(__FILE__)));
+$root = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
 require_once $root.'/externals/html2text/src/Html2Text.php';
 require_once $root.'/externals/html2text/src/Html2TextException.php';
 
