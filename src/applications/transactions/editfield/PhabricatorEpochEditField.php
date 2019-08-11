@@ -37,7 +37,8 @@ final class PhabricatorEpochEditField
   }
 
   protected function newConduitParameterType() {
-    return new ConduitEpochParameterType();
+    return id(new ConduitEpochParameterType())
+      ->setAllowNull($this->getAllowNull());
   }
 
 }

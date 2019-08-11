@@ -121,6 +121,10 @@ When defining custom fields using a configuration option like
     supported in text, int and remarkup fields (optional).
   - **copy**: If true, this field's value will be copied when an object is
     created using another object as a template.
+  - **limit**: For control types which use a tokenizer control to let the user
+    select a list of values, this limits how many values can be selected. For
+    example, a "users" field with a limit of "1" will behave like the "Owner"
+    field in Maniphest and only allow selection of a single user.
 
 The `strings` value supports different strings per control type. They are:
 

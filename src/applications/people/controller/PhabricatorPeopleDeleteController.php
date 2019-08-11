@@ -17,58 +17,35 @@ final class PhabricatorPeopleDeleteController
 
     $manage_uri = $this->getApplicationURI("manage/{$id}/");
 
-    if ($user->getPHID() == $viewer->getPHID()) {
-      return $this->buildDeleteSelfResponse($manage_uri);
-    }
-
-    $str1 = pht(
-      'Be careful when deleting users! This will permanently and '.
-      'irreversibly destroy this user account.');
-
-    $str2 = pht(
-      'If this user interacted with anything, it is generally better to '.
-      'disable them, not delete them. If you delete them, it will no longer '.
-      'be possible to (for example) search for objects they created, and you '.
-      'will lose other information about their history. Disabling them '.
-      'instead will prevent them from logging in, but will not destroy any of '.
-      'their data.');
-
-    $str3 = pht(
-      'It is generally safe to delete newly created users (and test users and '.
-      'so on), but less safe to delete established users. If possible, '.
-      'disable them instead.');
-
-    $str4 = pht('To permanently destroy this user, run this command:');
-
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendRemarkupInstructions(
-        csprintf(
-          "  phabricator/ $ ./bin/remove destroy %R\n",
-          '@'.$user->getUsername()));
+    $doc_uri = PhabricatorEnv::getDoclink(
+      'Permanently Destroying Data');
 
     return $this->newDialog()
-      ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->setTitle(pht('Permanently Delete User'))
-      ->setShortTitle(pht('Delete User'))
-      ->appendParagraph($str1)
-      ->appendParagraph($str2)
-      ->appendParagraph($str3)
-      ->appendParagraph($str4)
-      ->appendChild($form->buildLayoutView())
-      ->addCancelButton($manage_uri, pht('Close'));
-  }
-
-  private function buildDeleteSelfResponse($cancel_uri) {
-    return $this->newDialog()
-      ->setTitle(pht('You Shall Journey No Farther'))
+      ->setTitle(pht('Delete User'))
       ->appendParagraph(
         pht(
-          'As you stare into the gaping maw of the abyss, something '.
-          'holds you back.'))
-      ->appendParagraph(pht('You can not delete your own account.'))
-      ->addCancelButton($cancel_uri, pht('Turn Back'));
+          'To permanently destroy this user, run this command from the '.
+          'command line:'))
+      ->appendCommand(
+        csprintf(
+          'phabricator/ $ ./bin/remove destroy %R',
+          $user->getMonogram()))
+      ->appendParagraph(
+        pht(
+          'Unless you have a very good reason to delete this user, consider '.
+          'disabling them instead.'))
+      ->appendParagraph(
+        pht(
+          'Users can not be permanently destroyed from the web interface. '.
+          'See %s in the documentation for more information.',
+          phutil_tag(
+            'a',
+            array(
+              'href' => $doc_uri,
+              'target' => '_blank',
+            ),
+            pht('Permanently Destroying Data'))))
+      ->addCancelButton($manage_uri, pht('Close'));
   }
-
 
 }

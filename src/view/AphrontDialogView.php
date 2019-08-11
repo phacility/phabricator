@@ -161,14 +161,35 @@ final class AphrontDialogView
   }
 
   public function appendParagraph($paragraph) {
-    return $this->appendChild(
-      phutil_tag(
-        'p',
-        array(
-          'class' => 'aphront-dialog-view-paragraph',
-        ),
-        $paragraph));
+    return $this->appendParagraphTag($paragraph);
   }
+
+  public function appendCommand($command) {
+    $command_tag = phutil_tag('tt', array(), $command);
+    return $this->appendParagraphTag(
+      $command_tag,
+      'aphront-dialog-view-command');
+  }
+
+  private function appendParagraphTag($content, $classes = null) {
+    if ($classes) {
+      $classes = (array)$classes;
+    } else {
+      $classes = array();
+    }
+
+    array_unshift($classes, 'aphront-dialog-view-paragraph');
+
+    $paragraph_tag = phutil_tag(
+      'p',
+      array(
+        'class' => implode(' ', $classes),
+      ),
+      $content);
+
+    return $this->appendChild($paragraph_tag);
+  }
+
 
   public function appendList(array $items) {
     $listitems = array();

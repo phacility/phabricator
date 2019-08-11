@@ -107,7 +107,16 @@ final class PhabricatorProjectColumnBulkMoveController
         ->executeLayout();
 
       $dst_columns = $layout_engine->getColumns($dst_project->getPHID());
-      $dst_columns = mpull($columns, null, 'getPHID');
+      $dst_columns = mpull($dst_columns, null, 'getPHID');
+
+      // Prevent moves to milestones or subprojects by selecting their
+      // columns, since the implications aren't obvious and this doesn't
+      // work the same way as normal column moves.
+      foreach ($dst_columns as $key => $dst_column) {
+        if ($dst_column->getProxyPHID()) {
+          unset($dst_columns[$key]);
+        }
+      }
 
       $has_column = false;
       $dst_column = null;
@@ -210,12 +219,40 @@ final class PhabricatorProjectColumnBulkMoveController
             ->setValue($dst_project->getDisplayName()));
       }
 
+      $column_options = array(
+        'visible' => array(),
+        'hidden' => array(),
+      );
+
+      $any_hidden = false;
+      foreach ($dst_columns as $column) {
+        if (!$column->isHidden()) {
+          $group = 'visible';
+        } else {
+          $group = 'hidden';
+        }
+
+        $phid = $column->getPHID();
+        $display_name = $column->getDisplayName();
+
+        $column_options[$group][$phid] = $display_name;
+      }
+
+      if ($column_options['hidden']) {
+        $column_options = array(
+          pht('Visible Columns') => $column_options['visible'],
+          pht('Hidden Columns') => $column_options['hidden'],
+        );
+      } else {
+        $column_options = $column_options['visible'];
+      }
+
       $form->appendControl(
-          id(new AphrontFormSelectControl())
-            ->setName('dstColumnPHID')
-            ->setLabel(pht('Move to Column'))
-            ->setValue($dst_column_phid)
-            ->setOptions(mpull($dst_columns, 'getDisplayName', 'getPHID')));
+        id(new AphrontFormSelectControl())
+          ->setName('dstColumnPHID')
+          ->setLabel(pht('Move to Column'))
+          ->setValue($dst_column_phid)
+          ->setOptions($column_options));
 
       $submit = pht('Move Tasks');
 
