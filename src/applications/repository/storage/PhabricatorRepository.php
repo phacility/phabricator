@@ -34,6 +34,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    */
   const IMPORT_THRESHOLD = 7;
 
+  const LOWPRI_THRESHOLD = 64;
+
   const TABLE_PATH = 'repository_path';
   const TABLE_PATHCHANGE = 'repository_pathchange';
   const TABLE_FILESYSTEM = 'repository_filesystem';
