@@ -16,11 +16,13 @@ final class PhortuneAccount extends PhortuneDAO
   protected $billingAddress;
 
   private $memberPHIDs = self::ATTACHABLE;
+  private $merchantPHIDs = self::ATTACHABLE;
 
   public static function initializeNewAccount(PhabricatorUser $actor) {
     return id(new self())
       ->setBillingName('')
       ->setBillingAddress('')
+      ->attachMerchantPHIDs(array())
       ->attachMemberPHIDs(array());
   }
 
@@ -115,6 +117,26 @@ final class PhortuneAccount extends PhortuneDAO
       $this->getID());
   }
 
+  public function attachMerchantPHIDs(array $merchant_phids) {
+    $this->merchantPHIDs = $merchant_phids;
+    return $this;
+  }
+
+  public function getMerchantPHIDs() {
+    return $this->assertAttached($this->merchantPHIDs);
+  }
+
+  public function writeMerchantEdge(PhortuneMerchant $merchant) {
+    $edge_src = $this->getPHID();
+    $edge_type = PhortuneAccountHasMerchantEdgeType::EDGECONST;
+    $edge_dst = $merchant->getPHID();
+
+    id(new PhabricatorEdgeEditor())
+      ->addEdge($edge_src, $edge_type, $edge_dst)
+      ->save();
+
+    return $this;
+  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

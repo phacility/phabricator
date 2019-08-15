@@ -235,4 +235,16 @@ final class PhortuneCartEditor
     return $this;
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $account = $object->getAccount();
+    $merchant = $object->getMerchant();
+    $account->writeMerchantEdge($merchant);
+
+    return $xactions;
+  }
+
+
 }

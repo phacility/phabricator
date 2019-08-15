@@ -161,6 +161,10 @@ final class PhortuneSubscription extends PhortuneDAO
       }
     $this->saveTransaction();
 
+    $account = $this->getAccount();
+    $merchant = $this->getMerchant();
+    $account->writeMerchantEdge($merchant);
+
     return $result;
   }
 

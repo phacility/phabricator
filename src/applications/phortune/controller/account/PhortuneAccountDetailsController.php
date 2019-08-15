@@ -97,6 +97,28 @@ final class PhortuneAccountDetailsController
       ->setHeaderText(pht('Managers'))
       ->appendChild($member_list);
 
+    $merchant_list = id(new PHUIObjectItemListView())
+      ->setSimple(true)
+      ->setNoDataString(pht('No purchase history.'));
+
+    $merchant_phids = $account->getMerchantPHIDs();
+    $handles = $viewer->loadHandles($merchant_phids);
+
+    foreach ($merchant_phids as $merchant_phid) {
+      $handle = $handles[$merchant_phid];
+
+      $merchant = id(new PHUIObjectItemView())
+        ->setImageURI($handle->getImageURI())
+        ->setHref($handle->getURI())
+        ->setHeader($handle->getFullName());
+
+      $merchant_list->addItem($merchant);
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Merchants'))
+      ->appendChild($merchant_list);
+
     return $curtain;
   }
 
