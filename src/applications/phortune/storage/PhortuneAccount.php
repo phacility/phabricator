@@ -179,13 +179,18 @@ final class PhortuneAccount extends PhortuneDAO
       return true;
     }
 
-    // If the viewer is acting on behalf of a merchant, they can see
-    // payment accounts.
+    // See T13366. If the viewer can edit any merchant that this payment
+    // account has a relationship with, they can see the payment account.
     if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-      foreach ($viewer->getAuthorities() as $authority) {
-        if ($authority instanceof PhortuneMerchant) {
-          return true;
-        }
+      $viewer_phids = array($viewer->getPHID());
+      $merchant_phids = $this->getMerchantPHIDs();
+
+      $any_edit = PhortuneMerchantQuery::canViewersEditMerchants(
+        $viewer_phids,
+        $merchant_phids);
+
+      if ($any_edit) {
+        return true;
       }
     }
 
@@ -193,7 +198,10 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('Members of an account can always view and edit it.');
+    return array(
+      pht('Members of an account can always view and edit it.'),
+      pht('Merchants an account has established a relationship can view it.'),
+    );
   }
 
 

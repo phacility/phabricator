@@ -58,9 +58,10 @@ final class PhortuneMerchantInvoiceCreateController
     }
 
     if (!$target_account) {
-      $accounts = PhortuneAccountQuery::loadAccountsForUser(
-        $target_user,
-        PhabricatorContentSource::newFromRequest($request));
+      $accounts = id(new PhortuneAccountQuery())
+        ->setViewer($viewer)
+        ->withMemberPHIDs(array($target_user->getPHID()))
+        ->execute();
 
       $form = id(new AphrontFormView())
         ->setUser($viewer)
