@@ -34,7 +34,6 @@ final class PhortuneAccountPaymentMethodsController
       ->setCrumbs($crumbs)
       ->setNavigation($navigation)
       ->appendChild($view);
-
   }
 
   private function buildPaymentMethodsSection(PhortuneAccount $account) {

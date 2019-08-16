@@ -44,16 +44,6 @@ abstract class PhabricatorPolicyCodex
     return null;
   }
 
-  final public function getPolicySpecialRuleForCapability($capability) {
-    foreach ($this->getPolicySpecialRuleDescriptions() as $rule) {
-      if (in_array($capability, $rule->getCapabilities())) {
-        return $rule;
-      }
-    }
-
-    return null;
-  }
-
   final protected function newRule() {
     return new PhabricatorPolicyCodexRuleDescription();
   }

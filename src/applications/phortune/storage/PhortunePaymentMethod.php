@@ -4,8 +4,12 @@
  * A payment method is a credit card; it is associated with an account and
  * charges can be made against it.
  */
-final class PhortunePaymentMethod extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+final class PhortunePaymentMethod
+  extends PhortuneDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
+    PhabricatorPolicyCodexInterface {
 
   const STATUS_ACTIVE     = 'payment:active';
   const STATUS_DISABLED   = 'payment:disabled';
@@ -148,18 +152,50 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    return $this->getAccount()->getPolicy($capability);
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getAccount()->hasAutomaticCapability(
-      $capability,
-      $viewer);
+
+    // See T13366. If you can edit the merchant associated with this payment
+    // method, you can view the payment method.
+    if ($capability === PhabricatorPolicyCapability::CAN_VIEW) {
+      $any_edit = PhortuneMerchantQuery::canViewersEditMerchants(
+        array($viewer->getPHID()),
+        array($this->getMerchantPHID()));
+      if ($any_edit) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return pht(
-      'Members of an account can always view and edit its payment methods.');
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    if ($this->hasAutomaticCapability($capability, $viewer)) {
+      return array();
+    }
+
+    // See T13366. For blanket view and edit permissions on all payment
+    // methods, you must be able to edit the associated account.
+    return array(
+      array(
+        $this->getAccount(),
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+    );
+  }
+
+
+/* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
+
+
+  public function newPolicyCodex() {
+    return new PhortunePaymentMethodPolicyCodex();
   }
 
 }

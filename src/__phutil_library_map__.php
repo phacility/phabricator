@@ -5329,6 +5329,7 @@ phutil_register_library_map(array(
     'PhortunePaymentMethodDisableController' => 'applications/phortune/controller/payment/PhortunePaymentMethodDisableController.php',
     'PhortunePaymentMethodEditController' => 'applications/phortune/controller/payment/PhortunePaymentMethodEditController.php',
     'PhortunePaymentMethodPHIDType' => 'applications/phortune/phid/PhortunePaymentMethodPHIDType.php',
+    'PhortunePaymentMethodPolicyCodex' => 'applications/phortune/codex/PhortunePaymentMethodPolicyCodex.php',
     'PhortunePaymentMethodQuery' => 'applications/phortune/query/PhortunePaymentMethodQuery.php',
     'PhortunePaymentProvider' => 'applications/phortune/provider/PhortunePaymentProvider.php',
     'PhortunePaymentProviderConfig' => 'applications/phortune/storage/PhortunePaymentProviderConfig.php',
@@ -11893,11 +11894,14 @@ phutil_register_library_map(array(
     'PhortunePaymentMethod' => array(
       'PhortuneDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorExtendedPolicyInterface',
+      'PhabricatorPolicyCodexInterface',
     ),
     'PhortunePaymentMethodCreateController' => 'PhortuneController',
     'PhortunePaymentMethodDisableController' => 'PhortuneController',
     'PhortunePaymentMethodEditController' => 'PhortuneController',
     'PhortunePaymentMethodPHIDType' => 'PhabricatorPHIDType',
+    'PhortunePaymentMethodPolicyCodex' => 'PhabricatorPolicyCodex',
     'PhortunePaymentMethodQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhortunePaymentProvider' => 'Phobject',
     'PhortunePaymentProviderConfig' => array(
