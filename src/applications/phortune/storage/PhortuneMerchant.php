@@ -70,6 +70,10 @@ final class PhortuneMerchant extends PhortuneDAO
     return $this->assertAttached($this->profileImageFile);
   }
 
+  public function getObjectName() {
+    return pht('Merchant %d', $this->getID());
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

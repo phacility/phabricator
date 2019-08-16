@@ -9,7 +9,8 @@ final class PhortunePaymentMethod
   implements
     PhabricatorPolicyInterface,
     PhabricatorExtendedPolicyInterface,
-    PhabricatorPolicyCodexInterface {
+    PhabricatorPolicyCodexInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const STATUS_ACTIVE     = 'payment:active';
   const STATUS_DISABLED   = 'payment:disabled';
@@ -138,6 +139,29 @@ final class PhortunePaymentMethod
 
   public function isActive() {
     return ($this->getStatus() === self::STATUS_ACTIVE);
+  }
+
+  public function getURI() {
+    return urisprintf(
+      '/phortune/account/%d/methods/%d/',
+      $this->getAccount()->getID(),
+      $this->getID());
+  }
+
+  public function getObjectName() {
+    return pht('Payment Method %d', $this->getID());
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhortunePaymentMethodEditor();
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhortunePaymentMethodTransaction();
   }
 
 

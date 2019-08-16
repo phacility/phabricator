@@ -23,6 +23,10 @@ abstract class PhortuneAccountController
   abstract protected function shouldRequireAccountEditCapability();
   abstract protected function handleAccountRequest(AphrontRequest $request);
 
+  private function hasAccount() {
+    return (bool)$this->account;
+  }
+
   final protected function getAccount() {
     if ($this->account === null) {
       throw new Exception(
@@ -37,8 +41,10 @@ abstract class PhortuneAccountController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $account = $this->getAccount();
-    if ($account) {
+    // If we hit a policy exception, we can make it here without finding
+    // an account.
+    if ($this->hasAccount()) {
+      $account = $this->getAccount();
       $crumbs->addTextCrumb($account->getName(), $account->getURI());
     }
 

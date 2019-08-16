@@ -26,14 +26,23 @@ final class PhortunePaymentMethodDisableController
 
     $account = $method->getAccount();
     $account_id = $account->getID();
-    $account_uri = $this->getApplicationURI("/account/billing/{$account_id}/");
+    $account_uri = $account->getPaymentMethodsURI();
 
     if ($request->isFormPost()) {
+      $xactions = array();
 
-      // TODO: ApplicationTransactions!!!!
-      $method
-        ->setStatus(PhortunePaymentMethod::STATUS_DISABLED)
-        ->save();
+      $xactions[] = $method->getApplicationTransactionTemplate()
+        ->setTransactionType(
+          PhortunePaymentMethodStatusTransaction::TRANSACTIONTYPE)
+        ->setNewValue(PhortunePaymentMethod::STATUS_DISABLED);
+
+      $editor = id(new PhortunePaymentMethodEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
+
+      $editor->applyTransactions($method, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($account_uri);
     }

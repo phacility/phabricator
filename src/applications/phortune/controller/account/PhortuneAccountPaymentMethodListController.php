@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneAccountPaymentMethodsController
+final class PhortuneAccountPaymentMethodListController
   extends PhortuneAccountProfileController {
 
   protected function shouldRequireAccountEditCapability() {
@@ -46,15 +46,17 @@ final class PhortuneAccountPaymentMethodsController
 
     $id = $account->getID();
 
-    // TODO: Allow adding a card here directly
     $add = id(new PHUIButtonView())
       ->setTag('a')
-      ->setText(pht('New Payment Method'))
+      ->setText(pht('Add Payment Method'))
       ->setIcon('fa-plus')
-      ->setHref($this->getApplicationURI("{$id}/card/new/"));
+      ->setHref($this->getApplicationURI("{$id}/card/new/"))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Payment Methods'));
+      ->setHeader(pht('Payment Methods'))
+      ->addActionLink($add);
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
@@ -74,38 +76,13 @@ final class PhortuneAccountPaymentMethodsController
     foreach ($methods as $method) {
       $id = $method->getID();
 
-      $item = new PHUIObjectItemView();
-      $item->setHeader($method->getFullDisplayName());
-
-      switch ($method->getStatus()) {
-        case PhortunePaymentMethod::STATUS_ACTIVE:
-          $item->setStatusIcon('fa-check green');
-
-          $disable_uri = $this->getApplicationURI('card/'.$id.'/disable/');
-          $item->addAction(
-            id(new PHUIListItemView())
-              ->setIcon('fa-times')
-              ->setHref($disable_uri)
-              ->setDisabled(!$can_edit)
-              ->setWorkflow(true));
-          break;
-        case PhortunePaymentMethod::STATUS_DISABLED:
-          $item->setStatusIcon('fa-ban lightbluetext');
-          $item->setDisabled(true);
-          break;
-      }
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName($method->getObjectName())
+        ->setHeader($method->getFullDisplayName())
+        ->setHref($method->getURI());
 
       $provider = $method->buildPaymentProvider();
       $item->addAttribute($provider->getPaymentMethodProviderDescription());
-
-      $edit_uri = $this->getApplicationURI('card/'.$id.'/edit/');
-
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon('fa-pencil')
-          ->setHref($edit_uri)
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit));
 
       $list->addItem($item);
     }

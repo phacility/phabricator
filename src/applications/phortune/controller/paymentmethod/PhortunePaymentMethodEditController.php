@@ -20,25 +20,36 @@ final class PhortunePaymentMethodEditController
       return new Aphront404Response();
     }
 
+    $next_uri = $method->getURI();
+
     $account = $method->getAccount();
-    $account_uri = $this->getApplicationURI($account->getID().'/');
+    $v_name = $method->getName();
 
     if ($request->isFormPost()) {
+      $v_name = $request->getStr('name');
 
-      $name = $request->getStr('name');
+      $xactions = array();
 
-      // TODO: Use ApplicationTransactions
+      $xactions[] = $method->getApplicationTransactionTemplate()
+        ->setTransactionType(
+          PhortunePaymentMethodNameTransaction::TRANSACTIONTYPE)
+        ->setNewValue($v_name);
 
-      $method->setName($name);
-      $method->save();
+      $editor = id(new PhortunePaymentMethodEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
 
-      return id(new AphrontRedirectResponse())->setURI($account_uri);
+      $editor->applyTransactions($method, $xactions);
+
+      return id(new AphrontRedirectResponse())->setURI($next_uri);
     }
 
     $provider = $method->buildPaymentProvider();
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer)
+      ->setViewer($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -54,7 +65,7 @@ final class PhortunePaymentMethodEditController
           ->setValue($method->getDisplayExpires()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($account_uri)
+          ->addCancelButton($next_uri)
           ->setValue(pht('Save Changes')));
 
     $box = id(new PHUIObjectBoxView())
@@ -62,11 +73,12 @@ final class PhortunePaymentMethodEditController
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($account->getName(), $account_uri);
-    $crumbs->addTextCrumb($method->getDisplayName());
-    $crumbs->addTextCrumb(pht('Edit'));
-    $crumbs->setBorder(true);
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($account->getName(), $account->getURI())
+      ->addTextCrumb(pht('Payment Methods'), $account->getPaymentMethodsURI())
+      ->addTextCrumb($method->getObjectName(), $method->getURI())
+      ->addTextCrumb(pht('Edit'))
+      ->setBorder(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit Payment Method'))
@@ -74,15 +86,15 @@ final class PhortunePaymentMethodEditController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $box,
-      ));
+      ->setFooter(
+        array(
+          $box,
+        ));
 
     return $this->newPage()
       ->setTitle(pht('Edit Payment Method'))
       ->setCrumbs($crumbs)
       ->appendChild($view);
-
   }
 
 }

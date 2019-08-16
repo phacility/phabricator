@@ -47,11 +47,8 @@ final class PhortuneAccountSubscriptionController
       ->setLimit(25)
       ->execute();
 
-    $handles = $this->loadViewerHandles(mpull($subscriptions, 'getPHID'));
-
     $table = id(new PhortuneSubscriptionTableView())
       ->setUser($viewer)
-      ->setHandles($handles)
       ->setSubscriptions($subscriptions);
 
     $header = id(new PHUIHeaderView())

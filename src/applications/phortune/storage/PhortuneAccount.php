@@ -117,6 +117,12 @@ final class PhortuneAccount extends PhortuneDAO
       $this->getID());
   }
 
+  public function getPaymentMethodsURI() {
+    return urisprintf(
+      '/phortune/account/%d/methods/',
+      $this->getID());
+  }
+
   public function attachMerchantPHIDs(array $merchant_phids) {
     $this->merchantPHIDs = $merchant_phids;
     return $this;
