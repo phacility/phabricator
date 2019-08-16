@@ -3,26 +3,29 @@
 final class PhortuneAccountManagersController
   extends PhortuneAccountProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadAccount();
-    if ($response) {
-      return $response;
-    }
+  protected function shouldRequireAccountEditCapability() {
+    return false;
+  }
 
+  protected function handleAccountRequest(AphrontRequest $request) {
     $account = $this->getAccount();
     $title = $account->getName();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Managers'));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Managers'))
+      ->setBorder(true);
 
     $header = $this->buildHeaderView();
+    $authority = $this->newAccountAuthorityView();
     $members = $this->buildMembersSection($account);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $members,
-      ));
+      ->setFooter(
+        array(
+          $authority,
+          $members,
+        ));
 
     $navigation = $this->buildSideNavView('managers');
 

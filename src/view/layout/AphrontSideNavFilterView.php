@@ -111,6 +111,11 @@ final class AphrontSideNavFilterView extends AphrontView {
       $key, $name, $uri, PHUIListItemView::TYPE_BUTTON);
   }
 
+  public function newLink($key) {
+    $this->addFilter($key, '');
+    return $this->getMenuView()->getItem($key);
+  }
+
   private function addThing($key, $name, $uri, $type, $icon = null) {
     $item = id(new PHUIListItemView())
       ->setName($name)

@@ -73,7 +73,8 @@ final class PhortuneAccountEmail
 
   public function getURI() {
     return urisprintf(
-      '/phortune/address/%d/',
+      '/phortune/account/%d/addresses/%d/',
+      $this->getAccount()->getID(),
       $this->getID());
   }
 

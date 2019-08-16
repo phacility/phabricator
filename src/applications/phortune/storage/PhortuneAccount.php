@@ -138,6 +138,17 @@ final class PhortuneAccount extends PhortuneDAO
     return $this;
   }
 
+  public function isUserAccountMember(PhabricatorUser $user) {
+    $user_phid = $user->getPHID();
+    if (!$user_phid) {
+      return null;
+    }
+
+    $member_map = array_fuse($this->getMemberPHIDs());
+
+    return isset($member_map[$user_phid]);
+  }
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 
@@ -174,8 +185,7 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    $members = array_fuse($this->getMemberPHIDs());
-    if (isset($members[$viewer->getPHID()])) {
+    if ($this->isUserAccountMember($viewer)) {
       return true;
     }
 

@@ -17,19 +17,24 @@ abstract class PhortuneAccountProfileController
       ->setHeader($title)
       ->setHeaderIcon('fa-user-circle');
 
-    return $header;
-  }
+    if ($this->getMerchants()) {
+      $customer_tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setName(pht('Customer Account'))
+        ->setColor('indigo')
+        ->setIcon('fa-credit-card');
+      $header->addTag($customer_tag);
+    }
 
-  protected function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->setBorder(true);
-    return $crumbs;
+    return $header;
   }
 
   protected function buildSideNavView($filter = null) {
     $viewer = $this->getViewer();
     $account = $this->getAccount();
     $id = $account->getID();
+
+    $can_edit = !$this->getMerchants();
 
     $nav = id(new AphrontSideNavFilterView())
       ->setBaseURI(new PhutilURI($this->getApplicationURI()));
@@ -42,11 +47,12 @@ abstract class PhortuneAccountProfileController
       $this->getApplicationURI("/{$id}/"),
       'fa-user-circle');
 
-    $nav->addFilter(
-      'details',
-      pht('Account Details'),
-      $this->getApplicationURI("/account/{$id}/details/"),
-      'fa-address-card-o');
+    $nav->newLink('details')
+      ->setName(pht('Account Details'))
+      ->setHref($this->getApplicationURI("/account/{$id}/details/"))
+      ->setIcon('fa-address-card-o')
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit);
 
     $nav->addLabel(pht('Payments'));
 
@@ -82,11 +88,12 @@ abstract class PhortuneAccountProfileController
       $this->getApplicationURI("/account/{$id}/managers/"),
       'fa-group');
 
-    $nav->addFilter(
-      'addresses',
-      pht('Email Addresses'),
-      $this->getApplicationURI("/account/{$id}/addresses/"),
-      'fa-envelope-o');
+    $nav->newLink('addresses')
+      ->setname(pht('Email Addresses'))
+      ->setHref($this->getApplicationURI("/account/{$id}/addresses/"))
+      ->setIcon('fa-envelope-o')
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit);
 
     $nav->selectFilter($filter);
 

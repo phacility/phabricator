@@ -3,23 +3,17 @@
 final class PhortuneAccountEmailEditController
   extends PhortuneAccountController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireAccountEditCapability() {
+    return true;
+  }
+
+  protected function handleAccountRequest(AphrontRequest $request) {
+    $account = $this->getAccount();
+
     $engine = id(new PhortuneAccountEmailEditEngine())
       ->setController($this);
 
     if (!$request->getURIData('id')) {
-
-      if (!$request->getURIData('accountID')) {
-        return new Aphront404Response();
-      }
-
-      $response = $this->loadAccount();
-      if ($response) {
-        return $response;
-      }
-
-      $account = $this->getAccount();
-
       $engine->setAccount($account);
     }
 

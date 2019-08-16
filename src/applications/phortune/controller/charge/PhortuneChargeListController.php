@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneAccountChargeListController
+final class PhortuneChargeListController
   extends PhortuneController {
 
   private $account;

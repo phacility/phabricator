@@ -3,18 +3,19 @@
 final class PhortuneAccountPaymentMethodsController
   extends PhortuneAccountProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadAccount();
-    if ($response) {
-      return $response;
-    }
+  protected function shouldRequireAccountEditCapability() {
+    return false;
+  }
 
+  protected function handleAccountRequest(AphrontRequest $request) {
     $account = $this->getAccount();
     $title = $account->getName();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Payment Methods'));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Payment Methods'))
+      ->setBorder(true);
 
+    $authority = $this->newAccountAuthorityView();
     $header = $this->buildHeaderView();
     $methods = $this->buildPaymentMethodsSection($account);
 
@@ -22,6 +23,7 @@ final class PhortuneAccountPaymentMethodsController
       ->setHeader($header)
       ->setFooter(
         array(
+          $authority,
           $methods,
         ));
 

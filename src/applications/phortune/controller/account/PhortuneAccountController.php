@@ -4,14 +4,34 @@ abstract class PhortuneAccountController
   extends PhortuneController {
 
   private $account;
+  private $merchants;
 
-  protected function getAccount() {
-    return $this->account;
+  final public function handleRequest(AphrontRequest $request) {
+    if ($this->shouldRequireAccountEditCapability()) {
+      $response = $this->loadAccountForEdit();
+    } else {
+      $response = $this->loadAccountForView();
+    }
+
+    if ($response) {
+      return $response;
+    }
+
+    return $this->handleAccountRequest($request);
   }
 
-  protected function setAccount(PhortuneAccount $account) {
-    $this->account = $account;
-    return $this;
+  abstract protected function shouldRequireAccountEditCapability();
+  abstract protected function handleAccountRequest(AphrontRequest $request);
+
+  final protected function getAccount() {
+    if ($this->account === null) {
+      throw new Exception(
+        pht(
+          'Unable to "getAccount()" before loading or setting account '.
+          'context.'));
+    }
+
+    return $this->account;
   }
 
   protected function buildApplicationCrumbs() {
@@ -25,44 +45,112 @@ abstract class PhortuneAccountController
     return $crumbs;
   }
 
-  protected function loadAccount() {
-    // TODO: Currently, you must be able to edit an account to view the detail
-    // page, because the account must be broadly visible so merchants can
-    // process orders but merchants should not be able to see all the details
-    // of an account. Ideally the profile pages should be visible to merchants,
-    // too, just with less information.
-    return $this->loadAccountForEdit();
+  private function loadAccountForEdit() {
+    return $this->loadAccountWithCapabilities(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ));
   }
 
-  protected function loadAccountForEdit() {
+  private function loadAccountForView() {
+    return $this->loadAccountWithCapabilities(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+      ));
+  }
+
+  private function loadAccountWithCapabilities(array $capabilities) {
     $viewer = $this->getViewer();
     $request = $this->getRequest();
 
     $account_id = $request->getURIData('accountID');
     if (!$account_id) {
-      $account_id = $request->getURIData('id');
-    }
-
-    if (!$account_id) {
-      return new Aphront404Response();
+      throw new Exception(
+        pht(
+          'Controller ("%s") extends controller "%s", but is reachable '.
+          'with no "accountID" in URI.',
+          get_class($this),
+          __CLASS__));
     }
 
     $account = id(new PhortuneAccountQuery())
       ->setViewer($viewer)
       ->withIDs(array($account_id))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
+      ->requireCapabilities($capabilities)
       ->executeOne();
     if (!$account) {
       return new Aphront404Response();
     }
 
-    $this->account = $account;
+    $this->setAccount($account);
 
     return null;
+  }
+
+  private function setAccount(PhortuneAccount $account) {
+    $this->account = $account;
+
+    $viewer = $this->getViewer();
+    if (!$account->isUserAccountMember($viewer)) {
+      $merchant_phids = $account->getMerchantPHIDs();
+      $merchants = id(new PhortuneMerchantQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($merchant_phids)
+        ->withMemberPHIDs(array($viewer->getPHID()))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->execute();
+
+      $this->merchants = $merchants;
+    } else {
+      $this->merchants = array();
+    }
+
+    return $this;
+  }
+
+  final protected function getMerchants() {
+    if ($this->merchants === null) {
+      throw new Exception(
+        pht(
+          'Unable to "getMerchants()" before loading or setting account '.
+          'context.'));
+    }
+
+    return $this->merchants;
+  }
+
+  final protected function newAccountAuthorityView() {
+    $viewer = $this->getViewer();
+
+    $merchants = $this->getMerchants();
+    if (!$merchants) {
+      return null;
+    }
+
+    $merchant_phids = mpull($merchants, 'getPHID');
+    $merchant_handles = $viewer->loadHandles($merchant_phids);
+    $merchant_handles = iterator_to_array($merchant_handles);
+
+    $merchant_list = mpull($merchant_handles, 'renderLink');
+    $merchant_list = phutil_implode_html(', ', $merchant_list);
+
+    $merchant_message = pht(
+      'You can view this account because you control %d merchant(s) it '.
+      'has a relationship with: %s.',
+      phutil_count($merchants),
+      $merchant_list);
+
+    return id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->setErrors(
+        array(
+          $merchant_message,
+        ));
   }
 
 }

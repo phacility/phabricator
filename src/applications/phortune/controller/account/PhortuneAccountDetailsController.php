@@ -3,12 +3,11 @@
 final class PhortuneAccountDetailsController
   extends PhortuneAccountProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadAccount();
-    if ($response) {
-      return $response;
-    }
+  protected function shouldRequireAccountEditCapability() {
+    return true;
+  }
 
+  protected function handleAccountRequest(AphrontRequest $request) {
     $account = $this->getAccount();
     $title = $account->getName();
 
@@ -26,6 +25,7 @@ final class PhortuneAccountDetailsController
 
     $header = $this->buildHeaderView();
 
+    $authority = $this->newAccountAuthorityView();
     $details = $this->newDetailsView($account);
 
     $curtain = $this->buildCurtainView($account);
@@ -41,6 +41,7 @@ final class PhortuneAccountDetailsController
       ->setCurtain($curtain)
       ->setMainColumn(
         array(
+          $authority,
           $details,
           $timeline,
         ));

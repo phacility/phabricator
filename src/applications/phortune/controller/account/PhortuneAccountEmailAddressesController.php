@@ -3,25 +3,27 @@
 final class PhortuneAccountEmailAddressesController
   extends PhortuneAccountProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadAccount();
-    if ($response) {
-      return $response;
-    }
+  protected function shouldRequireAccountEditCapability() {
+    return true;
+  }
 
+  protected function handleAccountRequest(AphrontRequest $request) {
     $account = $this->getAccount();
     $title = $account->getName();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Email Addresses'));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Email Addresses'))
+      ->setBorder(true);
 
     $header = $this->buildHeaderView();
+    $authority = $this->newAccountAuthorityView();
     $addresses = $this->buildAddressesSection($account);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(
         array(
+          $authority,
           $addresses,
         ));
 

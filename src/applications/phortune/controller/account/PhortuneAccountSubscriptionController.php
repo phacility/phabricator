@@ -3,26 +3,30 @@
 final class PhortuneAccountSubscriptionController
   extends PhortuneAccountProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadAccount();
-    if ($response) {
-      return $response;
-    }
+  protected function shouldRequireAccountEditCapability() {
+    return false;
+  }
 
+  protected function handleAccountRequest(AphrontRequest $request) {
     $account = $this->getAccount();
     $title = $account->getName();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Subscriptions'));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Subscriptions'))
+      ->setBorder(true);
 
     $header = $this->buildHeaderView();
+    $authority = $this->newAccountAuthorityView();
+
     $subscriptions = $this->buildSubscriptionsSection($account);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $subscriptions,
-      ));
+      ->setFooter(
+        array(
+          $authority,
+          $subscriptions,
+        ));
 
     $navigation = $this->buildSideNavView('subscriptions');
 

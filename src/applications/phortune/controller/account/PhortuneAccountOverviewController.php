@@ -3,12 +3,11 @@
 final class PhortuneAccountOverviewController
   extends PhortuneAccountProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadAccount();
-    if ($response) {
-      return $response;
-    }
+  protected function shouldRequireAccountEditCapability() {
+    return false;
+  }
 
+  protected function handleAccountRequest(AphrontRequest $request) {
     $account = $this->getAccount();
     $title = $account->getName();
 
@@ -26,6 +25,7 @@ final class PhortuneAccountOverviewController
 
     $header = $this->buildHeaderView();
 
+    $authority = $this->newAccountAuthorityView();
     $status = $this->buildStatusView($account, $invoices);
     $invoices = $this->buildInvoicesSection($account, $invoices);
     $purchase_history = $this->newRecentOrdersView($account, 10);
@@ -34,6 +34,7 @@ final class PhortuneAccountOverviewController
       ->setHeader($header)
       ->setFooter(
         array(
+          $authority,
           $status,
           $invoices,
           $purchase_history,

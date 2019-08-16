@@ -3,19 +3,22 @@
 final class PhortuneAccountEmailViewController
   extends PhortuneAccountController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireAccountEditCapability() {
+    return true;
+  }
+
+  protected function handleAccountRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
+    $account = $this->getAccount();
 
     $address = id(new PhortuneAccountEmailQuery())
       ->setViewer($viewer)
+      ->withAccountPHIDs(array($account->getPHID()))
       ->withIDs(array($request->getURIData('id')))
       ->executeOne();
     if (!$address) {
       return new Aphront404Response();
     }
-
-    $account = $address->getAccount();
-    $this->setAccount($account);
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Email Addresses'), $account->getEmailAddressesURI())
@@ -61,7 +64,8 @@ final class PhortuneAccountEmailViewController
 
     $edit_uri = $this->getApplicationURI(
       urisprintf(
-        'address/edit/%d/',
+        'account/%d/addresses/edit/%d/',
+        $account->getID(),
         $address->getID()));
 
     $curtain = $this->newCurtainView($account);

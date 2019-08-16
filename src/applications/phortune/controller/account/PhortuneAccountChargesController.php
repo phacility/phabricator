@@ -3,25 +3,27 @@
 final class PhortuneAccountChargesController
   extends PhortuneAccountProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadAccount();
-    if ($response) {
-      return $response;
-    }
+  protected function shouldRequireAccountEditCapability() {
+    return false;
+  }
 
+  protected function handleAccountRequest(AphrontRequest $request) {
     $account = $this->getAccount();
     $title = $account->getName();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Order History'));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Order History'))
+      ->setBorder(true);
 
     $header = $this->buildHeaderView();
+    $authority = $this->newAccountAuthorityView();
     $charge_history = $this->buildChargeHistorySection($account);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(
         array(
+          $authority,
           $charge_history,
         ));
 
