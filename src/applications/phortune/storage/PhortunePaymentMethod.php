@@ -180,7 +180,6 @@ final class PhortunePaymentMethod
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-
     // See T13366. If you can edit the merchant associated with this payment
     // method, you can view the payment method.
     if ($capability === PhabricatorPolicyCapability::CAN_VIEW) {

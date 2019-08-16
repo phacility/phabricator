@@ -43,9 +43,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
             '(?:query/(?P<queryKey>[^/]+)/)?'
               => 'PhortuneSubscriptionListController',
             'view/(?P<id>\d+)/'
-              => 'PhortuneSubscriptionViewController',
-            'edit/(?P<id>\d+)/'
-              => 'PhortuneSubscriptionEditController',
+              => 'PhortuneAccountSubscriptionViewController',
             'order/(?P<subscriptionID>\d+)/'
               => 'PhortuneCartListController',
           ),
@@ -73,12 +71,18 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '(?P<accountID>\d+)/' => array(
             'details/' => 'PhortuneAccountDetailsController',
             'methods/' => array(
-              '' => 'PhortuneAccountPaymentMethodListController',
+              '' => 'PhortuneAccountPaymentMethodController',
               '(?P<id>\d+)/' => 'PhortuneAccountPaymentMethodViewController',
             ),
             'orders/' => 'PhortuneAccountOrdersController',
             'charges/' => 'PhortuneAccountChargesController',
-            'subscriptions/' => 'PhortuneAccountSubscriptionController',
+            'subscriptions/' => array(
+              '' => 'PhortuneAccountSubscriptionController',
+              '(?P<subscriptionID>\d+)/' => array(
+                'autopay/(?P<methodID>\d+)/'
+                  => 'PhortuneAccountSubscriptionAutopayController',
+              ),
+            ),
             'managers/' => array(
               '' => 'PhortuneAccountManagersController',
               'add/' => 'PhortuneAccountAddManagerController',
@@ -124,7 +128,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
               '(?:query/(?P<queryKey>[^/]+)/)?'
                 => 'PhortuneSubscriptionListController',
               'view/(?P<id>\d+)/'
-                => 'PhortuneSubscriptionViewController',
+                => 'PhortuneAccountSubscriptionViewController',
               'order/(?P<subscriptionID>\d+)/'
                 => 'PhortuneCartListController',
             ),

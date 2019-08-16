@@ -1,6 +1,6 @@
 <?php
 
-final class PhortunePaymentMethodPolicyCodex
+final class PhortuneSubscriptionPolicyCodex
   extends PhabricatorPolicyCodex {
 
   public function getPolicySpecialRuleDescriptions() {
@@ -17,7 +17,7 @@ final class PhortunePaymentMethodPolicyCodex
       ->setIsActive(true)
       ->setDescription(
         pht(
-          'Account members may view and edit payment methods.'));
+          'Account members may view and edit subscriptions.'));
 
     $rules[] = $this->newRule()
       ->setCapabilities(
@@ -28,7 +28,7 @@ final class PhortunePaymentMethodPolicyCodex
       ->setDescription(
         pht(
           'Merchants you have a relationship with may view associated '.
-          'payment methods.'));
+          'subscriptions.'));
 
     return $rules;
   }

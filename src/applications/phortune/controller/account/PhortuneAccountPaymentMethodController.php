@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneAccountPaymentMethodListController
+final class PhortuneAccountPaymentMethodController
   extends PhortuneAccountProfileController {
 
   protected function shouldRequireAccountEditCapability() {

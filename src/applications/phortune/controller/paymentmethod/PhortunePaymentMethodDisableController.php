@@ -24,6 +24,21 @@ final class PhortunePaymentMethodDisableController
       return new Aphront400Response();
     }
 
+    $subscription_id = $request->getInt('subscriptionID');
+    if ($subscription_id) {
+      $subscription = id(new PhortuneSubscriptionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($subscription_id))
+        ->withAccountPHIDs(array($method->getAccountPHID()))
+        ->withMerchantPHIDs(array($method->getMerchantPHID()))
+        ->executeOne();
+      if (!$subscription) {
+        return new Aphront404Response();
+      }
+    } else {
+      $subscription = null;
+    }
+
     $account = $method->getAccount();
     $account_id = $account->getID();
     $account_uri = $account->getPaymentMethodsURI();
@@ -44,18 +59,32 @@ final class PhortunePaymentMethodDisableController
 
       $editor->applyTransactions($method, $xactions);
 
-      return id(new AphrontRedirectResponse())->setURI($account_uri);
+      if ($subscription) {
+        $next_uri = $subscription->getURI();
+      } else {
+        $next_uri = $account_uri;
+      }
+
+      return id(new AphrontRedirectResponse())->setURI($next_uri);
     }
+
+    $method_phid = $method->getPHID();
+    $handles = $viewer->loadHandles(
+      array(
+        $method_phid,
+      ));
+
+    $method_handle = $handles[$method_phid];
+    $method_display = $method_handle->renderLink();
+    $method_display = phutil_tag('strong', array(), $method_display);
 
     return $this->newDialog()
       ->setTitle(pht('Remove Payment Method'))
+      ->addHiddenInput('subscriptionID', $subscription_id)
       ->appendParagraph(
         pht(
-          'Remove the payment method "%s" from your account?',
-          phutil_tag(
-            'strong',
-            array(),
-            $method->getFullDisplayName())))
+          'Remove the payment method %s from your account?',
+          $method_display))
       ->appendParagraph(
         pht(
           'You will no longer be able to make payments using this payment '.
