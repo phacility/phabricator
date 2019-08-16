@@ -61,9 +61,39 @@ final class AphrontUnhandledExceptionResponse
     return 'unhandled-exception';
   }
 
-  protected function getResponseBody() {
-    $ex = $this->exception;
+  private function getExceptionList() {
+    return $this->expandException($this->exception);
+  }
 
+  private function expandException($root) {
+    if ($root instanceof PhutilAggregateException) {
+      $list = array();
+
+      $list[] = $root;
+
+      foreach ($root->getExceptions() as $ex) {
+        foreach ($this->expandException($ex) as $child) {
+          $list[] = $child;
+        }
+      }
+
+      return $list;
+    }
+
+    return array($root);
+  }
+
+  protected function getResponseBody() {
+    $body = array();
+
+    foreach ($this->getExceptionList() as $ex) {
+      $body[] = $this->newHTMLMessage($ex);
+    }
+
+    return $body;
+  }
+
+  private function newHTMLMessage($ex) {
     if ($ex instanceof AphrontMalformedRequestException) {
       $title = $ex->getTitle();
     } else {
@@ -122,12 +152,20 @@ final class AphrontUnhandledExceptionResponse
   }
 
   protected function buildPlainTextResponseString() {
-    $ex = $this->exception;
+    $messages = array();
 
+    foreach ($this->getExceptionList() as $exception) {
+      $messages[] = $this->newPlainTextMessage($exception);
+    }
+
+    return implode("\n\n", $messages);
+  }
+
+  private function newPlainTextMessage($exception) {
     return pht(
       '%s: %s',
-      get_class($ex),
-      $ex->getMessage());
+      get_class($exception),
+      $exception->getMessage());
   }
 
 }
