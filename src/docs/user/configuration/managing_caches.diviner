@@ -41,7 +41,7 @@ with the `--help` flag to see options:
 This tool can purge caches in a granular way, but it's normally easiest to
 just purge all of the caches:
 
-  phabricator/ $ ./bin/cache purge --purge-all
+  phabricator/ $ ./bin/cache purge --all
 
 You can purge caches safely. The data they contain can always be rebuilt from
 other data if Phabricator needs it.
