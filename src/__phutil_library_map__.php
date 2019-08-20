@@ -1222,6 +1222,7 @@ phutil_register_library_map(array(
     'DrydockResourceQuery' => 'applications/drydock/query/DrydockResourceQuery.php',
     'DrydockResourceReclaimLogType' => 'applications/drydock/logtype/DrydockResourceReclaimLogType.php',
     'DrydockResourceReleaseController' => 'applications/drydock/controller/DrydockResourceReleaseController.php',
+    'DrydockResourceSearchConduitAPIMethod' => 'applications/drydock/conduit/DrydockResourceSearchConduitAPIMethod.php',
     'DrydockResourceSearchEngine' => 'applications/drydock/query/DrydockResourceSearchEngine.php',
     'DrydockResourceStatus' => 'applications/drydock/constants/DrydockResourceStatus.php',
     'DrydockResourceUpdateWorker' => 'applications/drydock/worker/DrydockResourceUpdateWorker.php',
@@ -7021,6 +7022,7 @@ phutil_register_library_map(array(
     'DrydockResource' => array(
       'DrydockDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorConduitResultInterface',
     ),
     'DrydockResourceActivationFailureLogType' => 'DrydockLogType',
     'DrydockResourceActivationYieldLogType' => 'DrydockLogType',
@@ -7034,6 +7036,7 @@ phutil_register_library_map(array(
     'DrydockResourceQuery' => 'DrydockQuery',
     'DrydockResourceReclaimLogType' => 'DrydockLogType',
     'DrydockResourceReleaseController' => 'DrydockResourceController',
+    'DrydockResourceSearchConduitAPIMethod' => 'PhabricatorSearchEngineAPIMethod',
     'DrydockResourceSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockResourceStatus' => 'PhabricatorObjectStatus',
     'DrydockResourceUpdateWorker' => 'DrydockWorker',
