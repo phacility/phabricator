@@ -6,8 +6,8 @@ require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
 $args->setSynopsis(<<<EOSYNOPSIS
-**people** __command__ [__options__]
-    Manage user profiles and accounts.
+**user** __command__ [__options__]
+    Modify user accounts to regain access to an install.
 
 EOSYNOPSIS
   );
