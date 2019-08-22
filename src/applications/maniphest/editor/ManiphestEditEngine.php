@@ -261,6 +261,7 @@ EODOCS
 
     $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
     $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+    $commit_type = ManiphestTaskHasCommitEdgeType::EDGECONST;
 
     $src_phid = $object->getPHID();
     if ($src_phid) {
@@ -270,6 +271,7 @@ EODOCS
           array(
             $parent_type,
             $subtask_type,
+            $commit_type,
           ));
       $edge_query->execute();
 
@@ -280,9 +282,14 @@ EODOCS
       $subtask_phids = $edge_query->getDestinationPHIDs(
         array($src_phid),
         array($subtask_type));
+
+      $commit_phids = $edge_query->getDestinationPHIDs(
+        array($src_phid),
+        array($commit_type));
     } else {
       $parent_phids = array();
       $subtask_phids = array();
+      $commit_phids = array();
     }
 
     $fields[] = id(new PhabricatorHandlesEditField())
@@ -307,7 +314,19 @@ EODOCS
       ->setIsFormField(false)
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue('edge:type', $subtask_type)
-      ->setValue($parent_phids);
+      ->setValue($subtask_phids);
+
+    $fields[] = id(new PhabricatorHandlesEditField())
+      ->setKey('commits')
+      ->setLabel(pht('Commits'))
+      ->setDescription(pht('Related commits.'))
+      ->setConduitDescription(pht('Change the related commits for this task.'))
+      ->setConduitTypeDescription(pht('List of related commit PHIDs.'))
+      ->setUseEdgeTransactions(true)
+      ->setIsFormField(false)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $commit_type)
+      ->setValue($commit_phids);
 
     return $fields;
   }
