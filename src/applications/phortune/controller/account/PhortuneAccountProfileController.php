@@ -3,10 +3,6 @@
 abstract class PhortuneAccountProfileController
   extends PhortuneAccountController {
 
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView()->getMenu();
-  }
-
   protected function buildHeaderView() {
     $viewer = $this->getViewer();
     $account = $this->getAccount();
@@ -44,7 +40,7 @@ abstract class PhortuneAccountProfileController
     $nav->addFilter(
       'overview',
       pht('Overview'),
-      $this->getApplicationURI("/{$id}/"),
+      $account->getURI(),
       'fa-user-circle');
 
     $nav->newLink('details')
@@ -59,25 +55,25 @@ abstract class PhortuneAccountProfileController
     $nav->addFilter(
       'methods',
       pht('Payment Methods'),
-      $this->getApplicationURI("/account/{$id}/methods/"),
+      $account->getPaymentMethodsURI(),
       'fa-credit-card');
 
     $nav->addFilter(
       'subscriptions',
       pht('Subscriptions'),
-      $this->getApplicationURI("/account/{$id}/subscriptions/"),
+      $account->getSubscriptionsURI(),
       'fa-retweet');
 
     $nav->addFilter(
       'orders',
       pht('Order History'),
-      $this->getApplicationURI("/account/{$id}/orders/"),
+      $account->getOrdersURI(),
       'fa-shopping-bag');
 
     $nav->addFilter(
       'charges',
       pht('Charge History'),
-      $this->getApplicationURI("/account/{$id}/charges/"),
+      $account->getChargesURI(),
       'fa-calculator');
 
     $nav->addLabel(pht('Personnel'));
@@ -90,7 +86,7 @@ abstract class PhortuneAccountProfileController
 
     $nav->newLink('addresses')
       ->setname(pht('Email Addresses'))
-      ->setHref($this->getApplicationURI("/account/{$id}/addresses/"))
+      ->setHref($account->getEmailAddressesURI())
       ->setIcon('fa-envelope-o')
       ->setWorkflow(!$can_edit)
       ->setDisabled(!$can_edit);
@@ -130,7 +126,7 @@ abstract class PhortuneAccountProfileController
     }
     $handles = $this->loadViewerHandles($phids);
 
-    $orders_uri = $this->getApplicationURI($account->getID().'/order/');
+    $orders_uri = $account->getOrderListURI();
 
     $table = id(new PhortuneOrderTableView())
       ->setUser($viewer)

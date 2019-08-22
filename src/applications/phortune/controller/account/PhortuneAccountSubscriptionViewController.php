@@ -12,7 +12,7 @@ final class PhortuneAccountSubscriptionViewController
 
     $subscription = id(new PhortuneSubscriptionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($request->getURIData('id')))
+      ->withIDs(array($request->getURIData('subscriptionID')))
       ->needTriggers(true)
       ->executeOne();
     if (!$subscription) {
@@ -179,7 +179,7 @@ final class PhortuneAccountSubscriptionViewController
     $account = $subscription->getAccount();
 
     $add_method_uri = urisprintf(
-      '/phortune/account/%d/card/new/?subscriptionID=%s',
+      '/account/%d/methods/new/?subscriptionID=%s',
       $account->getID(),
       $subscription->getID());
     $add_method_uri = $this->getApplicationURI($add_method_uri);

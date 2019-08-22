@@ -50,7 +50,7 @@ final class PhortuneAccountPaymentMethodController
       ->setTag('a')
       ->setText(pht('Add Payment Method'))
       ->setIcon('fa-plus')
-      ->setHref($this->getApplicationURI("{$id}/card/new/"))
+      ->setHref($this->getApplicationURI("account/{$id}/methods/new/"))
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit);
 

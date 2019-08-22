@@ -56,7 +56,7 @@ final class PhortuneAccountChargesController
 
     $handles = $this->loadViewerHandles($phids);
 
-    $charges_uri = $this->getApplicationURI($account->getID().'/charge/');
+    $charges_uri = $account->getChargeListURI();
 
     $table = id(new PhortuneChargeTableView())
       ->setUser($viewer)

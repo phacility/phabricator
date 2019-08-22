@@ -40,16 +40,6 @@ final class PhortuneChargeSearchEngine
 
     $account = $this->getAccount();
     if ($account) {
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $account,
-        PhabricatorPolicyCapability::CAN_EDIT);
-      if (!$can_edit) {
-        throw new Exception(
-          pht(
-            'You can not query charges for an account you are not '.
-            'a member of.'));
-      }
       $query->withAccountPHIDs(array($account->getPHID()));
     } else {
       $accounts = id(new PhortuneAccountQuery())

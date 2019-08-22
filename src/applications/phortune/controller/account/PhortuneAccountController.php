@@ -23,7 +23,7 @@ abstract class PhortuneAccountController
   abstract protected function shouldRequireAccountEditCapability();
   abstract protected function handleAccountRequest(AphrontRequest $request);
 
-  private function hasAccount() {
+  final protected function hasAccount() {
     return (bool)$this->account;
   }
 

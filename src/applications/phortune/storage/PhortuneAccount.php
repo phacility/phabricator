@@ -102,12 +102,33 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getURI() {
-    return '/phortune/'.$this->getID().'/';
+    return urisprintf(
+      '/phortune/account/%d/',
+      $this->getID());
   }
 
   public function getDetailsURI() {
     return urisprintf(
       '/phortune/account/%d/details/',
+      $this->getID());
+  }
+
+  public function getOrdersURI() {
+    return urisprintf(
+      '/phortune/account/%d/orders/',
+      $this->getID());
+  }
+
+  public function getOrderListURI($path = '') {
+    return urisprintf(
+      '/phortune/account/%d/orders/list/%s',
+      $this->getID(),
+      $path);
+  }
+
+  public function getSubscriptionsURI() {
+    return urisprintf(
+      '/phortune/account/%d/subscriptions/',
       $this->getID());
   }
 
@@ -121,6 +142,19 @@ final class PhortuneAccount extends PhortuneDAO
     return urisprintf(
       '/phortune/account/%d/methods/',
       $this->getID());
+  }
+
+  public function getChargesURI() {
+    return urisprintf(
+      '/phortune/account/%d/charges/',
+      $this->getID());
+  }
+
+  public function getChargeListURI($path = '') {
+    return urisprintf(
+      '/phortune/account/%d/charges/list/%s',
+      $this->getID(),
+      $path);
   }
 
   public function attachMerchantPHIDs(array $merchant_phids) {

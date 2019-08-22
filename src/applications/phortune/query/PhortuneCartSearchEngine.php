@@ -62,26 +62,8 @@ final class PhortuneCartSearchEngine
     $merchant = $this->getMerchant();
     $account = $this->getAccount();
     if ($merchant) {
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $merchant,
-        PhabricatorPolicyCapability::CAN_EDIT);
-      if (!$can_edit) {
-        throw new Exception(
-          pht('You can not query orders for a merchant you do not control.'));
-      }
       $query->withMerchantPHIDs(array($merchant->getPHID()));
     } else if ($account) {
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $account,
-        PhabricatorPolicyCapability::CAN_EDIT);
-      if (!$can_edit) {
-        throw new Exception(
-          pht(
-            'You can not query orders for an account you are not '.
-            'a member of.'));
-      }
       $query->withAccountPHIDs(array($account->getPHID()));
     } else {
       $accounts = id(new PhortuneAccountQuery())
@@ -125,7 +107,7 @@ final class PhortuneCartSearchEngine
     if ($merchant) {
       return '/phortune/merchant/orders/'.$merchant->getID().'/'.$path;
     } else if ($account) {
-      return '/phortune/'.$account->getID().'/order/'.$path;
+      return $account->getOrderListURI($path);
     } else {
       return '/phortune/order/'.$path;
     }

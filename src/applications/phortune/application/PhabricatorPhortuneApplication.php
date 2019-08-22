@@ -34,24 +34,6 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
     return array(
       '/phortune/' => array(
         '' => 'PhortuneLandingController',
-        '(?P<accountID>\d+)/' => array(
-          '' => 'PhortuneAccountOverviewController',
-          'card/' => array(
-            'new/' => 'PhortunePaymentMethodCreateController',
-          ),
-          'subscription/' => array(
-            '(?:query/(?P<queryKey>[^/]+)/)?'
-              => 'PhortuneSubscriptionListController',
-            'view/(?P<id>\d+)/'
-              => 'PhortuneAccountSubscriptionViewController',
-            'order/(?P<subscriptionID>\d+)/'
-              => 'PhortuneCartListController',
-          ),
-          'order/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneCartListController',
-          'charge/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneChargeListController',
-        ),
         'card/(?P<id>\d+)/' => array(
           'edit/' => 'PhortunePaymentMethodEditController',
           'disable/' => 'PhortunePaymentMethodDisableController',
@@ -65,22 +47,36 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         ),
         'account/' => array(
           '' => 'PhortuneAccountListController',
+
           $this->getEditRoutePattern('edit/')
             => 'PhortuneAccountEditController',
 
           '(?P<accountID>\d+)/' => array(
+            '' => 'PhortuneAccountOverviewController',
             'details/' => 'PhortuneAccountDetailsController',
             'methods/' => array(
               '' => 'PhortuneAccountPaymentMethodController',
               '(?P<id>\d+)/' => 'PhortuneAccountPaymentMethodViewController',
+              'new/' => 'PhortunePaymentMethodCreateController',
             ),
-            'orders/' => 'PhortuneAccountOrdersController',
-            'charges/' => 'PhortuneAccountChargesController',
+            'orders/' => array(
+              '' => 'PhortuneAccountOrdersController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneAccountOrderListController',
+            ),
+            'charges/' => array(
+              '' => 'PhortuneAccountChargesController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneAccountChargeListController',
+            ),
             'subscriptions/' => array(
               '' => 'PhortuneAccountSubscriptionController',
               '(?P<subscriptionID>\d+)/' => array(
+                '' => 'PhortuneAccountSubscriptionViewController',
                 'autopay/(?P<methodID>\d+)/'
                   => 'PhortuneAccountSubscriptionAutopayController',
+                $this->getQueryRoutePattern('orders/')
+                  => 'PhortuneAccountOrderListController',
               ),
             ),
             'managers/' => array(

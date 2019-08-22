@@ -189,10 +189,10 @@ final class PhortuneSubscription
   }
 
   public function getURI() {
-    $account_id = $this->getAccount()->getID();
-    $id = $this->getID();
-
-    return "/phortune/{$account_id}/subscription/view/{$id}/";
+    return urisprintf(
+      '/phortune/account/%d/subscriptions/%d/',
+      $this->getAccount()->getID(),
+      $this->getID());
   }
 
   public function getEditURI() {

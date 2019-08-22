@@ -3,7 +3,8 @@
 final class PhortuneCart extends PhortuneDAO
   implements
     PhabricatorApplicationTransactionInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface {
 
   const STATUS_BUILDING = 'cart:building';
   const STATUS_READY = 'cart:ready';
@@ -652,26 +653,15 @@ final class PhortuneCart extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    // NOTE: Both view and edit use the account's edit policy. We punch a hole
-    // through this for merchants, below.
-    return $this
-      ->getAccount()
-      ->getPolicy(PhabricatorPolicyCapability::CAN_EDIT);
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->getAccount()->hasAutomaticCapability($capability, $viewer)) {
-      return true;
-    }
-
-    // If the viewer controls the merchant this order was placed with, they
-    // can view the order.
-    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-      $can_admin = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $this->getMerchant(),
-        PhabricatorPolicyCapability::CAN_EDIT);
-      if ($can_admin) {
+    if ($capability === PhabricatorPolicyCapability::CAN_VIEW) {
+      $any_edit = PhortuneMerchantQuery::canViewersEditMerchants(
+        array($viewer->getPHID()),
+        array($this->getMerchantPHID()));
+      if ($any_edit) {
         return true;
       }
     }
@@ -679,10 +669,20 @@ final class PhortuneCart extends PhortuneDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    if ($this->hasAutomaticCapability($capability, $viewer)) {
+      return array();
+    }
+
     return array(
-      pht('Orders inherit the policies of the associated account.'),
-      pht('The merchant you placed an order with can review and manage it.'),
+      array(
+        $this->getAccount(),
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ),
     );
   }
 
