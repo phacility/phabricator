@@ -86,4 +86,11 @@ final class PhabricatorUserEmpowerTransaction
 
     return null;
   }
+
+  public function shouldTryMFA(
+    $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return true;
+  }
+
 }
