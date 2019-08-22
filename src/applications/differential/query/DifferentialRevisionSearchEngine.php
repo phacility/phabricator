@@ -51,6 +51,12 @@ final class DifferentialRevisionSearchEngine
         $map['createdEnd']);
     }
 
+    if ($map['modifiedStart'] || $map['modifiedEnd']) {
+      $query->withUpdatedEpochBetween(
+        $map['modifiedStart'],
+        $map['modifiedEnd']);
+    }
+
     return $query;
   }
 
@@ -100,6 +106,18 @@ final class DifferentialRevisionSearchEngine
         ->setKey('createdEnd')
         ->setDescription(
           pht('Find revisions created at or before a particular time.')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Modified After'))
+        ->setKey('modifiedStart')
+        ->setIsHidden(true)
+        ->setDescription(
+          pht('Find revisions modified at or after a particular time.')),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Modified Before'))
+        ->setKey('modifiedEnd')
+        ->setIsHidden(true)
+        ->setDescription(
+          pht('Find revisions modified at or before a particular time.')),
     );
   }
 
