@@ -1,35 +1,29 @@
 <?php
 
-final class PhortuneMerchantManagerController
+final class PhortuneMerchantManagersController
   extends PhortuneMerchantProfileController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireMerchantEditCapability() {
+    return false;
+  }
+
+  protected function handleMerchantRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+    $merchant = $this->getMerchant();
 
-    $merchant = id(new PhortuneMerchantQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needProfileImage(true)
-      ->executeOne();
-    if (!$merchant) {
-      return new Aphront404Response();
-    }
-
-    $this->setMerchant($merchant);
-    $header = $this->buildHeaderView();
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Managers'));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Managers'))
+      ->setBorder(true);
 
     $header = $this->buildHeaderView();
     $members = $this->buildMembersSection($merchant);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $members,
-      ));
+      ->setFooter(
+        array(
+          $members,
+        ));
 
     $navigation = $this->buildSideNavView('managers');
 
@@ -38,7 +32,6 @@ final class PhortuneMerchantManagerController
       ->setCrumbs($crumbs)
       ->setNavigation($navigation)
       ->appendChild($view);
-
   }
 
   private function buildMembersSection(PhortuneMerchant $merchant) {
@@ -51,12 +44,18 @@ final class PhortuneMerchantManagerController
 
     $id = $merchant->getID();
 
+    $add_uri = urisprintf(
+      'merchant/%d/managers/new/',
+      $merchant->getID());
+    $add_uri = $this->getApplicationURI($add_uri);
+
     $add = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('New Manager'))
       ->setIcon('fa-plus')
       ->setWorkflow(true)
-      ->setHref("/phortune/merchant/manager/add/{$id}/");
+      ->setDisabled(!$can_edit)
+      ->setHref($add_uri);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Merchant Account Managers'))

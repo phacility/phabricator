@@ -3,19 +3,9 @@
 final class PhortuneOrderTableView extends AphrontView {
 
   private $carts;
-  private $handles;
   private $noDataString;
   private $isInvoices;
   private $isMerchantView;
-
-  public function setHandles(array $handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
-  public function getHandles() {
-    return $this->handles;
-  }
 
   public function setCarts(array $carts) {
     $this->carts = $carts;
@@ -55,11 +45,21 @@ final class PhortuneOrderTableView extends AphrontView {
 
   public function render() {
     $carts = $this->getCarts();
-    $handles = $this->getHandles();
     $viewer = $this->getUser();
 
     $is_invoices = $this->getIsInvoices();
     $is_merchant = $this->getIsMerchantView();
+
+    $phids = array();
+    foreach ($carts as $cart) {
+      $phids[] = $cart->getPHID();
+      foreach ($cart->getPurchases() as $purchase) {
+        $phids[] = $purchase->getPHID();
+      }
+      $phids[] = $cart->getMerchantPHID();
+    }
+
+    $handles = $viewer->loadHandles($phids);
 
     $rows = array();
     $rowc = array();

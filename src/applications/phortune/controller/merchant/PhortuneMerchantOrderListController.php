@@ -1,21 +1,21 @@
 <?php
 
-final class PhortuneAccountOrderListController
-  extends PhortuneAccountProfileController {
+final class PhortuneMerchantOrderListController
+  extends PhortuneMerchantProfileController {
 
   private $subscription;
 
-  protected function shouldRequireAccountEditCapability() {
-    return false;
+  protected function shouldRequireMerchantEditCapability() {
+    return true;
   }
 
-  protected function handleAccountRequest(AphrontRequest $request) {
+  protected function handleMerchantRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $account = $this->getAccount();
+    $merchant = $this->getMerchant();
 
     $engine = id(new PhortuneCartSearchEngine())
       ->setController($this)
-      ->setAccount($account);
+      ->setMerchant($merchant);
 
     $subscription_id = $request->getURIData('subscriptionID');
     if ($subscription_id) {
@@ -42,10 +42,10 @@ final class PhortuneAccountOrderListController
       $crumbs->addTextCrumb(
         $subscription->getObjectName(),
         $subscription->getURI());
-    } else if ($this->hasAccount()) {
-      $account = $this->getAccount();
+    } else if ($this->hasMerchant()) {
+      $merchant = $this->getMerchant();
 
-      $crumbs->addTextCrumb(pht('Orders'), $account->getOrdersURI());
+      $crumbs->addTextCrumb(pht('Orders'), $merchant->getOrdersURI());
     }
 
     return $crumbs;

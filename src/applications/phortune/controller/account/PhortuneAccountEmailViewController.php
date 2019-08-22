@@ -50,7 +50,6 @@ final class PhortuneAccountEmailViewController
       ->setTitle($address->getObjectName())
       ->setCrumbs($crumbs)
       ->appendChild($view);
-
   }
 
   private function buildCurtainView(PhortuneAccountEmail $address) {

@@ -103,36 +103,40 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
             => 'PhortuneProviderActionController',
         ),
         'merchant/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhortuneMerchantListController',
-          'picture/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantPictureController',
+          $this->getQueryRoutePattern()
+            => 'PhortuneMerchantListController',
           $this->getEditRoutePattern('edit/')
             => 'PhortuneMerchantEditController',
-          'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneCartListController',
-          'manager/' => array(
-            '(?:(?P<id>\d+)/)?' => 'PhortuneMerchantManagerController',
-            'add/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantAddManagerController',
-          ),
           '(?P<merchantID>\d+)/' => array(
-            'cart/(?P<id>\d+)/' => array(
-              '' => 'PhortuneCartViewController',
-              '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
-              'update/' => 'PhortuneCartUpdateController',
-              'accept/' => 'PhortuneCartAcceptController',
+            '' => 'PhortuneMerchantOverviewController',
+            'details/' => 'PhortuneMerchantDetailsController',
+            'providers/' => array(
+              '' => 'PhortuneMerchantProvidersController',
+              '(?P<providerID>\d+)/' => array(
+                '' => 'PhortuneMerchantProviderViewController',
+                'disable/' => 'PhortuneMerchantProviderDisableController',
+              ),
+              $this->getEditRoutePattern('edit/')
+                => 'PhortuneMerchantProviderEditController',
             ),
-            'subscription/' => array(
-              '(?:query/(?P<queryKey>[^/]+)/)?'
-                => 'PhortuneSubscriptionListController',
-              'view/(?P<id>\d+)/'
-                => 'PhortuneAccountSubscriptionViewController',
-              'order/(?P<subscriptionID>\d+)/'
-                => 'PhortuneCartListController',
+            'orders/' => array(
+              '' => 'PhortuneMerchantOrdersController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneMerchantOrderListController',
             ),
-            'invoice/' => array(
-              'new/' => 'PhortuneMerchantInvoiceCreateController',
+            'picture/' => array(
+              'edit/' => 'PhortuneMerchantPictureController',
+            ),
+            'subscriptions/' => array(
+              '' => 'PhortuneMerchantSubscriptionsController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneMerchantSubscriptionListController',
+            ),
+            'managers/' => array(
+              '' => 'PhortuneMerchantManagersController',
+              'new/' => 'PhortuneMerchantAddManagerController',
             ),
           ),
-          '(?P<id>\d+)/' => 'PhortuneMerchantViewController',
         ),
       ),
     );

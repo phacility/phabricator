@@ -66,22 +66,11 @@ final class PhortuneAccountOverviewController
 
     $viewer = $this->getViewer();
 
-    $phids = array();
-    foreach ($carts as $cart) {
-      $phids[] = $cart->getPHID();
-      $phids[] = $cart->getMerchantPHID();
-      foreach ($cart->getPurchases() as $purchase) {
-        $phids[] = $purchase->getPHID();
-      }
-    }
-    $handles = $this->loadViewerHandles($phids);
-
     $table = id(new PhortuneOrderTableView())
       ->setNoDataString(pht('You have no unpaid invoices.'))
       ->setIsInvoices(true)
       ->setUser($viewer)
-      ->setCarts($carts)
-      ->setHandles($handles);
+      ->setCarts($carts);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Invoices Due'));

@@ -1,16 +1,23 @@
 <?php
 
-final class PhortuneProviderEditController
+final class PhortuneMerchantProviderEditController
   extends PhortuneMerchantController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireMerchantEditCapability() {
+    return true;
+  }
+
+  protected function handleMerchantRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
+    $merchant = $this->getMerchant();
+
     $id = $request->getURIData('id');
 
     if ($id) {
       $provider_config = id(new PhortunePaymentProviderConfigQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
+        ->withMerchantPHIDs(array($merchant->getPHID()))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -25,20 +32,8 @@ final class PhortuneProviderEditController
 
       $merchant = $provider_config->getMerchant();
       $merchant_id = $merchant->getID();
-      $cancel_uri = $this->getApplicationURI("merchant/{$merchant_id}/");
+      $cancel_uri = $provider_config->getURI();
     } else {
-      $merchant = id(new PhortuneMerchantQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($request->getStr('merchantID')))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
-      if (!$merchant) {
-        return new Aphront404Response();
-      }
       $merchant_id = $merchant->getID();
 
       $current_providers = id(new PhortunePaymentProviderConfigQuery())
@@ -62,9 +57,7 @@ final class PhortuneProviderEditController
       }
 
       $provider_config->setProviderClass($class);
-
-      $cancel_uri = $this->getApplicationURI(
-        'provider/edit/?merchantID='.$merchant_id);
+      $cancel_uri = $merchant->getPaymentProvidersURI();
     }
 
     $provider = $provider_config->buildProvider();
@@ -123,10 +116,12 @@ final class PhortuneProviderEditController
 
           $xactions = array();
 
-          $xactions[] = id(new PhortunePaymentProviderConfigTransaction())
-            ->setTransactionType(
-              PhortunePaymentProviderConfigTransaction::TYPE_CREATE)
-            ->setNewValue(true);
+          if (!$provider_config->getID()) {
+            $xactions[] = id(new PhortunePaymentProviderConfigTransaction())
+              ->setTransactionType(
+                PhortunePaymentProviderConfigTransaction::TYPE_CREATE)
+              ->setNewValue(true);
+          }
 
           foreach ($xaction_values as $key => $value) {
             $xactions[] = id(clone $template)
@@ -143,9 +138,9 @@ final class PhortuneProviderEditController
 
           $editor->applyTransactions($provider_config, $xactions);
 
-          $merchant_uri = $this->getApplicationURI(
-            'merchant/'.$merchant->getID().'/');
-          return id(new AphrontRedirectResponse())->setURI($merchant_uri);
+          $next_uri = $provider_config->getURI();
+
+          return id(new AphrontRedirectResponse())->setURI($next_uri);
         }
       }
     } else {
@@ -155,7 +150,6 @@ final class PhortuneProviderEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->addHiddenInput('merchantID', $merchant->getID())
       ->addHiddenInput('class', $provider_config->getProviderClass())
       ->addHiddenInput('edit', true)
       ->appendChild(
@@ -261,7 +255,6 @@ final class PhortuneProviderEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->addHiddenInput('merchantID', $merchant->getID())
       ->appendRemarkupInstructions(
         pht('Choose the type of payment provider to add:'))
       ->appendChild($panel_classes)

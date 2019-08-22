@@ -117,21 +117,11 @@ abstract class PhortuneAccountProfileController
       ->setLimit($limit)
       ->execute();
 
-    $phids = array();
-    foreach ($carts as $cart) {
-      $phids[] = $cart->getPHID();
-      foreach ($cart->getPurchases() as $purchase) {
-        $phids[] = $purchase->getPHID();
-      }
-    }
-    $handles = $this->loadViewerHandles($phids);
-
     $orders_uri = $account->getOrderListURI();
 
     $table = id(new PhortuneOrderTableView())
       ->setUser($viewer)
-      ->setCarts($carts)
-      ->setHandles($handles);
+      ->setCarts($carts);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Recent Orders'))

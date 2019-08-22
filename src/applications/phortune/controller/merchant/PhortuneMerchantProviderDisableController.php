@@ -1,11 +1,17 @@
 <?php
 
-final class PhortuneProviderDisableController
+final class PhortuneMerchantProviderDisableController
   extends PhortuneMerchantController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireMerchantEditCapability() {
+    return true;
+  }
+
+  protected function handleMerchantRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+    $merchant = $this->getMerchant();
+
+    $id = $request->getURIData('providerID');
 
     $provider_config = id(new PhortunePaymentProviderConfigQuery())
       ->setViewer($viewer)
@@ -20,9 +26,8 @@ final class PhortuneProviderDisableController
       return new Aphront404Response();
     }
 
-    $merchant = $provider_config->getMerchant();
     $merchant_id = $merchant->getID();
-    $cancel_uri = $this->getApplicationURI("merchant/{$merchant_id}/");
+    $cancel_uri = $provider_config->getURI();
 
     $provider = $provider_config->buildProvider();
 

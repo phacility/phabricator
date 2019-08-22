@@ -1,9 +1,16 @@
 <?php
 
 final class PhortuneMerchantInvoiceCreateController
-  extends PhortuneMerchantProfileController {
+  extends PhortuneMerchantController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireMerchantEditCapability() {
+    return true;
+  }
+
+  protected function handleMerchantRequest(AphrontRequest $request) {
+    // TODO: Make this work again, or destroy it.
+    return new Aphront404Response();
+
     $viewer = $request->getUser();
 
     $merchant = $this->loadMerchantAuthority();

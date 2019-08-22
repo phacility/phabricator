@@ -92,21 +92,10 @@ final class PhortuneAccountSubscriptionViewController
       ->withInvoices(true)
       ->execute();
 
-    $phids = array();
-    foreach ($invoices as $invoice) {
-      $phids[] = $invoice->getPHID();
-      $phids[] = $invoice->getMerchantPHID();
-      foreach ($invoice->getPurchases() as $purchase) {
-        $phids[] = $purchase->getPHID();
-      }
-    }
-    $handles = $this->loadViewerHandles($phids);
-
     $invoice_table = id(new PhortuneOrderTableView())
       ->setUser($viewer)
       ->setCarts($invoices)
-      ->setIsInvoices(true)
-      ->setHandles($handles);
+      ->setIsInvoices(true);
 
     $invoice_header = id(new PHUIHeaderView())
       ->setHeader(pht('Invoices Due'));
@@ -135,19 +124,9 @@ final class PhortuneAccountSubscriptionViewController
       ->setLimit(50)
       ->execute();
 
-    $phids = array();
-    foreach ($invoices as $invoice) {
-      $phids[] = $invoice->getPHID();
-      foreach ($invoice->getPurchases() as $purchase) {
-        $phids[] = $purchase->getPHID();
-      }
-    }
-    $handles = $this->loadViewerHandles($phids);
-
     $invoice_table = id(new PhortuneOrderTableView())
       ->setUser($viewer)
-      ->setCarts($invoices)
-      ->setHandles($handles);
+      ->setCarts($invoices);
 
     $account = $subscription->getAccount();
     $merchant = $subscription->getMerchant();
