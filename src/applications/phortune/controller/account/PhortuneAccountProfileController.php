@@ -66,13 +66,13 @@ abstract class PhortuneAccountProfileController
 
     $nav->addFilter(
       'orders',
-      pht('Order History'),
+      pht('Orders'),
       $account->getOrdersURI(),
       'fa-shopping-bag');
 
     $nav->addFilter(
       'charges',
-      pht('Charge History'),
+      pht('Charges'),
       $account->getChargesURI(),
       'fa-calculator');
 

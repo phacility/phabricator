@@ -5,62 +5,33 @@ final class PhortuneCartViewController
 
   private $action = null;
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireAccountAuthority() {
+    return false;
+  }
+
+  protected function shouldRequireMerchantAuthority() {
+    return false;
+  }
+
+  protected function handleCartRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+    $cart = $this->getCart();
+    $authority = $this->getMerchantAuthority();
+    $can_edit = $this->hasAccountAuthority();
+
     $this->action = $request->getURIData('action');
 
-    $authority = $this->loadMerchantAuthority();
-    require_celerity_resource('phortune-css');
-
-    $query = id(new PhortuneCartQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needPurchases(true);
-
-    if ($authority) {
-      $query->withMerchantPHIDs(array($authority->getPHID()));
-    }
-
-    $cart = $query->executeOne();
-    if (!$cart) {
-      return new Aphront404Response();
-    }
-
     $cart_table = $this->buildCartContentTable($cart);
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $cart,
-      PhabricatorPolicyCapability::CAN_EDIT);
 
     $errors = array();
     $error_view = null;
     $resume_uri = null;
     switch ($cart->getStatus()) {
       case PhortuneCart::STATUS_READY:
-        if ($authority && $cart->getIsInvoice()) {
-          // We arrived here by following the ad-hoc invoice workflow, and
-          // are acting with merchant authority.
-
-          $checkout_uri = PhabricatorEnv::getURI($cart->getCheckoutURI());
-
-          $invoice_message = array(
-            pht(
-              'Manual invoices do not automatically notify recipients yet. '.
-              'Send the payer this checkout link:'),
-            ' ',
-            phutil_tag(
-              'a',
-              array(
-                'href' => $checkout_uri,
-              ),
-              $checkout_uri),
-          );
-
+        if ($cart->getIsInvoice()) {
           $error_view = id(new PHUIInfoView())
-            ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-            ->setErrors(array($invoice_message));
+            ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+            ->appendChild(pht('This invoice is ready for payment.'));
         }
         break;
       case PhortuneCart::STATUS_PURCHASING:
@@ -133,7 +104,7 @@ final class PhortuneCartViewController
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($cart->getName())
-      ->setHeaderIcon('fa-shopping-cart');
+      ->setHeaderIcon('fa-shopping-bag');
 
     if ($cart->getStatus() == PhortuneCart::STATUS_PURCHASED) {
       $done_uri = $cart->getDoneURI();
@@ -160,18 +131,8 @@ final class PhortuneCartViewController
       ->needCarts(true)
       ->execute();
 
-    $phids = array();
-    foreach ($charges as $charge) {
-      $phids[] = $charge->getProviderPHID();
-      $phids[] = $charge->getCartPHID();
-      $phids[] = $charge->getMerchantPHID();
-      $phids[] = $charge->getPaymentMethodPHID();
-    }
-    $handles = $this->loadViewerHandles($phids);
-
     $charges_table = id(new PhortuneChargeTableView())
       ->setUser($viewer)
-      ->setHandles($handles)
       ->setCharges($charges)
       ->setShowOrder(false);
 
@@ -182,14 +143,13 @@ final class PhortuneCartViewController
 
     $account = $cart->getAccount();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    if ($authority) {
-      $this->addMerchantCrumb($crumbs, $authority);
-    } else {
-      $this->addAccountCrumb($crumbs, $cart->getAccount());
-    }
-    $crumbs->addTextCrumb(pht('Cart %d', $cart->getID()));
-    $crumbs->setBorder(true);
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($account->getName(), $account->getURI())
+      ->addTextCrumb(pht('Orders'), $account->getOrdersURI())
+      ->addTextCrumb(pht('Cart %d', $cart->getID()))
+      ->setBorder(true);
+
+    require_celerity_resource('phortune-css');
 
     if (!$this->action) {
       $class = 'phortune-cart-page';
@@ -267,6 +227,7 @@ final class PhortuneCartViewController
     if ($crumbs) {
       $page->setCrumbs($crumbs);
     }
+
     return $page;
   }
 
@@ -318,20 +279,31 @@ final class PhortuneCartViewController
     $viewer = $this->getViewer();
     $id = $cart->getID();
     $curtain = $this->newCurtainView($cart);
+    $status = $cart->getStatus();
+
+    $is_ready = ($status === PhortuneCart::STATUS_READY);
 
     $can_cancel = ($can_edit && $cart->canCancelOrder());
+    $can_checkout = ($can_edit && $is_ready);
+    $can_accept = ($status === PhortuneCart::STATUS_REVIEW);
+    $can_refund = ($authority && $cart->canRefundOrder());
+    $can_void = ($authority && $cart->canVoidOrder());
 
-    if ($authority) {
-      $prefix = 'merchant/'.$authority->getID().'/';
-    } else {
-      $prefix = '';
-    }
+    $cancel_uri = $this->getApplicationURI("cart/{$id}/cancel/");
+    $refund_uri = $this->getApplicationURI("cart/{$id}/refund/");
+    $update_uri = $this->getApplicationURI("cart/{$id}/update/");
+    $accept_uri = $this->getApplicationURI("cart/{$id}/accept/");
+    $print_uri = $this->getApplicationURI("cart/{$id}/print/");
+    $checkout_uri = $cart->getCheckoutURI();
+    $void_uri = $this->getApplicationURI("cart/{$id}/void/");
 
-    $cancel_uri = $this->getApplicationURI("{$prefix}cart/{$id}/cancel/");
-    $refund_uri = $this->getApplicationURI("{$prefix}cart/{$id}/refund/");
-    $update_uri = $this->getApplicationURI("{$prefix}cart/{$id}/update/");
-    $accept_uri = $this->getApplicationURI("{$prefix}cart/{$id}/accept/");
-    $print_uri = $this->getApplicationURI("{$prefix}cart/{$id}/print/");
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Pay Now'))
+        ->setIcon('fa-credit-card')
+        ->setDisabled(!$can_checkout)
+        ->setWorkflow(!$can_checkout)
+        ->setHref($checkout_uri));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -340,24 +312,6 @@ final class PhortuneCartViewController
         ->setDisabled(!$can_cancel)
         ->setWorkflow(true)
         ->setHref($cancel_uri));
-
-    if ($authority) {
-      if ($cart->getStatus() == PhortuneCart::STATUS_REVIEW) {
-        $curtain->addAction(
-          id(new PhabricatorActionView())
-            ->setName(pht('Accept Order'))
-            ->setIcon('fa-check')
-            ->setWorkflow(true)
-            ->setHref($accept_uri));
-      }
-
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Refund Order'))
-          ->setIcon('fa-reply')
-          ->setWorkflow(true)
-          ->setHref($refund_uri));
-    }
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -369,7 +323,7 @@ final class PhortuneCartViewController
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Continue Checkout'))
-          ->setIcon('fa-shopping-cart')
+          ->setIcon('fa-shopping-bag')
           ->setHref($resume_uri));
     }
 
@@ -379,6 +333,36 @@ final class PhortuneCartViewController
         ->setHref($print_uri)
         ->setOpenInNewWindow(true)
         ->setIcon('fa-print'));
+
+    if ($authority) {
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setType(PhabricatorActionView::TYPE_DIVIDER));
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Accept Order'))
+          ->setIcon('fa-check')
+          ->setWorkflow(true)
+          ->setDisabled(!$can_accept)
+          ->setHref($accept_uri));
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Refund Order'))
+          ->setIcon('fa-reply')
+          ->setWorkflow(true)
+          ->setDisabled(!$can_refund)
+          ->setHref($refund_uri));
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Void Invoice'))
+          ->setIcon('fa-times')
+          ->setWorkflow(true)
+          ->setDisabled(!$can_void)
+          ->setHref($void_uri));
+    }
 
     return $curtain;
   }

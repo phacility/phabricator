@@ -12,7 +12,7 @@ final class PhortuneAccountOrdersController
     $title = $account->getName();
 
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Order History'))
+      ->addTextCrumb(pht('Orders'))
       ->setBorder(true);
 
     $header = $this->buildHeaderView();

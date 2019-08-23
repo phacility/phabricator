@@ -12,7 +12,7 @@ final class PhortuneAccountChargesController
     $title = $account->getName();
 
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Order History'))
+      ->addTextCrumb(pht('Orders'))
       ->setBorder(true);
 
     $header = $this->buildHeaderView();
@@ -46,22 +46,11 @@ final class PhortuneAccountChargesController
       ->setLimit(100)
       ->execute();
 
-    $phids = array();
-    foreach ($charges as $charge) {
-      $phids[] = $charge->getProviderPHID();
-      $phids[] = $charge->getCartPHID();
-      $phids[] = $charge->getMerchantPHID();
-      $phids[] = $charge->getPaymentMethodPHID();
-    }
-
-    $handles = $this->loadViewerHandles($phids);
-
     $charges_uri = $account->getChargeListURI();
 
     $table = id(new PhortuneChargeTableView())
       ->setUser($viewer)
-      ->setCharges($charges)
-      ->setHandles($handles);
+      ->setCharges($charges);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Recent Charges'))

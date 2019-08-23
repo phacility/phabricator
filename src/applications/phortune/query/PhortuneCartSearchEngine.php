@@ -105,7 +105,7 @@ final class PhortuneCartSearchEngine
     $merchant = $this->getMerchant();
     $account = $this->getAccount();
     if ($merchant) {
-      return '/phortune/merchant/orders/'.$merchant->getID().'/'.$path;
+      return $merchant->getOrderListURI($path);
     } else if ($account) {
       return $account->getOrderListURI($path);
     } else {

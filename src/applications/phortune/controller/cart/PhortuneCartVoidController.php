@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneCartAcceptController
+final class PhortuneCartVoidController
   extends PhortuneCartController {
 
   protected function shouldRequireAccountAuthority() {
@@ -17,28 +17,27 @@ final class PhortuneCartAcceptController
 
     $cancel_uri = $cart->getDetailURI();
 
-    if ($cart->getStatus() !== PhortuneCart::STATUS_REVIEW) {
+    try {
+      $title = pht('Unable to Void Invoice');
+      $cart->assertCanVoidOrder();
+    } catch (Exception $ex) {
       return $this->newDialog()
-        ->setTitle(pht('Order Not in Review'))
-        ->appendParagraph(
-          pht(
-            'This order does not need manual review, so you can not '.
-            'accept it.'))
+        ->setTitle($title)
+        ->appendChild($ex->getMessage())
         ->addCancelButton($cancel_uri);
     }
 
     if ($request->isFormPost()) {
-      $cart->didReviewCart();
       return id(new AphrontRedirectResponse())->setURI($cancel_uri);
     }
 
     return $this->newDialog()
-      ->setTitle(pht('Accept Order?'))
+      ->setTitle(pht('Void Invoice?'))
       ->appendParagraph(
         pht(
-          'This order has been flagged for manual review. You should review '.
-          'it carefully before accepting it.'))
+          'Really void this invoice? The customer will no longer be asked '.
+          'to submit payment for it.'))
       ->addCancelButton($cancel_uri)
-      ->addSubmitButton(pht('Accept Order'));
+      ->addSubmitButton(pht('Void Invoice'));
   }
 }

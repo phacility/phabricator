@@ -96,9 +96,9 @@ final class PhortuneSubscriptionSearchEngine
     $merchant = $this->getMerchant();
     $account = $this->getAccount();
     if ($merchant) {
-      return '/phortune/merchant/'.$merchant->getID().'/subscription/'.$path;
+      return $merchant->getSubscriptionListURI($path);
     } else if ($account) {
-      return '/phortune/'.$account->getID().'/subscription/';
+      return $account->getSubscriptionListURI($path);
     } else {
       return '/phortune/subscription/'.$path;
     }

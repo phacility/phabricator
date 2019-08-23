@@ -471,13 +471,10 @@ final class PhortuneCart extends PhortuneDAO
     return $this->getImplementation()->getDescription($this);
   }
 
-  public function getDetailURI(PhortuneMerchant $authority = null) {
-    if ($authority) {
-      $prefix = 'merchant/'.$authority->getID().'/';
-    } else {
-      $prefix = '';
-    }
-    return '/phortune/'.$prefix.'cart/'.$this->getID().'/';
+  public function getDetailURI() {
+    return urisprintf(
+      '/phortune/cart/%d/',
+      $this->getID());
   }
 
   public function getCheckoutURI() {
@@ -496,6 +493,15 @@ final class PhortuneCart extends PhortuneDAO
   public function canRefundOrder() {
     try {
       $this->assertCanRefundOrder();
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+  public function canVoidOrder() {
+    try {
+      $this->assertCanVoidOrder();
       return true;
     } catch (Exception $ex) {
       return false;
@@ -533,6 +539,27 @@ final class PhortuneCart extends PhortuneDAO
 
     return $this->getImplementation()->assertCanRefundOrder($this);
   }
+
+  public function assertCanVoidOrder() {
+    if (!$this->getIsInvoice()) {
+      throw new Exception(
+        pht(
+          'This order can not be voided because it is not an invoice.'));
+    }
+
+    switch ($this->getStatus()) {
+      case self::STATUS_READY:
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'This order can not be voided because it is not ready for '.
+            'payment.'));
+    }
+
+    return null;
+  }
+
 
   protected function getConfiguration() {
     return array(

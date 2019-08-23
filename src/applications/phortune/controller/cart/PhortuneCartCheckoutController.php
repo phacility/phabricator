@@ -3,18 +3,17 @@
 final class PhortuneCartCheckoutController
   extends PhortuneCartController {
 
-  public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+  protected function shouldRequireAccountAuthority() {
+    return true;
+  }
 
-    $cart = id(new PhortuneCartQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needPurchases(true)
-      ->executeOne();
-    if (!$cart) {
-      return new Aphront404Response();
-    }
+  protected function shouldRequireMerchantAuthority() {
+    return false;
+  }
+
+  protected function handleCartRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $cart = $this->getCart();
 
     $cancel_uri = $cart->getCancelURI();
     $merchant = $cart->getMerchant();
@@ -139,7 +138,10 @@ final class PhortuneCartCheckoutController
       'cartID' => $cart->getID(),
     );
 
-    $payment_method_uri = $this->getApplicationURI("{$account_id}/card/new/");
+    $payment_method_uri = urisprintf(
+      'account/%d/methods/new/',
+      $account->getID());
+    $payment_method_uri = $this->getApplicationURI($payment_method_uri);
     $payment_method_uri = new PhutilURI($payment_method_uri, $params);
 
     $form = id(new AphrontFormView())
