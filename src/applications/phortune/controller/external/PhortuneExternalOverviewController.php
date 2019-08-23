@@ -12,7 +12,14 @@ final class PhortuneExternalOverviewController
       ->setBorder(true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Invoices and Receipts: %s', $account->getName()));
+      ->setHeader(pht('Invoices and Receipts: %s', $account->getName()))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setIcon('fa-times')
+          ->setText(pht('Unsubscribe'))
+          ->setHref($email->getUnsubscribeURI())
+          ->setWorkflow(true));
 
     $external_view = $this->newExternalView();
     $invoices_view = $this->newInvoicesView();

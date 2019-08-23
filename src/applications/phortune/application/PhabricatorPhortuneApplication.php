@@ -87,7 +87,12 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
             ),
             'addresses/' => array(
               '' => 'PhortuneAccountEmailAddressesController',
-              '(?P<id>\d+)/' => 'PhortuneAccountEmailViewController',
+              '(?P<addressID>\d+)/' => array(
+                '' => 'PhortuneAccountEmailViewController',
+                'rotate/' => 'PhortuneAccountEmailRotateController',
+                '(?P<action>disable|enable)/'
+                  => 'PhortuneAccountEmailStatusController',
+              ),
               $this->getEditRoutePattern('edit/')
                 => 'PhortuneAccountEmailEditController',
             ),
@@ -106,6 +111,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         ),
         'external/(?P<addressKey>[^/]+)/(?P<accessKey>[^/]+)/' => array(
           '' => 'PhortuneExternalOverviewController',
+          'unsubscribe/' => 'PhortuneExternalUnsubscribeController',
         ),
         'merchant/' => array(
           $this->getQueryRoutePattern()

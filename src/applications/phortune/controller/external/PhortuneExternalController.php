@@ -83,7 +83,29 @@ abstract class PhortuneExternalController
       return $dialog;
     }
 
-    // TODO: Test that status is good.
+    switch ($email->getStatus()) {
+      case PhortuneAccountEmailStatus::STATUS_ACTIVE:
+        break;
+      case PhortuneAccountEmailStatus::STATUS_DISABLED:
+        return $this->newDialog()
+          ->setTitle(pht('Address Disabled'))
+          ->appendParagraph(
+            pht(
+              'This email address (%s) has been disabled and no longer has '.
+              'access to this payment account.',
+              $email_display));
+      case PhortuneAccountEmailStatus::STATUS_UNSUBSCRIBED:
+        return $this->newDialog()
+          ->setTitle(pht('Permanently Unsubscribed'))
+          ->appendParagraph(
+            pht(
+              'This email address (%s) has been permanently unsubscribed '.
+              'and no longer has access to this payment account.',
+              $email_display));
+        break;
+      default:
+        return new Aphront404Response();
+    }
 
     $this->email = $email;
 

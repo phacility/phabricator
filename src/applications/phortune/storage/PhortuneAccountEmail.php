@@ -85,6 +85,13 @@ final class PhortuneAccountEmail
       $this->getAccessKey());
   }
 
+  public function getUnsubscribeURI() {
+    return urisprintf(
+      '/phortune/external/%s/%s/unsubscribe/',
+      $this->getAddressKey(),
+      $this->getAccessKey());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

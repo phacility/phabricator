@@ -14,7 +14,7 @@ final class PhortuneAccountEmailViewController
     $address = id(new PhortuneAccountEmailQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
-      ->withIDs(array($request->getURIData('id')))
+      ->withIDs(array($request->getURIData('addressID')))
       ->executeOne();
     if (!$address) {
       return new Aphront404Response();
@@ -83,6 +83,56 @@ final class PhortuneAccountEmailViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    switch ($address->getStatus()) {
+      case PhortuneAccountEmailStatus::STATUS_ACTIVE:
+        $disable_name = pht('Disable Address');
+        $disable_icon = 'fa-times';
+        $can_disable = true;
+        $disable_action = 'disable';
+        break;
+      case PhortuneAccountEmailStatus::STATUS_DISABLED:
+        $disable_name = pht('Enable Address');
+        $disable_icon = 'fa-check';
+        $can_disable = true;
+        $disable_action = 'enable';
+        break;
+      case PhortuneAccountEmailStatus::STATUS_UNSUBSCRIBED:
+        $disable_name = pht('Disable Address');
+        $disable_icon = 'fa-times';
+        $can_disable = false;
+        $disable_action = 'disable';
+        break;
+    }
+
+    $disable_uri = $this->getApplicationURI(
+      urisprintf(
+        'account/%d/addresses/%d/%s/',
+        $account->getID(),
+        $address->getID(),
+        $disable_action));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName($disable_name)
+        ->setIcon($disable_icon)
+        ->setHref($disable_uri)
+        ->setDisabled(!$can_disable)
+        ->setWorkflow(true));
+
+    $rotate_uri = $this->getApplicationURI(
+      urisprintf(
+        'account/%d/addresses/%d/rotate/',
+        $account->getID(),
+        $address->getID()));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Rotate Access Key'))
+        ->setIcon('fa-refresh')
+        ->setHref($rotate_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Show External View'))
@@ -100,7 +150,23 @@ final class PhortuneAccountEmailViewController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
+    $access_key = $address->getAccessKey();
+
+    // This is not a meaningful security barrier: the full plaintext of the
+    // access key is visible on the page in the link target of the "Show
+    // External View" action. It's just here to make it clear "Rotate Access
+    // Key" actually does something.
+
+    $prefix_length = 4;
+    $visible_part = substr($access_key, 0, $prefix_length);
+    $masked_part = str_repeat(
+      "\xE2\x80\xA2",
+      strlen($access_key) - $prefix_length);
+    $access_display = $visible_part.$masked_part;
+    $access_display = phutil_tag('tt', array(), $access_display);
+
     $view->addProperty(pht('Email Address'), $address->getAddress());
+    $view->addProperty(pht('Access Key'), $access_display);
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Email Address Details'))
