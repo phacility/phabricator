@@ -67,6 +67,12 @@ final class PhortuneAccountEmailViewController
         $account->getID(),
         $address->getID()));
 
+    if ($can_edit) {
+      $external_uri = $address->getExternalURI();
+    } else {
+      $external_uri = null;
+    }
+
     $curtain = $this->newCurtainView($account);
 
     $curtain->addAction(
@@ -76,6 +82,14 @@ final class PhortuneAccountEmailViewController
         ->setHref($edit_uri)
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Show External View'))
+        ->setIcon('fa-eye')
+        ->setHref($external_uri)
+        ->setDisabled(!$can_edit)
+        ->setOpenInNewWindow(true));
 
     return $curtain;
   }

@@ -49,6 +49,7 @@ final class PhortuneOrderTableView extends AphrontView {
 
     $is_invoices = $this->getIsInvoices();
     $is_merchant = $this->getIsMerchantView();
+    $is_external = (!$viewer->getPHID());
 
     $phids = array();
     foreach ($carts as $cart) {
@@ -69,14 +70,18 @@ final class PhortuneOrderTableView extends AphrontView {
 
       if (count($purchases) == 1) {
         $purchase = head($purchases);
-        $purchase_name = $handles[$purchase->getPHID()]->renderLink();
+        $purchase_name = $handles[$purchase->getPHID()]->getName();
         $purchases = array();
       } else {
         $purchase_name = '';
       }
 
       if ($is_invoices) {
-        $merchant_link = $handles[$cart->getMerchantPHID()]->renderLink();
+        if ($is_external) {
+          $merchant_link = $handles[$cart->getMerchantPHID()]->getName();
+        } else {
+          $merchant_link = $handles[$cart->getMerchantPHID()]->renderLink();
+        }
       } else {
         $merchant_link = null;
       }
@@ -97,13 +102,12 @@ final class PhortuneOrderTableView extends AphrontView {
         PhortuneCart::getNameForStatus($cart->getStatus()),
         phabricator_datetime($cart->getDateModified(), $viewer),
         phabricator_datetime($cart->getDateCreated(), $viewer),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $cart->getCheckoutURI(),
-            'class' => 'small button button-green',
-          ),
-          pht('Pay Now')),
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setColor('green')
+          ->setHref($cart->getCheckoutURI())
+          ->setText(pht('Pay Now'))
+          ->setIcon('fa-credit-card'),
       );
       foreach ($purchases as $purchase) {
         $id = $purchase->getID();
@@ -164,7 +168,7 @@ final class PhortuneOrderTableView extends AphrontView {
 
           // We show "Pay Now" for due invoices, but not if the viewer is the
           // merchant, since it doesn't make sense for them to pay.
-          ($is_invoices && !$is_merchant),
+          ($is_invoices && !$is_merchant && !$is_external),
         ));
 
     return $table;

@@ -104,6 +104,9 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '(?P<id>\d+)/(?P<action>[^/]+)/'
             => 'PhortuneProviderActionController',
         ),
+        'external/(?P<addressKey>[^/]+)/(?P<accessKey>[^/]+)/' => array(
+          '' => 'PhortuneExternalOverviewController',
+        ),
         'merchant/' => array(
           $this->getQueryRoutePattern()
             => 'PhortuneMerchantListController',

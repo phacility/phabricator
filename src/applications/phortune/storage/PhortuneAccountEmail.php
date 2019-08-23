@@ -78,6 +78,13 @@ final class PhortuneAccountEmail
       $this->getID());
   }
 
+  public function getExternalURI() {
+    return urisprintf(
+      '/phortune/external/%s/%s/',
+      $this->getAddressKey(),
+      $this->getAccessKey());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
