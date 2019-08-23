@@ -112,6 +112,9 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         'external/(?P<addressKey>[^/]+)/(?P<accessKey>[^/]+)/' => array(
           '' => 'PhortuneExternalOverviewController',
           'unsubscribe/' => 'PhortuneExternalUnsubscribeController',
+          'order/' => array(
+            '(?P<orderID>[^/]+)/' => 'PhortuneExternalOrderController',
+          ),
         ),
         'merchant/' => array(
           $this->getQueryRoutePattern()

@@ -7,6 +7,7 @@ final class PhortuneAccountEmailQuery
   private $phids;
   private $accountPHIDs;
   private $addressKeys;
+  private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -25,6 +26,11 @@ final class PhortuneAccountEmailQuery
 
   public function withAddressKeys(array $keys) {
     $this->addressKeys = $keys;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -88,6 +94,13 @@ final class PhortuneAccountEmailQuery
         $conn,
         'address.addressKey IN (%Ls)',
         $this->addressKeys);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'address.status IN (%Ls)',
+        $this->statuses);
     }
 
     return $where;

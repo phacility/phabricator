@@ -656,6 +656,10 @@ final class PhortuneCart extends PhortuneDAO
     return idx($this->metadata, $key, $default);
   }
 
+  public function getObjectName() {
+    return pht('Order %d', $this->getID());
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

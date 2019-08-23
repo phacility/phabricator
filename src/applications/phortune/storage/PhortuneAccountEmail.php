@@ -92,6 +92,14 @@ final class PhortuneAccountEmail
       $this->getAccessKey());
   }
 
+  public function getExternalOrderURI(PhortuneCart $cart) {
+    return urisprintf(
+      '/phortune/external/%s/%s/order/%d/',
+      $this->getAddressKey(),
+      $this->getAccessKey(),
+      $cart->getID());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

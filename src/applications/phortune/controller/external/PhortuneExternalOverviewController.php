@@ -9,6 +9,7 @@ final class PhortuneExternalOverviewController
     $account = $email->getAccount();
 
     $crumbs = $this->newExternalCrumbs()
+      ->addTextCrumb(pht('Viewing As "%s"', $email->getAddress()))
       ->setBorder(true);
 
     $header = id(new PHUIHeaderView())
@@ -61,6 +62,7 @@ final class PhortuneExternalOverviewController
 
     $invoices_table = id(new PhortuneOrderTableView())
       ->setViewer($xviewer)
+      ->setAccountEmail($email)
       ->setCarts($invoices)
       ->setIsInvoices(true);
 
@@ -87,6 +89,7 @@ final class PhortuneExternalOverviewController
 
     $receipts_table = id(new PhortuneOrderTableView())
       ->setViewer($xviewer)
+      ->setAccountEmail($email)
       ->setCarts($receipts);
 
     return id(new PHUIObjectBoxView())

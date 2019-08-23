@@ -1520,6 +1520,10 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    foreach ($this->newAuxiliaryMail($object, $xactions) as $message) {
+      $messages[] = $message;
+    }
+
     // NOTE: This actually sends the mail. We do this last to reduce the chance
     // that we send some mail, hit an exception, then send the mail again when
     // retrying.
@@ -4797,6 +4801,10 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $extensions;
+  }
+
+  protected function newAuxiliaryMail($object, array $xactions) {
+    return array();
   }
 
   private function generateMailStamps($object, $data) {

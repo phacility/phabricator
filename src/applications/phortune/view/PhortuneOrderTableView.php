@@ -6,6 +6,7 @@ final class PhortuneOrderTableView extends AphrontView {
   private $noDataString;
   private $isInvoices;
   private $isMerchantView;
+  private $accountEmail;
 
   public function setCarts(array $carts) {
     $this->carts = $carts;
@@ -43,13 +44,24 @@ final class PhortuneOrderTableView extends AphrontView {
     return $this->isMerchantView;
   }
 
+  public function setAccountEmail(PhortuneAccountEmail $account_email) {
+    $this->accountEmail = $account_email;
+    return $this;
+  }
+
+  public function getAccountEmail() {
+    return $this->accountEmail;
+  }
+
   public function render() {
     $carts = $this->getCarts();
     $viewer = $this->getUser();
 
     $is_invoices = $this->getIsInvoices();
     $is_merchant = $this->getIsMerchantView();
-    $is_external = (!$viewer->getPHID());
+    $is_external = (bool)$this->getAccountEmail();
+
+    $email = $this->getAccountEmail();
 
     $phids = array();
     foreach ($carts as $cart) {
@@ -65,7 +77,16 @@ final class PhortuneOrderTableView extends AphrontView {
     $rows = array();
     $rowc = array();
     foreach ($carts as $cart) {
-      $cart_link = $handles[$cart->getPHID()]->renderLink();
+      if ($is_external) {
+        $cart_link = phutil_tag(
+          'a',
+          array(
+            'href' => $email->getExternalOrderURI($cart),
+          ),
+          $handles[$cart->getPHID()]->getName());
+      } else {
+        $cart_link = $handles[$cart->getPHID()]->renderLink();
+      }
       $purchases = $cart->getPurchases();
 
       if (count($purchases) == 1) {

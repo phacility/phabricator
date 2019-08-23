@@ -127,19 +127,11 @@ abstract class PhortuneExternalController
 
       $crumb = id(new PHUICrumbView())
         ->setIcon('fa-diamond')
-        ->setName($crumb_name);
-
-      $can_see = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $account,
-        PhabricatorPolicyCapability::CAN_VIEW);
-      if ($can_see) {
-        $crumb->setHref($account->getURI());
-      }
+        ->setName($crumb_name)
+        ->setHref($email->getExternalURI());
 
       $crumbs
-        ->addCrumb($crumb)
-        ->addTextCrumb(pht('Viewing As "%s"', $email->getAddress()));
+        ->addCrumb($crumb);
     } else {
       $crumb = id(new PHUICrumbView())
         ->setIcon('fa-diamond')
@@ -153,11 +145,22 @@ abstract class PhortuneExternalController
 
   final protected function newExternalView() {
     $email = $this->getAccountEmail();
+    $xviewer = $this->getExternalViewer();
+
+    $origin_phid = $email->getAuthorPHID();
+
+    $handles = $xviewer->loadHandles(array($origin_phid));
+
 
     $messages = array();
     $messages[] = pht(
       'You are viewing this payment account as: %s',
       phutil_tag('strong', array(), $email->getAddress()));
+
+    $messages[] = pht(
+      'This email address was added to this payment account by: %s',
+      phutil_tag('strong', array(), $handles[$origin_phid]->getFullName()));
+
     $messages[] = pht(
       'Anyone who has a link to this page can view order history for '.
       'this payment account.');
