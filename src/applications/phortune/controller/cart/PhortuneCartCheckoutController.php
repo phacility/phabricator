@@ -207,7 +207,9 @@ final class PhortuneCartCheckoutController
       ->appendChild($form)
       ->appendChild($provider_form);
 
-    $description_box = $this->renderCartDescription($cart);
+    $description_view = id(new PhortuneOrderDescriptionView())
+      ->setViewer($viewer)
+      ->setOrder($cart);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Checkout'));
@@ -220,11 +222,12 @@ final class PhortuneCartCheckoutController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
-        $cart_box,
-        $description_box,
-        $payment_box,
-      ));
+      ->setFooter(
+        array(
+          $description_view,
+          $cart_box,
+          $payment_box,
+        ));
 
     return $this->newPage()
       ->setTitle($title)

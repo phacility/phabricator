@@ -481,13 +481,24 @@ abstract class PhabricatorController extends AphrontController {
 
   protected function buildTransactionTimeline(
     PhabricatorApplicationTransactionInterface $object,
-    PhabricatorApplicationTransactionQuery $query,
+    PhabricatorApplicationTransactionQuery $query = null,
     PhabricatorMarkupEngine $engine = null,
     $view_data = array()) {
 
     $request = $this->getRequest();
     $viewer = $this->getViewer();
     $xaction = $object->getApplicationTransactionTemplate();
+
+    if (!$query) {
+      $query = PhabricatorApplicationTransactionQuery::newQueryForObject(
+        $object);
+      if (!$query) {
+        throw new Exception(
+          pht(
+            'Unable to find transaction query for object of class "%s".',
+            get_class($object)));
+      }
+    }
 
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request)

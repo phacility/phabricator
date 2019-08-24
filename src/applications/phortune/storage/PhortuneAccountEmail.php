@@ -100,6 +100,14 @@ final class PhortuneAccountEmail
       $cart->getID());
   }
 
+  public function getExternalOrderPrintURI(PhortuneCart $cart) {
+    return urisprintf(
+      '/phortune/external/%s/%s/order/%d/print/',
+      $this->getAddressKey(),
+      $this->getAccessKey(),
+      $cart->getID());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -3,8 +3,6 @@
 final class PhortuneCartViewController
   extends PhortuneCartController {
 
-  private $action = null;
-
   protected function shouldRequireAccountAuthority() {
     return false;
   }
@@ -15,259 +13,99 @@ final class PhortuneCartViewController
 
   protected function handleCartRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $cart = $this->getCart();
+    $order = $this->getCart();
     $authority = $this->getMerchantAuthority();
     $can_edit = $this->hasAccountAuthority();
 
-    $this->action = $request->getURIData('action');
+    $is_printable = ($request->getURIData('action') === 'print');
 
-    $cart_table = $this->buildCartContentTable($cart);
-
-    $errors = array();
-    $error_view = null;
     $resume_uri = null;
-    switch ($cart->getStatus()) {
-      case PhortuneCart::STATUS_READY:
-        if ($cart->getIsInvoice()) {
-          $error_view = id(new PHUIInfoView())
-            ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-            ->appendChild(pht('This invoice is ready for payment.'));
-        }
-        break;
-      case PhortuneCart::STATUS_PURCHASING:
-        if ($can_edit) {
-          $resume_uri = $cart->getMetadataValue('provider.checkoutURI');
-          if ($resume_uri) {
-            $errors[] = pht(
-              'The checkout process has been started, but not yet completed. '.
-              'You can continue checking out by clicking %s, or cancel the '.
-              'order, or contact the merchant for assistance.',
-              phutil_tag('strong', array(), pht('Continue Checkout')));
-          } else {
-            $errors[] = pht(
-              'The checkout process has been started, but an error occurred. '.
-              'You can cancel the order or contact the merchant for '.
-              'assistance.');
-          }
-        }
-        break;
-      case PhortuneCart::STATUS_CHARGED:
-        if ($can_edit) {
-          $errors[] = pht(
-            'You have been charged, but processing could not be completed. '.
-            'You can cancel your order, or contact the merchant for '.
-            'assistance.');
-        }
-        break;
-      case PhortuneCart::STATUS_HOLD:
-        if ($can_edit) {
-          $errors[] = pht(
-            'Payment for this order is on hold. You can click %s to check '.
-            'for updates, cancel the order, or contact the merchant for '.
-            'assistance.',
-            phutil_tag('strong', array(), pht('Update Status')));
-        }
-        break;
-      case PhortuneCart::STATUS_REVIEW:
-        if ($authority) {
-          $errors[] = pht(
-            'This order has been flagged for manual review. Review the order '.
-            'and choose %s to accept it or %s to reject it.',
-            phutil_tag('strong', array(), pht('Accept Order')),
-            phutil_tag('strong', array(), pht('Refund Order')));
-        } else if ($can_edit) {
-          $errors[] = pht(
-            'This order requires manual processing and will complete once '.
-            'the merchant accepts it.');
-        }
-        break;
-      case PhortuneCart::STATUS_PURCHASED:
-        $error_view = id(new PHUIInfoView())
-          ->setSeverity(PHUIInfoView::SEVERITY_SUCCESS)
-          ->appendChild(pht('This purchase has been completed.'));
-        break;
+    if ($order->getStatus() === PhortuneCart::STATUS_PURCHASING) {
+      if ($can_edit) {
+        $resume_uri = $order->getMetadataValue('provider.checkoutURI');
+      }
     }
-
-    if ($errors) {
-      $error_view = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-        ->appendChild($errors);
-    }
-
-    $details = $this->buildDetailsView($cart);
-    $curtain = $this->buildCurtainView(
-      $cart,
-      $can_edit,
-      $authority,
-      $resume_uri);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($cart->getName())
+      ->setHeader($order->getName())
       ->setHeaderIcon('fa-shopping-bag');
 
-    if ($cart->getStatus() == PhortuneCart::STATUS_PURCHASED) {
-      $done_uri = $cart->getDoneURI();
+    if ($order->getStatus() == PhortuneCart::STATUS_PURCHASED) {
+      $done_uri = $order->getDoneURI();
       if ($done_uri) {
         $header->addActionLink(
           id(new PHUIButtonView())
             ->setTag('a')
             ->setHref($done_uri)
             ->setIcon('fa-check-square green')
-            ->setText($cart->getDoneActionName()));
+            ->setText($order->getDoneActionName()));
       }
     }
 
-    $cart_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Cart Items'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($cart_table);
-
-    $description = $this->renderCartDescription($cart);
-
-    $charges = id(new PhortuneChargeQuery())
+    $order_view = id(new PhortuneOrderSummaryView())
       ->setViewer($viewer)
-      ->withCartPHIDs(array($cart->getPHID()))
-      ->needCarts(true)
-      ->execute();
+      ->setOrder($order)
+      ->setResumeURI($resume_uri)
+      ->setPrintable($is_printable);
 
-    $charges_table = id(new PhortuneChargeTableView())
-      ->setUser($viewer)
-      ->setCharges($charges)
-      ->setShowOrder(false);
+    $crumbs = null;
+    $curtain = null;
 
-    $charges = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Charges'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($charges_table);
+    $main = array();
+    $tail = array();
 
-    $account = $cart->getAccount();
+    require_celerity_resource('phortune-invoice-css');
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($account->getName(), $account->getURI())
-      ->addTextCrumb(pht('Orders'), $account->getOrdersURI())
-      ->addTextCrumb(pht('Cart %d', $cart->getID()))
-      ->setBorder(true);
+    if ($is_printable) {
+      $body_class = 'phortune-invoice-view';
 
-    require_celerity_resource('phortune-css');
-
-    if (!$this->action) {
-      $class = 'phortune-cart-page';
-      $timeline = $this->buildTransactionTimeline(
-        $cart,
-        new PhortuneCartTransactionQuery());
-      $timeline
-       ->setShouldTerminate(true);
-
-      $view = id(new PHUITwoColumnView())
-        ->setHeader($header)
-        ->setCurtain($curtain)
-        ->setMainColumn(array(
-          $error_view,
-          $details,
-          $cart_box,
-          $description,
-          $charges,
-          $timeline,
-        ));
-
+      $tail[] = $order_view;
     } else {
-      $class = 'phortune-invoice-view';
-      $crumbs = null;
-      $merchant_phid = $cart->getMerchantPHID();
-      $buyer_phid = $cart->getAuthorPHID();
-      $merchant = id(new PhortuneMerchantQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($merchant_phid))
-        ->needProfileImage(true)
-        ->executeOne();
-      $buyer = id(new PhabricatorPeopleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($buyer_phid))
-        ->needProfileImage(true)
-        ->executeOne();
+      $body_class = 'phortune-cart-page';
 
-      $merchant_contact = new PHUIRemarkupView(
-        $viewer,
-        $merchant->getContactInfo());
+      $curtain = $this->buildCurtainView(
+        $order,
+        $can_edit,
+        $authority,
+        $resume_uri);
 
-      $account_name = $account->getBillingName();
-      if (!strlen($account_name)) {
-        $account_name = $buyer->getRealName();
-      }
+      $account = $order->getAccount();
+      $crumbs = $this->buildApplicationCrumbs()
+        ->addTextCrumb($account->getName(), $account->getURI())
+        ->addTextCrumb(pht('Orders'), $account->getOrdersURI())
+        ->addTextCrumb($order->getObjectName())
+        ->setBorder(true);
 
-      $account_contact = $account->getBillingAddress();
-      if (strlen($account_contact)) {
-        $account_contact = new PHUIRemarkupView(
-          $viewer,
-          $account_contact);
-      }
+      $timeline = $this->buildTransactionTimeline($order)
+        ->setShouldTerminate(true);
 
-      $view = id(new PhortuneInvoiceView())
-        ->setMerchantName($merchant->getName())
-        ->setMerchantLogo($merchant->getProfileImageURI())
-        ->setMerchantContact($merchant_contact)
-        ->setMerchantFooter($merchant->getInvoiceFooter())
-        ->setAccountName($account_name)
-        ->setAccountContact($account_contact)
-        ->setStatus($error_view)
-        ->setContent(
-          array(
-            $details,
-            $cart_box,
-            $charges,
-          ));
+      $main[] = $order_view;
+      $main[] = $timeline;
+    }
+
+    $column_view = id(new PHUITwoColumnView())
+      ->setMainColumn($main)
+      ->setFooter($tail);
+
+    if ($curtain) {
+      $column_view->setCurtain($curtain);
     }
 
     $page = $this->newPage()
-      ->setTitle(pht('Cart %d', $cart->getID()))
-      ->addClass($class)
-      ->appendChild($view);
+      ->addClass($body_class)
+      ->setTitle(
+        array(
+          $order->getObjectName(),
+          $order->getName(),
+        ))
+      ->appendChild($column_view);
 
     if ($crumbs) {
       $page->setCrumbs($crumbs);
     }
 
     return $page;
-  }
-
-  private function buildDetailsView(PhortuneCart $cart) {
-    $viewer = $this->getViewer();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($cart);
-
-    $handles = $this->loadViewerHandles(
-      array(
-        $cart->getAccountPHID(),
-        $cart->getAuthorPHID(),
-        $cart->getMerchantPHID(),
-      ));
-
-    if ($this->action == 'print') {
-      $view->addProperty(pht('Order Name'), $cart->getName());
-    }
-
-    $view->addProperty(
-      pht('Account'),
-      $handles[$cart->getAccountPHID()]->renderLink());
-    $view->addProperty(
-      pht('Authorized By'),
-      $handles[$cart->getAuthorPHID()]->renderLink());
-    $view->addProperty(
-      pht('Merchant'),
-      $handles[$cart->getMerchantPHID()]->renderLink());
-    $view->addProperty(
-      pht('Status'),
-      PhortuneCart::getNameForStatus($cart->getStatus()));
-    $view->addProperty(
-      pht('Updated'),
-      phabricator_datetime($cart->getDateModified(), $viewer));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Details'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($view);
   }
 
   private function buildCurtainView(
@@ -296,6 +134,18 @@ final class PhortuneCartViewController
     $print_uri = $this->getApplicationURI("cart/{$id}/print/");
     $checkout_uri = $cart->getCheckoutURI();
     $void_uri = $this->getApplicationURI("cart/{$id}/void/");
+
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Printable Version'))
+        ->setHref($print_uri)
+        ->setOpenInNewWindow(true)
+        ->setIcon('fa-print'));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -326,13 +176,6 @@ final class PhortuneCartViewController
           ->setIcon('fa-shopping-bag')
           ->setHref($resume_uri));
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Printable Version'))
-        ->setHref($print_uri)
-        ->setOpenInNewWindow(true)
-        ->setIcon('fa-print'));
 
     if ($authority) {
       $curtain->addAction(

@@ -113,7 +113,10 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '' => 'PhortuneExternalOverviewController',
           'unsubscribe/' => 'PhortuneExternalUnsubscribeController',
           'order/' => array(
-            '(?P<orderID>[^/]+)/' => 'PhortuneExternalOrderController',
+            '(?P<orderID>[^/]+)/' => array(
+              '' => 'PhortuneExternalOrderController',
+              '(?P<action>print)/' => 'PhortuneExternalOrderController',
+            ),
           ),
         ),
         'merchant/' => array(
