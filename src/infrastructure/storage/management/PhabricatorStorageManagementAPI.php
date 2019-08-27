@@ -298,6 +298,14 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     return self::isCharacterSetAvailableOnConnection($character_set, $conn);
   }
 
+  public function getClientCharset() {
+    if ($this->isCharacterSetAvailable('utf8mb4')) {
+      return 'utf8mb4';
+    } else {
+      return 'utf8';
+    }
+  }
+
   public static function isCharacterSetAvailableOnConnection(
     $character_set,
     AphrontDatabaseConnection $conn) {

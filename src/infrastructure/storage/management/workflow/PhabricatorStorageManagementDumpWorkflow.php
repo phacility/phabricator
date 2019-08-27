@@ -179,7 +179,9 @@ final class PhabricatorStorageManagementDumpWorkflow
     $argv = array();
     $argv[] = '--hex-blob';
     $argv[] = '--single-transaction';
-    $argv[] = '--default-character-set=utf8';
+
+    $argv[] = '--default-character-set';
+    $argv[] = $api->getClientCharset();
 
     if ($args->getArg('for-replica')) {
       $argv[] = '--master-data';
