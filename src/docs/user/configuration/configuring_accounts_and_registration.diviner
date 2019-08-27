@@ -49,30 +49,8 @@ phabricator/ $ ./bin/auth recover <username>
 ...where `<username>` is the account username you want to recover access
 to. This will generate a link which will log you in as the specified user.
 
-
-Managing Accounts with the Web Console
-======================================
-
-To manage accounts from the web, login as an administrator account and go to
-`/people/` or click "People" on the homepage. Provided you're an admin,
-you'll see options to create or edit accounts.
-
-
-Manually Creating New Accounts
-==============================
-
-There are two ways to manually create new accounts: via the web UI using
-the "People" application (this is easiest), or via the CLI using the
-`accountadmin` binary (this has a few more options).
-
-To use the CLI script, run:
-
-  phabricator/ $ ./bin/accountadmin
-
-Some options (like changing certain account flags) are only available from
-the CLI. You can also use this script to make a user
-an administrator (if you accidentally remove your admin flag) or to create an
-administrative account.
+For more details on recovering access to accounts and unlocking objects, see
+@{article:User Guide: Unlocking Objects}.
 
 
 Next Steps

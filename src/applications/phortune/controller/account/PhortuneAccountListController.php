@@ -38,7 +38,7 @@ final class PhortuneAccountListController extends PhortuneController {
       $item = id(new PHUIObjectItemView())
         ->setSubhead(pht('Account %d', $account->getID()))
         ->setHeader($account->getName())
-        ->setHref($this->getApplicationURI($account->getID().'/'))
+        ->setHref($account->getURI())
         ->setObject($account)
         ->setImageIcon('fa-user-circle');
 

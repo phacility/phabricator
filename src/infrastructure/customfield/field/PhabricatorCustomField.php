@@ -1648,6 +1648,7 @@ abstract class PhabricatorCustomField extends Phobject {
     $subtype_roles = array(
       self::ROLE_EDITENGINE,
       self::ROLE_VIEW,
+      self::ROLE_EDIT,
     );
 
     $subtype_roles = array_fuse($subtype_roles);

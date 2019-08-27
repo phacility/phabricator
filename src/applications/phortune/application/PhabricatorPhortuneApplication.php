@@ -34,26 +34,6 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
     return array(
       '/phortune/' => array(
         '' => 'PhortuneLandingController',
-        '(?P<accountID>\d+)/' => array(
-          '' => 'PhortuneAccountViewController',
-          'card/' => array(
-            'new/' => 'PhortunePaymentMethodCreateController',
-          ),
-          'order/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneCartListController',
-          'subscription/' => array(
-            '(?:query/(?P<queryKey>[^/]+)/)?'
-              => 'PhortuneSubscriptionListController',
-            'view/(?P<id>\d+)/'
-              => 'PhortuneSubscriptionViewController',
-            'edit/(?P<id>\d+)/'
-              => 'PhortuneSubscriptionEditController',
-            'order/(?P<subscriptionID>\d+)/'
-              => 'PhortuneCartListController',
-          ),
-          'charge/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneAccountChargeListController',
-        ),
         'card/(?P<id>\d+)/' => array(
           'edit/' => 'PhortunePaymentMethodEditController',
           'disable/' => 'PhortunePaymentMethodDisableController',
@@ -63,21 +43,59 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           'checkout/' => 'PhortuneCartCheckoutController',
           '(?P<action>print)/' => 'PhortuneCartViewController',
           '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
+          'accept/' => 'PhortuneCartAcceptController',
+          'void/' => 'PhortuneCartVoidController',
           'update/' => 'PhortuneCartUpdateController',
         ),
         'account/' => array(
           '' => 'PhortuneAccountListController',
+
           $this->getEditRoutePattern('edit/')
             => 'PhortuneAccountEditController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneAccountEditController',
-          'add/manager/(?:(?P<id>\d+)/)?'
-            => 'PhortuneAccountAddManagerController',
-          'billing/(?:(?P<id>\d+)/)?' => 'PhortuneAccountBillingController',
-          'subscription/(?:(?P<id>\d+)/)?'
-            => 'PhortuneAccountSubscriptionController',
-          'manager/' => array(
-            '(?:(?P<id>\d+)/)?' => 'PhortuneAccountManagerController',
-            'add/(?:(?P<id>\d+)/)?' => 'PhortuneAccountAddManagerController',
+
+          '(?P<accountID>\d+)/' => array(
+            '' => 'PhortuneAccountOverviewController',
+            'details/' => 'PhortuneAccountDetailsController',
+            'methods/' => array(
+              '' => 'PhortuneAccountPaymentMethodController',
+              '(?P<id>\d+)/' => 'PhortuneAccountPaymentMethodViewController',
+              'new/' => 'PhortunePaymentMethodCreateController',
+            ),
+            'orders/' => array(
+              '' => 'PhortuneAccountOrdersController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneAccountOrderListController',
+            ),
+            'charges/' => array(
+              '' => 'PhortuneAccountChargesController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneAccountChargeListController',
+            ),
+            'subscriptions/' => array(
+              '' => 'PhortuneAccountSubscriptionController',
+              '(?P<subscriptionID>\d+)/' => array(
+                '' => 'PhortuneAccountSubscriptionViewController',
+                'autopay/(?P<methodID>\d+)/'
+                  => 'PhortuneAccountSubscriptionAutopayController',
+                $this->getQueryRoutePattern('orders/')
+                  => 'PhortuneAccountOrderListController',
+              ),
+            ),
+            'managers/' => array(
+              '' => 'PhortuneAccountManagersController',
+              'add/' => 'PhortuneAccountAddManagerController',
+            ),
+            'addresses/' => array(
+              '' => 'PhortuneAccountEmailAddressesController',
+              '(?P<addressID>\d+)/' => array(
+                '' => 'PhortuneAccountEmailViewController',
+                'rotate/' => 'PhortuneAccountEmailRotateController',
+                '(?P<action>disable|enable)/'
+                  => 'PhortuneAccountEmailStatusController',
+              ),
+              $this->getEditRoutePattern('edit/')
+                => 'PhortuneAccountEmailEditController',
+            ),
           ),
         ),
         'product/' => array(
@@ -91,37 +109,51 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '(?P<id>\d+)/(?P<action>[^/]+)/'
             => 'PhortuneProviderActionController',
         ),
+        'external/(?P<addressKey>[^/]+)/(?P<accessKey>[^/]+)/' => array(
+          '' => 'PhortuneExternalOverviewController',
+          'unsubscribe/' => 'PhortuneExternalUnsubscribeController',
+          'order/' => array(
+            '(?P<orderID>[^/]+)/' => array(
+              '' => 'PhortuneExternalOrderController',
+              '(?P<action>print)/' => 'PhortuneExternalOrderController',
+            ),
+          ),
+        ),
         'merchant/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhortuneMerchantListController',
-          'picture/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantPictureController',
+          $this->getQueryRoutePattern()
+            => 'PhortuneMerchantListController',
           $this->getEditRoutePattern('edit/')
             => 'PhortuneMerchantEditController',
-          'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneCartListController',
-          'manager/' => array(
-            '(?:(?P<id>\d+)/)?' => 'PhortuneMerchantManagerController',
-            'add/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantAddManagerController',
-          ),
           '(?P<merchantID>\d+)/' => array(
-            'cart/(?P<id>\d+)/' => array(
-              '' => 'PhortuneCartViewController',
-              '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
-              'update/' => 'PhortuneCartUpdateController',
-              'accept/' => 'PhortuneCartAcceptController',
+            '' => 'PhortuneMerchantOverviewController',
+            'details/' => 'PhortuneMerchantDetailsController',
+            'providers/' => array(
+              '' => 'PhortuneMerchantProvidersController',
+              '(?P<providerID>\d+)/' => array(
+                '' => 'PhortuneMerchantProviderViewController',
+                'disable/' => 'PhortuneMerchantProviderDisableController',
+              ),
+              $this->getEditRoutePattern('edit/')
+                => 'PhortuneMerchantProviderEditController',
             ),
-            'subscription/' => array(
-              '(?:query/(?P<queryKey>[^/]+)/)?'
-                => 'PhortuneSubscriptionListController',
-              'view/(?P<id>\d+)/'
-                => 'PhortuneSubscriptionViewController',
-              'order/(?P<subscriptionID>\d+)/'
-                => 'PhortuneCartListController',
+            'orders/' => array(
+              '' => 'PhortuneMerchantOrdersController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneMerchantOrderListController',
             ),
-            'invoice/' => array(
-              'new/' => 'PhortuneMerchantInvoiceCreateController',
+            'picture/' => array(
+              'edit/' => 'PhortuneMerchantPictureController',
+            ),
+            'subscriptions/' => array(
+              '' => 'PhortuneMerchantSubscriptionsController',
+              $this->getQueryRoutePattern('list/')
+                => 'PhortuneMerchantSubscriptionListController',
+            ),
+            'managers/' => array(
+              '' => 'PhortuneMerchantManagersController',
+              'new/' => 'PhortuneMerchantAddManagerController',
             ),
           ),
-          '(?P<id>\d+)/' => 'PhortuneMerchantViewController',
         ),
       ),
     );

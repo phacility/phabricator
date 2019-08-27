@@ -3,61 +3,75 @@
 abstract class PhortuneCartController
   extends PhortuneController {
 
-  protected function buildCartContentTable(PhortuneCart $cart) {
+  private $cart;
+  private $merchantAuthority;
 
-    $rows = array();
-    foreach ($cart->getPurchases() as $purchase) {
-      $rows[] = array(
-        $purchase->getFullDisplayName(),
-        $purchase->getBasePriceAsCurrency()->formatForDisplay(),
-        $purchase->getQuantity(),
-        $purchase->getTotalPriceAsCurrency()->formatForDisplay(),
+  abstract protected function shouldRequireAccountAuthority();
+  abstract protected function shouldRequireMerchantAuthority();
+  abstract protected function handleCartRequest(AphrontRequest $request);
+
+  final public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+
+    if ($this->shouldRequireAccountAuthority()) {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      );
+    } else {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
       );
     }
 
-    $rows[] = array(
-      phutil_tag('strong', array(), pht('Total')),
-      '',
-      '',
-      phutil_tag('strong', array(),
-        $cart->getTotalPriceAsCurrency()->formatForDisplay()),
-    );
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Item'),
-        pht('Price'),
-        pht('Qty.'),
-        pht('Total'),
-      ));
-    $table->setColumnClasses(
-      array(
-        'wide',
-        'right',
-        'right',
-        'right',
-      ));
-
-    return $table;
-  }
-
-  protected function renderCartDescription(PhortuneCart $cart) {
-    $description = $cart->getDescription();
-    if (!strlen($description)) {
-      return null;
+    $cart = id(new PhortuneCartQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($request->getURIData('id')))
+      ->needPurchases(true)
+      ->requireCapabilities($capabilities)
+      ->executeOne();
+    if (!$cart) {
+      return new Aphront404Response();
     }
 
-    $output = new PHUIRemarkupView($this->getViewer(), $description);
+    if ($this->shouldRequireMerchantAuthority()) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $cart->getMerchant(),
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
 
-    $box = id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($output);
+    $this->cart = $cart;
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Description'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($box);
+    $can_edit = PhortuneMerchantQuery::canViewersEditMerchants(
+      array($viewer->getPHID()),
+      array($cart->getMerchantPHID()));
+    if ($can_edit) {
+      $this->merchantAuthority = $cart->getMerchant();
+    } else {
+      $this->merchantAuthority = null;
+    }
+
+    return $this->handleCartRequest($request);
+  }
+
+  final protected function getCart() {
+    return $this->cart;
+  }
+
+  final protected function getMerchantAuthority() {
+    return $this->merchantAuthority;
+  }
+
+  final protected function hasMerchantAuthority() {
+    return (bool)$this->merchantAuthority;
+  }
+
+  final protected function hasAccountAuthority() {
+    return (bool)PhabricatorPolicyFilter::hasCapability(
+      $this->getViewer(),
+      $this->getCart(),
+      PhabricatorPolicyCapability::CAN_EDIT);
   }
 
 }

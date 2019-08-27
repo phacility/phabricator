@@ -32,9 +32,9 @@ final class PhortunePaymentMethodPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $method = $objects[$phid];
 
-      $id = $method->getID();
-
-      $handle->setName($method->getFullDisplayName());
+      $handle
+        ->setName($method->getFullDisplayName())
+        ->setURI($method->getURI());
     }
   }
 

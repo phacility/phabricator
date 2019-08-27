@@ -6,7 +6,6 @@ final class PhortuneMerchant extends PhortuneDAO
     PhabricatorPolicyInterface {
 
   protected $name;
-  protected $viewPolicy;
   protected $description;
   protected $contactInfo;
   protected $invoiceEmail;
@@ -18,7 +17,6 @@ final class PhortuneMerchant extends PhortuneDAO
 
   public static function initializeNewMerchant(PhabricatorUser $actor) {
     return id(new PhortuneMerchant())
-      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->attachMemberPHIDs(array())
       ->setContactInfo('')
       ->setInvoiceEmail('')
@@ -70,6 +68,53 @@ final class PhortuneMerchant extends PhortuneDAO
     return $this->assertAttached($this->profileImageFile);
   }
 
+  public function getObjectName() {
+    return pht('Merchant %d', $this->getID());
+  }
+
+  public function getDetailsURI() {
+    return urisprintf(
+      '/phortune/merchant/%d/details/',
+      $this->getID());
+  }
+
+  public function getOrdersURI() {
+    return urisprintf(
+      '/phortune/merchant/%d/orders/',
+      $this->getID());
+  }
+
+  public function getOrderListURI($path = '') {
+    return urisprintf(
+      '/phortune/merchant/%d/orders/list/%s',
+      $this->getID(),
+      $path);
+  }
+
+  public function getSubscriptionsURI() {
+    return urisprintf(
+      '/phortune/merchant/%d/subscriptions/',
+      $this->getID());
+  }
+
+  public function getSubscriptionListURI($path = '') {
+    return urisprintf(
+      '/phortune/merchant/%d/subscriptions/list/%s',
+      $this->getID(),
+      $path);
+  }
+
+  public function getManagersURI() {
+    return urisprintf(
+      '/phortune/merchant/%d/managers/',
+      $this->getID());
+  }
+
+  public function getPaymentProvidersURI() {
+    return urisprintf(
+      '/phortune/merchant/%d/providers/',
+      $this->getID());
+  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -96,7 +141,7 @@ final class PhortuneMerchant extends PhortuneDAO
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return $this->getViewPolicy();
+        return PhabricatorPolicies::getMostOpenPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return PhabricatorPolicies::POLICY_NOONE;
     }
