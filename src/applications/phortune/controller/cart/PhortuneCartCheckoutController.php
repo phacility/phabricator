@@ -101,13 +101,9 @@ final class PhortuneCartCheckoutController
       }
     }
 
-    $cart_table = $this->buildCartContentTable($cart);
-
-    $cart_box = id(new PHUIObjectBoxView())
-      ->setFormErrors($errors)
-      ->setHeaderText(pht('Cart Contents'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($cart_table);
+    $cart_box = id(new PhortuneOrderItemsView())
+      ->setViewer($viewer)
+      ->setOrder($cart);
 
     $title = $cart->getName();
 
