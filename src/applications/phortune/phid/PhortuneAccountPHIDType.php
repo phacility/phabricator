@@ -32,10 +32,9 @@ final class PhortuneAccountPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $account = $objects[$phid];
 
-      $id = $account->getID();
-
-      $handle->setName($account->getName());
-      $handle->setURI("/phortune/{$id}/");
+      $handle
+        ->setName($account->getName())
+        ->setURI($account->getURI());
     }
   }
 
