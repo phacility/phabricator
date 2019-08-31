@@ -1410,6 +1410,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
     }
 
+    if ($write) {
+      if ($this->isReadOnly()) {
+        return false;
+      }
+    }
+
     return false;
   }
 
@@ -2264,6 +2270,35 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function supportsBranchComparison() {
     return $this->isGit();
+  }
+
+  public function isReadOnly() {
+    return (bool)$this->getDetail('read-only');
+  }
+
+  public function setReadOnly($read_only) {
+    return $this->setDetail('read-only', $read_only);
+  }
+
+  public function getReadOnlyMessage() {
+    return $this->getDetail('read-only-message');
+  }
+
+  public function setReadOnlyMessage($message) {
+    return $this->setDetail('read-only-message', $message);
+  }
+
+  public function getReadOnlyMessageForDisplay() {
+    $parts = array();
+    $parts[] = pht(
+      'This repository is currently in read-only maintenance mode.');
+
+    $message = $this->getReadOnlyMessage();
+    if ($message !== null) {
+      $parts[] = $message;
+    }
+
+    return implode("\n\n", $parts);
   }
 
 /* -(  Repository URIs  )---------------------------------------------------- */

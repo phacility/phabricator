@@ -255,6 +255,10 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
           'user account.'));
     }
 
+    if ($repository->isReadOnly()) {
+      throw new Exception($repository->getReadOnlyMessageForDisplay());
+    }
+
     $protocol = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH;
     if ($repository->canServeProtocol($protocol, true)) {
       $can_push = PhabricatorPolicyFilter::hasCapability(
