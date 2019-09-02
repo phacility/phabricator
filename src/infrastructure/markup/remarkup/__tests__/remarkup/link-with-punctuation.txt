@@ -1,0 +1,9 @@
+http://www.example.com/,
+http://www.example.com/..
+http://www.example.com/!!!
+~~~~~~~~~~
+<p><a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a>,
+<a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a>..
+<a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com/</a>!!!</p>
+~~~~~~~~~~
+http://www.example.com/, http://www.example.com/.. http://www.example.com/!!!

@@ -1,0 +1,19 @@
+* item
+* item
+* item
+
+derp
+~~~~~~~~~~
+<ul class="remarkup-list">
+<li class="remarkup-list-item">item</li>
+<li class="remarkup-list-item">item</li>
+<li class="remarkup-list-item">item</li>
+</ul>
+
+<p>derp</p>
+~~~~~~~~~~
+- item
+- item
+- item
+
+derp

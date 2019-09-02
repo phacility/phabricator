@@ -1,0 +1,23 @@
+    - top
+  - mid
+# bot
+
+derp
+~~~~~~~~~~
+<ol class="remarkup-list">
+<li class="remarkup-list-item phantom-item"><ul class="remarkup-list">
+<li class="remarkup-list-item phantom-item"><ul class="remarkup-list">
+<li class="remarkup-list-item">top</li>
+</ul></li>
+<li class="remarkup-list-item">mid</li>
+</ul></li>
+<li class="remarkup-list-item">bot</li>
+</ol>
+
+<p>derp</p>
+~~~~~~~~~~
+    - top
+  - mid
+1. bot
+
+derp
