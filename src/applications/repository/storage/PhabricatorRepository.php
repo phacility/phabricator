@@ -1842,6 +1842,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorUser $viewer,
     array $options) {
 
+    $refs = $this->getAlmanacServiceRefs($viewer, $options);
+
+    if (!$refs) {
+      return null;
+    }
+
+    $ref = head($refs);
+    return $ref->getURI();
+  }
+
+  public function getAlmanacServiceRefs(
+    PhabricatorUser $viewer,
+    array $options) {
+
     PhutilTypeSpec::checkMap(
       $options,
       array(
@@ -1856,7 +1870,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $cache_key = $this->getAlmanacServiceCacheKey();
     if (!$cache_key) {
-      return null;
+      return array();
     }
 
     $cache = PhabricatorCaches::getMutableStructureCache();
@@ -1869,7 +1883,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     if ($uris === null) {
-      return null;
+      return array();
     }
 
     $local_device = AlmanacKeys::getDeviceID();
@@ -1893,7 +1907,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
       if ($local_device && $never_proxy) {
         if ($uri['device'] == $local_device) {
-          return null;
+          return array();
         }
       }
 
@@ -1954,15 +1968,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
     }
 
+    $refs = array();
+    foreach ($results as $result) {
+      $refs[] = DiffusionServiceRef::newFromDictionary($result);
+    }
+
     // If we require a writable device, remove URIs which aren't writable.
     if ($writable) {
-      foreach ($results as $key => $uri) {
-        if (!$uri['writable']) {
+      foreach ($refs as $key => $ref) {
+        if (!$ref->isWritable()) {
           unset($results[$key]);
         }
       }
 
-      if (!$results) {
+      if (!$refs) {
         throw new Exception(
           pht(
             'This repository ("%s") is not writable with the given '.
@@ -1974,23 +1993,30 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     if ($writable) {
-      $results = $this->sortWritableAlmanacServiceURIs($results);
+      $refs = $this->sortWritableAlmanacServiceRefs($refs);
     } else {
-      shuffle($results);
+      $refs = $this->sortReadableAlmanacServiceRefs($refs);
     }
 
-    $result = head($results);
-    return $result['uri'];
+    return array_values($refs);
   }
 
-  private function sortWritableAlmanacServiceURIs(array $results) {
+  private function sortReadableAlmanacServiceRefs(array $refs) {
+    assert_instances_of($refs, 'DiffusionServiceRef');
+    shuffle($refs);
+    return $refs;
+  }
+
+  private function sortWritableAlmanacServiceRefs(array $refs) {
+    assert_instances_of($refs, 'DiffusionServiceRef');
+
     // See T13109 for discussion of how this method routes requests.
 
     // In the absence of other rules, we'll send traffic to devices randomly.
     // We also want to select randomly among nodes which are equally good
     // candidates to receive the write, and accomplish that by shuffling the
     // list up front.
-    shuffle($results);
+    shuffle($refs);
 
     $order = array();
 
@@ -2002,8 +2028,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $this->getPHID());
     if ($writer) {
       $device_phid = $writer->getWriteProperty('devicePHID');
-      foreach ($results as $key => $result) {
-        if ($result['devicePHID'] === $device_phid) {
+      foreach ($refs as $key => $ref) {
+        if ($ref->getDevicePHID() === $device_phid) {
           $order[] = $key;
         }
       }
@@ -2025,8 +2051,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
       $max_devices = array_fuse($max_devices);
 
-      foreach ($results as $key => $result) {
-        if (isset($max_devices[$result['devicePHID']])) {
+      foreach ($refs as $key => $ref) {
+        if (isset($max_devices[$ref->getDevicePHID()])) {
           $order[] = $key;
         }
       }
@@ -2034,9 +2060,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     // Reorder the results, putting any we've selected as preferred targets for
     // the write at the head of the list.
-    $results = array_select_keys($results, $order) + $results;
+    $refs = array_select_keys($refs, $order) + $refs;
 
-    return $results;
+    return $refs;
   }
 
   public function supportsSynchronization() {
