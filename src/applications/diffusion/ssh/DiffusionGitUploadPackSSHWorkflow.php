@@ -126,8 +126,6 @@ final class DiffusionGitUploadPackSSHWorkflow
         ->setCommandChannelFromExecFuture($future)
         ->execute();
 
-      $err = 1;
-
       // TODO: Currently, when proxying, we do not write an event log on the
       // proxy. Perhaps we should write a "proxy log". This is not very useful
       // for statistics or auditing, but could be useful for diagnostics.
@@ -144,14 +142,7 @@ final class DiffusionGitUploadPackSSHWorkflow
       // the same host.
       array_shift($refs);
 
-      // Check if we have more services we can try. If we do, we'll make an
-      // effort to fall back to them below. If not, we can't do anything to
-      // recover so just bail out.
-      if (!$refs) {
-        return $err;
-      }
-
-      $should_retry = $this->shouldRetryRequest();
+      $should_retry = $this->shouldRetryRequest($refs);
       if (!$should_retry) {
         return $err;
       }
@@ -168,7 +159,7 @@ final class DiffusionGitUploadPackSSHWorkflow
     return $this;
   }
 
-  private function shouldRetryRequest() {
+  private function shouldRetryRequest(array $remaining_refs) {
     $this->requestFailures++;
 
     if ($this->requestFailures > $this->requestAttempts) {
@@ -178,11 +169,11 @@ final class DiffusionGitUploadPackSSHWorkflow
           "missing call to \"didBeginRequest()\".\n"));
     }
 
-    $max_failures = 3;
-    if ($this->requestFailures >= $max_failures) {
+    if (!$remaining_refs) {
       $this->writeClusterEngineLogMessage(
         pht(
-          "# Reached maximum number of retry attempts, giving up.\n"));
+          "# All available services failed to serve the request, ".
+          "giving up.\n"));
       return false;
     }
 
@@ -208,7 +199,7 @@ final class DiffusionGitUploadPackSSHWorkflow
       pht(
         "# Service request failed, retrying (making attempt %s of %s).\n",
         new PhutilNumber($this->requestAttempts + 1),
-        new PhutilNumber($max_failures)));
+        new PhutilNumber($this->requestAttempts + count($remaining_refs))));
 
     return true;
   }
