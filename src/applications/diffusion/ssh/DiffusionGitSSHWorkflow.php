@@ -8,6 +8,8 @@ abstract class DiffusionGitSSHWorkflow
   private $protocolLog;
 
   private $wireProtocol;
+  private $ioBytesRead = 0;
+  private $ioBytesWritten = 0;
 
   protected function writeError($message) {
     // Git assumes we'll add our own newlines.
@@ -98,6 +100,8 @@ abstract class DiffusionGitSSHWorkflow
     PhabricatorSSHPassthruCommand $command,
     $message) {
 
+    $this->ioBytesWritten += strlen($message);
+
     $log = $this->getProtocolLog();
     if ($log) {
       $log->didWriteBytes($message);
@@ -125,7 +129,21 @@ abstract class DiffusionGitSSHWorkflow
       $message = $protocol->willReadBytes($message);
     }
 
+    // Note that bytes aren't counted until they're emittted by the protocol
+    // layer. This means the underlying command might emit bytes, but if they
+    // are buffered by the protocol layer they won't count as read bytes yet.
+
+    $this->ioBytesRead += strlen($message);
+
     return $message;
+  }
+
+  final protected function getIOBytesRead() {
+    return $this->ioBytesRead;
+  }
+
+  final protected function getIOBytesWritten() {
+    return $this->ioBytesWritten;
   }
 
 }
