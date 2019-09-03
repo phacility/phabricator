@@ -68,17 +68,45 @@ final class AphrontMySQLiDatabaseConnection
       $host = 'p:'.$host;
     }
 
-    @$conn->real_connect(
+    $trap = new PhutilErrorTrap();
+
+    $ok = @$conn->real_connect(
       $host,
       $user,
       $pass,
       $database,
       $port);
 
+    $call_error = $trap->getErrorsAsString();
+    $trap->destroy();
+
     $errno = $conn->connect_errno;
     if ($errno) {
       $error = $conn->connect_error;
       $this->throwConnectionException($errno, $error, $user, $host);
+    }
+
+    // See T13403. If the parameters to "real_connect()" are wrong, it may
+    // fail without setting an error code. In this case, raise a generic
+    // exception. (One way to reproduce this is to pass a string to the
+    // "port" parameter.)
+
+    if (!$ok) {
+      if (strlen($call_error)) {
+        $message = pht(
+          'mysqli->real_connect() failed: %s',
+          $call_error);
+      } else {
+        $message = pht(
+          'mysqli->real_connect() failed, but did not set an error code '.
+          'or emit a message.');
+      }
+
+      $this->throwConnectionException(
+        self::CALLERROR_CONNECT,
+        $message,
+        $user,
+        $host);
     }
 
     // See T13238. Attempt to prevent "LOAD DATA LOCAL INFILE", which allows a
@@ -152,7 +180,7 @@ final class AphrontMySQLiDatabaseConnection
             'Call to "mysqli->query()" failed, but did not set an error '.
             'code or emit an error message.');
         }
-        $this->throwQueryCodeException(777777, $message);
+        $this->throwQueryCodeException(self::CALLERROR_QUERY, $message);
       }
     }
 

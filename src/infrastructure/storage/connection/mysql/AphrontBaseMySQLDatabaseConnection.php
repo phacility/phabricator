@@ -10,6 +10,9 @@ abstract class AphrontBaseMySQLDatabaseConnection
 
   private $nextError;
 
+  const CALLERROR_QUERY = 777777;
+  const CALLERROR_CONNECT = 777778;
+
   abstract protected function connect();
   abstract protected function rawQuery($raw_query);
   abstract protected function rawQueries(array $raw_queries);
