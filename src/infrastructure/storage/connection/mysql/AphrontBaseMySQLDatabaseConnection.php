@@ -126,7 +126,14 @@ abstract class AphrontBaseMySQLDatabaseConnection
             $code,
             $ex->getMessage());
 
-          phlog($message);
+          // See T13403. If we're silenced with the "@" operator, don't log
+          // this connection attempt. This keeps things quiet if we're
+          // running a setup workflow like "bin/config" and expect that the
+          // database credentials will often be incorrect.
+
+          if (error_reporting()) {
+            phlog($message);
+          }
         } else {
           $profiler->endServiceCall($call_id, array());
           throw $ex;

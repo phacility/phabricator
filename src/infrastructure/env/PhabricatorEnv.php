@@ -249,9 +249,17 @@ final class PhabricatorEnv extends Phobject {
     }
 
     try {
-      $stack->pushSource(
-        id(new PhabricatorConfigDatabaseSource('default'))
-          ->setName(pht('Database')));
+      // See T13403. If we're starting up in "config optional" mode, suppress
+      // messages about connection retries.
+      if ($config_optional) {
+        $database_source = @new PhabricatorConfigDatabaseSource('default');
+      } else {
+        $database_source = new PhabricatorConfigDatabaseSource('default');
+      }
+
+      $database_source->setName(pht('Database'));
+
+      $stack->pushSource($database_source);
     } catch (AphrontSchemaQueryException $exception) {
       // If the database is not available, just skip this configuration
       // source. This happens during `bin/storage upgrade`, `bin/conf` before
