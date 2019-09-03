@@ -140,10 +140,21 @@ final class PhabricatorConfigManagementSetWorkflow
         'Wrote configuration key "%s" to database storage.',
         $key);
     } else {
-      $config_source = id(new PhabricatorConfigLocalSource())
-        ->setKeys(array($key => $value));
+      $config_source = new PhabricatorConfigLocalSource();
 
       $local_path = $config_source->getReadablePath();
+
+      try {
+        Filesystem::assertWritable($local_path);
+      } catch (FilesystemException $ex) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Local path "%s" is not writable. This file must be writable '.
+            'so that "bin/config" can store configuration.',
+            Filesystem::readablePath($local_path)));
+      }
+
+      $config_source->setKeys(array($key => $value));
 
       $write_message = pht(
         'Wrote configuration key "%s" to local storage (in file "%s").',
