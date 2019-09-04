@@ -89,6 +89,10 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     return $this->namespace.'_'.$fragment;
   }
 
+  public function getDisplayName() {
+    return $this->getRef()->getDisplayName();
+  }
+
   public function getDatabaseList(array $patches, $only_living = false) {
     assert_instances_of($patches, 'PhabricatorStoragePatch');
 
