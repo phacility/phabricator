@@ -136,12 +136,12 @@ final class FundInitiative extends FundDAO
     }
 
     if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-      foreach ($viewer->getAuthorities() as $authority) {
-        if ($authority instanceof PhortuneMerchant) {
-          if ($authority->getPHID() == $this->getMerchantPHID()) {
-            return true;
-          }
-        }
+      $can_merchant = PhortuneMerchantQuery::canViewersEditMerchants(
+        array($viewer->getPHID()),
+        array($this->getMerchantPHID()));
+
+      if ($can_merchant) {
+        return true;
       }
     }
 
