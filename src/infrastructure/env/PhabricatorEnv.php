@@ -135,6 +135,11 @@ final class PhabricatorEnv extends Phobject {
     // TODO: Add a "locale.default" config option once we have some reasonable
     // defaults which aren't silly nonsense.
     self::setLocaleCode('en_US');
+
+    // Load the preamble utility library if we haven't already. On web
+    // requests this loaded earlier, but we want to load it for non-web
+    // requests so that unit tests can call these functions.
+    require_once $phabricator_path.'/support/startup/preamble-utils.php';
   }
 
   public static function beginScopedLocale($locale_code) {

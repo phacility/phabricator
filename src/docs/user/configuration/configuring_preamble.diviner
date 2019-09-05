@@ -15,10 +15,9 @@ You can use a special preamble script to make arbitrary adjustments to the
 environment and some parts of Phabricator's configuration in order to fix these
 problems and set up the environment which Phabricator expects.
 
-NOTE: This is an advanced feature. Most installs should not need to configure
-a preamble script.
 
-= Creating a Preamble Script =
+Creating a Preamble Script
+==========================
 
 To create a preamble script, write a file to:
 
@@ -37,6 +36,7 @@ If present, this script will be executed at the very beginning of each web
 request, allowing you to adjust the environment. For common adjustments and
 examples, see the next sections.
 
+
 Adjusting Client IPs
 ====================
 
@@ -44,9 +44,15 @@ If your install is behind a load balancer, Phabricator may incorrectly detect
 all requests as originating from the load balancer, rather than from the
 correct client IPs.
 
-If this is the case and some other header (like `X-Forwarded-For`) is known to
-be trustworthy, you can read the header and overwrite the `REMOTE_ADDR` value
-so Phabricator can figure out the client IP correctly.
+In common cases where networks are configured like this, the `X-Forwarded-For`
+header will have trustworthy information about the real client IP. You
+can use the function `preamble_trust_x_forwarded_for_header()` in your
+preamble to tell Phabricator that you expect to receive requests from a
+load balancer or proxy which modifies this header:
+
+```name="Trust X-Forwarded-For Header", lang=php
+preamble_trust_x_forwarded_for_header();
+```
 
 You should do this //only// if the `X-Forwarded-For` header is known to be
 trustworthy. In particular, if users can make requests to the web server
@@ -54,30 +60,29 @@ directly, they can provide an arbitrary `X-Forwarded-For` header, and thereby
 spoof an arbitrary client IP.
 
 The `X-Forwarded-For` header may also contain a list of addresses if a request
-has been forwarded through multiple loadbalancers. Using a snippet like this
-will usually handle most situations correctly:
+has been forwarded through multiple load balancers. If you know that requests
+on your network are routed through `N` trustworthy devices, you can specify
+that `N` to tell the function how many layers of `X-Forwarded-For` to discard:
 
+```name="Trust X-Forwarded-For Header, Multiple Layers", lang=php
+preamble_trust_x_forwarded_for_header(3);
 ```
-name=Overwrite REMOTE_ADDR with X-Forwarded-For
-<?php
 
-// Overwrite REMOTE_ADDR with the value in the "X-Forwarded-For" HTTP header.
+If you have an unusual network configuration (for example, the number of
+trustworthy devices depends on the network path) you can also implement your
+own logic.
 
-// Only do this if you're certain the request is coming from a loadbalancer!
-// If the request came directly from a client, doing this will allow them to
-// them spoof any remote address.
+Note that this is very odd, advanced, and easy to get wrong. If you get it
+wrong, users will most likely be able to spoof any client address.
 
-// The header may contain a list of IPs, like "1.2.3.4, 4.5.6.7", if the
-// request the load balancer received also had this header.
+```name="Custom X-Forwarded-For Handling", lang=php
 
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-  $forwarded_for = $_SERVER['HTTP_X_FORWARDED_FOR'];
-  if ($forwarded_for) {
-    $forwarded_for = explode(',', $forwarded_for);
-    $forwarded_for = end($forwarded_for);
-    $forwarded_for = trim($forwarded_for);
-    $_SERVER['REMOTE_ADDR'] = $forwarded_for;
-  }
+  $raw_header = $_SERVER['X_FORWARDED_FOR'];
+
+  $real_address = your_custom_parsing_function($raw_header);
+
+  $_SERVER['REMOTE_ADDR'] = $raw_header;
 }
 ```
 

@@ -85,6 +85,7 @@ function phabricator_startup() {
   require_once $root.'/support/startup/PhabricatorClientLimit.php';
   require_once $root.'/support/startup/PhabricatorClientRateLimit.php';
   require_once $root.'/support/startup/PhabricatorClientConnectionLimit.php';
+  require_once $root.'/support/startup/preamble-utils.php';
 
   // If the preamble script exists, load it.
   $t_preamble = microtime(true);
