@@ -116,8 +116,9 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     return $form;
   }
 
-  private function buildModeSelector($selector_id, $application_id) {
-    $viewer = $this->getViewer();
+  public static function getGlobalSearchScopeItems(
+    PhabricatorUser $viewer,
+    PhabricatorApplication $application) {
 
     $items = array();
     $items[] = array(
@@ -132,7 +133,6 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
 
     $application_value = null;
     $application_icon = self::DEFAULT_APPLICATION_ICON;
-    $application = $this->getApplication();
     if ($application) {
       $application_value = get_class($application);
       if ($application->getApplicationSearchDocumentTypes()) {
@@ -185,6 +185,14 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       'href' => PhabricatorEnv::getDoclink('Search User Guide'),
     );
 
+    return $items;
+  }
+
+  private function buildModeSelector($selector_id, $application_id) {
+    $viewer = $this->getViewer();
+
+    $items = self::getGlobalSearchScopeItems($viewer, $this->getApplication());
+
     $scope_key = PhabricatorSearchScopeSetting::SETTINGKEY;
     $current_value = $viewer->getUserSetting($scope_key);
 
@@ -194,6 +202,13 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         $current_icon = $item['icon'];
         break;
       }
+    }
+
+    $application = $this->getApplication();
+
+    $application_value = null;
+    if ($application) {
+      $application_value = get_class($application);
     }
 
     $selector = id(new PHUIButtonView())
