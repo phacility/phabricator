@@ -145,7 +145,7 @@ final class PhabricatorConfigManagementSetWorkflow
       $local_path = $config_source->getReadablePath();
 
       try {
-        Filesystem::assertWritable($local_path);
+        $config_source->setKeys(array($key => $value));
       } catch (FilesystemException $ex) {
         throw new PhutilArgumentUsageException(
           pht(
@@ -153,8 +153,6 @@ final class PhabricatorConfigManagementSetWorkflow
             'so that "bin/config" can store configuration.',
             Filesystem::readablePath($local_path)));
       }
-
-      $config_source->setKeys(array($key => $value));
 
       $write_message = pht(
         'Wrote configuration key "%s" to local storage (in file "%s").',
