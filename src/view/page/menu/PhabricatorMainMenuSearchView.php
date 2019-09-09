@@ -118,7 +118,8 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
 
   public static function getGlobalSearchScopeItems(
     PhabricatorUser $viewer,
-    PhabricatorApplication $application = null) {
+    PhabricatorApplication $application = null,
+    $global_only = false) {
 
     $items = array();
     $items[] = array(
@@ -154,13 +155,23 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     $engine = id(new PhabricatorSearchApplicationSearchEngine())
       ->setViewer($viewer);
     $engine_queries = $engine->loadEnabledNamedQueries();
-    $query_map = mpull($engine_queries, 'getQueryName', 'getQueryKey');
-    foreach ($query_map as $query_key => $query_name) {
+    foreach ($engine_queries as $query) {
+      $query_key = $query->getQueryKey();
       if ($query_key == 'all') {
         // Skip the builtin "All" query since it's redundant with the default
         // setting.
         continue;
       }
+
+      // In the global "Settings" panel, we don't want to offer personal
+      // queries the viewer may have saved.
+      if ($global_only) {
+        if (!$query->isGlobal()) {
+          continue;
+        }
+      }
+
+      $query_name = $query->getQueryName();
 
       $items[] = array(
         'icon' => 'fa-certificate',

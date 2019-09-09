@@ -25,7 +25,8 @@ final class PhabricatorSearchScopeSetting
   protected function getSelectOptions() {
     $scopes = PhabricatorMainMenuSearchView::getGlobalSearchScopeItems(
       $this->getViewer(),
-      new PhabricatorSettingsApplication());
+      new PhabricatorSettingsApplication(),
+      $only_global = true);
 
     $scope_map = array();
     foreach ($scopes as $scope) {
