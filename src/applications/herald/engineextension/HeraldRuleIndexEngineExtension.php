@@ -37,6 +37,20 @@ final class HeraldRuleIndexEngineExtension
 
     $phids = array();
 
+    $fields = HeraldField::getAllFields();
+    foreach ($rule->getConditions() as $condition_record) {
+      $field = idx($fields, $condition_record->getFieldName());
+
+      if (!$field) {
+        continue;
+      }
+
+      $affected_phids = $field->getPHIDsAffectedByCondition($condition_record);
+      foreach ($affected_phids as $phid) {
+        $phids[] = $phid;
+      }
+    }
+
     $actions = HeraldAction::getAllActions();
     foreach ($rule->getActions() as $action_record) {
       $action = idx($actions, $action_record->getAction());
