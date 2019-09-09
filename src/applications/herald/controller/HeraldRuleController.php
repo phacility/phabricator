@@ -404,8 +404,8 @@ final class HeraldRuleController extends HeraldController {
     HeraldAdapter $adapter) {
 
     $all_rules = $this->loadRulesThisRuleMayDependUpon($rule);
-    $all_rules = mpull($all_rules, 'getName', 'getPHID');
-    asort($all_rules);
+    $all_rules = msortv($all_rules, 'getEditorSortVector');
+    $all_rules = mpull($all_rules, 'getEditorDisplayName', 'getPHID');
 
     $all_fields = $adapter->getFieldNameMap();
     $all_conditions = $adapter->getConditionNameMap();
@@ -672,15 +672,6 @@ final class HeraldRuleController extends HeraldController {
         ->withContentTypes(array($rule->getContentType()))
         ->withAuthorPHIDs(array($rule->getAuthorPHID()))
         ->execute();
-    }
-
-    // mark disabled rules as disabled since they are not useful as such;
-    // don't filter though to keep edit cases sane / expected
-    foreach ($all_rules as $current_rule) {
-      if ($current_rule->getIsDisabled()) {
-        $current_rule->makeEphemeral();
-        $current_rule->setName($rule->getName().' '.pht('(Disabled)'));
-      }
     }
 
     // A rule can not depend upon itself.
