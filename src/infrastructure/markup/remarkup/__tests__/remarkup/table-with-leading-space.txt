@@ -1,0 +1,7 @@
+ <table><tr><td>cell</td></tr></table>
+~~~~~~~~~~
+<div class="remarkup-table-wrap"><table class="remarkup-table">
+<tr><td>cell</td></tr>
+</table></div>
+~~~~~~~~~~
+| cell |

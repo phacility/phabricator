@@ -1,0 +1,15 @@
+## Fruit
+- Apple
+- Banana
+~~~~~~~~~~
+<ul class="remarkup-list">
+<li class="remarkup-list-item phantom-item"><ol class="remarkup-list">
+<li class="remarkup-list-item">Fruit</li>
+</ol></li>
+<li class="remarkup-list-item">Apple</li>
+<li class="remarkup-list-item">Banana</li>
+</ul>
+~~~~~~~~~~
+  1. Fruit
+- Apple
+- Banana

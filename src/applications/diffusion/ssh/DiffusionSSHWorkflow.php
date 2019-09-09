@@ -73,13 +73,13 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $this->shouldProxy;
   }
 
-  protected function getProxyCommand($for_write) {
+  final protected function getAlmanacServiceRefs($for_write) {
     $viewer = $this->getSSHUser();
     $repository = $this->getRepository();
 
     $is_cluster_request = $this->getIsClusterRequest();
 
-    $uri = $repository->getAlmanacServiceURI(
+    $refs = $repository->getAlmanacServiceRefs(
       $viewer,
       array(
         'neverProxy' => $is_cluster_request,
@@ -89,14 +89,28 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
         'writable' => $for_write,
       ));
 
-    if (!$uri) {
+    if (!$refs) {
       throw new Exception(
         pht(
           'Failed to generate an intracluster proxy URI even though this '.
           'request was routed as a proxy request.'));
     }
 
-    $uri = new PhutilURI($uri);
+    return $refs;
+  }
+
+  final protected function getProxyCommand($for_write) {
+    $refs = $this->getAlmanacServiceRefs($for_write);
+
+    $ref = head($refs);
+
+    return $this->getProxyCommandForServiceRef($ref);
+  }
+
+  final protected function getProxyCommandForServiceRef(
+    DiffusionServiceRef $ref) {
+
+    $uri = new PhutilURI($ref->getURI());
 
     $username = AlmanacKeys::getClusterSSHUser();
     if ($username === null) {

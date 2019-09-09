@@ -1,0 +1,15 @@
+IMPORTANT: interesting **stuff**
+
+(IMPORTANT) interesting **stuff**
+~~~~~~~~~~
+<div class="remarkup-important"><span class="remarkup-note-word">IMPORTANT:</span> interesting <strong>stuff</strong></div>
+
+
+
+<div class="remarkup-important">interesting <strong>stuff</strong></div>
+~~~~~~~~~~
+IMPORTANT: interesting **stuff**
+
+
+
+(IMPORTANT) interesting **stuff**

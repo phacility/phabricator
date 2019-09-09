@@ -64,7 +64,7 @@ final class PhabricatorAuthListController
           array(
             'href' => $this->getApplicationURI('config/new/'),
           ),
-          pht('Add Authentication Provider'))));
+          pht('Add Provider'))));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login and Registration'));

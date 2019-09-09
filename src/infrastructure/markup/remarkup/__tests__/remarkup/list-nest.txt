@@ -1,0 +1,30 @@
+- item
+  - sub
+- item
+  # sub
+  # sub
+- item
+
+derp
+~~~~~~~~~~
+<ul class="remarkup-list">
+<li class="remarkup-list-item">item<ul class="remarkup-list">
+<li class="remarkup-list-item">sub</li>
+</ul></li>
+<li class="remarkup-list-item">item<ol class="remarkup-list">
+<li class="remarkup-list-item">sub</li>
+<li class="remarkup-list-item">sub</li>
+</ol></li>
+<li class="remarkup-list-item">item</li>
+</ul>
+
+<p>derp</p>
+~~~~~~~~~~
+- item
+  - sub
+- item
+  1. sub
+  2. sub
+- item
+
+derp

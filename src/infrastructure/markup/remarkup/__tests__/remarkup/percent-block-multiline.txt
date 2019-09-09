@@ -1,0 +1,21 @@
+**foo**
+%%%- first
+- second
+- third%%%
+[[http://hello | world]]
+~~~~~~~~~~
+<p><strong>foo</strong></p>
+
+<p class="remarkup-literal">- first
+<br />- second
+<br />- third</p>
+
+<p><a href="http://hello" class="remarkup-link" target="_blank" rel="noreferrer">world</a></p>
+~~~~~~~~~~
+**foo**
+
+- first
+- second
+- third
+
+world <http://hello>

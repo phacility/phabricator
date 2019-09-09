@@ -1,0 +1,30 @@
+This is a paragraph.
+
+
+  lang=txt
+  First line of code block.
+  Second line of code block.
+
+
+<table>
+  <tr>
+    <td>Cell 1</td>
+    <td>Cell 2</td>
+  </tr>
+</table>
+~~~~~~~~~~
+<p>This is a paragraph.</p>
+
+<div class="remarkup-code-block" data-code-lang="txt" data-sigil="remarkup-code-block"><pre class="remarkup-code">First line of code block.
+Second line of code block.</pre></div>
+
+<div class="remarkup-table-wrap"><table class="remarkup-table">
+<tr><td>Cell 1</td><td>Cell 2</td></tr>
+</table></div>
+~~~~~~~~~~
+This is a paragraph.
+
+  First line of code block.
+  Second line of code block.
+
+| Cell 1 | Cell 2 |

@@ -1,0 +1,7 @@
+# At the end of a block, this should be a list.
+~~~~~~~~~~
+<ol class="remarkup-list">
+<li class="remarkup-list-item">At the end of a block, this should be a list.</li>
+</ol>
+~~~~~~~~~~
+1. At the end of a block, this should be a list.

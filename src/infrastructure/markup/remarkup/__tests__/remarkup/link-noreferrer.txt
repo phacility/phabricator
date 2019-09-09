@@ -1,0 +1,16 @@
+[[ /\evil.com ]]
+
+[[ /
+/evil.com ]]
+
+~~~~~~~~~~
+<p><a href="/\evil.com" class="remarkup-link" target="_blank" rel="noreferrer">/\evil.com</a></p>
+
+<p><a href="/
+/evil.com" class="remarkup-link" target="_blank" rel="noreferrer">/
+/evil.com</a></p>
+~~~~~~~~~~
+/\evil.com
+
+/
+/evil.com
