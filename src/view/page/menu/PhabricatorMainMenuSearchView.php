@@ -118,7 +118,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
 
   public static function getGlobalSearchScopeItems(
     PhabricatorUser $viewer,
-    PhabricatorApplication $application) {
+    PhabricatorApplication $application = null) {
 
     $items = array();
     $items[] = array(
