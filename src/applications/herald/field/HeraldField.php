@@ -177,25 +177,26 @@ abstract class HeraldField extends Phobject {
   }
 
   public function getPHIDsAffectedByCondition(HeraldCondition $condition) {
-    $phids = array();
+    try {
+      $standard_type = $this->getHeraldFieldStandardType();
+    } catch (PhutilMethodNotImplementedException $ex) {
+      $standard_type = null;
+    }
 
-    $standard_type = $this->getHeraldFieldStandardType();
     switch ($standard_type) {
       case self::STANDARD_PHID:
       case self::STANDARD_PHID_NULLABLE:
-        $phid = $condition->getValue();
-        if ($phid) {
-          $phids[] = $phid;
-        }
-        break;
       case self::STANDARD_PHID_LIST:
-        foreach ($condition->getValue() as $phid) {
-          $phids[] = $phid;
+        $phids = $condition->getValue();
+
+        if (!is_array($phids)) {
+          $phids = array();
         }
-        break;
+
+        return $phids;
     }
 
-    return $phids;
+    return array();
   }
 
   final public function setAdapter(HeraldAdapter $adapter) {
