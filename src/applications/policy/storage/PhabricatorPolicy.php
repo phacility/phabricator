@@ -85,8 +85,10 @@ final class PhabricatorPolicy
     $phid_type = phid_get_type($policy_identifier);
     switch ($phid_type) {
       case PhabricatorProjectProjectPHIDType::TYPECONST:
-        $policy->setType(PhabricatorPolicyType::TYPE_PROJECT);
-        $policy->setName($handle->getName());
+        $policy
+          ->setType(PhabricatorPolicyType::TYPE_PROJECT)
+          ->setName($handle->getName())
+          ->setIcon($handle->getIcon());
         break;
       case PhabricatorPeopleUserPHIDType::TYPECONST:
         $policy->setType(PhabricatorPolicyType::TYPE_USER);
