@@ -602,12 +602,13 @@ final class PhabricatorPolicyFilter extends Phobject {
     PhabricatorPolicyInterface $object,
     $policy,
     $capability) {
+    $viewer = $this->viewer;
 
     if (!$this->raisePolicyExceptions) {
       return;
     }
 
-    if ($this->viewer->isOmnipotent()) {
+    if ($viewer->isOmnipotent()) {
       // Never raise policy exceptions for the omnipotent viewer. Although we
       // will never normally issue a policy rejection for the omnipotent
       // viewer, we can end up here when queries blanket reject objects that
@@ -634,7 +635,30 @@ final class PhabricatorPolicyFilter extends Phobject {
         $capability);
     }
 
-    $more = PhabricatorPolicy::getPolicyExplanation($this->viewer, $policy);
+    // See T13411. If you receive a policy exception because you can't view
+    // an object, we also want to avoid disclosing too many details about the
+    // actual policy (for example, the names of projects in the policy).
+
+    // If you failed a "CAN_VIEW" check, or failed some other check and don't
+    // have "CAN_VIEW" on the object, we give you an "opaque" explanation.
+    // Otherwise, we give you a more detailed explanation.
+
+    $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
+    if ($capability === $view_capability) {
+      $show_details = false;
+    } else {
+      $show_details = self::hasCapability(
+        $viewer,
+        $object,
+        $view_capability);
+    }
+
+    if ($show_details) {
+      $more = PhabricatorPolicy::getPolicyExplanation($viewer, $policy);
+    } else {
+      $more = PhabricatorPolicy::getOpaquePolicyExplanation($viewer, $policy);
+    }
+
     $more = (array)$more;
     $more = array_filter($more);
 

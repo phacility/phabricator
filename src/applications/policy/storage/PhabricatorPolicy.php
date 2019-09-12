@@ -220,6 +220,25 @@ final class PhabricatorPolicy
     PhabricatorUser $viewer,
     $policy) {
 
+    $type = phid_get_type($policy);
+    if ($type === PhabricatorProjectProjectPHIDType::TYPECONST) {
+      $handle = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($policy))
+        ->executeOne();
+
+      return pht(
+        'Members of the project "%s" can take this action.',
+        $handle->getFullName());
+    }
+
+    return self::getOpaquePolicyExplanation($viewer, $policy);
+  }
+
+  public static function getOpaquePolicyExplanation(
+    PhabricatorUser $viewer,
+    $policy) {
+
     $rule = PhabricatorPolicyQuery::getObjectPolicyRule($policy);
     if ($rule) {
       return $rule->getPolicyExplanation();
@@ -245,7 +264,9 @@ final class PhabricatorPolicy
         $type = phid_get_type($policy);
         if ($type == PhabricatorProjectProjectPHIDType::TYPECONST) {
           return pht(
-            'Members of the project "%s" can take this action.',
+            'Members of a particular project can take this action. (You '.
+            'can not see this object, so the name of this project is '.
+            'restricted.)',
             $handle->getFullName());
         } else if ($type == PhabricatorPeopleUserPHIDType::TYPECONST) {
           return pht(
