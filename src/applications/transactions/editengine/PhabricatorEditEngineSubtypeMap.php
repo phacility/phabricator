@@ -5,6 +5,7 @@ final class PhabricatorEditEngineSubtypeMap
   extends Phobject {
 
   private $subtypes;
+  private $datasource;
 
   public function __construct(array $subtypes) {
     assert_instances_of($subtypes, 'PhabricatorEditEngineSubtype');
@@ -37,6 +38,19 @@ final class PhabricatorEditEngineSubtypeMap
     }
 
     return $this->subtypes[$subtype_key];
+  }
+
+  public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
+    $this->datasource = $datasource;
+    return $this;
+  }
+
+  public function newDatasource() {
+    if (!$this->datasource) {
+      throw new PhutilInvalidStateException('setDatasource');
+    }
+
+    return clone($this->datasource);
   }
 
   public function getCreateFormsForSubtype(
