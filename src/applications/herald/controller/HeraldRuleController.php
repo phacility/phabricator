@@ -684,7 +684,10 @@ final class HeraldRuleController extends HeraldController {
     $group_map = array();
     foreach ($field_map as $field_key => $field_name) {
       $group_key = $adapter->getFieldGroupKey($field_key);
-      $group_map[$group_key][$field_key] = $field_name;
+      $group_map[$group_key][$field_key] = array(
+        'name' => $field_name,
+        'available' => $adapter->isFieldAvailable($field_key),
+      );
     }
 
     return $this->getGroups(
@@ -696,7 +699,10 @@ final class HeraldRuleController extends HeraldController {
     $group_map = array();
     foreach ($action_map as $action_key => $action_name) {
       $group_key = $adapter->getActionGroupKey($action_key);
-      $group_map[$group_key][$action_key] = $action_name;
+      $group_map[$group_key][$action_key] = array(
+        'name' => $action_name,
+        'available' => $adapter->isActionAvailable($action_key),
+      );
     }
 
     return $this->getGroups(

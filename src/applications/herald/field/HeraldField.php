@@ -241,4 +241,8 @@ abstract class HeraldField extends Phobject {
     return false;
   }
 
+  public function isFieldAvailable() {
+    return true;
+  }
+
 }

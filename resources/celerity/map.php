@@ -397,7 +397,7 @@ return array(
     'rsrc/js/application/files/behavior-icon-composer.js' => '38a6cedb',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => 'a17b84f1',
     'rsrc/js/application/harbormaster/behavior-harbormaster-log.js' => 'b347a301',
-    'rsrc/js/application/herald/HeraldRuleEditor.js' => '27daef73',
+    'rsrc/js/application/herald/HeraldRuleEditor.js' => '2633bef7',
     'rsrc/js/application/herald/PathTypeahead.js' => 'ad486db3',
     'rsrc/js/application/herald/herald-rule-editor.js' => '0922e81d',
     'rsrc/js/application/maniphest/behavior-batch-selector.js' => '139ef688',
@@ -571,7 +571,7 @@ return array(
     'global-drag-and-drop-css' => '1d2713a4',
     'harbormaster-css' => '8dfe16b2',
     'herald-css' => '648d39e2',
-    'herald-rule-editor' => '27daef73',
+    'herald-rule-editor' => '2633bef7',
     'herald-test-css' => 'e004176f',
     'inline-comment-summary-css' => '81eb368d',
     'javelin-aphlict' => '022516b4',
@@ -1117,7 +1117,7 @@ return array(
       'javelin-json',
       'phabricator-draggable-list',
     ),
-    '27daef73' => array(
+    '2633bef7' => array(
       'multirow-row-manager',
       'javelin-install',
       'javelin-util',
