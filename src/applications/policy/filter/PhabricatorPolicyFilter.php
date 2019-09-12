@@ -653,14 +653,42 @@ final class PhabricatorPolicyFilter extends Phobject {
         $view_capability);
     }
 
+    // TODO: This is a bit clumsy. We're producing HTML and text versions of
+    // this message, but can't render the full policy rules in text today.
+    // Users almost never get a text-only version of this exception anyway.
+
+    $head = null;
+    $more = null;
+
     if ($show_details) {
-      $more = PhabricatorPolicy::getPolicyExplanation($viewer, $policy);
+      $head = PhabricatorPolicy::getPolicyExplanation($viewer, $policy);
+
+      $policy_type = PhabricatorPolicyPHIDTypePolicy::TYPECONST;
+      $is_custom = (phid_get_type($policy) === $policy_type);
+      if ($is_custom) {
+        $policy_map = PhabricatorPolicyQuery::loadPolicies(
+          $viewer,
+          $object);
+        if (isset($policy_map[$capability])) {
+          require_celerity_resource('phui-policy-section-view-css');
+
+          $more = id(new PhabricatorPolicyRulesView())
+            ->setViewer($viewer)
+            ->setPolicy($policy_map[$capability]);
+
+          $more = phutil_tag(
+            'div',
+            array(
+              'class' => 'phui-policy-section-view-rules',
+            ),
+            $more);
+        }
+      }
     } else {
-      $more = PhabricatorPolicy::getOpaquePolicyExplanation($viewer, $policy);
+      $head = PhabricatorPolicy::getOpaquePolicyExplanation($viewer, $policy);
     }
 
-    $more = (array)$more;
-    $more = array_filter($more);
+    $head = (array)$head;
 
     $exceptions = PhabricatorPolicy::getSpecialRules(
       $object,
@@ -668,7 +696,10 @@ final class PhabricatorPolicyFilter extends Phobject {
       $capability,
       true);
 
-    $details = array_filter(array_merge($more, $exceptions));
+    $text_details = array_filter(array_merge($head, $exceptions));
+    $text_details = implode(' ', $text_details);
+
+    $html_details = array($head, $more, $exceptions);
 
     $access_denied = $this->renderAccessDenied($object);
 
@@ -677,7 +708,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       $access_denied,
       $capability_name,
       $rejection,
-      implode(' ', $details));
+      $text_details);
 
     $exception = id(new PhabricatorPolicyException($full_message))
       ->setTitle($access_denied)
@@ -685,7 +716,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       ->setRejection($rejection)
       ->setCapability($capability)
       ->setCapabilityName($capability_name)
-      ->setMoreInfo($details);
+      ->setMoreInfo($html_details);
 
     throw $exception;
   }
