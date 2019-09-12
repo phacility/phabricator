@@ -63,15 +63,22 @@ For detailed help on managing and stripping MFA, see the instructions in
 Unlocking Objects
 =================
 
-If you aren't sure who owns an object, or no user account has access to an
-object, you can directly change object policies from the CLI:
+If you aren't sure who owns an object, you can inspect the policies from the
+CLI:
+
+```
+$ ./bin/policy show <object>
+```
+
+To identify the object you want to examine, you can specify an object
+name (like `T123`) or a PHID as the `<object>` parameter.
+
+If examining the policy isn't helpful, or no user account has access to an
+object, you can then directly change object policies from the CLI:
 
 ```
 $ ./bin/policy unlock <object> [--view ...] [--edit ...] [--owner ...]
 ```
-
-To identify the object you want to unlock, you can specify an object name (like
-`T123`) or a PHID as the `<object>` parameter.
 
 Use the `--view` and `--edit` flags (and, for some objects, the `--owner`
 flag) to specify new policies for the object.

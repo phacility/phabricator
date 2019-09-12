@@ -48,7 +48,8 @@ final class PhabricatorPolicyQuery
     $policies = self::loadPolicies($viewer, $object);
 
     foreach ($policies as $capability => $policy) {
-      $policies[$capability] = $policy->renderDescription();
+      $policies[$capability] = $policy->newRef($viewer)
+        ->newCapabilityLink($object, $capability);
     }
 
     return $policies;

@@ -215,17 +215,16 @@ abstract class PhabricatorModularTransactionType
       $phid,
       $handles[$phid]);
 
+    $ref = $policy->newRef($viewer);
+
     if ($this->isTextMode()) {
-      return $this->renderValue($policy->getFullName());
+      $name = $ref->getPolicyDisplayName();
+    } else {
+      $storage = $this->getStorage();
+      $name = $ref->newTransactionLink($mode, $storage);
     }
 
-    $storage = $this->getStorage();
-    if ($policy->getType() == PhabricatorPolicyType::TYPE_CUSTOM) {
-      $policy->setHref('/transactions/'.$mode.'/'.$storage->getPHID().'/');
-      $policy->setWorkflow(true);
-    }
-
-    return $this->renderValue($policy->renderDescription());
+    return $this->renderValue($name);
   }
 
   final protected function renderHandleList(array $phids) {

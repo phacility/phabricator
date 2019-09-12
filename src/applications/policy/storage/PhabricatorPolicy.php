@@ -276,32 +276,22 @@ final class PhabricatorPolicy
     }
   }
 
-  public function renderDescription() {
-    if ($this->getHref()) {
-      $desc = javelin_tag(
-        'a',
-        array(
-          'href' => $this->getHref(),
-          'class' => 'policy-link',
-          'sigil' => $this->getWorkflow() ? 'workflow' : null,
-        ),
-        $this->getName());
-    } else {
-      $desc = $this->getName();
-    }
+  public function newRef(PhabricatorUser $viewer) {
+    return id(new PhabricatorPolicyRef())
+      ->setViewer($viewer)
+      ->setPolicy($this);
+  }
 
-    switch ($this->getType()) {
-      case PhabricatorPolicyType::TYPE_PROJECT:
-        return pht('%s (Project)', $desc);
-      case PhabricatorPolicyType::TYPE_CUSTOM:
-        return $desc;
-      case PhabricatorPolicyType::TYPE_MASKED:
-        return pht(
-          '%s (You do not have permission to view policy details.)',
-          $desc);
-      default:
-        return $desc;
-    }
+  public function isProjectPolicy() {
+    return ($this->getType() === PhabricatorPolicyType::TYPE_PROJECT);
+  }
+
+  public function isCustomPolicy() {
+    return ($this->getType() === PhabricatorPolicyType::TYPE_CUSTOM);
+  }
+
+  public function isMaskedPolicy() {
+    return ($this->getType() === PhabricatorPolicyType::TYPE_MASKED);
   }
 
   /**

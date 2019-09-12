@@ -445,19 +445,15 @@ abstract class PhabricatorApplicationTransaction
     $policy = PhabricatorPolicy::newFromPolicyAndHandle(
       $phid,
       $this->getHandleIfExists($phid));
+
+    $ref = $policy->newRef($this->getViewer());
+
     if ($this->renderingTarget == self::TARGET_HTML) {
-      switch ($policy->getType()) {
-        case PhabricatorPolicyType::TYPE_CUSTOM:
-          $policy->setHref('/transactions/'.$state.'/'.$this->getPHID().'/');
-          $policy->setWorkflow(true);
-          break;
-        default:
-          break;
-      }
-      $output = $policy->renderDescription();
+      $output = $ref->newTransactionLink($state, $this);
     } else {
-      $output = hsprintf('%s', $policy->getFullName());
+      $output = $ref->getPolicyDisplayName();
     }
+
     return $output;
   }
 
