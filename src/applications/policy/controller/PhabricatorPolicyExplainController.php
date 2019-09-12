@@ -333,8 +333,8 @@ final class PhabricatorPolicyExplainController
       ->appendList(
         array(
           PhabricatorPolicy::getPolicyExplanation(
-          $viewer,
-          $policy->getPHID()),
+            $viewer,
+            $policy->getPHID()),
         ));
 
     $strength = $this->getStrengthInformation($object, $policy, $capability);

@@ -276,13 +276,7 @@ final class PhabricatorPolicy
     }
   }
 
-  public function renderDescription($icon = false) {
-    $img = null;
-    if ($icon) {
-      $img = id(new PHUIIconView())
-        ->setIcon($this->getIcon());
-    }
-
+  public function renderDescription() {
     if ($this->getHref()) {
       $desc = javelin_tag(
         'a',
@@ -291,16 +285,9 @@ final class PhabricatorPolicy
           'class' => 'policy-link',
           'sigil' => $this->getWorkflow() ? 'workflow' : null,
         ),
-        array(
-          $img,
-          $this->getName(),
-        ));
+        $this->getName());
     } else {
-      if ($img) {
-        $desc = array($img, $this->getName());
-      } else {
-        $desc = $this->getName();
-      }
+      $desc = $this->getName();
     }
 
     switch ($this->getType()) {

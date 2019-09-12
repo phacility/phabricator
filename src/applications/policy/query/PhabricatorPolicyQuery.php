@@ -43,13 +43,12 @@ final class PhabricatorPolicyQuery
 
   public static function renderPolicyDescriptions(
     PhabricatorUser $viewer,
-    PhabricatorPolicyInterface $object,
-    $icon = false) {
+    PhabricatorPolicyInterface $object) {
 
     $policies = self::loadPolicies($viewer, $object);
 
     foreach ($policies as $capability => $policy) {
-      $policies[$capability] = $policy->renderDescription($icon);
+      $policies[$capability] = $policy->renderDescription();
     }
 
     return $policies;
