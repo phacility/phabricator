@@ -61,9 +61,6 @@ final class PhabricatorApplicationPolicyChangeTransaction
   }
 
   public function getTitleForFeed() {
-    $old = $this->renderApplicationPolicy($this->getOldValue());
-    $new = $this->renderApplicationPolicy($this->getNewValue());
-
     return pht(
       '%s changed the %s policy for application %s from %s to %s.',
       $this->renderAuthor(),
