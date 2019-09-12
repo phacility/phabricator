@@ -344,6 +344,8 @@ dictionary with these keys:
   - `children` //Optional map.// Configure options shown to the user when
      they "Create Subtask". See below.
   - `fields` //Optional map.// Configure field behaviors. See below.
+  - `mutations` //Optional list.// Configure which subtypes this subtype
+    can easily be converted to by using the "Change Subtype" action. See below.
 
 Each subtype must have a unique key, and you must define a subtype with
 the key "%s", which is used as a default subtype.
@@ -404,15 +406,15 @@ The `fields` key can configure the behavior of custom fields on specific
 task subtypes. For example:
 
 ```
-{
-  ...
-  "fields": {
-    "custom.some-field": {
-      "disabled": true
+  {
+    ...
+    "fields": {
+      "custom.some-field": {
+        "disabled": true
+      }
     }
+    ...
   }
-  ...
-}
 ```
 
 Each field supports these options:
@@ -420,6 +422,31 @@ Each field supports these options:
   - `disabled` //Optional bool.// Allows you to disable fields on certain
     subtypes.
   - `name` //Optional string.// Custom name of this field for the subtype.
+
+
+The `mutations` key allows you to control the behavior of the "Change Subtype"
+action above the comment area. By default, this action allows users to change
+the task subtype into any other subtype.
+
+If you'd prefer to make it more difficult to change subtypes or offer only a
+subset of subtypes, you can specify the list of subtypes that "Change Subtypes"
+offers. For example, if you have several similar subtypes and want to allow
+tasks to be converted between them but not easily converted to other types,
+you can make the "Change Subtypes" control show only these options like this:
+
+```
+  {
+    ...
+    "mutations": ["bug", "issue", "defect"]
+    ...
+  }
+```
+
+If you specify an empty list, the "Change Subtypes" action will be completely
+hidden.
+
+This mutation list is advisory and only configures the UI. Tasks may still be
+converted across subtypes freely by using the Bulk Editor or API.
 
 EOTEXT
       ,
