@@ -445,19 +445,15 @@ abstract class PhabricatorApplicationTransaction
     $policy = PhabricatorPolicy::newFromPolicyAndHandle(
       $phid,
       $this->getHandleIfExists($phid));
+
+    $ref = $policy->newRef($this->getViewer());
+
     if ($this->renderingTarget == self::TARGET_HTML) {
-      switch ($policy->getType()) {
-        case PhabricatorPolicyType::TYPE_CUSTOM:
-          $policy->setHref('/transactions/'.$state.'/'.$this->getPHID().'/');
-          $policy->setWorkflow(true);
-          break;
-        default:
-          break;
-      }
-      $output = $policy->renderDescription();
+      $output = $ref->newTransactionLink($state, $this);
     } else {
-      $output = hsprintf('%s', $policy->getFullName());
+      $output = $ref->getPolicyDisplayName();
     }
+
     return $output;
   }
 
@@ -775,6 +771,13 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_MFA:
         return true;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        // See T8952. When an application (usually Herald) modifies
+        // subscribers, this tends to be very uninteresting.
+        if ($this->isApplicationAuthor()) {
+          return true;
+        }
+        break;
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
@@ -1385,12 +1388,6 @@ abstract class PhabricatorApplicationTransaction
         if ($this->isSelfSubscription()) {
           // Make this weaker than TYPE_COMMENT.
           return 25;
-        }
-
-        if ($this->isApplicationAuthor()) {
-          // When applications (most often: Herald) change subscriptions it
-          // is very uninteresting.
-          return 1;
         }
 
         // In other cases, subscriptions are more interesting than comments

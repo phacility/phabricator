@@ -293,37 +293,6 @@ final class PhrictionDocumentController
       } else {
         throw new Exception(pht("Unknown document status '%s'!", $doc_status));
       }
-
-      $move_notice = null;
-      if ($current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
-        $from_doc_id = $content->getChangeRef();
-
-        $slug_uri = null;
-
-        // If the old document exists and is visible, provide a link to it.
-        $from_docs = id(new PhrictionDocumentQuery())
-          ->setViewer($viewer)
-          ->withIDs(array($from_doc_id))
-          ->execute();
-        if ($from_docs) {
-          $from_doc = head($from_docs);
-          $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
-        }
-
-        $move_notice = id(new PHUIInfoView())
-          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-
-        if ($slug_uri) {
-          $move_notice->appendChild(
-            pht(
-              'This document was moved from %s.',
-              phutil_tag('a', array('href' => $slug_uri), $slug_uri)));
-        } else {
-          // Render this for consistency, even though it's a bit silly.
-          $move_notice->appendChild(
-            pht('This document was moved from elsewhere.'));
-        }
-      }
     }
 
     $children = $this->renderDocumentChildren($slug);

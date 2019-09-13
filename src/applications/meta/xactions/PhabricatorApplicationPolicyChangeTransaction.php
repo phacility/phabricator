@@ -52,28 +52,22 @@ final class PhabricatorApplicationPolicyChangeTransaction
   }
 
   public function getTitle() {
-    $old = $this->renderApplicationPolicy($this->getOldValue());
-    $new = $this->renderApplicationPolicy($this->getNewValue());
-
     return pht(
-      '%s changed the "%s" policy from "%s" to "%s".',
+      '%s changed the %s policy from %s to %s.',
       $this->renderAuthor(),
       $this->renderCapability(),
-      $old,
-      $new);
+      $this->renderOldPolicy(),
+      $this->renderNewPolicy());
   }
 
   public function getTitleForFeed() {
-    $old = $this->renderApplicationPolicy($this->getOldValue());
-    $new = $this->renderApplicationPolicy($this->getNewValue());
-
     return pht(
-      '%s changed the "%s" policy for application %s from "%s" to "%s".',
+      '%s changed the %s policy for application %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderCapability(),
       $this->renderObject(),
-      $old,
-      $new);
+      $this->renderOldPolicy(),
+      $this->renderNewPolicy());
   }
 
   public function validateTransactions($object, array $xactions) {
@@ -165,38 +159,11 @@ final class PhabricatorApplicationPolicyChangeTransaction
     return $errors;
   }
 
-  private function renderApplicationPolicy($name) {
-    $policies = $this->getAllPolicies();
-    if (empty($policies[$name])) {
-      // Not a standard policy, check for a custom policy.
-      $policy = id(new PhabricatorPolicyQuery())
-        ->setViewer($this->getViewer())
-        ->withPHIDs(array($name))
-        ->executeOne();
-      $policies[$name] = $policy;
-    }
-
-    $policy = idx($policies, $name);
-    return $this->renderValue($policy->getFullName());
-  }
-
-  private function getAllPolicies() {
-    if (!$this->policies) {
-      $viewer = $this->getViewer();
-      $application = $this->getObject();
-      $this->policies = id(new PhabricatorPolicyQuery())
-        ->setViewer($viewer)
-        ->setObject($application)
-        ->execute();
-    }
-
-    return $this->policies;
-  }
-
   private function renderCapability() {
     $application = $this->getObject();
     $capability = $this->getCapabilityName();
-    return $application->getCapabilityLabel($capability);
+    $label = $application->getCapabilityLabel($capability);
+    return $this->renderValue($label);
   }
 
   private function getCapabilityName() {

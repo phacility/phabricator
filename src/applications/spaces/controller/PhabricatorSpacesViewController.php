@@ -80,14 +80,6 @@ final class PhabricatorSpacesViewController
         ? pht('Yes')
         : pht('No'));
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $space);
-
-    $list->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
     $description = $space->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);

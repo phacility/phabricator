@@ -259,6 +259,22 @@ final class HeraldRule extends HeraldDAO
     return '/'.$this->getMonogram();
   }
 
+  public function getEditorSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->getIsDisabled() ? 1 : 0)
+      ->addString($this->getName());
+  }
+
+  public function getEditorDisplayName() {
+    $name = pht('%s %s', $this->getMonogram(), $this->getName());
+
+    if ($this->getIsDisabled()) {
+      $name = pht('%s (Disabled)', $name);
+    }
+
+    return $name;
+  }
+
 
 /* -(  Repetition Policies  )------------------------------------------------ */
 

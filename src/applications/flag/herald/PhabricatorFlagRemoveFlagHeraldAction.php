@@ -1,15 +1,15 @@
 <?php
 
-final class PhabricatorFlagAddFlagHeraldAction
+final class PhabricatorFlagRemoveFlagHeraldAction
   extends PhabricatorFlagHeraldAction {
 
-  const ACTIONCONST = 'flag';
+  const ACTIONCONST = 'unflag';
 
-  const DO_FLAG = 'do.flag';
-  const DO_IGNORE = 'do.flagged';
+  const DO_UNFLAG = 'do.unflag';
+  const DO_IGNORE_UNFLAG = 'do.ignore-unflag';
 
   public function getHeraldActionName() {
-    return pht('Mark with flag');
+    return pht('Remove flag');
   }
 
   public function applyEffect($object, HeraldEffect $effect) {
@@ -18,21 +18,19 @@ final class PhabricatorFlagAddFlagHeraldAction
     $author = $rule->getAuthor();
 
     $flag = PhabricatorFlagQuery::loadUserFlag($author, $phid);
-    if ($flag) {
-      $this->logEffect(self::DO_IGNORE, $flag->getColor());
+    if (!$flag) {
+      $this->logEffect(self::DO_IGNORE_UNFLAG, null);
       return;
     }
 
-    $flag = id(new PhabricatorFlag())
-      ->setOwnerPHID($author->getPHID())
-      ->setType(phid_get_type($phid))
-      ->setObjectPHID($phid)
-      ->setReasonPHID($rule->getPHID())
-      ->setColor($effect->getTarget())
-      ->setNote('')
-      ->save();
+    if ($flag->getColor() !== $effect->getTarget()) {
+      $this->logEffect(self::DO_IGNORE_UNFLAG, $flag->getColor());
+      return;
+    }
 
-    $this->logEffect(self::DO_FLAG, $flag->getColor());
+    $flag->delete();
+
+    $this->logEffect(self::DO_UNFLAG, $flag->getColor());
   }
 
   public function getHeraldActionValueType() {
@@ -44,32 +42,36 @@ final class PhabricatorFlagAddFlagHeraldAction
 
   protected function getActionEffectMap() {
     return array(
-      self::DO_IGNORE => array(
+      self::DO_IGNORE_UNFLAG => array(
         'icon' => 'fa-times',
         'color' => 'grey',
-        'name' => pht('Already Marked'),
+        'name' => pht('Did Not Remove Flag'),
       ),
-      self::DO_FLAG => array(
+      self::DO_UNFLAG => array(
         'icon' => 'fa-flag',
-        'name' => pht('Flagged'),
+        'name' => pht('Removed Flag'),
       ),
     );
   }
 
   public function renderActionDescription($value) {
     $color = PhabricatorFlagColor::getColorName($value);
-    return pht('Mark with %s flag.', $color);
+    return pht('Remove %s flag.', $color);
   }
 
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
-      case self::DO_IGNORE:
+      case self::DO_IGNORE_UNFLAG:
+        if (!$data) {
+          return pht('Not marked with any flag.');
+        } else {
+          return pht(
+            'Marked with flag of the wrong color ("%s").',
+            PhabricatorFlagColor::getColorName($data));
+        }
+      case self::DO_UNFLAG:
         return pht(
-          'Already marked with %s flag.',
-          PhabricatorFlagColor::getColorName($data));
-      case self::DO_FLAG:
-        return pht(
-          'Marked with "%s" flag.',
+          'Removed "%s" flag.',
           PhabricatorFlagColor::getColorName($data));
     }
   }

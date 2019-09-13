@@ -602,12 +602,13 @@ final class PhabricatorPolicyFilter extends Phobject {
     PhabricatorPolicyInterface $object,
     $policy,
     $capability) {
+    $viewer = $this->viewer;
 
     if (!$this->raisePolicyExceptions) {
       return;
     }
 
-    if ($this->viewer->isOmnipotent()) {
+    if ($viewer->isOmnipotent()) {
       // Never raise policy exceptions for the omnipotent viewer. Although we
       // will never normally issue a policy rejection for the omnipotent
       // viewer, we can end up here when queries blanket reject objects that
@@ -634,9 +635,60 @@ final class PhabricatorPolicyFilter extends Phobject {
         $capability);
     }
 
-    $more = PhabricatorPolicy::getPolicyExplanation($this->viewer, $policy);
-    $more = (array)$more;
-    $more = array_filter($more);
+    // See T13411. If you receive a policy exception because you can't view
+    // an object, we also want to avoid disclosing too many details about the
+    // actual policy (for example, the names of projects in the policy).
+
+    // If you failed a "CAN_VIEW" check, or failed some other check and don't
+    // have "CAN_VIEW" on the object, we give you an "opaque" explanation.
+    // Otherwise, we give you a more detailed explanation.
+
+    $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
+    if ($capability === $view_capability) {
+      $show_details = false;
+    } else {
+      $show_details = self::hasCapability(
+        $viewer,
+        $object,
+        $view_capability);
+    }
+
+    // TODO: This is a bit clumsy. We're producing HTML and text versions of
+    // this message, but can't render the full policy rules in text today.
+    // Users almost never get a text-only version of this exception anyway.
+
+    $head = null;
+    $more = null;
+
+    if ($show_details) {
+      $head = PhabricatorPolicy::getPolicyExplanation($viewer, $policy);
+
+      $policy_type = PhabricatorPolicyPHIDTypePolicy::TYPECONST;
+      $is_custom = (phid_get_type($policy) === $policy_type);
+      if ($is_custom) {
+        $policy_map = PhabricatorPolicyQuery::loadPolicies(
+          $viewer,
+          $object);
+        if (isset($policy_map[$capability])) {
+          require_celerity_resource('phui-policy-section-view-css');
+
+          $more = id(new PhabricatorPolicyRulesView())
+            ->setViewer($viewer)
+            ->setPolicy($policy_map[$capability]);
+
+          $more = phutil_tag(
+            'div',
+            array(
+              'class' => 'phui-policy-section-view-rules',
+            ),
+            $more);
+        }
+      }
+    } else {
+      $head = PhabricatorPolicy::getOpaquePolicyExplanation($viewer, $policy);
+    }
+
+    $head = (array)$head;
 
     $exceptions = PhabricatorPolicy::getSpecialRules(
       $object,
@@ -644,7 +696,10 @@ final class PhabricatorPolicyFilter extends Phobject {
       $capability,
       true);
 
-    $details = array_filter(array_merge($more, $exceptions));
+    $text_details = array_filter(array_merge($head, $exceptions));
+    $text_details = implode(' ', $text_details);
+
+    $html_details = array($head, $more, $exceptions);
 
     $access_denied = $this->renderAccessDenied($object);
 
@@ -653,7 +708,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       $access_denied,
       $capability_name,
       $rejection,
-      implode(' ', $details));
+      $text_details);
 
     $exception = id(new PhabricatorPolicyException($full_message))
       ->setTitle($access_denied)
@@ -661,7 +716,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       ->setRejection($rejection)
       ->setCapability($capability)
       ->setCapabilityName($capability_name)
-      ->setMoreInfo($details);
+      ->setMoreInfo($html_details);
 
     throw $exception;
   }
