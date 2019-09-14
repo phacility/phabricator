@@ -17,6 +17,7 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
     PhortuneMerchant $merchant) {
     return id(new PhortunePaymentProviderConfig())
       ->setMerchantPHID($merchant->getPHID())
+      ->attachMerchant($merchant)
       ->setIsEnabled(1);
   }
 
@@ -73,6 +74,17 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
   public function buildProvider() {
     return newv($this->getProviderClass(), array())
       ->setProviderConfig($this);
+  }
+
+  public function getObjectName() {
+    return pht('Provider %d', $this->getID());
+  }
+
+  public function getURI() {
+    return urisprintf(
+      '/phortune/merchant/%d/providers/%d/',
+      $this->getMerchant()->getID(),
+      $this->getID());
   }
 
 

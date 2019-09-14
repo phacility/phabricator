@@ -312,11 +312,17 @@ final class AphrontApplicationConfiguration
     if ($response_exception) {
       // If we encountered an exception while building a normal response, then
       // encountered another exception while building a response for the first
-      // exception, just throw the original exception. It is more likely to be
-      // useful and point at a root cause than the second exception we ran into
-      // while telling the user about it.
+      // exception, throw an aggregate exception that will be unpacked by the
+      // higher-level handler. This is above our pay grade.
       if ($original_exception) {
-        throw $original_exception;
+        throw new PhutilAggregateException(
+          pht(
+            'Encountered a processing exception, then another exception when '.
+            'trying to build a response for the first exception.'),
+          array(
+            $response_exception,
+            $original_exception,
+          ));
       }
 
       // If we built a response successfully and then ran into an exception

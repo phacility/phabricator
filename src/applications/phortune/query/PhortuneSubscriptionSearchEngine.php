@@ -96,9 +96,9 @@ final class PhortuneSubscriptionSearchEngine
     $merchant = $this->getMerchant();
     $account = $this->getAccount();
     if ($merchant) {
-      return '/phortune/merchant/'.$merchant->getID().'/subscription/'.$path;
+      return $merchant->getSubscriptionListURI($path);
     } else if ($account) {
-      return '/phortune/'.$account->getID().'/subscription/';
+      return $account->getSubscriptionListURI($path);
     } else {
       return '/phortune/subscription/'.$path;
     }
@@ -125,18 +125,6 @@ final class PhortuneSubscriptionSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $subscriptions,
-    PhabricatorSavedQuery $query) {
-    $phids = array();
-    foreach ($subscriptions as $subscription) {
-      $phids[] = $subscription->getPHID();
-      $phids[] = $subscription->getMerchantPHID();
-      $phids[] = $subscription->getAuthorPHID();
-    }
-    return $phids;
-  }
-
   protected function renderResultList(
     array $subscriptions,
     PhabricatorSavedQuery $query,
@@ -147,7 +135,6 @@ final class PhortuneSubscriptionSearchEngine
 
     $table = id(new PhortuneSubscriptionTableView())
       ->setUser($viewer)
-      ->setHandles($handles)
       ->setSubscriptions($subscriptions);
 
     $merchant = $this->getMerchant();

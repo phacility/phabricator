@@ -1,0 +1,19 @@
+>>! In U, W wrote:
+> - Y
+>
+> Z
+~~~~~~~~~~
+<blockquote class="remarkup-reply-block">
+<div class="remarkup-reply-head">In U, W wrote:</div>
+<div class="remarkup-reply-body"><ul class="remarkup-list">
+<li class="remarkup-list-item">Y</li>
+</ul>
+
+<p>Z</p></div>
+</blockquote>
+~~~~~~~~~~
+In U, W wrote:
+
+> - Y
+>
+> Z

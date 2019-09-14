@@ -108,7 +108,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
             'PhabricatorAuthMessageListController',
           $this->getEditRoutePattern('edit/') =>
             'PhabricatorAuthMessageEditController',
-          '(?P<id>[1-9]\d*)/' =>
+          '(?P<id>[^/]+)/' =>
             'PhabricatorAuthMessageViewController',
         ),
 

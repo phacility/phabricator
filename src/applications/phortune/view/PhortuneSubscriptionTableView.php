@@ -3,18 +3,8 @@
 final class PhortuneSubscriptionTableView extends AphrontView {
 
   private $subscriptions;
-  private $handles;
   private $isMerchantView;
   private $notice;
-
-  public function setHandles(array $handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
-  public function getHandles() {
-    return $this->handles;
-  }
 
   public function setSubscriptions(array $subscriptions) {
     $this->subscriptions = $subscriptions;
@@ -40,9 +30,15 @@ final class PhortuneSubscriptionTableView extends AphrontView {
   }
 
   public function render() {
+    return $this->newTableView();
+  }
+
+  public function newTableView() {
     $subscriptions = $this->getSubscriptions();
-    $handles = $this->getHandles();
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
+
+    $phids = mpull($subscriptions, 'getPHID');
+    $handles = $viewer->loadHandles($phids);
 
     $rows = array();
     $rowc = array();

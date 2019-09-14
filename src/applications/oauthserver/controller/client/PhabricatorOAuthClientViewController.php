@@ -15,12 +15,11 @@ final class PhabricatorOAuthClientViewController
     }
 
     $header = $this->buildHeaderView($client);
-    $actions = $this->buildActionView($client);
     $properties = $this->buildPropertyListView($client);
-    $properties->setActionList($actions);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($client->getName());
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($client->getName())
+      ->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $client,
@@ -28,19 +27,27 @@ final class PhabricatorOAuthClientViewController
     $timeline->setShouldTerminate(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $title = pht('OAuth Application: %s', $client->getName());
 
-    return $this->newPage()
-      ->setCrumbs($crumbs)
-      ->setTitle($title)
-      ->appendChild(
+    $curtain = $this->buildCurtain($client);
+
+    $columns = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(
         array(
           $box,
           $timeline,
         ));
+
+    return $this->newPage()
+      ->setCrumbs($crumbs)
+      ->setTitle($title)
+      ->appendChild($columns);
   }
 
   private function buildHeaderView(PhabricatorOAuthServerClient $client) {
@@ -60,8 +67,9 @@ final class PhabricatorOAuthClientViewController
     return $header;
   }
 
-  private function buildActionView(PhabricatorOAuthServerClient $client) {
+  private function buildCurtain(PhabricatorOAuthServerClient $client) {
     $viewer = $this->getViewer();
+    $actions = array();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -70,24 +78,19 @@ final class PhabricatorOAuthClientViewController
 
     $id = $client->getID();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('Edit Application'))
+      ->setIcon('fa-pencil')
+      ->setWorkflow(!$can_edit)
+      ->setDisabled(!$can_edit)
+      ->setHref($client->getEditURI());
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Application'))
-        ->setIcon('fa-pencil')
-        ->setWorkflow(!$can_edit)
-        ->setDisabled(!$can_edit)
-        ->setHref($client->getEditURI()));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Show Application Secret'))
-        ->setIcon('fa-eye')
-        ->setHref($this->getApplicationURI("client/secret/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('Show Application Secret'))
+      ->setIcon('fa-eye')
+      ->setHref($this->getApplicationURI("client/secret/{$id}/"))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
 
     $is_disabled = $client->getIsDisabled();
     if ($is_disabled) {
@@ -100,22 +103,26 @@ final class PhabricatorOAuthClientViewController
 
     $disable_uri = $this->getApplicationURI("client/disable/{$id}/");
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName($disable_text)
-        ->setIcon($disable_icon)
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit)
-        ->setHref($disable_uri));
+    $actions[] = id(new PhabricatorActionView())
+      ->setName($disable_text)
+      ->setIcon($disable_icon)
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit)
+      ->setHref($disable_uri);
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Generate Test Token'))
-        ->setIcon('fa-plus')
-        ->setWorkflow(true)
-        ->setHref($this->getApplicationURI("client/test/{$id}/")));
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('Generate Test Token'))
+      ->setIcon('fa-plus')
+      ->setWorkflow(true)
+      ->setHref($this->getApplicationURI("client/test/{$id}/"));
 
-    return $view;
+    $curtain = $this->newCurtainView($client);
+
+    foreach ($actions as $action) {
+      $curtain->addAction($action);
+    }
+
+    return $curtain;
   }
 
   private function buildPropertyListView(PhabricatorOAuthServerClient $client) {
@@ -131,10 +138,6 @@ final class PhabricatorOAuthClientViewController
     $view->addProperty(
       pht('Redirect URI'),
       $client->getRedirectURI());
-
-    $view->addProperty(
-      pht('Created'),
-      phabricator_datetime($client->getDateCreated(), $viewer));
 
     return $view;
   }

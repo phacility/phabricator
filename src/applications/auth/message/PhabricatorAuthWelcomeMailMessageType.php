@@ -6,7 +6,7 @@ final class PhabricatorAuthWelcomeMailMessageType
   const MESSAGEKEY = 'mail.welcome';
 
   public function getDisplayName() {
-    return pht('Welcome Email Body');
+    return pht('Mail Body: Welcome');
   }
 
   public function getShortDescription() {

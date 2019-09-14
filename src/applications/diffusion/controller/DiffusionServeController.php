@@ -302,6 +302,12 @@ final class DiffusionServeController extends DiffusionController {
       }
 
       if ($is_push) {
+        if ($repository->isReadOnly()) {
+          return new PhabricatorVCSResponse(
+            503,
+            $repository->getReadOnlyMessageForDisplay());
+        }
+
         $can_write =
           $repository->canServeProtocol($proto_https, true) ||
           $repository->canServeProtocol($proto_http, true);

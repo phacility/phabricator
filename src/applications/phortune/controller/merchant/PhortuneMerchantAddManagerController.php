@@ -1,32 +1,23 @@
 <?php
 
-final class PhortuneMerchantAddManagerController extends PhortuneController {
+final class PhortuneMerchantAddManagerController
+  extends PhortuneMerchantController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireMerchantEditCapability() {
+    return true;
+  }
+
+  protected function handleMerchantRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
-
-    $merchant = id(new PhortuneMerchantQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needProfileImage(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$merchant) {
-      return new Aphront404Response();
-    }
+    $merchant = $this->getMerchant();
 
     $v_members = array();
     $e_members = null;
-    $merchant_uri = $this->getApplicationURI("/merchant/manager/{$id}/");
+    $merchant_uri = $merchant->getManagersURI();
 
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHiSecPost()) {
       $xactions = array();
-      $v_members = $request->getArr('memberPHIDs');
+      $v_members = $request->getArr('managerPHIDs');
       $type_edge = PhabricatorTransactions::TYPE_EDGE;
 
       $xactions[] = id(new PhortuneMerchantTransaction())
@@ -59,13 +50,13 @@ final class PhortuneMerchantAddManagerController extends PhortuneController {
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setLabel(pht('Members'))
-          ->setName('memberPHIDs')
+          ->setLabel(pht('New Managers'))
+          ->setName('managerPHIDs')
           ->setValue($v_members)
           ->setError($e_members));
 
     return $this->newDialog()
-      ->setTitle(pht('Add New Manager'))
+      ->setTitle(pht('Add New Managers'))
       ->appendForm($form)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->addCancelButton($merchant_uri)

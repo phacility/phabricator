@@ -53,13 +53,34 @@ final class PhortuneAccountQuery
   protected function willFilterPage(array $accounts) {
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($accounts, 'getPHID'))
-      ->withEdgeTypes(array(PhortuneAccountHasMemberEdgeType::EDGECONST));
+      ->withEdgeTypes(
+        array(
+          PhortuneAccountHasMemberEdgeType::EDGECONST,
+          PhortuneAccountHasMerchantEdgeType::EDGECONST,
+        ));
+
     $query->execute();
 
     foreach ($accounts as $account) {
-      $member_phids = $query->getDestinationPHIDs(array($account->getPHID()));
+      $member_phids = $query->getDestinationPHIDs(
+        array(
+          $account->getPHID(),
+        ),
+        array(
+          PhortuneAccountHasMemberEdgeType::EDGECONST,
+        ));
       $member_phids = array_reverse($member_phids);
       $account->attachMemberPHIDs($member_phids);
+
+      $merchant_phids = $query->getDestinationPHIDs(
+        array(
+          $account->getPHID(),
+        ),
+        array(
+          PhortuneAccountHasMerchantEdgeType::EDGECONST,
+        ));
+      $merchant_phids = array_reverse($merchant_phids);
+      $account->attachMerchantPHIDs($merchant_phids);
     }
 
     return $accounts;

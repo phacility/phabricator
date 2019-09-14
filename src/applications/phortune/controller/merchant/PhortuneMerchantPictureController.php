@@ -1,28 +1,17 @@
 <?php
 
 final class PhortuneMerchantPictureController
-  extends PhortuneMerchantProfileController {
+  extends PhortuneMerchantController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireMerchantEditCapability() {
+    return true;
+  }
+
+  protected function handleMerchantRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+    $merchant = $this->getMerchant();
 
-    $merchant = id(new PhortuneMerchantQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needProfileImage(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$merchant) {
-      return new Aphront404Response();
-    }
-
-    $this->setMerchant($merchant);
-    $uri = $merchant->getURI();
+    $uri = $merchant->getDetailsURI();
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;
@@ -222,12 +211,9 @@ final class PhortuneMerchantPictureController
         $upload_box,
       ));
 
-    $navigation = $this->buildSideNavView();
-
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($navigation)
       ->appendChild(
         array(
           $view,

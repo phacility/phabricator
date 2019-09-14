@@ -373,6 +373,16 @@ abstract class HeraldAdapter extends Phobject {
     return $field->getFieldGroupKey();
   }
 
+  public function isFieldAvailable($field_key) {
+    $field = $this->getFieldImplementation($field_key);
+
+    if (!$field) {
+      return null;
+    }
+
+    return $field->isFieldAvailable();
+  }
+
 
 /* -(  Conditions  )--------------------------------------------------------- */
 
@@ -763,6 +773,16 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $action->getActionGroupKey();
+  }
+
+  public function isActionAvailable($action_key) {
+    $action = $this->getActionImplementation($action_key);
+
+    if (!$action) {
+      return null;
+    }
+
+    return $action->isActionAvailable();
   }
 
   public function getActions($rule_type) {

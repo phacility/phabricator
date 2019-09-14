@@ -158,6 +158,11 @@
   margin-top: 16px;
 }
 
+.aphront-dialog-view-command {
+  padding: 8px 16px;
+  background: {$greybackground};
+}
+
 .device-desktop .aphront-dialog-flush .phui-oi-list-view {
   margin: 0;
   padding: 0;

@@ -904,7 +904,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function newEditEngineSubtypeMap() {
     $config = PhabricatorEnv::getEnvConfig('projects.subtypes');
-    return PhabricatorEditEngineSubtype::newSubtypeMap($config);
+    return PhabricatorEditEngineSubtype::newSubtypeMap($config)
+      ->setDatasource(new PhabricatorProjectSubtypeDatasource());
   }
 
   public function newSubtypeObject() {

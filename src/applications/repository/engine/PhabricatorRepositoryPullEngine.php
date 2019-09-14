@@ -52,6 +52,13 @@ final class PhabricatorRepositoryPullEngine
     $repository = $this->getRepository();
     $viewer = PhabricatorUser::getOmnipotentUser();
 
+    if ($repository->isReadOnly()) {
+      $this->skipPull(
+        pht(
+          "Skipping pull on read-only repository.\n\n%s",
+          $repository->getReadOnlyMessageForDisplay()));
+    }
+
     $is_hg = false;
     $is_git = false;
     $is_svn = false;

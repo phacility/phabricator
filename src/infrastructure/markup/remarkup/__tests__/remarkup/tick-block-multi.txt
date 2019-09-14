@@ -1,0 +1,18 @@
+```code
+
+more code
+
+more code```
+
+~~~~~~~~~~
+<div class="remarkup-code-block" data-code-lang="text" data-sigil="remarkup-code-block"><pre class="remarkup-code">code
+
+more code
+
+more code</pre></div>
+~~~~~~~~~~
+  code
+  
+  more code
+  
+  more code

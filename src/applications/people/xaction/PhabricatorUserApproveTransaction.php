@@ -19,10 +19,6 @@ final class PhabricatorUserApproveTransaction
 
   public function applyExternalEffects($object, $value) {
     $user = $object;
-    $this->newUserLog(PhabricatorUserLog::ACTION_APPROVE)
-      ->setOldValue((bool)$user->getIsApproved())
-      ->setNewValue((bool)$value)
-      ->save();
 
     $actor = $this->getActor();
     $title = pht(

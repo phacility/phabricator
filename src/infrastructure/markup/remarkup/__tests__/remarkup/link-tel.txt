@@ -1,0 +1,18 @@
+[[ tel:18005555555 | call me ]]
+
+[ call me ]( tel:18005555555 )
+
+[[tel:18005555555]]
+
+~~~~~~~~~~
+<p><a href="tel:18005555555" class="remarkup-link" target="_blank" rel="noreferrer">call me</a></p>
+
+<p><a href="tel:18005555555" class="remarkup-link" target="_blank" rel="noreferrer">call me</a></p>
+
+<p><a href="tel:18005555555" class="remarkup-link" target="_blank" rel="noreferrer">18005555555</a></p>
+~~~~~~~~~~
+call me <18005555555>
+
+call me <18005555555>
+
+18005555555

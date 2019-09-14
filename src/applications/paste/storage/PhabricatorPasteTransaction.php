@@ -8,7 +8,7 @@ final class PhabricatorPasteTransaction
   const MAILTAG_COMMENT = 'paste-comment';
 
   public function getApplicationName() {
-    return 'pastebin';
+    return 'paste';
   }
 
   public function getApplicationTransactionType() {

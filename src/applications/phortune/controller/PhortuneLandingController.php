@@ -11,7 +11,7 @@ final class PhortuneLandingController extends PhortuneController {
 
     if (count($accounts) == 1) {
       $account = head($accounts);
-      $next_uri = $this->getApplicationURI($account->getID().'/');
+      $next_uri = $account->getURI();
     } else {
       $next_uri = $this->getApplicationURI('account/');
     }

@@ -1520,6 +1520,10 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    foreach ($this->newAuxiliaryMail($object, $xactions) as $message) {
+      $messages[] = $message;
+    }
+
     // NOTE: This actually sends the mail. We do this last to reduce the chance
     // that we send some mail, hit an exception, then send the mail again when
     // retrying.
@@ -1799,6 +1803,11 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorMutedByEdgeType::EDGECONST:
         // At time of writing, you can only write this edge for yourself, so
         // you don't need permissions. If you can eventually mute an object
+        // for other users, this would need to be revisited.
+        return null;
+      case PhabricatorProjectSilencedEdgeType::EDGECONST:
+        // At time of writing, you can only write this edge for yourself, so
+        // you don't need permissions. If you can eventually silence project
         // for other users, this would need to be revisited.
         return null;
       case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
@@ -4792,6 +4801,10 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $extensions;
+  }
+
+  protected function newAuxiliaryMail($object, array $xactions) {
+    return array();
   }
 
   private function generateMailStamps($object, $data) {

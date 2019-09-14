@@ -59,7 +59,6 @@ final class PhabricatorUser
   private $rawCacheData = array();
   private $usableCacheData = array();
 
-  private $authorities = array();
   private $handlePool;
   private $csrfSalt;
 
@@ -704,23 +703,6 @@ final class PhabricatorUser
     return null;
   }
 
-
-  /**
-   * Grant a user a source of authority, to let them bypass policy checks they
-   * could not otherwise.
-   */
-  public function grantAuthority($authority) {
-    $this->authorities[] = $authority;
-    return $this;
-  }
-
-
-  /**
-   * Get authorities granted to the user.
-   */
-  public function getAuthorities() {
-    return $this->authorities;
-  }
 
   public function hasConduitClusterToken() {
     return ($this->conduitClusterToken !== self::ATTACHABLE);

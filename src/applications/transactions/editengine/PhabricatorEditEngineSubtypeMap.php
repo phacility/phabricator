@@ -5,6 +5,7 @@ final class PhabricatorEditEngineSubtypeMap
   extends Phobject {
 
   private $subtypes;
+  private $datasource;
 
   public function __construct(array $subtypes) {
     assert_instances_of($subtypes, 'PhabricatorEditEngineSubtype');
@@ -37,6 +38,57 @@ final class PhabricatorEditEngineSubtypeMap
     }
 
     return $this->subtypes[$subtype_key];
+  }
+
+  public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
+    $this->datasource = $datasource;
+    return $this;
+  }
+
+  public function newDatasource() {
+    if (!$this->datasource) {
+      throw new PhutilInvalidStateException('setDatasource');
+    }
+
+    return clone($this->datasource);
+  }
+
+  public function getMutationMap($source_key) {
+    return mpull($this->getMutations($source_key), 'getName');
+  }
+
+  public function getMutations($source_key) {
+    $mutations = $this->subtypes;
+
+    $subtype = idx($this->subtypes, $source_key);
+    if ($subtype) {
+      $map = $subtype->getMutations();
+      if ($map !== null) {
+        $map = array_fuse($map);
+        foreach ($mutations as $key => $mutation) {
+          if ($key === $source_key) {
+            // This is the current subtype, so we always want to show it.
+            continue;
+          }
+
+          if (isset($map[$key])) {
+            // This is an allowed mutation, so keep it.
+            continue;
+          }
+
+          // Discard other subtypes as mutation options.
+          unset($mutations[$key]);
+        }
+      }
+    }
+
+    // If the only available mutation is the current subtype, treat this like
+    // no mutations are available.
+    if (array_keys($mutations) === array($source_key)) {
+      $mutations = array();
+    }
+
+    return $mutations;
   }
 
   public function getCreateFormsForSubtype(

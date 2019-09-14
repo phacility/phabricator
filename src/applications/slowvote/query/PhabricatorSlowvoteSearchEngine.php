@@ -46,20 +46,26 @@ final class PhabricatorSlowvoteSearchEngine
         ->setKey('authorPHIDs')
         ->setAliases(array('authors'))
         ->setLabel(pht('Authors')),
-
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('voted')
+        ->setLabel(pht('Voted'))
+
+        // TODO: This should probably become a list of "voterPHIDs", so hide
+        // the field from Conduit to avoid a backward compatibility break when
+        // this changes.
+
+        ->setEnableForConduit(false)
         ->setOptions(array(
           'voted' => pht("Show only polls I've voted in."),
           )),
-
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Statuses'))
-        ->setOptions(array(
+        ->setOptions(
+          array(
           'open' => pht('Open'),
           'closed' => pht('Closed'),
-          )),
+        )),
     );
   }
 

@@ -1,0 +1,24 @@
+> # X
+> # Y
+>
+> B
+>
+> * C
+~~~~~~~~~~
+<blockquote><ol class="remarkup-list">
+<li class="remarkup-list-item">X</li>
+<li class="remarkup-list-item">Y</li>
+</ol>
+
+<p>B</p>
+
+<ul class="remarkup-list">
+<li class="remarkup-list-item">C</li>
+</ul></blockquote>
+~~~~~~~~~~
+> 1. X
+> 2. Y
+>
+> B
+>
+> - C

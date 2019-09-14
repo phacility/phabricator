@@ -104,13 +104,22 @@ JX.install('Workflow', {
       var link = event.getNode('tag:a');
 
       // If the link is an anchor, or does not go anywhere, ignore the event.
-      var href = '' + link.getAttribute('href');
+      var href = link.getAttribute('href');
+      if (typeof href !== 'string') {
+        return;
+      }
+
       if (!href.length || href[0] === '#') {
         return;
       }
 
       // This link will open in a new window.
       if (link.target === '_blank') {
+        return;
+      }
+
+      // This link is really a dialog button which we'll handle elsewhere.
+      if (JX.Stratcom.hasSigil(link, 'jx-workflow-button')) {
         return;
       }
 

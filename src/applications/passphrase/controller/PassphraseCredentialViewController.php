@@ -190,14 +190,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
       pht('Credential Type'),
       $type->getCredentialTypeName());
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $credential);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
     if ($type->shouldRequireUsername()) {
       $properties->addProperty(
         pht('Username'),

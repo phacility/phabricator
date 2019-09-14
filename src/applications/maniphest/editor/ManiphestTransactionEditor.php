@@ -3,6 +3,7 @@
 final class ManiphestTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $oldProjectPHIDs;
   private $moreValidationErrors = array();
 
   public function getEditorApplicationClass() {
@@ -376,6 +377,11 @@ final class ManiphestTransactionEditor
               '+' => array($actor_phid => $actor_phid),
             ));
       }
+    }
+
+    $send_notifications = PhabricatorNotificationClient::isEnabled();
+    if ($send_notifications) {
+      $this->oldProjectPHIDs = $this->loadProjectPHIDs($object);
     }
 
     return $results;
@@ -857,6 +863,73 @@ final class ManiphestTransactionEditor
     }
 
     return array_values($phid_list);
+  }
+
+  protected function didApplyTransactions($object, array $xactions) {
+    $send_notifications = PhabricatorNotificationClient::isEnabled();
+    if ($send_notifications) {
+      $old_phids = $this->oldProjectPHIDs;
+      $new_phids = $this->loadProjectPHIDs($object);
+
+      // We want to emit update notifications for all old and new tagged
+      // projects, and all parents of those projects. For example, if an
+      // edit removes project "A > B" from a task, the "A" workboard should
+      // receive an update event.
+
+      $project_phids = array_fuse($old_phids) + array_fuse($new_phids);
+      $project_phids = array_keys($project_phids);
+
+      if ($project_phids) {
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($project_phids)
+          ->execute();
+
+        $notify_projects = array();
+        foreach ($projects as $project) {
+          $notify_projects[$project->getPHID()] = $project;
+          foreach ($project->getAncestorProjects() as $ancestor) {
+            $notify_projects[$ancestor->getPHID()] = $ancestor;
+          }
+        }
+
+        foreach ($notify_projects as $key => $project) {
+          if (!$project->getHasWorkboard()) {
+            unset($notify_projects[$key]);
+          }
+        }
+
+        $notify_phids = array_keys($notify_projects);
+
+        if ($notify_phids) {
+          $data = array(
+            'type' => 'workboards',
+            'subscribers' => $notify_phids,
+          );
+
+          PhabricatorNotificationClient::tryToPostMessage($data);
+        }
+      }
+    }
+
+    return $xactions;
+  }
+
+  private function loadProjectPHIDs(ManiphestTask $task) {
+    if (!$task->getPHID()) {
+      return array();
+    }
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array($task->getPHID()))
+      ->withEdgeTypes(
+        array(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        ));
+
+    $edge_query->execute();
+
+    return $edge_query->getDestinationPHIDs();
   }
 
 }

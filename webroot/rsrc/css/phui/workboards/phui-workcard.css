@@ -36,6 +36,10 @@
 
 .phui-workcard .phui-oi-link {
   white-space: normal;
+
+  /* See T13413. This works around a Chrome 77 rendering engine freeze. */
+  word-wrap: normal;
+
   font-weight: normal;
   color: {$blacktext};
   margin-left: 2px;

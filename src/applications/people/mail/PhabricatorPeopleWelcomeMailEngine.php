@@ -104,7 +104,6 @@ final class PhabricatorPeopleWelcomeMailEngine
     $message = implode("\n\n", $message);
 
     return id(new PhabricatorMetaMTAMail())
-      ->addTos(array($recipient->getPHID()))
       ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
       ->setBody($message);
   }

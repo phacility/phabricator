@@ -1,0 +1,16 @@
+> This should be a code block:
+>
+> ```lang=php
+> <?php
+> $foo = 'bar';
+> ```
+~~~~~~~~~~
+<blockquote><p>This should be a code block:</p>
+
+<div class="remarkup-code-block" data-code-lang="php" data-sigil="remarkup-code-block"><pre class="remarkup-code"><span class="o">&lt;?php</span>
+<span class="nv">$foo</span> <span class="k">=</span> <span class="s">&#039;bar&#039;</span><span class="k">;</span></pre></div></blockquote>
+~~~~~~~~~~
+> This should be a code block:
+>
+>   <?php
+>   $foo = 'bar';

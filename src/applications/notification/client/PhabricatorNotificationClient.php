@@ -37,4 +37,8 @@ final class PhabricatorNotificationClient extends Phobject {
     }
   }
 
+  public static function isEnabled() {
+    return (bool)PhabricatorNotificationServerRef::getEnabledAdminServers();
+  }
+
 }

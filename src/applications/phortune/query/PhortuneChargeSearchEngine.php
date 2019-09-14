@@ -40,16 +40,6 @@ final class PhortuneChargeSearchEngine
 
     $account = $this->getAccount();
     if ($account) {
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $account,
-        PhabricatorPolicyCapability::CAN_EDIT);
-      if (!$can_edit) {
-        throw new Exception(
-          pht(
-            'You can not query charges for an account you are not '.
-            'a member of.'));
-      }
       $query->withAccountPHIDs(array($account->getPHID()));
     } else {
       $accounts = id(new PhortuneAccountQuery())
@@ -72,7 +62,7 @@ final class PhortuneChargeSearchEngine
   protected function getURI($path) {
     $account = $this->getAccount();
     if ($account) {
-      return '/phortune/'.$account->getID().'/charge/';
+      return $account->getChargeListURI($path);
     } else {
       return '/phortune/charge/'.$path;
     }
@@ -99,20 +89,6 @@ final class PhortuneChargeSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $charges,
-    PhabricatorSavedQuery $query) {
-
-    $phids = array();
-    foreach ($charges as $charge) {
-      $phids[] = $charge->getProviderPHID();
-      $phids[] = $charge->getCartPHID();
-      $phids[] = $charge->getMerchantPHID();
-      $phids[] = $charge->getPaymentMethodPHID();
-    }
-
-    return $phids;
-  }
 
   protected function renderResultList(
     array $charges,
@@ -124,8 +100,7 @@ final class PhortuneChargeSearchEngine
 
     $table = id(new PhortuneChargeTableView())
       ->setUser($viewer)
-      ->setCharges($charges)
-      ->setHandles($handles);
+      ->setCharges($charges);
 
     $result = new PhabricatorApplicationSearchResultView();
     $result->setTable($table);

@@ -2,7 +2,10 @@
 
 abstract class PhabricatorSystemAction extends Phobject {
 
-  abstract public function getActionConstant();
+  final public function getActionConstant() {
+    return $this->getPhobjectClassConstant('TYPECONST', 32);
+  }
+
   abstract public function getScoreThreshold();
 
   public function shouldBlockActor($actor, $score) {

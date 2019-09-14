@@ -67,7 +67,9 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.metamta' => array(),
       'db.oauth_server' => array(),
       'db.owners' => array(),
-      'db.pastebin' => array(),
+      'db.pastebin' => array(
+        'dead' => true,
+      ),
       'db.phame' => array(),
       'db.phriction' => array(),
       'db.project' => array(),
@@ -113,6 +115,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.badges' => array(),
       'db.packages' => array(),
       'db.application' => array(),
+      'db.paste' => array(),
       '0000.legacy.sql' => array(
         'legacy' => 0,
       ),

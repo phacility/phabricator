@@ -1,0 +1,11 @@
+omg~~ wtf~~~~~ bbq~~~ lol~~~
+~~deleted text~~~
+~~This is a great idea~~~ die forever please
+~~~~~~~
+~~~~~~~~~~
+<p>omg~~ wtf~~~~~ bbq~~~ lol~~~
+<del>deleted text</del>
+<del>This is a great idea~</del> die forever please
+~~~~~~</p>
+~~~~~~~~~~
+omg~~ wtf~~~~~ bbq~~~ lol~~ ~~deleted text~~ ~~This is a great idea~~~ die forever please ~~~~~~~

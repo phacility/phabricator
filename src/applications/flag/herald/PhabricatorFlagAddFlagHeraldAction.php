@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorFlagAddFlagHeraldAction extends HeraldAction {
+final class PhabricatorFlagAddFlagHeraldAction
+  extends PhabricatorFlagHeraldAction {
 
   const ACTIONCONST = 'flag';
 
@@ -9,18 +10,6 @@ final class PhabricatorFlagAddFlagHeraldAction extends HeraldAction {
 
   public function getHeraldActionName() {
     return pht('Mark with flag');
-  }
-
-  public function getActionGroupKey() {
-    return HeraldSupportActionGroup::ACTIONGROUPKEY;
-  }
-
-  public function supportsObject($object) {
-    return ($object instanceof PhabricatorFlaggableInterface);
-  }
-
-  public function supportsRuleType($rule_type) {
-    return ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
   }
 
   public function applyEffect($object, HeraldEffect $effect) {

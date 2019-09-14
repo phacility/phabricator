@@ -130,4 +130,9 @@ final class LegalpadRequireSignatureHeraldAction
       'Require document signatures: %s.',
       $this->renderHandleList($value));
   }
+
+  public function isActionAvailable() {
+    return id(new PhabricatorLegalpadApplication())->isInstalled();
+  }
+
 }

@@ -3,8 +3,13 @@
 /**
  * A subscription bills users regularly.
  */
-final class PhortuneSubscription extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+final class PhortuneSubscription
+  extends PhortuneDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
+    PhabricatorPolicyCodexInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const STATUS_ACTIVE = 'active';
   const STATUS_CANCELLED = 'cancelled';
@@ -55,9 +60,8 @@ final class PhortuneSubscription extends PhortuneDAO
     ) + parent::getConfiguration();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhortuneSubscriptionPHIDType::TYPECONST);
+  public function getPHIDType() {
+    return PhortuneSubscriptionPHIDType::TYPECONST;
   }
 
   public static function initializeNewSubscription(
@@ -161,6 +165,10 @@ final class PhortuneSubscription extends PhortuneDAO
       }
     $this->saveTransaction();
 
+    $account = $this->getAccount();
+    $merchant = $this->getMerchant();
+    $account->writeMerchantEdge($merchant);
+
     return $result;
   }
 
@@ -181,10 +189,10 @@ final class PhortuneSubscription extends PhortuneDAO
   }
 
   public function getURI() {
-    $account_id = $this->getAccount()->getID();
-    $id = $this->getID();
-
-    return "/phortune/{$account_id}/subscription/view/{$id}/";
+    return urisprintf(
+      '/phortune/account/%d/subscriptions/%d/',
+      $this->getAccount()->getID(),
+      $this->getID());
   }
 
   public function getEditURI() {
@@ -241,6 +249,16 @@ final class PhortuneSubscription extends PhortuneDAO
       $purchase);
   }
 
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhortuneSubscriptionEditor();
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhortuneSubscriptionTransaction();
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -253,26 +271,17 @@ final class PhortuneSubscription extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    // NOTE: Both view and edit use the account's edit policy. We punch a hole
-    // through this for merchants, below.
-    return $this
-      ->getAccount()
-      ->getPolicy(PhabricatorPolicyCapability::CAN_EDIT);
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->getAccount()->hasAutomaticCapability($capability, $viewer)) {
-      return true;
-    }
-
-    // If the viewer controls the merchant this subscription bills to, they can
-    // view the subscription.
-    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-      $can_admin = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $this->getMerchant(),
-        PhabricatorPolicyCapability::CAN_EDIT);
-      if ($can_admin) {
+    // See T13366. If you can edit the merchant associated with this
+    // subscription, you can view the subscription.
+    if ($capability === PhabricatorPolicyCapability::CAN_VIEW) {
+      $any_edit = PhortuneMerchantQuery::canViewersEditMerchants(
+        array($viewer->getPHID()),
+        array($this->getMerchantPHID()));
+      if ($any_edit) {
         return true;
       }
     }
@@ -280,12 +289,31 @@ final class PhortuneSubscription extends PhortuneDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    if ($this->hasAutomaticCapability($capability, $viewer)) {
+      return array();
+    }
+
+    // See T13366. For blanket view and edit permissions on all subscriptions,
+    // you must be able to edit the associated account.
     return array(
-      pht('Subscriptions inherit the policies of the associated account.'),
-      pht(
-        'The merchant you are subscribed with can review and manage the '.
-        'subscription.'),
+      array(
+        $this->getAccount(),
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ),
     );
   }
+
+
+/* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
+
+
+  public function newPolicyCodex() {
+    return new PhortuneSubscriptionPolicyCodex();
+  }
+
 }

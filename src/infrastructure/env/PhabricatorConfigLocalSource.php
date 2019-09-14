@@ -65,4 +65,9 @@ final class PhabricatorConfigLocalSource extends PhabricatorConfigProxySource {
     return $path;
   }
 
+  public function getReadablePath() {
+    $path = $this->getConfigPath();
+    return Filesystem::readablePath($path);
+  }
+
 }

@@ -318,7 +318,7 @@ final class PhabricatorPolicyExplainController
       ->setViewer($viewer)
       ->setIcon($handle->getIcon().' bluegrey')
       ->setHeader(pht('Object Policy'))
-      ->appendList(
+      ->appendParagraph(
         array(
           array(
             phutil_tag('strong', array(), pht('%s:', $capability_name)),
@@ -333,9 +333,16 @@ final class PhabricatorPolicyExplainController
       ->appendList(
         array(
           PhabricatorPolicy::getPolicyExplanation(
-          $viewer,
-          $policy->getPHID()),
+            $viewer,
+            $policy->getPHID()),
         ));
+
+    if ($policy->isCustomPolicy()) {
+      $rules_view = id(new PhabricatorPolicyRulesView())
+        ->setViewer($viewer)
+        ->setPolicy($policy);
+      $object_section->appendRulesView($rules_view);
+    }
 
     $strength = $this->getStrengthInformation($object, $policy, $capability);
     if ($strength) {

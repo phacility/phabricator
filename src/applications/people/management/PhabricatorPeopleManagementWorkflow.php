@@ -3,45 +3,55 @@
 abstract class PhabricatorPeopleManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
-  protected function buildIterator(PhutilArgumentParser $args) {
-    $usernames = $args->getArg('users');
-
-    if ($args->getArg('all')) {
-      if ($usernames) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'Specify either a list of users or `%s`, but not both.',
-            '--all'));
-      }
-      return new LiskMigrationIterator(new PhabricatorUser());
-    }
-
-    if ($usernames) {
-      return $this->loadUsersWithUsernames($usernames);
-    }
-
-    return null;
+  final protected function getUserSelectionArguments() {
+    return array(
+      array(
+        'name' => 'user',
+        'param' => 'username',
+        'help' => pht('User account to act on.'),
+      ),
+    );
   }
 
-  protected function loadUsersWithUsernames(array $usernames) {
-    $users = array();
-    foreach($usernames as $username) {
-      $query = id(new PhabricatorPeopleQuery())
-        ->setViewer($this->getViewer())
-        ->withUsernames(array($username))
-        ->executeOne();
+  final protected function selectUser(PhutilArgumentParser $argv) {
+    $username = $argv->getArg('user');
 
-      if (!$query) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            '"%s" is not a valid username.',
-            $username));
-      }
-      $users[] = $query;
+    if (!strlen($username)) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Select a user account to act on with "--user <username>".'));
     }
 
-    return $users;
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($this->getViewer())
+      ->withUsernames(array($username))
+      ->executeOne();
+    if (!$user) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'No user with username "%s" exists.',
+          $username));
+    }
+
+    return $user;
   }
 
+  final protected function applyTransactions(
+    PhabricatorUser $user,
+    array $xactions) {
+    assert_instances_of($xactions, 'PhabricatorUserTransaction');
+
+    $viewer = $this->getViewer();
+    $application = id(new PhabricatorPeopleApplication())->getPHID();
+    $content_source = $this->newContentSource();
+
+    $editor = $user->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setActingAsPHID($application)
+      ->setContentSource($content_source)
+      ->setContinueOnMissingFields(true);
+
+    return $editor->applyTransactions($user, $xactions);
+  }
 
 }

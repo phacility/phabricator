@@ -445,19 +445,15 @@ abstract class PhabricatorApplicationTransaction
     $policy = PhabricatorPolicy::newFromPolicyAndHandle(
       $phid,
       $this->getHandleIfExists($phid));
+
+    $ref = $policy->newRef($this->getViewer());
+
     if ($this->renderingTarget == self::TARGET_HTML) {
-      switch ($policy->getType()) {
-        case PhabricatorPolicyType::TYPE_CUSTOM:
-          $policy->setHref('/transactions/'.$state.'/'.$this->getPHID().'/');
-          $policy->setWorkflow(true);
-          break;
-        default:
-          break;
-      }
-      $output = $policy->renderDescription();
+      $output = $ref->newTransactionLink($state, $this);
     } else {
-      $output = hsprintf('%s', $policy->getFullName());
+      $output = $ref->getPolicyDisplayName();
     }
+
     return $output;
   }
 
@@ -775,6 +771,13 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_MFA:
         return true;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        // See T8952. When an application (usually Herald) modifies
+        // subscribers, this tends to be very uninteresting.
+        if ($this->isApplicationAuthor()) {
+          return true;
+        }
+        break;
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
@@ -1375,35 +1378,29 @@ abstract class PhabricatorApplicationTransaction
 
   public function getActionStrength() {
     if ($this->isInlineCommentTransaction()) {
-      return 250;
+      return 25;
     }
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-        return 500;
+        return 50;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         if ($this->isSelfSubscription()) {
           // Make this weaker than TYPE_COMMENT.
-          return 250;
-        }
-
-        if ($this->isApplicationAuthor()) {
-          // When applications (most often: Herald) change subscriptions it
-          // is very uninteresting.
-          return 1;
+          return 25;
         }
 
         // In other cases, subscriptions are more interesting than comments
         // (which are shown anyway) but less interesting than any other type of
         // transaction.
-        return 750;
+        return 75;
       case PhabricatorTransactions::TYPE_MFA:
         // We want MFA signatures to render at the top of transaction groups,
         // on top of the things they signed.
-        return 10000;
+        return 1000;
     }
 
-    return 1000;
+    return 100;
   }
 
   public function isCommentTransaction() {

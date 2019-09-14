@@ -536,6 +536,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'differential.whitespace-matters' => pht(
         'Whitespace rendering is now handled automatically.'),
+
+      'phd.pid-directory' => pht(
+        'Phabricator daemons no longer use PID files.'),
     );
 
     return $ancient_config;

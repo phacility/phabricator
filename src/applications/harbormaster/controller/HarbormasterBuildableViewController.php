@@ -128,7 +128,7 @@ final class HarbormasterBuildableViewController
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-repeat')
-        ->setName(pht('Restart All Builds'))
+        ->setName(pht('Restart Builds'))
         ->setHref($this->getApplicationURI($restart_uri))
         ->setWorkflow(true)
         ->setDisabled(!$can_restart || !$can_edit));
@@ -136,7 +136,7 @@ final class HarbormasterBuildableViewController
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pause')
-        ->setName(pht('Pause All Builds'))
+        ->setName(pht('Pause Builds'))
         ->setHref($this->getApplicationURI($pause_uri))
         ->setWorkflow(true)
         ->setDisabled(!$can_pause || !$can_edit));
@@ -144,7 +144,7 @@ final class HarbormasterBuildableViewController
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-play')
-        ->setName(pht('Resume All Builds'))
+        ->setName(pht('Resume Builds'))
         ->setHref($this->getApplicationURI($resume_uri))
         ->setWorkflow(true)
         ->setDisabled(!$can_resume || !$can_edit));
@@ -152,7 +152,7 @@ final class HarbormasterBuildableViewController
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-exclamation-triangle')
-        ->setName(pht('Abort All Builds'))
+        ->setName(pht('Abort Builds'))
         ->setHref($this->getApplicationURI($abort_uri))
         ->setWorkflow(true)
         ->setDisabled(!$can_abort || !$can_edit));

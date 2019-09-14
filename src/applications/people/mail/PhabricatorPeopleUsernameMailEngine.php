@@ -30,7 +30,6 @@ final class PhabricatorPeopleUsernameMailEngine
 
   protected function newMail() {
     $sender = $this->getSender();
-    $recipient = $this->getRecipient();
 
     $sender_username = $sender->getUsername();
     $sender_realname = $sender->getRealName();
@@ -52,7 +51,6 @@ final class PhabricatorPeopleUsernameMailEngine
         $new_username));
 
     return id(new PhabricatorMetaMTAMail())
-      ->addTos(array($recipient->getPHID()))
       ->setSubject(pht('[Phabricator] Username Changed'))
       ->setBody($body);
   }

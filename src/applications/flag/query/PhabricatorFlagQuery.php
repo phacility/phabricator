@@ -6,6 +6,7 @@ final class PhabricatorFlagQuery
   const GROUP_COLOR = 'color';
   const GROUP_NONE  = 'none';
 
+  private $ids;
   private $ownerPHIDs;
   private $types;
   private $objectPHIDs;
@@ -14,6 +15,11 @@ final class PhabricatorFlagQuery
 
   private $needHandles;
   private $needObjects;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withOwnerPHIDs(array $owner_phids) {
     $this->ownerPHIDs = $owner_phids;
@@ -125,6 +131,13 @@ final class PhabricatorFlagQuery
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
+
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'flag.id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->ownerPHIDs) {
       $where[] = qsprintf(

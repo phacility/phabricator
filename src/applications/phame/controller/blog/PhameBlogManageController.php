@@ -143,14 +143,6 @@ final class PhameBlogManageController extends PhameBlogController {
         ),
         $feed_uri));
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $blog);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($viewer)
       ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
