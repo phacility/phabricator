@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorScaleChartFunction
-  extends PhabricatorChartFunction {
+  extends PhabricatorPureChartFunction {
 
   const FUNCTIONKEY = 'scale';
 

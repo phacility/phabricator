@@ -32,12 +32,14 @@ final class PhabricatorProjectBurndownChartEngine
     if ($project_phids) {
       foreach ($project_phids as $project_phid) {
         $function = $this->newFunction(
-          'min',
           array(
             'accumulate',
             array('fact', 'tasks.open-count.assign.project', $project_phid),
           ),
-          0);
+          array(
+            'min',
+            0,
+          ));
 
         $function->getFunctionLabel()
           ->setName(pht('Tasks Moved Into Project'))
@@ -47,12 +49,14 @@ final class PhabricatorProjectBurndownChartEngine
         $functions[] = $function;
 
         $function = $this->newFunction(
-          'min',
           array(
             'accumulate',
             array('fact', 'tasks.open-count.status.project', $project_phid),
           ),
-          0);
+          array(
+            'min',
+            0,
+          ));
 
         $function->getFunctionLabel()
           ->setName(pht('Tasks Reopened'))
@@ -68,20 +72,24 @@ final class PhabricatorProjectBurndownChartEngine
             array('fact', 'tasks.open-count.create.project', $project_phid),
           ),
           array(
-            'max',
             array(
               'accumulate',
               array('fact', 'tasks.open-count.status.project', $project_phid),
             ),
-            0,
+            array(
+              'max',
+              0,
+            ),
           ),
           array(
-            'max',
             array(
               'accumulate',
               array('fact', 'tasks.open-count.assign.project', $project_phid),
             ),
-            0,
+            array(
+              'max',
+              0,
+            ),
           ));
 
         $function->getFunctionLabel()
