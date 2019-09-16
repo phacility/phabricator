@@ -33,10 +33,12 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     }
 
     $chart_view = $engine->newChartView();
-    return $this->newChartResponse($chart_view);
+    $tabular_view = $engine->newTabularView();
+
+    return $this->newChartResponse($chart_view, $tabular_view);
   }
 
-  private function newChartResponse($chart_view) {
+  private function newChartResponse($chart_view, $tabular_view) {
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Chart'))
       ->appendChild($chart_view);
@@ -50,7 +52,11 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
+      ->appendChild(
+        array(
+          $box,
+          $tabular_view,
+        ));
   }
 
   private function newDemoChart() {

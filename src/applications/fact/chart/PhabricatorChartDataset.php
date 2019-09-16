@@ -75,4 +75,35 @@ abstract class PhabricatorChartDataset
     PhabricatorChartDataQuery $data_query);
 
 
+  final public function getTabularDisplayData(
+    PhabricatorChartDataQuery $data_query) {
+    $results = array();
+
+    $functions = $this->getFunctions();
+    foreach ($functions as $function) {
+      $datapoints = $function->newDatapoints($data_query);
+
+      $refs = $function->getDataRefs(ipull($datapoints, 'x'));
+
+      foreach ($datapoints as $key => $point) {
+        $x = $point['x'];
+
+        if (isset($refs[$x])) {
+          $xrefs = $refs[$x];
+        } else {
+          $xrefs = array();
+        }
+
+        $datapoints[$key]['refs'] = $xrefs;
+      }
+
+      $results[] = array(
+        'data' => $datapoints,
+      );
+    }
+
+    return id(new PhabricatorChartDisplayData())
+      ->setWireData($results);
+  }
+
 }

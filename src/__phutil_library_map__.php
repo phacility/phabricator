@@ -8301,7 +8301,7 @@ phutil_register_library_map(array(
     'PhabricatorAccessLog' => 'Phobject',
     'PhabricatorAccessLogConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorAccessibilitySetting' => 'PhabricatorSelectSetting',
-    'PhabricatorAccumulateChartFunction' => 'PhabricatorChartFunction',
+    'PhabricatorAccumulateChartFunction' => 'PhabricatorHigherOrderChartFunction',
     'PhabricatorActionListView' => 'AphrontTagView',
     'PhabricatorActionView' => 'AphrontView',
     'PhabricatorActivitySettingsPanel' => 'PhabricatorSettingsPanel',

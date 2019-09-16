@@ -180,6 +180,8 @@ abstract class PhabricatorChartFunction
   }
 
   abstract public function evaluateFunction(array $xv);
+  abstract public function getDataRefs(array $xv);
+  abstract public function loadRefs(array $refs);
 
   public function getDomain() {
     return null;
