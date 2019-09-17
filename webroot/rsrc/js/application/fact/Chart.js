@@ -139,7 +139,20 @@ JX.install('Chart', {
 
       var area = d3.area()
         .x(function(d) { return x(to_date(d.x)); })
-        .y0(function(d) { return y(d.y0); })
+        .y0(function(d) {
+          // When the area is positive, draw it above the X axis. When the area
+          // is negative, draw it below the X axis. We currently avoid having
+          // functions which cross the X axis by clever construction.
+          if (d.y0 >= 0 && d.y1 >= 0) {
+            return y(d.y0);
+          }
+
+          if (d.y0 <= 0 && d.y1 <= 0) {
+            return y(d.y0);
+          }
+
+          return y(0);
+        })
         .y1(function(d) { return y(d.y1); });
 
       var line = d3.line()

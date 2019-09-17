@@ -178,6 +178,9 @@ final class PhabricatorChartRenderingEngine
             $rows[] = array(
               $xv,
               $yv,
+              null,
+              null,
+              null,
             );
           } else {
             foreach ($point_refs as $ref => $ref_data) {

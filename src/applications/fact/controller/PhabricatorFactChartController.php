@@ -62,50 +62,9 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
   private function newDemoChart() {
     $viewer = $this->getViewer();
 
-    $argvs = array();
-
-    $argvs[] = array('fact', 'tasks.count.create');
-
-    $argvs[] = array('constant', 360);
-
-    $argvs[] = array('fact', 'tasks.open-count.create');
-
-    $argvs[] = array(
-      'sum',
-      array(
-        'accumulate',
-        array('fact', 'tasks.count.create'),
-      ),
-      array(
-        'accumulate',
-        array('fact', 'tasks.open-count.create'),
-      ),
-    );
-
-    $argvs[] = array(
-      'compose',
-      array('scale', 0.001),
-      array('cos'),
-      array('scale', 100),
-      array('shift', 800),
-    );
-
-    $datasets = array();
-    foreach ($argvs as $argv) {
-      $datasets[] = PhabricatorChartDataset::newFromDictionary(
-        array(
-          'function' => $argv,
-        ));
-    }
-
-    $chart = id(new PhabricatorFactChart())
-      ->setDatasets($datasets);
-
-    $engine = id(new PhabricatorChartRenderingEngine())
+    $chart = id(new PhabricatorDemoChartEngine())
       ->setViewer($viewer)
-      ->setChart($chart);
-
-    $chart = $engine->getStoredChart();
+      ->newStoredChart();
 
     return id(new AphrontRedirectResponse())->setURI($chart->getURI());
   }

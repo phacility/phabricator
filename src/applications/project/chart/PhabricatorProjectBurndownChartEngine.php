@@ -34,62 +34,24 @@ final class PhabricatorProjectBurndownChartEngine
         $function = $this->newFunction(
           array(
             'accumulate',
-            array('fact', 'tasks.open-count.assign.project', $project_phid),
-          ),
-          array(
-            'min',
-            0,
+            array(
+              'compose',
+              array('fact', 'tasks.open-count.assign.project', $project_phid),
+              array('min', 0),
+            ),
           ));
 
         $function->getFunctionLabel()
           ->setName(pht('Tasks Moved Into Project'))
-          ->setColor('rgba(0, 200, 200, 1)')
-          ->setFillColor('rgba(0, 200, 200, 0.15)');
+          ->setColor('rgba(128, 128, 200, 1)')
+          ->setFillColor('rgba(128, 128, 200, 0.15)');
 
         $functions[] = $function;
 
         $function = $this->newFunction(
-          array(
-            'accumulate',
-            array('fact', 'tasks.open-count.status.project', $project_phid),
-          ),
-          array(
-            'min',
-            0,
-          ));
-
-        $function->getFunctionLabel()
-          ->setName(pht('Tasks Reopened'))
-          ->setColor('rgba(200, 0, 200, 1)')
-          ->setFillColor('rgba(200, 0, 200, 0.15)');
-
-        $functions[] = $function;
-
-        $function = $this->newFunction(
-          'sum',
           array(
             'accumulate',
             array('fact', 'tasks.open-count.create.project', $project_phid),
-          ),
-          array(
-            array(
-              'accumulate',
-              array('fact', 'tasks.open-count.status.project', $project_phid),
-            ),
-            array(
-              'max',
-              0,
-            ),
-          ),
-          array(
-            array(
-              'accumulate',
-              array('fact', 'tasks.open-count.assign.project', $project_phid),
-            ),
-            array(
-              'max',
-              0,
-            ),
           ));
 
         $function->getFunctionLabel()
@@ -98,27 +60,61 @@ final class PhabricatorProjectBurndownChartEngine
           ->setFillColor('rgba(0, 0, 200, 0.15)');
 
         $functions[] = $function;
+
+        $function = $this->newFunction(
+          array(
+            'accumulate',
+            array(
+              'compose',
+              array('fact', 'tasks.open-count.assign.project', $project_phid),
+              array('max', 0),
+            ),
+          ));
+
+        $function->getFunctionLabel()
+          ->setName(pht('Tasks Moved Out of Project'))
+          ->setColor('rgba(128, 200, 128, 1)')
+          ->setFillColor('rgba(128, 200, 128, 0.15)');
+
+        $functions[] = $function;
+
+        $function = $this->newFunction(
+          array(
+            'accumulate',
+            array('fact', 'tasks.open-count.status.project', $project_phid),
+          ));
+
+        $function->getFunctionLabel()
+          ->setName(pht('Tasks Closed'))
+          ->setColor('rgba(0, 200, 0, 1)')
+          ->setFillColor('rgba(0, 200, 0, 0.15)');
+
+        $functions[] = $function;
       }
     } else {
       $function = $this->newFunction(
-        'accumulate',
-        array('fact', 'tasks.open-count.create'));
+        array(
+          'accumulate',
+          array('fact', 'tasks.open-count.create'),
+        ));
 
       $function->getFunctionLabel()
         ->setName(pht('Tasks Created'))
-        ->setColor('rgba(0, 200, 200, 1)')
-        ->setFillColor('rgba(0, 200, 200, 0.15)');
+        ->setColor('rgba(0, 0, 200, 1)')
+        ->setFillColor('rgba(0, 0, 200, 0.15)');
 
       $functions[] = $function;
 
       $function = $this->newFunction(
-        'accumulate',
-        array('fact', 'tasks.open-count.status'));
+        array(
+          'accumulate',
+          array('fact', 'tasks.open-count.status'),
+        ));
 
       $function->getFunctionLabel()
-        ->setName(pht('Tasks Closed / Reopened'))
-        ->setColor('rgba(200, 0, 200, 1)')
-        ->setFillColor('rgba(200, 0, 200, 0.15)');
+        ->setName(pht('Tasks Closed'))
+        ->setColor('rgba(0, 200, 0, 1)')
+        ->setFillColor('rgba(0, 200, 0, 0.15)');
 
       $functions[] = $function;
     }
