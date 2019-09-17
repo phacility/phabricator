@@ -29,6 +29,8 @@ final class PhabricatorProjectBurndownChartEngine
     }
 
     $functions = array();
+    $stacks = array();
+
     if ($project_phids) {
       foreach ($project_phids as $project_phid) {
         $function = $this->newFunction(
@@ -42,7 +44,26 @@ final class PhabricatorProjectBurndownChartEngine
           ));
 
         $function->getFunctionLabel()
+          ->setKey('moved-in')
           ->setName(pht('Tasks Moved Into Project'))
+          ->setColor('rgba(128, 128, 200, 1)')
+          ->setFillColor('rgba(128, 128, 200, 0.15)');
+
+        $functions[] = $function;
+
+        $function = $this->newFunction(
+          array(
+            'accumulate',
+            array(
+              'compose',
+              array('fact', 'tasks.open-count.status.project', $project_phid),
+              array('min', 0),
+            ),
+          ));
+
+        $function->getFunctionLabel()
+          ->setKey('reopened')
+          ->setName(pht('Tasks Reopened'))
           ->setColor('rgba(128, 128, 200, 1)')
           ->setFillColor('rgba(128, 128, 200, 0.15)');
 
@@ -55,9 +76,28 @@ final class PhabricatorProjectBurndownChartEngine
           ));
 
         $function->getFunctionLabel()
+          ->setKey('created')
           ->setName(pht('Tasks Created'))
           ->setColor('rgba(0, 0, 200, 1)')
           ->setFillColor('rgba(0, 0, 200, 0.15)');
+
+        $functions[] = $function;
+
+        $function = $this->newFunction(
+          array(
+            'accumulate',
+            array(
+              'compose',
+              array('fact', 'tasks.open-count.status.project', $project_phid),
+              array('max', 0),
+            ),
+          ));
+
+        $function->getFunctionLabel()
+          ->setKey('closed')
+          ->setName(pht('Tasks Closed'))
+          ->setColor('rgba(0, 200, 0, 1)')
+          ->setFillColor('rgba(0, 200, 0, 0.15)');
 
         $functions[] = $function;
 
@@ -72,24 +112,15 @@ final class PhabricatorProjectBurndownChartEngine
           ));
 
         $function->getFunctionLabel()
+          ->setKey('moved-out')
           ->setName(pht('Tasks Moved Out of Project'))
           ->setColor('rgba(128, 200, 128, 1)')
           ->setFillColor('rgba(128, 200, 128, 0.15)');
 
         $functions[] = $function;
 
-        $function = $this->newFunction(
-          array(
-            'accumulate',
-            array('fact', 'tasks.open-count.status.project', $project_phid),
-          ));
-
-        $function->getFunctionLabel()
-          ->setName(pht('Tasks Closed'))
-          ->setColor('rgba(0, 200, 0, 1)')
-          ->setFillColor('rgba(0, 200, 0, 0.15)');
-
-        $functions[] = $function;
+        $stacks[] = array('created', 'reopened', 'moved-in');
+        $stacks[] = array('closed', 'moved-out');
       }
     } else {
       $function = $this->newFunction(
@@ -99,7 +130,8 @@ final class PhabricatorProjectBurndownChartEngine
         ));
 
       $function->getFunctionLabel()
-        ->setName(pht('Tasks Created'))
+        ->setKey('open')
+        ->setName(pht('Open Tasks'))
         ->setColor('rgba(0, 0, 200, 1)')
         ->setFillColor('rgba(0, 0, 200, 0.15)');
 
@@ -112,7 +144,8 @@ final class PhabricatorProjectBurndownChartEngine
         ));
 
       $function->getFunctionLabel()
-        ->setName(pht('Tasks Closed'))
+        ->setKey('closed')
+        ->setName(pht('Closed Tasks'))
         ->setColor('rgba(0, 200, 0, 1)')
         ->setFillColor('rgba(0, 200, 0, 0.15)');
 
@@ -121,9 +154,14 @@ final class PhabricatorProjectBurndownChartEngine
 
     $datasets = array();
 
-    $datasets[] = id(new PhabricatorChartStackedAreaDataset())
+    $dataset = id(new PhabricatorChartStackedAreaDataset())
       ->setFunctions($functions);
 
+    if ($stacks) {
+      $dataset->setStacks($stacks);
+    }
+
+    $datasets[] = $dataset;
     $chart->attachDatasets($datasets);
   }
 

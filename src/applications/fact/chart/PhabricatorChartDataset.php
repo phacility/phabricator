@@ -59,13 +59,6 @@ abstract class PhabricatorChartDataset
     return $dataset;
   }
 
-  final public function toDictionary() {
-    return array(
-      'type' => $this->getDatasetTypeKey(),
-      'functions' => mpull($this->getFunctions(), 'toDictionary'),
-    );
-  }
-
   final public function getChartDisplayData(
     PhabricatorChartDataQuery $data_query) {
     return $this->newChartDisplayData($data_query);
