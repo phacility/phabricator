@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
     'core.pkg.css' => 'c69171e6',
-    'core.pkg.js' => '73a06a9f',
+    'core.pkg.js' => '6e5c894f',
     'differential.pkg.css' => '8d8360fb',
     'differential.pkg.js' => '0b037a4f',
     'diffusion.pkg.css' => '42c75c37',
@@ -506,7 +506,7 @@ return array(
     'rsrc/js/core/behavior-tokenizer.js' => '3b4899b0',
     'rsrc/js/core/behavior-tooltip.js' => '73ecc1f8',
     'rsrc/js/core/behavior-user-menu.js' => '60cd9241',
-    'rsrc/js/core/behavior-watch-anchor.js' => '0e6d261f',
+    'rsrc/js/core/behavior-watch-anchor.js' => '3972dadb',
     'rsrc/js/core/behavior-workflow.js' => '9623adc1',
     'rsrc/js/core/darkconsole/DarkLog.js' => '3b869402',
     'rsrc/js/core/darkconsole/DarkMessage.js' => '26cd4b73',
@@ -655,7 +655,7 @@ return array(
     'javelin-behavior-phabricator-tooltips' => '73ecc1f8',
     'javelin-behavior-phabricator-transaction-comment-form' => '2bdadf1a',
     'javelin-behavior-phabricator-transaction-list' => '9cec214e',
-    'javelin-behavior-phabricator-watch-anchor' => '0e6d261f',
+    'javelin-behavior-phabricator-watch-anchor' => '3972dadb',
     'javelin-behavior-pholio-mock-edit' => '3eed1f2b',
     'javelin-behavior-pholio-mock-view' => '5aa1544e',
     'javelin-behavior-phui-dropdown-menu' => '5cf0501a',
@@ -999,12 +999,6 @@ return array(
     '0d2490ce' => array(
       'javelin-install',
     ),
-    '0e6d261f' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-vector',
-    ),
     '0eaa33a9' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1226,6 +1220,12 @@ return array(
     '38c1f3fb' => array(
       'javelin-install',
       'javelin-dom',
+    ),
+    '3972dadb' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-vector',
     ),
     '398fdf13' => array(
       'javelin-behavior',
