@@ -282,11 +282,11 @@ td.cov-I {
   font-weight: bold;
 }
 
-.differential-diff .differential-image-diff {
+.differential-diff .diff-image-cell {
   background-image: url(/rsrc/image/checker_light.png);
 }
 
-.differential-diff .differential-image-diff:hover {
+.device-desktop .differential-diff .diff-image-cell:hover {
   background-image: url(/rsrc/image/checker_dark.png);
 }
 

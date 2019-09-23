@@ -364,26 +364,28 @@ final class DifferentialChangesetTwoUpRenderer
     return $this->wrapChangeInTable(phutil_implode_html('', $html));
   }
 
-  public function renderFileChange(
-    $old_file = null,
-    $new_file = null,
-    $id = 0,
-    $vs = 0) {
+  public function renderDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $block_list,
+    $old_changeset_key,
+    $new_changeset_key) {
 
-    $old = null;
-    if ($old_file) {
-      $old = $this->renderImageStage($old_file);
-    }
+    $old_view = null;
+    $new_view = null;
 
-    $new = null;
-    if ($new_file) {
-      $new = $this->renderImageStage($new_file);
-    }
+    foreach ($block_list->newTwoUpLayout() as $row) {
+      list($old, $new) = $row;
 
-    // If we don't have an explicit "vs" changeset, it's the left side of the
-    // "id" changeset.
-    if (!$vs) {
-      $vs = $id;
+      if ($old) {
+        $old_view = $old->newContentView();
+      } else {
+        $old_view = null;
+      }
+
+      if ($new) {
+        $new_view = $new->newContentView();
+      } else {
+        $new_view = null;
+      }
     }
 
     $html_old = array();
@@ -405,31 +407,52 @@ final class DifferentialChangesetTwoUpRenderer
       }
     }
 
-    if (!$old) {
-      $th_old = phutil_tag('th', array());
+    if ($old_view === null) {
+      $old_id = null;
+      $old_label = null;
     } else {
-      $th_old = phutil_tag('th', array('id' => "C{$vs}OL1"), 1);
+      $old_id = "C{$old_changeset_key}OL1";
+      $old_label = '1';
     }
 
-    if (!$new) {
-      $th_new = phutil_tag('th', array());
+    $old_cell = phutil_tag(
+      'td',
+      array(
+        'id' => $old_id,
+        'class' => 'n',
+      ),
+      $old_label);
+
+    if ($new_view === null) {
+      $new_id = null;
+      $new_label = null;
     } else {
-      $th_new = phutil_tag('th', array('id' => "C{$id}NL1"), 1);
+      $new_id = "C{$new_changeset_key}NL1";
+      $new_label = '1';
     }
+
+    $new_cell = phutil_tag(
+      'td',
+      array(
+        'id' => $new_id,
+        'class' => 'n',
+      ),
+      $new_label);
 
     $output = hsprintf(
       '<tr class="differential-image-diff">'.
         '%s'.
-        '<td class="differential-old-image">%s</td>'.
+        '<td class="differential-old-image diff-image-cell">%s</td>'.
         '%s'.
-        '<td class="differential-new-image" colspan="3">%s</td>'.
+        '<td class="differential-new-image diff-image-cell" '.
+          'colspan="3">%s</td>'.
       '</tr>'.
       '%s'.
       '%s',
-      $th_old,
-      $old,
-      $th_new,
-      $new,
+      $old_cell,
+      $old_view,
+      $new_cell,
+      $new_view,
       phutil_implode_html('', $html_old),
       phutil_implode_html('', $html_new));
 

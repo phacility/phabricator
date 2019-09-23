@@ -228,34 +228,21 @@ final class DifferentialChangesetOneUpRenderer
     return null;
   }
 
-  public function renderFileChange(
-    $old_file = null,
-    $new_file = null,
-    $id = 0,
-    $vs = 0) {
+  public function renderDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $block_list,
+    $old_changeset_key,
+    $new_changeset_key) {
 
     // TODO: This should eventually merge into the normal primitives pathway,
     // but fake it for now and just share as much code as possible.
 
     $primitives = array();
-    if ($old_file) {
+    foreach ($block_list->newOneUpLayout() as $block) {
       $primitives[] = array(
         'type' => 'old-file',
-        'htype' => ($new_file ? 'new-file' : null),
-        'file' => $old_file,
+        'htype' => '',
         'line' => 1,
-        'render' => $this->renderImageStage($old_file),
-      );
-    }
-
-    if ($new_file) {
-      $primitives[] = array(
-        'type' => 'new-file',
-        'htype' => ($old_file ? 'old-file' : null),
-        'file' => $new_file,
-        'line' => 1,
-        'oline' => ($old_file ? 1 : null),
-        'render' => $this->renderImageStage($new_file),
+        'render' => $block->newContentView(),
       );
     }
 

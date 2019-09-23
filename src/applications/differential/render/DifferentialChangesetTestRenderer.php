@@ -134,14 +134,4 @@ abstract class DifferentialChangesetTestRenderer
     return phutil_safe_html($out);
   }
 
-
-  public function renderFileChange(
-    $old_file = null,
-    $new_file = null,
-    $id = 0,
-    $vs = 0) {
-
-    throw new PhutilMethodNotImplementedException();
-  }
-
 }

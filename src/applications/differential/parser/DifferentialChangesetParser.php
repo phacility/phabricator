@@ -1013,84 +1013,36 @@ final class DifferentialChangesetParser extends Phobject {
       ->setOldComments($old_comments)
       ->setNewComments($new_comments);
 
-    $engine_view = $this->newDocumentEngineChangesetView();
-    if ($engine_view !== null) {
-      return $engine_view;
+    $engine_blocks = $this->newDocumentEngineChangesetView();
+    if ($engine_blocks !== null) {
+      $reference = $this->getRenderingReference();
+      $parts = explode('/', $reference);
+      if (count($parts) == 2) {
+        list($id, $vs) = $parts;
+      } else {
+        $id = $parts[0];
+        $vs = 0;
+      }
+
+      // If we don't have an explicit "vs" changeset, it's the left side of
+      // the "id" changeset.
+      if (!$vs) {
+        $vs = $id;
+      }
+
+      return $renderer->renderDocumentEngineBlocks(
+        $engine_blocks,
+        (string)$id,
+        (string)$vs);
     }
 
+    // If we've made it here with a type of file we don't know how to render,
+    // bail out with a default empty rendering. Normally, we'd expect a
+    // document engine to catch these changes before we make it this far.
     switch ($this->changeset->getFileType()) {
-      case DifferentialChangeType::FILE_IMAGE:
-        $old = null;
-        $new = null;
-        // TODO: Improve the architectural issue as discussed in D955
-        // https://secure.phabricator.com/D955
-        $reference = $this->getRenderingReference();
-        $parts = explode('/', $reference);
-        if (count($parts) == 2) {
-          list($id, $vs) = $parts;
-        } else {
-          $id = $parts[0];
-          $vs = 0;
-        }
-        $id = (int)$id;
-        $vs = (int)$vs;
-
-        if (!$vs) {
-          $metadata = $this->changeset->getMetadata();
-          $data = idx($metadata, 'attachment-data');
-
-          $old_phid = idx($metadata, 'old:binary-phid');
-          $new_phid = idx($metadata, 'new:binary-phid');
-        } else {
-          $vs_changeset = id(new DifferentialChangeset())->load($vs);
-          $old_phid = null;
-          $new_phid = null;
-
-          // TODO: This is spooky, see D6851
-          if ($vs_changeset) {
-            $vs_metadata = $vs_changeset->getMetadata();
-            $old_phid = idx($vs_metadata, 'new:binary-phid');
-          }
-
-          $changeset = id(new DifferentialChangeset())->load($id);
-          if ($changeset) {
-            $metadata = $changeset->getMetadata();
-            $new_phid = idx($metadata, 'new:binary-phid');
-          }
-        }
-
-        if ($old_phid || $new_phid) {
-          // grab the files, (micro) optimization for 1 query not 2
-          $file_phids = array();
-          if ($old_phid) {
-            $file_phids[] = $old_phid;
-          }
-          if ($new_phid) {
-            $file_phids[] = $new_phid;
-          }
-
-          $files = id(new PhabricatorFileQuery())
-            ->setViewer($this->getUser())
-            ->withPHIDs($file_phids)
-            ->execute();
-          foreach ($files as $file) {
-            if (empty($file)) {
-              continue;
-            }
-            if ($file->getPHID() == $old_phid) {
-              $old = $file;
-            } else if ($file->getPHID() == $new_phid) {
-              $new = $file;
-            }
-          }
-        }
-
-        $renderer->attachOldFile($old);
-        $renderer->attachNewFile($new);
-
-        return $renderer->renderFileChange($old, $new, $id, $vs);
       case DifferentialChangeType::FILE_DIRECTORY:
       case DifferentialChangeType::FILE_BINARY:
+      case DifferentialChangeType::FILE_IMAGE:
         $output = $renderer->renderChangesetTable(null);
         return $output;
     }
@@ -1699,21 +1651,39 @@ final class DifferentialChangesetParser extends Phobject {
       return null;
     }
 
-    $old_data = $this->old;
-    $old_data = ipull($old_data, 'text');
-    $old_data = implode('', $old_data);
+    $old_file = null;
+    $new_file = null;
 
-    $new_data = $this->new;
-    $new_data = ipull($new_data, 'text');
-    $new_data = implode('', $new_data);
+    switch ($changeset->getFileType()) {
+      case DifferentialChangeType::FILE_IMAGE:
+      case DifferentialChangeType::FILE_BINARY:
+        list($old_file, $new_file) = $this->loadFileObjectsForChangeset();
+        break;
+    }
 
     $old_ref = id(new PhabricatorDocumentRef())
-      ->setName($changeset->getOldFile())
-      ->setData($old_data);
+      ->setName($changeset->getOldFile());
+    if ($old_file) {
+      $old_ref->setFile($old_file);
+    } else {
+      $old_data = $this->old;
+      $old_data = ipull($old_data, 'text');
+      $old_data = implode('', $old_data);
+
+      $old_ref->setData($old_data);
+    }
 
     $new_ref = id(new PhabricatorDocumentRef())
-      ->setName($changeset->getFilename())
-      ->setData($new_data);
+      ->setName($changeset->getFilename());
+    if ($new_file) {
+      $new_ref->setFile($new_file);
+    } else {
+      $new_data = $this->new;
+      $new_data = ipull($new_data, 'text');
+      $new_data = implode('', $new_data);
+
+      $new_ref->setData($old_data);
+    }
 
     $old_engines = PhabricatorDocumentEngine::getEnginesForRef(
       $viewer,
@@ -1741,6 +1711,76 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     return null;
+  }
+
+  private function loadFileObjectsForChangeset() {
+    $changeset = $this->changeset;
+    $viewer = $this->getViewer();
+
+    $old_file = null;
+    $new_file = null;
+
+    // TODO: Improve the architectural issue as discussed in D955
+    // https://secure.phabricator.com/D955
+    $reference = $this->getRenderingReference();
+    $parts = explode('/', $reference);
+    if (count($parts) == 2) {
+      list($id, $vs) = $parts;
+    } else {
+      $id = $parts[0];
+      $vs = 0;
+    }
+    $id = (int)$id;
+    $vs = (int)$vs;
+
+    if (!$vs) {
+      $metadata = $this->changeset->getMetadata();
+      $data = idx($metadata, 'attachment-data');
+
+      $old_phid = idx($metadata, 'old:binary-phid');
+      $new_phid = idx($metadata, 'new:binary-phid');
+    } else {
+      $vs_changeset = id(new DifferentialChangeset())->load($vs);
+      $old_phid = null;
+      $new_phid = null;
+
+      // TODO: This is spooky, see D6851
+      if ($vs_changeset) {
+        $vs_metadata = $vs_changeset->getMetadata();
+        $old_phid = idx($vs_metadata, 'new:binary-phid');
+      }
+
+      $changeset = id(new DifferentialChangeset())->load($id);
+      if ($changeset) {
+        $metadata = $changeset->getMetadata();
+        $new_phid = idx($metadata, 'new:binary-phid');
+      }
+    }
+
+    if ($old_phid || $new_phid) {
+      $file_phids = array();
+      if ($old_phid) {
+        $file_phids[] = $old_phid;
+      }
+      if ($new_phid) {
+        $file_phids[] = $new_phid;
+      }
+
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($file_phids)
+        ->execute();
+
+      foreach ($files as $file) {
+        if ($file->getPHID() == $old_phid) {
+          $old_file = $file;
+        } else if ($file->getPHID() == $new_phid) {
+          $new_file = $file;
+        }
+      }
+    }
+
+    return array($old_file, $new_file);
   }
 
 }

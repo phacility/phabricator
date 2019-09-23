@@ -608,17 +608,4 @@ abstract class DifferentialChangesetHTMLRenderer
     return array($left_prefix, $right_prefix);
   }
 
-  protected function renderImageStage(PhabricatorFile $file) {
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-image-stage',
-      ),
-      phutil_tag(
-        'img',
-        array(
-          'src' => $file->getBestURI(),
-        )));
-  }
-
 }

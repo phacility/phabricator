@@ -378,11 +378,13 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     $range_start,
     $range_len,
     $rows);
-  abstract public function renderFileChange(
-    $old = null,
-    $new = null,
-    $id = 0,
-    $vs = 0);
+
+  public function renderDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $blocks,
+    $old_changeset_key,
+    $new_changeset_key) {
+    return null;
+  }
 
   abstract protected function renderChangeTypeHeader($force);
   abstract protected function renderUndershieldHeader();
