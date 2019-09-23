@@ -17,6 +17,7 @@ final class PhabricatorDemoChartEngine
       array('shift', 256));
 
     $function->getFunctionLabel()
+      ->setKey('cos-x')
       ->setName(pht('cos(x)'))
       ->setColor('rgba(0, 200, 0, 1)')
       ->setFillColor('rgba(0, 200, 0, 0.15)');
@@ -27,6 +28,7 @@ final class PhabricatorDemoChartEngine
       array('constant', 345));
 
     $function->getFunctionLabel()
+      ->setKey('constant-345')
       ->setName(pht('constant(345)'))
       ->setColor('rgba(0, 0, 200, 1)')
       ->setFillColor('rgba(0, 0, 200, 0.15)');
