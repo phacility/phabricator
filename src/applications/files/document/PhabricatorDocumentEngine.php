@@ -31,6 +31,18 @@ abstract class PhabricatorDocumentEngine
     return $this->canRenderDocumentType($ref);
   }
 
+  public function canDiffDocuments(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+    return false;
+  }
+
+  public function newDiffView(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
   public function canConfigureEncoding(PhabricatorDocumentRef $ref) {
     return false;
   }

@@ -58,6 +58,7 @@ final class DifferentialChangesetParser extends Phobject {
   private $linesOfContext = 8;
 
   private $highlightEngine;
+  private $viewer;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;
@@ -147,6 +148,15 @@ final class DifferentialChangesetParser extends Phobject {
 
   public function getOffsetMode() {
     return $this->offsetMode;
+  }
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
   }
 
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
@@ -1003,6 +1013,11 @@ final class DifferentialChangesetParser extends Phobject {
       ->setOldComments($old_comments)
       ->setNewComments($new_comments);
 
+    $engine_view = $this->newDocumentEngineChangesetView();
+    if ($engine_view !== null) {
+      return $engine_view;
+    }
+
     switch ($this->changeset->getFileType()) {
       case DifferentialChangeType::FILE_IMAGE:
         $old = null;
@@ -1673,6 +1688,59 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     return $prefix.$line;
+  }
+
+  private function newDocumentEngineChangesetView() {
+    $changeset = $this->changeset;
+    $viewer = $this->getViewer();
+
+    // TODO: This should probably be made non-optional in the future.
+    if (!$viewer) {
+      return null;
+    }
+
+    $old_data = $this->old;
+    $old_data = ipull($old_data, 'text');
+    $old_data = implode('', $old_data);
+
+    $new_data = $this->new;
+    $new_data = ipull($new_data, 'text');
+    $new_data = implode('', $new_data);
+
+    $old_ref = id(new PhabricatorDocumentRef())
+      ->setName($changeset->getOldFile())
+      ->setData($old_data);
+
+    $new_ref = id(new PhabricatorDocumentRef())
+      ->setName($changeset->getFilename())
+      ->setData($new_data);
+
+    $old_engines = PhabricatorDocumentEngine::getEnginesForRef(
+      $viewer,
+      $old_ref);
+
+    $new_engines = PhabricatorDocumentEngine::getEnginesForRef(
+      $viewer,
+      $new_ref);
+
+    $shared_engines = array_intersect_key($old_engines, $new_engines);
+
+    $document_engine = null;
+    foreach ($shared_engines as $shared_engine) {
+      if ($shared_engine->canDiffDocuments($old_ref, $new_ref)) {
+        $document_engine = $shared_engine;
+        break;
+      }
+    }
+
+
+    if ($document_engine) {
+      return $document_engine->newDiffView(
+        $old_ref,
+        $new_ref);
+    }
+
+    return null;
   }
 
 }

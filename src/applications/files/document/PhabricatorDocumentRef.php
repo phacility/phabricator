@@ -11,6 +11,7 @@ final class PhabricatorDocumentRef
   private $symbolMetadata = array();
   private $blameURI;
   private $coverage = array();
+  private $data;
 
   public function setFile(PhabricatorFile $file) {
     $this->file = $file;
@@ -65,6 +66,10 @@ final class PhabricatorDocumentRef
       return $this->byteLength;
     }
 
+    if ($this->data !== null) {
+      return strlen($this->data);
+    }
+
     if ($this->file) {
       return (int)$this->file->getByteSize();
     }
@@ -72,7 +77,26 @@ final class PhabricatorDocumentRef
     return null;
   }
 
+  public function setData($data) {
+    $this->data = $data;
+    return $this;
+  }
+
   public function loadData($begin = null, $end = null) {
+    if ($this->data !== null) {
+      $data = $this->data;
+
+      if ($begin !== null && $end !== null) {
+        $data = substr($data, $begin, $end - $begin);
+      } else if ($begin !== null) {
+        $data = substr($data, $begin);
+      } else if ($end !== null) {
+        $data = substr($data, 0, $end);
+      }
+
+      return $data;
+    }
+
     if ($this->file) {
       $iterator = $this->file->getFileDataIterator($begin, $end);
 
