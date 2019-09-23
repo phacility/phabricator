@@ -82,7 +82,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 
   $real_address = your_custom_parsing_function($raw_header);
 
-  $_SERVER['REMOTE_ADDR'] = $raw_header;
+  $_SERVER['REMOTE_ADDR'] = $real_address;
 }
 ```
 

@@ -44,10 +44,24 @@ final class PhabricatorProjectReportsController
       ->setParentPanelPHIDs(array())
       ->renderPanel();
 
+    $activity_panel = id(new PhabricatorProjectActivityChartEngine())
+      ->setViewer($viewer)
+      ->setProjects(array($project))
+      ->buildChartPanel();
+
+    $activity_panel->setName(pht('%s: Activity', $project->getName()));
+
+    $activity_view = id(new PhabricatorDashboardPanelRenderingEngine())
+      ->setViewer($viewer)
+      ->setPanel($activity_panel)
+      ->setParentPanelPHIDs(array())
+      ->renderPanel();
+
     $view = id(new PHUITwoColumnView())
       ->setFooter(
         array(
           $chart_view,
+          $activity_view,
         ));
 
     return $this->newPage()

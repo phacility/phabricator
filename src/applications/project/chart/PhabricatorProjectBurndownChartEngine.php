@@ -30,97 +30,78 @@ final class PhabricatorProjectBurndownChartEngine
 
     $functions = array();
     if ($project_phids) {
-      foreach ($project_phids as $project_phid) {
-        $function = $this->newFunction(
-          'min',
+      $open_function = $this->newFunction(
+        array(
+          'accumulate',
           array(
-            'accumulate',
-            array('fact', 'tasks.open-count.assign.project', $project_phid),
+            'sum',
+            $this->newFactSum(
+              'tasks.open-count.create.project', $project_phids),
+            $this->newFactSum(
+              'tasks.open-count.status.project', $project_phids),
+            $this->newFactSum(
+              'tasks.open-count.assign.project', $project_phids),
           ),
-          0);
+        ));
 
-        $function->getFunctionLabel()
-          ->setName(pht('Tasks Moved Into Project'))
-          ->setColor('rgba(0, 200, 200, 1)')
-          ->setFillColor('rgba(0, 200, 200, 0.15)');
-
-        $functions[] = $function;
-
-        $function = $this->newFunction(
-          'min',
-          array(
-            'accumulate',
-            array('fact', 'tasks.open-count.status.project', $project_phid),
-          ),
-          0);
-
-        $function->getFunctionLabel()
-          ->setName(pht('Tasks Reopened'))
-          ->setColor('rgba(200, 0, 200, 1)')
-          ->setFillColor('rgba(200, 0, 200, 0.15)');
-
-        $functions[] = $function;
-
-        $function = $this->newFunction(
-          'sum',
-          array(
-            'accumulate',
-            array('fact', 'tasks.open-count.create.project', $project_phid),
-          ),
-          array(
-            'max',
-            array(
-              'accumulate',
-              array('fact', 'tasks.open-count.status.project', $project_phid),
-            ),
-            0,
-          ),
-          array(
-            'max',
-            array(
-              'accumulate',
-              array('fact', 'tasks.open-count.assign.project', $project_phid),
-            ),
-            0,
-          ));
-
-        $function->getFunctionLabel()
-          ->setName(pht('Tasks Created'))
-          ->setColor('rgba(0, 0, 200, 1)')
-          ->setFillColor('rgba(0, 0, 200, 0.15)');
-
-        $functions[] = $function;
-      }
+      $closed_function = $this->newFunction(
+        array(
+          'accumulate',
+          $this->newFactSum('tasks.open-count.status.project', $project_phids),
+        ));
     } else {
-      $function = $this->newFunction(
-        'accumulate',
-        array('fact', 'tasks.open-count.create'));
+      $open_function = $this->newFunction(
+        array(
+          'accumulate',
+          array('fact', 'tasks.open-count.create'),
+        ));
 
-      $function->getFunctionLabel()
-        ->setName(pht('Tasks Created'))
-        ->setColor('rgba(0, 200, 200, 1)')
-        ->setFillColor('rgba(0, 200, 200, 0.15)');
-
-      $functions[] = $function;
-
-      $function = $this->newFunction(
-        'accumulate',
-        array('fact', 'tasks.open-count.status'));
-
-      $function->getFunctionLabel()
-        ->setName(pht('Tasks Closed / Reopened'))
-        ->setColor('rgba(200, 0, 200, 1)')
-        ->setFillColor('rgba(200, 0, 200, 0.15)');
-
-      $functions[] = $function;
+      $closed_function = $this->newFunction(
+        array(
+          'accumulate',
+          array('fact', 'tasks.open-count.status'),
+        ));
     }
+
+    $open_function->getFunctionLabel()
+      ->setKey('open')
+      ->setName(pht('Open Tasks'))
+      ->setColor('rgba(0, 0, 200, 1)')
+      ->setFillColor('rgba(0, 0, 200, 0.15)');
+
+    $closed_function->getFunctionLabel()
+      ->setKey('closed')
+      ->setName(pht('Closed Tasks'))
+      ->setColor('rgba(0, 200, 0, 1)')
+      ->setFillColor('rgba(0, 200, 0, 0.15)');
 
     $datasets = array();
 
-    $datasets[] = id(new PhabricatorChartStackedAreaDataset())
-      ->setFunctions($functions);
+    $dataset = id(new PhabricatorChartStackedAreaDataset())
+      ->setFunctions(
+        array(
+          $open_function,
+          $closed_function,
+        ))
+      ->setStacks(
+        array(
+          array('open'),
+          array('closed'),
+        ));
 
+    $datasets[] = $dataset;
     $chart->attachDatasets($datasets);
+  }
+
+  private function newFactSum($fact_key, array $phids) {
+    $result = array();
+    $result[] = 'sum';
+
+    foreach ($phids as $phid) {
+      $result[] = array('fact', $fact_key, $phid);
+    }
+
+    return $result;
   }
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorConstantChartFunction
-  extends PhabricatorChartFunction {
+  extends PhabricatorPureChartFunction {
 
   const FUNCTIONKEY = 'constant';
 
