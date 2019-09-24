@@ -23,13 +23,22 @@ final class PhabricatorPeopleRenameController
     $done_uri = $this->getApplicationURI("manage/{$id}/");
 
     if (!$viewer->getIsAdmin()) {
-      return $this->newDialog()
+      $dialog = $this->newDialog()
         ->setTitle(pht('Change Username'))
         ->appendParagraph(
           pht(
             'You can not change usernames because you are not an '.
             'administrator. Only administrators can change usernames.'))
         ->addCancelButton($done_uri, pht('Okay'));
+
+      $message_body = PhabricatorAuthMessage::loadMessageText(
+        $viewer,
+        PhabricatorAuthChangeUsernameMessageType::MESSAGEKEY);
+      if (strlen($message_body)) {
+        $dialog->appendRemarkup($message_body);
+      }
+
+      return $dialog;
     }
 
     $validation_exception = null;
