@@ -162,12 +162,7 @@ final class PhutilRemarkupHeaderBlockRule extends PhutilRemarkupBlockRule {
 
   public static function getAnchorNameFromHeaderText($text) {
     $anchor = phutil_utf8_strtolower($text);
-
-    // Replace all latin characters which are not "a-z" or "0-9" with "-".
-    // Preserve other characters, since non-latin letters and emoji work
-    // fine in anchors.
-    $anchor = preg_replace('/[\x00-\x2F\x3A-\x60\x7B-\x7F]+/', '-', $anchor);
-    $anchor = trim($anchor, '-');
+    $anchor = PhutilRemarkupAnchorRule::normalizeAnchor($anchor);
 
     // Truncate the fragment to something reasonable.
     $anchor = id(new PhutilUTF8StringTruncator())
