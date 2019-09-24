@@ -19,6 +19,7 @@ final class PhabricatorRepositoryRefCursor
   protected $refNameHash;
   protected $refNameRaw;
   protected $refNameEncoding;
+  protected $isPermanent;
 
   private $repository = self::ATTACHABLE;
   private $positions = self::ATTACHABLE;
@@ -34,6 +35,7 @@ final class PhabricatorRepositoryRefCursor
         'refType' => 'text32',
         'refNameHash' => 'bytes12',
         'refNameEncoding' => 'text16?',
+        'isPermanent' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_ref' => array(

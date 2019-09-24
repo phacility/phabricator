@@ -10,7 +10,16 @@ final class PhabricatorRepositoryRefEngine
   private $newPositions = array();
   private $deadPositions = array();
   private $closeCommits = array();
-  private $hasNoCursors;
+  private $rebuild;
+
+  public function setRebuild($rebuild) {
+    $this->rebuild = $rebuild;
+    return $this;
+  }
+
+  public function getRebuild() {
+    return $this->rebuild;
+  }
 
   public function updateRefs() {
     $this->newPositions = array();
@@ -60,15 +69,17 @@ final class PhabricatorRepositoryRefEngine
       ->execute();
     $cursor_groups = mgroup($all_cursors, 'getRefType');
 
-    $this->hasNoCursors = (!$all_cursors);
-
-    // Find all the heads of closing refs.
+    // Find all the heads of permanent refs.
     $all_closing_heads = array();
     foreach ($all_cursors as $cursor) {
-      $should_close = $this->shouldCloseRef(
-        $cursor->getRefType(),
-        $cursor->getRefName());
-      if (!$should_close) {
+
+      // See T13284. Note that we're considering whether this ref was a
+      // permanent ref or not the last time we updated refs for this
+      // repository. This allows us to handle things properly when a ref
+      // is reconfigured from non-permanent to permanent.
+
+      $was_permanent = $cursor->getIsPermanent();
+      if (!$was_permanent) {
         continue;
       }
 
@@ -76,6 +87,7 @@ final class PhabricatorRepositoryRefEngine
         $all_closing_heads[] = $identifier;
       }
     }
+
     $all_closing_heads = array_unique($all_closing_heads);
     $all_closing_heads = $this->removeMissingCommits($all_closing_heads);
 
@@ -88,11 +100,17 @@ final class PhabricatorRepositoryRefEngine
       $this->setCloseFlagOnCommits($this->closeCommits);
     }
 
-    if ($this->newPositions || $this->deadPositions) {
+    $save_cursors = $this->getCursorsForUpdate($all_cursors);
+
+    if ($this->newPositions || $this->deadPositions || $save_cursors) {
       $repository->openTransaction();
 
         $this->saveNewPositions();
         $this->deleteDeadPositions();
+
+        foreach ($save_cursors as $cursor) {
+          $cursor->save();
+        }
 
       $repository->saveTransaction();
     }
@@ -101,6 +119,28 @@ final class PhabricatorRepositoryRefEngine
     if ($branches && $branches_may_close) {
       $this->updateBranchStates($repository, $branches);
     }
+  }
+
+  private function getCursorsForUpdate(array $cursors) {
+    assert_instances_of($cursors, 'PhabricatorRepositoryRefCursor');
+
+    $results = array();
+
+    foreach ($cursors as $cursor) {
+      $ref_type = $cursor->getRefType();
+      $ref_name = $cursor->getRefName();
+
+      $is_permanent = $this->isPermanentRef($ref_type, $ref_name);
+
+      if ($is_permanent == $cursor->getIsPermanent()) {
+        continue;
+      }
+
+      $cursor->setIsPermanent((int)$is_permanent);
+      $results[] = $cursor;
+    }
+
+    return $results;
   }
 
   private function updateBranchStates(
@@ -301,11 +341,41 @@ final class PhabricatorRepositoryRefEngine
         $this->markPositionNew($new_position);
       }
 
-      if ($this->shouldCloseRef($ref_type, $name)) {
-        foreach ($added_commits as $identifier) {
+      if ($this->isPermanentRef($ref_type, $name)) {
+
+        // See T13284. If this cursor was already marked as permanent, we
+        // only need to publish the newly created ref positions. However, if
+        // this cursor was not previously permanent but has become permanent,
+        // we need to publish all the ref positions.
+
+        // This corresponds to users reconfiguring a branch to make it
+        // permanent without pushing any new commits to it.
+
+        $is_rebuild = $this->getRebuild();
+        $was_permanent = $ref_cursor->getIsPermanent();
+
+        if ($is_rebuild || !$was_permanent) {
+          $update_all = true;
+        } else {
+          $update_all = false;
+        }
+
+        if ($update_all) {
+          $update_commits = $new_commits;
+        } else {
+          $update_commits = $added_commits;
+        }
+
+        if ($is_rebuild) {
+          $exclude = array();
+        } else {
+          $exclude = $all_closing_heads;
+        }
+
+        foreach ($update_commits as $identifier) {
           $new_identifiers = $this->loadNewCommitIdentifiers(
             $identifier,
-            $all_closing_heads);
+            $exclude);
 
           $this->markCloseCommits($new_identifiers);
         }
@@ -334,16 +404,8 @@ final class PhabricatorRepositoryRefEngine
     }
   }
 
-  private function shouldCloseRef($ref_type, $ref_name) {
+  private function isPermanentRef($ref_type, $ref_name) {
     if ($ref_type !== PhabricatorRepositoryRefCursor::TYPE_BRANCH) {
-      return false;
-    }
-
-    if ($this->hasNoCursors) {
-      // If we don't have any cursors, don't close things. Particularly, this
-      // corresponds to the case where you've just updated to this code on an
-      // existing repository: we don't want to requeue message steps for every
-      // commit on a closeable ref.
       return false;
     }
 
@@ -505,10 +567,13 @@ final class PhabricatorRepositoryRefEngine
     $ref_type,
     $ref_name) {
 
+    $is_permanent = $this->isPermanentRef($ref_type, $ref_name);
+
     $cursor = id(new PhabricatorRepositoryRefCursor())
       ->setRepositoryPHID($repository->getPHID())
       ->setRefType($ref_type)
-      ->setRefName($ref_name);
+      ->setRefName($ref_name)
+      ->setIsPermanent((int)$is_permanent);
 
     try {
       return $cursor->save();
