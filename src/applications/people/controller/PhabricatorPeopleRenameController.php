@@ -3,8 +3,13 @@
 final class PhabricatorPeopleRenameController
   extends PhabricatorPeopleController {
 
+  public function shouldRequireAdmin() {
+    return false;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
+
     $id = $request->getURIData('id');
 
     $user = id(new PhabricatorPeopleQuery())
@@ -16,6 +21,16 @@ final class PhabricatorPeopleRenameController
     }
 
     $done_uri = $this->getApplicationURI("manage/{$id}/");
+
+    if (!$viewer->getIsAdmin()) {
+      return $this->newDialog()
+        ->setTitle(pht('Change Username'))
+        ->appendParagraph(
+          pht(
+            'You can not change usernames because you are not an '.
+            'administrator. Only administrators can change usernames.'))
+        ->addCancelButton($done_uri, pht('Okay'));
+    }
 
     $validation_exception = null;
     $username = $user->getUsername();
