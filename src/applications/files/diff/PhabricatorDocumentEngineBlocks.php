@@ -20,28 +20,54 @@ final class PhabricatorDocumentEngineBlocks
     $rows = array();
     $lists = $this->lists;
 
-    $idx = 0;
-    while (true) {
-      $found_any = false;
+    $specs = array();
+    foreach ($this->lists as $list) {
+      $specs[] = $this->newDiffSpec($list['blocks']);
+    }
 
-      $row = array();
-      foreach ($lists as $list) {
-        $blocks = $list['blocks'];
-        $cell = idx($blocks, $idx);
+    $old_map = $specs[0]['map'];
+    $new_map = $specs[1]['map'];
 
-        if ($cell !== null) {
-          $found_any = true;
-        }
+    $old_list = $specs[0]['list'];
+    $new_list = $specs[1]['list'];
 
-        $row[] = $cell;
+    $changeset = id(new PhabricatorDifferenceEngine())
+      ->generateChangesetFromFileContent($old_list, $new_list);
+
+    $hunk_parser = id(new DifferentialHunkParser())
+      ->parseHunksForLineData($changeset->getHunks())
+      ->reparseHunksForSpecialAttributes();
+
+    $old_lines = $hunk_parser->getOldLines();
+    $new_lines = $hunk_parser->getNewLines();
+
+    $rows = array();
+
+    $count = count($old_lines);
+    for ($ii = 0; $ii < $count; $ii++) {
+      $old_line = idx($old_lines, $ii);
+      $new_line = idx($new_lines, $ii);
+
+      if ($old_line) {
+        $old_hash = rtrim($old_line['text'], "\n");
+        $old_block = array_shift($old_map[$old_hash]);
+        $old_block->setDifferenceType($old_line['type']);
+      } else {
+        $old_block = null;
       }
 
-      if (!$found_any) {
-        break;
+      if ($new_line) {
+        $new_hash = rtrim($new_line['text'], "\n");
+        $new_block = array_shift($new_map[$new_hash]);
+        $new_block->setDifferenceType($new_line['type']);
+      } else {
+        $new_block = null;
       }
 
-      $rows[] = $row;
-      $idx++;
+      $rows[] = array(
+        $old_block,
+        $new_block,
+      );
     }
 
     return $rows;
@@ -79,5 +105,26 @@ final class PhabricatorDocumentEngineBlocks
     return $rows;
   }
 
+
+  private function newDiffSpec(array $blocks) {
+    $map = array();
+    $list = array();
+
+    foreach ($blocks as $block) {
+      $hash = $block->getDifferenceHash();
+
+      if (!isset($map[$hash])) {
+        $map[$hash] = array();
+      }
+      $map[$hash][] = $block;
+
+      $list[] = $hash;
+    }
+
+    return array(
+      'map' => $map,
+      'list' => implode("\n", $list)."\n",
+    );
+  }
 
 }

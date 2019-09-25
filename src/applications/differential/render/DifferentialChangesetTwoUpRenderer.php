@@ -379,7 +379,15 @@ final class DifferentialChangesetTwoUpRenderer
       if ($old) {
         $old_content = $old->newContentView();
         $old_key = $old->getBlockKey();
-        $old_classes = implode(' ', $old->getClasses());
+
+        $old_classes = $old->getClasses();
+
+        if ($old->getDifferenceType() === '-') {
+          $old_classes[] = 'old';
+          $old_classes[] = 'old-full';
+        }
+
+        $old_classes = implode(' ', $old_classes);
       } else {
         $old_content = null;
         $old_key = null;
@@ -389,7 +397,14 @@ final class DifferentialChangesetTwoUpRenderer
       if ($new) {
         $new_content = $new->newContentView();
         $new_key = $new->getBlockKey();
-        $new_classes = implode(' ', $new->getClasses());
+        $new_classes = $new->getClasses();
+
+        if ($new->getDifferenceType() === '+') {
+          $new_classes[] = 'new';
+          $new_classes[] = 'new-full';
+        }
+
+        $new_classes = implode(' ', $new_classes);
       } else {
         $new_content = null;
         $new_key = null;

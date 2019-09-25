@@ -82,8 +82,13 @@ final class PhabricatorJupyterDocumentEngine
         ),
         $notebook_table);
 
+      $hash = PhabricatorHash::digestWithNamedKey(
+        serialize($cell),
+        'document-engine.content-digest');
+
       $blocks[] = id(new PhabricatorDocumentEngineBlock())
         ->setBlockKey($idx)
+        ->setDifferenceHash($hash)
         ->setContent($container);
 
       $idx++;

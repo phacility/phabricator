@@ -55,9 +55,12 @@ final class PhabricatorImageDocumentEngine
           'src' => $file->getBestURI(),
         )));
 
+    $hash = $file->getContentHash();
+
     $blocks[] = id(new PhabricatorDocumentEngineBlock())
       ->setBlockKey('1')
       ->addClass('diff-image-cell')
+      ->setDifferenceHash($hash)
       ->setContent($image_view);
 
     return $blocks;

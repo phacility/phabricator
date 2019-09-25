@@ -6,6 +6,8 @@ final class PhabricatorDocumentEngineBlock
   private $blockKey;
   private $content;
   private $classes = array();
+  private $differenceHash;
+  private $differenceType;
 
   public function setContent($content) {
     $this->content = $content;
@@ -36,6 +38,24 @@ final class PhabricatorDocumentEngineBlock
 
   public function getClasses() {
     return $this->classes;
+  }
+
+  public function setDifferenceHash($difference_hash) {
+    $this->differenceHash = $difference_hash;
+    return $this;
+  }
+
+  public function getDifferenceHash() {
+    return $this->differenceHash;
+  }
+
+  public function setDifferenceType($difference_type) {
+    $this->differenceType = $difference_type;
+    return $this;
+  }
+
+  public function getDifferenceType() {
+    return $this->differenceType;
   }
 
 }

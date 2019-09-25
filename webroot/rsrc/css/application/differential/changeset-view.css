@@ -282,7 +282,8 @@ td.cov-I {
   font-weight: bold;
 }
 
-.differential-diff .diff-image-cell {
+.differential-diff td.diff-image-cell {
+  background-color: transparent;
   background-image: url(/rsrc/image/checker_light.png);
   padding: 8px;
 }
