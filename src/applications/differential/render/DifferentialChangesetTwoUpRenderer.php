@@ -420,19 +420,17 @@ final class DifferentialChangesetTwoUpRenderer
 
       if ($old_content === null) {
         $old_id = null;
-        $old_label = null;
       } else {
         $old_id = "C{$old_changeset_key}OL{$old_key}";
-        $old_label = $old_key;
       }
 
       $old_line_cell = phutil_tag(
         'td',
         array(
           'id' => $old_id,
+          'data-n' => $old_key,
           'class' => 'n',
-        ),
-        $old_label);
+        ));
 
       $old_content_cell = phutil_tag(
         'td',
@@ -443,19 +441,17 @@ final class DifferentialChangesetTwoUpRenderer
 
       if ($new_content === null) {
         $new_id = null;
-        $new_label = null;
       } else {
         $new_id = "C{$new_changeset_key}NL{$new_key}";
-        $new_label = $new_key;
       }
 
       $new_line_cell = phutil_tag(
         'td',
         array(
           'id' => $new_id,
+          'data-n' => $new_key,
           'class' => 'n',
-        ),
-        $new_label);
+        ));
 
       $new_content_cell = phutil_tag(
         'td',
