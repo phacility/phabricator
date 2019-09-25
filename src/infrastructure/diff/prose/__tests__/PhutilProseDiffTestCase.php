@@ -1,6 +1,7 @@
 <?php
 
-final class PhutilProseDiffTestCase extends PhutilTestCase {
+final class PhutilProseDiffTestCase
+  extends PhabricatorTestCase {
 
   public function testProseDiffsDistance() {
     $this->assertProseParts(

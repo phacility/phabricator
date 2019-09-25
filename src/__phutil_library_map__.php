@@ -12402,7 +12402,7 @@ phutil_register_library_map(array(
     'PhutilPHPCodeSnippetContextFreeGrammar' => 'PhutilCLikeCodeSnippetContextFreeGrammar',
     'PhutilPhabricatorAuthAdapter' => 'PhutilOAuthAuthAdapter',
     'PhutilProseDiff' => 'Phobject',
-    'PhutilProseDiffTestCase' => 'PhutilTestCase',
+    'PhutilProseDiffTestCase' => 'PhabricatorTestCase',
     'PhutilProseDifferenceEngine' => 'Phobject',
     'PhutilQueryString' => 'Phobject',
     'PhutilRealNameContextFreeGrammar' => 'PhutilContextFreeGrammar',

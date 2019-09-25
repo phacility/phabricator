@@ -50,18 +50,33 @@ final class PhabricatorDocumentEngineBlocks
 
       if ($old_line) {
         $old_hash = rtrim($old_line['text'], "\n");
-        $old_block = array_shift($old_map[$old_hash]);
-        $old_block->setDifferenceType($old_line['type']);
+        if (!strlen($old_hash)) {
+          // This can happen when one of the sources has no blocks.
+          $old_block = null;
+        } else {
+          $old_block = array_shift($old_map[$old_hash]);
+          $old_block->setDifferenceType($old_line['type']);
+        }
       } else {
         $old_block = null;
       }
 
       if ($new_line) {
         $new_hash = rtrim($new_line['text'], "\n");
-        $new_block = array_shift($new_map[$new_hash]);
-        $new_block->setDifferenceType($new_line['type']);
+        if (!strlen($new_hash)) {
+          $new_block = null;
+        } else {
+          $new_block = array_shift($new_map[$new_hash]);
+          $new_block->setDifferenceType($new_line['type']);
+        }
       } else {
         $new_block = null;
+      }
+
+      // If both lists are empty, we may generate a row which has two empty
+      // blocks.
+      if (!$old_block && !$new_block) {
+        continue;
       }
 
       $rows[] = array(
