@@ -453,11 +453,17 @@ final class DifferentialChangesetTwoUpRenderer
           'class' => 'n',
         ));
 
+      $copy_gutter = phutil_tag(
+        'td',
+        array(
+          'class' => 'copy',
+        ));
+
       $new_content_cell = phutil_tag(
         'td',
         array(
           'class' => $new_classes,
-          'colspan' => '3',
+          'colspan' => '2',
         ),
         $new_content);
 
@@ -468,6 +474,7 @@ final class DifferentialChangesetTwoUpRenderer
           $old_line_cell,
           $old_content_cell,
           $new_line_cell,
+          $copy_gutter,
           $new_content_cell,
         ));
 

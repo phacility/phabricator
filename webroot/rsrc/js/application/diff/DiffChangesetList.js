@@ -1196,19 +1196,30 @@ JX.install('DiffChangesetList', {
       }
 
       // Find the leftmost cell that we're going to highlight: this is the next
-      // <td /> in the row. In 2up views, it should be directly adjacent. In
+      // <td /> in the row that does not have a "data-n" (line number)
+      // attribute. In 2up views, it should be directly adjacent. In
       // 1up views, we may have to skip over the other line number column.
       var l = top;
-      while (JX.DOM.isType(l, 'th')) {
+      while (l.nextSibling && l.getAttribute('data-n')) {
         l = l.nextSibling;
       }
 
       // Find the rightmost cell that we're going to highlight: this is the
-      // farthest consecutive, adjacent <td /> in the row. Sometimes the left
-      // and right nodes are the same (left side of 2up view); sometimes we're
-      // going to highlight several nodes (copy + code + coverage).
+      // farthest consecutive, adjacent <td /> in the row that does not have
+      // a "data-n" (line number) attribute. Sometimes the left and right nodes
+      // are the same (left side of 2up view); sometimes we're going to
+      // highlight several nodes (copy + code + coverage).
       var r = l;
-      while (r.nextSibling && JX.DOM.isType(r.nextSibling, 'td')) {
+      while (true) {
+        // No more cells in the row, so we can't keep expanding.
+        if (!r.nextSibling) {
+          break;
+        }
+
+        if (r.nextSibling.getAttribute('data-n')) {
+          break;
+        }
+
         r = r.nextSibling;
       }
 
