@@ -241,7 +241,7 @@ final class DifferentialChangesetOneUpRenderer
       $primitives[] = array(
         'type' => 'old-file',
         'htype' => '',
-        'line' => 1,
+        'line' => $block->getBlockKey(),
         'render' => $block->newContentView(),
       );
     }

@@ -284,14 +284,11 @@ td.cov-I {
 
 .differential-diff .diff-image-cell {
   background-image: url(/rsrc/image/checker_light.png);
+  padding: 8px;
 }
 
 .device-desktop .differential-diff .diff-image-cell:hover {
   background-image: url(/rsrc/image/checker_dark.png);
-}
-
-.differential-diff .differential-image-diff td {
-  padding: 8px;
 }
 
 .differential-image-stage {

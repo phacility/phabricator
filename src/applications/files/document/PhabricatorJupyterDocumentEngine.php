@@ -35,6 +35,63 @@ final class PhabricatorJupyterDocumentEngine
     return $ref->isProbablyJSON();
   }
 
+  public function canDiffDocuments(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+    return true;
+  }
+
+  public function newDiffView(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+
+    $u_blocks = $this->newDiffBlocks($uref);
+    $v_blocks = $this->newDiffBlocks($vref);
+
+    return id(new PhabricatorDocumentEngineBlocks())
+      ->addBlockList($uref, $u_blocks)
+      ->addBlockList($vref, $v_blocks);
+  }
+
+  private function newDiffBlocks(PhabricatorDocumentRef $ref) {
+    $viewer = $this->getViewer();
+    $content = $ref->loadData();
+
+    $data = phutil_json_decode($content);
+    $cells = idx($data, 'cells');
+    if (!is_array($cells)) {
+      throw new Exception('Missing "cells".');
+    }
+
+    $idx = 1;
+    $blocks = array();
+    foreach ($cells as $cell) {
+      $cell_content = $this->renderJupyterCell($viewer, $cell);
+
+      $notebook_table = phutil_tag(
+        'table',
+        array(
+          'class' => 'jupyter-notebook',
+        ),
+        $cell_content);
+
+      $container = phutil_tag(
+        'div',
+        array(
+          'class' => 'document-engine-jupyter document-engine-diff',
+        ),
+        $notebook_table);
+
+      $blocks[] = id(new PhabricatorDocumentEngineBlock())
+        ->setBlockKey($idx)
+        ->setContent($container);
+
+      $idx++;
+    }
+
+    return $blocks;
+  }
+
   protected function newDocumentContent(PhabricatorDocumentRef $ref) {
     $viewer = $this->getViewer();
     $content = $ref->loadData();

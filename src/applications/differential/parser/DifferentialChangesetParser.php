@@ -1693,7 +1693,7 @@ final class DifferentialChangesetParser extends Phobject {
       $new_data = ipull($new_data, 'text');
       $new_data = implode('', $new_data);
 
-      $new_ref->setData($old_data);
+      $new_ref->setData($new_data);
     }
 
     $old_engines = PhabricatorDocumentEngine::getEnginesForRef(

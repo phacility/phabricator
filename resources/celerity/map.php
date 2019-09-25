@@ -9,9 +9,9 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => '3c8a0668',
     'conpherence.pkg.js' => '020aebcf',
-    'core.pkg.css' => 'c69171e6',
+    'core.pkg.css' => '6a8c9533',
     'core.pkg.js' => '6e5c894f',
-    'differential.pkg.css' => 'eef74643',
+    'differential.pkg.css' => 'ce54994e',
     'differential.pkg.js' => '49515551',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
@@ -61,7 +61,7 @@ return array(
     'rsrc/css/application/dashboard/dashboard.css' => '5a205b9d',
     'rsrc/css/application/diff/inline-comment-summary.css' => '81eb368d',
     'rsrc/css/application/differential/add-comment.css' => '7e5900d9',
-    'rsrc/css/application/differential/changeset-view.css' => '215129ef',
+    'rsrc/css/application/differential/changeset-view.css' => 'db306b82',
     'rsrc/css/application/differential/core.css' => '7300a73e',
     'rsrc/css/application/differential/phui-inline-comment.css' => '48acce5b',
     'rsrc/css/application/differential/revision-comment.css' => '7dbc8d1d',
@@ -169,7 +169,7 @@ return array(
     'rsrc/css/phui/phui-pager.css' => 'd022c7ad',
     'rsrc/css/phui/phui-pinboard-view.css' => '1f08f5d8',
     'rsrc/css/phui/phui-policy-section-view.css' => '139fdc64',
-    'rsrc/css/phui/phui-property-list-view.css' => 'cad62236',
+    'rsrc/css/phui/phui-property-list-view.css' => '34180764',
     'rsrc/css/phui/phui-remarkup-preview.css' => '91767007',
     'rsrc/css/phui/phui-segment-bar-view.css' => '5166b370',
     'rsrc/css/phui/phui-spacing.css' => 'b05cadc3',
@@ -554,7 +554,7 @@ return array(
     'conpherence-thread-manager' => 'aec8e38c',
     'conpherence-transaction-css' => '3a3f5e7e',
     'd3' => '9d068042',
-    'differential-changeset-view-css' => '215129ef',
+    'differential-changeset-view-css' => 'db306b82',
     'differential-core-view-css' => '7300a73e',
     'differential-revision-add-comment-css' => '7e5900d9',
     'differential-revision-comment-css' => '7dbc8d1d',
@@ -865,7 +865,7 @@ return array(
     'phui-pager-css' => 'd022c7ad',
     'phui-pinboard-view-css' => '1f08f5d8',
     'phui-policy-section-view-css' => '139fdc64',
-    'phui-property-list-view-css' => 'cad62236',
+    'phui-property-list-view-css' => '34180764',
     'phui-remarkup-preview-css' => '91767007',
     'phui-segment-bar-view-css' => '5166b370',
     'phui-spacing-css' => 'b05cadc3',
@@ -1064,9 +1064,6 @@ return array(
     '202bfa3f' => array(
       'javelin-behavior',
       'javelin-request',
-    ),
-    '215129ef' => array(
-      'phui-inline-comment-view-css',
     ),
     '225bbb98' => array(
       'javelin-install',
@@ -2071,6 +2068,9 @@ return array(
       'javelin-behavior',
       'javelin-uri',
       'phabricator-notification',
+    ),
+    'db306b82' => array(
+      'phui-inline-comment-view-css',
     ),
     'dfa1d313' => array(
       'javelin-behavior',

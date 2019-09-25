@@ -56,6 +56,8 @@ final class PhabricatorImageDocumentEngine
         )));
 
     $blocks[] = id(new PhabricatorDocumentEngineBlock())
+      ->setBlockKey('1')
+      ->addClass('diff-image-cell')
       ->setContent($image_view);
 
     return $blocks;

@@ -268,6 +268,10 @@ div.phui-property-list-stacked .phui-property-list-properties
   margin: 20px;
 }
 
+.document-engine-jupyter.document-engine-diff {
+  margin: 0;
+}
+
 .document-engine-in-flight {
   opacity: 0.25;
 }
