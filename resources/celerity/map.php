@@ -12,7 +12,7 @@ return array(
     'core.pkg.css' => 'c69171e6',
     'core.pkg.js' => '6e5c894f',
     'differential.pkg.css' => 'eef74643',
-    'differential.pkg.js' => '0b037a4f',
+    'differential.pkg.js' => '49515551',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
@@ -376,8 +376,8 @@ return array(
     'rsrc/js/application/dashboard/behavior-dashboard-move-panels.js' => 'a2ab19be',
     'rsrc/js/application/dashboard/behavior-dashboard-query-panel-select.js' => '1e413dc9',
     'rsrc/js/application/dashboard/behavior-dashboard-tab-panel.js' => '0116d3e8',
-    'rsrc/js/application/diff/DiffChangeset.js' => 'd0a85a85',
-    'rsrc/js/application/diff/DiffChangesetList.js' => '04023d82',
+    'rsrc/js/application/diff/DiffChangeset.js' => 'a31ffc00',
+    'rsrc/js/application/diff/DiffChangesetList.js' => '40850e53',
     'rsrc/js/application/diff/DiffInline.js' => 'a4a14a94',
     'rsrc/js/application/diff/behavior-preview-link.js' => 'f51e9c17',
     'rsrc/js/application/differential/behavior-diff-radios.js' => '925fe8cd',
@@ -773,8 +773,8 @@ return array(
     'phabricator-darklog' => '3b869402',
     'phabricator-darkmessage' => '26cd4b73',
     'phabricator-dashboard-css' => '5a205b9d',
-    'phabricator-diff-changeset' => 'd0a85a85',
-    'phabricator-diff-changeset-list' => '04023d82',
+    'phabricator-diff-changeset' => 'a31ffc00',
+    'phabricator-diff-changeset-list' => '40850e53',
     'phabricator-diff-inline' => 'a4a14a94',
     'phabricator-drag-and-drop-file-upload' => '4370900d',
     'phabricator-draggable-list' => 'c9ad6f70',
@@ -943,10 +943,6 @@ return array(
     ),
     '03e8891f' => array(
       'javelin-install',
-    ),
-    '04023d82' => array(
-      'javelin-install',
-      'phuix-button-view',
     ),
     '04f8a1e3' => array(
       'javelin-behavior',
@@ -1262,6 +1258,10 @@ return array(
     '407ee861' => array(
       'javelin-behavior',
       'javelin-uri',
+    ),
+    '40850e53' => array(
+      'javelin-install',
+      'phuix-button-view',
     ),
     '4234f572' => array(
       'syntax-default-css',
@@ -1788,6 +1788,17 @@ return array(
       'javelin-workflow',
       'phabricator-draggable-list',
     ),
+    'a31ffc00' => array(
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-install',
+      'javelin-workflow',
+      'javelin-router',
+      'javelin-behavior-device',
+      'javelin-vector',
+      'phabricator-diff-inline',
+    ),
     'a4356cde' => array(
       'javelin-install',
       'javelin-dom',
@@ -2033,17 +2044,6 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'javelin-stratcom',
-    ),
-    'd0a85a85' => array(
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-install',
-      'javelin-workflow',
-      'javelin-router',
-      'javelin-behavior-device',
-      'javelin-vector',
-      'phabricator-diff-inline',
     ),
     'd12d214f' => array(
       'javelin-install',

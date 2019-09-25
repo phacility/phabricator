@@ -827,6 +827,26 @@ JX.install('DiffChangesetList', {
         });
       list.addItem(highlight_item);
 
+      var engine_item = new JX.PHUIXActionView()
+        .setIcon('fa-file-image-o')
+        .setName(pht('View As...'))
+        .setHandler(function(e) {
+          var params = {
+            engine: changeset.getDocumentEngine(),
+          };
+
+          new JX.Workflow('/services/viewas/', params)
+            .setHandler(function(r) {
+              changeset.setDocumentEngine(r.engine);
+              changeset.reload();
+            })
+            .start();
+
+          e.prevent();
+          menu.close();
+        });
+      list.addItem(engine_item);
+
       add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
       add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
       add_link('fa-pencil', pht('Open in Editor'), data.editor, true);
@@ -860,6 +880,7 @@ JX.install('DiffChangesetList', {
 
         encoding_item.setDisabled(!changeset.isLoaded());
         highlight_item.setDisabled(!changeset.isLoaded());
+        engine_item.setDisabled(!changeset.isLoaded());
 
         if (changeset.isLoaded()) {
           if (changeset.getRenderer() == '2up') {

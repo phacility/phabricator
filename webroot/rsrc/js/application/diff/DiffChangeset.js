@@ -24,6 +24,7 @@ JX.install('DiffChangeset', {
     this._ref = data.ref;
     this._renderer = data.renderer;
     this._highlight = data.highlight;
+    this._documentEngine = data.documentEngine;
     this._encoding = data.encoding;
     this._loaded = data.loaded;
     this._treeNodeID = data.treeNodeID;
@@ -47,6 +48,7 @@ JX.install('DiffChangeset', {
     _ref: null,
     _renderer: null,
     _highlight: null,
+    _documentEngine: null,
     _encoding: null,
     _undoTemplates: null,
 
@@ -310,6 +312,7 @@ JX.install('DiffChangeset', {
         ref: this._ref,
         renderer: this.getRenderer() || '',
         highlight: this._highlight || '',
+        engine: this._documentEngine || '',
         encoding: this._encoding || ''
       };
     },
@@ -364,6 +367,14 @@ JX.install('DiffChangeset', {
 
     getHighlight: function() {
       return this._highlight;
+    },
+
+    setDocumentEngine: function(engine) {
+      this._documentEngine = engine;
+    },
+
+    getDocumentEngine: function(engine) {
+      return this._documentEngine;
     },
 
     getSelectableItems: function() {

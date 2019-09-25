@@ -59,6 +59,7 @@ final class DifferentialChangesetParser extends Phobject {
 
   private $highlightEngine;
   private $viewer;
+  private $documentEngineKey;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;
@@ -159,6 +160,15 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->viewer;
   }
 
+  public function setDocumentEngineKey($document_engine_key) {
+    $this->documentEngineKey = $document_engine_key;
+    return $this;
+  }
+
+  public function getDocumentEngineKey() {
+    return $this->documentEngineKey;
+  }
+
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
     $is_unified = $viewer->compareUserSetting(
       PhabricatorUnifiedDiffsSetting::SETTINGKEY,
@@ -174,6 +184,7 @@ final class DifferentialChangesetParser extends Phobject {
   public function readParametersFromRequest(AphrontRequest $request) {
     $this->setCharacterEncoding($request->getStr('encoding'));
     $this->setHighlightAs($request->getStr('highlight'));
+    $this->setDocumentEngineKey($request->getStr('engine'));
 
     $renderer = null;
 
@@ -1695,14 +1706,22 @@ final class DifferentialChangesetParser extends Phobject {
 
     $shared_engines = array_intersect_key($old_engines, $new_engines);
 
-    $document_engine = null;
-    foreach ($shared_engines as $shared_engine) {
-      if ($shared_engine->canDiffDocuments($old_ref, $new_ref)) {
-        $document_engine = $shared_engine;
-        break;
+    foreach ($shared_engines as $key => $shared_engine) {
+      if (!$shared_engine->canDiffDocuments($old_ref, $new_ref)) {
+        unset($shared_engines[$key]);
       }
     }
 
+    $engine_key = $this->getDocumentEngineKey();
+    if (strlen($engine_key)) {
+      if (isset($shared_engines[$engine_key])) {
+        $document_engine = $shared_engines[$engine_key];
+      } else {
+        $document_engine = null;
+      }
+    } else {
+      $document_engine = head($shared_engines);
+    }
 
     if ($document_engine) {
       return $document_engine->newDiffView(
