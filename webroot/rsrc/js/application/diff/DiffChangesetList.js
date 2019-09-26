@@ -1195,41 +1195,26 @@ JX.install('DiffChangesetList', {
         bot = tmp;
       }
 
-      // Find the leftmost cell that we're going to highlight: this is the next
-      // <td /> in the row that does not have a "data-n" (line number)
-      // attribute. In 2up views, it should be directly adjacent. In
-      // 1up views, we may have to skip over the other line number column.
-      var l = top;
-      while (l.nextSibling && l.getAttribute('data-n')) {
-        l = l.nextSibling;
+      // Find the leftmost cell that we're going to highlight. This is the
+      // next sibling with a "data-copy-mode" attribute, which is a marker
+      // for the cell with actual content in it.
+      var content_cell = top;
+      while (content_cell && !content_cell.getAttribute('data-copy-mode')) {
+        content_cell = content_cell.nextSibling;
       }
 
-      // Find the rightmost cell that we're going to highlight: this is the
-      // farthest consecutive, adjacent <td /> in the row that does not have
-      // a "data-n" (line number) attribute. Sometimes the left and right nodes
-      // are the same (left side of 2up view); sometimes we're going to
-      // highlight several nodes (copy + code + coverage).
-      var r = l;
-      while (true) {
-        // No more cells in the row, so we can't keep expanding.
-        if (!r.nextSibling) {
-          break;
-        }
-
-        if (r.nextSibling.getAttribute('data-n')) {
-          break;
-        }
-
-        r = r.nextSibling;
+      // If we didn't find a cell to highlight, don't highlight anything.
+      if (!content_cell) {
+        return;
       }
 
-      var pos = JX.$V(l)
-        .add(JX.Vector.getAggregateScrollForNode(l));
+      var pos = JX.$V(content_cell)
+        .add(JX.Vector.getAggregateScrollForNode(content_cell));
 
-      var dim = JX.$V(r)
-        .add(JX.Vector.getAggregateScrollForNode(r))
+      var dim = JX.$V(content_cell)
+        .add(JX.Vector.getAggregateScrollForNode(content_cell))
         .add(-pos.x, -pos.y)
-        .add(JX.Vector.getDim(r));
+        .add(JX.Vector.getDim(content_cell));
 
       var bpos = JX.$V(bot)
         .add(JX.Vector.getAggregateScrollForNode(bot));

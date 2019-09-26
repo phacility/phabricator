@@ -387,6 +387,8 @@ final class DifferentialChangesetTwoUpRenderer
           $old_classes[] = 'old-full';
         }
 
+        $old_classes[] = 'diff-flush';
+
         $old_classes = implode(' ', $old_classes);
       } else {
         $old_content = null;
@@ -403,6 +405,8 @@ final class DifferentialChangesetTwoUpRenderer
           $new_classes[] = 'new';
           $new_classes[] = 'new-full';
         }
+
+        $new_classes[] = 'diff-flush';
 
         $new_classes = implode(' ', $new_classes);
       } else {
@@ -451,6 +455,7 @@ final class DifferentialChangesetTwoUpRenderer
         'td',
         array(
           'class' => $old_classes,
+          'data-copy-mode' => 'copy-l',
         ),
         $old_content);
 
@@ -479,6 +484,7 @@ final class DifferentialChangesetTwoUpRenderer
         array(
           'class' => $new_classes,
           'colspan' => '2',
+          'data-copy-mode' => 'copy-r',
         ),
         $new_content);
 
