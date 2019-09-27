@@ -37,6 +37,30 @@ abstract class PhabricatorDocumentEngine
     return false;
   }
 
+  public function newBlockDiffViews(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentEngineBlock $ublock,
+    PhabricatorDocumentRef $vref,
+    PhabricatorDocumentEngineBlock $vblock) {
+
+    $u_content = $this->newBlockContentView($uref, $ublock);
+    $v_content = $this->newBlockContentView($vref, $vblock);
+
+    return id(new PhabricatorDocumentEngineBlockDiff())
+      ->setOldContent($u_content)
+      ->addOldClass('old')
+      ->addOldClass('old-full')
+      ->setNewContent($v_content)
+      ->addNewClass('new')
+      ->addNewClass('new-full');
+  }
+
+  public function newBlockContentView(
+    PhabricatorDocumentRef $ref,
+    PhabricatorDocumentEngineBlock $block) {
+    return $block->getContent();
+  }
+
   public function newEngineBlocks(
     PhabricatorDocumentRef $uref,
     PhabricatorDocumentRef $vref) {

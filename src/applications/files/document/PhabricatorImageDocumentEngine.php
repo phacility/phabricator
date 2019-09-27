@@ -39,6 +39,23 @@ final class PhabricatorImageDocumentEngine
       ->addBlockList($vref, $v_blocks);
   }
 
+  public function newBlockDiffViews(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentEngineBlock $ublock,
+    PhabricatorDocumentRef $vref,
+    PhabricatorDocumentEngineBlock $vblock) {
+
+    $u_content = $this->newBlockContentView($uref, $ublock);
+    $v_content = $this->newBlockContentView($vref, $vblock);
+
+    return id(new PhabricatorDocumentEngineBlockDiff())
+      ->setOldContent($u_content)
+      ->addOldClass('diff-image-cell')
+      ->setNewContent($v_content)
+      ->addNewClass('diff-image-cell');
+  }
+
+
   private function newDiffBlocks(PhabricatorDocumentRef $ref) {
     $blocks = array();
 
@@ -59,7 +76,6 @@ final class PhabricatorImageDocumentEngine
 
     $blocks[] = id(new PhabricatorDocumentEngineBlock())
       ->setBlockKey('1')
-      ->addClass('diff-image-cell')
       ->setDifferenceHash($hash)
       ->setContent($image_view);
 

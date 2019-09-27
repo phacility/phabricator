@@ -242,7 +242,7 @@ final class DifferentialChangesetOneUpRenderer
         'type' => 'old-file',
         'htype' => '',
         'line' => $block->getBlockKey(),
-        'render' => $block->newContentView(),
+        'render' => $block->getContent(),
       );
     }
 

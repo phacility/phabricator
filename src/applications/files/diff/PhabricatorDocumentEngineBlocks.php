@@ -26,6 +26,10 @@ final class PhabricatorDocumentEngineBlocks
     return $this;
   }
 
+  public function getDocumentRefs() {
+    return ipull($this->lists, 'ref');
+  }
+
   public function newTwoUpLayout() {
     $rows = array();
     $lists = $this->lists;

@@ -868,7 +868,15 @@ final class DifferentialChangesetParser extends Phobject {
       ->setHighlightingDisabled($this->highlightingDisabled)
       ->setDepthOnlyLines($this->getDepthOnlyLines());
 
-    $engine_blocks = $this->newDocumentEngineBlocks();
+    list($engine, $old_ref, $new_ref) = $this->newDocumentEngine();
+    if ($engine) {
+      $engine_blocks = $engine->newEngineBlocks(
+        $old_ref,
+        $new_ref);
+    } else {
+      $engine_blocks = null;
+    }
+
     $has_document_engine = ($engine_blocks !== null);
 
     $shield = null;
@@ -1043,7 +1051,9 @@ final class DifferentialChangesetParser extends Phobject {
         $vs = $id;
       }
 
-      $renderer->setDocumentEngineBlocks($engine_blocks);
+      $renderer
+        ->setDocumentEngine($engine)
+        ->setDocumentEngineBlocks($engine_blocks);
 
       return $renderer->renderDocumentEngineBlocks(
         $engine_blocks,
@@ -1657,7 +1667,7 @@ final class DifferentialChangesetParser extends Phobject {
     return $prefix.$line;
   }
 
-  private function newDocumentEngineBlocks() {
+  private function newDocumentEngine() {
     $changeset = $this->changeset;
     $viewer = $this->getViewer();
 
@@ -1728,7 +1738,8 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     if ($document_engine) {
-      return $document_engine->newEngineBlocks(
+      return array(
+        $document_engine,
         $old_ref,
         $new_ref);
     }

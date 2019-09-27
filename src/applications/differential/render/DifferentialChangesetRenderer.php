@@ -35,6 +35,8 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   private $highlightingDisabled;
   private $scopeEngine = false;
   private $depthOnlyLines;
+
+  private $documentEngine;
   private $documentEngineBlocks;
 
   private $oldFile = false;
@@ -238,6 +240,15 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   }
   protected function getOldChangesetID() {
     return $this->oldChangesetID;
+  }
+
+  public function setDocumentEngine(PhabricatorDocumentEngine $engine) {
+    $this->documentEngine = $engine;
+    return $this;
+  }
+
+  public function getDocumentEngine() {
+    return $this->documentEngine;
   }
 
   public function setDocumentEngineBlocks(

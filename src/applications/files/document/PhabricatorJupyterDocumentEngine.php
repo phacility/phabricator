@@ -60,6 +60,126 @@ final class PhabricatorJupyterDocumentEngine
     return $blocks;
   }
 
+  public function newBlockDiffViews(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentEngineBlock $ublock,
+    PhabricatorDocumentRef $vref,
+    PhabricatorDocumentEngineBlock $vblock) {
+
+    $ucell = $ublock->getContent();
+    $vcell = $vblock->getContent();
+
+    $utype = idx($ucell, 'cell_type');
+    $vtype = idx($vcell, 'cell_type');
+
+    if ($utype === $vtype) {
+      switch ($utype) {
+        case 'markdown':
+          $usource = idx($ucell, 'source');
+          $usource = implode('', $usource);
+
+          $vsource = idx($vcell, 'source');
+          $vsource = implode('', $vsource);
+
+          $diff = id(new PhutilProseDifferenceEngine())
+            ->getDiff($usource, $vsource);
+
+          $u_content = $this->newProseDiffCell($diff, array('=', '-'));
+          $v_content = $this->newProseDiffCell($diff, array('=', '+'));
+
+          $u_content = $this->newJupyterCell(null, $u_content, null);
+          $v_content = $this->newJupyterCell(null, $v_content, null);
+
+          $u_content = $this->newCellContainer($u_content);
+          $v_content = $this->newCellContainer($v_content);
+
+          return id(new PhabricatorDocumentEngineBlockDiff())
+            ->setOldContent($u_content)
+            ->addOldClass('old')
+            ->setNewContent($v_content)
+            ->addNewClass('new');
+      }
+    }
+
+    return parent::newBlockDiffViews($uref, $ublock, $vref, $vblock);
+  }
+
+  public function newBlockContentView(
+    PhabricatorDocumentRef $ref,
+    PhabricatorDocumentEngineBlock $block) {
+
+    $viewer = $this->getViewer();
+    $cell = $block->getContent();
+
+    $cell_content = $this->renderJupyterCell($viewer, $cell);
+
+    return $this->newCellContainer($cell_content);
+  }
+
+  private function newCellContainer($cell_content) {
+    $notebook_table = phutil_tag(
+      'table',
+      array(
+        'class' => 'jupyter-notebook',
+      ),
+      $cell_content);
+
+    $container = phutil_tag(
+      'div',
+      array(
+        'class' => 'document-engine-jupyter document-engine-diff',
+      ),
+      $notebook_table);
+
+    return $container;
+  }
+
+  private function newProseDiffCell(PhutilProseDiff $diff, array $mask) {
+    $mask = array_fuse($mask);
+
+    $result = array();
+    foreach ($diff->getParts() as $part) {
+      $type = $part['type'];
+      $text = $part['text'];
+
+      if (!isset($mask[$type])) {
+        continue;
+      }
+
+      switch ($type) {
+        case '-':
+          $result[] = phutil_tag(
+            'span',
+            array(
+              'class' => 'bright',
+            ),
+            $text);
+          break;
+        case '+':
+          $result[] = phutil_tag(
+            'span',
+            array(
+              'class' => 'bright',
+            ),
+            $text);
+          break;
+        case '=':
+          $result[] = $text;
+          break;
+      }
+    }
+
+    return array(
+      null,
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'jupyter-cell-markdown',
+        ),
+        $result),
+    );
+  }
+
   private function newDiffBlocks(PhabricatorDocumentRef $ref) {
     $viewer = $this->getViewer();
     $content = $ref->loadData();
@@ -69,28 +189,15 @@ final class PhabricatorJupyterDocumentEngine
     $idx = 1;
     $blocks = array();
     foreach ($cells as $cell) {
-      $cell_content = $this->renderJupyterCell($viewer, $cell);
-
-      $notebook_table = phutil_tag(
-        'table',
-        array(
-          'class' => 'jupyter-notebook',
-        ),
-        $cell_content);
-
-      $container = phutil_tag(
-        'div',
-        array(
-          'class' => 'document-engine-jupyter document-engine-diff',
-        ),
-        $notebook_table);
-
       // When the cell is a source code line, we can hash just the raw
       // input rather than all the cell metadata.
 
       switch (idx($cell, 'cell_type')) {
         case 'code/line':
           $hash_input = $cell['raw'];
+          break;
+        case 'markdown':
+          $hash_input = implode('', $cell['source']);
           break;
         default:
           $hash_input = serialize($cell);
@@ -104,7 +211,7 @@ final class PhabricatorJupyterDocumentEngine
       $blocks[] = id(new PhabricatorDocumentEngineBlock())
         ->setBlockKey($idx)
         ->setDifferenceHash($hash)
-        ->setContent($container);
+        ->setContent($cell);
 
       $idx++;
     }
@@ -204,6 +311,26 @@ final class PhabricatorJupyterDocumentEngine
     foreach ($cells as $cell) {
       $cell_type = idx($cell, 'cell_type');
 
+      if ($cell_type === 'markdown') {
+        $source = $cell['source'];
+        $source = implode('', $source);
+
+        // Attempt to split contiguous blocks of markdown into smaller
+        // pieces.
+
+        $chunks = preg_split(
+          '/\n\n+/',
+          $source);
+
+        foreach ($chunks as $chunk) {
+          $result = $cell;
+          $result['source'] = array($chunk);
+          $results[] = $result;
+        }
+
+        continue;
+      }
+
       if ($cell_type !== 'code') {
         $results[] = $cell;
         continue;
@@ -261,19 +388,26 @@ final class PhabricatorJupyterDocumentEngine
 
     list($label, $content) = $this->renderJupyterCellContent($viewer, $cell);
 
-    $label_cell = phutil_tag(
-      'td',
-      array(
-        'class' => 'jupyter-label',
-      ),
-      $label);
-
     $classes = null;
     switch (idx($cell, 'cell_type')) {
       case 'code/line':
         $classes = 'jupyter-cell-flush';
         break;
     }
+
+    return $this->newJupyterCell(
+      $label,
+      $content,
+      $classes);
+  }
+
+  private function newJupyterCell($label, $content, $classes) {
+    $label_cell = phutil_tag(
+      'td',
+      array(
+        'class' => 'jupyter-label',
+      ),
+      $label);
 
     $content_cell = phutil_tag(
       'td',

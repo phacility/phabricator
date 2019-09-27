@@ -369,6 +369,15 @@ final class DifferentialChangesetTwoUpRenderer
     $old_changeset_key,
     $new_changeset_key) {
 
+    $engine = $this->getDocumentEngine();
+
+    $old_ref = null;
+    $new_ref = null;
+    $refs = $block_list->getDocumentRefs();
+    if ($refs) {
+      list($old_ref, $new_ref) = $refs;
+    }
+
     $old_comments = $this->getOldComments();
     $new_comments = $this->getNewComments();
 
@@ -392,41 +401,16 @@ final class DifferentialChangesetTwoUpRenderer
 
       if ($old) {
         $old_key = $old->getBlockKey();
-
-        $old_classes = $old->getClasses();
-
-        if ($old->getDifferenceType() === '-') {
-          $old_classes[] = 'old';
-          $old_classes[] = 'old-full';
-        }
-
-        $old_classes[] = 'diff-flush';
-
-        $old_classes = implode(' ', $old_classes);
-
         $is_visible = $old->getIsVisible();
       } else {
         $old_key = null;
-        $old_classes = null;
       }
 
       if ($new) {
         $new_key = $new->getBlockKey();
-        $new_classes = $new->getClasses();
-
-        if ($new->getDifferenceType() === '+') {
-          $new_classes[] = 'new';
-          $new_classes[] = 'new-full';
-        }
-
-        $new_classes[] = 'diff-flush';
-
-        $new_classes = implode(' ', $new_classes);
-
         $is_visible = $new->getIsVisible();
       } else {
         $new_key = null;
-        $new_classes = null;
       }
 
       if (!$is_visible) {
@@ -454,23 +438,53 @@ final class DifferentialChangesetTwoUpRenderer
       }
 
       if ($is_rem && $is_add) {
-        list($old_content, $new_content) = array(
-          $old->newContentView(),
-          $new->newContentView(),
-        );
+        $block_diff = $engine->newBlockDiffViews(
+          $old_ref,
+          $old,
+          $new_ref,
+          $new);
+
+        $old_content = $block_diff->getOldContent();
+        $new_content = $block_diff->getNewContent();
+
+        $old_classes = $block_diff->getOldClasses();
+        $new_classes = $block_diff->getNewClasses();
       } else {
+        $old_classes = array();
+        $new_classes = array();
+
         if ($old) {
-          $old_content = $old->newContentView();
+          $old_content = $engine->newBlockContentView(
+            $old_ref,
+            $old);
+
+          if ($is_rem) {
+            $old_classes[] = 'old';
+            $old_classes[] = 'old-full';
+          }
         } else {
           $old_content = null;
         }
 
         if ($new) {
-          $new_content = $new->newContentView();
+          $new_content = $engine->newBlockContentView(
+            $new_ref,
+            $new);
+
+          if ($is_add) {
+            $new_classes[] = 'new';
+            $new_classes[] = 'new-full';
+          }
         } else {
           $new_content = null;
         }
       }
+
+      $old_classes[] = 'diff-flush';
+      $old_classes = implode(' ', $old_classes);
+
+      $new_classes[] = 'diff-flush';
+      $new_classes = implode(' ', $new_classes);
 
       $old_inline_rows = array();
       if ($old_key !== null) {
