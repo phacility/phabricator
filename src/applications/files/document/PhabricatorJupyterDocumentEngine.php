@@ -41,16 +41,23 @@ final class PhabricatorJupyterDocumentEngine
     return true;
   }
 
-  public function newDiffView(
+  public function newEngineBlocks(
     PhabricatorDocumentRef $uref,
     PhabricatorDocumentRef $vref) {
 
-    $u_blocks = $this->newDiffBlocks($uref);
-    $v_blocks = $this->newDiffBlocks($vref);
+    $blocks = new PhabricatorDocumentEngineBlocks();
 
-    return id(new PhabricatorDocumentEngineBlocks())
-      ->addBlockList($uref, $u_blocks)
-      ->addBlockList($vref, $v_blocks);
+    try {
+      $u_blocks = $this->newDiffBlocks($uref);
+      $v_blocks = $this->newDiffBlocks($vref);
+
+      $blocks->addBlockList($uref, $u_blocks);
+      $blocks->addBlockList($vref, $v_blocks);
+    } catch (Exception $ex) {
+      $blocks->addMessage($ex->getMessage());
+    }
+
+    return $blocks;
   }
 
   private function newDiffBlocks(PhabricatorDocumentRef $ref) {

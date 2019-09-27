@@ -27,7 +27,7 @@ final class PhabricatorImageDocumentEngine
     return ($uref->getFile() && $vref->getFile());
   }
 
-  public function newDiffView(
+  public function newEngineBlocks(
     PhabricatorDocumentRef $uref,
     PhabricatorDocumentRef $vref) {
 

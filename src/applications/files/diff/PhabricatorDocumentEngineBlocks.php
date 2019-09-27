@@ -4,6 +4,16 @@ final class PhabricatorDocumentEngineBlocks
   extends Phobject {
 
   private $lists = array();
+  private $messages = array();
+
+  public function addMessage($message) {
+    $this->messages[] = $message;
+    return $this;
+  }
+
+  public function getMessages() {
+    return $this->messages;
+  }
 
   public function addBlockList(PhabricatorDocumentRef $ref, array $blocks) {
     assert_instances_of($blocks, 'PhabricatorDocumentEngineBlock');
@@ -19,6 +29,10 @@ final class PhabricatorDocumentEngineBlocks
   public function newTwoUpLayout() {
     $rows = array();
     $lists = $this->lists;
+
+    if (count($lists) != 2) {
+      return array();
+    }
 
     $specs = array();
     foreach ($this->lists as $list) {

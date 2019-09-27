@@ -37,7 +37,7 @@ abstract class PhabricatorDocumentEngine
     return false;
   }
 
-  public function newDiffView(
+  public function newEngineBlocks(
     PhabricatorDocumentRef $uref,
     PhabricatorDocumentRef $vref) {
     throw new PhutilMethodNotImplementedException();

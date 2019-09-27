@@ -868,8 +868,11 @@ final class DifferentialChangesetParser extends Phobject {
       ->setHighlightingDisabled($this->highlightingDisabled)
       ->setDepthOnlyLines($this->getDepthOnlyLines());
 
+    $engine_blocks = $this->newDocumentEngineBlocks();
+    $has_document_engine = ($engine_blocks !== null);
+
     $shield = null;
-    if ($this->isTopLevel && !$this->comments) {
+    if ($this->isTopLevel && !$this->comments && !$has_document_engine) {
       if ($this->isGenerated()) {
         $shield = $renderer->renderShield(
           pht(
@@ -1024,7 +1027,6 @@ final class DifferentialChangesetParser extends Phobject {
       ->setOldComments($old_comments)
       ->setNewComments($new_comments);
 
-    $engine_blocks = $this->newDocumentEngineChangesetView();
     if ($engine_blocks !== null) {
       $reference = $this->getRenderingReference();
       $parts = explode('/', $reference);
@@ -1040,6 +1042,8 @@ final class DifferentialChangesetParser extends Phobject {
       if (!$vs) {
         $vs = $id;
       }
+
+      $renderer->setDocumentEngineBlocks($engine_blocks);
 
       return $renderer->renderDocumentEngineBlocks(
         $engine_blocks,
@@ -1653,7 +1657,7 @@ final class DifferentialChangesetParser extends Phobject {
     return $prefix.$line;
   }
 
-  private function newDocumentEngineChangesetView() {
+  private function newDocumentEngineBlocks() {
     $changeset = $this->changeset;
     $viewer = $this->getViewer();
 
@@ -1724,7 +1728,7 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     if ($document_engine) {
-      return $document_engine->newDiffView(
+      return $document_engine->newEngineBlocks(
         $old_ref,
         $new_ref);
     }

@@ -35,6 +35,7 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   private $highlightingDisabled;
   private $scopeEngine = false;
   private $depthOnlyLines;
+  private $documentEngineBlocks;
 
   private $oldFile = false;
   private $newFile = false;
@@ -239,6 +240,16 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     return $this->oldChangesetID;
   }
 
+  public function setDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $blocks) {
+    $this->documentEngineBlocks = $blocks;
+    return $this;
+  }
+
+  public function getDocumentEngineBlocks() {
+    return $this->documentEngineBlocks;
+  }
+
   public function setNewComments(array $new_comments) {
     foreach ($new_comments as $line_number => $comments) {
       assert_instances_of($comments, 'PhabricatorInlineCommentInterface');
@@ -355,6 +366,16 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     $notice = null;
     if ($this->getIsTopLevel()) {
       $force = (!$content && !$props);
+
+      // If we have DocumentEngine messages about the blocks, assume they
+      // explain why there's no content.
+      $blocks = $this->getDocumentEngineBlocks();
+      if ($blocks) {
+        if ($blocks->getMessages()) {
+          $force = false;
+        }
+      }
+
       $notice = $this->renderChangeTypeHeader($force);
     }
 
