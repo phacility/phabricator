@@ -315,6 +315,16 @@ div.phui-property-list-stacked .phui-property-list-properties
   border-width: 0 1px;
 }
 
+td.new .jupyter-cell-code-line {
+  background: {$new-background};
+  border-color: {$new-bright};
+}
+
+td.old .jupyter-cell-code-line {
+  background: {$old-background};
+  border-color: {$old-bright};
+}
+
 .jupyter-cell-code-head {
   border-top-width: 1px;
   margin-top: 4px;
@@ -363,4 +373,8 @@ div.phui-property-list-stacked .phui-property-list-properties
 
 .jupyter-output-html {
   background: {$sh-indigobackground};
+}
+
+.jupyter-cell-markdown {
+  white-space: pre-wrap;
 }

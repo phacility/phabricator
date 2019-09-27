@@ -8,6 +8,7 @@ final class PhabricatorDocumentEngineBlock
   private $classes = array();
   private $differenceHash;
   private $differenceType;
+  private $isVisible;
 
   public function setContent($content) {
     $this->content = $content;
@@ -56,6 +57,15 @@ final class PhabricatorDocumentEngineBlock
 
   public function getDifferenceType() {
     return $this->differenceType;
+  }
+
+  public function setIsVisible($is_visible) {
+    $this->isVisible = $is_visible;
+    return $this;
+  }
+
+  public function getIsVisible() {
+    return $this->isVisible;
   }
 
 }

@@ -372,12 +372,25 @@ final class DifferentialChangesetTwoUpRenderer
     $old_comments = $this->getOldComments();
     $new_comments = $this->getNewComments();
 
+    $gap_view = javelin_tag(
+      'tr',
+      array(
+        'sigil' => 'context-target',
+      ),
+      phutil_tag(
+        'td',
+        array(
+          'colspan' => 6,
+          'class' => 'show-more',
+        ),
+        pht("\xE2\x80\xA2 \xE2\x80\xA2 \xE2\x80\xA2")));
+
     $rows = array();
+    $in_gap = false;
     foreach ($block_list->newTwoUpLayout() as $row) {
       list($old, $new) = $row;
 
       if ($old) {
-        $old_content = $old->newContentView();
         $old_key = $old->getBlockKey();
 
         $old_classes = $old->getClasses();
@@ -390,14 +403,14 @@ final class DifferentialChangesetTwoUpRenderer
         $old_classes[] = 'diff-flush';
 
         $old_classes = implode(' ', $old_classes);
+
+        $is_visible = $old->getIsVisible();
       } else {
-        $old_content = null;
         $old_key = null;
         $old_classes = null;
       }
 
       if ($new) {
-        $new_content = $new->newContentView();
         $new_key = $new->getBlockKey();
         $new_classes = $new->getClasses();
 
@@ -409,10 +422,54 @@ final class DifferentialChangesetTwoUpRenderer
         $new_classes[] = 'diff-flush';
 
         $new_classes = implode(' ', $new_classes);
+
+        $is_visible = $new->getIsVisible();
       } else {
-        $new_content = null;
         $new_key = null;
         $new_classes = null;
+      }
+
+      if (!$is_visible) {
+        if (!$in_gap) {
+          $in_gap = true;
+          $rows[] = $gap_view;
+        }
+        continue;
+      }
+
+      if ($in_gap) {
+        $in_gap = false;
+      }
+
+      if ($old) {
+        $is_rem = ($old->getDifferenceType() === '-');
+      } else {
+        $is_rem = false;
+      }
+
+      if ($new) {
+        $is_add = ($new->getDifferenceType() === '+');
+      } else {
+        $is_add = false;
+      }
+
+      if ($is_rem && $is_add) {
+        list($old_content, $new_content) = array(
+          $old->newContentView(),
+          $new->newContentView(),
+        );
+      } else {
+        if ($old) {
+          $old_content = $old->newContentView();
+        } else {
+          $old_content = null;
+        }
+
+        if ($new) {
+          $new_content = $new->newContentView();
+        } else {
+          $new_content = null;
+        }
       }
 
       $old_inline_rows = array();

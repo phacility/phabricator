@@ -247,7 +247,7 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->depthOnlyLines;
   }
 
-  public function setVisibileLinesMask(array $mask) {
+  public function setVisibleLinesMask(array $mask) {
     $this->visible = $mask;
     return $this;
   }
@@ -699,13 +699,13 @@ final class DifferentialChangesetParser extends Phobject {
     $lines_context = $this->getLinesOfContext();
 
     $hunk_parser->generateIntraLineDiffs();
-    $hunk_parser->generateVisibileLinesMask($lines_context);
+    $hunk_parser->generateVisibleLinesMask($lines_context);
 
     $this->setOldLines($hunk_parser->getOldLines());
     $this->setNewLines($hunk_parser->getNewLines());
     $this->setIntraLineDiffs($hunk_parser->getIntraLineDiffs());
     $this->setDepthOnlyLines($hunk_parser->getDepthOnlyLines());
-    $this->setVisibileLinesMask($hunk_parser->getVisibleLinesMask());
+    $this->setVisibleLinesMask($hunk_parser->getVisibleLinesMask());
     $this->hunkStartLines = $hunk_parser->getHunkStartLines(
       $changeset->getHunks());
 

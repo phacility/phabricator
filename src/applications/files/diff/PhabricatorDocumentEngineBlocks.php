@@ -52,6 +52,9 @@ final class PhabricatorDocumentEngineBlocks
       ->parseHunksForLineData($changeset->getHunks())
       ->reparseHunksForSpecialAttributes();
 
+    $hunk_parser->generateVisibleLinesMask(2);
+    $mask = $hunk_parser->getVisibleLinesMask();
+
     $old_lines = $hunk_parser->getOldLines();
     $new_lines = $hunk_parser->getNewLines();
 
@@ -62,6 +65,15 @@ final class PhabricatorDocumentEngineBlocks
       $old_line = idx($old_lines, $ii);
       $new_line = idx($new_lines, $ii);
 
+      $is_visible = !empty($mask[$ii + 1]);
+
+      // TODO: There's currently a bug where one-line files get incorrectly
+      // masked. This causes images to completely fail to render. Just ignore
+      // the mask if it came back empty.
+      if (!$mask) {
+        $is_visible = true;
+      }
+
       if ($old_line) {
         $old_hash = rtrim($old_line['text'], "\n");
         if (!strlen($old_hash)) {
@@ -69,7 +81,9 @@ final class PhabricatorDocumentEngineBlocks
           $old_block = null;
         } else {
           $old_block = array_shift($old_map[$old_hash]);
-          $old_block->setDifferenceType($old_line['type']);
+          $old_block
+            ->setDifferenceType($old_line['type'])
+            ->setIsVisible($is_visible);
         }
       } else {
         $old_block = null;
@@ -81,7 +95,9 @@ final class PhabricatorDocumentEngineBlocks
           $new_block = null;
         } else {
           $new_block = array_shift($new_map[$new_hash]);
-          $new_block->setDifferenceType($new_line['type']);
+          $new_block
+            ->setDifferenceType($new_line['type'])
+            ->setIsVisible($is_visible);
         }
       } else {
         $new_block = null;

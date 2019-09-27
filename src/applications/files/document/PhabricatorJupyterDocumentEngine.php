@@ -307,7 +307,8 @@ final class PhabricatorJupyterDocumentEngine
         return $this->newCodeOutputCell($cell);
     }
 
-    return $this->newRawCell(id(new PhutilJSON())->encodeFormatted($cell));
+    return $this->newRawCell(id(new PhutilJSON())
+      ->encodeFormatted($cell));
   }
 
   private function newRawCell($content) {
@@ -328,8 +329,9 @@ final class PhabricatorJupyterDocumentEngine
       $content = array();
     }
 
-    $content = implode('', $content);
-    $content = phutil_escape_html_newlines($content);
+    // TODO: This should ideally highlight as Markdown, but the "md"
+    // highlighter in Pygments is painfully slow and not terribly useful.
+    $content = $this->highlightLines($content, 'txt');
 
     return array(
       null,
@@ -514,15 +516,20 @@ final class PhabricatorJupyterDocumentEngine
     return $label;
   }
 
-  private function highlightLines(array $lines) {
-    $head = head($lines);
-    $matches = null;
-    if (preg_match('/^%%(.*)$/', $head, $matches)) {
-      $restore = array_shift($lines);
-      $lang = $matches[1];
+  private function highlightLines(array $lines, $force_language = null) {
+    if ($force_language === null) {
+      $head = head($lines);
+      $matches = null;
+      if (preg_match('/^%%(.*)$/', $head, $matches)) {
+        $restore = array_shift($lines);
+        $lang = $matches[1];
+      } else {
+        $restore = null;
+        $lang = 'py';
+      }
     } else {
       $restore = null;
-      $lang = 'py';
+      $lang = $force_language;
     }
 
     $content = PhabricatorSyntaxHighlighter::highlightWithLanguage(
