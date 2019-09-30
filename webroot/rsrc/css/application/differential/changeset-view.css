@@ -63,6 +63,11 @@
   padding: 1px 8px;
 }
 
+.differential-diff td.diff-flush {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .device .differential-diff td {
   padding: 1px 4px;
 }
@@ -282,16 +287,14 @@ td.cov-I {
   font-weight: bold;
 }
 
-.differential-diff .differential-image-diff {
+.differential-diff td.diff-image-cell {
+  background-color: transparent;
   background-image: url(/rsrc/image/checker_light.png);
-}
-
-.differential-diff .differential-image-diff:hover {
-  background-image: url(/rsrc/image/checker_dark.png);
-}
-
-.differential-diff .differential-image-diff td {
   padding: 8px;
+}
+
+.device-desktop .differential-diff .diff-image-cell:hover {
+  background-image: url(/rsrc/image/checker_dark.png);
 }
 
 .differential-image-stage {

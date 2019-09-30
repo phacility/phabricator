@@ -364,76 +364,220 @@ final class DifferentialChangesetTwoUpRenderer
     return $this->wrapChangeInTable(phutil_implode_html('', $html));
   }
 
-  public function renderFileChange(
-    $old_file = null,
-    $new_file = null,
-    $id = 0,
-    $vs = 0) {
+  public function renderDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $block_list,
+    $old_changeset_key,
+    $new_changeset_key) {
 
-    $old = null;
-    if ($old_file) {
-      $old = $this->renderImageStage($old_file);
+    $engine = $this->getDocumentEngine();
+
+    $old_ref = null;
+    $new_ref = null;
+    $refs = $block_list->getDocumentRefs();
+    if ($refs) {
+      list($old_ref, $new_ref) = $refs;
     }
 
-    $new = null;
-    if ($new_file) {
-      $new = $this->renderImageStage($new_file);
-    }
+    $old_comments = $this->getOldComments();
+    $new_comments = $this->getNewComments();
 
-    // If we don't have an explicit "vs" changeset, it's the left side of the
-    // "id" changeset.
-    if (!$vs) {
-      $vs = $id;
-    }
+    $gap_view = javelin_tag(
+      'tr',
+      array(
+        'sigil' => 'context-target',
+      ),
+      phutil_tag(
+        'td',
+        array(
+          'colspan' => 6,
+          'class' => 'show-more',
+        ),
+        pht("\xE2\x80\xA2 \xE2\x80\xA2 \xE2\x80\xA2")));
 
-    $html_old = array();
-    $html_new = array();
-    foreach ($this->getOldComments() as $on_line => $comment_group) {
-      foreach ($comment_group as $comment) {
-        $inline = $this->buildInlineComment(
-          $comment,
-          $on_right = false);
-        $html_old[] = $this->getRowScaffoldForInline($inline);
+    $rows = array();
+    $in_gap = false;
+    foreach ($block_list->newTwoUpLayout() as $row) {
+      list($old, $new) = $row;
+
+      if ($old) {
+        $old_key = $old->getBlockKey();
+        $is_visible = $old->getIsVisible();
+      } else {
+        $old_key = null;
       }
-    }
-    foreach ($this->getNewComments() as $lin_line => $comment_group) {
-      foreach ($comment_group as $comment) {
-        $inline = $this->buildInlineComment(
-          $comment,
-          $on_right = true);
-        $html_new[] = $this->getRowScaffoldForInline($inline);
+
+      if ($new) {
+        $new_key = $new->getBlockKey();
+        $is_visible = $new->getIsVisible();
+      } else {
+        $new_key = null;
       }
+
+      if (!$is_visible) {
+        if (!$in_gap) {
+          $in_gap = true;
+          $rows[] = $gap_view;
+        }
+        continue;
+      }
+
+      if ($in_gap) {
+        $in_gap = false;
+      }
+
+      if ($old) {
+        $is_rem = ($old->getDifferenceType() === '-');
+      } else {
+        $is_rem = false;
+      }
+
+      if ($new) {
+        $is_add = ($new->getDifferenceType() === '+');
+      } else {
+        $is_add = false;
+      }
+
+      if ($is_rem && $is_add) {
+        $block_diff = $engine->newBlockDiffViews(
+          $old_ref,
+          $old,
+          $new_ref,
+          $new);
+
+        $old_content = $block_diff->getOldContent();
+        $new_content = $block_diff->getNewContent();
+
+        $old_classes = $block_diff->getOldClasses();
+        $new_classes = $block_diff->getNewClasses();
+      } else {
+        $old_classes = array();
+        $new_classes = array();
+
+        if ($old) {
+          $old_content = $engine->newBlockContentView(
+            $old_ref,
+            $old);
+
+          if ($is_rem) {
+            $old_classes[] = 'old';
+            $old_classes[] = 'old-full';
+          }
+        } else {
+          $old_content = null;
+        }
+
+        if ($new) {
+          $new_content = $engine->newBlockContentView(
+            $new_ref,
+            $new);
+
+          if ($is_add) {
+            $new_classes[] = 'new';
+            $new_classes[] = 'new-full';
+          }
+        } else {
+          $new_content = null;
+        }
+      }
+
+      $old_classes[] = 'diff-flush';
+      $old_classes = implode(' ', $old_classes);
+
+      $new_classes[] = 'diff-flush';
+      $new_classes = implode(' ', $new_classes);
+
+      $old_inline_rows = array();
+      if ($old_key !== null) {
+        $old_inlines = idx($old_comments, $old_key, array());
+        foreach ($old_inlines as $inline) {
+          $inline = $this->buildInlineComment(
+            $inline,
+            $on_right = false);
+          $old_inline_rows[] = $this->getRowScaffoldForInline($inline);
+        }
+      }
+
+      $new_inline_rows = array();
+      if ($new_key !== null) {
+        $new_inlines = idx($new_comments, $new_key, array());
+        foreach ($new_inlines as $inline) {
+          $inline = $this->buildInlineComment(
+            $inline,
+            $on_right = true);
+          $new_inline_rows[] = $this->getRowScaffoldForInline($inline);
+        }
+      }
+
+      if ($old_content === null) {
+        $old_id = null;
+      } else {
+        $old_id = "C{$old_changeset_key}OL{$old_key}";
+      }
+
+      $old_line_cell = phutil_tag(
+        'td',
+        array(
+          'id' => $old_id,
+          'data-n' => $old_key,
+          'class' => 'n',
+        ));
+
+      $old_content_cell = phutil_tag(
+        'td',
+        array(
+          'class' => $old_classes,
+          'data-copy-mode' => 'copy-l',
+        ),
+        $old_content);
+
+      if ($new_content === null) {
+        $new_id = null;
+      } else {
+        $new_id = "C{$new_changeset_key}NL{$new_key}";
+      }
+
+      $new_line_cell = phutil_tag(
+        'td',
+        array(
+          'id' => $new_id,
+          'data-n' => $new_key,
+          'class' => 'n',
+        ));
+
+      $copy_gutter = phutil_tag(
+        'td',
+        array(
+          'class' => 'copy',
+        ));
+
+      $new_content_cell = phutil_tag(
+        'td',
+        array(
+          'class' => $new_classes,
+          'colspan' => '2',
+          'data-copy-mode' => 'copy-r',
+        ),
+        $new_content);
+
+      $row_view = phutil_tag(
+        'tr',
+        array(),
+        array(
+          $old_line_cell,
+          $old_content_cell,
+          $new_line_cell,
+          $copy_gutter,
+          $new_content_cell,
+        ));
+
+      $rows[] = array(
+        $row_view,
+        $old_inline_rows,
+        $new_inline_rows,
+      );
     }
 
-    if (!$old) {
-      $th_old = phutil_tag('th', array());
-    } else {
-      $th_old = phutil_tag('th', array('id' => "C{$vs}OL1"), 1);
-    }
-
-    if (!$new) {
-      $th_new = phutil_tag('th', array());
-    } else {
-      $th_new = phutil_tag('th', array('id' => "C{$id}NL1"), 1);
-    }
-
-    $output = hsprintf(
-      '<tr class="differential-image-diff">'.
-        '%s'.
-        '<td class="differential-old-image">%s</td>'.
-        '%s'.
-        '<td class="differential-new-image" colspan="3">%s</td>'.
-      '</tr>'.
-      '%s'.
-      '%s',
-      $th_old,
-      $old,
-      $th_new,
-      $new,
-      phutil_implode_html('', $html_old),
-      phutil_implode_html('', $html_new));
-
-    $output = $this->wrapChangeInTable($output);
+    $output = $this->wrapChangeInTable($rows);
 
     return $this->renderChangesetTable($output);
   }

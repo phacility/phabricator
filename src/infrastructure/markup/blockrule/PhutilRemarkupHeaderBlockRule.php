@@ -73,24 +73,7 @@ final class PhutilRemarkupHeaderBlockRule extends PhutilRemarkupBlockRule {
   }
 
   private function generateAnchor($level, $text) {
-    $anchor = strtolower($text);
-    $anchor = preg_replace('/[^a-z0-9]/', '-', $anchor);
-    $anchor = preg_replace('/--+/', '-', $anchor);
-    $anchor = trim($anchor, '-');
-    $anchor = substr($anchor, 0, 24);
-    $anchor = trim($anchor, '-');
-    $base = $anchor;
-
-    $key = self::KEY_HEADER_TOC;
     $engine = $this->getEngine();
-    $anchors = $engine->getTextMetadata($key, array());
-
-    $suffix = 1;
-    while (!strlen($anchor) || isset($anchors[$anchor])) {
-      $anchor = $base.'-'.$suffix;
-      $anchor = trim($anchor, '-');
-      $suffix++;
-    }
 
     // When a document contains a link inside a header, like this:
     //
@@ -100,12 +83,30 @@ final class PhutilRemarkupHeaderBlockRule extends PhutilRemarkupBlockRule {
     // header itself. We push the 'toc' state so all the link rules generate
     // just names.
     $engine->pushState('toc');
-      $text = $this->applyRules($text);
-      $text = $engine->restoreText($text);
-
-      $anchors[$anchor] = array($level, $text);
+      $plain_text = $text;
+      $plain_text = $this->applyRules($plain_text);
+      $plain_text = $engine->restoreText($plain_text);
     $engine->popState('toc');
 
+    $anchor = self::getAnchorNameFromHeaderText($plain_text);
+
+    if (!strlen($anchor)) {
+      return null;
+    }
+
+    $base = $anchor;
+
+    $key = self::KEY_HEADER_TOC;
+    $anchors = $engine->getTextMetadata($key, array());
+
+    $suffix = 1;
+    while (isset($anchors[$anchor])) {
+      $anchor = $base.'-'.$suffix;
+      $anchor = trim($anchor, '-');
+      $suffix++;
+    }
+
+    $anchors[$anchor] = array($level, $plain_text);
     $engine->setTextMetadata($key, $anchors);
 
     return phutil_tag(
@@ -157,6 +158,28 @@ final class PhutilRemarkupHeaderBlockRule extends PhutilRemarkupBlockRule {
     }
 
     return phutil_implode_html("\n", $toc);
+  }
+
+  public static function getAnchorNameFromHeaderText($text) {
+    $anchor = phutil_utf8_strtolower($text);
+    $anchor = PhutilRemarkupAnchorRule::normalizeAnchor($anchor);
+
+    // Truncate the fragment to something reasonable.
+    $anchor = id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(32)
+      ->setTerminator('')
+      ->truncateString($anchor);
+
+    // If the fragment is terminated by a word which "The U.S. Government
+    // Printing Office Style Manual" normally discourages capitalizing in
+    // titles, discard it. This is an arbitrary heuristic intended to avoid
+    // awkward hanging words in anchors.
+    $anchor = preg_replace(
+      '/-(a|an|the|at|by|for|in|of|on|per|to|up|and|as|but|if|or|nor)\z/',
+      '',
+      $anchor);
+
+    return $anchor;
   }
 
 }

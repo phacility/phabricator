@@ -268,6 +268,10 @@ div.phui-property-list-stacked .phui-property-list-properties
   margin: 20px;
 }
 
+.document-engine-jupyter.document-engine-diff {
+  margin: 0;
+}
+
 .document-engine-in-flight {
   opacity: 0.25;
 }
@@ -294,22 +298,66 @@ div.phui-property-list-stacked .phui-property-list-properties
 
 .jupyter-cell-code {
   white-space: pre-wrap;
+  word-break: break-word;
   background: {$lightgreybackground};
-  padding: 8px;
-  border: 1px solid {$lightgreyborder};
   border-radius: 2px;
+  border-color: {$lightgreyborder};
+  border-style: solid;
 }
 
-.jupyter-notebook > tbody > tr > th,
+.jupyter-cell-code-block {
+  padding: 8px;
+  border-width: 1px;
+}
+
+.jupyter-cell-code-line {
+  padding: 2px 8px;
+  border-width: 0 1px;
+}
+
+td.new .jupyter-cell-code-line {
+  background: {$new-background};
+  border-color: {$new-bright};
+}
+
+td.old .jupyter-cell-code-line {
+  background: {$old-background};
+  border-color: {$old-bright};
+}
+
+.jupyter-cell-code-head {
+  border-top-width: 1px;
+  margin-top: 4px;
+  padding-top: 8px;
+}
+
+.jupyter-cell-code-last {
+  border-bottom-width: 1px;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+}
+
 .jupyter-notebook > tbody > tr > td {
   padding: 8px;
 }
 
-.jupyter-notebook > tbody > tr > th {
+.jupyter-notebook > tbody > tr > td.jupyter-cell-flush {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.jupyter-notebook,
+.jupyter-notebook > tbody > tr > td {
+  width: 100%;
+}
+
+.jupyter-notebook > tbody > tr > td.jupyter-label {
   white-space: nowrap;
   text-align: right;
-  min-width: 48px;
+  min-width: 56px;
   font-weight: bold;
+  width: auto;
+  padding: 8px 8px 0;
 }
 
 .jupyter-output {
@@ -325,4 +373,8 @@ div.phui-property-list-stacked .phui-property-list-properties
 
 .jupyter-output-html {
   background: {$sh-indigobackground};
+}
+
+.jupyter-cell-markdown {
+  white-space: pre-wrap;
 }

@@ -18,6 +18,10 @@ final class PhutilRemarkupBoldRule extends PhutilRemarkupRule {
   }
 
   protected function applyCallback(array $matches) {
+    if ($this->getEngine()->isAnchorMode()) {
+      return $matches[1];
+    }
+
     return hsprintf('<strong>%s</strong>', $matches[1]);
   }
 

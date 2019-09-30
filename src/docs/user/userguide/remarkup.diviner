@@ -715,6 +715,18 @@ Press {key down down-right right LP} to activate the hadoken technique.
 > Press {key down down-right right LP} to activate the hadoken technique.
 
 
+Anchors
+========
+
+You can use `{anchor #xyz}` to create a document anchor and later link to
+it directly with `#xyz` in the URI.
+
+Headers also automatically create named anchors.
+
+If you navigate to `#xyz` in your browser location bar, the page will scroll
+to the first anchor with "xyz" as a prefix of the anchor name.
+
+
 = Fullscreen Mode =
 
 Remarkup editors provide a fullscreen composition mode. This can make it easier

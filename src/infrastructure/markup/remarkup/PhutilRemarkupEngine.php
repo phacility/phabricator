@@ -34,6 +34,10 @@ final class PhutilRemarkupEngine extends PhutilMarkupEngine {
     return $this->mode & self::MODE_TEXT;
   }
 
+  public function isAnchorMode() {
+    return $this->getState('toc');
+  }
+
   public function isHTMLMailMode() {
     return $this->mode & self::MODE_HTML_MAIL;
   }

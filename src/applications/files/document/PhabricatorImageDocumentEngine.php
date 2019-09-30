@@ -17,6 +17,71 @@ final class PhabricatorImageDocumentEngine
     return (1024 * 1024 * 64);
   }
 
+  public function canDiffDocuments(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+
+    // For now, we can only render a rich image diff if both documents have
+    // their data stored in Files already.
+
+    return ($uref->getFile() && $vref->getFile());
+  }
+
+  public function newEngineBlocks(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+
+    $u_blocks = $this->newDiffBlocks($uref);
+    $v_blocks = $this->newDiffBlocks($vref);
+
+    return id(new PhabricatorDocumentEngineBlocks())
+      ->addBlockList($uref, $u_blocks)
+      ->addBlockList($vref, $v_blocks);
+  }
+
+  public function newBlockDiffViews(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentEngineBlock $ublock,
+    PhabricatorDocumentRef $vref,
+    PhabricatorDocumentEngineBlock $vblock) {
+
+    $u_content = $this->newBlockContentView($uref, $ublock);
+    $v_content = $this->newBlockContentView($vref, $vblock);
+
+    return id(new PhabricatorDocumentEngineBlockDiff())
+      ->setOldContent($u_content)
+      ->addOldClass('diff-image-cell')
+      ->setNewContent($v_content)
+      ->addNewClass('diff-image-cell');
+  }
+
+
+  private function newDiffBlocks(PhabricatorDocumentRef $ref) {
+    $blocks = array();
+
+    $file = $ref->getFile();
+
+    $image_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'differential-image-stage',
+      ),
+      phutil_tag(
+        'img',
+        array(
+          'src' => $file->getBestURI(),
+        )));
+
+    $hash = $file->getContentHash();
+
+    $blocks[] = id(new PhabricatorDocumentEngineBlock())
+      ->setBlockKey('1')
+      ->setDifferenceHash($hash)
+      ->setContent($image_view);
+
+    return $blocks;
+  }
+
   protected function canRenderDocumentType(PhabricatorDocumentRef $ref) {
     $file = $ref->getFile();
     if ($file) {

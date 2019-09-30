@@ -22,7 +22,8 @@ final class BulkTokenizerParameterType
     $template = new AphrontTokenizerTemplateView();
     $template_markup = $template->render();
 
-    $datasource = $this->getDatasource();
+    $datasource = $this->getDatasource()
+      ->setViewer($this->getViewer());
 
     return array(
       'markup' => (string)hsprintf('%s', $template_markup),

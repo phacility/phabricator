@@ -36,7 +36,7 @@ final class DifferentialHunkParser extends Phobject {
   }
   public function getVisibleLinesMask() {
     if ($this->visibleLinesMask === null) {
-      throw new PhutilInvalidStateException('generateVisibileLinesMask');
+      throw new PhutilInvalidStateException('generateVisibleLinesMask');
     }
     return $this->visibleLinesMask;
   }
@@ -354,7 +354,7 @@ final class DifferentialHunkParser extends Phobject {
     return $this;
   }
 
-  public function generateVisibileLinesMask($lines_context) {
+  public function generateVisibleLinesMask($lines_context) {
     $old = $this->getOldLines();
     $new = $this->getNewLines();
     $max_length = max(count($old), count($new));

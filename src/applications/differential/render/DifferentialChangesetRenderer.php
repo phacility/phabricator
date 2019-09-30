@@ -36,6 +36,9 @@ abstract class DifferentialChangesetRenderer extends Phobject {
   private $scopeEngine = false;
   private $depthOnlyLines;
 
+  private $documentEngine;
+  private $documentEngineBlocks;
+
   private $oldFile = false;
   private $newFile = false;
 
@@ -239,6 +242,25 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     return $this->oldChangesetID;
   }
 
+  public function setDocumentEngine(PhabricatorDocumentEngine $engine) {
+    $this->documentEngine = $engine;
+    return $this;
+  }
+
+  public function getDocumentEngine() {
+    return $this->documentEngine;
+  }
+
+  public function setDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $blocks) {
+    $this->documentEngineBlocks = $blocks;
+    return $this;
+  }
+
+  public function getDocumentEngineBlocks() {
+    return $this->documentEngineBlocks;
+  }
+
   public function setNewComments(array $new_comments) {
     foreach ($new_comments as $line_number => $comments) {
       assert_instances_of($comments, 'PhabricatorInlineCommentInterface');
@@ -355,6 +377,16 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     $notice = null;
     if ($this->getIsTopLevel()) {
       $force = (!$content && !$props);
+
+      // If we have DocumentEngine messages about the blocks, assume they
+      // explain why there's no content.
+      $blocks = $this->getDocumentEngineBlocks();
+      if ($blocks) {
+        if ($blocks->getMessages()) {
+          $force = false;
+        }
+      }
+
       $notice = $this->renderChangeTypeHeader($force);
     }
 
@@ -378,11 +410,13 @@ abstract class DifferentialChangesetRenderer extends Phobject {
     $range_start,
     $range_len,
     $rows);
-  abstract public function renderFileChange(
-    $old = null,
-    $new = null,
-    $id = 0,
-    $vs = 0);
+
+  public function renderDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $blocks,
+    $old_changeset_key,
+    $new_changeset_key) {
+    return null;
+  }
 
   abstract protected function renderChangeTypeHeader($force);
   abstract protected function renderUndershieldHeader();

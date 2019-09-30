@@ -58,6 +58,8 @@ final class DifferentialChangesetParser extends Phobject {
   private $linesOfContext = 8;
 
   private $highlightEngine;
+  private $viewer;
+  private $documentEngineKey;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;
@@ -149,6 +151,24 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->offsetMode;
   }
 
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
+
+  public function setDocumentEngineKey($document_engine_key) {
+    $this->documentEngineKey = $document_engine_key;
+    return $this;
+  }
+
+  public function getDocumentEngineKey() {
+    return $this->documentEngineKey;
+  }
+
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
     $is_unified = $viewer->compareUserSetting(
       PhabricatorUnifiedDiffsSetting::SETTINGKEY,
@@ -164,6 +184,7 @@ final class DifferentialChangesetParser extends Phobject {
   public function readParametersFromRequest(AphrontRequest $request) {
     $this->setCharacterEncoding($request->getStr('encoding'));
     $this->setHighlightAs($request->getStr('highlight'));
+    $this->setDocumentEngineKey($request->getStr('engine'));
 
     $renderer = null;
 
@@ -226,7 +247,7 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->depthOnlyLines;
   }
 
-  public function setVisibileLinesMask(array $mask) {
+  public function setVisibleLinesMask(array $mask) {
     $this->visible = $mask;
     return $this;
   }
@@ -678,13 +699,13 @@ final class DifferentialChangesetParser extends Phobject {
     $lines_context = $this->getLinesOfContext();
 
     $hunk_parser->generateIntraLineDiffs();
-    $hunk_parser->generateVisibileLinesMask($lines_context);
+    $hunk_parser->generateVisibleLinesMask($lines_context);
 
     $this->setOldLines($hunk_parser->getOldLines());
     $this->setNewLines($hunk_parser->getNewLines());
     $this->setIntraLineDiffs($hunk_parser->getIntraLineDiffs());
     $this->setDepthOnlyLines($hunk_parser->getDepthOnlyLines());
-    $this->setVisibileLinesMask($hunk_parser->getVisibleLinesMask());
+    $this->setVisibleLinesMask($hunk_parser->getVisibleLinesMask());
     $this->hunkStartLines = $hunk_parser->getHunkStartLines(
       $changeset->getHunks());
 
@@ -847,8 +868,19 @@ final class DifferentialChangesetParser extends Phobject {
       ->setHighlightingDisabled($this->highlightingDisabled)
       ->setDepthOnlyLines($this->getDepthOnlyLines());
 
+    list($engine, $old_ref, $new_ref) = $this->newDocumentEngine();
+    if ($engine) {
+      $engine_blocks = $engine->newEngineBlocks(
+        $old_ref,
+        $new_ref);
+    } else {
+      $engine_blocks = null;
+    }
+
+    $has_document_engine = ($engine_blocks !== null);
+
     $shield = null;
-    if ($this->isTopLevel && !$this->comments) {
+    if ($this->isTopLevel && !$this->comments && !$has_document_engine) {
       if ($this->isGenerated()) {
         $shield = $renderer->renderShield(
           pht(
@@ -1003,79 +1035,39 @@ final class DifferentialChangesetParser extends Phobject {
       ->setOldComments($old_comments)
       ->setNewComments($new_comments);
 
+    if ($engine_blocks !== null) {
+      $reference = $this->getRenderingReference();
+      $parts = explode('/', $reference);
+      if (count($parts) == 2) {
+        list($id, $vs) = $parts;
+      } else {
+        $id = $parts[0];
+        $vs = 0;
+      }
+
+      // If we don't have an explicit "vs" changeset, it's the left side of
+      // the "id" changeset.
+      if (!$vs) {
+        $vs = $id;
+      }
+
+      $renderer
+        ->setDocumentEngine($engine)
+        ->setDocumentEngineBlocks($engine_blocks);
+
+      return $renderer->renderDocumentEngineBlocks(
+        $engine_blocks,
+        (string)$id,
+        (string)$vs);
+    }
+
+    // If we've made it here with a type of file we don't know how to render,
+    // bail out with a default empty rendering. Normally, we'd expect a
+    // document engine to catch these changes before we make it this far.
     switch ($this->changeset->getFileType()) {
-      case DifferentialChangeType::FILE_IMAGE:
-        $old = null;
-        $new = null;
-        // TODO: Improve the architectural issue as discussed in D955
-        // https://secure.phabricator.com/D955
-        $reference = $this->getRenderingReference();
-        $parts = explode('/', $reference);
-        if (count($parts) == 2) {
-          list($id, $vs) = $parts;
-        } else {
-          $id = $parts[0];
-          $vs = 0;
-        }
-        $id = (int)$id;
-        $vs = (int)$vs;
-
-        if (!$vs) {
-          $metadata = $this->changeset->getMetadata();
-          $data = idx($metadata, 'attachment-data');
-
-          $old_phid = idx($metadata, 'old:binary-phid');
-          $new_phid = idx($metadata, 'new:binary-phid');
-        } else {
-          $vs_changeset = id(new DifferentialChangeset())->load($vs);
-          $old_phid = null;
-          $new_phid = null;
-
-          // TODO: This is spooky, see D6851
-          if ($vs_changeset) {
-            $vs_metadata = $vs_changeset->getMetadata();
-            $old_phid = idx($vs_metadata, 'new:binary-phid');
-          }
-
-          $changeset = id(new DifferentialChangeset())->load($id);
-          if ($changeset) {
-            $metadata = $changeset->getMetadata();
-            $new_phid = idx($metadata, 'new:binary-phid');
-          }
-        }
-
-        if ($old_phid || $new_phid) {
-          // grab the files, (micro) optimization for 1 query not 2
-          $file_phids = array();
-          if ($old_phid) {
-            $file_phids[] = $old_phid;
-          }
-          if ($new_phid) {
-            $file_phids[] = $new_phid;
-          }
-
-          $files = id(new PhabricatorFileQuery())
-            ->setViewer($this->getUser())
-            ->withPHIDs($file_phids)
-            ->execute();
-          foreach ($files as $file) {
-            if (empty($file)) {
-              continue;
-            }
-            if ($file->getPHID() == $old_phid) {
-              $old = $file;
-            } else if ($file->getPHID() == $new_phid) {
-              $new = $file;
-            }
-          }
-        }
-
-        $renderer->attachOldFile($old);
-        $renderer->attachNewFile($new);
-
-        return $renderer->renderFileChange($old, $new, $id, $vs);
       case DifferentialChangeType::FILE_DIRECTORY:
       case DifferentialChangeType::FILE_BINARY:
+      case DifferentialChangeType::FILE_IMAGE:
         $output = $renderer->renderChangesetTable(null);
         return $output;
     }
@@ -1673,6 +1665,156 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     return $prefix.$line;
+  }
+
+  private function newDocumentEngine() {
+    $changeset = $this->changeset;
+    $viewer = $this->getViewer();
+
+    // TODO: This should probably be made non-optional in the future.
+    if (!$viewer) {
+      return null;
+    }
+
+    $old_file = null;
+    $new_file = null;
+
+    switch ($changeset->getFileType()) {
+      case DifferentialChangeType::FILE_IMAGE:
+      case DifferentialChangeType::FILE_BINARY:
+        list($old_file, $new_file) = $this->loadFileObjectsForChangeset();
+        break;
+    }
+
+    $old_ref = id(new PhabricatorDocumentRef())
+      ->setName($changeset->getOldFile());
+    if ($old_file) {
+      $old_ref->setFile($old_file);
+    } else {
+      $old_data = $this->old;
+      $old_data = ipull($old_data, 'text');
+      $old_data = implode('', $old_data);
+
+      $old_ref->setData($old_data);
+    }
+
+    $new_ref = id(new PhabricatorDocumentRef())
+      ->setName($changeset->getFilename());
+    if ($new_file) {
+      $new_ref->setFile($new_file);
+    } else {
+      $new_data = $this->new;
+      $new_data = ipull($new_data, 'text');
+      $new_data = implode('', $new_data);
+
+      $new_ref->setData($new_data);
+    }
+
+    $old_engines = PhabricatorDocumentEngine::getEnginesForRef(
+      $viewer,
+      $old_ref);
+
+    $new_engines = PhabricatorDocumentEngine::getEnginesForRef(
+      $viewer,
+      $new_ref);
+
+    $shared_engines = array_intersect_key($old_engines, $new_engines);
+
+    foreach ($shared_engines as $key => $shared_engine) {
+      if (!$shared_engine->canDiffDocuments($old_ref, $new_ref)) {
+        unset($shared_engines[$key]);
+      }
+    }
+
+    $engine_key = $this->getDocumentEngineKey();
+    if (strlen($engine_key)) {
+      if (isset($shared_engines[$engine_key])) {
+        $document_engine = $shared_engines[$engine_key];
+      } else {
+        $document_engine = null;
+      }
+    } else {
+      $document_engine = head($shared_engines);
+    }
+
+    if ($document_engine) {
+      return array(
+        $document_engine,
+        $old_ref,
+        $new_ref);
+    }
+
+    return null;
+  }
+
+  private function loadFileObjectsForChangeset() {
+    $changeset = $this->changeset;
+    $viewer = $this->getViewer();
+
+    $old_file = null;
+    $new_file = null;
+
+    // TODO: Improve the architectural issue as discussed in D955
+    // https://secure.phabricator.com/D955
+    $reference = $this->getRenderingReference();
+    $parts = explode('/', $reference);
+    if (count($parts) == 2) {
+      list($id, $vs) = $parts;
+    } else {
+      $id = $parts[0];
+      $vs = 0;
+    }
+    $id = (int)$id;
+    $vs = (int)$vs;
+
+    if (!$vs) {
+      $metadata = $this->changeset->getMetadata();
+      $data = idx($metadata, 'attachment-data');
+
+      $old_phid = idx($metadata, 'old:binary-phid');
+      $new_phid = idx($metadata, 'new:binary-phid');
+    } else {
+      $vs_changeset = id(new DifferentialChangeset())->load($vs);
+      $old_phid = null;
+      $new_phid = null;
+
+      // TODO: This is spooky, see D6851
+      if ($vs_changeset) {
+        $vs_metadata = $vs_changeset->getMetadata();
+        $old_phid = idx($vs_metadata, 'new:binary-phid');
+      }
+
+      $changeset = id(new DifferentialChangeset())->load($id);
+      if ($changeset) {
+        $metadata = $changeset->getMetadata();
+        $new_phid = idx($metadata, 'new:binary-phid');
+      }
+    }
+
+    if ($old_phid || $new_phid) {
+      $file_phids = array();
+      if ($old_phid) {
+        $file_phids[] = $old_phid;
+      }
+      if ($new_phid) {
+        $file_phids[] = $new_phid;
+      }
+
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($file_phids)
+        ->execute();
+
+      foreach ($files as $file) {
+        if ($file->getPHID() == $old_phid) {
+          $old_file = $file;
+        } else if ($file->getPHID() == $new_phid) {
+          $new_file = $file;
+        }
+      }
+    }
+
+    return array($old_file, $new_file);
   }
 
 }

@@ -228,60 +228,238 @@ final class DifferentialChangesetOneUpRenderer
     return null;
   }
 
-  public function renderFileChange(
-    $old_file = null,
-    $new_file = null,
-    $id = 0,
-    $vs = 0) {
+  public function renderDocumentEngineBlocks(
+    PhabricatorDocumentEngineBlocks $block_list,
+    $old_changeset_key,
+    $new_changeset_key) {
 
-    // TODO: This should eventually merge into the normal primitives pathway,
-    // but fake it for now and just share as much code as possible.
+    $engine = $this->getDocumentEngine();
+    $layout = $block_list->newTwoUpLayout();
 
-    $primitives = array();
-    if ($old_file) {
-      $primitives[] = array(
-        'type' => 'old-file',
-        'htype' => ($new_file ? 'new-file' : null),
-        'file' => $old_file,
-        'line' => 1,
-        'render' => $this->renderImageStage($old_file),
-      );
+    $old_comments = $this->getOldComments();
+    $new_comments = $this->getNewComments();
+
+    $unchanged = array();
+    foreach ($layout as $key => $row) {
+      list($old, $new) = $row;
+
+      if (!$old) {
+        continue;
+      }
+
+      if (!$new) {
+        continue;
+      }
+
+      if ($old->getDifferenceType() !== null) {
+        continue;
+      }
+
+      if ($new->getDifferenceType() !== null) {
+        continue;
+      }
+
+      $unchanged[$key] = true;
     }
 
-    if ($new_file) {
-      $primitives[] = array(
-        'type' => 'new-file',
-        'htype' => ($old_file ? 'old-file' : null),
-        'file' => $new_file,
-        'line' => 1,
-        'oline' => ($old_file ? 1 : null),
-        'render' => $this->renderImageStage($new_file),
-      );
-    }
+    $rows = array();
+    $count = count($layout);
+    for ($ii = 0; $ii < $count;) {
+      $start = $ii;
 
-    // TODO: We'd like to share primitive code here, but buildPrimitives()
-    // currently chokes on changesets with no textual data.
-    foreach ($this->getOldComments() as $line => $group) {
-      foreach ($group as $comment) {
-        $primitives[] = array(
-          'type' => 'inline',
-          'comment' => $comment,
-          'right' => false,
+      for ($jj = $ii; $jj < $count; $jj++) {
+        list($old, $new) = $layout[$jj];
+
+        if (empty($unchanged[$jj])) {
+          break;
+        }
+
+        $rows[] = array(
+          'type' => 'unchanged',
+          'layoutKey' => $jj,
         );
+      }
+      $ii = $jj;
+
+      for ($jj = $ii; $jj < $count; $jj++) {
+        list($old, $new) = $layout[$jj];
+
+        if (!empty($unchanged[$jj])) {
+          break;
+        }
+
+        $rows[] = array(
+          'type' => 'old',
+          'layoutKey' => $jj,
+        );
+      }
+
+      for ($jj = $ii; $jj < $count; $jj++) {
+        list($old, $new) = $layout[$jj];
+
+        if (!empty($unchanged[$jj])) {
+          break;
+        }
+
+        $rows[] = array(
+          'type' => 'new',
+          'layoutKey' => $jj,
+        );
+      }
+      $ii = $jj;
+
+      // We always expect to consume at least one row when iterating through
+      // the loop and make progress. If we don't, bail out to avoid spinning
+      // to death.
+      if ($ii === $start) {
+        throw new Exception(
+          pht(
+            'Failed to make progress during 1up diff layout.'));
       }
     }
 
-    foreach ($this->getNewComments() as $line => $group) {
-      foreach ($group as $comment) {
-        $primitives[] = array(
-          'type' => 'inline',
-          'comment' => $comment,
-          'right' => true,
-        );
+    $old_ref = null;
+    $new_ref = null;
+    $refs = $block_list->getDocumentRefs();
+    if ($refs) {
+      list($old_ref, $new_ref) = $refs;
+    }
+
+    $view = array();
+    foreach ($rows as $row) {
+      $row_type = $row['type'];
+      $layout_key = $row['layoutKey'];
+      $row_layout = $layout[$layout_key];
+      list($old, $new) = $row_layout;
+
+      if ($old) {
+        $old_key = $old->getBlockKey();
+      } else {
+        $old_key = null;
+      }
+
+      if ($new) {
+        $new_key = $new->getBlockKey();
+      } else {
+        $new_key = null;
+      }
+
+      $cells = array();
+      $cell_classes = array();
+
+      if ($row_type === 'unchanged') {
+        $cell_content = $engine->newBlockContentView(
+          $old_ref,
+          $old);
+      } else if ($old && $new) {
+        $block_diff = $engine->newBlockDiffViews(
+          $old_ref,
+          $old,
+          $new_ref,
+          $new);
+
+        // TODO: We're currently double-rendering this: once when building
+        // the old row, and once when building the new one. In both cases,
+        // we throw away the other half of the output. We could cache this
+        // to improve performance.
+
+        if ($row_type === 'old') {
+          $cell_content = $block_diff->getOldContent();
+          $cell_classes = $block_diff->getOldClasses();
+        } else {
+          $cell_content = $block_diff->getNewContent();
+          $cell_classes = $block_diff->getNewClasses();
+        }
+      } else if ($row_type === 'old') {
+        $cell_content = $engine->newBlockContentView(
+          $old_ref,
+          $old);
+        $cell_classes[] = 'old';
+        $cell_classes[] = 'old-full';
+
+        $new_key = null;
+      } else if ($row_type === 'new') {
+        $cell_content = $engine->newBlockContentView(
+          $new_ref,
+          $new);
+        $cell_classes[] = 'new';
+        $cell_classes[] = 'new-full';
+
+        $old_key = null;
+      }
+
+      if ($old_key === null) {
+        $old_id = null;
+      } else {
+        $old_id = "C{$old_changeset_key}OL{$old_key}";
+      }
+
+      if ($new_key === null) {
+        $new_id = null;
+      } else {
+        $new_id = "C{$new_changeset_key}NL{$new_key}";
+      }
+
+      $cells[] = phutil_tag(
+        'td',
+        array(
+          'id' => $old_id,
+          'data-n' => $old_key,
+          'class' => 'n',
+        ));
+
+      $cells[] = phutil_tag(
+        'td',
+        array(
+          'id' => $new_id,
+          'data-n' => $new_key,
+          'class' => 'n',
+        ));
+
+      $cells[] = phutil_tag(
+        'td',
+        array(
+          'class' => 'copy',
+        ));
+
+      $cell_classes[] = 'diff-flush';
+      $cell_classes = implode(' ', $cell_classes);
+
+      $cells[] = phutil_tag(
+        'td',
+        array(
+          'class' => $cell_classes,
+          'data-copy-mode' => 'copy-unified',
+        ),
+        $cell_content);
+
+      $view[] = phutil_tag(
+        'tr',
+        array(),
+        $cells);
+
+      if ($old_key !== null) {
+        $old_inlines = idx($old_comments, $old_key, array());
+        foreach ($old_inlines as $inline) {
+          $inline = $this->buildInlineComment(
+            $inline,
+            $on_right = false);
+          $view[] = $this->getRowScaffoldForInline($inline);
+        }
+      }
+
+      if ($new_key !== null) {
+        $new_inlines = idx($new_comments, $new_key, array());
+        foreach ($new_inlines as $inline) {
+          $inline = $this->buildInlineComment(
+            $inline,
+            $on_right = true);
+          $view[] = $this->getRowScaffoldForInline($inline);
+        }
       }
     }
 
-    $output = $this->renderPrimitives($primitives, 1);
+    $output = $this->wrapChangeInTable($view);
     return $this->renderChangesetTable($output);
   }
 

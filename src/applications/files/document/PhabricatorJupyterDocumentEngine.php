@@ -35,55 +35,198 @@ final class PhabricatorJupyterDocumentEngine
     return $ref->isProbablyJSON();
   }
 
+  public function canDiffDocuments(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+    return true;
+  }
+
+  public function newEngineBlocks(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentRef $vref) {
+
+    $blocks = new PhabricatorDocumentEngineBlocks();
+
+    try {
+      $u_blocks = $this->newDiffBlocks($uref);
+      $v_blocks = $this->newDiffBlocks($vref);
+
+      $blocks->addBlockList($uref, $u_blocks);
+      $blocks->addBlockList($vref, $v_blocks);
+    } catch (Exception $ex) {
+      $blocks->addMessage($ex->getMessage());
+    }
+
+    return $blocks;
+  }
+
+  public function newBlockDiffViews(
+    PhabricatorDocumentRef $uref,
+    PhabricatorDocumentEngineBlock $ublock,
+    PhabricatorDocumentRef $vref,
+    PhabricatorDocumentEngineBlock $vblock) {
+
+    $ucell = $ublock->getContent();
+    $vcell = $vblock->getContent();
+
+    $utype = idx($ucell, 'cell_type');
+    $vtype = idx($vcell, 'cell_type');
+
+    if ($utype === $vtype) {
+      switch ($utype) {
+        case 'markdown':
+          $usource = idx($ucell, 'source');
+          $usource = implode('', $usource);
+
+          $vsource = idx($vcell, 'source');
+          $vsource = implode('', $vsource);
+
+          $diff = id(new PhutilProseDifferenceEngine())
+            ->getDiff($usource, $vsource);
+
+          $u_content = $this->newProseDiffCell($diff, array('=', '-'));
+          $v_content = $this->newProseDiffCell($diff, array('=', '+'));
+
+          $u_content = $this->newJupyterCell(null, $u_content, null);
+          $v_content = $this->newJupyterCell(null, $v_content, null);
+
+          $u_content = $this->newCellContainer($u_content);
+          $v_content = $this->newCellContainer($v_content);
+
+          return id(new PhabricatorDocumentEngineBlockDiff())
+            ->setOldContent($u_content)
+            ->addOldClass('old')
+            ->setNewContent($v_content)
+            ->addNewClass('new');
+      }
+    }
+
+    return parent::newBlockDiffViews($uref, $ublock, $vref, $vblock);
+  }
+
+  public function newBlockContentView(
+    PhabricatorDocumentRef $ref,
+    PhabricatorDocumentEngineBlock $block) {
+
+    $viewer = $this->getViewer();
+    $cell = $block->getContent();
+
+    $cell_content = $this->renderJupyterCell($viewer, $cell);
+
+    return $this->newCellContainer($cell_content);
+  }
+
+  private function newCellContainer($cell_content) {
+    $notebook_table = phutil_tag(
+      'table',
+      array(
+        'class' => 'jupyter-notebook',
+      ),
+      $cell_content);
+
+    $container = phutil_tag(
+      'div',
+      array(
+        'class' => 'document-engine-jupyter document-engine-diff',
+      ),
+      $notebook_table);
+
+    return $container;
+  }
+
+  private function newProseDiffCell(PhutilProseDiff $diff, array $mask) {
+    $mask = array_fuse($mask);
+
+    $result = array();
+    foreach ($diff->getParts() as $part) {
+      $type = $part['type'];
+      $text = $part['text'];
+
+      if (!isset($mask[$type])) {
+        continue;
+      }
+
+      switch ($type) {
+        case '-':
+          $result[] = phutil_tag(
+            'span',
+            array(
+              'class' => 'bright',
+            ),
+            $text);
+          break;
+        case '+':
+          $result[] = phutil_tag(
+            'span',
+            array(
+              'class' => 'bright',
+            ),
+            $text);
+          break;
+        case '=':
+          $result[] = $text;
+          break;
+      }
+    }
+
+    return array(
+      null,
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'jupyter-cell-markdown',
+        ),
+        $result),
+    );
+  }
+
+  private function newDiffBlocks(PhabricatorDocumentRef $ref) {
+    $viewer = $this->getViewer();
+    $content = $ref->loadData();
+
+    $cells = $this->newCells($content, true);
+
+    $idx = 1;
+    $blocks = array();
+    foreach ($cells as $cell) {
+      // When the cell is a source code line, we can hash just the raw
+      // input rather than all the cell metadata.
+
+      switch (idx($cell, 'cell_type')) {
+        case 'code/line':
+          $hash_input = $cell['raw'];
+          break;
+        case 'markdown':
+          $hash_input = implode('', $cell['source']);
+          break;
+        default:
+          $hash_input = serialize($cell);
+          break;
+      }
+
+      $hash = PhabricatorHash::digestWithNamedKey(
+        $hash_input,
+        'document-engine.content-digest');
+
+      $blocks[] = id(new PhabricatorDocumentEngineBlock())
+        ->setBlockKey($idx)
+        ->setDifferenceHash($hash)
+        ->setContent($cell);
+
+      $idx++;
+    }
+
+    return $blocks;
+  }
+
   protected function newDocumentContent(PhabricatorDocumentRef $ref) {
     $viewer = $this->getViewer();
     $content = $ref->loadData();
 
     try {
-      $data = phutil_json_decode($content);
-    } catch (PhutilJSONParserException $ex) {
-      return $this->newMessage(
-        pht(
-          'This is not a valid JSON document and can not be rendered as '.
-          'a Jupyter notebook: %s.',
-          $ex->getMessage()));
-    }
-
-    if (!is_array($data)) {
-      return $this->newMessage(
-        pht(
-          'This document does not encode a valid JSON object and can not '.
-          'be rendered as a Jupyter notebook.'));
-    }
-
-
-    $nbformat = idx($data, 'nbformat');
-    if (!strlen($nbformat)) {
-      return $this->newMessage(
-        pht(
-          'This document is missing an "nbformat" field. Jupyter notebooks '.
-          'must have this field.'));
-    }
-
-    if ($nbformat !== 4) {
-      return $this->newMessage(
-        pht(
-          'This Jupyter notebook uses an unsupported version of the file '.
-          'format (found version %s, expected version 4).',
-          $nbformat));
-    }
-
-    $cells = idx($data, 'cells');
-    if (!is_array($cells)) {
-      return $this->newMessage(
-        pht(
-          'This Jupyter notebook does not specify a list of "cells".'));
-    }
-
-    if (!$cells) {
-      return $this->newMessage(
-        pht(
-          'This Jupyter notebook does not specify any notebook cells.'));
+      $cells = $this->newCells($content, false);
+    } catch (Exception $ex) {
+      return $this->newMessage($ex->getMessage());
     }
 
     $rows = array();
@@ -108,20 +251,169 @@ final class PhabricatorJupyterDocumentEngine
     return $container;
   }
 
+  private function newCells($content, $for_diff) {
+    try {
+      $data = phutil_json_decode($content);
+    } catch (PhutilJSONParserException $ex) {
+      throw new Exception(
+        pht(
+          'This is not a valid JSON document and can not be rendered as '.
+          'a Jupyter notebook: %s.',
+          $ex->getMessage()));
+    }
+
+    if (!is_array($data)) {
+      throw new Exception(
+        pht(
+          'This document does not encode a valid JSON object and can not '.
+          'be rendered as a Jupyter notebook.'));
+    }
+
+
+    $nbformat = idx($data, 'nbformat');
+    if (!strlen($nbformat)) {
+      throw new Exception(
+        pht(
+          'This document is missing an "nbformat" field. Jupyter notebooks '.
+          'must have this field.'));
+    }
+
+    if ($nbformat !== 4) {
+      throw new Exception(
+        pht(
+          'This Jupyter notebook uses an unsupported version of the file '.
+          'format (found version %s, expected version 4).',
+          $nbformat));
+    }
+
+    $cells = idx($data, 'cells');
+    if (!is_array($cells)) {
+      throw new Exception(
+        pht(
+          'This Jupyter notebook does not specify a list of "cells".'));
+    }
+
+    if (!$cells) {
+      throw new Exception(
+        pht(
+          'This Jupyter notebook does not specify any notebook cells.'));
+    }
+
+    if (!$for_diff) {
+      return $cells;
+    }
+
+    // If we're extracting cells to build a diff view, split code cells into
+    // individual lines and individual outputs. We want users to be able to
+    // add inline comments to each line and each output block.
+
+    $results = array();
+    foreach ($cells as $cell) {
+      $cell_type = idx($cell, 'cell_type');
+
+      if ($cell_type === 'markdown') {
+        $source = $cell['source'];
+        $source = implode('', $source);
+
+        // Attempt to split contiguous blocks of markdown into smaller
+        // pieces.
+
+        $chunks = preg_split(
+          '/\n\n+/',
+          $source);
+
+        foreach ($chunks as $chunk) {
+          $result = $cell;
+          $result['source'] = array($chunk);
+          $results[] = $result;
+        }
+
+        continue;
+      }
+
+      if ($cell_type !== 'code') {
+        $results[] = $cell;
+        continue;
+      }
+
+      $label = $this->newCellLabel($cell);
+
+      $lines = idx($cell, 'source');
+      if (!is_array($lines)) {
+        $lines = array();
+      }
+
+      $content = $this->highlightLines($lines);
+
+      $count = count($lines);
+      for ($ii = 0; $ii < $count; $ii++) {
+        $is_head = ($ii === 0);
+        $is_last = ($ii === ($count - 1));
+
+        if ($is_head) {
+          $line_label = $label;
+        } else {
+          $line_label = null;
+        }
+
+        $results[] = array(
+          'cell_type' => 'code/line',
+          'label' => $line_label,
+          'raw' => $lines[$ii],
+          'display' => idx($content, $ii),
+          'head' => $is_head,
+          'last' => $is_last,
+        );
+      }
+
+      $outputs = array();
+      $output_list = idx($cell, 'outputs');
+      if (is_array($output_list)) {
+        foreach ($output_list as $output) {
+          $results[] = array(
+            'cell_type' => 'code/output',
+            'output' => $output,
+          );
+        }
+      }
+    }
+
+    return $results;
+  }
+
+
   private function renderJupyterCell(
     PhabricatorUser $viewer,
     array $cell) {
 
     list($label, $content) = $this->renderJupyterCellContent($viewer, $cell);
 
+    $classes = null;
+    switch (idx($cell, 'cell_type')) {
+      case 'code/line':
+        $classes = 'jupyter-cell-flush';
+        break;
+    }
+
+    return $this->newJupyterCell(
+      $label,
+      $content,
+      $classes);
+  }
+
+  private function newJupyterCell($label, $content, $classes) {
     $label_cell = phutil_tag(
-      'th',
-      array(),
+      'td',
+      array(
+        'class' => 'jupyter-label',
+      ),
       $label);
 
     $content_cell = phutil_tag(
       'td',
-      array(),
+      array(
+        'class' => $classes,
+      ),
       $content);
 
     return phutil_tag(
@@ -142,10 +434,15 @@ final class PhabricatorJupyterDocumentEngine
       case 'markdown':
         return $this->newMarkdownCell($cell);
       case 'code':
-       return $this->newCodeCell($cell);
+        return $this->newCodeCell($cell);
+      case 'code/line':
+        return $this->newCodeLineCell($cell);
+      case 'code/output':
+        return $this->newCodeOutputCell($cell);
     }
 
-    return $this->newRawCell(id(new PhutilJSON())->encodeFormatted($cell));
+    return $this->newRawCell(id(new PhutilJSON())
+      ->encodeFormatted($cell));
   }
 
   private function newRawCell($content) {
@@ -166,8 +463,9 @@ final class PhabricatorJupyterDocumentEngine
       $content = array();
     }
 
-    $content = implode('', $content);
-    $content = phutil_escape_html_newlines($content);
+    // TODO: This should ideally highlight as Markdown, but the "md"
+    // highlighter in Pygments is painfully slow and not terribly useful.
+    $content = $this->highlightLines($content, 'txt');
 
     return array(
       null,
@@ -181,23 +479,14 @@ final class PhabricatorJupyterDocumentEngine
   }
 
   private function newCodeCell(array $cell) {
-    $execution_count = idx($cell, 'execution_count');
-    if ($execution_count) {
-      $label = 'In ['.$execution_count.']:';
-    } else {
-      $label = null;
-    }
+    $label = $this->newCellLabel($cell);
 
     $content = idx($cell, 'source');
     if (!is_array($content)) {
       $content = array();
     }
 
-    $content = implode('', $content);
-
-    $content = PhabricatorSyntaxHighlighter::highlightWithLanguage(
-      'py',
-      $content);
+    $content = $this->highlightLines($content);
 
     $outputs = array();
     $output_list = idx($cell, 'outputs');
@@ -213,13 +502,54 @@ final class PhabricatorJupyterDocumentEngine
         phutil_tag(
           'div',
           array(
-            'class' => 'jupyter-cell-code PhabricatorMonospaced remarkup-code',
+            'class' =>
+              'jupyter-cell-code jupyter-cell-code-block '.
+              'PhabricatorMonospaced remarkup-code',
           ),
           array(
             $content,
           )),
         $outputs,
       ),
+    );
+  }
+
+  private function newCodeLineCell(array $cell) {
+    $classes = array();
+    $classes[] = 'PhabricatorMonospaced';
+    $classes[] = 'remarkup-code';
+    $classes[] = 'jupyter-cell-code';
+    $classes[] = 'jupyter-cell-code-line';
+
+    if ($cell['head']) {
+      $classes[] = 'jupyter-cell-code-head';
+    }
+
+    if ($cell['last']) {
+      $classes[] = 'jupyter-cell-code-last';
+    }
+
+    $classes = implode(' ', $classes);
+
+    return array(
+      $cell['label'],
+      array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => $classes,
+          ),
+          array(
+            $cell['display'],
+          )),
+      ),
+    );
+  }
+
+  private function newCodeOutputCell(array $cell) {
+    return array(
+      null,
+      $this->newOutput($cell['output']),
     );
   }
 
@@ -307,6 +637,52 @@ final class PhabricatorJupyterDocumentEngine
         'class' => implode(' ', $classes),
       ),
       $content);
+  }
+
+  private function newCellLabel(array $cell) {
+    $execution_count = idx($cell, 'execution_count');
+    if ($execution_count) {
+      $label = 'In ['.$execution_count.']:';
+    } else {
+      $label = null;
+    }
+
+    return $label;
+  }
+
+  private function highlightLines(array $lines, $force_language = null) {
+    if ($force_language === null) {
+      $head = head($lines);
+      $matches = null;
+      if (preg_match('/^%%(.*)$/', $head, $matches)) {
+        $restore = array_shift($lines);
+        $lang = $matches[1];
+      } else {
+        $restore = null;
+        $lang = 'py';
+      }
+    } else {
+      $restore = null;
+      $lang = $force_language;
+    }
+
+    $content = PhabricatorSyntaxHighlighter::highlightWithLanguage(
+      $lang,
+      implode('', $lines));
+    $content = phutil_split_lines($content);
+
+    if ($restore !== null) {
+      $language_tag = phutil_tag(
+        'span',
+        array(
+          'class' => 'language-tag',
+        ),
+        $restore);
+
+      array_unshift($content, $language_tag);
+    }
+
+    return $content;
   }
 
 }

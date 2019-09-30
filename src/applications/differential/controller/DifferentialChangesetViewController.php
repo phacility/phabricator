@@ -166,6 +166,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       DifferentialChangesetParser::parseRangeSpecification($spec);
 
     $parser = id(new DifferentialChangesetParser())
+      ->setViewer($viewer)
       ->setCoverage($coverage)
       ->setChangeset($changeset)
       ->setRenderingReference($rendering_reference)
