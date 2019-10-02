@@ -98,6 +98,54 @@ final class PhabricatorJupyterDocumentEngine
             ->addOldClass('old')
             ->setNewContent($v_content)
             ->addNewClass('new');
+        case 'code/line':
+          $usource = idx($ucell, 'raw');
+          $vsource = idx($vcell, 'raw');
+          $udisplay = idx($ucell, 'display');
+          $vdisplay = idx($vcell, 'display');
+          $ulabel = idx($ucell, 'label');
+          $vlabel = idx($vcell, 'label');
+
+          $intraline_segments = ArcanistDiffUtils::generateIntralineDiff(
+            $usource,
+            $vsource);
+
+          $u_segments = array();
+          foreach ($intraline_segments[0] as $u_segment) {
+            $u_segments[] = $u_segment;
+          }
+
+          $v_segments = array();
+          foreach ($intraline_segments[1] as $v_segment) {
+            $v_segments[] = $v_segment;
+          }
+
+          $usource = ArcanistDiffUtils::applyIntralineDiff(
+            $udisplay,
+            $u_segments);
+
+          $vsource = ArcanistDiffUtils::applyIntralineDiff(
+            $vdisplay,
+            $v_segments);
+
+          $u_content = $this->newCodeLineCell($ucell, $usource);
+          $v_content = $this->newCodeLineCell($vcell, $vsource);
+
+          $classes = array(
+            'jupyter-cell-flush',
+          );
+
+          $u_content = $this->newJupyterCell($ulabel, $u_content, $classes);
+          $v_content = $this->newJupyterCell($vlabel, $v_content, $classes);
+
+          $u_content = $this->newCellContainer($u_content);
+          $v_content = $this->newCellContainer($v_content);
+
+          return id(new PhabricatorDocumentEngineBlockDiff())
+            ->setOldContent($u_content)
+            ->addOldClass('old')
+            ->setNewContent($v_content)
+            ->addNewClass('new');
       }
     }
 
@@ -441,8 +489,10 @@ final class PhabricatorJupyterDocumentEngine
         return $this->newCodeOutputCell($cell);
     }
 
-    return $this->newRawCell(id(new PhutilJSON())
-      ->encodeFormatted($cell));
+    $json_content = id(new PhutilJSON())
+      ->encodeFormatted($cell);
+
+    return $this->newRawCell($json_content);
   }
 
   private function newRawCell($content) {
@@ -514,7 +564,7 @@ final class PhabricatorJupyterDocumentEngine
     );
   }
 
-  private function newCodeLineCell(array $cell) {
+  private function newCodeLineCell(array $cell, $content = null) {
     $classes = array();
     $classes[] = 'PhabricatorMonospaced';
     $classes[] = 'remarkup-code';
@@ -531,6 +581,10 @@ final class PhabricatorJupyterDocumentEngine
 
     $classes = implode(' ', $classes);
 
+    if ($content === null) {
+      $content = $cell['display'];
+    }
+
     return array(
       $cell['label'],
       array(
@@ -540,7 +594,7 @@ final class PhabricatorJupyterDocumentEngine
             'class' => $classes,
           ),
           array(
-            $cell['display'],
+            $content,
           )),
       ),
     );
