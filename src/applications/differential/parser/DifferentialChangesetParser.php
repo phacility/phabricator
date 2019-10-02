@@ -1718,7 +1718,8 @@ final class DifferentialChangesetParser extends Phobject {
       $viewer,
       $new_ref);
 
-    $shared_engines = array_intersect_key($old_engines, $new_engines);
+    $shared_engines = array_intersect_key($new_engines, $old_engines);
+    $default_engine = head_key($new_engines);
 
     foreach ($shared_engines as $key => $shared_engine) {
       if (!$shared_engine->canDiffDocuments($old_ref, $new_ref)) {
@@ -1734,7 +1735,17 @@ final class DifferentialChangesetParser extends Phobject {
         $document_engine = null;
       }
     } else {
-      $document_engine = head($shared_engines);
+      // If we aren't rendering with a specific engine, only use a default
+      // engine if the best engine for the new file is a shared engine which
+      // can diff files. If we're less picky (for example, by accepting any
+      // shared engine) we can end up with silly behavior (like ".json" files
+      // rendering as Jupyter documents).
+
+      if (isset($shared_engines[$default_engine])) {
+        $document_engine = $shared_engines[$default_engine];
+      } else {
+        $document_engine = null;
+      }
     }
 
     if ($document_engine) {
