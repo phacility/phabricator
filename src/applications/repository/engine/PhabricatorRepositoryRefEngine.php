@@ -498,7 +498,7 @@ final class PhabricatorRepositoryRefEngine
   private function setCloseFlagOnCommits(array $identifiers) {
     $repository = $this->getRepository();
     $commit_table = new PhabricatorRepositoryCommit();
-    $conn_w = $commit_table->establishConnection('w');
+    $conn = $commit_table->establishConnection('w');
 
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
@@ -515,13 +515,27 @@ final class PhabricatorRepositoryRefEngine
         throw new Exception(pht("Unknown repository type '%s'!", $vcs));
     }
 
-    $all_commits = queryfx_all(
-      $conn_w,
-      'SELECT id, phid, commitIdentifier, importStatus FROM %T
-        WHERE repositoryID = %d AND commitIdentifier IN (%Ls)',
-      $commit_table->getTableName(),
-      $repository->getID(),
-      $identifiers);
+    $identifier_tokens = array();
+    foreach ($identifiers as $identifier) {
+      $identifier_tokens[] = qsprintf(
+        $conn,
+        '%s',
+        $identifier);
+    }
+
+    $all_commits = array();
+    foreach (PhabricatorLiskDAO::chunkSQL($identifier_tokens) as $chunk) {
+      $rows = queryfx_all(
+        $conn,
+        'SELECT id, phid, commitIdentifier, importStatus FROM %T
+          WHERE repositoryID = %d AND commitIdentifier IN (%LQ)',
+        $commit_table->getTableName(),
+        $repository->getID(),
+        $chunk);
+      foreach ($rows as $row) {
+        $all_commits[] = $row;
+      }
+    }
 
     $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
 
@@ -539,7 +553,7 @@ final class PhabricatorRepositoryRefEngine
 
       if (!($row['importStatus'] & $closeable_flag)) {
         queryfx(
-          $conn_w,
+          $conn,
           'UPDATE %T SET importStatus = (importStatus | %d) WHERE id = %d',
           $commit_table->getTableName(),
           $closeable_flag,
