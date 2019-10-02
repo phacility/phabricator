@@ -469,11 +469,26 @@ final class PhabricatorRepositoryRefEngine
         return phutil_split_lines($stdout, $retain_newlines = false);
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         if ($all_closing_heads) {
-          list($stdout) = $this->getRepository()->execxLocalCommand(
-            'log --format=%s %s --not %Ls',
-            '%H',
-            $new_head,
-            $all_closing_heads);
+
+          // See PHI1474. This length of list may exceed the maximum size of
+          // a command line argument list, so pipe the list in using "--stdin"
+          // instead.
+
+          $ref_list = array();
+          $ref_list[] = $new_head;
+          foreach ($all_closing_heads as $old_head) {
+            $ref_list[] = '^'.$old_head;
+          }
+          $ref_list[] = '--';
+          $ref_list = implode("\n", $ref_list)."\n";
+
+          $future = $this->getRepository()->getLocalCommandFuture(
+            'log --format=%s --stdin',
+            '%H');
+
+          list($stdout) = $future
+            ->write($ref_list)
+            ->resolvex();
         } else {
           list($stdout) = $this->getRepository()->execxLocalCommand(
             'log --format=%s %s',
