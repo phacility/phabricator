@@ -1,13 +1,14 @@
 <?php
 
-final class PhabricatorFactChartController extends PhabricatorFactController {
+final class PhabricatorFactChartController
+  extends PhabricatorFactController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
     $chart_key = $request->getURIData('chartKey');
-    if ($chart_key === null) {
-      return $this->newDemoChart();
+    if (!$chart_key) {
+      return new Aphront404Response();
     }
 
     $engine = id(new PhabricatorChartRenderingEngine())
@@ -24,15 +25,24 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $mode = $request->getURIData('mode');
     $is_draw_mode = ($mode === 'draw');
 
-    // TODO: For now, always pull the data. We'll throw it away if we're just
-    // drawing the frame, but this makes errors easier to debug.
-    $chart_data = $engine->newChartData();
+    $want_data = $is_draw_mode;
 
-    if ($is_draw_mode) {
-      return id(new AphrontAjaxResponse())->setContent($chart_data);
+    // In developer mode, always pull the data in the main request. We'll
+    // throw it away if we're just drawing the chart frame, but this currently
+    // makes errors quite a bit easier to debug.
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+      $want_data = true;
+    }
+
+    if ($want_data) {
+      $chart_data = $engine->newChartData();
+      if ($is_draw_mode) {
+        return id(new AphrontAjaxResponse())->setContent($chart_data);
+      }
     }
 
     $chart_view = $engine->newChartView();
+
     return $this->newChartResponse($chart_view);
   }
 
@@ -50,58 +60,10 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
-  }
-
-  private function newDemoChart() {
-    $viewer = $this->getViewer();
-
-    $argvs = array();
-
-    $argvs[] = array('fact', 'tasks.count.create');
-
-    $argvs[] = array('constant', 360);
-
-    $argvs[] = array('fact', 'tasks.open-count.create');
-
-    $argvs[] = array(
-      'sum',
-      array(
-        'accumulate',
-        array('fact', 'tasks.count.create'),
-      ),
-      array(
-        'accumulate',
-        array('fact', 'tasks.open-count.create'),
-      ),
-    );
-
-    $argvs[] = array(
-      'compose',
-      array('scale', 0.001),
-      array('cos'),
-      array('scale', 100),
-      array('shift', 800),
-    );
-
-    $datasets = array();
-    foreach ($argvs as $argv) {
-      $datasets[] = PhabricatorChartDataset::newFromDictionary(
+      ->appendChild(
         array(
-          'function' => $argv,
+          $box,
         ));
-    }
-
-    $chart = id(new PhabricatorFactChart())
-      ->setDatasets($datasets);
-
-    $engine = id(new PhabricatorChartRenderingEngine())
-      ->setViewer($viewer)
-      ->setChart($chart);
-
-    $chart = $engine->getStoredChart();
-
-    return id(new AphrontRedirectResponse())->setURI($chart->getURI());
   }
 
 }

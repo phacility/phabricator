@@ -34,6 +34,11 @@ final class PhabricatorProjectReportsProfileMenuItem
       return false;
     }
 
+    $class = 'PhabricatorFactApplication';
+    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      return false;
+    }
+
     return true;
   }
 

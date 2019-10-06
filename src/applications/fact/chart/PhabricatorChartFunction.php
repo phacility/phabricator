@@ -60,6 +60,10 @@ abstract class PhabricatorChartFunction
     return $this->functionLabel;
   }
 
+  final public function getKey() {
+    return $this->getFunctionLabel()->getKey();
+  }
+
   final public static function newFromDictionary(array $map) {
     PhutilTypeSpec::checkMap(
       $map,
@@ -84,13 +88,6 @@ abstract class PhabricatorChartFunction
       ->setArguments($map['arguments']);
 
     return $function;
-  }
-
-  public function toDictionary() {
-    return array(
-      'function' => $this->getFunctionKey(),
-      'arguments' => $this->getArgumentParser()->getRawArguments(),
-    );
   }
 
   public function getSubfunctions() {
@@ -180,6 +177,8 @@ abstract class PhabricatorChartFunction
   }
 
   abstract public function evaluateFunction(array $xv);
+  abstract public function getDataRefs(array $xv);
+  abstract public function loadRefs(array $refs);
 
   public function getDomain() {
     return null;

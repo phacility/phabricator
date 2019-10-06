@@ -35,8 +35,12 @@ final class ManiphestReportController extends ManiphestController {
     $nav->addLabel(pht('Open Tasks'));
     $nav->addFilter('user', pht('By User'));
     $nav->addFilter('project', pht('By Project'));
-    $nav->addLabel(pht('Burnup'));
-    $nav->addFilter('burn', pht('Burnup Rate'));
+
+    $class = 'PhabricatorFactApplication';
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $nav->addLabel(pht('Burnup'));
+      $nav->addFilter('burn', pht('Burnup Rate'));
+    }
 
     $this->view = $nav->selectFilter($this->view, 'user');
 

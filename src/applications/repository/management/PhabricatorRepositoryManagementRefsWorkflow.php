@@ -15,6 +15,12 @@ final class PhabricatorRepositoryManagementRefsWorkflow
             'help'        => pht('Show additional debugging information.'),
           ),
           array(
+            'name' => 'rebuild',
+            'help' => pht(
+              'Publish commits currently reachable from any permanent ref, '.
+              'ignoring the cached ref state.'),
+          ),
+          array(
             'name'        => 'repos',
             'wildcard'    => true,
           ),
@@ -41,6 +47,7 @@ final class PhabricatorRepositoryManagementRefsWorkflow
       $engine = id(new PhabricatorRepositoryRefEngine())
         ->setRepository($repo)
         ->setVerbose($args->getArg('verbose'))
+        ->setRebuild($args->getArg('rebuild'))
         ->updateRefs();
     }
 

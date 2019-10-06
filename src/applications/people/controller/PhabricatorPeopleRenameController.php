@@ -3,8 +3,13 @@
 final class PhabricatorPeopleRenameController
   extends PhabricatorPeopleController {
 
+  public function shouldRequireAdmin() {
+    return false;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
+
     $id = $request->getURIData('id');
 
     $user = id(new PhabricatorPeopleQuery())
@@ -16,6 +21,25 @@ final class PhabricatorPeopleRenameController
     }
 
     $done_uri = $this->getApplicationURI("manage/{$id}/");
+
+    if (!$viewer->getIsAdmin()) {
+      $dialog = $this->newDialog()
+        ->setTitle(pht('Change Username'))
+        ->appendParagraph(
+          pht(
+            'You can not change usernames because you are not an '.
+            'administrator. Only administrators can change usernames.'))
+        ->addCancelButton($done_uri, pht('Okay'));
+
+      $message_body = PhabricatorAuthMessage::loadMessageText(
+        $viewer,
+        PhabricatorAuthChangeUsernameMessageType::MESSAGEKEY);
+      if (strlen($message_body)) {
+        $dialog->appendRemarkup($message_body);
+      }
+
+      return $dialog;
+    }
 
     $validation_exception = null;
     $username = $user->getUsername();
@@ -43,32 +67,25 @@ final class PhabricatorPeopleRenameController
 
     }
 
-    $inst1 = pht(
-      'Be careful when renaming users!');
+    $instructions = array();
 
-    $inst2 = pht(
-      'The old username will no longer be tied to the user, so anything '.
-      'which uses it (like old commit messages) will no longer associate '.
-      'correctly. (And, if you give a user a username which some other user '.
-      'used to have, username lookups will begin returning the wrong user.)');
+    $instructions[] = pht(
+      'If you rename this user, the old username will no longer be tied '.
+      'to the user account. Anything which uses the old username in raw '.
+      'text (like old commit messages) may no longer associate correctly.');
 
-    $inst3 = pht(
-      'It is generally safe to rename newly created users (and test users '.
-      'and so on), but less safe to rename established users and unsafe to '.
-      'reissue a username.');
+    $instructions[] = pht(
+      'It is generally safe to rename users, but changing usernames may '.
+      'create occasional minor complications or confusion with text that '.
+      'contains the old username.');
 
-    $inst4 = pht(
-      'Users who rely on password authentication will need to reset their '.
-      'password after their username is changed (their username is part of '.
-      'the salt in the password hash).');
-
-    $inst5 = pht(
+    $instructions[] = pht(
       'The user will receive an email notifying them that you changed their '.
-      'username, with instructions for logging in and resetting their '.
-      'password if necessary.');
+      'username.');
+
+    $instructions[] = null;
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Old Username'))
@@ -79,19 +96,20 @@ final class PhabricatorPeopleRenameController
           ->setValue($username)
           ->setName('username'));
 
-    return $this->newDialog()
-      ->setWidth(AphrontDialogView::WIDTH_FORM)
+    $dialog = $this->newDialog()
       ->setTitle(pht('Change Username'))
-      ->setValidationException($validation_exception)
-      ->appendParagraph($inst1)
-      ->appendParagraph($inst2)
-      ->appendParagraph($inst3)
-      ->appendParagraph($inst4)
-      ->appendParagraph($inst5)
-      ->appendParagraph(null)
+      ->setValidationException($validation_exception);
+
+    foreach ($instructions as $instruction) {
+      $dialog->appendParagraph($instruction);
+    }
+
+    $dialog
       ->appendForm($form)
       ->addSubmitButton(pht('Rename User'))
       ->addCancelButton($done_uri);
+
+    return $dialog;
   }
 
 }

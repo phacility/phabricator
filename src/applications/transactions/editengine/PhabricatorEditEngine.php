@@ -2523,6 +2523,8 @@ abstract class PhabricatorEditEngine
   }
 
   final public function newBulkEditMap() {
+    $viewer = $this->getViewer();
+
     $config = $this->loadDefaultConfiguration();
     if (!$config) {
       throw new Exception(
@@ -2541,6 +2543,8 @@ abstract class PhabricatorEditEngine
       if ($bulk_type === null) {
         continue;
       }
+
+      $bulk_type->setViewer($viewer);
 
       $bulk_label = $type->getBulkEditLabel();
       if ($bulk_label === null) {

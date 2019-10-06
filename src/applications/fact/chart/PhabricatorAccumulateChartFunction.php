@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorAccumulateChartFunction
-  extends PhabricatorChartFunction {
+  extends PhabricatorHigherOrderChartFunction {
 
   const FUNCTIONKEY = 'accumulate';
 
@@ -11,14 +11,6 @@ final class PhabricatorAccumulateChartFunction
         ->setName('x')
         ->setType('function'),
     );
-  }
-
-  public function getDomain() {
-    return $this->getArgument('x')->getDomain();
-  }
-
-  public function newInputValues(PhabricatorChartDataQuery $query) {
-    return $this->getArgument('x')->newInputValues($query);
   }
 
   public function evaluateFunction(array $xv) {

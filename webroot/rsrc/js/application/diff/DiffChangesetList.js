@@ -827,6 +827,26 @@ JX.install('DiffChangesetList', {
         });
       list.addItem(highlight_item);
 
+      var engine_item = new JX.PHUIXActionView()
+        .setIcon('fa-file-image-o')
+        .setName(pht('View As...'))
+        .setHandler(function(e) {
+          var params = {
+            engine: changeset.getDocumentEngine(),
+          };
+
+          new JX.Workflow('/services/viewas/', params)
+            .setHandler(function(r) {
+              changeset.setDocumentEngine(r.engine);
+              changeset.reload();
+            })
+            .start();
+
+          e.prevent();
+          menu.close();
+        });
+      list.addItem(engine_item);
+
       add_link('fa-arrow-left', pht('Show Raw File (Left)'), data.leftURI);
       add_link('fa-arrow-right', pht('Show Raw File (Right)'), data.rightURI);
       add_link('fa-pencil', pht('Open in Editor'), data.editor, true);
@@ -860,6 +880,7 @@ JX.install('DiffChangesetList', {
 
         encoding_item.setDisabled(!changeset.isLoaded());
         highlight_item.setDisabled(!changeset.isLoaded());
+        engine_item.setDisabled(!changeset.isLoaded());
 
         if (changeset.isLoaded()) {
           if (changeset.getRenderer() == '2up') {
@@ -1174,30 +1195,26 @@ JX.install('DiffChangesetList', {
         bot = tmp;
       }
 
-      // Find the leftmost cell that we're going to highlight: this is the next
-      // <td /> in the row. In 2up views, it should be directly adjacent. In
-      // 1up views, we may have to skip over the other line number column.
-      var l = top;
-      while (JX.DOM.isType(l, 'th')) {
-        l = l.nextSibling;
+      // Find the leftmost cell that we're going to highlight. This is the
+      // next sibling with a "data-copy-mode" attribute, which is a marker
+      // for the cell with actual content in it.
+      var content_cell = top;
+      while (content_cell && !content_cell.getAttribute('data-copy-mode')) {
+        content_cell = content_cell.nextSibling;
       }
 
-      // Find the rightmost cell that we're going to highlight: this is the
-      // farthest consecutive, adjacent <td /> in the row. Sometimes the left
-      // and right nodes are the same (left side of 2up view); sometimes we're
-      // going to highlight several nodes (copy + code + coverage).
-      var r = l;
-      while (r.nextSibling && JX.DOM.isType(r.nextSibling, 'td')) {
-        r = r.nextSibling;
+      // If we didn't find a cell to highlight, don't highlight anything.
+      if (!content_cell) {
+        return;
       }
 
-      var pos = JX.$V(l)
-        .add(JX.Vector.getAggregateScrollForNode(l));
+      var pos = JX.$V(content_cell)
+        .add(JX.Vector.getAggregateScrollForNode(content_cell));
 
-      var dim = JX.$V(r)
-        .add(JX.Vector.getAggregateScrollForNode(r))
+      var dim = JX.$V(content_cell)
+        .add(JX.Vector.getAggregateScrollForNode(content_cell))
         .add(-pos.x, -pos.y)
-        .add(JX.Vector.getDim(r));
+        .add(JX.Vector.getDim(content_cell));
 
       var bpos = JX.$V(bot)
         .add(JX.Vector.getAggregateScrollForNode(bot));
