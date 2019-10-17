@@ -301,6 +301,12 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       ->execute();
     $boards = mpull($boards, null, 'getPHID');
 
+    foreach ($boards as $key => $board) {
+      if (!($board instanceof PhabricatorWorkboardInterface)) {
+        unset($boards[$key]);
+      }
+    }
+
     if (!$this->fetchAllBoards) {
       foreach ($boards as $key => $board) {
         if (!$board->getHasWorkboard()) {

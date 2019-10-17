@@ -13,7 +13,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorConduitResultInterface,
     PhabricatorColumnProxyInterface,
     PhabricatorSpacesInterface,
-    PhabricatorEditEngineSubtypeInterface {
+    PhabricatorEditEngineSubtypeInterface,
+    PhabricatorWorkboardInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
