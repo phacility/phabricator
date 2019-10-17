@@ -103,7 +103,7 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
         $newcode2[] = $altcodearr[$randomlines_new[$c++]];
       }
     }
-    return implode($newcode2, "\n");
+    return implode("\n", $newcode2);
   }
 
 }
