@@ -1743,12 +1743,6 @@ final class DifferentialChangesetParser extends Phobject {
     if ($new_engines !== null && $old_engines !== null) {
       $shared_engines = array_intersect_key($new_engines, $old_engines);
       $default_engine = head_key($new_engines);
-
-      foreach ($shared_engines as $key => $shared_engine) {
-        if (!$shared_engine->canDiffDocuments($old_ref, $new_ref)) {
-          unset($shared_engines[$key]);
-        }
-      }
     } else if ($new_engines !== null) {
       $shared_engines = $new_engines;
       $default_engine = head_key($shared_engines);
@@ -1757,6 +1751,12 @@ final class DifferentialChangesetParser extends Phobject {
       $default_engine = head_key($shared_engines);
     } else {
       return null;
+    }
+
+    foreach ($shared_engines as $key => $shared_engine) {
+      if (!$shared_engine->canDiffDocuments($old_ref, $new_ref)) {
+        unset($shared_engines[$key]);
+      }
     }
 
     $engine_key = $this->getDocumentEngineKey();
