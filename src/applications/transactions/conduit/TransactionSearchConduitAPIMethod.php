@@ -103,8 +103,11 @@ EOREMARKUP
     if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
       throw new Exception(
         pht(
-          'Object "%s" does not implement "%s", so transactions can not '.
-          'be loaded for it.'));
+          'Object "%s" (of type "%s") does not implement "%s", so '.
+          'transactions can not be loaded for it.',
+          $object_name,
+          get_class($object),
+          'PhabricatorApplicationTransactionInterface'));
     }
 
     $xaction_query = PhabricatorApplicationTransactionQuery::newQueryForObject(

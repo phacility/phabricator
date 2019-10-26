@@ -36,7 +36,7 @@ final class PhabricatorProjectCardView extends AphrontTagView {
     $classes[] = 'project-card-'.$color;
 
     return array(
-      'class' => implode($classes, ' '),
+      'class' => implode(' ', $classes),
     );
   }
 

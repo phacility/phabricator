@@ -316,12 +316,12 @@ div.phui-property-list-stacked .phui-property-list-properties
 }
 
 td.new .jupyter-cell-code-line {
-  background: {$new-background};
+  background: rgba(255, 255, 255, 0.5);
   border-color: {$new-bright};
 }
 
 td.old .jupyter-cell-code-line {
-  background: {$old-background};
+  background: rgba(255, 255, 255, 0.5);
   border-color: {$old-bright};
 }
 

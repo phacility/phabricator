@@ -371,17 +371,27 @@ final class DifferentialChangesetOneUpRenderer
           $cell_classes = $block_diff->getNewClasses();
         }
       } else if ($row_type === 'old') {
+        if (!$old_ref) {
+          continue;
+        }
+
         $cell_content = $engine->newBlockContentView(
           $old_ref,
           $old);
+
         $cell_classes[] = 'old';
         $cell_classes[] = 'old-full';
 
         $new_key = null;
       } else if ($row_type === 'new') {
+        if (!$new_ref) {
+          continue;
+        }
+
         $cell_content = $engine->newBlockContentView(
           $new_ref,
           $new);
+
         $cell_classes[] = 'new';
         $cell_classes[] = 'new-full';
 

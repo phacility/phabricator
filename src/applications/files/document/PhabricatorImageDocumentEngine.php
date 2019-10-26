@@ -18,21 +18,38 @@ final class PhabricatorImageDocumentEngine
   }
 
   public function canDiffDocuments(
-    PhabricatorDocumentRef $uref,
-    PhabricatorDocumentRef $vref) {
+    PhabricatorDocumentRef $uref = null,
+    PhabricatorDocumentRef $vref = null) {
 
-    // For now, we can only render a rich image diff if both documents have
+    // For now, we can only render a rich image diff if the documents have
     // their data stored in Files already.
 
-    return ($uref->getFile() && $vref->getFile());
+    if ($uref && !$uref->getFile()) {
+      return false;
+    }
+
+    if ($vref && !$vref->getFile()) {
+      return false;
+    }
+
+    return true;
   }
 
   public function newEngineBlocks(
-    PhabricatorDocumentRef $uref,
-    PhabricatorDocumentRef $vref) {
+    PhabricatorDocumentRef $uref = null,
+    PhabricatorDocumentRef $vref = null) {
 
-    $u_blocks = $this->newDiffBlocks($uref);
-    $v_blocks = $this->newDiffBlocks($vref);
+    if ($uref) {
+      $u_blocks = $this->newDiffBlocks($uref);
+    } else {
+      $u_blocks = array();
+    }
+
+    if ($vref) {
+      $v_blocks = $this->newDiffBlocks($vref);
+    } else {
+      $v_blocks = array();
+    }
 
     return id(new PhabricatorDocumentEngineBlocks())
       ->addBlockList($uref, $u_blocks)

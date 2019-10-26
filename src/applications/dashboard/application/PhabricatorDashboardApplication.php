@@ -69,7 +69,7 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
           'PhabricatorDashboardPortalListController',
         $this->getEditRoutePattern('edit/') =>
           'PhabricatorDashboardPortalEditController',
-        'view/(?P<portalID>\d)/' => array(
+        'view/(?P<portalID>\d+)/' => array(
             '' => 'PhabricatorDashboardPortalViewController',
           ) + $menu_rules,
 

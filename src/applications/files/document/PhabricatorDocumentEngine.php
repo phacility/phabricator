@@ -32,8 +32,8 @@ abstract class PhabricatorDocumentEngine
   }
 
   public function canDiffDocuments(
-    PhabricatorDocumentRef $uref,
-    PhabricatorDocumentRef $vref) {
+    PhabricatorDocumentRef $uref = null,
+    PhabricatorDocumentRef $vref = null) {
     return false;
   }
 
