@@ -109,7 +109,7 @@ if ($authstruct === null) {
 if ($sshd_key !== null) {
   $matches = array();
   foreach ($authstruct['keys'] as $key => $key_struct) {
-    if (phutil_hashes_are_identical($key_struct['key'], $sshd_key)) {
+    if ($key_struct['key'] === $sshd_key) {
       $matches[$key] = $key_struct;
     }
   }
