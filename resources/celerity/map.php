@@ -12,7 +12,7 @@ return array(
     'core.pkg.css' => '686ae87c',
     'core.pkg.js' => '6e5c894f',
     'differential.pkg.css' => '607c84be',
-    'differential.pkg.js' => 'a0212a0b',
+    'differential.pkg.js' => '1b97518d',
     'diffusion.pkg.css' => '42c75c37',
     'diffusion.pkg.js' => 'a98c0bf7',
     'maniphest.pkg.css' => '35995d6d',
@@ -428,7 +428,7 @@ return array(
     'rsrc/js/application/releeph/releeph-preview-branch.js' => '75184d68',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => '9f081f05',
     'rsrc/js/application/releeph/releeph-request-typeahead.js' => 'aa3a100c',
-    'rsrc/js/application/repository/repository-crossreference.js' => 'c15122b4',
+    'rsrc/js/application/repository/repository-crossreference.js' => '1c95ea63',
     'rsrc/js/application/search/behavior-reorder-profile-menu-items.js' => 'e5bdb730',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'b86f297f',
     'rsrc/js/application/transactions/behavior-comment-actions.js' => '4dffaeb2',
@@ -682,7 +682,7 @@ return array(
     'javelin-behavior-reorder-applications' => 'aa371860',
     'javelin-behavior-reorder-columns' => '8ac32fd9',
     'javelin-behavior-reorder-profile-menu-items' => 'e5bdb730',
-    'javelin-behavior-repository-crossreference' => 'c15122b4',
+    'javelin-behavior-repository-crossreference' => '1c95ea63',
     'javelin-behavior-scrollbar' => '92388bae',
     'javelin-behavior-search-reorder-queries' => 'b86f297f',
     'javelin-behavior-select-content' => 'e8240b50',
@@ -1033,6 +1033,12 @@ return array(
     '1c850a26' => array(
       'javelin-install',
       'javelin-util',
+    ),
+    '1c95ea63' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-uri',
     ),
     '1cab0e9a' => array(
       'javelin-behavior',
@@ -1976,12 +1982,6 @@ return array(
     ),
     'c03f2fb4' => array(
       'javelin-install',
-    ),
-    'c15122b4' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-uri',
     ),
     'c2c500a7' => array(
       'javelin-install',
