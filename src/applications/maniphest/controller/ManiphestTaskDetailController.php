@@ -413,8 +413,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
       foreach ($commit_phids as $phid) {
         $revisions_commits[$phid] = $handles->renderHandle($phid)
-          ->setShowHovercard(true)
-          ->setShowStateIcon(true);
+          ->setShowHovercard(true);
         $revision_phid = key($drev_edges[$phid][$commit_drev]);
         $revision_handle = $handles->getHandleIfExists($revision_phid);
         if ($revision_handle) {
@@ -435,8 +434,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
       $edge_handles = $viewer->loadHandles(array_keys($edges[$edge_type]));
 
-      $edge_list = $edge_handles->renderList()
-        ->setShowStateIcons(true);
+      $edge_list = $edge_handles->renderList();
 
       $view->addProperty($edge_name, $edge_list);
     }
