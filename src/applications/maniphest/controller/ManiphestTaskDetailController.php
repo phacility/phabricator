@@ -593,6 +593,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $handle_phids = array();
     $any_linked = false;
+    $any_status = false;
 
     $idx = 0;
     $objects = array();
@@ -623,7 +624,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
             ->setIcon($status->getIcon())
             ->setColor($status->getColor())
             ->setName($status->getName());
-
         }
       }
 
@@ -750,9 +750,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       if ($repository_phid !== $last_repository) {
         $repository_link = null;
         if ($repository_phid) {
-          $repository_link = $handles[$repository_phid]->renderLink();
+          $repository_handle = $handles[$repository_phid];
           $rows[] = array(
-            $repository_link,
+            $repository_handle->renderLink(),
           );
           $rowd[] = true;
         }
@@ -772,6 +772,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setIcon($handle->getIcon());
 
       $status_view = $object['status'];
+      if ($status_view) {
+        $any_status = true;
+      }
 
       $revision_tags = array();
       foreach ($object['revisionPHIDs'] as $link_phid) {
@@ -797,16 +800,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $changes_table = id(new AphrontTableView($rows))
       ->setNoDataString(pht('This task has no related commits or revisions.'))
       ->setRowDividers($rowd)
-      ->setHeaders(
-        array(
-          null,
-          null,
-          null,
-          pht('Revision/Commit'),
-        ))
       ->setColumnClasses(
         array(
-          'center',
+          'indent center',
           null,
           null,
           'wide pri object-link',
@@ -814,14 +810,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setColumnVisibility(
         array(
           true,
-          true,
+          $any_status,
           $any_linked,
           true,
         ))
       ->setDeviceVisibility(
         array(
           false,
-          true,
+          $any_status,
           false,
           true,
         ));

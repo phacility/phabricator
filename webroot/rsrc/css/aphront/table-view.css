@@ -61,6 +61,10 @@
   padding: 8px 12px;
 }
 
+.aphront-table-view td.indent {
+  padding-left: 24px;
+}
+
 .aphront-table-view th {
   border-bottom: 1px solid {$thinblueborder};
 }

@@ -306,7 +306,7 @@ final class AphrontTableView extends AphrontView {
               'td',
               array(
                 'class' => 'row-divider',
-                'colspan' => count($headers),
+                'colspan' => count($visibility),
               ),
               $value);
             $row_idx = -1;
