@@ -594,7 +594,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $handle_phids = array();
     $any_linked = false;
 
-    $tail = array();
+    $idx = 0;
+    $objects = array();
     foreach ($commit_phids as $commit_phid) {
       $handle_phids[] = $commit_phid;
 
@@ -654,16 +655,20 @@ final class ManiphestTaskDetailController extends ManiphestController {
         );
       }
 
-      $tail[] = array(
+      $objects[] = array(
         'objectPHID' => $commit_phid,
         'objectLink' => $object_link,
         'repositoryPHID' => $repository_phid,
         'revisionPHIDs' => $link_phids,
         'status' => $status_view,
+        'order' => id(new PhutilSortVector())
+          ->addInt($repository_phid ? 1 : 0)
+          ->addString((string)$repository_phid)
+          ->addInt(1)
+          ->addInt($idx++),
       );
     }
 
-    $head = array();
     foreach ($revision_phids as $revision_phid) {
       $handle_phids[] = $revision_phid;
 
@@ -717,20 +722,44 @@ final class ManiphestTaskDetailController extends ManiphestController {
         );
       }
 
-      $head[] = array(
+      $objects[] = array(
         'objectPHID' => $revision_phid,
         'objectLink' => $object_link,
         'repositoryPHID' => $repository_phid,
         'revisionPHIDs' => array(),
         'status' => $status_view,
+        'order' => id(new PhutilSortVector())
+          ->addInt($repository_phid ? 1 : 0)
+          ->addString((string)$repository_phid)
+          ->addInt(0)
+          ->addInt($idx++),
       );
     }
 
-    $objects = array_merge($head, $tail);
     $handles = $viewer->loadHandles($handle_phids);
 
+    $order = ipull($objects, 'order');
+    $order = msortv($order, 'getSelf');
+    $objects = array_select_keys($objects, array_keys($order));
+
+    $last_repository = false;
     $rows = array();
+    $rowd = array();
     foreach ($objects as $object) {
+      $repository_phid = $object['repositoryPHID'];
+      if ($repository_phid !== $last_repository) {
+        $repository_link = null;
+        if ($repository_phid) {
+          $repository_link = $handles[$repository_phid]->renderLink();
+          $rows[] = array(
+            $repository_link,
+          );
+          $rowd[] = true;
+        }
+
+        $last_repository = $repository_phid;
+      }
+
       $object_phid = $object['objectPHID'];
       $handle = $handles[$object_phid];
 
@@ -741,12 +770,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
       $object_icon = id(new PHUIIconView())
         ->setIcon($handle->getIcon());
-
-      $repository_link = null;
-      $repository_phid = $object['repositoryPHID'];
-      if ($repository_phid) {
-        $repository_link = $handles[$repository_phid]->renderLink();
-      }
 
       $status_view = $object['status'];
 
@@ -762,10 +785,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
         phutil_tag('br'),
         $revision_tags);
 
+      $rowd[] = false;
       $rows[] = array(
         $object_icon,
         $status_view,
-        $repository_link,
         $revision_tags,
         $object_link,
       );
@@ -773,11 +796,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $changes_table = id(new AphrontTableView($rows))
       ->setNoDataString(pht('This task has no related commits or revisions.'))
+      ->setRowDividers($rowd)
       ->setHeaders(
         array(
           null,
           null,
-          pht('Repository'),
           null,
           pht('Revision/Commit'),
         ))
@@ -786,12 +809,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
           'center',
           null,
           null,
-          null,
           'wide pri object-link',
         ))
       ->setColumnVisibility(
         array(
-          true,
           true,
           true,
           $any_linked,
@@ -801,7 +822,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         array(
           false,
           true,
-          false,
           false,
           true,
         ));
