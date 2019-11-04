@@ -44,15 +44,6 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
       if ($revision->isClosed()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
-
-      $icon = $revision->getStatusIcon();
-      $color = $revision->getStatusIconColor();
-      $name = $revision->getStatusDisplayName();
-
-      $handle
-        ->setStateIcon($icon)
-        ->setStateColor($color)
-        ->setStateName($name);
     }
   }
 

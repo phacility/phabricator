@@ -65,6 +65,35 @@ final class PhabricatorProjectSearchEngine
           pht(
             'Pass true to find only milestones, or false to omit '.
             'milestones.')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Root Projects'))
+        ->setKey('isRoot')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Root Projects'),
+          pht('Hide Root Projects'))
+        ->setDescription(
+          pht(
+            'Pass true to find only root projects, or false to omit '.
+            'root projects.')),
+      id(new PhabricatorSearchIntField())
+        ->setLabel(pht('Minimum Depth'))
+        ->setKey('minDepth')
+        ->setIsHidden(true)
+        ->setDescription(
+          pht(
+            'Find projects with a given minimum depth. Root projects '.
+            'have depth 0, their immediate children have depth 1, and '.
+            'so on.')),
+      id(new PhabricatorSearchIntField())
+        ->setLabel(pht('Maximum Depth'))
+        ->setKey('maxDepth')
+        ->setIsHidden(true)
+        ->setDescription(
+          pht(
+            'Find projects with a given maximum depth. Root projects '.
+            'have depth 0, their immediate children have depth 1, and '.
+            'so on.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Subtypes'))
         ->setKey('subtypes')
@@ -135,6 +164,42 @@ final class PhabricatorProjectSearchEngine
 
     if ($map['isMilestone'] !== null) {
       $query->withIsMilestone($map['isMilestone']);
+    }
+
+    $min_depth = $map['minDepth'];
+    $max_depth = $map['maxDepth'];
+
+    if ($min_depth !== null || $max_depth !== null) {
+      if ($min_depth !== null && $max_depth !== null) {
+        if ($min_depth > $max_depth) {
+          throw new Exception(
+            pht(
+              'Search constraint "minDepth" must be no larger than '.
+              'search constraint "maxDepth".'));
+        }
+      }
+    }
+
+    if ($map['isRoot'] !== null) {
+      if ($map['isRoot']) {
+        if ($max_depth === null) {
+          $max_depth = 0;
+        } else {
+          $max_depth = min(0, $max_depth);
+        }
+
+        $query->withDepthBetween(null, 0);
+      } else {
+        if ($min_depth === null) {
+          $min_depth = 1;
+        } else {
+          $min_depth = max($min_depth, 1);
+        }
+      }
+    }
+
+    if ($min_depth !== null || $max_depth !== null) {
+      $query->withDepthBetween($min_depth, $max_depth);
     }
 
     if ($map['parentPHIDs']) {

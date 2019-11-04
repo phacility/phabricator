@@ -29,6 +29,7 @@ final class PhabricatorFactChartFunction
     $key_id = id(new PhabricatorFactKeyDimension())
       ->newDimensionID($fact->getKey());
     if (!$key_id) {
+      $this->map = array();
       return;
     }
 
