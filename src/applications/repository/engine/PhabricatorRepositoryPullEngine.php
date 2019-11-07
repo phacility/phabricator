@@ -421,7 +421,7 @@ final class PhabricatorRepositoryPullEngine
     // checked out. See T13280.
 
     $future = $repository->getRemoteCommandFuture(
-      'fetch --update-head-ok -- %P %Ls',
+      'fetch --no-tags --update-head-ok -- %P %Ls',
       $repository->getRemoteURIEnvelope(),
       $fetch_rules);
 
