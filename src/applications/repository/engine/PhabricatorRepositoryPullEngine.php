@@ -257,16 +257,15 @@ final class PhabricatorRepositoryPullEngine
 
     $path = rtrim($repository->getLocalPath(), '/');
 
-    if ($repository->isHosted()) {
-      $repository->execxRemoteCommand(
-        'init --bare -- %s',
-        $path);
-    } else {
-      $repository->execxRemoteCommand(
-        'clone --bare -- %P %s',
-        $repository->getRemoteURIEnvelope(),
-        $path);
-    }
+    // See T13448. In all cases, we create repositories by using "git init"
+    // to build a bare, empty working copy. If we try to use "git clone"
+    // instead, we'll pull in too many refs if "Fetch Refs" is also
+    // configured. There's no apparent way to make "git clone" behave narrowly
+    // and no apparent reason to bother.
+
+    $repository->execxRemoteCommand(
+      'init --bare -- %s',
+      $path);
   }
 
 
@@ -290,29 +289,27 @@ final class PhabricatorRepositoryPullEngine
         $files = Filesystem::listDirectory($path, $include_hidden = true);
         if (!$files) {
           $message = pht(
-            "Expected to find a git repository at '%s', but there ".
-            "is an empty directory there. Remove the directory: the daemon ".
-            "will run '%s' for you.",
-            $path,
-            'git clone');
+            'Expected to find a Git repository at "%s", but there is an '.
+            'empty directory there. Remove the directory. A daemon will '.
+            'construct the working copy for you.',
+            $path);
         } else {
           $message = pht(
-            "Expected to find a git repository at '%s', but there is ".
-            "a non-repository directory (with other stuff in it) there. Move ".
-            "or remove this directory (or reconfigure the repository to use a ".
-            "different directory), and then either clone a repository ".
-            "yourself or let the daemon do it.",
+            'Expected to find a Git repository at "%s", but there is '.
+            'a non-repository directory (with other stuff in it) there. '.
+            'Move or remove this directory. A daemon will construct '.
+            'the working copy for you.',
             $path);
         }
       } else if (is_file($path)) {
         $message = pht(
-          "Expected to find a git repository at '%s', but there is a ".
-          "file there instead. Remove it and let the daemon clone a ".
-          "repository for you.",
+          'Expected to find a Git repository at "%s", but there is a '.
+          'file there instead. Move or remove this file. A daemon will '.
+          'construct the working copy for you.',
           $path);
       } else {
         $message = pht(
-          "Expected to find a git repository at '%s', but did not.",
+          'Expected to find a git repository at "%s", but did not.',
           $path);
       }
     } else {
@@ -327,11 +324,10 @@ final class PhabricatorRepositoryPullEngine
       } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
         $err = true;
         $message = pht(
-          "Expected to find repo at '%s', but the actual git repository root ".
-          "for this directory is '%s'. Something is misconfigured. ".
-          "The repository's 'Local Path' should be set to some place where ".
-          "the daemon can check out a working copy, ".
-          "and should not be inside another git repository.",
+          'Expected to find a Git repository at "%s", but the actual Git '.
+          'repository root for this directory is "%s". Something is '.
+          'misconfigured. This directory should be writable by the daemons '.
+          'and not inside another Git repository.',
           $path,
           $repo_path);
       }
