@@ -181,6 +181,15 @@ JX.install('DraggableList', {
         return;
       }
 
+      // See T13452. If this is an ungrabble part of the item, don't start a
+      // drag. We use this to allow users to select text on cards.
+      var target = e.getTarget();
+      if (target) {
+        if (JX.Stratcom.hasSigil(target, 'ungrabbable')) {
+          return;
+        }
+      }
+
       if (JX.Stratcom.pass()) {
         // Let other handlers deal with this event before we do.
         return;
