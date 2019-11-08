@@ -371,7 +371,7 @@ final class DifferentialChangesetOneUpRenderer
           $cell_classes = $block_diff->getNewClasses();
         }
       } else if ($row_type === 'old') {
-        if (!$old_ref) {
+        if (!$old_ref || !$old) {
           continue;
         }
 
@@ -384,7 +384,7 @@ final class DifferentialChangesetOneUpRenderer
 
         $new_key = null;
       } else if ($row_type === 'new') {
-        if (!$new_ref) {
+        if (!$new_ref || !$new) {
           continue;
         }
 
