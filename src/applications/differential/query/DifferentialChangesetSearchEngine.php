@@ -22,6 +22,10 @@ final class DifferentialChangesetSearchEngine
     return 'PhabricatorDifferentialApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     $query = id(new DifferentialChangesetQuery());
 
