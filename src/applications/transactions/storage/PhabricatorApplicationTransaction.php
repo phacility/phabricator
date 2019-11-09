@@ -1133,6 +1133,8 @@ abstract class PhabricatorApplicationTransaction
         } else {
           $fragments = array();
           foreach ($moves as $move) {
+            $to_column = $move['columnPHID'];
+            $board_phid = $move['boardPHID'];
             $fragments[] = pht(
               '%s (%s)',
               $this->renderHandleLink($board_phid),
