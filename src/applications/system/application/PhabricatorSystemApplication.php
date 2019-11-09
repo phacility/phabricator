@@ -14,6 +14,12 @@ final class PhabricatorSystemApplication extends PhabricatorApplication {
     return true;
   }
 
+  public function getEventListeners() {
+    return array(
+      new PhabricatorSystemDebugUIEventListener(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/status/' => 'PhabricatorStatusController',

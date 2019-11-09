@@ -399,7 +399,7 @@ abstract class HeraldAdapter extends Phobject {
       self::CONDITION_IS_NOT_ANY      => pht('is not any of'),
       self::CONDITION_INCLUDE_ALL     => pht('include all of'),
       self::CONDITION_INCLUDE_ANY     => pht('include any of'),
-      self::CONDITION_INCLUDE_NONE    => pht('do not include'),
+      self::CONDITION_INCLUDE_NONE    => pht('include none of'),
       self::CONDITION_IS_ME           => pht('is myself'),
       self::CONDITION_IS_NOT_ME       => pht('is not myself'),
       self::CONDITION_REGEXP          => pht('matches regexp'),

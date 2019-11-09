@@ -71,21 +71,30 @@ final class PhabricatorUserUsernameTransaction
       }
 
       if (!strlen($new)) {
-        $errors[] = $this->newRequiredError(
-          pht('New username is required.'),  $xaction);
+        $errors[] = $this->newInvalidError(
+          pht('New username is required.'),
+          $xaction);
       } else if (!PhabricatorUser::validateUsername($new)) {
         $errors[] = $this->newInvalidError(
-          PhabricatorUser::describeValidUsername(), $xaction);
+          PhabricatorUser::describeValidUsername(),
+          $xaction);
       }
 
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withUsernames(array($new))
         ->executeOne();
-
       if ($user) {
-        $errors[] = $this->newInvalidError(
-          pht('Another user already has that username.'), $xaction);
+        // See T13446. We may be changing the letter case of a username, which
+        // is a perfectly fine edit.
+        $is_self = ($user->getPHID() === $object->getPHID());
+        if (!$is_self) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'Another user already has the username "%s".',
+              $new),
+            $xaction);
+        }
       }
 
     }

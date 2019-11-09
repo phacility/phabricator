@@ -52,6 +52,14 @@ final class PhabricatorActionListView extends AphrontTagView {
       $action->setViewer($viewer);
     }
 
+    $sort = array();
+    foreach ($actions as $key => $action) {
+      $sort[$key] = id(new PhutilSortVector())
+        ->addInt($action->getOrder());
+    }
+    $sort = msortv($sort, 'getSelf');
+    $actions = array_select_keys($actions, array_keys($sort));
+
     require_celerity_resource('phabricator-action-list-view-css');
 
     $items = array();

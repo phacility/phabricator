@@ -123,8 +123,11 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
   }
 
   public function fillObjectFromData(DoorkeeperExternalObject $obj, $result) {
-    $id = $result['id'];
-    $uri = "https://app.asana.com/0/{$id}/{$id}";
+    $gid = $result['gid'];
+    $uri = urisprintf(
+      'https://app.asana.com/0/%s/%s',
+      $gid,
+      $gid);
     $obj->setObjectURI($uri);
   }
 
