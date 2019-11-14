@@ -68,6 +68,24 @@ final class DiffusionRepositoryIdentityEngine
   }
 
   private function updateIdentity(PhabricatorRepositoryIdentity $identity) {
+
+    // If we're updating an identity and it has a manual user PHID associated
+    // with it but the user is no longer valid, remove the value. This likely
+    // corresponds to a user that was destroyed.
+
+    $assigned_phid = $identity->getManuallySetUserPHID();
+    $unassigned = DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN;
+    if ($assigned_phid && ($assigned_phid !== $unassigned)) {
+      $viewer = $this->getViewer();
+      $user = id(new PhabricatorPeopleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($assigned_phid))
+        ->executeOne();
+      if (!$user) {
+        $identity->setManuallySetUserPHID(null);
+      }
+    }
+
     $resolved_phid = $this->resolveIdentity($identity);
 
     $identity
