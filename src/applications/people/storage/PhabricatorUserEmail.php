@@ -18,6 +18,7 @@ final class PhabricatorUserEmail
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'address' => 'sort128',
         'isVerified' => 'bool',
@@ -34,6 +35,10 @@ final class PhabricatorUserEmail
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getPHIDType() {
+    return PhabricatorPeopleUserEmailPHIDType::TYPECONST;
   }
 
   public function getVerificationURI() {
