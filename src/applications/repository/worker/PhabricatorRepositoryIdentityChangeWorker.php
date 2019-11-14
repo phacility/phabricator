@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorRepositoryIdentityChangeWorker
-extends PhabricatorWorker {
+  extends PhabricatorWorker {
 
   protected function doWork() {
     $viewer = PhabricatorUser::getOmnipotentUser();
@@ -15,18 +15,20 @@ extends PhabricatorWorker {
       ->executeOne();
 
     $emails = id(new PhabricatorUserEmail())->loadAllWhere(
-      'userPHID = %s ORDER BY address',
+      'userPHID = %s',
       $user->getPHID());
+
+    $identity_engine = id(new DiffusionRepositoryIdentityEngine())
+      ->setViewer($viewer);
 
     foreach ($emails as $email) {
       $identities = id(new PhabricatorRepositoryIdentityQuery())
         ->setViewer($viewer)
-        ->withEmailAddresses($email->getAddress())
+        ->withEmailAddresses(array($email->getAddress()))
         ->execute();
 
       foreach ($identities as $identity) {
-        $identity->setAutomaticGuessedUserPHID($user->getPHID())
-          ->save();
+        $identity_engine->newUpdatedIdentity($identity);
       }
     }
   }

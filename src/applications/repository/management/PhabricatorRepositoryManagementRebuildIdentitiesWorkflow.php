@@ -3,6 +3,8 @@
 final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
+  private $identityCache = array();
+
   protected function didConstruct() {
     $this
       ->setName('rebuild-identities')
@@ -94,31 +96,21 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
   }
 
   private function getIdentityForCommit(
-    PhabricatorRepositoryCommit $commit, $identity_name) {
+    PhabricatorRepositoryCommit $commit,
+    $raw_identity) {
 
-    static $seen = array();
-    $identity_key = PhabricatorHash::digestForIndex($identity_name);
-    if (empty($seen[$identity_key])) {
-      try {
-        $user_phid = id(new DiffusionResolveUserQuery())
-          ->withName($identity_name)
-          ->execute();
+    if (!isset($this->identityCache[$raw_identity])) {
+      $viewer = $this->getViewer();
 
-        $identity = id(new PhabricatorRepositoryIdentity())
-          ->setAuthorPHID($commit->getPHID())
-          ->setIdentityName($identity_name)
-          ->setAutomaticGuessedUserPHID($user_phid)
-          ->save();
-      } catch (AphrontDuplicateKeyQueryException $ex) {
-          // Somehow this identity already exists?
-        $identity = id(new PhabricatorRepositoryIdentityQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withIdentityNames(array($identity_name))
-          ->executeOne();
-      }
-      $seen[$identity_key] = $identity;
+      $identity = id(new DiffusionRepositoryIdentityEngine())
+        ->setViewer($viewer)
+        ->setSourcePHID($commit->getPHID())
+        ->newResolvedIdentity($raw_identity);
+
+      $this->identityCache[$raw_identity] = $identity;
     }
 
-    return $seen[$identity_key];
+    return $this->identityCache[$raw_identity];
   }
+
 }
