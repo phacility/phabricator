@@ -95,4 +95,12 @@ final class DiffusionRepositoryIdentityEngine
     return $identity;
   }
 
+  public function didUpdateEmailAddress($raw_address) {
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorRepositoryIdentityChangeWorker',
+      array(
+        'emailAddresses' => array($raw_address),
+      ));
+  }
+
 }
