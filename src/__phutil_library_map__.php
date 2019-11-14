@@ -11681,7 +11681,10 @@ phutil_register_library_map(array(
     'PhabricatorUserEditEngine' => 'PhabricatorEditEngine',
     'PhabricatorUserEditor' => 'PhabricatorEditor',
     'PhabricatorUserEditorTestCase' => 'PhabricatorTestCase',
-    'PhabricatorUserEmail' => 'PhabricatorUserDAO',
+    'PhabricatorUserEmail' => array(
+      'PhabricatorUserDAO',
+      'PhabricatorDestructibleInterface',
+    ),
     'PhabricatorUserEmailTestCase' => 'PhabricatorTestCase',
     'PhabricatorUserEmpowerTransaction' => 'PhabricatorUserTransactionType',
     'PhabricatorUserFerretEngine' => 'PhabricatorFerretEngine',

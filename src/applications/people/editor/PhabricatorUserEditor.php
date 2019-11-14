@@ -241,7 +241,8 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
           throw new Exception(pht('Email not owned by user!'));
         }
 
-        $email->delete();
+        id(new PhabricatorDestructionEngine())
+          ->destroyObject($email);
 
         $log = PhabricatorUserLog::initializeNewLog(
           $actor,

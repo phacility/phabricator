@@ -4,7 +4,9 @@
  * @task restrictions   Domain Restrictions
  * @task email          Email About Email
  */
-final class PhabricatorUserEmail extends PhabricatorUserDAO {
+final class PhabricatorUserEmail
+  extends PhabricatorUserDAO
+  implements PhabricatorDestructibleInterface {
 
   protected $userPHID;
   protected $address;
@@ -269,6 +271,15 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
       ->saveAndSend();
 
     return $this;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
   }
 
 }
