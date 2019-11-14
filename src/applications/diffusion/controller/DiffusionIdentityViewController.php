@@ -25,6 +25,9 @@ final class DiffusionIdentityViewController
       ->setHeaderIcon('fa-globe');
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      pht('Identities'),
+      $this->getApplicationURI('identity/'));
     $crumbs->addTextCrumb($identity->getObjectName());
     $crumbs->setBorder(true);
 

@@ -96,10 +96,17 @@ final class PhabricatorRepositoryIdentity
 
   public function save() {
     if ($this->manuallySetUserPHID) {
-      $this->currentEffectiveUserPHID = $this->manuallySetUserPHID;
+      $unassigned = DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN;
+      if ($this->manuallySetUserPHID === $unassigned) {
+        $effective_phid = null;
+      } else {
+        $effective_phid = $this->manuallySetUserPHID;
+      }
     } else {
-      $this->currentEffectiveUserPHID = $this->automaticGuessedUserPHID;
+      $effective_phid = $this->automaticGuessedUserPHID;
     }
+
+    $this->setCurrentEffectiveUserPHID($effective_phid);
 
     $email_address = $this->getIdentityEmailAddress();
 

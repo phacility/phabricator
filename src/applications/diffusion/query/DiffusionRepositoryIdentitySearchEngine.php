@@ -17,21 +17,35 @@ final class DiffusionRepositoryIdentitySearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Matching Users'))
+        ->setKey('effectivePHIDs')
+        ->setAliases(
+          array(
+            'effective',
+            'effectivePHID',
+          ))
+        ->setDescription(pht('Search for identities by effective user.')),
       id(new DiffusionIdentityAssigneeSearchField())
         ->setLabel(pht('Assigned To'))
-        ->setKey('assignee')
-        ->setDescription(pht('Search for identities by assignee.')),
+        ->setKey('assignedPHIDs')
+        ->setAliases(
+          array(
+            'assigned',
+            'assignedPHID',
+          ))
+        ->setDescription(pht('Search for identities by explicit assignee.')),
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Identity Contains'))
         ->setKey('match')
         ->setDescription(pht('Search for identities by substring.')),
       id(new PhabricatorSearchThreeStateField())
-        ->setLabel(pht('Is Assigned'))
+        ->setLabel(pht('Has Matching User'))
         ->setKey('hasEffectivePHID')
         ->setOptions(
           pht('(Show All)'),
-          pht('Show Only Assigned Identities'),
-          pht('Show Only Unassigned Identities')),
+          pht('Show Identities With Matching Users'),
+          pht('Show Identities Without Matching Users')),
     );
   }
 
@@ -46,8 +60,12 @@ final class DiffusionRepositoryIdentitySearchEngine
       $query->withIdentityNameLike($map['match']);
     }
 
-    if ($map['assignee']) {
-      $query->withAssigneePHIDs($map['assignee']);
+    if ($map['assignedPHIDs']) {
+      $query->withAssignedPHIDs($map['assignedPHIDs']);
+    }
+
+    if ($map['effectivePHIDs']) {
+      $query->withEffectivePHIDs($map['effectivePHIDs']);
     }
 
     return $query;
@@ -86,14 +104,53 @@ final class DiffusionRepositoryIdentitySearchEngine
 
     $viewer = $this->requireViewer();
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
+    $list = id(new PHUIObjectItemListView())
+      ->setViewer($viewer);
+
+    $phids = array();
+    foreach ($identities as $identity) {
+      $phids[] = $identity->getCurrentEffectiveUserPHID();
+      $phids[] = $identity->getManuallySetUserPHID();
+    }
+
+    $handles = $viewer->loadHandles($phids);
+
+    $unassigned = DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN;
+
     foreach ($identities as $identity) {
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Identity %d', $identity->getID()))
+        ->setObjectName($identity->getObjectName())
         ->setHeader($identity->getIdentityShortName())
         ->setHref($identity->getURI())
         ->setObject($identity);
+
+      $status_icon = 'fa-circle-o grey';
+
+      $effective_phid = $identity->getCurrentEffectiveUserPHID();
+      if ($effective_phid) {
+        $item->addIcon(
+          'fa-id-badge',
+          pht('Matches User: %s', $handles[$effective_phid]->getName()));
+
+        $status_icon = 'fa-id-badge';
+      }
+
+      $assigned_phid = $identity->getManuallySetUserPHID();
+      if ($assigned_phid) {
+        if ($assigned_phid === $unassigned) {
+          $item->addIcon(
+            'fa-ban',
+            pht('Explicitly Unassigned'));
+          $status_icon = 'fa-ban';
+        } else {
+          $item->addIcon(
+            'fa-user',
+            pht('Assigned To: %s', $handles[$assigned_phid]->getName()));
+          $status_icon = 'fa-user';
+        }
+      }
+
+      $item->setStatusIcon($status_icon);
 
       $list->addItem($item);
     }

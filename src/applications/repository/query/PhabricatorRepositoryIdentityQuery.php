@@ -7,7 +7,8 @@ final class PhabricatorRepositoryIdentityQuery
   private $phids;
   private $identityNames;
   private $emailAddresses;
-  private $assigneePHIDs;
+  private $assignedPHIDs;
+  private $effectivePHIDs;
   private $identityNameLike;
   private $hasEffectivePHID;
 
@@ -36,8 +37,13 @@ final class PhabricatorRepositoryIdentityQuery
     return $this;
   }
 
-  public function withAssigneePHIDs(array $assignees) {
-    $this->assigneePHIDs = $assignees;
+  public function withAssignedPHIDs(array $assigned) {
+    $this->assignedPHIDs = $assigned;
+    return $this;
+  }
+
+  public function withEffectivePHIDs(array $effective) {
+    $this->effectivePHIDs = $effective;
     return $this;
   }
 
@@ -75,11 +81,18 @@ final class PhabricatorRepositoryIdentityQuery
         $this->phids);
     }
 
-    if ($this->assigneePHIDs !== null) {
+    if ($this->assignedPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'repository_identity.manuallySetUserPHID IN (%Ls)',
+        $this->assignedPHIDs);
+    }
+
+    if ($this->effectivePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'repository_identity.currentEffectiveUserPHID IN (%Ls)',
-        $this->assigneePHIDs);
+        $this->effectivePHIDs);
     }
 
     if ($this->hasEffectivePHID !== null) {
