@@ -21,7 +21,7 @@ extends PhabricatorWorker {
     foreach ($emails as $email) {
       $identities = id(new PhabricatorRepositoryIdentityQuery())
         ->setViewer($viewer)
-        ->withEmailAddress($email->getAddress())
+        ->withEmailAddresses($email->getAddress())
         ->execute();
 
       foreach ($identities as $identity) {

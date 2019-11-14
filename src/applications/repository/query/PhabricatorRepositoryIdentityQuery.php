@@ -6,7 +6,7 @@ final class PhabricatorRepositoryIdentityQuery
   private $ids;
   private $phids;
   private $identityNames;
-  private $emailAddress;
+  private $emailAddresses;
   private $assigneePHIDs;
   private $identityNameLike;
   private $hasEffectivePHID;
@@ -31,8 +31,8 @@ final class PhabricatorRepositoryIdentityQuery
     return $this;
   }
 
-  public function withEmailAddress($address) {
-    $this->emailAddress = $address;
+  public function withEmailAddresses(array $addresses) {
+    $this->emailAddresses = $addresses;
     return $this;
   }
 
@@ -106,12 +106,11 @@ final class PhabricatorRepositoryIdentityQuery
         $name_hashes);
     }
 
-    if ($this->emailAddress !== null) {
-      $identity_style = "<{$this->emailAddress}>";
+    if ($this->emailAddresses !== null) {
       $where[] = qsprintf(
         $conn,
-        'repository_identity.identityNameRaw LIKE %<',
-        $identity_style);
+        'repository_identity.emailAddress IN (%Ls)',
+        $this->emailAddresses);
     }
 
     if ($this->identityNameLike != null) {
