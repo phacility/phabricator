@@ -101,7 +101,6 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
     if (empty($seen[$identity_key])) {
       try {
         $user_phid = id(new DiffusionResolveUserQuery())
-          ->withCommit($commit)
           ->withName($identity_name)
           ->execute();
 

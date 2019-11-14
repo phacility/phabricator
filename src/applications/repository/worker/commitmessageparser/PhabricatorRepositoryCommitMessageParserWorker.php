@@ -182,7 +182,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $user_name) {
 
     return id(new DiffusionResolveUserQuery())
-      ->withCommit($commit)
       ->withName($user_name)
       ->execute();
   }

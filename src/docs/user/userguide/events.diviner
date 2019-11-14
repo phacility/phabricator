@@ -159,35 +159,6 @@ will be available yet. Data available on this event:
   - `repository` The @{class:PhabricatorRepository} the commit was discovered
     in.
 
-== Diffusion: Lookup User ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_DIFFUSION_LOOKUPUSER`.
-
-This event is dispatched when the daemons are trying to link a commit to a
-Phabricator user account. You can listen for it to improve the accuracy of
-associating users with their commits.
-
-By default, Phabricator will try to find matches based on usernames, real names,
-or email addresses, but this can result in incorrect matches (e.g., if you have
-several employees with the same name) or failures to match (e.g., if someone
-changed their email address). Listening for this event allows you to intercept
-the lookup and supplement the results from another datasource.
-
-Data available on this event:
-
-  - `commit` The @{class:PhabricatorRepositoryCommit} that data is being looked
-    up for.
-  - `query` The author or committer string being looked up. This will usually
-    be something like "Abraham Lincoln <alincoln@logcabin.example.com>", but
-    comes from the commit metadata so it may not be well-formatted.
-  - `result` The current result from the lookup (Phabricator's best guess at
-    the user PHID of the user named in the "query"). To substitute the result
-    with a different result, replace this with the correct PHID in your event
-    listener.
-
-Using @{class@libphutil:PhutilEmailAddress} may be helpful in parsing the query.
-
 == Test: Did Run Test ==
 
 The constant for this event is
