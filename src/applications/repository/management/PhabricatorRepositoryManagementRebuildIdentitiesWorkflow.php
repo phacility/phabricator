@@ -98,7 +98,12 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
           ->needCommitData(true)
           ->withRepositoryIDs(array($repository->getID()));
 
-        $commit_iterator = new PhabricatorQueryIterator($commit_query);
+        // See T13457. Adjust ordering to hit keys better and tweak page size
+        // to improve performance slightly, since these records are small.
+        $commit_query->setOrderVector(array('-epoch', '-id'));
+
+        $commit_iterator = id(new PhabricatorQueryIterator($commit_query))
+          ->setPageSize(1000);
 
         $this->rebuildCommits($commit_iterator);
       }
