@@ -4218,7 +4218,6 @@ phutil_register_library_map(array(
     'PhabricatorPolicyRule' => 'applications/policy/rule/PhabricatorPolicyRule.php',
     'PhabricatorPolicyRulesView' => 'applications/policy/view/PhabricatorPolicyRulesView.php',
     'PhabricatorPolicySearchEngineExtension' => 'applications/policy/engineextension/PhabricatorPolicySearchEngineExtension.php',
-    'PhabricatorPolicyStrengthConstants' => 'applications/policy/constants/PhabricatorPolicyStrengthConstants.php',
     'PhabricatorPolicyTestCase' => 'applications/policy/__tests__/PhabricatorPolicyTestCase.php',
     'PhabricatorPolicyTestObject' => 'applications/policy/__tests__/PhabricatorPolicyTestObject.php',
     'PhabricatorPolicyType' => 'applications/policy/constants/PhabricatorPolicyType.php',
@@ -10730,7 +10729,6 @@ phutil_register_library_map(array(
     'PhabricatorPolicyRule' => 'Phobject',
     'PhabricatorPolicyRulesView' => 'AphrontView',
     'PhabricatorPolicySearchEngineExtension' => 'PhabricatorSearchEngineExtension',
-    'PhabricatorPolicyStrengthConstants' => 'PhabricatorPolicyConstants',
     'PhabricatorPolicyTestCase' => 'PhabricatorTestCase',
     'PhabricatorPolicyTestObject' => array(
       'Phobject',
