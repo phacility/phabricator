@@ -5,6 +5,7 @@ final class DiffusionRepositoryIdentityEngine
 
   private $viewer;
   private $sourcePHID;
+  private $dryRun;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -26,6 +27,15 @@ final class DiffusionRepositoryIdentityEngine
     }
 
     return $this->sourcePHID;
+  }
+
+  public function setDryRun($dry_run) {
+    $this->dryRun = $dry_run;
+    return $this;
+  }
+
+  public function getDryRun() {
+    return $this->dryRun;
   }
 
   public function newResolvedIdentity($raw_identity) {
@@ -88,9 +98,13 @@ final class DiffusionRepositoryIdentityEngine
 
     $resolved_phid = $this->resolveIdentity($identity);
 
-    $identity
-      ->setAutomaticGuessedUserPHID($resolved_phid)
-      ->save();
+    $identity->setAutomaticGuessedUserPHID($resolved_phid);
+
+    if ($this->getDryRun()) {
+      $identity->makeEphemeral();
+    } else {
+      $identity->save();
+    }
 
     return $identity;
   }

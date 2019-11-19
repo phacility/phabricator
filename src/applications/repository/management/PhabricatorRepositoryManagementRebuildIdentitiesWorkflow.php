@@ -4,6 +4,8 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
   private $identityCache = array();
+  private $phidCache = array();
+  private $dryRun;
 
   protected function didConstruct() {
     $this
@@ -51,6 +53,10 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
             'repeat' => true,
             'help' => pht('Rebuild identities for a raw commit string.'),
           ),
+          array(
+            'name' => 'dry-run',
+            'help' => pht('Show changes, but do not make any changes.'),
+          ),
         ));
   }
 
@@ -58,7 +64,6 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
     $viewer = $this->getViewer();
 
     $rebuilt_anything = false;
-
 
     $all_repositories = $args->getArg('all-repositories');
     $repositories = $args->getArg('repository');
@@ -79,6 +84,15 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
         pht(
           'Flags "--all-identities" and "--raw" are not '.
           'compatible.'));
+    }
+
+    $dry_run = $args->getArg('dry-run');
+    $this->dryRun = $dry_run;
+
+    if ($this->dryRun) {
+      $this->logWarn(
+        pht('DRY RUN'),
+        pht('This is a dry run, so no changes will be written.'));
     }
 
     if ($all_repositories || $repositories) {
@@ -245,10 +259,7 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
     $raw_identity) {
 
     if (!isset($this->identityCache[$raw_identity])) {
-      $viewer = $this->getViewer();
-
-      $identity = id(new DiffusionRepositoryIdentityEngine())
-        ->setViewer($viewer)
+      $identity = $this->newIdentityEngine()
         ->setSourcePHID($commit->getPHID())
         ->newResolvedIdentity($raw_identity);
 
@@ -317,7 +328,7 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
   }
 
   private function rebuildIdentities($identities) {
-    $viewer = $this->getViewer();
+    $dry_run = $this->dryRun;
 
     foreach ($identities as $identity) {
       $raw_identity = $identity->getIdentityName();
@@ -340,8 +351,7 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
       $old_auto = $identity->getAutomaticGuessedUserPHID();
       $old_assign = $identity->getManuallySetUserPHID();
 
-      $identity = id(new DiffusionRepositoryIdentityEngine())
-        ->setViewer($viewer)
+      $identity = $this->newIdentityEngine()
         ->newUpdatedIdentity($identity);
 
       $this->identityCache[$raw_identity] = $identity;
@@ -358,20 +368,38 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
           pht('No changes to identity.'));
       } else {
         if (!$same_auto) {
-          $this->logWarn(
-            pht('AUTOMATIC PHID'),
-            pht(
-              'Automatic user updated from "%s" to "%s".',
-              $this->renderPHID($old_auto),
-              $this->renderPHID($new_auto)));
+          if ($dry_run) {
+            $this->logWarn(
+              pht('DETECTED PHID'),
+              pht(
+                '(Dry Run) Would update detected user from "%s" to "%s".',
+                $this->renderPHID($old_auto),
+                $this->renderPHID($new_auto)));
+          } else {
+            $this->logWarn(
+              pht('DETECTED PHID'),
+              pht(
+                'Detected user updated from "%s" to "%s".',
+                $this->renderPHID($old_auto),
+                $this->renderPHID($new_auto)));
+          }
         }
         if (!$same_assign) {
-          $this->logWarn(
-            pht('ASSIGNED PHID'),
-            pht(
-              'Assigned user updated from "%s" to "%s".',
-              $this->renderPHID($old_assign),
-              $this->renderPHID($new_assign)));
+          if ($dry_run) {
+            $this->logWarn(
+              pht('ASSIGNED PHID'),
+              pht(
+                '(Dry Run) Would update assigned user from "%s" to "%s".',
+                $this->renderPHID($old_assign),
+                $this->renderPHID($new_assign)));
+          } else {
+            $this->logWarn(
+              pht('ASSIGNED PHID'),
+              pht(
+                'Assigned user updated from "%s" to "%s".',
+                $this->renderPHID($old_assign),
+                $this->renderPHID($new_assign)));
+          }
         }
       }
     }
@@ -380,9 +408,26 @@ final class PhabricatorRepositoryManagementRebuildIdentitiesWorkflow
   private function renderPHID($phid) {
     if ($phid == null) {
       return pht('NULL');
-    } else {
-      return $phid;
     }
+
+    if (!isset($this->phidCache[$phid])) {
+      $viewer = $this->getViewer();
+      $handles = $viewer->loadHandles(array($phid));
+      $this->phidCache[$phid] = pht(
+        '%s <%s>',
+        $handles[$phid]->getFullName(),
+        $phid);
+    }
+
+    return $this->phidCache[$phid];
+  }
+
+  private function newIdentityEngine() {
+    $viewer = $this->getViewer();
+
+    return id(new DiffusionRepositoryIdentityEngine())
+      ->setViewer($viewer)
+      ->setDryRun($this->dryRun);
   }
 
 }
