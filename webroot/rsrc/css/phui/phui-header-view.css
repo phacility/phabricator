@@ -213,33 +213,6 @@ body .phui-header-shell.phui-bleed-header
   -webkit-font-smoothing: auto;
 }
 
-.policy-header-callout.policy-adjusted-weaker {
-  background: {$sh-greenbackground};
-}
-
-.policy-header-callout.policy-adjusted-weaker .policy-link,
-.policy-header-callout.policy-adjusted-weaker .phui-icon-view {
-  color: {$sh-greentext};
-}
-
-.policy-header-callout.policy-adjusted-stronger {
-  background: {$sh-redbackground};
-}
-
-.policy-header-callout.policy-adjusted-stronger .policy-link,
-.policy-header-callout.policy-adjusted-stronger .phui-icon-view {
-  color: {$sh-redtext};
-}
-
-.policy-header-callout.policy-adjusted-different {
-  background: {$sh-orangebackground};
-}
-
-.policy-header-callout.policy-adjusted-different .policy-link,
-.policy-header-callout.policy-adjusted-different .phui-icon-view {
-  color: {$sh-orangetext};
-}
-
 .policy-header-callout.policy-adjusted-special {
   background: {$sh-indigobackground};
 }

@@ -40,10 +40,6 @@ abstract class PhabricatorPolicyCodex
       $this->capability);
   }
 
-  public function compareToDefaultPolicy(PhabricatorPolicy $policy) {
-    return null;
-  }
-
   final protected function newRule() {
     return new PhabricatorPolicyCodexRuleDescription();
   }

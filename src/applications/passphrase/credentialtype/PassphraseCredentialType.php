@@ -102,35 +102,6 @@ abstract class PassphraseCredentialType extends Phobject {
     return pht('Password');
   }
 
-
-  /**
-   * Return true if the provided credential requires a password to decrypt.
-   *
-   * @param PhutilOpaqueEnvelope  Credential secret value.
-   * @return bool                 True if the credential needs a password.
-   *
-   * @task password
-   */
-  public function requiresPassword(PhutilOpaqueEnvelope $secret) {
-    return false;
-  }
-
-
-  /**
-   * Return the decrypted credential secret, or `null` if the password does
-   * not decrypt the credential.
-   *
-   * @param PhutilOpaqueEnvelope  Credential secret value.
-   * @param PhutilOpaqueEnvelope  Credential password.
-   * @return
-   * @task password
-   */
-  public function decryptSecret(
-    PhutilOpaqueEnvelope $secret,
-    PhutilOpaqueEnvelope $password) {
-    return $secret;
-  }
-
   public function shouldRequireUsername() {
     return true;
   }
