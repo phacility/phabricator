@@ -345,40 +345,59 @@ final class PhabricatorProjectTransactionEditor
       $copy->setMilestoneNumber(1);
     }
 
-    $member_xaction = null;
-    foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() !== $type_edge) {
-        continue;
+    $hint = null;
+    if ($this->getIsMilestone()) {
+      // See T13462. If we're creating a milestone, predict that the members
+      // of the newly created milestone will be the same as the members of the
+      // parent project, since this is the governing rule.
+
+      $parent = $copy->getParentProject();
+
+      $parent = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs(array($parent->getPHID()))
+        ->needMembers(true)
+        ->executeOne();
+      $members = $parent->getMemberPHIDs();
+
+      $hint = array_fuse($members);
+    } else {
+      $member_xaction = null;
+      foreach ($xactions as $xaction) {
+        if ($xaction->getTransactionType() !== $type_edge) {
+          continue;
+        }
+
+        $edgetype = $xaction->getMetadataValue('edge:type');
+        if ($edgetype !== $edgetype_member) {
+          continue;
+        }
+
+        $member_xaction = $xaction;
       }
 
-      $edgetype = $xaction->getMetadataValue('edge:type');
-      if ($edgetype !== $edgetype_member) {
-        continue;
-      }
+      if ($member_xaction) {
+        $object_phid = $object->getPHID();
 
-      $member_xaction = $xaction;
+        if ($object_phid) {
+          $project = id(new PhabricatorProjectQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($object_phid))
+            ->needMembers(true)
+            ->executeOne();
+          $members = $project->getMemberPHIDs();
+        } else {
+          $members = array();
+        }
+
+        $clone_xaction = clone $member_xaction;
+        $hint = $this->getPHIDTransactionNewValue($clone_xaction, $members);
+        $hint = array_fuse($hint);
+      }
     }
 
-    if ($member_xaction) {
-      $object_phid = $object->getPHID();
-
-      if ($object_phid) {
-        $project = id(new PhabricatorProjectQuery())
-          ->setViewer($this->getActor())
-          ->withPHIDs(array($object_phid))
-          ->needMembers(true)
-          ->executeOne();
-        $members = $project->getMemberPHIDs();
-      } else {
-        $members = array();
-      }
-
-      $clone_xaction = clone $member_xaction;
-      $hint = $this->getPHIDTransactionNewValue($clone_xaction, $members);
+    if ($hint !== null) {
       $rule = new PhabricatorProjectMembersPolicyRule();
-
-      $hint = array_fuse($hint);
-
       PhabricatorPolicyRule::passTransactionHintToRule(
         $copy,
         $rule,
