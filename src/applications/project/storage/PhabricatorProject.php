@@ -107,7 +107,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->setHasMilestones(0)
       ->setHasSubprojects(0)
       ->setSubtype(PhabricatorEditEngineSubtype::SUBTYPE_DEFAULT)
-      ->attachParentProject(null);
+      ->attachParentProject($parent);
   }
 
   public function getCapabilities() {

@@ -336,6 +336,15 @@ final class PhabricatorProjectTransactionEditor
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
     $edgetype_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
 
+    // See T13462. If we're creating a milestone, set a dummy milestone
+    // number so the project behaves like a milestone and uses milestone
+    // policy rules. Otherwise, we'll end up checking the default policies
+    // (which are not relevant to milestones) instead of the parent project
+    // policies (which are the correct policies).
+    if ($this->getIsMilestone() && !$copy->isMilestone()) {
+      $copy->setMilestoneNumber(1);
+    }
+
     $member_xaction = null;
     foreach ($xactions as $xaction) {
       if ($xaction->getTransactionType() !== $type_edge) {
