@@ -59,7 +59,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
           $call = new ConduitCall(
             'differential.createrawdiff',
             array(
-              'diff' => $diff,
+              'diff' => mb_convert_encoding($diff, "UTF-8"),
               'repositoryPHID' => $repository_phid,
               'viewPolicy' => $request->getStr('viewPolicy'),
             ));
