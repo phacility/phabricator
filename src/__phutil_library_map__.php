@@ -11690,6 +11690,7 @@ phutil_register_library_map(array(
     'PhabricatorUserEmail' => array(
       'PhabricatorUserDAO',
       'PhabricatorDestructibleInterface',
+      'PhabricatorPolicyInterface',
     ),
     'PhabricatorUserEmailTestCase' => 'PhabricatorTestCase',
     'PhabricatorUserEmpowerTransaction' => 'PhabricatorUserTransactionType',

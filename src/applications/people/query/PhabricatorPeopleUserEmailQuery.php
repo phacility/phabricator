@@ -48,6 +48,32 @@ final class PhabricatorPeopleUserEmailQuery
     return $where;
   }
 
+  protected function willLoadPage(array $page) {
+
+    $user_phids = mpull($page, 'getUserPHID');
+
+    $users = id(new PhabricatorPeopleQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withPHIDs($user_phids)
+      ->execute();
+    $users = mpull($users, null, 'getPHID');
+
+    foreach ($page as $key => $address) {
+      $user = idx($users, $address->getUserPHID());
+
+      if (!$user) {
+        unset($page[$key]);
+        $this->didRejectResult($address);
+        continue;
+      }
+
+      $address->attachUser($user);
+    }
+
+    return $page;
+  }
+
   public function getQueryApplicationClass() {
     return 'PhabricatorPeopleApplication';
   }
