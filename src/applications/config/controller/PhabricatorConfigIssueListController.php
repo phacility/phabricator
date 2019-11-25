@@ -59,13 +59,12 @@ final class PhabricatorConfigIssueListController
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
-      ->setMainColumn($issue_list);
+      ->setFooter($issue_list);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($content);
   }
 

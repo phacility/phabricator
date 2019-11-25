@@ -18,9 +18,7 @@ final class PhabricatorConfigApplicationController
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
-      ->setMainColumn($apps_list);
+      ->setFooter($apps_list);
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb($title)
@@ -29,6 +27,7 @@ final class PhabricatorConfigApplicationController
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($content);
   }
 

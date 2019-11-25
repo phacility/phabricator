@@ -142,13 +142,12 @@ final class PhabricatorConfigDatabaseStatusController
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
-      ->setMainColumn($body);
+      ->setFooter($body);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($content);
   }
 
