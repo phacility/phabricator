@@ -1148,7 +1148,7 @@ final class PhabricatorUser
         'userPHID = %s',
         $this->getPHID());
       foreach ($emails as $email) {
-        $email->delete();
+        $engine->destroyObject($email);
       }
 
       $sessions = id(new PhabricatorAuthSession())->loadAllWhere(

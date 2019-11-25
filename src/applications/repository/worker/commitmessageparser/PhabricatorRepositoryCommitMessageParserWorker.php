@@ -65,37 +65,20 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $message = $ref->getMessage();
     $committer = $ref->getCommitter();
     $hashes = $ref->getHashes();
+    $has_committer = (bool)strlen($committer);
 
-    $author_identity = id(new PhabricatorRepositoryIdentityQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIdentityNames(array($author))
-      ->executeOne();
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
-    if (!$author_identity) {
-      $author_identity = id(new PhabricatorRepositoryIdentity())
-        ->setAuthorPHID($commit->getPHID())
-        ->setIdentityName($author)
-        ->setAutomaticGuessedUserPHID(
-          $this->resolveUserPHID($commit, $author))
-        ->save();
-    }
+    $identity_engine = id(new DiffusionRepositoryIdentityEngine())
+      ->setViewer($viewer)
+      ->setSourcePHID($commit->getPHID());
 
-    $committer_identity = null;
+    $author_identity = $identity_engine->newResolvedIdentity($author);
 
-    if ($committer) {
-      $committer_identity = id(new PhabricatorRepositoryIdentityQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withIdentityNames(array($committer))
-        ->executeOne();
-
-      if (!$committer_identity) {
-        $committer_identity = id(new PhabricatorRepositoryIdentity())
-          ->setAuthorPHID($commit->getPHID())
-          ->setIdentityName($committer)
-          ->setAutomaticGuessedUserPHID(
-            $this->resolveUserPHID($commit, $committer))
-          ->save();
-      }
+    if ($has_committer) {
+      $committer_identity = $identity_engine->newResolvedIdentity($committer);
+    } else {
+      $committer_identity = null;
     }
 
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
@@ -117,11 +100,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       'authorIdentityPHID', $author_identity->getPHID());
     $data->setCommitDetail(
       'authorPHID',
-      $this->resolveUserPHID($commit, $author));
+      $author_identity->getCurrentEffectiveUserPHID());
 
     $data->setCommitMessage($message);
 
-    if (strlen($committer)) {
+    if ($has_committer) {
       $data->setCommitDetail('committer', $committer);
 
       $data->setCommitDetail('committerName', $ref->getCommitterName());
@@ -129,7 +112,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
       $data->setCommitDetail(
         'committerPHID',
-        $this->resolveUserPHID($commit, $committer));
+        $committer_identity->getCurrentEffectiveUserPHID());
+
       $data->setCommitDetail(
         'committerIdentityPHID', $committer_identity->getPHID());
 
@@ -175,16 +159,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $commit->writeImportStatusFlag(
       PhabricatorRepositoryCommit::IMPORTED_MESSAGE);
-  }
-
-  private function resolveUserPHID(
-    PhabricatorRepositoryCommit $commit,
-    $user_name) {
-
-    return id(new DiffusionResolveUserQuery())
-      ->withCommit($commit)
-      ->withName($user_name)
-      ->execute();
   }
 
   private function closeRevisions(
