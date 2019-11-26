@@ -5,35 +5,30 @@ confirm() {
   read -e ignored
 }
 
-INSTALL_URI="   https://phurl.io/u/install"
+INSTALL_URI="https://phurl.io/u/install"
 
 failed() {
-  echo
-  echo
+  echo -e "\n \n"
   echo "Installation has failed."
-  echo "Text above this message might be useful to understanding what exactly failed."
-  echo
-  echo "Please follow this guide to manually complete installation:"
-  echo
-  echo $INSTALL_URI
-  echo
+  echo -e "Text above this message might be useful to understanding what exactly failed. \n"
+  echo -e "Please follow this guide to manually complete installation: \n"
+  echo -e "$INSTALL_URI \n"
   echo "We apologize for the inconvenience."
   exit 3
 }
 
-ISSUE=`cat /etc/issue`
-if [[ $ISSUE != Ubuntu* ]]
+ubuntuinfo=$(grep PRETTY_NAME /etc/os-release | cut -d= -f2)
+
+if [[ $ubuntuinfo != Ubuntu* ]]
 then
   echo "This script is intended for use on Ubuntu, but this system appears";
-  echo "to be something else. Your results may vary.";
-  echo
+  echo -e "to be something else. Your results may vary. \n";
   confirm
 fi
 
 echo "PHABRICATOR UBUNTU INSTALL SCRIPT";
 echo "This script will install Apache, Phabricator and its core dependencies.";
-echo "Run it from the directory you want to install into.";
-echo
+echo -e "Run it from the directory you want to install into. \n";
 
 echo "Testing sudo..."
 sudo true
@@ -45,18 +40,16 @@ fi;
 
 echo 'Testing Ubuntu version...'
 
-VERSION=`lsb_release -rs`
-MAJOR=`expr match "$VERSION" '\([0-9]*\)'`
+
+MAJOR=$(echo ubuntuinfo | awk '{print $2}' | cut -d. -f1)
 
 if [ "$MAJOR" -lt 16 ]
 then
   echo 'This script is intented to install on modern operating systems; Your '
   echo 'operating system is too old for this script.'
   echo 'You can still install Phabricator manually - please consult the installation'
-  echo 'guide to see how:'
-  echo
-  echo $INSTALL_URI
-  echo
+  echo -e "guide to see how: \n"
+  echo -e "$INSTALL_URI \n"
   exit 2
 fi
 
@@ -67,57 +60,38 @@ then
   echo 'This version of Ubuntu requires additional resources in order to install'
   echo 'and run Phabricator.'
   echo 'We will now add a the following package repository to your system:'
-  echo '  https://launchpad.net/~ondrej/+archive/ubuntu/php'
-  echo
+  echo -e "  https://launchpad.net/~ondrej/+archive/ubuntu/php \n "
   echo 'This repository is generally considered safe to use.'
   confirm
-
   sudo add-apt-repository -y ppa:ondrej/php  || failed
 fi
 
-ROOT=`pwd`
+ROOT=$(pwd)
 echo "Phabricator will be installed to: ${ROOT}.";
 confirm
 
-echo "Installing dependencies: git, apache, mysql, php...";
-echo
+echo -e "Installing dependencies: git, apache, mysql, php... \n";
 sudo apt-get -qq update
 sudo apt-get install \
   git mysql-server apache2 libapache2-mod-php \
   php php-mysql php-gd php-curl php-apcu php-cli php-json php-mbstring \
   || failed
 
-echo "Enabling mod_rewrite in Apache..."
-echo
+echo -e "Enabling mod_rewrite in Apache... \n"
 sudo a2enmod rewrite  || failed
 
-echo "Downloading Phabricator and dependencies..."
-echo
-if [ ! -e libphutil ]
-then
-  git clone https://github.com/phacility/libphutil.git
-else
-  (cd libphutil && git pull --rebase)
-fi
+echo -e "Downloading Phabricator and dependencies... \n"
 
-if [ ! -e arcanist ]
+for software in "libphutil arcanist phabricator"; do
+if [ ! -e "$software" ]
 then
-  git clone https://github.com/phacility/arcanist.git
+  git clone https://github.com/phacility/"$software".git
 else
-  (cd arcanist && git pull --rebase)
+  (cd "$software" && git pull --rebase)
 fi
+done
 
-if [ ! -e phabricator ]
-then
-  git clone https://github.com/phacility/phabricator.git
-else
-  (cd phabricator && git pull --rebase)
-fi
-
-echo
-echo
-echo "Install probably worked mostly correctly. Continue with the 'Configuration Guide':";
-echo
-echo "    https://secure.phabricator.com/book/phabricator/article/configuration_guide/";
-echo
+echo -e "\n \n"
+echo -e "Install probably worked mostly correctly. Continue with the 'Configuration Guide': \n";
+echo -e "    https://secure.phabricator.com/book/phabricator/article/configuration_guide/ \n";
 echo 'Next step is "Configuring Apache webserver".'
