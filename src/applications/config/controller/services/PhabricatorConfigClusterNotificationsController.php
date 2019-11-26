@@ -1,13 +1,10 @@
 <?php
 
 final class PhabricatorConfigClusterNotificationsController
-  extends PhabricatorConfigController {
+  extends PhabricatorConfigServicesController {
 
   public function handleRequest(AphrontRequest $request) {
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('cluster/notifications/');
-
-    $title = pht('Cluster Notifications');
+    $title = pht('Notification Servers');
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Notifications');
     $button = id(new PHUIButtonView())
       ->setIcon('fa-book')
@@ -22,13 +19,14 @@ final class PhabricatorConfigClusterNotificationsController
       pht('Notifications Status'),
       $notification_status);
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
+    $crumbs = $this->newCrumbs()
+      ->addTextCrumb($title);
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter($status);
+
+    $nav = $this->newNavigation('notification-servers');
 
     return $this->newPage()
       ->setTitle($title)

@@ -1,7 +1,7 @@
 <?php
 
 abstract class PhabricatorConfigDatabaseController
-  extends PhabricatorConfigController {
+  extends PhabricatorConfigServicesController {
 
   protected function renderIcon($status) {
     switch ($status) {

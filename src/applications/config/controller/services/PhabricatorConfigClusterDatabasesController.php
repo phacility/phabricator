@@ -1,13 +1,12 @@
 <?php
 
 final class PhabricatorConfigClusterDatabasesController
-  extends PhabricatorConfigController {
+  extends PhabricatorConfigServicesController {
 
   public function handleRequest(AphrontRequest $request) {
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('cluster/databases/');
+    $nav = $this->newNavigation('database-servers');
 
-    $title = pht('Cluster Database Status');
+    $title = pht('Database Servers');
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Databases');
     $button = id(new PHUIButtonView())
       ->setIcon('fa-book')
@@ -20,9 +19,8 @@ final class PhabricatorConfigClusterDatabasesController
     $database_status = $this->buildClusterDatabaseStatus();
     $status = $this->buildConfigBoxView(pht('Status'), $database_status);
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($title)
-      ->setBorder(true);
+    $crumbs = $this->newCrumbs()
+      ->addTextCrumb($title);
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)

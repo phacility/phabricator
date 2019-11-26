@@ -25,23 +25,6 @@ abstract class PhabricatorConfigController extends PhabricatorController {
       pht('Setup Issues'), null, 'fa-warning');
     $nav->addFilter(null,
       pht('Installation Guide'), $guide_href, 'fa-book');
-    $nav->addLabel(pht('Database'));
-    $nav->addFilter('database/',
-      pht('Database Status'), null, 'fa-heartbeat');
-    $nav->addFilter('dbissue/',
-      pht('Database Issues'), null, 'fa-exclamation-circle');
-    $nav->addLabel(pht('Cache'));
-    $nav->addFilter('cache/',
-      pht('Cache Status'), null, 'fa-home');
-    $nav->addLabel(pht('Cluster'));
-    $nav->addFilter('cluster/databases/',
-      pht('Database Servers'), null, 'fa-database');
-    $nav->addFilter('cluster/notifications/',
-      pht('Notification Servers'), null, 'fa-bell-o');
-    $nav->addFilter('cluster/repositories/',
-      pht('Repository Servers'), null, 'fa-code');
-    $nav->addFilter('cluster/search/',
-      pht('Search Servers'), null, 'fa-search');
 
     return $nav;
   }
