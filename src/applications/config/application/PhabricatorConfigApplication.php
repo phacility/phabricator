@@ -63,7 +63,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
           'purge/' => 'PhabricatorConfigPurgeCacheController',
         ),
         'module/' => array(
-          '(?P<module>[^/]+)/' => 'PhabricatorConfigModuleController',
+          '(?:(?P<module>[^/]+)/)?' => 'PhabricatorConfigModuleController',
         ),
         'cluster/' => array(
           'databases/' => 'PhabricatorConfigClusterDatabasesController',
