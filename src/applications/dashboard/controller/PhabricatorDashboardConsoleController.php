@@ -59,9 +59,11 @@ final class PhabricatorDashboardConsoleController
       ->setBackground(PHUIObjectBoxView::WHITE_CONFIG)
       ->setObjectList($menu);
 
+    $launch_view = id(new PHUILauncherView())
+      ->appendChild($box);
+
     $view = id(new PHUITwoColumnView())
-      ->setFixed(true)
-      ->setFooter($box);
+      ->setFooter($launch_view);
 
     return $this->newPage()
       ->setTitle($title)
