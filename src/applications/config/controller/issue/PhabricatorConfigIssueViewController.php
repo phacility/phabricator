@@ -14,9 +14,6 @@ final class PhabricatorConfigIssueViewController
     }
     $issues = $engine->getIssues();
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('issue/');
-
     if (empty($issues[$issue_key])) {
       $content = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
@@ -36,23 +33,21 @@ final class PhabricatorConfigIssueViewController
       $title = $issue->getShortName();
     }
 
-    $header = $this->buildHeaderView($title);
-
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->setBorder(true)
       ->addTextCrumb(pht('Setup Issues'), $this->getApplicationURI('issue/'))
       ->addTextCrumb($title, $request->getRequestURI())
       ->setBorder(true);
 
+    $launcher_view = id(new PHUILauncherView())
+      ->appendChild($content);
+
     $content = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter($content);
+      ->setFooter($launcher_view);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->setNavigation($nav)
       ->appendChild($content);
   }
 
