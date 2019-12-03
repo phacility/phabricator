@@ -28,7 +28,7 @@ final class Aphront403Response extends AphrontHTMLResponse {
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle(pht('403 Forbidden'))
-      ->addCancelButton('/', pht('Peace Out'))
+      ->addCancelButton('/', pht('Yikes!'))
       ->appendParagraph($forbidden_text);
 
     $view = id(new PhabricatorStandardPageView())

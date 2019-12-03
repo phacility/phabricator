@@ -298,27 +298,6 @@ final class PhabricatorAuthStartController
       ->setURI($auto_uri);
   }
 
-  private function newCustomStartMessage() {
-    $viewer = $this->getViewer();
-
-    $text = PhabricatorAuthMessage::loadMessageText(
-      $viewer,
-      PhabricatorAuthLoginMessageType::MESSAGEKEY);
-
-    if (!strlen($text)) {
-      return null;
-    }
-
-    $remarkup_view = new PHUIRemarkupView($viewer, $text);
-
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'auth-custom-message',
-      ),
-      $remarkup_view);
-  }
-
   private function newEmailLoginView(array $configs) {
     assert_instances_of($configs, 'PhabricatorAuthProviderConfig');
 

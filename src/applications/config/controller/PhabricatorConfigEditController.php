@@ -237,9 +237,8 @@ final class PhabricatorConfigEditController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
-      ->setMainColumn(array(
+      ->setFooter(
+        array(
         $error_view,
         $form_box,
         $status_items,
@@ -250,6 +249,7 @@ final class PhabricatorConfigEditController
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($view);
   }
 

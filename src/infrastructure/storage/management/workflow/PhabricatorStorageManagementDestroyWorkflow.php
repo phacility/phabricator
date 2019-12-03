@@ -21,84 +21,110 @@ final class PhabricatorStorageManagementDestroyWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
+    $api = $this->getSingleAPI();
+
+    $host_display = $api->getDisplayName();
 
     if (!$this->isDryRun() && !$this->isForce()) {
       if ($args->getArg('unittest-fixtures')) {
-        $console->writeOut(
-          phutil_console_wrap(
-            pht(
-              'Are you completely sure you really want to destroy all unit '.
-              'test fixure data? This operation can not be undone.')));
+        $warning = pht(
+          'Are you completely sure you really want to destroy all unit '.
+          'test fixure data on host "%s"? This operation can not be undone.',
+          $host_display);
+
+        echo tsprintf(
+          '%B',
+          id(new PhutilConsoleBlock())
+            ->addParagraph($warning)
+            ->drawConsoleString());
+
         if (!phutil_console_confirm(pht('Destroy all unit test data?'))) {
-          $console->writeOut("%s\n", pht('Cancelled.'));
+          $this->logFail(
+            pht('CANCELLED'),
+            pht('User cancelled operation.'));
           exit(1);
         }
       } else {
-        $console->writeOut(
-          phutil_console_wrap(
-            pht(
-              'Are you completely sure you really want to permanently destroy '.
-              'all storage for Phabricator data? This operation can not be '.
-              'undone and your data will not be recoverable if you proceed.')));
+        $warning = pht(
+          'Are you completely sure you really want to permanently destroy '.
+          'all storage for Phabricator data on host "%s"? This operation '.
+          'can not be undone and your data will not be recoverable if '.
+          'you proceed.',
+          $host_display);
+
+        echo tsprintf(
+          '%B',
+          id(new PhutilConsoleBlock())
+            ->addParagraph($warning)
+            ->drawConsoleString());
 
         if (!phutil_console_confirm(pht('Permanently destroy all data?'))) {
-          $console->writeOut("%s\n", pht('Cancelled.'));
+          $this->logFail(
+            pht('CANCELLED'),
+            pht('User cancelled operation.'));
           exit(1);
         }
 
         if (!phutil_console_confirm(pht('Really destroy all data forever?'))) {
-          $console->writeOut("%s\n", pht('Cancelled.'));
+          $this->logFail(
+            pht('CANCELLED'),
+            pht('User cancelled operation.'));
           exit(1);
         }
       }
     }
 
-    $apis = $this->getMasterAPIs();
-    foreach ($apis as $api) {
-      $patches = $this->getPatches();
+    $patches = $this->getPatches();
 
-      if ($args->getArg('unittest-fixtures')) {
-        $conn = $api->getConn(null);
-        $databases = queryfx_all(
-          $conn,
-          'SELECT DISTINCT(TABLE_SCHEMA) AS db '.
-          'FROM INFORMATION_SCHEMA.TABLES '.
-          'WHERE TABLE_SCHEMA LIKE %>',
-          PhabricatorTestCase::NAMESPACE_PREFIX);
-        $databases = ipull($databases, 'db');
-      } else {
-        $databases   = $api->getDatabaseList($patches);
-        $databases[] = $api->getDatabaseName('meta_data');
+    if ($args->getArg('unittest-fixtures')) {
+      $conn = $api->getConn(null);
+      $databases = queryfx_all(
+        $conn,
+        'SELECT DISTINCT(TABLE_SCHEMA) AS db '.
+        'FROM INFORMATION_SCHEMA.TABLES '.
+        'WHERE TABLE_SCHEMA LIKE %>',
+        PhabricatorTestCase::NAMESPACE_PREFIX);
+      $databases = ipull($databases, 'db');
+    } else {
+      $databases = $api->getDatabaseList($patches);
+      $databases[] = $api->getDatabaseName('meta_data');
 
-        // These are legacy databases that were dropped long ago. See T2237.
-        $databases[] = $api->getDatabaseName('phid');
-        $databases[] = $api->getDatabaseName('directory');
-      }
+      // These are legacy databases that were dropped long ago. See T2237.
+      $databases[] = $api->getDatabaseName('phid');
+      $databases[] = $api->getDatabaseName('directory');
+    }
 
-      foreach ($databases as $database) {
-        if ($this->isDryRun()) {
-          $console->writeOut(
-            "%s\n",
-            pht("DRYRUN: Would drop database '%s'.", $database));
-        } else {
-          $console->writeOut(
-            "%s\n",
-            pht("Dropping database '%s'...", $database));
-          queryfx(
-            $api->getConn(null),
-            'DROP DATABASE IF EXISTS %T',
-            $database);
-        }
-      }
+    asort($databases);
 
-      if (!$this->isDryRun()) {
-        $console->writeOut(
-          "%s\n",
+    foreach ($databases as $database) {
+      if ($this->isDryRun()) {
+        $this->logInfo(
+          pht('DRY RUN'),
           pht(
-            'Storage on "%s" was destroyed.',
-            $api->getRef()->getRefKey()));
+            'Would drop database "%s" on host "%s".',
+            $database,
+            $host_display));
+      } else {
+        $this->logWarn(
+          pht('DESTROY'),
+          pht(
+            'Dropping database "%s" on host "%s"...',
+            $database,
+            $host_display));
+
+        queryfx(
+          $api->getConn(null),
+          'DROP DATABASE IF EXISTS %T',
+          $database);
       }
+    }
+
+    if (!$this->isDryRun()) {
+      $this->logOkay(
+        pht('DONE'),
+        pht(
+          'Storage on "%s" was destroyed.',
+          $host_display));
     }
 
     return 0;

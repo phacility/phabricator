@@ -1,0 +1,16 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Phacility//Phabricator//EN
+BEGIN:VEVENT
+UID:tea-time
+CREATED:20160915T070000Z
+DTSTAMP:20160915T070000Z
+DTSTART:20160916T150000Z
+DTEND:20160916T160000Z
+SUMMARY:Tea Time
+DESCRIPTION:Tea and\, perhaps\, crumpets.\nYour presence is requested!\nThi
+ s is a long list of types of tea to test line wrapping: earl grey tea\, En
+ glish breakfast tea\, black tea\, green tea\, t-rex\, oolong tea\, mint te
+ a\, tea with milk.
+END:VEVENT
+END:VCALENDAR

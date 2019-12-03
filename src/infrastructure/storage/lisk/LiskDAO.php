@@ -1881,6 +1881,10 @@ abstract class LiskDAO extends Phobject
       ->getMaximumByteLengthForDataType($data_type);
   }
 
+  public function getSchemaPersistence() {
+    return null;
+  }
+
 
 /* -(  AphrontDatabaseTableRefInterface  )----------------------------------- */
 

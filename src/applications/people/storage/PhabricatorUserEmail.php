@@ -4,7 +4,11 @@
  * @task restrictions   Domain Restrictions
  * @task email          Email About Email
  */
-final class PhabricatorUserEmail extends PhabricatorUserDAO {
+final class PhabricatorUserEmail
+  extends PhabricatorUserDAO
+  implements
+    PhabricatorDestructibleInterface,
+    PhabricatorPolicyInterface {
 
   protected $userPHID;
   protected $address;
@@ -12,10 +16,13 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
   protected $isPrimary;
   protected $verificationCode;
 
+  private $user = self::ATTACHABLE;
+
   const MAX_ADDRESS_LENGTH = 128;
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'address' => 'sort128',
         'isVerified' => 'bool',
@@ -34,6 +41,10 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
     ) + parent::getConfiguration();
   }
 
+  public function getPHIDType() {
+    return PhabricatorPeopleUserEmailPHIDType::TYPECONST;
+  }
+
   public function getVerificationURI() {
     return '/emailverify/'.$this->getVerificationCode().'/';
   }
@@ -43,6 +54,15 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
       $this->setVerificationCode(Filesystem::readRandomCharacters(24));
     }
     return parent::save();
+  }
+
+  public function attachUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->assertAttached($this->user);
   }
 
 
@@ -269,6 +289,39 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
       ->saveAndSend();
 
     return $this;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    $user = $this->getUser();
+
+    if ($this->getIsSystemAgent() || $this->getIsMailingList()) {
+      return PhabricatorPolicies::POLICY_ADMIN;
+    }
+
+    return $user->getPHID();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

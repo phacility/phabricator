@@ -373,6 +373,16 @@ abstract class HeraldAdapter extends Phobject {
     return $field->getFieldGroupKey();
   }
 
+  public function isFieldAvailable($field_key) {
+    $field = $this->getFieldImplementation($field_key);
+
+    if (!$field) {
+      return null;
+    }
+
+    return $field->isFieldAvailable();
+  }
+
 
 /* -(  Conditions  )--------------------------------------------------------- */
 
@@ -389,7 +399,7 @@ abstract class HeraldAdapter extends Phobject {
       self::CONDITION_IS_NOT_ANY      => pht('is not any of'),
       self::CONDITION_INCLUDE_ALL     => pht('include all of'),
       self::CONDITION_INCLUDE_ANY     => pht('include any of'),
-      self::CONDITION_INCLUDE_NONE    => pht('do not include'),
+      self::CONDITION_INCLUDE_NONE    => pht('include none of'),
       self::CONDITION_IS_ME           => pht('is myself'),
       self::CONDITION_IS_NOT_ME       => pht('is not myself'),
       self::CONDITION_REGEXP          => pht('matches regexp'),
@@ -763,6 +773,16 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $action->getActionGroupKey();
+  }
+
+  public function isActionAvailable($action_key) {
+    $action = $this->getActionImplementation($action_key);
+
+    if (!$action) {
+      return null;
+    }
+
+    return $action->isActionAvailable();
   }
 
   public function getActions($rule_type) {

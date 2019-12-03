@@ -23,6 +23,7 @@ final class DiffusionRepositoryBranchesManagementPanel
 
     $has_any =
       $repository->getDetail('default-branch') ||
+      $repository->getFetchRules() ||
       $repository->getTrackOnlyRules() ||
       $repository->getPermanentRefRules();
 

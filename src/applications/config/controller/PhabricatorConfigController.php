@@ -7,8 +7,6 @@ abstract class PhabricatorConfigController extends PhabricatorController {
   }
 
   public function buildSideNavView($filter = null, $for_app = false) {
-
-
     $guide_href = new PhutilURI('/guides/');
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));

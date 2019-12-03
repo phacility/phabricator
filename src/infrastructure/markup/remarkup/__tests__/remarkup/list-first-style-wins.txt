@@ -1,0 +1,19 @@
+# item
+- item
+- item
+
+derp
+~~~~~~~~~~
+<ol class="remarkup-list">
+<li class="remarkup-list-item">item</li>
+<li class="remarkup-list-item">item</li>
+<li class="remarkup-list-item">item</li>
+</ol>
+
+<p>derp</p>
+~~~~~~~~~~
+1. item
+2. item
+3. item
+
+derp

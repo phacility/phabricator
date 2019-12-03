@@ -33,6 +33,8 @@ final class PhabricatorSearchApplication extends PhabricatorApplication {
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
         'hovercard/'
           => 'PhabricatorSearchHovercardController',
+        'handle/(?P<phid>[^/]+)/'
+          => 'PhabricatorSearchHandleController',
         'edit/' => array(
           'key/(?P<queryKey>[^/]+)/' => 'PhabricatorSearchEditController',
           'id/(?P<id>[^/]+)/' => 'PhabricatorSearchEditController',

@@ -195,13 +195,15 @@ final class DiffusionLowLevelResolveRefsQuery
 
       $alternate = null;
       if ($type == 'tag') {
-        $alternate = $identifier;
-        $identifier = idx($tag_map, $ref);
-        if (!$identifier) {
-          throw new Exception(
-            pht(
-              "Failed to look up tag '%s'!",
-              $ref));
+        $tag_identifier = idx($tag_map, $ref);
+        if ($tag_identifier === null) {
+          // This can happen when we're asked to resolve the hash of a "tag"
+          // object created with "git tag --annotate" that isn't currently
+          // reachable from any ref. Just leave things as they are.
+        } else {
+          // Otherwise, we have a normal named tag.
+          $alternate = $identifier;
+          $identifier = $tag_identifier;
         }
       }
 

@@ -68,12 +68,42 @@ final class PhabricatorLogoutController
         ->setURI('/auth/loggedout/');
     }
 
+
     if ($viewer->getPHID()) {
-      return $this->newDialog()
+      $dialog = $this->newDialog()
         ->setTitle(pht('Log Out?'))
-        ->appendChild(pht('Are you sure you want to log out?'))
-        ->addSubmitButton(pht('Log Out'))
+        ->appendParagraph(pht('Are you sure you want to log out?'))
         ->addCancelButton('/');
+
+      $configs = id(new PhabricatorAuthProviderConfigQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->execute();
+      if (!$configs) {
+        $dialog
+          ->appendRemarkup(
+            pht(
+              'WARNING: You have not configured any authentication providers '.
+              'yet, so your account has no login credentials. If you log out '.
+              'now, you will not be able to log back in normally.'))
+          ->appendParagraph(
+            pht(
+              'To enable the login flow, follow setup guidance and configure '.
+              'at least one authentication provider, then associate '.
+              'credentials with your account. After completing these steps, '.
+              'you will be able to log out and log back in normally.'))
+          ->appendParagraph(
+            pht(
+              'If you log out now, you can still regain access to your '.
+              'account later by using the account recovery workflow. The '.
+              'login screen will prompt you with recovery instructions.'));
+
+        $button = pht('Log Out Anyway');
+      } else {
+        $button = pht('Log Out');
+      }
+
+      $dialog->addSubmitButton($button);
+      return $dialog;
     }
 
     return id(new AphrontRedirectResponse())->setURI('/');

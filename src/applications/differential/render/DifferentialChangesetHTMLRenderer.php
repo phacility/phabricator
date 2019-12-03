@@ -270,11 +270,20 @@ abstract class DifferentialChangesetHTMLRenderer
       }
     }
 
-    if ($this->getHighlightingDisabled()) {
-      $messages[] = pht(
-        'This file is larger than %s, so syntax highlighting is '.
-        'disabled by default.',
-        phutil_format_bytes(DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT));
+    $blocks = $this->getDocumentEngineBlocks();
+    if ($blocks) {
+      foreach ($blocks->getMessages() as $message) {
+        $messages[] = $message;
+      }
+    } else {
+      if ($this->getHighlightingDisabled()) {
+        $byte_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
+        $byte_limit = phutil_format_bytes($byte_limit);
+        $messages[] = pht(
+          'This file is larger than %s, so syntax highlighting is '.
+          'disabled by default.',
+          $byte_limit);
+      }
     }
 
     return $this->formatHeaderMessages($messages);
@@ -606,19 +615,6 @@ abstract class DifferentialChangesetHTMLRenderer
     }
 
     return array($left_prefix, $right_prefix);
-  }
-
-  protected function renderImageStage(PhabricatorFile $file) {
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-image-stage',
-      ),
-      phutil_tag(
-        'img',
-        array(
-          'src' => $file->getBestURI(),
-        )));
   }
 
 }

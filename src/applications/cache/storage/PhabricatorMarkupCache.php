@@ -30,4 +30,8 @@ final class PhabricatorMarkupCache extends PhabricatorCacheDAO {
     ) + parent::getConfiguration();
   }
 
+  public function getSchemaPersistence() {
+    return PhabricatorConfigTableSchema::PERSISTENCE_CACHE;
+  }
+
 }

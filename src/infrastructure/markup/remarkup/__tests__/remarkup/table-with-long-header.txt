@@ -1,0 +1,8 @@
+|x|
+||--
+~~~~~~~~~~
+<div class="remarkup-table-wrap"><table class="remarkup-table">
+<tr><td>x</td></tr>
+</table></div>
+~~~~~~~~~~
+| x |

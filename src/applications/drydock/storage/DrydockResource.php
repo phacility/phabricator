@@ -1,7 +1,9 @@
 <?php
 
 final class DrydockResource extends DrydockDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorConduitResultInterface {
 
   protected $id;
   protected $phid;
@@ -340,4 +342,38 @@ final class DrydockResource extends DrydockDAO
   public function describeAutomaticCapability($capability) {
     return pht('Resources inherit the policies of their blueprints.');
   }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('blueprintPHID')
+        ->setType('phid')
+        ->setDescription(pht('The blueprint which generated this resource.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about resource status.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $status = $this->getStatus();
+
+    return array(
+      'blueprintPHID' => $this->getBlueprintPHID(),
+      'status' => array(
+        'value' => $status,
+        'name' => DrydockResourceStatus::getNameForStatus($status),
+      ),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
 }

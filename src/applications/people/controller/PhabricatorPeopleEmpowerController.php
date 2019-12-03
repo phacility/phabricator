@@ -17,14 +17,8 @@ final class PhabricatorPeopleEmpowerController
 
     $done_uri = $this->getApplicationURI("manage/{$id}/");
 
-    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $viewer,
-      $request,
-      $done_uri);
-
     $validation_exception = null;
-
-    if ($request->isFormPost()) {
+    if ($request->isFormOrHisecPost()) {
       $xactions = array();
       $xactions[] = id(new PhabricatorUserTransaction())
         ->setTransactionType(
@@ -34,7 +28,8 @@ final class PhabricatorPeopleEmpowerController
       $editor = id(new PhabricatorUserTransactionEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
-        ->setContinueOnMissingFields(true);
+        ->setContinueOnMissingFields(true)
+        ->setCancelURI($done_uri);
 
       try {
         $editor->applyTransactions($user, $xactions);

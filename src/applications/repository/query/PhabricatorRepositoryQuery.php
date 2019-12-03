@@ -215,6 +215,8 @@ final class PhabricatorRepositoryQuery
         $commits = id(new DiffusionCommitQuery())
           ->setViewer($this->getViewer())
           ->withIDs($commit_ids)
+          ->needCommitData(true)
+          ->needIdentities(true)
           ->execute();
       } else {
         $commits = array();

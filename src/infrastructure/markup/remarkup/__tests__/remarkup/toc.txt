@@ -1,0 +1,29 @@
+= [[ http://www.example.com/ | link_name ]] =
+
+== **bold** ==
+
+= http://www.example.com =
+
+~~~~~~~~~~
+<ul>
+<li><a href="#link-name">link_name</a></li>
+<ul>
+<li><a href="#bold">bold</a></li>
+</ul>
+<li><a href="#http-www-example-com">http://www.example.com</a></li>
+</ul>
+
+<h2 class="remarkup-header"><a name="link-name"></a><a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">link_name</a></h2>
+
+<h3 class="remarkup-header"><a name="bold"></a><strong>bold</strong></h3>
+
+<h2 class="remarkup-header"><a name="http-www-example-com"></a><a href="http://www.example.com" class="remarkup-link" target="_blank" rel="noreferrer">http://www.example.com</a></h2>
+~~~~~~~~~~
+[[ http://www.example.com/ | link_name ]]
+=========================================
+
+**bold**
+--------
+
+http://www.example.com
+======================

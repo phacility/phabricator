@@ -163,69 +163,6 @@ final class PhabricatorPolicyExplainController
     return $space_section;
   }
 
-  private function getStrengthInformation(
-    PhabricatorPolicyInterface $object,
-    PhabricatorPolicy $policy,
-    $capability) {
-    $viewer = $this->getViewer();
-
-
-    $strength = null;
-    if ($object instanceof PhabricatorPolicyCodexInterface) {
-      $codex = id(PhabricatorPolicyCodex::newFromObject($object, $viewer))
-        ->setCapability($capability);
-      $strength = $codex->compareToDefaultPolicy($policy);
-      $default_policy = $codex->getDefaultPolicy();
-    } else {
-      $default_policy = PhabricatorPolicyQuery::getDefaultPolicyForObject(
-        $viewer,
-        $object,
-        $capability);
-
-      if ($default_policy) {
-        if ($default_policy->getPHID() == $policy->getPHID()) {
-          return;
-        }
-
-        if ($default_policy->getPHID() != $policy->getPHID()) {
-          if ($default_policy->isStrongerThan($policy)) {
-            $strength = PhabricatorPolicyStrengthConstants::WEAKER;
-          } else if ($policy->isStrongerThan($default_policy)) {
-            $strength = PhabricatorPolicyStrengthConstants::STRONGER;
-          } else {
-            $strength = PhabricatorPolicyStrengthConstants::ADJUSTED;
-          }
-        }
-      }
-    }
-
-    if (!$strength) {
-      return;
-    }
-
-    if ($strength == PhabricatorPolicyStrengthConstants::WEAKER) {
-      $info = pht(
-        'This object has a less restrictive policy ("%s") than the default '.
-        'policy for similar objects (which is "%s").',
-        $policy->getShortName(),
-        $default_policy->getShortName());
-    } else if ($strength == PhabricatorPolicyStrengthConstants::STRONGER) {
-      $info = pht(
-        'This object has a more restrictive policy ("%s") than the default '.
-        'policy for similar objects (which is "%s").',
-        $policy->getShortName(),
-        $default_policy->getShortName());
-    } else {
-      $info = pht(
-        'This object has a different policy ("%s") than the default policy '.
-        'for similar objects (which is "%s").',
-        $policy->getShortName(),
-        $default_policy->getShortName());
-    }
-
-    return $info;
-  }
-
   private function getCapabilityName($capability) {
     $capability_name = $capability;
     $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
@@ -318,7 +255,7 @@ final class PhabricatorPolicyExplainController
       ->setViewer($viewer)
       ->setIcon($handle->getIcon().' bluegrey')
       ->setHeader(pht('Object Policy'))
-      ->appendList(
+      ->appendParagraph(
         array(
           array(
             phutil_tag('strong', array(), pht('%s:', $capability_name)),
@@ -333,13 +270,15 @@ final class PhabricatorPolicyExplainController
       ->appendList(
         array(
           PhabricatorPolicy::getPolicyExplanation(
-          $viewer,
-          $policy->getPHID()),
+            $viewer,
+            $policy->getPHID()),
         ));
 
-    $strength = $this->getStrengthInformation($object, $policy, $capability);
-    if ($strength) {
-      $object_section->appendHint($strength);
+    if ($policy->isCustomPolicy()) {
+      $rules_view = id(new PhabricatorPolicyRulesView())
+        ->setViewer($viewer)
+        ->setPolicy($policy);
+      $object_section->appendRulesView($rules_view);
     }
 
     return $object_section;

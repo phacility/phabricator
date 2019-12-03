@@ -22,11 +22,13 @@ final class DiffusionIdentityViewController
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($identity->getIdentityShortName())
-      ->setHeaderIcon('fa-globe')
-      ->setPolicyObject($identity);
+      ->setHeaderIcon('fa-globe');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($identity->getID());
+    $crumbs->addTextCrumb(
+      pht('Identities'),
+      $this->getApplicationURI('identity/'));
+    $crumbs->addTextCrumb($identity->getObjectName());
     $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
@@ -83,7 +85,11 @@ final class DiffusionIdentityViewController
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer);
+      ->setViewer($viewer);
+
+    $properties->addProperty(
+      pht('Email Address'),
+      $identity->getEmailAddress());
 
     $effective_phid = $identity->getCurrentEffectiveUserPHID();
     $automatic_phid = $identity->getAutomaticGuessedUserPHID();
@@ -109,7 +115,7 @@ final class DiffusionIdentityViewController
       pht('Automatically Detected User'),
       $this->buildPropertyValue($automatic_phid));
     $properties->addProperty(
-      pht('Manually Set User'),
+      pht('Assigned To'),
       $this->buildPropertyValue($manual_phid));
 
     $header = id(new PHUIHeaderView())
@@ -127,7 +133,7 @@ final class DiffusionIdentityViewController
     if ($value == DiffusionIdentityUnassignedDatasource::FUNCTION_TOKEN) {
       return phutil_tag('em', array(), pht('Explicitly Unassigned'));
     } else if (!$value) {
-      return null;
+      return phutil_tag('em', array(), pht('None'));
     } else {
       return $viewer->renderHandle($value);
     }

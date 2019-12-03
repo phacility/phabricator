@@ -29,9 +29,17 @@ final class PhabricatorSubtypeEditEngineExtension
     PhabricatorApplicationTransactionInterface $object) {
 
     $subtype_type = PhabricatorTransactions::TYPE_SUBTYPE;
+    $subtype_value = $object->getEditEngineSubtype();
 
     $map = $object->newEditEngineSubtypeMap();
-    $options = $map->getDisplayMap();
+
+    if ($object->getID()) {
+      $options = $map->getMutationMap($subtype_value);
+    } else {
+      // NOTE: This is a crude proxy for "are we in the bulk edit workflow".
+      // We want to allow any mutation.
+      $options = $map->getDisplayMap();
+    }
 
     $subtype_field = id(new PhabricatorSelectEditField())
       ->setKey(self::EDITKEY)
@@ -40,12 +48,12 @@ final class PhabricatorSubtypeEditEngineExtension
       ->setTransactionType($subtype_type)
       ->setConduitDescription(pht('Change the object subtype.'))
       ->setConduitTypeDescription(pht('New object subtype key.'))
-      ->setValue($object->getEditEngineSubtype())
+      ->setValue($subtype_value)
       ->setOptions($options);
 
-    // If subtypes are configured, enable changing them from the bulk editor
-    // and comment action stack.
-    if ($map->getCount() > 1) {
+    // If subtypes are configured, enable changing them from the bulk editor.
+    // Bulk editor
+    if ($options) {
       $subtype_field
         ->setBulkEditLabel(pht('Change subtype to'))
         ->setCommentActionLabel(pht('Change Subtype'))

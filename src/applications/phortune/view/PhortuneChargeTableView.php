@@ -3,7 +3,6 @@
 final class PhortuneChargeTableView extends AphrontView {
 
   private $charges;
-  private $handles;
   private $showOrder;
 
   public function setShowOrder($show_order) {
@@ -13,15 +12,6 @@ final class PhortuneChargeTableView extends AphrontView {
 
   public function getShowOrder() {
     return $this->showOrder;
-  }
-
-  public function setHandles(array $handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
-  public function getHandles() {
-    return $this->handles;
   }
 
   public function setCharges(array $charges) {
@@ -35,8 +25,17 @@ final class PhortuneChargeTableView extends AphrontView {
 
   public function render() {
     $charges = $this->getCharges();
-    $handles = $this->getHandles();
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
+
+    $phids = array();
+    foreach ($charges as $charge) {
+      $phids[] = $charge->getCartPHID();
+      $phids[] = $charge->getProviderPHID();
+      $phids[] = $charge->getPaymentMethodPHID();
+      $phids[] = $charge->getMerchantPHID();
+    }
+
+    $handles = $viewer->loadHandles($phids);
 
     $rows = array();
     foreach ($charges as $charge) {

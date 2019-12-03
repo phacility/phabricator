@@ -33,6 +33,7 @@ final class PhabricatorApplicationTransactionValueController
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorRepositoryPushPolicyTransaction::TRANSACTIONTYPE:
+      case PhabricatorApplicationPolicyChangeTransaction::TRANSACTIONTYPE:
         break;
       default:
         return new Aphront404Response();
@@ -57,89 +58,16 @@ final class PhabricatorApplicationTransactionValueController
       return new Aphront404Response();
     }
 
-    $rule_objects = array();
-    foreach ($policy->getCustomRuleClasses() as $class) {
-      $rule_objects[$class] = newv($class, array());
-    }
-    $policy->attachRuleObjects($rule_objects);
+    $rules_view = id(new PhabricatorPolicyRulesView())
+      ->setViewer($viewer)
+      ->setPolicy($policy);
 
-    $this->requireResource('policy-transaction-detail-css');
     $cancel_uri = $this->guessCancelURI($viewer, $xaction);
 
     return $this->newDialog()
       ->setTitle($policy->getFullName())
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendChild($this->renderPolicyDetails($policy, $rule_objects))
+      ->appendChild($rules_view)
       ->addCancelButton($cancel_uri, pht('Close'));
   }
-
-  private function extractPHIDs(
-    PhabricatorPolicy $policy,
-    array $rule_objects) {
-
-    $phids = array();
-    foreach ($policy->getRules() as $rule) {
-      $rule_object = $rule_objects[$rule['rule']];
-      $phids[] =
-        $rule_object->getRequiredHandlePHIDsForSummary($rule['value']);
-    }
-    return array_filter(array_mergev($phids));
-  }
-
-  private function renderPolicyDetails(
-    PhabricatorPolicy $policy,
-    array $rule_objects) {
-    $details = array();
-    $details[] = phutil_tag(
-      'p',
-      array(
-        'class' => 'policy-transaction-detail-intro',
-      ),
-      pht('These rules are processed in order:'));
-
-    foreach ($policy->getRules() as $index => $rule) {
-      $rule_object = $rule_objects[$rule['rule']];
-      if ($rule['action'] == 'allow') {
-        $icon = 'fa-check-circle green';
-      } else {
-        $icon = 'fa-minus-circle red';
-      }
-      $icon = id(new PHUIIconView())
-        ->setIcon($icon)
-        ->setText(
-          ucfirst($rule['action']).' '.$rule_object->getRuleDescription());
-
-      $handle_phids = $rule_object->getRequiredHandlePHIDsForSummary(
-        $rule['value']);
-      if ($handle_phids) {
-        $value = $this->getViewer()
-          ->renderHandleList($handle_phids)
-          ->setAsInline(true);
-      } else {
-        $value = $rule['value'];
-      }
-
-      $details[] = phutil_tag('div',
-        array(
-          'class' => 'policy-transaction-detail-row',
-        ),
-        array(
-          $icon,
-          $value,
-        ));
-    }
-
-    $details[] = phutil_tag(
-      'p',
-      array(
-        'class' => 'policy-transaction-detail-end',
-      ),
-      pht(
-        'If no rules match, %s all other users.',
-        phutil_tag('b',
-        array(),
-        $policy->getDefaultAction())));
-    return $details;
-  }
-
 }

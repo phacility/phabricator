@@ -1,0 +1,12 @@
+[Example](http://www.example.com/)
+
+x[0][1](**ptr);
+
+~~~~~~~~~~
+<p><a href="http://www.example.com/" class="remarkup-link" target="_blank" rel="noreferrer">Example</a></p>
+
+<p>x[0][1](**ptr);</p>
+~~~~~~~~~~
+Example <http://www.example.com/>
+
+x[0][1](**ptr);

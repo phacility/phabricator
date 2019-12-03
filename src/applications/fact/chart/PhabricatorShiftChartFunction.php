@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorShiftChartFunction
-  extends PhabricatorChartFunction {
+  extends PhabricatorPureChartFunction {
 
   const FUNCTIONKEY = 'shift';
 

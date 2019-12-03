@@ -358,7 +358,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
         'POST',
         $subtask_data + array(
           'assignee' => $phid_aid_map[$user_phid],
-          'completed' => $is_completed,
+          'completed' => (int)$is_completed,
           'parent' => $parent_ref->getObjectID(),
         ));
 
@@ -393,7 +393,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
         'PUT',
         $subtask_data + array(
           'assignee' => $phid_aid_map[$user_phid],
-          'completed' => $is_completed,
+          'completed' => (int)$is_completed,
         ));
     }
 
@@ -484,7 +484,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
     return array(
       'name' => $title,
       'notes' => $notes,
-      'completed' => $is_completed,
+      'completed' => (int)$is_completed,
     );
   }
 
@@ -632,7 +632,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       ->setApplicationType(DoorkeeperBridgeAsana::APPTYPE_ASANA)
       ->setApplicationDomain(DoorkeeperBridgeAsana::APPDOMAIN_ASANA)
       ->setObjectType($type)
-      ->setObjectID($result['id'])
+      ->setObjectID($result['gid'])
       ->setIsVisible(true);
 
     $xobj = $ref->newExternalObject();

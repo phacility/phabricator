@@ -38,7 +38,7 @@ final class PhabricatorUserCardView extends AphrontTagView {
     }
 
     return array(
-      'class' => implode($classes, ' '),
+      'class' => implode(' ', $classes),
     );
   }
 

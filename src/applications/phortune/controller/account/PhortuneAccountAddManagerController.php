@@ -1,27 +1,21 @@
 <?php
 
-final class PhortuneAccountAddManagerController extends PhortuneController {
+final class PhortuneAccountAddManagerController
+  extends PhortuneAccountController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireAccountEditCapability() {
+    return true;
+  }
+
+  protected function handleAccountRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+    $account = $this->getAccount();
 
-    $account = id(new PhortuneAccountQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$account) {
-      return new Aphront404Response();
-    }
+    $id = $account->getID();
 
     $v_managers = array();
     $e_managers = null;
-    $account_uri = $this->getApplicationURI("/account/manager/{$id}/");
+    $account_uri = $this->getApplicationURI("/account/{$id}/managers/");
 
     if ($request->isFormPost()) {
       $xactions = array();
@@ -53,23 +47,34 @@ final class PhortuneAccountAddManagerController extends PhortuneController {
       }
     }
 
+    $account_phid = $account->getPHID();
+    $handles = $viewer->loadHandles(array($account_phid));
+    $handle = $handles[$account_phid];
+
     $form = id(new AphrontFormView())
-      ->setUser($viewer)
+      ->setViewer($viewer)
+      ->appendInstructions(
+        pht(
+          'Choose one or more users to add as account managers. Managers '.
+          'have full control of the account.'))
+      ->appendControl(
+        id(new AphrontFormStaticControl())
+          ->setLabel(pht('Payment Account'))
+          ->setValue($handle->renderLink()))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setLabel(pht('Managers'))
+          ->setLabel(pht('Add Managers'))
           ->setName('managerPHIDs')
           ->setValue($v_managers)
           ->setError($e_managers));
 
     return $this->newDialog()
-      ->setTitle(pht('Add New Manager'))
+      ->setTitle(pht('Add New Managers'))
       ->appendForm($form)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->addCancelButton($account_uri)
-      ->addSubmitButton(pht('Add Manager'));
-
+      ->addSubmitButton(pht('Add Managers'));
   }
 
 }

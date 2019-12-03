@@ -99,7 +99,6 @@ final class PhabricatorRepositoryManagementLookupUsersWorkflow
 
   private function resolveUser(PhabricatorRepositoryCommit $commit, $name) {
     $phid = id(new DiffusionResolveUserQuery())
-      ->withCommit($commit)
       ->withName($name)
       ->execute();
 

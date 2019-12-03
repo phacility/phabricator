@@ -26,7 +26,17 @@ final class PhabricatorDatasourceURIEngineExtension
         ->setProtocol(null)
         ->setPort(null);
 
-      return phutil_string_cast($uri);
+      $uri = phutil_string_cast($uri);
+
+      // See T13412. If the URI was in the form "http://dev.example.com" with
+      // no trailing slash, there may be no path. Redirecting to the empty
+      // string is considered an error by safety checks during redirection,
+      // so treat this like the user entered the URI with a trailing slash.
+      if (!strlen($uri)) {
+        $uri = '/';
+      }
+
+      return $uri;
     }
 
     return null;

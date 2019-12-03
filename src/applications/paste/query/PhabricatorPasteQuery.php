@@ -378,15 +378,15 @@ final class PhabricatorPasteQuery
   }
 
   private function highlightSource($source, $title, $language) {
-      if (empty($language)) {
-        return PhabricatorSyntaxHighlighter::highlightWithFilename(
-          $title,
-          $source);
-      } else {
-        return PhabricatorSyntaxHighlighter::highlightWithLanguage(
-          $language,
-          $source);
-      }
+    if (empty($language)) {
+      return PhabricatorSyntaxHighlighter::highlightWithFilename(
+        $title,
+        $source);
+    } else {
+      return PhabricatorSyntaxHighlighter::highlightWithLanguage(
+        $language,
+        $source);
+    }
   }
 
   public function getQueryApplicationClass() {

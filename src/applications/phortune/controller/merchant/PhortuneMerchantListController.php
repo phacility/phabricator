@@ -1,37 +1,12 @@
 <?php
 
 final class PhortuneMerchantListController
-  extends PhortuneMerchantController {
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+  extends PhortuneController {
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-    $querykey = $request->getURIData('queryKey');
-
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($querykey)
-      ->setSearchEngine(new PhortuneMerchantSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
-  }
-
-  public function buildSideNavView() {
-    $viewer = $this->getViewer();
-
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    id(new PhortuneMerchantSearchEngine())
-      ->setViewer($viewer)
-      ->addNavigationItems($nav->getMenu());
-
-    $nav->selectFilter(null);
-
-    return $nav;
+    return id(new PhortuneMerchantSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
   protected function buildApplicationCrumbs() {

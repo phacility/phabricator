@@ -3,10 +3,20 @@
 final class PhabricatorChartFunctionLabel
   extends Phobject {
 
+  private $key;
   private $name;
   private $color;
   private $icon;
   private $fillColor;
+
+  public function setKey($key) {
+    $this->key = $key;
+    return $this;
+  }
+
+  public function getKey() {
+    return $this->key;
+  }
 
   public function setName($name) {
     $this->name = $name;
@@ -46,6 +56,7 @@ final class PhabricatorChartFunctionLabel
 
   public function toWireFormat() {
     return array(
+      'key' => $this->getKey(),
       'name' => $this->getName(),
       'color' => $this->getColor(),
       'icon' => $this->getIcon(),

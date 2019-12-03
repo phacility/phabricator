@@ -96,4 +96,8 @@ final class HarbormasterRunBuildPlansHeraldAction
     return $record->getTarget();
   }
 
+  public function isActionAvailable() {
+    return id(new PhabricatorHarbormasterApplication())->isInstalled();
+  }
+
 }

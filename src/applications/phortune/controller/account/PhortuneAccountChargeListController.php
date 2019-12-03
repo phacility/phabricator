@@ -1,71 +1,32 @@
 <?php
 
 final class PhortuneAccountChargeListController
-  extends PhortuneController {
+  extends PhortuneAccountProfileController {
 
-  private $account;
-
-  public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-    $querykey = $request->getURIData('queryKey');
-    $account_id = $request->getURIData('accountID');
-
-    $engine = new PhortuneChargeSearchEngine();
-
-    if ($account_id) {
-      $account = id(new PhortuneAccountQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($account_id))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
-      if (!$account) {
-        return new Aphront404Response();
-      }
-      $this->account = $account;
-      $engine->setAccount($account);
-    } else {
-      return new Aphront404Response();
-    }
-
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($querykey)
-      ->setSearchEngine($engine)
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
+  protected function shouldRequireAccountEditCapability() {
+    return false;
   }
 
-  public function buildSideNavView() {
-    $viewer = $this->getViewer();
+  protected function handleAccountRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $account = $this->getAccount();
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    id(new PhortuneChargeSearchEngine())
-      ->setViewer($viewer)
-      ->addNavigationItems($nav->getMenu());
-
-    $nav->selectFilter(null);
-
-    return $nav;
+    return id(new PhortuneChargeSearchEngine())
+      ->setAccount($account)
+      ->setController($this)
+      ->buildResponse();
   }
 
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $account = $this->account;
-    if ($account) {
+    if ($this->hasAccount()) {
+      $account = $this->getAccount();
       $id = $account->getID();
-      $crumbs->addTextCrumb(
-        $account->getName(),
-        $this->getApplicationURI("{$id}/"));
+
       $crumbs->addTextCrumb(
         pht('Charges'),
-        $this->getApplicationURI("{$id}/charge/"));
+        $account->getChargesURI());
     }
 
     return $crumbs;

@@ -26,20 +26,45 @@ final class DiffusionHovercardEngineExtension
 
     $viewer = $this->getViewer();
 
-    $author_phid = $commit->getAuthorPHID();
-    if ($author_phid) {
-      $author = $viewer->renderHandle($author_phid);
-    } else {
-      $commit_data = $commit->loadCommitData();
-      $author = phutil_tag('em', array(), $commit_data->getAuthorName());
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->needIdentities(true)
+      ->needCommitData(true)
+      ->withPHIDs(array($commit->getPHID()))
+      ->executeOne();
+    if (!$commit) {
+      return;
     }
+
+    $author_phid = $commit->getAuthorDisplayPHID();
+    $committer_phid = $commit->getCommitterDisplayPHID();
+    $repository_phid = $commit->getRepository()->getPHID();
+
+    $phids = array();
+    $phids[] = $author_phid;
+    $phids[] = $committer_phid;
+    $phids[] = $repository_phid;
+
+    $handles = $viewer->loadHandles($phids);
 
     $hovercard->setTitle($handle->getName());
     $hovercard->setDetail($commit->getSummary());
 
-    $hovercard->addField(pht('Author'), $author);
-    $hovercard->addField(pht('Date'),
-      phabricator_date($commit->getEpoch(), $viewer));
+    $repository = $handles[$repository_phid]->renderLink();
+    $hovercard->addField(pht('Repository'), $repository);
+
+    $author = $handles[$author_phid]->renderLink();
+    if ($author_phid) {
+      $hovercard->addField(pht('Author'), $author);
+    }
+
+    if ($committer_phid && ($committer_phid !== $author_phid)) {
+      $committer = $handles[$committer_phid]->renderLink();
+      $hovercard->addField(pht('Committer'), $committer);
+    }
+
+    $date = phabricator_date($commit->getEpoch(), $viewer);
+    $hovercard->addField(pht('Date'), $date);
 
     if (!$commit->isAuditStatusNoAudit()) {
       $status = $commit->getAuditStatusObject();
