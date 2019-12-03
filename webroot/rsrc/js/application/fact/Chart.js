@@ -133,18 +133,33 @@ JX.install('Chart', {
     },
 
     _newStackedArea: function(g, dataset, x, y, div, curtain) {
+      var ii;
+
       var to_date = JX.bind(this, this._newDate);
 
       var area = d3.area()
         .x(function(d) { return x(to_date(d.x)); })
-        .y0(function(d) { return y(d.y0); })
+        .y0(function(d) {
+          // When the area is positive, draw it above the X axis. When the area
+          // is negative, draw it below the X axis. We currently avoid having
+          // functions which cross the X axis by clever construction.
+          if (d.y0 >= 0 && d.y1 >= 0) {
+            return y(d.y0);
+          }
+
+          if (d.y0 <= 0 && d.y1 <= 0) {
+            return y(d.y0);
+          }
+
+          return y(0);
+        })
         .y1(function(d) { return y(d.y1); });
 
       var line = d3.line()
         .x(function(d) { return x(to_date(d.x)); })
         .y(function(d) { return y(d.y1); });
 
-      for (var ii = 0; ii < dataset.data.length; ii++) {
+      for (ii = 0; ii < dataset.data.length; ii++) {
         var label = new JX.ChartFunctionLabel(dataset.labels[ii]);
 
         var fill_color = label.getFillColor() || label.getColor();
@@ -160,6 +175,11 @@ JX.install('Chart', {
           .style('stroke', stroke_color)
           .attr('d', line(dataset.data[ii]));
 
+        curtain.addFunctionLabel(label);
+      }
+
+      // Now that we've drawn all the areas and lines, draw the dots.
+      for (ii = 0; ii < dataset.data.length; ii++) {
         g.selectAll('dot')
           .data(dataset.events[ii])
           .enter()
@@ -178,8 +198,16 @@ JX.install('Chart', {
 
             var d_d = dd.getDate();
 
+            var y = parseInt(d.y1);
+
+            var label = d.n + ' Points';
+
+            var view =
+              d_y + '-' + d_m + '-' + d_d + ': ' + y + '<br />' +
+              label;
+
             div
-              .html(d_y + '-' + d_m + '-' + d_d + ': ' + d.y1)
+              .html(view)
               .style('opacity', 0.9)
               .style('left', (d3.event.pageX - 60) + 'px')
               .style('top', (d3.event.pageY - 38) + 'px');
@@ -187,9 +215,8 @@ JX.install('Chart', {
           .on('mouseout', function() {
             div.style('opacity', 0);
           });
-
-        curtain.addFunctionLabel(label);
       }
+
     },
 
     _newDate: function(epoch) {

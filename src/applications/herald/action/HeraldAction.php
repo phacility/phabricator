@@ -405,4 +405,8 @@ abstract class HeraldAction extends Phobject {
     return array();
   }
 
+  public function isActionAvailable() {
+    return true;
+  }
+
 }

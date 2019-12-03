@@ -1,7 +1,7 @@
 <?php
 
 final class PhortuneMerchantEditController
-  extends PhortuneMerchantController {
+  extends PhortuneController {
 
   public function handleRequest(AphrontRequest $request) {
     return id(new PhortuneMerchantEditEngine())

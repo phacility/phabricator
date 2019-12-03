@@ -404,8 +404,8 @@ final class HeraldRuleController extends HeraldController {
     HeraldAdapter $adapter) {
 
     $all_rules = $this->loadRulesThisRuleMayDependUpon($rule);
-    $all_rules = mpull($all_rules, 'getName', 'getPHID');
-    asort($all_rules);
+    $all_rules = msortv($all_rules, 'getEditorSortVector');
+    $all_rules = mpull($all_rules, 'getEditorDisplayName', 'getPHID');
 
     $all_fields = $adapter->getFieldNameMap();
     $all_conditions = $adapter->getConditionNameMap();
@@ -674,15 +674,6 @@ final class HeraldRuleController extends HeraldController {
         ->execute();
     }
 
-    // mark disabled rules as disabled since they are not useful as such;
-    // don't filter though to keep edit cases sane / expected
-    foreach ($all_rules as $current_rule) {
-      if ($current_rule->getIsDisabled()) {
-        $current_rule->makeEphemeral();
-        $current_rule->setName($rule->getName().' '.pht('(Disabled)'));
-      }
-    }
-
     // A rule can not depend upon itself.
     unset($all_rules[$rule->getID()]);
 
@@ -693,7 +684,10 @@ final class HeraldRuleController extends HeraldController {
     $group_map = array();
     foreach ($field_map as $field_key => $field_name) {
       $group_key = $adapter->getFieldGroupKey($field_key);
-      $group_map[$group_key][$field_key] = $field_name;
+      $group_map[$group_key][$field_key] = array(
+        'name' => $field_name,
+        'available' => $adapter->isFieldAvailable($field_key),
+      );
     }
 
     return $this->getGroups(
@@ -705,7 +699,10 @@ final class HeraldRuleController extends HeraldController {
     $group_map = array();
     foreach ($action_map as $action_key => $action_name) {
       $group_key = $adapter->getActionGroupKey($action_key);
-      $group_map[$group_key][$action_key] = $action_name;
+      $group_map[$group_key][$action_key] = array(
+        'name' => $action_name,
+        'available' => $adapter->isActionAvailable($action_key),
+      );
     }
 
     return $this->getGroups(

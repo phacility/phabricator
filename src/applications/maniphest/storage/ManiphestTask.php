@@ -358,10 +358,6 @@ final class ManiphestTask extends ManiphestDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return pht('The owner of a task can always view and edit it.');
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
@@ -564,7 +560,8 @@ final class ManiphestTask extends ManiphestDAO
 
   public function newEditEngineSubtypeMap() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.subtypes');
-    return PhabricatorEditEngineSubtype::newSubtypeMap($config);
+    return PhabricatorEditEngineSubtype::newSubtypeMap($config)
+      ->setDatasource(new ManiphestTaskSubtypeDatasource());
   }
 
 

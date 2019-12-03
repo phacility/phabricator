@@ -21,7 +21,8 @@ final class PhortuneMerchantPHIDType extends PhabricatorPHIDType {
     array $phids) {
 
     return id(new PhortuneMerchantQuery())
-      ->withPHIDs($phids);
+      ->withPHIDs($phids)
+      ->needProfileImage(true);
   }
 
   public function loadHandles(
@@ -32,10 +33,10 @@ final class PhortuneMerchantPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $merchant = $objects[$phid];
 
-      $id = $merchant->getID();
-
-      $handle->setName($merchant->getName());
-      $handle->setURI("/phortune/merchant/{$id}/");
+      $handle
+        ->setName($merchant->getName())
+        ->setURI($merchant->getURI())
+        ->setImageURI($merchant->getProfileImageURI());
     }
   }
 

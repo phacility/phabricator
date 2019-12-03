@@ -33,10 +33,6 @@ final class PhabricatorObjectHandle
   private $commandLineObjectName;
   private $mailStampName;
 
-  private $stateIcon;
-  private $stateColor;
-  private $stateName;
-
   public function setIcon($icon) {
     $this->icon = $icon;
     return $this;
@@ -297,55 +293,6 @@ final class PhabricatorObjectHandle
    */
   public function isComplete() {
     return $this->complete;
-  }
-
-  public function setStateIcon($state_icon) {
-    $this->stateIcon = $state_icon;
-    return $this;
-  }
-
-  public function getStateIcon() {
-    return $this->stateIcon;
-  }
-
-  public function setStateColor($state_color) {
-    $this->stateColor = $state_color;
-    return $this;
-  }
-
-  public function getStateColor() {
-    return $this->stateColor;
-  }
-
-  public function setStateName($state_name) {
-    $this->stateName = $state_name;
-    return $this;
-  }
-
-  public function getStateName() {
-    return $this->stateName;
-  }
-
-  public function renderStateIcon() {
-    $icon = $this->getStateIcon();
-    if ($icon === null) {
-      $icon = 'fa-question-circle-o';
-    }
-
-    $color = $this->getStateColor();
-
-    $name = $this->getStateName();
-    if ($name === null) {
-      $name = pht('Unknown');
-    }
-
-    return id(new PHUIIconView())
-      ->setIcon($icon, $color)
-      ->addSigil('has-tooltip')
-      ->setMetadata(
-        array(
-          'tip' => $name,
-        ));
   }
 
   public function renderLink($name = null) {

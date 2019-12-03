@@ -63,7 +63,7 @@ abstract class PhabricatorChartEngine
 
   abstract protected function newChart(PhabricatorFactChart $chart, array $map);
 
-  final public function buildChartPanel() {
+  final public function newStoredChart() {
     $viewer = $this->getViewer();
 
     $parameters = $this->getEngineParameters();
@@ -76,7 +76,11 @@ abstract class PhabricatorChartEngine
       ->setViewer($viewer)
       ->setChart($chart);
 
-    $chart = $rendering_engine->getStoredChart();
+    return $rendering_engine->getStoredChart();
+  }
+
+  final public function buildChartPanel() {
+    $chart = $this->newStoredChart();
 
     $panel_type = id(new PhabricatorDashboardChartPanelType())
       ->getPanelTypeKey();
@@ -91,7 +95,7 @@ abstract class PhabricatorChartEngine
   final protected function newFunction($name /* , ... */) {
     $argv = func_get_args();
     return id(new PhabricatorComposeChartFunction())
-      ->setArguments(array($argv));
+      ->setArguments($argv);
   }
 
 }

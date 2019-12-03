@@ -58,7 +58,7 @@ final class PhortuneMerchantEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    return $object->getURI();
+    return $object->getDetailsURI();
   }
 
   public function isEngineConfigurable() {

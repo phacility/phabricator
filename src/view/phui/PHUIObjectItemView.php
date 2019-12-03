@@ -379,10 +379,11 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->objectName) {
       $header_name[] = array(
-        phutil_tag(
+        javelin_tag(
           'span',
           array(
             'class' => 'phui-oi-objname',
+            'sigil' => 'ungrabbable',
           ),
           $this->objectName),
         ' ',

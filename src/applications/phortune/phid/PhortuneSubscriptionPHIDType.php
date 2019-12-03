@@ -32,11 +32,9 @@ final class PhortuneSubscriptionPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $subscription = $objects[$phid];
 
-      $id = $subscription->getID();
-
-      $handle->setName($subscription->getSubscriptionName());
-      $handle->setURI($subscription->getURI());
-
+      $handle
+        ->setName($subscription->getSubscriptionName())
+        ->setURI($subscription->getURI());
     }
   }
 

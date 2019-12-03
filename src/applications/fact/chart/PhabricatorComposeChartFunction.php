@@ -70,4 +70,22 @@ final class PhabricatorComposeChartFunction
     return $yv;
   }
 
+  public function getDataRefs(array $xv) {
+    // TODO: This is not entirely correct. The correct implementation would
+    // map "x -> y" at each stage of composition and pull and aggregate all
+    // the datapoint refs. In practice, we currently never compose functions
+    // with a data function somewhere in the middle, so just grabbing the first
+    // result is close enough.
+
+    // In the future, we may: notably, "x -> shift(-1 month) -> ..." to
+    // generate a month-over-month overlay is a sensible operation which will
+    // source data from the middle of a function composition.
+
+    foreach ($this->getFunctionArguments() as $function) {
+      return $function->getDataRefs($xv);
+    }
+
+    return array();
+  }
+
 }

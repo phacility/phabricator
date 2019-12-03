@@ -1,22 +1,7 @@
 <?php
 
 abstract class PhortuneMerchantProfileController
-  extends PhortuneController {
-
-  private $merchant;
-
-  public function setMerchant(PhortuneMerchant $merchant) {
-    $this->merchant = $merchant;
-    return $this;
-  }
-
-  public function getMerchant() {
-    return $this->merchant;
-  }
-
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView()->getMenu();
-  }
+  extends PhortuneMerchantController {
 
   protected function buildHeaderView() {
     $viewer = $this->getViewer();
@@ -26,20 +11,20 @@ abstract class PhortuneMerchantProfileController
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($merchant)
       ->setImage($merchant->getProfileImageURI());
 
     return $header;
   }
 
   protected function buildApplicationCrumbs() {
-    $merchant = $this->getMerchant();
-    $id = $merchant->getID();
-    $merchant_uri = $this->getApplicationURI("/merchant/{$id}/");
-
     $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->addTextCrumb($merchant->getName(), $merchant_uri);
-    $crumbs->setBorder(true);
+
+    if ($this->hasMerchant()) {
+      $merchant = $this->getMerchant();
+      $merchant_uri = $merchant->getURI();
+      $crumbs->addTextCrumb($merchant->getName(), $merchant_uri);
+    }
+
     return $crumbs;
   }
 
@@ -58,31 +43,47 @@ abstract class PhortuneMerchantProfileController
 
     $nav->addLabel(pht('Merchant'));
 
-    $nav->addFilter(
-      'overview',
-      pht('Overview'),
-      $this->getApplicationURI("/merchant/{$id}/"),
-      'fa-building-o');
+    $nav->newLink('overview')
+      ->setName(pht('Overview'))
+      ->setHref($merchant->getURI())
+      ->setIcon('fa-building-o');
 
-    if ($can_edit) {
-      $nav->addFilter(
-        'orders',
-        pht('Orders'),
-        $this->getApplicationURI("merchant/orders/{$id}/"),
-        'fa-retweet');
+    $nav->newLink('details')
+      ->setName(pht('Account Details'))
+      ->setHref($merchant->getDetailsURI())
+      ->setIcon('fa-address-card-o')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
 
-      $nav->addFilter(
-        'subscriptions',
-        pht('Subscriptions'),
-        $this->getApplicationURI("merchant/{$id}/subscription/"),
-        'fa-shopping-cart');
+    $nav->addLabel(pht('Payments'));
 
-      $nav->addFilter(
-        'managers',
-        pht('Managers'),
-        $this->getApplicationURI("/merchant/manager/{$id}/"),
-        'fa-group');
-    }
+    $nav->newLink('providers')
+      ->setName(pht('Payment Providers'))
+      ->setHref($merchant->getPaymentProvidersURI())
+      ->setIcon('fa-credit-card')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
+    $nav->newLink('orders')
+      ->setName(pht('Orders'))
+      ->setHref($merchant->getOrdersURI())
+      ->setIcon('fa-shopping-bag')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
+    $nav->newLink('subscriptions')
+      ->setName(pht('Subscriptions'))
+      ->setHref($merchant->getSubscriptionsURI())
+      ->setIcon('fa-retweet')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
+    $nav->addLabel(pht('Personnel'));
+
+    $nav->newLink('managers')
+      ->setName(pht('Managers'))
+      ->setHref($merchant->getManagersURI())
+      ->setIcon('fa-group');
 
     $nav->selectFilter($filter);
 

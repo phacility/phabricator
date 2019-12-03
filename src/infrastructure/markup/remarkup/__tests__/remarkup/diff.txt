@@ -1,0 +1,36 @@
+here is a diff
+
+  lang=diff
+  @@ derp derp @@
+  x
+  y
+
+  - x
+  - y
+  + z
+
+derp derp
+~~~~~~~~~~
+<p>here is a diff</p>
+
+<div class="remarkup-code-block" data-code-lang="diff" data-sigil="remarkup-code-block"><pre class="remarkup-code">@@ derp derp @@
+x
+y
+
+- x
+- y
++ z</pre></div>
+
+<p>derp derp</p>
+~~~~~~~~~~
+here is a diff
+
+  @@ derp derp @@
+  x
+  y
+  
+  - x
+  - y
+  + z
+
+derp derp

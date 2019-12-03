@@ -93,6 +93,16 @@ final class PHUIPolicySectionView
     return $this->appendChild(phutil_tag('p', array(), $content));
   }
 
+  public function appendRulesView(PhabricatorPolicyRulesView $rules_view) {
+    return $this->appendChild(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-policy-section-view-rules',
+        ),
+        $rules_view));
+  }
+
   protected function getTagAttributes() {
     return array(
       'class' => 'phui-policy-section-view',
@@ -100,7 +110,7 @@ final class PHUIPolicySectionView
   }
 
   protected function getTagContent() {
-    require_celerity_resource('phui-header-view-css');
+    require_celerity_resource('phui-policy-section-view-css');
 
     $icon_view = null;
     $icon = $this->getIcon();

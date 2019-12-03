@@ -220,7 +220,7 @@ final class PHUITwoColumnView extends AphrontTagView {
     return phutil_tag(
       'div',
       array(
-        'class' => implode($classes, ' '),
+        'class' => implode(' ', $classes),
       ),
       array(
         $navigation,

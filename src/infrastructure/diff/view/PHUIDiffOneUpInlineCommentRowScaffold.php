@@ -17,7 +17,7 @@ final class PHUIDiffOneUpInlineCommentRowScaffold
     $inline = head($inlines);
 
     $attrs = array(
-      'colspan' => 3,
+      'colspan' => 2,
       'id' => $inline->getScaffoldCellID(),
     );
 
@@ -32,6 +32,7 @@ final class PHUIDiffOneUpInlineCommentRowScaffold
     $cells = array(
       phutil_tag('td', array('class' => 'n'), $left_hidden),
       phutil_tag('td', array('class' => 'n'), $right_hidden),
+      phutil_tag('td', array('class' => 'copy')),
       phutil_tag('td', $attrs, $inline),
     );
 

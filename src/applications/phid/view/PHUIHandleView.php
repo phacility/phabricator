@@ -17,7 +17,6 @@ final class PHUIHandleView
   private $asText;
   private $useShortName;
   private $showHovercard;
-  private $showStateIcon;
   private $glyphLimit;
 
   public function setHandleList(PhabricatorHandleList $list) {
@@ -48,15 +47,6 @@ final class PHUIHandleView
   public function setShowHovercard($hovercard) {
     $this->showHovercard = $hovercard;
     return $this;
-  }
-
-  public function setShowStateIcon($show_state_icon) {
-    $this->showStateIcon = $show_state_icon;
-    return $this;
-  }
-
-  public function getShowStateIcon() {
-    return $this->showStateIcon;
   }
 
   public function setGlyphLimit($glyph_limit) {
@@ -102,11 +92,6 @@ final class PHUIHandleView
       $link = $handle->renderHovercardLink($name);
     } else {
       $link = $handle->renderLink($name);
-    }
-
-    if ($this->showStateIcon) {
-      $icon = $handle->renderStateIcon();
-      $link = array($icon, ' ', $link);
     }
 
     return $link;

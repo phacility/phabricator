@@ -1,0 +1,12 @@
+## Small Header
+
+This should be a small header.
+~~~~~~~~~~
+<h3 class="remarkup-header">Small Header</h3>
+
+<p>This should be a small header.</p>
+~~~~~~~~~~
+Small Header
+------------
+
+This should be a small header.

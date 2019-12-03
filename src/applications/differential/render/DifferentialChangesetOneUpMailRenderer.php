@@ -31,14 +31,6 @@ final class DifferentialChangesetOneUpMailRenderer
     return null;
   }
 
-  public function renderFileChange(
-    $old_file = null,
-    $new_file = null,
-    $id = 0,
-    $vs = 0) {
-    return null;
-  }
-
   public function renderTextChange(
     $range_start,
     $range_len,

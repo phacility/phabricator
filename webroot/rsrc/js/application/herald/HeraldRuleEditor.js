@@ -350,8 +350,10 @@ JX.install('HeraldRuleEditor', {
         sigil: 'field-select'
       };
 
-      var field_select = this._renderGroupSelect(groups, attrs);
-      field_select.value = this._config.conditions[row_id][0];
+      var field_select = this._renderGroupSelect(
+        groups,
+        attrs,
+        this._config.conditions[row_id][0]);
 
       var field_cell = JX.$N('td', {sigil: 'field-cell'}, field_select);
 
@@ -367,18 +369,38 @@ JX.install('HeraldRuleEditor', {
       }
     },
 
-    _renderGroupSelect: function(groups, attrs) {
+    _renderGroupSelect: function(groups, attrs, value) {
       var optgroups = [];
       for (var ii = 0; ii < groups.length; ii++) {
         var group = groups[ii];
         var options = [];
         for (var k in group.options) {
-          options.push(JX.$N('option', {value: k}, group.options[k]));
+          var option = group.options[k];
+
+          var name = option.name;
+          var available = option.available;
+
+          // See T7961. If the option is not marked as "available", we only
+          // include it in the dropdown if the dropdown already has it as a
+          // value. We want to hide options provided by applications which are
+          // not installed, but do not want to break existing rules.
+
+          if (available || (k === value)) {
+            options.push(JX.$N('option', {value: k}, name));
+          }
         }
-        optgroups.push(JX.$N('optgroup', {label: group.label}, options));
+        if (options.length) {
+          optgroups.push(JX.$N('optgroup', {label: group.label}, options));
+        }
       }
 
-      return JX.$N('select', attrs, optgroups);
+      var select = JX.$N('select', attrs, optgroups);
+
+      if (value !== undefined) {
+        select.value = value;
+      }
+
+      return select;
     },
 
     _newAction : function(data) {
@@ -402,8 +424,10 @@ JX.install('HeraldRuleEditor', {
         sigil: 'action-select'
       };
 
-      var action_select = this._renderGroupSelect(groups, attrs);
-      action_select.value = action[0];
+      var action_select = this._renderGroupSelect(
+        groups,
+        attrs,
+        action[0]);
 
       var action_cell = JX.$N('td', {sigil: 'action-cell'}, action_select);
 

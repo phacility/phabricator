@@ -160,6 +160,20 @@ final class AphrontDialogView
     return $this->appendChild($box);
   }
 
+  public function appendRemarkup($remarkup) {
+    $viewer = $this->getViewer();
+    $view = new PHUIRemarkupView($viewer, $remarkup);
+
+    $view_tag = phutil_tag(
+      'div',
+      array(
+        'class' => 'aphront-dialog-view-paragraph',
+      ),
+      $view);
+
+    return $this->appendChild($view_tag);
+  }
+
   public function appendParagraph($paragraph) {
     return $this->appendParagraphTag($paragraph);
   }

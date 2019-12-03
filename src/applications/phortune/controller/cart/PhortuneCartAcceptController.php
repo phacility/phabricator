@@ -3,27 +3,19 @@
 final class PhortuneCartAcceptController
   extends PhortuneCartController {
 
-  public function handleRequest(AphrontRequest $request) {
+  protected function shouldRequireAccountAuthority() {
+    return false;
+  }
+
+  protected function shouldRequireMerchantAuthority() {
+    return true;
+  }
+
+  protected function handleCartRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
+    $cart = $this->getCart();
 
-    // You must control the merchant to accept orders.
-    $authority = $this->loadMerchantAuthority();
-    if (!$authority) {
-      return new Aphront404Response();
-    }
-
-    $cart = id(new PhortuneCartQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->withMerchantPHIDs(array($authority->getPHID()))
-      ->needPurchases(true)
-      ->executeOne();
-    if (!$cart) {
-      return new Aphront404Response();
-    }
-
-    $cancel_uri = $cart->getDetailURI($authority);
+    $cancel_uri = $cart->getDetailURI();
 
     if ($cart->getStatus() !== PhortuneCart::STATUS_REVIEW) {
       return $this->newDialog()

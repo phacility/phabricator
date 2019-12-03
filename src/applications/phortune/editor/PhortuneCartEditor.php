@@ -235,4 +235,113 @@ final class PhortuneCartEditor
     return $this;
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $account = $object->getAccount();
+    $merchant = $object->getMerchant();
+    $account->writeMerchantEdge($merchant);
+
+    return $xactions;
+  }
+
+  protected function newAuxiliaryMail($object, array $xactions) {
+    $xviewer = PhabricatorUser::getOmnipotentUser();
+    $account = $object->getAccount();
+
+    $addresses = id(new PhortuneAccountEmailQuery())
+      ->setViewer($xviewer)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->withStatuses(
+        array(
+          PhortuneAccountEmailStatus::STATUS_ACTIVE,
+        ))
+      ->execute();
+
+    $messages = array();
+    foreach ($addresses as $address) {
+      $message = $this->newExternalMail($address, $object, $xactions);
+      if ($message) {
+        $messages[] = $message;
+      }
+    }
+
+    return $messages;
+  }
+
+  private function newExternalMail(
+    PhortuneAccountEmail $email,
+    PhortuneCart $cart,
+    array $xactions) {
+    $xviewer = PhabricatorUser::getOmnipotentUser();
+    $account = $cart->getAccount();
+
+    $id = $cart->getID();
+    $name = $cart->getName();
+
+    $origin_user = id(new PhabricatorPeopleQuery())
+      ->setViewer($xviewer)
+      ->withPHIDs(array($email->getAuthorPHID()))
+      ->executeOne();
+    if (!$origin_user) {
+      return null;
+    }
+
+    if ($this->isInvoice()) {
+      $subject = pht('[Invoice #%d] %s', $id, $name);
+      $order_header = pht('INVOICE DETAIL');
+    } else {
+      $subject = pht('[Order #%d] %s', $id, $name);
+      $order_header = pht('ORDER DETAIL');
+    }
+
+    $body = id(new PhabricatorMetaMTAMailBody())
+      ->setViewer($xviewer)
+      ->setContextObject($cart);
+
+    $origin_username = $origin_user->getUsername();
+    $origin_realname = $origin_user->getRealName();
+    if (strlen($origin_realname)) {
+      $origin_display = pht('%s (%s)', $origin_username, $origin_realname);
+    } else {
+      $origin_display = pht('%s', $origin_username);
+    }
+
+    $body->addRawSection(
+      pht(
+        'This email address (%s) was added to a payment account (%s) '.
+        'by %s.',
+        $email->getAddress(),
+        $account->getName(),
+        $origin_display));
+
+    $body->addLinkSection(
+      $order_header,
+      PhabricatorEnv::getProductionURI($email->getExternalOrderURI($cart)));
+
+    $body->addLinkSection(
+      pht('FULL ORDER HISTORY'),
+      PhabricatorEnv::getProductionURI($email->getExternalURI()));
+
+    $body->addLinkSection(
+      pht('UNSUBSCRIBE'),
+      PhabricatorEnv::getProductionURI($email->getUnsubscribeURI()));
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setFrom($this->getActingAsPHID())
+      ->setSubject($subject)
+      ->addRawTos(
+        array(
+          $email->getAddress(),
+        ))
+      ->setForceDelivery(true)
+      ->setIsBulk(true)
+      ->setSensitiveContent(true)
+      ->setBody($body->render())
+      ->setHTMLBody($body->renderHTML());
+
+  }
+
+
 }

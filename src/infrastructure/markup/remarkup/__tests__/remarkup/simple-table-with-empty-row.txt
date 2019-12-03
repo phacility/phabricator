@@ -1,0 +1,13 @@
+| Alpaca |
+| |
+| Zebra  |
+~~~~~~~~~~
+<div class="remarkup-table-wrap"><table class="remarkup-table">
+<tr><td>Alpaca</td></tr>
+<tr><td></td></tr>
+<tr><td>Zebra</td></tr>
+</table></div>
+~~~~~~~~~~
+| Alpaca |
+|        |
+| Zebra  |

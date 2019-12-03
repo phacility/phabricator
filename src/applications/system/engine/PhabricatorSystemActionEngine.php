@@ -100,31 +100,33 @@ final class PhabricatorSystemActionEngine extends Phobject {
 
     $actor_hashes = array();
     foreach ($actors as $actor) {
-      $actor_hashes[] = PhabricatorHash::digestForIndex($actor);
+      $digest = PhabricatorHash::digestForIndex($actor);
+      $actor_hashes[$digest] = $actor;
     }
 
     $log = new PhabricatorSystemActionLog();
 
     $window = self::getWindow();
 
-    $conn_r = $log->establishConnection('r');
-    $scores = queryfx_all(
-      $conn_r,
-      'SELECT actorIdentity, SUM(score) totalScore FROM %T
+    $conn = $log->establishConnection('r');
+
+    $rows = queryfx_all(
+      $conn,
+      'SELECT actorHash, SUM(score) totalScore FROM %T
         WHERE action = %s AND actorHash IN (%Ls)
           AND epoch >= %d GROUP BY actorHash',
       $log->getTableName(),
       $action->getActionConstant(),
-      $actor_hashes,
-      (time() - $window));
+      array_keys($actor_hashes),
+      (PhabricatorTime::getNow() - $window));
 
-    $scores = ipull($scores, 'totalScore', 'actorIdentity');
+    $rows = ipull($rows, 'totalScore', 'actorHash');
 
-    foreach ($scores as $key => $score) {
-      $scores[$key] = $score / $window;
+    $scores = array();
+    foreach ($actor_hashes as $digest => $actor) {
+      $score = idx($rows, $digest, 0);
+      $scores[$actor] = ($score / $window);
     }
-
-    $scores = $scores + array_fill_keys($actors, 0);
 
     return $scores;
   }

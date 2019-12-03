@@ -89,6 +89,10 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     return $this->namespace.'_'.$fragment;
   }
 
+  public function getDisplayName() {
+    return $this->getRef()->getDisplayName();
+  }
+
   public function getDatabaseList(array $patches, $only_living = false) {
     assert_instances_of($patches, 'PhabricatorStoragePatch');
 
@@ -296,6 +300,14 @@ final class PhabricatorStorageManagementAPI extends Phobject {
 
     $conn = $this->getConn(null);
     return self::isCharacterSetAvailableOnConnection($character_set, $conn);
+  }
+
+  public function getClientCharset() {
+    if ($this->isCharacterSetAvailable('utf8mb4')) {
+      return 'utf8mb4';
+    } else {
+      return 'utf8';
+    }
   }
 
   public static function isCharacterSetAvailableOnConnection(

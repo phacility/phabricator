@@ -85,6 +85,7 @@ final class PhabricatorDaemonConsoleController
         phutil_tag('em', array(), pht('Temporary Failures')),
         count($failed),
         null,
+        null,
       );
     }
 

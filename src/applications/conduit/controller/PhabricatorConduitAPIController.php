@@ -99,9 +99,6 @@ final class PhabricatorConduitAPIController
         list($error_code, $error_info) = $auth_error;
       }
     } catch (Exception $ex) {
-      if (!($ex instanceof ConduitMethodNotFoundException)) {
-        phlog($ex);
-      }
       $result = null;
       $error_code = ($ex instanceof ConduitException
         ? 'ERR-CONDUIT-CALL'

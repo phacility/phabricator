@@ -22,6 +22,7 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
       return;
     }
 
+
     $account = $subscription->getAccount();
     $merchant = $subscription->getMerchant();
 

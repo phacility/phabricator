@@ -5,6 +5,9 @@ final class PhabricatorDestructionEngine extends Phobject {
   private $rootLogID;
   private $collectNotes;
   private $notes = array();
+  private $depth = 0;
+  private $destroyedObjects = array();
+  private $waitToFinalizeDestruction = false;
 
   public function setCollectNotes($collect_notes) {
     $this->collectNotes = $collect_notes;
@@ -19,9 +22,20 @@ final class PhabricatorDestructionEngine extends Phobject {
     return PhabricatorUser::getOmnipotentUser();
   }
 
+  public function setWaitToFinalizeDestruction($wait) {
+    $this->waitToFinalizeDestruction = $wait;
+    return $this;
+  }
+
+  public function getWaitToFinalizeDestruction() {
+    return $this->waitToFinalizeDestruction;
+  }
+
   public function destroyObject(PhabricatorDestructibleInterface $object) {
+    $this->depth++;
+
     $log = id(new PhabricatorSystemDestructionLog())
-      ->setEpoch(time())
+      ->setEpoch(PhabricatorTime::getNow())
       ->setObjectClass(get_class($object));
 
     if ($this->rootLogID) {
@@ -73,7 +87,42 @@ final class PhabricatorDestructionEngine extends Phobject {
       foreach ($extensions as $key => $extension) {
         $extension->destroyObject($this, $object);
       }
+
+      $this->destroyedObjects[] = $object;
     }
+
+    $this->depth--;
+
+    // If this is a root-level invocation of "destroyObject()", flush the
+    // queue of destroyed objects and fire "didDestroyObject()" hooks. This
+    // hook allows extensions to do things like queue cache updates which
+    // might race if we fire them during object destruction.
+
+    if (!$this->depth) {
+      if (!$this->getWaitToFinalizeDestruction()) {
+        $this->finalizeDestruction();
+      }
+    }
+
+    return $this;
+  }
+
+  public function finalizeDestruction() {
+    $extensions = PhabricatorDestructionEngineExtension::getAllExtensions();
+
+    foreach ($this->destroyedObjects as $object) {
+      foreach ($extensions as $extension) {
+        if (!$extension->canDestroyObject($this, $object)) {
+          continue;
+        }
+
+        $extension->didDestroyObject($this, $object);
+      }
+    }
+
+    $this->destroyedObjects = array();
+
+    return $this;
   }
 
   private function getObjectPHID($object) {

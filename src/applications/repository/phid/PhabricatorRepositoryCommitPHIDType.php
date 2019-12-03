@@ -81,16 +81,6 @@ final class PhabricatorRepositoryCommitPHIDType extends PhabricatorPHIDType {
       $handle->setFullName($full_name);
       $handle->setURI($commit->getURI());
       $handle->setTimestamp($commit->getEpoch());
-
-      $status = $commit->getAuditStatusObject();
-      $icon = $status->getIcon();
-      $color = $status->getColor();
-      $name = $status->getName();
-
-      $handle
-        ->setStateIcon($icon)
-        ->setStateColor($color)
-        ->setStateName($name);
     }
   }
 

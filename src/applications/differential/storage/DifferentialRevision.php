@@ -112,11 +112,6 @@ final class DifferentialRevision extends DifferentialDAO
         'repositoryPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'authorPHID' => array(
           'columns' => array('authorPHID', 'status'),
         ),
@@ -130,6 +125,9 @@ final class DifferentialRevision extends DifferentialDAO
         // edge table.
         'key_status' => array(
           'columns' => array('status', 'phid'),
+        ),
+        'key_modified' => array(
+          'columns' => array('dateModified'),
         ),
       ),
     ) + parent::getConfiguration();

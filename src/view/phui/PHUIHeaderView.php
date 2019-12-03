@@ -469,53 +469,6 @@ final class PHUIHeaderView extends AphrontTagView {
     $container_classes[] = 'policy-header-callout';
     $phid = $object->getPHID();
 
-    // If we're going to show the object policy, try to determine if the object
-    // policy differs from the default policy. If it does, we'll call it out
-    // as changed.
-    if (!$use_space_policy) {
-      $strength = null;
-      if ($object instanceof PhabricatorPolicyCodexInterface) {
-        $codex = id(PhabricatorPolicyCodex::newFromObject($object, $viewer))
-          ->setCapability($view_capability);
-        $strength = $codex->compareToDefaultPolicy($policy);
-      } else {
-        $default_policy = PhabricatorPolicyQuery::getDefaultPolicyForObject(
-          $viewer,
-          $object,
-          $view_capability);
-
-        if ($default_policy) {
-          if ($default_policy->getPHID() != $policy->getPHID()) {
-            if ($default_policy->isStrongerThan($policy)) {
-              $strength = PhabricatorPolicyStrengthConstants::WEAKER;
-            } else if ($policy->isStrongerThan($default_policy)) {
-              $strength = PhabricatorPolicyStrengthConstants::STRONGER;
-            } else {
-              $strength = PhabricatorPolicyStrengthConstants::ADJUSTED;
-            }
-          }
-        }
-      }
-
-      if ($strength) {
-        if ($strength == PhabricatorPolicyStrengthConstants::WEAKER) {
-          // The policy has strictly been weakened. For example, the
-          // default might be "All Users" and the current policy is "Public".
-          $container_classes[] = 'policy-adjusted-weaker';
-        } else if ($strength == PhabricatorPolicyStrengthConstants::STRONGER) {
-          // The policy has strictly been strengthened, and is now more
-          // restrictive than the default. For example, "All Users" has
-          // been replaced with "No One".
-          $container_classes[] = 'policy-adjusted-stronger';
-        } else {
-          // The policy has been adjusted but not strictly strengthened
-          // or weakened. For example, "Members of X" has been replaced with
-          // "Members of Y".
-          $container_classes[] = 'policy-adjusted-different';
-        }
-      }
-    }
-
     $policy_name = array($policy->getShortName());
     $policy_icon = $policy->getIcon().' bluegrey';
 
