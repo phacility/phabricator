@@ -267,7 +267,7 @@ affects child projects. If you restrict the visibility of the parent, you also
 restrict the visibility of the children.
 
 In contrast, permission to edit a parent project grants permission to edit
-any subproject. If a user can {nav Root Project}, they can also edit
+any subproject. If a user can edit {nav Root Project}, they can also edit
 {nav Root Project > Child} and {nav Root Project > Child > Sprint 3}.
 
 
