@@ -36,13 +36,12 @@ final class PhabricatorConfigHistoryController
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
-      ->setMainColumn($timeline);
+      ->setFooter($timeline);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($content);
   }
 

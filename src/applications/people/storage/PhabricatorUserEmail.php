@@ -6,13 +6,17 @@
  */
 final class PhabricatorUserEmail
   extends PhabricatorUserDAO
-  implements PhabricatorDestructibleInterface {
+  implements
+    PhabricatorDestructibleInterface,
+    PhabricatorPolicyInterface {
 
   protected $userPHID;
   protected $address;
   protected $isVerified;
   protected $isPrimary;
   protected $verificationCode;
+
+  private $user = self::ATTACHABLE;
 
   const MAX_ADDRESS_LENGTH = 128;
 
@@ -50,6 +54,15 @@ final class PhabricatorUserEmail
       $this->setVerificationCode(Filesystem::readRandomCharacters(24));
     }
     return parent::save();
+  }
+
+  public function attachUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->assertAttached($this->user);
   }
 
 
@@ -285,6 +298,30 @@ final class PhabricatorUserEmail
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
     $this->delete();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    $user = $this->getUser();
+
+    if ($this->getIsSystemAgent() || $this->getIsMailingList()) {
+      return PhabricatorPolicies::POLICY_ADMIN;
+    }
+
+    return $user->getPHID();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

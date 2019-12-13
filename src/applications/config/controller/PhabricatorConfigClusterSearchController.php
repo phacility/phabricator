@@ -26,13 +26,12 @@ final class PhabricatorConfigClusterSearchController
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
-      ->setMainColumn($search_status);
+      ->setFooter($search_status);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($content);
   }
 

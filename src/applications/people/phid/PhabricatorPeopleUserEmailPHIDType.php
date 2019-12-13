@@ -29,6 +29,12 @@ final class PhabricatorPeopleUserEmailPHIDType
     PhabricatorHandleQuery $query,
     array $handles,
     array $objects) {
+
+    foreach ($handles as $phid => $handle) {
+      $email = $objects[$phid];
+      $handle->setName($email->getAddress());
+    }
+
     return null;
   }
 

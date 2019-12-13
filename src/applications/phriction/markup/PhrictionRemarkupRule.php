@@ -16,8 +16,23 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
   }
 
   public function markupDocumentLink(array $matches) {
+    $name = trim(idx($matches, 2, ''));
+    if (empty($matches[2])) {
+      $name = null;
+    }
+
+    $path = trim($matches[1]);
+
+    if (!$this->isFlatText($name)) {
+      return $matches[0];
+    }
+
+    if (!$this->isFlatText($path)) {
+      return $matches[0];
+    }
+
     // If the link contains an anchor, separate that off first.
-    $parts = explode('#', trim($matches[1]), 2);
+    $parts = explode('#', $path, 2);
     if (count($parts) == 2) {
       $link = $parts[0];
       $anchor = $parts[1];
@@ -46,11 +61,6 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
         }
         $link = implode('/', $base_parts).'/';
       }
-    }
-
-    $name = trim(idx($matches, 2, ''));
-    if (empty($matches[2])) {
-      $name = null;
     }
 
     // Link is now used for slug detection, so append a slash if one
