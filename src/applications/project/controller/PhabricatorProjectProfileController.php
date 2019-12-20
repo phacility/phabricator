@@ -63,14 +63,14 @@ final class PhabricatorProjectProfileController
     $member_list = id(new PhabricatorProjectMemberListView())
       ->setUser($viewer)
       ->setProject($project)
-      ->setLimit(5)
+      ->setLimit(10)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getMemberPHIDs());
 
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
-      ->setLimit(5)
+      ->setLimit(10)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getWatcherPHIDs());
 

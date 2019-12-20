@@ -136,6 +136,14 @@ final class PhutilRemarkupDocumentLinkRule extends PhutilRemarkupRule {
     $uri = trim($matches[1]);
     $name = trim(idx($matches, 2));
 
+    if (!$this->isFlatText($uri)) {
+      return $matches[0];
+    }
+
+    if (!$this->isFlatText($name)) {
+      return $matches[0];
+    }
+
     // If whatever is being linked to begins with "/" or "#", or has "://",
     // or is "mailto:" or "tel:", treat it as a URI instead of a wiki page.
     $is_uri = preg_match('@(^/)|(://)|(^#)|(^(?:mailto|tel):)@', $uri);

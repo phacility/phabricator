@@ -93,6 +93,12 @@ final class PhabricatorAuditManagementDeleteWorkflow
 
     if ($repos) {
       $query->withRepositoryIDs(mpull($repos, 'getID'));
+
+      // See T13457. If we're iterating over commits in a single large
+      // repository, the lack of a "<repositoryID, [id]>" key can slow things
+      // down. Iterate in a specific order to use a key which is present
+      // on the table ("<repositoryID, epoch, [id]>").
+      $query->setOrderVector(array('-epoch', '-id'));
     }
 
     $auditor_map = array();
@@ -105,7 +111,11 @@ final class PhabricatorAuditManagementDeleteWorkflow
       $query->withPHIDs(mpull($commits, 'getPHID'));
     }
 
-    $commit_iterator = new PhabricatorQueryIterator($query);
+    $commit_iterator = id(new PhabricatorQueryIterator($query));
+
+    // See T13457. We may be examining many commits; each commit is small so
+    // we can safely increase the page size to improve performance a bit.
+    $commit_iterator->setPageSize(1000);
 
     $audits = array();
     foreach ($commit_iterator as $commit) {

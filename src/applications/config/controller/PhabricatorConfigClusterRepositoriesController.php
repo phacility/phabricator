@@ -32,16 +32,16 @@ final class PhabricatorConfigClusterRepositoriesController
 
     $content = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setNavigation($nav)
-      ->setFixed(true)
-      ->setMainColumn(array(
-        $repo_status,
-        $repo_errors,
-      ));
+      ->setFooter(
+        array(
+          $repo_status,
+          $repo_errors,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($content);
   }
 

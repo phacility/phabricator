@@ -80,6 +80,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
     $validation_exception = null;
     $errors = array();
     $e_password = null;
+    $e_secret = null;
     if ($request->isFormPost()) {
 
       $v_name = $request->getStr('name');
@@ -97,22 +98,36 @@ final class PassphraseCredentialEditController extends PassphraseController {
       $env_secret = new PhutilOpaqueEnvelope($v_secret);
       $env_password = new PhutilOpaqueEnvelope($v_password);
 
-      if ($type->requiresPassword($env_secret)) {
+      $has_secret = !preg_match('/^('.$bullet.')+$/', trim($v_decrypt));
+
+      // Validate and repair SSH private keys, and apply passwords if they
+      // are provided. See T13454 for discussion.
+
+      // This should eventually be refactored to be modular rather than a
+      // hard-coded set of behaviors here in the Controller, but this is
+      // likely a fairly extensive change.
+
+      $is_ssh = ($type instanceof PassphraseSSHPrivateKeyTextCredentialType);
+
+      if ($is_ssh && $has_secret) {
+        $old_object = PhabricatorAuthSSHPrivateKey::newFromRawKey($env_secret);
+
         if (strlen($v_password)) {
-          $v_decrypt = $type->decryptSecret($env_secret, $env_password);
-          if ($v_decrypt === null) {
-            $e_password = pht('Incorrect');
-            $errors[] = pht(
-              'This key requires a password, but the password you provided '.
-              'is incorrect.');
-          } else {
-            $v_decrypt = $v_decrypt->openEnvelope();
+          $old_object->setPassphrase($env_password);
+        }
+
+        try {
+          $new_object = $old_object->newBarePrivateKey();
+          $v_decrypt = $new_object->getKeyBody()->openEnvelope();
+        } catch (PhabricatorAuthSSHPrivateKeyException $ex) {
+          $errors[] = $ex->getMessage();
+
+          if ($ex->isFormatException()) {
+            $e_secret = pht('Invalid');
           }
-        } else {
-          $e_password = pht('Required');
-          $errors[] = pht(
-            'This key requires a password. You must provide the password '.
-            'for the key.');
+          if ($ex->isPassphraseException()) {
+            $e_password = pht('Invalid');
+          }
         }
       }
 
@@ -166,13 +181,14 @@ final class PassphraseCredentialEditController extends PassphraseController {
             ->setTransactionType($type_username)
             ->setNewValue($v_username);
           }
+
           // If some value other than a sequence of bullets was provided for
           // the credential, update it. In particular, note that we are
           // explicitly allowing empty secrets: one use case is HTTP auth where
           // the username is a secret token which covers both identity and
           // authentication.
 
-          if (!preg_match('/^('.$bullet.')+$/', trim($v_decrypt))) {
+          if ($has_secret) {
             // If the credential was previously destroyed, restore it when it is
             // edited if a secret is provided.
             $xactions[] = id(new PassphraseCredentialTransaction())
@@ -182,6 +198,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
             $new_secret = id(new PassphraseSecret())
               ->setSecretData($v_decrypt)
               ->save();
+
             $xactions[] = id(new PassphraseCredentialTransaction())
               ->setTransactionType($type_secret_id)
               ->setNewValue($new_secret->getID());
@@ -287,7 +304,8 @@ final class PassphraseCredentialEditController extends PassphraseController {
         ->setName('secret')
         ->setLabel($type->getSecretLabel())
         ->setDisabled($credential_is_locked)
-        ->setValue($v_secret));
+        ->setValue($v_secret)
+        ->setError($e_secret));
 
     if ($type->shouldShowPasswordField()) {
       $form->appendChild(

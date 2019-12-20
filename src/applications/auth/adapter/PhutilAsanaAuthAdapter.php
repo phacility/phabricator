@@ -14,7 +14,9 @@ final class PhutilAsanaAuthAdapter extends PhutilOAuthAuthAdapter {
   }
 
   public function getAccountID() {
-    return $this->getOAuthAccountData('id');
+    // See T13453. The Asana API has changed to string IDs and now returns a
+    // "gid" field (previously, it returned an "id" field).
+    return $this->getOAuthAccountData('gid');
   }
 
   public function getAccountEmail() {

@@ -42,6 +42,15 @@ final class ManiphestTaskPolicyCodex
     $rules[] = $this->newRule()
       ->setCapabilities(
         array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->setDescription(
+        pht('The owner of a task can always view and edit it.'));
+
+    $rules[] = $this->newRule()
+      ->setCapabilities(
+        array(
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->setIsActive($object->areEditsLocked())

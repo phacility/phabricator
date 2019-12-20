@@ -1686,40 +1686,72 @@ final class DifferentialChangesetParser extends Phobject {
         break;
     }
 
-    $old_ref = id(new PhabricatorDocumentRef())
-      ->setName($changeset->getOldFile());
-    if ($old_file) {
-      $old_ref->setFile($old_file);
-    } else {
-      $old_data = $this->old;
-      $old_data = ipull($old_data, 'text');
-      $old_data = implode('', $old_data);
+    $type_delete = DifferentialChangeType::TYPE_DELETE;
+    $type_add = DifferentialChangeType::TYPE_ADD;
+    $change_type = $changeset->getChangeType();
 
-      $old_ref->setData($old_data);
+    $no_old = ($change_type == $type_add);
+    $no_new = ($change_type == $type_delete);
+
+    if ($no_old) {
+      $old_ref = null;
+    } else {
+      $old_ref = id(new PhabricatorDocumentRef())
+        ->setName($changeset->getOldFile());
+      if ($old_file) {
+        $old_ref->setFile($old_file);
+      } else {
+        $old_data = $this->old;
+        $old_data = ipull($old_data, 'text');
+        $old_data = implode('', $old_data);
+
+        $old_ref->setData($old_data);
+      }
     }
 
-    $new_ref = id(new PhabricatorDocumentRef())
-      ->setName($changeset->getFilename());
-    if ($new_file) {
-      $new_ref->setFile($new_file);
+    if ($no_new) {
+      $new_ref = null;
     } else {
-      $new_data = $this->new;
-      $new_data = ipull($new_data, 'text');
-      $new_data = implode('', $new_data);
+      $new_ref = id(new PhabricatorDocumentRef())
+        ->setName($changeset->getFilename());
+      if ($new_file) {
+        $new_ref->setFile($new_file);
+      } else {
+        $new_data = $this->new;
+        $new_data = ipull($new_data, 'text');
+        $new_data = implode('', $new_data);
 
-      $new_ref->setData($new_data);
+        $new_ref->setData($new_data);
+      }
     }
 
-    $old_engines = PhabricatorDocumentEngine::getEnginesForRef(
-      $viewer,
-      $old_ref);
 
-    $new_engines = PhabricatorDocumentEngine::getEnginesForRef(
-      $viewer,
-      $new_ref);
+    $old_engines = null;
+    if ($old_ref) {
+      $old_engines = PhabricatorDocumentEngine::getEnginesForRef(
+        $viewer,
+        $old_ref);
+    }
 
-    $shared_engines = array_intersect_key($new_engines, $old_engines);
-    $default_engine = head_key($new_engines);
+    $new_engines = null;
+    if ($new_ref) {
+      $new_engines = PhabricatorDocumentEngine::getEnginesForRef(
+        $viewer,
+        $new_ref);
+    }
+
+    if ($new_engines !== null && $old_engines !== null) {
+      $shared_engines = array_intersect_key($new_engines, $old_engines);
+      $default_engine = head_key($new_engines);
+    } else if ($new_engines !== null) {
+      $shared_engines = $new_engines;
+      $default_engine = head_key($shared_engines);
+    } else if ($old_engines !== null) {
+      $shared_engines = $old_engines;
+      $default_engine = head_key($shared_engines);
+    } else {
+      return null;
+    }
 
     foreach ($shared_engines as $key => $shared_engine) {
       if (!$shared_engine->canDiffDocuments($old_ref, $new_ref)) {

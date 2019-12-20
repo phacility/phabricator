@@ -284,7 +284,7 @@ final class PHUIPropertyListView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => implode($classes, ' '),
+        'class' => implode(' ', $classes),
       ),
       $part['content']);
   }
@@ -295,7 +295,7 @@ final class PHUIPropertyListView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => implode($classes, ' '),
+        'class' => implode(' ', $classes),
       ),
       $part['content']);
   }

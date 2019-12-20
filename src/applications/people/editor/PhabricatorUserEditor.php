@@ -89,6 +89,9 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $this->didVerifyEmail($user, $email);
     }
 
+    id(new DiffusionRepositoryIdentityEngine())
+      ->didUpdateEmailAddress($email->getAddress());
+
     return $this;
   }
 
@@ -202,11 +205,8 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $user->endWriteLocking();
     $user->saveTransaction();
 
-    // Try and match this new address against unclaimed `RepositoryIdentity`s
-    PhabricatorWorker::scheduleTask(
-      'PhabricatorRepositoryIdentityChangeWorker',
-      array('userPHID' => $user->getPHID()),
-      array('objectPHID' => $user->getPHID()));
+    id(new DiffusionRepositoryIdentityEngine())
+      ->didUpdateEmailAddress($email->getAddress());
 
     return $this;
   }
@@ -241,7 +241,9 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
           throw new Exception(pht('Email not owned by user!'));
         }
 
-        $email->delete();
+        $destruction_engine = id(new PhabricatorDestructionEngine())
+          ->setWaitToFinalizeDestruction(true)
+          ->destroyObject($email);
 
         $log = PhabricatorUserLog::initializeNewLog(
           $actor,
@@ -254,6 +256,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $user->saveTransaction();
 
     $this->revokePasswordResetLinks($user);
+    $destruction_engine->finalizeDestruction();
 
     return $this;
   }
@@ -325,7 +328,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $old_primary->sendOldPrimaryEmail($user, $email);
     }
     $email->sendNewPrimaryEmail($user);
-
 
     $this->revokePasswordResetLinks($user);
 
@@ -440,6 +442,9 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
       $user->endWriteLocking();
     $user->saveTransaction();
+
+    id(new DiffusionRepositoryIdentityEngine())
+      ->didUpdateEmailAddress($email->getAddress());
   }
 
 

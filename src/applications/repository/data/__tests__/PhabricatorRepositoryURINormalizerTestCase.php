@@ -31,6 +31,36 @@ final class PhabricatorRepositoryURINormalizerTestCase
     }
   }
 
+  public function testDomainURINormalizer() {
+    $base_domain = 'base.phabricator.example.com';
+    $ssh_domain = 'ssh.phabricator.example.com';
+
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('phabricator.base-uri', 'http://'.$base_domain);
+    $env->overrideEnvConfig('diffusion.ssh-host', $ssh_domain);
+
+    $cases = array(
+      '/' => '<void>',
+      '/path/to/local/repo.git' => '<void>',
+      'ssh://user@domain.com/path.git' => 'domain.com',
+      'ssh://user@DOMAIN.COM/path.git' => 'domain.com',
+      'http://'.$base_domain.'/diffusion/X/' => '<base-uri>',
+      'ssh://'.$ssh_domain.'/diffusion/X/' => '<ssh-host>',
+      'git@'.$ssh_domain.':bananas.git' => '<ssh-host>',
+    );
+
+    $type_git = PhabricatorRepositoryURINormalizer::TYPE_GIT;
+
+    foreach ($cases as $input => $expect) {
+      $normal = new PhabricatorRepositoryURINormalizer($type_git, $input);
+
+      $this->assertEqual(
+        $expect,
+        $normal->getNormalizedDomain(),
+        pht('Normalized domain for "%s".', $input));
+    }
+  }
+
   public function testSVNURINormalizer() {
     $cases = array(
       'file:///path/to/repo' => 'path/to/repo',

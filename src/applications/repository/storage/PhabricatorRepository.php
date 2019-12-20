@@ -2757,6 +2757,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ->setDescription(
           pht(
             'The "Fetch" and "Permanent Ref" rules for this repository.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('defaultBranch')
+        ->setType('string?')
+        ->setDescription(pht('Default branch name.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('remarkup')
+        ->setDescription(pht('Repository description.')),
     );
   }
 
@@ -2768,6 +2776,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $fetch_rules = $this->getStringListForConduit($fetch_rules);
     $track_rules = $this->getStringListForConduit($track_rules);
     $permanent_rules = $this->getStringListForConduit($permanent_rules);
+
+    $default_branch = $this->getDefaultBranch();
+    if (!strlen($default_branch)) {
+      $default_branch = null;
+    }
 
     return array(
       'name' => $this->getName(),
@@ -2781,6 +2794,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'fetchRules' => $fetch_rules,
         'trackRules' => $track_rules,
         'permanentRefRules' => $permanent_rules,
+      ),
+      'defaultBranch' => $default_branch,
+      'description' => array(
+        'raw' => (string)$this->getDetail('description'),
       ),
     );
   }
@@ -2804,6 +2821,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return array(
       id(new DiffusionRepositoryURIsSearchEngineAttachment())
         ->setAttachmentKey('uris'),
+      id(new DiffusionRepositoryMetricsSearchEngineAttachment())
+        ->setAttachmentKey('metrics'),
     );
   }
 

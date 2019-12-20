@@ -41,23 +41,6 @@ final class PhrictionDocumentPolicyCodex
             ->executeOne();
   }
 
-  public function compareToDefaultPolicy(PhabricatorPolicy $policy) {
-    $root_policy = $this->getDefaultPolicy();
-    $strongest_policy = $this->getStrongestPolicy();
-
-    // Note that we never return 'weaker', because Phriction documents can
-    // never have weaker permissions than their parents. If this object has
-    // been set to weaker permissions anyway, return 'adjusted'.
-    if ($root_policy == $strongest_policy) {
-      $strength = null;
-    } else if ($strongest_policy->isStrongerThan($root_policy)) {
-      $strength = PhabricatorPolicyStrengthConstants::STRONGER;
-    } else {
-      $strength = PhabricatorPolicyStrengthConstants::ADJUSTED;
-    }
-    return $strength;
-  }
-
   private function getStrongestPolicy() {
     $ancestors = $this->getObject()->getAncestors();
     $ancestors[] = $this->getObject();

@@ -113,7 +113,8 @@ final class PhabricatorManualActivitySetupCheck
       'pre',
       array(),
       (string)csprintf(
-        'phabricator/ $ ./bin/repository rebuild-identities --all'));
+        'phabricator/ $ '.
+        './bin/repository rebuild-identities --all-repositories'));
 
     $message[] = pht(
       'You can find more information about this new identity mapping '.

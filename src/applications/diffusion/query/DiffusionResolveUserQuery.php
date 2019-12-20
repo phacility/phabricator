@@ -8,25 +8,14 @@
 final class DiffusionResolveUserQuery extends Phobject {
 
   private $name;
-  private $commit;
 
   public function withName($name) {
     $this->name = $name;
     return $this;
   }
 
-  public function withCommit($commit) {
-    $this->commit = $commit;
-    return $this;
-  }
-
   public function execute() {
-    $user_name = $this->name;
-
-    $phid = $this->findUserPHID($this->name);
-    $phid = $this->fireLookupEvent($phid);
-
-    return $phid;
+    return $this->findUserPHID($this->name);
   }
 
   private function findUserPHID($user_name) {
@@ -75,33 +64,15 @@ final class DiffusionResolveUserQuery extends Phobject {
   }
 
 
-  /**
-   * Emit an event so installs can do custom lookup of commit authors who may
-   * not be naturally resolvable.
-   */
-  private function fireLookupEvent($guess) {
-
-    $type = PhabricatorEventType::TYPE_DIFFUSION_LOOKUPUSER;
-    $data = array(
-      'commit'  => $this->commit,
-      'query'   => $this->name,
-      'result'  => $guess,
-    );
-
-    $event = new PhabricatorEvent($type, $data);
-    PhutilEventEngine::dispatchEvent($event);
-
-    return $event->getValue('result');
-  }
-
-
   private function findUserByUserName($user_name) {
     $by_username = id(new PhabricatorUser())->loadOneWhere(
       'userName = %s',
       $user_name);
+
     if ($by_username) {
       return $by_username->getPHID();
     }
+
     return null;
   }
 
@@ -112,18 +83,22 @@ final class DiffusionResolveUserQuery extends Phobject {
     $by_realname = id(new PhabricatorUser())->loadAllWhere(
       'realName = %s',
       $real_name);
+
     if (count($by_realname) == 1) {
-      return reset($by_realname)->getPHID();
+      return head($by_realname)->getPHID();
     }
+
     return null;
   }
 
 
   private function findUserByEmailAddress($email_address) {
     $by_email = PhabricatorUser::loadOneWithEmailAddress($email_address);
+
     if ($by_email) {
       return $by_email->getPHID();
     }
+
     return null;
   }
 

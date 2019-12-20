@@ -55,6 +55,16 @@
   background-color: {$lightbluebackground};
 }
 
+.aphront-table-view td.row-divider {
+  background-color: {$bluebackground};
+  font-weight: bold;
+  padding: 8px 12px;
+}
+
+.aphront-table-view td.indent {
+  padding-left: 24px;
+}
+
 .aphront-table-view th {
   border-bottom: 1px solid {$thinblueborder};
 }

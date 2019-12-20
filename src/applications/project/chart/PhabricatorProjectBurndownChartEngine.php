@@ -53,7 +53,11 @@ final class PhabricatorProjectBurndownChartEngine
       $open_function = $this->newFunction(
         array(
           'accumulate',
-          array('fact', 'tasks.open-count.create'),
+          array(
+            'sum',
+            array('fact', 'tasks.open-count.create'),
+            array('fact', 'tasks.open-count.status'),
+          ),
         ));
 
       $closed_function = $this->newFunction(
