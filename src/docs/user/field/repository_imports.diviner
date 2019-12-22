@@ -54,7 +54,7 @@ the import process is stuck.
 First, to identify which commits have missing import steps, run this command:
 
 ```
-phabricator/ $ ./bin/repository importing rXYZ
+phabricator/ $ ./bin/repository importing Rxyz
 ```
 
 That will show what work remains to be done. Each line shows a commit which
