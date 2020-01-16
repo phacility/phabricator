@@ -523,7 +523,7 @@ final class PhabricatorStartup {
         "'{$required_version}'.");
     }
 
-    if (get_magic_quotes_gpc()) {
+    if (@get_magic_quotes_gpc()) {
       self::didFatal(
         "Your server is configured with PHP 'magic_quotes_gpc' enabled. This ".
         "feature is 'highly discouraged' by PHP's developers and you must ".
