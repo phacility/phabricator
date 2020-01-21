@@ -241,6 +241,51 @@ abstract class HeraldField extends Phobject {
     return false;
   }
 
+  final protected function getAppliedTransactionsOfTypes(array $types) {
+    $types = array_fuse($types);
+    $xactions = $this->getAdapter()->getAppliedTransactions();
+
+    $result = array();
+    foreach ($xactions as $key => $xaction) {
+      $xaction_type = $xaction->getTransactionType();
+      if (isset($types[$xaction_type])) {
+        $result[$key] = $xaction;
+      }
+    }
+
+    return $result;
+  }
+
+  final protected function getAppliedEdgeTransactionOfType($edge_type) {
+    $edge_xactions = $this->getAppliedTransactionsOfTypes(
+      array(
+        PhabricatorTransactions::TYPE_EDGE,
+      ));
+
+    $results = array();
+    foreach ($edge_xactions as $edge_xaction) {
+      $xaction_edge_type = $edge_xaction->getMetadataValue('edge:type');
+      if ($xaction_edge_type == $edge_type) {
+        $results[] = $edge_xaction;
+      }
+    }
+
+    if (count($results) > 1) {
+      throw new Exception(
+        pht(
+          'Found more than one ("%s") applied edge transactions with given '.
+          'edge type ("%s"); expected zero or one.',
+          phutil_count($results),
+          $edge_type));
+    }
+
+    if ($results) {
+      return head($results);
+    }
+
+    return null;
+  }
+
   public function isFieldAvailable() {
     return true;
   }
