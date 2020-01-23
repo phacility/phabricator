@@ -447,8 +447,9 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   private function buildObjectTranscriptPanel(HeraldTranscript $xscript) {
-
+    $viewer = $this->getViewer();
     $adapter = $this->getAdapter();
+
     $field_names = $adapter->getFieldNameMap();
 
     $object_xscript = $xscript->getObjectTranscript();
@@ -487,29 +488,21 @@ final class HeraldTranscriptController extends HeraldController {
     }
 
     if ($object_xscript) {
-      foreach ($object_xscript->getFields() as $field => $value) {
-        if (isset($field_names[$field])) {
-          $field_name = pht('Field: %s', $field_names[$field]);
+      foreach ($object_xscript->getFields() as $field_type => $value) {
+        if (isset($field_names[$field_type])) {
+          $field_name = pht('Field: %s', $field_names[$field_type]);
         } else {
-          $field_name = pht('Unknown Field ("%s")', $field_name);
+          $field_name = pht('Unknown Field ("%s")', $field_type);
         }
 
-        if (!is_scalar($value) && !is_null($value)) {
-          $value = implode("\n", $value);
-        }
-
-        if (strlen($value) > 256) {
-          $value = phutil_tag(
-            'textarea',
-            array(
-              'class' => 'herald-field-value-transcript',
-            ),
-            $value);
-        }
+        $field_value = $adapter->renderFieldTranscriptValue(
+          $viewer,
+          $field_type,
+          $value);
 
         $rows[] = array(
           $field_name,
-          $value,
+          $field_value,
         );
       }
     }

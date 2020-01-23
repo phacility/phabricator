@@ -1071,6 +1071,26 @@ abstract class HeraldAdapter extends Phobject {
       $condition->getValue());
   }
 
+  public function renderFieldTranscriptValue(
+    PhabricatorUser $viewer,
+    $field_type,
+    $field_value) {
+
+    $field = $this->getFieldImplementation($field_type);
+    if ($field) {
+      return $field->renderTranscriptValue(
+        $viewer,
+        $field_value);
+    }
+
+    return phutil_tag(
+      'em',
+      array(),
+      pht(
+        'Unable to render value for unknown field type ("%s").',
+        $field_type));
+  }
+
 
 /* -(  Applying Effects  )--------------------------------------------------- */
 
