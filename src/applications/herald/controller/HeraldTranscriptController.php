@@ -453,31 +453,47 @@ final class HeraldTranscriptController extends HeraldController {
 
     $object_xscript = $xscript->getObjectTranscript();
 
-    $data = array();
+    $rows = array();
     if ($object_xscript) {
       $phid = $object_xscript->getPHID();
       $handles = $this->handles;
 
-      $data += array(
-        pht('Object Name') => $object_xscript->getName(),
-        pht('Object Type') => $object_xscript->getType(),
-        pht('Object PHID') => $phid,
-        pht('Object Link') => $handles[$phid]->renderLink(),
+      $rows[] = array(
+        pht('Object Name'),
+        $object_xscript->getName(),
+      );
+
+      $rows[] = array(
+        pht('Object Type'),
+        $object_xscript->getType(),
+      );
+
+      $rows[] = array(
+        pht('Object PHID'),
+        $phid,
+      );
+
+      $rows[] = array(
+        pht('Object Link'),
+        $handles[$phid]->renderLink(),
       );
     }
 
-    $data += $xscript->getMetadataMap();
+    foreach ($xscript->getMetadataMap() as $key => $value) {
+      $rows[] = array(
+        $key,
+        $value,
+      );
+    }
 
     if ($object_xscript) {
       foreach ($object_xscript->getFields() as $field => $value) {
-        $field = idx($field_names, $field, '['.$field.'?]');
-        $data['Field: '.$field] = $value;
-      }
-    }
+        if (isset($field_names[$field])) {
+          $field_name = pht('Field: %s', $field_names[$field]);
+        } else {
+          $field_name = pht('Unknown Field ("%s")', $field_name);
+        }
 
-    $rows = array();
-    foreach ($data as $name => $value) {
-      if (!($value instanceof PhutilSafeHTML)) {
         if (!is_scalar($value) && !is_null($value)) {
           $value = implode("\n", $value);
         }
@@ -490,9 +506,12 @@ final class HeraldTranscriptController extends HeraldController {
             ),
             $value);
         }
-      }
 
-      $rows[] = array($name, $value);
+        $rows[] = array(
+          $field_name,
+          $value,
+        );
+      }
     }
 
     $property_list = new PHUIPropertyListView();
