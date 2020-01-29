@@ -13,14 +13,14 @@ final class DiffusionCommitAuthorProjectsHeraldField
     $adapter = $this->getAdapter();
     $viewer = $adapter->getViewer();
 
-    $phid = $adapter->getAuthorPHID();
-    if (!$phid) {
+    $author_phid = $adapter->getAuthorPHID();
+    if (!$author_phid) {
       return array();
     }
 
     $projects = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
-      ->withMemberPHIDs(array($phid))
+      ->withMemberPHIDs(array($author_phid))
       ->execute();
 
     return mpull($projects, 'getPHID');
