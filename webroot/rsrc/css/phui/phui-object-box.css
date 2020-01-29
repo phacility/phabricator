@@ -62,6 +62,12 @@ div.phui-object-box.phui-object-box-flush {
   font-size: {$normalfontsize};
 }
 
+.phui-object-box-tail-buttons {
+  padding: 8px;
+  background: {$lightgreybackground};
+  border-top: 1px solid {$lightgreyborder};
+}
+
 /* - Object Box Colors ------------------------------------------------------ */
 
 .phui-box-border.phui-object-box-green {
