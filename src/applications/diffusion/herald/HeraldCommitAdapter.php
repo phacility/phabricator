@@ -35,18 +35,6 @@ final class HeraldCommitAdapter
   }
 
   public function newTestAdapter(PhabricatorUser $viewer, $object) {
-    $object = id(new DiffusionCommitQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($object->getPHID()))
-      ->needCommitData(true)
-      ->executeOne();
-    if (!$object) {
-      throw new Exception(
-        pht(
-          'Failed to reload commit ("%s") to fetch commit data.',
-          $object->getPHID()));
-    }
-
     return id(clone $this)
       ->setObject($object);
   }
@@ -56,7 +44,23 @@ final class HeraldCommitAdapter
   }
 
   public function setObject($object) {
-    $this->commit = $object;
+    $viewer = $this->getViewer();
+    $commit_phid = $object->getPHID();
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($commit_phid))
+      ->needCommitData(true)
+      ->needIdentities(true)
+      ->executeOne();
+    if (!$commit) {
+      throw new Exception(
+        pht(
+          'Failed to reload commit ("%s") to fetch commit data.',
+          $commit_phid));
+    }
+
+    $this->commit = $commit;
 
     return $this;
   }
@@ -351,6 +355,22 @@ final class HeraldCommitAdapter
   private function getRepository() {
     return $this->getObject()->getRepository();
   }
+
+  public function getAuthorPHID() {
+    return $this->getObject()->getEffectiveAuthorPHID();
+  }
+
+  public function getCommitterPHID() {
+    $commit = $this->getObject();
+
+    if ($commit->hasCommitterIdentity()) {
+      $identity = $commit->getCommitterIdentity();
+      return $identity->getCurrentEffectiveUserPHID();
+    }
+
+    return null;
+  }
+
 
 /* -(  HarbormasterBuildableAdapterInterface  )------------------------------ */
 

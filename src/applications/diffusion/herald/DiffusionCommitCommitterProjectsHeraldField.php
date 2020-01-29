@@ -11,8 +11,9 @@ final class DiffusionCommitCommitterProjectsHeraldField
 
   public function getHeraldFieldValue($object) {
     $adapter = $this->getAdapter();
+    $viewer = $adapter->getViewer();
 
-    $phid = $object->getCommitData()->getCommitDetail('committerPHID');
+    $phid = $adapter->getCommitterPHID();
     if (!$phid) {
       return array();
     }
