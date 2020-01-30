@@ -105,11 +105,16 @@ abstract class HeraldField extends Phobject {
   }
 
   public function getHeraldFieldValueType($condition) {
+
+    // NOTE: The condition type may be "null" to indicate that the caller
+    // wants a generic field value type. This is used when rendering field
+    // values in the object transcript.
+
     $standard_type = $this->getHeraldFieldStandardType();
     switch ($standard_type) {
       case self::STANDARD_BOOL:
       case self::STANDARD_PHID_BOOL:
-        return new HeraldEmptyFieldValue();
+        return new HeraldBoolFieldValue();
       case self::STANDARD_TEXT:
       case self::STANDARD_TEXT_LIST:
       case self::STANDARD_TEXT_MAP:
@@ -176,6 +181,14 @@ abstract class HeraldField extends Phobject {
     return $value_type->renderEditorValue($value);
   }
 
+  public function renderTranscriptValue(
+    PhabricatorUser $viewer,
+    $field_value) {
+    $value_type = $this->getHeraldFieldValueType($condition_type = null);
+    $value_type->setViewer($viewer);
+    return $value_type->renderTranscriptValue($field_value);
+  }
+
   public function getPHIDsAffectedByCondition(HeraldCondition $condition) {
     try {
       $standard_type = $this->getHeraldFieldStandardType();
@@ -239,6 +252,51 @@ abstract class HeraldField extends Phobject {
     }
 
     return false;
+  }
+
+  final protected function getAppliedTransactionsOfTypes(array $types) {
+    $types = array_fuse($types);
+    $xactions = $this->getAdapter()->getAppliedTransactions();
+
+    $result = array();
+    foreach ($xactions as $key => $xaction) {
+      $xaction_type = $xaction->getTransactionType();
+      if (isset($types[$xaction_type])) {
+        $result[$key] = $xaction;
+      }
+    }
+
+    return $result;
+  }
+
+  final protected function getAppliedEdgeTransactionOfType($edge_type) {
+    $edge_xactions = $this->getAppliedTransactionsOfTypes(
+      array(
+        PhabricatorTransactions::TYPE_EDGE,
+      ));
+
+    $results = array();
+    foreach ($edge_xactions as $edge_xaction) {
+      $xaction_edge_type = $edge_xaction->getMetadataValue('edge:type');
+      if ($xaction_edge_type == $edge_type) {
+        $results[] = $edge_xaction;
+      }
+    }
+
+    if (count($results) > 1) {
+      throw new Exception(
+        pht(
+          'Found more than one ("%s") applied edge transactions with given '.
+          'edge type ("%s"); expected zero or one.',
+          phutil_count($results),
+          $edge_type));
+    }
+
+    if ($results) {
+      return head($results);
+    }
+
+    return null;
   }
 
   public function isFieldAvailable() {

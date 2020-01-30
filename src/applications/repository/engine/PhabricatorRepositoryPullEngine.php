@@ -275,11 +275,39 @@ final class PhabricatorRepositoryPullEngine
   private function executeGitUpdate() {
     $repository = $this->getRepository();
 
+    // See T13479. We previously used "--show-toplevel", but this stopped
+    // working in Git 2.25.0 when run in a bare repository.
+
+    // NOTE: As of Git 2.21.1, "git rev-parse" can not parse "--" in its
+    // argument list, so we can not specify arguments unambiguously. Any
+    // version of Git which does not recognize the "--git-dir" flag will
+    // treat this as a request to parse the literal refname "--git-dir".
+
     list($err, $stdout) = $repository->execLocalCommand(
-      'rev-parse --show-toplevel');
+      'rev-parse --git-dir');
+
+    $repository_root = null;
+    $path = $repository->getLocalPath();
+
+    if (!$err) {
+      $repository_root = Filesystem::resolvePath(
+        rtrim($stdout, "\n"),
+        $path);
+
+      // If we're in a bare Git repository, the "--git-dir" will be the
+      // root directory. If we're in a working copy, the "--git-dir" will
+      // be the ".git/" directory.
+
+      // Test if the result is the root directory. If it is, we're in good
+      // shape and appear to be inside a bare repository. If not, take the
+      // parent directory to get out of the ".git/" folder.
+
+      if (!Filesystem::pathsAreEquivalent($repository_root, $path)) {
+        $repository_root = dirname($repository_root);
+      }
+    }
 
     $message = null;
-    $path = $repository->getLocalPath();
     if ($err) {
       // Try to raise a more tailored error message in the more common case
       // of the user creating an empty directory. (We could try to remove it,
@@ -313,15 +341,14 @@ final class PhabricatorRepositoryPullEngine
           $path);
       }
     } else {
-      $repo_path = rtrim($stdout, "\n");
 
-      if (empty($repo_path)) {
-        // This can mean one of two things: we're in a bare repository, or
-        // we're inside a git repository inside another git repository. Since
-        // the first is dramatically more likely now that we perform bare
-        // clones and I don't have a great way to test for the latter, assume
-        // we're OK.
-      } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
+      // Prior to Git 2.25.0, we used "--show-toplevel", which had a weird
+      // case here when the working copy was inside another working copy.
+      // The switch to "--git-dir" seems to have resolved this; we now seem
+      // to find the nearest git directory and thus the correct repository
+      // root.
+
+      if (!Filesystem::pathsAreEquivalent($repository_root, $path)) {
         $err = true;
         $message = pht(
           'Expected to find a Git repository at "%s", but the actual Git '.
@@ -329,7 +356,7 @@ final class PhabricatorRepositoryPullEngine
           'misconfigured. This directory should be writable by the daemons '.
           'and not inside another Git repository.',
           $path,
-          $repo_path);
+          $repository_root);
       }
     }
 

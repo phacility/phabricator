@@ -1,29 +1,29 @@
 <?php
 
-final class DiffusionPreCommitContentCommitterProjectsHeraldField
+final class DiffusionPreCommitContentAuthorPackagesHeraldField
   extends DiffusionPreCommitContentHeraldField {
 
-  const FIELDCONST = 'diffusion.pre.commit.committer.projects';
+  const FIELDCONST = 'diffusion.pre.commit.author.packages';
 
   public function getHeraldFieldName() {
-    return pht("Committer's projects");
+    return pht("Author's packages");
   }
 
   public function getHeraldFieldValue($object) {
     $adapter = $this->getAdapter();
     $viewer = $adapter->getViewer();
 
-    $committer_phid = $adapter->getCommitterPHID();
-    if (!$committer_phid) {
+    $author_phid = $adapter->getAuthorPHID();
+    if (!$author_phid) {
       return array();
     }
 
-    $projects = id(new PhabricatorProjectQuery())
+    $packages = id(new PhabricatorOwnersPackageQuery())
       ->setViewer($viewer)
-      ->withMemberPHIDs(array($committer_phid))
+      ->withAuthorityPHIDs(array($author_phid))
       ->execute();
 
-    return mpull($projects, 'getPHID');
+    return mpull($packages, 'getPHID');
   }
 
   protected function getHeraldFieldStandardType() {
@@ -31,7 +31,7 @@ final class DiffusionPreCommitContentCommitterProjectsHeraldField
   }
 
   protected function getDatasource() {
-    return new PhabricatorProjectDatasource();
+    return new PhabricatorOwnersPackageDatasource();
   }
 
 }
