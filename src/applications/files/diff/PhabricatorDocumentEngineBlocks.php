@@ -59,7 +59,7 @@ final class PhabricatorDocumentEngineBlocks
       ->parseHunksForLineData($changeset->getHunks())
       ->reparseHunksForSpecialAttributes();
 
-    $hunk_parser->generateVisibleLinesMask(2);
+    $hunk_parser->generateVisibleBlocksMask(2);
     $mask = $hunk_parser->getVisibleLinesMask();
 
     $old_lines = $hunk_parser->getOldLines();
@@ -72,14 +72,7 @@ final class PhabricatorDocumentEngineBlocks
       $old_line = idx($old_lines, $ii);
       $new_line = idx($new_lines, $ii);
 
-      $is_visible = !empty($mask[$ii + 1]);
-
-      // TODO: There's currently a bug where one-line files get incorrectly
-      // masked. This causes images to completely fail to render. Just ignore
-      // the mask if it came back empty.
-      if (!$mask) {
-        $is_visible = true;
-      }
+      $is_visible = !empty($mask[$ii]);
 
       if ($old_line) {
         $old_hash = rtrim($old_line['text'], "\n");
