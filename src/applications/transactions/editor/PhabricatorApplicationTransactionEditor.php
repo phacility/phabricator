@@ -5152,12 +5152,14 @@ abstract class PhabricatorApplicationTransactionEditor
           'an MFA check.'));
     }
 
-    id(new PhabricatorAuthSessionEngine())
+    $token = id(new PhabricatorAuthSessionEngine())
       ->setWorkflowKey($workflow_key)
       ->requireHighSecurityToken($actor, $request, $cancel_uri);
 
-    foreach ($xactions as $xaction) {
-      $xaction->setIsMFATransaction(true);
+    if (!$token->getIsUnchallengedToken()) {
+      foreach ($xactions as $xaction) {
+        $xaction->setIsMFATransaction(true);
+      }
     }
   }
 
