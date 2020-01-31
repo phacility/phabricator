@@ -8,6 +8,7 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
   private $revision = false;
 
   private $affectedPackages;
+  private $identityCache = array();
 
   public function getAdapterContentName() {
     return pht('Commit Hook: Commit Content');
@@ -166,10 +167,39 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
     }
   }
 
-  private function lookupUser($author) {
-    return id(new DiffusionResolveUserQuery())
-      ->withName($author)
-      ->execute();
+  private function lookupUser($raw_identity) {
+    // See T13480. After the move to repository identities, we want to look
+    // users up in the identity table. If you push a commit which is authored
+    // by "A Duck <duck@example.org>" and that identity is bound to user
+    // "@mallard" in the identity table, Herald should see the author of the
+    // commit as "@mallard" when evaluating pre-commit content rules.
+
+    if (!array_key_exists($raw_identity, $this->identityCache)) {
+      $repository = $this->getHookEngine()->getRepository();
+      $viewer = $this->getHookEngine()->getViewer();
+
+      $identity_engine = id(new DiffusionRepositoryIdentityEngine())
+        ->setViewer($viewer);
+
+      // We must provide a "sourcePHID" when resolving identities, but don't
+      // have a legitimate one yet. Just use the repository PHID as a
+      // reasonable value. This won't actually be written to storage.
+      $source_phid = $repository->getPHID();
+      $identity_engine->setSourcePHID($source_phid);
+
+      // If the identity doesn't exist yet, we don't want to create it if
+      // we haven't seen it before. It will be created later when we actually
+      // import the commit.
+      $identity_engine->setDryRun(true);
+
+      $author_identity = $identity_engine->newResolvedIdentity($raw_identity);
+
+      $effective_phid = $author_identity->getCurrentEffectiveUserPHID();
+
+      $this->identityCache[$raw_identity] = $effective_phid;
+    }
+
+    return $this->identityCache[$raw_identity];
   }
 
   private function getCommitFields() {

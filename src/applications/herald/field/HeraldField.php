@@ -105,11 +105,16 @@ abstract class HeraldField extends Phobject {
   }
 
   public function getHeraldFieldValueType($condition) {
+
+    // NOTE: The condition type may be "null" to indicate that the caller
+    // wants a generic field value type. This is used when rendering field
+    // values in the object transcript.
+
     $standard_type = $this->getHeraldFieldStandardType();
     switch ($standard_type) {
       case self::STANDARD_BOOL:
       case self::STANDARD_PHID_BOOL:
-        return new HeraldEmptyFieldValue();
+        return new HeraldBoolFieldValue();
       case self::STANDARD_TEXT:
       case self::STANDARD_TEXT_LIST:
       case self::STANDARD_TEXT_MAP:
@@ -174,6 +179,14 @@ abstract class HeraldField extends Phobject {
     $value_type = $this->getHeraldFieldValueType($condition);
     $value_type->setViewer($viewer);
     return $value_type->renderEditorValue($value);
+  }
+
+  public function renderTranscriptValue(
+    PhabricatorUser $viewer,
+    $field_value) {
+    $value_type = $this->getHeraldFieldValueType($condition_type = null);
+    $value_type->setViewer($viewer);
+    return $value_type->renderTranscriptValue($field_value);
   }
 
   public function getPHIDsAffectedByCondition(HeraldCondition $condition) {

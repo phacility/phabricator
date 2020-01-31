@@ -23,7 +23,7 @@ final class HeraldAlwaysField extends HeraldField {
   }
 
   public function getHeraldFieldValueType($condition) {
-    return new HeraldEmptyFieldValue();
+    return new HeraldBoolFieldValue();
   }
 
   public function supportsObject($object) {

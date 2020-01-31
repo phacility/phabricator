@@ -155,7 +155,6 @@
 
 .phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item {
   color: {$lightgreytext};
-  text-decoration: line-through;
 }
 
 .phabricator-remarkup ul.remarkup-list ol.remarkup-list,
