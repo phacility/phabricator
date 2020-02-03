@@ -52,6 +52,7 @@ final class HeraldCommitAdapter
       ->withPHIDs(array($commit_phid))
       ->needCommitData(true)
       ->needIdentities(true)
+      ->needAuditRequests(true)
       ->executeOne();
     if (!$commit) {
       throw new Exception(
