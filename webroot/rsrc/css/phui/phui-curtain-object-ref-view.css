@@ -1,0 +1,48 @@
+/**
+ * @provides phui-curtain-object-ref-view-css
+ */
+
+.phui-curtain-object-ref-list-view-empty {
+  font-style: italic;
+  color: {$greytext};
+}
+
+.phui-curtain-object-ref-view-image-cell {
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.phui-curtain-object-ref-view-image-cell > a {
+  height: 24px;
+  width: 24px;
+  background-size: 100%;
+  border-radius: 3px;
+  display: block;
+}
+
+.phui-curtain-object-ref-view-title-cell {
+  font-weight: bold;
+  text-overflow: ellipsis;
+  overflow: hidden;
+
+  /* This is forcing "text-overflow: ellipsis" to actually work. */
+  max-width: 225px;
+}
+
+.phui-curtain-object-ref-view-without-content >
+  .phui-curtain-object-ref-view-title-cell {
+  vertical-align: middle;
+}
+
+.phui-curtain-object-ref-view-with-content >
+  .phui-curtain-object-ref-view-image-cell > a {
+  margin-top: 4px;
+}
+
+.phui-curtain-object-ref-view-title-cell > a {
+  color: {$darkgreytext};
+}
+
+.phui-curtain-object-ref-view-epoch-cell {
+  color: {$greytext};
+}
