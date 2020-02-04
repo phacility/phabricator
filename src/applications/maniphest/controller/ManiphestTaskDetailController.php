@@ -336,6 +336,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $curtain->addAction($relationship_submenu);
     }
 
+    $viewer_phid = $viewer->getPHID();
     $owner_phid = $task->getOwnerPHID();
     $author_phid = $task->getAuthorPHID();
     $handles = $viewer->loadHandles(array($owner_phid, $author_phid));
@@ -346,7 +347,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     if ($owner_phid) {
       $assigned_ref = $assigned_refs->newObjectRefView()
-        ->setHandle($handles[$owner_phid]);
+        ->setHandle($handles[$owner_phid])
+        ->setHighlighted($owner_phid === $viewer_phid);
     }
 
     $curtain->newPanel()
@@ -358,7 +360,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $author_ref = $author_refs->newObjectRefView()
       ->setHandle($handles[$author_phid])
-      ->setEpoch($task->getDateCreated());
+      ->setEpoch($task->getDateCreated())
+      ->setHighlighted($author_phid === $viewer_phid);
 
     $curtain->newPanel()
       ->setHeaderText(pht('Authored By'))

@@ -5,6 +5,7 @@ final class PHUICurtainObjectRefListView
 
   private $refs = array();
   private $emptyMessage;
+  private $tail = array();
 
   protected function getTagAttributes() {
     return array(
@@ -20,18 +21,31 @@ final class PHUICurtainObjectRefListView
   protected function getTagContent() {
     $refs = $this->refs;
 
-    if (!$refs) {
-      if ($this->emptyMessage) {
-        return phutil_tag(
-          'div',
-          array(
-            'class' => 'phui-curtain-object-ref-list-view-empty',
-          ),
-          $this->emptyMessage);
-      }
+    if (!$refs && ($this->emptyMessage !== null)) {
+      $view = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-curtain-object-ref-list-view-empty',
+        ),
+        $this->emptyMessage);
+    } else {
+      $view = $refs;
     }
 
-    return $refs;
+    $tail = null;
+    if ($this->tail) {
+      $tail = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-curtain-object-ref-list-view-tail',
+        ),
+        $this->tail);
+    }
+
+    return array(
+      $view,
+      $tail,
+    );
   }
 
   public function newObjectRefView() {
@@ -41,6 +55,14 @@ final class PHUICurtainObjectRefListView
     $this->refs[] = $ref_view;
 
     return $ref_view;
+  }
+
+  public function newTailLink() {
+    $link = new PHUILinkView();
+
+    $this->tail[] = $link;
+
+    return $link;
   }
 
 }

@@ -5,6 +5,7 @@ final class PHUICurtainObjectRefView
 
   private $handle;
   private $epoch;
+  private $highlighted;
 
   public function setHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
@@ -16,9 +17,22 @@ final class PHUICurtainObjectRefView
     return $this;
   }
 
+  public function setHighlighted($highlighted) {
+    $this->highlighted = $highlighted;
+    return $this;
+  }
+
   protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'phui-curtain-object-ref-view';
+
+    if ($this->highlighted) {
+      $classes[] = 'phui-curtain-object-ref-view-highlighted';
+    }
+    $classes = implode(' ', $classes);
+
     return array(
-      'class' => 'phui-curtain-object-ref-view',
+      'class' => $classes,
     );
   }
 
@@ -114,6 +128,11 @@ final class PHUICurtainObjectRefView
     $image_uri = $this->getImageURI();
     $target_uri = $this->getTargetURI();
 
+    $icon_view = null;
+    if ($image_uri == null) {
+      $icon_view = $this->newIconView();
+    }
+
     if ($image_uri !== null) {
       $image_view = javelin_tag(
         'a',
@@ -122,6 +141,15 @@ final class PHUICurtainObjectRefView
           'href' => $target_uri,
           'aural' => false,
         ));
+    } else if ($icon_view !== null) {
+      $image_view = javelin_tag(
+        'a',
+        array(
+          'href' => $target_uri,
+          'class' => 'phui-curtain-object-ref-view-icon-image',
+          'aural' => false,
+        ),
+        $icon_view);
     } else {
       $image_view = null;
     }
@@ -149,6 +177,17 @@ final class PHUICurtainObjectRefView
     }
 
     return $image_uri;
+  }
+
+  private function newIconView() {
+    $handle = $this->handle;
+
+    if ($handle) {
+      $icon_view = id(new PHUIIconView())
+        ->setIcon($handle->getIcon());
+    }
+
+    return $icon_view;
   }
 
 
