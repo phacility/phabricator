@@ -123,7 +123,9 @@ final class PhabricatorSubscriptionsCurtainExtension
           $handle = $handles[$subscriber_phid];
           if ($handle->isComplete()) {
             $is_complete = true;
+
             $sort_name = $handle->getLinkName();
+            $sort_name = phutil_utf8_strtolower($sort_name);
           }
         }
       }
