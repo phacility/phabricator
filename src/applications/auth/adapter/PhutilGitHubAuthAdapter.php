@@ -51,12 +51,16 @@ final class PhutilGitHubAuthAdapter extends PhutilOAuthAuthAdapter {
 
   protected function loadOAuthAccountData() {
     $uri = new PhutilURI('https://api.github.com/user');
-    $uri->replaceQueryParam('access_token', $this->getAccessToken());
 
     $future = new HTTPSFuture($uri);
 
     // NOTE: GitHub requires a User-Agent string.
     $future->addHeader('User-Agent', __CLASS__);
+
+    // See T13485. Circa early 2020, GitHub has deprecated use of the
+    // "access_token" URI parameter.
+    $token_header = sprintf('token %s', $this->getAccessToken());
+    $future->addHeader('Authorization', $token_header);
 
     list($body) = $future->resolvex();
 
